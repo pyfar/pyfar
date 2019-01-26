@@ -9,14 +9,15 @@ class Audio(object):
 
 
 class Signal(Audio):
+    """
 
-    """Docstring for Signal. """
+    """
 
     def __init__(self,
                  data,
                  samplingrate,
                  domain='time',
-                 dtype=np.double,
+                 dtype=None,
                  position=None,
                  orientation=None):
         """TODO: to be defined1.
@@ -32,10 +33,13 @@ class Signal(Audio):
         """
         Audio.__init__(self)
 
-        self._data = data
+        if not dtype:
+            self._dtype = data.dtype
+        else:
+            self._dtype = dtype
+        self._data = np.asarray(data, dtype=dtype)
         self._samplingrate = samplingrate
         self._domain = domain
-        self._dtype = dtype
 
     @property
     def n_samples(self):
@@ -64,11 +68,18 @@ class Signal(Audio):
     @property
     def freq(self):
         """The signal data in the frequency domain."""
-        return np.fft.rfft(self._data)
+        if self.iscomplex:
+            freq = np.fft.rfft(self._data)
+        else:
+            freq = np.fft.fft(self._data)
+        return freq
 
     @freq.setter
     def freq(self, value):
-        self._data = np.fft.irfft(value)
+        if self.iscomplex:
+            self.data = np.fft.ifft(value)
+        else:
+            self.data = np.fft.irfft(value)
 
     @property
     def samplingrate(self):
@@ -88,3 +99,11 @@ class Signal(Audio):
     @dtype.setter
     def dtype(self, value):
         self._dtype = value
+
+    @property
+    def iscomplex(self):
+        if 'complex' in str(self.dtype):
+            iscomplex = True
+        else:
+            iscomplex = False
+        return iscomplex
