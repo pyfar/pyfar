@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Audio(object):
 
     """Docstring for Audio. """
@@ -32,14 +33,20 @@ class Signal(Audio):
 
         """
         Audio.__init__(self)
-
-        if not dtype:
-            self._dtype = data.dtype
-        else:
-            self._dtype = dtype
-        self._data = np.asarray(data, dtype=dtype)
         self._samplingrate = samplingrate
-        self._domain = domain
+        if domain == 'time':
+            if not dtype:
+                self._dtype = data.dtype
+            else:
+                self._dtype = dtype
+            self._data = np.asarray(data, dtype=dtype)
+        elif domain == 'freq':
+            if dtype is None:
+                self._dtype = np.double
+            if self.iscomplex:
+                self._data = np.asarray(np.fft.ifft(data), dtype=dtype)
+            else:
+                self._data = np.asarray(np.fft.irfft(data), dtype=dtype)
 
     @property
     def n_samples(self):
@@ -95,10 +102,6 @@ class Signal(Audio):
         """The data type of the signal. This can be any data type and precision
         supported by numpy."""
         return self._dtype
-
-    @dtype.setter
-    def dtype(self, value):
-        self._dtype = value
 
     @property
     def iscomplex(self):
