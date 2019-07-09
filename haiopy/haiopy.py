@@ -11,7 +11,7 @@ class Audio(object):
 class Signal(Audio):
     """TODO: Docstring of the Class
 
-    Attributes
+    Parameters
     ----------
     data : ndarray, double
         Raw data of the signal
@@ -24,6 +24,8 @@ class Signal(Audio):
     position : TODO
 
     orientation : TODO
+
+
     """
 
     def __init__(self,
@@ -34,7 +36,7 @@ class Signal(Audio):
                  position=None,
                  orientation=None):
         """Inits Signal with data, sampling rate and domain.
-        
+
         Parameters
         ----------
         data : ndarray, double
@@ -125,6 +127,11 @@ class Signal(Audio):
         """The data type of the signal. This can be any data type and precision
         supported by numpy."""
         return self._dtype
+
+    @property
+    def signallength(self):
+        """The length of the signal in seconds."""
+        return (self.n_samples - 1) / self.samplingrate
 
     @property
     def iscomplex(self):
