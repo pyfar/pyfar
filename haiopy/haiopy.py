@@ -2,7 +2,6 @@ import numpy as np
 
 
 class Audio(object):
-
     """Docstring for Audio. """
 
     def __init__(self):
@@ -10,8 +9,21 @@ class Audio(object):
 
 
 class Signal(Audio):
-    """
+    """TODO: Docstring of the Class
 
+    Attributes
+    ----------
+    data : ndarray, double
+        Raw data of the signal
+    samplingrate : double
+        Sampling rate in Hertz
+    domain : string
+        Domain of data ('freq'/'time')
+    dtype : string
+        Raw data type of the signal, optional
+    position : TODO
+
+    orientation : TODO
     """
 
     def __init__(self,
@@ -21,17 +33,23 @@ class Signal(Audio):
                  dtype=None,
                  position=None,
                  orientation=None):
-        """TODO: to be defined1.
-
+        """Inits Signal with data, sampling rate and domain.
+        
         Parameters
         ----------
-        data : TODO
-        samplingrate : TODO
-        domain : TODO
-        dtype : TODO, optional
+        data : ndarray, double
+            Raw data of the signal
+        samplingrate : double
+            Sampling rate in Hertz
+        domain : string
+            Domain of data ('freq'/'time')
+        dtype : string
+            Raw data type of the signal, optional
+        position : TODO
 
-
+        orientation : TODO
         """
+
         Audio.__init__(self)
         self._samplingrate = samplingrate
         if domain == 'time':
@@ -52,6 +70,11 @@ class Signal(Audio):
     def n_samples(self):
         """Number of samples."""
         return self._data.shape[-1]
+
+    @property
+    def n_bins(self):
+        """Number of frequency bins."""
+        return (self._data.shape[-1] / 2) + 1
 
     @property
     def frequencies(self):
