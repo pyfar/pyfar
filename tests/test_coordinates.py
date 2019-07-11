@@ -38,7 +38,7 @@ def test_coordinates_init_from_spherical():
     x = 1
     y = 0
     z = 0
-    rad, theta, phi = cart2sph(x, y, z)
+    rad, theta, phi = _cart2sph(x, y, z)
     coords = Coordinates.from_spherical(rad, theta, phi)
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
