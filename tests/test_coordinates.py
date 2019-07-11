@@ -20,9 +20,9 @@ def test_coordinates_init_incomplete():
     x = [1, 2]
     y = 1
     z = 1
-    with raises(ValueError, \
-            message="Input arrays need to have same dimensions."):
+    with raises(ValueError):
         Coordinates(x, y, z)
+        pytest.fail("Input arrays need to have same dimensions.")
 
 def test_coordinates_init_from_cartesian():
     x = 1
