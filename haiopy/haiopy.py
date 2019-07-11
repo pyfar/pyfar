@@ -1,4 +1,5 @@
 import numpy as np
+from coordinates import Coordinates
 
 
 class Audio(object):
@@ -32,10 +33,11 @@ class Signal(Audio):
                  data,
                  samplingrate,
                  domain='time',
+                 signaltype='power',
                  dtype=None,
                  position=None,
                  orientation=None):
-        """Inits Signal with data, sampling rate and domain.
+        """Inits Signal with data, sampling rate and domain and signal type.
 
         Parameters
         ----------
@@ -45,6 +47,8 @@ class Signal(Audio):
             Sampling rate in Hertz
         domain : string
             Domain of data ('freq'/'time')
+        signaltype : string
+            Destinguish between power and energy signals
         dtype : string
             Raw data type of the signal, optional
         position : TODO
@@ -67,6 +71,8 @@ class Signal(Audio):
                 self._data = np.asarray(np.fft.ifft(data), dtype=dtype)
             else:
                 self._data = np.asarray(np.fft.irfft(data), dtype=dtype)
+        self._signaltype = signaltype
+        self._VALID_SIGNALTYPE = ["power", "energy"]
 
     @property
     def n_samples(self):
@@ -121,6 +127,18 @@ class Signal(Audio):
     @samplingrate.setter
     def samplingrate(self, value):
         self._samplingrate = value
+
+    @property
+    def signaltype(self):
+        """The signal type"""
+        return self._signaltype
+
+    @signaltype.setter
+    def signaltype(self, value):
+        if (value in self._VALID_SIGNALTYPE) is True:
+            self._signaltype = value
+        else:
+            raise ValueError("Not a valid signal type ('power'/'energy')")
 
     @property
     def dtype(self):
