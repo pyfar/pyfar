@@ -22,20 +22,19 @@ class Signal(Audio):
         Domain of data ('freq'/'time')
     dtype : string
         Raw data type of the signal, optional
-    position : TODO
-
+    position : Coordinates
+        Coordinates object
     orientation : TODO
 
 
     """
-
     def __init__(self,
                  data,
                  samplingrate,
                  domain='time',
                  signaltype='power',
                  dtype=None,
-                 position=None,
+                 position=Coordinates(),
                  orientation=None):
         """Inits Signal with data, sampling rate and domain and signal type.
 
@@ -51,8 +50,8 @@ class Signal(Audio):
             Destinguish between power and energy signals
         dtype : string
             Raw data type of the signal, optional
-        position : TODO
-
+        position : Coordinates
+            Coordinates object
         orientation : TODO
         """
 
@@ -73,6 +72,7 @@ class Signal(Audio):
                 self._data = np.asarray(np.fft.irfft(data), dtype=dtype)
         self._signaltype = signaltype
         self._VALID_SIGNALTYPE = ["power", "energy"]
+        self._position = position
 
     @property
     def n_samples(self):
@@ -150,6 +150,15 @@ class Signal(Audio):
     def signallength(self):
         """The length of the signal in seconds."""
         return (self.n_samples - 1) / self.samplingrate
+
+    @property
+    def position(self):
+        """Coordinates of the object"""
+        return self._position
+
+    @position.setter
+    def position(self, coordinates):
+        self._position = coordinates
 
     @property
     def iscomplex(self):
