@@ -1,6 +1,6 @@
 import numpy as np
-from coordinates import Coordinates
-from orientation import Orientation
+from haiopy.coordinates import Coordinates
+from haiopy.orientation import Orientation
 
 
 class Audio(object):
