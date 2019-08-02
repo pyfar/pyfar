@@ -1,5 +1,6 @@
 import numpy as np
 from coordinates import Coordinates
+from orientation import Orientation
 
 
 class Audio(object):
@@ -10,9 +11,13 @@ class Audio(object):
 
 
 class Signal(Audio):
-    """TODO: Docstring of the Class
+    """Class for audio signals.
 
-    Parameters
+    Objects of this class contain data which is directly convertable between
+    time and frequency domain. Equally spaced samples or frequency bins,
+    respectively.
+
+    Attributes
     ----------
     data : ndarray, double
         Raw data of the signal
@@ -24,7 +29,8 @@ class Signal(Audio):
         Raw data type of the signal, optional
     position : Coordinates
         Coordinates object
-    orientation : TODO
+    orientation : Orientation
+        Orientation object
 
 
     """
@@ -35,10 +41,10 @@ class Signal(Audio):
                  signaltype='power',
                  dtype=None,
                  position=Coordinates(),
-                 orientation=None):
-        """Inits Signal with data, sampling rate and domain and signal type.
+                 orientation=Orientation()):
+        """Init Signal with data, sampling rate and domain and signal type.
 
-        Parameters
+        Attributes
         ----------
         data : ndarray, double
             Raw data of the signal
@@ -52,7 +58,8 @@ class Signal(Audio):
             Raw data type of the signal, optional
         position : Coordinates
             Coordinates object
-        orientation : TODO
+        orientation : Orientation
+            Orientation object
         """
 
         Audio.__init__(self)
@@ -73,6 +80,7 @@ class Signal(Audio):
         self._signaltype = signaltype
         self._VALID_SIGNALTYPE = ["power", "energy"]
         self._position = position
+        self._orientation = orientation
 
     @property
     def n_samples(self):
@@ -157,8 +165,17 @@ class Signal(Audio):
         return self._position
 
     @position.setter
-    def position(self, coordinates):
-        self._position = coordinates
+    def position(self, value):
+        self._position = value
+
+    @property
+    def orientation(self):
+        """Orientation of the object"""
+        return self._orientation
+
+    @orientation.setter
+    def orientation(self, value):
+        self._orientation = value
 
     @property
     def iscomplex(self):
