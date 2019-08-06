@@ -1,6 +1,6 @@
 import numpy as np
-from haiopy.coordinates import Coordinates
-from haiopy.orientation import Orientation
+from coordinates import Coordinates
+from orientation import Orientation
 
 
 class Audio(object):
@@ -77,10 +77,24 @@ class Signal(Audio):
                 self._data = np.asarray(np.fft.ifft(data), dtype=dtype)
             else:
                 self._data = np.asarray(np.fft.irfft(data), dtype=dtype)
-        self._signaltype = signaltype
+                
         self._VALID_SIGNALTYPE = ["power", "energy"]
-        self._position = position
-        self._orientation = orientation
+        if (signaltype in self._VALID_SIGNALTYPE) is True:
+            self._signaltype = signaltype
+        else:
+            raise ValueError("Not a valid signal type ('power'/'energy')")
+        
+        if type(position).__name__ == "Coordinates":
+            self._position = position
+        else:
+            raise TypeError(("Input value has to be coordinates object, "
+                             "not {}").format(type(position).__name__)) 
+            
+        if type(orientation).__name__ == "Orientation":
+            self._orientation = orientation
+        else:
+            raise TypeError(("Input value has to be orientation object, "
+                             "not {}").format(type(orientation).__name__))
 
     @property
     def n_samples(self):
@@ -138,7 +152,7 @@ class Signal(Audio):
 
     @property
     def signaltype(self):
-        """The signal type"""
+        """The signal type."""
         return self._signaltype
 
     @signaltype.setter
@@ -161,21 +175,30 @@ class Signal(Audio):
 
     @property
     def position(self):
-        """Coordinates of the object"""
+        """Coordinates of the object."""
         return self._position
 
     @position.setter
     def position(self, value):
-        self._position = value
+        if type(value).__name__ == "Coordinates":
+            self._position = value
+        else:
+            raise TypeError(("Input value has to be coordinates object, "
+                             "not {}").format(type(value).__name__))
 
     @property
     def orientation(self):
-        """Orientation of the object"""
+        """Orientation of the object."""
         return self._orientation
 
     @orientation.setter
     def orientation(self, value):
         self._orientation = value
+
+    @property
+    def shape(self):
+        """Shape of the data."""
+        return self._data.shape
 
     @property
     def iscomplex(self):
@@ -184,3 +207,51 @@ class Signal(Audio):
         else:
             iscomplex = False
         return iscomplex
+    
+    def __repr__(self):
+        """String representation of signal class.
+        """
+        if len(self.shape) == 1:
+            n_channels = 1
+        else:
+            n_channels = self.shape[0]
+            
+        repr_string = ("Audio Signal\n"
+        "--------------------\n"
+        "Dimensions: {}x{}\n"
+        "Sampling rate: {} Hz\n" 
+        "Signal type: {}\n" 
+        "Signal length: {} sec").format(
+            n_channels, self.n_samples, self._samplingrate,
+            self._signaltype, self.signallength)
+        return repr_string
+
+    def __getitem__(self, key):
+        """Get signal channels at key.
+        """
+        if isinstance(key, (int, slice)):
+            try:
+                return self._data[key]
+            except:
+                raise KeyError("Index is out of range")
+        else:
+            raise TypeError(
+                    "Index must be int, not {}".format(type(key).__name__))
+            
+    def __setitem__(self, key, value):
+        """Set signal channels at key.
+        """
+        if isinstance(key, (int, slice)):
+            try:
+                self._data[key] = value
+            except:
+                raise KeyError("Index is out of range")
+        else:
+            raise TypeError(
+                    "Index must be int, not {}".format(type(key).__name__))
+
+    def __len__(self):
+        """Length of the object which is the number of samples stored.
+        """
+        return self.n_samples
+    
