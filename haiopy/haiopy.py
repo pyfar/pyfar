@@ -77,19 +77,19 @@ class Signal(Audio):
                 self._data = np.asarray(np.fft.ifft(data), dtype=dtype)
             else:
                 self._data = np.asarray(np.fft.irfft(data), dtype=dtype)
-                
+
         self._VALID_SIGNALTYPE = ["power", "energy"]
         if (signaltype in self._VALID_SIGNALTYPE) is True:
             self._signaltype = signaltype
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
-        
+
         if type(position).__name__ == "Coordinates":
             self._position = position
         else:
             raise TypeError(("Input value has to be coordinates object, "
-                             "not {}").format(type(position).__name__)) 
-            
+                             "not {}").format(type(position).__name__))
+
         if type(orientation).__name__ == "Orientation":
             self._orientation = orientation
         else:
@@ -207,7 +207,7 @@ class Signal(Audio):
         else:
             iscomplex = False
         return iscomplex
-    
+
     def __repr__(self):
         """String representation of signal class.
         """
@@ -215,15 +215,15 @@ class Signal(Audio):
             n_channels = 1
         else:
             n_channels = self.shape[0]
-            
+
         repr_string = ("Audio Signal\n"
-        "--------------------\n"
-        "Dimensions: {}x{}\n"
-        "Sampling rate: {} Hz\n" 
-        "Signal type: {}\n" 
-        "Signal length: {} sec").format(
-            n_channels, self.n_samples, self._samplingrate,
-            self._signaltype, self.signallength)
+                       "--------------------\n"
+                       "Dimensions: {}x{}\n"
+                       "Sampling rate: {} Hz\n"
+                       "Signal type: {}\n"
+                       "Signal length: {} sec").format(
+                       n_channels, self.n_samples, self._samplingrate,
+                       self._signaltype, self.signallength)
         return repr_string
 
     def __getitem__(self, key):
@@ -232,19 +232,19 @@ class Signal(Audio):
         if isinstance(key, (int, slice)):
             try:
                 return self._data[key]
-            except:
+            except KeyError:
                 raise KeyError("Index is out of range")
         else:
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
-            
+
     def __setitem__(self, key, value):
         """Set signal channels at key.
         """
         if isinstance(key, (int, slice)):
             try:
                 self._data[key] = value
-            except:
+            except KeyError:
                 raise KeyError("Index is out of range")
         else:
             raise TypeError(
@@ -254,4 +254,3 @@ class Signal(Audio):
         """Length of the object which is the number of samples stored.
         """
         return self.n_samples
-    
