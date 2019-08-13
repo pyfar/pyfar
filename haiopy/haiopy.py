@@ -1,10 +1,11 @@
 import numpy as np
-from coordinates import Coordinates
-from orientation import Orientation
+
+from haiopy.coordinates import Coordinates
+from haiopy.orientation import Orientation
 
 
 class Audio(object):
-    """Docstring for Audio. """
+    """Abstract class for audio objects."""
 
     def __init__(self):
         """TODO: to be defined1. """
@@ -14,8 +15,8 @@ class Signal(Audio):
     """Class for audio signals.
 
     Objects of this class contain data which is directly convertable between
-    time and frequency domain. Equally spaced samples or frequency bins,
-    respectively.
+     time and frequency domain. Equally spaced samples or frequency bins,
+     respectively.
 
     Attributes
     ----------
