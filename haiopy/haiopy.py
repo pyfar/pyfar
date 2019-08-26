@@ -138,9 +138,9 @@ class Signal(Audio):
     @freq.setter
     def freq(self, value):
         if self.iscomplex:
-            self.data = np.fft.ifft(value)
+            self._data = np.fft.ifft(value)
         else:
-            self.data = np.fft.irfft(value)
+            self._data = np.fft.irfft(value)
 
     @property
     def samplingrate(self):

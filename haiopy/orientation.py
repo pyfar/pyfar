@@ -36,7 +36,7 @@ class Orientation(object):
         if not np.shape(view) == np.shape(up):
             raise ValueError("Input arrays need to have same dimensions.")
 
-        if not np.isnan(view, up).any():
+        if not ( np.isnan(view).any() or np.isnan(up).any() ):
             if not np.dot(view, up) == 0:
                 raise ValueError(
                     "Input arrays need to be orthogonal to each other.")
