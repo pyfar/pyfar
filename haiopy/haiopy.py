@@ -70,14 +70,16 @@ class Signal(Audio):
                 self._dtype = data.dtype
             else:
                 self._dtype = dtype
-            self._data = np.asarray(data, dtype=dtype)
+            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
         elif domain == 'freq':
             if dtype is None:
                 self._dtype = np.double
             if self.iscomplex:
-                self._data = np.asarray(np.fft.ifft(data), dtype=dtype)
+                self._data = np.atleast_2d(
+                        np.asarray(np.fft.ifft(data), dtype=dtype))
             else:
-                self._data = np.asarray(np.fft.irfft(data), dtype=dtype)
+                self._data = np.atleast_2d(
+                        np.asarray(np.fft.irfft(data), dtype=dtype))
 
         self._VALID_SIGNALTYPE = ["power", "energy"]
         if (signaltype in self._VALID_SIGNALTYPE) is True:
@@ -212,18 +214,13 @@ class Signal(Audio):
     def __repr__(self):
         """String representation of signal class.
         """
-        if len(self.shape) == 1:
-            n_channels = 1
-        else:
-            n_channels = self.shape[0]
-
         repr_string = ("Audio Signal\n"
                        "--------------------\n"
                        "Dimensions: {}x{}\n"
                        "Sampling rate: {} Hz\n"
                        "Signal type: {}\n"
                        "Signal length: {} sec").format(
-                       n_channels, self.n_samples, self._samplingrate,
+                       self.shape[0], self.n_samples, self._samplingrate,
                        self._signaltype, self.signallength)
         return repr_string
 
@@ -234,7 +231,12 @@ class Signal(Audio):
             try:
                 return self._data[key]
             except KeyError:
-                raise KeyError("Index is out of range")
+                raise KeyError("Index is out of bounds")
+        elif isinstance(key, tuple):
+            try:
+                return self._data[key]
+            except KeyError:
+                raise KeyError("Index is out of bounds")
         else:
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
@@ -246,7 +248,7 @@ class Signal(Audio):
             try:
                 self._data[key] = value
             except KeyError:
-                raise KeyError("Index is out of range")
+                raise KeyError("Index is out of bound")
         else:
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
