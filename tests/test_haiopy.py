@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+from unittest import mock
 
 from haiopy import Signal
 from haiopy import Coordinates
@@ -15,12 +16,15 @@ def test_signal_init(sine):
 
 def test_signal_init_val(sine):
     """Test to init Signal with complete parameters."""
-    coord = Coordinates(1, 1, 1)
-    view = np.array([1, 0, 0])
-    up = np.array([0, 1, 0])
-    orient = Orientation(view, up)
+    coord_mock = mock.Mock(spec_set=Coordinates())
+    coord_mock.x = 1
+    coord_mock.y = 1
+    coord_mock.z = 1
+    orient_mock = mock.Mock(spec_set=Orientation())
+    orient_mock.view = np.array([1, 0, 0])
+    orient_mock.up = np.array([0, 1, 0])
     signal = Signal(sine, 44100, domain="time", signaltype="power",
-                    position=coord, orientation=orient)
+                    position=coord_mock, orientation=orient_mock)
     assert isinstance(signal, Signal)
 
 
@@ -100,41 +104,47 @@ def test_setter_signaltype(sine):
 
 
 def test_getter_position(sine):
-    coord = Coordinates(1, 1, 1)
+    coord_mock = mock.Mock(spec_set=Coordinates())
+    coord_mock.x = 1
+    coord_mock.y = 1
+    coord_mock.z = 1
     signal = Signal(sine, 44100)
-    signal._position = coord
-    npt.assert_allclose(signal.position.x, coord.x)
-    npt.assert_allclose(signal.position.y, coord.y)
-    npt.assert_allclose(signal.position.z, coord.z)
+    signal._position = coord_mock
+    npt.assert_allclose(signal.position.x, coord_mock.x)
+    npt.assert_allclose(signal.position.y, coord_mock.y)
+    npt.assert_allclose(signal.position.z, coord_mock.z)
 
 
 def test_setter_position(sine):
-    coord = Coordinates(1, 1, 1)
+    coord_mock = mock.Mock(spec_set=Coordinates())
+    coord_mock.x = 1
+    coord_mock.y = 1
+    coord_mock.z = 1
     signal = Signal(sine, 44100)
-    signal.position = coord
-    npt.assert_allclose(coord.x, signal._position.x)
-    npt.assert_allclose(coord.y, signal._position.y)
-    npt.assert_allclose(coord.z, signal._position.z)
+    signal.position = coord_mock
+    npt.assert_allclose(coord_mock.x, signal._position.x)
+    npt.assert_allclose(coord_mock.y, signal._position.y)
+    npt.assert_allclose(coord_mock.z, signal._position.z)
 
 
 def test_getter_orientation(sine):
-    view = np.array([1, 0, 0])
-    up = np.array([0, 1, 0])
-    orient = Orientation(view, up)
+    orient_mock = mock.Mock(spec_set=Orientation())
+    orient_mock.view = np.array([1, 0, 0])
+    orient_mock.up = np.array([0, 1, 0])
     signal = Signal(sine, 44100)
-    signal._orientation = orient
-    npt.assert_allclose(signal.orientation.up, orient.up)
-    npt.assert_allclose(signal.orientation.view, orient.view)
+    signal._orientation = orient_mock
+    npt.assert_allclose(signal.orientation.up, orient_mock.up)
+    npt.assert_allclose(signal.orientation.view, orient_mock.view)
 
 
 def test_setter_orientation(sine):
-    view = np.array([1, 0, 0])
-    up = np.array([0, 1, 0])
-    orient = Orientation(view, up)
+    orient_mock = mock.Mock(spec_set=Orientation())
+    orient_mock.view = np.array([1, 0, 0])
+    orient_mock.up = np.array([0, 1, 0])
     signal = Signal(sine, 44100)
-    signal.orientation = orient
-    npt.assert_allclose(orient.up, signal._orientation.up)
-    npt.assert_allclose(orient.view, signal._orientation.view)
+    signal.orientation = orient_mock
+    npt.assert_allclose(orient_mock.up, signal._orientation.up)
+    npt.assert_allclose(orient_mock.view, signal._orientation.view)
 
 
 @pytest.fixture

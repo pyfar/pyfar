@@ -87,13 +87,13 @@ class Signal(Audio):
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
 
-        if type(position).__name__ == "Coordinates":
+        if isinstance(position, Coordinates):
             self._position = position
         else:
             raise TypeError(("Input value has to be coordinates object, "
                              "not {}").format(type(position).__name__))
 
-        if type(orientation).__name__ == "Orientation":
+        if isinstance(orientation, Orientation):
             self._orientation = orientation
         else:
             raise TypeError(("Input value has to be orientation object, "
@@ -183,7 +183,7 @@ class Signal(Audio):
 
     @position.setter
     def position(self, value):
-        if type(value).__name__ == "Coordinates":
+        if isinstance(value, Coordinates):
             self._position = value
         else:
             raise TypeError(("Input value has to be coordinates object, "
