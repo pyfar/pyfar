@@ -51,31 +51,51 @@ def test_signal_init_false_orientation(sine):
         pytest.fail("Input value has to be coordinates object.")
 
 
+def test_n_samples(impulse):
+    """Test for number of samples."""
+    data = impulse
+    signal = Signal(data, 44100)
+    assert signal.n_samples == len(data)
+
+
+def test_n_bins(sine):
+    """Test for number of freq bins."""
+    data = sine
+    signal = Signal(data, 44100)
+    data_freq = np.fft.rfft(data)
+    assert signal.n_bins == len(data_freq)
+
+
 def test_getter_time(sine, impulse):
+    """Test if attribute time is accessed correctly."""
     signal = Signal(sine, 44100)
     signal._data = impulse
     npt.assert_allclose(signal.time, impulse)
 
 
 def test_setter_time(sine, impulse):
+    """Test if attribute time is set correctly."""
     signal = Signal(sine, 44100)
     signal.time = impulse
     npt.assert_allclose(impulse, signal._data)
 
 
 def test_getter_freq(sine, impulse):
+    """Test if attribute freq is accessed correctly."""
     signal = Signal(sine, 44100)
     signal._data = impulse
-    npt.assert_allclose(signal.freq, np.fft.fft(impulse), atol=1e-15)
+    npt.assert_allclose(signal.freq, np.fft.rfft(impulse), atol=1e-15)
 
 
 def test_setter_freq(sine, impulse):
+    """Test if attribute freq is set correctly."""
     signal = Signal(sine, 44100)
     signal.freq = np.fft.rfft(impulse)
     npt.assert_allclose(impulse, signal._data, atol=1e-15)
 
 
 def test_getter_samplingrate(sine):
+    """Test if attribute samplingrate is accessed correctly."""
     samplingrate = 48000
     signal = Signal(sine, 44100)
     signal._samplingrate = samplingrate
@@ -83,6 +103,7 @@ def test_getter_samplingrate(sine):
 
 
 def test_setter_sampligrate(sine):
+    """Test if attribute samplingrate is set correctly."""
     samplingrate = 48000
     signal = Signal(sine, 44100)
     signal.samplingrate = samplingrate
@@ -90,6 +111,7 @@ def test_setter_sampligrate(sine):
 
 
 def test_getter_signaltype(sine):
+    """Test if attribute signaltype is accessed correctly."""
     signaltype = "energy"
     signal = Signal(sine, 44100)
     signal._signaltype = signaltype
@@ -97,13 +119,30 @@ def test_getter_signaltype(sine):
 
 
 def test_setter_signaltype(sine):
+    """Test if attribute signaltype is set correctly."""
     signaltype = "energy"
     signal = Signal(sine, 44100)
     signal.signaltype = signaltype
     npt.assert_string_equal(signaltype, signal._signaltype)
 
 
+def test_setter_signaltype_false_type(sine):
+    """Test if ValueError is raised when signaltype is set incorrectly."""
+    signal = Signal(sine, 44100)
+    with pytest.raises(ValueError):
+        signal.signaltype = "falsetype"
+        pytest.fail("Not a valid signal type ('power'/'energy')")
+
+
+def test_signallength(sine):
+    """Test for the signal length."""
+    signal = Signal(sine, 44100)
+    length = (1000 - 1) / 44100
+    assert signal.signallength == length
+
+
 def test_getter_position(sine):
+    """Test if attribute position is accessed correctly."""
     coord_mock = mock.Mock(spec_set=Coordinates())
     coord_mock.x = 1
     coord_mock.y = 1
@@ -116,6 +155,7 @@ def test_getter_position(sine):
 
 
 def test_setter_position(sine):
+    """Test if attribute position is set correctly."""
     coord_mock = mock.Mock(spec_set=Coordinates())
     coord_mock.x = 1
     coord_mock.y = 1
@@ -128,6 +168,7 @@ def test_setter_position(sine):
 
 
 def test_getter_orientation(sine):
+    """Test if attribute orientation is accessed correctly."""
     orient_mock = mock.Mock(spec_set=Orientation())
     orient_mock.view = np.array([1, 0, 0])
     orient_mock.up = np.array([0, 1, 0])
@@ -138,6 +179,7 @@ def test_getter_orientation(sine):
 
 
 def test_setter_orientation(sine):
+    """Test if attribute orientation is set correctly."""
     orient_mock = mock.Mock(spec_set=Orientation())
     orient_mock.view = np.array([1, 0, 0])
     orient_mock.up = np.array([0, 1, 0])
@@ -145,6 +187,36 @@ def test_setter_orientation(sine):
     signal.orientation = orient_mock
     npt.assert_allclose(orient_mock.up, signal._orientation.up)
     npt.assert_allclose(orient_mock.view, signal._orientation.view)
+
+
+def test_shape(sine, impulse):
+    """Test the attribute shape."""
+    data = np.array([sine, impulse])
+    signal = Signal(data, 44100)
+    assert signal.shape == (2, 1000)
+
+
+def test_magic_getitem(sine, impulse):
+    """Test slicing operations by the magic function __getitem__."""
+    data = np.array([sine, impulse])
+    signal = Signal(data, 44100)
+    npt.assert_allclose(data[0], signal[0])
+    npt.assert_allclose(data[:], signal[:])
+    npt.assert_allclose(data[..., 0], signal[..., 0])
+
+
+def test_magic_setitem(sine, impulse):
+    """Test the magic function __setitem__."""
+    signal = Signal(sine, 44100)
+    signal[0] = impulse
+    impulse_2d = np.atleast_2d(impulse)
+    npt.assert_allclose(signal._data, impulse_2d)
+
+
+def test_magic_len(impulse):
+    """Test the magic function __len__."""
+    signal = Signal(impulse, 44100)
+    assert len(signal) == 1000
 
 
 @pytest.fixture
@@ -160,7 +232,7 @@ def sine():
     amplitude = 1
     frequency = 440
     samplingrate = 44100
-    num_samples = 100
+    num_samples = 1000
     fullperiod = False
 
     if fullperiod:
@@ -193,7 +265,7 @@ def impulse():
 
     """
     amplitude = 1
-    num_samples = 100
+    num_samples = 1000
 
     signal = np.zeros(num_samples, dtype=np.double)
     signal[0] = amplitude

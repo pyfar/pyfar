@@ -74,12 +74,8 @@ class Signal(Audio):
         elif domain == 'freq':
             if dtype is None:
                 self._dtype = np.double
-            if self.iscomplex:
-                self._data = np.atleast_2d(
-                        np.asarray(np.fft.ifft(data), dtype=dtype))
-            else:
-                self._data = np.atleast_2d(
-                        np.asarray(np.fft.irfft(data), dtype=dtype))
+            self._data = np.atleast_2d(
+                    np.asarray(np.fft.irfft(data), dtype=dtype))
 
         self._VALID_SIGNALTYPE = ["power", "energy"]
         if (signaltype in self._VALID_SIGNALTYPE) is True:
@@ -117,7 +113,7 @@ class Signal(Audio):
     @property
     def times(self):
         """Time instances the signal is sampled at."""
-        return np.arange(0, self.n_samples) / self.samplingrate
+        return np.atleast_2d(np.arange(0, self.n_samples) / self.samplingrate)
 
     @property
     def time(self):
@@ -131,18 +127,12 @@ class Signal(Audio):
     @property
     def freq(self):
         """The signal data in the frequency domain."""
-        if self.iscomplex:
-            freq = np.fft.rfft(self._data)
-        else:
-            freq = np.fft.fft(self._data)
+        freq = np.fft.rfft(self._data)
         return freq
 
     @freq.setter
     def freq(self, value):
-        if self.iscomplex:
-            self._data = np.fft.ifft(value)
-        else:
-            self._data = np.fft.irfft(value)
+        self._data = np.fft.irfft(value)
 
     @property
     def samplingrate(self):
@@ -202,14 +192,6 @@ class Signal(Audio):
     def shape(self):
         """Shape of the data."""
         return self._data.shape
-
-    @property
-    def iscomplex(self):
-        if 'complex' in str(self.dtype):
-            iscomplex = True
-        else:
-            iscomplex = False
-        return iscomplex
 
     def __repr__(self):
         """String representation of signal class.
