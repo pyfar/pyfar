@@ -186,7 +186,11 @@ class Signal(Audio):
 
     @orientation.setter
     def orientation(self, value):
-        self._orientation = value
+        if isinstance(value, Orientation):
+            self._orientation = value
+        else:
+            raise TypeError(("Input value has to be orientation object, "
+                             "not {}").format(type(value).__name__))
 
     @property
     def shape(self):

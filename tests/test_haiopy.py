@@ -66,6 +66,13 @@ def test_n_bins(sine):
     assert signal.n_bins == len(data_freq)
 
 
+def test_times(sine):
+    """Test for the time instances."""
+    signal = Signal(sine, 44100)
+    times = np.atleast_2d(np.arange(0, len(sine)) / 44100)
+    npt.assert_allclose(signal.times, times)
+
+
 def test_getter_time(sine, impulse):
     """Test if attribute time is accessed correctly."""
     signal = Signal(sine, 44100)
@@ -167,6 +174,14 @@ def test_setter_position(sine):
     npt.assert_allclose(coord_mock.z, signal._position.z)
 
 
+def test_setter_position_false_type(sine):
+    """Test if TypeError is raised when position is not set with Coordinates."""
+    signal = Signal(sine, 44100)
+    with pytest.raises(TypeError):
+        signal.position = np.array([1, 1, 1])
+        pytest.fail("Input has to be Coordinates object")
+
+
 def test_getter_orientation(sine):
     """Test if attribute orientation is accessed correctly."""
     orient_mock = mock.Mock(spec_set=Orientation())
@@ -187,6 +202,14 @@ def test_setter_orientation(sine):
     signal.orientation = orient_mock
     npt.assert_allclose(orient_mock.up, signal._orientation.up)
     npt.assert_allclose(orient_mock.view, signal._orientation.view)
+
+
+def test_setter_orientation_false_type(sine):
+    """Test if TypeError is raised when orientation is set incerrectly."""
+    signal = Signal(sine, 44100)
+    with pytest.raises(TypeError):
+        signal.orientation = np.array([[1, 0, 0], [0, 1, 0]])
+        pytest.fail("Input has to be Orientation object")
 
 
 def test_shape(sine, impulse):
