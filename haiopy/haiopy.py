@@ -65,17 +65,20 @@ class Signal(Audio):
 
         Audio.__init__(self)
         self._samplingrate = samplingrate
-        if domain == 'time':
-            if not dtype:
-                self._dtype = data.dtype
-            else:
-                self._dtype = dtype
-            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
-        elif domain == 'freq':
-            if dtype is None:
-                self._dtype = np.double
-            self._data = np.atleast_2d(
-                    np.asarray(np.fft.irfft(data), dtype=dtype))
+        if len(data.shape) <= 2:
+            if domain == 'time':
+                if not dtype:
+                    self._dtype = data.dtype
+                else:
+                    self._dtype = dtype
+                self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+            elif domain == 'freq':
+                if dtype is None:
+                    self._dtype = np.double
+                self._data = np.atleast_2d(
+                        np.asarray(np.fft.irfft(data), dtype=dtype))
+        else:
+            raise ValueError("Only 2-dim data is allowed")
 
         self._VALID_SIGNALTYPE = ["power", "energy"]
         if (signaltype in self._VALID_SIGNALTYPE) is True:
@@ -122,7 +125,10 @@ class Signal(Audio):
 
     @time.setter
     def time(self, value):
-        self._data = value
+        if len(value.shape) <= 2:
+            self._data = value
+        else:
+            raise ValueError("Only 2-dim data is allowed")
 
     @property
     def freq(self):
@@ -132,7 +138,10 @@ class Signal(Audio):
 
     @freq.setter
     def freq(self, value):
-        self._data = np.fft.irfft(value)
+        if len(value.shape) <= 2:
+            self._data = np.fft.irfft(value)
+        else:
+            raise ValueError("Only 2-dim data is allowed")
 
     @property
     def samplingrate(self):

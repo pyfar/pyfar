@@ -51,6 +51,14 @@ def test_signal_init_false_orientation(sine):
         pytest.fail("Input value has to be coordinates object.")
 
 
+def test_signal_init_3D(sine):
+    """Test if ValueError is raised when init with 3D data."""
+    data = sine.reshape([1, 1, 1000])
+    with pytest.raises(ValueError):
+        Signal(data, 44100)
+        pytest.fail("Input dimension has to be smaller than 3")
+
+
 def test_n_samples(impulse):
     """Test for number of samples."""
     data = impulse
@@ -87,6 +95,15 @@ def test_setter_time(sine, impulse):
     npt.assert_allclose(impulse, signal._data)
 
 
+def test_setter_time_3D(sine):
+    """Test if ValueError is raised when set with 3D data."""
+    signal = Signal(sine, 44100)
+    data_3d = sine.reshape([1, 1, 1000])
+    with pytest.raises(ValueError):
+        signal.time = data_3d
+        pytest.fail("Input dimension has to be smaller than 3")
+
+
 def test_getter_freq(sine, impulse):
     """Test if attribute freq is accessed correctly."""
     signal = Signal(sine, 44100)
@@ -99,6 +116,15 @@ def test_setter_freq(sine, impulse):
     signal = Signal(sine, 44100)
     signal.freq = np.fft.rfft(impulse)
     npt.assert_allclose(impulse, signal._data, atol=1e-15)
+
+
+def test_setter_freq_3D(sine):
+    """Test if ValueError is raised when set with 3D data."""
+    signal = Signal(sine, 44100)
+    data_3d = sine.reshape([1, 1, 1000])
+    with pytest.raises(ValueError):
+        signal.time = np.fft.rfft(data_3d)
+        pytest.fail("Input dimension has to be smaller than 3")
 
 
 def test_getter_samplingrate(sine):
@@ -139,6 +165,13 @@ def test_setter_signaltype_false_type(sine):
     with pytest.raises(ValueError):
         signal.signaltype = "falsetype"
         pytest.fail("Not a valid signal type ('power'/'energy')")
+
+
+def test_dtype(sine):
+    """Test for the getter od dtype."""
+    dtype = np.float64
+    signal = Signal(sine, 44100, dtype=dtype)
+    assert signal.dtype == dtype
 
 
 def test_signallength(sine):
@@ -205,7 +238,7 @@ def test_setter_orientation(sine):
 
 
 def test_setter_orientation_false_type(sine):
-    """Test if TypeError is raised when orientation is set incerrectly."""
+    """Test if TypeError is raised when orientation is set incorrectly."""
     signal = Signal(sine, 44100)
     with pytest.raises(TypeError):
         signal.orientation = np.array([[1, 0, 0], [0, 1, 0]])
