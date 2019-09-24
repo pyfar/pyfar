@@ -116,7 +116,7 @@ class Signal(Audio):
     @property
     def times(self):
         """Time instances the signal is sampled at."""
-        return np.atleast_2d(np.arange(0, self.n_samples) / self.samplingrate)
+        return np.arange(0, self.n_samples) / self.samplingrate
 
     @property
     def time(self):
