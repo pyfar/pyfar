@@ -1,6 +1,8 @@
 from itertools import cycle
 import matplotlib.pyplot as plt
 from matplotlib.backend_tools import ToolBase, ToolToggleBase
+import tkinter as tk
+
 import numpy as np
 
 from haiopy import Signal
@@ -35,12 +37,15 @@ def plot_time(signal, **kwargs):
     x_data = signal.times
     y_data = signal.time.T
 
-    def on_m_click(event):
-        if event.key == 'm':
-            print("event triggered")
+    def on_d_click(event):
+        if event.key == 'd':
+            root = tk.Tk()
+            gui = UpdateAxisGUI(root)
+            root.mainloop()
+            root.destroy()
 
     fig, axes = plt.subplots()
-    fig.canvas.mpl_connect('key_press_event', on_m_click)
+    fig.canvas.mpl_connect('key_press_event', on_d_click)
 
     axes.plot(x_data, y_data)
 
@@ -49,13 +54,14 @@ def plot_time(signal, **kwargs):
     axes.set_ylabel("Amplitude")
     axes.grid(True)
 
-    fig.canvas.manager.toolmanager.add_tool(
-        'ChannelCycle', CycleChannels, axes=axes)
-    fig.canvas.manager.toolmanager.add_tool(
-        'ChannelToggle', ToggleChannels, axes=axes)
-    fig.canvas.manager.toolmanager.add_tool(
-        'DarkMode', ToggleDarkMode, axes=axes)
-
+    if 'inline' not in plt.get_backend(): 
+        fig.canvas.manager.toolmanager.add_tool(
+            'ChannelCycle', CycleChannels, axes=axes)
+        fig.canvas.manager.toolmanager.add_tool(
+            'ChannelToggle', ToggleChannels, axes=axes)
+        fig.canvas.manager.toolmanager.add_tool(
+            'DarkMode', ToggleDarkMode, axes=axes)
+    
     plt.show()
 
     return axes
@@ -98,12 +104,14 @@ def plot_freq(signal, xmin=20, xmax=20000, ymin=None, ymax=None):
     axes.set_ylim(-90, 10)
     axes.grid(True)
 
-    fig.canvas.manager.toolmanager.add_tool(
-        'ChannelCycle', CycleChannels, axes=axes)
-    fig.canvas.manager.toolmanager.add_tool(
-        'ChannelToggle', ToggleChannels, axes=axes)
-    fig.canvas.manager.toolmanager.add_tool(
-        'DarkMode', ToggleDarkMode, axes=axes)
+    if 'inline' not in plt.get_backend(): 
+        fig.canvas.manager.toolmanager.add_tool(
+            'ChannelCycle', CycleChannels, axes=axes)
+        fig.canvas.manager.toolmanager.add_tool(
+            'ChannelToggle', ToggleChannels, axes=axes)
+        fig.canvas.manager.toolmanager.add_tool(
+            'DarkMode', ToggleDarkMode, axes=axes)
+        
 
     plt.show()
 
@@ -224,4 +232,16 @@ class ToggleDarkMode(ToolToggleBase):
             self.axes.yaxis.label.set_color('k')
             self.axes.xaxis.label.set_color('k')
             self.axes.title.set_color('k')
-        self.figure.canvas.draw()
+        self.figure.canvas.draw()        
+
+
+class UpdateAxisGUI():
+    def __init__(self, master):
+        self.master = master
+        master.title = ("Setting the axis limits")
+        
+        self.okay_button = tk.Button(master, text="Okay", command = master.quit)
+        self.okay_button.grid(row=1, column=1)
+        self.cancel_button = tk.Button(master, text="Cancel", command = master.quit)
+        self.cancel_button.grid(row=1, column=2)
+        
