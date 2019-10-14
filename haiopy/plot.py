@@ -34,7 +34,7 @@ def plot_time(signal, **kwargs):
     # if not isinstance(signal, Signal):
     #     raise TypeError("Expected Signal object, not {}".format(type(signal).__name__))
     # n_channels = signal.shape[0]
-    x_data = signal.times
+    x_data = signal.times[0]
     y_data = signal.time.T
 
     def on_d_click(event):
