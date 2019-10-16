@@ -1,7 +1,7 @@
 # haiopy
 
-[![pipeline status](https://git.rwth-aachen.de/mbe/haiopy/badges/signal_attributes/pipeline.svg)](https://git.rwth-aachen.de/mbe/haiopy/commits/signal_attributes)
-[![coverage report](https://git.rwth-aachen.de/mbe/haiopy/badges/signal_attributes/coverage.svg)](https://git.rwth-aachen.de/mbe/haiopy/commits/signal_attributes)
+[![pipeline status](https://git.rwth-aachen.de/mbe/haiopy/badges/signal_attributes/pipeline.svg)](https://git.rwth-aachen.de/mbe/haiopy/commits/plot)
+[![coverage report](https://git.rwth-aachen.de/mbe/haiopy/badges/signal_attributes/coverage.svg)](https://git.rwth-aachen.de/mbe/haiopy/commits/plot)
 
 Haiopy Acoustics Input and Output in Python. An open and common base for Python programming in acoustics.
 
