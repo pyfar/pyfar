@@ -1,7 +1,8 @@
 from itertools import cycle
 import matplotlib.pyplot as plt
 from matplotlib.backend_tools import ToolBase, ToolToggleBase
-import tkinter as tk
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QGridLayout, QLineEdit, QLabel
+from PyQt5.QtCore import Qt
 
 import numpy as np
 
@@ -23,11 +24,11 @@ def plot_time(signal, **kwargs):
     Returns
     -------
     axes :  Axes object or array of Axes objects.
-    
+
     See Also
     --------
     matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
-    
+
     Examples
     --------
     """
@@ -37,15 +38,7 @@ def plot_time(signal, **kwargs):
     x_data = signal.times[0]
     y_data = signal.time.T
 
-    def on_d_click(event):
-        if event.key == 'd':
-            root = tk.Tk()
-            gui = UpdateAxisGUI(root)
-            root.mainloop()
-            root.destroy()
-
     fig, axes = plt.subplots()
-    fig.canvas.mpl_connect('key_press_event', on_d_click)
 
     axes.plot(x_data, y_data)
 
@@ -54,14 +47,16 @@ def plot_time(signal, **kwargs):
     axes.set_ylabel("Amplitude")
     axes.grid(True)
 
-    if 'inline' not in plt.get_backend(): 
+    if 'Qt' in plt.get_backend():
         fig.canvas.manager.toolmanager.add_tool(
             'ChannelCycle', CycleChannels, axes=axes)
         fig.canvas.manager.toolmanager.add_tool(
             'ChannelToggle', ToggleChannels, axes=axes)
         fig.canvas.manager.toolmanager.add_tool(
             'DarkMode', ToggleDarkMode, axes=axes)
-    
+        fig.canvas.manager.toolmanager.add_tool(
+                'AxisUpdate', UpdateAxis, axes=axes)
+
     plt.show()
 
     return axes
@@ -80,11 +75,11 @@ def plot_freq(signal, xmin=20, xmax=20000, ymin=None, ymax=None):
     Returns
     -------
     axes : Axes object or array of Axes objects.
-    
+
     See Also
     --------
     matplotlib.pyplot.magnitude_spectrum() : Plot the magnitudes of the corresponding frequencies.
-    
+
     Examples
     --------
     """
@@ -104,14 +99,13 @@ def plot_freq(signal, xmin=20, xmax=20000, ymin=None, ymax=None):
     axes.set_ylim(-90, 10)
     axes.grid(True)
 
-    if 'inline' not in plt.get_backend(): 
+    if 'inline' not in plt.get_backend():
         fig.canvas.manager.toolmanager.add_tool(
             'ChannelCycle', CycleChannels, axes=axes)
         fig.canvas.manager.toolmanager.add_tool(
             'ChannelToggle', ToggleChannels, axes=axes)
         fig.canvas.manager.toolmanager.add_tool(
             'DarkMode', ToggleDarkMode, axes=axes)
-        
 
     plt.show()
 
@@ -120,9 +114,9 @@ def plot_freq(signal, xmin=20, xmax=20000, ymin=None, ymax=None):
 
 class CycleChannels(ToolBase):
     """Cycle throgh the channels.
-    
+
     This class adds custom functionalities to the matplotlib UI
-    
+
     Reference
     ---------
     `Backend Managers <https://matplotlib.org/api/backend_managers_api.html>`_
@@ -145,9 +139,9 @@ class CycleChannels(ToolBase):
 
 class ToggleChannels(ToolToggleBase):
     """Toggles between all channels and single channel.
-    
+
     This class adds custom functionalities to the matplotlib UI
-    
+
     Reference
     ---------
     `Backend Managers <https://matplotlib.org/api/backend_managers_api.html>`_
@@ -186,9 +180,9 @@ class ToggleChannels(ToolToggleBase):
 
 class ToggleDarkMode(ToolToggleBase):
     """Toggles the dark mode of the plot.
-    
+
     This class adds custom functionalities to the matplotlib UI
-    
+
     Reference
     ---------
     `Backend Managers <https://matplotlib.org/api/backend_managers_api.html>`_
@@ -232,16 +226,84 @@ class ToggleDarkMode(ToolToggleBase):
             self.axes.yaxis.label.set_color('k')
             self.axes.xaxis.label.set_color('k')
             self.axes.title.set_color('k')
-        self.figure.canvas.draw()        
+        self.figure.canvas.draw()
 
 
-class UpdateAxisGUI():
-    def __init__(self, master):
-        self.master = master
-        master.title = ("Setting the axis limits")
-        
-        self.okay_button = tk.Button(master, text="Okay", command = master.quit)
-        self.okay_button.grid(row=1, column=1)
-        self.cancel_button = tk.Button(master, text="Cancel", command = master.quit)
-        self.cancel_button.grid(row=1, column=2)
-        
+class UpdateAxis(ToolBase):
+    """Open the AxisDialog to update the axis limits.
+
+    This class adds custom functionalities to the matplotlib UI
+
+    Reference
+    ---------
+    `Backend Managers <https://matplotlib.org/api/backend_managers_api.html>`_
+    """
+    default_keymap = 'd'
+    description = "Update Axis GUI"
+
+    def __init__(self, *args, axes, **kwargs):
+        self.axes = axes
+        self.line_cycle = cycle(self.axes.lines)
+        self.current_line = next(self.line_cycle)
+
+    def trigger(self, *args, **kwargs):
+        AxisDialog.update_axis(axes=self.axes)
+
+        self.figure.canvas.draw()
+
+
+class AxisDialog(QDialog):
+    """Qt GUI to update the axix limits"""
+
+    def __init__(self, parent, axes):
+        super().__init__(parent)
+
+        # Get axes info
+        self.axes = axes
+        self.xlim = self.axes.get_xlim()
+        self.ylim = self.axes.get_ylim()
+
+        self.setWindowTitle('Update Axis Limits')
+        self.grid = QGridLayout(self)
+
+        # Create widgets
+        self.label_x = QLabel("x-axis")
+        self.label_y = QLabel("y-axis")
+        self.label_start = QLabel("Start")
+        self.label_stop = QLabel("Stop")
+        self.label_delta = QLabel("Delta")
+        self.edit_xmin = QLineEdit("{:0.5f}".format(self.xlim[0]))
+        self.edit_xmax = QLineEdit("{:0.5f}".format(self.xlim[1]))
+        self.edit_xdelta = QLineEdit()
+        self.edit_ymin = QLineEdit("{:0.5f}".format(self.ylim[0]))
+        self.edit_ymax = QLineEdit("{:0.5f}".format(self.ylim[1]))
+        self.edit_ydelta = QLineEdit()
+
+        # OK and Cancel buttons
+        self.buttonbox = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+            Qt.Horizontal, self)
+
+        self.buttonbox.accepted.connect(self.accept)
+        self.buttonbox.rejected.connect(self.reject)
+
+        # Add widgets to grid
+        self.grid.addWidget(self.label_start, 0, 1, 1, 1)
+        self.grid.addWidget(self.label_stop, 0, 2, 1, 1)
+        self.grid.addWidget(self.label_delta, 0, 3, 1, 1)
+        self.grid.addWidget(self.label_x, 1, 0, 1, 1)
+        self.grid.addWidget(self.label_y, 2, 0, 1, 1)
+        self.grid.addWidget(self.edit_xmin, 1, 1, 1, 1)
+        self.grid.addWidget(self.edit_xmax, 1, 2, 1, 1)
+        self.grid.addWidget(self.edit_xdelta, 1, 3, 1, 1)
+        self.grid.addWidget(self.edit_ymin, 2, 1, 1, 1)
+        self.grid.addWidget(self.edit_ymax, 2, 2, 1, 1)
+        self.grid.addWidget(self.edit_ydelta, 2, 3, 1, 1)
+        self.grid.addWidget(self.buttonbox, 3, 1, 1, 2)
+
+    # static method to create the dialog and return (date, time, accepted)
+    @staticmethod
+    def update_axis(axes, parent=None):
+        dialog = AxisDialog(parent, axes)
+        result = dialog.exec_()
+        return (result == QDialog.Accepted)
