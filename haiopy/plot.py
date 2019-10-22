@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backend_tools import ToolBase, ToolToggleBase
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QGridLayout, QLineEdit, QLabel
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QDoubleValidator
 
 import numpy as np
 
@@ -62,7 +63,7 @@ def plot_time(signal, **kwargs):
     return axes
 
 
-def plot_freq(signal, xmin=20, xmax=20000, ymin=None, ymax=None):
+def plot_freq(signal, xmin=20, xmax=20000):
     """Plot the absolute values of the spectrum on the positive frequency axis.
 
     Parameters
@@ -92,20 +93,30 @@ def plot_freq(signal, xmin=20, xmax=20000, ymin=None, ymax=None):
     fig, axes = plt.subplots()
 
     axes.set_title("Magnitude Spectrum")
+    
     for i in range(n_channels):
-        axes.magnitude_spectrum(time_data[i], Fs=samplingrate, scale='dB')
+        spectrum = axes.magnitude_spectrum(time_data[i], Fs=samplingrate, scale='dB')
+        
     axes.set_xscale('log')
-    axes.set_xlim(xmin, xmax)
-    axes.set_ylim(-90, 10)
+    axes.set_xlim(xmin, xmax)   
+    spectrum_db = 20 * np.log10(spectrum + np.finfo(float).tiny)
+    
+    #Check if param is None
+    ymax = np.max(spectrum_db)
+    ymin = ymax - 90
+    ymax = ymax + 10    
+    axes.set_ylim(ymin, ymax)
     axes.grid(True)
 
-    if 'inline' not in plt.get_backend():
+    if 'Qt' not in plt.get_backend():
         fig.canvas.manager.toolmanager.add_tool(
             'ChannelCycle', CycleChannels, axes=axes)
         fig.canvas.manager.toolmanager.add_tool(
             'ChannelToggle', ToggleChannels, axes=axes)
         fig.canvas.manager.toolmanager.add_tool(
             'DarkMode', ToggleDarkMode, axes=axes)
+        fig.canvas.manager.toolmanager.add_tool(
+                'AxisUpdate', UpdateAxis, axes=axes)
 
     plt.show()
 
@@ -247,8 +258,10 @@ class UpdateAxis(ToolBase):
         self.current_line = next(self.line_cycle)
 
     def trigger(self, *args, **kwargs):
-        AxisDialog.update_axis(axes=self.axes)
+        xlim_update, ylim_update, result = AxisDialog.update_axis(axes=self.axes)
 
+        self.axes.set_xlim(xlim_update)
+        self.axes.set_ylim(ylim_update)
         self.figure.canvas.draw()
 
 
@@ -271,13 +284,18 @@ class AxisDialog(QDialog):
         self.label_y = QLabel("y-axis")
         self.label_start = QLabel("Start")
         self.label_stop = QLabel("Stop")
-        self.label_delta = QLabel("Delta")
+        # self.label_delta = QLabel("Delta")
         self.edit_xmin = QLineEdit("{:0.5f}".format(self.xlim[0]))
         self.edit_xmax = QLineEdit("{:0.5f}".format(self.xlim[1]))
-        self.edit_xdelta = QLineEdit()
+        # self.edit_xdelta = QLineEdit()
         self.edit_ymin = QLineEdit("{:0.5f}".format(self.ylim[0]))
         self.edit_ymax = QLineEdit("{:0.5f}".format(self.ylim[1]))
-        self.edit_ydelta = QLineEdit()
+        # self.edit_ydelta = QLineEdit()
+        
+        self.edit_xmin.setValidator(QDoubleValidator())
+        self.edit_xmax.setValidator(QDoubleValidator())
+        self.edit_ymin.setValidator(QDoubleValidator())
+        self.edit_ymax.setValidator(QDoubleValidator())
 
         # OK and Cancel buttons
         self.buttonbox = QDialogButtonBox(
@@ -290,20 +308,30 @@ class AxisDialog(QDialog):
         # Add widgets to grid
         self.grid.addWidget(self.label_start, 0, 1, 1, 1)
         self.grid.addWidget(self.label_stop, 0, 2, 1, 1)
-        self.grid.addWidget(self.label_delta, 0, 3, 1, 1)
+        # self.grid.addWidget(self.label_delta, 0, 3, 1, 1)
         self.grid.addWidget(self.label_x, 1, 0, 1, 1)
         self.grid.addWidget(self.label_y, 2, 0, 1, 1)
         self.grid.addWidget(self.edit_xmin, 1, 1, 1, 1)
         self.grid.addWidget(self.edit_xmax, 1, 2, 1, 1)
-        self.grid.addWidget(self.edit_xdelta, 1, 3, 1, 1)
+        # self.grid.addWidget(self.edit_xdelta, 1, 3, 1, 1)
         self.grid.addWidget(self.edit_ymin, 2, 1, 1, 1)
         self.grid.addWidget(self.edit_ymax, 2, 2, 1, 1)
-        self.grid.addWidget(self.edit_ydelta, 2, 3, 1, 1)
+        # self.grid.addWidget(self.edit_ydelta, 2, 3, 1, 1)
         self.grid.addWidget(self.buttonbox, 3, 1, 1, 2)
 
     # static method to create the dialog and return (date, time, accepted)
     @staticmethod
     def update_axis(axes, parent=None):
-        dialog = AxisDialog(parent, axes)
+        dialog = AxisDialog(parent, axes)        
         result = dialog.exec_()
-        return (result == QDialog.Accepted)
+        
+        if result == QDialog.Accepted:
+            xlim = (float(dialog.edit_xmin.text()), 
+                    float(dialog.edit_xmax.text()))
+            ylim = (float(dialog.edit_ymin.text()), 
+                    float(dialog.edit_ymax.text()))
+        else:
+            xlim = dialog.axes.get_xlim()
+            ylim = dialog.axes.get_ylim()
+            
+        return (xlim, ylim, result == QDialog.Accepted)
