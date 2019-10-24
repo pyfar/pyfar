@@ -21,6 +21,7 @@ def plot_time(signal, **kwargs):
         An audio signal object from the haiopy Signal class
     **kwargs
         Arbitrary keyword arguments.
+        Use 'xmin', 'xmax', 'ymin', 'ymax' to set axis limitations.
 
     Returns
     -------
@@ -33,9 +34,7 @@ def plot_time(signal, **kwargs):
     Examples
     --------
     """
-    # if not isinstance(signal, Signal):
-    #     raise TypeError("Expected Signal object, not {}".format(type(signal).__name__))
-    # n_channels = signal.shape[0]
+
     x_data = signal.times[0]
     y_data = signal.time.T
 
@@ -47,6 +46,27 @@ def plot_time(signal, **kwargs):
     axes.set_xlabel("Time [sec]")
     axes.set_ylabel("Amplitude")
     axes.grid(True)
+
+    if "xmin" in kwargs:
+        if isinstance(kwargs.get("xmin"), (int, float)):
+            axes.set_xlim(left=kwargs.get("xmin"))
+        else:
+            raise TypeError("Expected int/double")
+    if "xmax" in kwargs:
+        if isinstance(kwargs.get("xmax"), (int, float)):
+            axes.set_xlim(right=kwargs.get("xmax"))
+        else:
+            raise TypeError("Expected int/double")
+    if "ymin" in kwargs:
+        if isinstance(kwargs.get("ymin"), (int, float)):
+            axes.set_ylim(bottom=kwargs.get("ymin"))
+        else:
+            raise TypeError("Expected int/double")
+    if "ymax" in kwargs:
+        if isinstance(kwargs.get("ymax"), (int, float)):
+            axes.set_ylim(top=kwargs.get("ymax"))
+        else:
+            raise TypeError("Expected int/double")
 
     if 'Qt' in plt.get_backend():
         fig.canvas.manager.toolmanager.add_tool(
@@ -63,7 +83,7 @@ def plot_time(signal, **kwargs):
     return axes
 
 
-def plot_freq(signal, xmin=20, xmax=20000):
+def plot_freq(signal, **kwargs):
     """Plot the absolute values of the spectrum on the positive frequency axis.
 
     Parameters
@@ -72,6 +92,7 @@ def plot_freq(signal, xmin=20, xmax=20000):
         An adio signal object from the haiopy signal class
     **kwargs
         Arbitrary keyword arguments.
+        Use 'xmin', 'xmax', 'ymin', 'ymax' to set axis limitations.
 
     Returns
     -------
@@ -84,8 +105,7 @@ def plot_freq(signal, xmin=20, xmax=20000):
     Examples
     --------
     """
-    # if not isinstance(signal, Signal):
-    #     raise TypeError("Expected Signal object, not {}".format(type(signal).__name__))
+
     n_channels = signal.shape[0]
     time_data = signal.time
     samplingrate = signal.samplingrate
@@ -93,22 +113,48 @@ def plot_freq(signal, xmin=20, xmax=20000):
     fig, axes = plt.subplots()
 
     axes.set_title("Magnitude Spectrum")
-    
+
     for i in range(n_channels):
-        spectrum = axes.magnitude_spectrum(time_data[i], Fs=samplingrate, scale='dB')
-        
+        spectrum, freq, line = axes.magnitude_spectrum(time_data[i], Fs=samplingrate, scale='dB')
+
     axes.set_xscale('log')
-    axes.set_xlim(xmin, xmax)   
-    spectrum_db = 20 * np.log10(spectrum + np.finfo(float).tiny)
-    
-    #Check if param is None
-    ymax = np.max(spectrum_db)
-    ymin = ymax - 90
-    ymax = ymax + 10    
-    axes.set_ylim(ymin, ymax)
     axes.grid(True)
 
-    if 'Qt' not in plt.get_backend():
+    spectrum_db = 20 * np.log10(spectrum + np.finfo(float).tiny)
+    ymax = np.max(spectrum_db)
+    ymin = ymax - 90
+    ymax = ymax + 10
+
+    if "xmin" in kwargs:
+        if isinstance(kwargs.get("xmin"), (int, float)):
+            axes.set_xlim(left=kwargs.get("xmin"))
+        else:
+            raise TypeError("Expected int/double")
+    else:
+        axes.set_xlim(left=20)
+    if "xmax" in kwargs:
+        if isinstance(kwargs.get("xmax"), (int, float)):
+            axes.set_xlim(right=kwargs.get("xmax"))
+        else:
+            raise TypeError("Expected int/double")
+    else:
+        axes.set_xlim(right=20000)
+    if "ymin" in kwargs:
+        if isinstance(kwargs.get("ymin"), (int, float)):
+            axes.set_ylim(bottom=kwargs.get("ymin"))
+        else:
+            raise TypeError("Expected int/double")
+    else:
+        axes.set_ylim(bottom=ymin)
+    if "ymax" in kwargs:
+        if isinstance(kwargs.get("ymax"), (int, float)):
+            axes.set_ylim(top=kwargs.get("ymax"))
+        else:
+            raise TypeError("Expected int/double")
+    else:
+        axes.set_ylim(top=ymax)
+
+    if 'Qt' in plt.get_backend():
         fig.canvas.manager.toolmanager.add_tool(
             'ChannelCycle', CycleChannels, axes=axes)
         fig.canvas.manager.toolmanager.add_tool(
@@ -291,7 +337,7 @@ class AxisDialog(QDialog):
         self.edit_ymin = QLineEdit("{:0.5f}".format(self.ylim[0]))
         self.edit_ymax = QLineEdit("{:0.5f}".format(self.ylim[1]))
         # self.edit_ydelta = QLineEdit()
-        
+
         self.edit_xmin.setValidator(QDoubleValidator())
         self.edit_xmax.setValidator(QDoubleValidator())
         self.edit_ymin.setValidator(QDoubleValidator())
@@ -322,16 +368,16 @@ class AxisDialog(QDialog):
     # static method to create the dialog and return (date, time, accepted)
     @staticmethod
     def update_axis(axes, parent=None):
-        dialog = AxisDialog(parent, axes)        
+        dialog = AxisDialog(parent, axes)
         result = dialog.exec_()
-        
+
         if result == QDialog.Accepted:
-            xlim = (float(dialog.edit_xmin.text()), 
+            xlim = (float(dialog.edit_xmin.text()),
                     float(dialog.edit_xmax.text()))
-            ylim = (float(dialog.edit_ymin.text()), 
+            ylim = (float(dialog.edit_ymin.text()),
                     float(dialog.edit_ymax.text()))
         else:
             xlim = dialog.axes.get_xlim()
             ylim = dialog.axes.get_ylim()
-            
+
         return (xlim, ylim, result == QDialog.Accepted)
