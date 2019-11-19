@@ -9,7 +9,7 @@ import numpy as np
 
 from haiopy import Signal
 
-plt.rcParams['toolbar'] = 'toolmanager'
+# plt.rcParams['toolbar'] = 'toolmanager'
 
 
 def plot_time(signal, **kwargs):
@@ -38,49 +38,53 @@ def plot_time(signal, **kwargs):
     x_data = signal.times[0]
     y_data = signal.time.T
 
-    fig, axes = plt.subplots()
+    fig, ax = plt.subplots()
 
-    axes.plot(x_data, y_data)
+    ax.plot(x_data, y_data)
 
-    axes.set_title("Signal")
-    axes.set_xlabel("Time [sec]")
-    axes.set_ylabel("Amplitude")
-    axes.grid(True)
+    ax.set_title("Signal")
+    ax.set_xlabel("Time [sec]")
+    ax.set_ylabel("Amplitude")
+    ax.grid(True)
 
-    if "xmin" in kwargs:
-        if isinstance(kwargs.get("xmin"), (int, float)):
-            axes.set_xlim(left=kwargs.get("xmin"))
-        else:
-            raise TypeError("Expected int/double")
-    if "xmax" in kwargs:
-        if isinstance(kwargs.get("xmax"), (int, float)):
-            axes.set_xlim(right=kwargs.get("xmax"))
-        else:
-            raise TypeError("Expected int/double")
-    if "ymin" in kwargs:
-        if isinstance(kwargs.get("ymin"), (int, float)):
-            axes.set_ylim(bottom=kwargs.get("ymin"))
-        else:
-            raise TypeError("Expected int/double")
-    if "ymax" in kwargs:
-        if isinstance(kwargs.get("ymax"), (int, float)):
-            axes.set_ylim(top=kwargs.get("ymax"))
-        else:
-            raise TypeError("Expected int/double")
+    # if "xmin" in kwargs:
+    #     if isinstance(kwargs.get("xmin"), (int, float)):
+    #         axes.set_xlim(left=kwargs.get("xmin"))
+    #     else:
+    #         raise TypeError("Expected int/double")
+    # if "xmax" in kwargs:
+    #     if isinstance(kwargs.get("xmax"), (int, float)):
+    #         axes.set_xlim(right=kwargs.get("xmax"))
+    #     else:
+    #         raise TypeError("Expected int/double")
+    # if "ymin" in kwargs:
+    #     if isinstance(kwargs.get("ymin"), (int, float)):
+    #         axes.set_ylim(bottom=kwargs.get("ymin"))
+    #     else:
+    #         raise TypeError("Expected int/double")
+    # if "ymax" in kwargs:
+    #     if isinstance(kwargs.get("ymax"), (int, float)):
+    #         axes.set_ylim(top=kwargs.get("ymax"))
+    #     else:
+    #         raise TypeError("Expected int/double")
 
-    if 'Qt' in plt.get_backend():
-        fig.canvas.manager.toolmanager.add_tool(
-            'ChannelCycle', CycleChannels, axes=axes)
-        fig.canvas.manager.toolmanager.add_tool(
-            'ChannelToggle', ToggleChannels, axes=axes)
-        fig.canvas.manager.toolmanager.add_tool(
-            'DarkMode', ToggleDarkMode, axes=axes)
-        fig.canvas.manager.toolmanager.add_tool(
-                'AxisUpdate', UpdateAxis, axes=axes)
+    # if 'Qt' in plt.get_backend():
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #         'ChannelCycle', CycleChannels, axes=axes)
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #         'ChannelToggle', ToggleAllChannels, axes=axes)
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #         'DarkMode', ToggleDarkMode, axes=axes)
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #             'AxisUpdate', UpdateAxis, axes=axes)
+    # else:
+    Cycler = ToggleChannels(axes=ax)
+    fig.canvas.mpl_connect('key_press_event', Cycler.cycle_lines)
+    fig.canvas.mpl_connect('key_press_event', Cycler.toggle_all_lines)
 
     plt.show()
 
-    return axes
+    return ax
 
 
 def plot_freq(signal, **kwargs):
@@ -154,19 +158,121 @@ def plot_freq(signal, **kwargs):
     else:
         axes.set_ylim(top=ymax)
 
-    if 'Qt' in plt.get_backend():
-        fig.canvas.manager.toolmanager.add_tool(
-            'ChannelCycle', CycleChannels, axes=axes)
-        fig.canvas.manager.toolmanager.add_tool(
-            'ChannelToggle', ToggleChannels, axes=axes)
-        fig.canvas.manager.toolmanager.add_tool(
-            'DarkMode', ToggleDarkMode, axes=axes)
-        fig.canvas.manager.toolmanager.add_tool(
-                'AxisUpdate', UpdateAxis, axes=axes)
+    # if 'Qt' in plt.get_backend():
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #         'ChannelCycle', CycleChannels, axes=axes)
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #         'ChannelToggle', ToggleAllChannels, axes=axes)
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #         'DarkMode', ToggleDarkMode, axes=axes)
+    #     fig.canvas.manager.toolmanager.add_tool(
+    #             'AxisUpdate', UpdateAxis, axes=axes)
+    # else:
+    ax = plt.gca()
+    Cycler = ToggleChannels(axes=axes)
+    # fig.canvas.mpl_connect('key_press_event', Cycler.trigger)
+    fig.Cycler = Cycler
+
+    fig.canvas.mpl_connect('key_press_event', fig.Cycler.cycle_lines)
+    fig.canvas.mpl_connect('key_press_event', fig.Cycler.toggle_all_lines)
+    plt.draw()
 
     plt.show()
 
     return axes
+
+
+class CycleChannels(object):
+    def __init__(self, axes):
+        self.axes = axes
+        self.cycle = Cycle(self.axes.lines)
+        self.current_line = self.cycle.current()
+    def trigger(self, event):
+        print('triggered')
+        if event.key in ['*', ']', '[', '/', '7']:
+            for i in range(len(self.axes.lines)):
+                self.axes.lines[i].set_visible(False)
+            if event.key in ['*', ']']:
+                self.current_line = next(self.cycle)
+            elif event.key in ['[', '/', '7']:
+                self.current_line = self.cycle.previous()
+            self.current_line.set_visible(True)
+            plt.draw()
+
+
+class Cycle(object):
+    """ Cycle class implementation inspired by itertools.cycle. Supports
+    circular iterations into two directions by using next and previous.
+    """
+    def __init__(self, data):
+        """
+        Parameters
+        ----------
+        data : array like
+            The data to be iterated over.
+        """
+        self.data = data
+        self.n_elements = len(self.data)
+        self.index = 0
+
+    def __next__(self):
+        index = (self.index + 1) % self.n_elements
+        self.index = index
+        return self.data[self.index]
+
+    def next(self):
+        return self.__next__()
+
+    def previous(self):
+        index = self.index - 1
+        if index < 0:
+            index = self.n_elements + index
+        self.index = index
+        return self.data[self.index]
+
+    def current(self):
+        return self.data[self.index]
+
+
+class ToggleChannels(object):
+    """ Keybindings for cycling and toggling visible channels. Uses the event
+    API provided by matplotlib. Works for the jupyter-matplotlib and qt
+    backends.
+    """
+    def __init__(self, axes):
+        self.axes = axes
+        self.cycle = Cycle(self.axes.lines)
+        self.current_line = self.cycle.current()
+        self.all_visible = True
+
+    def cycle_lines(self, event):
+        print(event.key)
+        if event.key in ['*', ']', '[', '/', '7']:
+            if self.all_visible:
+                for i in range(len(self.axes.lines)):
+                    self.axes.lines[i].set_visible(False)
+            else:
+                self.current_line.set_visible(False)
+            if event.key in ['*', ']']:
+                self.current_line = next(self.cycle)
+            elif event.key in ['[', '/', '7']:
+                self.current_line = self.cycle.previous()
+            self.current_line.set_visible(True)
+            self.all_visible = False
+            plt.draw()
+
+    def toggle_all_lines(self, event):
+        if event.key in ['a']:
+            if self.all_visible:
+                for i in range(len(self.axes.lines)):
+                    self.axes.lines[i].set_visible(False)
+                self.current_line.set_visible(True)
+                self.all_visible = False
+            else:
+                for i in range(len(self.axes.lines)):
+                    self.axes.lines[i].set_visible(True)
+                self.all_visible = True
+            plt.draw()
 
 
 class CycleChannels(ToolBase):
@@ -194,7 +300,7 @@ class CycleChannels(ToolBase):
         self.figure.canvas.draw()
 
 
-class ToggleChannels(ToolToggleBase):
+class ToggleAllChannels(ToolToggleBase):
     """Toggles between all channels and single channel.
 
     This class adds custom functionalities to the matplotlib UI
