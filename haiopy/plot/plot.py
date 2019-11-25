@@ -9,6 +9,8 @@ import numpy as np
 
 from haiopy import Signal
 
+from ._interaction import AxisModifierLinesLinYAxis, AxisModifierLinesLogYAxis
+
 # plt.rcParams['toolbar'] = 'toolmanager'
 
 
@@ -47,40 +49,8 @@ def plot_time(signal, **kwargs):
     ax.set_ylabel("Amplitude")
     ax.grid(True)
 
-    # if "xmin" in kwargs:
-    #     if isinstance(kwargs.get("xmin"), (int, float)):
-    #         axes.set_xlim(left=kwargs.get("xmin"))
-    #     else:
-    #         raise TypeError("Expected int/double")
-    # if "xmax" in kwargs:
-    #     if isinstance(kwargs.get("xmax"), (int, float)):
-    #         axes.set_xlim(right=kwargs.get("xmax"))
-    #     else:
-    #         raise TypeError("Expected int/double")
-    # if "ymin" in kwargs:
-    #     if isinstance(kwargs.get("ymin"), (int, float)):
-    #         axes.set_ylim(bottom=kwargs.get("ymin"))
-    #     else:
-    #         raise TypeError("Expected int/double")
-    # if "ymax" in kwargs:
-    #     if isinstance(kwargs.get("ymax"), (int, float)):
-    #         axes.set_ylim(top=kwargs.get("ymax"))
-    #     else:
-    #         raise TypeError("Expected int/double")
-
-    # if 'Qt' in plt.get_backend():
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #         'ChannelCycle', CycleChannels, axes=axes)
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #         'ChannelToggle', ToggleAllChannels, axes=axes)
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #         'DarkMode', ToggleDarkMode, axes=axes)
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #             'AxisUpdate', UpdateAxis, axes=axes)
-    # else:
-    Cycler = ToggleChannels(axes=ax)
-    fig.canvas.mpl_connect('key_press_event', Cycler.cycle_lines)
-    fig.canvas.mpl_connect('key_press_event', Cycler.toggle_all_lines)
+    modifier = AxisModifierLinesLinYAxis(ax, fig)
+    modifier.connect()
 
     plt.show()
 
@@ -129,150 +99,17 @@ def plot_freq(signal, **kwargs):
     ymin = ymax - 90
     ymax = ymax + 10
 
-    if "xmin" in kwargs:
-        if isinstance(kwargs.get("xmin"), (int, float)):
-            axes.set_xlim(left=kwargs.get("xmin"))
-        else:
-            raise TypeError("Expected int/double")
-    else:
-        axes.set_xlim(left=20)
-    if "xmax" in kwargs:
-        if isinstance(kwargs.get("xmax"), (int, float)):
-            axes.set_xlim(right=kwargs.get("xmax"))
-        else:
-            raise TypeError("Expected int/double")
-    else:
-        axes.set_xlim(right=20000)
-    if "ymin" in kwargs:
-        if isinstance(kwargs.get("ymin"), (int, float)):
-            axes.set_ylim(bottom=kwargs.get("ymin"))
-        else:
-            raise TypeError("Expected int/double")
-    else:
-        axes.set_ylim(bottom=ymin)
-    if "ymax" in kwargs:
-        if isinstance(kwargs.get("ymax"), (int, float)):
-            axes.set_ylim(top=kwargs.get("ymax"))
-        else:
-            raise TypeError("Expected int/double")
-    else:
-        axes.set_ylim(top=ymax)
 
-    # if 'Qt' in plt.get_backend():
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #         'ChannelCycle', CycleChannels, axes=axes)
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #         'ChannelToggle', ToggleAllChannels, axes=axes)
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #         'DarkMode', ToggleDarkMode, axes=axes)
-    #     fig.canvas.manager.toolmanager.add_tool(
-    #             'AxisUpdate', UpdateAxis, axes=axes)
-    # else:
+    axes.set_ylim((ymin, ymax))
+
     ax = plt.gca()
-    Cycler = ToggleChannels(axes=axes)
-    # fig.canvas.mpl_connect('key_press_event', Cycler.trigger)
-    fig.Cycler = Cycler
 
-    fig.canvas.mpl_connect('key_press_event', fig.Cycler.cycle_lines)
-    fig.canvas.mpl_connect('key_press_event', fig.Cycler.toggle_all_lines)
-    plt.draw()
+    modifier = AxisModifierLinesLogYAxis(ax, fig)
+    modifier.connect()
 
     plt.show()
 
     return axes
-
-
-class CycleChannels(object):
-    def __init__(self, axes):
-        self.axes = axes
-        self.cycle = Cycle(self.axes.lines)
-        self.current_line = self.cycle.current()
-    def trigger(self, event):
-        print('triggered')
-        if event.key in ['*', ']', '[', '/', '7']:
-            for i in range(len(self.axes.lines)):
-                self.axes.lines[i].set_visible(False)
-            if event.key in ['*', ']']:
-                self.current_line = next(self.cycle)
-            elif event.key in ['[', '/', '7']:
-                self.current_line = self.cycle.previous()
-            self.current_line.set_visible(True)
-            plt.draw()
-
-
-class Cycle(object):
-    """ Cycle class implementation inspired by itertools.cycle. Supports
-    circular iterations into two directions by using next and previous.
-    """
-    def __init__(self, data):
-        """
-        Parameters
-        ----------
-        data : array like
-            The data to be iterated over.
-        """
-        self.data = data
-        self.n_elements = len(self.data)
-        self.index = 0
-
-    def __next__(self):
-        index = (self.index + 1) % self.n_elements
-        self.index = index
-        return self.data[self.index]
-
-    def next(self):
-        return self.__next__()
-
-    def previous(self):
-        index = self.index - 1
-        if index < 0:
-            index = self.n_elements + index
-        self.index = index
-        return self.data[self.index]
-
-    def current(self):
-        return self.data[self.index]
-
-
-class ToggleChannels(object):
-    """ Keybindings for cycling and toggling visible channels. Uses the event
-    API provided by matplotlib. Works for the jupyter-matplotlib and qt
-    backends.
-    """
-    def __init__(self, axes):
-        self.axes = axes
-        self.cycle = Cycle(self.axes.lines)
-        self.current_line = self.cycle.current()
-        self.all_visible = True
-
-    def cycle_lines(self, event):
-        print(event.key)
-        if event.key in ['*', ']', '[', '/', '7']:
-            if self.all_visible:
-                for i in range(len(self.axes.lines)):
-                    self.axes.lines[i].set_visible(False)
-            else:
-                self.current_line.set_visible(False)
-            if event.key in ['*', ']']:
-                self.current_line = next(self.cycle)
-            elif event.key in ['[', '/', '7']:
-                self.current_line = self.cycle.previous()
-            self.current_line.set_visible(True)
-            self.all_visible = False
-            plt.draw()
-
-    def toggle_all_lines(self, event):
-        if event.key in ['a']:
-            if self.all_visible:
-                for i in range(len(self.axes.lines)):
-                    self.axes.lines[i].set_visible(False)
-                self.current_line.set_visible(True)
-                self.all_visible = False
-            else:
-                for i in range(len(self.axes.lines)):
-                    self.axes.lines[i].set_visible(True)
-                self.all_visible = True
-            plt.draw()
 
 
 class CycleChannels(ToolBase):
