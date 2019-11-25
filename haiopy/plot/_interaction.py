@@ -2,9 +2,7 @@ import matplotlib as mpl
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QGridLayout, QLineEdit, QLabel
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QDoubleValidator
+from .gui import AxisDialog
 
 import numpy as np
 
@@ -175,4 +173,23 @@ class AxisModifierLinesLinYAxis(AxisModifierLines):
             lims[1] = lims[1] - zoom
 
             self.axes.set_ylim(lims)
-            plt.draw()
+            self.figure.draw()
+
+
+class AxisModifierDialog(AxisModifier):
+    def __init__(self, axes, figure):
+        super(AxisModifierDialog, self).__init__(axes, figure)
+
+    def open(self, event):
+        if event.key in ['d']:
+            xlim_update, ylim_update, result = \
+                AxisDialog.update_axis(axes=self.axes)
+
+            self.axes.set_xlim(xlim_update)
+            self.axes.set_ylim(ylim_update)
+            self.figure.canvas.draw()
+
+    def connect(self):
+        super().connect()
+        self._open = self.figure.canvas.mpl_connect(
+            'key_press_event', self.open)
