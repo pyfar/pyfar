@@ -10,6 +10,54 @@ from ._interaction import AxisModifierDialog
 from .ticker import LogFormatterITAToolbox, LogLocatorITAToolbox
 
 
+def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
+    """Plot the time signal of a haiopy audio signal object.
+
+    Parameters
+    ----------
+    signal : Signal object
+        An audio signal object from the haiopy Signal class
+    **kwargs
+        Arbitrary keyword arguments.
+        Use 'xmin', 'xmax', 'ymin', 'ymax' to set axis limitations.
+
+    Returns
+    -------
+    axes :  Axes object or array of Axes objects.
+
+    See Also
+    --------
+    matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
+
+    Examples
+    --------
+    """
+
+    x_data = signal.times[0]
+    y_data = signal.time.T
+
+    fig, axes = plt.subplots()
+
+    data_dB = log_prefix*np.log10(np.abs(y_data)/log_reference)
+    ymax = np.max(data_dB)
+    ymin = ymax - 90
+    ymax = ymax + 10
+
+    axes.plot(x_data, data_dB)
+
+    axes.set_ylim((ymin, ymax))
+    axes.set_xlabel("Time [s]")
+    axes.set_ylabel("Amplitude [dB re {}]".format(log_reference))
+    axes.grid(True)
+
+    modifier = AxisModifierLinesLogYAxis(axes, fig)
+    modifier.connect()
+
+    plt.show()
+
+    return axes
+
+
 def plot_time(signal, **kwargs):
     """Plot the time signal of a haiopy audio signal object.
 
