@@ -1,11 +1,4 @@
-from itertools import cycle
-
 import matplotlib.pyplot as plt
-from matplotlib.backend_tools import ToolBase, ToolToggleBase
-
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QGridLayout, QLineEdit, QLabel
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QDoubleValidator
 
 import numpy as np
 
@@ -13,6 +6,8 @@ from haiopy import Signal
 
 from ._interaction import AxisModifierLinesLinYAxis, AxisModifierLinesLogYAxis
 from ._interaction import AxisModifierDialog
+
+from .ticker import LogFormatterITAToolbox, LogLocatorITAToolbox
 
 
 def plot_time(signal, **kwargs):
@@ -45,8 +40,7 @@ def plot_time(signal, **kwargs):
 
     ax.plot(x_data, y_data)
 
-    ax.set_title("Signal")
-    ax.set_xlabel("Time [sec]")
+    ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
     ax.grid(True)
 
@@ -87,13 +81,14 @@ def plot_freq(signal, **kwargs):
 
     fig, axes = plt.subplots()
 
-    axes.set_title("Magnitude Spectrum")
-
     for i in range(n_channels):
         spectrum, freq, line = axes.magnitude_spectrum(time_data[i], Fs=samplingrate, scale='dB')
 
+    axes.set_xlabel("Frequency [Hz]")
+    axes.set_ylabel("Magnitude [dB]")
+
     axes.set_xscale('log')
-    axes.grid(True)
+    axes.grid(True, 'both')
 
     spectrum_db = 20 * np.log10(spectrum + np.finfo(float).tiny)
     ymax = np.max(spectrum_db)
@@ -107,7 +102,12 @@ def plot_freq(signal, **kwargs):
 
     modifier = AxisModifierLinesLogYAxis(ax, fig)
     modifier.connect()
+    axes.xaxis.set_major_locator(
+        LogLocatorITAToolbox())
+    axes.xaxis.set_major_formatter(
+        LogFormatterITAToolbox())
 
+    axes.set_xlim((20, signal.samplingrate/2))
     plt.show()
 
     return axes
