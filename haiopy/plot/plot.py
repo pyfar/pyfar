@@ -106,9 +106,6 @@ def plot_freq(signal, **kwargs):
     modifier = AxisModifierLinesLogYAxis(ax, fig)
     modifier.connect()
 
-    dialog = AxisModifierDialog(ax, fig)
-    dialog.connect()
-
     plt.show()
 
     return axes

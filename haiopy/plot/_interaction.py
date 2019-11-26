@@ -82,7 +82,7 @@ class AxisModifierLines(AxisModifier):
                 self.current_line = self.cycle.previous()
             self.current_line.set_visible(True)
             self.all_visible = False
-            plt.draw()
+            self.figure.canvas.draw()
 
     def toggle_all_lines(self, event):
         if event.key in ['a']:
@@ -95,8 +95,7 @@ class AxisModifierLines(AxisModifier):
                 for i in range(len(self.axes.lines)):
                     self.axes.lines[i].set_visible(True)
                 self.all_visible = True
-            # plt.draw(self.axes.lines)
-            self.axes.draw(self.axes.lines)
+            self.figure.canvas.draw()
 
     def move_y_axis(self, event):
         if event.key in ['up', 'down']:
@@ -107,7 +106,7 @@ class AxisModifierLines(AxisModifier):
                 self.axes.set_ylim(lims + shift)
             elif event.key in ['down']:
                 self.axes.set_ylim(lims - shift)
-            plt.draw()
+            self.figure.canvas.draw()
 
     def zoom_y_axis(self, event):
         raise NotImplementedError("Use child classes to specify if the zoom \
@@ -151,7 +150,7 @@ class AxisModifierLinesLogYAxis(AxisModifierLines):
                 lims[0] = lims[0] - zoom
 
             self.axes.set_ylim(lims)
-            plt.draw()
+            self.figure.canvas.draw()
 
 
 class AxisModifierLinesLinYAxis(AxisModifierLines):
@@ -173,7 +172,7 @@ class AxisModifierLinesLinYAxis(AxisModifierLines):
             lims[1] = lims[1] - zoom
 
             self.axes.set_ylim(lims)
-            self.figure.draw()
+            self.figure.canvas.draw()
 
 
 class AxisModifierDialog(AxisModifier):
