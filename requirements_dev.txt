@@ -12,3 +12,4 @@ pytest-runner
 numpy
 scipy
 PyQt5
+matplotlib
