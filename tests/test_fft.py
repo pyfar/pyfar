@@ -44,6 +44,29 @@ def test_irfft_power_imp_even_samples(sine):
     npt.assert_allclose(data, truth, atol=1e-10)
 
 
+def test_irfft_power_imp_odd_samples(sine_odd):
+    n_samples = 1023
+    spec = np.zeros(int((n_samples+1)/2), dtype=np.complex)
+    spec[int(n_samples/16)] = 1/np.sqrt(2)
+
+    data = fft.irfft(spec, n_samples, 'power')
+
+    truth, f = sine_odd
+    npt.assert_allclose(data, truth, atol=1e-10)
+
+
+def test_rfft_power_imp_odd_samples(sine_odd):
+    n_samples = 1023
+    sampling_rate = 2e3
+    s, f = sine_odd
+    spec = fft.rfft(s, n_samples, 'power')
+
+    truth = np.zeros(int((n_samples+1)/2), dtype=np.complex)
+    truth[int(n_samples/16)] = 1/np.sqrt(2)
+    npt.assert_allclose(np.real(spec), np.real(truth), atol=1e-10)
+    npt.assert_allclose(np.imag(spec), np.imag(truth), atol=1e-10)
+
+
 @pytest.fixture
 def impulse():
     """Generate an impulse, also known as the Dirac delta function
@@ -96,3 +119,30 @@ def sine():
     signal = amplitude * np.cos(2 * np.pi * frequency * times)
 
     return signal
+
+
+@pytest.fixture
+def sine_odd():
+    """Generate a sine signal with f = 440 Hz and samplingrate = 44100 Hz.
+
+    Returns
+    -------
+    signal : ndarray, double
+        The sine signal
+
+    """
+    amplitude = 1
+    frequency = 125
+    samplingrate = 2e3
+    num_samples = 1023
+    fullperiod = True
+
+    if fullperiod:
+        num_periods = np.floor(num_samples / samplingrate * frequency)
+        # round to the nearest frequency resulting in a fully periodic sine signal
+        # in the given time interval
+        frequency = num_periods * samplingrate / num_samples
+    times = np.arange(0, num_samples) / samplingrate
+    signal = amplitude * np.cos(2 * np.pi * frequency * times)
+
+    return signal, frequency

@@ -19,7 +19,7 @@ def rfft(data, n_samples, signal_type):
     elif signal_type == 'power':
         norm = 1/n_samples*np.sqrt(2)
 
-    spec = fft.rfft(data, axis=-1) * norm
+    spec = fft.rfft(data, n=n_samples, axis=-1) * norm
 
     return spec
 
