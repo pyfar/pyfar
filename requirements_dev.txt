@@ -11,3 +11,4 @@ pytest
 pytest-runner
 numpy
 scipy
+pyfftw
