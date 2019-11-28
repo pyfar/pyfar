@@ -4,6 +4,113 @@ import pytest
 
 from haiopy import fft
 
+def test_fft_orthogonality_sine_even_lib():
+    num_samples = 2**10
+    frequency = 10e3
+    samplingrate = 40e3
+    num_periods = np.floor(num_samples / samplingrate * frequency)
+    # round to the nearest frequency resulting in a fully periodic sine signal
+    # in the given time interval
+    frequency = num_periods * samplingrate / num_samples
+    times = np.arange(0, num_samples) / samplingrate
+
+    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
+    signal_spec = np.fft.rfft(signal_time, n=num_samples, axis=-1)
+    transformed_signal_time = np.fft.irfft(signal_spec, n=num_samples, axis=-1)
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
+
+def test_fft_orthogonality_sine_odd_lib():
+    num_samples = 2**10+3
+    frequency = 10e3
+    samplingrate = 40e3
+    num_periods = np.floor(num_samples / samplingrate * frequency)
+    # round to the nearest frequency resulting in a fully periodic sine signal
+    # in the given time interval
+    frequency = num_periods * samplingrate / num_samples
+    times = np.arange(0, num_samples) / samplingrate
+
+    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
+    signal_spec = np.fft.rfft(signal_time, n=num_samples, axis=-1)
+    transformed_signal_time = np.fft.irfft(signal_spec, n=num_samples, axis=-1)
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
+
+def test_fft_orthogonality_noise_even_lib():
+    n_samples = 2**18
+    np.random.seed(450)
+    signal_time = np.random.normal(0, 1, n_samples)
+    signal_spec = np.fft.rfft(signal_time, n=n_samples, axis=-1)
+    transformed_signal_time = np.fft.irfft(signal_spec, n=n_samples, axis=-1)
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
+
+def test_fft_orthogonality_noise_odd_lib():
+    n_samples = 2**18+1
+    np.random.seed(450)
+    signal_time = np.random.normal(0, 1, n_samples)
+    signal_spec = np.fft.rfft(signal_time, n=n_samples, axis=-1)
+    transformed_signal_time = np.fft.irfft(signal_spec, n=n_samples, axis=-1)
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
+
+def test_fft_orthogonality_sine_even():
+    num_samples = 2**10
+    frequency = 10e3
+    samplingrate = 40e3
+    num_periods = np.floor(num_samples / samplingrate * frequency)
+    # round to the nearest frequency resulting in a fully periodic sine signal
+    # in the given time interval
+    frequency = num_periods * samplingrate / num_samples
+    times = np.arange(0, num_samples) / samplingrate
+
+    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
+    signal_spec = fft.rfft(signal_time, num_samples, 'power')
+    transformed_signal_time = fft.irfft(signal_spec, num_samples, 'power')
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
+
+def test_fft_orthogonality_sine_odd():
+    num_samples = 2**10+3
+    frequency = 10e3
+    samplingrate = 40e3
+    num_periods = np.floor(num_samples / samplingrate * frequency)
+    # round to the nearest frequency resulting in a fully periodic sine signal
+    # in the given time interval
+    frequency = num_periods * samplingrate / num_samples
+    times = np.arange(0, num_samples) / samplingrate
+
+    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
+    signal_spec = fft.rfft(signal_time, num_samples, 'power')
+    transformed_signal_time = fft.irfft(signal_spec, num_samples, 'power')
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
+
+def test_fft_orthogonality_noise_even():
+    n_samples = 2**18
+    np.random.seed(450)
+    signal_time = np.random.normal(0, 1, n_samples)
+    signal_spec = fft.rfft(signal_time, n_samples, 'power')
+    transformed_signal_time = fft.irfft(signal_spec, n_samples, 'power')
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
+
+def test_fft_orthogonality_noise_odd():
+    n_samples = 2**18+1
+    np.random.seed(450)
+    signal_time = np.random.normal(0, 1, n_samples)
+    signal_spec = fft.rfft(signal_time, n_samples, 'power')
+    transformed_signal_time = fft.irfft(signal_spec, n_samples, 'power')
+
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+
 
 def test_fft_parsevaL_theorem_sine_even():
     num_samples = 2**10
