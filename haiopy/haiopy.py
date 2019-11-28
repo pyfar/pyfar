@@ -3,6 +3,8 @@ import numpy as np
 from haiopy.coordinates import Coordinates
 from haiopy.orientation import Orientation
 
+from haiopy import fft as fft
+
 
 class Audio(object):
     """Abstract class for audio objects."""
@@ -39,7 +41,7 @@ class Signal(Audio):
                  data,
                  samplingrate,
                  domain='time',
-                 signaltype='power',
+                 signaltype='energy',
                  dtype=None,
                  position=Coordinates(),
                  orientation=Orientation()):
@@ -75,8 +77,11 @@ class Signal(Audio):
             elif domain == 'freq':
                 if dtype is None:
                     self._dtype = np.double
+                n_bins = data.shape[-1]
+                n_samples = (n_bins - 1)*2
                 self._data = np.atleast_2d(
-                        np.asarray(np.fft.irfft(data), dtype=dtype))
+                    np.asarray(fft.irfft(data, n_samples, signaltype),
+                    dtype=dtype))
         else:
             raise ValueError("Only 2-dim data is allowed")
 
@@ -111,7 +116,7 @@ class Signal(Audio):
     @property
     def frequencies(self):
         """Frequencies of the discrete signal spectrum."""
-        return np.fft.rfftfreq(self.n_samples, d=1/self.samplingrate)
+        return fft.rfftfreq(self.n_samples, self.samplingrate)
 
     @property
     def times(self):
@@ -133,13 +138,13 @@ class Signal(Audio):
     @property
     def freq(self):
         """The signal data in the frequency domain."""
-        freq = np.fft.rfft(self._data)
+        freq = fft.rfft(self._data, self.n_samples, self._signaltype)
         return freq
 
     @freq.setter
     def freq(self, value):
         if len(value.shape) <= 2:
-            self._data = np.fft.irfft(value)
+            self._data = fft.irfft(value, self.n_samples, self.signaltype)
         else:
             raise ValueError("Only 2-dim data is allowed")
 
