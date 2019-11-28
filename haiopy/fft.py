@@ -136,3 +136,27 @@ def _is_odd(num):
 
     """
     return bool(num & 0x1)
+
+
+def _n_bins(n_samples):
+    """
+    Helper function to calculate the number of bins resulting from a FFT
+    with n_samples
+
+    Paramters
+    ---------
+    n_samples : int
+        Number of samples
+
+    Returns
+    -------
+    n_bins : int
+        Resulting number of frequency bins
+
+    """
+    if _is_odd(n_samples):
+        n_bins = (n_samples+1)/2
+    else:
+        n_bins = n_samples/2+1
+
+    return int(n_bins)

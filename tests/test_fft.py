@@ -4,6 +4,21 @@ import pytest
 
 from haiopy import fft
 
+
+def test_n_bins_even():
+    n_samples = 6
+    truth = int(n_samples/2 + 1)
+    n_bins = fft._n_bins(n_samples)
+    assert n_bins == truth
+
+
+def test_n_bins_odd():
+    n_samples = 7
+    truth = int((n_samples + 1)/2)
+    n_bins = fft._n_bins(n_samples)
+    assert n_bins == truth
+
+
 def test_fft_orthogonality_sine_even_lib():
     num_samples = 2**10
     frequency = 10e3
