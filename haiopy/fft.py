@@ -1,9 +1,9 @@
 import numpy as np
 
 try:
-    import pyfftw
+    from pyfftw.interfaces import numpy_fft as fft
 except ImportError:
-    from numpy import fft as fft
+    from numpy import fft
 
 
 def rfftfreq(n_samples, sampling_rate):

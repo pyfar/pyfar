@@ -99,7 +99,7 @@ def test_fft_orthogonality_noise_even():
     signal_spec = fft.rfft(signal_time, n_samples, 'power')
     transformed_signal_time = fft.irfft(signal_spec, n_samples, 'power')
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
 
 def test_fft_orthogonality_noise_odd():
@@ -109,7 +109,7 @@ def test_fft_orthogonality_noise_odd():
     signal_spec = fft.rfft(signal_time, n_samples, 'power')
     transformed_signal_time = fft.irfft(signal_spec, n_samples, 'power')
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
 
 def test_fft_parsevaL_theorem_sine_even():
