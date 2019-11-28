@@ -5,6 +5,78 @@ import pytest
 from haiopy import fft
 
 
+def test_fft_parsevaL_theorem_sine_even():
+    num_samples = 2**10
+    frequency = 10e3
+    samplingrate = 40e3
+    num_periods = np.floor(num_samples / samplingrate * frequency)
+    # round to the nearest frequency resulting in a fully periodic sine signal
+    # in the given time interval
+    frequency = num_periods * samplingrate / num_samples
+    times = np.arange(0, num_samples) / samplingrate
+
+    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
+    signal_spec = fft.rfft(signal_time, num_samples, 'power')
+
+    e_time = np.mean(np.abs(signal_time)**2)
+    e_freq = np.sum(np.abs(signal_spec)**2)
+
+    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+
+
+def test_fft_parsevaL_theorem_sine_odd():
+    num_samples = 2**10+3
+    frequency = 10e3
+    samplingrate = 40e3
+    num_periods = np.floor(num_samples / samplingrate * frequency)
+    # round to the nearest frequency resulting in a fully periodic sine signal
+    # in the given time interval
+    frequency = num_periods * samplingrate / num_samples
+    times = np.arange(0, num_samples) / samplingrate
+
+    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
+    signal_spec = fft.rfft(signal_time, num_samples, 'power')
+
+    e_time = np.mean(np.abs(signal_time)**2)
+    e_freq = np.sum(np.abs(signal_spec)**2)
+
+    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+
+
+def test_fft_parsevaL_theorem_noise_even():
+    n_samples = 2**20
+    np.random.seed(450)
+    noise_time = np.random.normal(0,1,n_samples)
+    noise_spec = fft.rfft(noise_time, n_samples, 'power')
+
+    e_time = np.mean(np.abs(noise_time)**2)
+    e_freq = np.sum(np.abs(noise_spec)**2)
+
+    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+
+
+def test_fft_parsevaL_theorem_noise_odd():
+    n_samples = 2**20+1
+    np.random.seed(450)
+    noise_time = np.random.normal(0,1,n_samples)
+    noise_spec = fft.rfft(noise_time, n_samples, 'power')
+
+    e_time = np.mean(np.abs(noise_time)**2)
+    e_freq = np.sum(np.abs(noise_spec)**2)
+
+    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+
+
+def test_is_odd():
+    num = 3
+    assert fft._is_odd(num)
+
+
+def test_is_not_odd():
+    num = 4
+    assert not fft._is_odd(num)
+
+
 def test_rfft_energy_imp_even_samples(impulse):
     n_samples = 1024
     spec = fft.rfft(impulse, n_samples, 'energy')
