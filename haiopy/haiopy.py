@@ -111,7 +111,7 @@ class Signal(Audio):
     @property
     def n_bins(self):
         """Number of frequency bins."""
-        return (self._data.shape[-1] / 2) + 1
+        return fft._n_bins(self.n_samples)
 
     @property
     def frequencies(self):
