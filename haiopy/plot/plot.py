@@ -1,13 +1,12 @@
 import matplotlib.pyplot as plt
-
 import numpy as np
 
-from haiopy import Signal
-
-from ._interaction import AxisModifierLinesLinYAxis, AxisModifierLinesLogYAxis
-from ._interaction import AxisModifierDialog
-
-from .ticker import LogFormatterITAToolbox, LogLocatorITAToolbox
+from ._interaction import (
+    AxisModifierLinesLinYAxis,
+    AxisModifierLinesLogYAxis)
+from .ticker import (
+    LogFormatterITAToolbox,
+    LogLocatorITAToolbox)
 
 
 def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
@@ -125,12 +124,13 @@ def plot_freq(signal, **kwargs):
 
     n_channels = signal.shape[0]
     time_data = signal.time
-    samplingrate = signal.samplingrate
+    sampling_rate = signal.sampling_rate
 
     fig, axes = plt.subplots()
 
     for i in range(n_channels):
-        spectrum, freq, line = axes.magnitude_spectrum(time_data[i], Fs=samplingrate, scale='dB')
+        spectrum, freq, line = axes.magnitude_spectrum(
+            time_data[i], Fs=sampling_rate, scale='dB')
 
     axes.set_xlabel("Frequency [Hz]")
     axes.set_ylabel("Magnitude [dB]")
@@ -143,7 +143,6 @@ def plot_freq(signal, **kwargs):
     ymin = ymax - 90
     ymax = ymax + 10
 
-
     axes.set_ylim((ymin, ymax))
 
     ax = plt.gca()
@@ -155,8 +154,7 @@ def plot_freq(signal, **kwargs):
     axes.xaxis.set_major_formatter(
         LogFormatterITAToolbox())
 
-    axes.set_xlim((20, signal.samplingrate/2))
+    axes.set_xlim((20, signal.sampling_rate/2))
     plt.show()
 
     return axes
-

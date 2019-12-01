@@ -1,9 +1,8 @@
 import numpy as np
 
+from haiopy import fft as fft
 from haiopy.coordinates import Coordinates
 from haiopy.orientation import Orientation
-
-from haiopy import fft as fft
 
 
 class Audio(object):
@@ -24,7 +23,7 @@ class Signal(Audio):
     ----------
     data : ndarray, double
         Raw data of the signal
-    samplingrate : double
+    sampling_rate : double
         Sampling rate in Hertz
     domain : string
         Domain of data ('freq'/'time')
@@ -39,7 +38,7 @@ class Signal(Audio):
     """
     def __init__(self,
                  data,
-                 samplingrate,
+                 sampling_rate,
                  domain='time',
                  signaltype='energy',
                  dtype=None,
@@ -51,7 +50,7 @@ class Signal(Audio):
         ----------
         data : ndarray, double
             Raw data of the signal
-        samplingrate : double
+        sampling_rate : double
             Sampling rate in Hertz
         domain : string
             Domain of data ('freq'/'time')
@@ -66,7 +65,7 @@ class Signal(Audio):
         """
 
         Audio.__init__(self)
-        self._samplingrate = samplingrate
+        self._sampling_rate = sampling_rate
         if len(data.shape) <= 2:
             if domain == 'time':
                 if not dtype:
@@ -116,12 +115,12 @@ class Signal(Audio):
     @property
     def frequencies(self):
         """Frequencies of the discrete signal spectrum."""
-        return fft.rfftfreq(self.n_samples, self.samplingrate)
+        return fft.rfftfreq(self.n_samples, self.sampling_rate)
 
     @property
     def times(self):
         """Time instances the signal is sampled at."""
-        return np.atleast_2d(np.arange(0, self.n_samples) / self.samplingrate)
+        return np.atleast_2d(np.arange(0, self.n_samples) / self.sampling_rate)
 
     @property
     def time(self):
@@ -149,13 +148,13 @@ class Signal(Audio):
             raise ValueError("Only 2-dim data is allowed")
 
     @property
-    def samplingrate(self):
+    def sampling_rate(self):
         """The sampling rate of the signal."""
-        return self._samplingrate
+        return self._sampling_rate
 
-    @samplingrate.setter
-    def samplingrate(self, value):
-        self._samplingrate = value
+    @sampling_rate.setter
+    def sampling_rate(self, value):
+        self._sampling_rate = value
 
     @property
     def signaltype(self):
@@ -178,7 +177,7 @@ class Signal(Audio):
     @property
     def signallength(self):
         """The length of the signal in seconds."""
-        return (self.n_samples - 1) / self.samplingrate
+        return (self.n_samples - 1) / self.sampling_rate
 
     @property
     def position(self):
@@ -220,7 +219,7 @@ class Signal(Audio):
                        "Sampling rate: {} Hz\n"
                        "Signal type: {}\n"
                        "Signal length: {} sec").format(
-                       self.shape[0], self.n_samples, self._samplingrate,
+                       self.shape[0], self.n_samples, self._sampling_rate,
                        self._signaltype, self.signallength)
         return repr_string
 

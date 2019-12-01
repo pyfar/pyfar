@@ -127,20 +127,20 @@ def test_setter_freq_3D(sine):
         pytest.fail("Input dimension has to be smaller than 3")
 
 
-def test_getter_samplingrate(sine):
-    """Test if attribute samplingrate is accessed correctly."""
-    samplingrate = 48000
+def test_getter_sampling_rate(sine):
+    """Test if attribute sampling rate is accessed correctly."""
+    sampling_rate = 48000
     signal = Signal(sine, 44100)
-    signal._samplingrate = samplingrate
-    npt.assert_allclose(signal.samplingrate, samplingrate)
+    signal._sampling_rate = sampling_rate
+    npt.assert_allclose(signal.sampling_rate, sampling_rate)
 
 
 def test_setter_sampligrate(sine):
-    """Test if attribute samplingrate is set correctly."""
-    samplingrate = 48000
+    """Test if attribute sampling rate is set correctly."""
+    sampling_rate = 48000
     signal = Signal(sine, 44100)
-    signal.samplingrate = samplingrate
-    npt.assert_allclose(samplingrate, signal._samplingrate)
+    signal.sampling_rate = sampling_rate
+    npt.assert_allclose(sampling_rate, signal._sampling_rate)
 
 
 def test_getter_signaltype(sine):
@@ -277,7 +277,7 @@ def test_magic_len(impulse):
 
 @pytest.fixture
 def sine():
-    """Generate a sine signal with f = 440 Hz and samplingrate = 44100 Hz.
+    """Generate a sine signal with f = 440 Hz and sampling_rate = 44100 Hz.
 
     Returns
     -------
@@ -287,16 +287,16 @@ def sine():
     """
     amplitude = 1
     frequency = 440
-    samplingrate = 44100
+    sampling_rate = 44100
     num_samples = 1000
     fullperiod = False
 
     if fullperiod:
-        num_periods = np.floor(num_samples / samplingrate * frequency)
+        num_periods = np.floor(num_samples / sampling_rate * frequency)
         # round to the nearest frequency resulting in a fully periodic sine signal
         # in the given time interval
-        frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
+        frequency = num_periods * sampling_rate / num_samples
+    times = np.arange(0, num_samples) / sampling_rate
     signal = amplitude * np.sin(2 * np.pi * frequency * times)
 
     return signal
