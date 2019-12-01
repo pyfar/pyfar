@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.spatial import cKDTree
 
+
 class Coordinates(object):
     """Container class for coordinates in a three-dimensional space, allowing
     for compact representation and convenient conversion into spherical as well
@@ -97,8 +98,8 @@ class Coordinates(object):
     def azimuth(self, azimuth):
         x, y, z = _sph2cart(
             self.radius,
-           self.elevation,
-           np.asarray(azimuth, dtype=np.float64))
+            self.elevation,
+            np.asarray(azimuth, dtype=np.float64))
         self._x = x
         self._y = y
         self._z = z
@@ -270,10 +271,10 @@ class Coordinates(object):
 def _sph2cart(r, theta, phi):
     """Transforms from spherical to Cartesian coordinates.
     Spherical coordinates follow the common convention in Physics/Mathematics
-    Theta denotes the elevation angle with theta = 0 at the north pole and theta = pi
-    at the south pole
-    Phi is the azimuth angle counting from phi = 0 at the x-axis in positive direction
-    (counter clockwise rotation).
+    Theta denotes the elevation angle with theta = 0 at the north pole and
+    theta = pi at the south pole.
+    Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
+    direction (counter clockwise rotation).
 
     .. math::
 
@@ -306,10 +307,10 @@ def _cart2sph(x, y, z):
     """
     Transforms from Cartesian to spherical coordinates.
     Spherical coordinates follow the common convention in Physics/Mathematics
-    Theta denotes the elevation angle with theta = 0 at the north pole and theta = pi
-    at the south pole
-    Phi is the azimuth angle counting from phi = 0 at the x-axis in positive direction
-    (counter clockwise rotation).
+    Theta denotes the elevation angle with theta = 0 at the north pole and
+    theta = pi at the south pole.
+    Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
+    direction (counter clockwise rotation).
 
     .. math::
 

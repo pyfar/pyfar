@@ -1,6 +1,10 @@
-import numpy as np
 from matplotlib import transforms as mtransforms
-from matplotlib.ticker import FixedLocator, FixedFormatter, LogFormatter, LogLocator
+from matplotlib.ticker import (
+    FixedFormatter,
+    FixedLocator,
+    LogFormatter,
+    LogLocator)
+
 
 class FractionalOctaveFormatter(FixedFormatter):
     def __init__(self, n_fractions=1):
@@ -38,13 +42,19 @@ class FractionalOctaveLocator(FixedLocator):
         super().__init__(ticks)
 
 
-def is_close_to_int(x):
-    return abs(x - np.round(x)) < 1e-10
-
-
 class LogLocatorITAToolbox(LogLocator):
-    def __init__(self, base=10.0, subs=(0.2, 0.4, 0.6, 1), numdecs=4, numticks=None):
-        super().__init__(base=base, subs=subs, numdecs=numdecs, numticks=numticks)
+    def __init__(
+        self,
+        base=10.0,
+        subs=(0.2, 0.4, 0.6, 1),
+        numdecs=4,
+        numticks=None
+    ):
+        super().__init__(
+            base=base,
+            subs=subs,
+            numdecs=numdecs,
+            numticks=numticks)
 
 
 class LogFormatterITAToolbox(LogFormatter):
@@ -52,8 +62,18 @@ class LogFormatterITAToolbox(LogFormatter):
     Log-formatter inspired by the tick labels used in the ITA-Toolbox
     for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
     """
-    def __init__(self, base=10.0, labelOnlyBase=False, minor_thresholds=None, linthresh=None):
-        super().__init__(base=base, labelOnlyBase=labelOnlyBase, minor_thresholds=minor_thresholds, linthresh=linthresh)
+    def __init__(
+        self,
+        base=10.0,
+        labelOnlyBase=False,
+        minor_thresholds=None,
+        linthresh=None
+    ):
+        super().__init__(
+            base=base,
+            labelOnlyBase=labelOnlyBase,
+            minor_thresholds=minor_thresholds,
+            linthresh=linthresh)
 
     def _num_to_string(self, x, vmin, vmax):
         if x >= 1000 and x < 1e6:
@@ -74,11 +94,6 @@ class LogFormatterITAToolbox(LogFormatter):
             return '0'
 
         x = abs(x)
-        b = self._base
-        fx = np.log(x) / np.log(b)
-        is_x_decade = is_close_to_int(fx)
-        exponent = np.round(fx) if is_x_decade else np.floor(fx)
-        coeff = np.round(x / b ** exponent)
 
         vmin, vmax = self.axis.get_view_interval()
         vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)

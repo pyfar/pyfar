@@ -1,10 +1,6 @@
-import matplotlib as mpl
-from matplotlib.axes import Axes
-import matplotlib.pyplot as plt
+import numpy as np
 
 from .gui import AxisDialog
-
-import numpy as np
 
 
 class Cycle(object):

@@ -116,7 +116,8 @@ def plot_freq(signal, **kwargs):
 
     See Also
     --------
-    matplotlib.pyplot.magnitude_spectrum() : Plot the magnitudes of the corresponding frequencies.
+    matplotlib.pyplot.magnitude_spectrum() : Plot the magnitudes of the
+        corresponding frequencies.
 
     Examples
     --------

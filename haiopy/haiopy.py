@@ -79,8 +79,9 @@ class Signal(Audio):
                 n_bins = data.shape[-1]
                 n_samples = (n_bins - 1)*2
                 self._data = np.atleast_2d(
-                    np.asarray(fft.irfft(data, n_samples, signal_type),
-                    dtype=dtype))
+                    np.asarray(
+                        fft.irfft(data, n_samples, signal_type),
+                        dtype=dtype))
         else:
             raise ValueError("Only 2-dim data is allowed")
 

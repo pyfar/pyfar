@@ -1,4 +1,9 @@
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QGridLayout, QLineEdit, QLabel
+from PyQt5.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QGridLayout,
+    QLineEdit,
+    QLabel)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
 
