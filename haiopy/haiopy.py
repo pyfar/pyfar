@@ -40,7 +40,7 @@ class Signal(Audio):
                  data,
                  sampling_rate,
                  domain='time',
-                 signaltype='energy',
+                 signal_type='energy',
                  dtype=None,
                  position=Coordinates(),
                  orientation=Orientation()):
@@ -54,7 +54,7 @@ class Signal(Audio):
             Sampling rate in Hertz
         domain : string
             Domain of data ('freq'/'time')
-        signaltype : string
+        signal_type : string
             Destinguish between power and energy signals
         dtype : string
             Raw data type of the signal, optional
@@ -79,14 +79,14 @@ class Signal(Audio):
                 n_bins = data.shape[-1]
                 n_samples = (n_bins - 1)*2
                 self._data = np.atleast_2d(
-                    np.asarray(fft.irfft(data, n_samples, signaltype),
+                    np.asarray(fft.irfft(data, n_samples, signal_type),
                     dtype=dtype))
         else:
             raise ValueError("Only 2-dim data is allowed")
 
-        self._VALID_SIGNALTYPE = ["power", "energy"]
-        if (signaltype in self._VALID_SIGNALTYPE) is True:
-            self._signaltype = signaltype
+        self._VALID_SIGNAL_TYPE = ["power", "energy"]
+        if (signal_type in self._VALID_SIGNAL_TYPE) is True:
+            self._signal_type = signal_type
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
 
@@ -137,13 +137,13 @@ class Signal(Audio):
     @property
     def freq(self):
         """The signal data in the frequency domain."""
-        freq = fft.rfft(self._data, self.n_samples, self._signaltype)
+        freq = fft.rfft(self._data, self.n_samples, self._signal_type)
         return freq
 
     @freq.setter
     def freq(self, value):
         if len(value.shape) <= 2:
-            self._data = fft.irfft(value, self.n_samples, self.signaltype)
+            self._data = fft.irfft(value, self.n_samples, self.signal_type)
         else:
             raise ValueError("Only 2-dim data is allowed")
 
@@ -157,14 +157,14 @@ class Signal(Audio):
         self._sampling_rate = value
 
     @property
-    def signaltype(self):
+    def signal_type(self):
         """The signal type."""
-        return self._signaltype
+        return self._signal_type
 
-    @signaltype.setter
-    def signaltype(self, value):
-        if (value in self._VALID_SIGNALTYPE) is True:
-            self._signaltype = value
+    @signal_type.setter
+    def signal_type(self, value):
+        if (value in self._VALID_SIGNAL_TYPE) is True:
+            self._signal_type = value
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
 
@@ -220,7 +220,7 @@ class Signal(Audio):
                        "Signal type: {}\n"
                        "Signal length: {} sec").format(
                        self.shape[0], self.n_samples, self._sampling_rate,
-                       self._signaltype, self.signallength)
+                       self._signal_type, self.signallength)
         return repr_string
 
     def __getitem__(self, key):

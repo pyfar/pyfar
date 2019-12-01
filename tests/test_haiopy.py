@@ -23,15 +23,15 @@ def test_signal_init_val(sine):
     orient_mock = mock.Mock(spec_set=Orientation())
     orient_mock.view = np.array([1, 0, 0])
     orient_mock.up = np.array([0, 1, 0])
-    signal = Signal(sine, 44100, domain="time", signaltype="power",
+    signal = Signal(sine, 44100, domain="time", signal_type="power",
                     position=coord_mock, orientation=orient_mock)
     assert isinstance(signal, Signal)
 
 
-def test_signal_init_false_signaltype(sine):
-    """Test to init Signal with invalid signaltype."""
+def test_signal_init_false_signal_type(sine):
+    """Test to init Signal with invalid signal type."""
     with pytest.raises(ValueError):
-        Signal(sine, 44100, signaltype="falsetype")
+        Signal(sine, 44100, signal_type="falsetype")
         pytest.fail("Not a valid signal type ('power'/'energy')")
 
 
@@ -143,27 +143,27 @@ def test_setter_sampligrate(sine):
     npt.assert_allclose(sampling_rate, signal._sampling_rate)
 
 
-def test_getter_signaltype(sine):
-    """Test if attribute signaltype is accessed correctly."""
-    signaltype = "energy"
+def test_getter_signal_type(sine):
+    """Test if attribute signal type is accessed correctly."""
+    signal_type = "energy"
     signal = Signal(sine, 44100)
-    signal._signaltype = signaltype
-    npt.assert_string_equal(signal.signaltype, signaltype)
+    signal._signal_type = signal_type
+    npt.assert_string_equal(signal.signal_type, signal_type)
 
 
-def test_setter_signaltype(sine):
-    """Test if attribute signaltype is set correctly."""
-    signaltype = "energy"
+def test_setter_signal_type(sine):
+    """Test if attribute signal type is set correctly."""
+    signal_type = "energy"
     signal = Signal(sine, 44100)
-    signal.signaltype = signaltype
-    npt.assert_string_equal(signaltype, signal._signaltype)
+    signal.signal_type = signal_type
+    npt.assert_string_equal(signal_type, signal._signal_type)
 
 
-def test_setter_signaltype_false_type(sine):
-    """Test if ValueError is raised when signaltype is set incorrectly."""
+def test_setter_signal_type_false_type(sine):
+    """Test if ValueError is raised when signal type is set incorrectly."""
     signal = Signal(sine, 44100)
     with pytest.raises(ValueError):
-        signal.signaltype = "falsetype"
+        signal.signal_type = "falsetype"
         pytest.fail("Not a valid signal type ('power'/'energy')")
 
 
