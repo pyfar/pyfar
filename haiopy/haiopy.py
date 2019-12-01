@@ -115,12 +115,12 @@ class Signal(Audio):
     @property
     def frequencies(self):
         """Frequencies of the discrete signal spectrum."""
-        return fft.rfftfreq(self.n_samples, self.sampling_rate)
+        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
 
     @property
     def times(self):
         """Time instances the signal is sampled at."""
-        return np.atleast_2d(np.arange(0, self.n_samples) / self.sampling_rate)
+        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
 
     @property
     def time(self):
@@ -129,10 +129,7 @@ class Signal(Audio):
 
     @time.setter
     def time(self, value):
-        if len(value.shape) <= 2:
-            self._data = value
-        else:
-            raise ValueError("Only 2-dim data is allowed")
+        self._data = np.atleast_2d(value)
 
     @property
     def freq(self):
@@ -142,10 +139,8 @@ class Signal(Audio):
 
     @freq.setter
     def freq(self, value):
-        if len(value.shape) <= 2:
-            self._data = fft.irfft(value, self.n_samples, self.signal_type)
-        else:
-            raise ValueError("Only 2-dim data is allowed")
+        self._data = np.atleast_2d(
+            fft.irfft(value, self.n_samples, self.signal_type))
 
     @property
     def sampling_rate(self):

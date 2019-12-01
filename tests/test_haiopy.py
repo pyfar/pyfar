@@ -1,11 +1,10 @@
+from unittest import mock
+
 import numpy as np
 import numpy.testing as npt
 import pytest
-from unittest import mock
 
-from haiopy import Signal
-from haiopy import Coordinates
-from haiopy import Orientation
+from haiopy import Coordinates, Orientation, Signal
 
 
 def test_signal_init(sine):
@@ -77,7 +76,7 @@ def test_n_bins(sine):
 def test_times(sine):
     """Test for the time instances."""
     signal = Signal(sine, 44100)
-    times = np.atleast_2d(np.arange(0, len(sine)) / 44100)
+    times = np.atleast_1d(np.arange(0, len(sine)) / 44100)
     npt.assert_allclose(signal.times, times)
 
 
@@ -92,16 +91,7 @@ def test_setter_time(sine, impulse):
     """Test if attribute time is set correctly."""
     signal = Signal(sine, 44100)
     signal.time = impulse
-    npt.assert_allclose(impulse, signal._data)
-
-
-def test_setter_time_3D(sine):
-    """Test if ValueError is raised when set with 3D data."""
-    signal = Signal(sine, 44100)
-    data_3d = sine.reshape([1, 1, 1000])
-    with pytest.raises(ValueError):
-        signal.time = data_3d
-        pytest.fail("Input dimension has to be smaller than 3")
+    npt.assert_allclose(np.atleast_2d(impulse), signal._data)
 
 
 def test_getter_freq(sine, impulse):
@@ -115,16 +105,7 @@ def test_setter_freq(sine, impulse):
     """Test if attribute freq is set correctly."""
     signal = Signal(sine, 44100)
     signal.freq = np.fft.rfft(impulse)
-    npt.assert_allclose(impulse, signal._data, atol=1e-15)
-
-
-def test_setter_freq_3D(sine):
-    """Test if ValueError is raised when set with 3D data."""
-    signal = Signal(sine, 44100)
-    data_3d = sine.reshape([1, 1, 1000])
-    with pytest.raises(ValueError):
-        signal.time = np.fft.rfft(data_3d)
-        pytest.fail("Input dimension has to be smaller than 3")
+    npt.assert_allclose(np.atleast_2d(impulse), signal._data, atol=1e-15)
 
 
 def test_getter_sampling_rate(sine):
@@ -208,7 +189,8 @@ def test_setter_position(sine):
 
 
 def test_setter_position_false_type(sine):
-    """Test if TypeError is raised when position is not set with Coordinates."""
+    """Test if TypeError is raised when position is not set with Coordinates.
+    """
     signal = Signal(sine, 44100)
     with pytest.raises(TypeError):
         signal.position = np.array([1, 1, 1])
@@ -293,8 +275,8 @@ def sine():
 
     if fullperiod:
         num_periods = np.floor(num_samples / sampling_rate * frequency)
-        # round to the nearest frequency resulting in a fully periodic sine signal
-        # in the given time interval
+        # round to the nearest frequency resulting in a fully periodic sine
+        # signal in the given time interval
         frequency = num_periods * sampling_rate / num_samples
     times = np.arange(0, num_samples) / sampling_rate
     signal = amplitude * np.sin(2 * np.pi * frequency * times)
