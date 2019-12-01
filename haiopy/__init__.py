@@ -9,3 +9,5 @@ __version__ = '0.1.0'
 
 from .haiopy import *
 from .coordinates import Coordinates
+
+import haiopy.plot as plot
