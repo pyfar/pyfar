@@ -155,11 +155,11 @@ def test_dtype(sine):
     assert signal.dtype == dtype
 
 
-def test_signallength(sine):
+def test_signal_length(sine):
     """Test for the signal length."""
     signal = Signal(sine, 44100)
     length = (1000 - 1) / 44100
-    assert signal.signallength == length
+    assert signal.signal_length == length
 
 
 def test_getter_position(sine):

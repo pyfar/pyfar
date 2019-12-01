@@ -170,7 +170,7 @@ class Signal(Audio):
         return self._dtype
 
     @property
-    def signallength(self):
+    def signal_length(self):
         """The length of the signal in seconds."""
         return (self.n_samples - 1) / self.sampling_rate
 
@@ -215,7 +215,7 @@ class Signal(Audio):
                        "Signal type: {}\n"
                        "Signal length: {} sec").format(
                        self.shape[0], self.n_samples, self._sampling_rate,
-                       self._signal_type, self.signallength)
+                       self._signal_type, self.signal_length)
         return repr_string
 
     def __getitem__(self, key):
