@@ -1,6 +1,7 @@
-import numpy as np
+import warnings
 
-from .gui import AxisDialog
+import matplotlib as mpl
+import numpy as np
 
 
 class Cycle(object):
@@ -176,13 +177,16 @@ class AxisModifierDialog(AxisModifier):
         super(AxisModifierDialog, self).__init__(axes, figure)
 
     def open(self, event):
-        if event.key in ['d']:
-            xlim_update, ylim_update, result = \
-                AxisDialog.update_axis(axes=self.axes)
-
-            self.axes.set_xlim(xlim_update)
-            self.axes.set_ylim(ylim_update)
-            self.figure.canvas.draw()
+        if 'Qt' in matplotlib.get_backend():
+            from .gui import AxisDialog
+            if event.key in ['d']:
+                xlim_update, ylim_update, result = \
+                    AxisDialog.update_axis(axes=self.axes)
+                self.axes.set_xlim(xlim_update)
+                self.axes.set_ylim(ylim_update)
+                self.figure.canvas.draw()
+        else:
+            warnings.warn("Only implemented for matplotlib's Qt backends")
 
     def connect(self):
         super().connect()
