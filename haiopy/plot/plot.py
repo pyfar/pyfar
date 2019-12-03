@@ -17,8 +17,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
     signal : Signal object
         An audio signal object from the haiopy Signal class
     **kwargs
-        Arbitrary keyword arguments.
-        Use 'xmin', 'xmax', 'ymin', 'ymax' to set axis limitations.
+        Keyword arguments that are piped to matplotlib.pyplot.plot
 
     Returns
     -------
@@ -41,11 +40,11 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
     ymin = ymax - 90
     ymax = ymax + 10
 
-    axes.plot(x_data, data_dB)
+    axes.plot(x_data, data_dB, **kwargs)
 
     axes.set_ylim((ymin, ymax))
     axes.set_xlabel("Time [s]")
-    axes.set_ylabel("Amplitude [dB re {}]".format(log_reference))
+    axes.set_ylabel("Amplitude [dB]")
     axes.grid(True)
 
     modifier = AxisModifierLinesLogYAxis(axes, fig)
@@ -64,8 +63,7 @@ def plot_time(signal, **kwargs):
     signal : Signal object
         An audio signal object from the haiopy Signal class
     **kwargs
-        Arbitrary keyword arguments.
-        Use 'xmin', 'xmax', 'ymin', 'ymax' to set axis limitations.
+        Keyword arguments that are piped to matplotlib.pyplot.plot
 
     Returns
     -------
@@ -83,7 +81,7 @@ def plot_time(signal, **kwargs):
 
     fig, ax = plt.subplots()
 
-    ax.plot(x_data, y_data)
+    ax.plot(x_data, y_data, **kwargs)
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
@@ -105,8 +103,7 @@ def plot_freq(signal, log_prefix=20, log_reference=1, **kwargs):
     signal : Signal object
         An adio signal object from the haiopy signal class
     **kwargs
-        Arbitrary keyword arguments.
-        Use 'xmin', 'xmax', 'ymin', 'ymax' to set axis limitations.
+        Keyword arguments that are piped to matplotlib.pyplot.plot
 
     Returns
     -------
@@ -127,7 +124,7 @@ def plot_freq(signal, log_prefix=20, log_reference=1, **kwargs):
 
     eps = np.finfo(float).tiny
     data_dB = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
-    axes.semilogx(signal.frequencies, data_dB.T)
+    axes.semilogx(signal.frequencies, data_dB.T, **kwargs)
 
 
     axes.set_xlabel("Frequency [Hz]")
