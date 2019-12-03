@@ -31,8 +31,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
     Examples
     --------
     """
-
-    x_data = signal.times[0]
+    x_data = signal.times
     y_data = signal.time.T
 
     fig, axes = plt.subplots()
@@ -79,8 +78,7 @@ def plot_time(signal, **kwargs):
     Examples
     --------
     """
-
-    x_data = signal.times[0]
+    x_data = signal.times
     y_data = signal.time.T
 
     fig, ax = plt.subplots()
@@ -99,7 +97,7 @@ def plot_time(signal, **kwargs):
     return ax
 
 
-def plot_freq(signal, **kwargs):
+def plot_freq(signal, log_prefix=20, log_reference=1, **kwargs):
     """Plot the absolute values of the spectrum on the positive frequency axis.
 
     Parameters
@@ -122,16 +120,15 @@ def plot_freq(signal, **kwargs):
     Examples
     --------
     """
-
-    n_channels = signal.shape[0]
     time_data = signal.time
     sampling_rate = signal.sampling_rate
 
     fig, axes = plt.subplots()
 
-    for i in range(n_channels):
-        spectrum, freq, line = axes.magnitude_spectrum(
-            time_data[i], Fs=sampling_rate, scale='dB')
+    eps = np.finfo(float).tiny
+    data_dB = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
+    axes.semilogx(signal.frequencies, data_dB.T)
+
 
     axes.set_xlabel("Frequency [Hz]")
     axes.set_ylabel("Magnitude [dB]")
@@ -139,23 +136,20 @@ def plot_freq(signal, **kwargs):
     axes.set_xscale('log')
     axes.grid(True, 'both')
 
-    spectrum_db = 20 * np.log10(spectrum + np.finfo(float).tiny)
-    ymax = np.max(spectrum_db)
+    ymax = np.max(data_dB)
     ymin = ymax - 90
     ymax = ymax + 10
 
     axes.set_ylim((ymin, ymax))
+    axes.set_xlim((20, signal.sampling_rate/2))
 
-    ax = plt.gca()
-
-    modifier = AxisModifierLinesLogYAxis(ax, fig)
+    modifier = AxisModifierLinesLogYAxis(axes, fig)
     modifier.connect()
     axes.xaxis.set_major_locator(
         LogLocatorITAToolbox())
     axes.xaxis.set_major_formatter(
         LogFormatterITAToolbox())
 
-    axes.set_xlim((20, signal.sampling_rate/2))
     plt.show()
 
     return axes
