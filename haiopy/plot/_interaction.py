@@ -177,7 +177,7 @@ class AxisModifierDialog(AxisModifier):
         super(AxisModifierDialog, self).__init__(axes, figure)
 
     def open(self, event):
-        if 'Qt' in matplotlib.get_backend():
+        if 'Qt' in mpl.get_backend():
             from .gui import AxisDialog
             if event.key in ['d']:
                 xlim_update, ylim_update, result = \
