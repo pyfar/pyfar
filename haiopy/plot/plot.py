@@ -36,7 +36,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
     fig, axes = plt.subplots()
 
     data_dB = log_prefix*np.log10(np.abs(y_data)/log_reference)
-    ymax = np.max(data_dB)
+    ymax = np.nanmax(data_dB)
     ymin = ymax - 90
     ymax = ymax + 10
 
@@ -133,7 +133,7 @@ def plot_freq(signal, log_prefix=20, log_reference=1, **kwargs):
     axes.set_xscale('log')
     axes.grid(True, 'both')
 
-    ymax = np.max(data_dB)
+    ymax = np.nanmax(data_dB)
     ymin = ymax - 90
     ymax = ymax + 10
 
