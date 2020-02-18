@@ -55,7 +55,7 @@ class Signal(Audio):
         domain : string
             Domain of data ('freq'/'time')
         signal_type : string
-            Destinguish between power and energy signals
+            Distinguish between power and energy signals
         dtype : string
             Raw data type of the signal, optional
         position : Coordinates
