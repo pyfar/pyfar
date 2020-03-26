@@ -1,11 +1,16 @@
-import numpy as np
 import multiprocessing
+import warnings
+
+import numpy as np
 
 try:
     import pyfftw
     pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
     from pyfftw.interfaces import numpy_fft as fft_lib
 except ImportError:
+    warnings.warn(
+        "Using numpy FFT implementation.\
+        Install pyfftw for improved performance.")
     from numpy import fft as fft_lib
 
 
