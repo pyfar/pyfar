@@ -2,17 +2,15 @@ import numpy as np
 import multiprocessing
 
 try:
-    from pyfftw.interfaces.numpy_fft import rfft as fftw_rfft
-    def lib_rfft(*args, **kwargs):
-        return fftw_rfft(*args, **kwargs, threads=multiprocessing.cpu_count())
-    from pyfftw.interfaces.numpy_fft import irfft as fftw_irfft
-    def lib_irfft(*args, **kwargs):
-        return fftw_irfft(*args, **kwargs, threads=multiprocessing.cpu_count())
-    from pyfftw.interfaces.numpy_fft import rfftfreq  as lib_rfftfreq
+    import pyfftw
+    pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
+    from pyfftw.interfaces.numpy_fft import rfft as lib_rfft
+    from pyfftw.interfaces.numpy_fft import irfft as lib_irfft
+    from pyfftw.interfaces.numpy_fft import rfftfreq as lib_rfftfreq
 except ImportError:
-    from numpy.numpy_fft import rfft as lib_rfft
-    from numpy.numpy_fft import irfft as lib_irfft
-    from numpy.numpy_fft import rfftfreq  as lib_rfftfreq
+    from numpy.fft import rfft as lib_rfft
+    from numpy.fft import irfft as lib_irfft
+    from numpy.fft import rfftfreq as lib_rfftfreq
 
 
 def rfftfreq(n_samples, sampling_rate):
