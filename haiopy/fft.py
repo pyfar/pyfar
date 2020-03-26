@@ -4,13 +4,9 @@ import multiprocessing
 try:
     import pyfftw
     pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-    from pyfftw.interfaces.numpy_fft import rfft as lib_rfft
-    from pyfftw.interfaces.numpy_fft import irfft as lib_irfft
-    from pyfftw.interfaces.numpy_fft import rfftfreq as lib_rfftfreq
+    from pyfftw.interfaces import numpy_fft as fft_lib
 except ImportError:
-    from numpy.fft import rfft as lib_rfft
-    from numpy.fft import irfft as lib_irfft
-    from numpy.fft import rfftfreq as lib_rfftfreq
+    from numpy import fft as fft_lib
 
 
 def rfftfreq(n_samples, sampling_rate):
@@ -33,7 +29,7 @@ def rfftfreq(n_samples, sampling_rate):
     frequencies : array, double
         The positive discrete frequencies for which the FFT is calculated.
     """
-    return lib_rfftfreq(n_samples, d=1/sampling_rate)
+    return fft_lib.rfftfreq(n_samples, d=1/sampling_rate)
 
 
 def rfft(data, n_samples, signal_type):
@@ -66,7 +62,7 @@ def rfft(data, n_samples, signal_type):
     """
 
     sqrt_two = np.sqrt(2)
-    spec = lib_rfft(data, n=n_samples, axis=-1)
+    spec = fft_lib.rfft(data, n=n_samples, axis=-1)
 
     if signal_type == 'energy':
         norm = 1
@@ -122,7 +118,7 @@ def irfft(spec, n_samples, signal_type):
 
     spec *= norm
 
-    data = lib_irfft(spec, n=n_samples, axis=-1)
+    data = fft_lib.irfft(spec, n=n_samples, axis=-1)
 
     return data
 
