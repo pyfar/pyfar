@@ -1,5 +1,6 @@
 import numpy as np
 
+from haiopy import fft as fft
 from haiopy.coordinates import Coordinates
 from haiopy.orientation import Orientation
 
@@ -22,7 +23,7 @@ class Signal(Audio):
     ----------
     data : ndarray, double
         Raw data of the signal
-    samplingrate : double
+    sampling_rate : double
         Sampling rate in Hertz
     domain : string
         Domain of data ('freq'/'time')
@@ -37,9 +38,9 @@ class Signal(Audio):
     """
     def __init__(self,
                  data,
-                 samplingrate,
+                 sampling_rate,
                  domain='time',
-                 signaltype='power',
+                 signal_type='energy',
                  dtype=None,
                  position=Coordinates(),
                  orientation=Orientation()):
@@ -49,12 +50,12 @@ class Signal(Audio):
         ----------
         data : ndarray, double
             Raw data of the signal
-        samplingrate : double
+        sampling_rate : double
             Sampling rate in Hertz
         domain : string
             Domain of data ('freq'/'time')
-        signaltype : string
-            Destinguish between power and energy signals
+        signal_type : string
+            Distinguish between power and energy signals
         dtype : string
             Raw data type of the signal, optional
         position : Coordinates
@@ -64,7 +65,7 @@ class Signal(Audio):
         """
 
         Audio.__init__(self)
-        self._samplingrate = samplingrate
+        self._sampling_rate = sampling_rate
         if len(data.shape) <= 2:
             if domain == 'time':
                 if not dtype:
@@ -75,14 +76,18 @@ class Signal(Audio):
             elif domain == 'freq':
                 if dtype is None:
                     self._dtype = np.double
+                n_bins = data.shape[-1]
+                n_samples = (n_bins - 1)*2
                 self._data = np.atleast_2d(
-                        np.asarray(np.fft.irfft(data), dtype=dtype))
+                    np.asarray(
+                        fft.irfft(data, n_samples, signal_type),
+                        dtype=dtype))
         else:
             raise ValueError("Only 2-dim data is allowed")
 
-        self._VALID_SIGNALTYPE = ["power", "energy"]
-        if (signaltype in self._VALID_SIGNALTYPE) is True:
-            self._signaltype = signaltype
+        self._VALID_SIGNAL_TYPE = ["power", "energy"]
+        if (signal_type in self._VALID_SIGNAL_TYPE) is True:
+            self._signal_type = signal_type
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
 
@@ -106,17 +111,17 @@ class Signal(Audio):
     @property
     def n_bins(self):
         """Number of frequency bins."""
-        return (self._data.shape[-1] / 2) + 1
+        return fft._n_bins(self.n_samples)
 
     @property
     def frequencies(self):
         """Frequencies of the discrete signal spectrum."""
-        return np.fft.rfftfreq(self.n_samples, d=1/self.samplingrate)
+        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
 
     @property
     def times(self):
         """Time instances the signal is sampled at."""
-        return np.atleast_2d(np.arange(0, self.n_samples) / self.samplingrate)
+        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
 
     @property
     def time(self):
@@ -125,42 +130,37 @@ class Signal(Audio):
 
     @time.setter
     def time(self, value):
-        if len(value.shape) <= 2:
-            self._data = value
-        else:
-            raise ValueError("Only 2-dim data is allowed")
+        self._data = np.atleast_2d(value)
 
     @property
     def freq(self):
         """The signal data in the frequency domain."""
-        freq = np.fft.rfft(self._data)
+        freq = fft.rfft(self._data, self.n_samples, self._signal_type)
         return freq
 
     @freq.setter
     def freq(self, value):
-        if len(value.shape) <= 2:
-            self._data = np.fft.irfft(value)
-        else:
-            raise ValueError("Only 2-dim data is allowed")
+        self._data = np.atleast_2d(
+            fft.irfft(value, self.n_samples, self.signal_type))
 
     @property
-    def samplingrate(self):
+    def sampling_rate(self):
         """The sampling rate of the signal."""
-        return self._samplingrate
+        return self._sampling_rate
 
-    @samplingrate.setter
-    def samplingrate(self, value):
-        self._samplingrate = value
+    @sampling_rate.setter
+    def sampling_rate(self, value):
+        self._sampling_rate = value
 
     @property
-    def signaltype(self):
+    def signal_type(self):
         """The signal type."""
-        return self._signaltype
+        return self._signal_type
 
-    @signaltype.setter
-    def signaltype(self, value):
-        if (value in self._VALID_SIGNALTYPE) is True:
-            self._signaltype = value
+    @signal_type.setter
+    def signal_type(self, value):
+        if (value in self._VALID_SIGNAL_TYPE) is True:
+            self._signal_type = value
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
 
@@ -171,9 +171,9 @@ class Signal(Audio):
         return self._dtype
 
     @property
-    def signallength(self):
+    def signal_length(self):
         """The length of the signal in seconds."""
-        return (self.n_samples - 1) / self.samplingrate
+        return (self.n_samples - 1) / self.sampling_rate
 
     @property
     def position(self):
@@ -215,8 +215,8 @@ class Signal(Audio):
                        "Sampling rate: {} Hz\n"
                        "Signal type: {}\n"
                        "Signal length: {} sec").format(
-                       self.shape[0], self.n_samples, self._samplingrate,
-                       self._signaltype, self.signallength)
+                       self.shape[0], self.n_samples, self._sampling_rate,
+                       self._signal_type, self.signal_length)
         return repr_string
 
     def __getitem__(self, key):

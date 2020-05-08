@@ -1,4 +1,4 @@
-image: python
+image: python:3.7
 
 stages:
 - test

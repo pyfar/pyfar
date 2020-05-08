@@ -1,11 +1,10 @@
+from unittest import mock
+
 import numpy as np
 import numpy.testing as npt
 import pytest
-from unittest import mock
 
-from haiopy import Signal
-from haiopy import Coordinates
-from haiopy import Orientation
+from haiopy import Coordinates, Orientation, Signal
 
 
 def test_signal_init(sine):
@@ -23,15 +22,15 @@ def test_signal_init_val(sine):
     orient_mock = mock.Mock(spec_set=Orientation())
     orient_mock.view = np.array([1, 0, 0])
     orient_mock.up = np.array([0, 1, 0])
-    signal = Signal(sine, 44100, domain="time", signaltype="power",
+    signal = Signal(sine, 44100, domain="time", signal_type="power",
                     position=coord_mock, orientation=orient_mock)
     assert isinstance(signal, Signal)
 
 
-def test_signal_init_false_signaltype(sine):
-    """Test to init Signal with invalid signaltype."""
+def test_signal_init_false_signal_type(sine):
+    """Test to init Signal with invalid signal type."""
     with pytest.raises(ValueError):
-        Signal(sine, 44100, signaltype="falsetype")
+        Signal(sine, 44100, signal_type="falsetype")
         pytest.fail("Not a valid signal type ('power'/'energy')")
 
 
@@ -77,7 +76,7 @@ def test_n_bins(sine):
 def test_times(sine):
     """Test for the time instances."""
     signal = Signal(sine, 44100)
-    times = np.atleast_2d(np.arange(0, len(sine)) / 44100)
+    times = np.atleast_1d(np.arange(0, len(sine)) / 44100)
     npt.assert_allclose(signal.times, times)
 
 
@@ -92,16 +91,7 @@ def test_setter_time(sine, impulse):
     """Test if attribute time is set correctly."""
     signal = Signal(sine, 44100)
     signal.time = impulse
-    npt.assert_allclose(impulse, signal._data)
-
-
-def test_setter_time_3D(sine):
-    """Test if ValueError is raised when set with 3D data."""
-    signal = Signal(sine, 44100)
-    data_3d = sine.reshape([1, 1, 1000])
-    with pytest.raises(ValueError):
-        signal.time = data_3d
-        pytest.fail("Input dimension has to be smaller than 3")
+    npt.assert_allclose(np.atleast_2d(impulse), signal._data)
 
 
 def test_getter_freq(sine, impulse):
@@ -115,55 +105,46 @@ def test_setter_freq(sine, impulse):
     """Test if attribute freq is set correctly."""
     signal = Signal(sine, 44100)
     signal.freq = np.fft.rfft(impulse)
-    npt.assert_allclose(impulse, signal._data, atol=1e-15)
+    npt.assert_allclose(np.atleast_2d(impulse), signal._data, atol=1e-15)
 
 
-def test_setter_freq_3D(sine):
-    """Test if ValueError is raised when set with 3D data."""
+def test_getter_sampling_rate(sine):
+    """Test if attribute sampling rate is accessed correctly."""
+    sampling_rate = 48000
     signal = Signal(sine, 44100)
-    data_3d = sine.reshape([1, 1, 1000])
-    with pytest.raises(ValueError):
-        signal.time = np.fft.rfft(data_3d)
-        pytest.fail("Input dimension has to be smaller than 3")
-
-
-def test_getter_samplingrate(sine):
-    """Test if attribute samplingrate is accessed correctly."""
-    samplingrate = 48000
-    signal = Signal(sine, 44100)
-    signal._samplingrate = samplingrate
-    npt.assert_allclose(signal.samplingrate, samplingrate)
+    signal._sampling_rate = sampling_rate
+    npt.assert_allclose(signal.sampling_rate, sampling_rate)
 
 
 def test_setter_sampligrate(sine):
-    """Test if attribute samplingrate is set correctly."""
-    samplingrate = 48000
+    """Test if attribute sampling rate is set correctly."""
+    sampling_rate = 48000
     signal = Signal(sine, 44100)
-    signal.samplingrate = samplingrate
-    npt.assert_allclose(samplingrate, signal._samplingrate)
+    signal.sampling_rate = sampling_rate
+    npt.assert_allclose(sampling_rate, signal._sampling_rate)
 
 
-def test_getter_signaltype(sine):
-    """Test if attribute signaltype is accessed correctly."""
-    signaltype = "energy"
+def test_getter_signal_type(sine):
+    """Test if attribute signal type is accessed correctly."""
+    signal_type = "energy"
     signal = Signal(sine, 44100)
-    signal._signaltype = signaltype
-    npt.assert_string_equal(signal.signaltype, signaltype)
+    signal._signal_type = signal_type
+    npt.assert_string_equal(signal.signal_type, signal_type)
 
 
-def test_setter_signaltype(sine):
-    """Test if attribute signaltype is set correctly."""
-    signaltype = "energy"
+def test_setter_signal_type(sine):
+    """Test if attribute signal type is set correctly."""
+    signal_type = "energy"
     signal = Signal(sine, 44100)
-    signal.signaltype = signaltype
-    npt.assert_string_equal(signaltype, signal._signaltype)
+    signal.signal_type = signal_type
+    npt.assert_string_equal(signal_type, signal._signal_type)
 
 
-def test_setter_signaltype_false_type(sine):
-    """Test if ValueError is raised when signaltype is set incorrectly."""
+def test_setter_signal_type_false_type(sine):
+    """Test if ValueError is raised when signal type is set incorrectly."""
     signal = Signal(sine, 44100)
     with pytest.raises(ValueError):
-        signal.signaltype = "falsetype"
+        signal.signal_type = "falsetype"
         pytest.fail("Not a valid signal type ('power'/'energy')")
 
 
@@ -174,11 +155,11 @@ def test_dtype(sine):
     assert signal.dtype == dtype
 
 
-def test_signallength(sine):
+def test_signal_length(sine):
     """Test for the signal length."""
     signal = Signal(sine, 44100)
     length = (1000 - 1) / 44100
-    assert signal.signallength == length
+    assert signal.signal_length == length
 
 
 def test_getter_position(sine):
@@ -208,7 +189,8 @@ def test_setter_position(sine):
 
 
 def test_setter_position_false_type(sine):
-    """Test if TypeError is raised when position is not set with Coordinates."""
+    """Test if TypeError is raised when position is not set with Coordinates.
+    """
     signal = Signal(sine, 44100)
     with pytest.raises(TypeError):
         signal.position = np.array([1, 1, 1])
@@ -277,7 +259,7 @@ def test_magic_len(impulse):
 
 @pytest.fixture
 def sine():
-    """Generate a sine signal with f = 440 Hz and samplingrate = 44100 Hz.
+    """Generate a sine signal with f = 440 Hz and sampling_rate = 44100 Hz.
 
     Returns
     -------
@@ -287,16 +269,16 @@ def sine():
     """
     amplitude = 1
     frequency = 440
-    samplingrate = 44100
+    sampling_rate = 44100
     num_samples = 1000
     fullperiod = False
 
     if fullperiod:
-        num_periods = np.floor(num_samples / samplingrate * frequency)
-        # round to the nearest frequency resulting in a fully periodic sine signal
-        # in the given time interval
-        frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
+        num_periods = np.floor(num_samples / sampling_rate * frequency)
+        # round to the nearest frequency resulting in a fully periodic sine
+        # signal in the given time interval
+        frequency = num_periods * sampling_rate / num_samples
+    times = np.arange(0, num_samples) / sampling_rate
     signal = amplitude * np.sin(2 * np.pi * frequency * times)
 
     return signal
