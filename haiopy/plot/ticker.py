@@ -1,9 +1,14 @@
+import numpy as np
 from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
     FixedFormatter,
     FixedLocator,
     LogFormatter,
-    LogLocator)
+    LogLocator,
+    MultipleLocator,
+    Formatter)
+
+import matplotlib.ticker as mpt
 
 
 class FractionalOctaveFormatter(FixedFormatter):
@@ -57,7 +62,7 @@ class LogLocatorITAToolbox(LogLocator):
             numticks=numticks)
 
 
-class LogFormatterITAToolbox(LogFormatter):
+class LogFormatterITAToolbox(mpt.LogFormatter):
     """
     Log-formatter inspired by the tick labels used in the ITA-Toolbox
     for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
@@ -83,7 +88,10 @@ class LogFormatterITAToolbox(LogFormatter):
         elif x >= 1e9:
             s = '{:g}G'.format(x/1e9)
         else:
-            s = self._pprint_val(x, vmax - vmin)
+            try:
+                s = self._pprint_val(x, vmax - vmin)
+            except AttributeError:
+                s = self.pprint_val(x, vmax - vmin)
         return s
 
     def __call__(self, x, pos=None):
