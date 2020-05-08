@@ -107,3 +107,57 @@ class LogFormatterITAToolbox(mpt.LogFormatter):
         vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
         s = self._num_to_string(x, vmin, vmax)
         return self.fix_minus(s)
+
+
+class MultipleFractionLocator(MultipleLocator):
+    """
+
+    """
+    def __init__(self, nominator=1, denominator=2, base=1):
+        super().__init__(base=base * nominator / denominator)
+        self._nominator = nominator
+        self._denominator = denominator
+
+
+class MultipleFractionFormatter(Formatter):
+    """
+    """
+    def __init__(self, nominator=1, denominator=2, base=1, base_str=None):
+        super().__init__()
+        self._nominator = nominator
+        self._denominator = denominator
+        self._base = base
+        if base_str is not None:
+            self._base_str = base_str
+        else:
+            self._base_str = "{}".format(base)
+
+    def _gcd(nom, denom):
+        while nom:
+            nom, denom = denom, nom % denom
+        return nom
+
+    def __call__(self, x):
+        den = self._denominator
+        num = np.int(np.rint(den*x/self.base))
+        com = self._gcd(num, den)
+        (num, den) = (int(num / com), int(den/com))
+        if den == 1:
+            if num == 0:
+                return r'$0$'
+            if num == 1:
+                return r'$%s$'%self._base_str
+            elif num == -1:
+                return r'$-%s$'%self._base_str
+            else:
+                return r'$%s%s$'%(num, self._base_str)
+        else:
+            if num == 1:
+                return r'$\frac{%s}{%s}$'%(self._base_str, den)
+            elif num == -1:
+                return r'$\frac{-%s}{%s}$'%(self._base_str, den)
+            else:
+                return r'$\frac{%s%s}{%s}$'%(num, self._base_str, den)
+
+    # def __call__(self, x, pos=None):
+    #     pass
