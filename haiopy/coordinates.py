@@ -1,6 +1,11 @@
 import numpy as np
 from scipy.spatial import cKDTree
 
+# General Idea:
+# - add a Position(object) class. This class is identical Coordinates, but can
+#   only hold a single point.
+# - Coordinates(object) is derived from Position() but can hold N points.
+
 
 class Coordinates(object):
     """Container class for coordinates in a three-dimensional space, allowing
