@@ -8,8 +8,6 @@ from matplotlib.ticker import (
     MultipleLocator,
     Formatter)
 
-import matplotlib.ticker as mpt
-
 
 class FractionalOctaveFormatter(FixedFormatter):
     def __init__(self, n_fractions=1):
@@ -62,7 +60,7 @@ class LogLocatorITAToolbox(LogLocator):
             numticks=numticks)
 
 
-class LogFormatterITAToolbox(mpt.LogFormatter):
+class LogFormatterITAToolbox(LogFormatter):
     """
     Log-formatter inspired by the tick labels used in the ITA-Toolbox
     for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
@@ -110,8 +108,9 @@ class LogFormatterITAToolbox(mpt.LogFormatter):
 
 
 class MultipleFractionLocator(MultipleLocator):
-    """
-
+    r"""
+    Tick locator for rational fraction multiples of a specified base, ie.
+    `math: \pi / 2`.
     """
     def __init__(self, nominator=1, denominator=2, base=1):
         super().__init__(base=base * nominator / denominator)
@@ -120,7 +119,9 @@ class MultipleFractionLocator(MultipleLocator):
 
 
 class MultipleFractionFormatter(Formatter):
-    """
+    r"""
+    Tick formatter for rational fraction multiples of a specified base, ie.
+    `math: \pi / 2`.
     """
     def __init__(self, nominator=1, denominator=2, base=1, base_str=None):
         super().__init__()
