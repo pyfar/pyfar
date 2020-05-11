@@ -132,32 +132,36 @@ class MultipleFractionFormatter(Formatter):
         else:
             self._base_str = "{}".format(base)
 
-    def _gcd(nom, denom):
-        while nom:
+    def _gcd(self, nom, denom):
+        while denom:
             nom, denom = denom, nom % denom
         return nom
 
-    def __call__(self, x):
+    def __call__(self, x, pos=None):
         den = self._denominator
-        num = np.int(np.rint(den*x/self.base))
+        num = np.int(np.rint(den*x/self._base))
         com = self._gcd(num, den)
         (num, den) = (int(num / com), int(den/com))
         if den == 1:
             if num == 0:
-                return r'$0$'
-            if num == 1:
-                return r'$%s$'%self._base_str
+                string = r'$0$'
+            elif num == 1:
+                string = r'${}$'.format(self._base_str)
             elif num == -1:
-                return r'$-%s$'%self._base_str
+                string = r'$-{}$'.format(self._base_str)
             else:
-                return r'$%s%s$'%(num, self._base_str)
+                string = r'${}{}$'.format(num, self._base_str)
         else:
             if num == 1:
-                return r'$\frac{%s}{%s}$'%(self._base_str, den)
+                string = r'$\frac{{{}}}{{{}}}$'.format(self._base_str, den)
             elif num == -1:
-                return r'$\frac{-%s}{%s}$'%(self._base_str, den)
+                string = r'$-\frac{{{}}}{{{}}}$'.format(self._base_str, den)
             else:
-                return r'$\frac{%s%s}{%s}$'%(num, self._base_str, den)
+                if num > 0:
+                    string = r'$\frac{{{}{}}}{{{}}}$'.format(
+                        num, self._base_str, den)
+                else:
+                    string = r'$-\frac{{{}{}}}{{{}}}$'.format(
+                        np.abs(num), self._base_str, den)
 
-    # def __call__(self, x, pos=None):
-    #     pass
+        return string
