@@ -1,13 +1,7 @@
 # Config file for automatic testing at travis-ci.org
 
+dist: bionic
 language: python
-
-jobs:
-  include:
-    - os: linux
-      dist: bionic
-    - os: osx
-
 python:
   - 3.6
   - 3.7
