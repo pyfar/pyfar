@@ -346,6 +346,18 @@ class Coordinates(object):
         """
         return self.n_points
 
+def coordinate_systems(domain=None, convention=None):
+    """
+    Get information about available coordinate systems.
+
+    Returns
+    -------
+    None.
+
+    """
+
+
+
 def _coordinate_systems():
     """
     Get module internal information about available coordinate systems.
@@ -498,6 +510,45 @@ def _coordinate_systems():
                     _coordinates[coord]['units'].append(cur_units)
 
     return _systems, _coordinates
+
+
+def _exist_coordinate_systems(domain=None, convention=None):
+    """
+    Check if the requested coordinate system exists.
+
+    The coordinate systems are defined in _coordinate_systems.
+
+    Parameters
+    ----------
+    domain : STRING
+        Sepcify the domain of the coordinate system, e.g., 'cart'.
+    convention : STRING
+        The convention of the coordinate system, e.g., 'top_colat'
+
+    Returns
+    -------
+    Assertion error if domain or convention are invalid.
+    """
+
+    # check general validity of input
+    assert(domain == None and convention == None) or\
+          (domain != None and convention != None) or\
+          (domain != None and convention == None), \
+        "domain can not be 'None' if convention is specified."
+
+    # get available coordinate systems
+    systems, _ = _coordinate_systems()
+
+    # check if domain exists
+    assert domain in systems or domain == None, \
+        "{} does not exist. Domain must be one of the follwing: {}.".\
+            format(domain, ', '.join(list(systems)))
+
+    #check if convention exisits in domain
+    if convention != None:
+        assert convention in systems[domain] or convention == None,\
+            "{} does not exist in {}. Convention must be one of the following: {}.".\
+                format(convention, domain, ', '.join(list(systems[domain])))
 
 
 def _sph2cart(r, theta, phi):
