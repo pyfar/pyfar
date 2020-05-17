@@ -1,11 +1,50 @@
 import numpy as np
+import pandas as pd
 import numpy.testing as npt
+import pytest
 from pytest import raises
 
 import haiopy
 from haiopy import Coordinates
 from haiopy.coordinates import _sph2cart, _cart2sph, _cart2latlon
 
+
+def test_coordinate_systems():
+    systems, coordinates = Coordinates._coordinate_systems()
+
+    # check object type
+    assert isinstance(systems, dict)
+    assert isinstance(coordinates, dict)
+
+    # check completeness of systems
+    for domain in systems:
+        for convention in systems[domain]:
+            assert "description_short" in systems[domain][convention], \
+                "{} ({}) is missing entry 'description_short'".format(domain, convention)
+            assert "coordinates"       in systems[domain][convention], \
+                "{} ({}) is missing entry 'coordinates'".format(domain, convention)
+            assert "units"             in systems[domain][convention], \
+                "{} ({}) is missing entry 'units'".format(domain, convention)
+            assert "description"       in systems[domain][convention], \
+                "{} ({}) is missing entry 'description'".format(domain, convention)
+
+    # check if units agree across coordinates that appear more than once
+    for coordinate in coordinates:
+         # get unique first entry
+        units     = coordinates[coordinate]['units'].copy()
+        units_ref = pd.unique(units[0])
+        for cc in range(1, len(units)):
+            # get nex entry for comparison
+            units_test = pd.unique(units[cc])
+            # compare
+            assert all(units_ref == units_test), \
+                "'{}' has units {} in {} ({}) but units {} in {} ({})".\
+                    format(coordinate, units_ref, \
+                           coordinates[coordinate]['domain'][0], \
+                           coordinates[coordinate]['convention'][0], \
+                           units_test, \
+                           coordinates[coordinate]['domain'][cc], \
+                           coordinates[coordinate]['convention'][cc])
 
 def test_coordinates_init():
     coords = Coordinates()

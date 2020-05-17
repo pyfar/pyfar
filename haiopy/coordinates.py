@@ -1,11 +1,6 @@
 import numpy as np
 from scipy.spatial import cKDTree
 
-# General Idea:
-# - add a Position(object) class. This class is identical Coordinates, but can
-#   only hold a single point.
-# - Coordinates(object) is derived from Position() but can hold N points.
-
 
 class Coordinates(object):
     """Container class for coordinates in a three-dimensional space, allowing
@@ -71,8 +66,8 @@ class Coordinates(object):
     # * The coordinate system is changed by
     #    @classmethod convert(domain=None, convention=None, units=None)
     #      - this calls two converters
-    #        1: domain2cart(self, 'convention', 'units')
-    #      - 2: cart2domain(self, 'convention', 'units')
+    #        1: _domain2cart(self, 'convention', 'units')
+    #      - 2: _cart2domain(self, 'convention', 'units')
     #
     #
     # * The number of points are stored
@@ -80,7 +75,12 @@ class Coordinates(object):
     #
     # * __repr__ will list the the current coordinate system and the number of
     #            points
-
+    #
+    # - explicit getter, e.g., c.get_sph('top_colat', 'deg')
+    # - unique coordinate names, e.g., radius_cyl
+    # - no explicit conversion
+    # - coordinate_dictionary
+    # - private property to store current domain, convention, units
 
     def __init__(self, x=None, y=None, z=None):
         """Init coordinates container
@@ -319,56 +319,6 @@ class Coordinates(object):
 
         return distance, index
 
-    @staticmethod
-    def coordinate_systems():
-        # nested dictionary of all implemented coordinate systems of the form
-        # {domain: {convention: {coordinates:[], units:[], description:''}}}
-        # _coordinate_systems = {
-        #      'cartesian': {'right handed':
-        #                        [['x', 'y', 'z'],
-        #                         ['meters'],
-        #                         ['right handed cartesian coordiate system']]},
-        #      'spherical': {'top pole':
-        #                        [['azimuth', 'colatitude', 'radius'],
-        #                         ['radians', 'degrees'],
-        #                         ['']],
-        #                    'top pole 2':
-        #                        [['azimuth', 'elevation', 'radius'],
-        #                         ['radians', 'degrees']],
-        #                    'side pole':
-        #                        [['lateral', 'polar', 'radius'],
-        #                         ['radians', 'meter']],
-        #                    'front pole':
-        #                        [['azimuth', 'colatitude', 'radius'],
-        #                         ['radians', 'meters']]}}
-
-        _coordinate_systems = {
-            'cartesian':{
-                'right handed':{
-                    'coordinates':
-                        ['x', 'y', 'z'],
-                    'units':
-                        ['meters'],
-                    'description':
-                        'Right handed cartesian coordinate system.'}},
-            'spherical':{
-                'top pole':{
-                    'coordinates':
-                        ['azimuth', 'colatitude', 'radius'],
-                    'units':
-                        ['radians', 'degrees'],
-                    'description':
-                        ('The azimuth denotes the counter clockwise angle in the x/y-plane with'
-                         '0 pointing in positive x-direction and pi/2 in positive y-direction.'
-                         'The elevation denotes the angle downwards from the z-axis with 0'
-                         'pointing in positve z-direction and pi in negative z-direction. The'
-                         'azimuth and elevation can be in radians or degrees, the radius is'
-                         'always in meters.')}
-                }
-            }
-
-        return _coordinate_systems
-
     def __repr__(self):
         """repr for Coordinate class
 
@@ -395,6 +345,159 @@ class Coordinates(object):
         """Length of the object which is the number of points stored.
         """
         return self.n_points
+
+def _coordinate_systems():
+    """
+    Get module internal information about available coordinate systems.
+
+    Returns
+    -------
+    _systems : NESTED DICT
+        List all available coordinate systems.
+        Key 0  - domain, e.g., 'cart'
+        Key 1  - convention, e.g., 'right'
+        Key 2a - 'short_description'
+        Key 2b - 'coordinates'
+        Key 2c - 'units'
+        Key 2d - 'description'
+
+    _coordinates: NESTED DICT
+        Resolve coordinate systems in which a coordinate ocurrs and the units
+        that a coordinate can have.
+        Key 0  - coordinate
+        Key 1a - domain
+        Key 1b - convention
+        Key 1c - units
+
+    """
+
+    # define coordinate systems
+    _systems = {
+        "cart":
+            {
+            "right":{
+                "description_short":
+                    "Right handed cartesian coordinate system.",
+                "coordinates":
+                    ["x", "y", "z"],
+                "units":
+                    ["meters", "meters", "meters"],
+                "description":
+                    "Right handed cartesian coordinate system with x,y, and."\
+                    "z in meters."}
+            },
+        "sph":
+            {
+            "top_colat":{
+                "description_short":
+                    "Spherical coordinate system with North and South Pole.",
+                "coordinates":
+                    ["azimuth", "colatitude", "radius"],
+                "units":
+                    [["radians", "radians", "meter"],
+                     ["degrees", "degrees", "meters"]],
+                "description":
+                    "The azimuth denotes the counter clockwise angle in the "\
+                    "x/y-plane with 0 pointing in positive x-direction and "\
+                    " pi/2 in positive y-direction. The colatitude denotes "\
+                    "the angle downwards from the z-axis with 0 pointing in "\
+                    "positve z-direction and pi in negative z-direction. The "\
+                    "azimuth and colatitude can be in radians or degrees, "\
+                    "the radius is always in meters."},
+            "top_elev":{
+                "description_short":
+                    "Spherical coordinate system with North and South Pole.",
+                "coordinates":
+                    ["azimuth", "elevation", "radius"],
+                "units":
+                    [["radians", "radians", "meter"],
+                     ["degrees", "degrees", "meters"]],
+                "description":
+                    "The azimuth and radius are identical to 'sph', "\
+                    "'top_colat'. The elevation denotes the angle upwards "\
+                    "and downwards from the x/y-plane with pi/2 pointing at "\
+                    "positive z-direction and -pi/2 pointing in negative "\
+                    "z-direction. The azimuth and elevation can be in "\
+                    "radians or degrees, the radius is always in meters."},
+            "side":{
+                "description_short":
+                    "Spherical coordinate system with poles on the y-axis.",
+                "coordinates":
+                    ["lateral", "polar", "radius"],
+                "units":
+                    [["radians", "radians", "meter"],
+                     ["degrees", "degrees", "meters"]],
+                "description":
+                    "The lateral angle denotes the angle in the x/y-plane "\
+                    "with pi/2 pointing in positive y-direction and -pi/2 in "\
+                    "negative y-direction. The polar angle denotes the angle "\
+                    "in the x/z-plane with -pi/2 pointing in negative "\
+                    "z-direction, 0 in positive x-direction, pi/2 in "\
+                    "positive z-direction, pi in negative x-direction. The "\
+                    "polar and lateral angle can be in radians and degree, "\
+                    "the radius is always in meters."},
+            "front":{
+                "description_short":
+                    "Spherical coordinate system with poles on the x-axis.",
+                "coordinates":
+                    ["phi", "theta", "radius"],
+                "units":
+                    [["radians", "radians", "meter"],
+                     ["degrees", "degrees", "meters"]],
+                "description":
+                    "Phi denotes the angle measured from the x-axis with 0 "\
+                    "pointing in positve x-direction and pi in negative x-"\
+                    "direction. Theta denotes the angle in the y/z-plane "\
+                    "with 0 pointing in positive z-direction, pi/2 in "\
+                    "positive y-direction, pi in negative z-direction, and "\
+                    "3*pi/2 in negative y-direction. Phi and theta can be "\
+                    "in radians and degrees, the radius is always in meters."}
+            },
+        "cyl":
+            {
+            "top":{
+                "description_short":
+                    "Cylindrical coordinate system along the z-axis.",
+                "coordinates":
+                    ["azimuth", "z", "radius_z"],
+                "units":
+                    [["radians", "meters", "meter"],
+                     ["degrees", "meters", "meters"]],
+                "description":
+                    "The azimuth denotes the counter clockwise angle in the "\
+                    "x/y-plane with 0 pointing in positive x-direction and "\
+                    " pi/2 in positive y-direction. The heigt is given by "\
+                    "z, and radius_z denotes the radius measured orthogonal "\
+                    "to the z-axis."}
+            }
+        }
+
+    # resolve membership of coordinates
+    _coordinates = {}
+
+    # loop across domains and conventions
+    for domain in _systems:
+        for convention in _systems[domain]:
+            # loop across coordinates
+            for cc, coord in enumerate(_systems[domain][convention]['coordinates']):
+                # units of the current coordinate
+                all_units = _systems[domain][convention]['units']
+                if np.asarray(all_units).ndim == 1:
+                    cur_units = [all_units[cc]]
+                else:
+                    cur_units = [u[cc] for u in _systems[domain][convention]['units']]
+                # add coordinate to _coordinates
+                if not coord in _coordinates:
+                    _coordinates[coord]= {}
+                    _coordinates[coord]['domain']     = [domain]
+                    _coordinates[coord]['convention'] = [convention]
+                    _coordinates[coord]['units']      = [cur_units]
+                else:
+                    _coordinates[coord]['domain'].append(domain)
+                    _coordinates[coord]['convention'].append(convention)
+                    _coordinates[coord]['units'].append(cur_units)
+
+    return _systems, _coordinates
 
 
 def _sph2cart(r, theta, phi):
