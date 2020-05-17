@@ -13,7 +13,7 @@ import haiopy.coordinates as coordinates
 
 # TODO: Do I have to provide an error string to assert or does pytest show more
 #       detailed information?
-def test_coordinate_systems():
+def test__coordinate_systems():
     systems, coords = coordinates._coordinate_systems()
 
     # check object type
@@ -59,11 +59,20 @@ def test_exist_coordinate_systems():
 
     # things that shoud not pass
     with raises(AssertionError):
+         coordinates._exist_coordinate_systems(1)
+    with raises(AssertionError):
+         coordinates._exist_coordinate_systems(None, 1)
+    with raises(AssertionError):
          coordinates._exist_coordinate_systems(None, 'side')
     with raises(AssertionError):
          coordinates._exist_coordinate_systems('shp')
     with raises(AssertionError):
          coordinates._exist_coordinate_systems('sph', 'tight')
+
+def test_coordinate_systems():
+    # if one call passes, all calls should pass because the user input is
+    # checked by coordinates.exist_coordinate_systems()
+    coordinates.coordinate_systems()
 
 
 # %% Test Coordinates() class ------------------------------------------------

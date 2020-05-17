@@ -37,7 +37,7 @@ class Coordinates(object):
     #                in meters
     #       - description:
     #
-    # * @classmethod coordinate_systems(domain='all', convention='all') can be
+    # * coordinate_systems(domain='all', convention='all') can be
     #    used to list all available coordinate systems or a specific subset
     #
     # * The Coordinates(object) has properties that specify the current
@@ -106,24 +106,6 @@ class Coordinates(object):
         self._x = x
         self._y = y
         self._z = z
-
-    @classmethod
-    def list_coordinate_systems(self, domain='all',convention='all'):
-
-        # get implemented coordinate systems
-        _coordinate_systems = self.get_coordinate_systems()
-
-        # check what domains to list
-        if domain=='all':
-            domain=list(_coordinate_systems)[:]
-
-        #
-        for d in domain:
-            if convention == 'all':
-                print(d + ':')
-            else:
-                print(d + ', ' + convention)
-
 
     @property
     def x(self):
@@ -348,13 +330,65 @@ class Coordinates(object):
 
 def coordinate_systems(domain=None, convention=None):
     """
-    Get information about available coordinate systems.
+    List coordinate systems.
+
+    Parameters
+    ----------
+    domain :string, None, optional
+        string to get information about a sepcific system, None to get
+        information about all systems. The default is None.
+    convention : string, None, optional
+        string to get information about a sepcific convention, None to get
+        information about all conventions. The default is None.
 
     Returns
     -------
-    None.
+    Prints to console.
+
+    Examples
+    --------
+    List information for all coordinate systems
+
+    >>> coordinate_systems()
+
+    List information for a specific coordinate system, e.g.,
+
+    >>> coordinate_systems('sph', 'top_elev')
 
     """
+
+    # check user input
+    _exist_coordinate_systems(domain, convention)
+
+    # get coordinate systems
+    systems, _ = _coordinate_systems()
+
+    # print information
+    domains = list(systems) if domain == None else [domain]
+
+    for dd in domains:
+        conventions = list(systems[dd]) if convention == None else [convention]
+        for cc in conventions:
+            # current coordinates and units
+            coords = systems[dd][cc]['coordinates']
+            units  = systems[dd][cc]['units']
+            unit_specifier = [unit[0][0:3] for unit in units]
+            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            print("domain: {}, convention: {}, units: [{}]\n"\
+                  .format(dd, cc, ', '.join(unit_specifier)))
+            print(systems[dd][cc]['description_short'] + '\n')
+            print("Coordinates:")
+            for nn, coord in enumerate(coords):
+                cur_units = [unit[nn] for unit in units]
+                print("{} [{}]".format(coord, ', '.join(cur_units)))
+            print('\n' + systems[dd][cc]['description'] + '\n\n')
+
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+    print("Available coordinate are listed above. They are specified by "\
+          "their 'domain', 'convention' and 'unit'. If multiple units are "\
+          "available for a convention, the unit listed first is the default.")
+    print("NOTE: All coordinate systems are described with respect to the "\
+          "right handed cartesian system (domain=cart, convention=right).")
 
 
 
@@ -364,16 +398,18 @@ def _coordinate_systems():
 
     Returns
     -------
-    _systems : NESTED DICT
+    _systems : nested dictionary
         List all available coordinate systems.
         Key 0  - domain, e.g., 'cart'
         Key 1  - convention, e.g., 'right'
-        Key 2a - 'short_description'
-        Key 2b - 'coordinates'
-        Key 2c - 'units'
+        Key 2a - 'short_description': string
+        Key 2b - 'coordinates': ['coordinate_1','coordinate_2','coordinate_3']
+        Key 2c - 'units': [['unit_1.1','unit_2.1','unit_3.1'],
+                                        ...
+                           ['unit_1.N','unit_2.N','unit_3.N']]
         Key 2d - 'description'
 
-    _coordinates: NESTED DICT
+    _coordinates: nested dictionary
         Resolve coordinate systems in which a coordinate ocurrs and the units
         that a coordinate can have.
         Key 0  - coordinate
@@ -393,7 +429,7 @@ def _coordinate_systems():
                 "coordinates":
                     ["x", "y", "z"],
                 "units":
-                    ["meters", "meters", "meters"],
+                    [["meters", "meters", "meters"]],
                 "description":
                     "Right handed cartesian coordinate system with x,y, and."\
                     "z in meters."}
@@ -406,7 +442,7 @@ def _coordinate_systems():
                 "coordinates":
                     ["azimuth", "colatitude", "radius"],
                 "units":
-                    [["radians", "radians", "meter"],
+                    [["radians", "radians", "meters"],
                      ["degrees", "degrees", "meters"]],
                 "description":
                     "The azimuth denotes the counter clockwise angle in the "\
@@ -422,22 +458,24 @@ def _coordinate_systems():
                 "coordinates":
                     ["azimuth", "elevation", "radius"],
                 "units":
-                    [["radians", "radians", "meter"],
+                    [["radians", "radians", "meters"],
                      ["degrees", "degrees", "meters"]],
                 "description":
-                    "The azimuth and radius are identical to 'sph', "\
-                    "'top_colat'. The elevation denotes the angle upwards "\
-                    "and downwards from the x/y-plane with pi/2 pointing at "\
-                    "positive z-direction and -pi/2 pointing in negative "\
-                    "z-direction. The azimuth and elevation can be in "\
-                    "radians or degrees, the radius is always in meters."},
+                    "The azimuth denotes the counter clockwise angle in the "\
+                    "x/y-plane with 0 pointing in positive x-direction and "\
+                    " pi/2 in positive y-direction. The elevation denotes "\
+                    "the angle upwards and downwards from the x/y-plane with "\
+                    " pi/2 pointing at positive z-direction and -pi/2 "\
+                    "pointing in negative z-direction. The azimuth and "\
+                    "elevation can be in radians or degrees, the radius is "\
+                    " always in meters."},
             "side":{
                 "description_short":
                     "Spherical coordinate system with poles on the y-axis.",
                 "coordinates":
                     ["lateral", "polar", "radius"],
                 "units":
-                    [["radians", "radians", "meter"],
+                    [["radians", "radians", "meters"],
                      ["degrees", "degrees", "meters"]],
                 "description":
                     "The lateral angle denotes the angle in the x/y-plane "\
@@ -454,7 +492,7 @@ def _coordinate_systems():
                 "coordinates":
                     ["phi", "theta", "radius"],
                 "units":
-                    [["radians", "radians", "meter"],
+                    [["radians", "radians", "meters"],
                      ["degrees", "degrees", "meters"]],
                 "description":
                     "Phi denotes the angle measured from the x-axis with 0 "\
@@ -473,7 +511,7 @@ def _coordinate_systems():
                 "coordinates":
                     ["azimuth", "z", "radius_z"],
                 "units":
-                    [["radians", "meters", "meter"],
+                    [["radians", "meters", "meters"],
                      ["degrees", "meters", "meters"]],
                 "description":
                     "The azimuth denotes the counter clockwise angle in the "\
@@ -493,11 +531,7 @@ def _coordinate_systems():
             # loop across coordinates
             for cc, coord in enumerate(_systems[domain][convention]['coordinates']):
                 # units of the current coordinate
-                all_units = _systems[domain][convention]['units']
-                if np.asarray(all_units).ndim == 1:
-                    cur_units = [all_units[cc]]
-                else:
-                    cur_units = [u[cc] for u in _systems[domain][convention]['units']]
+                cur_units = [u[cc] for u in _systems[domain][convention]['units']]
                 # add coordinate to _coordinates
                 if not coord in _coordinates:
                     _coordinates[coord]= {}
@@ -520,9 +554,9 @@ def _exist_coordinate_systems(domain=None, convention=None):
 
     Parameters
     ----------
-    domain : STRING
+    domain : string
         Sepcify the domain of the coordinate system, e.g., 'cart'.
-    convention : STRING
+    convention : string
         The convention of the coordinate system, e.g., 'top_colat'
 
     Returns
@@ -531,6 +565,12 @@ def _exist_coordinate_systems(domain=None, convention=None):
     """
 
     # check general validity of input
+    if domain!=None and not isinstance(domain, str):
+        raise ValueError("domain must be None or string")
+
+    if convention!=None and not isinstance(convention, str):
+        raise ValueError("convention must be None or string")
+
     assert(domain == None and convention == None) or\
           (domain != None and convention != None) or\
           (domain != None and convention == None), \
