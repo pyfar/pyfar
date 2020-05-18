@@ -13,6 +13,11 @@ def test_signal_init(sine):
     assert isinstance(signal, Signal)
 
 
+def test_signal_init_list(impulse_list):
+    signal = Signal(impulse_list, 44100)
+    assert isinstance(signal, Signal)
+
+
 def test_signal_init_val(sine):
     """Test to init Signal with complete parameters."""
     coord_mock = mock.Mock(spec_set=Coordinates())
@@ -48,14 +53,6 @@ def test_signal_init_false_orientation(sine):
     with pytest.raises(TypeError):
         Signal(sine, 44100, orientation=orientation_false)
         pytest.fail("Input value has to be coordinates object.")
-
-
-def test_signal_init_3D(sine):
-    """Test if ValueError is raised when init with 3D data."""
-    data = sine.reshape([1, 1, 1000])
-    with pytest.raises(ValueError):
-        Signal(data, 44100)
-        pytest.fail("Input dimension has to be smaller than 3")
 
 
 def test_n_samples(impulse):
@@ -284,8 +281,7 @@ def sine():
     return signal
 
 
-@pytest.fixture
-def impulse():
+def impulse_func():
     """Generate an impulse, also known as the Dirac delta function
 
     .. math::
@@ -309,3 +305,15 @@ def impulse():
     signal[0] = amplitude
 
     return signal
+
+
+@pytest.fixture
+def impulse():
+    return impulse_func()
+
+
+@pytest.fixture
+def impulse_list():
+    imp = impulse_func()
+
+    return imp.tolist()

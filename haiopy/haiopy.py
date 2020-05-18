@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from haiopy import fft as fft
@@ -39,9 +41,10 @@ class Signal(Audio):
     def __init__(self,
                  data,
                  sampling_rate,
+                 n_samples=None,
                  domain='time',
                  signal_type='energy',
-                 dtype=None,
+                 dtype=np.double,
                  position=Coordinates(),
                  orientation=Orientation()):
         """Init Signal with data, sampling rate and domain and signal type.
@@ -66,30 +69,26 @@ class Signal(Audio):
 
         Audio.__init__(self)
         self._sampling_rate = sampling_rate
-        if len(data.shape) <= 2:
-            if domain == 'time':
-                if not dtype:
-                    self._dtype = data.dtype
-                else:
-                    self._dtype = dtype
-                self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
-            elif domain == 'freq':
-                if dtype is None:
-                    self._dtype = np.double
-                n_bins = data.shape[-1]
-                n_samples = (n_bins - 1)*2
-                self._data = np.atleast_2d(
-                    np.asarray(
-                        fft.irfft(data, n_samples, signal_type),
-                        dtype=dtype))
-        else:
-            raise ValueError("Only 2-dim data is allowed")
+        self._dtype = dtype
 
         self._VALID_SIGNAL_TYPE = ["power", "energy"]
         if (signal_type in self._VALID_SIGNAL_TYPE) is True:
             self._signal_type = signal_type
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
+
+        if domain == 'time':
+            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+        elif domain == 'freq':
+            if n_samples is None:
+                warnings.warn("Number of time samples not given, assuming an\
+                    even number of samples from the number of frequency bins.")
+                n_bins = data.shape[-1]
+                n_samples = (n_bins - 1)*2
+            self._data = np.atleast_2d(
+                np.asarray(
+                    fft.irfft(data, n_samples, signal_type),
+                    dtype=dtype))
 
         if isinstance(position, Coordinates):
             self._position = position
