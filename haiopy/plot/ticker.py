@@ -107,3 +107,64 @@ class LogFormatterITAToolbox(mpt.LogFormatter):
         vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
         s = self._num_to_string(x, vmin, vmax)
         return self.fix_minus(s)
+
+
+class MultipleFractionLocator(MultipleLocator):
+    r"""
+    Tick locator for rational fraction multiples of a specified base, ie.
+    `math: \pi / 2`.
+    """
+    def __init__(self, nominator=1, denominator=2, base=1):
+        super().__init__(base=base * nominator / denominator)
+        self._nominator = nominator
+        self._denominator = denominator
+
+
+class MultipleFractionFormatter(Formatter):
+    r"""
+    Tick formatter for rational fraction multiples of a specified base, ie.
+    `math: \pi / 2`.
+    """
+    def __init__(self, nominator=1, denominator=2, base=1, base_str=None):
+        super().__init__()
+        self._nominator = nominator
+        self._denominator = denominator
+        self._base = base
+        if base_str is not None:
+            self._base_str = base_str
+        else:
+            self._base_str = "{}".format(base)
+
+    def _gcd(self, nom, denom):
+        while denom:
+            nom, denom = denom, nom % denom
+        return nom
+
+    def __call__(self, x, pos=None):
+        den = self._denominator
+        num = np.int(np.rint(den*x/self._base))
+        com = self._gcd(num, den)
+        (num, den) = (int(num / com), int(den/com))
+        if den == 1:
+            if num == 0:
+                string = r'$0$'
+            elif num == 1:
+                string = r'${}$'.format(self._base_str)
+            elif num == -1:
+                string = r'$-{}$'.format(self._base_str)
+            else:
+                string = r'${}{}$'.format(num, self._base_str)
+        else:
+            if num == 1:
+                string = r'$\frac{{{}}}{{{}}}$'.format(self._base_str, den)
+            elif num == -1:
+                string = r'$-\frac{{{}}}{{{}}}$'.format(self._base_str, den)
+            else:
+                if num > 0:
+                    string = r'$\frac{{{}{}}}{{{}}}$'.format(
+                        num, self._base_str, den)
+                else:
+                    string = r'$-\frac{{{}{}}}{{{}}}$'.format(
+                        np.abs(num), self._base_str, den)
+
+        return string
