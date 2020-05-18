@@ -3,23 +3,14 @@ from scipy.spatial import cKDTree
 
 
 class Coordinates(object):
-    """Container class for coordinates in a three-dimensional space, allowing
-    for compact representation and convenient conversion into spherical as well
-    as geospatial coordinate systems.
-    The constructor as well as the internal representation are only
-    available in Cartesian coordinates. To create a Coordinates object from
-    a set of points in spherical coordinates, please use the
-    Coordinates.from_spherical() method.
+    """
+    Container class for coordinates in a three-dimensional space, allowing
+    for compact representation and convenient conversion from and to cartesian,
+    sphercial, and cylindrical coordinate systems.
 
-    Attributes
-    ----------
-    x : ndarray, double
-        x-coordinate
-    y : ndarray, double
-        y-coordinate
-    z : ndarray, double
-        z-coordinate
+    To obtain a list of all available coordinate systems, use
 
+    >>> coordinate_systems()
     """
 
     # structure ----------------------
@@ -82,7 +73,8 @@ class Coordinates(object):
     # - coordinate_dictionary
     # - private property to store current domain, convention, units
 
-    def __init__(self, x=None, y=None, z=None):
+    def __init__(self, coord_1=None, coord_2=None, coord_3=None,
+                  domain='cart', convention='right', unit='met'):
         """Init coordinates container
 
         Attributes
@@ -95,238 +87,138 @@ class Coordinates(object):
             z-coordinate
         """
 
+        # init emtpy object
         super(Coordinates, self).__init__()
-        x = np.asarray(x, dtype=np.float64)
-        y = np.asarray(y, dtype=np.float64)
-        z = np.asarray(z, dtype=np.float64)
 
-        if not np.shape(x) == np.shape(y) == np.shape(z):
-            raise ValueError("Input arrays need to have same dimensions.")
+        # check if coordinate system exists
+        _exist_coordinate_systems(domain, convention, unit)
 
-        self._x = x
-        self._y = y
-        self._z = z
+        # save coordinate system to self
+        self._system = self._get_coordinate_system(domain, convention, unit)
 
-    @property
-    def x(self):
-        """The x-axis coordinates for each point.
+        # save coordinates to self
+        self._points = self._check_coordinates(coord_1, coord_2, coord_3)
+
+
+    @staticmethod
+    def _get_coordinate_system(domain=None, convention=None, unit=None):
         """
-        return self._x
+        Get class internal information about current coordinate system.
 
-    @x.setter
-    def x(self, value):
-        self._x = np.asarray(value, dtype=np.float64)
+        Retruns
+        -------
+        system : dict
 
-    @property
-    def y(self):
-        """The y-axis coordinate for each point."""
-        return self._y
-
-    @y.setter
-    def y(self, value):
-        self._y = np.asarray(value, dtype=np.float64)
-
-    @property
-    def z(self):
-        """The z-axis coordinate for each point."""
-        return self._z
-
-    @z.setter
-    def z(self, value):
-        self._z = np.asarray(value, dtype=np.float64)
-
-    @property
-    def radius(self):
-        """The radius for each point."""
-        return np.sqrt(self.x**2 + self.y**2 + self.z**2)
-
-    @radius.setter
-    def radius(self, radius):
-        x, y, z = _sph2cart(
-            np.asarray(radius, dtype=np.float64),
-            self.elevation,
-            self.azimuth)
-        self._x = x
-        self._y = y
-        self._z = z
-
-    @property
-    def azimuth(self):
-        """The azimuth angle for each point."""
-        return np.mod(np.arctan2(self.y, self.x), 2*np.pi)
-
-    @azimuth.setter
-    def azimuth(self, azimuth):
-        x, y, z = _sph2cart(
-            self.radius,
-            self.elevation,
-            np.asarray(azimuth, dtype=np.float64))
-        self._x = x
-        self._y = y
-        self._z = z
-
-    @property
-    def elevation(self):
-        """The elevation angle for each point"""
-        rad = self.radius
-        return np.arccos(self.z/rad)
-
-    @elevation.setter
-    def elevation(self, elevation):
-        x, y, z = _sph2cart(
-            self.radius,
-            np.asarray(elevation, dtype=np.float64),
-            self.azimuth)
-        self._x = x
-        self._y = y
-        self._z = z
-
-    @classmethod
-    def from_cartesian(cls, x, y, z):
-        """Create a Coordinates class object from a set of points in the
-        Cartesian coordinate system.
-
-        Parameters
-        ----------
-        x : ndarray, double
-            x-coordinate
-        y : ndarray, double
-            y-coordinate
-        z : ndarray, double
-            z-coordinate
         """
-        return Coordinates(x, y, z)
 
-    @classmethod
-    def from_spherical(cls, radius, elevation, azimuth):
-        """Create a Coordinates class object from a set of points in the
-        spherical coordinate system.
+        # get the system
+        system = _coordinate_systems()
+        system = system[domain][convention]
 
-        Parameters
-        ----------
-        radius : ndarray, double
-            The radius for each point
-        elevation : ndarray, double
-            The elevation angle in radians
-        azimuth : ndarray, double
-            The azimuth angle in radians
+        # get the units
+        for units in system['units']:
+            if unit == units[0][0:3]:
+                break
+
+        # add class internal keys
+        system['domain'] = domain
+        system['unit']   = unit
+        system['units']  = units
+
+        return system
+
+
+    @staticmethod
+    def _get_coordinates():
         """
-        radius = np.asarray(radius, dtype=np.double)
-        elevation = np.asarray(elevation, dtype=np.double)
-        azimuth = np.asarray(azimuth, dtype=np.double)
-        x, y, z = _sph2cart(radius, elevation, azimuth)
-        return Coordinates(x, y, z)
-
-    @classmethod
-    def from_array(cls, values, coordinate_system='cartesian'):
-        """Create a Coordinates class object from a set of points given as
-        numpy array
-
-        Parameters
-        ----------
-        values : double, ndarray
-            Array with shape Nx3 where N is the number of points.
-        coordinate_system : string
-            Coordinate convention of the given values.
-            Can be Cartesian or spherical coordinates.
-        """
-        coords = Coordinates()
-        if coordinate_system == 'cartesian':
-            coords.cartesian = values
-        elif coordinate_system == 'spherical':
-            coords.spherical = values
-        else:
-            return ValueError("This coordinate system is not supported.")
-
-        return coords
-
-    @property
-    def latitude(self):
-        """The latitude angle as used in geospatial coordinates."""
-        return np.pi/2 - self.elevation
-
-    @property
-    def longitude(self):
-        """The longitude angle as used in geospatial coordinates."""
-        return np.arctan2(self.y, self.x)
-
-    @property
-    def cartesian(self):
-        """Cartesian coordinates of all points."""
-        return np.vstack((self.x, self.y, self.z))
-
-    @cartesian.setter
-    def cartesian(self, value):
-        """Cartesian coordinates of all points."""
-        self.x = value[0, :]
-        self.y = value[1, :]
-        self.z = value[2, :]
-
-    @property
-    def spherical(self):
-        """Spherical coordinates of all points."""
-        return np.vstack((self.radius, self.elevation, self.azimuth))
-
-    @spherical.setter
-    def spherical(self, value):
-        """Cartesian coordinates of all points."""
-        x, y, z = _sph2cart(value[0, :], value[1, :], value[2, :])
-        self.cartesian = np.vstack((x, y, z))
-
-    @property
-    def n_points(self):
-        """Return number of points stored in the object"""
-        return self.x.size
-
-    def find_nearest_point(self, point):
-        """Find the closest Coordinate point to a given Point.
-        The search for the nearest point is performed using the scipy
-        cKDTree implementation.
-
-        Parameters
-        ----------
-        point : Coordinates
-            Point to find nearest neighboring Coordinate
+        Get unique list of coordinates and their properties.
 
         Returns
         -------
-        distance : ndarray, double
-            Distance between the point and it's closest neighbor
-        index : int
-            Index of the closest point.
+        coords: nested dictionary
+            Resolve coordinate systems in which a coordinate ocurrs and the
+            units that a coordinate can have.
+            Key 0  - coordinate
+            Key 1a - domain
+            Key 1b - convention
+            Key 1c - units
 
         """
-        kdtree = cKDTree(self.cartesian.T)
-        distance, index = kdtree.query(point.cartesian.T)
 
-        return distance, index
+        # get coordinate systems
+        systems = _coordinate_systems()
 
-    def __repr__(self):
-        """repr for Coordinate class
+        # resolve membership of coordinates
+        coords = {}
 
+        # loop across domains and conventions
+        for domain in systems:
+            for convention in systems[domain]:
+                # loop across coordinates
+                for cc, coord in enumerate(systems[domain][convention]['coordinates']):
+                    # units of the current coordinate
+                    cur_units = [u[cc] for u in systems[domain][convention]['units']]
+                    # add coordinate to coords
+                    if not coord in coords:
+                        coords[coord]= {}
+                        coords[coord]['domain']     = [domain]
+                        coords[coord]['convention'] = [convention]
+                        coords[coord]['units']      = [cur_units]
+                    else:
+                        coords[coord]['domain'].append(domain)
+                        coords[coord]['convention'].append(convention)
+                        coords[coord]['units'].append(cur_units)
+
+        return coords
+
+
+    @staticmethod
+    def _check_coordinates(coordinate_1, coordinate_2, coordinate_3):
         """
-        if self.n_points == 1:
-            repr_string = "Coordinates of 1 point"
-        else:
-            repr_string = "Coordinates of {} points".format(self.n_points)
-        return repr_string
+        Check the format of points to be added to Coordinates().
 
-    def __getitem__(self, index):
-        """Return Coordinates at index
+        Retruns
+        -------
+        points : array
+            size [3 x self._num_points]
         """
-        return Coordinates(self._x[index], self._y[index], self._z[index])
 
-    def __setitem__(self, index, item):
-        """Set Coordinates at index
-        """
-        self.x[index] = item.x
-        self.y[index] = item.y
-        self.z[index] = item.z
+        # cast to numpy array
+        coord_1 = np.asarray(coordinate_1, dtype=np.float64)
+        coord_2 = np.asarray(coordinate_2, dtype=np.float64)
+        coord_3 = np.asarray(coordinate_3, dtype=np.float64)
 
-    def __len__(self):
-        """Length of the object which is the number of points stored.
-        """
-        return self.n_points
+        # check dimensions
+        for cc, coord in enumerate([coord_1, coord_2, coord_3]):
+            assert coord.ndim <= 2, "coordinate_{}.ndim={} but must be <= 2."\
+                .format(cc+1, coord.ndim)
+            if coord.ndim == 2:
+                assert coord.shape[0] == 1 or coord.shape[1] == 1,\
+                    "coordinate_{} has shape {} but should have shape ({},), "\
+                    "({},1), or (1,{}).".format(cc+1, coord.shape, \
+                    max(coord.shape), max(coord.shape), max(coord.shape))
+
+        # flatten input
+        coord_1 = np.atleast_1d(coord_1.flatten())
+        coord_2 = np.atleast_1d(coord_2.flatten())
+        coord_3 = np.atleast_1d(coord_3.flatten())
+
+        # check for scalar entries
+        N_max = max([coord_1.shape[0], coord_2.shape[0], coord_3.shape[0]])
+        if coord_1.shape[0] == 1:
+            coord_1 = np.tile(coord_1, N_max)
+        if coord_2.shape[0] == 1:
+            coord_2 = np.tile(coord_2, N_max)
+        if coord_3.shape[0] == 1:
+            coord_3 = np.tile(coord_3, N_max)
+
+        # check for equal length
+        assert np.shape(coord_1) == np.shape(coord_2) == np.shape(coord_3),\
+            "Input must be of equal length."
+
+        points = np.vstack((coord_1, coord_2, coord_3))
+
+        return points
 
 def coordinate_systems(domain=None, convention=None):
     """
@@ -334,7 +226,7 @@ def coordinate_systems(domain=None, convention=None):
 
     Parameters
     ----------
-    domain :string, None, optional
+    domain : string, None, optional
         string to get information about a sepcific system, None to get
         information about all systems. The default is None.
     convention : string, None, optional
@@ -361,7 +253,7 @@ def coordinate_systems(domain=None, convention=None):
     _exist_coordinate_systems(domain, convention)
 
     # get coordinate systems
-    systems, _ = _coordinate_systems()
+    systems = _coordinate_systems()
 
     # print information
     domains = list(systems) if domain == None else [domain]
@@ -380,7 +272,7 @@ def coordinate_systems(domain=None, convention=None):
             print("Coordinates:")
             for nn, coord in enumerate(coords):
                 cur_units = [unit[nn] for unit in units]
-                print("{} [{}]".format(coord, ', '.join(cur_units)))
+                print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
             print('\n' + systems[dd][cc]['description'] + '\n\n')
 
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
@@ -408,14 +300,6 @@ def _coordinate_systems():
                                         ...
                            ['unit_1.N','unit_2.N','unit_3.N']]
         Key 2d - 'description'
-
-    _coordinates: nested dictionary
-        Resolve coordinate systems in which a coordinate ocurrs and the units
-        that a coordinate can have.
-        Key 0  - coordinate
-        Key 1a - domain
-        Key 1b - convention
-        Key 1c - units
 
     """
 
@@ -522,33 +406,12 @@ def _coordinate_systems():
             }
         }
 
-    # resolve membership of coordinates
-    _coordinates = {}
-
-    # loop across domains and conventions
-    for domain in _systems:
-        for convention in _systems[domain]:
-            # loop across coordinates
-            for cc, coord in enumerate(_systems[domain][convention]['coordinates']):
-                # units of the current coordinate
-                cur_units = [u[cc] for u in _systems[domain][convention]['units']]
-                # add coordinate to _coordinates
-                if not coord in _coordinates:
-                    _coordinates[coord]= {}
-                    _coordinates[coord]['domain']     = [domain]
-                    _coordinates[coord]['convention'] = [convention]
-                    _coordinates[coord]['units']      = [cur_units]
-                else:
-                    _coordinates[coord]['domain'].append(domain)
-                    _coordinates[coord]['convention'].append(convention)
-                    _coordinates[coord]['units'].append(cur_units)
-
-    return _systems, _coordinates
+    return _systems
 
 
-def _exist_coordinate_systems(domain=None, convention=None):
+def _exist_coordinate_systems(domain=None, convention=None, unit=None):
     """
-    Check if the requested coordinate system exists.
+    Throw an error if the coordinate system does not exist.
 
     The coordinate systems are defined in _coordinate_systems.
 
@@ -558,26 +421,19 @@ def _exist_coordinate_systems(domain=None, convention=None):
         Sepcify the domain of the coordinate system, e.g., 'cart'.
     convention : string
         The convention of the coordinate system, e.g., 'top_colat'
-
-    Returns
-    -------
-    Assertion error if domain or convention are invalid.
+    units: string
+        The unit of the coordinate system (rad, deg, or met for radians,
+        degrees, or meters)
     """
 
-    # check general validity of input
-    if domain!=None and not isinstance(domain, str):
-        raise ValueError("domain must be None or string")
+    if domain == None and convention != None:
+        raise ValueError('convention must be None if domain is None')
 
-    if convention!=None and not isinstance(convention, str):
-        raise ValueError("convention must be None or string")
-
-    assert(domain == None and convention == None) or\
-          (domain != None and convention != None) or\
-          (domain != None and convention == None), \
-        "domain can not be 'None' if convention is specified."
+    if convention == None and unit != None:
+        raise ValueError('units must be None if convention is None')
 
     # get available coordinate systems
-    systems, _ = _coordinate_systems()
+    systems = _coordinate_systems()
 
     # check if domain exists
     assert domain in systems or domain == None, \
@@ -589,6 +445,15 @@ def _exist_coordinate_systems(domain=None, convention=None):
         assert convention in systems[domain] or convention == None,\
             "{} does not exist in {}. Convention must be one of the following: {}.".\
                 format(convention, domain, ', '.join(list(systems[domain])))
+
+    # check if units exist
+    if unit != None:
+        cur_units = [u[0][0:3] for u in systems[domain][convention]['units']]
+        assert unit in cur_units, "{} does not exist in {} ({}). Units must "\
+            "be one of the following: {}.".format(unit, domain, convention,
+                                                  ', '.join(cur_units))
+
+
 
 
 def _sph2cart(r, theta, phi):
@@ -793,7 +658,7 @@ class Coordinates_copy(object):
             z-coordinate
         """
 
-        super(Coordinates, self).__init__()
+        super(Coordinates_copy, self).__init__()
         x = np.asarray(x, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
         z = np.asarray(z, dtype=np.float64)
@@ -805,223 +670,223 @@ class Coordinates_copy(object):
         self._y = y
         self._z = z
 
-    @property
-    def x(self):
-        """The x-axis coordinates for each point.
-        """
-        return self._x
+    # @property
+    # def x(self):
+    #     """The x-axis coordinates for each point.
+    #     """
+    #     return self._x
 
-    @x.setter
-    def x(self, value):
-        self._x = np.asarray(value, dtype=np.float64)
+    # @x.setter
+    # def x(self, value):
+    #     self._x = np.asarray(value, dtype=np.float64)
 
-    @property
-    def y(self):
-        """The y-axis coordinate for each point."""
-        return self._y
+    # @property
+    # def y(self):
+    #     """The y-axis coordinate for each point."""
+    #     return self._y
 
-    @y.setter
-    def y(self, value):
-        self._y = np.asarray(value, dtype=np.float64)
+    # @y.setter
+    # def y(self, value):
+    #     self._y = np.asarray(value, dtype=np.float64)
 
-    @property
-    def z(self):
-        """The z-axis coordinate for each point."""
-        return self._z
+    # @property
+    # def z(self):
+    #     """The z-axis coordinate for each point."""
+    #     return self._z
 
-    @z.setter
-    def z(self, value):
-        self._z = np.asarray(value, dtype=np.float64)
+    # @z.setter
+    # def z(self, value):
+    #     self._z = np.asarray(value, dtype=np.float64)
 
-    @property
-    def radius(self):
-        """The radius for each point."""
-        return np.sqrt(self.x**2 + self.y**2 + self.z**2)
+    # @property
+    # def radius(self):
+    #     """The radius for each point."""
+    #     return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
-    @radius.setter
-    def radius(self, radius):
-        x, y, z = _sph2cart(
-            np.asarray(radius, dtype=np.float64),
-            self.elevation,
-            self.azimuth)
-        self._x = x
-        self._y = y
-        self._z = z
+    # @radius.setter
+    # def radius(self, radius):
+    #     x, y, z = _sph2cart(
+    #         np.asarray(radius, dtype=np.float64),
+    #         self.elevation,
+    #         self.azimuth)
+    #     self._x = x
+    #     self._y = y
+    #     self._z = z
 
-    @property
-    def azimuth(self):
-        """The azimuth angle for each point."""
-        return np.mod(np.arctan2(self.y, self.x), 2*np.pi)
+    # @property
+    # def azimuth(self):
+    #     """The azimuth angle for each point."""
+    #     return np.mod(np.arctan2(self.y, self.x), 2*np.pi)
 
-    @azimuth.setter
-    def azimuth(self, azimuth):
-        x, y, z = _sph2cart(
-            self.radius,
-            self.elevation,
-            np.asarray(azimuth, dtype=np.float64))
-        self._x = x
-        self._y = y
-        self._z = z
+    # @azimuth.setter
+    # def azimuth(self, azimuth):
+    #     x, y, z = _sph2cart(
+    #         self.radius,
+    #         self.elevation,
+    #         np.asarray(azimuth, dtype=np.float64))
+    #     self._x = x
+    #     self._y = y
+    #     self._z = z
 
-    @property
-    def elevation(self):
-        """The elevation angle for each point"""
-        rad = self.radius
-        return np.arccos(self.z/rad)
+    # @property
+    # def elevation(self):
+    #     """The elevation angle for each point"""
+    #     rad = self.radius
+    #     return np.arccos(self.z/rad)
 
-    @elevation.setter
-    def elevation(self, elevation):
-        x, y, z = _sph2cart(
-            self.radius,
-            np.asarray(elevation, dtype=np.float64),
-            self.azimuth)
-        self._x = x
-        self._y = y
-        self._z = z
+    # @elevation.setter
+    # def elevation(self, elevation):
+    #     x, y, z = _sph2cart(
+    #         self.radius,
+    #         np.asarray(elevation, dtype=np.float64),
+    #         self.azimuth)
+    #     self._x = x
+    #     self._y = y
+    #     self._z = z
 
-    @classmethod
-    def from_cartesian(cls, x, y, z):
-        """Create a Coordinates class object from a set of points in the
-        Cartesian coordinate system.
+    # @classmethod
+    # def from_cartesian(cls, x, y, z):
+    #     """Create a Coordinates class object from a set of points in the
+    #     Cartesian coordinate system.
 
-        Parameters
-        ----------
-        x : ndarray, double
-            x-coordinate
-        y : ndarray, double
-            y-coordinate
-        z : ndarray, double
-            z-coordinate
-        """
-        return Coordinates(x, y, z)
+    #     Parameters
+    #     ----------
+    #     x : ndarray, double
+    #         x-coordinate
+    #     y : ndarray, double
+    #         y-coordinate
+    #     z : ndarray, double
+    #         z-coordinate
+    #     """
+    #     return Coordinates(x, y, z)
 
-    @classmethod
-    def from_spherical(cls, radius, elevation, azimuth):
-        """Create a Coordinates class object from a set of points in the
-        spherical coordinate system.
+    # @classmethod
+    # def from_spherical(cls, radius, elevation, azimuth):
+    #     """Create a Coordinates class object from a set of points in the
+    #     spherical coordinate system.
 
-        Parameters
-        ----------
-        radius : ndarray, double
-            The radius for each point
-        elevation : ndarray, double
-            The elevation angle in radians
-        azimuth : ndarray, double
-            The azimuth angle in radians
-        """
-        radius = np.asarray(radius, dtype=np.double)
-        elevation = np.asarray(elevation, dtype=np.double)
-        azimuth = np.asarray(azimuth, dtype=np.double)
-        x, y, z = _sph2cart(radius, elevation, azimuth)
-        return Coordinates(x, y, z)
+    #     Parameters
+    #     ----------
+    #     radius : ndarray, double
+    #         The radius for each point
+    #     elevation : ndarray, double
+    #         The elevation angle in radians
+    #     azimuth : ndarray, double
+    #         The azimuth angle in radians
+    #     """
+    #     radius = np.asarray(radius, dtype=np.double)
+    #     elevation = np.asarray(elevation, dtype=np.double)
+    #     azimuth = np.asarray(azimuth, dtype=np.double)
+    #     x, y, z = _sph2cart(radius, elevation, azimuth)
+    #     return Coordinates(x, y, z)
 
-    @classmethod
-    def from_array(cls, values, coordinate_system='cartesian'):
-        """Create a Coordinates class object from a set of points given as
-        numpy array
+    # @classmethod
+    # def from_array(cls, values, coordinate_system='cartesian'):
+    #     """Create a Coordinates class object from a set of points given as
+    #     numpy array
 
-        Parameters
-        ----------
-        values : double, ndarray
-            Array with shape Nx3 where N is the number of points.
-        coordinate_system : string
-            Coordinate convention of the given values.
-            Can be Cartesian or spherical coordinates.
-        """
-        coords = Coordinates()
-        if coordinate_system == 'cartesian':
-            coords.cartesian = values
-        elif coordinate_system == 'spherical':
-            coords.spherical = values
-        else:
-            return ValueError("This coordinate system is not supported.")
+    #     Parameters
+    #     ----------
+    #     values : double, ndarray
+    #         Array with shape Nx3 where N is the number of points.
+    #     coordinate_system : string
+    #         Coordinate convention of the given values.
+    #         Can be Cartesian or spherical coordinates.
+    #     """
+    #     coords = Coordinates()
+    #     if coordinate_system == 'cartesian':
+    #         coords.cartesian = values
+    #     elif coordinate_system == 'spherical':
+    #         coords.spherical = values
+    #     else:
+    #         return ValueError("This coordinate system is not supported.")
 
-        return coords
+    #     return coords
 
-    @property
-    def latitude(self):
-        """The latitude angle as used in geospatial coordinates."""
-        return np.pi/2 - self.elevation
+    # @property
+    # def latitude(self):
+    #     """The latitude angle as used in geospatial coordinates."""
+    #     return np.pi/2 - self.elevation
 
-    @property
-    def longitude(self):
-        """The longitude angle as used in geospatial coordinates."""
-        return np.arctan2(self.y, self.x)
+    # @property
+    # def longitude(self):
+    #     """The longitude angle as used in geospatial coordinates."""
+    #     return np.arctan2(self.y, self.x)
 
-    @property
-    def cartesian(self):
-        """Cartesian coordinates of all points."""
-        return np.vstack((self.x, self.y, self.z))
+    # @property
+    # def cartesian(self):
+    #     """Cartesian coordinates of all points."""
+    #     return np.vstack((self.x, self.y, self.z))
 
-    @cartesian.setter
-    def cartesian(self, value):
-        """Cartesian coordinates of all points."""
-        self.x = value[0, :]
-        self.y = value[1, :]
-        self.z = value[2, :]
+    # @cartesian.setter
+    # def cartesian(self, value):
+    #     """Cartesian coordinates of all points."""
+    #     self.x = value[0, :]
+    #     self.y = value[1, :]
+    #     self.z = value[2, :]
 
-    @property
-    def spherical(self):
-        """Spherical coordinates of all points."""
-        return np.vstack((self.radius, self.elevation, self.azimuth))
+    # @property
+    # def spherical(self):
+    #     """Spherical coordinates of all points."""
+    #     return np.vstack((self.radius, self.elevation, self.azimuth))
 
-    @spherical.setter
-    def spherical(self, value):
-        """Cartesian coordinates of all points."""
-        x, y, z = _sph2cart(value[0, :], value[1, :], value[2, :])
-        self.cartesian = np.vstack((x, y, z))
+    # @spherical.setter
+    # def spherical(self, value):
+    #     """Cartesian coordinates of all points."""
+    #     x, y, z = _sph2cart(value[0, :], value[1, :], value[2, :])
+    #     self.cartesian = np.vstack((x, y, z))
 
-    @property
-    def n_points(self):
-        """Return number of points stored in the object"""
-        return self.x.size
+    # @property
+    # def n_points(self):
+    #     """Return number of points stored in the object"""
+    #     return self.x.size
 
-    def find_nearest_point(self, point):
-        """Find the closest Coordinate point to a given Point.
-        The search for the nearest point is performed using the scipy
-        cKDTree implementation.
+    # def find_nearest_point(self, point):
+    #     """Find the closest Coordinate point to a given Point.
+    #     The search for the nearest point is performed using the scipy
+    #     cKDTree implementation.
 
-        Parameters
-        ----------
-        point : Coordinates
-            Point to find nearest neighboring Coordinate
+    #     Parameters
+    #     ----------
+    #     point : Coordinates
+    #         Point to find nearest neighboring Coordinate
 
-        Returns
-        -------
-        distance : ndarray, double
-            Distance between the point and it's closest neighbor
-        index : int
-            Index of the closest point.
+    #     Returns
+    #     -------
+    #     distance : ndarray, double
+    #         Distance between the point and it's closest neighbor
+    #     index : int
+    #         Index of the closest point.
 
-        """
-        kdtree = cKDTree(self.cartesian.T)
-        distance, index = kdtree.query(point.cartesian.T)
+    #     """
+    #     kdtree = cKDTree(self.cartesian.T)
+    #     distance, index = kdtree.query(point.cartesian.T)
 
-        return distance, index
+    #     return distance, index
 
-    def __repr__(self):
-        """repr for Coordinate class
+    # def __repr__(self):
+    #     """repr for Coordinate class
 
-        """
-        if self.n_points == 1:
-            repr_string = "Coordinates of 1 point"
-        else:
-            repr_string = "Coordinates of {} points".format(self.n_points)
-        return repr_string
+    #     """
+    #     if self.n_points == 1:
+    #         repr_string = "Coordinates of 1 point"
+    #     else:
+    #         repr_string = "Coordinates of {} points".format(self.n_points)
+    #     return repr_string
 
-    def __getitem__(self, index):
-        """Return Coordinates at index
-        """
-        return Coordinates(self._x[index], self._y[index], self._z[index])
+    # def __getitem__(self, index):
+    #     """Return Coordinates at index
+    #     """
+    #     return Coordinates(self._x[index], self._y[index], self._z[index])
 
-    def __setitem__(self, index, item):
-        """Set Coordinates at index
-        """
-        self.x[index] = item.x
-        self.y[index] = item.y
-        self.z[index] = item.z
+    # def __setitem__(self, index, item):
+    #     """Set Coordinates at index
+    #     """
+    #     self.x[index] = item.x
+    #     self.y[index] = item.y
+    #     self.z[index] = item.z
 
-    def __len__(self):
-        """Length of the object which is the number of points stored.
-        """
-        return self.n_points
+    # def __len__(self):
+    #     """Length of the object which is the number of points stored.
+    #     """
+    #     return self.n_points

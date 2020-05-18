@@ -13,12 +13,12 @@ import haiopy.coordinates as coordinates
 
 # TODO: Do I have to provide an error string to assert or does pytest show more
 #       detailed information?
+
 def test__coordinate_systems():
-    systems, coords = coordinates._coordinate_systems()
+    systems = coordinates._coordinate_systems()
 
     # check object type
     assert isinstance(systems, dict)
-    assert isinstance(coords, dict)
 
     # check completeness of systems
     for domain in systems:
@@ -32,42 +32,25 @@ def test__coordinate_systems():
             assert "description"       in systems[domain][convention], \
                 "{} ({}) is missing entry 'description'".format(domain, convention)
 
-    # check if units agree across coordinates that appear more than once
-    for coord in coords:
-         # get unique first entry
-        units     = coords[coord]['units'].copy()
-        units_ref = pd.unique(units[0])
-        for cc in range(1, len(units)):
-            # get nex entry for comparison
-            units_test = pd.unique(units[cc])
-            # compare
-            assert all(units_ref == units_test), \
-                "'{}' has units {} in {} ({}) but units {} in {} ({})".\
-                    format(coord, units_ref, \
-                           coords[coord]['domain'][0], \
-                           coords[coord]['convention'][0], \
-                           units_test, \
-                           coords[coord]['domain'][cc], \
-                           coords[coord]['convention'][cc])
-
 def test_exist_coordinate_systems():
 
-    # things that should pass
-    coordinates._exist_coordinate_systems
+    # tests that have to pass
+    coordinates._exist_coordinate_systems()
     coordinates._exist_coordinate_systems('sph')
     coordinates._exist_coordinate_systems('sph', 'side')
+    coordinates._exist_coordinate_systems('sph', 'side', 'rad')
 
-    # things that shoud not pass
-    with raises(AssertionError):
-         coordinates._exist_coordinate_systems(1)
-    with raises(AssertionError):
-         coordinates._exist_coordinate_systems(None, 1)
-    with raises(AssertionError):
-         coordinates._exist_coordinate_systems(None, 'side')
+    # tests that have to fail
     with raises(AssertionError):
          coordinates._exist_coordinate_systems('shp')
+    with raises(ValueError):
+         coordinates._exist_coordinate_systems(None, 'side')
     with raises(AssertionError):
          coordinates._exist_coordinate_systems('sph', 'tight')
+    with raises(AssertionError):
+         coordinates._exist_coordinate_systems('sph', 'side', 'met')
+    with raises(ValueError):
+         coordinates._exist_coordinate_systems(None, None, 'met')
 
 def test_coordinate_systems():
     # if one call passes, all calls should pass because the user input is
@@ -77,22 +60,57 @@ def test_coordinate_systems():
 
 # %% Test Coordinates() class ------------------------------------------------
 
-# def test_coordinates_init():
-#     coords = Coordinates()
-#     assert isinstance(coords, Coordinates)
+def test_coordinates_init():
+    coords = Coordinates()
+    assert isinstance(coords, Coordinates)
 
-# def test_coordinates_init_val():
+def test_coordinates_init_val():
 
-#     coords = Coordinates(1, 0, 0)
-#     assert isinstance(coords, Coordinates)
+    # test input: scalar
+    c1 = 1
+    # test input: 2 element vectors
+    c2 = [1,2]                         # list
+    c3 = np.asarray(c2)                # flat np.array
+    c4 = np.atleast_2d(c2)             # row vector np.array
+    c5 = np.transpose(c4)              # column vector np.array
+    # test input: 3 element vector
+    c6 = [1,2,3]
+    # test input: 2D matrix
+    c7 = np.array([[1,2,3], [1,2,3]])
+    # test input: 3D matrix
+    c8 = np.array([[[1,2,3], [1,2,3]],
+                   [[1,2,3], [1,2,3]]])
 
-# def test_coordinates_init_incomplete():
-#     x = [1, 2]
-#     y = 1
-#     z = 1
-#     with raises(ValueError):
-#         Coordinates(x, y, z)
-#         pytest.fail("Input arrays need to have same dimensions.")
+    # tests that have to path
+    # input scalar coordinate
+    Coordinates(c1, c1, c1)
+    # input list of coordinates
+    Coordinates(c2, c2, c2)
+    # input scalar and lists
+    Coordinates(c1, c2, c2)
+    # input flat np.arrays
+    Coordinates(c3, c3, c3)
+    # input non flat vectors
+    Coordinates(c3, c4, c5)
+
+    # tests that have to fail
+    with raises(AssertionError):
+        Coordinates(c2, c2, c6)
+    with raises(AssertionError):
+        Coordinates(c6, c6, c7)
+    with raises(AssertionError):
+        Coordinates(c2, c2, c8)
+
+def test_coordinates_init_val_and_sys():
+
+    # get list of available coordinate systems
+    systems = coordinates._coordinate_systems()
+
+    # test constructor with all systems
+    for domain in list(systems):
+        for convention in list(systems[domain]):
+            for unit in list(systems[domain][convention]['units']):
+                Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
 
 # def test_coordinates_init_from_cartesian():
 #     x = 1
