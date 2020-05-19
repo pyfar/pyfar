@@ -10,13 +10,23 @@ class Coordinates(object):
 
     To obtain a list of all available coordinate systems, use
 
-    >>> coordinate_systems()
+    >>> coords = Coordinates()          # get an instance of the class
+    >>> coords.list_systems()           # list all systems
+
+    A coordinate system is defined by it's 'domain', 'convention', and 'unit'
+    as given in the list obtained above.
+
+    To enter coordinates into the class, for example use
+
+    >>> coords = Coordinates([0, 1], [1, 0], [1, 1])
+
+    wich will use the default cartesian right handed coordinate system.
     """
 
     # structure ----------------------
     #
     # * cordinate systems are defined in a nested dictionary. The dictionary
-    #   is stored in a pseudo private mudole class def _coordinate_systems.
+    #   is stored in a pseudo private mudole class def _systems.
     #   The dictionary holds the following
     #   - domain: e.g., 'spherical'
     #     - convention: e.g., 'top pole 1' (unique within domain)
@@ -28,7 +38,7 @@ class Coordinates(object):
     #                in meters
     #       - description:
     #
-    # * coordinate_systems(domain='all', convention='all') can be
+    # * list_systems(domain='all', convention='all') can be
     #    used to list all available coordinate systems or a specific subset
     #
     # * The Coordinates(object) has properties that specify the current
@@ -74,7 +84,7 @@ class Coordinates(object):
     # - private property to store current domain, convention, units
 
     def __init__(self, points_1=None, points_2=None, points_3=None,
-                  domain='cart', convention='right', unit='met'):
+                  domain='cart', convention='right', unit=None):
         """
         Init coordinates container.
 
@@ -86,19 +96,23 @@ class Coordinates(object):
             points for the second coordinate
         points_3 : scalar or array like
             points for the third coordinate
+        domain : string
+            domain of the coordinate system (see self.list_systems)
+        convention: string
+             coordinate convention (see self.list_systems)
+        unit: string
+             unit of the coordinate system. By default the first available unit
+             is used (see self.list_systems)
         """
 
         # init emtpy object
         super(Coordinates, self).__init__()
 
-        # check if coordinate system exists
-        _exist_coordinate_systems(domain, convention, unit)
-
-        # save coordinate system to self
-        self._system = self._get_coordinate_system(domain, convention, unit)
+        # set the coordinate system (stored in self._system)
+        self._set_system(domain, convention, unit)
 
         # save coordinates to self
-        self._points = self._check_coordinates(points_1, points_2, points_3)
+        self._points = self._check_points(points_1, points_2, points_3)
 
 
     @property
@@ -108,44 +122,217 @@ class Coordinates(object):
 
     @property
     def coordinates(self):
-        """Return current coordinates and units as sting."""
+        """Return current coordinate names and units as sting."""
         coords = ["{} in {}".format(c, u) for c, u in \
                   zip(self._system['coordinates'], self._system['units'])]
         return '; '.join(coords)
 
 
-    @staticmethod
-    def _get_coordinate_system(domain=None, convention=None, unit=None):
+    def list_systems(self, domain=None, convention=None, unit=None):
         """
-        Get class internal information about current coordinate system.
+        List available coordinate systems on the console.
 
-        Retruns
+        Systems are specified by their 'domain', 'convention' and 'unit'. If
+        multiple units are available for a convention, the unit listed first
+        is the default.
+
+        NOTE: All coordinate systems are described with respect to the right
+        handed cartesian system (domain=cart, convention=right).
+
+        NOTE: All distances are always specified in meters, while angles can be
+        radians or degrees.
+
+
+        Parameters
+        ----------
+        domain : string, None, optional
+            string to get information about a sepcific system, None to get
+            information about all systems. The default is None.
+        convention : string, None, optional
+            string to get information about a sepcific convention, None to get
+            information about all conventions. The default is None.
+        unit : string, None, optional
+            string to get information about a sepcific unit, None to get
+            information about all units. The default is None.
+
+        Returns
         -------
-        system : dict
+        Prints to console.
+
+        Examples
+        --------
+        List information for all coordinate systems
+
+        >>> self.list_systems()
+
+        List information for a specific coordinate system, e.g.,
+
+        >>> self.list_systems('sph', 'top_elev')
 
         """
 
-        # get the system
-        system = _coordinate_systems()
-        system = system[domain][convention]
+        # check user input
+        self._exist_system(domain, convention, unit)
 
-        # get the units
-        for units in system['units']:
-            if unit == units[0][0:3]:
-                break
+        # get coordinate systems
+        systems = self._systems()
 
-        # add class internal keys
-        system['domain'] = domain
-        system['unit']   = unit
-        system['units']  = units
+        # print information
+        domains = list(systems) if domain == None else [domain]
 
-        return system
+        for dd in domains:
+            conventions = list(systems[dd]) if convention == None else [convention]
+            for cc in conventions:
+                # current coordinates
+                coords = systems[dd][cc]['coordinates']
+                # current units
+                if unit != None:
+                    units = [units for units in systems[dd][cc]['units'] \
+                        if unit == units[0][0:3]]
+                else:
+                    units = systems[dd][cc]['units']
+                # key for unit
+                unit_key = [u[0][0:3] for u in units]
+                print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+                print("domain: {}, convention: {}, units: [{}]\n"\
+                      .format(dd, cc, ', '.join(unit_key)))
+                print(systems[dd][cc]['description_short'] + '\n')
+                print("Coordinates:")
+                for nn, coord in enumerate(coords):
+                    cur_units = [u[nn] for u in units]
+                    print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
+                print('\n' + systems[dd][cc]['description'] + '\n\n')
 
 
     @staticmethod
-    def _get_coordinates():
+    def _systems():
         """
-        Get unique list of coordinates and their properties.
+        Get class internal information about all coordinate systems.
+
+        Returns
+        -------
+        _systems : nested dictionary
+            List all available coordinate systems.
+            Key 0  - domain, e.g., 'cart'
+            Key 1  - convention, e.g., 'right'
+            Key 2a - 'short_description': string
+            Key 2b - 'coordinates': ['coordinate_1','coordinate_2','coordinate_3']
+            Key 2c - 'units': [['unit_1.1','unit_2.1','unit_3.1'],
+                                            ...
+                               ['unit_1.N','unit_2.N','unit_3.N']]
+            Key 2d - 'description'
+
+        """
+
+        # define coordinate systems
+        _systems = {
+            "cart":
+                {
+                "right":{
+                    "description_short":
+                        "Right handed cartesian coordinate system.",
+                    "coordinates":
+                        ["x", "y", "z"],
+                    "units":
+                        [["meters", "meters", "meters"]],
+                    "description":
+                        "Right handed cartesian coordinate system with x,y, and."\
+                        "z in meters."}
+                },
+            "sph":
+                {
+                "top_colat":{
+                    "description_short":
+                        "Spherical coordinate system with North and South Pole.",
+                    "coordinates":
+                        ["azimuth", "colatitude", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "The azimuth denotes the counter clockwise angle in the "\
+                        "x/y-plane with 0 pointing in positive x-direction and "\
+                        " pi/2 in positive y-direction. The colatitude denotes "\
+                        "the angle downwards from the z-axis with 0 pointing in "\
+                        "positve z-direction and pi in negative z-direction. The "\
+                        "azimuth and colatitude can be in radians or degrees, "\
+                        "the radius is always in meters."},
+                "top_elev":{
+                    "description_short":
+                        "Spherical coordinate system with North and South Pole.",
+                    "coordinates":
+                        ["azimuth", "elevation", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "The azimuth denotes the counter clockwise angle in the "\
+                        "x/y-plane with 0 pointing in positive x-direction and "\
+                        " pi/2 in positive y-direction. The elevation denotes "\
+                        "the angle upwards and downwards from the x/y-plane with "\
+                        " pi/2 pointing at positive z-direction and -pi/2 "\
+                        "pointing in negative z-direction. The azimuth and "\
+                        "elevation can be in radians or degrees, the radius is "\
+                        " always in meters."},
+                "side":{
+                    "description_short":
+                        "Spherical coordinate system with poles on the y-axis.",
+                    "coordinates":
+                        ["lateral", "polar", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "The lateral angle denotes the angle in the x/y-plane "\
+                        "with pi/2 pointing in positive y-direction and -pi/2 in "\
+                        "negative y-direction. The polar angle denotes the angle "\
+                        "in the x/z-plane with -pi/2 pointing in negative "\
+                        "z-direction, 0 in positive x-direction, pi/2 in "\
+                        "positive z-direction, pi in negative x-direction. The "\
+                        "polar and lateral angle can be in radians and degree, "\
+                        "the radius is always in meters."},
+                "front":{
+                    "description_short":
+                        "Spherical coordinate system with poles on the x-axis.",
+                    "coordinates":
+                        ["phi", "theta", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "Phi denotes the angle measured from the x-axis with 0 "\
+                        "pointing in positve x-direction and pi in negative x-"\
+                        "direction. Theta denotes the angle in the y/z-plane "\
+                        "with 0 pointing in positive z-direction, pi/2 in "\
+                        "positive y-direction, pi in negative z-direction, and "\
+                        "3*pi/2 in negative y-direction. Phi and theta can be "\
+                        "in radians and degrees, the radius is always in meters."}
+                },
+            "cyl":
+                {
+                "top":{
+                    "description_short":
+                        "Cylindrical coordinate system along the z-axis.",
+                    "coordinates":
+                        ["azimuth", "z", "radius_z"],
+                    "units":
+                        [["radians", "meters", "meters"],
+                         ["degrees", "meters", "meters"]],
+                    "description":
+                        "The azimuth denotes the counter clockwise angle in the "\
+                        "x/y-plane with 0 pointing in positive x-direction and "\
+                        " pi/2 in positive y-direction. The heigt is given by "\
+                        "z, and radius_z denotes the radius measured orthogonal "\
+                        "to the z-axis."}
+                }
+            }
+
+        return _systems
+
+
+    def _coordinates(self):
+        """
+        Get unique list of all coordinate names and their properties.
 
         Returns
         -------
@@ -160,7 +347,7 @@ class Coordinates(object):
         """
 
         # get coordinate systems
-        systems = _coordinate_systems()
+        systems = self._systems()
 
         # resolve membership of coordinates
         coords = {}
@@ -186,8 +373,81 @@ class Coordinates(object):
         return coords
 
 
+    def _exist_system(self, domain=None, convention=None, unit=None):
+        """
+        Check if a coordinate system exists and throw an error if it does not.
+
+        The coordinate systems are defined in self._systems.
+
+        Parameters
+        ----------
+        domain : string
+            Sepcify the domain of the coordinate system, e.g., 'cart'.
+        convention : string
+            The convention of the coordinate system, e.g., 'top_colat'
+        units: string
+            The unit of the coordinate system (rad, deg, or met for radians,
+            degrees, or meters)
+        """
+
+        if domain == None and convention != None:
+            raise ValueError('convention must be None if domain is None')
+
+        if convention == None and unit != None:
+            raise ValueError('units must be None if convention is None')
+
+        # get available coordinate systems
+        systems = self._systems()
+
+        # check if domain exists
+        assert domain in systems or domain == None, \
+            "{} does not exist. Domain must be one of the follwing: {}.".\
+                format(domain, ', '.join(list(systems)))
+
+        #check if convention exisits in domain
+        if convention != None:
+            assert convention in systems[domain] or convention == None,\
+                "{} does not exist in {}. Convention must be one of the following: {}.".\
+                    format(convention, domain, ', '.join(list(systems[domain])))
+
+        # check if units exist
+        if unit != None:
+            cur_units = [u[0][0:3] for u in systems[domain][convention]['units']]
+            assert unit in cur_units, "{} does not exist in {} ({}). Units must "\
+                "be one of the following: {}.".format(unit, domain, convention,
+                                                      ', '.join(cur_units))
+
+
+    def _set_system(self, domain=None, convention=None, unit=None):
+        """
+        Store class internal information about current coordinate system.
+        """
+
+        # check if coordinate system exists
+        self._exist_system(domain, convention, unit)
+
+        # get the system
+        system = self._systems()
+        system = system[domain][convention]
+
+        # get the units
+        if unit != None:
+            units = [units for units in system['units']if unit == units[0][0:3]]
+            units = units[0]
+        else:
+            units = system['units'][0]
+            unit  = units[0][0:3]
+
+        # add class internal keys
+        system['domain'] = domain
+        system['unit']   = unit
+        system['units']  = units
+
+        self._system = system
+
+
     @staticmethod
-    def _check_coordinates(points_1, points_2, points_3):
+    def _check_points(points_1, points_2, points_3):
         """
         Check the format of points to be added to Coordinates().
 
@@ -233,239 +493,6 @@ class Coordinates(object):
         points = np.vstack((pts_1, pts_2, pts_3))
 
         return points
-
-def coordinate_systems(domain=None, convention=None):
-    """
-    List coordinate systems.
-
-    Parameters
-    ----------
-    domain : string, None, optional
-        string to get information about a sepcific system, None to get
-        information about all systems. The default is None.
-    convention : string, None, optional
-        string to get information about a sepcific convention, None to get
-        information about all conventions. The default is None.
-
-    Returns
-    -------
-    Prints to console.
-
-    Examples
-    --------
-    List information for all coordinate systems
-
-    >>> coordinate_systems()
-
-    List information for a specific coordinate system, e.g.,
-
-    >>> coordinate_systems('sph', 'top_elev')
-
-    """
-
-    # check user input
-    _exist_coordinate_systems(domain, convention)
-
-    # get coordinate systems
-    systems = _coordinate_systems()
-
-    # print information
-    domains = list(systems) if domain == None else [domain]
-
-    for dd in domains:
-        conventions = list(systems[dd]) if convention == None else [convention]
-        for cc in conventions:
-            # current coordinates and units
-            coords = systems[dd][cc]['coordinates']
-            units  = systems[dd][cc]['units']
-            unit_specifier = [unit[0][0:3] for unit in units]
-            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-            print("domain: {}, convention: {}, units: [{}]\n"\
-                  .format(dd, cc, ', '.join(unit_specifier)))
-            print(systems[dd][cc]['description_short'] + '\n')
-            print("Coordinates:")
-            for nn, coord in enumerate(coords):
-                cur_units = [unit[nn] for unit in units]
-                print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
-            print('\n' + systems[dd][cc]['description'] + '\n\n')
-
-    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("Available coordinate are listed above. They are specified by "\
-          "their 'domain', 'convention' and 'unit'. If multiple units are "\
-          "available for a convention, the unit listed first is the default.")
-    print("NOTE: All coordinate systems are described with respect to the "\
-          "right handed cartesian system (domain=cart, convention=right).")
-
-
-
-def _coordinate_systems():
-    """
-    Get module internal information about available coordinate systems.
-
-    Returns
-    -------
-    _systems : nested dictionary
-        List all available coordinate systems.
-        Key 0  - domain, e.g., 'cart'
-        Key 1  - convention, e.g., 'right'
-        Key 2a - 'short_description': string
-        Key 2b - 'coordinates': ['coordinate_1','coordinate_2','coordinate_3']
-        Key 2c - 'units': [['unit_1.1','unit_2.1','unit_3.1'],
-                                        ...
-                           ['unit_1.N','unit_2.N','unit_3.N']]
-        Key 2d - 'description'
-
-    """
-
-    # define coordinate systems
-    _systems = {
-        "cart":
-            {
-            "right":{
-                "description_short":
-                    "Right handed cartesian coordinate system.",
-                "coordinates":
-                    ["x", "y", "z"],
-                "units":
-                    [["meters", "meters", "meters"]],
-                "description":
-                    "Right handed cartesian coordinate system with x,y, and."\
-                    "z in meters."}
-            },
-        "sph":
-            {
-            "top_colat":{
-                "description_short":
-                    "Spherical coordinate system with North and South Pole.",
-                "coordinates":
-                    ["azimuth", "colatitude", "radius"],
-                "units":
-                    [["radians", "radians", "meters"],
-                     ["degrees", "degrees", "meters"]],
-                "description":
-                    "The azimuth denotes the counter clockwise angle in the "\
-                    "x/y-plane with 0 pointing in positive x-direction and "\
-                    " pi/2 in positive y-direction. The colatitude denotes "\
-                    "the angle downwards from the z-axis with 0 pointing in "\
-                    "positve z-direction and pi in negative z-direction. The "\
-                    "azimuth and colatitude can be in radians or degrees, "\
-                    "the radius is always in meters."},
-            "top_elev":{
-                "description_short":
-                    "Spherical coordinate system with North and South Pole.",
-                "coordinates":
-                    ["azimuth", "elevation", "radius"],
-                "units":
-                    [["radians", "radians", "meters"],
-                     ["degrees", "degrees", "meters"]],
-                "description":
-                    "The azimuth denotes the counter clockwise angle in the "\
-                    "x/y-plane with 0 pointing in positive x-direction and "\
-                    " pi/2 in positive y-direction. The elevation denotes "\
-                    "the angle upwards and downwards from the x/y-plane with "\
-                    " pi/2 pointing at positive z-direction and -pi/2 "\
-                    "pointing in negative z-direction. The azimuth and "\
-                    "elevation can be in radians or degrees, the radius is "\
-                    " always in meters."},
-            "side":{
-                "description_short":
-                    "Spherical coordinate system with poles on the y-axis.",
-                "coordinates":
-                    ["lateral", "polar", "radius"],
-                "units":
-                    [["radians", "radians", "meters"],
-                     ["degrees", "degrees", "meters"]],
-                "description":
-                    "The lateral angle denotes the angle in the x/y-plane "\
-                    "with pi/2 pointing in positive y-direction and -pi/2 in "\
-                    "negative y-direction. The polar angle denotes the angle "\
-                    "in the x/z-plane with -pi/2 pointing in negative "\
-                    "z-direction, 0 in positive x-direction, pi/2 in "\
-                    "positive z-direction, pi in negative x-direction. The "\
-                    "polar and lateral angle can be in radians and degree, "\
-                    "the radius is always in meters."},
-            "front":{
-                "description_short":
-                    "Spherical coordinate system with poles on the x-axis.",
-                "coordinates":
-                    ["phi", "theta", "radius"],
-                "units":
-                    [["radians", "radians", "meters"],
-                     ["degrees", "degrees", "meters"]],
-                "description":
-                    "Phi denotes the angle measured from the x-axis with 0 "\
-                    "pointing in positve x-direction and pi in negative x-"\
-                    "direction. Theta denotes the angle in the y/z-plane "\
-                    "with 0 pointing in positive z-direction, pi/2 in "\
-                    "positive y-direction, pi in negative z-direction, and "\
-                    "3*pi/2 in negative y-direction. Phi and theta can be "\
-                    "in radians and degrees, the radius is always in meters."}
-            },
-        "cyl":
-            {
-            "top":{
-                "description_short":
-                    "Cylindrical coordinate system along the z-axis.",
-                "coordinates":
-                    ["azimuth", "z", "radius_z"],
-                "units":
-                    [["radians", "meters", "meters"],
-                     ["degrees", "meters", "meters"]],
-                "description":
-                    "The azimuth denotes the counter clockwise angle in the "\
-                    "x/y-plane with 0 pointing in positive x-direction and "\
-                    " pi/2 in positive y-direction. The heigt is given by "\
-                    "z, and radius_z denotes the radius measured orthogonal "\
-                    "to the z-axis."}
-            }
-        }
-
-    return _systems
-
-
-def _exist_coordinate_systems(domain=None, convention=None, unit=None):
-    """
-    Throw an error if the coordinate system does not exist.
-
-    The coordinate systems are defined in _coordinate_systems.
-
-    Parameters
-    ----------
-    domain : string
-        Sepcify the domain of the coordinate system, e.g., 'cart'.
-    convention : string
-        The convention of the coordinate system, e.g., 'top_colat'
-    units: string
-        The unit of the coordinate system (rad, deg, or met for radians,
-        degrees, or meters)
-    """
-
-    if domain == None and convention != None:
-        raise ValueError('convention must be None if domain is None')
-
-    if convention == None and unit != None:
-        raise ValueError('units must be None if convention is None')
-
-    # get available coordinate systems
-    systems = _coordinate_systems()
-
-    # check if domain exists
-    assert domain in systems or domain == None, \
-        "{} does not exist. Domain must be one of the follwing: {}.".\
-            format(domain, ', '.join(list(systems)))
-
-    #check if convention exisits in domain
-    if convention != None:
-        assert convention in systems[domain] or convention == None,\
-            "{} does not exist in {}. Convention must be one of the following: {}.".\
-                format(convention, domain, ', '.join(list(systems[domain])))
-
-    # check if units exist
-    if unit != None:
-        cur_units = [u[0][0:3] for u in systems[domain][convention]['units']]
-        assert unit in cur_units, "{} does not exist in {} ({}). Units must "\
-            "be one of the following: {}.".format(unit, domain, convention,
-                                                  ', '.join(cur_units))
 
 
 

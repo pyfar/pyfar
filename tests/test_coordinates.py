@@ -13,9 +13,17 @@ import haiopy.coordinates as coordinates
 
 # TODO: Do I have to provide an error string to assert or does pytest show more
 #       detailed information?
+# TODO: AssertionError vs. ValueError vs. Exception
 
-def test__coordinate_systems():
-    systems = coordinates._coordinate_systems()
+def test_coordinates_init():
+    # get class instance
+    coords = Coordinates()
+    assert isinstance(coords, Coordinates)
+
+def test__systems():
+    # get all coordinate systems
+    coords = Coordinates()
+    systems = coords._systems()
 
     # check object type
     assert isinstance(systems, dict)
@@ -32,34 +40,59 @@ def test__coordinate_systems():
             assert "description"       in systems[domain][convention], \
                 "{} ({}) is missing entry 'description'".format(domain, convention)
 
-def test_exist_coordinate_systems():
+def test__coordinates():
+    # get all coordinate systems
+    c = Coordinates()
+    coords = c._coordinates()
+
+    # check if units agree across coordinates that appear more than once
+    for coord in coords:
+         # get unique first entry
+        units     = coords[coord]['units'].copy()
+        units_ref = pd.unique(units[0])
+        for cc in range(1, len(units)):
+            # get nex entry for comparison
+            units_test = pd.unique(units[cc])
+            # compare
+            assert all(units_ref == units_test), \
+                "'{}' has units {} in {} ({}) but units {} in {} ({})".\
+                    format(coord, units_ref, \
+                           coords[coord]['domain'][0], \
+                           coords[coord]['convention'][0], \
+                           units_test, \
+                           coords[coord]['domain'][cc], \
+                           coords[coord]['convention'][cc])
+
+
+def test_exist_systems():
+    # get class instance
+    coords = Coordinates()
 
     # tests that have to pass
-    coordinates._exist_coordinate_systems()
-    coordinates._exist_coordinate_systems('sph')
-    coordinates._exist_coordinate_systems('sph', 'side')
-    coordinates._exist_coordinate_systems('sph', 'side', 'rad')
+    coords._exist_system()
+    coords._exist_system('sph')
+    coords._exist_system('sph', 'side')
+    coords._exist_system('sph', 'side', 'rad')
 
     # tests that have to fail
     with raises(AssertionError):
-         coordinates._exist_coordinate_systems('shp')
+         coords._exist_system('shp')
     with raises(ValueError):
-         coordinates._exist_coordinate_systems(None, 'side')
+         coords._exist_system(None, 'side')
     with raises(AssertionError):
-         coordinates._exist_coordinate_systems('sph', 'tight')
+         coords._exist_system('sph', 'tight')
     with raises(AssertionError):
-         coordinates._exist_coordinate_systems('sph', 'side', 'met')
+         coords._exist_system('sph', 'side', 'met')
     with raises(ValueError):
-         coordinates._exist_coordinate_systems(None, None, 'met')
+         coords._exist_system(None, None, 'met')
 
-def test_coordinate_systems():
+def test_list_systems():
+    # get class instance
+    coords = Coordinates()
+
     # if one call passes, all calls should pass because the user input is
     # checked by coordinates.exist_coordinate_systems()
-    coordinates.coordinate_systems()
-
-def test_coordinates_init():
-    coords = Coordinates()
-    assert isinstance(coords, Coordinates)
+    coords.list_systems()
 
 def test_coordinates_init_val():
 
@@ -99,9 +132,9 @@ def test_coordinates_init_val():
         Coordinates(c2, c2, c8)
 
 def test_coordinates_init_val_and_sys():
-
+    coords = Coordinates()
     # get list of available coordinate systems
-    systems = coordinates._coordinate_systems()
+    systems = coords._systems()
 
     # test constructor with all systems
     for domain in list(systems):
@@ -117,11 +150,11 @@ def test_coordinates():
     coords = Coordinates([1, 0], [1, 1], [0, 1])
     assert coords.coordinates == 'x in meters; y in meters; z in meters'
 
-
-test__coordinate_systems()
-test_exist_coordinate_systems()
-test_coordinate_systems()
 test_coordinates_init()
+test__systems()
+test__coordinates()
+test_exist_systems()
+test_list_systems()
 test_coordinates_init_val()
 test_coordinates_init_val_and_sys()
 test_num_points()
