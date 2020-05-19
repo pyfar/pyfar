@@ -9,7 +9,7 @@ from haiopy import Coordinates
 import haiopy.coordinates as coordinates
 
 
-# %% Test module functions ----------------------------------------------------
+# %% Test Coordinates() class ------------------------------------------------
 
 # TODO: Do I have to provide an error string to assert or does pytest show more
 #       detailed information?
@@ -56,9 +56,6 @@ def test_coordinate_systems():
     # if one call passes, all calls should pass because the user input is
     # checked by coordinates.exist_coordinate_systems()
     coordinates.coordinate_systems()
-
-
-# %% Test Coordinates() class ------------------------------------------------
 
 def test_coordinates_init():
     coords = Coordinates()
@@ -111,6 +108,25 @@ def test_coordinates_init_val_and_sys():
         for convention in list(systems[domain]):
             for unit in list(systems[domain][convention]['units']):
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
+
+def test_num_points():
+    coords = Coordinates([1, 0], [1, 1], [0, 1])
+    assert coords.num_points == 2
+
+def test_coordinates():
+    coords = Coordinates([1, 0], [1, 1], [0, 1])
+    assert coords.coordinates == 'x in meters; y in meters; z in meters'
+
+
+test__coordinate_systems()
+test_exist_coordinate_systems()
+test_coordinate_systems()
+test_coordinates_init()
+test_coordinates_init_val()
+test_coordinates_init_val_and_sys()
+test_num_points()
+test_coordinates()
+print('\n\n\nAll tests passed')
 
 # def test_coordinates_init_from_cartesian():
 #     x = 1
@@ -317,11 +333,6 @@ def test_coordinates_init_val_and_sys():
 #     npt.assert_allclose(coords._x, x, atol=eps)
 #     npt.assert_allclose(coords._y, y, atol=eps)
 #     npt.assert_allclose(coords._z, z, atol=eps)
-
-
-# def test_n_points():
-#     coords = Coordinates([1, 0], [1, 1], [0, 1])
-#     assert coords.n_points == 2
 
 
 # def test_find_nearest():

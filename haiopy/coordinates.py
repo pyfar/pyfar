@@ -46,7 +46,7 @@ class Coordinates(object):
     #   are valid
     #
     # * The data are
-    #     - stored in sefl._points
+    #     - stored in sefl._coords
     #     - returned by @porpoerty points
     #     - and set by @points.setter points
     #
@@ -73,18 +73,19 @@ class Coordinates(object):
     # - coordinate_dictionary
     # - private property to store current domain, convention, units
 
-    def __init__(self, coord_1=None, coord_2=None, coord_3=None,
+    def __init__(self, points_1=None, points_2=None, points_3=None,
                   domain='cart', convention='right', unit='met'):
-        """Init coordinates container
+        """
+        Init coordinates container.
 
         Attributes
         ----------
-        x : ndarray, double
-            x-coordinate
-        y : ndarray, double
-            y-coordinate
-        z : ndarray, double
-            z-coordinate
+        points_1 : scalar or array like
+            points for the first coordinate
+        points_2 : scalar or array like
+            points for the second coordinate
+        points_3 : scalar or array like
+            points for the third coordinate
         """
 
         # init emtpy object
@@ -97,7 +98,20 @@ class Coordinates(object):
         self._system = self._get_coordinate_system(domain, convention, unit)
 
         # save coordinates to self
-        self._points = self._check_coordinates(coord_1, coord_2, coord_3)
+        self._points = self._check_coordinates(points_1, points_2, points_3)
+
+
+    @property
+    def num_points(self):
+        """Return number of coordinate points stored in the object."""
+        return self._points.shape[-1]
+
+    @property
+    def coordinates(self):
+        """Return current coordinates and units as sting."""
+        coords = ["{} in {}".format(c, u) for c, u in \
+                  zip(self._system['coordinates'], self._system['units'])]
+        return '; '.join(coords)
 
 
     @staticmethod
@@ -173,7 +187,7 @@ class Coordinates(object):
 
 
     @staticmethod
-    def _check_coordinates(coordinate_1, coordinate_2, coordinate_3):
+    def _check_coordinates(points_1, points_2, points_3):
         """
         Check the format of points to be added to Coordinates().
 
@@ -184,39 +198,39 @@ class Coordinates(object):
         """
 
         # cast to numpy array
-        coord_1 = np.asarray(coordinate_1, dtype=np.float64)
-        coord_2 = np.asarray(coordinate_2, dtype=np.float64)
-        coord_3 = np.asarray(coordinate_3, dtype=np.float64)
+        pts_1 = np.asarray(points_1, dtype=np.float64)
+        pts_2 = np.asarray(points_2, dtype=np.float64)
+        pts_3 = np.asarray(points_3, dtype=np.float64)
 
         # check dimensions
-        for cc, coord in enumerate([coord_1, coord_2, coord_3]):
-            assert coord.ndim <= 2, "coordinate_{}.ndim={} but must be <= 2."\
+        for cc, coord in enumerate([pts_1, pts_2, pts_3]):
+            assert coord.ndim <= 2, "points_{}.ndim={} but must be <= 2."\
                 .format(cc+1, coord.ndim)
             if coord.ndim == 2:
                 assert coord.shape[0] == 1 or coord.shape[1] == 1,\
-                    "coordinate_{} has shape {} but should have shape ({},), "\
+                    "points_{} has shape {} but should have shape ({},), "\
                     "({},1), or (1,{}).".format(cc+1, coord.shape, \
                     max(coord.shape), max(coord.shape), max(coord.shape))
 
         # flatten input
-        coord_1 = np.atleast_1d(coord_1.flatten())
-        coord_2 = np.atleast_1d(coord_2.flatten())
-        coord_3 = np.atleast_1d(coord_3.flatten())
+        pts_1 = np.atleast_1d(pts_1.flatten())
+        pts_2 = np.atleast_1d(pts_2.flatten())
+        pts_3 = np.atleast_1d(pts_3.flatten())
 
         # check for scalar entries
-        N_max = max([coord_1.shape[0], coord_2.shape[0], coord_3.shape[0]])
-        if coord_1.shape[0] == 1:
-            coord_1 = np.tile(coord_1, N_max)
-        if coord_2.shape[0] == 1:
-            coord_2 = np.tile(coord_2, N_max)
-        if coord_3.shape[0] == 1:
-            coord_3 = np.tile(coord_3, N_max)
+        N_max = max([pts_1.shape[0], pts_2.shape[0], pts_3.shape[0]])
+        if pts_1.shape[0] == 1:
+            pts_1 = np.tile(pts_1, N_max)
+        if pts_2.shape[0] == 1:
+            pts_2 = np.tile(pts_2, N_max)
+        if pts_3.shape[0] == 1:
+            pts_3 = np.tile(pts_3, N_max)
 
         # check for equal length
-        assert np.shape(coord_1) == np.shape(coord_2) == np.shape(coord_3),\
+        assert np.shape(pts_1) == np.shape(pts_2) == np.shape(pts_3),\
             "Input must be of equal length."
 
-        points = np.vstack((coord_1, coord_2, coord_3))
+        points = np.vstack((pts_1, pts_2, pts_3))
 
         return points
 
@@ -456,219 +470,219 @@ def _exist_coordinate_systems(domain=None, convention=None, unit=None):
 
 
 
-def _sph2cart(r, theta, phi):
-    """Transforms from spherical to Cartesian coordinates.
-    Spherical coordinates follow the common convention in Physics/Mathematics
-    Theta denotes the elevation angle with theta = 0 at the north pole and
-    theta = pi at the south pole.
-    Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
-    direction (counter clockwise rotation).
+# def _sph2cart(r, theta, phi):
+#     """Transforms from spherical to Cartesian coordinates.
+#     Spherical coordinates follow the common convention in Physics/Mathematics
+#     Theta denotes the elevation angle with theta = 0 at the north pole and
+#     theta = pi at the south pole.
+#     Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
+#     direction (counter clockwise rotation).
 
-    .. math::
+#     .. math::
 
-        x = r \\sin(\\theta) \\cos(\\phi),
+#         x = r \\sin(\\theta) \\cos(\\phi),
 
-        y = r \\sin(\\theta) \\sin(\\phi),
+#         y = r \\sin(\\theta) \\sin(\\phi),
 
-        z = r \\cos(\\theta)
+#         z = r \\cos(\\theta)
 
-    Parameters
-    ----------
-    r : ndarray, number
-    theta : ndarray, number
-    phi : ndarray, number
+#     Parameters
+#     ----------
+#     r : ndarray, number
+#     theta : ndarray, number
+#     phi : ndarray, number
 
-    Returns
-    -------
-    x : ndarray, number
-    y : ndarray, number
-    z : ndarray, number
+#     Returns
+#     -------
+#     x : ndarray, number
+#     y : ndarray, number
+#     z : ndarray, number
 
-    """
-    x = r*np.sin(theta)*np.cos(phi)
-    y = r*np.sin(theta)*np.sin(phi)
-    z = r*np.cos(theta)
-    return x, y, z
-
-
-def _cart2sph(x, y, z):
-    """
-    Transforms from Cartesian to spherical coordinates.
-    Spherical coordinates follow the common convention in Physics/Mathematics
-    Theta denotes the elevation angle with theta = 0 at the north pole and
-    theta = pi at the south pole.
-    Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
-    direction (counter clockwise rotation).
-
-    .. math::
-
-        r = \\sqrt{x^2 + y^2 + z^2},
-
-        \\theta = \\arccos(\\frac{z}{r}),
-
-        \\phi = \\arctan(\\frac{y}{x})
-
-        0 < \\theta < \\pi,
-
-        0 < \\phi < 2 \\pi
+#     """
+#     x = r*np.sin(theta)*np.cos(phi)
+#     y = r*np.sin(theta)*np.sin(phi)
+#     z = r*np.cos(theta)
+#     return x, y, z
 
 
-    Notes
-    -----
-    To ensure proper handling of the radiant for the azimuth angle, the arctan2
-    implementatition from numpy is used here.
+# def _cart2sph(x, y, z):
+#     """
+#     Transforms from Cartesian to spherical coordinates.
+#     Spherical coordinates follow the common convention in Physics/Mathematics
+#     Theta denotes the elevation angle with theta = 0 at the north pole and
+#     theta = pi at the south pole.
+#     Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
+#     direction (counter clockwise rotation).
 
-    Parameters
-    ----------
-    x : ndarray, number
-    y : ndarray, number
-    z : ndarray, number
+#     .. math::
 
-    Returns
-    -------
-    r : ndarray, number
-    theta : ndarray, number
-    phi : ndarray, number
+#         r = \\sqrt{x^2 + y^2 + z^2},
 
-    """
-    rad = np.sqrt(x**2 + y**2 + z**2)
-    theta = np.arccos(z/rad)
-    phi = np.mod(np.arctan2(y, x), 2*np.pi)
-    return rad, theta, phi
+#         \\theta = \\arccos(\\frac{z}{r}),
+
+#         \\phi = \\arctan(\\frac{y}{x})
+
+#         0 < \\theta < \\pi,
+
+#         0 < \\phi < 2 \\pi
 
 
-def _cart2latlon(x, y, z):
-    """Transforms from Cartesian coordinates to Geocentric coordinates
+#     Notes
+#     -----
+#     To ensure proper handling of the radiant for the azimuth angle, the arctan2
+#     implementatition from numpy is used here.
 
-    .. math::
+#     Parameters
+#     ----------
+#     x : ndarray, number
+#     y : ndarray, number
+#     z : ndarray, number
 
-        h = \\sqrt{x^2 + y^2 + z^2},
+#     Returns
+#     -------
+#     r : ndarray, number
+#     theta : ndarray, number
+#     phi : ndarray, number
 
-        \\theta = \\pi/2 - \\arccos(\\frac{z}{r}),
-
-        \\phi = \\arctan(\\frac{y}{x})
-
-        -\\pi/2 < \\theta < \\pi/2,
-
-        -\\pi < \\phi < \\pi
-
-    where :math:`h` is the heigth, :math:`\\theta` is the latitude angle
-    and :math:`\\phi` is the longitude angle
-
-    Parameters
-    ----------
-    x : ndarray, number
-        x-axis coordinates
-    y : ndarray, number
-        y-axis coordinates
-    z : ndarray, number
-        z-axis coordinates
-
-    Returns
-    -------
-    height : ndarray, number
-        The radius is rendered as height information
-    latitude : ndarray, number
-        Geocentric latitude angle
-    longitude : ndarray, number
-        Geocentric longitude angle
-
-    """
-    height = np.sqrt(x**2 + y**2 + z**2)
-    latitude = np.pi/2 - np.arccos(z/height)
-    longitude = np.arctan2(y, x)
-    return height, latitude, longitude
+#     """
+#     rad = np.sqrt(x**2 + y**2 + z**2)
+#     theta = np.arccos(z/rad)
+#     phi = np.mod(np.arctan2(y, x), 2*np.pi)
+#     return rad, theta, phi
 
 
-def _latlon2cart(height, latitude, longitude):
-    """Transforms from Geocentric coordinates to Cartesian coordinates
+# def _cart2latlon(x, y, z):
+#     """Transforms from Cartesian coordinates to Geocentric coordinates
 
-    .. math::
+#     .. math::
 
-        x = h \\cos(\\theta) \\cos(\\phi),
+#         h = \\sqrt{x^2 + y^2 + z^2},
 
-        y = h \\cos(\\theta) \\sin(\\phi),
+#         \\theta = \\pi/2 - \\arccos(\\frac{z}{r}),
 
-        z = h \\sin(\\theta)
+#         \\phi = \\arctan(\\frac{y}{x})
 
-        -\\pi/2 < \\theta < \\pi/2,
+#         -\\pi/2 < \\theta < \\pi/2,
 
-        -\\pi < \\phi < \\pi
+#         -\\pi < \\phi < \\pi
 
-    where :math:`h` is the heigth, :math:`\\theta` is the latitude angle
-    and :math:`\\phi` is the longitude angle
+#     where :math:`h` is the heigth, :math:`\\theta` is the latitude angle
+#     and :math:`\\phi` is the longitude angle
 
-    Parameters
-    ----------
-    height : ndarray, number
-        The radius is rendered as height information
-    latitude : ndarray, number
-        Geocentric latitude angle
-    longitude : ndarray, number
-        Geocentric longitude angle
+#     Parameters
+#     ----------
+#     x : ndarray, number
+#         x-axis coordinates
+#     y : ndarray, number
+#         y-axis coordinates
+#     z : ndarray, number
+#         z-axis coordinates
 
-    Returns
-    -------
-    x : ndarray, number
-        x-axis coordinates
-    y : ndarray, number
-        y-axis coordinates
-    z : ndarray, number
-        z-axis coordinates
+#     Returns
+#     -------
+#     height : ndarray, number
+#         The radius is rendered as height information
+#     latitude : ndarray, number
+#         Geocentric latitude angle
+#     longitude : ndarray, number
+#         Geocentric longitude angle
 
-    """
-
-    x = height * np.cos(latitude) * np.cos(longitude)
-    y = height * np.cos(latitude) * np.sin(longitude)
-    z = height * np.sin(latitude)
-
-    return x, y, z
+#     """
+#     height = np.sqrt(x**2 + y**2 + z**2)
+#     latitude = np.pi/2 - np.arccos(z/height)
+#     longitude = np.arctan2(y, x)
+#     return height, latitude, longitude
 
 
+# def _latlon2cart(height, latitude, longitude):
+#     """Transforms from Geocentric coordinates to Cartesian coordinates
 
-class Coordinates_copy(object):
-    """Container class for coordinates in a three-dimensional space, allowing
-    for compact representation and convenient conversion into spherical as well
-    as geospatial coordinate systems.
-    The constructor as well as the internal representation are only
-    available in Cartesian coordinates. To create a Coordinates object from
-    a set of points in spherical coordinates, please use the
-    Coordinates.from_spherical() method.
+#     .. math::
 
-    Attributes
-    ----------
-    x : ndarray, double
-        x-coordinate
-    y : ndarray, double
-        y-coordinate
-    z : ndarray, double
-        z-coordinate
+#         x = h \\cos(\\theta) \\cos(\\phi),
 
-    """
-    def __init__(self, x=None, y=None, z=None):
-        """Init coordinates container
+#         y = h \\cos(\\theta) \\sin(\\phi),
 
-        Attributes
-        ----------
-        x : ndarray, double
-            x-coordinate
-        y : ndarray, double
-            y-coordinate
-        z : ndarray, double
-            z-coordinate
-        """
+#         z = h \\sin(\\theta)
 
-        super(Coordinates_copy, self).__init__()
-        x = np.asarray(x, dtype=np.float64)
-        y = np.asarray(y, dtype=np.float64)
-        z = np.asarray(z, dtype=np.float64)
+#         -\\pi/2 < \\theta < \\pi/2,
 
-        if not np.shape(x) == np.shape(y) == np.shape(z):
-            raise ValueError("Input arrays need to have same dimensions.")
+#         -\\pi < \\phi < \\pi
 
-        self._x = x
-        self._y = y
-        self._z = z
+#     where :math:`h` is the heigth, :math:`\\theta` is the latitude angle
+#     and :math:`\\phi` is the longitude angle
+
+#     Parameters
+#     ----------
+#     height : ndarray, number
+#         The radius is rendered as height information
+#     latitude : ndarray, number
+#         Geocentric latitude angle
+#     longitude : ndarray, number
+#         Geocentric longitude angle
+
+#     Returns
+#     -------
+#     x : ndarray, number
+#         x-axis coordinates
+#     y : ndarray, number
+#         y-axis coordinates
+#     z : ndarray, number
+#         z-axis coordinates
+
+#     """
+
+#     x = height * np.cos(latitude) * np.cos(longitude)
+#     y = height * np.cos(latitude) * np.sin(longitude)
+#     z = height * np.sin(latitude)
+
+#     return x, y, z
+
+
+
+# class Coordinates_copy(object):
+#     """Container class for coordinates in a three-dimensional space, allowing
+#     for compact representation and convenient conversion into spherical as well
+#     as geospatial coordinate systems.
+#     The constructor as well as the internal representation are only
+#     available in Cartesian coordinates. To create a Coordinates object from
+#     a set of points in spherical coordinates, please use the
+#     Coordinates.from_spherical() method.
+
+#     Attributes
+#     ----------
+#     x : ndarray, double
+#         x-coordinate
+#     y : ndarray, double
+#         y-coordinate
+#     z : ndarray, double
+#         z-coordinate
+
+#     """
+#     def __init__(self, x=None, y=None, z=None):
+#         """Init coordinates container
+
+#         Attributes
+#         ----------
+#         x : ndarray, double
+#             x-coordinate
+#         y : ndarray, double
+#             y-coordinate
+#         z : ndarray, double
+#             z-coordinate
+#         """
+
+#         super(Coordinates_copy, self).__init__()
+#         x = np.asarray(x, dtype=np.float64)
+#         y = np.asarray(y, dtype=np.float64)
+#         z = np.asarray(z, dtype=np.float64)
+
+#         if not np.shape(x) == np.shape(y) == np.shape(z):
+#             raise ValueError("Input arrays need to have same dimensions.")
+
+#         self._x = x
+#         self._y = y
+#         self._z = z
 
     # @property
     # def x(self):
