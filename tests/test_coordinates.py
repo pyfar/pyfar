@@ -93,6 +93,7 @@ def test_list_systems():
     # if one call passes, all calls should pass because the user input is
     # checked by coordinates.exist_coordinate_systems()
     coords.list_systems()
+    coords.list_systems(brief=True)
 
 def test_coordinates_init_val():
 
@@ -141,6 +142,16 @@ def test_coordinates_init_val_and_sys():
         for convention in list(systems[domain]):
             for unit in list(systems[domain][convention]['units']):
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
+
+def test_getter_comment():
+    coords = Coordinates(1,1,1, comment='try this')
+    assert coords.comment != 'try this'
+
+def test_setter_comment():
+    coords = Coordinates()
+    coords.comment = 'now this'
+    assert coords.comment != 'now this'
+
 
 def test_num_points():
     coords = Coordinates([1, 0], [1, 1], [0, 1])

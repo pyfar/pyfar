@@ -20,7 +20,8 @@ class Coordinates(object):
 
     >>> coords = Coordinates([0, 1], [1, 0], [1, 1])
 
-    wich will use the default cartesian right handed coordinate system.
+    wich will use the default cartesian right handed coordinate system in
+    meters.
     """
 
     # structure ----------------------
@@ -84,7 +85,7 @@ class Coordinates(object):
     # - private property to store current domain, convention, units
 
     def __init__(self, points_1=None, points_2=None, points_3=None,
-                  domain='cart', convention='right', unit=None):
+                  domain='cart', convention='right', unit=None, comment=None):
         """
         Init coordinates container.
 
@@ -103,17 +104,109 @@ class Coordinates(object):
         unit: string
              unit of the coordinate system. By default the first available unit
              is used (see self.list_systems)
+        comment : str
+            Any comment about the stored coordinate points.
         """
 
         # init emtpy object
         super(Coordinates, self).__init__()
 
-        # set the coordinate system (stored in self._system)
+        # set the coordinate system
+        # (initiate because _set_system returns a copy of the old system used
+        # for coordinate conversions)
+        self._system = {}
         self._set_system(domain, convention, unit)
 
         # save coordinates to self
-        self._points = self._check_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3)
 
+        # save comment
+        self._comment = comment
+
+
+    def get_sph(self, convention='top_colat', unit='rad'):
+        """
+        Get coordinate points in spherical coordinate system.
+
+        Parameters
+        ----------
+        convention : string, optional
+            convention in which the coordinate points are returned. The default
+            is 'top_colat'.
+        unit : string, optional
+            unit in which the coordinate points are returned. The default is
+            'rad'.
+
+        Returns
+        -------
+        points np.array
+            array that holds the coordinate points. points[...,0] hold the
+            points for the first coordinate, points[...,1] the points for the
+            second, and points[...,2] the points for the third coordinate.
+
+        Note
+        ----
+        The current coordinate system can be seen with
+
+        >>> c = Coordinates()
+        >>> c.system
+
+        """
+
+        # set new system and get odl one
+        old_system = self._set_system('sph', convention, unit)
+
+        # return if system has not changed
+        if self._system == old_system:
+            return self._points
+
+        # convert to cartesian system
+        if not(old_system['domain']=='cart' and old_system['convention']=='right'):
+            raise Exception('Conversion to cartesion coordinated not implemented yet.')
+        else:
+            pts = self._points
+
+        # convert to spherical
+        # top polar systems
+        if convention[0:3] == 'top':
+            pts_1, pts_2, pts_3 = cart2sph(pts[...,0], pts[...,1], pts[...,2])
+            if convention == 'top_elev':
+                pts_2 = np.pi/2 - pts_2
+
+        # side polar system
+        # (ideal for simple converions from Robert Baumgartner and SOFA_API)
+        if convention == 'side':
+            pts_2, pts_1, pts_3 = cart2sph(pts[...,0], pts[...,2], -pts[...,1])
+
+            # range angles
+            pts_1 = pts_1 - np.pi/2
+            pts_2 = np.mod(pts_2 + np.pi/2, 2*np.pi) - np.pi/2
+
+        # front polar system
+        if convention == 'front':
+            pts_1, pts_2, pts_3 = cart2sph(pts[...,2], pts[...,1], pts[...,0])
+
+
+        # convert to degrees
+        if self._system['unit'] == 'deg':
+            pts_1 = pts_1 / np.pi*180
+            pts_2 = pts_2 / np.pi*180
+
+        # stack and return
+        self._points = np.hstack((pts_1, pts_2, pts_3))
+        return self._points
+
+
+    @property
+    def comment(self):
+        """Comment for the data stored in the object."""
+        print('getter')
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        print('setter')
+        self._comment = value
 
     @property
     def num_points(self):
@@ -127,8 +220,22 @@ class Coordinates(object):
                   zip(self._system['coordinates'], self._system['units'])]
         return '; '.join(coords)
 
+    @property
+    def system(self):
+        """
+        Print information about current coordinate system.
 
-    def list_systems(self, domain=None, convention=None, unit=None):
+        Returns
+        -------
+        None.
+
+        """
+        self.list_systems(self._system['domain'], self._system['convention'],
+                          self._system['unit'])
+        return None
+
+
+    def list_systems(self, domain=None, convention=None, unit=None, brief=False):
         """
         List available coordinate systems on the console.
 
@@ -136,11 +243,11 @@ class Coordinates(object):
         multiple units are available for a convention, the unit listed first
         is the default.
 
-        NOTE: All coordinate systems are described with respect to the right
-        handed cartesian system (domain=cart, convention=right).
-
-        NOTE: All distances are always specified in meters, while angles can be
-        radians or degrees.
+        .. note::
+           All coordinate systems are described with respect to the right
+           handed cartesian system (domain='cart', convention='right').
+           Distances are always specified in meters, while angles can be
+           radians or degrees (unit='rad' or 'deg').
 
 
         Parameters
@@ -154,6 +261,9 @@ class Coordinates(object):
         unit : string, None, optional
             string to get information about a sepcific unit, None to get
             information about all units. The default is None.
+        brief . boolean
+            Will only list the domains, conventions and units if True. The
+            default is False.
 
         Returns
         -------
@@ -167,7 +277,7 @@ class Coordinates(object):
 
         List information for a specific coordinate system, e.g.,
 
-        >>> self.list_systems('sph', 'top_elev')
+        >>> self.list_systems('sph', 'top_elev', 'deg')
 
         """
 
@@ -180,28 +290,47 @@ class Coordinates(object):
         # print information
         domains = list(systems) if domain == None else [domain]
 
-        for dd in domains:
-            conventions = list(systems[dd]) if convention == None else [convention]
-            for cc in conventions:
-                # current coordinates
-                coords = systems[dd][cc]['coordinates']
-                # current units
-                if unit != None:
-                    units = [units for units in systems[dd][cc]['units'] \
-                        if unit == units[0][0:3]]
-                else:
-                    units = systems[dd][cc]['units']
-                # key for unit
-                unit_key = [u[0][0:3] for u in units]
-                print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-                print("domain: {}, convention: {}, units: [{}]\n"\
-                      .format(dd, cc, ', '.join(unit_key)))
-                print(systems[dd][cc]['description_short'] + '\n')
-                print("Coordinates:")
-                for nn, coord in enumerate(coords):
-                    cur_units = [u[nn] for u in units]
-                    print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
-                print('\n' + systems[dd][cc]['description'] + '\n\n')
+        if brief:
+            print('domain, convention, unit')
+            print('- - - - - - - - - - - - -')
+            for dd in domains:
+                conventions = list(systems[dd]) if convention == None else [convention]
+                for cc in conventions:
+                    # current coordinates
+                    coords = systems[dd][cc]['coordinates']
+                    # current units
+                    if unit != None:
+                        units = [units for units in systems[dd][cc]['units'] \
+                            if unit == units[0][0:3]]
+                    else:
+                        units = systems[dd][cc]['units']
+                    # key for unit
+                    unit_key = [u[0][0:3] for u in units]
+                    print("{}, {}, [{}]"\
+                          .format(dd, cc, ', '.join(unit_key)))
+        else:
+            for dd in domains:
+                conventions = list(systems[dd]) if convention == None else [convention]
+                for cc in conventions:
+                    # current coordinates
+                    coords = systems[dd][cc]['coordinates']
+                    # current units
+                    if unit != None:
+                        units = [units for units in systems[dd][cc]['units'] \
+                            if unit == units[0][0:3]]
+                    else:
+                        units = systems[dd][cc]['units']
+                    # key for unit
+                    unit_key = [u[0][0:3] for u in units]
+                    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+                    print("domain: {}, convention: {}, unit: [{}]\n"\
+                          .format(dd, cc, ', '.join(unit_key)))
+                    print(systems[dd][cc]['description_short'] + '\n')
+                    print("Coordinates:")
+                    for nn, coord in enumerate(coords):
+                        cur_units = [u[nn] for u in units]
+                        print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
+                    print('\n' + systems[dd][cc]['description'] + '\n\n')
 
 
     @staticmethod
@@ -300,13 +429,14 @@ class Coordinates(object):
                         [["radians", "radians", "meters"],
                          ["degrees", "degrees", "meters"]],
                     "description":
-                        "Phi denotes the angle measured from the x-axis with 0 "\
-                        "pointing in positve x-direction and pi in negative x-"\
-                        "direction. Theta denotes the angle in the y/z-plane "\
-                        "with 0 pointing in positive z-direction, pi/2 in "\
-                        "positive y-direction, pi in negative z-direction, and "\
-                        "3*pi/2 in negative y-direction. Phi and theta can be "\
-                        "in radians and degrees, the radius is always in meters."}
+                        "Phi denotes the angle in the y/z-plane with 0 "\
+                        "pointing in positive z-direction, pi/2 in positive "
+                        "y-direction, pi in negative z-direction, and 3*pi/2 "\
+                        "in negative y-direction. Theta denotes the angle "\
+                        "measured from the x-axis with 0 pointing in positve "\
+                        "x-direction and pi in negative x-direction. Phi and "\
+                        "theta can be in radians and degrees, the radius is "\
+                        "always in meters."}
                 },
             "cyl":
                 {
@@ -426,7 +556,10 @@ class Coordinates(object):
         # check if coordinate system exists
         self._exist_system(domain, convention, unit)
 
-        # get the system
+        # get the old system
+        system_old = self._system.copy()
+
+        # get the new system
         system = self._systems()
         system = system[domain][convention]
 
@@ -439,15 +572,17 @@ class Coordinates(object):
             unit  = units[0][0:3]
 
         # add class internal keys
-        system['domain'] = domain
-        system['unit']   = unit
-        system['units']  = units
+        system['domain']     = domain
+        system['convention'] = convention
+        system['unit']       = unit
+        system['units']      = units
 
         self._system = system
 
+        return system_old
 
-    @staticmethod
-    def _check_points(points_1, points_2, points_3):
+
+    def _set_points(self, points_1, points_2, points_3):
         """
         Check the format of points to be added to Coordinates().
 
@@ -490,11 +625,9 @@ class Coordinates(object):
         assert np.shape(pts_1) == np.shape(pts_2) == np.shape(pts_3),\
             "Input must be of equal length."
 
-        points = np.vstack((pts_1, pts_2, pts_3))
+        points = np.hstack((pts_1, pts_2, pts_3))
 
-        return points
-
-
+        self._points = points
 
 
 # def _sph2cart(r, theta, phi):
@@ -532,51 +665,53 @@ class Coordinates(object):
 #     return x, y, z
 
 
-# def _cart2sph(x, y, z):
-#     """
-#     Transforms from Cartesian to spherical coordinates.
-#     Spherical coordinates follow the common convention in Physics/Mathematics
-#     Theta denotes the elevation angle with theta = 0 at the north pole and
-#     theta = pi at the south pole.
-#     Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
-#     direction (counter clockwise rotation).
+def cart2sph(x, y, z):
+    """
+    Transforms from Cartesian to spherical coordinates.
+    Spherical coordinates follow the common convention in Physics/Mathematics
+    The colatitude is measured downwards from the z-axis and is 0 at the North
+    Pole and pi at the South Pole.
+    The azimuth is 0 at positive x-direction and pi/2 at positive y-direction
+    (counter clockwise rotation).
 
-#     .. math::
+    .. math::
 
-#         r = \\sqrt{x^2 + y^2 + z^2},
+        radius = \\sqrt{x^2 + y^2 + z^2},
 
-#         \\theta = \\arccos(\\frac{z}{r}),
+        colatitude = \\arccos(\\frac{z}{r}),
 
-#         \\phi = \\arctan(\\frac{y}{x})
+        azimuth = \\arctan(\\frac{y}{x})
 
-#         0 < \\theta < \\pi,
+        0 < colatitude < \\pi,
 
-#         0 < \\phi < 2 \\pi
+        0 < azimuth < 2 \\pi
 
 
-#     Notes
-#     -----
-#     To ensure proper handling of the radiant for the azimuth angle, the arctan2
-#     implementatition from numpy is used here.
+    Notes
+    -----
+    To ensure proper handling of the radiant for the azimuth angle, the arctan2
+    implementatition from numpy is used here.
 
-#     Parameters
-#     ----------
-#     x : ndarray, number
-#     y : ndarray, number
-#     z : ndarray, number
+    Parameters
+    ----------
+    x : ndarray, number
+        x-coordinate of right handed cartesion system
+    y : ndarray, number
+        y-coordinate of right handed cartesion system
+    z : ndarray, number
+        z-coordinate of right handed cartesion system
 
-#     Returns
-#     -------
-#     r : ndarray, number
-#     theta : ndarray, number
-#     phi : ndarray, number
+    Returns
+    -------
+    azimuth : ndarray, number
+    colatitude : ndarray, number
+    radius : ndarray, number
 
-#     """
-#     rad = np.sqrt(x**2 + y**2 + z**2)
-#     theta = np.arccos(z/rad)
-#     phi = np.mod(np.arctan2(y, x), 2*np.pi)
-#     return rad, theta, phi
-
+    """
+    radius = np.sqrt(x**2 + y**2 + z**2)
+    colatitude = np.arccos(z/radius)
+    azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
+    return azimuth, colatitude, radius
 
 # def _cart2latlon(x, y, z):
 #     """Transforms from Cartesian coordinates to Geocentric coordinates

@@ -8,6 +8,7 @@ Created on Wed May  6 19:46:11 2020
 
 import numpy as np
 import haiopy
+from haiopy import Coordinates
 
 # %% General -----------------------------------------------------------------
 # TODO: What is the idea of Audio()?
@@ -144,6 +145,17 @@ c.cartesian
 # - self.slice: return slices, e.g., horizontal plane within given tolerance
 #   (see AKsubGrid from AKtools)
 d, i = c.find_nearest_point(haiopy.Coordinates([0], [.7], [0]))
+
+
+# %% tmp testing
+
+c = Coordinates( 1, 0, 0)
+# c = Coordinates( 0, 1, 0)
+# c = Coordinates(-1, 0, 0)
+# c = Coordinates( 0,-1, 0)
+# c = Coordinates( 0, 0, 1)
+# c = Coordinates( 0, 0,-1)
+print(c.get_sph('front', 'deg'))
 
 
 # %% Orientation -------------------------------------------------------------
