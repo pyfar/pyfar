@@ -124,6 +124,85 @@ class Coordinates(object):
         self._comment = comment
 
 
+    def get_cart(self, convention='right', unit='met'):
+        """
+        Get coordinate points in cartesian coordinate system.
+
+        Parameters
+        ----------
+        convention : string, optional
+            convention in which the coordinate points are returned. The default
+            is 'right'.
+        unit : string, optional
+            unit in which the coordinate points are returned. The default is
+            'met'.
+
+        Returns
+        -------
+        points np.array
+            array that holds the coordinate points. points[...,0] hold the
+            points for the first coordinate, points[...,1] the points for the
+            second, and points[...,2] the points for the third coordinate.
+
+        Note
+        ----
+        The current and all availanle coordinate systems can be seen with
+
+        >>> c = Coordinates()
+        >>> c.system
+        >>> c.list_systems()
+
+        """
+
+        # set new system and get old one
+        old_system = self._set_system('cart', convention, unit)
+
+        # return if system has not changed
+        if self._system == old_system:
+            return self._points
+
+        # convert to radians
+        pts = self._points
+        for nn, unit in enumerate(old_system['units']):
+            if unit == 'degrees':
+                pts[...,nn] = pts[...,nn] / 180*np.pi
+
+        # convert to cartesian
+        # spherical coordinate systems
+        if old_system['domain'] == 'sph':
+            if old_system['convention'] == 'top_colat':
+                x, y, z = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+
+            elif old_system['convention'] == 'top_elev':
+                x, y, z = sph2cart(pts[...,0], np.pi/2-pts[...,1], pts[...,2])
+
+            elif old_system['convention'] == 'side':
+                x, z, y = sph2cart(pts[...,1], np.pi/2-pts[...,0], pts[...,2])
+
+            elif old_system['convention'] == 'front':
+                z, y, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+
+            else:
+                raise Exception("Conversion for {} is not implemented.".\
+                             format(old_system['convention']))
+
+        # cylindrical coordinate systems
+        elif old_system['domain'] == 'cyl':
+            if old_system['convention'] == 'top':
+                x, y, z = cyl2cart(pts[...,0], pts[...,1], pts[...,2])
+            else:
+                raise Exception("Conversion for {} is not implemented.".\
+                             format(old_system['convention']))
+        else:
+            raise Exception("Conversion for {} is not implemented.".\
+                             format(convention))
+
+
+        # stack and return
+        self._points = np.hstack((x, y, z))
+        return self._points
+
+
     def get_sph(self, convention='top_colat', unit='rad'):
         """
         Get coordinate points in spherical coordinate system.
@@ -146,23 +225,30 @@ class Coordinates(object):
 
         Note
         ----
-        The current coordinate system can be seen with
+        The current and all availanle coordinate systems can be seen with
 
         >>> c = Coordinates()
         >>> c.system
+        >>> c.list_systems()
 
         """
 
-        # set new system and get odl one
+        # set new system and get old one
         old_system = self._set_system('sph', convention, unit)
+        new_system = self._system
 
         # return if system has not changed
-        if self._system == old_system:
+        if new_system == old_system:
             return self._points
 
-        # convert to cartesian system
+        # convert to cartesian system first
         if not(old_system['domain']=='cart' and old_system['convention']=='right'):
-            raise Exception('Conversion to cartesion coordinated not implemented yet.')
+            # reset coordinate system (was changed above)
+            self._system = old_system
+            # get cartesian coordinates
+            pts = self.get_cart('right', 'met')
+            # set new coordinate system again
+            self._system = new_system
         else:
             pts = self._points
 
@@ -175,7 +261,7 @@ class Coordinates(object):
 
         # side polar system
         # (ideal for simple converions from Robert Baumgartner and SOFA_API)
-        if convention == 'side':
+        elif convention == 'side':
             pts_2, pts_1, pts_3 = cart2sph(pts[...,0], pts[...,2], -pts[...,1])
 
             # range angles
@@ -183,14 +269,86 @@ class Coordinates(object):
             pts_2 = np.mod(pts_2 + np.pi/2, 2*np.pi) - np.pi/2
 
         # front polar system
-        if convention == 'front':
+        elif convention == 'front':
             pts_1, pts_2, pts_3 = cart2sph(pts[...,2], pts[...,1], pts[...,0])
+
+        else:
+            raise Exception("Conversion for {} is not implemented.".\
+                             format(convention))
 
 
         # convert to degrees
         if self._system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi*180
             pts_2 = pts_2 / np.pi*180
+
+        # stack and return
+        self._points = np.hstack((pts_1, pts_2, pts_3))
+        return self._points
+
+
+    def get_cyl(self, convention='top', unit='rad'):
+        """
+        Get coordinate points in cylindrical coordinate system.
+
+        Parameters
+        ----------
+        convention : string, optional
+            convention in which the coordinate points are returned. The default
+            is 'top'.
+        unit : string, optional
+            unit in which the coordinate points are returned. The default is
+            'rad'.
+
+        Returns
+        -------
+        points np.array
+            array that holds the coordinate points. points[...,0] hold the
+            points for the first coordinate, points[...,1] the points for the
+            second, and points[...,2] the points for the third coordinate.
+
+        Note
+        ----
+        The current and all availanle coordinate systems can be seen with
+
+        >>> c = Coordinates()
+        >>> c.system
+        >>> c.list_systems()
+
+        """
+
+        # set new system and get old one
+        old_system = self._set_system('cyl', convention, unit)
+        new_system = self._system
+
+        # return if system has not changed
+        if new_system == old_system:
+            return self._points
+
+        # convert to cartesian system first
+        if not(old_system['domain']=='cart' and old_system['convention']=='right'):
+            # reset coordinate system (was changed above)
+            self._system = old_system
+            # get cartesian coordinates
+            pts = self.get_cart('right', 'met')
+            # set new coordinate system again
+            self._system = new_system
+        else:
+            pts = self._points
+
+        # convert to spherical
+        # top polar systems
+        if convention == 'top':
+            pts_1, pts_2, pts_3 = cart2cyl(pts[...,0], pts[...,1], pts[...,2])
+
+        else:
+            raise Exception("Conversion for {} is not implemented.".\
+                             format(convention))
+
+
+        # convert to degrees
+        if self._system['unit'] == 'deg':
+            pts_1 = pts_1 / np.pi*180
 
         # stack and return
         self._points = np.hstack((pts_1, pts_2, pts_3))
@@ -630,88 +788,219 @@ class Coordinates(object):
         self._points = points
 
 
-# def _sph2cart(r, theta, phi):
-#     """Transforms from spherical to Cartesian coordinates.
-#     Spherical coordinates follow the common convention in Physics/Mathematics
-#     Theta denotes the elevation angle with theta = 0 at the north pole and
-#     theta = pi at the south pole.
-#     Phi is the azimuth angle counting from phi = 0 at the x-axis in positive
-#     direction (counter clockwise rotation).
-
-#     .. math::
-
-#         x = r \\sin(\\theta) \\cos(\\phi),
-
-#         y = r \\sin(\\theta) \\sin(\\phi),
-
-#         z = r \\cos(\\theta)
-
-#     Parameters
-#     ----------
-#     r : ndarray, number
-#     theta : ndarray, number
-#     phi : ndarray, number
-
-#     Returns
-#     -------
-#     x : ndarray, number
-#     y : ndarray, number
-#     z : ndarray, number
-
-#     """
-#     x = r*np.sin(theta)*np.cos(phi)
-#     y = r*np.sin(theta)*np.sin(phi)
-#     z = r*np.cos(theta)
-#     return x, y, z
-
-
 def cart2sph(x, y, z):
     """
     Transforms from Cartesian to spherical coordinates.
-    Spherical coordinates follow the common convention in Physics/Mathematics
+
+    Spherical coordinates follow the common convention in Physics/Mathematics.
     The colatitude is measured downwards from the z-axis and is 0 at the North
-    Pole and pi at the South Pole.
-    The azimuth is 0 at positive x-direction and pi/2 at positive y-direction
-    (counter clockwise rotation).
+    Pole and pi at the South Pole. The azimuth is 0 at positive x-direction
+    and pi/2 at positive y-direction (counter clockwise rotation).
+
+    Cartesian coordinates follow the right hand rule.
 
     .. math::
 
-        radius = \\sqrt{x^2 + y^2 + z^2},
+        azimuth &= \\arctan(\\frac{y}{x}),
 
-        colatitude = \\arccos(\\frac{z}{r}),
+        colatitude &= \\arccos(\\frac{z}{r}),
 
-        azimuth = \\arctan(\\frac{y}{x})
+        radius &= \\sqrt{x^2 + y^2 + z^2}
 
-        0 < colatitude < \\pi,
+    .. math::
+
+        0 < azimuth < 2 \\pi,
+
+        0 < colatitude < \\pi
+
+
+    Notes
+    -----
+    To ensure proper handling of the azimuth angle, the arctan2 implementation
+    from numpy is used.
+
+    Parameters
+    ----------
+    x : ndarray, number
+
+    y : ndarray, number
+
+    z : ndarray, number
+
+    Returns
+    -------
+    azimuth : ndarray, number
+
+    colatitude : ndarray, number
+
+    radius : ndarray, number
+    """
+    radius = np.sqrt(x**2 + y**2 + z**2)
+    colatitude = np.arccos(z/radius)
+    azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
+    return azimuth, colatitude, radius
+
+
+def sph2cart(azimuth, colatitude, radius):
+    """
+    Transforms from spherical to Cartesian coordinates.
+
+    Spherical coordinates follow the common convention in Physics/Mathematics.
+    The colatitude is measured downwards from the z-axis and is 0 at the North
+    Pole and pi at the South Pole. The azimuth is 0 at positive x-direction
+    and pi/2 at positive y-direction (counter clockwise rotation).
+
+    Cartesian coordinates follow the right hand rule.
+
+    .. math::
+
+        x &= radius * \\sin(colatitude) * \\cos(azimuth),
+
+        y &= radius * \\sin(colatitude) * \\sin(azimuth),
+
+        z &= radius * \\cos(colatitude)
+
+    .. math::
+
+        0 < azimuth < 2 \\pi
+
+        0 < colatitude < \\pi
+
+
+    Parameters
+    ----------
+    azimuth : ndarray, number
+
+    colatitude : ndarray, number
+
+    radius : ndarray, number
+
+    Returns
+    -------
+    x : ndarray, number
+
+    y : ndarray, number
+
+    z : ndarray, number
+    """
+    r_sin_cola = radius * np.sin(colatitude)
+    x = r_sin_cola * np.cos(azimuth)
+    y = r_sin_cola * np.sin(azimuth)
+    z = radius * np.cos(colatitude)
+
+    return x, y, z
+
+
+def cart2cyl(x, y, z):
+    """
+    Transforms from Cartesian to cylindrical coordinates.
+
+    Cylindrical coordinates follow the convention that the azimuth is 0 at
+    positive x-direction and pi/2 at positive y-direction (counter clockwise
+    rotation). The height is identical to the z-coordinate and the radius is
+    measured orthogonal from the z-axis.
+
+    Cartesian coordinates follow the right hand rule.
+
+    .. math::
+
+        azimuth &= \\arctan(\\frac{y}{x}),
+
+        height &= z,
+
+        radius &= \\sqrt{x^2 + y^2},
+
+    .. math::
 
         0 < azimuth < 2 \\pi
 
 
     Notes
     -----
-    To ensure proper handling of the radiant for the azimuth angle, the arctan2
-    implementatition from numpy is used here.
+    To ensure proper handling of the azimuth angle, the arctan2 implementation
+    from numpy is used.
 
     Parameters
     ----------
     x : ndarray, number
-        x-coordinate of right handed cartesion system
+
     y : ndarray, number
-        y-coordinate of right handed cartesion system
+
     z : ndarray, number
-        z-coordinate of right handed cartesion system
 
     Returns
     -------
     azimuth : ndarray, number
-    colatitude : ndarray, number
+
+    height : ndarray, number
+
+    radius : ndarray, number
+    """
+
+    azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
+    try:
+        height = z.copy()
+    except:
+        height = z
+    radius  = np.sqrt(x**2 + y**2)
+
+    return azimuth, height, radius
+
+
+def cyl2cart(azimuth, height, radius):
+    """
+    Transforms from cylindrical to Cartesian coordinates.
+
+    Cylindrical coordinates follow the convention that the azimuth is 0 at
+    positive x-direction and pi/2 at positive y-direction (counter clockwise
+    rotation). The height is identical to the z-coordinate and the radius is
+    measured orthogonal from the z-axis.
+
+    Cartesian coordinates follow the right hand rule.
+
+    .. math::
+
+        x &= radius * \\cos(azimuth),
+
+        y &= radius * \\sin(azimuth),
+
+        z &= height
+
+    .. math::
+
+        0 < azimuth < 2 \\pi
+
+
+    Notes
+    -----
+    To ensure proper handling of the azimuth angle, the arctan2 implementation
+    from numpy is used.
+
+    Parameters
+    ----------
+    azimuth : ndarray, number
+
+    height : ndarray, number
+
     radius : ndarray, number
 
+    Returns
+    -------
+    x : ndarray, number
+
+    y : ndarray, number
+
+    z : ndarray, number
     """
-    radius = np.sqrt(x**2 + y**2 + z**2)
-    colatitude = np.arccos(z/radius)
-    azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
-    return azimuth, colatitude, radius
+
+    x = radius * np.cos(azimuth)
+    y = radius * np.sin(azimuth)
+    try:
+        z = height.copy()
+    except:
+        z = height
+
+    return x, y, z
 
 # def _cart2latlon(x, y, z):
 #     """Transforms from Cartesian coordinates to Geocentric coordinates

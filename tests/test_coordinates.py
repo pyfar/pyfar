@@ -11,6 +11,7 @@ import haiopy.coordinates as coordinates
 
 # %% Test Coordinates() class ------------------------------------------------
 
+# TODO: tests for get_cart, get_sph, get_cyl, and x2y
 # TODO: Do I have to provide an error string to assert or does pytest show more
 #       detailed information?
 # TODO: AssertionError vs. ValueError vs. Exception

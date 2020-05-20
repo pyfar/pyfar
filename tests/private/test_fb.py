@@ -155,7 +155,8 @@ c = Coordinates( 1, 0, 0)
 # c = Coordinates( 0,-1, 0)
 # c = Coordinates( 0, 0, 1)
 # c = Coordinates( 0, 0,-1)
-print(c.get_sph('front', 'deg'))
+print(c.get_cyl('top', 'deg'))
+print(c.get_cart())
 
 
 # %% Orientation -------------------------------------------------------------
