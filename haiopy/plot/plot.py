@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 import numpy as np
-from .dsp import *
+from .. import dsp
 
 from ._interaction import (
     AxisModifierLinesLinYAxis,
@@ -231,8 +233,10 @@ def plot_phase(signal, deg=False, unwrap=False, **kwargs):
 
     return axes
 
-def plot_freq_phase(signal, log_prefix=20, log_reference=1, deg=False, unwrap=False, **kwargs):
-    """Plot the magnitude and phase of the spectrum on the positive frequency axis.
+def plot_freq_phase(signal, log_prefix=20, log_reference=1, deg=False,
+                    unwrap=False, **kwargs):
+    """Plot the magnitude and phase of the spectrum on the positive frequency
+    axis.
 
     Parameters
     ----------
@@ -258,11 +262,12 @@ def plot_freq_phase(signal, log_prefix=20, log_reference=1, deg=False, unwrap=Fa
     Examples
     --------
     """
-    # TODO:
+    # TODO: Check possibilities for modular fuction call.
+    # Is it possible to plot existing axes to a new figure?
 
     #fig, axes = plt.subplots(2,1,sharex=True)
     #plot_freq(signal, log_prefix, log_reference, axes[0], **kwargs)
-    #plot_phase(signal, deg, unwrap, axes[0], **kwargs)
+    #plot_phase(signal, deg, unwrap, axes[1], **kwargs)
     #plt.show()
     return axes
 
@@ -272,8 +277,78 @@ def plot_groupdelay(signal, **kwargs): # TODO
 def plot_freq_groupdelay(signal, **kwargs): # TODO
     return
 
-def plot_spectrogram(signal, **kwargs): # TODO
-    return
+def plot_spectrogram(signal, log=False, nodb=False, window='hann',
+                     window_length='auto', window_overlap_fct=0.5,
+                     log_prefix=20, log_reference=1, cut=False,
+                     clim=np.array([]), cmap=mpl.cm.get_cmap(name='magma')):
+    """Plots the spectrogram for a given signal object.
+
+    Parameters
+    ----------
+    signal : Signal object
+        An audio signal object from the haiopy signal class
+    window : String (Default: 'hann')
+        Specifies the window type. See scipy.signal.get_window for details.
+    window_length : integer
+        Specifies the window length. If not set, it will be automatically
+        calculated.
+    window_overlap_fct : double
+        Ratio of points to overlap between fft segments [0...1]
+    log_prefix : integer
+        Prefix for Decibel calculation.
+    log_reference : double
+        Prefix for Decibel calculation.
+    log : Boolean
+        Speciefies, whether the y axis is plotted logarithmically.
+        Defaults to False.
+    nodb : Boolean
+        Speciefies, whether the spectrogram is plotted in decibels.
+        Defaults to False.
+    cut : Boolean
+        Cut results to specified clim vector to avoid sparcles.
+        Defaults to False.
+    clim : np.array()
+        Array of limits for the colorbar [lower, upper].
+    cmap : matplotlib.colors.Colormap(name, N=256)
+        Colormap for spectrogram. Defaults to matplotlibs 'magma' colormap.
+
+    Returns
+    -------
+    axes : Axes object or array of Axes objects.
+
+    See Also
+    --------
+    scipy.signal.spectrogram() : Generate the spectrogram for a given signal.
+
+    Examples
+    --------
+    """
+    # Define figure and axes for plot:
+    fig, axes = plt.subplots(1,2,gridspec_kw={"width_ratios":[1, 0.05]})
+    # Generate necessarry data for plot:
+    frequencies, times, spectrogram, clim = dsp.spectrogram(
+            signal=signal, window=window, window_length=window_length,
+            window_overlap_fct=window_overlap_fct, log_prefix=log_prefix,
+            log_reference=log_reference, log=log, nodb=nodb, cut=cut, clim=clim)
+
+    # Adjust axes:
+    axes[0].pcolormesh(times, frequencies, spectrogram,
+                   norm=None, cmap=cmap, shading='flat')
+    axes[0].set_ylabel('Frequency [Hz]')
+    axes[0].set_xlabel('Time [sec]')
+    axes[0].set_ylim((20, signal.sampling_rate/2))
+    if log:
+        axes[0].set_yscale('symlog')
+        axes[0].yaxis.set_major_locator(LogLocatorITAToolbox())
+    axes[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
+
+    # Colorbar:
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=None)
+    sm.set_clim(vmin=clim[0], vmax=clim[1])
+    cb = fig.colorbar(sm, cax=axes[1])
+    cb.set_label('Modulus [dB]')
+
+    return axes
 
 def plot_all(signal, **kwargs):  # TODO
     return
