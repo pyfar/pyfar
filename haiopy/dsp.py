@@ -59,13 +59,16 @@ def phase(signal, deg=False, unwrap=False):
         phase = wrap_to_2pi(np.unwrap(phase))
 
     if deg:
-        phase = dsp.rad_to_deg(phase)
+        phase = rad_to_deg(phase)
     return phase
 
 def spectrogram(signal, window='hann', window_length='auto',
                          window_overlap_fct=0.5, log_prefix=20, log_reference=1,
                          log=False, nodb=False, cut=False, clim=None):
-    """Generates the spectrogram for a given signal object including frequency,
+    """TODO: This function might not be necessary, if clipping functionallity
+     is not desired. It is already provided by scipy.signal.spectrogram().
+
+    Generates the spectrogram for a given signal object including frequency,
     time and colorbar-limit vectors.
 
     Parameters
@@ -188,7 +191,7 @@ def rad_to_deg(x):
 
     Returns
     -------
-    x : double
+    rad_to_deg : double
         Value in degrees.
     """
     return x*180/np.pi
@@ -203,8 +206,7 @@ def nextpow2(x):
 
     Returns
     -------
-    nextpower2 : double
+    nextpow2 : double
         Exponent of next higher power of 2.
     """
-    nextpower2 = np.ceil(np.log2(x))
-    return nextpower2
+    return np.ceil(np.log2(x))

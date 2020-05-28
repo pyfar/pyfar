@@ -1,0 +1,3 @@
+figure.figsize      : 10, 5  ## figure size in inches
+figure.dpi          : 150
+lines.linewidth     : 1     ## line width in points
