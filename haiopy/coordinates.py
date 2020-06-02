@@ -112,10 +112,7 @@ class Coordinates(object):
         super(Coordinates, self).__init__()
 
         # set the coordinate system
-        # (initiate because _set_system returns a copy of the old system used
-        # for coordinate conversions)
-        self._system = {}
-        self._set_system(domain, convention, unit)
+        self._system = self._make_system(domain, convention, unit)
 
         # save coordinates to self
         self._set_points(points_1, points_2, points_3)
@@ -154,52 +151,58 @@ class Coordinates(object):
 
         """
 
-        # set new system and get old one
-        old_system = self._set_system('cart', convention, unit)
+        # check for points
+        if self.num_points == 0:
+            raise Exception('Object is empty or contains invalid points')
+
+        # make the new system
+        new_system = self._make_system('cart', convention, unit)
 
         # return if system has not changed
-        if self._system == old_system:
+        if self._system == new_system:
             return self._points
 
         # convert to radians
         pts = self._points
-        for nn, unit in enumerate(old_system['units']):
+        for nn, unit in enumerate(self._system['units']):
             if unit == 'degrees':
                 pts[...,nn] = pts[...,nn] / 180*np.pi
 
-        # convert to cartesian
-        # spherical coordinate systems
-        if old_system['domain'] == 'sph':
-            if old_system['convention'] == 'top_colat':
+        # convert to cartesian ...
+        # ... from spherical coordinate systems
+        if self._system['domain'] == 'sph':
+            if self._system['convention'] == 'top_colat':
                 x, y, z = sph2cart(pts[...,0], pts[...,1], pts[...,2])
 
-            elif old_system['convention'] == 'top_elev':
+            elif self._system['convention'] == 'top_elev':
                 x, y, z = sph2cart(pts[...,0], np.pi/2-pts[...,1], pts[...,2])
 
-            elif old_system['convention'] == 'side':
+            elif self._system['convention'] == 'side':
                 x, z, y = sph2cart(pts[...,1], np.pi/2-pts[...,0], pts[...,2])
 
-            elif old_system['convention'] == 'front':
+            elif self._system['convention'] == 'front':
                 z, y, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
 
             else:
                 raise Exception("Conversion for {} is not implemented.".\
-                             format(old_system['convention']))
+                             format(self._system['convention']))
 
-        # cylindrical coordinate systems
-        elif old_system['domain'] == 'cyl':
-            if old_system['convention'] == 'top':
+        # ... from cylindrical coordinate systems
+        elif self._system['domain'] == 'cyl':
+            if self._system['convention'] == 'top':
                 x, y, z = cyl2cart(pts[...,0], pts[...,1], pts[...,2])
             else:
                 raise Exception("Conversion for {} is not implemented.".\
-                             format(old_system['convention']))
+                             format(self._system['convention']))
         else:
             raise Exception("Conversion for {} is not implemented.".\
                              format(convention))
 
+        # set the new system
+        self._system = new_system
 
-        # stack and return
-        self._points = np.hstack((x, y, z))
+        # set points and return
+        self._points = self._set_points(x, y, z)
         return self._points
 
 
@@ -233,33 +236,31 @@ class Coordinates(object):
 
         """
 
-        # set new system and get old one
-        old_system = self._set_system('sph', convention, unit)
-        new_system = self._system
+        # check for points
+        if self.num_points == 0:
+            raise Exception('Object is empty or contains invalid points')
+
+        # make the new system
+        new_system = self._make_system('sph', convention, unit)
 
         # return if system has not changed
-        if new_system == old_system:
+        if new_system == self._system:
             return self._points
 
-        # convert to cartesian system first
-        if not(old_system['domain']=='cart' and old_system['convention']=='right'):
-            # reset coordinate system (was changed above)
-            self._system = old_system
-            # get cartesian coordinates
+        # get cartesian system first
+        if not(self._system['domain']=='cart' and self._system['convention']=='right'):
             pts = self.get_cart('right', 'met')
-            # set new coordinate system again
-            self._system = new_system
         else:
             pts = self._points
 
-        # convert to spherical
-        # top polar systems
+        # convert to spherical...
+        # ... top polar systems
         if convention[0:3] == 'top':
             pts_1, pts_2, pts_3 = cart2sph(pts[...,0], pts[...,1], pts[...,2])
             if convention == 'top_elev':
                 pts_2 = np.pi/2 - pts_2
 
-        # side polar system
+        # ... side polar system
         # (ideal for simple converions from Robert Baumgartner and SOFA_API)
         elif convention == 'side':
             pts_2, pts_1, pts_3 = cart2sph(pts[...,0], pts[...,2], -pts[...,1])
@@ -268,7 +269,7 @@ class Coordinates(object):
             pts_1 = pts_1 - np.pi/2
             pts_2 = np.mod(pts_2 + np.pi/2, 2*np.pi) - np.pi/2
 
-        # front polar system
+        # ... front polar system
         elif convention == 'front':
             pts_1, pts_2, pts_3 = cart2sph(pts[...,2], pts[...,1], pts[...,0])
 
@@ -276,14 +277,16 @@ class Coordinates(object):
             raise Exception("Conversion for {} is not implemented.".\
                              format(convention))
 
-
         # convert to degrees
-        if self._system['unit'] == 'deg':
+        if new_system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi*180
             pts_2 = pts_2 / np.pi*180
 
+        # set the new system
+        self._system = new_system
+
         # stack and return
-        self._points = np.hstack((pts_1, pts_2, pts_3))
+        self._points = self._set_points(pts_1, pts_2, pts_3)
         return self._points
 
 
@@ -317,27 +320,25 @@ class Coordinates(object):
 
         """
 
-        # set new system and get old one
-        old_system = self._set_system('cyl', convention, unit)
-        new_system = self._system
+        # check for points
+        if self.num_points == 0:
+            raise Exception('Object is empty or contains invalid points')
+
+        # make the new system
+        new_system = self._make_system('cyl', convention, unit)
 
         # return if system has not changed
-        if new_system == old_system:
+        if new_system == self._system:
             return self._points
 
         # convert to cartesian system first
-        if not(old_system['domain']=='cart' and old_system['convention']=='right'):
-            # reset coordinate system (was changed above)
-            self._system = old_system
-            # get cartesian coordinates
+        if not(self._system['domain']=='cart' and self._system['convention']=='right'):
             pts = self.get_cart('right', 'met')
-            # set new coordinate system again
-            self._system = new_system
         else:
             pts = self._points
 
-        # convert to spherical
-        # top polar systems
+        # convert to cylindrical ...
+        # ... top systems
         if convention == 'top':
             pts_1, pts_2, pts_3 = cart2cyl(pts[...,0], pts[...,1], pts[...,2])
 
@@ -350,8 +351,11 @@ class Coordinates(object):
         if self._system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi*180
 
+        # set the new system
+        self._system = new_system
+
         # stack and return
-        self._points = np.hstack((pts_1, pts_2, pts_3))
+        self._points = self._set_points(pts_1, pts_2, pts_3)
         return self._points
 
 
@@ -369,7 +373,10 @@ class Coordinates(object):
     @property
     def num_points(self):
         """Return number of coordinate points stored in the object."""
-        return self._points.shape[-1]
+        if np.isnan(self._points).any():
+            return 0
+
+        return self._points.shape[0]
 
     @property
     def coordinates(self):
@@ -706,16 +713,13 @@ class Coordinates(object):
                                                       ', '.join(cur_units))
 
 
-    def _set_system(self, domain=None, convention=None, unit=None):
+    def _make_system(self, domain=None, convention=None, unit=None):
         """
-        Store class internal information about current coordinate system.
+        Make and return class internal information about coordinate system.
         """
 
         # check if coordinate system exists
         self._exist_system(domain, convention, unit)
-
-        # get the old system
-        system_old = self._system.copy()
 
         # get the new system
         system = self._systems()
@@ -735,9 +739,7 @@ class Coordinates(object):
         system['unit']       = unit
         system['units']      = units
 
-        self._system = system
-
-        return system_old
+        return system
 
 
     def _set_points(self, points_1, points_2, points_3):
@@ -766,26 +768,25 @@ class Coordinates(object):
                     max(coord.shape), max(coord.shape), max(coord.shape))
 
         # flatten input
-        pts_1 = np.atleast_1d(pts_1.flatten())
-        pts_2 = np.atleast_1d(pts_2.flatten())
-        pts_3 = np.atleast_1d(pts_3.flatten())
+        pts_1 = np.transpose(np.atleast_2d(pts_1.flatten()))
+        pts_2 = np.transpose(np.atleast_2d(pts_2.flatten()))
+        pts_3 = np.transpose(np.atleast_2d(pts_3.flatten()))
 
         # check for scalar entries
         N_max = max([pts_1.shape[0], pts_2.shape[0], pts_3.shape[0]])
         if pts_1.shape[0] == 1:
-            pts_1 = np.tile(pts_1, N_max)
+            pts_1 = np.tile(pts_1, [N_max, 1])
         if pts_2.shape[0] == 1:
-            pts_2 = np.tile(pts_2, N_max)
+            pts_2 = np.tile(pts_2, [N_max, 1])
         if pts_3.shape[0] == 1:
-            pts_3 = np.tile(pts_3, N_max)
+            pts_3 = np.tile(pts_3, [N_max, 1])
 
         # check for equal length
         assert np.shape(pts_1) == np.shape(pts_2) == np.shape(pts_3),\
             "Input must be of equal length."
 
-        points = np.hstack((pts_1, pts_2, pts_3))
-
-        self._points = points
+        # stack points
+        self._points = np.hstack((pts_1, pts_2, pts_3))
 
 
 def cart2sph(x, y, z):
