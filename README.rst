@@ -29,24 +29,40 @@ You can either clone the public repository
 
 or download the code as zip archive.
 
-You can install it with:
+You can install it by running
 
 .. code-block:: console
 
     $ python setup.py install
 
+in the haiopy directory.
 The required packages to install the package can be installed using pip:
 
 .. code-block:: console
 
     $ pip install -r requirements_dev.txt
 
-When actively developing for the package it is recommended to install using the
+When actively developing for the package it is recommended to use a virtual environment and install using the
 develop option:
 
 .. code-block:: console
 
     $ python setup.py develop
 
-.. _git repository: https://github.com/mberz/haiopy
+More information is found in the `contribution guidelines`_.
 
+Building the Docs
+=================
+
+Currently remotely hosted documentation is not available.
+The documentation can be build by running
+
+.. code-block:: console
+
+    $ make html
+
+inside the `docs` folder. For more information refer to the `contribution guidelines`_.
+
+
+.. _git repository: https://github.com/mberz/haiopy
+.. _`contribution guidelines`: CONTRIBUTING.rst
