@@ -146,32 +146,19 @@ def test_coordinates_init_val_and_sys():
 
 def test_getter_comment():
     coords = Coordinates(1,1,1, comment='try this')
-    assert coords.comment != 'try this'
+    assert coords.comment == 'try this'
 
 def test_setter_comment():
     coords = Coordinates()
     coords.comment = 'now this'
-    assert coords.comment != 'now this'
+    assert coords.comment == 'now this'
 
 
 def test_num_points():
     coords = Coordinates([1, 0], [1, 1], [0, 1])
     assert coords.num_points == 2
 
-def test_coordinates():
-    coords = Coordinates([1, 0], [1, 1], [0, 1])
-    assert coords.coordinates == 'x in meters; y in meters; z in meters'
 
-test_coordinates_init()
-test__systems()
-test__coordinates()
-test_exist_systems()
-test_list_systems()
-test_coordinates_init_val()
-test_coordinates_init_val_and_sys()
-test_num_points()
-test_coordinates()
-print('\n\n\nAll tests passed')
 
 # def test_coordinates_init_from_cartesian():
 #     x = 1

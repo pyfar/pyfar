@@ -379,13 +379,6 @@ class Coordinates(object):
         return self._points.shape[0]
 
     @property
-    def coordinates(self):
-        """Return current coordinate names and units as sting."""
-        coords = ["{} in {}".format(c, u) for c, u in \
-                  zip(self._system['coordinates'], self._system['units'])]
-        return '; '.join(coords)
-
-    @property
     def system(self):
         """
         Print information about current coordinate system.
@@ -787,6 +780,24 @@ class Coordinates(object):
 
         # stack points
         self._points = np.hstack((pts_1, pts_2, pts_3))
+
+    def __repr__(self):
+        """Get info about Coordinates object."""
+
+        # object type
+        obj = 'Coordinates object of cshape ' + str(self._points.shape[:-1])
+
+        # coordinate convention
+        conv = "domain: {}, convention: {}, unit: {}".format(
+            self._system['domain'], self._system['convention'],
+            self._system['unit'])
+
+        # coordinates and units
+        coords = ["{} in {}".format(c, u) for c, u in \
+                  zip(self._system['coordinates'], self._system['units'])]
+
+        return obj + '\n' + conv + '\n' + 'coordinates: ' + ', '.join(coords)
+
 
 
 def cart2sph(x, y, z):
