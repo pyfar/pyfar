@@ -124,6 +124,10 @@ def test_coordinates_init_val():
     Coordinates(c3, c3, c3)
     # input non flat vectors
     Coordinates(c3, c4, c5)
+    # input 2D data
+    Coordinates(c1, c1, c7)
+    # input 3D data
+    Coordinates(c1, c1, c8)
 
     # tests that have to fail
     with raises(AssertionError):
@@ -153,10 +157,27 @@ def test_setter_comment():
     coords.comment = 'now this'
     assert coords.comment == 'now this'
 
-
-def test_num_points():
+def test_cshape():
+    # empty
+    coords = Coordinates()
+    assert coords.cshape == (0,)
+    # 2D points
     coords = Coordinates([1, 0], [1, 1], [0, 1])
-    assert coords.num_points == 2
+    assert coords.cshape == (2,)
+    # 3D points
+    coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
+    assert coords.cshape == (2,3)
+
+def test_cdim():
+    # empty
+    coords = Coordinates()
+    assert coords.cdim == 0
+    # 2D points
+    coords = Coordinates([1, 0], 1, 1)
+    assert coords.cdim == 1
+    # 3D points
+    coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
+    assert coords.cdim == 2
 
 
 

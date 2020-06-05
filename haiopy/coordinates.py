@@ -151,9 +151,9 @@ class Coordinates(object):
 
         """
 
-        # check for points
-        if self.num_points == 0:
-            raise Exception('Object is empty or contains invalid points')
+        # check if object is empty
+        if self.cshape == (0,):
+            raise Exception('Object is empty.')
 
         # make the new system
         new_system = self._make_system('cart', convention, unit)
@@ -236,9 +236,9 @@ class Coordinates(object):
 
         """
 
-        # check for points
-        if self.num_points == 0:
-            raise Exception('Object is empty or contains invalid points')
+        # check if object is empty
+        if self.cshape == (0,):
+            raise Exception('Object is empty.')
 
         # make the new system
         new_system = self._make_system('sph', convention, unit)
@@ -320,9 +320,9 @@ class Coordinates(object):
 
         """
 
-        # check for points
-        if self.num_points == 0:
-            raise Exception('Object is empty or contains invalid points')
+        # check if object is empty
+        if self.cshape == (0,):
+            raise Exception('Object is empty.')
 
         # make the new system
         new_system = self._make_system('cyl', convention, unit)
@@ -371,26 +371,36 @@ class Coordinates(object):
         self._comment = value
 
     @property
-    def num_points(self):
-        """Return number of coordinate points stored in the object."""
+    def cshape(self):
+        """
+        Return channel shape.
+
+        The channel shape gives the shape of the coordinate points excluding
+        the last dimension, which is always 3.
+        """
+        if np.isnan(self._points).any():
+            return (0,)
+        else:
+            return self._points.shape[:-1]
+
+    @property
+    def cdim(self):
+        """
+        Return channel dimension.
+
+        The channel dimension gives the number of dimensions of the coordinate
+        points excluding the last dimension.
+        """
         if np.isnan(self._points).any():
             return 0
-
-        return self._points.shape[0]
+        else:
+            return self._points.ndim-1
 
     @property
     def system(self):
-        """
-        Print information about current coordinate system.
-
-        Returns
-        -------
-        None.
-
-        """
+        """Print information about current coordinate system."""
         self.list_systems(self._system['domain'], self._system['convention'],
                           self._system['unit'])
-        return None
 
 
     def list_systems(self, domain=None, convention=None, unit=None, brief=False):
@@ -737,55 +747,60 @@ class Coordinates(object):
 
     def _set_points(self, points_1, points_2, points_3):
         """
-        Check the format of points to be added to Coordinates().
+        Check and add points to self.
 
-        Retruns
-        -------
-        points : array
-            size [3 x self._num_points]
+        Set self._points, which is an atleast_2d numpy array of shape
+        [L,M,...,N, 3].
         """
 
         # cast to numpy array
-        pts_1 = np.asarray(points_1, dtype=np.float64)
-        pts_2 = np.asarray(points_2, dtype=np.float64)
-        pts_3 = np.asarray(points_3, dtype=np.float64)
+        pts = [np.atleast_2d(np.asarray(points_1, dtype=np.float64)),
+               np.atleast_2d(np.asarray(points_2, dtype=np.float64)),
+               np.atleast_2d(np.asarray(points_3, dtype=np.float64))]
 
-        # check dimensions
-        for cc, coord in enumerate([pts_1, pts_2, pts_3]):
-            assert coord.ndim <= 2, "points_{}.ndim={} but must be <= 2."\
-                .format(cc+1, coord.ndim)
-            if coord.ndim == 2:
-                assert coord.shape[0] == 1 or coord.shape[1] == 1,\
-                    "points_{} has shape {} but should have shape ({},), "\
-                    "({},1), or (1,{}).".format(cc+1, coord.shape, \
-                    max(coord.shape), max(coord.shape), max(coord.shape))
+        # transpose
+        for nn, p in enumerate(pts):
+            if len(p.shape)==2 and p.shape[0]==1:
+                pts[nn] = np.transpose(p)
 
-        # flatten input
-        pts_1 = np.transpose(np.atleast_2d(pts_1.flatten()))
-        pts_2 = np.transpose(np.atleast_2d(pts_2.flatten()))
-        pts_3 = np.transpose(np.atleast_2d(pts_3.flatten()))
+        # shapes of non scalar entries
+        shapes = [p.shape for p in pts if p.shape != (1,1)]
 
-        # check for scalar entries
-        N_max = max([pts_1.shape[0], pts_2.shape[0], pts_3.shape[0]])
-        if pts_1.shape[0] == 1:
-            pts_1 = np.tile(pts_1, [N_max, 1])
-        if pts_2.shape[0] == 1:
-            pts_2 = np.tile(pts_2, [N_max, 1])
-        if pts_3.shape[0] == 1:
-            pts_3 = np.tile(pts_3, [N_max, 1])
+        # check for equal shape
+        for nn in range(1,len(shapes)):
+            assert shapes[0] == shapes[nn],\
+                "points_1, points_2, and points_3 must be scalar or of the "\
+                "same shape."
 
-        # check for equal length
-        assert np.shape(pts_1) == np.shape(pts_2) == np.shape(pts_3),\
-            "Input must be of equal length."
+        # repeat scalar entries if non-scalars exists
+        if len(shapes):
+            for nn, p in enumerate(pts):
+                if p.size==1:
+                    pts[nn] = np.tile(p, shapes[0])
 
-        # stack points
-        self._points = np.hstack((pts_1, pts_2, pts_3))
+        # axis for concatenation
+        if shapes:
+            axis = len(shapes[0]) if shapes[0][-1] > 1 else len(shapes[0])-1
+        else:
+            axis = 1
+
+        # create axis for concatenation if it does not exist
+        for nn, p in enumerate(pts):
+            if p.ndim == axis:
+                pts[nn] = p[...,np.newaxis]
+
+        # concatenate
+        self._points = np.concatenate((pts[0], pts[1], pts[2]), axis)
+
 
     def __repr__(self):
         """Get info about Coordinates object."""
 
         # object type
-        obj = 'Coordinates object of cshape ' + str(self._points.shape[:-1])
+        if self.cshape != (0,):
+            obj = 'Coordinates object of cshape ' + str(self._points.shape[:-1])
+        else:
+            obj = 'Empty coordinates object'
 
         # coordinate convention
         conv = "domain: {}, convention: {}, unit: {}".format(
