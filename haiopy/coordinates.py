@@ -489,16 +489,9 @@ class Coordinates(object):
         else:
             return self._points.ndim-1
 
-    @property
-    def system(self):
-        """Print information about current coordinate system."""
-        self.list_systems(self._system['domain'], self._system['convention'],
-                          self._system['unit'])
-
-
-    def list_systems(self, domain=None, convention=None, unit=None, brief=False):
+    def systems(self, show = 'current', brief=False):
         """
-        List available coordinate systems on the console.
+        List current and available coordinate systems on the console.
 
         Systems are specified by their 'domain', 'convention' and 'unit'. If
         multiple units are available for a convention, the unit listed first
@@ -542,25 +535,31 @@ class Coordinates(object):
 
         """
 
-        # check user input
-        self._exist_system(domain, convention, unit)
+        if show == 'current':
+            domain     = self._system['domain']
+            convention = self._system['convention']
+            unit       = self._system['unit']
+        elif show == 'all':
+            domain = convention = unit = 'all'
+        else:
+            raise ValueError("show must be 'current' or 'all'.")
 
         # get coordinate systems
         systems = self._systems()
 
         # print information
-        domains = list(systems) if domain == None else [domain]
+        domains = list(systems) if domain == 'all' else [domain]
 
         if brief:
             print('domain, convention, unit')
             print('- - - - - - - - - - - - -')
             for dd in domains:
-                conventions = list(systems[dd]) if convention == None else [convention]
+                conventions = list(systems[dd]) if convention == 'all' else [convention]
                 for cc in conventions:
                     # current coordinates
                     coords = systems[dd][cc]['coordinates']
                     # current units
-                    if unit != None:
+                    if unit != 'all':
                         units = [units for units in systems[dd][cc]['units'] \
                             if unit == units[0][0:3]]
                     else:
@@ -571,12 +570,12 @@ class Coordinates(object):
                           .format(dd, cc, ', '.join(unit_key)))
         else:
             for dd in domains:
-                conventions = list(systems[dd]) if convention == None else [convention]
+                conventions = list(systems[dd]) if convention == 'all' else [convention]
                 for cc in conventions:
                     # current coordinates
                     coords = systems[dd][cc]['coordinates']
                     # current units
-                    if unit != None:
+                    if unit != 'all':
                         units = [units for units in systems[dd][cc]['units'] \
                             if unit == units[0][0:3]]
                     else:
@@ -592,6 +591,102 @@ class Coordinates(object):
                         cur_units = [u[nn] for u in units]
                         print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
+    # def list_systems(self, domain=None, convention=None, unit=None, brief=False):
+    #     """
+    #     List available coordinate systems on the console.
+
+    #     Systems are specified by their 'domain', 'convention' and 'unit'. If
+    #     multiple units are available for a convention, the unit listed first
+    #     is the default.
+
+    #     .. note::
+    #        All coordinate systems are described with respect to the right
+    #        handed cartesian system (domain='cart', convention='right').
+    #        Distances are always specified in meters, while angles can be
+    #        radians or degrees (unit='rad' or 'deg').
+
+
+    #     Parameters
+    #     ----------
+    #     domain : string, None, optional
+    #         string to get information about a sepcific system, None to get
+    #         information about all systems. The default is None.
+    #     convention : string, None, optional
+    #         string to get information about a sepcific convention, None to get
+    #         information about all conventions. The default is None.
+    #     unit : string, None, optional
+    #         string to get information about a sepcific unit, None to get
+    #         information about all units. The default is None.
+    #     brief . boolean
+    #         Will only list the domains, conventions and units if True. The
+    #         default is False.
+
+    #     Returns
+    #     -------
+    #     Prints to console.
+
+    #     Examples
+    #     --------
+    #     List information for all coordinate systems
+
+    #     >>> self.list_systems()
+
+    #     List information for a specific coordinate system, e.g.,
+
+    #     >>> self.list_systems('sph', 'top_elev', 'deg')
+
+    #     """
+
+    #     # check user input
+    #     self._exist_system(domain, convention, unit)
+
+    #     # get coordinate systems
+    #     systems = self._systems()
+
+    #     # print information
+    #     domains = list(systems) if domain == None else [domain]
+
+    #     if brief:
+    #         print('domain, convention, unit')
+    #         print('- - - - - - - - - - - - -')
+    #         for dd in domains:
+    #             conventions = list(systems[dd]) if convention == None else [convention]
+    #             for cc in conventions:
+    #                 # current coordinates
+    #                 coords = systems[dd][cc]['coordinates']
+    #                 # current units
+    #                 if unit != None:
+    #                     units = [units for units in systems[dd][cc]['units'] \
+    #                         if unit == units[0][0:3]]
+    #                 else:
+    #                     units = systems[dd][cc]['units']
+    #                 # key for unit
+    #                 unit_key = [u[0][0:3] for u in units]
+    #                 print("{}, {}, [{}]"\
+    #                       .format(dd, cc, ', '.join(unit_key)))
+    #     else:
+    #         for dd in domains:
+    #             conventions = list(systems[dd]) if convention == None else [convention]
+    #             for cc in conventions:
+    #                 # current coordinates
+    #                 coords = systems[dd][cc]['coordinates']
+    #                 # current units
+    #                 if unit != None:
+    #                     units = [units for units in systems[dd][cc]['units'] \
+    #                         if unit == units[0][0:3]]
+    #                 else:
+    #                     units = systems[dd][cc]['units']
+    #                 # key for unit
+    #                 unit_key = [u[0][0:3] for u in units]
+    #                 print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+    #                 print("domain: {}, convention: {}, unit: [{}]\n"\
+    #                       .format(dd, cc, ', '.join(unit_key)))
+    #                 print(systems[dd][cc]['description_short'] + '\n')
+    #                 print("Coordinates:")
+    #                 for nn, coord in enumerate(coords):
+    #                     cur_units = [u[nn] for u in units]
+    #                     print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
+    #                 print('\n' + systems[dd][cc]['description'] + '\n\n')
 
 
     @staticmethod
@@ -1203,9 +1298,12 @@ def _format_points_for_conversion(pts_1, pts_2, pts_3):
 
     # remove noise below eps
     eps = np.finfo(np.float64).eps
-    pts_1[np.abs(pts_1)<eps] = 0
-    pts_2[np.abs(pts_2)<eps] = 0
-    pts_3[np.abs(pts_3)<eps] = 0
+    if not np.isnan(pts_1).any():
+        pts_1[np.abs(pts_1)<eps] = 0
+    if not np.isnan(pts_2).any():
+        pts_2[np.abs(pts_2)<eps] = 0
+    if not np.isnan(pts_3).any():
+        pts_3[np.abs(pts_3)<eps] = 0
 
     return pts_1, pts_2, pts_3
 

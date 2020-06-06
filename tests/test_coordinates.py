@@ -99,14 +99,15 @@ def test_exist_systems():
     with raises(ValueError):
          coords._exist_system(None, None, 'met')
 
-def test_list_systems():
+def test_systems():
     # get class instance
     coords = Coordinates()
 
-    # if one call passes, all calls should pass because the user input is
-    # checked by coordinates.exist_coordinate_systems()
-    coords.list_systems()
-    coords.list_systems(brief=True)
+    # test all four possible calls
+    coords.systems()
+    coords.systems(brief=True)
+    coords.systems('all')
+    coords.systems('all', brief=True)
 
 def test_coordinates_init_val():
 
