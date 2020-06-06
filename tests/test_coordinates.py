@@ -40,6 +40,18 @@ def test__systems():
                 "{} ({}) is missing entry 'units'".format(domain, convention)
             assert "description"       in systems[domain][convention], \
                 "{} ({}) is missing entry 'description'".format(domain, convention)
+            assert "front" in systems[domain][convention], \
+                "{} ({}) is missing entry 'front'".format(domain, convention)
+            assert "left" in systems[domain][convention], \
+                "{} ({}) is missing entry 'left'".format(domain, convention)
+            assert "back" in systems[domain][convention], \
+                "{} ({}) is missing entry 'back'".format(domain, convention)
+            assert "right" in systems[domain][convention], \
+                "{} ({}) is missing entry 'right'".format(domain, convention)
+            assert "up" in systems[domain][convention], \
+                "{} ({}) is missing entry 'up'".format(domain, convention)
+            assert "down" in systems[domain][convention], \
+                "{} ({}) is missing entry 'down'".format(domain, convention)
 
 def test__coordinates():
     # get all coordinate systems
@@ -138,8 +150,8 @@ def test_coordinates_init_val():
         Coordinates(c2, c2, c8)
 
 def test_coordinates_init_val_and_sys():
-    coords = Coordinates()
     # get list of available coordinate systems
+    coords = Coordinates()
     systems = coords._systems()
 
     # test constructor with all systems
@@ -147,6 +159,37 @@ def test_coordinates_init_val_and_sys():
         for convention in list(systems[domain]):
             for unit in list(systems[domain][convention]['units']):
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
+
+def test_setter_and_getter():
+    # get list of available coordinate systems
+    coords = Coordinates()
+    systems = coords._systems()
+    # test points contained in system definitions
+    points = ['front', 'left', 'back', 'right', 'up', 'down']
+
+    # test setter and getter with all systems and default unit
+    for domain_in in list(systems):
+        for convention_in in list(systems[domain_in]):
+            for domain_out in list(systems):
+                for convention_out in list(systems[domain_out]):
+                    for point in points:
+                        # for debugging
+                        print('{}({}) -> {}({}): {}'.format(\
+                         domain_in, convention_in, domain_out, convention_out, point))
+                        # in and out points
+                        p_in  = systems[domain_in] [convention_in] [point]
+                        p_out = systems[domain_out][convention_out][point]
+                        # empty object
+                        c = Coordinates()
+                        # set point
+                        eval("c.set_{}(p_in[0], p_in[1], p_in[2], '{}')"\
+                             .format(domain_in, convention_in))
+                        p = c._points
+                        npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
+                        # get point
+                        p = eval("c.get_{}('{}')"\
+                                 .format(domain_out, convention_out))
+                        npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
 
 def test_getter_comment():
     coords = Coordinates(1,1,1, comment='try this')
@@ -178,8 +221,6 @@ def test_cdim():
     # 3D points
     coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
     assert coords.cdim == 2
-
-
 
 # def test_coordinates_init_from_cartesian():
 #     x = 1

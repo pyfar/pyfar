@@ -121,6 +121,37 @@ class Coordinates(object):
         self._comment = comment
 
 
+    def set_cart(self, points_1, points_2, points_3,
+                 convention='right', unit='met'):
+        """
+        Set coordinate points in cartesian coordinate system.
+
+        Parameters
+        ----------
+        convention : string, optional
+            convention in which the coordinate points are returned. The default
+            is 'right'.
+        unit : string, optional
+            unit in which the coordinate points are returned. The default is
+            'met'.
+
+        Note
+        ----
+        The current and all availanle coordinate systems can be seen with
+
+        >>> c = Coordinates()
+        >>> c.system
+        >>> c.list_systems()
+
+        """
+
+        # set the coordinate system
+        self._system = self._make_system('cart', convention, unit)
+
+        # save coordinates to self
+        self._set_points(points_1, points_2, points_3)
+
+
     def get_cart(self, convention='right', unit='met'):
         """
         Get coordinate points in cartesian coordinate system.
@@ -202,8 +233,39 @@ class Coordinates(object):
         self._system = new_system
 
         # set points and return
-        self._points = self._set_points(x, y, z)
+        self._set_points(x, y, z)
         return self._points
+
+
+    def set_sph(self, points_1, points_2, points_3,
+                 convention='top_colat', unit='rad'):
+        """
+        Set coordinate points in spherical coordinate system.
+
+        Parameters
+        ----------
+        convention : string, optional
+            convention in which the coordinate points are returned. The default
+            is 'right'.
+        unit : string, optional
+            unit in which the coordinate points are returned. The default is
+            'met'.
+
+        Note
+        ----
+        The current and all availanle coordinate systems can be seen with
+
+        >>> c = Coordinates()
+        >>> c.system
+        >>> c.list_systems()
+
+        """
+
+        # set the coordinate system
+        self._system = self._make_system('sph', convention, unit)
+
+        # save coordinates to self
+        self._set_points(points_1, points_2, points_3)
 
 
     def get_sph(self, convention='top_colat', unit='rad'):
@@ -286,8 +348,39 @@ class Coordinates(object):
         self._system = new_system
 
         # stack and return
-        self._points = self._set_points(pts_1, pts_2, pts_3)
+        self._set_points(pts_1, pts_2, pts_3)
         return self._points
+
+
+    def set_cyl(self, points_1, points_2, points_3,
+                 convention='top', unit='rad'):
+        """
+        Set coordinate points in spherical coordinate system.
+
+        Parameters
+        ----------
+        convention : string, optional
+            convention in which the coordinate points are returned. The default
+            is 'right'.
+        unit : string, optional
+            unit in which the coordinate points are returned. The default is
+            'met'.
+
+        Note
+        ----
+        The current and all availanle coordinate systems can be seen with
+
+        >>> c = Coordinates()
+        >>> c.system
+        >>> c.list_systems()
+
+        """
+
+        # set the coordinate system
+        self._system = self._make_system('cyl', convention, unit)
+
+        # save coordinates to self
+        self._set_points(points_1, points_2, points_3)
 
 
     def get_cyl(self, convention='top', unit='rad'):
@@ -355,7 +448,7 @@ class Coordinates(object):
         self._system = new_system
 
         # stack and return
-        self._points = self._set_points(pts_1, pts_2, pts_3)
+        self._set_points(pts_1, pts_2, pts_3)
         return self._points
 
 
@@ -518,6 +611,12 @@ class Coordinates(object):
                                             ...
                                ['unit_1.N','unit_2.N','unit_3.N']]
             Key 2d - 'description'
+            Key 2e - 'front': positive x (for debugging, meters and radians)
+            Key 2f - 'left' : positive y (for debugging, meters and radians)
+            Key 2g - 'back' : negative x (for debugging, meters and radians)
+            Key 2h - 'right': negative y (for debugging, meters and radians)
+            Key 2i - 'up'   : positive z (for debugging, meters and radians)
+            Key 2j - 'down' : negative z (for debugging, meters and radians)
 
         """
 
@@ -534,7 +633,13 @@ class Coordinates(object):
                         [["meters", "meters", "meters"]],
                     "description":
                         "Right handed cartesian coordinate system with x,y, and."\
-                        "z in meters."}
+                        "z in meters.",
+                    "front": [ 1,  0,  0],
+                    "left" : [ 0,  1,  0],
+                    "back" : [-1,  0,  0],
+                    "right": [ 0, -1,  0],
+                    "up"   : [ 0,  0,  1],
+                    "down" : [ 0,  0, -1]}
                 },
             "sph":
                 {
@@ -553,7 +658,13 @@ class Coordinates(object):
                         "the angle downwards from the z-axis with 0 pointing in "\
                         "positve z-direction and pi in negative z-direction. The "\
                         "azimuth and colatitude can be in radians or degrees, "\
-                        "the radius is always in meters."},
+                        "the radius is always in meters.",
+                    "front": [0,         np.pi/2, 1],
+                    "left" : [np.pi/2,   np.pi/2, 1],
+                    "back" : [np.pi,     np.pi/2, 1],
+                    "right": [3*np.pi/2, np.pi/2, 1],
+                    "up"   : [0,         0      , 1],
+                    "down" : [0,         np.pi,   1]},
                 "top_elev":{
                     "description_short":
                         "Spherical coordinate system with North and South Pole.",
@@ -570,7 +681,13 @@ class Coordinates(object):
                         " pi/2 pointing at positive z-direction and -pi/2 "\
                         "pointing in negative z-direction. The azimuth and "\
                         "elevation can be in radians or degrees, the radius is "\
-                        " always in meters."},
+                        " always in meters.",
+                    "front": [0,         0,       1],
+                    "left" : [np.pi/2,   0,       1],
+                    "back" : [np.pi,     0,       1],
+                    "right": [3*np.pi/2, 0,       1],
+                    "up"   : [0,         np.pi/2, 1],
+                    "down" : [0,        -np.pi/2, 1]},
                 "side":{
                     "description_short":
                         "Spherical coordinate system with poles on the y-axis.",
@@ -587,7 +704,13 @@ class Coordinates(object):
                         "z-direction, 0 in positive x-direction, pi/2 in "\
                         "positive z-direction, pi in negative x-direction. The "\
                         "polar and lateral angle can be in radians and degree, "\
-                        "the radius is always in meters."},
+                        "the radius is always in meters.",
+                    "front": [ 0,       0,       1],
+                    "left" : [ np.pi/2, 0,       1],
+                    "back" : [ 0,       np.pi,   1],
+                    "right": [-np.pi/2, 0,       1],
+                    "up"   : [ 0,       np.pi/2, 1],
+                    "down" : [ 0,      -np.pi/2, 1]},
                 "front":{
                     "description_short":
                         "Spherical coordinate system with poles on the x-axis.",
@@ -604,7 +727,13 @@ class Coordinates(object):
                         "measured from the x-axis with 0 pointing in positve "\
                         "x-direction and pi in negative x-direction. Phi and "\
                         "theta can be in radians and degrees, the radius is "\
-                        "always in meters."}
+                        "always in meters.",
+                    "front": [0,         0,       1],
+                    "left" : [np.pi/2,   np.pi/2, 1],
+                    "back" : [0,         np.pi,   1],
+                    "right": [3*np.pi/2, np.pi/2, 1],
+                    "up"   : [0,         np.pi/2, 1],
+                    "down" : [np.pi,     np.pi/2, 1]}
                 },
             "cyl":
                 {
@@ -621,7 +750,13 @@ class Coordinates(object):
                         "x/y-plane with 0 pointing in positive x-direction and "\
                         " pi/2 in positive y-direction. The heigt is given by "\
                         "z, and radius_z denotes the radius measured orthogonal "\
-                        "to the z-axis."}
+                        "to the z-axis.",
+                    "front": [0,         0, 1],
+                    "left" : [np.pi/2,   0, 1],
+                    "back" : [np.pi,     0, 1],
+                    "right": [3*np.pi/2, 0, 1],
+                    "up"   : [0,         1, 0],
+                    "down" : [0,        -1, 0]}
                 }
             }
 
@@ -753,10 +888,11 @@ class Coordinates(object):
         [L,M,...,N, 3].
         """
 
-        # cast to numpy array
-        pts = [np.atleast_2d(np.asarray(points_1, dtype=np.float64)),
-               np.atleast_2d(np.asarray(points_2, dtype=np.float64)),
-               np.atleast_2d(np.asarray(points_3, dtype=np.float64))]
+        # cast to numpy array and remove noise below eps
+        points_1, points_2, points_3 = _format_points_for_conversion(
+            points_1, points_2, points_3)
+
+        pts = [points_1, points_2, points_3]
 
         # transpose
         for nn, p in enumerate(pts):
@@ -862,6 +998,10 @@ def cart2sph(x, y, z):
 
     radius : ndarray, number
     """
+    # convert to np.array and remove noise below eps
+    x, y, z = _format_points_for_conversion(x, y, z)
+
+    # coordinate conversion
     radius = np.sqrt(x**2 + y**2 + z**2)
     colatitude = np.arccos(z/radius)
     azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
@@ -910,6 +1050,11 @@ def sph2cart(azimuth, colatitude, radius):
 
     z : ndarray, number
     """
+    # convert to np.array and remove noise below eps
+    azimuth, colatitude, radius = _format_points_for_conversion(
+        azimuth, colatitude, radius)
+
+    # coordinate conversion
     r_sin_cola = radius * np.sin(colatitude)
     x = r_sin_cola * np.cos(azimuth)
     y = r_sin_cola * np.sin(azimuth)
@@ -963,7 +1108,10 @@ def cart2cyl(x, y, z):
 
     radius : ndarray, number
     """
+    # convert to np.array and remove noise below eps
+    x, y, z = _format_points_for_conversion(x, y, z)
 
+    # coordinate conversion
     azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
     try:
         height = z.copy()
@@ -1019,15 +1167,47 @@ def cyl2cart(azimuth, height, radius):
 
     z : ndarray, number
     """
+    # convert to np.array and remove noise below eps
+    azimuth, height, radius = _format_points_for_conversion(
+        azimuth, height, radius)
 
+    # coordinate conversion
     x = radius * np.cos(azimuth)
     y = radius * np.sin(azimuth)
-    try:
-        z = height.copy()
-    except:
-        z = height
+    z = height.copy()
 
     return x, y, z
+
+def _format_points_for_conversion(pts_1, pts_2, pts_3):
+    """
+    Format points for coordinate conversion.
+
+    Convert to numpy array and remove noise below eps for robust conversion.
+
+    Parameters
+    ----------
+    pts_i : int, float, array like, None
+        coordinate points.
+
+    Returns
+    -------
+    pts_i : np.array
+        coordinate points dtype=np.float64 with noise below eps set to zero.
+
+    """
+
+    # convert to np.array
+    pts_1 = np.atleast_2d(np.asarray(pts_1, dtype=np.float64))
+    pts_2 = np.atleast_2d(np.asarray(pts_2, dtype=np.float64))
+    pts_3 = np.atleast_2d(np.asarray(pts_3, dtype=np.float64))
+
+    # remove noise below eps
+    eps = np.finfo(np.float64).eps
+    pts_1[np.abs(pts_1)<eps] = 0
+    pts_2[np.abs(pts_2)<eps] = 0
+    pts_3[np.abs(pts_3)<eps] = 0
+
+    return pts_1, pts_2, pts_3
 
 # def _cart2latlon(x, y, z):
 #     """Transforms from Cartesian coordinates to Geocentric coordinates
