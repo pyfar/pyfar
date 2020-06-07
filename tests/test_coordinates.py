@@ -50,10 +50,32 @@ def test__systems():
             assert "down" in systems[domain][convention], \
                 "{} ({}) is missing entry 'down'".format(domain, convention)
 
-def test__coordinates():
+def test_coordinate_names():
+    # check if units agree across coordinates that appear more than once
+
     # get all coordinate systems
     c = Coordinates()
-    coords = c._coordinates()
+    systems = c._systems()
+
+    # get unique list of coordinates and their properties
+    coords = {}
+    # loop across domains and conventions
+    for domain in systems:
+        for convention in systems[domain]:
+            # loop across coordinates
+            for cc, coord in enumerate(systems[domain][convention]['coordinates']):
+                # units of the current coordinate
+                cur_units = [u[cc] for u in systems[domain][convention]['units']]
+                # add coordinate to coords
+                if not coord in coords:
+                    coords[coord]= {}
+                    coords[coord]['domain']     = [domain]
+                    coords[coord]['convention'] = [convention]
+                    coords[coord]['units']      = [cur_units]
+                else:
+                    coords[coord]['domain'].append(domain)
+                    coords[coord]['convention'].append(convention)
+                    coords[coord]['units'].append(cur_units)
 
     # check if units agree across coordinates that appear more than once
     for coord in coords:

@@ -865,49 +865,6 @@ class Coordinates(object):
         return _systems
 
 
-    def _coordinates(self):
-        """
-        Get unique list of all coordinate names and their properties.
-
-        Returns
-        -------
-        coords: nested dictionary
-            Resolve coordinate systems in which a coordinate ocurrs and the
-            units that a coordinate can have.
-            Key 0  - coordinate
-            Key 1a - domain
-            Key 1b - convention
-            Key 1c - units
-
-        """
-
-        # get coordinate systems
-        systems = self._systems()
-
-        # resolve membership of coordinates
-        coords = {}
-
-        # loop across domains and conventions
-        for domain in systems:
-            for convention in systems[domain]:
-                # loop across coordinates
-                for cc, coord in enumerate(systems[domain][convention]['coordinates']):
-                    # units of the current coordinate
-                    cur_units = [u[cc] for u in systems[domain][convention]['units']]
-                    # add coordinate to coords
-                    if not coord in coords:
-                        coords[coord]= {}
-                        coords[coord]['domain']     = [domain]
-                        coords[coord]['convention'] = [convention]
-                        coords[coord]['units']      = [cur_units]
-                    else:
-                        coords[coord]['domain'].append(domain)
-                        coords[coord]['convention'].append(convention)
-                        coords[coord]['units'].append(cur_units)
-
-        return coords
-
-
     def _exist_system(self, domain=None, convention=None, unit=None):
         """
         Check if a coordinate system exists and throw an error if it does not.
