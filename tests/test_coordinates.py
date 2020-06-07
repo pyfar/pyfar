@@ -11,9 +11,6 @@ import haiopy.coordinates as coordinates
 
 # %% Test Coordinates() class ------------------------------------------------
 
-# TODO: tests for get_cart, get_sph, get_cyl, and x2y
-# TODO: Do I have to provide an error string to assert or does pytest show more
-#       detailed information?
 # TODO: AssertionError vs. ValueError vs. Exception
 
 def test_coordinates_init():
@@ -222,6 +219,10 @@ def test_cdim():
     # 3D points
     coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
     assert coords.cdim == 2
+
+
+# %% Test coordinate conversions ----------------------------------------------
+
 
 # def test_coordinates_init_from_cartesian():
 #     x = 1

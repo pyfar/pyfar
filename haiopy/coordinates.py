@@ -84,7 +84,7 @@ class Coordinates(object):
     # - coordinate_dictionary
     # - private property to store current domain, convention, units
 
-    def __init__(self, points_1=None, points_2=None, points_3=None,
+    def __init__(self, points_1=[], points_2=[], points_3=[],
                   domain='cart', convention='right', unit=None, comment=None):
         """
         Init coordinates container.
@@ -312,6 +312,9 @@ class Coordinates(object):
         # get cartesian system first
         if not(self._system['domain']=='cart' and self._system['convention']=='right'):
             pts = self.get_cart('right', 'met')
+            # remove noise below eps
+            eps = np.finfo(np.float64).eps
+            pts[np.abs(pts)<eps] = 0
         else:
             pts = self._points
 
@@ -427,6 +430,9 @@ class Coordinates(object):
         # convert to cartesian system first
         if not(self._system['domain']=='cart' and self._system['convention']=='right'):
             pts = self.get_cart('right', 'met')
+            # remove noise below eps
+            eps = np.finfo(np.float64).eps
+            pts[np.abs(pts)<eps] = 0
         else:
             pts = self._points
 
@@ -471,10 +477,11 @@ class Coordinates(object):
         The channel shape gives the shape of the coordinate points excluding
         the last dimension, which is always 3.
         """
-        if np.isnan(self._points).any():
-            return (0,)
-        else:
+        if self._points.size:
             return self._points.shape[:-1]
+        else:
+            return (0,)
+
 
     @property
     def cdim(self):
@@ -484,10 +491,10 @@ class Coordinates(object):
         The channel dimension gives the number of dimensions of the coordinate
         points excluding the last dimension.
         """
-        if np.isnan(self._points).any():
-            return 0
-        else:
+        if self._points.size:
             return self._points.ndim-1
+        else:
+            return 0
 
     def systems(self, show = 'current', brief=False):
         """
@@ -983,11 +990,10 @@ class Coordinates(object):
         [L,M,...,N, 3].
         """
 
-        # cast to numpy array and remove noise below eps
-        points_1, points_2, points_3 = _format_points_for_conversion(
-            points_1, points_2, points_3)
-
-        pts = [points_1, points_2, points_3]
+        # cast to numpy array
+        pts = [np.atleast_2d(np.asarray(points_1, dtype=np.float64)),
+               np.atleast_2d(np.asarray(points_2, dtype=np.float64)),
+               np.atleast_2d(np.asarray(points_3, dtype=np.float64))]
 
         # transpose
         for nn, p in enumerate(pts):
@@ -1021,7 +1027,14 @@ class Coordinates(object):
                 pts[nn] = p[...,np.newaxis]
 
         # concatenate
-        self._points = np.concatenate((pts[0], pts[1], pts[2]), axis)
+        pts = np.concatenate((pts[0], pts[1], pts[2]), axis)
+
+        #remove noise below eps
+        eps = np.finfo(np.float64).eps
+        pts[np.abs(pts)<eps] = 0
+
+        # save to class variable
+        self._points = pts
 
 
     def __repr__(self):
@@ -1093,10 +1106,6 @@ def cart2sph(x, y, z):
 
     radius : ndarray, number
     """
-    # convert to np.array and remove noise below eps
-    x, y, z = _format_points_for_conversion(x, y, z)
-
-    # coordinate conversion
     radius = np.sqrt(x**2 + y**2 + z**2)
     colatitude = np.arccos(z/radius)
     azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
@@ -1145,11 +1154,6 @@ def sph2cart(azimuth, colatitude, radius):
 
     z : ndarray, number
     """
-    # convert to np.array and remove noise below eps
-    azimuth, colatitude, radius = _format_points_for_conversion(
-        azimuth, colatitude, radius)
-
-    # coordinate conversion
     r_sin_cola = radius * np.sin(colatitude)
     x = r_sin_cola * np.cos(azimuth)
     y = r_sin_cola * np.sin(azimuth)
@@ -1203,10 +1207,6 @@ def cart2cyl(x, y, z):
 
     radius : ndarray, number
     """
-    # convert to np.array and remove noise below eps
-    x, y, z = _format_points_for_conversion(x, y, z)
-
-    # coordinate conversion
     azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
     try:
         height = z.copy()
@@ -1262,50 +1262,15 @@ def cyl2cart(azimuth, height, radius):
 
     z : ndarray, number
     """
-    # convert to np.array and remove noise below eps
-    azimuth, height, radius = _format_points_for_conversion(
-        azimuth, height, radius)
-
-    # coordinate conversion
     x = radius * np.cos(azimuth)
     y = radius * np.sin(azimuth)
-    z = height.copy()
+    try:
+        z = height.copy()
+    except:
+        z = height
+
 
     return x, y, z
-
-def _format_points_for_conversion(pts_1, pts_2, pts_3):
-    """
-    Format points for coordinate conversion.
-
-    Convert to numpy array and remove noise below eps for robust conversion.
-
-    Parameters
-    ----------
-    pts_i : int, float, array like, None
-        coordinate points.
-
-    Returns
-    -------
-    pts_i : np.array
-        coordinate points dtype=np.float64 with noise below eps set to zero.
-
-    """
-
-    # convert to np.array
-    pts_1 = np.atleast_2d(np.asarray(pts_1, dtype=np.float64))
-    pts_2 = np.atleast_2d(np.asarray(pts_2, dtype=np.float64))
-    pts_3 = np.atleast_2d(np.asarray(pts_3, dtype=np.float64))
-
-    # remove noise below eps
-    eps = np.finfo(np.float64).eps
-    if not np.isnan(pts_1).any():
-        pts_1[np.abs(pts_1)<eps] = 0
-    if not np.isnan(pts_2).any():
-        pts_2[np.abs(pts_2)<eps] = 0
-    if not np.isnan(pts_3).any():
-        pts_3[np.abs(pts_3)<eps] = 0
-
-    return pts_1, pts_2, pts_3
 
 # def _cart2latlon(x, y, z):
 #     """Transforms from Cartesian coordinates to Geocentric coordinates
