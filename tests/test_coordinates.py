@@ -222,7 +222,12 @@ def test_cdim():
 
 
 # %% Test coordinate conversions ----------------------------------------------
-
+def test_converters():
+    # test if converterts can handle numbers
+    coordinates.cart2sph(0, 0, 1)
+    coordinates.sph2cart(0, 0, 1)
+    coordinates.cart2cyl(0, 0, 1)
+    coordinates.cyl2cart(0, 0, 1)
 
 # def test_coordinates_init_from_cartesian():
 #     x = 1
