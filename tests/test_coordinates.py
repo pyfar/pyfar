@@ -2,7 +2,6 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from pytest import raises
-import pandas as pd
 
 import haiopy
 from haiopy import Coordinates
@@ -80,11 +79,13 @@ def test_coordinate_names():
     # check if units agree across coordinates that appear more than once
     for coord in coords:
          # get unique first entry
-        units     = coords[coord]['units'].copy()
-        units_ref = pd.unique(units[0])
+        units          = coords[coord]['units'].copy()
+        units_ref, idx = np.unique(units[0], True)
+        units_ref      = units_ref[idx]
         for cc in range(1, len(units)):
             # get nex entry for comparison
-            units_test = pd.unique(units[cc])
+            units_test, idx = np.unique(units[cc], True)
+            units_test      = units_test[idx]
             # compare
             assert all(units_ref == units_test), \
                 "'{}' has units {} in {} ({}) but units {} in {} ({})".\
@@ -94,7 +95,6 @@ def test_coordinate_names():
                            units_test, \
                            coords[coord]['domain'][cc], \
                            coords[coord]['convention'][cc])
-
 
 def test_exist_systems():
     # get class instance
