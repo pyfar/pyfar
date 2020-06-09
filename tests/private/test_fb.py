@@ -8,6 +8,7 @@ Created on Wed May  6 19:46:11 2020
 
 import numpy as np
 import haiopy
+from haiopy import Coordinates
 
 # %% General -----------------------------------------------------------------
 # TODO: What is the idea of Audio()?
@@ -103,47 +104,38 @@ x.signal_type
 #          relate the local coordinates to world coordinates. Is this the way
 #          it was intended?
 
-# TODO: In analogy to signal(), store data in the last used coordinate system
+# DONE: In analogy to signal(), store data in the last used coordinate system
 #       and only convert upon request
 
-# TODO: Clear naming of coordinate systems and parameters of the coordinate
+# DONE: Clear naming of coordinate systems and parameters of the coordinate
 #       systems. E.g. 'spherical 1' and 'azimuth', 'colatitude', and 'radius'
 
-# TODO: find way to return coordinates in different units 'degree', 'radians',
-#       'meter', 'millimeter'
-# TODO: Degrees instead of radians, or string to get either (please, please, please)?
+# DONE: find way to return coordinates in different units 'degree', 'radians',
+#       'meter'
 
-# TODO: Document how new coordinate conventions can be added
+# DONE: Document how new coordinate conventions can be added
 
 # TODO: add plot function
 
-# TODO: add comment field, e.g. for name of the sampling scheme
+# DONE: add comment field, e.g. for name of the sampling scheme
 # TODO: can contain sampling weights?
 # TODO: can have a spherical harmonics maximum order (read/write)?
 
 
-# TODO: make all constructors work with scalars and array_like?
-c = haiopy.Coordinates.from_spherical(1, np.pi/2, 0)
-
-c = haiopy.Coordinates([0,1], [1,0], [0,0])
-
-# TODO: short names 'cart', 'sph', 'az', etc...?
-c.cartesian
+# DONE: make all constructors work with scalars and array_like?
 
 
-# TODO: find_nearest_point
+# TODO: self.find_nearest_point
+# - Rename to self.nearest() to make it shorter
 # - Make it work with numbers/arrays as input (conversion to class inside function)
 # - Make it work for different coordinate systems as input (additional string parameter)
 # - Make it work with arrays as input
-# - Features from AKsubGrid
+# - Ability to return N nearest points or everything within a specified
+#   distance
 
-# TODO: renaming and additional functionality (?)
-# - self.nearest_point: instead of find_nearest_point to make it shorter
-# - self.nearest_points: as nearest point, but return everything within a given
-#   range
-# - self.slice: return slices, e.g., horizontal plane within given tolerance
-#   (see AKsubGrid from AKtools)
-d, i = c.find_nearest_point(haiopy.Coordinates([0], [.7], [0]))
+# TODO: add self.slice
+# - get all points that match a given coordinate, e.g., azimuth = 0 within
+#   a specified tolerance.
 
 
 # %% Orientation -------------------------------------------------------------
@@ -159,4 +151,5 @@ d, i = c.find_nearest_point(haiopy.Coordinates([0], [.7], [0]))
 
 # %% Position ---------------------------------------------------------------
 
-# TODO: Do we want a position? I think yes - for completeness.
+# DONE: A position is a Coordinates object with 1 point. For simplicity we
+#       do not want a separate class for that.
