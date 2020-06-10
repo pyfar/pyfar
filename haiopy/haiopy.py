@@ -77,18 +77,23 @@ class Signal(Audio):
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
 
+        self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
+        if domain in self._VALID_SIGNAL_DOMAIN:
+            self._domain = domain
+        else:
+            raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
+
         if domain == 'time':
             self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+            self._n_samples = self._data.shape[-1]
         elif domain == 'freq':
             if n_samples is None:
                 warnings.warn("Number of time samples not given, assuming an\
                     even number of samples from the number of frequency bins.")
                 n_bins = data.shape[-1]
                 n_samples = (n_bins - 1)*2
-            self._data = np.atleast_2d(
-                np.asarray(
-                    fft.irfft(data, n_samples, signal_type),
-                    dtype=dtype))
+            self._n_samples = n_samples
+            self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
         if isinstance(position, Coordinates):
             self._position = position
