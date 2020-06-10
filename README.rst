@@ -48,5 +48,26 @@ develop option:
 
     $ python setup.py develop
 
+
+Building the Documentation
+==========================
+
+Currently we do not yet host the documentation on a public server.
+The documentation can however be built locally using Sphinx by
+executing the make script inside the docs folder.
+
+.. code-block:: console
+
+    $ cd docs/
+    $ make html
+
+After Sphinx finishes the documentation you can open the generated html found in
+
+.. code-block:: console
+
+    $ docs/_build/index.html
+
+using any browser.
+
 .. _git repository: https://github.com/mberz/haiopy
 
