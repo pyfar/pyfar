@@ -1,3 +1,4 @@
+"""Generate, store, and manipulate points in 3D coordinate systems."""
 import numpy as np
 from scipy.spatial import cKDTree
 
