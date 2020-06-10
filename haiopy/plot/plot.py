@@ -23,10 +23,6 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
     -------
     axes :  Axes object or array of Axes objects.
 
-    See Also
-    --------
-    matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
-
     Examples
     --------
     """
@@ -69,10 +65,6 @@ def plot_time(signal, **kwargs):
     -------
     axes :  Axes object or array of Axes objects.
 
-    See Also
-    --------
-    matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
-
     Examples
     --------
     """
@@ -108,11 +100,6 @@ def plot_freq(signal, log_prefix=20, log_reference=1, **kwargs):
     Returns
     -------
     axes : Axes object or array of Axes objects.
-
-    See Also
-    --------
-    matplotlib.pyplot.magnitude_spectrum() : Plot the magnitudes of the
-        corresponding frequencies.
 
     Examples
     --------

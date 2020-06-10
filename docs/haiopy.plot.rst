@@ -12,10 +12,10 @@ There's a bug in in building the documentation for this somewhere...
 ..    :show-inheritance:
 
 
-.. .. automodule:: haiopy.plot.plot
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: haiopy.plot.plot
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 .. haiopy.plot.ticker module
 .. -------------------------
@@ -26,10 +26,10 @@ There's a bug in in building the documentation for this somewhere...
 ..    :show-inheritance:
 
 
-Module contents
----------------
+.. Module contents
+.. ---------------
 
-.. automodule:: haiopy.plot
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: haiopy.plot
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
