@@ -605,6 +605,19 @@ class Coordinates(object):
                         print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
+
+    def get_nearest_n():
+        return None
+
+
+    def get_nearest_cart():
+        return None
+
+
+    def get_nearest_sph():
+        return None
+
+
     @staticmethod
     def _systems():
         """
@@ -1216,19 +1229,9 @@ def cyl2cart(azimuth, height, radius):
 
     #     return distance, index
 
-    # def __getitem__(self, index):
-    #     """Return Coordinates at index
-    #     """
-    #     return Coordinates(self._x[index], self._y[index], self._z[index])
-
     # def __setitem__(self, index, item):
     #     """Set Coordinates at index
     #     """
     #     self.x[index] = item.x
     #     self.y[index] = item.y
     #     self.z[index] = item.z
-
-    # def __len__(self):
-    #     """Length of the object which is the number of points stored.
-    #     """
-    #     return self.n_points
