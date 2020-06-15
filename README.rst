@@ -1,5 +1,5 @@
 ======
-haiopy
+Readme
 ======
 
 Haiopy Acoustics Input and Output in Python. An open and common base for Python programming in acoustics.
