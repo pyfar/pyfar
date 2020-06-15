@@ -14,4 +14,3 @@ scipy
 pyfftw
 PyQt5
 matplotlib
-sphinx_rtd_theme
