@@ -97,51 +97,6 @@ x
 # TODO: What is depending on signal_type
 x.signal_type
 
-# %% Coordinates -------------------------------------------------------------
-
-# TODO: add plot function
-
-# TODO: self.find_nearest_point
-# - Rename to self.nearest() to make it shorter
-# - nearest(point, domain='cart', convention='right', unit='met',
-#           distance=0, metric='cart', atol=1e-15)
-# - do we allow implicit calls or must domain, convention, and unit always be
-#   specified?
-# - metric: 'cart' - eucledian distance
-#           'sph'  - great circle distance
-#           'n'    - N nearest points
-# - Can return N nearest points or everything within a specified distance
-# - use spherical distance as done in
-#   https://pysal.org/libpysal/_modules/libpysal/cg/kdtree.html
-
-# TODO: add self.slice
-# - get all points that match a given coordinate, e.g., azimuth = 0 within
-#   a specified tolerance.
-# - slice(point, coordinate, distance)
-# - needs to account for cyclic coordinates, e.g., azimuth. This can be done
-#   by adding a range property for each coordinate, e.g., [0 2*np.pi]
-
-# TODO: Do we want slicing, i.e., __getitem__, __setitem__
-# TODO: can contain sampling weights?
-# TODO: can have a spherical harmonics maximum order (read/write)?
-# TODO: add sampling grids (Lebedev, Fliege, Gaussian, EquiAngular, GCD, Hyper)
-# TODO: Rotation - do we need it? It's quick and easy to do...
-
-# DONE: In analogy to signal(), store data in the last used coordinate system
-#       and only convert upon request
-
-# DONE: Clear naming of coordinate systems and parameters of the coordinate
-#       systems. E.g. 'spherical 1' and 'azimuth', 'colatitude', and 'radius'
-
-# DONE: find way to return coordinates in different units 'degree', 'radians',
-#       'meter'
-
-# DONE: Document how new coordinate conventions can be added
-
-# DONE: add comment field, e.g. for name of the sampling scheme
-
-# DONE: make all constructors work with scalars and array_like?
-
 
 # %% Orientation -------------------------------------------------------------
 
