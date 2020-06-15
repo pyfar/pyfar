@@ -70,7 +70,7 @@ After Sphinx finishes the documentation you can open the generated html found in
 
 using any browser.
 
-.. _git repository: https://github.com/mberz/haiopy
+.. code-block:: console
 
     $ make html
 
