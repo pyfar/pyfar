@@ -61,7 +61,8 @@ class Coordinates(object):
     #       because the definition differs from the sperical radius.
 
     def __init__(self, points_1=[], points_2=[], points_3=[],
-                  domain='cart', convention='right', unit=None, comment=None):
+                  domain='cart', convention='right', unit=None,
+                  weights=None, comment=None):
         """
         Init coordinates container.
 
@@ -80,8 +81,13 @@ class Coordinates(object):
         unit: string
              unit of the coordinate system. By default the first available unit
              is used, see self.systems('all')
+        weights: array like, number
+            sampling weights for the coordinate points (Optional). Must have
+            same size as points_i, i.e., if points_i has five entries, weights
+            must also have five entries. The default is None.
         comment : str
-            Any comment about the stored coordinate points.
+            Any comment about the stored coordinate points (Optional). The
+            default is None.
         """
 
         # init emtpy object
@@ -92,6 +98,9 @@ class Coordinates(object):
 
         # save coordinates to self
         self._set_points(points_1, points_2, points_3)
+
+        # save sampling weights
+        self._set_weights(weights)
 
         # save comment
         self._comment = comment
@@ -433,16 +442,24 @@ class Coordinates(object):
         self._set_points(pts_1, pts_2, pts_3)
         return self._points
 
+    @property
+    def weights(self):
+        """Get sampling weights."""
+        return self._weights
+
+    @weights.setter
+    def weights(self, value):
+        """Set sampling weights."""
+        self._set_weights(value)
 
     @property
     def comment(self):
-        """Comment for the data stored in the object."""
-        print('getter')
+        """Get comment."""
         return self._comment
 
     @comment.setter
     def comment(self, value):
-        print('setter')
+        """Set comment."""
         self._comment = value
 
     @property
@@ -871,6 +888,31 @@ class Coordinates(object):
 
         # save to class variable
         self._points = pts
+
+
+    def _set_weights(self, weights):
+        """
+        Check and set sampling weights.
+
+        Set self._weights, which is an atleast_1d numpy array of shape
+        [L,M,...,N].
+        """
+
+        # check input
+        if weights is None:
+            self._weights = weights
+            return
+
+        # cast to np.array
+        weights = np.asarray(weights, dtype=np.float64)
+
+        # reshape according to self._points
+        assert weights.size == self.csize,\
+            "weights must have same size as self.csize"
+        weights = weights.reshape(self.cshape)
+
+        # set class variable
+        self._weights = weights
 
 
     def __repr__(self):

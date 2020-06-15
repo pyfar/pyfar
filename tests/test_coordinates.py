@@ -178,6 +178,16 @@ def test_coordinates_init_val_and_sys():
             for unit in list(systems[domain][convention]['units']):
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
 
+def test_coordinates_init_val_and_weights():
+    # correct number of weights
+    coords = Coordinates([1,2],0,0, weights=[.5, .5])
+    assert isinstance(coords, Coordinates)
+
+    # incorrect number of weights
+    with raises(AssertionError):
+        Coordinates([1,2],0,0, weights=.5)
+
+
 def test_setter_and_getter():
     # get list of available coordinate systems
     coords = Coordinates()
@@ -209,6 +219,15 @@ def test_setter_and_getter():
                         p = eval("c.get_{}('{}')"\
                                  .format(domain_out, convention_out))
                         npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+
+def test_getter_weights():
+    coords = Coordinates([1,2],0,0, weights=[.5, .5])
+    assert (coords.weights == np.array([.5, .5])).all()
+
+def test_setter_weights():
+    coords = Coordinates([1,2],0,0)
+    coords.weights = [.5, .5]
+    assert (coords.weights == np.array([.5, .5])).all()
 
 def test_getter_comment():
     coords = Coordinates(1,1,1, comment='try this')
