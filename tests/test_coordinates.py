@@ -283,6 +283,26 @@ def test_csize():
     coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
     assert coords.csize == 6
 
+def test_getitem():
+    # test without weights
+    coords = Coordinates([1,2], 0, 0)
+    new = coords[0]
+    assert isinstance(new, Coordinates)
+    assert (new.get_cart().flatten() == np.array([1, 0, 0])).all()
+
+    # test with weights
+    coords = Coordinates([1,2], 0, 0, weights=[.1, .9])
+    new = coords[0]
+    assert isinstance(new, Coordinates)
+    assert (new.get_cart().flatten() == np.array([1, 0, 0])).all()
+    assert new.weights.flatten() == np.array(.1)
+
+    # test with 3D array
+    coords = Coordinates([[1,2,3,4,5],[2,3,4,5,6]], 0, 0)
+    new = coords[0:1]
+    assert isinstance(new, Coordinates)
+    assert new.cshape == (1,5)
+
 
 # %% Test coordinate conversions ----------------------------------------------
 def test_converters():

@@ -1,6 +1,7 @@
 """Generate, store, and manipulate points in 3D coordinate systems."""
 import numpy as np
 from scipy.spatial import cKDTree
+import copy
 
 
 class Coordinates(object):
@@ -927,6 +928,20 @@ class Coordinates(object):
         self._weights = weights
 
 
+    def __getitem__(self, index):
+        """Return copy of Coordinates object at index."""
+
+        # get copy
+        new = copy.deepcopy(self)
+        # slice points
+        new._points = new._points[index]
+        # slice weights
+        if not new._weights is None:
+            new._weights = new._weights[index]
+
+        return new
+
+
     def __repr__(self):
         """Get info about Coordinates object."""
 
@@ -1178,11 +1193,6 @@ def cyl2cart(azimuth, height, radius):
     return x, y, z
 
 
-    # @property
-    # def n_points(self):
-    #     """Return number of points stored in the object"""
-    #     return self.x.size
-
     # def find_nearest_point(self, point):
     #     """Find the closest Coordinate point to a given Point.
     #     The search for the nearest point is performed using the scipy
@@ -1205,16 +1215,6 @@ def cyl2cart(azimuth, height, radius):
     #     distance, index = kdtree.query(point.cartesian.T)
 
     #     return distance, index
-
-    # def __repr__(self):
-    #     """repr for Coordinate class
-
-    #     """
-    #     if self.n_points == 1:
-    #         repr_string = "Coordinates of 1 point"
-    #     else:
-    #         repr_string = "Coordinates of {} points".format(self.n_points)
-    #     return repr_string
 
     # def __getitem__(self, index):
     #     """Return Coordinates at index
