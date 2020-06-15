@@ -14,7 +14,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
 
     Parameters
     ----------
-    signal : Signal object
+    signal : Signal
         An audio signal object from the haiopy Signal class
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -56,7 +56,7 @@ def plot_time(signal, **kwargs):
 
     Parameters
     ----------
-    signal : Signal object
+    signal : Signal
         An audio signal object from the haiopy Signal class
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
