@@ -1,8 +1,6 @@
 Plotting (haiopy.plot)
 ======================
 
-There's a bug in in building the documentation for this somewhere...
-
 .. haiopy.plot.gui module
 .. ----------------------
 
