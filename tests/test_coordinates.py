@@ -187,6 +187,9 @@ def test_coordinates_init_val_and_weights():
     with raises(AssertionError):
         Coordinates([1,2],0,0, weights=.5)
 
+def test_coordinates_init_sh_order():
+    coords = Coordinates(sh_order = 5)
+    assert isinstance(coords, Coordinates)
 
 def test_setter_and_getter():
     # get list of available coordinate systems
@@ -228,6 +231,15 @@ def test_setter_weights():
     coords = Coordinates([1,2],0,0)
     coords.weights = [.5, .5]
     assert (coords.weights == np.array([.5, .5])).all()
+
+def test_getter_sh_order():
+    coords = Coordinates(sh_order=10)
+    assert coords.sh_order == 10
+
+def test_setter_sh_order():
+    coords = Coordinates()
+    coords.sh_order = 10
+    assert coords.sh_order == 10
 
 def test_getter_comment():
     coords = Coordinates(1,1,1, comment='try this')

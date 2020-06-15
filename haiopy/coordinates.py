@@ -62,7 +62,7 @@ class Coordinates(object):
 
     def __init__(self, points_1=[], points_2=[], points_3=[],
                   domain='cart', convention='right', unit=None,
-                  weights=None, comment=None):
+                  weights=None, sh_order=None, comment=None):
         """
         Init coordinates container.
 
@@ -85,6 +85,9 @@ class Coordinates(object):
             sampling weights for the coordinate points (Optional). Must have
             same size as points_i, i.e., if points_i has five entries, weights
             must also have five entries. The default is None.
+        sh_order : int
+            maximum sperical harmonics order of the sampling grid (Optional).
+            The default is None.
         comment : str
             Any comment about the stored coordinate points (Optional). The
             default is None.
@@ -99,10 +102,9 @@ class Coordinates(object):
         # save coordinates to self
         self._set_points(points_1, points_2, points_3)
 
-        # save sampling weights
+        # save meta data
         self._set_weights(weights)
-
-        # save comment
+        self._sh_order = sh_order
         self._comment = comment
 
 
@@ -451,6 +453,16 @@ class Coordinates(object):
     def weights(self, value):
         """Set sampling weights."""
         self._set_weights(value)
+
+    @property
+    def sh_order(self):
+        """Get the maximum spherical harmonics order."""
+        return self._sh_order
+
+    @sh_order.setter
+    def sh_order(self, value):
+        """Set the maximum spherical harmonics order."""
+        self._sh_order = value
 
     @property
     def comment(self):
@@ -933,7 +945,22 @@ class Coordinates(object):
         coords = ["{} in {}".format(c, u) for c, u in \
                   zip(self._system['coordinates'], self._system['units'])]
 
-        return obj + '\n' + conv + '\n' + 'coordinates: ' + ', '.join(coords)
+        # join information
+        _repr = obj + '\n' + conv + '\n' + 'coordinates: ' + ', '.join(coords)
+
+        # check for sampling weights
+        if not self._weights is None:
+            _repr += '\nContains sampling weights'
+
+        # check for sh_order
+        if not self._sh_order is None:
+            _repr += '\nSpherical harmonics order: {}'.format(self._sh_order)
+
+        # check for comment
+        if not self._comment is None:
+            _repr += '\nComment: {}'.format(self._comment)
+
+        return _repr
 
 
 
