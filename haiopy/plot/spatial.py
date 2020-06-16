@@ -9,7 +9,7 @@ import copy
 from haiopy.coordinates import Coordinates
 
 
-def scatter(coordinates, projection='3d', ax=None, **kwargs):
+def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
     """Plot the x, y, and z coordinates as a point cloud in three-dimensional
     space.
 
@@ -22,6 +22,9 @@ def scatter(coordinates, projection='3d', ax=None, **kwargs):
         are supported.
     ax : matplotlib.axis (optional)
         If no axis is defined, a new axis in a new figure is created.
+    set_ax: boolean
+        Set the limits of the axis according to the points in coordinates. The
+        default is True.
     **kwargs :
         additional key value arguments are passed to matplotlib.pyplot.scatter.
 
@@ -43,6 +46,12 @@ def scatter(coordinates, projection='3d', ax=None, **kwargs):
     if not 'Axes3D' in ax.__str__():
         raise ValueError("Only three-dimensional axes supported.")
 
+    # add defaults to kwargs
+    if not 'marker' in kwargs:
+        kwargs['marker'] = '.'
+    if not 'c' in kwargs:
+        kwargs['c'] = 'k'
+
     # copy to avoid changing the coordinate system of the original object
     c   = copy.deepcopy(coordinates)
     xyz = c.get_cart()
@@ -59,11 +68,12 @@ def scatter(coordinates, projection='3d', ax=None, **kwargs):
     ax.set_zlabel('Z [m]')
 
     # equal axis limits for distortion free  display
-    ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
-               np.max(xyz)+.15*np.abs(np.max(xyz)))
+    if set_ax:
+        ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
+                   np.max(xyz)+.15*np.abs(np.max(xyz)))
 
-    ax.set_xlim(ax_lims)
-    ax.set_ylim(ax_lims)
-    ax.set_zlim(ax_lims)
+        ax.set_xlim(ax_lims)
+        ax.set_ylim(ax_lims)
+        ax.set_zlim(ax_lims)
 
     return ax

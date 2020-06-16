@@ -3,6 +3,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 import copy
 
+import haiopy
 
 class Coordinates(object):
     """
@@ -606,8 +607,81 @@ class Coordinates(object):
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
 
-    def get_nearest_n():
-        return None
+    def get_nearest_k(self, points_1, points_2, points_3, k=1,
+                      domain='cart', convention='right', unit='met',
+                      show=False):
+        """
+        Find nearest coordinate points to a given point.
+
+        .. note::
+            numpy.spatial.cKDTree is used for the search., which requires an
+            (N, 3) array. The coordinate points in self are thus reshaped to
+            (self.csize, 3) before they are passed to cKDTree. The index that
+            is returned referres to the reshaped coordinate points.
+
+        Parameters
+        ----------
+        points_1 : array like, number
+            points for the first coordinate
+        points_2 : array like, number
+            points for the second coordinate
+        points_3 : array like, number
+            points for the third coordinate
+            Point to find nearest neighbors. Point must have three elements.
+        k : int
+            Number of points that are returned. The default is 1.
+        domain : string
+            domain of point, see self.systems('all').
+        convention: string
+             coordinate convention of point, see self.systems('all').
+        unit: string
+             unit of point, see self.systems('all').
+
+        Returns
+        -------
+        distance : array of floats
+            The eucledian distances to the nearest neighbors.
+            If ``points`` have shape ``tuple``, then ``distance`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with infinite distances.
+        index : ndarray of ints
+            The locations of the neighbors in ``self.data``.
+            If ``points`` have shape ``tuple``, then ``index`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with ``self.csize``.
+
+        """
+
+        # get kdTree
+        kdTree = self._make_kdtree()
+
+        # get target point in cartesian coordinates
+        coords = Coordinates(points_1, points_2, points_3,
+                            domain, convention, unit)
+        points = coords.get_cart()
+
+        # querry nearest neighbors
+        if coords.csize == 1:
+            # make sure output is 1d if a single point is querried
+            distance, index = kdTree.query(points.flatten(), k=k)
+        else:
+            distance, index = kdTree.query(points, k=k)
+
+        # plot all and returned points
+        if show:
+            if self.cdim > 1:
+                raise Exception('Plotting only works for self.cdim=1')
+
+            # geteverything that is not selected
+            if isinstance(index, int):
+                not_index = [i for i in range(self.csize) if i not in [index]]
+            else:
+                not_index = [i for i in range(self.csize) if i not in index]
+
+            ax = haiopy.plot.scatter(self[not_index], c='k')
+            haiopy.plot.scatter(self[index], ax=ax, set_ax=False, c='r',alpha=1)
+
+        return distance, index
 
 
     def get_nearest_cart():
@@ -941,6 +1015,22 @@ class Coordinates(object):
         self._weights = weights
 
 
+    def _make_kdtree(self):
+        """Make a numpy kdTree for fast search of nearest points."""
+
+        # get points from copy to avoid changing the original
+        xyz = copy.deepcopy(self).get_cart()
+
+        # format to (n,3) array
+        x   = xyz[...,0].reshape(self.csize,1)
+        y   = xyz[...,1].reshape(self.csize,1)
+        z   = xyz[...,2].reshape(self.csize,1)
+        xyz = np.concatenate((x, y, z), 1)
+
+        # make and return kdtree
+        kdtree = cKDTree(xyz)
+        return kdtree
+
     def __getitem__(self, index):
         """Return copy of Coordinates object at index."""
 
@@ -1204,30 +1294,6 @@ def cyl2cart(azimuth, height, radius):
 
 
     return x, y, z
-
-
-    # def find_nearest_point(self, point):
-    #     """Find the closest Coordinate point to a given Point.
-    #     The search for the nearest point is performed using the scipy
-    #     cKDTree implementation.
-
-    #     Parameters
-    #     ----------
-    #     point : Coordinates
-    #         Point to find nearest neighboring Coordinate
-
-    #     Returns
-    #     -------
-    #     distance : ndarray, double
-    #         Distance between the point and it's closest neighbor
-    #     index : int
-    #         Index of the closest point.
-
-    #     """
-    #     kdtree = cKDTree(self.cartesian.T)
-    #     distance, index = kdtree.query(point.cartesian.T)
-
-    #     return distance, index
 
     # def __setitem__(self, index, item):
     #     """Set Coordinates at index

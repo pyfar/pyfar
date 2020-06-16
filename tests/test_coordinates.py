@@ -303,6 +303,33 @@ def test_getitem():
     assert isinstance(new, Coordinates)
     assert new.cshape == (1,5)
 
+def test_get_nearest_k():
+    # 1D cartesian, nearest point
+    x = np.arange(6)
+    coords = Coordinates(x, 0, 0)
+    assert coords.get_nearest_k(1,0,0) == (0., 1)
+
+    # 1D spherical, nearest point
+    assert coords.get_nearest_k(0,0,1, 1, 'sph', 'top_elev', 'deg') == (0., 1)
+
+    # 1D cartesian, two nearest points
+    d, i = coords.get_nearest_k(1.2,0,0, 2)
+    npt.assert_allclose(d, [.2, .8], atol=1e-15)
+    npt.assert_allclose(i, [1, 2])
+
+    # 1D cartesian querry two points
+    d, i = coords.get_nearest_k([1, 2] ,0,0)
+    npt.assert_allclose(d, [0, 0], atol=1e-15)
+    npt.assert_allclose(i, [1, 2])
+
+    # 2D cartesion, nearest point
+    coords = Coordinates(x.reshape(2,3), 0, 0)
+    assert coords.get_nearest_k(1,0,0) == (0., 1)
+
+    # test with plot
+    coords = Coordinates(x, 0, 0)
+    coords.get_nearest_k(1,0,0, show=True)
+
 
 # %% Test coordinate conversions ----------------------------------------------
 def test_converters():
@@ -311,26 +338,6 @@ def test_converters():
     coordinates.sph2cart(0, 0, 1)
     coordinates.cart2cyl(0, 0, 1)
     coordinates.cyl2cart(0, 0, 1)
-
-
-# def test_find_nearest():
-#     coords = Coordinates([1, 0], [1, 1], [0, 1])
-#     point = Coordinates(1, 1, 0)
-
-#     dist, idx = coords.find_nearest_point(point)
-
-#     assert idx == 0
-
-
-# def test_len():
-#     coords = Coordinates([1, 0], [1, 1], [0, 1])
-#     assert len(coords) == 2
-
-
-# def test_getitem():
-#     coords = Coordinates([1, 0], [1, 1], [0, 1])
-#     getcoords = coords[0]
-#     npt.assert_allclose(np.squeeze(getcoords.cartesian), np.array([1, 1, 0]))
 
 
 # def test_setitem():
