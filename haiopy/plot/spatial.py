@@ -21,8 +21,7 @@ def scatter(coordinates, projection='3d', ax=None):
         Projection to be used for the plot. Only three-dimensional projections
         are supported.
     ax : matplotlib.axis (optional)
-        If no axis is defined, the currently active axis is selected through
-        matplotlib or a new axis in a new figure is created.
+        If no axis is defined, a new axis in a new figure is created.
 
     Returns
     ax : matplotlib.axes
@@ -33,6 +32,10 @@ def scatter(coordinates, projection='3d', ax=None):
         raise ValueError("The coordinates need to be a Coordinates object")
 
     if ax is None:
+        # create equal aspect figure for distortion free display
+        # (workaround for ax.set_aspect('equal', 'box'), which is currently not
+        #  working for 3D axes.)
+        plt.figure(figsize=plt.figaspect(1.))
         ax = plt.gca(projection=projection)
 
     if not 'Axes3D' in ax.__str__():
@@ -54,8 +57,6 @@ def scatter(coordinates, projection='3d', ax=None):
     ax.set_zlabel('Z [m]')
 
     # equal axis limits for distortion free  display
-    # (workaround for ax.set_aspect('equal', 'box'), which is currently not
-    #  working for 3D axes.)
     ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
                np.max(xyz)+.15*np.abs(np.max(xyz)))
 

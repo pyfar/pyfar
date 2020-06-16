@@ -12,7 +12,10 @@ from haiopy import Coordinates
 
 # %% Random testing
 
-c = Coordinates([0, 180], 0, 1, 'sph', 'top_elev', 'deg')
+# make random spherical grid
+az = np.random.rand((1024)) * 360
+el = np.random.rand((1024)) * 180 - 90
+c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 haiopy.plot.scatter(c)
 # %% General -----------------------------------------------------------------
 # TODO: What is the idea of Audio()?
