@@ -42,10 +42,6 @@ def scatter(coordinates, projection='3d', ax=None):
     c   = copy.deepcopy(coordinates)
     xyz = c.get_cart()
 
-    # find maxima for axis limits
-    ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
-               np.max(xyz)+.15*np.abs(np.max(xyz)))
-
     # plot
     ax.scatter(
         xyz[..., 0],
@@ -60,6 +56,9 @@ def scatter(coordinates, projection='3d', ax=None):
     # equal axis limits for distortion free  display
     # (workaround for ax.set_aspect('equal', 'box'), which is currently not
     #  working for 3D axes.)
+    ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
+               np.max(xyz)+.15*np.abs(np.max(xyz)))
+
     ax.set_xlim(ax_lims)
     ax.set_ylim(ax_lims)
     ax.set_zlim(ax_lims)
