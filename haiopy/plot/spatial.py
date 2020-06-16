@@ -3,6 +3,8 @@ Plot for spatially distributed data.
 """
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+import numpy as np
+import copy
 
 from haiopy.coordinates import Coordinates
 
@@ -36,13 +38,30 @@ def scatter(coordinates, projection='3d', ax=None):
     if not 'Axes3D' in ax.__str__():
         raise ValueError("Only three-dimensional axes supported.")
 
-    ax.scatter(
-        coordinates.get_cart()[..., 0],
-        coordinates.get_cart()[..., 1],
-        coordinates.get_cart()[..., 2])
+    # copy to avoid changing the coordinate system of the original object
+    c   = copy.deepcopy(coordinates)
+    xyz = c.get_cart()
 
+    # find maxima for axis limits
+    ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
+               np.max(xyz)+.15*np.abs(np.max(xyz)))
+
+    # plot
+    ax.scatter(
+        xyz[..., 0],
+        xyz[..., 1],
+        xyz[..., 2])
+
+    # labeling
     ax.set_xlabel('X [m]')
     ax.set_ylabel('Y [m]')
     ax.set_zlabel('Z [m]')
+
+    # equal axis limits for distortion free  display
+    # (workaround for ax.set_aspect('equal', 'box'), which is currently not
+    #  working for 3D axes.)
+    ax.set_xlim(ax_lims)
+    ax.set_ylim(ax_lims)
+    ax.set_zlim(ax_lims)
 
     return ax
