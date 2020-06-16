@@ -9,7 +9,7 @@ import copy
 from haiopy.coordinates import Coordinates
 
 
-def scatter(coordinates, projection='3d', ax=None):
+def scatter(coordinates, projection='3d', ax=None, **kwargs):
     """Plot the x, y, and z coordinates as a point cloud in three-dimensional
     space.
 
@@ -22,6 +22,8 @@ def scatter(coordinates, projection='3d', ax=None):
         are supported.
     ax : matplotlib.axis (optional)
         If no axis is defined, a new axis in a new figure is created.
+    **kwargs :
+        additional key value arguments are passed to matplotlib.pyplot.scatter.
 
     Returns
     ax : matplotlib.axes
@@ -49,7 +51,7 @@ def scatter(coordinates, projection='3d', ax=None):
     ax.scatter(
         xyz[..., 0],
         xyz[..., 1],
-        xyz[..., 2])
+        xyz[..., 2], **kwargs)
 
     # labeling
     ax.set_xlabel('X [m]')

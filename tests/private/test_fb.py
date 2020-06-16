@@ -13,10 +13,10 @@ from haiopy import Coordinates
 # %% Random testing
 
 # make random spherical grid
-az = np.random.rand((1024)) * 360
-el = np.random.rand((1024)) * 180 - 90
+az = np.random.rand(512) * 360
+el = np.random.rand(512) * 180 - 90
 c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
-haiopy.plot.scatter(c)
+haiopy.plot.scatter(c, c='r')
 # %% General -----------------------------------------------------------------
 # TODO: What is the idea of Audio()?
 # TODO: How do we handle irregular data, e.g., ctave values?
