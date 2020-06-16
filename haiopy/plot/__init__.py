@@ -3,3 +3,4 @@
 """Plot sub-package for haiopy."""
 
 from .plot import *
+from .spatial import *
