@@ -22,14 +22,13 @@ el = np.random.rand(3,10,30) * 180 - 90
 c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 # ax = haiopy.plot.scatter(c)
 
-d, idx = c.get_nearest_k(0,0,1, 50, 'sph', 'top_elev', 'deg', show=True)
+d, idx, mask = c.get_nearest_k(0,0,1, 50, 'sph', 'top_elev', 'deg', show=True)
+# idx, mask = c.get_nearest_cart(0,0,1, 1, 'sph', 'top_elev', 'deg', show=True)
+# idx, mask = c.get_nearest_sph(0,0,1, 90, 'sph', 'top_elev', 'deg', show=True)
 
 # p1 = c.get_sph('top_elev', 'deg')[idx]
 # p2 = c.get_sph('top_elev', 'deg')[~idx]
 
-# %% mask for getitem
-
-azz = az.flatten() if False else az
 
 # %% General -----------------------------------------------------------------
 # TODO: What is the idea of Audio()?

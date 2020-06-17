@@ -307,28 +307,84 @@ def test_get_nearest_k():
     # 1D cartesian, nearest point
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
-    assert coords.get_nearest_k(1,0,0) == (0., 1)
+    d, i, m = coords.get_nearest_k(1,0,0)
+    assert d == 0.
+    assert i == 1
+    assert (m == np.array([0,1,0,0,0,0], dtype=bool)).all()
 
     # 1D spherical, nearest point
-    assert coords.get_nearest_k(0,0,1, 1, 'sph', 'top_elev', 'deg') == (0., 1)
+    d, i, m = coords.get_nearest_k(0,0,1, 1, 'sph', 'top_elev', 'deg')
+    assert d == 0.
+    assert i == 1
+    assert (m == np.array([0,1,0,0,0,0], dtype=bool)).all()
 
     # 1D cartesian, two nearest points
-    d, i = coords.get_nearest_k(1.2,0,0, 2)
+    d, i, m = coords.get_nearest_k(1.2,0,0, 2)
     npt.assert_allclose(d, [.2, .8], atol=1e-15)
-    npt.assert_allclose(i, [1, 2])
+    assert (i == np.array([1, 2])).all()
+    assert (m == np.array([0,1,1,0,0,0], dtype=bool)).all()
 
     # 1D cartesian querry two points
-    d, i = coords.get_nearest_k([1, 2] ,0,0)
+    d, i, m = coords.get_nearest_k([1, 2] ,0,0)
     npt.assert_allclose(d, [0, 0], atol=1e-15)
     npt.assert_allclose(i, [1, 2])
+    assert (m == np.array([0,1,1,0,0,0], dtype=bool)).all()
 
-    # 2D cartesion, nearest point
+    # 2D cartesian, nearest point
     coords = Coordinates(x.reshape(2,3), 0, 0)
-    assert coords.get_nearest_k(1,0,0) == (0., 1)
+    d, i, m = coords.get_nearest_k(1,0,0)
+    assert d == 0.
+    assert i == 1
+    assert (m == np.array([[0,1,0],[0,0,0]], dtype=bool)).all()
 
     # test with plot
     coords = Coordinates(x, 0, 0)
     coords.get_nearest_k(1,0,0, show=True)
+
+    # test object with a single point
+    coords = Coordinates(1,0,0)
+    coords.get_nearest_k(1,0,0, show=True)
+
+    # test out of range parameters
+    with raises(AssertionError):
+        coords.get_nearest_k(1, 0, 0, -1)
+
+def test_get_nearest_cart():
+    # test only 1D case since most of the code from self.get_nearest_k is used
+    x = np.arange(6)
+    coords = Coordinates(x, 0, 0)
+    i, m = coords.get_nearest_cart(2.5,0,0, 1.5)
+    assert (i == np.array([1,2,3,4])).all()
+    assert (m == np.array([[0,1,1,1,1,0]], dtype=bool)).all()
+
+    # test search with empty results
+    i, m = coords.get_nearest_cart(2.5,0,0, .1)
+    assert len(i) == 0
+    assert (m == np.array([[0,0,0,0,0,0]], dtype=bool)).all()
+
+    # test out of range parameters
+    with raises(AssertionError):
+        coords.get_nearest_cart(1,0,0,-1)
+
+def test_get_nearest_sph():
+    # test only 1D case since most of the code from self.get_nearest_k is used
+    az = np.linspace(0, 40, 5)
+    coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
+    i, m = coords.get_nearest_sph(25,0,1, 5, 'sph', 'top_elev', 'deg')
+    assert (i == np.array([2,3])).all()
+    assert (m == np.array([[0,0,1,1,0]], dtype=bool)).all()
+
+    # test search with empty results
+    i, m = coords.get_nearest_sph(25,0,1, 1, 'sph', 'top_elev', 'deg')
+    assert len(i) == 0
+    assert (m == np.array([[0,0,0,0,0]], dtype=bool)).all()
+
+    # test out of range parameters
+    with raises(AssertionError):
+        coords.get_nearest_sph(1,0,0,-1)
+    with raises(AssertionError):
+        coords.get_nearest_sph(1,0,0,181)
+
 
 
 # %% Test coordinate conversions ----------------------------------------------

@@ -611,31 +611,23 @@ class Coordinates(object):
                       domain='cart', convention='right', unit='met',
                       show=False):
         """
-        Find nearest coordinate points to a given point.
-
-        .. note::
-            numpy.spatial.cKDTree is used for the search., which requires an
-            (N, 3) array. The coordinate points in self are thus reshaped to
-            (self.csize, 3) before they are passed to cKDTree. The index that
-            is returned referres to the reshaped coordinate points.
+        Find k nearest coordinates of one or more points.
 
         Parameters
         ----------
-        points_1 : array like, number
-            points for the first coordinate
-        points_2 : array like, number
-            points for the second coordinate
-        points_3 : array like, number
-            points for the third coordinate
-            Point to find nearest neighbors. Point must have three elements.
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
         k : int
-            Number of points that are returned. The default is 1.
+            Number of points to return. k must be > 0. The default is 1.
         domain : string
             domain of point, see self.systems('all').
         convention: string
              coordinate convention of point, see self.systems('all').
-        unit: string
+        unit : string
              unit of point, see self.systems('all').
+        show : bool
+            show a plot of the coordinate points. The default is False.
 
         Returns
         -------
@@ -649,40 +641,152 @@ class Coordinates(object):
             If ``points`` have shape ``tuple``, then ``index`` has shape
             ``tuple+(k,)``. When k == 1, the last dimension of the output is
             squeezed. Missing neighbors are indicated with ``self.csize``.
+        mask : boolean array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        numpy.spatial.cKDTree is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (self.csize, 3) before they are passed to cKDTree. The index that
+        is returned referres to the reshaped coordinate points.
 
         """
 
-        # get KDTree
-        kdtree = self._make_kdtree()
+        # check the input
+        assert isinstance(k, int) and k>0 and k<= self.csize,\
+            "k must be an integeger > 0 and <= self.csize."
 
-        # get target point in cartesian coordinates
-        coords = Coordinates(points_1, points_2, points_3,
-                            domain, convention, unit)
-        points = coords.get_cart()
-
-        # querry nearest neighbors
-        points = points.flatten() if coords.csize == 1 else points
-        distance, index = kdtree.query(points, k=k)
-
-        # mask for scatter plot
-        mask = np.full((self.csize), False)
-        mask[index] = True
-        mask = mask.reshape(self.cshape)
-
-        # plot all and returned points
-        if show:
-            ax = haiopy.plot.scatter(self[~mask], c='k')
-            haiopy.plot.scatter(self[mask], ax=ax, set_ax=False, c='r',alpha=1)
+        # get the points
+        distance, index, mask = self._get_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, k, 'k')
 
         return distance, index, mask
 
 
-    def get_nearest_cart():
-        return None
+    def get_nearest_cart(self, points_1, points_2, points_3, distance=1,
+                      domain='cart', convention='right', unit='met',
+                      show=False, atol=1e-15):
+        """
+        Find coordinates within certain distance to one or more points.
+
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        distance : number
+            Euclidean distance in meters. Must be >= 0. The default is 1.
+        domain : string
+            domain of point, see self.systems('all').
+        convention: string
+             coordinate convention of point, see self.systems('all').
+        unit: string
+             unit of point, see self.systems('all').
+        show : bool
+            show a plot of the coordinate points. The default is False.
+        atol : float
+            search for everything within ``distance + atol``. The default is
+            1e-15
+
+        Returns
+        -------
+        index : ndarray of ints
+            The locations of the neighbors in ``self.data``.
+            If ``points`` have shape ``tuple``, then ``index`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with ``self.csize``.
+        mask : boolean array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        numpy.spatial.cKDTree is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (self.csize, 3) before they are passed to cKDTree. The index that
+        is returned referres to the reshaped coordinate points.
+
+        """
+
+        # check the input
+        assert distance >= 0,"distance must be >= 0"
+
+        # get the points
+        distance, index, mask = self._get_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, distance, 'cart', atol)
+
+        return index, mask
 
 
-    def get_nearest_sph():
-        return None
+    def get_nearest_sph(self, points_1, points_2, points_3, distance=1,
+                      domain='sph', convention='top_colat', unit='rad',
+                      show=False, atol=1e-15):
+        """
+        Find coordinates within certain distance to one or more points.
+
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        distance : number
+            Great circle distance in degrees. Must be >= 0 and <= 180. The
+            default is 1.
+        domain : string
+            domain of point, see self.systems('all').
+        convention: string
+             coordinate convention of point, see self.systems('all').
+        unit: string
+             unit of point, see self.systems('all').
+        show : bool
+            show a plot of the coordinate points. The default is False.
+        atol : float
+            search for everything within ``distance + atol``. The default is
+            1e-15
+
+        Returns
+        -------
+        index : ndarray of ints
+            The locations of the neighbors in ``self.data``.
+            If ``points`` have shape ``tuple``, then ``index`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with ``self.csize``.
+        mask : boolean array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        numpy.spatial.cKDTree is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (self.csize, 3) before they are passed to cKDTree. The index that
+        is returned referres to the reshaped coordinate points.
+
+        """
+
+        # check the input
+        assert distance >= 0 and distance <= 180,"distance must be >= 0 and "\
+                                                 "<= 180."
+
+        # get radius and check for equality
+        radius = copy.deepcopy(self).get_sph()[...,2]
+        delta_radius = np.max(radius) - np.min(radius)
+        if delta_radius > 1e-15:
+            raise ValueError("get_nearest_sph only works if all points have "\
+                             "the same radius. Differences are larger than "\
+                             "1e-15")
+
+        # get the points
+        distance, index, mask = self._get_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, distance, 'sph', atol,
+            np.max(radius))
+
+        return index, mask
 
 
     @staticmethod
@@ -1006,6 +1110,59 @@ class Coordinates(object):
 
         # set class variable
         self._weights = weights
+
+    def _get_nearest(self, points_1, points_2, points_3,
+            domain, convention, unit, show,
+            value, measure, atol=1e-15, radius=None):
+
+        # get KDTree
+        kdtree = self._make_kdtree()
+
+        # get target point in cartesian coordinates
+        coords = Coordinates(points_1, points_2, points_3,
+                            domain, convention, unit)
+        points = coords.get_cart()
+
+        # querry nearest neighbors
+        points = points.flatten() if coords.csize == 1 else points
+
+        # get the points depending on measure and value
+        if measure == 'k':
+            # nearest points
+            distance, index = kdtree.query(points, k=value)
+        elif measure == 'cart':
+            # points within eucledian distance
+            index = kdtree.query_ball_point(points, value+atol)
+            distance = None
+        elif measure == 'sph':
+            # convert great circle to eucedian distance
+            x, y, z = sph2cart([0, value/180*np.pi],
+                               [np.pi/2, np.pi/2],
+                               [radius, radius])
+            value = np.sqrt( (x[0]-x[1])**2 + (y[0]-y[1])**2 + (z[0]-z[1])**2 )
+            # points within great circle distance
+            index = kdtree.query_ball_point(points, value+atol)
+            distance = None
+
+
+
+        # mask for scatter plot
+        mask = np.full((self.csize), False)
+        mask[index] = True
+        mask = mask.reshape(self.cshape)
+
+        # plot all and returned points
+        if show:
+            # if ~mask.any():
+            #     ax = haiopy.plot.scatter(self[~mask], c='k')
+            # if mask.any():
+            #     haiopy.plot.scatter(self[mask], ax=ax, set_ax=False, c='r',alpha=1)
+            colors = np.full(mask.shape, 'k')
+            colors[mask] = 'r'
+            haiopy.plot.scatter(self, c=colors.flatten())
+
+
+        return distance, index, mask
 
 
     def _make_kdtree(self):
