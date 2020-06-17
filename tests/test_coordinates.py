@@ -223,6 +223,39 @@ def test_setter_and_getter():
                                  .format(domain_out, convention_out))
                         npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
 
+def test_multiple_getter():
+    # test N successive coordinate conversions
+    N = 500
+
+    # get list of available coordinate systems
+    coords = Coordinates()
+    systems = coords._systems()
+
+    # get reference points in cartesian coordinate system
+    points = ['positive_x', 'positive_y', 'positive_z',
+              'negative_x', 'negative_y', 'negative_z']
+    pts = np.array( [systems['cart']['right'][point] for point in points] )
+
+    # init the system
+    coords.set_cart(pts[:,0],pts[:,1],pts[:,2])
+
+    # list of domains
+    domains = list(systems)
+
+    for ii in range(N):
+        # randomly select a coordinate system
+        domain = domains[np.random.randint(len(domains))]
+        conventions = list(systems[domain])
+        convention = conventions[np.random.randint(len(conventions))]
+        # convert points to selected system
+        pts = eval("coords.get_{}('{}')".format(domain, convention))
+        # get the reference
+        ref = np.array([systems[domain][convention][point] for point in points])
+        # check
+        npt.assert_allclose(pts, ref, atol=1e-15)
+        # print
+        print('Tolerance met in iteration {}'.format(ii))
+
 def test_getter_weights():
     coords = Coordinates([1,2],0,0, weights=[.5, .5])
     assert (coords.weights == np.array([.5, .5])).all()
