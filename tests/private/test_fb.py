@@ -13,19 +13,23 @@ from haiopy import Coordinates
 # %% Random testing
 
 # make random spherical grid
-az = np.random.rand(1024) * 360
-el = np.random.rand(1024) * 180 - 90
+az = np.random.rand(3,10,30) * 360
+el = np.random.rand(3,10,30) * 180 - 90
 # horizontal plane
 # az = np.linspace(0, 355, 72)
 # el = np.zeros(72)
 
 c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
-ax = haiopy.plot.scatter(c)
+# ax = haiopy.plot.scatter(c)
 
 d, idx = c.get_nearest_k(0,0,1, 50, 'sph', 'top_elev', 'deg', show=True)
 
 # p1 = c.get_sph('top_elev', 'deg')[idx]
 # p2 = c.get_sph('top_elev', 'deg')[~idx]
+
+# %% mask for getitem
+
+azz = az.flatten() if False else az
 
 # %% General -----------------------------------------------------------------
 # TODO: What is the idea of Audio()?

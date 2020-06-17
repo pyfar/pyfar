@@ -652,8 +652,8 @@ class Coordinates(object):
 
         """
 
-        # get kdTree
-        kdTree = self._make_kdtree()
+        # get KDTree
+        kdtree = self._make_kdtree()
 
         # get target point in cartesian coordinates
         coords = Coordinates(points_1, points_2, points_3,
@@ -661,27 +661,20 @@ class Coordinates(object):
         points = coords.get_cart()
 
         # querry nearest neighbors
-        if coords.csize == 1:
-            # make sure output is 1d if a single point is querried
-            distance, index = kdTree.query(points.flatten(), k=k)
-        else:
-            distance, index = kdTree.query(points, k=k)
+        points = points.flatten() if coords.csize == 1 else points
+        distance, index = kdtree.query(points, k=k)
+
+        # mask for scatter plot
+        mask = np.full((self.csize), False)
+        mask[index] = True
+        mask = mask.reshape(self.cshape)
 
         # plot all and returned points
         if show:
-            if self.cdim > 1:
-                raise Exception('Plotting only works for self.cdim=1')
+            ax = haiopy.plot.scatter(self[~mask], c='k')
+            haiopy.plot.scatter(self[mask], ax=ax, set_ax=False, c='r',alpha=1)
 
-            # geteverything that is not selected
-            if isinstance(index, int):
-                not_index = [i for i in range(self.csize) if i not in [index]]
-            else:
-                not_index = [i for i in range(self.csize) if i not in index]
-
-            ax = haiopy.plot.scatter(self[not_index], c='k')
-            haiopy.plot.scatter(self[index], ax=ax, set_ax=False, c='r',alpha=1)
-
-        return distance, index
+        return distance, index, mask
 
 
     def get_nearest_cart():
@@ -1016,19 +1009,13 @@ class Coordinates(object):
 
 
     def _make_kdtree(self):
-        """Make a numpy kdTree for fast search of nearest points."""
+        """Make a numpy KDTree for fast search of nearest points."""
 
-        # get points from copy to avoid changing the original
+        # copy to avoid changes in the original object
         xyz = copy.deepcopy(self).get_cart()
+        # get the tree
+        kdtree = cKDTree(xyz.reshape((self.csize, 3)))
 
-        # format to (n,3) array
-        x   = xyz[...,0].reshape(self.csize,1)
-        y   = xyz[...,1].reshape(self.csize,1)
-        z   = xyz[...,2].reshape(self.csize,1)
-        xyz = np.concatenate((x, y, z), 1)
-
-        # make and return kdtree
-        kdtree = cKDTree(xyz)
         return kdtree
 
     def __getitem__(self, index):
