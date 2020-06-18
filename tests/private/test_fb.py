@@ -11,11 +11,6 @@ import haiopy
 from haiopy import Coordinates
 
 
-d = [358, 359, 0, 1, 2]
-c = Coordinates(d, 0, 0, 'sph', 'top_elev', 'deg')
-c.get_sph('top_colat')
-c.get_slice('azimuth', 'deg', 0, 1)
-
 # %% slice and plot testing
 
 # random spherical grid

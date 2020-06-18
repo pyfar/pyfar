@@ -1198,6 +1198,21 @@ class Coordinates(object):
                 "points_1, points_2, and points_3 must be scalar or of the "\
                 "same shape."
 
+        # check the range of points
+        for nn, p in enumerate(pts):
+            # get type and range
+            c      = self._system['coordinates'][nn]
+            c_type = self._system[c][0]
+            c_range = np.array(self._system[c][1])
+            # range to degrees
+            if self._system['units'][nn] == 'degrees':
+                c_range = np.round(c_range/np.pi*180)
+
+            # check bounds (cyclic values could be wraped but this is safer)
+            if c_type in ['bound', 'cyclic']:
+                assert ((p>=c_range[0]) & (p<=c_range[1])).all(),"Values of "\
+                    "points_{} must be in the range {}".format(nn, c_range)
+
         # repeat scalar entries if non-scalars exists
         if len(shapes):
             for nn, p in enumerate(pts):
