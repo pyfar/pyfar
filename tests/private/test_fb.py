@@ -10,12 +10,35 @@ import numpy as np
 import haiopy
 from haiopy import Coordinates
 
-# %% Random testing
-coordinate = 'azimuth'
 
+d = [358, 359, 0, 1, 2]
+c = Coordinates(d, 0, 0, 'sph', 'top_elev', 'deg')
+c.get_sph('top_colat')
+c.get_slice('azimuth', 'deg', 0, 1)
 
-c = Coordinates()
-c._exist_coordinate('azimuth', 'rad')
+# %% slice and plot testing
+
+# random spherical grid
+az = np.random.rand(3,10,30) * 360
+el = np.random.rand(3,10,30) * 180 - 90
+cs = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
+
+mask = cs.get_slice('azimuth', 'deg', 0, 45, True)
+
+# random cartesian grid
+x  = np.random.rand(3,10,30) * 2 - 1
+y  = np.random.rand(3,10,30) * 2 - 1
+z  = np.random.rand(3,10,30) * 2 - 1
+cc = Coordinates(x, y, z)
+
+mask = cc.get_slice('x', 'met', .5, .25, True)
+
+# random cylindircal grid
+az = np.random.rand(3,10,30) * 360
+z  = np.random.rand(3,10,30) * 2 - 1
+cz = Coordinates(az, z, 1, 'cyl', 'top', 'deg')
+
+mask = cz.get_slice('azimuth', 'deg', 90, 5, True)
 
 # %% nearest and plot testing
 # make random spherical grid

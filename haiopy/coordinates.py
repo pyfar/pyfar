@@ -689,7 +689,7 @@ class Coordinates(object):
             show a plot of the coordinate points. The default is False.
         atol : float
             search for everything within ``distance + atol``. The default is
-            1e-15
+            1e-15.
 
         Returns
         -------
@@ -746,7 +746,7 @@ class Coordinates(object):
             show a plot of the coordinate points. The default is False.
         atol : float
             search for everything within ``distance + atol``. The default is
-            1e-15
+            1e-15.
 
         Returns
         -------
@@ -788,10 +788,97 @@ class Coordinates(object):
 
         return index, mask
 
-    def get_slice(self, coordinate, value, atol, unit):
+    def get_slice(self, coordinate: str, unit: str, value, tol=0,
+                  show=False, atol=1e-15):
+        """
+        Get a slice of the coordinates points.
+
+        A slice is defined by a coordinate and a value range, e.g., all points
+        with an elevation between -10 and 10 degree could be selected. The
+        range is calculated as ``[value-tol, value+tol]``.
+
+        Parameters
+        ----------
+        coordinate : str
+            coordinate for slicing. See self.systems('all').
+        unit : str
+            first three letters of the coordinate's unit ('met', 'rad', or
+            'deg').
+        value : TYPE
+            value of the coordinate around the points are sliced.
+        tol : TYPE, optional
+           tolerance for slicing. Points are sliced within the range
+           ``[value-tol, value+tol]``. The default is 0.
+        show : TYPE, optional
+            show a plot of the coordinate points. The default is False.
+        atol : TYPE, optional
+            search for everything within ``[value-tol-atol, value+tol+atol]``.
+            The default is 1e-15.
+
+        Returns
+        -------
+        mask : boolean array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        ``value`` must be inside the range of the coordinate
+        (see self.systems). However, ``value +/-tol`` may exceed the range.
+        ``value +/-tol`` is automatically wrapped if the coordinate is cyclic
+         (see self.systems).
+
+        """
 
         # check if the coordinate  and unit
         domain, convention, index = self._exist_coordinate(coordinate, unit)
+
+        # get type and range of coordinate
+        c_info = self._systems()[domain][convention][coordinate]
+
+        # convert input to radians
+        value = value/180*np.pi if unit == 'deg' else value
+        tol   = tol  /180*np.pi if unit == 'deg' else tol
+
+        # check if  value is within the range of coordinate
+        if c_info[0] in ["bound", "cyclic"]:
+            assert c_info[1][0] <= value <= c_info[1][1],\
+                "'value' is {} but must be in the range {}."\
+                    .format(value, c_info[1])
+
+        # get the search range
+        rng = [value-tol, value+tol]
+
+        # wrap range if coordinate is cyclic
+        if c_info[0] == 'cyclic':
+            low = c_info[1][0]
+            upp = c_info[1][1]
+            if rng[0] < c_info[1][0]-atol:
+                rng[0] = (rng[0]-low) % (upp-low) + low
+            if rng[1] > c_info[1][1]+atol:
+                rng[1] = (rng[1]-low) % (upp-low) + low
+
+        # get the coordinates
+        coords = eval("copy.deepcopy(self).get_{}('{}')"\
+                      .format(domain, convention))
+        coords = coords[...,index]
+
+        # get the mask
+        if rng[0]<=rng[1]:
+            mask = (coords >= rng[0]-atol) & (coords <= rng[1]+atol)
+        else:
+            mask = (coords >= rng[0]-atol) | (coords <= rng[1]+atol)
+
+        # plot all and returned points
+        if show:
+            colors = np.full(mask.shape, 'k')
+            colors[mask] = 'r'
+            haiopy.plot.scatter(self, c=colors.flatten())
+
+        return mask
+
+
+
 
     @staticmethod
     def _systems():
@@ -1041,14 +1128,14 @@ class Coordinates(object):
             for convention in systems[domain]:
                 if coordinate in systems[domain][convention]['coordinates']:
                     # get position of coordinate
-                    cc = systems[domain][convention]['coordinates'].\
+                    index = systems[domain][convention]['coordinates'].\
                             index(coordinate)
                     # get possible units
-                    units = [u[cc][0:3] for u in
+                    units = [u[index][0:3] for u in
                               systems[domain][convention]['units']]
                     # return or raise ValueError
                     if unit in units:
-                        return domain, convention, units.index(unit)
+                        return domain, convention, index
                     else:
                         raise ValueError("'{}' in '{}' does not exist. "\
                                 "See self.systems() for a list of possible "\
@@ -1196,8 +1283,6 @@ class Coordinates(object):
             index = kdtree.query_ball_point(points, value+atol)
             distance = None
 
-
-
         # mask for scatter plot
         mask = np.full((self.csize), False)
         mask[index] = True
@@ -1205,14 +1290,9 @@ class Coordinates(object):
 
         # plot all and returned points
         if show:
-            # if ~mask.any():
-            #     ax = haiopy.plot.scatter(self[~mask], c='k')
-            # if mask.any():
-            #     haiopy.plot.scatter(self[mask], ax=ax, set_ax=False, c='r',alpha=1)
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
             haiopy.plot.scatter(self, c=colors.flatten())
-
 
         return distance, index, mask
 

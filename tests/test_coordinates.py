@@ -49,6 +49,9 @@ def test__systems():
             for coord in systems[domain][convention]['coordinates']:
                 assert coord in systems[domain][convention], \
                     "{} ({}) is missing entry '{}'".format(domain, convention, coord)
+                assert systems[domain][convention][coord][0] in ["unbound", "bound", "cyclic"], \
+                    "{} ({}), {}[0] must be 'unbound', 'bound', or 'cyclic'."\
+                        .format(domain, convention, coord)
 
 def test_coordinate_names():
     # check if units agree across coordinates that appear more than once
@@ -421,7 +424,33 @@ def test_get_nearest_sph():
     with raises(AssertionError):
         coords.get_nearest_sph(1,0,0,181)
 
+def test_get_slice():
+    # test only for self.cdim = 1.
+    # self.get_slice uses KDTree, which is tested with N-dimensional arrays
+    # in test_get_nearest_k()
 
+    # cartesian grid
+    d = np.linspace(-2, 2, 5)
+    c = Coordinates(d, 0, 0)
+    assert (c.get_slice('x', 'met', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+    c = Coordinates(0, d, 0)
+    assert (c.get_slice('y', 'met', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+    c = Coordinates(0, 0, d)
+    assert (c.get_slice('z', 'met', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+
+    # spherical grid
+    d = [358, 359, 0, 1, 2]
+    c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
+    # cyclic querry
+    assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+    # non-cyclic querry
+    assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0,0,1,1,1], dtype=bool)).all()
+    # out of range querry
+    with raises(AssertionError):
+        c.get_slice('azimuth', 'deg', -1, 1)
+
+    # there is no unique processing for cylindrical coordinates - they are thus
+    # not tested here.
 
 # %% Test coordinate conversions ----------------------------------------------
 def test_converters():
