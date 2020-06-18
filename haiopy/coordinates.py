@@ -607,6 +607,31 @@ class Coordinates(object):
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
 
+    def show(self, mask=None):
+        """
+        Show a scatter plot of the coordinate points.
+
+        Parameters
+        ----------
+        mask : boolean numpy array, None
+            Plot points in black if mask==True and red if mask==False. The
+            default is None, in which case all points are plotted in black.
+
+        Returns
+        -------
+        None.
+
+        """
+        if mask is None:
+            haiopy.plot.scatter(self)
+        else:
+            assert mask.shape == self.cshape,\
+                "'mask.shape' must be self.cshape"
+            colors = np.full(mask.shape, 'k')
+            colors[mask] = 'r'
+            haiopy.plot.scatter(self, c=colors.flatten())
+
+
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',
                       show=False):
@@ -641,7 +666,7 @@ class Coordinates(object):
             If ``points`` have shape ``tuple``, then ``index`` has shape
             ``tuple+(k,)``. When k == 1, the last dimension of the output is
             squeezed. Missing neighbors are indicated with ``self.csize``.
-        mask : boolean array
+        mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
 
@@ -698,7 +723,7 @@ class Coordinates(object):
             If ``points`` have shape ``tuple``, then ``index`` has shape
             ``tuple+(k,)``. When k == 1, the last dimension of the output is
             squeezed. Missing neighbors are indicated with ``self.csize``.
-        mask : boolean array
+        mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
 
@@ -755,7 +780,7 @@ class Coordinates(object):
             If ``points`` have shape ``tuple``, then ``index`` has shape
             ``tuple+(k,)``. When k == 1, the last dimension of the output is
             squeezed. Missing neighbors are indicated with ``self.csize``.
-        mask : boolean array
+        mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
 
@@ -804,20 +829,20 @@ class Coordinates(object):
         unit : str
             first three letters of the coordinate's unit ('met', 'rad', or
             'deg').
-        value : TYPE
+        value : number
             value of the coordinate around the points are sliced.
-        tol : TYPE, optional
+        tol : number, optional
            tolerance for slicing. Points are sliced within the range
            ``[value-tol, value+tol]``. The default is 0.
-        show : TYPE, optional
+        show : bool, optional
             show a plot of the coordinate points. The default is False.
-        atol : TYPE, optional
+        atol : number, optional
             search for everything within ``[value-tol-atol, value+tol+atol]``.
             The default is 1e-15.
 
         Returns
         -------
-        mask : boolean array
+        mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
 
@@ -825,8 +850,6 @@ class Coordinates(object):
         -----
         ``value`` must be inside the range of the coordinate
         (see self.systems). However, ``value +/-tol`` may exceed the range.
-        ``value +/-tol`` is automatically wrapped if the coordinate is cyclic
-         (see self.systems).
 
         """
 
@@ -871,9 +894,7 @@ class Coordinates(object):
 
         # plot all and returned points
         if show:
-            colors = np.full(mask.shape, 'k')
-            colors[mask] = 'r'
-            haiopy.plot.scatter(self, c=colors.flatten())
+            self.show(mask)
 
         return mask
 
@@ -1305,9 +1326,7 @@ class Coordinates(object):
 
         # plot all and returned points
         if show:
-            colors = np.full(mask.shape, 'k')
-            colors[mask] = 'r'
-            haiopy.plot.scatter(self, c=colors.flatten())
+            self.show(mask)
 
         return distance, index, mask
 
@@ -1341,9 +1360,10 @@ class Coordinates(object):
 
         # object type
         if self.cshape != (0,):
-            obj = 'Coordinates object of cshape ' + str(self._points.shape[:-1])
+            obj = '{}D Coordinates object with {} points of cshape {}'\
+                .format(self.cdim, self.csize, self.cshape)
         else:
-            obj = 'Empty coordinates object'
+            obj = 'Empty Coordinates object'
 
         # coordinate convention
         conv = "domain: {}, convention: {}, unit: {}".format(

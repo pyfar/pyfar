@@ -197,6 +197,16 @@ def test_coordinates_init_sh_order():
     coords = Coordinates(sh_order = 5)
     assert isinstance(coords, Coordinates)
 
+def test_show():
+    coords = Coordinates([-1,0,1], 0, 0)
+    # show without mask
+    coords.show()
+    # show with mask
+    coords.show(np.array([1,0,1], dtype=bool))
+    # test assertion
+    with raises(AssertionError):
+        coords.show(np.array([1,0], dtype=bool))
+
 def test_setter_and_getter():
     # get list of available coordinate systems
     coords = Coordinates()
