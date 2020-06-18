@@ -788,6 +788,10 @@ class Coordinates(object):
 
         return index, mask
 
+    def get_slice(self, coordinate, value, atol, unit):
+
+        # check if the coordinate  and unit
+        domain, convention, index = self._exist_coordinate(coordinate, unit)
 
     @staticmethod
     def _systems():
@@ -812,6 +816,8 @@ class Coordinates(object):
             Key 2h - 'right': negative y (for debugging, meters and radians)
             Key 2i - 'up'   : positive z (for debugging, meters and radians)
             Key 2j - 'down' : negative z (for debugging, meters and radians)
+            Key 2k,l,m - coordinate_1,2,3 : [type, [lower_lim, upper_lim]]
+                         type can be 'unbound', 'bound', or 'cyclic'
 
         """
 
@@ -834,7 +840,10 @@ class Coordinates(object):
                     "negative_x": [-1,  0,  0],
                     "negative_y": [ 0, -1,  0],
                     "positive_z": [ 0,  0,  1],
-                    "negative_z": [ 0,  0, -1]}
+                    "negative_z": [ 0,  0, -1],
+                    "x": ["unbound", [-np.inf, np.inf]],
+                    "y": ["unbound", [-np.inf, np.inf]],
+                    "z": ["unbound", [-np.inf, np.inf]]}
                 },
             "sph":
                 {
@@ -859,7 +868,10 @@ class Coordinates(object):
                     "negative_x": [np.pi,     np.pi/2, 1],
                     "negative_y": [3*np.pi/2, np.pi/2, 1],
                     "positive_z": [0,         0      , 1],
-                    "negative_z": [0,         np.pi,   1]},
+                    "negative_z": [0,         np.pi,   1],
+                    "azimuth"    : ["cyclic", [0, 2*np.pi]],
+                    "colatitude" : ["bound",  [0, np.pi]],
+                    "radius"     : ["bound",  [0, np.inf]]},
                 "top_elev":{
                     "description_short":
                         "Spherical coordinate system with North and South Pole.",
@@ -882,7 +894,10 @@ class Coordinates(object):
                     "negative_x": [np.pi,     0,       1],
                     "negative_y": [3*np.pi/2, 0,       1],
                     "positive_z": [0,         np.pi/2, 1],
-                    "negative_z": [0,        -np.pi/2, 1]},
+                    "negative_z": [0,        -np.pi/2, 1],
+                    "azimuth"    : ["cyclic", [0, 2*np.pi]],
+                    "elevation"  : ["bound",  [-np.pi/2, np.pi/2]],
+                    "radius"     : ["bound",  [0, np.inf]]},
                 "side":{
                     "description_short":
                         "Spherical coordinate system with poles on the y-axis.",
@@ -905,7 +920,10 @@ class Coordinates(object):
                     "negative_x": [ 0,       np.pi,   1],
                     "negative_y": [-np.pi/2, 0,       1],
                     "positive_z": [ 0,       np.pi/2, 1],
-                    "negative_z": [ 0,      -np.pi/2, 1]},
+                    "negative_z": [ 0,      -np.pi/2, 1],
+                    "lateral" :["bound",  [-np.pi/2, np.pi/2]],
+                    "polar"   :["cyclic", [-np.pi/2, np.pi*3/2]],
+                    "radius"  :["bound",  [0, np.inf]]},
                 "front":{
                     "description_short":
                         "Spherical coordinate system with poles on the x-axis.",
@@ -928,7 +946,10 @@ class Coordinates(object):
                     "negative_x": [0,         np.pi,   1],
                     "negative_y": [3*np.pi/2, np.pi/2, 1],
                     "positive_z": [0,         np.pi/2, 1],
-                    "negative_z": [np.pi,     np.pi/2, 1]}
+                    "negative_z": [np.pi,     np.pi/2, 1],
+                    "phi"    : ["cyclic", [0, 2*np.pi]],
+                    "theta"  : ["bound",  [0, np.pi]],
+                    "radius" : ["bound",  [0, np.inf]]}
                 },
             "cyl":
                 {
@@ -951,7 +972,10 @@ class Coordinates(object):
                     "negative_x": [np.pi,     0, 1],
                     "negative_y": [3*np.pi/2, 0, 1],
                     "positive_z": [0,         1, 0],
-                    "negative_z": [0,        -1, 0]}
+                    "negative_z": [0,        -1, 0],
+                    "azimuth"  : ["cyclic",  [0, 2*np.pi]],
+                    "z"        : ["unbound", [-np.inf, np.inf]],
+                    "radius_z" : ["bound",   [0, np.inf]]}
                 }
             }
 
@@ -1002,6 +1026,34 @@ class Coordinates(object):
                 "be one of the following: {}.".format(unit, domain, convention,
                                                       ', '.join(cur_units))
 
+    def _exist_coordinate(self, coordinate, unit):
+        """
+        Check if coordinate and unit exist.
+
+        Returns domain and convention, and the index of coordinate if
+        coordinate and unit exists and raises a value error otherwise.
+        """
+        # get all systems
+        systems = self._systems()
+
+        # find coordinate and unit in systems
+        for domain in systems:
+            for convention in systems[domain]:
+                if coordinate in systems[domain][convention]['coordinates']:
+                    # get position of coordinate
+                    cc = systems[domain][convention]['coordinates'].\
+                            index(coordinate)
+                    # get possible units
+                    units = [u[cc][0:3] for u in
+                              systems[domain][convention]['units']]
+                    # return or raise ValueError
+                    if unit in units:
+                        return domain, convention, units.index(unit)
+                    else:
+                        raise ValueError("'{}' in '{}' does not exist. "\
+                                "See self.systems() for a list of possible "\
+                                "coordinates and units".\
+                                format(coordinate, unit))
 
     def _make_system(self, domain=None, convention=None, unit=None):
         """

@@ -11,7 +11,13 @@ import haiopy
 from haiopy import Coordinates
 
 # %% Random testing
+coordinate = 'azimuth'
 
+
+c = Coordinates()
+c._exist_coordinate('azimuth', 'rad')
+
+# %% nearest and plot testing
 # make random spherical grid
 az = np.random.rand(3,10,30) * 360
 el = np.random.rand(3,10,30) * 180 - 90

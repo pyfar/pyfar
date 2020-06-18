@@ -46,6 +46,9 @@ def test__systems():
                 "{} ({}) is missing entry 'positive_z'".format(domain, convention)
             assert "negative_z" in systems[domain][convention], \
                 "{} ({}) is missing entry 'negative_z'".format(domain, convention)
+            for coord in systems[domain][convention]['coordinates']:
+                assert coord in systems[domain][convention], \
+                    "{} ({}) is missing entry '{}'".format(domain, convention, coord)
 
 def test_coordinate_names():
     # check if units agree across coordinates that appear more than once
