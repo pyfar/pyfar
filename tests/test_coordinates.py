@@ -462,9 +462,44 @@ def test_get_slice():
     # there is no unique processing for cylindrical coordinates - they are thus
     # not tested here.
 
+def test_rotation():
+    # test with quaternion
+    c = Coordinates(1,0,0)
+    c.rotate('quat',[0, 0, 1/np.sqrt(2), 1/np.sqrt(2)])
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+
+    # test with matrix
+    c = Coordinates(1,0,0)
+    c.rotate('matrix',[[0,-1,0],[1,0,0],[0,0,1]])
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+
+    # test with rotvec
+    c = Coordinates(1,0,0)
+    c.rotate('rotvec',[0, 0, np.pi/2])
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+
+    # test with euler
+    c = Coordinates(1,0,0)
+    c.rotate('z', 90)
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+
+    # test with unknown type
+    with raises(ValueError):
+        c.rotate('urgh', 90)
+
+    # test if cshape is preserved and inverse rotation works
+    xyz = np.concatenate((np.ones((2,4,1)),
+                          np.zeros((2,4,1)),
+                          np.zeros((2,4,1))), -1)
+    c = Coordinates(xyz[...,0],xyz[...,1],xyz[...,2])
+    c.rotate('z', 90)
+    c.rotate('z', 90, inverse=True)
+    npt.assert_allclose(c._points, xyz)
+
 # %% Test coordinate conversions ----------------------------------------------
 def test_converters():
     # test if converterts can handle numbers
+    # (correctness of the rotation is tested in test_setter_and_getter)
     coordinates.cart2sph(0, 0, 1)
     coordinates.sph2cart(0, 0, 1)
     coordinates.cart2cyl(0, 0, 1)

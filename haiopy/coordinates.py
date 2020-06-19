@@ -1,6 +1,8 @@
 """Generate, store, and manipulate points in 3D coordinate systems."""
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.spatial.transform import Rotation as sp_rot
+import re
 import copy
 
 import haiopy
@@ -898,6 +900,73 @@ class Coordinates(object):
 
         return mask
 
+
+    def rotate(self, rotation: str, value = None, degrees=True, inverse=False):
+        """
+        Rotate points stored in the object.
+
+        This is a wrapper for scipy.spatial.transform.Rotation (see this class
+        for more detailed information).
+
+        Parameters
+        ----------
+        rotation : str
+            'quat' - rotation given by quaternions.
+
+            'matrix' - rotation given by matrixes.
+
+            'rotvec' - rotation using rotation vectors.
+
+            'xyz' - rotation using euler angles. Up to three letters. E.g., 'x'
+            will rotate about the x-axis only, while 'xz' will rotate about
+            the x-axis and then about the z-axis. Capital letters for intrinsic
+            and lower letters for extrinsic rotation.
+        value : number, array like
+            value(s) that describe the rotation according to 'rotation' (see
+            above).
+        degrees : bool, optional
+            pass Euler angles in degree instead of radians. The default is
+            True.
+        inverse : bool, optional
+            Apply inverse rotation. The default is False.
+
+        Returns
+        -------
+        None.
+
+        Notes
+        -----
+        Points are converted to the cartesian right handed coordinate system
+        for the rotation.
+
+        """
+
+        # initialize rotation object
+        if rotation == 'quat':
+            rot = sp_rot.from_quat(value)
+        elif rotation == 'matrix':
+            rot = sp_rot.from_matrix(value)
+        elif rotation == 'rotvec':
+            rot = sp_rot.from_rotvec(value)
+        elif not bool(re.search('[^x-z]', rotation.lower())):
+            # only check if string contains xyz, everything else is checked in
+            # from_euler()
+            rot = sp_rot.from_euler(rotation, value, degrees)
+        else:
+            raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "\
+                             "or from ['x', 'y', 'z'] or ['X', 'Y', 'Z'] but "\
+                             "is '{}'".format(rotation))
+
+        # current shape
+        shape = self.cshape
+
+        # apply rotation
+        points = rot.apply(self.get_cart().reshape((self.csize, 3)), inverse)
+
+        # set points
+        self.set_cart(points[:,0].reshape(shape),
+                      points[:,1].reshape(shape),
+                      points[:,2].reshape(shape))
 
 
 

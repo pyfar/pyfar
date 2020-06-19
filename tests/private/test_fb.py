@@ -11,6 +11,13 @@ import haiopy
 from haiopy import Coordinates
 
 
+# %% test rotation
+
+c = Coordinates([-1, 1], 0, 0)
+c.show(np.array([0,1],dtype=bool))
+c.rotate('Z', 90)
+
+
 # %% slice and plot testing
 
 # random spherical grid
