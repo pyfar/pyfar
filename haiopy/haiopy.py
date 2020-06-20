@@ -122,14 +122,13 @@ class Signal(Audio):
             if new_domain == 'time':
                 # If the new domain should be time, we had a saved spectrum
                 # and need to do an inverse Fourier Transform
-                self._data = fft.irfft(
+                self.time = fft.irfft(
                     self._data, self.n_samples, signal_type=self.signal_type)
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform
-                self._data = fft.rfft(
+                self.freq = fft.rfft(
                     self._data, self.n_samples, signal_type=self.signal_type)
-            self._domain = new_domain
 
     @property
     def n_samples(self):
