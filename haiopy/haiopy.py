@@ -108,6 +108,11 @@ class Signal(Audio):
                              "not {}").format(type(orientation).__name__))
 
     @property
+    def domain(self):
+        """The domain the data is stored in"""
+        return self._domain
+
+    @property
     def n_samples(self):
         """Number of samples."""
         return self._data.shape[-1]

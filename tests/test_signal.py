@@ -9,13 +9,25 @@ from haiopy import Coordinates, Orientation, Signal
 
 def test_signal_init(sine):
     """Test to init Signal without optional parameters."""
-    signal = Signal(sine, 44100)
+    signal = Signal(sine, 44100, domain='time')
     assert isinstance(signal, Signal)
 
 
 def test_signal_init_list(impulse_list):
-    signal = Signal(impulse_list, 44100)
+    signal = Signal(impulse_list, 44100, domain='time')
     assert isinstance(signal, Signal)
+
+
+def test_domain_getter_time(sine):
+    signal = Signal(np.array([1]), 44100)
+    signal._domain = 'freq'
+    assert signal.domain == 'freq'
+
+
+def test_domain_getter_freq(sine):
+    signal = Signal(np.array([1]), 44100)
+    signal._domain = 'time'
+    assert signal.domain == 'time'
 
 
 def test_signal_init_val(sine):
