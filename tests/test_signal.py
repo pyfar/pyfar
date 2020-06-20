@@ -299,10 +299,25 @@ def test_shape(sine, impulse):
 def test_magic_getitem(sine, impulse):
     """Test slicing operations by the magic function __getitem__."""
     data = np.array([sine, impulse])
-    signal = Signal(data, 44100)
-    npt.assert_allclose(data[0], signal[0])
-    npt.assert_allclose(data[:], signal[:])
-    npt.assert_allclose(data[..., 0], signal[..., 0])
+    sr = 44100
+    signal = Signal(data, sr)
+    npt.assert_allclose(Signal(sine, sr)._data, signal[0]._data)
+
+
+def test_magic_getitem_slice(sine, impulse):
+    """Test slicing operations by the magic function __getitem__."""
+    data = np.array([sine, impulse])
+    sr = 44100
+    signal = Signal(data, sr)
+    npt.assert_allclose(Signal(sine, sr)._data, signal[:1]._data)
+
+
+def test_magic_getitem_allslice(sine, impulse):
+    """Test slicing operations by the magic function __getitem__."""
+    data = np.array([sine, impulse])
+    sr = 44100
+    signal = Signal(data, sr)
+    npt.assert_allclose(Signal(data, sr)._data, signal[:]._data)
 
 
 def test_magic_setitem(sine, impulse):

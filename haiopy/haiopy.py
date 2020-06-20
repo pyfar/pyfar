@@ -263,19 +263,22 @@ class Signal(Audio):
     def __getitem__(self, key):
         """Get signal channels at key.
         """
-        if isinstance(key, (int, slice)):
+        if isinstance(key, (int, slice, tuple)):
             try:
-                return self._data[key]
-            except KeyError:
-                raise KeyError("Index is out of bounds")
-        elif isinstance(key, tuple):
-            try:
-                return self._data[key]
+                data = self._data[key]
             except KeyError:
                 raise KeyError("Index is out of bounds")
         else:
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
+        items = Signal(
+            data,
+            sampling_rate=self.sampling_rate,
+            domain=self.domain,
+            signal_type=self.signal_type,
+            dtype=self.dtype)
+
+        return items
 
     def __setitem__(self, key, value):
         """Set signal channels at key.
