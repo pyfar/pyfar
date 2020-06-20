@@ -79,12 +79,7 @@ def test_domain_setter_time_when_freq(sine):
 def test_signal_init_val(sine):
     """Test to init Signal with complete parameters."""
     coord_mock = mock.Mock(spec_set=Coordinates())
-    coord_mock.x = 1
-    coord_mock.y = 1
-    coord_mock.z = 1
     orient_mock = mock.Mock(spec_set=Orientation())
-    orient_mock.view = np.array([1, 0, 0])
-    orient_mock.up = np.array([0, 1, 0])
     signal = Signal(sine, 44100, domain="time", signal_type="power",
                     position=coord_mock, orientation=orient_mock)
     assert isinstance(signal, Signal)
