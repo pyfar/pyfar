@@ -250,14 +250,11 @@ class Signal(Audio):
     def __repr__(self):
         """String representation of signal class.
         """
-        repr_string = ("Audio Signal\n"
-                       "--------------------\n"
-                       "Dimensions: {}x{}\n"
-                       "Sampling rate: {} Hz\n"
-                       "Signal type: {}\n"
-                       "Signal length: {} sec").format(
-                       self.shape[0], self.n_samples, self._sampling_rate,
-                       self._signal_type, self.signal_length)
+        repr_string = (
+            "Audio Signal\n"
+            "--------------------\n"
+            "{} channels with {} samples @ {} Hz sampling rate".format(
+                self.shape[:-1], self.n_samples, self._sampling_rate))
         return repr_string
 
     def __getitem__(self, key):
