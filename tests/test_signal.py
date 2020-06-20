@@ -322,10 +322,40 @@ def test_magic_getitem_allslice(sine, impulse):
 
 def test_magic_setitem(sine, impulse):
     """Test the magic function __setitem__."""
-    signal = Signal(sine, 44100)
-    signal[0] = impulse
-    impulse_2d = np.atleast_2d(impulse)
-    npt.assert_allclose(signal._data, impulse_2d)
+    sr = 44100
+    signal = Signal(sine, sr)
+    set_signal = Signal(sine*2, sr)
+    signal[0] = set_signal
+    npt.assert_allclose(signal._data, set_signal._data)
+
+
+def test_magic_setitem_wrong_sr(sine, impulse):
+    """Test the magic function __setitem__."""
+    sr = 44100
+    signal = Signal(sine, sr)
+    set_signal = Signal(sine*2, 48000)
+    with pytest.raises(ValueError, match='sampling rates do not match'):
+        signal[0] = set_signal
+
+
+def test_magic_setitem_wrong_type(sine, impulse):
+    """Test the magic function __setitem__."""
+    sr = 44100
+    signal = Signal(sine, sr)
+    signal.signal_type = 'energy'
+    set_signal = Signal(sine*2, sr)
+    set_signal.signal_type = 'power'
+    with pytest.raises(ValueError, match='signal types do not match'):
+        signal[0] = set_signal
+
+
+def test_magic_setitem_wrong_n_samples(sine, impulse):
+    """Test the magic function __setitem__."""
+    sr = 44100
+    signal = Signal(sine, sr)
+    set_signal = Signal(sine[..., :-10]*2, sr)
+    with pytest.raises(ValueError, match='number of samples does not match'):
+        signal[0] = set_signal
 
 
 def test_magic_len(impulse):

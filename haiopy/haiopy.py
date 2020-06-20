@@ -280,9 +280,10 @@ class Signal(Audio):
     def __setitem__(self, key, value):
         """Set signal channels at key.
         """
+        self._assert_matching_meta_data(value)
         if isinstance(key, (int, slice)):
             try:
-                self._data[key] = value
+                self._data[key] = value._data
             except KeyError:
                 raise KeyError("Index is out of bound")
         else:
@@ -293,3 +294,16 @@ class Signal(Audio):
         """Length of the object which is the number of samples stored.
         """
         return self.n_samples
+
+    def _assert_matching_meta_data(self, other):
+        """Check if the sampling rate, the number of samples, and the signal
+        type of two Signal objects match.
+        """
+        if not isinstance(other, Signal):
+            raise ValueError("Comparison only valid against Signal objects.")
+        if self.sampling_rate != other.sampling_rate:
+            raise ValueError("The sampling rates do not match.")
+        if self.n_samples != other.n_samples:
+            raise ValueError("The number of samples does not match.")
+        if self.signal_type != other.signal_type:
+            raise ValueError("The signal types do not match.")
