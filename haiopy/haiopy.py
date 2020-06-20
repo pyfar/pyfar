@@ -112,10 +112,29 @@ class Signal(Audio):
         """The domain the data is stored in"""
         return self._domain
 
+    @domain.setter
+    def domain(self, new_domain):
+        if new_domain not in self._VALID_SIGNAL_DOMAIN:
+            raise ValueError("Incorrect domain, needs to be time/freq.")
+
+        if not (self._domain == new_domain):
+            # Only process if we change domain
+            if new_domain == 'time':
+                # If the new domain should be time, we had a saved spectrum
+                # and need to do an inverse Fourier Transform
+                self._data = fft.irfft(
+                    self._data, self.n_samples, signal_type=self.signal_type)
+            elif new_domain == 'freq':
+                # If the new domain should be freq, we had sampled time data
+                # and need to do a Fourier Transform
+                self._data = fft.rfft(
+                    self._data, self.n_samples, signal_type=self.signal_type)
+            self._domain = new_domain
+
     @property
     def n_samples(self):
         """Number of samples."""
-        return self._data.shape[-1]
+        return self._n_samples
 
     @property
     def n_bins(self):
@@ -135,22 +154,36 @@ class Signal(Audio):
     @property
     def time(self):
         """The signal data in the time domain."""
+        self.domain = 'time'
         return self._data
 
     @time.setter
     def time(self, value):
-        self._data = np.atleast_2d(value)
+        data = np.atleast_2d(value)
+        self._domain = 'time'
+        self._data = data
+        self._n_samples = data.shape[-1]
 
     @property
     def freq(self):
         """The signal data in the frequency domain."""
-        freq = fft.rfft(self._data, self.n_samples, self._signal_type)
-        return freq
+        self.domain = 'freq'
+        return self._data
 
     @freq.setter
     def freq(self, value):
-        self._data = np.atleast_2d(
-            fft.irfft(value, self.n_samples, self.signal_type))
+        spec = np.atleast_2d(value)
+        new_num_bins = spec.shape[-1]
+        if new_num_bins == self.n_bins:
+            n_samples = self.n_samples
+        else:
+            warnings.warn("Number of frequency bins different will change, assuming an\
+                    even number of samples from the number of frequency bins.")
+            n_samples = (new_num_bins - 1)*2
+
+        self._data = spec
+        self._n_samples = n_samples
+        self._domain = 'freq'
 
     @property
     def sampling_rate(self):
