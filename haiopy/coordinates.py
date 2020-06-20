@@ -1510,8 +1510,18 @@ def cart2sph(x, y, z):
     radius : ndarray, number
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
-    colatitude = np.arccos(z/radius)
+
+    if isinstance(radius, np.float64):
+        z_div_r = 0 if radius==0 else z/radius
+    else:
+        r0 = radius == 0
+        z_div_r      = np.empty_like(radius)
+        z_div_r[r0]  = 0
+        z_div_r[~r0] = z[~r0]/radius[~r0]
+    colatitude = np.arccos(z_div_r)
+
     azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
+
     return azimuth, colatitude, radius
 
 
