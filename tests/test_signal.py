@@ -293,7 +293,7 @@ def test_shape(sine, impulse):
     """Test the attribute shape."""
     data = np.array([sine, impulse])
     signal = Signal(data, 44100)
-    assert signal.shape == (2, 1000)
+    assert signal.shape == (2,)
 
 
 def test_magic_getitem(sine, impulse):

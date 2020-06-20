@@ -245,7 +245,7 @@ class Signal(Audio):
     @property
     def shape(self):
         """Shape of the data."""
-        return self._data.shape
+        return self._data.shape[:-1]
 
     def __repr__(self):
         """String representation of signal class.
@@ -254,7 +254,7 @@ class Signal(Audio):
             "Audio Signal\n"
             "--------------------\n"
             "{} channels with {} samples @ {} Hz sampling rate".format(
-                self.shape[:-1], self.n_samples, self._sampling_rate))
+                self.shape, self.n_samples, self._sampling_rate))
         return repr_string
 
     def __getitem__(self, key):
