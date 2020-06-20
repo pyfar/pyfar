@@ -22,7 +22,8 @@ def group_delay(signal):
 
     phase_vec = phase(signal, deg=False, unwrap=True)
     bin_dist = signal.sampling_rate / signal.n_samples
-    group_delay = - np.diff(phase_vec,1,-1, prepend=0) / (bin_dist * 2*np.pi);
+    group_delay = (- np.diff(phase_vec,1,-1, prepend=0) /
+                   (bin_dist * 2 * np.pi))
     return np.squeeze(group_delay)
 
 def phase(signal, deg=False, unwrap=False):
@@ -62,9 +63,16 @@ def phase(signal, deg=False, unwrap=False):
         phase = rad_to_deg(phase)
     return phase
 
-def spectrogram(signal, window='hann', window_length='auto',
-                         window_overlap_fct=0.5, log_prefix=20, log_reference=1,
-                         log=False, nodb=False, cut=False, clim=None):
+def spectrogram(signal,
+                window='hann',
+                window_length='auto',
+                window_overlap_fct=0.5,
+                log_prefix=20,
+                log_reference=1,
+                log=False,
+                nodb=False,
+                cut=False,
+                clim=None):
     """TODO: This function might not be necessary, if clipping functionallity
      is not desired. It is already provided by scipy.signal.spectrogram().
 
@@ -124,7 +132,6 @@ def spectrogram(signal, window='hann', window_length='auto',
         raise TypeError('Input data has to be of type: Signal.')
 
     eps = np.finfo(float).tiny
-    # TODO: Verify against ITAToolbox implementation!
 
     # If not set, define window length for FFT automatically
     if window_length == 'auto':
@@ -133,9 +140,12 @@ def spectrogram(signal, window='hann', window_length='auto',
     window_overlap = int(window_length * window_overlap_fct)
 
     frequencies, times, spectrogram = sgn.spectrogram(
-        x=signal.time, fs=signal.sampling_rate,
-        window=sgn.get_window(window, window_length), noverlap=window_overlap,
-        mode='magnitude', scaling='spectrum')
+            x=signal.time,
+            fs=signal.sampling_rate,
+            window=sgn.get_window(window, window_length),
+            noverlap=window_overlap,
+            mode='magnitude',
+            scaling='spectrum')
 
     spectrogram = spectrogram/(window_length/2)
 

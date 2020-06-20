@@ -3,6 +3,7 @@ import matplotlib as mpl
 import numpy as np
 from .. import dsp
 from scipy import signal as sgn
+from haiopy import Signal
 
 from ._interaction import (
     AxisModifierLinesLinYAxis,
@@ -12,7 +13,6 @@ from .ticker import (
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
-#plt.style.use('ggplot')
 
 
 def prepare_plot(ax=None):
@@ -45,6 +45,9 @@ def plot_time(signal, ax=None, **kwargs):
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     fig, ax = prepare_plot(ax)
     x_data = signal.times
     y_data = signal.time.T
@@ -53,7 +56,6 @@ def plot_time(signal, ax=None, **kwargs):
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
-    #ax.grid(True)
     ax.set_xlim((signal.times[0], signal.times[-1]))
 
     modifier = AxisModifierLinesLinYAxis(ax, fig)
@@ -82,12 +84,15 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     fig, ax = prepare_plot(ax)
 
     x_data = signal.times
     y_data = signal.time.T
-
-    data_dB = log_prefix*np.log10(np.abs(y_data)/log_reference)
+    data_dB = log_prefix*np.log10(np.abs(
+        y_data/np.amax(np.abs(y_data)))/log_reference)
     ymax = np.nanmax(data_dB)
     ymin = ymax - 90
     ymax = ymax + 10
@@ -127,17 +132,17 @@ def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     fig, ax = prepare_plot(ax)
 
     time_data = signal.time
     sampling_rate = signal.sampling_rate
 
-    #fig, axes = plt.subplots()
-
     eps = np.finfo(float).tiny
     data_dB = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
     ax.semilogx(signal.frequencies, data_dB.T, **kwargs)
-
 
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel("Magnitude [dB]")
@@ -154,10 +159,8 @@ def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     modifier = AxisModifierLinesLogYAxis(ax, fig)
     modifier.connect()
-    ax.xaxis.set_major_locator(
-        LogLocatorITAToolbox())
-    ax.xaxis.set_major_formatter(
-        LogFormatterITAToolbox())
+    ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+    ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
     return ax
 
 def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
@@ -187,6 +190,9 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     fig, ax = prepare_plot(ax)
 
     time_data = signal.time
@@ -194,6 +200,7 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
 
     phase_data = dsp.phase(signal, deg=deg, unwrap=unwrap)
 
+    # Construct the correct label string:
     ylabel_string = 'Phase '
     if(unwrap==True):
         ylabel_string += '(unwrapped) '
@@ -225,10 +232,8 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
 
     modifier = AxisModifierLinesLogYAxis(ax, fig)
     modifier.connect()
-    ax.xaxis.set_major_locator(
-        LogLocatorITAToolbox())
-    ax.xaxis.set_major_formatter(
-        LogFormatterITAToolbox())
+    ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+    ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
 
@@ -252,6 +257,9 @@ def plot_group_delay(signal, ax=None, **kwargs):
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     fig, ax = prepare_plot(ax)
 
     data = dsp.group_delay(signal)
@@ -276,10 +284,16 @@ def plot_group_delay(signal, ax=None, **kwargs):
 
     return ax
 
-def _plot_spectrogram(signal, log=False, scale='dB', window='hann',
-                     window_length='auto', window_overlap_fct=0.5,
-                     cmap=mpl.cm.get_cmap(name='magma'), ax=None, **kwargs):
-    """Plots the spectrogram for a given signal object.
+def _plot_spectrogram(signal,
+                      log=False,
+                      scale='dB',
+                      window='hann',
+                      window_length='auto',
+                      window_overlap_fct=0.5,
+                      cmap=mpl.cm.get_cmap(name='magma'),
+                      ax=None,
+                      **kwargs):
+    """Plots the spectrogram for a given signal object without colorbar.
 
     Parameters
     ----------
@@ -324,10 +338,10 @@ def _plot_spectrogram(signal, log=False, scale='dB', window='hann',
     Examples
     --------
     """
-    fig, ax = prepare_plot(ax)
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
 
-    # Define figure and axes for plot:
-    #fig, axes = plt.subplots(1,2,gridspec_kw={"width_ratios":[1, 0.05]})
+    fig, ax = prepare_plot(ax)
 
     if window_length == 'auto':
         window_length  = 2**dsp.nextpow2(signal.n_samples / 2000)
@@ -350,21 +364,24 @@ def _plot_spectrogram(signal, log=False, scale='dB', window='hann',
     ax.set_xlabel('Time [sec]')
     ax.set_xlim((signal.times[0], signal.times[-1]))
     ax.set_ylim((20, signal.sampling_rate/2))
+
     if log:
         ax.set_yscale('symlog')
         ax.yaxis.set_major_locator(LogLocatorITAToolbox())
     ax.yaxis.set_major_formatter(LogFormatterITAToolbox())
     ax.grid(ls='dotted')
 
-    # Colorbar:
-    #cb = plt.colorbar(mappable=im, cax=axes[1])
-    #cb.set_label('Modulus [dB]')
-
     return ax
 
-def plot_spectrogram(signal, log=False, scale='dB', window='hann',
-                     window_length='auto', window_overlap_fct=0.5,
-                     cmap=mpl.cm.get_cmap(name='magma'), ax=None, **kwargs):
+def plot_spectrogram(signal,
+                     log=False,
+                     scale='dB',
+                     window='hann',
+                     window_length='auto',
+                     window_overlap_fct=0.5,
+                     cmap=mpl.cm.get_cmap(name='magma'),
+                     ax=None,
+                     **kwargs):
     """Plots the spectrogram for a given signal object.
 
     Parameters
@@ -410,6 +427,9 @@ def plot_spectrogram(signal, log=False, scale='dB', window='hann',
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     plt.style.use('ggplot')
     plt.style.use('haiopy.mplstyle')
 
@@ -426,8 +446,12 @@ def plot_spectrogram(signal, log=False, scale='dB', window='hann',
 
     return ax
 
-def plot_freq_phase(signal, log_prefix=20, log_reference=1, deg=False,
-                    unwrap=False, **kwargs):
+def plot_freq_phase(signal,
+                    log_prefix=20,
+                    log_reference=1,
+                    deg=False,
+                    unwrap=False,
+                    **kwargs):
     """Plot the magnitude and phase of the spectrum on the positive frequency
     axis.
 
@@ -454,6 +478,9 @@ def plot_freq_phase(signal, log_prefix=20, log_reference=1, deg=False,
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     fig, ax = plt.subplots(2,1,sharex=True)
     plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     plot_phase(signal, deg, unwrap, ax[1], **kwargs)
@@ -481,6 +508,9 @@ def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, **kwargs):
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
     fig, ax = plt.subplots(2,1,sharex=True)
     plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     plot_group_delay(signal, ax[1], **kwargs)
@@ -509,25 +539,42 @@ def plot_all(signal, **kwargs):
     Examples
     --------
     """
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
 
     plt.style.use('ggplot')
     plt.style.use('haiopy.mplstyle')
 
-    fig, ax = plt.subplots(3,2,sharex='col')
+    # Setup figure, axes and grid:
+    fig, ax = plt.subplots(4,2, gridspec_kw={'height_ratios':[1,1,1,0.1]})
     fig.set_size_inches(10, 8)
 
+    # Time domain plots:
     plot_time(signal, ax=ax[0,0], **kwargs)
     plot_time_dB(signal, ax=ax[1,0], **kwargs)
     _plot_spectrogram(signal, ax=ax[2,0], **kwargs)
 
+    # Frequency domain plots:
     plot_freq(signal, ax=ax[0,1], **kwargs)
     plot_phase(signal, ax=ax[1,1], **kwargs)
     plot_group_delay(signal, ax=ax[2,1], **kwargs)
 
+    # Colorbar for spectrogram:
+    cb = plt.colorbar(mappable=ax[2,0].get_images()[0], cax=ax[3,0], orientation='horizontal')
+    cb.set_label('Modulus [dB]')
+
+    # Remove unnessecary labels and ticks:
     ax[0,0].set_xlabel(None)
     ax[1,0].set_xlabel(None)
     ax[0,1].set_xlabel(None)
     ax[1,1].set_xlabel(None)
-
+    ax[3,1].axis('off')
+    ax[0,0].get_shared_x_axes().join(ax[0,0], ax[1,0], ax[2,0])
+    ax[0,0].set_xticklabels([])
+    ax[1,0].set_xticklabels([])
+    ax[0,1].get_shared_x_axes().join(ax[0,1], ax[1,1], ax[2,1])
+    ax[0,1].set_xticklabels([])
+    ax[1,1].set_xticklabels([])
     plt.tight_layout()
+
     return ax
