@@ -227,27 +227,17 @@ def test_signal_length(sine):
 def test_getter_position(sine):
     """Test if attribute position is accessed correctly."""
     coord_mock = mock.Mock(spec_set=Coordinates())
-    coord_mock.x = 1
-    coord_mock.y = 1
-    coord_mock.z = 1
     signal = Signal(sine, 44100)
     signal._position = coord_mock
-    npt.assert_allclose(signal.position.x, coord_mock.x)
-    npt.assert_allclose(signal.position.y, coord_mock.y)
-    npt.assert_allclose(signal.position.z, coord_mock.z)
+    assert signal.position == coord_mock
 
 
 def test_setter_position(sine):
     """Test if attribute position is set correctly."""
     coord_mock = mock.Mock(spec_set=Coordinates())
-    coord_mock.x = 1
-    coord_mock.y = 1
-    coord_mock.z = 1
     signal = Signal(sine, 44100)
     signal.position = coord_mock
-    npt.assert_allclose(coord_mock.x, signal._position.x)
-    npt.assert_allclose(coord_mock.y, signal._position.y)
-    npt.assert_allclose(coord_mock.z, signal._position.z)
+    assert signal._position == coord_mock
 
 
 def test_setter_position_false_type(sine):
@@ -256,29 +246,23 @@ def test_setter_position_false_type(sine):
     signal = Signal(sine, 44100)
     with pytest.raises(TypeError):
         signal.position = np.array([1, 1, 1])
-        pytest.fail("Input has to be Coordinates object")
+        pytest.raises(TypeError, matches="Input has to be Coordinates object")
 
 
 def test_getter_orientation(sine):
     """Test if attribute orientation is accessed correctly."""
     orient_mock = mock.Mock(spec_set=Orientation())
-    orient_mock.view = np.array([1, 0, 0])
-    orient_mock.up = np.array([0, 1, 0])
     signal = Signal(sine, 44100)
     signal._orientation = orient_mock
-    npt.assert_allclose(signal.orientation.up, orient_mock.up)
-    npt.assert_allclose(signal.orientation.view, orient_mock.view)
+    assert signal.orientation == orient_mock
 
 
 def test_setter_orientation(sine):
     """Test if attribute orientation is set correctly."""
     orient_mock = mock.Mock(spec_set=Orientation())
-    orient_mock.view = np.array([1, 0, 0])
-    orient_mock.up = np.array([0, 1, 0])
     signal = Signal(sine, 44100)
     signal.orientation = orient_mock
-    npt.assert_allclose(orient_mock.up, signal._orientation.up)
-    npt.assert_allclose(orient_mock.view, signal._orientation.view)
+    assert signal._orientation == orient_mock
 
 
 def test_setter_orientation_false_type(sine):
@@ -286,7 +270,7 @@ def test_setter_orientation_false_type(sine):
     signal = Signal(sine, 44100)
     with pytest.raises(TypeError):
         signal.orientation = np.array([[1, 0, 0], [0, 1, 0]])
-        pytest.fail("Input has to be Orientation object")
+        pytest.raises(TypeError, matches="Input has to be Orientation object")
 
 
 def test_shape(sine, impulse):

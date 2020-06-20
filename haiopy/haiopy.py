@@ -98,13 +98,13 @@ class Signal(Audio):
         if isinstance(position, Coordinates):
             self._position = position
         else:
-            raise TypeError(("Input value has to be coordinates object, "
+            raise TypeError(("Input value has to be a Coordinates object, "
                              "not {}").format(type(position).__name__))
 
         if isinstance(orientation, Orientation):
             self._orientation = orientation
         else:
-            raise TypeError(("Input value has to be orientation object, "
+            raise TypeError(("Input value has to be a Orientation object, "
                              "not {}").format(type(orientation).__name__))
 
     @property
