@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from haiopy import fft as fft
@@ -39,9 +41,10 @@ class Signal(Audio):
     def __init__(self,
                  data,
                  sampling_rate,
+                 n_samples=None,
                  domain='time',
                  signal_type='energy',
-                 dtype=None,
+                 dtype=np.double,
                  position=Coordinates(),
                  orientation=Orientation()):
         """Init Signal with data, sampling rate and domain and signal type.
@@ -66,24 +69,7 @@ class Signal(Audio):
 
         Audio.__init__(self)
         self._sampling_rate = sampling_rate
-        if len(data.shape) <= 2:
-            if domain == 'time':
-                if not dtype:
-                    self._dtype = data.dtype
-                else:
-                    self._dtype = dtype
-                self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
-            elif domain == 'freq':
-                if dtype is None:
-                    self._dtype = np.double
-                n_bins = data.shape[-1]
-                n_samples = (n_bins - 1)*2
-                self._data = np.atleast_2d(
-                    np.asarray(
-                        fft.irfft(data, n_samples, signal_type),
-                        dtype=dtype))
-        else:
-            raise ValueError("Only 2-dim data is allowed")
+        self._dtype = dtype
 
         self._VALID_SIGNAL_TYPE = ["power", "energy"]
         if (signal_type in self._VALID_SIGNAL_TYPE) is True:
@@ -91,22 +77,63 @@ class Signal(Audio):
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")
 
+        self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
+        if domain in self._VALID_SIGNAL_DOMAIN:
+            self._domain = domain
+        else:
+            raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
+
+        if domain == 'time':
+            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+            self._n_samples = self._data.shape[-1]
+        elif domain == 'freq':
+            if n_samples is None:
+                warnings.warn("Number of time samples not given, assuming an\
+                    even number of samples from the number of frequency bins.")
+                n_bins = data.shape[-1]
+                n_samples = (n_bins - 1)*2
+            self._n_samples = n_samples
+            self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+
         if isinstance(position, Coordinates):
             self._position = position
         else:
-            raise TypeError(("Input value has to be coordinates object, "
+            raise TypeError(("Input value has to be a Coordinates object, "
                              "not {}").format(type(position).__name__))
 
         if isinstance(orientation, Orientation):
             self._orientation = orientation
         else:
-            raise TypeError(("Input value has to be orientation object, "
+            raise TypeError(("Input value has to be a Orientation object, "
                              "not {}").format(type(orientation).__name__))
+
+    @property
+    def domain(self):
+        """The domain the data is stored in"""
+        return self._domain
+
+    @domain.setter
+    def domain(self, new_domain):
+        if new_domain not in self._VALID_SIGNAL_DOMAIN:
+            raise ValueError("Incorrect domain, needs to be time/freq.")
+
+        if not (self._domain == new_domain):
+            # Only process if we change domain
+            if new_domain == 'time':
+                # If the new domain should be time, we had a saved spectrum
+                # and need to do an inverse Fourier Transform
+                self.time = fft.irfft(
+                    self._data, self.n_samples, signal_type=self.signal_type)
+            elif new_domain == 'freq':
+                # If the new domain should be freq, we had sampled time data
+                # and need to do a Fourier Transform
+                self.freq = fft.rfft(
+                    self._data, self.n_samples, signal_type=self.signal_type)
 
     @property
     def n_samples(self):
         """Number of samples."""
-        return self._data.shape[-1]
+        return self._n_samples
 
     @property
     def n_bins(self):
@@ -126,22 +153,36 @@ class Signal(Audio):
     @property
     def time(self):
         """The signal data in the time domain."""
+        self.domain = 'time'
         return self._data
 
     @time.setter
     def time(self, value):
-        self._data = np.atleast_2d(value)
+        data = np.atleast_2d(value)
+        self._domain = 'time'
+        self._data = data
+        self._n_samples = data.shape[-1]
 
     @property
     def freq(self):
         """The signal data in the frequency domain."""
-        freq = fft.rfft(self._data, self.n_samples, self._signal_type)
-        return freq
+        self.domain = 'freq'
+        return self._data
 
     @freq.setter
     def freq(self, value):
-        self._data = np.atleast_2d(
-            fft.irfft(value, self.n_samples, self.signal_type))
+        spec = np.atleast_2d(value)
+        new_num_bins = spec.shape[-1]
+        if new_num_bins == self.n_bins:
+            n_samples = self.n_samples
+        else:
+            warnings.warn("Number of frequency bins different will change, assuming an\
+                    even number of samples from the number of frequency bins.")
+            n_samples = (new_num_bins - 1)*2
+
+        self._data = spec
+        self._n_samples = n_samples
+        self._domain = 'freq'
 
     @property
     def sampling_rate(self):
@@ -204,44 +245,45 @@ class Signal(Audio):
     @property
     def shape(self):
         """Shape of the data."""
-        return self._data.shape
+        return self._data.shape[:-1]
 
     def __repr__(self):
         """String representation of signal class.
         """
-        repr_string = ("Audio Signal\n"
-                       "--------------------\n"
-                       "Dimensions: {}x{}\n"
-                       "Sampling rate: {} Hz\n"
-                       "Signal type: {}\n"
-                       "Signal length: {} sec").format(
-                       self.shape[0], self.n_samples, self._sampling_rate,
-                       self._signal_type, self.signal_length)
+        repr_string = (
+            "Audio Signal\n"
+            "--------------------\n"
+            "{} channels with {} samples @ {} Hz sampling rate".format(
+                self.shape, self.n_samples, self._sampling_rate))
         return repr_string
 
     def __getitem__(self, key):
         """Get signal channels at key.
         """
-        if isinstance(key, (int, slice)):
+        if isinstance(key, (int, slice, tuple)):
             try:
-                return self._data[key]
-            except KeyError:
-                raise KeyError("Index is out of bounds")
-        elif isinstance(key, tuple):
-            try:
-                return self._data[key]
+                data = self._data[key]
             except KeyError:
                 raise KeyError("Index is out of bounds")
         else:
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
+        items = Signal(
+            data,
+            sampling_rate=self.sampling_rate,
+            domain=self.domain,
+            signal_type=self.signal_type,
+            dtype=self.dtype)
+
+        return items
 
     def __setitem__(self, key, value):
         """Set signal channels at key.
         """
+        self._assert_matching_meta_data(value)
         if isinstance(key, (int, slice)):
             try:
-                self._data[key] = value
+                self._data[key] = value._data
             except KeyError:
                 raise KeyError("Index is out of bound")
         else:
@@ -252,3 +294,16 @@ class Signal(Audio):
         """Length of the object which is the number of samples stored.
         """
         return self.n_samples
+
+    def _assert_matching_meta_data(self, other):
+        """Check if the sampling rate, the number of samples, and the signal
+        type of two Signal objects match.
+        """
+        if not isinstance(other, Signal):
+            raise ValueError("Comparison only valid against Signal objects.")
+        if self.sampling_rate != other.sampling_rate:
+            raise ValueError("The sampling rates do not match.")
+        if self.n_samples != other.n_samples:
+            raise ValueError("The number of samples does not match.")
+        if self.signal_type != other.signal_type:
+            raise ValueError("The signal types do not match.")
