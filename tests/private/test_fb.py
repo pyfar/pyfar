@@ -15,7 +15,7 @@ from haiopy import Coordinates
 
 c = Coordinates([-1, 1], 0, 0)
 c.show(np.array([0,1],dtype=bool))
-c.rotate('Z', 90)
+c.rotate('z', 90)
 
 
 # %% slice and plot testing

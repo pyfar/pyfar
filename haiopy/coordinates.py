@@ -919,14 +919,18 @@ class Coordinates(object):
 
             'xyz' - rotation using euler angles. Up to three letters. E.g., 'x'
             will rotate about the x-axis only, while 'xz' will rotate about
-            the x-axis and then about the z-axis. Capital letters for intrinsic
-            and lower letters for extrinsic rotation.
+            the x-axis and then about the z-axis. Use lower letters for
+            extrinsic rotations (rotations about the axes of the original
+            coordinate system xyz, which remains motionless) and upper letters
+            for instrinsic rotations (rotations about the axes of the rotating
+            coordinate system XYZ, solidary with the moving body, which changes
+            its orientation after each elemental rotation).
         value : number, array like
-            value(s) that describe the rotation according to 'rotation' (see
+            amount of rotation in the format specified by 'rotation' (see
             above).
         degrees : bool, optional
-            pass Euler angles in degree instead of radians. The default is
-            True.
+            pass angles in degrees if using 'rotvec' or euler angles ('xyz').
+            The default is True. Use False to pass angles in radians.
         inverse : bool, optional
             Apply inverse rotation. The default is False.
 
@@ -947,6 +951,8 @@ class Coordinates(object):
         elif rotation == 'matrix':
             rot = sp_rot.from_matrix(value)
         elif rotation == 'rotvec':
+            if degrees:
+                value = np.asarray(value) / 180*np.pi
             rot = sp_rot.from_rotvec(value)
         elif not bool(re.search('[^x-z]', rotation.lower())):
             # only check if string contains xyz, everything else is checked in
