@@ -9,7 +9,19 @@ Created on Wed May  6 19:46:11 2020
 import numpy as np
 import haiopy
 from haiopy import Coordinates
+from haiopy.spatial import samplings
 
+
+# %% test samplings
+
+c = samplings.cube_equidistant(11)
+c = samplings.dodecahedron()
+c = samplings.icosahedron()
+c = samplings.sphere_equiangular(10)
+c = samplings.sphere_gaussian(10)
+c = samplings.hyperinterpolation(10)
+c = samplings.spherical_t_design(15, 'const_angular_spread')
+c.show()
 
 # %% test rotation
 

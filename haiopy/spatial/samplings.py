@@ -3,6 +3,7 @@ Collection of sampling schemes for the sphere
 """
 # import os
 import numpy as np
+import urllib3
 from haiopy.coordinates import Coordinates
 
 
@@ -99,7 +100,7 @@ def dodecahedron():
     rad = np.ones(np.size(theta))
 
     sampling = Coordinates(
-        phi, theta, rad, domain='spherical', convention='top_colat')
+        phi, theta, rad, domain='sph', convention='top_colat')
     return sampling
 
 
@@ -188,169 +189,169 @@ def sphere_equiangular(n_points=None, angles=None):
     return sampling
 
 
-# def sphere_gaussian(n_max):
-#     """Generate sampling of the sphere based on the Gaussian quadrature.
+def sphere_gaussian(n_max):
+    """Generate sampling of the sphere based on the Gaussian quadrature.
 
-#     Paramters
-#     ---------
-#     n_max : integer
-#         Spherical harmonic order of the sampling
+    Paramters
+    ---------
+    n_max : integer
+        Spherical harmonic order of the sampling
 
-#     Returns
-#     -------
-#     sampling : SamplingSphere
-#         SamplingSphere object containing all sampling points
+    Returns
+    -------
+    sampling : SamplingSphere
+        SamplingSphere object containing all sampling points
 
-#     """
-#     legendre, weights = np.polynomial.legendre.leggauss(n_max+1)
-#     theta_angles = np.arccos(legendre)
-#     n_phi = np.round((n_max+1)*2)
-#     phi_angles = np.arange(0,
-#                            2*np.pi,
-#                            2*np.pi/n_phi)
-#     theta, phi = np.meshgrid(theta_angles, phi_angles)
-#     rad = np.ones(theta.size)
-#     weights = np.tile(weights*np.pi/(n_max+1), 2*(n_max+1))
+    """
+    legendre, weights = np.polynomial.legendre.leggauss(n_max+1)
+    theta_angles = np.arccos(legendre)
+    n_phi = np.round((n_max+1)*2)
+    phi_angles = np.arange(0,
+                            2*np.pi,
+                            2*np.pi/n_phi)
+    theta, phi = np.meshgrid(theta_angles, phi_angles)
+    rad = np.ones(theta.size)
+    weights = np.tile(weights*np.pi/(n_max+1), 2*(n_max+1))
 
-#     sampling = SamplingSphere.from_spherical(rad,
-#                                              theta.reshape(-1),
-#                                              phi.reshape(-1))
-#     sampling.weights = weights
-#     return sampling
-
-
-# def hyperinterpolation(n_max):
-#     """Gives the points of a Hyperinterpolation sampling grid
-#     after Sloan and Womersley [1]_.
-
-#     Notes
-#     -----
-#     This implementation uses precalculated sets of points which are downloaded
-#     from Womersley's homepage [2]_.
-
-#     References
-#     ----------
-#     .. [1]  I. H. Sloan and R. S. Womersley, “Extremal Systems of Points and
-#             Numerical Integration on the Sphere,” Advances in Computational
-#             Mathematics, vol. 21, no. 1/2, pp. 107–125, 2004.
-#     .. [2]  http://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/index.html
-
-#     Parameters
-#     ----------
-#     n_max : integer
-#         Spherical harmonic order of the sampling
-
-#     Returns
-#     -------
-#     sampling: SamplingSphere
-#         SamplingSphere object containing all sampling points
-#     """
-#     n_sh = (n_max+1)**2
-#     filename = "/Womersley/md%02d.%04d" % (n_max, n_sh)
-#     url = "http://www.ita-toolbox.org/Griddata"
-#     fileurl = url + filename
-
-#     http = urllib3.PoolManager()
-#     http_data = http.urlopen('GET', fileurl)
-
-#     if http_data.status == 200:
-#         file_data = http_data.data.decode()
-#     else:
-#         raise ConnectionError("Connection error. Please check your internet \
-#                 connection.")
-
-#     file_data = np.fromstring(
-#         file_data,
-#         dtype='double',
-#         sep=' ').reshape((n_sh, 4))
-#     sampling = Coordinates(
-#         file_data[:, 0],
-#         file_data[:, 1],
-#         file_data[:, 2])
-#     sampling.weights = file_data[:, 3]
-
-#     return sampling
+    sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
+                           domain='sph', convention='top_colat')
+    sampling.weights = weights
+    return sampling
 
 
-# def spherical_t_design(n_max, criterion='const_energy'):
-#     r"""Return the sampling positions for a spherical t-design [1]_ .
-#     For a spherical harmonic order N, a t-Design of degree `:math: t=2N` for
-#     constant energy or `:math: t=2N+1` additionally ensuring a constant angular
-#     spread of energy is required [2]_. For a given degree t
+def hyperinterpolation(n_max):
+    """Gives the points of a Hyperinterpolation sampling grid
+    after Sloan and Womersley [1]_.
 
-#     .. math::
+    Notes
+    -----
+    This implementation uses precalculated sets of points which are downloaded
+    from Womersley's homepage [2]_.
 
-#         L = \lceil \frac{(t+1)^2}{2} \rceil+1,
+    References
+    ----------
+    .. [1]  I. H. Sloan and R. S. Womersley, “Extremal Systems of Points and
+            Numerical Integration on the Sphere,” Advances in Computational
+            Mathematics, vol. 21, no. 1/2, pp. 107–125, 2004.
+    .. [2]  http://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/index.html
 
-#     points will be generated, except for t = 3, 5, 7, 9, 11, 13, and 15.
-#     T-designs allow for a inverse spherical harmonic transform matrix
-#     calculated as `:math: D = \frac{4\pi}{L} \mathbf{Y}^\mathrm{H}`.
+    Parameters
+    ----------
+    n_max : integer
+        Spherical harmonic order of the sampling
 
-#     Parameters
-#     ----------
-#     degree : integer
-#         T-design degree
-#     criterion : 'const_energy', 'const_angular_spread'
-#         Design criterion ensuring only a constant energy or additionally
-#         constant angular spread of energy
+    Returns
+    -------
+    sampling: SamplingSphere
+        SamplingSphere object containing all sampling points
+    """
+    n_sh = (n_max+1)**2
+    filename = "/Womersley/md%02d.%04d" % (n_max, n_sh)
+    url = "http://www.ita-toolbox.org/Griddata"
+    fileurl = url + filename
 
-#     Returns
-#     -------
-#     sampling : SamplingSphere
-#         SamplingSphere object containing all sampling points
+    http = urllib3.PoolManager()
+    http_data = http.urlopen('GET', fileurl)
 
-#     Notes
-#     -----
-#     This function downloads a pre-calculated set of points from
-#     Rob Womersley's homepage [3]_ .
+    if http_data.status == 200:
+        file_data = http_data.data.decode()
+    else:
+        raise ConnectionError("Connection error. Please check your internet \
+                connection.")
 
-#     References
-#     ----------
+    file_data = np.fromstring(
+        file_data,
+        dtype='double',
+        sep=' ').reshape((n_sh, 4))
+    sampling = Coordinates(
+        file_data[:, 0],
+        file_data[:, 1],
+        file_data[:, 2])
+    sampling.weights = file_data[:, 3]
 
-#     .. [1]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
-#             Spherical Designs for Integration and Interpolation on the
-#             Two-Sphere,” SIAM Journal on Numerical Analysis, vol. 48, no. 6,
-#             pp. 2135–2157, Jan. 2010.
-#     .. [2]  F. Zotter, M. Frank, and A. Sontacchi, “The Virtual T-Design
-#             Ambisonics-Rig Using VBAP,” in Proceedings on the Congress on
-#             Sound and Vibration, 2010.
-#     .. [3]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
+    return sampling
 
-#     """
-#     if criterion == 'const_energy':
-#         degree = 2*n_max
-#     elif criterion == 'const_angular_spread':
-#         degree = 2*n_max + 1
-#     else:
-#         raise ValueError("Invalid design criterion.")
 
-#     n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
-#     n_points_exceptions = {3:8, 5:18, 7:32, 9:50, 11:72, 13:98, 15:128}
-#     if degree in n_points_exceptions:
-#         n_points = n_points_exceptions[degree]
+def spherical_t_design(n_max, criterion='const_energy'):
+    r"""Return the sampling positions for a spherical t-design [1]_ .
+    For a spherical harmonic order N, a t-Design of degree `:math: t=2N` for
+    constant energy or `:math: t=2N+1` additionally ensuring a constant angular
+    spread of energy is required [2]_. For a given degree t
 
-#     filename = "sf%03d.%05d" % (degree, n_points)
-#     url = "http://web.maths.unsw.edu.au/~rsw/Sphere/Points/SF/SF29-Nov-2012/"
-#     fileurl = url + filename
+    .. math::
 
-#     http = urllib3.PoolManager(
-#         cert_reqs=False)
-#     http_data = http.urlopen('GET', fileurl)
+        L = \lceil \frac{(t+1)^2}{2} \rceil+1,
 
-#     if http_data.status == 200:
-#         file_data = http_data.data.decode()
-#     elif http_data.status == 404:
-#         raise FileNotFoundError("File was not found. Check if the design you \
-#                 are trying to calculate is a valid t-design.")
-#     else:
-#         raise ConnectionError("Connection error. Please check your internet \
-#                 connection.")
+    points will be generated, except for t = 3, 5, 7, 9, 11, 13, and 15.
+    T-designs allow for a inverse spherical harmonic transform matrix
+    calculated as `:math: D = \frac{4\pi}{L} \mathbf{Y}^\mathrm{H}`.
 
-#     points = np.fromstring(
-#         file_data,
-#         dtype=np.double,
-#         sep=' ').reshape((n_points, 3)).T
-#     sampling = SamplingSphere.from_array(points)
+    Parameters
+    ----------
+    degree : integer
+        T-design degree
+    criterion : 'const_energy', 'const_angular_spread'
+        Design criterion ensuring only a constant energy or additionally
+        constant angular spread of energy
 
-#     return sampling
+    Returns
+    -------
+    sampling : SamplingSphere
+        SamplingSphere object containing all sampling points
+
+    Notes
+    -----
+    This function downloads a pre-calculated set of points from
+    Rob Womersley's homepage [3]_ .
+
+    References
+    ----------
+
+    .. [1]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
+            Spherical Designs for Integration and Interpolation on the
+            Two-Sphere,” SIAM Journal on Numerical Analysis, vol. 48, no. 6,
+            pp. 2135–2157, Jan. 2010.
+    .. [2]  F. Zotter, M. Frank, and A. Sontacchi, “The Virtual T-Design
+            Ambisonics-Rig Using VBAP,” in Proceedings on the Congress on
+            Sound and Vibration, 2010.
+    .. [3]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
+
+    """
+    if criterion == 'const_energy':
+        degree = 2*n_max
+    elif criterion == 'const_angular_spread':
+        degree = 2*n_max + 1
+    else:
+        raise ValueError("Invalid design criterion.")
+
+    n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
+    n_points_exceptions = {3:8, 5:18, 7:32, 9:50, 11:72, 13:98, 15:128}
+    if degree in n_points_exceptions:
+        n_points = n_points_exceptions[degree]
+
+    filename = "sf%03d.%05d" % (degree, n_points)
+    url = "http://web.maths.unsw.edu.au/~rsw/Sphere/Points/SF/SF29-Nov-2012/"
+    fileurl = url + filename
+
+    http = urllib3.PoolManager(
+        cert_reqs=False)
+    http_data = http.urlopen('GET', fileurl)
+
+    if http_data.status == 200:
+        file_data = http_data.data.decode()
+    elif http_data.status == 404:
+        raise FileNotFoundError("File was not found. Check if the design you \
+                are trying to calculate is a valid t-design.")
+    else:
+        raise ConnectionError("Connection error. Please check your internet \
+                connection.")
+
+    points = np.fromstring(
+        file_data,
+        dtype=np.double,
+        sep=' ').reshape((n_points, 3))
+
+    sampling = Coordinates(points[...,0], points[...,1], points[...,2])
+
+    return sampling
 
