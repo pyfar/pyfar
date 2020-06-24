@@ -2,40 +2,15 @@ import numpy as np
 from scipy import signal as sgn
 from haiopy import Signal
 
-def group_delay(signal):
-    """Generates the group delay for a given signal object including frequency,
-    time and colorbar-limit vectors.
-
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-
-    Returns
-    -------
-    group_delay : np.array()
-        Group delay.
-    """
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
-    phase_vec = phase(signal, deg=False, unwrap=True)
-    bin_dist = signal.sampling_rate / signal.n_samples
-    group_delay = (- np.diff(phase_vec,1,-1, prepend=0) /
-                   (bin_dist * 2 * np.pi))
-    return np.squeeze(group_delay)
-
 def phase(signal, deg=False, unwrap=False):
-    """Generates the spectrogram for a given signal object including frequency,
-    time and colorbar-limit vectors.
+    """Returns the phase for a given signal object.
 
     Parameters
     ----------
     signal : Signal object
         An audio signal object from the haiopy signal class
     deg : Boolean
-        Specifies, whether the phase is plotted in degrees or radians.
+        Specifies, whether the phase is returned in degrees or radians.
     unwrap : Boolean
         Specifies, whether the phase is unwrapped or not.
         If set to "360", the phase is wrapped to 2 pi.
@@ -60,8 +35,32 @@ def phase(signal, deg=False, unwrap=False):
         phase = wrap_to_2pi(np.unwrap(phase))
 
     if deg:
-        phase = rad_to_deg(phase)
+        phase = np.degrees(phase)
     return phase
+
+def group_delay(signal):
+    """Returns the group delay for a given signal object.
+
+    Parameters
+    ----------
+    signal : Signal object
+        An audio signal object from the haiopy signal class
+
+    Returns
+    -------
+    group_delay : np.array()
+        Group delay.
+    """
+
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    phase_vec = phase(signal, deg=False, unwrap=True)
+    bin_dist = signal.sampling_rate / signal.n_samples
+    group_delay = (- np.diff(phase_vec,1,-1, prepend=0) /
+                   (bin_dist * 2 * np.pi))
+    return np.squeeze(group_delay)
+
 
 def spectrogram(signal,
                 window='hann',
@@ -124,9 +123,6 @@ def spectrogram(signal,
     See Also
     --------
     scipy.signal.spectrogram() : Generate the spectrogram for a given signal.
-
-    Examples
-    --------
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -169,9 +165,6 @@ def spectrogram(signal,
 
     return frequencies, times, spectrogram, clim
 
-
-### HELPER FUNCTIONS ###
-
 def wrap_to_2pi(x):
     """Wraps phase to 2 pi.
 
@@ -190,21 +183,6 @@ def wrap_to_2pi(x):
     x = np.mod(x, 2*np.pi)
     x[zero_check] = 2*np.pi
     return x
-
-def rad_to_deg(x):
-    """Converts radians to degrees.
-
-    Parameters
-    ----------
-    x : double
-        Input variable to convert to degrees.
-
-    Returns
-    -------
-    rad_to_deg : double
-        Value in degrees.
-    """
-    return x*180/np.pi
 
 def nextpow2(x):
     """Returns the exponent of next higher power of 2.
