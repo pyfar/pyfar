@@ -1,8 +1,9 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import pytest
 import numpy as np
-import matplotlib.pyplot as plt
 from unittest import mock
-
 import haiopy.plot as plot
 from haiopy import Signal
 from matplotlib.testing.compare import compare_images
@@ -15,7 +16,6 @@ def test_plot_time(sine_plus_impulse_mock):
     filename = 'plot_time.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_time(sine_plus_impulse_mock)
     plt.savefig(output)
 
@@ -26,7 +26,6 @@ def test_plot_time_dB(sine_plus_impulse_mock):
     filename = 'plot_time_dB.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_time_dB(sine_plus_impulse_mock)
     plt.savefig(output)
 
@@ -37,7 +36,6 @@ def test_plot_freq(sine_plus_impulse_mock):
     filename = 'plot_freq.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_freq(sine_plus_impulse_mock)
     plt.savefig(output)
 
@@ -48,7 +46,6 @@ def test_plot_phase(sine_plus_impulse_mock):
     filename = 'plot_phase.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_phase(sine_plus_impulse_mock, deg=False, unwrap=False)
     plt.savefig(output)
 
@@ -59,7 +56,6 @@ def test_plot_phase_deg(sine_plus_impulse_mock):
     filename = 'plot_phase_deg.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_phase(sine_plus_impulse_mock, deg=True, unwrap=False)
     plt.savefig(output)
 
@@ -70,7 +66,6 @@ def test_plot_phase_unwrap(sine_plus_impulse_mock):
     filename = 'plot_phase_unwrap.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_phase(sine_plus_impulse_mock, deg=False, unwrap=True)
     plt.savefig(output)
 
@@ -81,7 +76,6 @@ def test_plot_phase_unwrap_deg(sine_plus_impulse_mock):
     filename = 'plot_phase_unwrap_deg.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_phase(sine_plus_impulse_mock, deg=True, unwrap=True)
     plt.savefig(output)
 
@@ -92,7 +86,6 @@ def test_plot_group_delay(sine_plus_impulse_mock):
     filename = 'plot_group_delay.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_group_delay(sine_plus_impulse_mock)
     plt.savefig(output)
 
@@ -103,7 +96,6 @@ def test_plot_spectrogram(sine_plus_impulse_mock):
     filename = 'plot_spectrogram.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_spectrogram(sine_plus_impulse_mock)
     plt.savefig(output)
 
@@ -114,7 +106,6 @@ def test_plot_freq_phase(sine_plus_impulse_mock):
     filename = 'plot_freq_phase.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_freq_phase(sine_plus_impulse_mock)
     plt.savefig(output)
 
@@ -125,7 +116,6 @@ def test_plot_freq_group_delay(sine_plus_impulse_mock):
     filename = 'plot_freq_group_delay.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_freq_group_delay(sine_plus_impulse_mock)
     plt.savefig(output)
 
@@ -136,7 +126,6 @@ def test_plot_all(sine_plus_impulse_mock):
     filename = 'plot_all.png'
     baseline = baseline_path + filename
     output = output_path + filename
-    plt.figure()
     plot.plot_all(sine_plus_impulse_mock)
     plt.savefig(output)
 

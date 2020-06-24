@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+plt.style.use(['default', 'ggplot', 'haiopy.mplstyle'])
 import matplotlib as mpl
 import numpy as np
 from .. import dsp
@@ -28,9 +29,8 @@ def prepare_plot(ax=None):
     ax : matplotlib.pyplot.axes object
         Axes or array of axes.
     """
-    plt.style.use('ggplot')
-    plt.style.use('haiopy.mplstyle')
     if ax is None:
+        plt.cla()
         ax = plt.gca()
     fig = ax.figure
 
