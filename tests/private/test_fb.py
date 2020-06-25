@@ -21,6 +21,7 @@ c = samplings.sphere_equiangular(10)
 c = samplings.sphere_gaussian(10)
 c = samplings.hyperinterpolation(10)
 c = samplings.spherical_t_design(15, 'const_angular_spread')
+c = samplings.great_circle_grid(match=90)
 c.show()
 
 # %% test rotation

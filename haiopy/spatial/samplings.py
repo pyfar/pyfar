@@ -355,3 +355,44 @@ def spherical_t_design(n_max, criterion='const_energy'):
 
     return sampling
 
+
+def great_circle_grid(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
+                      azimuth_res=1, match=360):
+
+    # check input
+    assert not 1 % azimuth_res,"1/azimuth_res must be an integer."
+    assert not 360 % match,"360/match must be an integer."
+
+    elevation = np.sort(np.asarray(elevation))
+    assert elevation.size > 3,"elevation must have at least three elements."
+
+    # calculate delta azimuth to meet the desired great circle distance.
+    # (according to Bovbjerg et al. 2000: Measuring the head related transfer
+    # functions of an artificial head with a high directional azimuth_res)
+    d_az = 2*np.arcsin(np.clip(
+        np.sin(gcd/360*np.pi) / np.cos(elevation/180*np.pi), -1, 1))
+    d_az = d_az / np.pi * 180
+    # correct values at the poles
+    d_az[np.abs(elevation)==90] = 360;
+    # next smallest value in desired angular azimuth_res
+    d_az = d_az // azimuth_res * azimuth_res;
+
+    # adjust phi to make sure that: match // d_az == 0
+    for nn in range(d_az.size):
+        if abs(elevation[nn]) != 90:
+            while match % d_az[nn]:
+                d_az[nn] = d_az[nn] - azimuth_res
+
+    # construct the full sampling grid
+    azim = np.empty(0)
+    elev = np.empty(0)
+    for nn in range(elevation.size):
+        azim = np.append(azim, np.arange(0, 360, d_az[nn]))
+        elev = np.append(elev, np.full(int(360/d_az[nn]), elevation[nn]))
+
+    # make Coordinates object
+    sampling = Coordinates(azim, elev, radius, 'sph', 'top_elev', 'deg')
+
+    return sampling
+
+
