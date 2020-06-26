@@ -13,6 +13,8 @@ def generate_test_plots(dir='tests/test_plot_data/baseline/'):
     dir : String
         Path to save the reference plots.
     """
+    matplotlib.use('Agg')
+
     function_list = ['plot_time',
                      'plot_time_dB',
                      'plot_freq',
