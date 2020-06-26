@@ -24,18 +24,15 @@ def generate_test_plots(dir='tests/test_plot_data/baseline/'):
                      'plot_all']
 
     for function_name in function_list:
-        plt.figure()
         getattr(plot, function_name)(sine_plus_impulse())
         plt.savefig((dir + function_name + '.png'))
 
+
     # additional plots to check different options:
-    plt.figure()
     plot.plot_phase(sine_plus_impulse(), deg=True, unwrap=False)
     plt.savefig((dir + 'plot_phase_deg' + '.png'))
-    plt.figure()
     plot.plot_phase(sine_plus_impulse(), deg=False, unwrap=True)
     plt.savefig((dir + 'plot_phase_unwrap' + '.png'))
-    plt.figure()
     plot.plot_phase(sine_plus_impulse(), deg=True, unwrap=True)
     plt.savefig((dir + 'plot_phase_unwrap_deg' + '.png'))
 
