@@ -1,7 +1,8 @@
 import warnings
-
 import matplotlib as mpl
 import numpy as np
+import haiopy.plot as plot
+
 
 
 class Cycle(object):
@@ -60,11 +61,16 @@ class AxisModifierLines(AxisModifier):
     API provided by matplotlib. Works for the jupyter-matplotlib and qt
     backends.
     """
-    def __init__(self, axes, figure):
+    def __init__(self, axes, figure, signal):
         super(AxisModifierLines, self).__init__(axes, figure)
         self.cycle = Cycle(self.axes.lines)
         self.current_line = self.cycle.current()
         self.all_visible = True
+        self._signal = signal
+
+    @property
+    def signal(self):
+        return self._signal
 
     def cycle_lines(self, event):
         if event.key in ['*', ']', '[', '/', '7']:
@@ -98,16 +104,47 @@ class AxisModifierLines(AxisModifier):
         if event.key in ['up', 'down']:
             lims = np.asarray(self.axes.get_ylim())
             dyn_range = (np.diff(lims))
-            shift = np.int(np.round(0.1 * dyn_range))
+            #shift = np.int(np.round(0.1 * dyn_range))   # does not work, if
+                                                        # dyn_range < 5
+            shift = 0.1 * dyn_range
             if event.key in ['up']:
                 self.axes.set_ylim(lims + shift)
             elif event.key in ['down']:
                 self.axes.set_ylim(lims - shift)
             self.figure.canvas.draw()
 
+
     def zoom_y_axis(self, event):
         raise NotImplementedError("Use child classes to specify if the zoom \
             is symmetric or asymmetric.")
+
+    def toggle_plot(self, event):
+        if event.key in ['t', 'f', 'p', 'd', 'g', 's']:
+            if event.key in ['f']:
+                self.axes.clear()
+                plot.plot_freq(self.signal, ax=self.axes)
+                self.figure.canvas.draw()
+            if event.key in ['t']:
+                self.axes.clear()
+                plot.plot_time(self.signal, ax=self.axes)
+                self.figure.canvas.draw()
+            if event.key in ['p']:
+                self.axes.clear()
+                plot.plot_phase(self.signal, ax=self.axes)
+                self.figure.canvas.draw()
+            if event.key in ['d']:
+                self.axes.clear()
+                plot.plot_time_dB(self.signal, ax=self.axes)
+                self.figure.canvas.draw()
+            if event.key in ['g']:
+                self.axes.clear()
+                plot.plot_group_delay(self.signal, ax=self.axes)
+                self.figure.canvas.draw()
+            #if event.key in ['s']:
+            #    self.axes.clear()
+            #    plot._plot_spectrogram(self.signal, ax=self.axes)
+            #    self.figure.canvas.draw()
+
 
     def connect(self):
         super().connect()
@@ -119,6 +156,9 @@ class AxisModifierLines(AxisModifier):
             'key_press_event', self.move_y_axis)
         self._zoom_y_axis = self.figure.canvas.mpl_connect(
             'key_press_event', self.zoom_y_axis)
+        self._toggle_plot = self.figure.canvas.mpl_connect(
+            'key_press_event', self.toggle_plot)
+
 
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(
@@ -129,17 +169,21 @@ class AxisModifierLines(AxisModifier):
             'key_press_event', self._move_y_axis)
         self.figure.canvas.mpl_disconnect(
             'key_press_event', self._zoom_y_axis)
+        self.figure.canvas.mpl_disconnect(
+            'key_press_event', self._toggle_plot)
 
 
 class AxisModifierLinesLogYAxis(AxisModifierLines):
-    def __init__(self, axes, figure):
-        super(AxisModifierLinesLogYAxis, self).__init__(axes, figure)
+    def __init__(self, axes, figure, signal):
+        super(AxisModifierLinesLogYAxis, self).__init__(axes, figure, signal)
 
     def zoom_y_axis(self, event):
         if event.key in ['shift+up', 'shift+down']:
             lims = np.asarray(self.axes.get_ylim())
             dyn_range = (np.diff(lims))
-            zoom = np.int(np.round(0.1 * dyn_range))
+            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
+                                                        # dyn_range < 5
+            zoom = 0.1 * dyn_range
 
             if event.key in ['shift+up']:
                 lims[0] = lims[0] + zoom
@@ -151,15 +195,16 @@ class AxisModifierLinesLogYAxis(AxisModifierLines):
 
 
 class AxisModifierLinesLinYAxis(AxisModifierLines):
-    def __init__(self, axes, figure):
-        super(AxisModifierLinesLinYAxis, self).__init__(axes, figure)
+    def __init__(self, axes, figure, signal):
+        super(AxisModifierLinesLinYAxis, self).__init__(axes, figure, signal)
 
     def zoom_y_axis(self, event):
         if event.key in ['shift+up', 'shift+down']:
             lims = np.asarray(self.axes.get_ylim())
             dyn_range = (np.diff(lims))
-            zoom = np.int(np.round(0.1 * dyn_range))
-
+            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
+                                                        # dyn_range < 5
+            zoom = 0.1 * dyn_range
             if event.key in ['shift+up']:
                 pass
             elif event.key in ['shift+down']:

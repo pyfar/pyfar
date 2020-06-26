@@ -33,7 +33,7 @@ def prepare_plot(ax=None):
         plt.cla()
         ax = plt.gca()
     fig = ax.figure
-
+    plt.tight_layout(pad=3)
     return fig, ax
 
 def plot_time(signal, ax=None, **kwargs):
@@ -65,12 +65,16 @@ def plot_time(signal, ax=None, **kwargs):
     y_data = signal.time.T
 
     ax.plot(x_data, y_data, **kwargs)
+    ymax = np.nanmax(y_data)
+    ymin = np.nanmin(y_data)
+    ax.set_xscale('linear')
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
     ax.set_xlim((signal.times[0], signal.times[-1]))
+    ax.set_ylim((ymin, ymax))
 
-    modifier = AxisModifierLinesLinYAxis(ax, fig)
+    modifier = AxisModifierLinesLinYAxis(ax, fig, signal)
     modifier.connect()
 
     return ax
@@ -121,7 +125,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     ax.set_ylabel("Amplitude [dB]")
     ax.grid(True)
 
-    modifier = AxisModifierLinesLogYAxis(ax, fig)
+    modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
 
     return ax
@@ -177,7 +181,7 @@ def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     ax.set_ylim((ymin, ymax))
     ax.set_xlim((20, signal.sampling_rate/2))
 
-    modifier = AxisModifierLinesLogYAxis(ax, fig)
+    modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
     ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
@@ -250,7 +254,7 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
     ax.set_ylim((ymin, ymax))
     ax.set_xlim((20, signal.sampling_rate/2))
 
-    modifier = AxisModifierLinesLogYAxis(ax, fig)
+    modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
     ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
@@ -292,7 +296,7 @@ def plot_group_delay(signal, ax=None, **kwargs):
     # TODO: Set y limits correctly.
     ax.set_xlim((20, signal.sampling_rate/2))
 
-    modifier = AxisModifierLinesLogYAxis(ax, fig)
+    modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
     ax.xaxis.set_major_locator(
         LogLocatorITAToolbox())
@@ -561,7 +565,7 @@ def plot_all(signal, **kwargs):
 
     # Setup figure, axes and grid:
     fig, ax = plt.subplots(4,2, gridspec_kw={'height_ratios':[1,1,1,0.1]})
-    fig.set_size_inches(10, 8)
+    fig.set_size_inches(6, 7)
 
     # Time domain plots:
     plot_time(signal, ax=ax[0,0], **kwargs)
