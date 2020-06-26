@@ -19,7 +19,8 @@ def test_plot_time(sine_plus_impulse_mock):
     plot.plot_time(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_time_dB(sine_plus_impulse_mock):
     """Test the time plot in Decibels."""
@@ -29,7 +30,8 @@ def test_plot_time_dB(sine_plus_impulse_mock):
     plot.plot_time_dB(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_freq(sine_plus_impulse_mock):
     """Test the magnitude plot."""
@@ -39,7 +41,8 @@ def test_plot_freq(sine_plus_impulse_mock):
     plot.plot_freq(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_phase(sine_plus_impulse_mock):
     """Test the phase plot."""
@@ -49,7 +52,8 @@ def test_plot_phase(sine_plus_impulse_mock):
     plot.plot_phase(sine_plus_impulse_mock, deg=False, unwrap=False)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_phase_deg(sine_plus_impulse_mock):
     """Test the phase plot."""
@@ -59,7 +63,8 @@ def test_plot_phase_deg(sine_plus_impulse_mock):
     plot.plot_phase(sine_plus_impulse_mock, deg=True, unwrap=False)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_phase_unwrap(sine_plus_impulse_mock):
     """Test the phase plot."""
@@ -69,7 +74,8 @@ def test_plot_phase_unwrap(sine_plus_impulse_mock):
     plot.plot_phase(sine_plus_impulse_mock, deg=False, unwrap=True)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_phase_unwrap_deg(sine_plus_impulse_mock):
     """Test the phase plot."""
@@ -79,7 +85,8 @@ def test_plot_phase_unwrap_deg(sine_plus_impulse_mock):
     plot.plot_phase(sine_plus_impulse_mock, deg=True, unwrap=True)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_group_delay(sine_plus_impulse_mock):
     """Test the group delay plot."""
@@ -89,7 +96,8 @@ def test_plot_group_delay(sine_plus_impulse_mock):
     plot.plot_group_delay(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_spectrogram(sine_plus_impulse_mock):
     """Test the spectrogram plot."""
@@ -99,7 +107,8 @@ def test_plot_spectrogram(sine_plus_impulse_mock):
     plot.plot_spectrogram(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_freq_phase(sine_plus_impulse_mock):
     """Test the combined magnitude/phase plot."""
@@ -109,7 +118,8 @@ def test_plot_freq_phase(sine_plus_impulse_mock):
     plot.plot_freq_phase(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_freq_group_delay(sine_plus_impulse_mock):
     """Test the combined magnitude/group delay plot."""
@@ -119,7 +129,8 @@ def test_plot_freq_group_delay(sine_plus_impulse_mock):
     plot.plot_freq_group_delay(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 def test_plot_all(sine_plus_impulse_mock):
     """Test the plot_all function."""
@@ -129,7 +140,8 @@ def test_plot_all(sine_plus_impulse_mock):
     plot.plot_all(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=0.01) == None
+    assert compare_images(baseline, output, tol=1) == None, \
+            compare_images(baseline, output, tol=1)
 
 @pytest.fixture
 def sine_plus_impulse_mock():

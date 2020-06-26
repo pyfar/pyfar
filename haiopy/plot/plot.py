@@ -239,32 +239,32 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
 
     if deg:
         ylabel_string += '[deg]'
+        y_margin = 5
     else:
         ylabel_string += '[rad]'
         ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
         ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
         ax.yaxis.set_major_formatter(MultipleFractionFormatter(
             nominator=1, denominator=2, base=np.pi, base_str='\pi'))
+        y_margin = np.radians(5)
+
+    ymin = np.nanmin(phase_data)-y_margin # more elegant solution possible?
+    ymax = np.nanmax(phase_data)+y_margin
 
     ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
-
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel(ylabel_string)
-
     ax.set_xscale('log')
     ax.grid(True, 'both')
-
-    ymin = np.nanmin(phase_data)-1.001 # more elegant solution possible?
-    ymax = np.nanmax(phase_data)+1
-
     ax.set_ylim((ymin, ymax))
     ax.set_xlim((20, signal.sampling_rate/2))
+    ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+    ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+
     plt.tight_layout()
 
     modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
-    ax.xaxis.set_major_locator(LogLocatorITAToolbox())
-    ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
 
