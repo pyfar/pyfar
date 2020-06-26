@@ -30,10 +30,12 @@ def prepare_plot(ax=None):
         Axes or array of axes.
     """
     if ax is None:
-        plt.cla()
+        plt.clf()
         ax = plt.gca()
-    fig = ax.figure
-    plt.tight_layout(pad=3)
+        fig = plt.gcf()
+        fig.set_size_inches(plt.rcParams.get('figure.figsize'))
+    else:
+        fig = ax.figure
     return fig, ax
 
 def plot_time(signal, ax=None, **kwargs):
@@ -63,16 +65,17 @@ def plot_time(signal, ax=None, **kwargs):
     fig, ax = prepare_plot(ax)
     x_data = signal.times
     y_data = signal.time.T
-
-    ax.plot(x_data, y_data, **kwargs)
     ymax = np.nanmax(y_data)
     ymin = np.nanmin(y_data)
-    ax.set_xscale('linear')
 
+    ax.plot(x_data, y_data, **kwargs)
+    ax.set_xscale('linear')
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
     ax.set_xlim((signal.times[0], signal.times[-1]))
     ax.set_ylim((ymin, ymax))
+
+    plt.tight_layout()
 
     modifier = AxisModifierLinesLinYAxis(ax, fig, signal)
     modifier.connect()
@@ -124,6 +127,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude [dB]")
     ax.grid(True)
+    plt.tight_layout()
 
     modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
@@ -180,11 +184,13 @@ def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     ax.set_ylim((ymin, ymax))
     ax.set_xlim((20, signal.sampling_rate/2))
+    plt.tight_layout()
 
     modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
     ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+
     return ax
 
 def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
@@ -253,6 +259,7 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
 
     ax.set_ylim((ymin, ymax))
     ax.set_xlim((20, signal.sampling_rate/2))
+    plt.tight_layout()
 
     modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
@@ -295,6 +302,7 @@ def plot_group_delay(signal, ax=None, **kwargs):
 
     # TODO: Set y limits correctly.
     ax.set_xlim((20, signal.sampling_rate/2))
+    plt.tight_layout()
 
     modifier = AxisModifierLinesLogYAxis(ax, fig, signal)
     modifier.connect()
@@ -457,6 +465,7 @@ def plot_spectrogram(signal,
     # Colorbar:
     cb = plt.colorbar(mappable=ax[0].get_images()[0], cax=ax[1])
     cb.set_label('Modulus [dB]')
+    plt.tight_layout()
 
     return ax
 
@@ -493,6 +502,8 @@ def plot_freq_phase(signal,
     plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     plot_phase(signal, deg, unwrap, ax[1], **kwargs)
     ax[0].set_xlabel(None)
+    fig.align_ylabels()
+    plt.tight_layout()
     return ax
 
 def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, **kwargs):
@@ -518,6 +529,9 @@ def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, **kwargs):
     plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     plot_group_delay(signal, ax[1], **kwargs)
     ax[0].set_xlabel(None)
+    fig.align_ylabels()
+    plt.tight_layout()
+
     return ax
 
 def plot_all(signal, **kwargs):
@@ -565,7 +579,7 @@ def plot_all(signal, **kwargs):
 
     # Setup figure, axes and grid:
     fig, ax = plt.subplots(4,2, gridspec_kw={'height_ratios':[1,1,1,0.1]})
-    fig.set_size_inches(6, 7)
+    fig.set_size_inches(6, 6)
 
     # Time domain plots:
     plot_time(signal, ax=ax[0,0], **kwargs)
@@ -594,6 +608,8 @@ def plot_all(signal, **kwargs):
     ax[0,1].get_shared_x_axes().join(ax[0,1], ax[1,1], ax[2,1])
     ax[0,1].set_xticklabels([])
     ax[1,1].set_xticklabels([])
+    fig.align_ylabels()
+
     plt.tight_layout()
 
     return ax
