@@ -1,7 +1,7 @@
 import warnings
 import matplotlib as mpl
 import numpy as np
-import haiopy.plot as plot
+from . import plot
 
 
 
