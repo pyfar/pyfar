@@ -203,7 +203,7 @@ class Coordinates(object):
                 x, z, y = sph2cart(pts[...,1], np.pi/2-pts[...,0], pts[...,2])
 
             elif self._system['convention'] == 'front':
-                z, y, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+                y, z, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
 
             else:
                 raise Exception("Conversion for {} is not implemented.".\
@@ -317,7 +317,7 @@ class Coordinates(object):
                 pts_2 = np.pi/2 - pts_2
 
         # ... side polar system
-        # (ideal for simple converions from Robert Baumgartner and SOFA_API)
+        # (idea for simple converions from Robert Baumgartner and SOFA_API)
         elif convention == 'side':
             pts_2, pts_1, pts_3 = cart2sph(pts[...,0], pts[...,2], -pts[...,1])
 
@@ -327,7 +327,7 @@ class Coordinates(object):
 
         # ... front polar system
         elif convention == 'front':
-            pts_1, pts_2, pts_3 = cart2sph(pts[...,2], pts[...,1], pts[...,0])
+            pts_1, pts_2, pts_3 = cart2sph(pts[...,1], pts[...,2], pts[...,0])
 
         else:
             raise Exception("Conversion for {} is not implemented.".\
@@ -1057,7 +1057,9 @@ class Coordinates(object):
                     "radius"     : ["bound",  [0, np.inf]]},
                 "top_elev":{
                     "description_short":
-                        "Spherical coordinate system with North and South Pole.",
+                        "Spherical coordinate system with North and South Pole. "\
+                        "Conform with AES69-2015: AES standard for file "\
+                        "exchange - Spatial acoustic data file format (SOFA).",
                     "coordinates":
                         ["azimuth", "elevation", "radius"],
                     "units":
@@ -1109,7 +1111,9 @@ class Coordinates(object):
                     "radius"  :["bound",  [0, np.inf]]},
                 "front":{
                     "description_short":
-                        "Spherical coordinate system with poles on the x-axis.",
+                        "Spherical coordinate system with poles on the x-axis. "\
+                        "Conform with AES56-2008 (r2019): AES standard on "\
+                        "acoustics - Sound source modeling.",
                     "coordinates":
                         ["phi", "theta", "radius"],
                     "units":
@@ -1117,19 +1121,19 @@ class Coordinates(object):
                          ["degrees", "degrees", "meters"]],
                     "description":
                         "Phi denotes the angle in the y/z-plane with 0 "\
-                        "pointing in positive z-direction, pi/2 in positive "
-                        "y-direction, pi in negative z-direction, and 3*pi/2 "\
-                        "in negative y-direction. Theta denotes the angle "\
+                        "pointing in positive y-direction, pi/2 in positive "
+                        "z-direction, pi in negative y-direction, and 3*pi/2 "\
+                        "in negative z-direction. Theta denotes the angle "\
                         "measured from the x-axis with 0 pointing in positve "\
                         "x-direction and pi in negative x-direction. Phi and "\
                         "theta can be in radians and degrees, the radius is "\
                         "always in meters.",
                     "positive_x": [0,         0,       1],
-                    "positive_y": [np.pi/2,   np.pi/2, 1],
+                    "positive_y": [0,         np.pi/2, 1],
                     "negative_x": [0,         np.pi,   1],
-                    "negative_y": [3*np.pi/2, np.pi/2, 1],
-                    "positive_z": [0,         np.pi/2, 1],
-                    "negative_z": [np.pi,     np.pi/2, 1],
+                    "negative_y": [np.pi,     np.pi/2, 1],
+                    "positive_z": [np.pi/2,   np.pi/2, 1],
+                    "negative_z": [3*np.pi/2, np.pi/2, 1],
                     "phi"    : ["cyclic", [0, 2*np.pi]],
                     "theta"  : ["bound",  [0, np.pi]],
                     "radius" : ["bound",  [0, np.inf]]}

@@ -475,7 +475,7 @@ def test_rotation():
 
     # test with rotvec
     c = Coordinates(1,0,0)
-    c.rotate('rotvec',[0, 0, np.pi/2])
+    c.rotate('rotvec',[0, 0, 90])
     npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
 
     # test with euler
