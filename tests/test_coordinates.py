@@ -179,9 +179,9 @@ def test_coordinates_init_val_and_sys():
     systems = coords._systems()
 
     # test constructor with all systems
-    for domain in list(systems):
-        for convention in list(systems[domain]):
-            for unit in list(systems[domain][convention]['units']):
+    for domain in systems:
+        for convention in systems[domain]:
+            for unit in systems[domain][convention]['units']:
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
 
 def test_coordinates_init_val_and_weights():

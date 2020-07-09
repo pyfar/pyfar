@@ -11,7 +11,7 @@ class Coordinates(object):
     """
     Container class for coordinates in a three-dimensional space, allowing
     for compact representation and convenient conversion from and to cartesian,
-    sphercial, and cylindrical coordinate systems.
+    spherical, and cylindrical coordinate systems.
 
     To obtain a list of all available coordinate systems, use
 
@@ -32,7 +32,7 @@ class Coordinates(object):
 
     >>> coords = Coordinates([0, 1], [1, 0], [1, 1])
 
-    wich will use the default cartesian right handed coordinate system in
+    which will use the default cartesian right handed coordinate system in
     meters. For more information, please refer to the documentation of the
     class methods.
     """
@@ -349,7 +349,7 @@ class Coordinates(object):
     def set_cyl(self, points_1, points_2, points_3,
                  convention='top', unit='rad'):
         """
-        Set coordinate points in cylindircal coordinate systems.
+        Set coordinate points in cylindrical coordinate systems.
 
         Parameters
         ----------
@@ -515,7 +515,7 @@ class Coordinates(object):
         """
         return self._points.size//3
 
-    def systems(self, show = 'all', brief=False):
+    def systems(self, show='all', brief=False):
         """
         List current or all available coordinate systems on the console.
 
@@ -1520,16 +1520,8 @@ def cart2sph(x, y, z):
     radius : ndarray, number
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
-
-    if isinstance(radius, np.float64):
-        z_div_r = 0 if radius==0 else z/radius
-    else:
-        r0 = radius == 0
-        z_div_r      = np.empty_like(radius)
-        z_div_r[r0]  = 0
-        z_div_r[~r0] = z[~r0]/radius[~r0]
+    z_div_r = np.where(radius != 0, z / radius, 0)
     colatitude = np.arccos(z_div_r)
-
     azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
 
     return azimuth, colatitude, radius
