@@ -1,13 +1,17 @@
 """Generate, store, and manipulate points in 3D coordinate systems."""
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.spatial.transform import Rotation as sp_rot
+import re
+import copy
 
+import haiopy
 
 class Coordinates(object):
     """
     Container class for coordinates in a three-dimensional space, allowing
     for compact representation and convenient conversion from and to cartesian,
-    sphercial, and cylindrical coordinate systems.
+    spherical, and cylindrical coordinate systems.
 
     To obtain a list of all available coordinate systems, use
 
@@ -28,7 +32,7 @@ class Coordinates(object):
 
     >>> coords = Coordinates([0, 1], [1, 0], [1, 1])
 
-    wich will use the default cartesian right handed coordinate system in
+    which will use the default cartesian right handed coordinate system in
     meters. For more information, please refer to the documentation of the
     class methods.
     """
@@ -61,7 +65,8 @@ class Coordinates(object):
     #       because the definition differs from the sperical radius.
 
     def __init__(self, points_1=[], points_2=[], points_3=[],
-                  domain='cart', convention='right', unit=None, comment=None):
+                  domain='cart', convention='right', unit=None,
+                  weights=None, sh_order=None, comment=None):
         """
         Init coordinates container.
 
@@ -80,8 +85,16 @@ class Coordinates(object):
         unit: string
              unit of the coordinate system. By default the first available unit
              is used, see self.systems('all')
+        weights: array like, number
+            sampling weights for the coordinate points (Optional). Must have
+            same size as points_i, i.e., if points_i has five entries, weights
+            must also have five entries. The default is None.
+        sh_order : int
+            maximum sperical harmonics order of the sampling grid (Optional).
+            The default is None.
         comment : str
-            Any comment about the stored coordinate points.
+            Any comment about the stored coordinate points (Optional). The
+            default is None.
         """
 
         # init emtpy object
@@ -93,7 +106,9 @@ class Coordinates(object):
         # save coordinates to self
         self._set_points(points_1, points_2, points_3)
 
-        # save comment
+        # save meta data
+        self._set_weights(weights)
+        self._sh_order = sh_order
         self._comment = comment
 
 
@@ -188,7 +203,7 @@ class Coordinates(object):
                 x, z, y = sph2cart(pts[...,1], np.pi/2-pts[...,0], pts[...,2])
 
             elif self._system['convention'] == 'front':
-                z, y, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+                y, z, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
 
             else:
                 raise Exception("Conversion for {} is not implemented.".\
@@ -302,7 +317,7 @@ class Coordinates(object):
                 pts_2 = np.pi/2 - pts_2
 
         # ... side polar system
-        # (ideal for simple converions from Robert Baumgartner and SOFA_API)
+        # (idea for simple converions from Robert Baumgartner and SOFA_API)
         elif convention == 'side':
             pts_2, pts_1, pts_3 = cart2sph(pts[...,0], pts[...,2], -pts[...,1])
 
@@ -312,7 +327,7 @@ class Coordinates(object):
 
         # ... front polar system
         elif convention == 'front':
-            pts_1, pts_2, pts_3 = cart2sph(pts[...,2], pts[...,1], pts[...,0])
+            pts_1, pts_2, pts_3 = cart2sph(pts[...,1], pts[...,2], pts[...,0])
 
         else:
             raise Exception("Conversion for {} is not implemented.".\
@@ -334,7 +349,7 @@ class Coordinates(object):
     def set_cyl(self, points_1, points_2, points_3,
                  convention='top', unit='rad'):
         """
-        Set coordinate points in cylindircal coordinate systems.
+        Set coordinate points in cylindrical coordinate systems.
 
         Parameters
         ----------
@@ -433,16 +448,34 @@ class Coordinates(object):
         self._set_points(pts_1, pts_2, pts_3)
         return self._points
 
+    @property
+    def weights(self):
+        """Get sampling weights."""
+        return self._weights
+
+    @weights.setter
+    def weights(self, value):
+        """Set sampling weights."""
+        self._set_weights(value)
+
+    @property
+    def sh_order(self):
+        """Get the maximum spherical harmonics order."""
+        return self._sh_order
+
+    @sh_order.setter
+    def sh_order(self, value):
+        """Set the maximum spherical harmonics order."""
+        self._sh_order = value
 
     @property
     def comment(self):
-        """Comment for the data stored in the object."""
-        print('getter')
+        """Get comment."""
         return self._comment
 
     @comment.setter
     def comment(self, value):
-        print('setter')
+        """Set comment."""
         self._comment = value
 
     @property
@@ -482,7 +515,7 @@ class Coordinates(object):
         """
         return self._points.size//3
 
-    def systems(self, show = 'all', brief=False):
+    def systems(self, show='all', brief=False):
         """
         List current or all available coordinate systems on the console.
 
@@ -575,6 +608,374 @@ class Coordinates(object):
                         print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
+
+    def show(self, mask=None):
+        """
+        Show a scatter plot of the coordinate points.
+
+        Parameters
+        ----------
+        mask : boolean numpy array, None
+            Plot points in black if mask==True and red if mask==False. The
+            default is None, in which case all points are plotted in black.
+
+        Returns
+        -------
+        None.
+
+        """
+        if mask is None:
+            haiopy.plot.scatter(self)
+        else:
+            assert mask.shape == self.cshape,\
+                "'mask.shape' must be self.cshape"
+            colors = np.full(mask.shape, 'k')
+            colors[mask] = 'r'
+            haiopy.plot.scatter(self, c=colors.flatten())
+
+
+    def get_nearest_k(self, points_1, points_2, points_3, k=1,
+                      domain='cart', convention='right', unit='met',
+                      show=False):
+        """
+        Find k nearest coordinates of one or more points.
+
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        k : int
+            Number of points to return. k must be > 0. The default is 1.
+        domain : string
+            domain of point, see self.systems('all').
+        convention: string
+             coordinate convention of point, see self.systems('all').
+        unit : string
+             unit of point, see self.systems('all').
+        show : bool
+            show a plot of the coordinate points. The default is False.
+
+        Returns
+        -------
+        distance : array of floats
+            The eucledian distances to the nearest neighbors.
+            If ``points`` have shape ``tuple``, then ``distance`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with infinite distances.
+        index : ndarray of ints
+            The locations of the neighbors in ``self.data``.
+            If ``points`` have shape ``tuple``, then ``index`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with ``self.csize``.
+        mask : boolean numpy array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        numpy.spatial.cKDTree is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (self.csize, 3) before they are passed to cKDTree. The index that
+        is returned referres to the reshaped coordinate points.
+
+        """
+
+        # check the input
+        assert isinstance(k, int) and k>0 and k<= self.csize,\
+            "k must be an integeger > 0 and <= self.csize."
+
+        # get the points
+        distance, index, mask = self._get_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, k, 'k')
+
+        return distance, index, mask
+
+
+    def get_nearest_cart(self, points_1, points_2, points_3, distance=1,
+                      domain='cart', convention='right', unit='met',
+                      show=False, atol=1e-15):
+        """
+        Find coordinates within certain distance to one or more points.
+
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        distance : number
+            Euclidean distance in meters. Must be >= 0. The default is 1.
+        domain : string
+            domain of point, see self.systems('all').
+        convention: string
+             coordinate convention of point, see self.systems('all').
+        unit: string
+             unit of point, see self.systems('all').
+        show : bool
+            show a plot of the coordinate points. The default is False.
+        atol : float
+            search for everything within ``distance + atol``. The default is
+            1e-15.
+
+        Returns
+        -------
+        index : ndarray of ints
+            The locations of the neighbors in ``self.data``.
+            If ``points`` have shape ``tuple``, then ``index`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with ``self.csize``.
+        mask : boolean numpy array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        numpy.spatial.cKDTree is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (self.csize, 3) before they are passed to cKDTree. The index that
+        is returned referres to the reshaped coordinate points.
+
+        """
+
+        # check the input
+        assert distance >= 0,"distance must be >= 0"
+
+        # get the points
+        distance, index, mask = self._get_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, distance, 'cart', atol)
+
+        return index, mask
+
+
+    def get_nearest_sph(self, points_1, points_2, points_3, distance=1,
+                      domain='sph', convention='top_colat', unit='rad',
+                      show=False, atol=1e-15):
+        """
+        Find coordinates within certain distance to one or more points.
+
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        distance : number
+            Great circle distance in degrees. Must be >= 0 and <= 180. The
+            default is 1.
+        domain : string
+            domain of point, see self.systems('all').
+        convention: string
+             coordinate convention of point, see self.systems('all').
+        unit: string
+             unit of point, see self.systems('all').
+        show : bool
+            show a plot of the coordinate points. The default is False.
+        atol : float
+            search for everything within ``distance + atol``. The default is
+            1e-15.
+
+        Returns
+        -------
+        index : ndarray of ints
+            The locations of the neighbors in ``self.data``.
+            If ``points`` have shape ``tuple``, then ``index`` has shape
+            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+            squeezed. Missing neighbors are indicated with ``self.csize``.
+        mask : boolean numpy array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        numpy.spatial.cKDTree is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (self.csize, 3) before they are passed to cKDTree. The index that
+        is returned referres to the reshaped coordinate points.
+
+        """
+
+        # check the input
+        assert distance >= 0 and distance <= 180,"distance must be >= 0 and "\
+                                                 "<= 180."
+
+        # get radius and check for equality
+        radius = copy.deepcopy(self).get_sph()[...,2]
+        delta_radius = np.max(radius) - np.min(radius)
+        if delta_radius > 1e-15:
+            raise ValueError("get_nearest_sph only works if all points have "\
+                             "the same radius. Differences are larger than "\
+                             "1e-15")
+
+        # get the points
+        distance, index, mask = self._get_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, distance, 'sph', atol,
+            np.max(radius))
+
+        return index, mask
+
+    def get_slice(self, coordinate: str, unit: str, value, tol=0,
+                  show=False, atol=1e-15):
+        """
+        Get a slice of the coordinates points.
+
+        A slice is defined by a coordinate and a value range, e.g., all points
+        with an elevation between -10 and 10 degree could be selected. The
+        range is calculated as ``[value-tol, value+tol]``.
+
+        Parameters
+        ----------
+        coordinate : str
+            coordinate for slicing. See self.systems('all').
+        unit : str
+            first three letters of the coordinate's unit ('met', 'rad', or
+            'deg').
+        value : number
+            value of the coordinate around the points are sliced.
+        tol : number, optional
+           tolerance for slicing. Points are sliced within the range
+           ``[value-tol, value+tol]``. The default is 0.
+        show : bool, optional
+            show a plot of the coordinate points. The default is False.
+        atol : number, optional
+            search for everything within ``[value-tol-atol, value+tol+atol]``.
+            The default is 1e-15.
+
+        Returns
+        -------
+        mask : boolean numpy array
+            mask that contains True at the positions of the selected points and
+            False otherwise. Mask is of shape self.cshape.
+
+        Notes
+        -----
+        ``value`` must be inside the range of the coordinate
+        (see self.systems). However, ``value +/-tol`` may exceed the range.
+
+        """
+
+        # check if the coordinate  and unit
+        domain, convention, index = self._exist_coordinate(coordinate, unit)
+
+        # get type and range of coordinate
+        c_info = self._systems()[domain][convention][coordinate]
+
+        # convert input to radians
+        value = value/180*np.pi if unit == 'deg' else value
+        tol   = tol  /180*np.pi if unit == 'deg' else tol
+
+        # check if  value is within the range of coordinate
+        if c_info[0] in ["bound", "cyclic"]:
+            assert c_info[1][0] <= value <= c_info[1][1],\
+                "'value' is {} but must be in the range {}."\
+                    .format(value, c_info[1])
+
+        # get the search range
+        rng = [value-tol, value+tol]
+
+        # wrap range if coordinate is cyclic
+        if c_info[0] == 'cyclic':
+            low = c_info[1][0]
+            upp = c_info[1][1]
+            if rng[0] < c_info[1][0]-atol:
+                rng[0] = (rng[0]-low) % (upp-low) + low
+            if rng[1] > c_info[1][1]+atol:
+                rng[1] = (rng[1]-low) % (upp-low) + low
+
+        # get the coordinates
+        coords = eval("copy.deepcopy(self).get_{}('{}')"\
+                      .format(domain, convention))
+        coords = coords[...,index]
+
+        # get the mask
+        if rng[0]<=rng[1]:
+            mask = (coords >= rng[0]-atol) & (coords <= rng[1]+atol)
+        else:
+            mask = (coords >= rng[0]-atol) | (coords <= rng[1]+atol)
+
+        # plot all and returned points
+        if show:
+            self.show(mask)
+
+        return mask
+
+
+    def rotate(self, rotation: str, value = None, degrees=True, inverse=False):
+        """
+        Rotate points stored in the object.
+
+        This is a wrapper for scipy.spatial.transform.Rotation (see this class
+        for more detailed information).
+
+        Parameters
+        ----------
+        rotation : str
+            'quat' - rotation given by quaternions.
+
+            'matrix' - rotation given by matrixes.
+
+            'rotvec' - rotation using rotation vectors.
+
+            'xyz' - rotation using euler angles. Up to three letters. E.g., 'x'
+            will rotate about the x-axis only, while 'xz' will rotate about
+            the x-axis and then about the z-axis. Use lower letters for
+            extrinsic rotations (rotations about the axes of the original
+            coordinate system xyz, which remains motionless) and upper letters
+            for instrinsic rotations (rotations about the axes of the rotating
+            coordinate system XYZ, solidary with the moving body, which changes
+            its orientation after each elemental rotation).
+        value : number, array like
+            amount of rotation in the format specified by 'rotation' (see
+            above).
+        degrees : bool, optional
+            pass angles in degrees if using 'rotvec' or euler angles ('xyz').
+            The default is True. Use False to pass angles in radians.
+        inverse : bool, optional
+            Apply inverse rotation. The default is False.
+
+        Returns
+        -------
+        None.
+
+        Notes
+        -----
+        Points are converted to the cartesian right handed coordinate system
+        for the rotation.
+
+        """
+
+        # initialize rotation object
+        if rotation == 'quat':
+            rot = sp_rot.from_quat(value)
+        elif rotation == 'matrix':
+            rot = sp_rot.from_matrix(value)
+        elif rotation == 'rotvec':
+            if degrees:
+                value = np.asarray(value) / 180*np.pi
+            rot = sp_rot.from_rotvec(value)
+        elif not bool(re.search('[^x-z]', rotation.lower())):
+            # only check if string contains xyz, everything else is checked in
+            # from_euler()
+            rot = sp_rot.from_euler(rotation, value, degrees)
+        else:
+            raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "\
+                             "or from ['x', 'y', 'z'] or ['X', 'Y', 'Z'] but "\
+                             "is '{}'".format(rotation))
+
+        # current shape
+        shape = self.cshape
+
+        # apply rotation
+        points = rot.apply(self.get_cart().reshape((self.csize, 3)), inverse)
+
+        # set points
+        self.set_cart(points[:,0].reshape(shape),
+                      points[:,1].reshape(shape),
+                      points[:,2].reshape(shape))
+
+
+
     @staticmethod
     def _systems():
         """
@@ -598,6 +999,8 @@ class Coordinates(object):
             Key 2h - 'right': negative y (for debugging, meters and radians)
             Key 2i - 'up'   : positive z (for debugging, meters and radians)
             Key 2j - 'down' : negative z (for debugging, meters and radians)
+            Key 2k,l,m - coordinate_1,2,3 : [type, [lower_lim, upper_lim]]
+                         type can be 'unbound', 'bound', or 'cyclic'
 
         """
 
@@ -620,7 +1023,10 @@ class Coordinates(object):
                     "negative_x": [-1,  0,  0],
                     "negative_y": [ 0, -1,  0],
                     "positive_z": [ 0,  0,  1],
-                    "negative_z": [ 0,  0, -1]}
+                    "negative_z": [ 0,  0, -1],
+                    "x": ["unbound", [-np.inf, np.inf]],
+                    "y": ["unbound", [-np.inf, np.inf]],
+                    "z": ["unbound", [-np.inf, np.inf]]}
                 },
             "sph":
                 {
@@ -645,10 +1051,15 @@ class Coordinates(object):
                     "negative_x": [np.pi,     np.pi/2, 1],
                     "negative_y": [3*np.pi/2, np.pi/2, 1],
                     "positive_z": [0,         0      , 1],
-                    "negative_z": [0,         np.pi,   1]},
+                    "negative_z": [0,         np.pi,   1],
+                    "azimuth"    : ["cyclic", [0, 2*np.pi]],
+                    "colatitude" : ["bound",  [0, np.pi]],
+                    "radius"     : ["bound",  [0, np.inf]]},
                 "top_elev":{
                     "description_short":
-                        "Spherical coordinate system with North and South Pole.",
+                        "Spherical coordinate system with North and South Pole. "\
+                        "Conform with AES69-2015: AES standard for file "\
+                        "exchange - Spatial acoustic data file format (SOFA).",
                     "coordinates":
                         ["azimuth", "elevation", "radius"],
                     "units":
@@ -668,7 +1079,10 @@ class Coordinates(object):
                     "negative_x": [np.pi,     0,       1],
                     "negative_y": [3*np.pi/2, 0,       1],
                     "positive_z": [0,         np.pi/2, 1],
-                    "negative_z": [0,        -np.pi/2, 1]},
+                    "negative_z": [0,        -np.pi/2, 1],
+                    "azimuth"    : ["cyclic", [0, 2*np.pi]],
+                    "elevation"  : ["bound",  [-np.pi/2, np.pi/2]],
+                    "radius"     : ["bound",  [0, np.inf]]},
                 "side":{
                     "description_short":
                         "Spherical coordinate system with poles on the y-axis.",
@@ -691,10 +1105,15 @@ class Coordinates(object):
                     "negative_x": [ 0,       np.pi,   1],
                     "negative_y": [-np.pi/2, 0,       1],
                     "positive_z": [ 0,       np.pi/2, 1],
-                    "negative_z": [ 0,      -np.pi/2, 1]},
+                    "negative_z": [ 0,      -np.pi/2, 1],
+                    "lateral" :["bound",  [-np.pi/2, np.pi/2]],
+                    "polar"   :["cyclic", [-np.pi/2, np.pi*3/2]],
+                    "radius"  :["bound",  [0, np.inf]]},
                 "front":{
                     "description_short":
-                        "Spherical coordinate system with poles on the x-axis.",
+                        "Spherical coordinate system with poles on the x-axis. "\
+                        "Conform with AES56-2008 (r2019): AES standard on "\
+                        "acoustics - Sound source modeling.",
                     "coordinates":
                         ["phi", "theta", "radius"],
                     "units":
@@ -702,19 +1121,22 @@ class Coordinates(object):
                          ["degrees", "degrees", "meters"]],
                     "description":
                         "Phi denotes the angle in the y/z-plane with 0 "\
-                        "pointing in positive z-direction, pi/2 in positive "
-                        "y-direction, pi in negative z-direction, and 3*pi/2 "\
-                        "in negative y-direction. Theta denotes the angle "\
+                        "pointing in positive y-direction, pi/2 in positive "
+                        "z-direction, pi in negative y-direction, and 3*pi/2 "\
+                        "in negative z-direction. Theta denotes the angle "\
                         "measured from the x-axis with 0 pointing in positve "\
                         "x-direction and pi in negative x-direction. Phi and "\
                         "theta can be in radians and degrees, the radius is "\
                         "always in meters.",
                     "positive_x": [0,         0,       1],
-                    "positive_y": [np.pi/2,   np.pi/2, 1],
+                    "positive_y": [0,         np.pi/2, 1],
                     "negative_x": [0,         np.pi,   1],
-                    "negative_y": [3*np.pi/2, np.pi/2, 1],
-                    "positive_z": [0,         np.pi/2, 1],
-                    "negative_z": [np.pi,     np.pi/2, 1]}
+                    "negative_y": [np.pi,     np.pi/2, 1],
+                    "positive_z": [np.pi/2,   np.pi/2, 1],
+                    "negative_z": [3*np.pi/2, np.pi/2, 1],
+                    "phi"    : ["cyclic", [0, 2*np.pi]],
+                    "theta"  : ["bound",  [0, np.pi]],
+                    "radius" : ["bound",  [0, np.inf]]}
                 },
             "cyl":
                 {
@@ -737,7 +1159,10 @@ class Coordinates(object):
                     "negative_x": [np.pi,     0, 1],
                     "negative_y": [3*np.pi/2, 0, 1],
                     "positive_z": [0,         1, 0],
-                    "negative_z": [0,        -1, 0]}
+                    "negative_z": [0,        -1, 0],
+                    "azimuth"  : ["cyclic",  [0, 2*np.pi]],
+                    "z"        : ["unbound", [-np.inf, np.inf]],
+                    "radius_z" : ["bound",   [0, np.inf]]}
                 }
             }
 
@@ -788,6 +1213,34 @@ class Coordinates(object):
                 "be one of the following: {}.".format(unit, domain, convention,
                                                       ', '.join(cur_units))
 
+    def _exist_coordinate(self, coordinate, unit):
+        """
+        Check if coordinate and unit exist.
+
+        Returns domain and convention, and the index of coordinate if
+        coordinate and unit exists and raises a value error otherwise.
+        """
+        # get all systems
+        systems = self._systems()
+
+        # find coordinate and unit in systems
+        for domain in systems:
+            for convention in systems[domain]:
+                if coordinate in systems[domain][convention]['coordinates']:
+                    # get position of coordinate
+                    index = systems[domain][convention]['coordinates'].\
+                            index(coordinate)
+                    # get possible units
+                    units = [u[index][0:3] for u in
+                              systems[domain][convention]['units']]
+                    # return or raise ValueError
+                    if unit in units:
+                        return domain, convention, index
+                    else:
+                        raise ValueError("'{}' in '{}' does not exist. "\
+                                "See self.systems() for a list of possible "\
+                                "coordinates and units".\
+                                format(coordinate, unit))
 
     def _make_system(self, domain=None, convention=None, unit=None):
         """
@@ -845,6 +1298,21 @@ class Coordinates(object):
                 "points_1, points_2, and points_3 must be scalar or of the "\
                 "same shape."
 
+        # check the range of points
+        for nn, p in enumerate(pts):
+            # get type and range
+            c      = self._system['coordinates'][nn]
+            c_type = self._system[c][0]
+            c_range = np.array(self._system[c][1])
+            # range to degrees
+            if self._system['units'][nn] == 'degrees':
+                c_range = np.round(c_range/np.pi*180)
+
+            # check bounds (cyclic values could be wraped but this is safer)
+            if c_type in ['bound', 'cyclic']:
+                assert ((p>=c_range[0]) & (p<=c_range[1])).all(),"Values of "\
+                    "points_{} must be in the range {}".format(nn, c_range)
+
         # repeat scalar entries if non-scalars exists
         if len(shapes):
             for nn, p in enumerate(pts):
@@ -873,14 +1341,108 @@ class Coordinates(object):
         self._points = pts
 
 
+    def _set_weights(self, weights):
+        """
+        Check and set sampling weights.
+
+        Set self._weights, which is an atleast_1d numpy array of shape
+        [L,M,...,N].
+        """
+
+        # check input
+        if weights is None:
+            self._weights = weights
+            return
+
+        # cast to np.array
+        weights = np.asarray(weights, dtype=np.float64)
+
+        # reshape according to self._points
+        assert weights.size == self.csize,\
+            "weights must have same size as self.csize"
+        weights = weights.reshape(self.cshape)
+
+        # set class variable
+        self._weights = weights
+
+    def _get_nearest(self, points_1, points_2, points_3,
+            domain, convention, unit, show,
+            value, measure, atol=1e-15, radius=None):
+
+        # get KDTree
+        kdtree = self._make_kdtree()
+
+        # get target point in cartesian coordinates
+        coords = Coordinates(points_1, points_2, points_3,
+                            domain, convention, unit)
+        points = coords.get_cart()
+
+        # querry nearest neighbors
+        points = points.flatten() if coords.csize == 1 else points
+
+        # get the points depending on measure and value
+        if measure == 'k':
+            # nearest points
+            distance, index = kdtree.query(points, k=value)
+        elif measure == 'cart':
+            # points within eucledian distance
+            index = kdtree.query_ball_point(points, value+atol)
+            distance = None
+        elif measure == 'sph':
+            # convert great circle to eucedian distance
+            x, y, z = sph2cart([0, value/180*np.pi],
+                               [np.pi/2, np.pi/2],
+                               [radius, radius])
+            value = np.sqrt( (x[0]-x[1])**2 + (y[0]-y[1])**2 + (z[0]-z[1])**2 )
+            # points within great circle distance
+            index = kdtree.query_ball_point(points, value+atol)
+            distance = None
+
+        # mask for scatter plot
+        mask = np.full((self.csize), False)
+        mask[index] = True
+        mask = mask.reshape(self.cshape)
+
+        # plot all and returned points
+        if show:
+            self.show(mask)
+
+        return distance, index, mask
+
+
+    def _make_kdtree(self):
+        """Make a numpy KDTree for fast search of nearest points."""
+
+        # copy to avoid changes in the original object
+        xyz = copy.deepcopy(self).get_cart()
+        # get the tree
+        kdtree = cKDTree(xyz.reshape((self.csize, 3)))
+
+        return kdtree
+
+    def __getitem__(self, index):
+        """Return copy of Coordinates object at index."""
+
+        # get copy
+        new = copy.deepcopy(self)
+        # slice points
+        new._points = new._points[index]
+        # slice weights
+        if not new._weights is None:
+            new._weights = new._weights[index]
+
+        return new
+
+
     def __repr__(self):
         """Get info about Coordinates object."""
 
         # object type
         if self.cshape != (0,):
-            obj = 'Coordinates object of cshape ' + str(self._points.shape[:-1])
+            obj = '{}D Coordinates object with {} points of cshape {}'\
+                .format(self.cdim, self.csize, self.cshape)
         else:
-            obj = 'Empty coordinates object'
+            obj = 'Empty Coordinates object'
 
         # coordinate convention
         conv = "domain: {}, convention: {}, unit: {}".format(
@@ -891,7 +1453,22 @@ class Coordinates(object):
         coords = ["{} in {}".format(c, u) for c, u in \
                   zip(self._system['coordinates'], self._system['units'])]
 
-        return obj + '\n' + conv + '\n' + 'coordinates: ' + ', '.join(coords)
+        # join information
+        _repr = obj + '\n' + conv + '\n' + 'coordinates: ' + ', '.join(coords)
+
+        # check for sampling weights
+        if not self._weights is None:
+            _repr += '\nContains sampling weights'
+
+        # check for sh_order
+        if not self._sh_order is None:
+            _repr += '\nSpherical harmonics order: {}'.format(self._sh_order)
+
+        # check for comment
+        if not self._comment is None:
+            _repr += '\nComment: {}'.format(self._comment)
+
+        return _repr
 
 
 
@@ -943,8 +1520,10 @@ def cart2sph(x, y, z):
     radius : ndarray, number
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
-    colatitude = np.arccos(z/radius)
+    z_div_r = np.where(radius != 0, z / radius, 0)
+    colatitude = np.arccos(z_div_r)
     azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
+
     return azimuth, colatitude, radius
 
 
@@ -1108,58 +1687,9 @@ def cyl2cart(azimuth, height, radius):
 
     return x, y, z
 
-
-    # @property
-    # def n_points(self):
-    #     """Return number of points stored in the object"""
-    #     return self.x.size
-
-    # def find_nearest_point(self, point):
-    #     """Find the closest Coordinate point to a given Point.
-    #     The search for the nearest point is performed using the scipy
-    #     cKDTree implementation.
-
-    #     Parameters
-    #     ----------
-    #     point : Coordinates
-    #         Point to find nearest neighboring Coordinate
-
-    #     Returns
-    #     -------
-    #     distance : ndarray, double
-    #         Distance between the point and it's closest neighbor
-    #     index : int
-    #         Index of the closest point.
-
-    #     """
-    #     kdtree = cKDTree(self.cartesian.T)
-    #     distance, index = kdtree.query(point.cartesian.T)
-
-    #     return distance, index
-
-    # def __repr__(self):
-    #     """repr for Coordinate class
-
-    #     """
-    #     if self.n_points == 1:
-    #         repr_string = "Coordinates of 1 point"
-    #     else:
-    #         repr_string = "Coordinates of {} points".format(self.n_points)
-    #     return repr_string
-
-    # def __getitem__(self, index):
-    #     """Return Coordinates at index
-    #     """
-    #     return Coordinates(self._x[index], self._y[index], self._z[index])
-
     # def __setitem__(self, index, item):
     #     """Set Coordinates at index
     #     """
     #     self.x[index] = item.x
     #     self.y[index] = item.y
     #     self.z[index] = item.z
-
-    # def __len__(self):
-    #     """Length of the object which is the number of points stored.
-    #     """
-    #     return self.n_points
