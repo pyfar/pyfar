@@ -9,8 +9,8 @@ Sphinx
 twine
 pytest
 pytest-runner
-numpy
-scipy
+numpy>=1.14.0
+scipy>=1.14.0
 pyfftw
 PyQt5
 matplotlib
