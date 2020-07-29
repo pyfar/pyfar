@@ -69,6 +69,7 @@ def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
 
     # equal axis limits for distortion free  display
     if set_ax:
+        # unfortunately ax.set_aspect('equal') does not work on Axes3D
         ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
                    np.max(xyz)+.15*np.abs(np.max(xyz)))
 
