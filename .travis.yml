@@ -10,6 +10,9 @@ python:
 install:
     - pip install -U pip
     - pip install -U tox-travis
+    - pip install flake8
 
 # Command to run tests, e.g. python setup.py test
-script: tox
+script: 
+    - tox
+    - flake8
