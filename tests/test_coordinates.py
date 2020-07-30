@@ -466,22 +466,22 @@ def test_rotation():
     # test with quaternion
     c = Coordinates(1,0,0)
     c.rotate('quat',[0, 0, 1/np.sqrt(2), 1/np.sqrt(2)])
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0], atol=1e-15)
 
     # test with matrix
     c = Coordinates(1,0,0)
     c.rotate('matrix',[[0,-1,0],[1,0,0],[0,0,1]])
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0], atol=1e-15)
 
     # test with rotvec
     c = Coordinates(1,0,0)
     c.rotate('rotvec',[0, 0, 90])
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0], atol=1e-15)
 
     # test with euler
     c = Coordinates(1,0,0)
     c.rotate('z', 90)
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+    npt.assert_allclose(c.get_cart().flatten(), [0,1,0], atol=1e-15)
 
     # test with unknown type
     with raises(ValueError):
@@ -494,7 +494,7 @@ def test_rotation():
     c = Coordinates(xyz[...,0],xyz[...,1],xyz[...,2])
     c.rotate('z', 90)
     c.rotate('z', 90, inverse=True)
-    npt.assert_allclose(c._points, xyz)
+    npt.assert_allclose(c._points, xyz, atol=1e-15)
 
 # %% Test coordinate conversions ----------------------------------------------
 def test_converters():
