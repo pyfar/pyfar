@@ -4,7 +4,7 @@ import numpy as np
 
 from haiopy import fft as fft
 from haiopy.coordinates import Coordinates
-from haiopy.orientation import Orientation
+from haiopy.orientations import Orientations
 
 
 class Audio(object):
@@ -33,8 +33,8 @@ class Signal(Audio):
         Raw data type of the signal, optional
     position : Coordinates
         Coordinates object
-    orientation : Orientation
-        Orientation object
+    orientations : Orientations
+        Orientations object
 
 
     """
@@ -46,7 +46,7 @@ class Signal(Audio):
                  signal_type='energy',
                  dtype=np.double,
                  position=Coordinates(),
-                 orientation=Orientation()):
+                 orientations=Orientations()):
         """Init Signal with data, sampling rate and domain and signal type.
 
         Attributes
@@ -63,8 +63,8 @@ class Signal(Audio):
             Raw data type of the signal, optional
         position : Coordinates
             Coordinates object
-        orientation : Orientation
-            Orientation object
+        orientations : Orientations
+            Orientations object
         """
 
         Audio.__init__(self)
@@ -101,11 +101,11 @@ class Signal(Audio):
             raise TypeError(("Input value has to be a Coordinates object, "
                              "not {}").format(type(position).__name__))
 
-        if isinstance(orientation, Orientation):
-            self._orientation = orientation
+        if isinstance(orientations, Orientations):
+            self._orientations = orientations
         else:
-            raise TypeError(("Input value has to be a Orientation object, "
-                             "not {}").format(type(orientation).__name__))
+            raise TypeError(("Input value has to be a Orientations object, "
+                             "not {}").format(type(orientations).__name__))
 
     @property
     def domain(self):
@@ -230,16 +230,16 @@ class Signal(Audio):
                              "not {}").format(type(value).__name__))
 
     @property
-    def orientation(self):
-        """Orientation of the object."""
-        return self._orientation
+    def orientations(self):
+        """Orientations of the object."""
+        return self._orientations
 
-    @orientation.setter
-    def orientation(self, value):
-        if isinstance(value, Orientation):
-            self._orientation = value
+    @orientations.setter
+    def orientations(self, value):
+        if isinstance(value, Orientations):
+            self._orientations = value
         else:
-            raise TypeError(("Input value has to be orientation object, "
+            raise TypeError(("Input value has to be orientations object, "
                              "not {}").format(type(value).__name__))
 
     @property

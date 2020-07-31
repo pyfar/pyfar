@@ -101,10 +101,10 @@ def test_signal_init_false_coord(sine):
 
 
 def test_signal_init_false_orientation(sine):
-    """Test to init Signal with orientation that is not of type Orientation."""
-    orientation_false = np.array([[1, 0, 0], [0, 1, 0]])
+    """Test to init Signal with orientations that is not of type Orientations."""
+    orientations_false = np.array([[1, 0, 0], [0, 1, 0]])
     with pytest.raises(TypeError):
-        Signal(sine, 44100, orientation=orientation_false)
+        Signal(sine, 44100, orientations=orientations_false)
         pytest.fail("Input value has to be coordinates object.")
 
 
@@ -245,27 +245,27 @@ def test_setter_position_false_type(sine):
 
 
 def test_getter_orientation(sine):
-    """Test if attribute orientation is accessed correctly."""
+    """Test if attribute orientations is accessed correctly."""
     orient_mock = mock.Mock(spec_set=Orientation())
     signal = Signal(sine, 44100)
-    signal._orientation = orient_mock
-    assert signal.orientation == orient_mock
+    signal._orientations = orient_mock
+    assert signal.orientations == orient_mock
 
 
 def test_setter_orientation(sine):
-    """Test if attribute orientation is set correctly."""
+    """Test if attribute orientations is set correctly."""
     orient_mock = mock.Mock(spec_set=Orientation())
     signal = Signal(sine, 44100)
-    signal.orientation = orient_mock
-    assert signal._orientation == orient_mock
+    signal.orientations = orient_mock
+    assert signal._orientations == orient_mock
 
 
 def test_setter_orientation_false_type(sine):
-    """Test if TypeError is raised when orientation is set incorrectly."""
+    """Test if TypeError is raised when orientations is set incorrectly."""
     signal = Signal(sine, 44100)
     with pytest.raises(TypeError):
-        signal.orientation = np.array([[1, 0, 0], [0, 1, 0]])
-        pytest.raises(TypeError, matches="Input has to be Orientation object")
+        signal.orientations = np.array([[1, 0, 0], [0, 1, 0]])
+        pytest.raises(TypeError, matches="Input has to be Orientations object")
 
 
 def test_shape(sine, impulse):
