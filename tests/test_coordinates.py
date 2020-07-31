@@ -15,6 +15,7 @@ def test_coordinates_init():
     coords = Coordinates()
     assert isinstance(coords, Coordinates)
 
+
 def test__systems():
     # get all coordinate systems
     coords = Coordinates()
@@ -27,31 +28,33 @@ def test__systems():
     for domain in systems:
         for convention in systems[domain]:
             assert "description_short" in systems[domain][convention], \
-                "{} ({}) is missing entry 'description_short'".format(domain, convention)
-            assert "coordinates"       in systems[domain][convention], \
-                "{} ({}) is missing entry 'coordinates'".format(domain, convention)
-            assert "units"             in systems[domain][convention], \
-                "{} ({}) is missing entry 'units'".format(domain, convention)
-            assert "description"       in systems[domain][convention], \
-                "{} ({}) is missing entry 'description'".format(domain, convention)
+                f"{domain} ({convention}) is missing entry 'description_short'"
+            assert "coordinates" in systems[domain][convention], \
+                f"{domain} ({convention}) is missing entry 'coordinates'"
+            assert "units" in systems[domain][convention], \
+                f"{domain} ({convention}) is missing entry 'units'"
+            assert "description" in systems[domain][convention], \
+                f"{domain} ({convention}) is missing entry 'description'"
             assert "positive_x" in systems[domain][convention], \
-                "{} ({}) is missing entry 'positive_x'".format(domain, convention)
+                f"{domain} ({convention}) is missing entry 'positive_x'"
             assert "positive_y" in systems[domain][convention], \
-                "{} ({}) is missing entry 'positive_y'".format(domain, convention)
+                f"{domain} ({convention}) is missing entry 'positive_y'"
             assert "negative_x" in systems[domain][convention], \
-                "{} ({}) is missing entry 'negative_'".format(domain, convention)
+                f"{domain} ({convention}) is missing entry 'negative_'"
             assert "negative_y" in systems[domain][convention], \
-                "{} ({}) is missing entry 'negative_y'".format(domain, convention)
+                f"{domain} ({convention}) is missing entry 'negative_y'"
             assert "positive_z" in systems[domain][convention], \
-                "{} ({}) is missing entry 'positive_z'".format(domain, convention)
+                f"{domain} ({convention}) is missing entry 'positive_z'"
             assert "negative_z" in systems[domain][convention], \
-                "{} ({}) is missing entry 'negative_z'".format(domain, convention)
+                f"{domain} ({convention}) is missing entry 'negative_z'"
             for coord in systems[domain][convention]['coordinates']:
                 assert coord in systems[domain][convention], \
-                    "{} ({}) is missing entry '{}'".format(domain, convention, coord)
-                assert systems[domain][convention][coord][0] in ["unbound", "bound", "cyclic"], \
-                    "{} ({}), {}[0] must be 'unbound', 'bound', or 'cyclic'."\
-                        .format(domain, convention, coord)
+                    f"{domain} ({convention}) is missing entry '{coord}'"
+                assert systems[domain][convention][coord][0] in \
+                    ["unbound", "bound", "cyclic"], \
+                    f"{domain} ({convention}), {coord}[0] must be 'unbound', "\
+                    "'bound', or 'cyclic'."
+
 
 def test_coordinate_names():
     # check if units agree across coordinates that appear more than once
@@ -66,15 +69,17 @@ def test_coordinate_names():
     for domain in systems:
         for convention in systems[domain]:
             # loop across coordinates
-            for cc, coord in enumerate(systems[domain][convention]['coordinates']):
+            for cc, coord in enumerate(systems[domain][convention]
+                                       ['coordinates']):
                 # units of the current coordinate
-                cur_units = [u[cc] for u in systems[domain][convention]['units']]
+                cur_units = [u[cc] for u in
+                             systems[domain][convention]['units']]
                 # add coordinate to coords
-                if not coord in coords:
-                    coords[coord]= {}
-                    coords[coord]['domain']     = [domain]
+                if coord not in coords:
+                    coords[coord] = {}
+                    coords[coord]['domain'] = [domain]
                     coords[coord]['convention'] = [convention]
-                    coords[coord]['units']      = [cur_units]
+                    coords[coord]['units'] = [cur_units]
                 else:
                     coords[coord]['domain'].append(domain)
                     coords[coord]['convention'].append(convention)
@@ -82,23 +87,22 @@ def test_coordinate_names():
 
     # check if units agree across coordinates that appear more than once
     for coord in coords:
-         # get unique first entry
-        units          = coords[coord]['units'].copy()
+        # get unique first entry
+        units = coords[coord]['units'].copy()
         units_ref, idx = np.unique(units[0], True)
-        units_ref      = units_ref[idx]
+        units_ref = units_ref[idx]
         for cc in range(1, len(units)):
             # get nex entry for comparison
             units_test, idx = np.unique(units[cc], True)
-            units_test      = units_test[idx]
+            units_test = units_test[idx]
             # compare
             assert all(units_ref == units_test), \
-                "'{}' has units {} in {} ({}) but units {} in {} ({})".\
-                    format(coord, units_ref, \
-                           coords[coord]['domain'][0], \
-                           coords[coord]['convention'][0], \
-                           units_test, \
-                           coords[coord]['domain'][cc], \
-                           coords[coord]['convention'][cc])
+                f"'{coord}' has units {units_ref} in "\
+                f"{coords[coord]['domain'][0]} "\
+                f"({coords[coord]['convention'][0]}) but units {units_test} "\
+                f"in {coords[coord]['domain'][cc]} "\
+                f"({coords[coord]['convention'][cc]})"
+
 
 def test_exist_systems():
     # get class instance
@@ -112,15 +116,16 @@ def test_exist_systems():
 
     # tests that have to fail
     with raises(AssertionError):
-         coords._exist_system('shp')
+        coords._exist_system('shp')
     with raises(ValueError):
-         coords._exist_system(None, 'side')
+        coords._exist_system(None, 'side')
     with raises(AssertionError):
-         coords._exist_system('sph', 'tight')
+        coords._exist_system('sph', 'tight')
     with raises(AssertionError):
-         coords._exist_system('sph', 'side', 'met')
+        coords._exist_system('sph', 'side', 'met')
     with raises(ValueError):
-         coords._exist_system(None, None, 'met')
+        coords._exist_system(None, None, 'met')
+
 
 def test_systems():
     # get class instance
@@ -131,6 +136,7 @@ def test_systems():
     coords.systems(brief=True)
     coords.systems('all')
     coords.systems('all', brief=True)
+
 
 def test_coordinates_init_val():
 
@@ -173,6 +179,7 @@ def test_coordinates_init_val():
     with raises(AssertionError):
         Coordinates(c2, c2, c8)
 
+
 def test_coordinates_init_val_and_sys():
     # get list of available coordinate systems
     coords = Coordinates()
@@ -184,6 +191,7 @@ def test_coordinates_init_val_and_sys():
             for unit in systems[domain][convention]['units']:
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
 
+
 def test_coordinates_init_val_and_weights():
     # correct number of weights
     coords = Coordinates([1,2],0,0, weights=[.5, .5])
@@ -193,9 +201,11 @@ def test_coordinates_init_val_and_weights():
     with raises(AssertionError):
         Coordinates([1,2],0,0, weights=.5)
 
+
 def test_coordinates_init_sh_order():
-    coords = Coordinates(sh_order = 5)
+    coords = Coordinates(sh_order=5)
     assert isinstance(coords, Coordinates)
+
 
 def test_show():
     coords = Coordinates([-1,0,1], 0, 0)
@@ -206,6 +216,7 @@ def test_show():
     # test assertion
     with raises(AssertionError):
         coords.show(np.array([1,0], dtype=bool))
+
 
 def test_setter_and_getter():
     # get list of available coordinate systems
@@ -222,22 +233,22 @@ def test_setter_and_getter():
                 for convention_out in list(systems[domain_out]):
                     for point in points:
                         # for debugging
-                        print('{}({}) -> {}({}): {}'.format(\
-                         domain_in, convention_in, domain_out, convention_out, point))
+                        print(f"{domain_in}({convention_in}) -> "
+                              f"{domain_out}({convention_out}): {point}")
                         # in and out points
-                        p_in  = systems[domain_in] [convention_in] [point]
+                        p_in = systems[domain_in][convention_in][point]
                         p_out = systems[domain_out][convention_out][point]
                         # empty object
                         c = Coordinates()
                         # set point
-                        eval("c.set_{}(p_in[0], p_in[1], p_in[2], '{}')"\
-                             .format(domain_in, convention_in))
+                        eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], "
+                             f"'{convention_in}')")
                         p = c._points
                         npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
                         # get point
-                        p = eval("c.get_{}('{}')"\
-                                 .format(domain_out, convention_out))
+                        p = eval(f"c.get_{domain_out}('{convention_out}')")
                         npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+
 
 def test_multiple_getter():
     # test N successive coordinate conversions
@@ -250,7 +261,7 @@ def test_multiple_getter():
     # get reference points in cartesian coordinate system
     points = ['positive_x', 'positive_y', 'positive_z',
               'negative_x', 'negative_y', 'negative_z']
-    pts = np.array( [systems['cart']['right'][point] for point in points] )
+    pts = np.array([systems['cart']['right'][point] for point in points])
 
     # init the system
     coords.set_cart(pts[:,0],pts[:,1],pts[:,2])
@@ -266,38 +277,46 @@ def test_multiple_getter():
         # convert points to selected system
         pts = eval("coords.get_{}('{}')".format(domain, convention))
         # get the reference
-        ref = np.array([systems[domain][convention][point] for point in points])
+        ref = np.array([systems[domain][convention][point]
+                        for point in points])
         # check
         npt.assert_allclose(pts, ref, atol=1e-15)
         # print
-        print('Tolerance met in iteration {}'.format(ii))
+        print(f"Tolerance met in iteration {ii}")
+
 
 def test_getter_weights():
     coords = Coordinates([1,2],0,0, weights=[.5, .5])
     assert (coords.weights == np.array([.5, .5])).all()
+
 
 def test_setter_weights():
     coords = Coordinates([1,2],0,0)
     coords.weights = [.5, .5]
     assert (coords.weights == np.array([.5, .5])).all()
 
+
 def test_getter_sh_order():
     coords = Coordinates(sh_order=10)
     assert coords.sh_order == 10
+
 
 def test_setter_sh_order():
     coords = Coordinates()
     coords.sh_order = 10
     assert coords.sh_order == 10
 
+
 def test_getter_comment():
     coords = Coordinates(1,1,1, comment='try this')
     assert coords.comment == 'try this'
+
 
 def test_setter_comment():
     coords = Coordinates()
     coords.comment = 'now this'
     assert coords.comment == 'now this'
+
 
 def test_cshape():
     # empty
@@ -310,6 +329,7 @@ def test_cshape():
     coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
     assert coords.cshape == (2,3)
 
+
 def test_cdim():
     # empty
     coords = Coordinates()
@@ -321,6 +341,7 @@ def test_cdim():
     coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
     assert coords.cdim == 2
 
+
 def test_csize():
     # 0 points
     coords = Coordinates()
@@ -331,6 +352,7 @@ def test_csize():
     # 6 points in two dimensions
     coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
     assert coords.csize == 6
+
 
 def test_getitem():
     # test without weights
@@ -351,6 +373,7 @@ def test_getitem():
     new = coords[0:1]
     assert isinstance(new, Coordinates)
     assert new.cshape == (1,5)
+
 
 def test_get_nearest_k():
     # 1D cartesian, nearest point
@@ -374,7 +397,7 @@ def test_get_nearest_k():
     assert (m == np.array([0,1,1,0,0,0], dtype=bool)).all()
 
     # 1D cartesian querry two points
-    d, i, m = coords.get_nearest_k([1, 2] ,0,0)
+    d, i, m = coords.get_nearest_k([1, 2], 0, 0)
     npt.assert_allclose(d, [0, 0], atol=1e-15)
     npt.assert_allclose(i, [1, 2])
     assert (m == np.array([0,1,1,0,0,0], dtype=bool)).all()
@@ -398,6 +421,7 @@ def test_get_nearest_k():
     with raises(AssertionError):
         coords.get_nearest_k(1, 0, 0, -1)
 
+
 def test_get_nearest_cart():
     # test only 1D case since most of the code from self.get_nearest_k is used
     x = np.arange(6)
@@ -414,6 +438,7 @@ def test_get_nearest_cart():
     # test out of range parameters
     with raises(AssertionError):
         coords.get_nearest_cart(1,0,0,-1)
+
 
 def test_get_nearest_sph():
     # test only 1D case since most of the code from self.get_nearest_k is used
@@ -434,6 +459,7 @@ def test_get_nearest_sph():
     with raises(AssertionError):
         coords.get_nearest_sph(1,0,0,181)
 
+
 def test_get_slice():
     # test only for self.cdim = 1.
     # self.get_slice uses KDTree, which is tested with N-dimensional arrays
@@ -442,19 +468,24 @@ def test_get_slice():
     # cartesian grid
     d = np.linspace(-2, 2, 5)
     c = Coordinates(d, 0, 0)
-    assert (c.get_slice('x', 'met', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+    assert (c.get_slice('x', 'met', 0, 1) == np.array([0,1,1,1,0],
+                                                      dtype=bool)).all()
     c = Coordinates(0, d, 0)
-    assert (c.get_slice('y', 'met', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+    assert (c.get_slice('y', 'met', 0, 1) == np.array([0,1,1,1,0],
+                                                      dtype=bool)).all()
     c = Coordinates(0, 0, d)
-    assert (c.get_slice('z', 'met', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+    assert (c.get_slice('z', 'met', 0, 1) == np.array([0,1,1,1,0],
+                                                      dtype=bool)).all()
 
     # spherical grid
     d = [358, 359, 0, 1, 2]
     c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
     # cyclic querry
-    assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0,1,1,1,0], dtype=bool)).all()
+    assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0,1,1,1,0],
+                                                            dtype=bool)).all()
     # non-cyclic querry
-    assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0,0,1,1,1], dtype=bool)).all()
+    assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0,0,1,1,1],
+                                                            dtype=bool)).all()
     # out of range querry
     with raises(AssertionError):
         c.get_slice('azimuth', 'deg', -1, 1)
@@ -462,10 +493,11 @@ def test_get_slice():
     # there is no unique processing for cylindrical coordinates - they are thus
     # not tested here.
 
+
 def test_rotation():
     # test with quaternion
     c = Coordinates(1,0,0)
-    c.rotate('quat',[0, 0, 1/np.sqrt(2), 1/np.sqrt(2)])
+    c.rotate('quat',[0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)])
     npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
 
     # test with matrix
@@ -497,6 +529,8 @@ def test_rotation():
     npt.assert_allclose(c._points, xyz)
 
 # %% Test coordinate conversions ----------------------------------------------
+
+
 def test_converters():
     # test if converterts can handle numbers
     # (correctness of the rotation is tested in test_setter_and_getter)
