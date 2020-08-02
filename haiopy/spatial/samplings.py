@@ -105,14 +105,19 @@ def sph_dodecahedron(radius=1.):
     return sampling
 
 
-def sph_icosahedron():
+def sph_icosahedron(radius=1.):
     """Generate a sampling based on the center points of the twenty \
             icosahedron faces.
 
+    Parameters
+    ----------
+    radius : number
+        Radius of the sampling grid
+
     Returns
     -------
-    sampling : SamplingSphere
-        SamplingSphere object containing all sampling points
+    sampling : Coordinates
+        Sampling positions as Coordinate object
     """
     gamma_R_r = np.arccos(np.cos(np.pi / 3) / np.sin(np.pi / 5))
     gamma_R_rho = np.arccos(1 / (np.tan(np.pi / 5) * np.tan(np.pi / 3)))
@@ -125,7 +130,7 @@ def sph_icosahedron():
     phi = np.arange(0, 2 * np.pi, 2 * np.pi / 5)
     phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi / 5, 2)))
 
-    rad = np.ones(20)
+    rad = radius * np.ones(20)
     sampling = Coordinates(
         phi, theta, rad, domain='sph', convention='top_colat')
     return sampling
