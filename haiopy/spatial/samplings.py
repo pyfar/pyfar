@@ -58,7 +58,7 @@ def sph_dodecahedron(radius=1.):
 
     Parameters
     ----------
-    radius : number
+    radius : number, optional
         Radius of the sampling grid
 
     Returns
@@ -112,7 +112,7 @@ def sph_icosahedron(radius=1.):
 
     Parameters
     ----------
-    radius : number
+    radius : number, optional
         Radius of the sampling grid
 
     Returns
@@ -144,12 +144,12 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
 
     Parameters
     ----------
-    n_points : int, tuple of two ints, None
+    n_points : int, tuple of two ints, optional
         number of sampling points in azimuth and elevation
-    n_sh : int, None
+    n_sh : int, optional
         maximum applicable spherical harmonics order. If this is provided,
         'n_points' is set to 2 * n_sh + 1
-    radius : number
+    radius : number, optional
         radius of the sampling grid
 
     Returns
