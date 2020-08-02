@@ -140,7 +140,7 @@ def sph_icosahedron(radius=1.):
 
 
 def sph_equiangular(n_points=None, n_sh=None, radius=1.):
-    """Generate an equiangular sampling of the sphere [1, Chapter 3.2].
+    """Generate an equiangular sampling of the sphere [1]_, Chapter 3.2.
 
     Parameters
     ----------
