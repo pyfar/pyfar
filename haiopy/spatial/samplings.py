@@ -7,7 +7,7 @@ import urllib3
 from haiopy.coordinates import Coordinates
 
 
-def cube_equidistant(n_points):
+def cart_equidistant(n_points):
     """Create a cuboid sampling with equidistant spacings in x, y, and z.
     The cube will have dimensions 1 x 1 x 1
 
@@ -51,7 +51,7 @@ def cube_equidistant(n_points):
     return sampling
 
 
-def dodecahedron():
+def sph_dodecahedron():
     """Generate a sampling based on the center points of the twelve
     dodecahedron faces.
 
@@ -106,7 +106,7 @@ def dodecahedron():
     return sampling
 
 
-def icosahedron():
+def sph_icosahedron():
     """Generate a sampling based on the center points of the twenty \
             icosahedron faces.
 
@@ -132,7 +132,7 @@ def icosahedron():
     return sampling
 
 
-def sphere_equiangular(n_points=None, angles=None):
+def sph_equiangular(n_points=None, angles=None):
     """Generate an equiangular sampling of the sphere.
 
     Paramters
@@ -187,7 +187,7 @@ def sphere_equiangular(n_points=None, angles=None):
     return sampling
 
 
-def sphere_gaussian(n_max):
+def sph_gaussian(n_max):
     """Generate sampling of the sphere based on the Gaussian quadrature.
 
     Paramters
@@ -215,7 +215,7 @@ def sphere_gaussian(n_max):
     return sampling
 
 
-def hyperinterpolation(n_max):
+def sph_hyperinterpolation(n_max):
     """Gives the points of a Hyperinterpolation sampling grid
     after Sloan and Womersley [1]_.
 
@@ -268,7 +268,7 @@ def hyperinterpolation(n_max):
     return sampling
 
 
-def spherical_t_design(n_max, criterion='const_energy'):
+def sph_t_design(n_max, criterion='const_energy'):
     r"""Return the sampling positions for a spherical t-design [1]_ .
     For a spherical harmonic order N, a t-Design of degree `:math: t=2N` for
     constant energy or `:math: t=2N+1` additionally ensuring a constant angular
@@ -352,8 +352,8 @@ def spherical_t_design(n_max, criterion='const_energy'):
     return sampling
 
 
-def great_circle_grid(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
-                      azimuth_res=1, match=360):
+def sph_great_circle(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
+                     azimuth_res=1, match=360):
 
     # check input
     assert not 1 % azimuth_res,"1/azimuth_res must be an integer."
