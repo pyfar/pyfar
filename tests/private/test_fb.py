@@ -17,7 +17,7 @@ from haiopy.spatial import samplings
 c = samplings.cart_equidistant_cube(11)
 c = samplings.sph_dodecahedron()
 c = samplings.sph_icosahedron()
-c = samplings.sphere_equiangular(10)
+c = samplings.sph_equiangular(5)
 c = samplings.sphere_gaussian(10)
 c = samplings.hyperinterpolation(10)
 c = samplings.spherical_t_design(15, 'const_angular_spread')

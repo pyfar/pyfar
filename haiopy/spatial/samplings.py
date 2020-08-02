@@ -65,6 +65,7 @@ def sph_dodecahedron(radius=1.):
     -------
     sampling : Coordinates
         Sampling positions as Coordinate object
+
     """
 
     dihedral = 2 * np.arcsin(np.cos(np.pi / 3) / np.sin(np.pi / 5))
@@ -118,6 +119,7 @@ def sph_icosahedron(radius=1.):
     -------
     sampling : Coordinates
         Sampling positions as Coordinate object
+
     """
     gamma_R_r = np.arccos(np.cos(np.pi / 3) / np.sin(np.pi / 5))
     gamma_R_rho = np.arccos(1 / (np.tan(np.pi / 5) * np.tan(np.pi / 3)))
@@ -138,23 +140,34 @@ def sph_icosahedron(radius=1.):
 
 
 def sph_equiangular(n_points=None, n_sh=None, radius=1.):
-    """Generate an equiangular sampling of the sphere.
+    """Generate an equiangular sampling of the sphere [1, Chapter 3.2].
 
-    Paramters
-    ---------
-    n_max : integer
-        Spherical harmonic order of the sampling
+    Parameters
+    ----------
+    n_points : int, tuple of two ints, None
+        number of sampling points in azimuth and elevation
+    n_sh : int, None
+        maximum applicable spherical harmonics order. If this is provided,
+        'n_points' is set to 2 * n_sh + 1
+    radius : number
+        radius of the sampling grid
 
     Returns
     -------
-    sampling : SamplingSphere
-        SamplingSphere object containing all sampling points
+    sampling : Coordinates
+        Sampling positions as Coordinate object
+
+    References
+    ----------
+    .. [1] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
+           Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
     if (n_points is None) and (n_sh is None):
         raise ValueError("Either the n_points or n_sh needs to be specified.")
 
     # get number of points from required spherical harmonics order
+    # ([1], equation 3.4)
     if n_sh is not None:
         n_points = 2 * int(n_sh) + 1
 
@@ -180,11 +193,22 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
     else:
         n_max = int(n_sh)
 
+    # compute sampling weights ([1], equation 3.11)
+    tmp = 2 * np.arange(0, n_max + 1) + 1
+    w = np.zeros_like(theta_angles)
+    for nn, tt in enumerate(theta_angles):
+        w[nn] = 2 * np.pi / (n_max + 1)**2 * np.sin(tt) \
+            * np.sum(1 / tmp * np.sin(tmp * tt))
+
+    # repeat and normalize sampling weights
+    w = np.tile(w, n_phi)
+    w = w / np.sum(w)
+
     # make Coordinates object
     sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
                            domain='sph', convention='top_colat',
                            comment='equiangular spherical sampling grid',
-                           sh_order=n_max)
+                           weights=w, sh_order=n_max)
 
     return sampling
 
