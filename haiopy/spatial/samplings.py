@@ -101,7 +101,7 @@ def sph_dodecahedron(radius=1.):
 
     sampling = Coordinates(
         phi, theta, rad, domain='sph', convention='top_colat',
-        comment='dodecahedral sampling grid.')
+        comment='dodecahedral sampling grid')
     return sampling
 
 
@@ -131,12 +131,13 @@ def sph_icosahedron(radius=1.):
     phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi / 5, 2)))
 
     rad = radius * np.ones(20)
-    sampling = Coordinates(
-        phi, theta, rad, domain='sph', convention='top_colat')
+    sampling = Coordinates(phi, theta, rad,
+                           domain='sph', convention='top_colat',
+                           comment='icosahedral spherical sampling grid')
     return sampling
 
 
-def sph_equiangular(n_points=None, angles=None):
+def sph_equiangular(n_points=None, n_sh=None, radius=1.):
     """Generate an equiangular sampling of the sphere.
 
     Paramters
@@ -150,43 +151,40 @@ def sph_equiangular(n_points=None, angles=None):
         SamplingSphere object containing all sampling points
 
     """
-    if (n_points is None) and (angles is None):
-        raise ValueError("Either the number of points or the angular distance \
-            needs to be specified.")
+    if (n_points is None) and (n_sh is None):
+        raise ValueError("Either the n_points or n_sh needs to be specified.")
 
-    if n_points is not None:
-        n_points = np.asarray(n_points)
-        if n_points.size == 2:
-            n_phi = n_points[0]
-            n_theta = n_points[1]
-        else:
-            n_phi = n_points
-            n_theta = n_points
+    # get number of points from required spherical harmonics order
+    if n_sh is not None:
+        n_points = 2 * int(n_sh) + 1
 
-        theta_angles = np.arange(np.pi / (n_theta * 2), np.pi, np.pi / n_theta)
-        phi_angles = np.arange(0, 2 * np.pi, 2 * np.pi / n_phi)
+    # get the angles
+    n_points = np.asarray(n_points)
+    if n_points.size == 2:
+        n_phi = n_points[0]
+        n_theta = n_points[1]
+    else:
+        n_phi = n_points
+        n_theta = n_points
 
-    elif angles is not None:
-        angles = np.asarray(angles)
-        if angles.size == 2:
-            alpha_phi = angles[0]
-            alpha_theta = angles[1]
-        else:
-            alpha_phi = angles
-            alpha_theta = angles
+    theta_angles = np.arange(np.pi / (n_theta * 2), np.pi, np.pi / n_theta)
+    phi_angles = np.arange(0, 2 * np.pi, 2 * np.pi / n_phi)
 
-        theta_angles = np.arange(np.pi / (n_theta * 2), np.pi, alpha_theta)
-        phi_angles = np.arange(0, 2 * np.pi, alpha_phi)
-
+    # construct the sampling grid
     theta, phi = np.meshgrid(theta_angles, phi_angles)
-    rad = np.ones(theta.size)
+    rad = radius * np.ones(theta.size)
 
-    sampling = Coordinates(
-        phi.reshape(-1),
-        theta.reshape(-1),
-        rad,
-        domain='sph',
-        convention='top_colat')
+    # compute maximum applicable spherical harmonics order
+    if n_sh is None:
+        n_max = int(np.min([(n_phi - 1) / 2, (n_theta - 1) / 2]))
+    else:
+        n_max = int(n_sh)
+
+    # make Coordinates object
+    sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
+                           domain='sph', convention='top_colat',
+                           comment='equiangular spherical sampling grid',
+                           sh_order=n_max)
 
     return sampling
 
