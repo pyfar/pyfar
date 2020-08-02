@@ -52,22 +52,19 @@ def cart_equidistant_cube(n_points):
     return sampling
 
 
-def sph_dodecahedron():
+def sph_dodecahedron(radius=1.):
     """Generate a sampling based on the center points of the twelve
     dodecahedron faces.
 
+    Parameters
+    ----------
+    radius : number
+        Radius of the sampling grid
+
     Returns
     -------
-    rad : ndarray
-        Radius of the sampling points
-    theta : ndarray
-        Elevation angle in the range [0, pi]
-    phi : ndarray
-        Azimuth angle in the range [0, 2 pi]
-    Returns
-    -------
-    sampling : SamplingSphere
-        SamplingSphere object containing all sampling points
+    sampling : Coordinates
+        Sampling positions as Coordinate object
     """
 
     dihedral = 2 * np.arcsin(np.cos(np.pi / 3) / np.sin(np.pi / 5))
@@ -100,10 +97,11 @@ def sph_dodecahedron():
         phi1 + np.pi / 3,
         phi2 + np.pi / 3,
         phi3 + np.pi / 3]), 2)
-    rad = np.ones(np.size(theta))
+    rad = radius * np.ones(np.size(theta))
 
     sampling = Coordinates(
-        phi, theta, rad, domain='sph', convention='top_colat')
+        phi, theta, rad, domain='sph', convention='top_colat',
+        comment='dodecahedral sampling grid.')
     return sampling
 
 
