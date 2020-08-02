@@ -213,31 +213,72 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
     return sampling
 
 
-def sph_gaussian(n_max):
-    """Generate sampling of the sphere based on the Gaussian quadrature.
+def sph_gaussian(n_points=None, n_sh=None, radius=1.):
+    """Generate sampling of the sphere based on the Gaussian quadrature [1]_.
 
-    Paramters
-    ---------
-    n_max : integer
-        Spherical harmonic order of the sampling
+    Parameters
+    ----------
+    n_points : int, tuple of two ints, optional
+        number of sampling points in azimuth and elevation
+    n_sh : int, optional
+        maximum applicable spherical harmonics order. If this is provided,
+        'n_points' is set to [2 * (n_sh + 1), n_sh + 1]
+    radius : number, optional
+        radius of the sampling grid in meters
 
     Returns
     -------
-    sampling : SamplingSphere
-        SamplingSphere object containing all sampling points
+    sampling : Coordinates
+        Sampling positions as Coordinate object
+
+    References
+    ----------
+    .. [1] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
+           Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
-    legendre, weights = np.polynomial.legendre.leggauss(n_max + 1)
+    if (n_points is None) and (n_sh is None):
+        raise ValueError("Either the n_points or n_sh needs to be specified.")
+
+    # get number of points from required spherical harmonics order
+    # ([1], equation 3.4)
+    if n_sh is not None:
+        n_points = [2 * (int(n_sh) + 1), int(n_sh) + 1]
+
+    # get the number of points in both dimensions
+    n_points = np.asarray(n_points)
+    if n_points.size == 2:
+        n_phi = n_points[0]
+        n_theta = n_points[1]
+    else:
+        n_phi = n_points
+        n_theta = n_points
+
+    # compute the maximum applicable spherical harmonics order
+    if n_sh is None:
+        n_max = int(np.min([n_phi / 2 - 1, n_theta - 1]))
+    else:
+        n_max = int(n_sh)
+
+    # construct the sampling grid
+    legendre, weights = np.polynomial.legendre.leggauss(int(n_theta))
     theta_angles = np.arccos(legendre)
-    n_phi = np.round((n_max + 1) * 2)
+
     phi_angles = np.arange(0, 2 * np.pi, 2 * np.pi / n_phi)
     theta, phi = np.meshgrid(theta_angles, phi_angles)
-    rad = np.ones(theta.size)
-    weights = np.tile(weights * np.pi / (n_max + 1), 2 * (n_max + 1))
 
+    rad = radius * np.ones(theta.size)
+
+    # compute the sampling weights
+    weights = np.tile(weights, n_phi)
+    weights = weights / np.sum(weights)
+
+    # make Coordinates object
     sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
-                           domain='sph', convention='top_colat')
-    sampling.weights = weights
+                           domain='sph', convention='top_colat',
+                           comment='gaussian spherical sampling grid',
+                           weights=weights, sh_order=n_max)
+
     return sampling
 
 
