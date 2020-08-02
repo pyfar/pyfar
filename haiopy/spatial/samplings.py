@@ -7,7 +7,7 @@ import urllib3
 from haiopy.coordinates import Coordinates
 
 
-def cart_equidistant(n_points):
+def cart_equidistant_cube(n_points):
     """Create a cuboid sampling with equidistant spacings in x, y, and z.
     The cube will have dimensions 1 x 1 x 1
 
@@ -46,7 +46,8 @@ def cart_equidistant(n_points):
         x_grid.flatten(),
         y_grid.flatten(),
         z_grid.flatten(),
-        domain='cart')
+        domain='cart',
+        comment='equidistant cuboid sampling grid')
 
     return sampling
 
