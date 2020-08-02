@@ -169,7 +169,7 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
     # get number of points from required spherical harmonics order
     # ([1], equation 3.4)
     if n_sh is not None:
-        n_points = 2 * int(n_sh) + 1
+        n_points = 2 * (int(n_sh) + 1)
 
     # get the angles
     n_points = np.asarray(n_points)
@@ -189,7 +189,7 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
 
     # compute maximum applicable spherical harmonics order
     if n_sh is None:
-        n_max = int(np.min([(n_phi - 1) / 2, (n_theta - 1) / 2]))
+        n_max = int(np.min([n_phi / 2 - 1, n_theta / 2 - 1]))
     else:
         n_max = int(n_sh)
 
