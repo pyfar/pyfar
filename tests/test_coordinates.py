@@ -143,17 +143,17 @@ def test_coordinates_init_val():
     # test input: scalar
     c1 = 1
     # test input: 2 element vectors
-    c2 = [1,2]                         # list
+    c2 = [1, 2]                         # list
     c3 = np.asarray(c2)                # flat np.array
     c4 = np.atleast_2d(c2)             # row vector np.array
     c5 = np.transpose(c4)              # column vector np.array
     # test input: 3 element vector
-    c6 = [1,2,3]
+    c6 = [1, 2, 3]
     # test input: 2D matrix
-    c7 = np.array([[1,2,3], [1,2,3]])
+    c7 = np.array([[1, 2, 3], [1, 2, 3]])
     # test input: 3D matrix
-    c8 = np.array([[[1,2,3], [1,2,3]],
-                   [[1,2,3], [1,2,3]]])
+    c8 = np.array([[[1, 2, 3], [1, 2, 3]],
+                   [[1, 2, 3], [1, 2, 3]]])
 
     # tests that have to path
     # input scalar coordinate
@@ -194,12 +194,12 @@ def test_coordinates_init_val_and_sys():
 
 def test_coordinates_init_val_and_weights():
     # correct number of weights
-    coords = Coordinates([1,2],0,0, weights=[.5, .5])
+    coords = Coordinates([1, 2], 0, 0, weights=[.5, .5])
     assert isinstance(coords, Coordinates)
 
     # incorrect number of weights
     with raises(AssertionError):
-        Coordinates([1,2],0,0, weights=.5)
+        Coordinates([1, 2], 0, 0, weights=.5)
 
 
 def test_coordinates_init_sh_order():
@@ -208,14 +208,14 @@ def test_coordinates_init_sh_order():
 
 
 def test_show():
-    coords = Coordinates([-1,0,1], 0, 0)
+    coords = Coordinates([-1, 0, 1], 0, 0)
     # show without mask
     coords.show()
     # show with mask
-    coords.show(np.array([1,0,1], dtype=bool))
+    coords.show(np.array([1, 0, 1], dtype=bool))
     # test assertion
     with raises(AssertionError):
-        coords.show(np.array([1,0], dtype=bool))
+        coords.show(np.array([1, 0], dtype=bool))
 
 
 def test_setter_and_getter():
@@ -264,7 +264,7 @@ def test_multiple_getter():
     pts = np.array([systems['cart']['right'][point] for point in points])
 
     # init the system
-    coords.set_cart(pts[:,0],pts[:,1],pts[:,2])
+    coords.set_cart(pts[:, 0], pts[:, 1], pts[:, 2])
 
     # list of domains
     domains = list(systems)
@@ -286,12 +286,12 @@ def test_multiple_getter():
 
 
 def test_getter_weights():
-    coords = Coordinates([1,2],0,0, weights=[.5, .5])
+    coords = Coordinates([1, 2], 0, 0, weights=[.5, .5])
     assert (coords.weights == np.array([.5, .5])).all()
 
 
 def test_setter_weights():
-    coords = Coordinates([1,2],0,0)
+    coords = Coordinates([1, 2], 0, 0)
     coords.weights = [.5, .5]
     assert (coords.weights == np.array([.5, .5])).all()
 
@@ -308,7 +308,7 @@ def test_setter_sh_order():
 
 
 def test_getter_comment():
-    coords = Coordinates(1,1,1, comment='try this')
+    coords = Coordinates(1, 1, 1, comment='try this')
     assert coords.comment == 'try this'
 
 
@@ -327,7 +327,7 @@ def test_cshape():
     assert coords.cshape == (2,)
     # 3D points
     coords = Coordinates([[1, 2, 3], [4, 5, 6]], 1, 1)
-    assert coords.cshape == (2,3)
+    assert coords.cshape == (2, 3)
 
 
 def test_cdim():
@@ -356,66 +356,66 @@ def test_csize():
 
 def test_getitem():
     # test without weights
-    coords = Coordinates([1,2], 0, 0)
+    coords = Coordinates([1, 2], 0, 0)
     new = coords[0]
     assert isinstance(new, Coordinates)
     assert (new.get_cart().flatten() == np.array([1, 0, 0])).all()
 
     # test with weights
-    coords = Coordinates([1,2], 0, 0, weights=[.1, .9])
+    coords = Coordinates([1, 2], 0, 0, weights=[.1, .9])
     new = coords[0]
     assert isinstance(new, Coordinates)
     assert (new.get_cart().flatten() == np.array([1, 0, 0])).all()
     assert new.weights.flatten() == np.array(.1)
 
     # test with 3D array
-    coords = Coordinates([[1,2,3,4,5],[2,3,4,5,6]], 0, 0)
+    coords = Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0)
     new = coords[0:1]
     assert isinstance(new, Coordinates)
-    assert new.cshape == (1,5)
+    assert new.cshape == (1, 5)
 
 
 def test_get_nearest_k():
     # 1D cartesian, nearest point
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
-    d, i, m = coords.get_nearest_k(1,0,0)
+    d, i, m = coords.get_nearest_k(1, 0, 0)
     assert d == 0.
     assert i == 1
-    assert (m == np.array([0,1,0,0,0,0], dtype=bool)).all()
+    assert (m == np.array([0, 1, 0, 0, 0, 0], dtype=bool)).all()
 
     # 1D spherical, nearest point
-    d, i, m = coords.get_nearest_k(0,0,1, 1, 'sph', 'top_elev', 'deg')
+    d, i, m = coords.get_nearest_k(0, 0, 1, 1, 'sph', 'top_elev', 'deg')
     assert d == 0.
     assert i == 1
-    assert (m == np.array([0,1,0,0,0,0], dtype=bool)).all()
+    assert (m == np.array([0, 1, 0, 0, 0, 0], dtype=bool)).all()
 
     # 1D cartesian, two nearest points
-    d, i, m = coords.get_nearest_k(1.2,0,0, 2)
+    d, i, m = coords.get_nearest_k(1.2, 0, 0, 2)
     npt.assert_allclose(d, [.2, .8], atol=1e-15)
     assert (i == np.array([1, 2])).all()
-    assert (m == np.array([0,1,1,0,0,0], dtype=bool)).all()
+    assert (m == np.array([0, 1, 1, 0, 0, 0], dtype=bool)).all()
 
     # 1D cartesian querry two points
     d, i, m = coords.get_nearest_k([1, 2], 0, 0)
     npt.assert_allclose(d, [0, 0], atol=1e-15)
     npt.assert_allclose(i, [1, 2])
-    assert (m == np.array([0,1,1,0,0,0], dtype=bool)).all()
+    assert (m == np.array([0, 1, 1, 0, 0, 0], dtype=bool)).all()
 
     # 2D cartesian, nearest point
-    coords = Coordinates(x.reshape(2,3), 0, 0)
-    d, i, m = coords.get_nearest_k(1,0,0)
+    coords = Coordinates(x.reshape(2, 3), 0, 0)
+    d, i, m = coords.get_nearest_k(1, 0, 0)
     assert d == 0.
     assert i == 1
-    assert (m == np.array([[0,1,0],[0,0,0]], dtype=bool)).all()
+    assert (m == np.array([[0, 1, 0], [0, 0, 0]], dtype=bool)).all()
 
     # test with plot
     coords = Coordinates(x, 0, 0)
-    coords.get_nearest_k(1,0,0, show=True)
+    coords.get_nearest_k(1, 0, 0, show=True)
 
     # test object with a single point
-    coords = Coordinates(1,0,0)
-    coords.get_nearest_k(1,0,0, show=True)
+    coords = Coordinates(1, 0, 0)
+    coords.get_nearest_k(1, 0, 0, show=True)
 
     # test out of range parameters
     with raises(AssertionError):
@@ -426,38 +426,38 @@ def test_get_nearest_cart():
     # test only 1D case since most of the code from self.get_nearest_k is used
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
-    i, m = coords.get_nearest_cart(2.5,0,0, 1.5)
-    assert (i == np.array([1,2,3,4])).all()
-    assert (m == np.array([[0,1,1,1,1,0]], dtype=bool)).all()
+    i, m = coords.get_nearest_cart(2.5, 0, 0, 1.5)
+    assert (i == np.array([1, 2, 3, 4])).all()
+    assert (m == np.array([[0, 1, 1, 1, 1, 0]], dtype=bool)).all()
 
     # test search with empty results
-    i, m = coords.get_nearest_cart(2.5,0,0, .1)
+    i, m = coords.get_nearest_cart(2.5, 0, 0, .1)
     assert len(i) == 0
-    assert (m == np.array([[0,0,0,0,0,0]], dtype=bool)).all()
+    assert (m == np.array([[0, 0, 0, 0, 0, 0]], dtype=bool)).all()
 
     # test out of range parameters
     with raises(AssertionError):
-        coords.get_nearest_cart(1,0,0,-1)
+        coords.get_nearest_cart(1, 0, 0, -1)
 
 
 def test_get_nearest_sph():
     # test only 1D case since most of the code from self.get_nearest_k is used
     az = np.linspace(0, 40, 5)
     coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
-    i, m = coords.get_nearest_sph(25,0,1, 5, 'sph', 'top_elev', 'deg')
-    assert (i == np.array([2,3])).all()
-    assert (m == np.array([[0,0,1,1,0]], dtype=bool)).all()
+    i, m = coords.get_nearest_sph(25, 0, 1, 5, 'sph', 'top_elev', 'deg')
+    assert (i == np.array([2, 3])).all()
+    assert (m == np.array([[0, 0, 1, 1, 0]], dtype=bool)).all()
 
     # test search with empty results
-    i, m = coords.get_nearest_sph(25,0,1, 1, 'sph', 'top_elev', 'deg')
+    i, m = coords.get_nearest_sph(25, 0, 1, 1, 'sph', 'top_elev', 'deg')
     assert len(i) == 0
-    assert (m == np.array([[0,0,0,0,0]], dtype=bool)).all()
+    assert (m == np.array([[0, 0, 0, 0, 0]], dtype=bool)).all()
 
     # test out of range parameters
     with raises(AssertionError):
-        coords.get_nearest_sph(1,0,0,-1)
+        coords.get_nearest_sph(1, 0, 0, -1)
     with raises(AssertionError):
-        coords.get_nearest_sph(1,0,0,181)
+        coords.get_nearest_sph(1, 0, 0, 181)
 
 
 def test_get_slice():
@@ -468,23 +468,23 @@ def test_get_slice():
     # cartesian grid
     d = np.linspace(-2, 2, 5)
     c = Coordinates(d, 0, 0)
-    assert (c.get_slice('x', 'met', 0, 1) == np.array([0,1,1,1,0],
+    assert (c.get_slice('x', 'met', 0, 1) == np.array([0, 1, 1, 1, 0],
                                                       dtype=bool)).all()
     c = Coordinates(0, d, 0)
-    assert (c.get_slice('y', 'met', 0, 1) == np.array([0,1,1,1,0],
+    assert (c.get_slice('y', 'met', 0, 1) == np.array([0, 1, 1, 1, 0],
                                                       dtype=bool)).all()
     c = Coordinates(0, 0, d)
-    assert (c.get_slice('z', 'met', 0, 1) == np.array([0,1,1,1,0],
+    assert (c.get_slice('z', 'met', 0, 1) == np.array([0, 1, 1, 1, 0],
                                                       dtype=bool)).all()
 
     # spherical grid
     d = [358, 359, 0, 1, 2]
     c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
     # cyclic querry
-    assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0,1,1,1,0],
+    assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0, 1, 1, 1, 0],
                                                             dtype=bool)).all()
     # non-cyclic querry
-    assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0,0,1,1,1],
+    assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0, 0, 1, 1, 1],
                                                             dtype=bool)).all()
     # out of range querry
     with raises(AssertionError):
@@ -496,34 +496,34 @@ def test_get_slice():
 
 def test_rotation():
     # test with quaternion
-    c = Coordinates(1,0,0)
-    c.rotate('quat',[0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)])
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0])
+    c = Coordinates(1, 0, 0)
+    c.rotate('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)])
+    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0])
 
     # test with matrix
-    c = Coordinates(1,0,0)
-    c.rotate('matrix',[[0,-1,0],[1,0,0],[0,0,1]])
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0], atol=1e-15)
+    c = Coordinates(1, 0, 0)
+    c.rotate('matrix', [[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
 
     # test with rotvec
-    c = Coordinates(1,0,0)
-    c.rotate('rotvec',[0, 0, 90])
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0], atol=1e-15)
+    c = Coordinates(1, 0, 0)
+    c.rotate('rotvec', [0, 0, 90])
+    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
 
     # test with euler
-    c = Coordinates(1,0,0)
+    c = Coordinates(1, 0, 0)
     c.rotate('z', 90)
-    npt.assert_allclose(c.get_cart().flatten(), [0,1,0], atol=1e-15)
+    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
 
     # test with unknown type
     with raises(ValueError):
         c.rotate('urgh', 90)
 
     # test if cshape is preserved and inverse rotation works
-    xyz = np.concatenate((np.ones((2,4,1)),
-                          np.zeros((2,4,1)),
-                          np.zeros((2,4,1))), -1)
-    c = Coordinates(xyz[...,0],xyz[...,1],xyz[...,2])
+    xyz = np.concatenate((np.ones((2, 4, 1)),
+                          np.zeros((2, 4, 1)),
+                          np.zeros((2, 4, 1))), -1)
+    c = Coordinates(xyz[..., 0], xyz[..., 1], xyz[..., 2])
     c.rotate('z', 90)
     c.rotate('z', 90, inverse=True)
     npt.assert_allclose(c._points, xyz, atol=1e-15)

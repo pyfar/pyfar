@@ -321,7 +321,7 @@ def spherical_t_design(n_max, criterion='const_energy'):
         raise ValueError("Invalid design criterion.")
 
     n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
-    n_points_exceptions = {3:8, 5:18, 7:32, 9:50, 11:72, 13:98, 15:128}
+    n_points_exceptions = {3: 8, 5: 18, 7: 32, 9: 50, 11: 72, 13: 98, 15: 128}
     if degree in n_points_exceptions:
         n_points = n_points_exceptions[degree]
 
@@ -347,20 +347,20 @@ def spherical_t_design(n_max, criterion='const_energy'):
         dtype=np.double,
         sep=' ').reshape((n_points, 3))
 
-    sampling = Coordinates(points[...,0], points[...,1], points[...,2])
+    sampling = Coordinates(points[..., 0], points[..., 1], points[..., 2])
 
     return sampling
 
 
-def great_circle_grid(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
+def great_circle_grid(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
                       azimuth_res=1, match=360):
 
     # check input
-    assert not 1 % azimuth_res,"1/azimuth_res must be an integer."
-    assert not 360 % match,"360/match must be an integer."
+    assert not 1 % azimuth_res, "1/azimuth_res must be an integer."
+    assert not 360 % match, "360/match must be an integer."
 
     elevation = np.sort(np.asarray(elevation))
-    assert elevation.size > 3,"elevation must have at least three elements."
+    assert elevation.size > 3, "elevation must have at least three elements."
 
     # calculate delta azimuth to meet the desired great circle distance.
     # (according to Bovbjerg et al. 2000: Measuring the head related transfer
