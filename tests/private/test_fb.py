@@ -20,7 +20,7 @@ c = samplings.sph_icosahedron()
 c = samplings.sph_equiangular(5)
 c = samplings.sph_gaussian(n_sh=1)
 c = samplings.sph_hyperinterpolation(n_sh=15, radius=2)
-c = samplings.spherical_t_design(15, 'const_angular_spread')
+c = samplings.sph_t_design(15, 'const_angular_spread')
 c = samplings.great_circle_grid(match=90)
 c.show()
 

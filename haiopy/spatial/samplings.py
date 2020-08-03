@@ -355,23 +355,27 @@ def sph_extremal(n_points=None, n_sh=None, radius=1.):
     return sampling
 
 
-def sph_t_design(n_max, criterion='const_energy'):
-    r"""Return the sampling positions for a spherical t-design [1]_ .
-    For a spherical harmonic order N, a t-Design of degree `:math: t=2N` for
-    constant energy or `:math: t=2N+1` additionally ensuring a constant angular
-    spread of energy is required [2]_. For a given degree t
+def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
+    r"""Return spherical t-design sampling grid [1]_.
+
+    For a spherical harmonic order :math:`n_{sh}`, a t-Design of degree
+    :math:`t=2n_{sh}` for constant energy or :math:`t=2n_{sh}+1` additionally
+    ensuring a constant angular spread of energy is required [2]_. For a given
+    degree t
 
     .. math::
 
         L = \lceil \frac{(t+1)^2}{2} \rceil+1,
 
     points will be generated, except for t = 3, 5, 7, 9, 11, 13, and 15.
-    T-designs allow for a inverse spherical harmonic transform matrix
-    calculated as `:math: D = \frac{4\pi}{L} \mathbf{Y}^\mathrm{H}`.
+    T-designs allow for an inverse spherical harmonic transform matrix
+    calculated as :math:`D = \frac{4\pi}{L} \mathbf{Y}^\mathrm{H}` with
+    :math:`\mathbf{Y}^\mathrm{H}` being the hermitian transpose of the
+    spherical harmonics matrix.
 
     Parameters
     ----------
-    degree : integer
+    degree : int, optional
         T-design degree
     criterion : 'const_energy', 'const_angular_spread'
         Design criterion ensuring only a constant energy or additionally
@@ -400,18 +404,29 @@ def sph_t_design(n_max, criterion='const_energy'):
     .. [3]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
 
     """
-    if criterion == 'const_energy':
-        degree = 2 * n_max
-    elif criterion == 'const_angular_spread':
-        degree = 2 * n_max + 1
-    else:
-        raise ValueError("Invalid design criterion.")
 
+    # check input
+    if (degree is None) and (n_sh is None):
+        raise ValueError("Either the degree or n_sh needs to be specified.")
+
+    if criterion not in ['const_energy', 'const_angular_spread']:
+        raise ValueError("Invalid design criterion. Must be 'const_energy' \
+                         or 'const_angular_spread'.")
+
+    # get the degree
+    if degree is None:
+        if criterion == 'const_energy':
+            degree = 2 * n_sh
+        else:
+            degree = 2 * n_sh + 1
+
+    # get the number of points
     n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
     n_points_exceptions = {3:8, 5:18, 7:32, 9:50, 11:72, 13:98, 15:128}
     if degree in n_points_exceptions:
         n_points = n_points_exceptions[degree]
 
+    # load the data
     filename = "sf%03d.%05d" % (degree, n_points)
     url = "http://web.maths.unsw.edu.au/~rsw/Sphere/Points/SF/SF29-Nov-2012/"
     fileurl = url + filename
@@ -429,12 +444,18 @@ def sph_t_design(n_max, criterion='const_energy'):
         raise ConnectionError("Connection error. Please check your internet \
                 connection.")
 
+    # format the data
     points = np.fromstring(
         file_data,
         dtype=np.double,
         sep=' ').reshape((n_points, 3))
 
-    sampling = Coordinates(points[...,0], points[...,1], points[...,2])
+    # generate Coordinates object
+    sampling = Coordinates(points[...,0] * radius,
+                           points[...,1] * radius,
+                           points[...,2] * radius,
+                           sh_order=n_sh,
+                           comment='spherical T-design sampling grid')
 
     return sampling
 
