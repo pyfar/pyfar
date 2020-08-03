@@ -69,21 +69,23 @@ def dodecahedron():
         SamplingSphere object containing all sampling points
     """
 
-    dihedral = 2*np.arcsin(np.cos(np.pi/3)/np.sin(np.pi/5))
-    R = np.tan(np.pi/3)*np.tan(dihedral/2)
-    rho = np.cos(np.pi/5)/np.sin(np.pi/10)
+    dihedral = 2 * np.arcsin(np.cos(np.pi / 3) / np.sin(np.pi / 5))
+    R = np.tan(np.pi / 3) * np.tan(dihedral / 2)
+    rho = np.cos(np.pi / 5) / np.sin(np.pi / 10)
 
-    theta1 = np.arccos((np.cos(np.pi/5)/np.sin(np.pi/5))/np.tan(np.pi/3))
+    theta1 = np.arccos((np.cos(np.pi / 5)
+                       / np.sin(np.pi / 5))
+                       / np.tan(np.pi / 3))
 
-    a2 = 2*np.arccos(rho/R)
+    a2 = 2 * np.arccos(rho / R)
 
-    theta2 = theta1+a2
+    theta2 = theta1 + a2
     theta3 = np.pi - theta2
     theta4 = np.pi - theta1
 
     phi1 = 0
-    phi2 = 2*np.pi/3
-    phi3 = 4*np.pi/3
+    phi2 = 2 * np.pi / 3
+    phi3 = 4 * np.pi / 3
 
     theta = np.concatenate((
         np.tile(theta1, 3),
@@ -94,9 +96,9 @@ def dodecahedron():
         phi1,
         phi2,
         phi3,
-        phi1 + np.pi/3,
-        phi2 + np.pi/3,
-        phi3 + np.pi/3]), 2)
+        phi1 + np.pi / 3,
+        phi2 + np.pi / 3,
+        phi3 + np.pi / 3]), 2)
     rad = np.ones(np.size(theta))
 
     sampling = Coordinates(
@@ -113,16 +115,16 @@ def icosahedron():
     sampling : SamplingSphere
         SamplingSphere object containing all sampling points
     """
-    gamma_R_r = np.arccos(np.cos(np.pi/3) / np.sin(np.pi/5))
-    gamma_R_rho = np.arccos(1/(np.tan(np.pi/5) * np.tan(np.pi/3)))
+    gamma_R_r = np.arccos(np.cos(np.pi / 3) / np.sin(np.pi / 5))
+    gamma_R_rho = np.arccos(1 / (np.tan(np.pi / 5) * np.tan(np.pi / 3)))
 
     theta = np.tile(np.array([np.pi - gamma_R_rho,
-                              np.pi - gamma_R_rho - 2*gamma_R_r,
-                              2*gamma_R_r + gamma_R_rho,
+                              np.pi - gamma_R_rho - 2 * gamma_R_r,
+                              2 * gamma_R_r + gamma_R_rho,
                               gamma_R_rho]), 5)
     theta = np.sort(theta)
-    phi = np.arange(0, 2*np.pi, 2*np.pi/5)
-    phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi/5, 2)))
+    phi = np.arange(0, 2 * np.pi, 2 * np.pi / 5)
+    phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi / 5, 2)))
 
     rad = np.ones(20)
     sampling = Coordinates(
@@ -157,10 +159,8 @@ def sphere_equiangular(n_points=None, angles=None):
             n_phi = n_points
             n_theta = n_points
 
-        theta_angles = np.arange(
-            np.pi/(n_theta*2), np.pi, np.pi/n_theta)
-        phi_angles = np.arange(
-            0, 2*np.pi, 2*np.pi/n_phi)
+        theta_angles = np.arange(np.pi / (n_theta * 2), np.pi, np.pi / n_theta)
+        phi_angles = np.arange(0, 2 * np.pi, 2 * np.pi / n_phi)
 
     elif angles is not None:
         angles = np.asarray(angles)
@@ -171,10 +171,8 @@ def sphere_equiangular(n_points=None, angles=None):
             alpha_phi = angles
             alpha_theta = angles
 
-        theta_angles = np.arange(
-            np.pi/(n_theta*2), np.pi, alpha_theta)
-        phi_angles = np.arange(
-            0, 2*np.pi, alpha_phi)
+        theta_angles = np.arange(np.pi / (n_theta * 2), np.pi, alpha_theta)
+        phi_angles = np.arange(0, 2 * np.pi, alpha_phi)
 
     theta, phi = np.meshgrid(theta_angles, phi_angles)
     rad = np.ones(theta.size)
@@ -203,15 +201,13 @@ def sphere_gaussian(n_max):
         SamplingSphere object containing all sampling points
 
     """
-    legendre, weights = np.polynomial.legendre.leggauss(n_max+1)
+    legendre, weights = np.polynomial.legendre.leggauss(n_max + 1)
     theta_angles = np.arccos(legendre)
-    n_phi = np.round((n_max+1)*2)
-    phi_angles = np.arange(0,
-                            2*np.pi,
-                            2*np.pi/n_phi)
+    n_phi = np.round((n_max + 1) * 2)
+    phi_angles = np.arange(0, 2 * np.pi, 2 * np.pi / n_phi)
     theta, phi = np.meshgrid(theta_angles, phi_angles)
     rad = np.ones(theta.size)
-    weights = np.tile(weights*np.pi/(n_max+1), 2*(n_max+1))
+    weights = np.tile(weights * np.pi / (n_max + 1), 2 * (n_max + 1))
 
     sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
                            domain='sph', convention='top_colat')
@@ -245,7 +241,7 @@ def hyperinterpolation(n_max):
     sampling: SamplingSphere
         SamplingSphere object containing all sampling points
     """
-    n_sh = (n_max+1)**2
+    n_sh = (n_max + 1)**2
     filename = "/Womersley/md%02d.%04d" % (n_max, n_sh)
     url = "http://www.ita-toolbox.org/Griddata"
     fileurl = url + filename
@@ -318,9 +314,9 @@ def spherical_t_design(n_max, criterion='const_energy'):
 
     """
     if criterion == 'const_energy':
-        degree = 2*n_max
+        degree = 2 * n_max
     elif criterion == 'const_angular_spread':
-        degree = 2*n_max + 1
+        degree = 2 * n_max + 1
     else:
         raise ValueError("Invalid design criterion.")
 
@@ -369,13 +365,13 @@ def great_circle_grid(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
     # calculate delta azimuth to meet the desired great circle distance.
     # (according to Bovbjerg et al. 2000: Measuring the head related transfer
     # functions of an artificial head with a high directional azimuth_res)
-    d_az = 2*np.arcsin(np.clip(
-        np.sin(gcd/360*np.pi) / np.cos(elevation/180*np.pi), -1, 1))
+    d_az = 2 * np.arcsin(np.clip(
+        np.sin(gcd / 360 * np.pi) / np.cos(elevation / 180 * np.pi), -1, 1))
     d_az = d_az / np.pi * 180
     # correct values at the poles
-    d_az[np.abs(elevation)==90] = 360;
+    d_az[np.abs(elevation) == 90] = 360
     # next smallest value in desired angular azimuth_res
-    d_az = d_az // azimuth_res * azimuth_res;
+    d_az = d_az // azimuth_res * azimuth_res
 
     # adjust phi to make sure that: match // d_az == 0
     for nn in range(d_az.size):
@@ -388,11 +384,9 @@ def great_circle_grid(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
     elev = np.empty(0)
     for nn in range(elevation.size):
         azim = np.append(azim, np.arange(0, 360, d_az[nn]))
-        elev = np.append(elev, np.full(int(360/d_az[nn]), elevation[nn]))
+        elev = np.append(elev, np.full(int(360 / d_az[nn]), elevation[nn]))
 
     # make Coordinates object
     sampling = Coordinates(azim, elev, radius, 'sph', 'top_elev', 'deg')
 
     return sampling
-
-
