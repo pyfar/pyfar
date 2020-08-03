@@ -383,8 +383,8 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
-        SamplingSphere object containing all sampling points
+    sampling : Coordinates
+        Sampling positions as Coordinate object
 
     Notes
     -----
@@ -462,13 +462,51 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
 
 def sph_great_circle(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
                      azimuth_res=1, match=360):
+    r"""
+    Spherical sampling grid according to the great circle distance criterion.
+
+    Sampling grid where neighboring points of the same elevation have approx.
+    the same great circle distance across elevations [1]_.
+
+    Parameters
+    ----------
+    elevation : array like, optional
+        Contains the elevation from wich the sampling grid is generated, with
+        :math:`-90^\circ\leq elevation \leq 90^\circ` (:math:`90^\circ`:
+        North Pole; :math:`-90^\circ`: South Pole). The default is
+        np.linspace(-90,90,19).
+    gcd : number, optional
+        Desired great circle distance (GCD). Note that the actual GCD of the
+        sampling grid is equal or larger then the desired GCD and that the GCD
+        may vary across elevatoins. The default is 10.
+    radius : number, optional
+        Radius of the sampling grid in meters. The default is 1.
+    azimuth_res : number, optional
+        Minimum resolution of the azimuth angle in degree. The default is 1.
+    match : number, optional
+        Forces azimuth entries to appear with a period of match degrees. E.g.,
+        if match=90, the grid will have azimuth angles at 0, 90, 180, and 270
+        degrees (and possibly inbetween). The default is 360.
+
+    Returns
+    -------
+    sampling : Coordinates
+        Sampling positions as Coordinate object
+
+    References
+    ----------
+    .. [1]  B. P. Bovbjerg, F. Christensen, P. Minnaar, and X. Chen, “Measuring
+            the head-related transfer functions of an artificial head with a
+            high directional resolution,” Los Angeles, USA, Sep. 2000.
+
+    """
 
     # check input
     assert not 1 % azimuth_res,"1/azimuth_res must be an integer."
     assert not 360 % match,"360/match must be an integer."
+    assert not match % azimuth_res,"match/azimuth_res must be an integer."
 
-    elevation = np.sort(np.asarray(elevation))
-    assert elevation.size > 3,"elevation must have at least three elements."
+    elevation = np.atleast_1d(np.asarray(elevation))
 
     # calculate delta azimuth to meet the desired great circle distance.
     # (according to Bovbjerg et al. 2000: Measuring the head related transfer
@@ -495,6 +533,7 @@ def sph_great_circle(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
         elev = np.append(elev, np.full(int(360 / d_az[nn]), elevation[nn]))
 
     # make Coordinates object
-    sampling = Coordinates(azim, elev, radius, 'sph', 'top_elev', 'deg')
+    sampling = Coordinates(azim, elev, radius, 'sph', 'top_elev', 'deg',
+                           comment='spherical great circle sampling grid')
 
     return sampling

@@ -19,9 +19,9 @@ c = samplings.sph_dodecahedron()
 c = samplings.sph_icosahedron()
 c = samplings.sph_equiangular(5)
 c = samplings.sph_gaussian(n_sh=1)
-c = samplings.sph_hyperinterpolation(n_sh=15, radius=2)
+c = samplings.sph_extremal(n_sh=15, radius=2)
 c = samplings.sph_t_design(15, 'const_angular_spread')
-c = samplings.great_circle_grid(match=90)
+c = samplings.sph_great_circle(match=90)
 c.show()
 
 # %% test rotation
@@ -41,16 +41,16 @@ cs = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 mask = cs.get_slice('azimuth', 'deg', 0, 45, True)
 
 # random cartesian grid
-x  = np.random.rand(3,10,30) * 2 - 1
-y  = np.random.rand(3,10,30) * 2 - 1
-z  = np.random.rand(3,10,30) * 2 - 1
+x = np.random.rand(3, 10, 30) * 2 - 1
+y = np.random.rand(3, 10, 30) * 2 - 1
+z = np.random.rand(3, 10, 30) * 2 - 1
 cc = Coordinates(x, y, z)
 
 mask = cc.get_slice('x', 'met', .5, .25, True)
 
 # random cylindircal grid
 az = np.random.rand(3,10,30) * 360
-z  = np.random.rand(3,10,30) * 2 - 1
+z = np.random.rand(3,10,30) * 2 - 1
 cz = Coordinates(az, z, 1, 'cyl', 'top', 'deg')
 
 mask = cz.get_slice('azimuth', 'deg', 90, 5, True)
@@ -111,7 +111,8 @@ d, idx, mask = c.get_nearest_k(0,0,1, 50, 'sph', 'top_elev', 'deg', show=True)
 #       structure is ready
 
 # TODO: Bugs
-#       - constructor not working with list (x = haiopy.Signal([1,2,3,3],44100))
+#       - constructor not working with list
+#         (x = haiopy.Signal([1,2,3,3],44100))
 #       - __repr__ only works for 2D arrays
 
 # TODO: Documentation
@@ -135,7 +136,8 @@ x.signal_length
 x.n_samples
 x.n_bins
 
-# TODO: String argument to get times and frequencies in samples, s, ms, , kHz, etc?
+# TODO: String argument to get times and frequencies in samples, s, ms, , kHz,
+#       etc?
 x.times
 x.frequencies
 # TODO: get times in samples?
