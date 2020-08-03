@@ -282,9 +282,25 @@ def sph_gaussian(n_points=None, n_sh=None, radius=1.):
     return sampling
 
 
-def sph_hyperinterpolation(n_max):
+def sph_extremal(n_points=None, n_sh=None, radius=1.):
     """Gives the points of a Hyperinterpolation sampling grid
     after Sloan and Womersley [1]_.
+
+    Parameters
+    ----------
+    n_points : int, optional
+        number of sampling points in the grid. Related to the spherical
+        harmonics order by n_points = (n_sh + 1)**2
+    n_sh : int, optional
+        maximum applicable spherical harmonics order. Related to the number of
+        points by n_sh = np.sqrt(n_points) - 1
+    radius : number, optional
+        radius of the sampling grid in meters
+
+    Returns
+    -------
+    sampling : Coordinates
+        Sampling positions as Coordinate object
 
     Notes
     -----
@@ -298,22 +314,23 @@ def sph_hyperinterpolation(n_max):
             Mathematics, vol. 21, no. 1/2, pp. 107–125, 2004.
     .. [2]  http://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/index.html
 
-    Parameters
-    ----------
-    n_max : integer
-        Spherical harmonic order of the sampling
-
-    Returns
-    -------
-    sampling: SamplingSphere
-        SamplingSphere object containing all sampling points
     """
-    n_sh = (n_max + 1)**2
-    filename = "/Womersley/md%02d.%04d" % (n_max, n_sh)
-    url = "http://www.ita-toolbox.org/Griddata"
+
+    if (n_points is None) and (n_sh is None):
+        raise ValueError("Either the n_points or n_sh needs to be specified.")
+
+    # get number of points or spherical harmonics order
+    if n_sh is not None:
+        n_points = (n_sh + 1)**2
+    else:
+        n_sh = np.sqrt(n_points) - 1
+
+    # load the data
+    filename = "md%03d.%05d" % (n_sh, n_points)
+    url = "https://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/"
     fileurl = url + filename
 
-    http = urllib3.PoolManager()
+    http = urllib3.PoolManager(cert_reqs=False)
     http_data = http.urlopen('GET', fileurl)
 
     if http_data.status == 200:
@@ -322,15 +339,18 @@ def sph_hyperinterpolation(n_max):
         raise ConnectionError("Connection error. Please check your internet \
                 connection.")
 
+    # format data
     file_data = np.fromstring(
         file_data,
         dtype='double',
-        sep=' ').reshape((n_sh, 4))
-    sampling = Coordinates(
-        file_data[:, 0],
-        file_data[:, 1],
-        file_data[:, 2])
-    sampling.weights = file_data[:, 3]
+        sep=' ').reshape((int(n_points), 4))
+
+    # generate Coordinates object
+    sampling = Coordinates(file_data[:, 0] * radius,
+                           file_data[:, 1] * radius,
+                           file_data[:, 2] * radius,
+                           sh_order=n_sh, weights=file_data[:, 3],
+                           comment='extremal spherical sampling grid')
 
     return sampling
 
