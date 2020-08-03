@@ -187,26 +187,26 @@ class Coordinates(object):
         pts = self._points
         for nn, unit in enumerate(self._system['units']):
             if unit == 'degrees':
-                pts[...,nn] = pts[...,nn] / 180 * np.pi
+                pts[..., nn] = pts[..., nn] / 180 * np.pi
 
         # convert to cartesian ...
         # ... from spherical coordinate systems
         if self._system['domain'] == 'sph':
             if self._system['convention'] == 'top_colat':
-                x, y, z = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+                x, y, z = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             elif self._system['convention'] == 'top_elev':
-                x, y, z = sph2cart(pts[...,0],
-                                   np.pi / 2 - pts[...,1],
-                                   pts[...,2])
+                x, y, z = sph2cart(pts[..., 0],
+                                   np.pi / 2 - pts[..., 1],
+                                   pts[..., 2])
 
             elif self._system['convention'] == 'side':
-                x, z, y = sph2cart(pts[...,1],
-                                   np.pi / 2 - pts[...,0],
-                                   pts[...,2])
+                x, z, y = sph2cart(pts[..., 1],
+                                   np.pi / 2 - pts[..., 0],
+                                   pts[..., 2])
 
             elif self._system['convention'] == 'front':
-                y, z, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+                y, z, x = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             else:
                 raise Exception("Conversion for {} is not implemented.".
@@ -215,7 +215,7 @@ class Coordinates(object):
         # ... from cylindrical coordinate systems
         elif self._system['domain'] == 'cyl':
             if self._system['convention'] == 'top':
-                x, y, z = cyl2cart(pts[...,0], pts[...,1], pts[...,2])
+                x, y, z = cyl2cart(pts[..., 0], pts[..., 1], pts[..., 2])
             else:
                 raise Exception("Conversion for {} is not implemented.".
                                 format(self._system['convention']))
@@ -314,14 +314,16 @@ class Coordinates(object):
         # convert to spherical...
         # ... top polar systems
         if convention[0:3] == 'top':
-            pts_1, pts_2, pts_3 = cart2sph(pts[...,0], pts[...,1], pts[...,2])
+            pts_1, pts_2, pts_3 = cart2sph(
+                pts[..., 0], pts[..., 1], pts[..., 2])
             if convention == 'top_elev':
                 pts_2 = np.pi / 2 - pts_2
 
         # ... side polar system
         # (idea for simple converions from Robert Baumgartner and SOFA_API)
         elif convention == 'side':
-            pts_2, pts_1, pts_3 = cart2sph(pts[...,0], pts[...,2], -pts[...,1])
+            pts_2, pts_1, pts_3 = cart2sph(
+                pts[..., 0], pts[..., 2], -pts[..., 1])
 
             # range angles
             pts_1 = pts_1 - np.pi / 2
@@ -329,7 +331,8 @@ class Coordinates(object):
 
         # ... front polar system
         elif convention == 'front':
-            pts_1, pts_2, pts_3 = cart2sph(pts[...,1], pts[...,2], pts[...,0])
+            pts_1, pts_2, pts_3 = cart2sph(
+                pts[..., 1], pts[..., 2], pts[..., 0])
 
         else:
             raise Exception(f"Conversion for {convention} is not implemented.")
@@ -430,7 +433,8 @@ class Coordinates(object):
         # convert to cylindrical ...
         # ... top systems
         if convention == 'top':
-            pts_1, pts_2, pts_3 = cart2cyl(pts[...,0], pts[...,1], pts[...,2])
+            pts_1, pts_2, pts_3 = cart2cyl(
+                pts[..., 0], pts[..., 1], pts[..., 2])
 
         else:
             raise Exception(f"Conversion for {convention} is not implemented.")
@@ -735,7 +739,7 @@ class Coordinates(object):
         """
 
         # check the input
-        assert distance >= 0,"distance must be >= 0"
+        assert distance >= 0, "distance must be >= 0"
 
         # get the points
         distance, index, mask = self._get_nearest(
@@ -791,11 +795,11 @@ class Coordinates(object):
         """
 
         # check the input
-        assert distance >= 0 and distance <= 180,"distance must be >= 0 and "\
-                                                 "<= 180."
+        assert distance >= 0 and distance <= 180, "distance must be >= 0 and \
+                                                  <= 180."
 
         # get radius and check for equality
-        radius = copy.deepcopy(self).get_sph()[...,2]
+        radius = copy.deepcopy(self).get_sph()[..., 2]
         delta_radius = np.max(radius) - np.min(radius)
         if delta_radius > 1e-15:
             raise ValueError("get_nearest_sph only works if all points have "
@@ -879,7 +883,7 @@ class Coordinates(object):
 
         # get the coordinates
         coords = eval(f"copy.deepcopy(self).get_{domain}('{convention}')")
-        coords = coords[...,index]
+        coords = coords[..., index]
 
         # get the mask
         if rng[0] <= rng[1]:
@@ -962,9 +966,9 @@ class Coordinates(object):
         points = rot.apply(self.get_cart().reshape((self.csize, 3)), inverse)
 
         # set points
-        self.set_cart(points[:,0].reshape(shape),
-                      points[:,1].reshape(shape),
-                      points[:,2].reshape(shape))
+        self.set_cart(points[:, 0].reshape(shape),
+                      points[:, 1].reshape(shape),
+                      points[:, 2].reshape(shape))
 
     @staticmethod
     def _systems():
@@ -998,8 +1002,8 @@ class Coordinates(object):
 
         # define coordinate systems
         _systems = {
-            "cart":{
-                "right":{
+            "cart": {
+                "right": {
                     "description_short":
                         "Right handed cartesian coordinate system.",
                     "coordinates":
@@ -1019,8 +1023,8 @@ class Coordinates(object):
                     "y": ["unbound", [-np.inf, np.inf]],
                     "z": ["unbound", [-np.inf, np.inf]]}
             },
-            "sph":{
-                "top_colat":{
+            "sph": {
+                "top_colat": {
                     "description_short":
                         "Spherical coordinate system with North and South "
                         "Pole.",
@@ -1047,7 +1051,7 @@ class Coordinates(object):
                     "azimuth": ["cyclic", [0, 2 * np.pi]],
                     "colatitude": ["bound", [0, np.pi]],
                     "radius": ["bound", [0, np.inf]]},
-                "top_elev":{
+                "top_elev": {
                     "description_short":
                         "Spherical coordinate system with North and South "
                         "Pole. Conform with AES69-2015: AES standard for file "
@@ -1075,7 +1079,7 @@ class Coordinates(object):
                     "azimuth": ["cyclic", [0, 2 * np.pi]],
                     "elevation": ["bound", [-np.pi / 2, np.pi / 2]],
                     "radius": ["bound", [0, np.inf]]},
-                "side":{
+                "side": {
                     "description_short":
                         "Spherical coordinate system with poles on the "
                         "y-axis.",
@@ -1099,10 +1103,10 @@ class Coordinates(object):
                     "negative_y": [-np.pi / 2, 0, 1],
                     "positive_z": [0, np.pi / 2, 1],
                     "negative_z": [0, -np.pi / 2, 1],
-                    "lateral":["bound", [-np.pi / 2, np.pi / 2]],
-                    "polar":["cyclic", [-np.pi / 2, np.pi * 3 / 2]],
-                    "radius":["bound", [0, np.inf]]},
-                "front":{
+                    "lateral": ["bound", [-np.pi / 2, np.pi / 2]],
+                    "polar": ["cyclic", [-np.pi / 2, np.pi * 3 / 2]],
+                    "radius": ["bound", [0, np.inf]]},
+                "front": {
                     "description_short":
                         "Spherical coordinate system with poles on the x-axis."
                         " Conform with AES56-2008 (r2019): AES standard on "
@@ -1131,8 +1135,8 @@ class Coordinates(object):
                     "theta": ["bound", [0, np.pi]],
                     "radius": ["bound", [0, np.inf]]}
             },
-            "cyl":{
-                "top":{
+            "cyl": {
+                "top": {
                     "description_short":
                         "Cylindrical coordinate system along the z-axis.",
                     "coordinates":
@@ -1282,13 +1286,13 @@ class Coordinates(object):
                 pts[nn] = np.transpose(p)
 
         # shapes of non scalar entries
-        shapes = [p.shape for p in pts if p.shape != (1,1)]
+        shapes = [p.shape for p in pts if p.shape != (1, 1)]
 
         # check for equal shape
-        for nn in range(1,len(shapes)):
-            assert shapes[0] == shapes[nn],\
-                "points_1, points_2, and points_3 must be scalar or of the "\
-                "same shape."
+        for nn in range(1, len(shapes)):
+            assert shapes[0] == shapes[nn], \
+                "points_1, points_2, and points_3 must be scalar or of the \
+                same shape."
 
         # check the range of points
         for nn, p in enumerate(pts):
@@ -1320,7 +1324,7 @@ class Coordinates(object):
         # create axis for concatenation if it does not exist
         for nn, p in enumerate(pts):
             if p.ndim == axis:
-                pts[nn] = p[...,np.newaxis]
+                pts[nn] = p[..., np.newaxis]
 
         # concatenate
         pts = np.concatenate((pts[0], pts[1], pts[2]), axis)

@@ -422,7 +422,7 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
 
     # get the number of points
     n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
-    n_points_exceptions = {3:8, 5:18, 7:32, 9:50, 11:72, 13:98, 15:128}
+    n_points_exceptions = {3: 8, 5: 18, 7: 32, 9: 50, 11: 72, 13: 98, 15: 128}
     if degree in n_points_exceptions:
         n_points = n_points_exceptions[degree]
 
@@ -451,9 +451,9 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
         sep=' ').reshape((n_points, 3))
 
     # generate Coordinates object
-    sampling = Coordinates(points[...,0] * radius,
-                           points[...,1] * radius,
-                           points[...,2] * radius,
+    sampling = Coordinates(points[..., 0] * radius,
+                           points[..., 1] * radius,
+                           points[..., 2] * radius,
                            sh_order=n_sh,
                            comment='spherical T-design sampling grid')
 
@@ -502,9 +502,9 @@ def sph_great_circle(elevation=np.linspace(-90,90,19), gcd=10, radius=1,
     """
 
     # check input
-    assert not 1 % azimuth_res,"1/azimuth_res must be an integer."
-    assert not 360 % match,"360/match must be an integer."
-    assert not match % azimuth_res,"match/azimuth_res must be an integer."
+    assert not 1 % azimuth_res, "1/azimuth_res must be an integer."
+    assert not 360 % match, "360/match must be an integer."
+    assert not match % azimuth_res, "match/azimuth_res must be an integer."
 
     elevation = np.atleast_1d(np.asarray(elevation))
 

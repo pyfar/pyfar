@@ -27,15 +27,15 @@ c.show()
 # %% test rotation
 
 c = Coordinates([-1, 1], 0, 0)
-c.show(np.array([0,1],dtype=bool))
+c.show(np.array([0, 1], dtype=bool))
 c.rotate('z', 90)
 
 
 # %% slice and plot testing
 
 # random spherical grid
-az = np.random.rand(3,10,30) * 360
-el = np.random.rand(3,10,30) * 180 - 90
+az = np.random.rand(3, 10, 30) * 360
+el = np.random.rand(3, 10, 30) * 180 - 90
 cs = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 
 mask = cs.get_slice('azimuth', 'deg', 0, 45, True)
@@ -49,16 +49,16 @@ cc = Coordinates(x, y, z)
 mask = cc.get_slice('x', 'met', .5, .25, True)
 
 # random cylindircal grid
-az = np.random.rand(3,10,30) * 360
-z = np.random.rand(3,10,30) * 2 - 1
+az = np.random.rand(3, 10, 30) * 360
+z = np.random.rand(3, 10, 30) * 2 - 1
 cz = Coordinates(az, z, 1, 'cyl', 'top', 'deg')
 
 mask = cz.get_slice('azimuth', 'deg', 90, 5, True)
 
 # %% nearest and plot testing
 # make random spherical grid
-az = np.random.rand(3,10,30) * 360
-el = np.random.rand(3,10,30) * 180 - 90
+az = np.random.rand(3, 10, 30) * 360
+el = np.random.rand(3, 10, 30) * 180 - 90
 # horizontal plane
 # az = np.linspace(0, 355, 72)
 # el = np.zeros(72)
@@ -66,7 +66,8 @@ el = np.random.rand(3,10,30) * 180 - 90
 c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 # ax = haiopy.plot.scatter(c)
 
-d, idx, mask = c.get_nearest_k(0,0,1, 50, 'sph', 'top_elev', 'deg', show=True)
+d, idx, mask = c.get_nearest_k(0, 0, 1, 50, 'sph', 'top_elev', 'deg',
+                               show=True)
 # idx, mask = c.get_nearest_cart(0,0,1, 1, 'sph', 'top_elev', 'deg', show=True)
 # idx, mask = c.get_nearest_sph(0,0,1, 90, 'sph', 'top_elev', 'deg', show=True)
 
