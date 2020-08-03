@@ -65,8 +65,8 @@ class Coordinates(object):
     #       because the definition differs from the sperical radius.
 
     def __init__(self, points_1=[], points_2=[], points_3=[],
-                  domain='cart', convention='right', unit=None,
-                  weights=None, sh_order=None, comment=None):
+                domain='cart', convention='right', unit=None,
+                weights=None, sh_order=None, comment=None):
         """
         Init coordinates container.
 
