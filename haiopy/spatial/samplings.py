@@ -540,7 +540,40 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     return sampling
 
 
-def sph_lebedev(degree=None, n_sh=None, radius=1.):
+def sph_lebedev(n_points=None, n_sh=None, radius=1.):
+    """
+    Return Lebedev spherical sampling grid [1]_.
+
+    Parameters
+    ----------
+    n_points : int, optional
+        number of sampling points in the grid. Related to the spherical
+        harmonics order by n_points = (n_sh + 1)**2
+    n_sh : int, optional
+        maximum applicable spherical harmonics order. Related to the number of
+        points by n_sh = np.sqrt(n_points) - 1
+    radius : number, optional
+        radius of the sampling grid in meters
+
+    Returns
+    -------
+    sampling : Coordinates
+        Sampling positions as Coordinate object
+
+    Notes
+    -----
+    This implementation is based on Matlab Code written by Rob Parrish [2]_.
+
+    References
+    ----------
+    .. [1] V.I. Lebedev, and D.N. Laikov
+           "A quadrature formula for the sphere of the 131st
+           algebraic order of accuracy"
+           Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
+    .. [2] https://de.mathworks.com/matlabcentral/fileexchange/27097-\
+        getlebedevsphere
+
+    """
 
     # possible degrees
     degrees = np.array([6, 14, 26, 38, 50, 74, 86, 110, 146, 170, 194, 230,
@@ -552,15 +585,15 @@ def sph_lebedev(degree=None, n_sh=None, radius=1.):
     orders = np.array((np.floor(np.sqrt(degrees / 1.3) - 1)), dtype=int)
 
     # list possible sh orders and degrees
-    if degree is None and n_sh is None:
+    if n_points is None and n_sh is None:
         for o, d in zip(orders, degrees):
-            print(f"SH order {o}, degree {d}\n")
+            print(f"SH order {o}, number of points {d}\n")
 
         return 0
 
     # check input
-    if degree is not None and n_sh is not None:
-        raise ValueError("Either degree or order must be None.")
+    if n_points is not None and n_sh is not None:
+        raise ValueError("Either n_points or n_sh must be None.")
 
     # check if the order is available
     if n_sh is not None:
@@ -570,18 +603,18 @@ def sph_lebedev(degree=None, n_sh=None, radius=1.):
                              Valid orders are: {}.".format(
                              ', '.join(str_orders)))
 
-        degree = int(degrees[orders == n_sh])
+        n_points = int(degrees[orders == n_sh])
 
-    # check if degree is available
-    if degree not in degrees:
+    # check if n_points is available
+    if n_points not in degrees:
         str_degrees = [f"{d}" for d in degrees]
-        raise ValueError("Invalid degree. Valid degrees are: {}.".format(
-            ', '.join(str_degrees)))
+        raise ValueError("Invalid number of points n_points. Valid degrees \
+                         are: {}.".format(', '.join(str_degrees)))
 
     # calculate sh_order
-    n_sh = int(orders[degrees == degree])
+    n_sh = int(orders[degrees == n_points])
 
-    leb = _lebedev._lebedevSphere(degree)
+    leb = _lebedev._lebedevSphere(n_points)
 
     # generate Coordinates object
     sampling = Coordinates(leb["x"] * radius,
