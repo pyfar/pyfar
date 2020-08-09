@@ -17,7 +17,7 @@ def cart_equidistant_cube(n_points):
     n_points : int, tuple
         Number of points in the sampling. If a single value is given, the
         number of sampling positions will be the same in every axis. If a
-        tuple is given, the number of points will be set as (n_x, n_y, n_z)
+        tuple is given, the number of points will be set as (n_x, n_y, n_z).
 
     Returns
     -------
@@ -60,7 +60,7 @@ def sph_dodecahedron(radius=1.):
     Parameters
     ----------
     radius : number, optional
-        Radius of the sampling grid
+        Radius of the sampling grid. The default is 1.
 
     Returns
     -------
@@ -114,7 +114,7 @@ def sph_icosahedron(radius=1.):
     Parameters
     ----------
     radius : number, optional
-        Radius of the sampling grid
+        Radius of the sampling grid. The default is 1.
 
     Returns
     -------
@@ -145,13 +145,15 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
 
     Parameters
     ----------
-    n_points : int, tuple of two ints, optional
-        number of sampling points in azimuth and elevation
-    n_sh : int, optional
+    n_points : int, tuple of two ints
+        number of sampling points in azimuth and elevation. Either n_points or
+        n_sh must be provided. The default is None.
+    n_sh : int
         maximum applicable spherical harmonics order. If this is provided,
-        'n_points' is set to 2 * n_sh + 1
+        'n_points' is set to 2 * n_sh + 1. Either n_points or n_sh must be
+        provided. The default is None.
     radius : number, optional
-        radius of the sampling grid
+        radius of the sampling grid. The default is 1.
 
     Returns
     -------
@@ -219,13 +221,15 @@ def sph_gaussian(n_points=None, n_sh=None, radius=1.):
 
     Parameters
     ----------
-    n_points : int, tuple of two ints, optional
-        number of sampling points in azimuth and elevation
-    n_sh : int, optional
+    n_points : int, tuple of two ints
+        number of sampling points in azimuth and elevation. Either n_points or
+        n_sh must be provided. The default is None.
+    n_sh : int
         maximum applicable spherical harmonics order. If this is provided,
-        'n_points' is set to [2 * (n_sh + 1), n_sh + 1]
+        'n_points' is set to 2 * (n_sh + 1), n_sh + 1. Either n_points or
+        n_sh must be provided. The default is None.
     radius : number, optional
-        radius of the sampling grid in meters
+        radius of the sampling grid in meters. The default is 1.
 
     Returns
     -------
@@ -289,14 +293,16 @@ def sph_extremal(n_points=None, n_sh=None, radius=1.):
 
     Parameters
     ----------
-    n_points : int, optional
+    n_points : int
         number of sampling points in the grid. Related to the spherical
-        harmonics order by n_points = (n_sh + 1)**2
-    n_sh : int, optional
+        harmonics order by n_points = (n_sh + 1)**2. Either n_points or
+        n_sh must be provided. The default is None.
+    n_sh : int
         maximum applicable spherical harmonics order. Related to the number of
-        points by n_sh = np.sqrt(n_points) - 1
+        points by n_sh = np.sqrt(n_points) - 1. Either n_points or n_sh must
+        be provided. The default is None.
     radius : number, optional
-        radius of the sampling grid in meters
+        radius of the sampling grid in meters. The default is 1.
 
     Returns
     -------
@@ -376,11 +382,18 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
 
     Parameters
     ----------
-    degree : int, optional
-        T-design degree
+    degree : int
+        T-design degree. Either degree or n_sh must be provided. The default
+        is None.
+    n_sh : int
+        maximum applicable spherical harmonics order. Related to the number of
+        points by n_sh = np.sqrt(n_points) - 1. Either degree or n_sh must
+        be provided. The default is None.
     criterion : 'const_energy', 'const_angular_spread'
         Design criterion ensuring only a constant energy or additionally
-        constant angular spread of energy
+        constant angular spread of energy. The default is 'const_energy'.
+    radius : number, optional
+        radius of the sampling grid in meters. The default is 1.
 
     Returns
     -------
@@ -475,7 +488,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
         Contains the elevation from wich the sampling grid is generated, with
         :math:`-90^\circ\leq elevation \leq 90^\circ` (:math:`90^\circ`:
         North Pole, :math:`-90^\circ`: South Pole). The default is
-        np.linspace(-90,90,19).
+        np.linspace(-90, 90, 19).
     gcd : number, optional
         Desired great circle distance (GCD). Note that the actual GCD of the
         sampling grid is equal or larger then the desired GCD and that the GCD
@@ -548,12 +561,14 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     ----------
     n_points : int, optional
         number of sampling points in the grid. Related to the spherical
-        harmonics order by n_points = (n_sh + 1)**2
+        harmonics order by n_points = (n_sh + 1)**2. Either n_points or
+        n_sh must be provided. The default is None.
     n_sh : int, optional
         maximum applicable spherical harmonics order. Related to the number of
-        points by n_sh = np.sqrt(n_points) - 1
+        points by n_sh = np.sqrt(n_points) - 1. Either n_points or n_sh must be
+        provided. The default is None.
     radius : number, optional
-        radius of the sampling grid in meters
+        radius of the sampling grid in meters. The default is 1.
 
     Returns
     -------
