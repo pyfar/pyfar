@@ -41,12 +41,13 @@ class Orientations(object):
         self._set_up_vectors(
             views, ups, domain, convention, unit, weights, sh_order, comment)
 
-    def show(self, positions=None, mask=None):
+    def show(self, positions=None):
         """
         Show a quiver plot of the orientation vectors.
 
         Parameters
         ----------
+        
         mask : boolean numpy array, None
             Plot points in black if mask==True and red if mask==False. The
             default is None, in which case all points are plotted in black.
@@ -57,11 +58,17 @@ class Orientations(object):
 
         """
         if positions is None:
-            origins_1 = np.zeros(self.views.cshape)
-            origins = Coordinates(origins_1, origins_1, origins_1)
-        ax = haiopy.plot.quiver(origins, self.views, color=(1, 0, 0))
-        ax = haiopy.plot.quiver(origins, self.ups, ax=ax, color=(0, 1, 0))
-        haiopy.plot.quiver(origins, self.rights, ax=ax, color=(0, 0, 1))
+            positions_1 = np.zeros(self.views.cshape)
+            positions = Coordinates(positions_1, positions_1, positions_1)
+        elif not isinstance(positions, Coordinates):
+            raise TypeError("Positions must be of type Coordinates.")
+        elif positions.cshape != self.views.cshape:
+            raise ValueError("If provided, there must be the same number"
+                             "of positions as orientations.")
+            
+        ax = haiopy.plot.quiver(positions, self.views, color=(1, 0, 0))
+        ax = haiopy.plot.quiver(positions, self.ups, ax=ax, color=(0, 1, 0))
+        haiopy.plot.quiver(positions, self.rights, ax=ax, color=(0, 0, 1))
 
     def _set_up_vectors(
             self,
