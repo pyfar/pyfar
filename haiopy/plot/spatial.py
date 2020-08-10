@@ -97,14 +97,16 @@ def quiver(
     ax = _setup_axes(
         projection, ax, set_ax, bounds=(min_val, max_val), **kwargs)
 
+    color = kwargs.get('color', None)
+
     # plot
-    ax.quiver(*xyz.T, *uvw.T)
+    ax.quiver(*xyz.T, *uvw.T, color=color)
 
     return ax
 
 
-def _setup_axes(
-        projection='3d', ax=None, set_ax=True, bounds=(-1, 1), **kwargs):
+def _setup_axes(projection=Axes3D.name, ax=None,
+                set_ax=True, bounds=(-1, 1), **kwargs):
     """Setup axes' limits and labels for 3D-plots.
 
     Parameters
@@ -139,10 +141,8 @@ def _setup_axes(
         raise ValueError("Only three-dimensional axes supported.")
 
     # add defaults to kwargs
-    if 'marker' not in kwargs:
-        kwargs['marker'] = '.'
-    if 'c' not in kwargs:
-        kwargs['c'] = 'k'
+    kwargs['marker'] = kwargs.get('marker', '.')
+    kwargs['c'] = kwargs.get('k', '.')
 
     # labeling
     ax.set_xlabel('X [m]')

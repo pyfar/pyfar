@@ -1,6 +1,8 @@
 import numpy as np
+import copy
 
 from haiopy.coordinates import Coordinates
+import haiopy
 
 
 class Orientations(object):
@@ -36,10 +38,32 @@ class Orientations(object):
             views = []
         if ups is None:
             ups = []
-        self._set_views_ups(
+        self._set_up_vectors(
             views, ups, domain, convention, unit, weights, sh_order, comment)
 
-    def _set_views_ups(
+    def show(self, positions=None, mask=None):
+        """
+        Show a quiver plot of the orientation vectors.
+
+        Parameters
+        ----------
+        mask : boolean numpy array, None
+            Plot points in black if mask==True and red if mask==False. The
+            default is None, in which case all points are plotted in black.
+
+        Returns
+        -------
+        None.
+
+        """
+        if positions is None:
+            origins_1 = np.zeros(self.views.cshape)
+            origins = Coordinates(origins_1, origins_1, origins_1)
+        ax = haiopy.plot.quiver(origins, self.views, color=(1, 0, 0))
+        ax = haiopy.plot.quiver(origins, self.ups, ax=ax, color=(0, 1, 0))
+        haiopy.plot.quiver(origins, self.rights, ax=ax, color=(0, 0, 1))
+
+    def _set_up_vectors(
             self,
             views,
             ups,
@@ -58,7 +82,7 @@ class Orientations(object):
             raise ValueError(
                 "There must be the same number of View and Up Vectors.")
         if views.size:
-            if views.shape[-1] not in (0, 3):
+            if views.shape[-1] != 3:
                 raise ValueError(
                     "View and Up Vectors must be either empty or 3D.")
             if not (
@@ -69,26 +93,23 @@ class Orientations(object):
 
         # Cast to Coordinates
         try:
-            views = Coordinates(
+            self.views = Coordinates(
                 views[:, 0], views[:, 1], views[:, 2],
                 domain=domain, convention=convention, unit=unit,
                 weights=weights, sh_order=sh_order, comment=comment)
-            ups = Coordinates(
+            self.ups = Coordinates(
                 ups[:, 0], ups[:, 1], ups[:, 2],
                 domain=domain, convention=convention, unit=unit,
                 weights=weights, sh_order=sh_order, comment=comment)
             # Are View and Up vectors perpendicular?
-            if not np.allclose(
-                    0,
-                    np.einsum('ij,kj->k', views.get_cart(), ups.get_cart())):
-                raise ValueError("View and Up vectors are not perpendicular")
+            if not np.allclose(0, np.einsum(
+                    'ij,kj->k', self.views.get_cart(), self.ups.get_cart())):
+                raise ValueError("View and Up vectors must be perpendicular")
+            rights = np.cross(self.views.get_cart(), self.ups.get_cart())
+            self.rights = Coordinates(rights[:, 0], rights[:, 1], rights[:, 2])
         except IndexError:
-            views = Coordinates(
+            self.views = Coordinates(
                 domain=domain, convention=convention, unit=unit,
                 weights=weights, sh_order=sh_order, comment=comment)
-            ups = Coordinates(
-                domain=domain, convention=convention, unit=unit,
-                weights=weights, sh_order=sh_order, comment=comment)
-
-        self.views = views
-        self.ups = ups
+            self.ups = copy.deepcopy(views)
+            self.rights = copy.deepcopy(views)
