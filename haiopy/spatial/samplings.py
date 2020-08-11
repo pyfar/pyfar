@@ -516,9 +516,10 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     """
 
     # check input
-    assert not 1 % azimuth_res, "1/azimuth_res must be an integer."
+    assert 1 / azimuth_res % 1 == 0, "1/azimuth_res must be an integer."
     assert not 360 % match, "360/match must be an integer."
-    assert not match % azimuth_res, "match/azimuth_res must be an integer."
+    assert match / azimuth_res % 1 == 0, "match/azimuth_res must be an \
+                                         integer."
 
     elevation = np.atleast_1d(np.asarray(elevation))
 
@@ -536,8 +537,10 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     # adjust phi to make sure that: match // d_az == 0
     for nn in range(d_az.size):
         if abs(elevation[nn]) != 90:
-            while match % d_az[nn]:
-                d_az[nn] = d_az[nn] - azimuth_res
+            while match % d_az[nn] > 1e-15:
+                # round to precision of azimuth_res to avoid numerical errors
+                d_az[nn] = np.round((d_az[nn] - azimuth_res)/azimuth_res) \
+                           * azimuth_res
 
     # construct the full sampling grid
     azim = np.empty(0)
@@ -545,6 +548,9 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     for nn in range(elevation.size):
         azim = np.append(azim, np.arange(0, 360, d_az[nn]))
         elev = np.append(elev, np.full(int(360 / d_az[nn]), elevation[nn]))
+
+    # round to precision of azimuth_res to avoid numerical errors
+    azim = np.round(azim/azimuth_res) * azimuth_res
 
     # make Coordinates object
     sampling = Coordinates(azim, elev, radius, 'sph', 'top_elev', 'deg',
@@ -602,9 +608,9 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     # list possible sh orders and degrees
     if n_points is None and n_sh is None:
         for o, d in zip(orders, degrees):
-            print(f"SH order {o}, number of points {d}\n")
+            print(f"SH order {o}, number of points {d}")
 
-        return 0
+        return None
 
     # check input
     if n_points is not None and n_sh is not None:
@@ -629,13 +635,17 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     # calculate sh_order
     n_sh = int(orders[degrees == n_points])
 
+    # get the samlpling
     leb = samplings_lebedev._lebedevSphere(n_points)
+
+    # normalize the weights
+    weights = leb["w"] / (4 * np.pi)
 
     # generate Coordinates object
     sampling = Coordinates(leb["x"] * radius,
                            leb["y"] * radius,
                            leb["z"] * radius,
-                           sh_order=n_sh, weights=leb["w"],
+                           sh_order=n_sh, weights=weights,
                            comment='spherical Lebedev sampling grid')
 
     return sampling
