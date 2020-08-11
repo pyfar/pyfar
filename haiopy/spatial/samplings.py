@@ -5,7 +5,7 @@ Collection of sampling schemes for the sphere
 import numpy as np
 import urllib3
 from haiopy.coordinates import Coordinates
-from haiopy.spatial import _lebedev
+from haiopy.spatial import samplings_lebedev
 
 
 def cart_equidistant_cube(n_points):
@@ -629,7 +629,7 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     # calculate sh_order
     n_sh = int(orders[degrees == n_points])
 
-    leb = _lebedev._lebedevSphere(n_points)
+    leb = samplings_lebedev._lebedevSphere(n_points)
 
     # generate Coordinates object
     sampling = Coordinates(leb["x"] * radius,
