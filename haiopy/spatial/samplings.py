@@ -1,7 +1,7 @@
 """
-Collection of sampling schemes for the sphere
+Collection of sampling schemes.
 """
-# import os
+
 import numpy as np
 import urllib3
 from haiopy.coordinates import Coordinates
