@@ -7,7 +7,11 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .haiopy import *
+from .haiopy import Signal
 from .coordinates import Coordinates
+from .orientation import Orientation
 
 import haiopy.plot as plot
+
+
+__all__ = ['Signal', 'Coordinates', 'Orientation', 'plot']

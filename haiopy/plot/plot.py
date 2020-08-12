@@ -104,15 +104,11 @@ def plot_freq(signal, log_prefix=20, log_reference=1, **kwargs):
     Examples
     --------
     """
-    time_data = signal.time
-    sampling_rate = signal.sampling_rate
-
     fig, axes = plt.subplots()
 
     eps = np.finfo(float).tiny
     data_dB = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
     axes.semilogx(signal.frequencies, data_dB.T, **kwargs)
-
 
     axes.set_xlabel("Frequency [Hz]")
     axes.set_ylabel("Magnitude [dB]")

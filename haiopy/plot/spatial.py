@@ -8,6 +8,8 @@ import copy
 
 from haiopy.coordinates import Coordinates
 
+__all__ = [Axes3D]
+
 
 def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
     """Plot the x, y, and z coordinates as a point cloud in three-dimensional
