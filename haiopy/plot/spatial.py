@@ -99,7 +99,6 @@ def quiver(
 
     color = kwargs.get('color', None)
 
-    # plot
     ax.quiver(*xyz.T, *uvw.T, color=color)
 
     return ax
@@ -152,8 +151,13 @@ def _setup_axes(projection=Axes3D.name, ax=None,
     # equal axis limits for distortion free  display
     if set_ax:
         # unfortunately ax.set_aspect('equal') does not work on Axes3D
-        ax_lims = (bounds[0]-.15*np.abs(bounds[0]),
-                   bounds[1]+.15*np.abs(bounds[1]))
+        ax_lims = [bounds[0]-.15*np.abs(bounds[0]),
+                   bounds[1]+.15*np.abs(bounds[1])]
+        if not ax.get_autoscale_on():
+            if ax_lims[0] > ax.get_xlim()[0]:
+                ax_lims[0] = ax.get_xlim()[0]
+            if ax_lims[1] < ax.get_xlim()[1]:
+                ax_lims[1] = ax.get_xlim()[1]
 
         ax.set_xlim(ax_lims)
         ax.set_ylim(ax_lims)
