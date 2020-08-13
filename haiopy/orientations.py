@@ -9,7 +9,6 @@ from scipy.spatial.transform import Rotation
 
 class Orientations(Rotation):
 
-
     def __init__(self, quat=None, normalize=True, copy=True):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
@@ -46,7 +45,6 @@ class Orientations(Rotation):
 
         return cls.from_matrix(rotation_matrix)
 
-
     def show(self, positions=None):
         """
         Show a quiver plot of the orientation vectors.
@@ -64,19 +62,18 @@ class Orientations(Rotation):
 
         """
         if positions is None:
-            positions_1 = np.zeros((self._quat.shape[0], 3))
-            positions = Coordinates(positions_1, positions_1, positions_1)
-        elif not isinstance(positions, Coordinates):
-            raise TypeError("Positions must be of type Coordinates.")
-        elif positions.cshape[0] != self._quat.shape[0]:
+            positions = np.zeros((self._quat.shape[0], 3))
+        try:
+            positions = positions.get_cart()
+        except AttributeError:
+            positions = np.atleast_2d(positions).astype(np.float64)
+        if positions.shape[0] != self._quat.shape[0]:
             raise ValueError("If provided, there must be the same number"
                              "of positions as orientations.")
 
         # Create view, up and right vectors from Rotation object
         views, rights, ups = [np.atleast_2d(self.apply(x)) for x in np.eye(3)]
-        views, rights, ups = [Coordinates(x[:, 0], x[:, 1], x[:, 2])
-                              for x in (views, rights, ups)]
-
+        
         ax = haiopy.plot.quiver(positions, views, color=(1, 0, 0))
         ax = haiopy.plot.quiver(positions, ups, ax=ax, color=(0, 1, 0))
         haiopy.plot.quiver(positions, rights, ax=ax, color=(0, 0, 1))

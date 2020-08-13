@@ -37,16 +37,16 @@ def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
         raise ValueError("The coordinates need to be a Coordinates object")
 
     # copy to avoid changing the coordinate system of the original object
-    xyz = copy.deepcopy(coordinates).get_cart()
+    origins = copy.deepcopy(coordinates).get_cart()
 
     ax = _setup_axes(
-        projection, ax, set_ax, bounds=(np.min(xyz), np.max(xyz)), **kwargs)
+        projection, ax, set_ax, bounds=(np.min(origins), np.max(origins)), **kwargs)
 
     # plot
     ax.scatter(
-        xyz[..., 0],
-        xyz[..., 1],
-        xyz[..., 2], **kwargs)
+        origins[..., 0],
+        origins[..., 1],
+        origins[..., 2], **kwargs)
 
     # labeling
     ax.set_xlabel('X [m]')
@@ -82,24 +82,21 @@ def quiver(
         The axis used for the plot.
 
     """
-    if not (
-            isinstance(origins, Coordinates)
-            and isinstance(endpoints, Coordinates)):
-        raise ValueError(
-            "The origins and endpoints need to be Coordinates objects")
+    try:
+        origins = origins.get_cart()
+        endpoints = endpoints.get_cart()
+    except AttributeError:
+        origins = np.atleast_2d(origins).astype(np.float64)
+        endpoints = np.atleast_2d(endpoints).astype(np.float64)
 
-    # copy to avoid changing the coordinate system of the original object
-    xyz = copy.deepcopy(origins).get_cart()
-    uvw = copy.deepcopy(endpoints).get_cart()
-
-    min_val = min(np.min(xyz), np.min(uvw))
-    max_val = max(np.max(xyz), np.max(uvw))
+    min_val = min(np.min(origins), np.min(endpoints))
+    max_val = max(np.max(origins), np.max(endpoints))
     ax = _setup_axes(
         projection, ax, set_ax, bounds=(min_val, max_val), **kwargs)
 
     color = kwargs.get('color', None)
 
-    ax.quiver(*xyz.T, *uvw.T, color=color)
+    ax.quiver(*origins.T, *endpoints.T, color=color)
 
     return ax
 

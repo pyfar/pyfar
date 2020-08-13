@@ -75,6 +75,9 @@ def test_orientations_show():
     orientations = Orientations.from_view_up(views, ups)
     orientations.show()
     # with matching number of positions
+    positions = [[0, 0, 0], [-2, 1, 3]]
+    orientations.show(positions)
+    # with positions provided as Coordinates
     positions = Coordinates([0, 5], [0, 0], [0, 0])
     orientations.show(positions)
     # with non-matching positions
