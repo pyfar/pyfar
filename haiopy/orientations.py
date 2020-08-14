@@ -13,21 +13,26 @@ class Orientations(Rotation):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
         super().__init__(quat, normalize=normalize, copy=copy)
+        
+    def __setitem__(self, idx, val):
+        if isinstance(val, Rotation) and len(val) == 1:
+            val = val[0].as_quat()
+        quat = np.atleast_2d(val)
+        if quat.shape != (1, 4):
+            raise ValueError(f"Expected assigned value to have shape"
+                             f" or (1, 4), got {quat.shape}")
+        self._quat[idx] = quat
 
     @classmethod
     def from_view_up(cls, views, ups):
-        try:
-            views = views.get_cart()
-            ups = ups.get_cart()
-        except AttributeError:
-            views = np.atleast_2d(views).astype(np.float64)
-            ups = np.atleast_2d(ups).astype(np.float64)
+        views = np.atleast_2d(views).astype(np.float64)
+        ups = np.atleast_2d(ups).astype(np.float64)
         if views.shape != ups.shape:
             raise ValueError(
                 "There must be the same number of View and Up Vectors.")
-        if views.shape[-1] != 3:
+        if views.ndim > 2 or views.shape[-1] != 3:
             raise ValueError(f"Expected `views` and `ups` to have shape (N, 3)"
-                             " or (3,), got {views.shape}")
+                             f" or (3,), got {views.shape}")
 
         if not (np.all(np.linalg.norm(views, axis=1))
                 and np.all(np.linalg.norm(ups, axis=1))):
@@ -63,10 +68,7 @@ class Orientations(Rotation):
         """
         if positions is None:
             positions = np.zeros((self._quat.shape[0], 3))
-        try:
-            positions = positions.get_cart()
-        except AttributeError:
-            positions = np.atleast_2d(positions).astype(np.float64)
+        positions = np.atleast_2d(positions).astype(np.float64)
         if positions.shape[0] != self._quat.shape[0]:
             raise ValueError("If provided, there must be the same number"
                              "of positions as orientations.")

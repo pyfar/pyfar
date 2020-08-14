@@ -84,3 +84,14 @@ def test_orientations_show():
     positions = Coordinates(0, 1, 0)
     with raises(ValueError):
         orientations.show(positions)
+        
+def test_orientations_from_view_up_show_coordinate_system_change():
+    # 1 Carteesian: Visualize to validate orientations
+    views = np.asarray([[1, 0, 0], [2, 0, 0]])
+    ups = np.asarray([[0, 1, 0], [0, -2, 0]])
+    views = Coordinates(views[:, 0], views[:, 1], views[:, 2])
+    ups = Coordinates(ups[:, 0], ups[:, 1], ups[:, 2])
+
+    positions = Coordinates([0, 0], [0, -1], [0, 0])
+    orient2 = Orientations.from_view_up(views, ups)
+    orient2.show(positions)

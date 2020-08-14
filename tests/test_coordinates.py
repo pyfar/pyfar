@@ -201,7 +201,9 @@ def test_show():
     coords = Coordinates([-1,0,1], 0, 0)
     # show without mask
     coords.show()
-    # show with mask
+    # show with mask as list
+    coords.show([1,0,1])
+    # show with mask as ndarray
     coords.show(np.array([1,0,1], dtype=bool))
     # test assertion
     with raises(AssertionError):

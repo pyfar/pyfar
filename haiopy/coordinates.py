@@ -110,6 +110,16 @@ class Coordinates(object):
         self._set_weights(weights)
         self._sh_order = sh_order
         self._comment = comment
+        
+    
+    def __array__(self):
+        # make the new system
+        new_system = self._make_system('cart', convention='right', unit='met')
+        if self._system == new_system:
+            return self.get_cart()
+        # copy to avoid changing the coordinate system of the original object
+        return copy.deepcopy(self).get_cart()
+        
 
 
     def set_cart(self, points_1, points_2, points_3,
@@ -627,6 +637,7 @@ class Coordinates(object):
         if mask is None:
             haiopy.plot.scatter(self)
         else:
+            mask = np.asarray(mask)
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
             colors = np.full(mask.shape, 'k')

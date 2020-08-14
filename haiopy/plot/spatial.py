@@ -4,12 +4,9 @@ Plot for spatially distributed data.
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
-import copy
-
-from haiopy.coordinates import Coordinates
 
 
-def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
+def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
     """Plot the x, y, and z coordinates as a point cloud in three-dimensional
     space.
 
@@ -33,20 +30,16 @@ def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
         The axis used for the plot.
 
     """
-    if not isinstance(coordinates, Coordinates):
-        raise ValueError("The coordinates need to be a Coordinates object")
+    points = np.atleast_2d(points).astype(np.float64)
 
-    # copy to avoid changing the coordinate system of the original object
-    origins = copy.deepcopy(coordinates).get_cart()
-
-    ax = _setup_axes(
-        projection, ax, set_ax, bounds=(np.min(origins), np.max(origins)), **kwargs)
+    ax = _setup_axes(projection, ax, set_ax,
+                     bounds=(np.min(points), np.max(points)), **kwargs)
 
     # plot
     ax.scatter(
-        origins[..., 0],
-        origins[..., 1],
-        origins[..., 2], **kwargs)
+        points[..., 0],
+        points[..., 1],
+        points[..., 2], **kwargs)
 
     # labeling
     ax.set_xlabel('X [m]')
@@ -82,12 +75,8 @@ def quiver(
         The axis used for the plot.
 
     """
-    try:
-        origins = origins.get_cart()
-        endpoints = endpoints.get_cart()
-    except AttributeError:
-        origins = np.atleast_2d(origins).astype(np.float64)
-        endpoints = np.atleast_2d(endpoints).astype(np.float64)
+    origins = np.atleast_2d(origins).astype(np.float64)
+    endpoints = np.atleast_2d(endpoints).astype(np.float64)
 
     min_val = min(np.min(origins), np.min(endpoints))
     max_val = max(np.max(origins), np.max(endpoints))
