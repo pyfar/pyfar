@@ -239,6 +239,8 @@ def test_setter_and_getter():
                         # get point
                         p = eval("c.get_{}('{}')"\
                                  .format(domain_out, convention_out))
+                        print("------------------------")
+                        print(p)
                         npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
 
 def test_multiple_getter():

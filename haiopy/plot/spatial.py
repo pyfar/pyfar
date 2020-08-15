@@ -12,7 +12,7 @@ def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
 
     Parameters
     ----------
-    coordinates : Coordinates
+    points : array_like, shape (N, 3) or (3,)
         Coordinates object with respective positions.
     projection : '3d', 'ortho'
         Projection to be used for the plot. Only three-dimensional projections
@@ -55,10 +55,10 @@ def quiver(
 
     Parameters
     ----------
-    origins : Coordinates
-        The origins of the vectors.
-    endpoints : Coordinates
-        The endpoints of the vectors.
+    origins : array_like, shape (N, 3) or (3,)
+        The coordinates of the origins of the vectors.
+    endpoints : array_like, shape (N, 3) or (3,)
+        The coordinates of the endpoints of the vectors.
     projection : '3d', 'ortho'
         Projection to be used for the plot. Only three-dimensional projections
         are supported.
@@ -68,7 +68,7 @@ def quiver(
         Set the limits of the axis according to the points in coordinates. The
         default is True.
     **kwargs :
-        Additional key value arguments are passed to matplotlib.pyplot.scatter.
+        Additional key value arguments are passed to matplotlib.pyplot.quiver.
 
     Returns
     ax : matplotlib.axes
@@ -106,7 +106,7 @@ def _setup_axes(projection=Axes3D.name, ax=None,
         default is True.
     bounds: tuple (min, max)
         The lower and upper boundaries of the data to be plotted. This is used
-        for the axes' limits.
+        for the axes' limits. Default is Axes3D.name ('3d').
     **kwargs :
         Additional key value arguments are passed to matplotlib.pyplot.scatter.
 
