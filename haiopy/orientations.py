@@ -1,30 +1,80 @@
-import numpy as np
-import copy
-
-from haiopy.coordinates import Coordinates
-import haiopy
-
 from scipy.spatial.transform import Rotation
+import numpy as np
+
+import haiopy
 
 
 class Orientations(Rotation):
+    """Orientations in 3d is a subclass of scipy.spatial.transform.Rotation.
+
+    This container class for Orientations in the three-dimensional space,
+    is a subclass of scipy.spatial.transform.Rotation and equally based on
+    quaternions of shape (N, 4). It inherits all methods of the Rotation class
+    and adds the creation from perpendicular view and up vectors and a
+    convenient plot function.
+
+    Examples
+    --------
+    from haiopy.orientations import Orientations
+
+    >>> views = [[1, 0, 0], [2, 0, 0]]
+    >>> ups = [[0, 1, 0], [0, -2, 0]]
+    >>> orientations = Orientations.from_view_up(views, ups)
+
+    Visualize orientations at certain positions:
+
+    >>> positions = [[0, 0.5, 0], [0, -0.5, 0]]
+    >>> orientations.show(positions)
+
+    Rotate first element of orientations:
+
+    >>> from scipy.spatial.transform import Rotation
+    >>> rot_x45 = Rotation.from_euler('x', 45, degrees=True)
+    >>> orientations[1] = orientations[1] * rot_x45
+    >>> orientations.show(positions)
+
+    To create `Orientations` objects use ``from_...`` methods.
+    ``Orientations(...)`` is not supposed to be instantiated directly.
+
+    Attributes
+    ----------
+        quat : array_like, shape (N, 4) or (4,)
+            Each row is a (possibly non-unit norm) quaternion in scalar-last
+            (x, y, z, w) format. Each quaternion will be normalized to unit
+            norm.
+    """
 
     def __init__(self, quat=None, normalize=True, copy=True):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, normalize=normalize, copy=copy)
-        
-    def __setitem__(self, idx, val):
-        if isinstance(val, Rotation) and len(val) == 1:
-            val = val[0].as_quat()
-        quat = np.atleast_2d(val)
-        if quat.shape != (1, 4):
-            raise ValueError(f"Expected assigned value to have shape"
-                             f" or (1, 4), got {quat.shape}")
-        self._quat[idx] = quat
+        super().__init__(quat, copy=copy)
 
     @classmethod
     def from_view_up(cls, views, ups):
+        """Initialize Orientations from a view an up vector.
+
+        Orientations are internally stored as quaternions for better spherical
+        linear interpolation (SLERP) and spherical harmonics operations.
+        More intuitionally, they can be expressed as view and and up of vectors
+        which cannot be collinear. In this case are restricted to be
+        perpendicular to minimize rounding errors.
+
+        Parameters
+        ----------
+        views : array_like, shape (N, 3) or (3,)
+            A single vector or a stack of vectors, giving the look-direction of
+            an object in three-dimensional space, e.g. from a listener, or the
+            acoustic axis of a loudspeaker, or the direction of a main lobe.
+
+        ups : array_like, shape (N, 3) or (3,)
+            A single vector or a stack of vectors, giving the up-direction of
+            an object, which is usually the up-direction in world-space.
+
+        Returns
+        -------
+        orientations : `Orientations` instance
+            Object containing the orientations represented by quaternions.
+        """
         views = np.atleast_2d(views).astype(np.float64)
         ups = np.atleast_2d(ups).astype(np.float64)
         if views.shape != ups.shape:
@@ -39,31 +89,26 @@ class Orientations(Rotation):
             raise ValueError("View and Up Vectors must have a length.")
         if not np.allclose(0, np.einsum('ij,kj->k', views, ups)):
             raise ValueError("View and Up vectors must be perpendicular.")
-        
+
         rights = np.cross(views, ups)
-        
+
         rotation_matrix = np.empty((views.shape[0], views.shape[1], 3))
-        
+
         rotation_matrix[:, 0, :3] = views
         rotation_matrix[:, 1, :3] = ups
         rotation_matrix[:, 2, :3] = rights
 
-        return cls.from_matrix(rotation_matrix)
+        return super().from_matrix(rotation_matrix)
 
     def show(self, positions=None):
         """
-        Show a quiver plot of the orientation vectors.
+        Visualize Orientations as view, up and right vectors in a quiver plot.
 
         Parameters
         ----------
-
-        mask : boolean numpy array, None
-            Plot points in black if mask==True and red if mask==False. The
-            default is None, in which case all points are plotted in black.
-
-        Returns
-        -------
-        None.
+        positions : array_like, shape (O, 3), O is len(self)
+            These are the positions of each vector triple. If not provided,
+            all triples are positioned in the origin of the coordinate system.
 
         """
         if positions is None:
@@ -74,8 +119,47 @@ class Orientations(Rotation):
                              "of positions as orientations.")
 
         # Create view, up and right vectors from Rotation object
-        views, rights, ups = [np.atleast_2d(self.apply(x)) for x in np.eye(3)]
-        
+        views, rights, ups = self.as_view_up_right()
+
         ax = haiopy.plot.quiver(positions, views, color=(1, 0, 0))
         ax = haiopy.plot.quiver(positions, ups, ax=ax, color=(0, 1, 0))
         haiopy.plot.quiver(positions, rights, ax=ax, color=(0, 0, 1))
+
+    def as_view_up_right(self):
+        """Initialize Orientations from a view an up vector.
+
+        Orientations are internally stored as quaternions for better spherical
+        linear interpolation (SLERP) and spherical harmonics operations.
+        More intuitionally, they can be expressed as view and and up of vectors
+        which cannot be collinear. In this case are restricted to be
+        perpendicular to minimize rounding errors.
+
+        Returns
+        ----------
+        vector_triple: ndarray, shape (N, 3), normalized vectors
+            - views, see `Orientations.from_view_up.__doc__`
+            - ups, see `Orientations.from_view_up.__doc__`
+            - rights, see `Orientations.from_view_up.__doc__`
+                A single vector or a stack of vectors, pointing to the right of
+                the object, constructed as a cross product of ups and rights.
+        """
+        # Apply self as a Rotation (base class) on eye i.e. generate orientions
+        # as rotations relative to standard basis in 3d
+        return np.asarray([np.atleast_2d(self.apply(x)) for x in np.eye(3)])
+
+    def __setitem__(self, idx, val):
+        """
+        Assign orientations(s) at given index(es) from object.
+
+        Parameters
+        ----------
+        idx : see NumPy Indexing
+        val : array_like quaternion(s), shape (N, 4) or (4,)
+        """
+        if isinstance(val, Orientations) and len(val) == 1:
+            val = val[0].as_quat()
+        quat = np.atleast_2d(val)
+        if quat.ndim > 2 or quat.shape[-1] != 4:
+            raise ValueError(f"Expected assigned value to have shape"
+                             f" or (1, 4), got {quat.shape}")
+        self._quat[idx] = quat

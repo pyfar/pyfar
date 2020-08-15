@@ -87,6 +87,8 @@ def test_orientations_show(views, ups, positions, orientations):
     Visualize orientations via `Orientations.show()`
     with and without `positions`.
     """
+    # default orientation
+    Orientations().show()
     # single vectors no position
     view = [1, 0, 0]
     up = [0, 1, 0]
@@ -140,6 +142,10 @@ def test_orientations_from_view_up_show_coordinate_system_change(views, ups):
         "Coordinate system has been changed by Orientations.")
     assert positions._system['domain'] == 'sph', (
         "Coordinate system has been changed by Orientations.show().")
+    
+def test_as_view_up_right(views, ups, orientations):
+    """"""
+    views_, ups_, rights_ = orientations.as_view_up_right()
 
 
 def test_orientations_indexing(orientations):
@@ -166,6 +172,7 @@ def test_orientations_indexing_assignment(orientations):
     orientations[0] = Orientations([0, 0, 0, 1])
     orientations[0] = Orientations.from_view_up([0, 0, 1], [1, 0, 0])
     orientations[0] = [0, 0, 0, 1]
+    orientations[:] = [[0, 0, 0, 1], [0, 0, 1, 0]]
     with raises(ValueError):
         orientations[0] = [0, 0, 3]
     with raises(ValueError):
