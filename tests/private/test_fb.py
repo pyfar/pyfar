@@ -20,9 +20,11 @@ c = samplings.sph_icosahedron()
 c = samplings.sph_equiangular(5)
 c = samplings.sph_gaussian(n_sh=1)
 c = samplings.sph_extremal(n_sh=15, radius=2)
-c = samplings.sph_t_design(15, 'const_angular_spread')
+c = samplings.sph_t_design(n_sh=9, criterion='const_angular_spread')
 c = samplings.sph_great_circle(match=90)
 c = samplings.sph_lebedev(n_sh=35)
+c = samplings.sph_fliege(100)
+
 c.show()
 
 # %% test rotation
