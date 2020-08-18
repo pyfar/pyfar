@@ -142,7 +142,8 @@ def test_orientations_from_view_up_show_coordinate_system_change(views, ups):
         "Coordinate system has been changed by Orientations.")
     assert positions._system['domain'] == 'sph', (
         "Coordinate system has been changed by Orientations.show().")
-    
+
+
 def test_as_view_up_right(views, ups, orientations):
     """"""
     views_, ups_, rights_ = orientations.as_view_up_right()

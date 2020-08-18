@@ -55,8 +55,8 @@ class Orientations(Rotation):
 
         Orientations are internally stored as quaternions for better spherical
         linear interpolation (SLERP) and spherical harmonics operations.
-        More intuitionally, they can be expressed as view and and up of vectors
-        which cannot be collinear. In this case are restricted to be
+        More intuitionally, they can be expressed as view and and up vectors
+        which cannot be collinear. In this case, they are restricted to be
         perpendicular to minimize rounding errors.
 
         Parameters
@@ -126,7 +126,7 @@ class Orientations(Rotation):
         haiopy.plot.quiver(positions, rights, ax=ax, color=(0, 0, 1))
 
     def as_view_up_right(self):
-        """Initialize Orientations from a view an up vector.
+        """Get Orientations as a view, up, and right vector.
 
         Orientations are internally stored as quaternions for better spherical
         linear interpolation (SLERP) and spherical harmonics operations.
