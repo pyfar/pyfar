@@ -180,9 +180,7 @@ def plot_group_delay(signal, ax=None, **kwargs):
     ax = hplt._plot_group_delay(signal, ax, **kwargs)
 
     plt.tight_layout()
-
-    modifier = AxisModifierLinesLogYAxis(ax, signal)
-    modifier.connect()
+    ia = Interaction('line_lin_Y', ax, signal)
 
     return ax
 
@@ -279,7 +277,7 @@ def plot_freq_phase(signal,
     ax = hplt._plot_freq_phase(signal, log_prefix, log_reference, deg, unwrap,
                                **kwargs)
     plt.tight_layout()
-    ia = Interaction('line_lin_Y', ax, signal)
+    ia = Interaction('line_lin_Y', ax[0], signal)
 
     return ax
 
@@ -307,7 +305,7 @@ def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
                                      **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_log_Y', ax, signal)
+    ia = Interaction('line_log_Y', ax[0], signal)
 
     return ax
 

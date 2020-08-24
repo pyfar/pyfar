@@ -357,7 +357,8 @@ def _plot_spectrogram(signal,
 
     if signal.time.shape[0] > 1:
         warnings.warn(
-            "You are trying to plot a spectrogram of more than one signal.")
+            "You are trying to plot a spectrogram of "
+            + str(signal.time.shape) + " signals.")
         signal.time = signal.time[0]
 
     fig, ax = _prepare_plot(ax)
@@ -592,7 +593,7 @@ def _plot_all(signal, ax=None, **kwargs):
     fig, ax = _prepare_plot(ax)
     ax = fig.subplots(4,2, gridspec_kw={'height_ratios':[1,1,1,0.1]})
     fig.axes[0].remove()
-    #fig.set_size_inches(6, 6)
+    fig.set_size_inches(6, 6)
 
     # Time domain plots:
     _plot_time(signal, ax=ax[0,0], **kwargs)
