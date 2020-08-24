@@ -14,7 +14,7 @@ def generate_test_plots(dir='tests/test_plot_data/baseline/'):
         Path to save the reference plots.
     """
     matplotlib.use('Agg')
-
+    matplotlib.testing.set_reproducibility_for_testing()
     function_list = ['plot_time',
                      'plot_time_dB',
                      'plot_freq',
