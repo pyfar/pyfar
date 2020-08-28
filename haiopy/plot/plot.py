@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-plt.style.use(['default', 'ggplot', 'haiopy.mplstyle'])
+# plt.style.use(['default', 'ggplot', 'haiopy.mplstyle'])
 import matplotlib as mpl
 import numpy as np
 from .. import dsp
