@@ -8,6 +8,8 @@ import copy
 
 from haiopy.coordinates import Coordinates
 
+__all__ = [Axes3D]
+
 
 def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
     """Plot the x, y, and z coordinates as a point cloud in three-dimensional
@@ -43,17 +45,17 @@ def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
         plt.figure(figsize=plt.figaspect(1.))
         ax = plt.gca(projection=projection)
 
-    if not 'Axes3D' in ax.__str__():
+    if 'Axes3D' not in ax.__str__():
         raise ValueError("Only three-dimensional axes supported.")
 
     # add defaults to kwargs
-    if not 'marker' in kwargs:
+    if 'marker' not in kwargs:
         kwargs['marker'] = '.'
-    if not 'c' in kwargs:
+    if 'c' not in kwargs:
         kwargs['c'] = 'k'
 
     # copy to avoid changing the coordinate system of the original object
-    c   = copy.deepcopy(coordinates)
+    c = copy.deepcopy(coordinates)
     xyz = c.get_cart()
 
     # plot
@@ -70,8 +72,8 @@ def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
     # equal axis limits for distortion free  display
     if set_ax:
         # unfortunately ax.set_aspect('equal') does not work on Axes3D
-        ax_lims = (np.min(xyz)-.15*np.abs(np.min(xyz)),
-                   np.max(xyz)+.15*np.abs(np.max(xyz)))
+        ax_lims = (np.min(xyz) - .15 * np.abs(np.min(xyz)),
+                   np.max(xyz) + .15 * np.abs(np.max(xyz)))
 
         ax.set_xlim(ax_lims)
         ax.set_ylim(ax_lims)

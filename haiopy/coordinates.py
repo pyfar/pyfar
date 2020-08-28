@@ -7,6 +7,7 @@ import copy
 
 import haiopy
 
+
 class Coordinates(object):
     """
     Container class for coordinates in a three-dimensional space, allowing
@@ -65,8 +66,8 @@ class Coordinates(object):
     #       because the definition differs from the sperical radius.
 
     def __init__(self, points_1=[], points_2=[], points_3=[],
-                  domain='cart', convention='right', unit=None,
-                  weights=None, sh_order=None, comment=None):
+                 domain='cart', convention='right', unit=None,
+                 weights=None, sh_order=None, comment=None):
         """
         Init coordinates container.
 
@@ -111,7 +112,6 @@ class Coordinates(object):
         self._sh_order = sh_order
         self._comment = comment
 
-
     def set_cart(self, points_1, points_2, points_3,
                  convention='right', unit='met'):
         """
@@ -142,7 +142,6 @@ class Coordinates(object):
 
         # save coordinates to self
         self._set_points(points_1, points_2, points_3)
-
 
     def get_cart(self, convention='right', unit='met'):
         """
@@ -188,37 +187,41 @@ class Coordinates(object):
         pts = self._points
         for nn, unit in enumerate(self._system['units']):
             if unit == 'degrees':
-                pts[...,nn] = pts[...,nn] / 180*np.pi
+                pts[..., nn] = pts[..., nn] / 180 * np.pi
 
         # convert to cartesian ...
         # ... from spherical coordinate systems
         if self._system['domain'] == 'sph':
             if self._system['convention'] == 'top_colat':
-                x, y, z = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+                x, y, z = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             elif self._system['convention'] == 'top_elev':
-                x, y, z = sph2cart(pts[...,0], np.pi/2-pts[...,1], pts[...,2])
+                x, y, z = sph2cart(pts[..., 0],
+                                   np.pi / 2 - pts[..., 1],
+                                   pts[..., 2])
 
             elif self._system['convention'] == 'side':
-                x, z, y = sph2cart(pts[...,1], np.pi/2-pts[...,0], pts[...,2])
+                x, z, y = sph2cart(pts[..., 1],
+                                   np.pi / 2 - pts[..., 0],
+                                   pts[..., 2])
 
             elif self._system['convention'] == 'front':
-                y, z, x = sph2cart(pts[...,0], pts[...,1], pts[...,2])
+                y, z, x = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             else:
-                raise Exception("Conversion for {} is not implemented.".\
-                             format(self._system['convention']))
+                raise Exception("Conversion for {} is not implemented.".
+                                format(self._system['convention']))
 
         # ... from cylindrical coordinate systems
         elif self._system['domain'] == 'cyl':
             if self._system['convention'] == 'top':
-                x, y, z = cyl2cart(pts[...,0], pts[...,1], pts[...,2])
+                x, y, z = cyl2cart(pts[..., 0], pts[..., 1], pts[..., 2])
             else:
-                raise Exception("Conversion for {} is not implemented.".\
-                             format(self._system['convention']))
+                raise Exception("Conversion for {} is not implemented.".
+                                format(self._system['convention']))
         else:
-            raise Exception("Conversion for {} is not implemented.".\
-                             format(convention))
+            raise Exception("Conversion for {} is not implemented.".
+                            format(convention))
 
         # set the new system
         self._system = new_system
@@ -227,9 +230,8 @@ class Coordinates(object):
         self._set_points(x, y, z)
         return self._points
 
-
     def set_sph(self, points_1, points_2, points_3,
-                 convention='top_colat', unit='rad'):
+                convention='top_colat', unit='rad'):
         """
         Set coordinate points in spherical coordinate systems.
 
@@ -258,7 +260,6 @@ class Coordinates(object):
 
         # save coordinates to self
         self._set_points(points_1, points_2, points_3)
-
 
     def get_sph(self, convention='top_colat', unit='rad'):
         """
@@ -301,42 +302,45 @@ class Coordinates(object):
             return self._points
 
         # get cartesian system first
-        if not(self._system['domain']=='cart' and self._system['convention']=='right'):
+        if not(self._system['domain'] == 'cart' and
+               self._system['convention'] == 'right'):
             pts = self.get_cart('right', 'met')
             # remove noise below eps
             eps = np.finfo(np.float64).eps
-            pts[np.abs(pts)<eps] = 0
+            pts[np.abs(pts) < eps] = 0
         else:
             pts = self._points
 
         # convert to spherical...
         # ... top polar systems
         if convention[0:3] == 'top':
-            pts_1, pts_2, pts_3 = cart2sph(pts[...,0], pts[...,1], pts[...,2])
+            pts_1, pts_2, pts_3 = cart2sph(
+                pts[..., 0], pts[..., 1], pts[..., 2])
             if convention == 'top_elev':
-                pts_2 = np.pi/2 - pts_2
+                pts_2 = np.pi / 2 - pts_2
 
         # ... side polar system
         # (idea for simple converions from Robert Baumgartner and SOFA_API)
         elif convention == 'side':
-            pts_2, pts_1, pts_3 = cart2sph(pts[...,0], pts[...,2], -pts[...,1])
+            pts_2, pts_1, pts_3 = cart2sph(
+                pts[..., 0], pts[..., 2], -pts[..., 1])
 
             # range angles
-            pts_1 = pts_1 - np.pi/2
-            pts_2 = np.mod(pts_2 + np.pi/2, 2*np.pi) - np.pi/2
+            pts_1 = pts_1 - np.pi / 2
+            pts_2 = np.mod(pts_2 + np.pi / 2, 2 * np.pi) - np.pi / 2
 
         # ... front polar system
         elif convention == 'front':
-            pts_1, pts_2, pts_3 = cart2sph(pts[...,1], pts[...,2], pts[...,0])
+            pts_1, pts_2, pts_3 = cart2sph(
+                pts[..., 1], pts[..., 2], pts[..., 0])
 
         else:
-            raise Exception("Conversion for {} is not implemented.".\
-                             format(convention))
+            raise Exception(f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
         if new_system['unit'] == 'deg':
-            pts_1 = pts_1 / np.pi*180
-            pts_2 = pts_2 / np.pi*180
+            pts_1 = pts_1 / np.pi * 180
+            pts_2 = pts_2 / np.pi * 180
 
         # set the new system
         self._system = new_system
@@ -345,9 +349,8 @@ class Coordinates(object):
         self._set_points(pts_1, pts_2, pts_3)
         return self._points
 
-
     def set_cyl(self, points_1, points_2, points_3,
-                 convention='top', unit='rad'):
+                convention='top', unit='rad'):
         """
         Set coordinate points in cylindrical coordinate systems.
 
@@ -376,7 +379,6 @@ class Coordinates(object):
 
         # save coordinates to self
         self._set_points(points_1, points_2, points_3)
-
 
     def get_cyl(self, convention='top', unit='rad'):
         """
@@ -419,27 +421,27 @@ class Coordinates(object):
             return self._points
 
         # convert to cartesian system first
-        if not(self._system['domain']=='cart' and self._system['convention']=='right'):
+        if not(self._system['domain'] == 'cart' and
+               self._system['convention'] == 'right'):
             pts = self.get_cart('right', 'met')
             # remove noise below eps
             eps = np.finfo(np.float64).eps
-            pts[np.abs(pts)<eps] = 0
+            pts[np.abs(pts) < eps] = 0
         else:
             pts = self._points
 
         # convert to cylindrical ...
         # ... top systems
         if convention == 'top':
-            pts_1, pts_2, pts_3 = cart2cyl(pts[...,0], pts[...,1], pts[...,2])
+            pts_1, pts_2, pts_3 = cart2cyl(
+                pts[..., 0], pts[..., 1], pts[..., 2])
 
         else:
-            raise Exception("Conversion for {} is not implemented.".\
-                             format(convention))
-
+            raise Exception(f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
         if self._system['unit'] == 'deg':
-            pts_1 = pts_1 / np.pi*180
+            pts_1 = pts_1 / np.pi * 180
 
         # set the new system
         self._system = new_system
@@ -491,7 +493,6 @@ class Coordinates(object):
         else:
             return (0,)
 
-
     @property
     def cdim(self):
         """
@@ -501,7 +502,7 @@ class Coordinates(object):
         points excluding the last dimension.
         """
         if self._points.size:
-            return self._points.ndim-1
+            return self._points.ndim - 1
         else:
             return 0
 
@@ -513,7 +514,7 @@ class Coordinates(object):
         The channel size gives the number of points stored in the coordinates
         object excluding the last dimension.
         """
-        return self._points.size//3
+        return self._points.size // 3
 
     def systems(self, show='all', brief=False):
         """
@@ -552,9 +553,9 @@ class Coordinates(object):
         """
 
         if show == 'current':
-            domain     = self._system['domain']
+            domain = self._system['domain']
             convention = self._system['convention']
-            unit       = self._system['unit']
+            unit = self._system['unit']
         elif show == 'all':
             domain = convention = unit = 'all'
         else:
@@ -570,44 +571,45 @@ class Coordinates(object):
             print('domain, convention, unit')
             print('- - - - - - - - - - - - -')
             for dd in domains:
-                conventions = list(systems[dd]) if convention == 'all' else [convention]
+                conventions = list(systems[dd]) if convention == 'all' \
+                    else [convention]
                 for cc in conventions:
                     # current coordinates
                     coords = systems[dd][cc]['coordinates']
                     # current units
                     if unit != 'all':
-                        units = [units for units in systems[dd][cc]['units'] \
-                            if unit == units[0][0:3]]
+                        units = [units for units in systems[dd][cc]['units']
+                                 if unit == units[0][0:3]]
                     else:
                         units = systems[dd][cc]['units']
                     # key for unit
                     unit_key = [u[0][0:3] for u in units]
-                    print("{}, {}, [{}]"\
-                          .format(dd, cc, ', '.join(unit_key)))
+                    print(f"{dd}, {cc}, [{', '.join(unit_key)}]")
         else:
             for dd in domains:
-                conventions = list(systems[dd]) if convention == 'all' else [convention]
+                conventions = \
+                    list(systems[dd]) if convention == 'all' else [convention]
                 for cc in conventions:
                     # current coordinates
                     coords = systems[dd][cc]['coordinates']
                     # current units
                     if unit != 'all':
-                        units = [units for units in systems[dd][cc]['units'] \
-                            if unit == units[0][0:3]]
+                        units = [units for units in systems[dd][cc]['units']
+                                 if unit == units[0][0:3]]
                     else:
                         units = systems[dd][cc]['units']
                     # key for unit
                     unit_key = [u[0][0:3] for u in units]
-                    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-                    print("domain: {}, convention: {}, unit: [{}]\n"\
-                          .format(dd, cc, ', '.join(unit_key)))
+                    print("- - - - - - - - - - - - - - - - - "
+                          "- - - - - - - - - - - - - - - - -")
+                    print(f"domain: {dd}, convention: {cc}, unit: "
+                          f"[{', '.join(unit_key)}]\n")
                     print(systems[dd][cc]['description_short'] + '\n')
                     print("Coordinates:")
                     for nn, coord in enumerate(coords):
                         cur_units = [u[nn] for u in units]
-                        print("{}: {} [{}]".format(nn+1, coord, ', '.join(cur_units)))
+                        print(f"{nn + 1}: {coord} [{', '.join(cur_units)}]")
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
-
 
     def show(self, mask=None):
         """
@@ -632,7 +634,6 @@ class Coordinates(object):
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
             haiopy.plot.scatter(self, c=colors.flatten())
-
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',
@@ -682,7 +683,7 @@ class Coordinates(object):
         """
 
         # check the input
-        assert isinstance(k, int) and k>0 and k<= self.csize,\
+        assert isinstance(k, int) and k > 0 and k <= self.csize,\
             "k must be an integeger > 0 and <= self.csize."
 
         # get the points
@@ -692,10 +693,9 @@ class Coordinates(object):
 
         return distance, index, mask
 
-
     def get_nearest_cart(self, points_1, points_2, points_3, distance=1,
-                      domain='cart', convention='right', unit='met',
-                      show=False, atol=1e-15):
+                         domain='cart', convention='right', unit='met',
+                         show=False, atol=1e-15):
         """
         Find coordinates within certain distance to one or more points.
 
@@ -739,7 +739,7 @@ class Coordinates(object):
         """
 
         # check the input
-        assert distance >= 0,"distance must be >= 0"
+        assert distance >= 0, "distance must be >= 0"
 
         # get the points
         distance, index, mask = self._get_nearest(
@@ -748,10 +748,9 @@ class Coordinates(object):
 
         return index, mask
 
-
     def get_nearest_sph(self, points_1, points_2, points_3, distance=1,
-                      domain='sph', convention='top_colat', unit='rad',
-                      show=False, atol=1e-15):
+                        domain='sph', convention='top_colat', unit='rad',
+                        show=False, atol=1e-15):
         """
         Find coordinates within certain distance to one or more points.
 
@@ -796,15 +795,15 @@ class Coordinates(object):
         """
 
         # check the input
-        assert distance >= 0 and distance <= 180,"distance must be >= 0 and "\
-                                                 "<= 180."
+        assert distance >= 0 and distance <= 180, "distance must be >= 0 and \
+                                                  <= 180."
 
         # get radius and check for equality
-        radius = copy.deepcopy(self).get_sph()[...,2]
+        radius = copy.deepcopy(self).get_sph()[..., 2]
         delta_radius = np.max(radius) - np.min(radius)
         if delta_radius > 1e-15:
-            raise ValueError("get_nearest_sph only works if all points have "\
-                             "the same radius. Differences are larger than "\
+            raise ValueError("get_nearest_sph only works if all points have "
+                             "the same radius. Differences are larger than "
                              "1e-15")
 
         # get the points
@@ -862,37 +861,35 @@ class Coordinates(object):
         c_info = self._systems()[domain][convention][coordinate]
 
         # convert input to radians
-        value = value/180*np.pi if unit == 'deg' else value
-        tol   = tol  /180*np.pi if unit == 'deg' else tol
+        value = value / 180 * np.pi if unit == 'deg' else value
+        tol = tol / 180 * np.pi if unit == 'deg' else tol
 
         # check if  value is within the range of coordinate
         if c_info[0] in ["bound", "cyclic"]:
             assert c_info[1][0] <= value <= c_info[1][1],\
-                "'value' is {} but must be in the range {}."\
-                    .format(value, c_info[1])
+                f"'value' is {value} but must be in the range {c_info[1]}."
 
         # get the search range
-        rng = [value-tol, value+tol]
+        rng = [value - tol, value + tol]
 
         # wrap range if coordinate is cyclic
         if c_info[0] == 'cyclic':
             low = c_info[1][0]
             upp = c_info[1][1]
-            if rng[0] < c_info[1][0]-atol:
-                rng[0] = (rng[0]-low) % (upp-low) + low
-            if rng[1] > c_info[1][1]+atol:
-                rng[1] = (rng[1]-low) % (upp-low) + low
+            if rng[0] < c_info[1][0] - atol:
+                rng[0] = (rng[0] - low) % (upp - low) + low
+            if rng[1] > c_info[1][1] + atol:
+                rng[1] = (rng[1] - low) % (upp - low) + low
 
         # get the coordinates
-        coords = eval("copy.deepcopy(self).get_{}('{}')"\
-                      .format(domain, convention))
-        coords = coords[...,index]
+        coords = eval(f"copy.deepcopy(self).get_{domain}('{convention}')")
+        coords = coords[..., index]
 
         # get the mask
-        if rng[0]<=rng[1]:
-            mask = (coords >= rng[0]-atol) & (coords <= rng[1]+atol)
+        if rng[0] <= rng[1]:
+            mask = (coords >= rng[0] - atol) & (coords <= rng[1] + atol)
         else:
-            mask = (coords >= rng[0]-atol) | (coords <= rng[1]+atol)
+            mask = (coords >= rng[0] - atol) | (coords <= rng[1] + atol)
 
         # plot all and returned points
         if show:
@@ -900,8 +897,7 @@ class Coordinates(object):
 
         return mask
 
-
-    def rotate(self, rotation: str, value = None, degrees=True, inverse=False):
+    def rotate(self, rotation: str, value=None, degrees=True, inverse=False):
         """
         Rotate points stored in the object.
 
@@ -952,16 +948,16 @@ class Coordinates(object):
             rot = sp_rot.from_matrix(value)
         elif rotation == 'rotvec':
             if degrees:
-                value = np.asarray(value) / 180*np.pi
+                value = np.asarray(value) / 180 * np.pi
             rot = sp_rot.from_rotvec(value)
         elif not bool(re.search('[^x-z]', rotation.lower())):
             # only check if string contains xyz, everything else is checked in
             # from_euler()
             rot = sp_rot.from_euler(rotation, value, degrees)
         else:
-            raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "\
-                             "or from ['x', 'y', 'z'] or ['X', 'Y', 'Z'] but "\
-                             "is '{}'".format(rotation))
+            raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "
+                             "or from ['x', 'y', 'z'] or ['X', 'Y', 'Z'] but "
+                             f"is '{rotation}'")
 
         # current shape
         shape = self.cshape
@@ -970,11 +966,9 @@ class Coordinates(object):
         points = rot.apply(self.get_cart().reshape((self.csize, 3)), inverse)
 
         # set points
-        self.set_cart(points[:,0].reshape(shape),
-                      points[:,1].reshape(shape),
-                      points[:,2].reshape(shape))
-
-
+        self.set_cart(points[:, 0].reshape(shape),
+                      points[:, 1].reshape(shape),
+                      points[:, 2].reshape(shape))
 
     @staticmethod
     def _systems():
@@ -988,7 +982,9 @@ class Coordinates(object):
             Key 0  - domain, e.g., 'cart'
             Key 1  - convention, e.g., 'right'
             Key 2a - 'short_description': string
-            Key 2b - 'coordinates': ['coordinate_1','coordinate_2','coordinate_3']
+            Key 2b - 'coordinates': ['coordinate_1',
+                                     'coordinate_2',
+                                     'coordinate_3']
             Key 2c - 'units': [['unit_1.1','unit_2.1','unit_3.1'],
                                             ...
                                ['unit_1.N','unit_2.N','unit_3.N']]
@@ -1006,9 +1002,8 @@ class Coordinates(object):
 
         # define coordinate systems
         _systems = {
-            "cart":
-                {
-                "right":{
+            "cart": {
+                "right": {
                     "description_short":
                         "Right handed cartesian coordinate system.",
                     "coordinates":
@@ -1016,49 +1011,50 @@ class Coordinates(object):
                     "units":
                         [["meters", "meters", "meters"]],
                     "description":
-                        "Right handed cartesian coordinate system with x,y, and."\
-                        "z in meters.",
-                    "positive_x": [ 1,  0,  0],
-                    "positive_y": [ 0,  1,  0],
-                    "negative_x": [-1,  0,  0],
-                    "negative_y": [ 0, -1,  0],
-                    "positive_z": [ 0,  0,  1],
-                    "negative_z": [ 0,  0, -1],
+                        "Right handed cartesian coordinate system with x,y, "
+                        "and z in meters.",
+                    "positive_x": [1, 0, 0],
+                    "positive_y": [0, 1, 0],
+                    "negative_x": [-1, 0, 0],
+                    "negative_y": [0, -1, 0],
+                    "positive_z": [0, 0, 1],
+                    "negative_z": [0, 0, -1],
                     "x": ["unbound", [-np.inf, np.inf]],
                     "y": ["unbound", [-np.inf, np.inf]],
                     "z": ["unbound", [-np.inf, np.inf]]}
-                },
-            "sph":
-                {
-                "top_colat":{
+            },
+            "sph": {
+                "top_colat": {
                     "description_short":
-                        "Spherical coordinate system with North and South Pole.",
+                        "Spherical coordinate system with North and South "
+                        "Pole.",
                     "coordinates":
                         ["azimuth", "colatitude", "radius"],
                     "units":
                         [["radians", "radians", "meters"],
                          ["degrees", "degrees", "meters"]],
                     "description":
-                        "The azimuth denotes the counter clockwise angle in the "\
-                        "x/y-plane with 0 pointing in positive x-direction and "\
-                        " pi/2 in positive y-direction. The colatitude denotes "\
-                        "the angle downwards from the z-axis with 0 pointing in "\
-                        "positve z-direction and pi in negative z-direction. The "\
-                        "azimuth and colatitude can be in radians or degrees, "\
-                        "the radius is always in meters.",
-                    "positive_x": [0,         np.pi/2, 1],
-                    "positive_y": [np.pi/2,   np.pi/2, 1],
-                    "negative_x": [np.pi,     np.pi/2, 1],
-                    "negative_y": [3*np.pi/2, np.pi/2, 1],
-                    "positive_z": [0,         0      , 1],
-                    "negative_z": [0,         np.pi,   1],
-                    "azimuth"    : ["cyclic", [0, 2*np.pi]],
-                    "colatitude" : ["bound",  [0, np.pi]],
-                    "radius"     : ["bound",  [0, np.inf]]},
-                "top_elev":{
+                        "The azimuth denotes the counter clockwise angle in "
+                        "the x/y-plane with 0 pointing in positive x-"
+                        "direction and pi/2 in positive y-direction. The "
+                        "colatitude denotes the angle downwards from the z-"
+                        "axis with 0 pointing in positve z-direction and pi "
+                        "in negative z-direction. The azimuth and colatitude "
+                        "can be in radians or degrees, the radius is always "
+                        "in meters.",
+                    "positive_x": [0, np.pi / 2, 1],
+                    "positive_y": [np.pi / 2, np.pi / 2, 1],
+                    "negative_x": [np.pi, np.pi / 2, 1],
+                    "negative_y": [3 * np.pi / 2, np.pi / 2, 1],
+                    "positive_z": [0, 0, 1],
+                    "negative_z": [0, np.pi, 1],
+                    "azimuth": ["cyclic", [0, 2 * np.pi]],
+                    "colatitude": ["bound", [0, np.pi]],
+                    "radius": ["bound", [0, np.inf]]},
+                "top_elev": {
                     "description_short":
-                        "Spherical coordinate system with North and South Pole. "\
-                        "Conform with AES69-2015: AES standard for file "\
+                        "Spherical coordinate system with North and South "
+                        "Pole. Conform with AES69-2015: AES standard for file "
                         "exchange - Spatial acoustic data file format (SOFA).",
                     "coordinates":
                         ["azimuth", "elevation", "radius"],
@@ -1066,53 +1062,54 @@ class Coordinates(object):
                         [["radians", "radians", "meters"],
                          ["degrees", "degrees", "meters"]],
                     "description":
-                        "The azimuth denotes the counter clockwise angle in the "\
-                        "x/y-plane with 0 pointing in positive x-direction and "\
-                        " pi/2 in positive y-direction. The elevation denotes "\
-                        "the angle upwards and downwards from the x/y-plane with "\
-                        " pi/2 pointing at positive z-direction and -pi/2 "\
-                        "pointing in negative z-direction. The azimuth and "\
-                        "elevation can be in radians or degrees, the radius is "\
-                        " always in meters.",
-                    "positive_x": [0,         0,       1],
-                    "positive_y": [np.pi/2,   0,       1],
-                    "negative_x": [np.pi,     0,       1],
-                    "negative_y": [3*np.pi/2, 0,       1],
-                    "positive_z": [0,         np.pi/2, 1],
-                    "negative_z": [0,        -np.pi/2, 1],
-                    "azimuth"    : ["cyclic", [0, 2*np.pi]],
-                    "elevation"  : ["bound",  [-np.pi/2, np.pi/2]],
-                    "radius"     : ["bound",  [0, np.inf]]},
-                "side":{
+                        "The azimuth denotes the counter clockwise angle in "
+                        "the x/y-plane with 0 pointing in positive x-"
+                        "direction and pi/2 in positive y-direction. The "
+                        "elevation denotes the angle upwards and downwards "
+                        "from the x/y-plane with pi/2 pointing at positive "
+                        "z-direction and -pi/2 pointing in negative z-"
+                        "direction. The azimuth and elevation can be in "
+                        "radians or degrees, the radius is always in meters.",
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [np.pi / 2, 0, 1],
+                    "negative_x": [np.pi, 0, 1],
+                    "negative_y": [3 * np.pi / 2, 0, 1],
+                    "positive_z": [0, np.pi / 2, 1],
+                    "negative_z": [0, -np.pi / 2, 1],
+                    "azimuth": ["cyclic", [0, 2 * np.pi]],
+                    "elevation": ["bound", [-np.pi / 2, np.pi / 2]],
+                    "radius": ["bound", [0, np.inf]]},
+                "side": {
                     "description_short":
-                        "Spherical coordinate system with poles on the y-axis.",
+                        "Spherical coordinate system with poles on the "
+                        "y-axis.",
                     "coordinates":
                         ["lateral", "polar", "radius"],
                     "units":
                         [["radians", "radians", "meters"],
                          ["degrees", "degrees", "meters"]],
                     "description":
-                        "The lateral angle denotes the angle in the x/y-plane "\
-                        "with pi/2 pointing in positive y-direction and -pi/2 in "\
-                        "negative y-direction. The polar angle denotes the angle "\
-                        "in the x/z-plane with -pi/2 pointing in negative "\
-                        "z-direction, 0 in positive x-direction, pi/2 in "\
-                        "positive z-direction, pi in negative x-direction. The "\
-                        "polar and lateral angle can be in radians and degree, "\
-                        "the radius is always in meters.",
-                    "positive_x": [ 0,       0,       1],
-                    "positive_y": [ np.pi/2, 0,       1],
-                    "negative_x": [ 0,       np.pi,   1],
-                    "negative_y": [-np.pi/2, 0,       1],
-                    "positive_z": [ 0,       np.pi/2, 1],
-                    "negative_z": [ 0,      -np.pi/2, 1],
-                    "lateral" :["bound",  [-np.pi/2, np.pi/2]],
-                    "polar"   :["cyclic", [-np.pi/2, np.pi*3/2]],
-                    "radius"  :["bound",  [0, np.inf]]},
-                "front":{
+                        "The lateral angle denotes the angle in the x/y-plane "
+                        "with pi/2 pointing in positive y-direction and -pi/2 "
+                        "in negative y-direction. The polar angle denotes the "
+                        "angle in the x/z-plane with -pi/2 pointing in "
+                        "negative z-direction, 0 in positive x-direction, "
+                        "pi/2 in positive z-direction, pi in negative x-"
+                        "direction. The polar and lateral angle can be in "
+                        "radians and degree, the radius is always in meters.",
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [np.pi / 2, 0, 1],
+                    "negative_x": [0, np.pi, 1],
+                    "negative_y": [-np.pi / 2, 0, 1],
+                    "positive_z": [0, np.pi / 2, 1],
+                    "negative_z": [0, -np.pi / 2, 1],
+                    "lateral": ["bound", [-np.pi / 2, np.pi / 2]],
+                    "polar": ["cyclic", [-np.pi / 2, np.pi * 3 / 2]],
+                    "radius": ["bound", [0, np.inf]]},
+                "front": {
                     "description_short":
-                        "Spherical coordinate system with poles on the x-axis. "\
-                        "Conform with AES56-2008 (r2019): AES standard on "\
+                        "Spherical coordinate system with poles on the x-axis."
+                        " Conform with AES56-2008 (r2019): AES standard on "
                         "acoustics - Sound source modeling.",
                     "coordinates":
                         ["phi", "theta", "radius"],
@@ -1120,27 +1117,26 @@ class Coordinates(object):
                         [["radians", "radians", "meters"],
                          ["degrees", "degrees", "meters"]],
                     "description":
-                        "Phi denotes the angle in the y/z-plane with 0 "\
+                        "Phi denotes the angle in the y/z-plane with 0 "
                         "pointing in positive y-direction, pi/2 in positive "
-                        "z-direction, pi in negative y-direction, and 3*pi/2 "\
-                        "in negative z-direction. Theta denotes the angle "\
-                        "measured from the x-axis with 0 pointing in positve "\
-                        "x-direction and pi in negative x-direction. Phi and "\
-                        "theta can be in radians and degrees, the radius is "\
+                        "z-direction, pi in negative y-direction, and 3*pi/2 "
+                        "in negative z-direction. Theta denotes the angle "
+                        "measured from the x-axis with 0 pointing in positve "
+                        "x-direction and pi in negative x-direction. Phi and "
+                        "theta can be in radians and degrees, the radius is "
                         "always in meters.",
-                    "positive_x": [0,         0,       1],
-                    "positive_y": [0,         np.pi/2, 1],
-                    "negative_x": [0,         np.pi,   1],
-                    "negative_y": [np.pi,     np.pi/2, 1],
-                    "positive_z": [np.pi/2,   np.pi/2, 1],
-                    "negative_z": [3*np.pi/2, np.pi/2, 1],
-                    "phi"    : ["cyclic", [0, 2*np.pi]],
-                    "theta"  : ["bound",  [0, np.pi]],
-                    "radius" : ["bound",  [0, np.inf]]}
-                },
-            "cyl":
-                {
-                "top":{
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [0, np.pi / 2, 1],
+                    "negative_x": [0, np.pi, 1],
+                    "negative_y": [np.pi, np.pi / 2, 1],
+                    "positive_z": [np.pi / 2, np.pi / 2, 1],
+                    "negative_z": [3 * np.pi / 2, np.pi / 2, 1],
+                    "phi": ["cyclic", [0, 2 * np.pi]],
+                    "theta": ["bound", [0, np.pi]],
+                    "radius": ["bound", [0, np.inf]]}
+            },
+            "cyl": {
+                "top": {
                     "description_short":
                         "Cylindrical coordinate system along the z-axis.",
                     "coordinates":
@@ -1149,25 +1145,24 @@ class Coordinates(object):
                         [["radians", "meters", "meters"],
                          ["degrees", "meters", "meters"]],
                     "description":
-                        "The azimuth denotes the counter clockwise angle in the "\
-                        "x/y-plane with 0 pointing in positive x-direction and "\
-                        " pi/2 in positive y-direction. The heigt is given by "\
-                        "z, and radius_z denotes the radius measured orthogonal "\
-                        "to the z-axis.",
-                    "positive_x": [0,         0, 1],
-                    "positive_y": [np.pi/2,   0, 1],
-                    "negative_x": [np.pi,     0, 1],
-                    "negative_y": [3*np.pi/2, 0, 1],
-                    "positive_z": [0,         1, 0],
-                    "negative_z": [0,        -1, 0],
-                    "azimuth"  : ["cyclic",  [0, 2*np.pi]],
-                    "z"        : ["unbound", [-np.inf, np.inf]],
-                    "radius_z" : ["bound",   [0, np.inf]]}
-                }
+                        "The azimuth denotes the counter clockwise angle in "
+                        "the x/y-plane with 0 pointing in positive x-"
+                        "direction and pi/2 in positive y-direction. The "
+                        "heigt is given by z, and radius_z denotes the radius "
+                        "measured orthogonal to the z-axis.",
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [np.pi / 2, 0, 1],
+                    "negative_x": [np.pi, 0, 1],
+                    "negative_y": [3 * np.pi / 2, 0, 1],
+                    "positive_z": [0, 1, 0],
+                    "negative_z": [0, -1, 0],
+                    "azimuth": ["cyclic", [0, 2 * np.pi]],
+                    "z": ["unbound", [-np.inf, np.inf]],
+                    "radius_z": ["bound", [0, np.inf]]}
             }
+        }
 
         return _systems
-
 
     def _exist_system(self, domain=None, convention=None, unit=None):
         """
@@ -1186,32 +1181,33 @@ class Coordinates(object):
             degrees, or meters)
         """
 
-        if domain == None and convention != None:
+        if domain is None and convention is not None:
             raise ValueError('convention must be None if domain is None')
 
-        if convention == None and unit != None:
+        if convention is None and unit is not None:
             raise ValueError('units must be None if convention is None')
 
         # get available coordinate systems
         systems = self._systems()
 
         # check if domain exists
-        assert domain in systems or domain == None, \
-            "{} does not exist. Domain must be one of the follwing: {}.".\
-                format(domain, ', '.join(list(systems)))
+        assert domain in systems or domain is None, \
+            f"{domain} does not exist. Domain must be one of the follwing: "\
+            f"{', '.join(list(systems))}."
 
-        #check if convention exisits in domain
-        if convention != None:
-            assert convention in systems[domain] or convention == None,\
-                "{} does not exist in {}. Convention must be one of the following: {}.".\
-                    format(convention, domain, ', '.join(list(systems[domain])))
+        # check if convention exisits in domain
+        if convention is not None:
+            assert convention in systems[domain] or convention is None,\
+                f"{convention} does not exist in {domain}. Convention must "\
+                "be one of the following: {', '.join(list(systems[domain]))}."
 
         # check if units exist
-        if unit != None:
-            cur_units = [u[0][0:3] for u in systems[domain][convention]['units']]
-            assert unit in cur_units, "{} does not exist in {} ({}). Units must "\
-                "be one of the following: {}.".format(unit, domain, convention,
-                                                      ', '.join(cur_units))
+        if unit is not None:
+            cur_units = [u[0][0:3] for u in
+                         systems[domain][convention]['units']]
+            assert unit in cur_units, \
+                f"{unit} does not exist in {domain} convention "\
+                f"Unit must be one of the following: {', '.join(cur_units)}."
 
     def _exist_coordinate(self, coordinate, unit):
         """
@@ -1229,18 +1225,18 @@ class Coordinates(object):
                 if coordinate in systems[domain][convention]['coordinates']:
                     # get position of coordinate
                     index = systems[domain][convention]['coordinates'].\
-                            index(coordinate)
+                        index(coordinate)
                     # get possible units
                     units = [u[index][0:3] for u in
-                              systems[domain][convention]['units']]
+                             systems[domain][convention]['units']]
                     # return or raise ValueError
                     if unit in units:
                         return domain, convention, index
                     else:
-                        raise ValueError("'{}' in '{}' does not exist. "\
-                                "See self.systems() for a list of possible "\
-                                "coordinates and units".\
-                                format(coordinate, unit))
+                        raise ValueError(
+                            f"'{coordinate}' in '{unit}' does not exist. See "
+                            "self.systems() for a list of possible "
+                            "coordinates and units")
 
     def _make_system(self, domain=None, convention=None, unit=None):
         """
@@ -1255,21 +1251,21 @@ class Coordinates(object):
         system = system[domain][convention]
 
         # get the units
-        if unit != None:
-            units = [units for units in system['units']if unit == units[0][0:3]]
+        if unit is not None:
+            units = [units for units in system['units']
+                     if unit == units[0][0:3]]
             units = units[0]
         else:
             units = system['units'][0]
-            unit  = units[0][0:3]
+            unit = units[0][0:3]
 
         # add class internal keys
-        system['domain']     = domain
+        system['domain'] = domain
         system['convention'] = convention
-        system['unit']       = unit
-        system['units']      = units
+        system['unit'] = unit
+        system['units'] = units
 
         return system
-
 
     def _set_points(self, points_1, points_2, points_3):
         """
@@ -1286,60 +1282,59 @@ class Coordinates(object):
 
         # transpose
         for nn, p in enumerate(pts):
-            if len(p.shape)==2 and p.shape[0]==1:
+            if len(p.shape) == 2 and p.shape[0] == 1:
                 pts[nn] = np.transpose(p)
 
         # shapes of non scalar entries
-        shapes = [p.shape for p in pts if p.shape != (1,1)]
+        shapes = [p.shape for p in pts if p.shape != (1, 1)]
 
         # check for equal shape
-        for nn in range(1,len(shapes)):
-            assert shapes[0] == shapes[nn],\
-                "points_1, points_2, and points_3 must be scalar or of the "\
-                "same shape."
+        for nn in range(1, len(shapes)):
+            assert shapes[0] == shapes[nn], \
+                "points_1, points_2, and points_3 must be scalar or of the \
+                same shape."
 
         # check the range of points
         for nn, p in enumerate(pts):
             # get type and range
-            c      = self._system['coordinates'][nn]
+            c = self._system['coordinates'][nn]
             c_type = self._system[c][0]
             c_range = np.array(self._system[c][1])
             # range to degrees
             if self._system['units'][nn] == 'degrees':
-                c_range = np.round(c_range/np.pi*180)
+                c_range = np.round(c_range / np.pi * 180)
 
             # check bounds (cyclic values could be wraped but this is safer)
             if c_type in ['bound', 'cyclic']:
-                assert ((p>=c_range[0]) & (p<=c_range[1])).all(),"Values of "\
-                    "points_{} must be in the range {}".format(nn, c_range)
+                assert ((p >= c_range[0]) & (p <= c_range[1])).all(),\
+                       f"Values of points_{nn} must be in the range {c_range}"
 
         # repeat scalar entries if non-scalars exists
         if len(shapes):
             for nn, p in enumerate(pts):
-                if p.size==1:
+                if p.size == 1:
                     pts[nn] = np.tile(p, shapes[0])
 
         # axis for concatenation
         if shapes:
-            axis = len(shapes[0]) if shapes[0][-1] > 1 else len(shapes[0])-1
+            axis = len(shapes[0]) if shapes[0][-1] > 1 else len(shapes[0]) - 1
         else:
             axis = 1
 
         # create axis for concatenation if it does not exist
         for nn, p in enumerate(pts):
             if p.ndim == axis:
-                pts[nn] = p[...,np.newaxis]
+                pts[nn] = p[..., np.newaxis]
 
         # concatenate
         pts = np.concatenate((pts[0], pts[1], pts[2]), axis)
 
-        #remove noise below eps
+        # remove noise below eps
         eps = np.finfo(np.float64).eps
-        pts[np.abs(pts)<eps] = 0
+        pts[np.abs(pts) < eps] = 0
 
         # save to class variable
         self._points = pts
-
 
     def _set_weights(self, weights):
         """
@@ -1366,15 +1361,15 @@ class Coordinates(object):
         self._weights = weights
 
     def _get_nearest(self, points_1, points_2, points_3,
-            domain, convention, unit, show,
-            value, measure, atol=1e-15, radius=None):
+                     domain, convention, unit, show,
+                     value, measure, atol=1e-15, radius=None):
 
         # get KDTree
         kdtree = self._make_kdtree()
 
         # get target point in cartesian coordinates
         coords = Coordinates(points_1, points_2, points_3,
-                            domain, convention, unit)
+                             domain, convention, unit)
         points = coords.get_cart()
 
         # querry nearest neighbors
@@ -1386,16 +1381,18 @@ class Coordinates(object):
             distance, index = kdtree.query(points, k=value)
         elif measure == 'cart':
             # points within eucledian distance
-            index = kdtree.query_ball_point(points, value+atol)
+            index = kdtree.query_ball_point(points, value + atol)
             distance = None
         elif measure == 'sph':
             # convert great circle to eucedian distance
-            x, y, z = sph2cart([0, value/180*np.pi],
-                               [np.pi/2, np.pi/2],
+            x, y, z = sph2cart([0, value / 180 * np.pi],
+                               [np.pi / 2, np.pi / 2],
                                [radius, radius])
-            value = np.sqrt( (x[0]-x[1])**2 + (y[0]-y[1])**2 + (z[0]-z[1])**2 )
+            value = np.sqrt((x[0] - x[1])**2
+                            + (y[0] - y[1])**2
+                            + (z[0] - z[1])**2)
             # points within great circle distance
-            index = kdtree.query_ball_point(points, value+atol)
+            index = kdtree.query_ball_point(points, value + atol)
             distance = None
 
         # mask for scatter plot
@@ -1408,7 +1405,6 @@ class Coordinates(object):
             self.show(mask)
 
         return distance, index, mask
-
 
     def _make_kdtree(self):
         """Make a numpy KDTree for fast search of nearest points."""
@@ -1428,21 +1424,20 @@ class Coordinates(object):
         # slice points
         new._points = new._points[index]
         # slice weights
-        if not new._weights is None:
+        if new._weights is not None:
             new._weights = new._weights[index]
 
         return new
-
 
     def __repr__(self):
         """Get info about Coordinates object."""
 
         # object type
         if self.cshape != (0,):
-            obj = '{}D Coordinates object with {} points of cshape {}'\
-                .format(self.cdim, self.csize, self.cshape)
+            obj = f"{self.cdim}D Coordinates object with {self.csize} points "\
+                  f"of cshape {self.cshape}"
         else:
-            obj = 'Empty Coordinates object'
+            obj = "Empty Coordinates object"
 
         # coordinate convention
         conv = "domain: {}, convention: {}, unit: {}".format(
@@ -1450,26 +1445,25 @@ class Coordinates(object):
             self._system['unit'])
 
         # coordinates and units
-        coords = ["{} in {}".format(c, u) for c, u in \
+        coords = ["{} in {}".format(c, u) for c, u in
                   zip(self._system['coordinates'], self._system['units'])]
 
         # join information
-        _repr = obj + '\n' + conv + '\n' + 'coordinates: ' + ', '.join(coords)
+        _repr = obj + "\n" + conv + "\n" + "coordinates: " + ", ".join(coords)
 
         # check for sampling weights
-        if not self._weights is None:
-            _repr += '\nContains sampling weights'
+        if self._weights is not None:
+            _repr += "\nContains sampling weights"
 
         # check for sh_order
-        if not self._sh_order is None:
-            _repr += '\nSpherical harmonics order: {}'.format(self._sh_order)
+        if self._sh_order is not None:
+            _repr += f"\nSpherical harmonics order: {self._sh_order}"
 
         # check for comment
-        if not self._comment is None:
-            _repr += '\nComment: {}'.format(self._comment)
+        if self._comment is not None:
+            _repr += f"\nComment: {self._comment}"
 
         return _repr
-
 
 
 def cart2sph(x, y, z):
@@ -1522,7 +1516,7 @@ def cart2sph(x, y, z):
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.where(radius != 0, z / radius, 0)
     colatitude = np.arccos(z_div_r)
-    azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
+    azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
 
     return azimuth, colatitude, radius
 
@@ -1622,12 +1616,12 @@ def cart2cyl(x, y, z):
 
     radius : ndarray, number
     """
-    azimuth = np.mod(np.arctan2(y, x), 2*np.pi)
-    try:
+    azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
+    if isinstance(z, np.ndarray):
         height = z.copy()
-    except:
+    else:
         height = z
-    radius  = np.sqrt(x**2 + y**2)
+    radius = np.sqrt(x**2 + y**2)
 
     return azimuth, height, radius
 
@@ -1679,11 +1673,10 @@ def cyl2cart(azimuth, height, radius):
     """
     x = radius * np.cos(azimuth)
     y = radius * np.sin(azimuth)
-    try:
+    if isinstance(height, np.ndarray):
         z = height.copy()
-    except:
+    else:
         z = height
-
 
     return x, y, z
 
