@@ -181,7 +181,7 @@ class Coordinates(object):
 
         # check if object is empty
         if self.cshape == (0,):
-            raise Exception('Object is empty.')
+            raise ValueError('Object is empty.')
 
         # make the new system
         new_system = self._make_system('cart', convention, unit)
@@ -216,19 +216,21 @@ class Coordinates(object):
                 y, z, x = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             else:
-                raise Exception("Conversion for {} is not implemented.".
-                                format(self._system['convention']))
+                raise NotImplementedError(
+                    f"Conversion for {self._system['convention']} \
+                    is not implemented.")
 
         # ... from cylindrical coordinate systems
         elif self._system['domain'] == 'cyl':
             if self._system['convention'] == 'top':
                 x, y, z = cyl2cart(pts[..., 0], pts[..., 1], pts[..., 2])
             else:
-                raise Exception("Conversion for {} is not implemented.".
-                                format(self._system['convention']))
+                raise NotImplementedError(
+                    f"Conversion for {self._system['convention']} \
+                    is not implemented.")
         else:
-            raise Exception("Conversion for {} is not implemented.".
-                            format(convention))
+            raise NotImplementedError(
+                f"Conversion for {convention} is not implemented.")
 
         # set the new system
         self._system = new_system
@@ -299,7 +301,7 @@ class Coordinates(object):
 
         # check if object is empty
         if self.cshape == (0,):
-            raise Exception('Object is empty.')
+            raise ValueError('Object is empty.')
 
         # make the new system
         new_system = self._make_system('sph', convention, unit)
@@ -342,7 +344,8 @@ class Coordinates(object):
                 pts[..., 1], pts[..., 2], pts[..., 0])
 
         else:
-            raise Exception(f"Conversion for {convention} is not implemented.")
+            raise NotImplementedError(
+                f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
         if new_system['unit'] == 'deg':
@@ -418,7 +421,7 @@ class Coordinates(object):
 
         # check if object is empty
         if self.cshape == (0,):
-            raise Exception('Object is empty.')
+            raise ValueError('Object is empty.')
 
         # make the new system
         new_system = self._make_system('cyl', convention, unit)
@@ -444,7 +447,8 @@ class Coordinates(object):
                 pts[..., 0], pts[..., 1], pts[..., 2])
 
         else:
-            raise Exception(f"Conversion for {convention} is not implemented.")
+            raise NotImplementedError(
+                f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
         if self._system['unit'] == 'deg':

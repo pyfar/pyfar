@@ -109,8 +109,8 @@ def sph_dodecahedron(radius=1.):
 
 
 def sph_icosahedron(radius=1.):
-    """Generate a sampling based on the center points of the twenty \
-            icosahedron faces.
+    """
+    Generate a sampling from the center points of the twenty icosahedron faces.
 
     Parameters
     ----------
