@@ -652,56 +652,57 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     return sampling
 
 
-def sph_fliege(n_points=None, n_sh=None, radius=1.):
+# TODO: Inlcude mat file in packaging
+# def sph_fliege(n_points=None, n_sh=None, radius=1.):
 
-    # possible values for n_points and n_sh
-    points = np.array([4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
-                       225, 256, 289, 324, 361, 400, 441, 484, 529, 576, 625,
-                       676, 729, 784, 841, 900], dtype=int)
+#     # possible values for n_points and n_sh
+#     points = np.array([4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
+#                        225, 256, 289, 324, 361, 400, 441, 484, 529, 576, 625,
+#                        676, 729, 784, 841, 900], dtype=int)
 
-    orders = np.array(np.floor(np.sqrt(points) - 1), dtype=int)
+#     orders = np.array(np.floor(np.sqrt(points) - 1), dtype=int)
 
-    # list possible sh orders and number of points
-    if n_points is None and n_sh is None:
-        for o, d in zip(orders, points):
-            print(f"SH order {o}, number of points {d}")
+#     # list possible sh orders and number of points
+#     if n_points is None and n_sh is None:
+#         for o, d in zip(orders, points):
+#             print(f"SH order {o}, number of points {d}")
 
-        return None
+#         return None
 
-    # check input
-    if n_points is not None and n_sh is not None:
-        raise ValueError("Either n_points or n_sh must be None.")
+#     # check input
+#     if n_points is not None and n_sh is not None:
+#         raise ValueError("Either n_points or n_sh must be None.")
 
-    # check if the order is available
-    if n_sh is not None:
-        if n_sh not in orders:
-            str_orders = [f"{o}" for o in orders]
-            raise ValueError("Invalid spherical harmonics order 'n_sh'. \
-                             Valid orders are: {}.".format(
-                             ', '.join(str_orders)))
+#     # check if the order is available
+#     if n_sh is not None:
+#         if n_sh not in orders:
+#             str_orders = [f"{o}" for o in orders]
+#             raise ValueError("Invalid spherical harmonics order 'n_sh'. \
+#                              Valid orders are: {}.".format(
+#                              ', '.join(str_orders)))
 
-        n_points = int(points[orders == n_sh])
+#         n_points = int(points[orders == n_sh])
 
-    # check if n_points is available
-    if n_points not in points:
-        str_points = [f"{d}" for d in points]
-        raise ValueError("Invalid number of points n_points. Valid points \
-                         are: {}.".format(', '.join(str_points)))
+#     # check if n_points is available
+#     if n_points not in points:
+#         str_points = [f"{d}" for d in points]
+#         raise ValueError("Invalid number of points n_points. Valid points \
+#                          are: {}.".format(', '.join(str_points)))
 
-    # calculate sh_order
-    n_sh = int(orders[points == n_points])
+#     # calculate sh_order
+#     n_sh = int(orders[points == n_points])
 
-    # get the samlpling points
-    fliege = sio.loadmat("samplings_fliege.mat",
-                         variable_names=f"Fliege_{int(n_points)}")
-    fliege = fliege[f"Fliege_{int(n_points)}"]
+#     # get the samlpling points
+#     fliege = sio.loadmat("samplings_fliege.mat",
+#                          variable_names=f"Fliege_{int(n_points)}")
+#     fliege = fliege[f"Fliege_{int(n_points)}"]
 
-    # generate Coordinates object
-    sampling = Coordinates(fliege[:, 0],
-                           fliege[:, 1],
-                           radius,
-                           domain='sph', convention='top_colat', unit='rad',
-                           sh_order=n_sh, weights=fliege[:, 2],
-                           comment='spherical Fliege sampling grid')
+#     # generate Coordinates object
+#     sampling = Coordinates(fliege[:, 0],
+#                            fliege[:, 1],
+#                            radius,
+#                            domain='sph', convention='top_colat', unit='rad',
+#                            sh_order=n_sh, weights=fliege[:, 2],
+#                            comment='spherical Fliege sampling grid')
 
-    return sampling
+#     return sampling

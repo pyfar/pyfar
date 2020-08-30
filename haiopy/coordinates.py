@@ -65,7 +65,7 @@ class Coordinates(object):
     #       cases, but the cylindrical system has the coordinate radius_z
     #       because the definition differs from the sperical radius.
 
-    def __init__(self, points_1=[], points_2=[], points_3=[],
+    def __init__(self, points_1=None, points_2=None, points_3=None,
                  domain='cart', convention='right', unit=None,
                  weights=None, sh_order=None, comment=None):
         """
@@ -97,6 +97,13 @@ class Coordinates(object):
             Any comment about the stored coordinate points (Optional). The
             default is None.
         """
+
+        if points_1 is None:
+            points_1 = []
+        if points_2 is None:
+            points_2 = []
+        if points_3 is None:
+            points_3 = []
 
         # init emtpy object
         super(Coordinates, self).__init__()
