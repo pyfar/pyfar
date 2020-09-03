@@ -112,7 +112,7 @@ class Coordinates(object):
         self._system = self._make_system(domain, convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
         # save meta data
         self._set_weights(weights)
@@ -148,9 +148,9 @@ class Coordinates(object):
         self._system = self._make_system('cart', convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
-    def get_cart(self, convention='right', unit='met'):
+    def get_cart(self, convention='right', unit='met', convert=False):
         """
         Get coordinate points in cartesian coordinate systems.
 
@@ -162,6 +162,11 @@ class Coordinates(object):
         unit : string, optional
             unit in which the coordinate points are returned. The default is
             'met'.
+        convert : boolean, optional
+            if True, the internal representation of the samplings points will
+            be converted to the querried coordinate systems as defined by the
+            convention and unit. The default is Falsee, i.e., the internal
+            presentation remains as it is.
 
         Returns
         -------
@@ -232,12 +237,8 @@ class Coordinates(object):
             raise NotImplementedError(
                 f"Conversion for {convention} is not implemented.")
 
-        # set the new system
-        self._system = new_system
-
-        # set points and return
-        self._set_points(x, y, z)
-        return self._points
+        # return points and convert internal state if desired
+        return self._return_system(x, y, z, new_system, convert)
 
     def set_sph(self, points_1, points_2, points_3,
                 convention='top_colat', unit='rad'):
@@ -268,9 +269,9 @@ class Coordinates(object):
         self._system = self._make_system('sph', convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
-    def get_sph(self, convention='top_colat', unit='rad'):
+    def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         Get coordinate points in spherical coordinate systems.
 
@@ -282,6 +283,11 @@ class Coordinates(object):
         unit : string, optional
             unit in which the coordinate points are returned. The default is
             'met'.
+        convert : boolean, optional
+            if True, the internal representation of the samplings points will
+            be converted to the querried coordinate systems as defined by the
+            convention and unit. The default is Falsee, i.e., the internal
+            presentation remains as it is.
 
         Returns
         -------
@@ -352,12 +358,8 @@ class Coordinates(object):
             pts_1 = pts_1 / np.pi * 180
             pts_2 = pts_2 / np.pi * 180
 
-        # set the new system
-        self._system = new_system
-
-        # stack and return
-        self._set_points(pts_1, pts_2, pts_3)
-        return self._points
+        # return points and convert internal state if desired
+        return self._return_system(pts_1, pts_2, pts_3, new_system, convert)
 
     def set_cyl(self, points_1, points_2, points_3,
                 convention='top', unit='rad'):
@@ -388,9 +390,9 @@ class Coordinates(object):
         self._system = self._make_system('cyl', convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
-    def get_cyl(self, convention='top', unit='rad'):
+    def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         Get coordinate points in cylindircal coordinate system.
 
@@ -402,6 +404,11 @@ class Coordinates(object):
         unit : string, optional
             unit in which the coordinate points are returned. The default is
             'met'.
+        convert : boolean, optional
+            if True, the internal representation of the samplings points will
+            be converted to the querried coordinate systems as defined by the
+            convention and unit. The default is Falsee, i.e., the internal
+            presentation remains as it is.
 
         Returns
         -------
@@ -454,12 +461,8 @@ class Coordinates(object):
         if self._system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi * 180
 
-        # set the new system
-        self._system = new_system
-
-        # stack and return
-        self._set_points(pts_1, pts_2, pts_3)
-        return self._points
+        # return points and convert internal state if desired
+        return self._return_system(pts_1, pts_2, pts_3, new_system, convert)
 
     @property
     def weights(self):
@@ -1278,13 +1281,40 @@ class Coordinates(object):
 
         return system
 
-    def _set_points(self, points_1, points_2, points_3):
+    def _return_system(self, pts1, pts2, pts3, new_system, convert):
+
+        if convert:
+            # set the new system
+            self._system = new_system
+            # return points with conversion
+            self._set_points(pts1, pts2, pts3, True)
+            return self._points
+        else:
+            # return points without conversion
+            return self._set_points(pts1, pts2, pts3, system=new_system)
+
+    def _set_points(self, points_1, points_2, points_3,
+                    convert=False, system=None):
         """
-        Check and add points to self.
+        Check points and convert to matrix.
+
+        Parameters
+        ----------
+        convert : boolean, optional
+            Set self._points if convert = True. Return points as
+            matrix otherwise. The fefault is False.
+        system: dict, optional
+            The coordinate system against which the range of the points are
+            checked as returned from self._make_system. If system = None
+            self._system is used.
 
         Set self._points, which is an atleast_2d numpy array of shape
         [L,M,...,N, 3].
         """
+
+        # get coordinate system against the points are checked
+        if system is None:
+            system = self._system
 
         # cast to numpy array
         pts = [np.atleast_2d(np.asarray(points_1, dtype=np.float64)),
@@ -1308,17 +1338,18 @@ class Coordinates(object):
         # check the range of points
         for nn, p in enumerate(pts):
             # get type and range
-            c = self._system['coordinates'][nn]
-            c_type = self._system[c][0]
-            c_range = np.array(self._system[c][1])
+            c = system['coordinates'][nn]
+            c_type = system[c][0]
+            c_range = np.array(system[c][1])
             # range to degrees
-            if self._system['units'][nn] == 'degrees':
+            if system['units'][nn] == 'degrees':
                 c_range = np.round(c_range / np.pi * 180)
 
             # check bounds (cyclic values could be wraped but this is safer)
             if c_type in ['bound', 'cyclic']:
                 assert ((p >= c_range[0]) & (p <= c_range[1])).all(),\
-                       f"Values of points_{nn} must be in the range {c_range}"
+                       f"Values of points_{nn+1} must be in the range \
+                       {c_range}"
 
         # repeat scalar entries if non-scalars exists
         if len(shapes):
@@ -1344,8 +1375,11 @@ class Coordinates(object):
         eps = np.finfo(np.float64).eps
         pts[np.abs(pts) < eps] = 0
 
-        # save to class variable
-        self._points = pts
+        if convert:
+            # save to class variable
+            self._points = pts
+        else:
+            return pts
 
     def _set_weights(self, weights):
         """

@@ -106,12 +106,14 @@ def test_sph_great_circle():
     # test with default values
     c = samplings.sph_great_circle()
     assert isinstance(c, Coordinates)
+    # check default radius
     npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
 
-    # test if matching angles work
+    # test if azimuth matching angles work
     c = samplings.sph_great_circle(0, 4, match=90)
+    azimuth = c.get_sph(unit='deg')[:, 0]
     for deg in [0, 90, 180, 270]:
-        assert deg in c.get_sph(unit='deg')[:, 0]
+        assert deg in azimuth
 
     # test user radius
     c = samplings.sph_great_circle(radius=1.5)
