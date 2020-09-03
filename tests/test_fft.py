@@ -60,7 +60,7 @@ def test_fft_orthogonality_noise_even_lib():
     signal_spec = np.fft.rfft(signal_time, n=n_samples, axis=-1)
     transformed_signal_time = np.fft.irfft(signal_spec, n=n_samples, axis=-1)
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
+    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1.5e-10)
 
 
 def test_fft_orthogonality_noise_odd_lib():
