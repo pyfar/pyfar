@@ -202,8 +202,8 @@ def test_coordinates_init_val_and_weights():
         Coordinates([1, 2], 0, 0, weights=.5)
 
 
-def test_coordinates_init_sh_order():
-    coords = Coordinates(sh_order=5)
+def test_coordinates_init_n_sh():
+    coords = Coordinates(n_sh=5)
     assert isinstance(coords, Coordinates)
 
 
@@ -296,15 +296,15 @@ def test_setter_weights():
     assert (coords.weights == np.array([.5, .5])).all()
 
 
-def test_getter_sh_order():
-    coords = Coordinates(sh_order=10)
-    assert coords.sh_order == 10
+def test_getter_n_sh():
+    coords = Coordinates(n_sh=10)
+    assert coords.n_sh == 10
 
 
-def test_setter_sh_order():
+def test_setter_n_sh():
     coords = Coordinates()
-    coords.sh_order = 10
-    assert coords.sh_order == 10
+    coords.n_sh = 10
+    assert coords.n_sh == 10
 
 
 def test_getter_comment():

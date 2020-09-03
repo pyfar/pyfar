@@ -67,7 +67,7 @@ class Coordinates(object):
 
     def __init__(self, points_1=None, points_2=None, points_3=None,
                  domain='cart', convention='right', unit=None,
-                 weights=None, sh_order=None, comment=None):
+                 weights=None, n_sh=None, comment=None):
         """
         Init coordinates container.
 
@@ -90,7 +90,7 @@ class Coordinates(object):
             sampling weights for the coordinate points (Optional). Must have
             same size as points_i, i.e., if points_i has five entries, weights
             must also have five entries. The default is None.
-        sh_order : int
+        n_sh : int
             maximum sperical harmonics order of the sampling grid (Optional).
             The default is None.
         comment : str
@@ -116,7 +116,7 @@ class Coordinates(object):
 
         # save meta data
         self._set_weights(weights)
-        self._sh_order = sh_order
+        self._n_sh = n_sh
         self._comment = comment
 
     def set_cart(self, points_1, points_2, points_3,
@@ -472,14 +472,14 @@ class Coordinates(object):
         self._set_weights(value)
 
     @property
-    def sh_order(self):
+    def n_sh(self):
         """Get the maximum spherical harmonics order."""
-        return self._sh_order
+        return self._n_sh
 
-    @sh_order.setter
-    def sh_order(self, value):
+    @n_sh.setter
+    def n_sh(self, value):
         """Set the maximum spherical harmonics order."""
-        self._sh_order = value
+        self._n_sh = value
 
     @property
     def comment(self):
@@ -1466,9 +1466,9 @@ class Coordinates(object):
         if self._weights is not None:
             _repr += "\nContains sampling weights"
 
-        # check for sh_order
-        if self._sh_order is not None:
-            _repr += f"\nSpherical harmonics order: {self._sh_order}"
+        # check for n_sh
+        if self._n_sh is not None:
+            _repr += f"\nSpherical harmonics order: {self._n_sh}"
 
         # check for comment
         if self._comment is not None:

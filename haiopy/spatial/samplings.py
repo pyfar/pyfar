@@ -212,7 +212,7 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
                            domain='sph', convention='top_colat',
                            comment='equiangular spherical sampling grid',
-                           weights=w, sh_order=n_max)
+                           weights=w, n_sh=n_max)
 
     return sampling
 
@@ -283,7 +283,7 @@ def sph_gaussian(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
                            domain='sph', convention='top_colat',
                            comment='gaussian spherical sampling grid',
-                           weights=weights, sh_order=n_max)
+                           weights=weights, n_sh=n_max)
 
     return sampling
 
@@ -357,7 +357,7 @@ def sph_extremal(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(file_data[:, 0] * radius,
                            file_data[:, 1] * radius,
                            file_data[:, 2] * radius,
-                           sh_order=n_sh, weights=file_data[:, 3],
+                           n_sh=n_sh, weights=file_data[:, 3],
                            comment='extremal spherical sampling grid')
 
     return sampling
@@ -469,7 +469,7 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
     sampling = Coordinates(points[..., 0] * radius,
                            points[..., 1] * radius,
                            points[..., 2] * radius,
-                           sh_order=n_sh,
+                           n_sh=n_sh,
                            comment='spherical T-design sampling grid')
 
     return sampling
@@ -633,7 +633,7 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
         raise ValueError("Invalid number of points n_points. Valid degrees \
                          are: {}.".format(', '.join(str_degrees)))
 
-    # calculate sh_order
+    # calculate n_sh
     n_sh = int(orders[degrees == n_points])
 
     # get the samlpling
@@ -646,7 +646,7 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(leb["x"] * radius,
                            leb["y"] * radius,
                            leb["z"] * radius,
-                           sh_order=n_sh, weights=weights,
+                           n_sh=n_sh, weights=weights,
                            comment='spherical Lebedev sampling grid')
 
     return sampling
@@ -689,7 +689,7 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
 #         raise ValueError("Invalid number of points n_points. Valid points \
 #                          are: {}.".format(', '.join(str_points)))
 
-#     # calculate sh_order
+#     # calculate n_sh
 #     n_sh = int(orders[points == n_points])
 
 #     # get the samlpling points
@@ -702,7 +702,7 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
 #                            fliege[:, 1],
 #                            radius,
 #                            domain='sph', convention='top_colat', unit='rad',
-#                            sh_order=n_sh, weights=fliege[:, 2],
+#                            n_sh=n_sh, weights=fliege[:, 2],
 #                            comment='spherical Fliege sampling grid')
 
 #     return sampling
