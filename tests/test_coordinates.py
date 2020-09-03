@@ -561,3 +561,4 @@ def test_converters():
 #     coords[0] = setcoords
 #     npt.assert_allclose(np.squeeze(coords.cartesian),
 #                         np.array([[1, 0], [1, 1], [0, 1]]))
+#test_get_nearest_sph()

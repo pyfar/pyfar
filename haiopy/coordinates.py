@@ -3,7 +3,6 @@ import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
 import re
-import copy
 
 import haiopy
 
@@ -196,7 +195,7 @@ class Coordinates(object):
             return self._points
 
         # convert to radians
-        pts = self._points
+        pts = self._points.copy()
         for nn, unit in enumerate(self._system['units']):
             if unit == 'degrees':
                 pts[..., nn] = pts[..., nn] / 180 * np.pi
@@ -324,7 +323,7 @@ class Coordinates(object):
             eps = np.finfo(np.float64).eps
             pts[np.abs(pts) < eps] = 0
         else:
-            pts = self._points
+            pts = self._points.copy()
 
         # convert to spherical...
         # ... top polar systems
@@ -445,7 +444,7 @@ class Coordinates(object):
             eps = np.finfo(np.float64).eps
             pts[np.abs(pts) < eps] = 0
         else:
-            pts = self._points
+            pts = self._points.copy()
 
         # convert to cylindrical ...
         # ... top systems
@@ -809,16 +808,16 @@ class Coordinates(object):
         """
 
         # check the input
-        assert distance >= 0 and distance <= 180, "distance must be >= 0 and \
-                                                  <= 180."
+        assert distance >= 0 and distance <= 180, \
+            "distance must be >= 0 and <= 180."
 
         # get radius and check for equality
-        radius = copy.deepcopy(self).get_sph()[..., 2]
+        radius = self.get_sph()[..., 2]
         delta_radius = np.max(radius) - np.min(radius)
         if delta_radius > 1e-15:
-            raise ValueError("get_nearest_sph only works if all points have "
-                             "the same radius. Differences are larger than "
-                             "1e-15")
+            raise ValueError(
+                "get_nearest_sph only works if all points have the same \
+                radius. Differences are larger than 1e-15")
 
         # get the points
         distance, index, mask = self._get_nearest(
@@ -896,7 +895,7 @@ class Coordinates(object):
                 rng[1] = (rng[1] - low) % (upp - low) + low
 
         # get the coordinates
-        coords = eval(f"copy.deepcopy(self).get_{domain}('{convention}')")
+        coords = eval(f"self.get_{domain}('{convention}')")
         coords = coords[..., index]
 
         # get the mask
@@ -1454,18 +1453,15 @@ class Coordinates(object):
     def _make_kdtree(self):
         """Make a numpy KDTree for fast search of nearest points."""
 
-        # copy to avoid changes in the original object
-        xyz = copy.deepcopy(self).get_cart()
-        # get the tree
+        xyz = self.get_cart()
         kdtree = cKDTree(xyz.reshape((self.csize, 3)))
 
         return kdtree
 
     def __getitem__(self, index):
-        """Return copy of Coordinates object at index."""
+        """Return mutable slice of Coordinates object at index."""
 
-        # get copy
-        new = copy.deepcopy(self)
+        new = self
         # slice points
         new._points = new._points[index]
         # slice weights

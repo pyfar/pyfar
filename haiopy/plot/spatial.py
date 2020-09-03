@@ -4,7 +4,6 @@ Plot for spatially distributed data.
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
-import copy
 
 from haiopy.coordinates import Coordinates
 
@@ -52,9 +51,8 @@ def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
     if 'c' not in kwargs:
         kwargs['c'] = 'k'
 
-    # copy to avoid changing the coordinate system of the original object
-    c = copy.deepcopy(coordinates)
-    xyz = c.get_cart()
+    # get cartesian points for scattering
+    xyz = coordinates.get_cart()
 
     # plot
     ax.scatter(
