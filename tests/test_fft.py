@@ -261,6 +261,30 @@ def test_rfft_power_imp_odd_samples(sine_odd):
     npt.assert_allclose(np.imag(spec), np.imag(truth), atol=1e-10)
 
 
+def test_fft_mock_numpy(fft_lib_np):
+    assert 'numpy.fft' in fft.fft_lib.__name__
+
+
+@pytest.fixture
+def fft_lib_np(monkeypatch):
+    # from haiopy.fft import fft_lib
+    import haiopy.fft
+    import numpy as np
+    monkeypatch.setattr(haiopy.fft, 'fft_lib', np.fft)
+
+
+def test_fft_mock_pyfftw(fft_lib_pyfftw):
+    assert 'pyfftw' in fft.fft_lib.__name__
+
+
+@pytest.fixture
+def fft_lib_pyfftw(monkeypatch):
+    # from haiopy.fft import fft_lib
+    import haiopy.fft
+    from pyfftw.interfaces import numpy_fft as npi_fft
+    monkeypatch.setattr(haiopy.fft, 'fft_lib', npi_fft)
+
+
 @pytest.fixture
 def impulse():
     """Generate an impulse, also known as the Dirac delta function
