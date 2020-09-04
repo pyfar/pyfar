@@ -199,11 +199,11 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
         n_max = int(sh_order)
 
     # compute sampling weights ([1], equation 3.11)
-    tmp = 2 * np.arange(0, n_max + 1) + 1
+    q = 2 * np.arange(0, n_max + 1) + 1
     w = np.zeros_like(theta_angles)
     for nn, tt in enumerate(theta_angles):
         w[nn] = 2 * np.pi / (n_max + 1)**2 * np.sin(tt) \
-            * np.sum(1 / tmp * np.sin(tmp * tt))
+            * np.sum(1 / q * np.sin(q * tt))
 
     # repeat and normalize sampling weights
     w = np.tile(w, n_phi)
