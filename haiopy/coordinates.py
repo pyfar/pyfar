@@ -220,7 +220,7 @@ class Coordinates(object):
                 y, z, x = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             else:
-                raise NotImplementedError(
+                raise ValueError(
                     f"Conversion for {self._system['convention']} \
                     is not implemented.")
 
@@ -229,11 +229,11 @@ class Coordinates(object):
             if self._system['convention'] == 'top':
                 x, y, z = cyl2cart(pts[..., 0], pts[..., 1], pts[..., 2])
             else:
-                raise NotImplementedError(
+                raise ValueError(
                     f"Conversion for {self._system['convention']} \
                     is not implemented.")
         else:
-            raise NotImplementedError(
+            raise ValueError(
                 f"Conversion for {convention} is not implemented.")
 
         # return points and convert internal state if desired
@@ -349,7 +349,7 @@ class Coordinates(object):
                 pts[..., 1], pts[..., 2], pts[..., 0])
 
         else:
-            raise NotImplementedError(
+            raise ValueError(
                 f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
@@ -453,7 +453,7 @@ class Coordinates(object):
                 pts[..., 0], pts[..., 1], pts[..., 2])
 
         else:
-            raise NotImplementedError(
+            raise ValueError(
                 f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
