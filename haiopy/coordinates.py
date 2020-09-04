@@ -90,7 +90,7 @@ class Coordinates(object):
             same size as points_i, i.e., if points_i has five entries, weights
             must also have five entries. The default is None.
         sh_order : int
-            maximum sperical harmonics order of the sampling grid (Optional).
+            maximum sperical harmonic order of the sampling grid (Optional).
             The default is None.
         comment : str
             Any comment about the stored coordinate points (Optional). The
@@ -475,12 +475,12 @@ class Coordinates(object):
 
     @property
     def sh_order(self):
-        """Get the maximum spherical harmonics order."""
+        """Get the maximum spherical harmonic order."""
         return self._sh_order
 
     @sh_order.setter
     def sh_order(self, value):
-        """Set the maximum spherical harmonics order."""
+        """Set the maximum spherical harmonic order."""
         self._sh_order = value
 
     @property
@@ -1509,7 +1509,7 @@ class Coordinates(object):
 
         # check for sh_order
         if self._sh_order is not None:
-            _repr += f"\nSpherical harmonics order: {self._sh_order}"
+            _repr += f"\nSpherical harmonic order: {self._sh_order}"
 
         # check for comment
         if self._comment is not None:

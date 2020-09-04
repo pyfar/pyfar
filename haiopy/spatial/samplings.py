@@ -150,7 +150,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
         number of sampling points in azimuth and elevation. Either n_points or
         sh_order must be provided. The default is None.
     sh_order : int
-        maximum applicable spherical harmonics order. If this is provided,
+        maximum applicable spherical harmonic order. If this is provided,
         'n_points' is set to 2 * sh_order + 1. Either n_points or sh_order must
         be provided. The default is None.
     radius : number, optional
@@ -171,7 +171,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
         raise ValueError(
             "Either the n_points or sh_order needs to be specified.")
 
-    # get number of points from required spherical harmonics order
+    # get number of points from required spherical harmonic order
     # ([1], equation 3.4)
     if sh_order is not None:
         n_points = 2 * (int(sh_order) + 1)
@@ -192,7 +192,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     theta, phi = np.meshgrid(theta_angles, phi_angles)
     rad = radius * np.ones(theta.size)
 
-    # compute maximum applicable spherical harmonics order
+    # compute maximum applicable spherical harmonic order
     if sh_order is None:
         n_max = int(np.min([n_phi / 2 - 1, n_theta / 2 - 1]))
     else:
@@ -227,7 +227,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
         number of sampling points in azimuth and elevation. Either n_points or
         sh_order must be provided. The default is None.
     sh_order : int
-        maximum applicable spherical harmonics order. If this is provided,
+        maximum applicable spherical harmonic order. If this is provided,
         'n_points' is set to 2 * (sh_order + 1), sh_order + 1. Either n_points
         or sh_order must be provided. The default is None.
     radius : number, optional
@@ -248,7 +248,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
         raise ValueError(
             "Either the n_points or sh_order needs to be specified.")
 
-    # get number of points from required spherical harmonics order
+    # get number of points from required spherical harmonic order
     # ([1], equation 3.4)
     if sh_order is not None:
         n_points = [2 * (int(sh_order) + 1), int(sh_order) + 1]
@@ -262,7 +262,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
         n_phi = n_points
         n_theta = n_points
 
-    # compute the maximum applicable spherical harmonics order
+    # compute the maximum applicable spherical harmonic order
     if sh_order is None:
         n_max = int(np.min([n_phi / 2 - 1, n_theta - 1]))
     else:
@@ -298,10 +298,10 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     ----------
     n_points : int
         number of sampling points in the grid. Related to the spherical
-        harmonics order by n_points = (sh_order + 1)**2. Either n_points or
+        harmonic order by n_points = (sh_order + 1)**2. Either n_points or
         sh_order must be provided. The default is None.
     sh_order : int
-        maximum applicable spherical harmonics order. Related to the number of
+        maximum applicable spherical harmonic order. Related to the number of
         points by sh_order = np.sqrt(n_points) - 1. Either n_points or sh_order
         must be provided. The default is None.
     radius : number, optional
@@ -330,7 +330,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
         raise ValueError(
             "Either the n_points or sh_order needs to be specified.")
 
-    # get number of points or spherical harmonics order
+    # get number of points or spherical harmonic order
     if sh_order is not None:
         n_points = (sh_order + 1)**2
     else:
@@ -366,7 +366,8 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     return sampling
 
 
-def sph_t_design(degree=None, sh_order=None, criterion='const_energy', radius=1.):
+def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
+                 radius=1.):
     r"""Return spherical t-design sampling grid [1]_.
 
     For a spherical harmonic order :math:`n_{sh}`, a t-Design of degree
@@ -390,7 +391,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy', radius=1.
         T-design degree. Either degree or sh_order must be provided. The
         default is None.
     sh_order : int
-        maximum applicable spherical harmonics order. Related to the number of
+        maximum applicable spherical harmonic order. Related to the number of
         points by sh_order = np.sqrt(n_points) - 1. Either degree or sh_order
         must be provided. The default is None.
     criterion : 'const_energy', 'const_angular_spread'
@@ -572,10 +573,10 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     ----------
     n_points : int, optional
         number of sampling points in the grid. Related to the spherical
-        harmonics order by n_points = (sh_order + 1)**2. Either n_points or
+        harmonic order by n_points = (sh_order + 1)**2. Either n_points or
         sh_order must be provided. The default is None.
     sh_order : int, optional
-        maximum applicable spherical harmonics order. Related to the number of
+        maximum applicable spherical harmonic order. Related to the number of
         points by sh_order = np.sqrt(n_points) - 1. Either n_points or sh_order
         must be provided. The default is None.
     radius : number, optional
@@ -607,7 +608,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
                         2030, 2354, 2702, 3074, 3470, 3890, 4334, 4802, 5294,
                         5810], dtype=int)
 
-    # corresponding spherical harmonics orders
+    # corresponding spherical harmonic orders
     orders = np.array((np.floor(np.sqrt(degrees / 1.3) - 1)), dtype=int)
 
     # list possible sh orders and degrees
@@ -625,7 +626,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     if sh_order is not None:
         if sh_order not in orders:
             str_orders = [f"{o}" for o in orders]
-            raise ValueError("Invalid spherical harmonics order 'sh_order'. \
+            raise ValueError("Invalid spherical harmonic order 'sh_order'. \
                              Valid orders are: {}.".format(
                              ', '.join(str_orders)))
 
@@ -681,7 +682,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
 #     if sh_order is not None:
 #         if sh_order not in orders:
 #             str_orders = [f"{o}" for o in orders]
-#             raise ValueError("Invalid spherical harmonics order 'sh_order'. \
+#             raise ValueError("Invalid spherical harmonic order 'sh_order'. \
 #                              Valid orders are: {}.".format(
 #                              ', '.join(str_orders)))
 

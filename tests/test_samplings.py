@@ -55,7 +55,7 @@ def test_sph_equiangular():
     assert c.csize == 3*5
     npt.assert_allclose(np.sum(c.weights), 1)
 
-    # test with spherical harmonics order
+    # test with spherical harmonic order
     c = samplings.sph_equiangular(sh_order=5)
     assert c.csize == 4 * (5 + 1)**2
     npt.assert_allclose(np.sum(c.weights), 1)
@@ -84,7 +84,7 @@ def test_sph_gaussian():
     assert c.csize == 3*5
     npt.assert_allclose(np.sum(c.weights), 1)
 
-    # test with spherical harmonics order
+    # test with spherical harmonic order
     c = samplings.sph_gaussian(sh_order=5)
     assert c.csize == 2 * (5 + 1)**2
     npt.assert_allclose(np.sum(c.weights), 1)
@@ -144,7 +144,7 @@ def test_sph_lebedev():
     assert c.csize == 14
     npt.assert_allclose(np.sum(c.weights), 1)
 
-    # test with spherical harmonics order
+    # test with spherical harmonic order
     c = samplings.sph_lebedev(sh_order=3)
     assert c.csize == 26
     npt.assert_allclose(np.sum(c.weights), 1)
@@ -168,7 +168,7 @@ def test_sph_lebedev():
 #     assert c.csize == 16
 #     npt.assert_allclose(np.sum(c.weights), 1)
 
-#     # test with spherical harmonics order
+#     # test with spherical harmonic order
 #     c = samplings.sph_fliege(sh_order=3)
 #     assert c.csize == 16
 #     npt.assert_allclose(np.sum(c.weights), 1)
