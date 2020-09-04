@@ -218,7 +218,7 @@ def test_show():
         coords.show(np.array([1, 0], dtype=bool))
 
 
-def test_setter_and_getter():
+def test_setter_and_getter_with():
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -240,17 +240,32 @@ def test_setter_and_getter():
                         p_out = systems[domain_out][convention_out][point]
                         # empty object
                         c = Coordinates()
-                        # set point
-                        eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], "
-                             f"'{convention_in}')")
+                        # --- set point ---
+                        eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
+                             '{convention_in}')")
+                        # check point
                         p = c._points
                         npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
-                        # get point
+                        # --- test without conversion ---
                         p = eval(f"c.get_{domain_out}('{convention_out}')")
+                        # check internal and returned point
+                        npt.assert_allclose(
+                            c._points.flatten(), p_in, atol=1e-15)
                         npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+                        # check if system was converted
+                        assert c._system["domain"] == domain_in
+                        assert c._system["convention"] == convention_in
+                        # --- test with conversion ---
+                        p = eval(f"c.get_{domain_out}('{convention_out}', \
+                                 convert=True)")
+                        # check point
+                        npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+                        # check if system was converted
+                        assert c._system["domain"] == domain_out
+                        assert c._system["convention"] == convention_out
 
 
-def test_multiple_getter():
+def test_multiple_getter_with_conversion():
     # test N successive coordinate conversions
     N = 500
 
@@ -275,7 +290,7 @@ def test_multiple_getter():
         conventions = list(systems[domain])
         convention = conventions[np.random.randint(len(conventions))]
         # convert points to selected system
-        pts = eval("coords.get_{}('{}')".format(domain, convention))
+        pts = eval(f"coords.get_{domain}('{convention}', convert=True)")
         # get the reference
         ref = np.array([systems[domain][convention][point]
                         for point in points])
@@ -498,7 +513,7 @@ def test_rotation():
     # test with quaternion
     c = Coordinates(1, 0, 0)
     c.rotate('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)])
-    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0])
+    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
 
     # test with matrix
     c = Coordinates(1, 0, 0)
@@ -546,3 +561,4 @@ def test_converters():
 #     coords[0] = setcoords
 #     npt.assert_allclose(np.squeeze(coords.cartesian),
 #                         np.array([[1, 0], [1, 1], [0, 1]]))
+#test_get_nearest_sph()
