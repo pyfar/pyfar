@@ -3,7 +3,6 @@ Collection of sampling schemes.
 """
 
 import numpy as np
-import scipy.io as sio
 import urllib3
 from haiopy.coordinates import Coordinates
 from haiopy.spatial.external import samplings_lebedev
