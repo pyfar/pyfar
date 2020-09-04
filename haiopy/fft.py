@@ -1,3 +1,60 @@
+r"""
+
+The implemented discrete Fourier spectrum is defined as
+
+.. math::
+        X(\mu) = \sum_{n=0}^{N-1} x(n) e^{-i 2 \pi \frac{\mu n}{N}}
+
+using a negative sign convention in the transform kernel `math::\kappa(\mu, n) = e^{-i 2 \pi \mu \frac{n}{N}`.
+Analogously, the discrete inverse Fourier transform is implemented as
+
+.. math::
+        x(n) = \frac{1}{N} \sum_{\mu = 0}^{N-1} X(\mu) e^{i 2 \pi \frac{\mu n}{N}}
+
+Normalization
+-------------
+Haiopy uses the assumption of real-valued time signals resulting
+in Fourier spectra with complex conjugate symmetry for negative and
+positive frequencies, enabling the use of single sided spectra.
+In order for Parseval's theorem to remain valid, the single sided
+needs to be multiplied by a factor of 2, compensating for the energy
+missing.
+
+>>> import numpy as np
+>>> from haiopy import fft
+>>> import matplotlib.pyplot as plt
+>>> sine = np.sin(np.linspace(0, 2*np.pi, 256))
+>>> spec = fft.rfft(sine, 256, 'power')
+>>> plt.plot(np.abs(spec))
+>>> plt.show()
+
+.. plot::
+
+    import numpy as np
+    from haiopy import fft
+    import matplotlib.pyplot as plt
+    n_samples = 1024
+    sine = np.sin(np.linspace(0, 10, n_samples) * 2*np.pi * 100)
+    spec = fft.rfft(sine, n_samples, 'power')
+    freqs = fft.rfftfreq(n_samples, 48e3)
+    plt.subplot(1, 2, 1)
+    plt.plot(sine)
+    plt.subplot(1, 2, 2)
+    plt.plot(freqs, np.abs(spec))
+    plt.show()
+
+
+References
+----------
+.. [1]  J.-R. Ohm and H. D. Lüke, Signalübertragung: Grundlagen der
+        digitalen und analogen Nachrichtenübertragungssysteme. Springer DE, 2002.
+
+.. [2]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on Scaling of
+        the Discrete Fourier Transform and the Implied Physical Units of the
+        Spectra of Time-Discrete Signals,” p. 5, 2020.
+
+
+"""
 import multiprocessing
 import warnings
 
