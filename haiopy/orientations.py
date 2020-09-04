@@ -77,11 +77,11 @@ class Orientations(Rotation):
         """
         views = np.atleast_2d(views).astype(np.float64)
         ups = np.atleast_2d(ups).astype(np.float64)
-        
+
         if (views.ndim > 2 or views.shape[-1] != 3
                 or ups.ndim > 2 or ups.shape[-1] != 3):
-            raise ValueError(f"Expected `views` and `ups` to have shape (N, 3) "
-                             f"or (3,), got {views.shape}")
+            raise ValueError(f"Expected `views` and `ups` to have shape (N, 3)"
+                             f" or (3,), got {views.shape}")
         if views.shape == ups.shape:
             pass
         elif views.shape[0] > 1 and ups.shape[0] == 1:
@@ -108,7 +108,8 @@ class Orientations(Rotation):
 
         return super().from_matrix(rotation_matrix)
 
-    def show(self, positions=None):
+    def show(self, positions=None,
+             show_views=True, show_ups=True, show_rights=True):
         """
         Visualize Orientations as view, up and right vectors in a quiver plot.
 
@@ -129,9 +130,13 @@ class Orientations(Rotation):
         # Create view, up and right vectors from Rotation object
         views, rights, ups = self.as_view_up_right()
 
-        ax = haiopy.plot.quiver(positions, views, color=(1, 0, 0))
-        ax = haiopy.plot.quiver(positions, ups, ax=ax, color=(0, 1, 0))
-        haiopy.plot.quiver(positions, rights, ax=ax, color=(0, 0, 1))
+        ax = None
+        if show_views:
+            ax = haiopy.plot.quiver(positions, views, color=(1, 0, 0))
+        if show_ups:
+            ax = haiopy.plot.quiver(positions, ups, ax=ax, color=(0, 1, 0))
+        if show_rights:
+            ax = haiopy.plot.quiver(positions, rights, ax=ax, color=(0, 0, 1))
 
     def as_view_up_right(self):
         """Get Orientations as a view, up, and right vector.

@@ -101,6 +101,16 @@ def test_orientations_show(views, ups, positions, orientations):
     orientations.show()
     # with matching number of positions
     orientations.show(positions)
+
+    # select what to show
+    orientations.show(show_views=False)
+    orientations.show(show_ups=False)
+    orientations.show(show_rights=False)
+    orientations.show(show_views=False, show_ups=False)
+    orientations.show(show_views=False, show_rights=False)
+    orientations.show(show_ups=False, show_rights=False)
+    orientations.show(positions=positions, show_views=False, show_ups=False)
+    
     # with positions provided as Coordinates
     positions = Coordinates([0, 5], [0, 0], [0, 0])
     orientations.show(positions)
