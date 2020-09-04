@@ -141,18 +141,18 @@ def sph_icosahedron(radius=1.):
     return sampling
 
 
-def sph_equiangular(n_points=None, n_sh=None, radius=1.):
+def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     """Generate an equiangular sampling of the sphere [1]_, Chapter 3.2.
 
     Parameters
     ----------
     n_points : int, tuple of two ints
         number of sampling points in azimuth and elevation. Either n_points or
-        n_sh must be provided. The default is None.
-    n_sh : int
+        sh_order must be provided. The default is None.
+    sh_order : int
         maximum applicable spherical harmonics order. If this is provided,
-        'n_points' is set to 2 * n_sh + 1. Either n_points or n_sh must be
-        provided. The default is None.
+        'n_points' is set to 2 * sh_order + 1. Either n_points or sh_order must
+        be provided. The default is None.
     radius : number, optional
         radius of the sampling grid. The default is 1.
 
@@ -167,13 +167,14 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
-    if (n_points is None) and (n_sh is None):
-        raise ValueError("Either the n_points or n_sh needs to be specified.")
+    if (n_points is None) and (sh_order is None):
+        raise ValueError(
+            "Either the n_points or sh_order needs to be specified.")
 
     # get number of points from required spherical harmonics order
     # ([1], equation 3.4)
-    if n_sh is not None:
-        n_points = 2 * (int(n_sh) + 1)
+    if sh_order is not None:
+        n_points = 2 * (int(sh_order) + 1)
 
     # get the angles
     n_points = np.asarray(n_points)
@@ -192,10 +193,10 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
     rad = radius * np.ones(theta.size)
 
     # compute maximum applicable spherical harmonics order
-    if n_sh is None:
+    if sh_order is None:
         n_max = int(np.min([n_phi / 2 - 1, n_theta / 2 - 1]))
     else:
-        n_max = int(n_sh)
+        n_max = int(sh_order)
 
     # compute sampling weights ([1], equation 3.11)
     tmp = 2 * np.arange(0, n_max + 1) + 1
@@ -212,23 +213,23 @@ def sph_equiangular(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
                            domain='sph', convention='top_colat',
                            comment='equiangular spherical sampling grid',
-                           weights=w, n_sh=n_max)
+                           weights=w, sh_order=n_max)
 
     return sampling
 
 
-def sph_gaussian(n_points=None, n_sh=None, radius=1.):
+def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     """Generate sampling of the sphere based on the Gaussian quadrature [1]_.
 
     Parameters
     ----------
     n_points : int, tuple of two ints
         number of sampling points in azimuth and elevation. Either n_points or
-        n_sh must be provided. The default is None.
-    n_sh : int
+        sh_order must be provided. The default is None.
+    sh_order : int
         maximum applicable spherical harmonics order. If this is provided,
-        'n_points' is set to 2 * (n_sh + 1), n_sh + 1. Either n_points or
-        n_sh must be provided. The default is None.
+        'n_points' is set to 2 * (sh_order + 1), sh_order + 1. Either n_points
+        or sh_order must be provided. The default is None.
     radius : number, optional
         radius of the sampling grid in meters. The default is 1.
 
@@ -243,13 +244,14 @@ def sph_gaussian(n_points=None, n_sh=None, radius=1.):
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
-    if (n_points is None) and (n_sh is None):
-        raise ValueError("Either the n_points or n_sh needs to be specified.")
+    if (n_points is None) and (sh_order is None):
+        raise ValueError(
+            "Either the n_points or sh_order needs to be specified.")
 
     # get number of points from required spherical harmonics order
     # ([1], equation 3.4)
-    if n_sh is not None:
-        n_points = [2 * (int(n_sh) + 1), int(n_sh) + 1]
+    if sh_order is not None:
+        n_points = [2 * (int(sh_order) + 1), int(sh_order) + 1]
 
     # get the number of points in both dimensions
     n_points = np.asarray(n_points)
@@ -261,10 +263,10 @@ def sph_gaussian(n_points=None, n_sh=None, radius=1.):
         n_theta = n_points
 
     # compute the maximum applicable spherical harmonics order
-    if n_sh is None:
+    if sh_order is None:
         n_max = int(np.min([n_phi / 2 - 1, n_theta - 1]))
     else:
-        n_max = int(n_sh)
+        n_max = int(sh_order)
 
     # construct the sampling grid
     legendre, weights = np.polynomial.legendre.leggauss(int(n_theta))
@@ -283,12 +285,12 @@ def sph_gaussian(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
                            domain='sph', convention='top_colat',
                            comment='gaussian spherical sampling grid',
-                           weights=weights, n_sh=n_max)
+                           weights=weights, sh_order=n_max)
 
     return sampling
 
 
-def sph_extremal(n_points=None, n_sh=None, radius=1.):
+def sph_extremal(n_points=None, sh_order=None, radius=1.):
     """Gives the points of a Hyperinterpolation sampling grid
     after Sloan and Womersley [1]_.
 
@@ -296,12 +298,12 @@ def sph_extremal(n_points=None, n_sh=None, radius=1.):
     ----------
     n_points : int
         number of sampling points in the grid. Related to the spherical
-        harmonics order by n_points = (n_sh + 1)**2. Either n_points or
-        n_sh must be provided. The default is None.
-    n_sh : int
+        harmonics order by n_points = (sh_order + 1)**2. Either n_points or
+        sh_order must be provided. The default is None.
+    sh_order : int
         maximum applicable spherical harmonics order. Related to the number of
-        points by n_sh = np.sqrt(n_points) - 1. Either n_points or n_sh must
-        be provided. The default is None.
+        points by sh_order = np.sqrt(n_points) - 1. Either n_points or sh_order
+        must be provided. The default is None.
     radius : number, optional
         radius of the sampling grid in meters. The default is 1.
 
@@ -324,17 +326,18 @@ def sph_extremal(n_points=None, n_sh=None, radius=1.):
 
     """
 
-    if (n_points is None) and (n_sh is None):
-        raise ValueError("Either the n_points or n_sh needs to be specified.")
+    if (n_points is None) and (sh_order is None):
+        raise ValueError(
+            "Either the n_points or sh_order needs to be specified.")
 
     # get number of points or spherical harmonics order
-    if n_sh is not None:
-        n_points = (n_sh + 1)**2
+    if sh_order is not None:
+        n_points = (sh_order + 1)**2
     else:
-        n_sh = np.sqrt(n_points) - 1
+        sh_order = np.sqrt(n_points) - 1
 
     # load the data
-    filename = "md%03d.%05d" % (n_sh, n_points)
+    filename = "md%03d.%05d" % (sh_order, n_points)
     url = "https://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/"
     fileurl = url + filename
 
@@ -357,13 +360,13 @@ def sph_extremal(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(file_data[:, 0] * radius,
                            file_data[:, 1] * radius,
                            file_data[:, 2] * radius,
-                           n_sh=n_sh, weights=file_data[:, 3],
+                           sh_order=sh_order, weights=file_data[:, 3],
                            comment='extremal spherical sampling grid')
 
     return sampling
 
 
-def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
+def sph_t_design(degree=None, sh_order=None, criterion='const_energy', radius=1.):
     r"""Return spherical t-design sampling grid [1]_.
 
     For a spherical harmonic order :math:`n_{sh}`, a t-Design of degree
@@ -384,12 +387,12 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
     Parameters
     ----------
     degree : int
-        T-design degree. Either degree or n_sh must be provided. The default
-        is None.
-    n_sh : int
+        T-design degree. Either degree or sh_order must be provided. The
+        default is None.
+    sh_order : int
         maximum applicable spherical harmonics order. Related to the number of
-        points by n_sh = np.sqrt(n_points) - 1. Either degree or n_sh must
-        be provided. The default is None.
+        points by sh_order = np.sqrt(n_points) - 1. Either degree or sh_order
+        must be provided. The default is None.
     criterion : 'const_energy', 'const_angular_spread'
         Design criterion ensuring only a constant energy or additionally
         constant angular spread of energy. The default is 'const_energy'.
@@ -421,8 +424,9 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
     """
 
     # check input
-    if (degree is None) and (n_sh is None):
-        raise ValueError("Either the degree or n_sh needs to be specified.")
+    if (degree is None) and (sh_order is None):
+        raise ValueError(
+            "Either the degree or sh_order needs to be specified.")
 
     if criterion not in ['const_energy', 'const_angular_spread']:
         raise ValueError("Invalid design criterion. Must be 'const_energy' \
@@ -431,9 +435,9 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
     # get the degree
     if degree is None:
         if criterion == 'const_energy':
-            degree = 2 * n_sh
+            degree = 2 * sh_order
         else:
-            degree = 2 * n_sh + 1
+            degree = 2 * sh_order + 1
 
     # get the number of points
     n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
@@ -469,7 +473,7 @@ def sph_t_design(degree=None, n_sh=None, criterion='const_energy', radius=1.):
     sampling = Coordinates(points[..., 0] * radius,
                            points[..., 1] * radius,
                            points[..., 2] * radius,
-                           n_sh=n_sh,
+                           sh_order=sh_order,
                            comment='spherical T-design sampling grid')
 
     return sampling
@@ -560,7 +564,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     return sampling
 
 
-def sph_lebedev(n_points=None, n_sh=None, radius=1.):
+def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     """
     Return Lebedev spherical sampling grid [1]_.
 
@@ -568,12 +572,12 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     ----------
     n_points : int, optional
         number of sampling points in the grid. Related to the spherical
-        harmonics order by n_points = (n_sh + 1)**2. Either n_points or
-        n_sh must be provided. The default is None.
-    n_sh : int, optional
+        harmonics order by n_points = (sh_order + 1)**2. Either n_points or
+        sh_order must be provided. The default is None.
+    sh_order : int, optional
         maximum applicable spherical harmonics order. Related to the number of
-        points by n_sh = np.sqrt(n_points) - 1. Either n_points or n_sh must be
-        provided. The default is None.
+        points by sh_order = np.sqrt(n_points) - 1. Either n_points or sh_order
+        must be provided. The default is None.
     radius : number, optional
         radius of the sampling grid in meters. The default is 1.
 
@@ -607,25 +611,25 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     orders = np.array((np.floor(np.sqrt(degrees / 1.3) - 1)), dtype=int)
 
     # list possible sh orders and degrees
-    if n_points is None and n_sh is None:
+    if n_points is None and sh_order is None:
         for o, d in zip(orders, degrees):
             print(f"SH order {o}, number of points {d}")
 
         return None
 
     # check input
-    if n_points is not None and n_sh is not None:
-        raise ValueError("Either n_points or n_sh must be None.")
+    if n_points is not None and sh_order is not None:
+        raise ValueError("Either n_points or sh_order must be None.")
 
     # check if the order is available
-    if n_sh is not None:
-        if n_sh not in orders:
+    if sh_order is not None:
+        if sh_order not in orders:
             str_orders = [f"{o}" for o in orders]
-            raise ValueError("Invalid spherical harmonics order 'n_sh'. \
+            raise ValueError("Invalid spherical harmonics order 'sh_order'. \
                              Valid orders are: {}.".format(
                              ', '.join(str_orders)))
 
-        n_points = int(degrees[orders == n_sh])
+        n_points = int(degrees[orders == sh_order])
 
     # check if n_points is available
     if n_points not in degrees:
@@ -633,8 +637,8 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
         raise ValueError("Invalid number of points n_points. Valid degrees \
                          are: {}.".format(', '.join(str_degrees)))
 
-    # calculate n_sh
-    n_sh = int(orders[degrees == n_points])
+    # calculate sh_order
+    sh_order = int(orders[degrees == n_points])
 
     # get the samlpling
     leb = samplings_lebedev._lebedevSphere(n_points)
@@ -646,16 +650,16 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
     sampling = Coordinates(leb["x"] * radius,
                            leb["y"] * radius,
                            leb["z"] * radius,
-                           n_sh=n_sh, weights=weights,
+                           sh_order=sh_order, weights=weights,
                            comment='spherical Lebedev sampling grid')
 
     return sampling
 
 
 # TODO: Inlcude mat file in packaging
-# def sph_fliege(n_points=None, n_sh=None, radius=1.):
+# def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
-#     # possible values for n_points and n_sh
+#     # possible values for n_points and sh_order
 #     points = np.array([4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
 #                        225, 256, 289, 324, 361, 400, 441, 484, 529, 576, 625,
 #                        676, 729, 784, 841, 900], dtype=int)
@@ -663,25 +667,25 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
 #     orders = np.array(np.floor(np.sqrt(points) - 1), dtype=int)
 
 #     # list possible sh orders and number of points
-#     if n_points is None and n_sh is None:
+#     if n_points is None and sh_order is None:
 #         for o, d in zip(orders, points):
 #             print(f"SH order {o}, number of points {d}")
 
 #         return None
 
 #     # check input
-#     if n_points is not None and n_sh is not None:
-#         raise ValueError("Either n_points or n_sh must be None.")
+#     if n_points is not None and sh_order is not None:
+#         raise ValueError("Either n_points or sh_order must be None.")
 
 #     # check if the order is available
-#     if n_sh is not None:
-#         if n_sh not in orders:
+#     if sh_order is not None:
+#         if sh_order not in orders:
 #             str_orders = [f"{o}" for o in orders]
-#             raise ValueError("Invalid spherical harmonics order 'n_sh'. \
+#             raise ValueError("Invalid spherical harmonics order 'sh_order'. \
 #                              Valid orders are: {}.".format(
 #                              ', '.join(str_orders)))
 
-#         n_points = int(points[orders == n_sh])
+#         n_points = int(points[orders == sh_order])
 
 #     # check if n_points is available
 #     if n_points not in points:
@@ -689,8 +693,8 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
 #         raise ValueError("Invalid number of points n_points. Valid points \
 #                          are: {}.".format(', '.join(str_points)))
 
-#     # calculate n_sh
-#     n_sh = int(orders[points == n_points])
+#     # calculate sh_order
+#     sh_order = int(orders[points == n_points])
 
 #     # get the samlpling points
 #     fliege = sio.loadmat("samplings_fliege.mat",
@@ -702,7 +706,7 @@ def sph_lebedev(n_points=None, n_sh=None, radius=1.):
 #                            fliege[:, 1],
 #                            radius,
 #                            domain='sph', convention='top_colat', unit='rad',
-#                            n_sh=n_sh, weights=fliege[:, 2],
+#                            sh_order=sh_order, weights=fliege[:, 2],
 #                            comment='spherical Fliege sampling grid')
 
 #     return sampling
