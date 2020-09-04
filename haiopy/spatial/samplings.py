@@ -6,7 +6,7 @@ import numpy as np
 import scipy.io as sio
 import urllib3
 from haiopy.coordinates import Coordinates
-from haiopy.spatial import samplings_lebedev
+from haiopy.spatial.external import samplings_lebedev
 
 
 def cart_equidistant_cube(n_points):
