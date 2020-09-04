@@ -706,16 +706,11 @@ class Coordinates(object):
 
         return distance, index, mask
 
-    def get_nearest_cart(self, points_1, points_2, points_3, distance=0,
+    def get_nearest_cart(self, points_1, points_2, points_3, distance,
                          domain='cart', convention='right', unit='met',
                          show=False, atol=1e-15):
         """
-        Find coordinates within certain distance to one or more points.
-
-        If the function is called with the default values for `distance` and
-        `atol` it can be used to get a point that is contained in the
-        Coordinates object (All rounding error due to coordinate conversions
-        are smaller than the `atol` default of 1e-15).
+        Find coordinates within certain distance in meters to querry points.
 
         Parameters
         ----------
@@ -724,7 +719,7 @@ class Coordinates(object):
             nearest neighbors are searched.
         distance : number
             Euclidean distance in meters in which the nearest points are
-            searched. Must be >= 0. The default is 0.
+            searched. Must be >= 0.
         domain : string
             domain of point, see self.systems('all').
         convention: string
@@ -767,16 +762,11 @@ class Coordinates(object):
 
         return index, mask
 
-    def get_nearest_sph(self, points_1, points_2, points_3, distance=0,
+    def get_nearest_sph(self, points_1, points_2, points_3, distance,
                         domain='sph', convention='top_colat', unit='rad',
                         show=False, atol=1e-15):
         """
-        Find coordinates within certain distance to one or more points.
-
-        If the function is called with the default values for `distance` and
-        `atol` it can be used to get a point that is contained in the
-        Coordinates object (All rounding error due to coordinate conversions
-        are smaller than the `atol` default of 1e-15).
+        Find coordinates within certain angular distance to querry points.
 
         Parameters
         ----------
@@ -785,7 +775,7 @@ class Coordinates(object):
             nearest neighbors are searched.
         distance : number
             Great circle distance in degrees in which the nearest points are
-            searched. Must be >= 0 and <= 180. The default is 0.
+            searched. Must be >= 0 and <= 180.
         domain : string
             domain of point, see self.systems('all').
         convention: string
