@@ -31,6 +31,10 @@ def test_orientations_from_view_up():
     views = Coordinates(views[:, 0], views[:, 1], views[:, 2])
     ups = Coordinates(ups[:, 0], ups[:, 1], ups[:, 2])
     Orientations.from_view_up(views, ups)
+    # view and up counts not matching
+    views = [[1, 0, 0], [0, 0, 1]]
+    ups = [[0, 1, 0]]
+    Orientations.from_view_up(views, ups)
 
 
 def test_orientations_from_view_up_invalid():
@@ -43,11 +47,6 @@ def test_orientations_from_view_up_invalid():
     # any of views and ups has zero-length
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    with raises(ValueError):
-        Orientations.from_view_up(views, ups)
-    # view and up counts not matching
-    views = [[1, 0, 0], [0, 0, 1]]
-    ups = [[0, 1, 0]]
     with raises(ValueError):
         Orientations.from_view_up(views, ups)
     # views' and ups' shape must be (N, 3) or (3,)

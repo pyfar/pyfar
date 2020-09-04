@@ -55,7 +55,7 @@ class Orientations(Rotation):
 
         Orientations are internally stored as quaternions for better spherical
         linear interpolation (SLERP) and spherical harmonics operations.
-        More intuitionally, they can be expressed as view and and up vectors
+        More intuitionally, they can be expressed as view and up vectors
         which cannot be collinear. In this case, they are restricted to be
         perpendicular to minimize rounding errors.
 
@@ -77,12 +77,20 @@ class Orientations(Rotation):
         """
         views = np.atleast_2d(views).astype(np.float64)
         ups = np.atleast_2d(ups).astype(np.float64)
-        if views.shape != ups.shape:
-            raise ValueError(
-                "There must be the same number of View and Up Vectors.")
-        if views.ndim > 2 or views.shape[-1] != 3:
-            raise ValueError(f"Expected `views` and `ups` to have shape (N, 3)"
-                             f" or (3,), got {views.shape}")
+        
+        if (views.ndim > 2 or views.shape[-1] != 3
+                or ups.ndim > 2 or ups.shape[-1] != 3):
+            raise ValueError(f"Expected `views` and `ups` to have shape (N, 3) "
+                             f"or (3,), got {views.shape}")
+        if views.shape == ups.shape:
+            pass
+        elif views.shape[0] > 1 and ups.shape[0] == 1:
+            ups = np.repeat(ups, views.shape[0], axis=0)
+        elif ups.shape[0] > 1 and views.shape[0] == 1:
+            views = np.repeat(views, ups.shape[0], axis=0)
+        else:
+            raise ValueError("Expected 1:1, 1:N or N:1 `views` and `ups` "
+                             f"not M:N, got {views.shape} and {ups.shape}")
 
         if not (np.all(np.linalg.norm(views, axis=1))
                 and np.all(np.linalg.norm(ups, axis=1))):
