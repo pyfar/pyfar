@@ -624,7 +624,7 @@ class Coordinates(object):
                         print(f"{nn + 1}: {coord} [{', '.join(cur_units)}]")
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
-    def show(self, mask=None):
+    def show(self, mask=None, **kwargs):
         """
         Show a scatter plot of the coordinate points.
 
@@ -633,20 +633,24 @@ class Coordinates(object):
         mask : boolean numpy array, None
             Plot points in black if mask==True and red if mask==False. The
             default is None, in which case all points are plotted in black.
+        kwargs : optional
+            key value arguments are passed to matplotlib.pyplot.scatter(). If a
+            mask is provided and the key `c` is contained in kwargs, it will be
+            overwritten.
 
         Returns
         -------
         None.
 
         """
-        if mask is None:
-            haiopy.plot.scatter(self)
-        else:
+        if mask is not None:
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
-            haiopy.plot.scatter(self, c=colors.flatten())
+            kwargs["c"] = colors.flatten()
+
+        haiopy.plot.scatter(self, **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',

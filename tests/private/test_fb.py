@@ -71,6 +71,7 @@ c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 
 d, idx, mask = c.get_nearest_k(0, 0, 1, 50, 'sph', 'top_elev', 'deg',
                                show=True)
+
 # idx, mask = c.get_nearest_cart(0,0,1, 1, 'sph', 'top_elev', 'deg', show=True)
 # idx, mask = c.get_nearest_sph(0,0,1, 90, 'sph', 'top_elev', 'deg', show=True)
 

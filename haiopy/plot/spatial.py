@@ -48,10 +48,8 @@ def scatter(coordinates, projection='3d', ax=None, set_ax=True, **kwargs):
         raise ValueError("Only three-dimensional axes supported.")
 
     # add defaults to kwargs
-    if 'marker' not in kwargs:
-        kwargs['marker'] = '.'
-    if 'c' not in kwargs:
-        kwargs['c'] = 'k'
+    kwargs['marker'] = kwargs.get('marker', '.')
+    kwargs['c'] = kwargs.get('c', 'k')
 
     # get cartesian points for scattering
     xyz = coordinates.get_cart()
