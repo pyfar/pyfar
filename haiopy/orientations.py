@@ -118,6 +118,15 @@ class Orientations(Rotation):
         positions : array_like, shape (O, 3), O is len(self)
             These are the positions of each vector triple. If not provided,
             all triples are positioned in the origin of the coordinate system.
+        show_views: bool
+            select wether to show the view vectors or not.
+            The default is True.
+        show_ups: bool
+            select wether to show the up vectors or not.
+            The default is True.
+        show_rights: bool
+            select wether to show the right vectors or not.
+            The default is True.
 
         """
         if positions is None:
