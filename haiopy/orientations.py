@@ -144,6 +144,8 @@ class Orientations(Rotation):
         # Create view, up and right vectors from Rotation object
         views, rights, ups = self.as_view_up_right()
 
+        kwargs.pop('color', None)
+
         ax = None
         if show_views:
             ax = haiopy.plot.quiver(
@@ -154,8 +156,6 @@ class Orientations(Rotation):
         if show_rights:
             ax = haiopy.plot.quiver(
                 positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
-
-        return ax
 
     def as_view_up_right(self):
         """Get Orientations as a view, up, and right vector.

@@ -632,8 +632,12 @@ class Coordinates(object):
         Parameters
         ----------
         mask : boolean numpy array, None
-            Plot points in black if mask==True and red if mask==False. The
+            Plot points in red where if mask==True and black elsewhere. The
             default is None, in which case all points are plotted in black.
+        kwargs : optional
+            key value arguments are passed to matplotlib.pyplot.scatter(). If a
+            mask is provided and the key `c` is contained in kwargs, it will be
+            overwritten.
 
         Returns
         -------
@@ -642,14 +646,14 @@ class Coordinates(object):
 
         """
         if mask is None:
-            return haiopy.plot.scatter(self)
-
-        mask = np.asarray(mask)
-        assert mask.shape == self.cshape,\
-            "'mask.shape' must be self.cshape"
-        colors = np.full(mask.shape, 'k')
-        colors[mask] = 'r'
-        return haiopy.plot.scatter(self, c=colors.flatten(), **kwargs)
+            haiopy.plot.scatter(self)
+        else:
+            mask = np.asarray(mask)
+            assert mask.shape == self.cshape,\
+                "'mask.shape' must be self.cshape"
+            colors = np.full(mask.shape, 'k')
+            colors[mask] = 'r'
+            haiopy.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',

@@ -110,7 +110,7 @@ def test_orientations_show(views, ups, positions, orientations):
     orientations.show(show_views=False, show_rights=False)
     orientations.show(show_ups=False, show_rights=False)
     orientations.show(positions=positions, show_views=False, show_ups=False)
-    
+
     # with positions provided as Coordinates
     positions = Coordinates([0, 5], [0, 0], [0, 0])
     orientations.show(positions)

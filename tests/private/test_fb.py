@@ -71,6 +71,7 @@ c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 
 d, idx, mask = c.get_nearest_k(0, 0, 1, 50, 'sph', 'top_elev', 'deg',
                                show=True)
+
 # idx, mask = c.get_nearest_cart(0,0,1, 1, 'sph', 'top_elev', 'deg', show=True)
 # idx, mask = c.get_nearest_sph(0,0,1, 90, 'sph', 'top_elev', 'deg', show=True)
 
@@ -123,14 +124,14 @@ d, idx, mask = c.get_nearest_k(0, 0, 1, 50, 'sph', 'top_elev', 'deg',
 #       - add information about effect of self.signal_type
 
 # generate audio signal
-x = haiopy.Signal(np.array([1,2,3,4]),44100)
+x = haiopy.Signal(np.array([1, 2, 3, 4]), 44100)
 
 # TODO: should also work with list - conversion inside Signal for ease of use
-x = haiopy.Signal([1,2,3,3],44100)
+x = haiopy.Signal([1, 2, 3, 3], 44100)
 
-x.time = np.array([2,0,0,0])
+x.time = np.array([2, 0, 0, 0])
 
-x.freq = np.array([1,1,1])
+x.freq = np.array([1, 1, 1])
 
 
 # TODO: Use only length?
@@ -155,7 +156,7 @@ x.samples
 #         be a good idea? We could also implictly assign coordinates() to an
 #         axis by matchting the length and throw an error if to axis have the
 #         same dimension.
-x.position = haiopy.Coordinates([0,1], [1,0], [0,0])
+x.position = haiopy.Coordinates([0, 1], [1, 0], [0, 0])
 
 # TODO: orientation
 #       - if position gets assigned to an axis, orientation also need to

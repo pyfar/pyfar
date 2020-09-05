@@ -168,7 +168,7 @@ def test_fft_parsevaL_theorem_sine_odd():
 def test_fft_parsevaL_theorem_noise_even():
     n_samples = 2**20
     np.random.seed(450)
-    noise_time = np.random.normal(0,1,n_samples)
+    noise_time = np.random.normal(0, 1, n_samples)
     noise_spec = fft.rfft(noise_time, n_samples, 'power')
 
     e_time = np.mean(np.abs(noise_time)**2)
@@ -180,7 +180,7 @@ def test_fft_parsevaL_theorem_noise_even():
 def test_fft_parsevaL_theorem_noise_odd():
     n_samples = 2**20+1
     np.random.seed(450)
-    noise_time = np.random.normal(0,1,n_samples)
+    noise_time = np.random.normal(0, 1, n_samples)
     noise_spec = fft.rfft(noise_time, n_samples, 'power')
 
     e_time = np.mean(np.abs(noise_time)**2)
@@ -218,7 +218,6 @@ def test_irfft_energy_imp_even_samples(impulse):
 
 def test_rfft_power_imp_even_samples(sine):
     n_samples = 1024
-    sampling_rate = 2e3
     spec = fft.rfft(sine, n_samples, 'power')
 
     truth = np.zeros(int(n_samples/2+1), dtype=np.complex)
@@ -251,7 +250,6 @@ def test_irfft_power_imp_odd_samples(sine_odd):
 
 def test_rfft_power_imp_odd_samples(sine_odd):
     n_samples = 1023
-    sampling_rate = 2e3
     s, f = sine_odd
     spec = fft.rfft(s, n_samples, 'power')
 
@@ -306,8 +304,8 @@ def sine():
 
     if fullperiod:
         num_periods = np.floor(num_samples / samplingrate * frequency)
-        # round to the nearest frequency resulting in a fully periodic sine signal
-        # in the given time interval
+        # round to the nearest frequency resulting in a fully periodic
+        # sine signal in the given time interval
         frequency = num_periods * samplingrate / num_samples
     times = np.arange(0, num_samples) / samplingrate
     signal = amplitude * np.cos(2 * np.pi * frequency * times)
@@ -333,8 +331,8 @@ def sine_odd():
 
     if fullperiod:
         num_periods = np.floor(num_samples / samplingrate * frequency)
-        # round to the nearest frequency resulting in a fully periodic sine signal
-        # in the given time interval
+        # round to the nearest frequency resulting in a fully periodic
+        # sine signal in the given time interval
         frequency = num_periods * samplingrate / num_samples
     times = np.arange(0, num_samples) / samplingrate
     signal = amplitude * np.cos(2 * np.pi * frequency * times)
