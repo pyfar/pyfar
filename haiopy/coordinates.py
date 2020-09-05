@@ -631,7 +631,7 @@ class Coordinates(object):
         Parameters
         ----------
         mask : boolean numpy array, None
-            Plot points in black if mask==True and red if mask==False. The
+            Plot points in red where if mask==True and black elsewhere. The
             default is None, in which case all points are plotted in black.
         kwargs : optional
             key value arguments are passed to matplotlib.pyplot.scatter(). If a
