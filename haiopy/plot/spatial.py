@@ -5,6 +5,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 
+__all__ = [Axes3D]
+
 
 def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
     """Plot the x, y, and z coordinates as a point cloud in three-dimensional
@@ -83,9 +85,7 @@ def quiver(
     ax = _setup_axes(
         projection, ax, set_ax, bounds=(min_val, max_val), **kwargs)
 
-    color = kwargs.get('color', None)
-
-    ax.quiver(*origins.T, *endpoints.T, color=color)
+    ax.quiver(*origins.T, *endpoints.T, **kwargs)
 
     return ax
 

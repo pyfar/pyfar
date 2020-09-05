@@ -109,7 +109,7 @@ class Orientations(Rotation):
         return super().from_matrix(rotation_matrix)
 
     def show(self, positions=None,
-             show_views=True, show_ups=True, show_rights=True):
+             show_views=True, show_ups=True, show_rights=True, **kwargs):
         """
         Visualize Orientations as view, up and right vectors in a quiver plot.
 
@@ -128,6 +128,11 @@ class Orientations(Rotation):
             select wether to show the right vectors or not.
             The default is True.
 
+        Returns
+        -------
+        ax : matplotlib.axes._subplots.Axes3DSubplot
+            The axis used for the plot.
+
         """
         if positions is None:
             positions = np.zeros((self._quat.shape[0], 3))
@@ -141,11 +146,16 @@ class Orientations(Rotation):
 
         ax = None
         if show_views:
-            ax = haiopy.plot.quiver(positions, views, color=(1, 0, 0))
+            ax = haiopy.plot.quiver(
+                positions, views, color=(1, 0, 0), **kwargs)
         if show_ups:
-            ax = haiopy.plot.quiver(positions, ups, ax=ax, color=(0, 1, 0))
+            ax = haiopy.plot.quiver(
+                positions, ups, ax=ax, color=(0, 1, 0), **kwargs)
         if show_rights:
-            ax = haiopy.plot.quiver(positions, rights, ax=ax, color=(0, 0, 1))
+            ax = haiopy.plot.quiver(
+                positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
+
+        return ax
 
     def as_view_up_right(self):
         """Get Orientations as a view, up, and right vector.

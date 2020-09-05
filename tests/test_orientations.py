@@ -137,9 +137,9 @@ def test_orientations_from_view_up_show_coordinate_system_change(views, ups):
     orient_from_cart.show(positions)
 
     # Convert to spherical: And again visualize to manually validate
-    views.get_sph()
-    ups.get_sph()
-    positions.get_sph()
+    views.get_sph(convert=True)
+    ups.get_sph(convert=True)
+    positions.get_sph(convert=True)
 
     orient_from_sph = Orientations.from_view_up(views, ups)
     orient_from_sph.show(positions)

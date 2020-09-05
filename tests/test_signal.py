@@ -1,10 +1,8 @@
-from unittest import mock
-
 import numpy as np
 import numpy.testing as npt
 import pytest
 
-from haiopy import Coordinates, Orientation, Signal
+from haiopy import Signal
 from haiopy import fft
 
 
@@ -78,10 +76,7 @@ def test_domain_setter_time_when_freq(sine):
 
 def test_signal_init_val(sine):
     """Test to init Signal with complete parameters."""
-    coord_mock = mock.Mock(spec_set=Coordinates())
-    orient_mock = mock.Mock(spec_set=Orientation())
-    signal = Signal(sine, 44100, domain="time", signal_type="power",
-                    position=coord_mock, orientation=orient_mock)
+    signal = Signal(sine, 44100, domain="time", signal_type="power")
     assert isinstance(signal, Signal)
 
 
@@ -101,7 +96,9 @@ def test_signal_init_false_coord(sine):
 
 
 def test_signal_init_false_orientation(sine):
-    """Test to init Signal with orientations that is not of type Orientations."""
+    """
+    Test to init Signal with orientations that is not of type Orientations.
+    """
     orientations_false = np.array([[1, 0, 0], [0, 1, 0]])
     with pytest.raises(TypeError):
         Signal(sine, 44100, orientations=orientations_false)
@@ -217,55 +214,6 @@ def test_signal_length(sine):
     signal = Signal(sine, 44100)
     length = (1000 - 1) / 44100
     assert signal.signal_length == length
-
-
-def test_getter_position(sine):
-    """Test if attribute position is accessed correctly."""
-    coord_mock = mock.Mock(spec_set=Coordinates())
-    signal = Signal(sine, 44100)
-    signal._position = coord_mock
-    assert signal.position == coord_mock
-
-
-def test_setter_position(sine):
-    """Test if attribute position is set correctly."""
-    coord_mock = mock.Mock(spec_set=Coordinates())
-    signal = Signal(sine, 44100)
-    signal.position = coord_mock
-    assert signal._position == coord_mock
-
-
-def test_setter_position_false_type(sine):
-    """Test if TypeError is raised when position is not set with Coordinates.
-    """
-    signal = Signal(sine, 44100)
-    with pytest.raises(TypeError):
-        signal.position = np.array([1, 1, 1])
-        pytest.raises(TypeError, matches="Input has to be Coordinates object")
-
-
-def test_getter_orientation(sine):
-    """Test if attribute orientations is accessed correctly."""
-    orient_mock = mock.Mock(spec_set=Orientation())
-    signal = Signal(sine, 44100)
-    signal._orientations = orient_mock
-    assert signal.orientations == orient_mock
-
-
-def test_setter_orientation(sine):
-    """Test if attribute orientations is set correctly."""
-    orient_mock = mock.Mock(spec_set=Orientation())
-    signal = Signal(sine, 44100)
-    signal.orientations = orient_mock
-    assert signal._orientations == orient_mock
-
-
-def test_setter_orientation_false_type(sine):
-    """Test if TypeError is raised when orientations is set incorrectly."""
-    signal = Signal(sine, 44100)
-    with pytest.raises(TypeError):
-        signal.orientations = np.array([[1, 0, 0], [0, 1, 0]])
-        pytest.raises(TypeError, matches="Input has to be Orientations object")
 
 
 def test_shape(sine, impulse):
