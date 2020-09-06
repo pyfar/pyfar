@@ -52,8 +52,8 @@ class Signal(Audio):
             Raw data type of the signal, optional
         position : Coordinates
             Coordinates object
-        orientation : Orientation
-            Orientation object
+        orientations : Orientations
+            Orientations object
         """
 
         Audio.__init__(self)
@@ -77,8 +77,9 @@ class Signal(Audio):
             self._n_samples = self._data.shape[-1]
         elif domain == 'freq':
             if n_samples is None:
-                warnings.warn("Number of time samples not given, assuming an\
-                    even number of samples from the number of frequency bins.")
+                warnings.warn(
+                    "Number of time samples not given, assuming an even "
+                    "number of samples from the number of frequency bins.")
                 n_bins = data.shape[-1]
                 n_samples = (n_bins - 1)*2
             self._n_samples = n_samples
@@ -153,8 +154,9 @@ class Signal(Audio):
         if new_num_bins == self.n_bins:
             n_samples = self.n_samples
         else:
-            warnings.warn("Number of frequency bins different will change, assuming an\
-                    even number of samples from the number of frequency bins.")
+            warnings.warn("Number of frequency bins different will change, "
+                          "assuming an even number of samples from the number "
+                          "of frequency bins.")
             n_samples = (new_num_bins - 1)*2
 
         self._data = spec

@@ -96,10 +96,12 @@ def test_signal_init_false_coord(sine):
 
 
 def test_signal_init_false_orientation(sine):
-    """Test to init Signal with orientation that is not of type Orientation."""
-    orientation_false = np.array([[1, 0, 0], [0, 1, 0]])
+    """
+    Test to init Signal with orientations that is not of type Orientations.
+    """
+    orientations_false = np.array([[1, 0, 0], [0, 1, 0]])
     with pytest.raises(TypeError):
-        Signal(sine, 44100, orientation=orientation_false)
+        Signal(sine, 44100, orientations=orientations_false)
         pytest.fail("Input value has to be coordinates object.")
 
 

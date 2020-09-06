@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
+import copy
 import re
 
 import haiopy
@@ -640,17 +641,19 @@ class Coordinates(object):
 
         Returns
         -------
-        None.
+        ax : matplotlib.axes._subplots.Axes3DSubplot
+            The axis used for the plot.
 
         """
-        if mask is not None:
+        if mask is None:
+            haiopy.plot.scatter(self)
+        else:
+            mask = np.asarray(mask)
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
-            kwargs["c"] = colors.flatten()
-
-        haiopy.plot.scatter(self, **kwargs)
+            haiopy.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',
@@ -1475,9 +1478,17 @@ class Coordinates(object):
 
         return new
 
+    def __array__(self):
+        """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
+        # make the new system
+        new_system = self._make_system('cart', convention='right', unit='met')
+        if self._system == new_system:
+            return self.get_cart()
+        # copy to avoid changing the coordinate system of the original object
+        return copy.deepcopy(self).get_cart()
+
     def __repr__(self):
         """Get info about Coordinates object."""
-
         # object type
         if self.cshape != (0,):
             obj = f"{self.cdim}D Coordinates object with {self.csize} points "\

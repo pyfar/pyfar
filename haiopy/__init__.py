@@ -9,9 +9,9 @@ __version__ = '0.1.0'
 
 from .haiopy import Signal
 from .coordinates import Coordinates
-from .orientation import Orientation
+from .orientations import Orientations
 
 import haiopy.plot as plot
 
 
-__all__ = ['Signal', 'Coordinates', 'Orientation', 'plot']
+__all__ = ['Signal', 'Coordinates', 'Orientations', 'plot']
