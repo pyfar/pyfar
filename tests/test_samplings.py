@@ -101,6 +101,24 @@ def test_sph_gaussian():
 # def test_sph_extremal():
 # def test_sph_t_design():
 
+def test_sph_euqal_angle():
+    # test with tuple
+    c = samplings.sph_equal_angle((10, 20))
+    assert isinstance(c, Coordinates)
+    # test with number
+    c = samplings.sph_equal_angle(10)
+    # test default radius
+    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    # test user radius
+    c = samplings.sph_equal_angle(10, 1.5)
+    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+
+    # test assertions
+    with raises(AssertionError):
+        c = samplings.sph_equal_angle((11, 20))
+    with raises(AssertionError):
+        c = samplings.sph_equal_angle((20, 11))
+
 
 def test_sph_great_circle():
     # test with default values

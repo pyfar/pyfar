@@ -24,6 +24,7 @@ c = samplings.sph_t_design(sh_order=9, criterion='const_angular_spread')
 c = samplings.sph_great_circle(match=90)
 c = samplings.sph_lebedev(sh_order=35)
 c = samplings.sph_fliege(100)
+c = samplings.sph_equal_angle((20, 180))
 
 c.show()
 

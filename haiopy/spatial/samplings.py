@@ -145,6 +145,10 @@ def sph_icosahedron(radius=1.):
 def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     """Generate an equiangular sampling of the sphere [1]_, Chapter 3.2.
 
+    This sampling does not contain points at the North and South Pole and is
+    typically used for spherical harmonics processing. See `sph_equal_angle()`
+    and `sph_great_circle()` for samplings containing points at the poles.
+
     Parameters
     ----------
     n_points : int, tuple of two ints
@@ -221,6 +225,10 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
 
 def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     """Generate sampling of the sphere based on the Gaussian quadrature [1]_.
+
+    This sampling does not contain points at the North and South Pole and is
+    typically used for spherical harmonics processing. See `sph_equal_angle()`
+    and `sph_great_circle()` for samplings containing points at the poles.
 
     Parameters
     ----------
@@ -477,6 +485,65 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
                            points[..., 2] * radius,
                            sh_order=sh_order,
                            comment='spherical T-design sampling grid')
+
+    return sampling
+
+
+def sph_equal_angle(delta_angles, radius=1.):
+    """
+    Generate sampling of the sphere with equally spaced angles.
+
+    This sampling does contain points at the North and South Pole. See
+    `sph_equiangular()` and `sph_gauss()` for samplings that do not contain
+    points at the poles.
+
+
+    Parameters
+    ----------
+    delta_angles : tuple, number
+        tuple that gives the angular spacing in azimuth and colatitude in
+        degrees. If a number is provided, the same spacing is applied in both
+        dimensions.
+    radius : number, optional
+        radius of the sampling grid. The default is 1.
+
+    Returns
+    -------
+    sampling : Coordinates
+        Sampling positions as Coordinate object
+
+    """
+
+    # get the angles
+    delta_angles = np.asarray(delta_angles)
+    if delta_angles.size == 2:
+        delta_phi = delta_angles[0]
+        delta_theta = delta_angles[1]
+    else:
+        delta_phi = delta_theta = delta_angles
+
+    # check if the angles can be distributed
+    assert 360 % delta_phi < 1e-15,\
+        "delta_phi must be an integer divisor of 360"
+    assert 180 % delta_theta < 1e-15,\
+        "delta_phi must be an integer divisor of 180"
+
+    # get the angles
+    phi_angles = np.arange(0, 360, delta_phi)
+    theta_angles = np.arange(delta_theta, 180, delta_theta)
+
+    # stack the angles
+    phi = np.tile(phi_angles, theta_angles.size)
+    theta = np.repeat(theta_angles, phi_angles.size)
+
+    # add North and South Pole
+    phi = np.concatenate(([0], phi, [0]))
+    theta = np.concatenate(([0], theta, [180]))
+
+    # make Coordinates object
+    sampling = Coordinates(phi, theta, radius,
+                           domain='sph', convention='top_colat', unit='deg',
+                           comment='equal angle spherical sampling grid')
 
     return sampling
 
