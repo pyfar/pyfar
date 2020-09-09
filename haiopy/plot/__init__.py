@@ -8,13 +8,14 @@ from .plot import (
     plot_time_dB
 )
 from .spatial import (
-    scatter
+    scatter,
+    quiver
 )
-
 
 __all__ = [
     plot_freq,
     plot_time,
     plot_time_dB,
-    scatter
+    scatter,
+    quiver
 ]

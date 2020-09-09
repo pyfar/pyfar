@@ -1,10 +1,6 @@
 import warnings
-
 import numpy as np
-
 from haiopy import fft as fft
-from haiopy.coordinates import Coordinates
-from haiopy.orientation import Orientation
 
 
 class Audio(object):
@@ -16,10 +12,9 @@ class Audio(object):
 
 class Signal(Audio):
     """Class for audio signals.
-
     Objects of this class contain data which is directly convertable between
-     time and frequency domain. Equally spaced samples or frequency bins,
-     respectively.
+    time and frequency domain. Equally spaced samples or frequency bins,
+    respectively.
 
     Attributes
     ----------
@@ -31,22 +26,16 @@ class Signal(Audio):
         Domain of data ('freq'/'time')
     dtype : string
         Raw data type of the signal, optional
-    position : Coordinates
-        Coordinates object
-    orientation : Orientation
-        Orientation object
-
 
     """
-    def __init__(self,
-                 data,
-                 sampling_rate,
-                 n_samples=None,
-                 domain='time',
-                 signal_type='energy',
-                 dtype=np.double,
-                 position=Coordinates(),
-                 orientation=Orientation()):
+    def __init__(
+            self,
+            data,
+            sampling_rate,
+            n_samples=None,
+            domain='time',
+            signal_type='energy',
+            dtype=np.double):
         """Init Signal with data, sampling rate and domain and signal type.
 
         Attributes
@@ -63,8 +52,8 @@ class Signal(Audio):
             Raw data type of the signal, optional
         position : Coordinates
             Coordinates object
-        orientation : Orientation
-            Orientation object
+        orientations : Orientations
+            Orientations object
         """
 
         Audio.__init__(self)
@@ -88,24 +77,13 @@ class Signal(Audio):
             self._n_samples = self._data.shape[-1]
         elif domain == 'freq':
             if n_samples is None:
-                warnings.warn("Number of time samples not given, assuming an\
-                    even number of samples from the number of frequency bins.")
+                warnings.warn(
+                    "Number of time samples not given, assuming an even "
+                    "number of samples from the number of frequency bins.")
                 n_bins = data.shape[-1]
                 n_samples = (n_bins - 1)*2
             self._n_samples = n_samples
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
-
-        if isinstance(position, Coordinates):
-            self._position = position
-        else:
-            raise TypeError(("Input value has to be a Coordinates object, "
-                             "not {}").format(type(position).__name__))
-
-        if isinstance(orientation, Orientation):
-            self._orientation = orientation
-        else:
-            raise TypeError(("Input value has to be a Orientation object, "
-                             "not {}").format(type(orientation).__name__))
 
     @property
     def domain(self):
@@ -176,8 +154,9 @@ class Signal(Audio):
         if new_num_bins == self.n_bins:
             n_samples = self.n_samples
         else:
-            warnings.warn("Number of frequency bins different will change, assuming an\
-                    even number of samples from the number of frequency bins.")
+            warnings.warn("Number of frequency bins different will change, "
+                          "assuming an even number of samples from the number "
+                          "of frequency bins.")
             n_samples = (new_num_bins - 1)*2
 
         self._data = spec
@@ -215,32 +194,6 @@ class Signal(Audio):
     def signal_length(self):
         """The length of the signal in seconds."""
         return (self.n_samples - 1) / self.sampling_rate
-
-    @property
-    def position(self):
-        """Coordinates of the object."""
-        return self._position
-
-    @position.setter
-    def position(self, value):
-        if isinstance(value, Coordinates):
-            self._position = value
-        else:
-            raise TypeError(("Input value has to be coordinates object, "
-                             "not {}").format(type(value).__name__))
-
-    @property
-    def orientation(self):
-        """Orientation of the object."""
-        return self._orientation
-
-    @orientation.setter
-    def orientation(self, value):
-        if isinstance(value, Orientation):
-            self._orientation = value
-        else:
-            raise TypeError(("Input value has to be orientation object, "
-                             "not {}").format(type(value).__name__))
 
     @property
     def shape(self):

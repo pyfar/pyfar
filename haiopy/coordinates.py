@@ -2,8 +2,8 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
-import re
 import copy
+import re
 
 import haiopy
 
@@ -65,7 +65,7 @@ class Coordinates(object):
     #       cases, but the cylindrical system has the coordinate radius_z
     #       because the definition differs from the sperical radius.
 
-    def __init__(self, points_1=[], points_2=[], points_3=[],
+    def __init__(self, points_1=None, points_2=None, points_3=None,
                  domain='cart', convention='right', unit=None,
                  weights=None, sh_order=None, comment=None):
         """
@@ -91,12 +91,19 @@ class Coordinates(object):
             same size as points_i, i.e., if points_i has five entries, weights
             must also have five entries. The default is None.
         sh_order : int
-            maximum sperical harmonics order of the sampling grid (Optional).
+            maximum sperical harmonic order of the sampling grid (Optional).
             The default is None.
         comment : str
             Any comment about the stored coordinate points (Optional). The
             default is None.
         """
+
+        if points_1 is None:
+            points_1 = []
+        if points_2 is None:
+            points_2 = []
+        if points_3 is None:
+            points_3 = []
 
         # init emtpy object
         super(Coordinates, self).__init__()
@@ -105,7 +112,7 @@ class Coordinates(object):
         self._system = self._make_system(domain, convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
         # save meta data
         self._set_weights(weights)
@@ -141,9 +148,9 @@ class Coordinates(object):
         self._system = self._make_system('cart', convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
-    def get_cart(self, convention='right', unit='met'):
+    def get_cart(self, convention='right', unit='met', convert=False):
         """
         Get coordinate points in cartesian coordinate systems.
 
@@ -155,6 +162,11 @@ class Coordinates(object):
         unit : string, optional
             unit in which the coordinate points are returned. The default is
             'met'.
+        convert : boolean, optional
+            if True, the internal representation of the samplings points will
+            be converted to the querried coordinate systems as defined by the
+            convention and unit. The default is Falsee, i.e., the internal
+            presentation remains as it is.
 
         Returns
         -------
@@ -174,7 +186,7 @@ class Coordinates(object):
 
         # check if object is empty
         if self.cshape == (0,):
-            raise Exception('Object is empty.')
+            raise ValueError('Object is empty.')
 
         # make the new system
         new_system = self._make_system('cart', convention, unit)
@@ -184,7 +196,7 @@ class Coordinates(object):
             return self._points
 
         # convert to radians
-        pts = self._points
+        pts = self._points.copy()
         for nn, unit in enumerate(self._system['units']):
             if unit == 'degrees':
                 pts[..., nn] = pts[..., nn] / 180 * np.pi
@@ -209,26 +221,24 @@ class Coordinates(object):
                 y, z, x = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             else:
-                raise Exception("Conversion for {} is not implemented.".
-                                format(self._system['convention']))
+                raise ValueError(
+                    f"Conversion for {self._system['convention']} \
+                    is not implemented.")
 
         # ... from cylindrical coordinate systems
         elif self._system['domain'] == 'cyl':
             if self._system['convention'] == 'top':
                 x, y, z = cyl2cart(pts[..., 0], pts[..., 1], pts[..., 2])
             else:
-                raise Exception("Conversion for {} is not implemented.".
-                                format(self._system['convention']))
+                raise ValueError(
+                    f"Conversion for {self._system['convention']} \
+                    is not implemented.")
         else:
-            raise Exception("Conversion for {} is not implemented.".
-                            format(convention))
+            raise ValueError(
+                f"Conversion for {convention} is not implemented.")
 
-        # set the new system
-        self._system = new_system
-
-        # set points and return
-        self._set_points(x, y, z)
-        return self._points
+        # return points and convert internal state if desired
+        return self._return_system(x, y, z, new_system, convert)
 
     def set_sph(self, points_1, points_2, points_3,
                 convention='top_colat', unit='rad'):
@@ -259,9 +269,9 @@ class Coordinates(object):
         self._system = self._make_system('sph', convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
-    def get_sph(self, convention='top_colat', unit='rad'):
+    def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         Get coordinate points in spherical coordinate systems.
 
@@ -273,6 +283,11 @@ class Coordinates(object):
         unit : string, optional
             unit in which the coordinate points are returned. The default is
             'met'.
+        convert : boolean, optional
+            if True, the internal representation of the samplings points will
+            be converted to the querried coordinate systems as defined by the
+            convention and unit. The default is Falsee, i.e., the internal
+            presentation remains as it is.
 
         Returns
         -------
@@ -292,7 +307,7 @@ class Coordinates(object):
 
         # check if object is empty
         if self.cshape == (0,):
-            raise Exception('Object is empty.')
+            raise ValueError('Object is empty.')
 
         # make the new system
         new_system = self._make_system('sph', convention, unit)
@@ -309,7 +324,7 @@ class Coordinates(object):
             eps = np.finfo(np.float64).eps
             pts[np.abs(pts) < eps] = 0
         else:
-            pts = self._points
+            pts = self._points.copy()
 
         # convert to spherical...
         # ... top polar systems
@@ -335,19 +350,16 @@ class Coordinates(object):
                 pts[..., 1], pts[..., 2], pts[..., 0])
 
         else:
-            raise Exception(f"Conversion for {convention} is not implemented.")
+            raise ValueError(
+                f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
         if new_system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi * 180
             pts_2 = pts_2 / np.pi * 180
 
-        # set the new system
-        self._system = new_system
-
-        # stack and return
-        self._set_points(pts_1, pts_2, pts_3)
-        return self._points
+        # return points and convert internal state if desired
+        return self._return_system(pts_1, pts_2, pts_3, new_system, convert)
 
     def set_cyl(self, points_1, points_2, points_3,
                 convention='top', unit='rad'):
@@ -378,9 +390,9 @@ class Coordinates(object):
         self._system = self._make_system('cyl', convention, unit)
 
         # save coordinates to self
-        self._set_points(points_1, points_2, points_3)
+        self._set_points(points_1, points_2, points_3, True)
 
-    def get_cyl(self, convention='top', unit='rad'):
+    def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         Get coordinate points in cylindircal coordinate system.
 
@@ -392,6 +404,11 @@ class Coordinates(object):
         unit : string, optional
             unit in which the coordinate points are returned. The default is
             'met'.
+        convert : boolean, optional
+            if True, the internal representation of the samplings points will
+            be converted to the querried coordinate systems as defined by the
+            convention and unit. The default is Falsee, i.e., the internal
+            presentation remains as it is.
 
         Returns
         -------
@@ -411,7 +428,7 @@ class Coordinates(object):
 
         # check if object is empty
         if self.cshape == (0,):
-            raise Exception('Object is empty.')
+            raise ValueError('Object is empty.')
 
         # make the new system
         new_system = self._make_system('cyl', convention, unit)
@@ -428,7 +445,7 @@ class Coordinates(object):
             eps = np.finfo(np.float64).eps
             pts[np.abs(pts) < eps] = 0
         else:
-            pts = self._points
+            pts = self._points.copy()
 
         # convert to cylindrical ...
         # ... top systems
@@ -437,18 +454,15 @@ class Coordinates(object):
                 pts[..., 0], pts[..., 1], pts[..., 2])
 
         else:
-            raise Exception(f"Conversion for {convention} is not implemented.")
+            raise ValueError(
+                f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
         if self._system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi * 180
 
-        # set the new system
-        self._system = new_system
-
-        # stack and return
-        self._set_points(pts_1, pts_2, pts_3)
-        return self._points
+        # return points and convert internal state if desired
+        return self._return_system(pts_1, pts_2, pts_3, new_system, convert)
 
     @property
     def weights(self):
@@ -462,12 +476,12 @@ class Coordinates(object):
 
     @property
     def sh_order(self):
-        """Get the maximum spherical harmonics order."""
+        """Get the maximum spherical harmonic order."""
         return self._sh_order
 
     @sh_order.setter
     def sh_order(self, value):
-        """Set the maximum spherical harmonics order."""
+        """Set the maximum spherical harmonic order."""
         self._sh_order = value
 
     @property
@@ -611,29 +625,35 @@ class Coordinates(object):
                         print(f"{nn + 1}: {coord} [{', '.join(cur_units)}]")
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
-    def show(self, mask=None):
+    def show(self, mask=None, **kwargs):
         """
         Show a scatter plot of the coordinate points.
 
         Parameters
         ----------
         mask : boolean numpy array, None
-            Plot points in black if mask==True and red if mask==False. The
+            Plot points in red where if mask==True and black elsewhere. The
             default is None, in which case all points are plotted in black.
+        kwargs : optional
+            key value arguments are passed to matplotlib.pyplot.scatter(). If a
+            mask is provided and the key `c` is contained in kwargs, it will be
+            overwritten.
 
         Returns
         -------
-        None.
+        ax : matplotlib.axes._subplots.Axes3DSubplot
+            The axis used for the plot.
 
         """
         if mask is None:
             haiopy.plot.scatter(self)
         else:
+            mask = np.asarray(mask)
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
-            haiopy.plot.scatter(self, c=colors.flatten())
+            haiopy.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',
@@ -693,11 +713,11 @@ class Coordinates(object):
 
         return distance, index, mask
 
-    def get_nearest_cart(self, points_1, points_2, points_3, distance=1,
+    def get_nearest_cart(self, points_1, points_2, points_3, distance,
                          domain='cart', convention='right', unit='met',
                          show=False, atol=1e-15):
         """
-        Find coordinates within certain distance to one or more points.
+        Find coordinates within certain distance in meters to querry points.
 
         Parameters
         ----------
@@ -705,7 +725,8 @@ class Coordinates(object):
             first, second and third coordinate of the points to which the
             nearest neighbors are searched.
         distance : number
-            Euclidean distance in meters. Must be >= 0. The default is 1.
+            Euclidean distance in meters in which the nearest points are
+            searched. Must be >= 0.
         domain : string
             domain of point, see self.systems('all').
         convention: string
@@ -748,11 +769,11 @@ class Coordinates(object):
 
         return index, mask
 
-    def get_nearest_sph(self, points_1, points_2, points_3, distance=1,
+    def get_nearest_sph(self, points_1, points_2, points_3, distance,
                         domain='sph', convention='top_colat', unit='rad',
                         show=False, atol=1e-15):
         """
-        Find coordinates within certain distance to one or more points.
+        Find coordinates within certain angular distance to querry points.
 
         Parameters
         ----------
@@ -760,8 +781,8 @@ class Coordinates(object):
             first, second and third coordinate of the points to which the
             nearest neighbors are searched.
         distance : number
-            Great circle distance in degrees. Must be >= 0 and <= 180. The
-            default is 1.
+            Great circle distance in degrees in which the nearest points are
+            searched. Must be >= 0 and <= 180.
         domain : string
             domain of point, see self.systems('all').
         convention: string
@@ -795,16 +816,16 @@ class Coordinates(object):
         """
 
         # check the input
-        assert distance >= 0 and distance <= 180, "distance must be >= 0 and \
-                                                  <= 180."
+        assert distance >= 0 and distance <= 180, \
+            "distance must be >= 0 and <= 180."
 
         # get radius and check for equality
-        radius = copy.deepcopy(self).get_sph()[..., 2]
+        radius = self.get_sph()[..., 2]
         delta_radius = np.max(radius) - np.min(radius)
         if delta_radius > 1e-15:
-            raise ValueError("get_nearest_sph only works if all points have "
-                             "the same radius. Differences are larger than "
-                             "1e-15")
+            raise ValueError(
+                "get_nearest_sph only works if all points have the same \
+                radius. Differences are larger than 1e-15")
 
         # get the points
         distance, index, mask = self._get_nearest(
@@ -882,7 +903,7 @@ class Coordinates(object):
                 rng[1] = (rng[1] - low) % (upp - low) + low
 
         # get the coordinates
-        coords = eval(f"copy.deepcopy(self).get_{domain}('{convention}')")
+        coords = eval(f"self.get_{domain}('{convention}')")
         coords = coords[..., index]
 
         # get the mask
@@ -1267,13 +1288,40 @@ class Coordinates(object):
 
         return system
 
-    def _set_points(self, points_1, points_2, points_3):
+    def _return_system(self, pts1, pts2, pts3, new_system, convert):
+
+        if convert:
+            # set the new system
+            self._system = new_system
+            # return points with conversion
+            self._set_points(pts1, pts2, pts3, True)
+            return self._points
+        else:
+            # return points without conversion
+            return self._set_points(pts1, pts2, pts3, system=new_system)
+
+    def _set_points(self, points_1, points_2, points_3,
+                    convert=False, system=None):
         """
-        Check and add points to self.
+        Check points and convert to matrix.
+
+        Parameters
+        ----------
+        convert : boolean, optional
+            Set self._points if convert = True. Return points as
+            matrix otherwise. The fefault is False.
+        system: dict, optional
+            The coordinate system against which the range of the points are
+            checked as returned from self._make_system. If system = None
+            self._system is used.
 
         Set self._points, which is an atleast_2d numpy array of shape
         [L,M,...,N, 3].
         """
+
+        # get coordinate system against the points are checked
+        if system is None:
+            system = self._system
 
         # cast to numpy array
         pts = [np.atleast_2d(np.asarray(points_1, dtype=np.float64)),
@@ -1297,17 +1345,18 @@ class Coordinates(object):
         # check the range of points
         for nn, p in enumerate(pts):
             # get type and range
-            c = self._system['coordinates'][nn]
-            c_type = self._system[c][0]
-            c_range = np.array(self._system[c][1])
+            c = system['coordinates'][nn]
+            c_type = system[c][0]
+            c_range = np.array(system[c][1])
             # range to degrees
-            if self._system['units'][nn] == 'degrees':
+            if system['units'][nn] == 'degrees':
                 c_range = np.round(c_range / np.pi * 180)
 
             # check bounds (cyclic values could be wraped but this is safer)
             if c_type in ['bound', 'cyclic']:
                 assert ((p >= c_range[0]) & (p <= c_range[1])).all(),\
-                       f"Values of points_{nn} must be in the range {c_range}"
+                       f"Values of points_{nn+1} must be in the range \
+                       {c_range}"
 
         # repeat scalar entries if non-scalars exists
         if len(shapes):
@@ -1333,8 +1382,11 @@ class Coordinates(object):
         eps = np.finfo(np.float64).eps
         pts[np.abs(pts) < eps] = 0
 
-        # save to class variable
-        self._points = pts
+        if convert:
+            # save to class variable
+            self._points = pts
+        else:
+            return pts
 
     def _set_weights(self, weights):
         """
@@ -1409,18 +1461,15 @@ class Coordinates(object):
     def _make_kdtree(self):
         """Make a numpy KDTree for fast search of nearest points."""
 
-        # copy to avoid changes in the original object
-        xyz = copy.deepcopy(self).get_cart()
-        # get the tree
+        xyz = self.get_cart()
         kdtree = cKDTree(xyz.reshape((self.csize, 3)))
 
         return kdtree
 
     def __getitem__(self, index):
-        """Return copy of Coordinates object at index."""
+        """Return mutable slice of Coordinates object at index."""
 
-        # get copy
-        new = copy.deepcopy(self)
+        new = self
         # slice points
         new._points = new._points[index]
         # slice weights
@@ -1429,9 +1478,17 @@ class Coordinates(object):
 
         return new
 
+    def __array__(self):
+        """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
+        # make the new system
+        new_system = self._make_system('cart', convention='right', unit='met')
+        if self._system == new_system:
+            return self.get_cart()
+        # copy to avoid changing the coordinate system of the original object
+        return copy.deepcopy(self).get_cart()
+
     def __repr__(self):
         """Get info about Coordinates object."""
-
         # object type
         if self.cshape != (0,):
             obj = f"{self.cdim}D Coordinates object with {self.csize} points "\
@@ -1457,7 +1514,7 @@ class Coordinates(object):
 
         # check for sh_order
         if self._sh_order is not None:
-            _repr += f"\nSpherical harmonics order: {self._sh_order}"
+            _repr += f"\nSpherical harmonic order: {self._sh_order}"
 
         # check for comment
         if self._comment is not None:

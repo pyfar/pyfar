@@ -14,14 +14,17 @@ from haiopy.spatial import samplings
 
 # %% test samplings
 
-c = samplings.cube_equidistant(11)
-c = samplings.dodecahedron()
-c = samplings.icosahedron()
-c = samplings.sphere_equiangular(10)
-c = samplings.sphere_gaussian(10)
-c = samplings.hyperinterpolation(10)
-c = samplings.spherical_t_design(15, 'const_angular_spread')
-c = samplings.great_circle_grid(match=90)
+c = samplings.cart_equidistant_cube(11)
+c = samplings.sph_dodecahedron()
+c = samplings.sph_icosahedron()
+c = samplings.sph_equiangular(5)
+c = samplings.sph_gaussian(sh_order=1)
+c = samplings.sph_extremal(sh_order=15, radius=2)
+c = samplings.sph_t_design(sh_order=9, criterion='const_angular_spread')
+c = samplings.sph_great_circle(match=90)
+c = samplings.sph_lebedev(sh_order=35)
+# c = samplings.sph_fliege(100)
+
 c.show()
 
 # %% test rotation
@@ -68,6 +71,7 @@ c = Coordinates(az, el, 1, 'sph', 'top_elev', 'deg')
 
 d, idx, mask = c.get_nearest_k(0, 0, 1, 50, 'sph', 'top_elev', 'deg',
                                show=True)
+
 # idx, mask = c.get_nearest_cart(0,0,1, 1, 'sph', 'top_elev', 'deg', show=True)
 # idx, mask = c.get_nearest_sph(0,0,1, 90, 'sph', 'top_elev', 'deg', show=True)
 
@@ -112,21 +116,22 @@ d, idx, mask = c.get_nearest_k(0, 0, 1, 50, 'sph', 'top_elev', 'deg',
 #       structure is ready
 
 # TODO: Bugs
-#       - constructor not working with list (x = haiopy.Signal([1,2,3,3],44100))
+#       - constructor not working with list
+#         (x = haiopy.Signal([1,2,3,3],44100))
 #       - __repr__ only works for 2D arrays
 
 # TODO: Documentation
 #       - add information about effect of self.signal_type
 
 # generate audio signal
-x = haiopy.Signal(np.array([1,2,3,4]),44100)
+x = haiopy.Signal(np.array([1, 2, 3, 4]), 44100)
 
 # TODO: should also work with list - conversion inside Signal for ease of use
-x = haiopy.Signal([1,2,3,3],44100)
+x = haiopy.Signal([1, 2, 3, 3], 44100)
 
-x.time = np.array([2,0,0,0])
+x.time = np.array([2, 0, 0, 0])
 
-x.freq = np.array([1,1,1])
+x.freq = np.array([1, 1, 1])
 
 
 # TODO: Use only length?
@@ -136,7 +141,8 @@ x.signal_length
 x.n_samples
 x.n_bins
 
-# TODO: String argument to get times and frequencies in samples, s, ms, , kHz, etc?
+# TODO: String argument to get times and frequencies in samples, s, ms, , kHz,
+#       etc?
 x.times
 x.frequencies
 # TODO: get times in samples?
@@ -150,7 +156,7 @@ x.samples
 #         be a good idea? We could also implictly assign coordinates() to an
 #         axis by matchting the length and throw an error if to axis have the
 #         same dimension.
-x.position = haiopy.Coordinates([0,1], [1,0], [0,0])
+x.position = haiopy.Coordinates([0, 1], [1, 0], [0, 0])
 
 # TODO: orientation
 #       - if position gets assigned to an axis, orientation also need to

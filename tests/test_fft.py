@@ -504,8 +504,8 @@ def sine():
 
     if fullperiod:
         num_periods = np.floor(num_samples / samplingrate * frequency)
-        # round to the nearest frequency resulting in a fully periodic sine signal
-        # in the given time interval
+        # round to the nearest frequency resulting in a fully periodic
+        # sine signal in the given time interval
         frequency = num_periods * samplingrate / num_samples
     times = np.arange(0, num_samples) / samplingrate
     signal = amplitude * np.cos(2 * np.pi * frequency * times)
@@ -531,8 +531,8 @@ def sine_odd():
 
     if fullperiod:
         num_periods = np.floor(num_samples / samplingrate * frequency)
-        # round to the nearest frequency resulting in a fully periodic sine
-        # signal in the given time interval
+        # round to the nearest frequency resulting in a fully periodic
+        # sine signal in the given time interval
         frequency = num_periods * samplingrate / num_samples
     times = np.arange(0, num_samples) / samplingrate
     signal = amplitude * np.cos(2 * np.pi * frequency * times)
