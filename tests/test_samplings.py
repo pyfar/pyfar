@@ -196,3 +196,9 @@ def test_sph_fliege():
     # test user radius
     c = samplings.sph_fliege(4, radius=1.5)
     npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+
+    # test exceptions
+    with raises(ValueError):
+        c = samplings.sph_fliege(9, 2)
+    with raises(ValueError):
+        c = samplings.sph_fliege(30)
