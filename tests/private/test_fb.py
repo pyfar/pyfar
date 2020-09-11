@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed May  6 19:46:11 2020
-
-@author: fabian
-"""
+# %%
 
 import numpy as np
 import haiopy
