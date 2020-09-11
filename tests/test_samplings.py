@@ -101,7 +101,7 @@ def test_sph_gaussian():
 # def test_sph_extremal():
 # def test_sph_t_design():
 
-def test_sph_euqal_angle():
+def test_sph_equal_angle():
     # test with tuple
     c = samplings.sph_equal_angle((10, 20))
     assert isinstance(c, Coordinates)

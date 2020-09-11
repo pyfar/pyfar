@@ -848,26 +848,27 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     if n_points is not None and sh_order is not None:
         raise ValueError("Either n_points or sh_order must be None.")
 
-    # check if the order is available
     if sh_order is not None:
+        # check if the order is available
         if sh_order not in orders:
             str_orders = [f"{o}" for o in orders]
             raise ValueError("Invalid spherical harmonic order 'sh_order'. \
                               Valid orders are: {}.".format(
                               ', '.join(str_orders)))
 
+        # assign n_points
         n_points = int(points[orders == sh_order])
+    else:
+        # check if n_points is available
+        if n_points not in points:
+            str_points = [f"{d}" for d in points]
+            raise ValueError("Invalid number of points n_points. Valid points \
+                            are: {}.".format(', '.join(str_points)))
 
-    # check if n_points is available
-    if n_points not in points:
-        str_points = [f"{d}" for d in points]
-        raise ValueError("Invalid number of points n_points. Valid points \
-                          are: {}.".format(', '.join(str_points)))
+        # assign sh_order
+        sh_order = int(orders[points == n_points])
 
-    # calculate sh_order
-    sh_order = int(orders[points == n_points])
-
-    # get the samlpling points
+    # get the sampling points
     fliege = sio.loadmat(os.path.join(
         os.path.dirname(__file__), "external", "samplings_fliege.mat"),
         variable_names=f"Fliege_{int(n_points)}")
