@@ -550,7 +550,7 @@ def sph_equal_angle(delta_angles, radius=1.):
 
 def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
                      azimuth_res=1, match=360):
-    r"""
+    """
     Spherical sampling grid according to the great circle distance criterion.
 
     Sampling grid where neighboring points of the same elevation have approx.
@@ -560,8 +560,8 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     ----------
     elevation : array like, optional
         Contains the elevation from wich the sampling grid is generated, with
-        :math:`-90^\circ\leq elevation \leq 90^\circ` (:math:`90^\circ`:
-        North Pole, :math:`-90^\circ`: South Pole). The default is
+        :math:`-90^\\circ\\leq elevation \\leq 90^\\circ` (:math:`90^\\circ`:
+        North Pole, :math:`-90^\\circ`: South Pole). The default is
         np.linspace(-90, 90, 19).
     gcd : number, optional
         Desired great circle distance (GCD). Note that the actual GCD of the
