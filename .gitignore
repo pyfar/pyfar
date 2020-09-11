@@ -110,3 +110,6 @@ venv.bak/
 
 # macOS
 .DS_Store
+
+# external data that os loaded from the web
+haiopy/spatial/external/samplings_extremal*

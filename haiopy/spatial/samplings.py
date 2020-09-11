@@ -293,7 +293,8 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
 
 def sph_extremal(n_points=None, sh_order=None, radius=1.):
     """Gives the points of a Hyperinterpolation sampling grid
-    after Sloan and Womersley [1]_.
+    after Sloan and Womersley [1]_. The samplings are available for
+    `1 <= sh_order <= 99` (`n_points = (sh_order + 1)^2`)
 
     Parameters
     ----------
@@ -323,7 +324,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     .. [1]  I. H. Sloan and R. S. Womersley, “Extremal Systems of Points and
             Numerical Integration on the Sphere,” Advances in Computational
             Mathematics, vol. 21, no. 1/2, pp. 107–125, 2004.
-    .. [2]  http://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/index.html
+    .. [2]  https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/
 
     """
 
@@ -337,19 +338,17 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     else:
         sh_order = np.sqrt(n_points) - 1
 
-    # load the data
-    filename = "md%03d.%05d" % (sh_order, n_points)
-    url = "https://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/"
-    fileurl = url + filename
+    # download data if necessary
+    filename = "samplings_extremal_md%03d.%05d" % (sh_order, n_points)
+    filename = os.path.join(os.path.dirname(__file__), "external",  filename)
+    if not os.path.exists(filename):
+        _load_sph_extremal_data('all')
 
-    http = urllib3.PoolManager(cert_reqs=False)
-    http_data = http.urlopen('GET', fileurl)
+    # open data
+    with open(filename, 'rb') as f:
+        file_data = f.read()
 
-    if http_data.status == 200:
-        file_data = http_data.data.decode()
-    else:
-        raise ConnectionError("Connection error. Please check your internet \
-                connection.")
+    file_data = file_data.decode()
 
     # format data
     file_data = np.fromstring(
@@ -815,3 +814,41 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
                            comment='spherical Fliege sampling grid')
 
     return sampling
+
+
+def _load_sph_extremal_data(data='all'):
+
+    # set the SH orders to be read
+    if data.lower() == 'all':
+        orders = range(1, 100)
+    elif data.lower() == 'test':
+        orders = [1, 2, 3]
+
+    print("Loading sampling points from \
+        https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/. \
+        This might take a while but is only done once.")
+
+    http = urllib3.PoolManager(cert_reqs=False)
+    prefix = 'samplings_extremal_'
+
+    for sh_order in orders:
+        # number of sampling points
+        n_points = (sh_order + 1)**2
+
+        # load the data
+        filename = "md%03d.%05d" % (sh_order, n_points)
+        url = "https://web.maths.unsw.edu.au/~rsw/Sphere/S2Pts/MD/"
+        fileurl = url + filename
+
+        http_data = http.urlopen('GET', fileurl)
+
+        # save the data
+        if http_data.status == 200:
+            save_name = os.path.join(
+                os.path.dirname(__file__), "external", prefix + filename)
+            print(f'Loading file {sh_order}/{len(orders)}')
+            with open(save_name, 'wb') as out:
+                out.write(http_data.data)
+        else:
+            raise ConnectionError("Connection error. Please check your internet \
+                    connection.")
