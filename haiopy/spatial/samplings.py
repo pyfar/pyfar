@@ -145,6 +145,10 @@ def sph_icosahedron(radius=1.):
 def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     """Generate an equiangular sampling of the sphere [1]_, Chapter 3.2.
 
+    This sampling does not contain points at the North and South Pole and is
+    typically used for spherical harmonics processing. See `sph_equal_angle()`
+    and `sph_great_circle()` for samplings containing points at the poles.
+
     Parameters
     ----------
     n_points : int, tuple of two ints
@@ -221,6 +225,10 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
 
 def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     """Generate sampling of the sphere based on the Gaussian quadrature [1]_.
+
+    This sampling does not contain points at the North and South Pole and is
+    typically used for spherical harmonics processing. See `sph_equal_angle()`
+    and `sph_great_circle()` for samplings containing points at the poles.
 
     Parameters
     ----------
@@ -500,9 +508,70 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     return sampling
 
 
+def sph_equal_angle(delta_angles, radius=1.):
+    """
+    Generate sampling of the sphere with equally spaced angles.
+
+    This sampling does contain points at the North and South Pole. See
+    `sph_equiangular()` and `sph_gauss()` for samplings that do not contain
+    points at the poles.
+
+
+    Parameters
+    ----------
+    delta_angles : tuple, number
+        tuple that gives the angular spacing in azimuth and colatitude in
+        degrees. If a number is provided, the same spacing is applied in both
+        dimensions.
+    radius : number, optional
+        radius of the sampling grid. The default is 1.
+
+    Returns
+    -------
+    sampling : Coordinates
+        Sampling positions as Coordinate object
+
+    """
+
+    # get the angles
+    delta_angles = np.asarray(delta_angles)
+    if delta_angles.size == 2:
+        delta_phi = delta_angles[0]
+        delta_theta = delta_angles[1]
+    else:
+        delta_phi = delta_angles
+        delta_theta = delta_angles
+
+    # check if the angles can be distributed
+    eps = np.finfo('float').eps
+    if not (np.abs(360 % delta_phi) < 2*eps):
+        raise ValueError("delta_phi must be an integer divisor of 360")
+    if not (np.abs(180 % delta_theta) < 2*eps):
+        raise ValueError("delta_theta must be an integer divisor of 180")
+
+    # get the angles
+    phi_angles = np.arange(0, 360, delta_phi)
+    theta_angles = np.arange(delta_theta, 180, delta_theta)
+
+    # stack the angles
+    phi = np.tile(phi_angles, theta_angles.size)
+    theta = np.repeat(theta_angles, phi_angles.size)
+
+    # add North and South Pole
+    phi = np.concatenate(([0], phi, [0]))
+    theta = np.concatenate(([0], theta, [180]))
+
+    # make Coordinates object
+    sampling = Coordinates(phi, theta, radius,
+                           domain='sph', convention='top_colat', unit='deg',
+                           comment='equal angle spherical sampling grid')
+
+    return sampling
+
+
 def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
                      azimuth_res=1, match=360):
-    r"""
+    """
     Spherical sampling grid according to the great circle distance criterion.
 
     Sampling grid where neighboring points of the same elevation have approx.
@@ -512,8 +581,8 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     ----------
     elevation : array like, optional
         Contains the elevation from wich the sampling grid is generated, with
-        :math:`-90^\circ\leq elevation \leq 90^\circ` (:math:`90^\circ`:
-        North Pole, :math:`-90^\circ`: South Pole). The default is
+        :math:`-90^\\circ\\leq elevation \\leq 90^\\circ` (:math:`90^\\circ`:
+        North Pole, :math:`-90^\\circ`: South Pole). The default is
         np.linspace(-90, 90, 19).
     gcd : number, optional
         Desired great circle distance (GCD). Note that the actual GCD of the
@@ -801,26 +870,27 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     if n_points is not None and sh_order is not None:
         raise ValueError("Either n_points or sh_order must be None.")
 
-    # check if the order is available
     if sh_order is not None:
+        # check if the order is available
         if sh_order not in orders:
             str_orders = [f"{o}" for o in orders]
             raise ValueError("Invalid spherical harmonic order 'sh_order'. \
                               Valid orders are: {}.".format(
                               ', '.join(str_orders)))
 
+        # assign n_points
         n_points = int(points[orders == sh_order])
+    else:
+        # check if n_points is available
+        if n_points not in points:
+            str_points = [f"{d}" for d in points]
+            raise ValueError("Invalid number of points n_points. Valid points \
+                            are: {}.".format(', '.join(str_points)))
 
-    # check if n_points is available
-    if n_points not in points:
-        str_points = [f"{d}" for d in points]
-        raise ValueError("Invalid number of points n_points. Valid points \
-                          are: {}.".format(', '.join(str_points)))
+        # assign sh_order
+        sh_order = int(orders[points == n_points])
 
-    # calculate sh_order
-    sh_order = int(orders[points == n_points])
-
-    # get the samlpling points
+    # get the sampling points
     fliege = sio.loadmat(os.path.join(
         os.path.dirname(__file__), "external", "samplings_fliege.mat"),
         variable_names=f"Fliege_{int(n_points)}")
