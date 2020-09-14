@@ -329,38 +329,49 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     """
 
     if (n_points is None) and (sh_order is None):
-        raise ValueError(
-            "Either the n_points or sh_order needs to be specified.")
+        for o in range(1, 100):
+            print(f"SH order {o}, number of points {(o + 1)**2}")
+        return None
+
+    # check input
+    if n_points is not None and sh_order is not None:
+        raise ValueError("Either n_points or sh_order must be None.")
 
     # get number of points or spherical harmonic order
     if sh_order is not None:
+        if sh_order < 1 or sh_order > 99:
+            raise ValueError('sh_order must be between 1 and 99')
         n_points = (sh_order + 1)**2
     else:
+        if n_points not in [(n + 1)**2 for n in range(1, 100)]:
+            raise ValueError('invalid value for n_points')
         sh_order = np.sqrt(n_points) - 1
 
     # download data if necessary
     filename = "samplings_extremal_md%03d.%05d" % (sh_order, n_points)
     filename = os.path.join(os.path.dirname(__file__), "external",  filename)
     if not os.path.exists(filename):
-        _load_sph_extremal_data('all')
+        _sph_extremal_load_data('all')
 
     # open data
     with open(filename, 'rb') as f:
         file_data = f.read()
 
-    file_data = file_data.decode()
-
     # format data
+    file_data = file_data.decode()
     file_data = np.fromstring(
         file_data,
         dtype='double',
         sep=' ').reshape((int(n_points), 4))
 
+    # normalize weights
+    weights = file_data[:, 3] / 4 / np.pi
+
     # generate Coordinates object
     sampling = Coordinates(file_data[:, 0] * radius,
                            file_data[:, 1] * radius,
                            file_data[:, 2] * radius,
-                           sh_order=sh_order, weights=file_data[:, 3],
+                           sh_order=sh_order, weights=weights,
                            comment='extremal spherical sampling grid')
 
     return sampling
@@ -388,12 +399,13 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     Parameters
     ----------
     degree : int
-        T-design degree. Either degree or sh_order must be provided. The
-        default is None.
+        T-design degree between 1 and 180. Either degree or sh_order must be
+        provided. The default is None.
     sh_order : int
-        maximum applicable spherical harmonic order. Related to the number of
-        points by sh_order = np.sqrt(n_points) - 1. Either degree or sh_order
-        must be provided. The default is None.
+        maximum applicable spherical harmonic order. Related to the degree
+        by degree = 2 * sh_order ('const_energy') and degree = 2 * sh_order + 1
+        ('const_angular_spreah'). Either degree or sh_order must be provided.
+        The default is None.
     criterion : 'const_energy', 'const_angular_spread'
         Design criterion ensuring only a constant energy or additionally
         constant angular spread of energy. The default is 'const_energy'.
@@ -426,12 +438,18 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     # check input
     if (degree is None) and (sh_order is None):
-        raise ValueError(
-            "Either the degree or sh_order needs to be specified.")
+        print('Possible input values:')
+        for d in range(1, 181):
+            print(f"degree {d}, sh_order {int(d / 2)} ('const_energy'), \
+                {int((d - 1) / 2)} ('const_angular_spread')")
+        return None
 
     if criterion not in ['const_energy', 'const_angular_spread']:
         raise ValueError("Invalid design criterion. Must be 'const_energy' \
                          or 'const_angular_spread'.")
+
+    if degree is not None and sh_order is not None:
+        raise ValueError("Either n_points or sh_order must be None.")
 
     # get the degree
     if degree is None:
@@ -439,6 +457,15 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
             degree = 2 * sh_order
         else:
             degree = 2 * sh_order + 1
+    # get the SH order for the meta data entry in the Coordinates object
+    else:
+        if criterion == 'const_energy':
+            sh_order = int(degree / 2)
+        else:
+            sh_order = int((degree - 1) / 2)
+
+    if degree < 1 or degree > 180:
+        raise ValueError('degree must be between 1 and 180.')
 
     # get the number of points
     n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
@@ -446,25 +473,18 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     if degree in n_points_exceptions:
         n_points = n_points_exceptions[degree]
 
-    # load the data
-    filename = "sf%03d.%05d" % (degree, n_points)
-    url = "http://web.maths.unsw.edu.au/~rsw/Sphere/Points/SF/SF29-Nov-2012/"
-    fileurl = url + filename
+    # download data if neccessary
+    filename = "samplings_t_design_sf%03d.%05d" % (degree, n_points)
+    filename = os.path.join(os.path.dirname(__file__), "external",  filename)
+    if not os.path.exists(filename):
+        _sph_t_design_load_data('all')
 
-    http = urllib3.PoolManager(
-        cert_reqs=False)
-    http_data = http.urlopen('GET', fileurl)
+    # open data
+    with open(filename, 'rb') as f:
+        file_data = f.read()
 
-    if http_data.status == 200:
-        file_data = http_data.data.decode()
-    elif http_data.status == 404:
-        raise FileNotFoundError("File was not found. Check if the design you \
-                are trying to calculate is a valid t-design.")
-    else:
-        raise ConnectionError("Connection error. Please check your internet \
-                connection.")
-
-    # format the data
+    # format data
+    file_data = file_data.decode()
     points = np.fromstring(
         file_data,
         dtype=np.double,
@@ -614,6 +634,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
 
     # list possible sh orders and degrees
     if n_points is None and sh_order is None:
+        print('Possible input values:')
         for o, d in zip(orders, degrees):
             print(f"SH order {o}, number of points {d}")
 
@@ -816,13 +837,13 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     return sampling
 
 
-def _load_sph_extremal_data(data='all'):
+def _sph_extremal_load_data(data='all'):
 
     # set the SH orders to be read
     if data.lower() == 'all':
         orders = range(1, 100)
     elif data.lower() == 'test':
-        orders = [1, 2, 3]
+        orders = [1]
 
     print("Loading sampling points from \
         https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/. \
@@ -847,6 +868,49 @@ def _load_sph_extremal_data(data='all'):
             save_name = os.path.join(
                 os.path.dirname(__file__), "external", prefix + filename)
             print(f'Loading file {sh_order}/{len(orders)}')
+            with open(save_name, 'wb') as out:
+                out.write(http_data.data)
+        else:
+            raise ConnectionError("Connection error. Please check your internet \
+                    connection.")
+
+
+def _sph_t_design_load_data(data='all'):
+
+    # set the degrees to be read
+    if data.lower() == 'all':
+        degrees = range(1, 100)
+    elif data.lower() == 'test':
+        degrees = [1, 2, 3]
+
+    print("Loading sampling points from \
+        https://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html. \
+        This might take a while but is only done once.")
+
+    http = urllib3.PoolManager(cert_reqs=False)
+    prefix = 'samplings_t_design_'
+
+    n_points_exceptions = {3: 8, 5: 18, 7: 32, 9: 50, 11: 72, 13: 98, 15: 128}
+
+    for degree in degrees:
+        # number of sampling points
+        n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
+        if degree in n_points_exceptions:
+            n_points = n_points_exceptions[degree]
+
+        # load the data
+        filename = "sf%03d.%05d" % (degree, n_points)
+        url = "http://web.maths.unsw.edu.au/~rsw/Sphere/Points/SF/"\
+              "SF29-Nov-2012/"
+        fileurl = url + filename
+
+        http_data = http.urlopen('GET', fileurl)
+
+        # save the data
+        if http_data.status == 200:
+            save_name = os.path.join(
+                os.path.dirname(__file__), "external", prefix + filename)
+            print(f'Loading file {degree}/{len(degrees)}')
             with open(save_name, 'wb') as out:
                 out.write(http_data.data)
         else:

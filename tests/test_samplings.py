@@ -97,9 +97,74 @@ def test_sph_gaussian():
     npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
 
 
-# TODO: once files are available offline
-# def test_sph_extremal():
-# def test_sph_t_design():
+def test_sph_extremal():
+    # load test data
+    samplings._sph_extremal_load_data('test')
+
+    # test without parameters
+    assert samplings.sph_extremal() is None
+
+    # test with n_points
+    c = samplings.sph_extremal(4)
+    isinstance(c, Coordinates)
+    assert c.csize == 4
+    npt.assert_allclose(np.sum(c.weights), 1)
+
+    # test with spherical harmonic order
+    c = samplings.sph_extremal(sh_order=1)
+    assert c.csize == 4
+    npt.assert_allclose(np.sum(c.weights), 1)
+
+    # test default radius
+    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+
+    # test user radius
+    c = samplings.sph_extremal(4, radius=1.5)
+    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+
+    # test exceptions
+    with raises(ValueError):
+        c = samplings.sph_extremal(4, 1)
+    with raises(ValueError):
+        c = samplings.sph_extremal(5)
+    with raises(ValueError):
+        c = samplings.sph_extremal(sh_order=0)
+
+
+def test_sph_t_design():
+    # load test data
+    samplings._sph_t_design_load_data('test')
+
+    # test without parameters
+    assert samplings.sph_t_design() is None
+
+    # test with degree
+    c = samplings.sph_t_design(2)
+    isinstance(c, Coordinates)
+    assert c.csize == 6
+
+    # test with spherical harmonic order
+    c = samplings.sph_t_design(sh_order=1)
+    assert c.csize == 6
+    c = samplings.sph_t_design(sh_order=1, criterion='const_angular_spread')
+    assert c.csize == 8
+
+    # test default radius
+    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+
+    # test user radius
+    c = samplings.sph_t_design(2, radius=1.5)
+    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+
+    # test exceptions
+    with raises(ValueError):
+        c = samplings.sph_t_design(4, 1)
+    with raises(ValueError):
+        c = samplings.sph_t_design(0)
+    with raises(ValueError):
+        c = samplings.sph_t_design(sh_order=0)
+    with raises(ValueError):
+        c = samplings.sph_t_design(2, criterion='const_thread')
 
 
 def test_sph_great_circle():
