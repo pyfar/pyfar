@@ -114,9 +114,9 @@ def test_sph_equal_angle():
     npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
 
     # test assertions
-    with raises(AssertionError):
+    with raises(ValueError):
         c = samplings.sph_equal_angle((11, 20))
-    with raises(AssertionError):
+    with raises(ValueError):
         c = samplings.sph_equal_angle((20, 11))
 
 

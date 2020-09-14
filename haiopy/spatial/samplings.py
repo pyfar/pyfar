@@ -520,13 +520,15 @@ def sph_equal_angle(delta_angles, radius=1.):
         delta_phi = delta_angles[0]
         delta_theta = delta_angles[1]
     else:
-        delta_phi = delta_theta = delta_angles
+        delta_phi = delta_angles
+        delta_theta = delta_angles
 
     # check if the angles can be distributed
-    assert 360 % delta_phi < 1e-15,\
-        "delta_phi must be an integer divisor of 360"
-    assert 180 % delta_theta < 1e-15,\
-        "delta_phi must be an integer divisor of 180"
+    eps = np.finfo('float').eps
+    if not (np.abs(360 % delta_phi) < 2*eps):
+        raise ValueError("delta_phi must be an integer divisor of 360")
+    if not (np.abs(180 % delta_theta) < 2*eps):
+        raise ValueError("delta_theta must be an integer divisor of 180")
 
     # get the angles
     phi_angles = np.arange(0, 360, delta_phi)
