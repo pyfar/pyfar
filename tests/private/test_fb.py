@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed May  6 19:46:11 2020
-
-@author: fabian
-"""
+# %%
 
 import numpy as np
 import haiopy
@@ -24,6 +18,7 @@ c = samplings.sph_t_design(sh_order=9, criterion='const_angular_spread')
 c = samplings.sph_great_circle(match=90)
 c = samplings.sph_lebedev(sh_order=35)
 c = samplings.sph_fliege(100)
+c = samplings.sph_equal_angle((20, 180))
 
 c.show()
 
