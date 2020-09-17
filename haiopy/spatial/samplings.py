@@ -412,7 +412,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     sh_order : int
         maximum applicable spherical harmonic order. Related to the degree
         by degree = 2 * sh_order ('const_energy') and degree = 2 * sh_order + 1
-        ('const_angular_spreah'). Either degree or sh_order must be provided.
+        ('const_angular_spread'). Either degree or sh_order must be provided.
         The default is None.
     criterion : 'const_energy', 'const_angular_spread'
         Design criterion ensuring only a constant energy or additionally
