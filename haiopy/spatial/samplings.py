@@ -302,7 +302,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
 def sph_extremal(n_points=None, sh_order=None, radius=1.):
     """Gives the points of a Hyperinterpolation sampling grid
     after Sloan and Womersley [1]_. The samplings are available for
-    `1 <= sh_order <= 99` (`n_points = (sh_order + 1)^2`)
+    `1 <= sh_order <= 200` (`n_points = (sh_order + 1)^2`).
 
     Parameters
     ----------
@@ -324,8 +324,9 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
     Notes
     -----
-    This implementation uses precalculated sets of points which are downloaded
-    from Womersley's homepage [2]_.
+    This implementation uses precalculated sets of points from [2]_. The data
+    up to `sh_order = 99` are loaded the first time this function is called.
+    The remaining data is loaded upon request.
 
     References
     ----------
@@ -347,11 +348,11 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
     # get number of points or spherical harmonic order
     if sh_order is not None:
-        if sh_order < 1 or sh_order > 99:
-            raise ValueError('sh_order must be between 1 and 99')
+        if sh_order < 1 or sh_order > 200:
+            raise ValueError('sh_order must be between 1 and 200')
         n_points = (sh_order + 1)**2
     else:
-        if n_points not in [(n + 1)**2 for n in range(1, 100)]:
+        if n_points not in [(n + 1)**2 for n in range(1, 200)]:
             raise ValueError('invalid value for n_points')
         sh_order = np.sqrt(n_points) - 1
 
@@ -359,7 +360,10 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     filename = "samplings_extremal_md%03d.%05d" % (sh_order, n_points)
     filename = os.path.join(os.path.dirname(__file__), "external",  filename)
     if not os.path.exists(filename):
-        _sph_extremal_load_data('all')
+        if sh_order < 100:
+            _sph_extremal_load_data('all')
+        else:
+            _sph_extremal_load_data(sh_order)
 
     # open data
     with open(filename, 'rb') as f:
@@ -427,8 +431,9 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     Notes
     -----
-    This function downloads a pre-calculated set of points from
-    Rob Womersley's homepage [3]_ .
+    This function downloads a pre-calculated set of points from [3]_ . The data
+    up to `degree = 99` are loaded the first time this function is called.
+    The remaining data is loaded upon request.
 
     References
     ----------
@@ -485,7 +490,10 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     filename = "samplings_t_design_sf%03d.%05d" % (degree, n_points)
     filename = os.path.join(os.path.dirname(__file__), "external",  filename)
     if not os.path.exists(filename):
-        _sph_t_design_load_data('all')
+        if degree < 100:
+            _sph_t_design_load_data('all')
+        else:
+            _sph_t_design_load_data(degree)
 
     # open data
     with open(filename, 'rb') as f:
@@ -908,9 +916,17 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
 
 def _sph_extremal_load_data(data='all'):
+    """Download extremal sampling grids.
+
+    data = 'all' : load all samplings up to SH order 99
+    data = 'test' : load sampling of SH order 1
+    data = number : load sampling of specified SH order
+    """
 
     # set the SH orders to be read
-    if data.lower() == 'all':
+    if not isinstance(data, str):
+        orders = [data]
+    elif data.lower() == 'all':
         orders = range(1, 100)
     elif data.lower() == 'test':
         orders = [1]
@@ -946,9 +962,17 @@ def _sph_extremal_load_data(data='all'):
 
 
 def _sph_t_design_load_data(data='all'):
+    """Download t-design sampling grids.
 
-    # set the degrees to be read
-    if data.lower() == 'all':
+    data = 'all' : load all samplings up to degree 99
+    data = 'test' : load sampling of degrees 1, 2, and 3
+    data = number : load sampling of specified degree
+    """
+
+    # set the SH orders to be read
+    if not isinstance(data, str):
+        degrees = [data]
+    elif data.lower() == 'all':
         degrees = range(1, 100)
     elif data.lower() == 'test':
         degrees = [1, 2, 3]

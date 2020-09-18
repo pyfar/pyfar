@@ -122,6 +122,9 @@ def test_sph_extremal():
     c = samplings.sph_extremal(4, radius=1.5)
     npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
 
+    # test loading SH order > 99
+    c = samplings.sph_extremal(sh_order=100)
+
     # test exceptions
     with raises(ValueError):
         c = samplings.sph_extremal(4, 1)
@@ -156,6 +159,9 @@ def test_sph_t_design():
     c = samplings.sph_t_design(2, radius=1.5)
     npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
 
+    # test loading degree order > 99
+    c = samplings.sph_t_design(100)
+
     # test exceptions
     with raises(ValueError):
         c = samplings.sph_t_design(4, 1)
@@ -165,6 +171,7 @@ def test_sph_t_design():
         c = samplings.sph_t_design(sh_order=0)
     with raises(ValueError):
         c = samplings.sph_t_design(2, criterion='const_thread')
+
 
 def test_sph_equal_angle():
     # test with tuple
