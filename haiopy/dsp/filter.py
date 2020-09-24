@@ -108,7 +108,7 @@ class FilterIIR(Filter):
 
         self._FILTER_FUNCS = {
             'default': lfilter,
-            'minimumphase': filtfilt}
+            'zerophase': filtfilt}
         self._filter_func = filter_func
 
     @property
@@ -135,7 +135,7 @@ class FilterSOS(Filter):
 
         self._FILTER_FUNCS = {
             'default': sosfilt,
-            'minimumphase': sosfiltfilt
+            'zerophase': sosfiltfilt
         }
         self._filter_func = filter_func
 
