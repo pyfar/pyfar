@@ -1,32 +1,67 @@
 r"""
 
-The implemented discrete Fourier spectrum is defined as
+The discrete Fourier spectrum of an arbitrary, but band-limited signal
+:math:`x(n)` is defined as
 
 .. math::
         X(\mu) = \sum_{n=0}^{N-1} x(n) e^{-i 2 \pi \frac{\mu n}{N}}
 
-using a negative sign convention in the transform kernel `math::\kappa(\mu, n) = e^{-i 2 \pi \mu \frac{n}{N}`.
+using a negative sign convention in the transform kernel
+:math:`\kappa(\mu, n) = e^{-i 2 \pi \mu \frac{n}{N}}`.
 Analogously, the discrete inverse Fourier transform is implemented as
 
 .. math::
-        x(n) = \frac{1}{N} \sum_{\mu = 0}^{N-1} X(\mu) e^{i 2 \pi \frac{\mu n}{N}}
+        x(n) = \frac{1}{N} \sum_{\mu=0}^{N-1} X(\mu) e^{i2\pi\frac{\mu n}{N}}
+
+Haiopy uses a DFT implementation for purely real-valued time signals resulting
+in Fourier spectra with complex conjugate symmetry for negative and
+positive frequencies :math:`X(\mu) = X(-\mu)^*`. As a result,
+the left-hand side of the spectrum is discarded, yielding
+:math:`X_R(\mu) = X(\mu) \mbox{ }\forall 0 \le \mu \le N/2`.
 
 Normalization
 -------------
-Haiopy uses the assumption of real-valued time signals resulting
-in Fourier spectra with complex conjugate symmetry for negative and
-positive frequencies, enabling the use of single sided spectra.
-In order for Parseval's theorem to remain valid, the single sided
-needs to be multiplied by a factor of 2, compensating for the energy
-missing.
+Bases on a signal's type - namely energy and power signals, haiopy implements
+two different normalization variants.
+
+Energy Signals
+==============
+
+For energy signals with finite energy,
+such as impulse responses, no additional normalization is required, that is
+the spectrum of a energy signal is equivalent to the right-hand spectrum
+of a real-valued time signal defined above.
+
+Power Signals
+=============
+
+For power signals however, which possess a finite power but infinite energy,
+a normalization for the time interval in which the signal is sampled, is
+chosen. In order for Parseval's theorem to remain valid, the single sided
+needs to be multiplied by a factor of 2, compensating for the discarded part
+of the spectrum. Additionally, the implemented DFT uses a normalization by
+:math:`\sqrt{2}`, the crest factor of sine signals, for all frequencies above
+:math:`\mu=0` and below the Nyquist frequency :math:`\mu=N/2`.
+Based on the assumption that in Fourier synthesis, any signal
+may be written as a sum of sine signals, hence yielding a magnitude spectra
+representing the respective amplitudes of the discrete sine tones.
+The resulting spectrum is written as
+
+..  math::
+        X_P(\mu) = \left\{
+            \begin{array}{ll}
+                \frac{2}{\sqrt{2}} X(\mu) & \forall 0 < \mu < N/2 \\
+                X(\mu) & \forall \mu = 0, \mu = N/2
+            \end{array}
+        \right.
 
 >>> import numpy as np
 >>> from haiopy import fft
 >>> import matplotlib.pyplot as plt
->>> sine = np.sin(np.linspace(0, 2*np.pi, 256))
->>> spec = fft.rfft(sine, 256, 'power')
->>> plt.plot(np.abs(spec))
->>> plt.show()
+>>> frequency = 100
+>>> sampling_rate = 1000
+>>> sine = np.sin(np.linspace(0, 2*np.pi*frequency/sampling_rate, 1024))
+>>> spectrum = fft.rfft(sine, 1024, 'power')
 
 .. plot::
 
@@ -34,24 +69,30 @@ missing.
     from haiopy import fft
     import matplotlib.pyplot as plt
     n_samples = 1024
-    sine = np.sin(np.linspace(0, 10, n_samples) * 2*np.pi * 100)
+    times = np.linspace(0, 10, n_samples)
+    sine = np.sin(times * 2*np.pi * 100)
     spec = fft.rfft(sine, n_samples, 'power')
     freqs = fft.rfftfreq(n_samples, 48e3)
     plt.subplot(1, 2, 1)
-    plt.plot(sine)
+    plt.plot(times, sine)
+    ax = plt.gca()
+    ax.set_xlabel('Time in s')
     plt.subplot(1, 2, 2)
     plt.plot(freqs, np.abs(spec))
+    ax = plt.gca()
+    ax.set_xlabel('Frequency in Hz')
     plt.show()
 
 
 References
 ----------
 .. [1]  J.-R. Ohm and H. D. Lüke, Signalübertragung: Grundlagen der
-        digitalen und analogen Nachrichtenübertragungssysteme. Springer DE, 2002.
+        digitalen und analogen Nachrichtenübertragungssysteme.
+        Springer DE, 2002.
 
-.. [2]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on Scaling of
-        the Discrete Fourier Transform and the Implied Physical Units of the
-        Spectra of Time-Discrete Signals,” p. 5, 2020.
+.. [2]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+        Scaling of the Discrete Fourier Transform and the Implied Physical
+        Units of the Spectra of Time-Discrete Signals,” p. 5, 2020.
 
 
 """
@@ -173,7 +214,7 @@ def irfft(spec, n_samples, signal_type):
     if signal_type == 'energy':
         norm = 1
     elif signal_type == 'power':
-        norm = n_samples/np.sqrt(2)
+        norm = n_samples/sqrt_two
         spec[..., 0] = spec[..., 0] * sqrt_two
         if not _is_odd(n_samples):
             spec[..., -1] = spec[..., -1] * sqrt_two
