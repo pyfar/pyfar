@@ -50,8 +50,8 @@ The resulting spectrum is written as
 ..  math::
         X_P(\mu) = \left\{
             \begin{array}{ll}
-                \frac{2}{\sqrt{2}} X(\mu) & \forall 0 < \mu < N/2 \\
-                X(\mu) & \forall \mu = 0, \mu = N/2
+                \frac{1}{N}\frac{2}{\sqrt{2}} X(\mu) & \forall 0 < \mu < N/2 \\
+                \frac{1}{N}X(\mu) & \forall \mu = 0, \mu = N/2
             \end{array}
         \right.
 
