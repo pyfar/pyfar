@@ -915,23 +915,22 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     return sampling
 
 
-def _sph_extremal_load_data(data='all'):
+def _sph_extremal_load_data(orders='all'):
     """Download extremal sampling grids.
 
-    data = 'all' : load all samplings up to SH order 99
-    data = 'test' : load sampling of SH order 1
-    data = number : load sampling of specified SH order
+    orders = 'all' : load all samplings up to SH order 99
+    orders = int, list : load sampling of specified SH order(s)
     """
 
     # set the SH orders to be read
-    if not isinstance(data, str):
-        orders = [data]
-    elif data.lower() == 'all':
+    if isinstance(orders, int):
+        orders = [orders]
+    elif isinstance(orders, str):
         orders = range(1, 100)
-    elif data.lower() == 'test':
-        orders = [1]
+    elif not isinstance(orders, list):
+        raise ValueError("orders must an int, list, or string.")
 
-    print("Loading sampling points from \
+    print("Loading extremal sampling points from \
         https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/. \
         This might take a while but is only done once.")
 
@@ -961,23 +960,22 @@ def _sph_extremal_load_data(data='all'):
                     connection.")
 
 
-def _sph_t_design_load_data(data='all'):
+def _sph_t_design_load_data(degrees='all'):
     """Download t-design sampling grids.
 
-    data = 'all' : load all samplings up to degree 99
-    data = 'test' : load sampling of degrees 1, 2, and 3
-    data = number : load sampling of specified degree
+    degrees = 'all' : load all samplings up to degree 99
+    degrees = number : load sampling of specified degree
     """
 
-    # set the SH orders to be read
-    if not isinstance(data, str):
-        degrees = [data]
-    elif data.lower() == 'all':
+    # set the degrees to be read
+    if isinstance(degrees, int):
+        degrees = [degrees]
+    elif isinstance(degrees, str):
         degrees = range(1, 100)
-    elif data.lower() == 'test':
-        degrees = [1, 2, 3]
+    elif not isinstance(degrees, list):
+        raise ValueError("degrees must an int, list, or string.")
 
-    print("Loading sampling points from \
+    print("Loading t-design sampling points from \
         https://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html. \
         This might take a while but is only done once.")
 

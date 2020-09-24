@@ -99,7 +99,7 @@ def test_sph_gaussian():
 
 def test_sph_extremal():
     # load test data
-    samplings._sph_extremal_load_data('test')
+    samplings._sph_extremal_load_data(1)
 
     # test without parameters
     assert samplings.sph_extremal() is None
@@ -136,7 +136,7 @@ def test_sph_extremal():
 
 def test_sph_t_design():
     # load test data
-    samplings._sph_t_design_load_data('test')
+    samplings._sph_t_design_load_data([1, 2, 3])
 
     # test without parameters
     assert samplings.sph_t_design() is None
