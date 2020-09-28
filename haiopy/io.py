@@ -22,19 +22,20 @@ def read_wav(filename):
     signal : signal instance
         An audio signal object from the haiopy Signal class
         containing the audio data from the WAV file.
+
+    Notes
+    -----
+    * This function is based on scipy.io.wavfile.write().
+    * This function cannot read wav files with 24-bit data.
     """
     sampling_rate, data = wavfile.read(filename)
     signal = Signal(data.T, sampling_rate, domain='time')
     return signal
 
 
-def write_wav(signal, filename, overwrite=False):
+def write_wav(signal, filename, overwrite=True):
     """
     Write a signal as a WAV file.
-
-    If the signals maximum absolute amplitude is larger than 1,
-    it is normalized before writing the WAV file.
-    This method is based on scipy.io.wavfile.write().
 
     Parameters
     ----------
@@ -46,15 +47,41 @@ def write_wav(signal, filename, overwrite=False):
 
     overwrite : bool
         Select wether to overwrite the WAV file, if it already exists.
-        The default is False.
+        The default is True.
+
+    Notes
+    -----
+    * This function is based on scipy.io.wavfile.write().
+    * Writes a simple uncompressed WAV file.
+    * The signal data of dimension larger than 2 is reshaped to 2D.
+    * The bits-per-sample and PCM/float will be determined by the data-type.
+
+    Common data types: [1]_
+
+    =====================  ===========  ===========  =============
+         WAV format            Min          Max       NumPy dtype
+    =====================  ===========  ===========  =============
+    32-bit floating-point  -1.0         +1.0         float32
+    32-bit PCM             -2147483648  +2147483647  int32
+    16-bit PCM             -32768       +32767       int16
+    8-bit PCM              0            255          uint8
+    =====================  ===========  ===========  =============
+
+    Note that 8-bit PCM is unsigned.
+
+    References
+    ----------
+    .. [1] IBM Corporation and Microsoft Corporation, "Multimedia Programming
+       Interface and Data Specifications 1.0", section "Data Format of the
+       Samples", August 1991
+       http://www.tactilemedia.com/info/MCI_Control_Info.html
+
     """
     sampling_rate = signal.sampling_rate
-    data = signal.time.T
+    data = signal.time
 
-    # Normalize, if maximum absolute amplitude is larger than 1
-    if np.max(np.abs(data)) > 1:
-        warnings.warn("Normalizing the data for wav export.")
-        data = 0.99 * data/np.max(np.abs(data))
+    # Reshape to 2D
+    data = data.reshape(-1, data.shape[-1])
 
     # Check for .wav file extension
     if filename.split('.')[-1] != 'wav':
@@ -67,4 +94,4 @@ def write_wav(signal, filename, overwrite=False):
                 "File already exists,"
                 "use overwrite option to disable error.")
     else:
-        wavfile.write(filename, sampling_rate, data)
+        wavfile.write(filename, sampling_rate, data.T)
