@@ -1,4 +1,3 @@
-import numpy as np
 import scipy.io.wavfile as wavfile
 import os.path
 import warnings
