@@ -6,6 +6,7 @@ from .. import dsp
 from scipy import signal as sgn
 from haiopy import Signal
 import warnings
+import os
 
 
 from .ticker import (
@@ -39,6 +40,25 @@ def _prepare_plot(ax=None):
         #ax = fig.add_subplot()
         #fig.set_size_inches(plt.rcParams.get('figure.figsize'))
     return fig, ax
+
+
+def _plotstyle(style='light'):
+
+    if style is None:
+        # get the currently used plotstyle
+        style = mpl.matplotlib_fname()
+    elif style in ['light', 'dark']:
+        # use haiopy style
+        style = os.path.join(
+            os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
+    elif style not in plt.style.available:
+        # error if style not found
+        ValueError((f"plotstyle '{style}' not available. Valid styles are "
+                    "None, 'light', 'dark' and styles from "
+                    "matplotlib.pyplot.available"))
+
+    return style
+
 
 def _plot_time(signal, ax=None, **kwargs):
     """Plot the time signal of a haiopy audio signal object.

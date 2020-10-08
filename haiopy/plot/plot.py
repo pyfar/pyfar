@@ -15,7 +15,7 @@ from .ticker import (
     MultipleFractionFormatter)
 
 
-def plot_time(signal, ax=None, **kwargs):
+def plot_time(signal, ax=None, style='light', **kwargs):
     """Plot the time signal of a haiopy audio signal object.
 
     Parameters
@@ -39,7 +39,8 @@ def plot_time(signal, ax=None, **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_time(signal, ax, **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_time(signal, ax, **kwargs)
 
     plt.tight_layout()
 
