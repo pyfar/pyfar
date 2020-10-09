@@ -571,7 +571,7 @@ def sradius_of_cap(dimension, area):
     elif dimension == 2:
         s_cap = 2*np.arcsin(np.sqrt(area / np.pi) / 2)
     else:
-        raise NotImplementedError
+        raise ValueError("Dimensions larger than 2 are not supported.")
     return np.asarray(s_cap)
 
 
