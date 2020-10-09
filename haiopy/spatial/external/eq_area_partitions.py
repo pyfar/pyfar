@@ -86,18 +86,11 @@ def point_set_polar(dimension, N):
     if dimension == 1:
         points_s = a_cap - np.pi/N
     else:
-        # import ipdb; ipdb.set_trace()
         n_collars = np.size(n_regions) - 2
-        # use_cache = dimension >= 2
-        # if use_cache:
-        #     cache_size = np.floor(n_collars/2)
-        #     cache =
 
         points_s = np.zeros((dimension, N))
         point_n = 2
-        # points = np.zeros((dimension, N))
 
-        # TODO check what the offset is for
         offset = 0
 
         for collar_n in range(0, n_collars):
@@ -110,15 +103,6 @@ def point_set_polar(dimension, N):
             # n_in_collar is the number of regions in the current collar.
             n_in_collar = n_regions[collar_n+1]
 
-            # if use_cache:
-            #     twin_collar_n = n_collars - collar_n
-            #
-            #     # if twin_collar_n <= cache_size && ...
-            #     #     size(cache{twin_collar_n},2) == n_in_collar
-            #     #     points_1 = cache{twin_collar_n};
-            #     # else
-            #     points_l = point_set_polar(dimension - 1, n_in_collar)
-            # else:
             points_l = point_set_polar(dimension - 1, n_in_collar)
 
             a_point = (a_top + a_bot)/2
@@ -133,7 +117,8 @@ def point_set_polar(dimension, N):
                 offset += circle_offset(n_in_collar, n_regions[2+collar_n])
                 offset -= np.floor(offset)
             else:
-                points_s[0:dimension-2, point_n+point_l_n-1] = points_l[:, point_l_n]
+                points_s[0:dimension-2, point_n+point_l_n-1] = \
+                    points_l[:, point_l_n]
 
             # import ipdb; ipdb.set_trace()
 
