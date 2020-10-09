@@ -7,7 +7,8 @@ import urllib3
 import os
 import scipy.io as sio
 from haiopy.coordinates import Coordinates
-from haiopy.spatial.external import samplings_lebedev
+from haiopy.spatial.external import (
+    samplings_lebedev, eq_area_partitions)
 
 
 def cart_equidistant_cube(n_points):
@@ -911,6 +912,39 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
                            domain='sph', convention='top_colat', unit='rad',
                            sh_order=sh_order, weights=fliege[:, 2],
                            comment='spherical Fliege sampling grid')
+
+    return sampling
+
+
+def sph_equal_area(n_points, radius=1.):
+    """Sampling based on partitioning into faces with equal area [1]_.
+
+    Parameters
+    ----------
+    n_points : int
+        Number of points corresponding to the number of partitions of the
+        sphere.
+    radius : number, optional
+        radius of the sampling grid in meters. The default is 1.
+
+    Returns
+    -------
+    sampling : Coordinates
+        Sampling positions as Coordinate object
+
+    References
+    ----------
+    .. [1]  P. Leopardi, “A partition of the unit sphere into regions of equal
+            area and small diameter,” Electronic Transactions on Numerical
+            Analysis, vol. 25, no. 12, pp. 309–327, 2006.
+
+    """
+
+    point_set = eq_area_partitions.point_set(2, n_points)
+    sampling = Coordinates(
+        point_set[0], point_set[1], point_set[2],
+        domain='cart', convention='right',
+        comment='Equal area partitioning of the sphere.')
 
     return sampling
 

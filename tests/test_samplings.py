@@ -274,3 +274,11 @@ def test_sph_fliege():
         c = samplings.sph_fliege(9, 2)
     with raises(ValueError):
         c = samplings.sph_fliege(30)
+
+
+def test_sph_equal_area():
+    c = samplings.sph_equal_area(10)
+
+    assert isinstance(c, Coordinates)
+
+    assert c.csize == 10
