@@ -40,10 +40,11 @@ class Cycle(object):
 
 
 class Interaction(object):
-    def __init__(self, plot_type, axes, signal):
+    def __init__(self, plot_type, axes, signal, style):
         self._plot_type = plot_type
         self._axes = np.asarray(axes)
         self._signal = signal
+        self._style = style
         self._figure = axes.figure
         if plot_type == 'line_lin_Y':
             self.axis_modifier = AxisModifierLinesLinYAxis(axes, signal)
@@ -77,6 +78,10 @@ class Interaction(object):
     def signal(self):
         return self._signal
 
+    @property
+    def style(self):
+        return self._style
+
     @axes.setter
     def axes(self, ax):
         self._axes = ax
@@ -91,7 +96,9 @@ class Interaction(object):
         self._figure.set_size_inches(plt.rcParams.get('figure.figsize'), forward=True)
 
     def toggle_plot(self, event):
-        if event.key in ['ctrl+1', 'ctrl+2', 'ctrl+3', 'ctrl+4', 'ctrl+5', 'ctrl+6', 'ctrl+7', 'ctrl+8', 'ctrl+9']:
+        if event.key not in ['ctrl+1', 'ctrl+2', 'ctrl+3', 'ctrl+4', 'ctrl+5', 'ctrl+6', 'ctrl+7', 'ctrl+8', 'ctrl+9']:
+            return
+        with plt.style.context(hplt._plotstyle(self.style)):
             if event.key in ['ctrl+1']: # plot time domain
                 self.clear_axes()
                 hplt._plot_time(self.signal, ax=self.axes)
@@ -120,9 +127,9 @@ class Interaction(object):
             if event.key in ['ctrl+6']: # plot spectrogram
                 self.clear_axes()
                 self._plot_signal = Signal(self.signal.time[0],
-                                      self.signal.sampling_rate,
-                                      'time',
-                                      self.signal.signal_type)
+                                        self.signal.sampling_rate,
+                                        'time',
+                                        self.signal.signal_type)
                 self.axes = hplt._plot_spectrogram_cb(self._plot_signal, ax=self.axes)
                 self.figure.canvas.draw()
                 self.change_modifier('spectrogram')

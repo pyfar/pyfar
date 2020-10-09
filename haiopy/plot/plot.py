@@ -44,11 +44,11 @@ def plot_time(signal, ax=None, style='light', **kwargs):
 
     plt.tight_layout()
 
-    ia = Interaction('line_lin_Y', ax, signal)
+    ia = Interaction('line_lin_Y', ax, signal, style)
 
     return ax
 
-def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
+def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kwargs):
     """Plot the time signal of a haiopy audio signal object in Decibels.
 
     Parameters
@@ -76,14 +76,15 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_time_dB(signal, log_prefix, log_reference, ax, **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_time_dB(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_log_Y', ax, signal)
+    ia = Interaction('line_log_Y', ax, signal, style)
 
     return ax
 
-def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
+def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kwargs):
     """Plot the absolute values of the spectrum on the positive frequency axis.
 
     Parameters
@@ -112,15 +113,16 @@ def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_freq(signal, log_prefix, log_reference, ax, **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_freq(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
 
-    ia = Interaction('line_log_Y', ax, signal)
+    ia = Interaction('line_log_Y', ax, signal, style)
 
     return ax
 
-def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
+def plot_phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis.
 
     Parameters
@@ -150,15 +152,16 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_phase(signal, deg, unwrap, ax, **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_phase(signal, deg, unwrap, ax, **kwargs)
 
     plt.tight_layout()
 
-    ia = Interaction('line_log_Y', ax, signal)
+    ia = Interaction('line_log_Y', ax, signal, style)
 
     return ax
 
-def plot_group_delay(signal, ax=None, **kwargs):
+def plot_group_delay(signal, ax=None, style='light', **kwargs):
     """Plot the group delay of a given signal.
 
     Parameters
@@ -178,10 +181,11 @@ def plot_group_delay(signal, ax=None, **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_group_delay(signal, ax, **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_group_delay(signal, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_lin_Y', ax, signal)
+    ia = Interaction('line_lin_Y', ax, signal, style)
 
     return ax
 
@@ -194,6 +198,7 @@ def plot_spectrogram(signal,
                      window_overlap_fct=0.5,
                      cmap=mpl.cm.get_cmap(name='magma'),
                      ax=None,
+                     style='light',
                      **kwargs):
     """Plots the spectrogram for a given signal object.
 
@@ -237,11 +242,12 @@ def plot_spectrogram(signal,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_spectrogram_cb(signal, log, nodb, window, window_length,
-                                    window_overlap_fct, cmap, ax, **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_spectrogram_cb(signal, log, nodb, window, window_length,
+                                        window_overlap_fct, cmap, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('spectrogram', ax[0], signal)
+    ia = Interaction('spectrogram', ax[0], signal, style)
 
     return ax
 
@@ -251,6 +257,7 @@ def plot_freq_phase(signal,
                     deg=False,
                     unwrap=False,
                     ax=None,
+                    style='light',
                     **kwargs):
     """Plot the magnitude and phase of the spectrum on the positive frequency
     axis.
@@ -275,15 +282,16 @@ def plot_freq_phase(signal,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_freq_phase(signal, log_prefix, log_reference, deg, unwrap,
-                               **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_freq_phase(signal, log_prefix, log_reference, deg, unwrap,
+                                **kwargs)
     plt.tight_layout()
-    ia = Interaction('line_lin_Y', ax[0], signal)
+    ia = Interaction('line_lin_Y', ax[0], signal, style)
 
     return ax
 
 def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
-                          **kwargs):
+                          style='light', **kwargs):
     """Plot the magnitude spectrum and group delay on the positive frequency
     axis.
 
@@ -302,15 +310,16 @@ def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_freq_group_delay(signal, log_prefix, log_reference,
-                                     **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_freq_group_delay(signal, log_prefix, log_reference,
+                                        **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_log_Y', ax[0], signal)
+    ia = Interaction('line_log_Y', ax[0], signal, style)
 
     return ax
 
-def plot_all(signal, ax=None, **kwargs):
+def plot_all(signal, ax=None, style='light', **kwargs):
     """ TODO: Implement input parameters for this function.
     Plot the time domain, the time domain in dB, the magnitude spectrum,
     the frequency domain, the phase and group delay on shared x axis.
@@ -350,7 +359,8 @@ def plot_all(signal, ax=None, **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    ax = hplt._plot_all(signal, **kwargs)
+    with plt.style.context(hplt._plotstyle(style)):
+        ax = hplt._plot_all(signal, **kwargs)
 
     plt.tight_layout()
 

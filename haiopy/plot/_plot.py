@@ -616,7 +616,7 @@ def _plot_all(signal, ax=None, **kwargs):
     fig.set_size_inches(6, 6)
 
     # Time domain plots:
-    _plot_time(signal, ax=ax[0,0], **kwargs)
+    _plot_time(signal, ax=ax[0,0], style='light', **kwargs)
     _plot_time_dB(signal, ax=ax[1,0], **kwargs)
     _plot_spectrogram(signal, ax=ax[2,0], **kwargs)
 
