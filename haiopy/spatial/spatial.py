@@ -68,7 +68,7 @@ def calculate_sampling_weights_with_spherical_voronoi(
 
         area[idx] = _poly_surface_area(sv.vertices[mask_new])
 
-    area = area / np.sum(area) * 4 * np.pi
+    area = area / np.sum(area)
 
     return area
 
