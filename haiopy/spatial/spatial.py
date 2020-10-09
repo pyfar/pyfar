@@ -2,34 +2,34 @@ import numpy as np
 from scipy import spatial as spat
 
 
-def SphericalVoronoi(sampling, round_decimals=13, center=0.0):
-    """Calculate a Voronoi diagram on the sphere for the given samplings
-    points.
+class SphericalVoronoi(spat.SphericalVoronoi):
 
-    Parameters
-    ----------
-    sampling : SamplingSphere
-        Sampling points on a sphere
-    round_decimals : int
-        Number of decimals to be rounded to.
-    center : double
-        Center point of the voronoi diagram.
+    def __init__(self, sampling, round_decimals=13, center=0.0):
+        """Calculate a Voronoi diagram on the sphere for the given samplings
+        points.
 
-    Returns
-    -------
-    voronoi : SphericalVoronoi
-        Spherical voronoi diagram as implemented in scipy.
+        Parameters
+        ----------
+        sampling : SamplingSphere
+            Sampling points on a sphere
+        round_decimals : int
+            Number of decimals to be rounded to.
+        center : double
+            Center point of the voronoi diagram.
 
-    """
-    points = sampling.get_cart()
-    radius = sampling.get_sph()[:, -1]
-    radius_round = np.unique(np.round(radius, decimals=round_decimals))
-    if len(radius_round) > 1:
-        raise ValueError("All sampling points need to be on the \
-                same radius.")
-    voronoi = spat.SphericalVoronoi(points, radius_round, center)
+        Returns
+        -------
+        voronoi : SphericalVoronoi
+            Spherical voronoi diagram as implemented in scipy.
 
-    return voronoi
+        """
+        points = sampling.get_cart()
+        radius = sampling.get_sph()[:, -1]
+        radius_round = np.unique(np.round(radius, decimals=round_decimals))
+        if len(radius_round) > 1:
+            raise ValueError("All sampling points need to be on the \
+                    same radius.")
+        super().__init__(points, radius_round, center)
 
 
 def calculate_sampling_weights_with_spherical_voronoi(
