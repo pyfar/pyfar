@@ -1,5 +1,5 @@
 import numpy as np
-from haiopy.spatial.spatial import SphericalVoronoi
+import haiopy.spatial.spatial as spatial
 from haiopy.coordinates import Coordinates
 
 
@@ -56,9 +56,20 @@ def test_sph_voronoi():
         [-1.27322004e-01,  9.34172359e-01,  3.33333333e-01],
         [-7.45355992e-01,  5.77350269e-01,  3.33333333e-01]])
 
-    sv = SphericalVoronoi(s)
+    sv = spatial.SphericalVoronoi(s)
     np.testing.assert_allclose(
         np.sort(np.sum(verts, axis=-1)),
         np.sort(np.sum(sv.vertices, axis=-1)),
         atol=1e-6,
         rtol=1e-6)
+
+
+def test_weights_from_voronoi():
+    s = Coordinates(
+        [0, 0, 1, -1, 0, 0], [0, 0, 0, 0, -1, 1], [-1, 1, 0, 0, 0, 0],
+        domain='cart', convention='right')
+
+    weights = spatial.calculate_sampling_weights_with_spherical_voronoi(s, 10)
+
+    desired = np.ones(6)/6
+    np.testing.assert_allclose(weights, desired)

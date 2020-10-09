@@ -59,7 +59,7 @@ def calculate_sampling_weights_with_spherical_voronoi(
         return_index=True)
 
     searchtree = spat.cKDTree(unique_verts)
-    area = np.zeros(sampling.n_points, np.double)
+    area = np.zeros(sampling.csize, np.double)
 
     for idx, region in enumerate(sv.regions):
         _, idx_nearest = searchtree.query(sv.vertices[np.array(region)])
