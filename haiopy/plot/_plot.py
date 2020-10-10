@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 # plt.style.use(['default', 'ggplot', 'haiopy.mplstyle'])
 import matplotlib as mpl
+from matplotlib.pyplot import colorbar
 import numpy as np
 from .. import dsp
 from scipy import signal as sgn
@@ -60,6 +61,29 @@ def _plotstyle(style='light'):
     return style
 
 
+def _return_default_colors_rgb(**kwargs):
+    """Replace color in kwargs with haiopy default color if possible."""
+
+    # haiopy default colors
+    colors = {'p': '#5F4690',  # purple
+              'b': '#1471B9',  # blue
+              't': '#4EBEBE',  # turqois
+              'g': '#078554',  # green
+              'l': '#72AF47',  # light green
+              'y': '#ECAD20',  # yellow
+              'o': '#E07D26',  # orange
+              'r': '#D83C27'}  # red
+
+    if 'c' in kwargs and isinstance(kwargs['c'], str):
+        kwargs['c'] = colors[kwargs['c']] \
+            if kwargs['c'] in colors else kwargs['c']
+    if 'color' in kwargs and isinstance(kwargs['color'], str):
+        kwargs['color'] = colors[kwargs['color']] \
+            if kwargs['color'] in colors else kwargs['color']
+
+    return kwargs
+
+
 def _plot_time(signal, ax=None, **kwargs):
     """Plot the time signal of a haiopy audio signal object.
 
@@ -83,6 +107,8 @@ def _plot_time(signal, ax=None, **kwargs):
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+
+    kwargs = _return_default_colors_rgb(**kwargs)
 
     fig, ax = _prepare_plot(ax)
     x_data = signal.times
@@ -129,6 +155,8 @@ def _plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
+
+    kwargs = _return_default_colors_rgb(**kwargs)
 
     x_data = signal.times
     y_data = signal.time.T
@@ -178,6 +206,8 @@ def _plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
+
+    kwargs = _return_default_colors_rgb(**kwargs)
 
     time_data = signal.time
     sampling_rate = signal.sampling_rate
@@ -236,6 +266,8 @@ def _plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
+
+    kwargs = _return_default_colors_rgb(**kwargs)
 
     time_data = signal.time
     sampling_rate = signal.sampling_rate
@@ -297,6 +329,8 @@ def _plot_group_delay(signal, ax=None, **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
+
+    kwargs = _return_default_colors_rgb(**kwargs)
 
     data = dsp.group_delay(signal)
     ax.semilogx(signal.frequencies, data.T, **kwargs)
@@ -528,6 +562,8 @@ def _plot_freq_phase(signal,
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
+    kwargs = _return_default_colors_rgb(**kwargs)
+
     ax = fig.subplots(2,1,sharex=False)
     fig.axes[0].remove()
     _plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
@@ -559,6 +595,8 @@ def _plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
+    kwargs = _return_default_colors_rgb(**kwargs)
+
     ax = fig.subplots(2,1,sharex=False)
     fig.axes[0].remove()
     _plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
@@ -614,6 +652,8 @@ def _plot_all(signal, ax=None, **kwargs):
     ax = fig.subplots(4,2, gridspec_kw={'height_ratios':[1,1,1,0.1]})
     fig.axes[0].remove()
     fig.set_size_inches(6, 6)
+
+    kwargs = _return_default_colors_rgb(**kwargs)
 
     # Time domain plots:
     _plot_time(signal, ax=ax[0,0], style='light', **kwargs)
