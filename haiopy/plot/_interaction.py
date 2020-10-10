@@ -40,11 +40,12 @@ class Cycle(object):
 
 
 class Interaction(object):
-    def __init__(self, plot_type, axes, signal, style):
+    def __init__(self, plot_type, axes, signal, style, **kwargs):
         self._plot_type = plot_type
         self._axes = np.asarray(axes)
         self._signal = signal
         self._style = style
+        self._kwargs = kwargs
         self._figure = axes.figure
         if plot_type == 'line_lin_Y':
             self.axis_modifier = AxisModifierLinesLinYAxis(axes, signal)
@@ -82,6 +83,10 @@ class Interaction(object):
     def style(self):
         return self._style
 
+    @property
+    def kwargs(self):
+        return self._kwargs
+
     @axes.setter
     def axes(self, ax):
         self._axes = ax
@@ -101,27 +106,27 @@ class Interaction(object):
         with plt.style.context(hplt._plotstyle(self.style)):
             if event.key in ['ctrl+1']: # plot time domain
                 self.clear_axes()
-                hplt._plot_time(self.signal, ax=self.axes)
+                hplt._plot_time(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+2']: # plot magnitude
                 self.clear_axes()
-                hplt._plot_freq(self.signal, ax=self.axes)
+                hplt._plot_freq(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
             if event.key in ['ctrl+3']: # plot phase
                 self.clear_axes()
-                hplt._plot_phase(self.signal, ax=self.axes)
+                hplt._plot_phase(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+4']: # plot time domain in decibels
                 self.clear_axes()
-                hplt._plot_time_dB(self.signal, ax=self.axes)
+                hplt._plot_time_dB(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
             if event.key in ['ctrl+5']: # plot group delay
                 self.clear_axes()
-                hplt._plot_group_delay(self.signal, ax=self.axes)
+                hplt._plot_group_delay(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+6']: # plot spectrogram
@@ -135,11 +140,11 @@ class Interaction(object):
                 self.change_modifier('spectrogram')
             if event.key in ['ctrl+7']: # plot magnitude and phase
                 self.clear_axes()
-                self.axes = hplt._plot_freq_phase(self.signal, ax=self.axes)
+                self.axes = hplt._plot_freq_phase(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
             if event.key in ['ctrl+8']: # plot magnitude and group delay
                 self.clear_axes()
-                self.axes = hplt._plot_freq_group_delay(self.signal, ax=self.axes)
+                self.axes = hplt._plot_freq_group_delay(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
             if event.key in ['ctrl+9']: # plot all
                 if self.signal.time.shape[0] > 1:
@@ -148,7 +153,7 @@ class Interaction(object):
                 else:
                     self.clear_axes()
                     self.figure.set_size_inches(6, 6, forward=True)
-                    self.axes = hplt._plot_all(self.signal, ax=self.axes)
+                    self.axes = hplt._plot_all(self.signal, ax=self.axes, **self.kwargs)
                     self.figure.canvas.draw()
 
     def change_modifier(self, plot_type):

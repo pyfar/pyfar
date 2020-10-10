@@ -44,7 +44,7 @@ def plot_time(signal, ax=None, style='light', **kwargs):
 
     plt.tight_layout()
 
-    ia = Interaction('line_lin_Y', ax, signal, style)
+    ia = Interaction('line_lin_Y', ax, signal, style, **kwargs)
 
     return ax
 
@@ -80,7 +80,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light',
         ax = hplt._plot_time_dB(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_log_Y', ax, signal, style)
+    ia = Interaction('line_log_Y', ax, signal, style, **kwargs)
 
     return ax
 
@@ -118,7 +118,7 @@ def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, style='light', **
 
     plt.tight_layout()
 
-    ia = Interaction('line_log_Y', ax, signal, style)
+    ia = Interaction('line_log_Y', ax, signal, style, **kwargs)
 
     return ax
 
@@ -157,7 +157,7 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs
 
     plt.tight_layout()
 
-    ia = Interaction('line_log_Y', ax, signal, style)
+    ia = Interaction('line_log_Y', ax, signal, style, **kwargs)
 
     return ax
 
@@ -185,7 +185,7 @@ def plot_group_delay(signal, ax=None, style='light', **kwargs):
         ax = hplt._plot_group_delay(signal, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_lin_Y', ax, signal, style)
+    ia = Interaction('line_lin_Y', ax, signal, style, **kwargs)
 
     return ax
 
@@ -247,7 +247,7 @@ def plot_spectrogram(signal,
                                         window_overlap_fct, cmap, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('spectrogram', ax[0], signal, style)
+    ia = Interaction('spectrogram', ax[0], signal, style, **kwargs)
 
     return ax
 
@@ -286,7 +286,7 @@ def plot_freq_phase(signal,
         ax = hplt._plot_freq_phase(signal, log_prefix, log_reference, deg, unwrap,
                                 **kwargs)
     plt.tight_layout()
-    ia = Interaction('line_lin_Y', ax[0], signal, style)
+    ia = Interaction('line_lin_Y', ax[0], signal, style, **kwargs)
 
     return ax
 
@@ -315,7 +315,7 @@ def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
                                         **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_log_Y', ax[0], signal, style)
+    ia = Interaction('line_log_Y', ax[0], signal, style, **kwargs)
 
     return ax
 
