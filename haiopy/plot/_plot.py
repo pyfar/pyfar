@@ -113,15 +113,13 @@ def _plot_time(signal, ax=None, **kwargs):
     fig, ax = _prepare_plot(ax)
     x_data = signal.times
     y_data = signal.time.T
-    ymax = np.nanmax(y_data)
-    ymin = np.nanmin(y_data)
 
     ax.plot(x_data, y_data, **kwargs)
     ax.set_xscale('linear')
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
     ax.set_xlim((signal.times[0], signal.times[-1]))
-    ax.set_ylim((ymin, ymax))
+
     plt.tight_layout()
 
     return ax
