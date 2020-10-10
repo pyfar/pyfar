@@ -40,8 +40,11 @@ axes.titlesize      : 10            ## fontsize of the axes title
 axes.titleweight    : bold          ## font weight of title
 axes.labelsize      : 10            ## fontsize of the x any y labels
 axes.labelcolor     : white
-axes.prop_cycle     : cycler('color', ['5F4690','1471B9','4EBEBE','078554','72AF47','ECAD20','E07D26','D83C27']) # colors from palettable.cartocolors.qualitative.Prism_8 with slight changes
-                                    #   purple   blue    turquois  green  light gr.  yellow  orange    red
+# colors from palettable.cartocolors.qualitative.Prism_8
+# slightly changed colors to work with dark and light theme
+# changed the order to improve contrast between the colors and start with blue and red
+axes.prop_cycle     : cycler('color', ['1471B9','D83C27','ECAD20','5F4690','078554','4EBEBE','E07D26','72AF47'])
+                                      # blue     red      yellow   purple   green    turquois  orange  light green
 
 
 #### TICKS
