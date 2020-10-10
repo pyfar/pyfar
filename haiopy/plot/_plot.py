@@ -116,7 +116,7 @@ def _plot_time(signal, ax=None, **kwargs):
 
     ax.plot(x_data, y_data, **kwargs)
     ax.set_xscale('linear')
-    ax.set_xlabel("Time [s]")
+    ax.set_xlabel("Time in s")
     ax.set_ylabel("Amplitude")
     ax.set_xlim((signal.times[0], signal.times[-1]))
 
@@ -168,8 +168,8 @@ def _plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     ax.set_xlim((signal.times[0], signal.times[-1]))
     ax.set_ylim((ymin, ymax))
-    ax.set_xlabel("Time [s]")
-    ax.set_ylabel("Amplitude [dB]")
+    ax.set_xlabel("Time in s")
+    ax.set_ylabel("Amplitude in dB")
     plt.tight_layout()
 
     return ax
@@ -211,8 +211,8 @@ def _plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     data_dB = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
     ax.semilogx(signal.frequencies, data_dB.T, **kwargs)
 
-    ax.set_xlabel("Frequency [Hz]")
-    ax.set_ylabel("Magnitude [dB]")
+    ax.set_xlabel("Frequency in Hz")
+    ax.set_ylabel("Magnitude in dB")
 
     ax.set_xscale('log')
     ax.grid(True, 'both')
@@ -277,10 +277,10 @@ def _plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
         ylabel_string += '(wrapped to 360) '
 
     if deg:
-        ylabel_string += '[deg]'
+        ylabel_string += 'in degree'
         y_margin = 5
     else:
-        ylabel_string += '[rad]'
+        ylabel_string += 'in radians'
         ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
         ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
         ax.yaxis.set_major_formatter(MultipleFractionFormatter(
@@ -291,7 +291,7 @@ def _plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
     ymax = np.nanmax(phase_data)+y_margin
 
     ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel(ylabel_string)
     ax.set_xscale('log')
     ax.grid(True, 'both')
@@ -330,8 +330,8 @@ def _plot_group_delay(signal, ax=None, **kwargs):
     data = dsp.group_delay(signal)
     ax.semilogx(signal.frequencies, data.T, **kwargs)
 
-    ax.set_xlabel("Frequency [Hz]")
-    ax.set_ylabel("Group delay [sec]")
+    ax.set_xlabel("Frequency in Hz")
+    ax.set_ylabel("Group delay in s")
 
     ax.set_xscale('log')
     ax.grid(True, 'both')
@@ -441,8 +441,8 @@ def _plot_spectrogram(signal,
     #        **kwargs)
 
     # Adjust axes:
-    ax.set_ylabel('Frequency [Hz]')
-    ax.set_xlabel('Time [sec]')
+    ax.set_ylabel('Frequency in Hz')
+    ax.set_xlabel('Time in s')
     ax.set_xlim((signal.times[0], signal.times[-1]))
     ax.set_ylim((20, signal.sampling_rate/2))
 
@@ -521,7 +521,7 @@ def _plot_spectrogram_cb(signal,
             break
 
     cb = plt.colorbar(PCM, cax=ax[1])
-    cb.set_label('Modulus [dB]')
+    cb.set_label('Modulus in dB')
     plt.tight_layout()
 
     return ax
