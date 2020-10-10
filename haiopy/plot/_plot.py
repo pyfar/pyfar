@@ -207,9 +207,6 @@ def _plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     kwargs = _return_default_colors_rgb(**kwargs)
 
-    time_data = signal.time
-    sampling_rate = signal.sampling_rate
-
     eps = np.finfo(float).tiny
     data_dB = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
     ax.semilogx(signal.frequencies, data_dB.T, **kwargs)
