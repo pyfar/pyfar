@@ -72,6 +72,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*/.ipynb_checkpoints/*
 
 # pyenv
 .python-version
@@ -114,7 +115,3 @@ venv.bak/
 # external data that is loaded from the web
 haiopy/spatial/external/samplings_extremal*
 haiopy/spatial/external/samplings_t_design*
-
-# Jupyter notebooks
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
