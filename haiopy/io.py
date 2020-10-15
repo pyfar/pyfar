@@ -94,3 +94,39 @@ def write_wav(signal, filename, overwrite=True):
                 "use overwrite option to disable error.")
     else:
         wavfile.write(filename, sampling_rate, data.T)
+
+
+def read_sofa(filename):
+    """
+    Import a SOFA file as signal object.
+
+    Parameters
+    ----------
+    filename : string or open file handle
+        Input wav file.
+
+    Returns
+    -------
+    signal : signal instance
+        An audio signal object from the haiopy Signal class
+        containing the data from the WAV file.
+
+    Notes
+    -----
+    * This function is based on the python-sofa package.
+    * Only SOFA files of DataType 'FIR' are supported.
+    """
+    sofafile = sofa.Database.open(filename)
+    if sofafile.Data.Type == 'FIR':
+        domain = 'time'
+        data = sofafile.Data.IR
+        sampling_rate = sofafile.Data.SamplingRate.get_values()
+        # Delay
+        # Coordinates
+    else:
+        raise ValueError('DataType ', sofafile.Data.type, ' is not supported.')
+
+    signal = Signal(data, sampling_rate, domain=domain)
+    return signal, source_coordinates, receiver_coordinates
+
+        
