@@ -1509,7 +1509,9 @@ class Coordinates(object):
         _repr = obj + "\n" + conv + "\n" + "coordinates: " + ", ".join(coords)
 
         # check for sampling weights
-        if self._weights is not None:
+        if self._weights is None:
+            _repr += "\nDoes not contains sampling weights"
+        else:
             _repr += "\nContains sampling weights"
 
         # check for sh_order
