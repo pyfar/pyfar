@@ -25,9 +25,9 @@ def test_sph_voronoi():
         np.tile(theta2, 3),
         np.tile(theta3, 3),
         np.tile(theta4, 3)))
-    phi = np.tile(
-        np.array(
-            [phi1, phi2, phi3, phi1 + np.pi/3, phi2 + np.pi/3, phi3 + np.pi/3]), 2)
+    phi = np.tile(np.array(
+            [phi1, phi2, phi3, phi1 + np.pi / 3,
+             phi2 + np.pi / 3, phi3 + np.pi / 3]), 2)
     rad = np.ones(np.size(theta))
 
     s = Coordinates(

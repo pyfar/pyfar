@@ -4,18 +4,19 @@ from scipy import spatial as spat
 
 class SphericalVoronoi(spat.SphericalVoronoi):
 
-    def __init__(self, sampling, round_decimals=13, center=0.0):
+    def __init__(self, sampling, round_decimals=12, center=0.0):
         """Calculate a Voronoi diagram on the sphere for the given samplings
         points.
 
         Parameters
         ----------
         sampling : SamplingSphere
-            Sampling points on a sphere
+            Spherical sampling points in Carthesian coordinates
         round_decimals : int
-            Number of decimals to be rounded to.
+            Number of decimals to be rounded for checking for equal radius.
+            The default is 12.
         center : double
-            Center point of the voronoi diagram.
+            Center point of the voronoi diagram. The default is 0.
 
         Returns
         -------
@@ -39,10 +40,11 @@ def calculate_sampling_weights_with_spherical_voronoi(
     Parameters
     ----------
     sampling : Coordinates
-        Sampling points on a sphere
+        Sampling points on a sphere, i.e., all points must have the same
+        radius.
     round_decimals : int, optional
-        Round to decimals to check for duplicate points in the Voronoi
-        diagram.
+        Round to decimals to check for equal radius and duplicate points in the
+        Voronoi diagram. The default is 12.
 
     Returns
     -------
@@ -50,17 +52,23 @@ def calculate_sampling_weights_with_spherical_voronoi(
         Sampling weights
 
     """
+    # get Voronoi diagram
     sv = SphericalVoronoi(sampling, round_decimals=round_decimals)
-    sv.sort_vertices_of_regions()
 
+    # prepare points for calculating the are
+    # sort vertives of each region to be in clockwise order
+    sv.sort_vertices_of_regions()
+    # detect duplicate vertices
     unique_verts, idx_uni = np.unique(
         np.round(sv.vertices, decimals=10),
         axis=0,
         return_index=True)
 
+    # search tree for efficient calculation of the areas
     searchtree = spat.cKDTree(unique_verts)
     area = np.zeros(sampling.csize, np.double)
 
+    # calculate and normalize the area
     for idx, region in enumerate(sv.regions):
         _, idx_nearest = searchtree.query(sv.vertices[np.array(region)])
         mask_unique = np.sort(np.unique(idx_nearest, return_index=True)[1])
