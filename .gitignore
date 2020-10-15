@@ -111,6 +111,10 @@ venv.bak/
 # macOS
 .DS_Store
 
-# external data that os loaded from the web
+# external data that is loaded from the web
 haiopy/spatial/external/samplings_extremal*
 haiopy/spatial/external/samplings_t_design*
+
+# Jupyter notebooks
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
