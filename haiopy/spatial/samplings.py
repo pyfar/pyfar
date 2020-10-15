@@ -942,7 +942,7 @@ def sph_equal_area(n_points, radius=1.):
 
     point_set = eq_area_partitions.point_set(2, n_points)
     sampling = Coordinates(
-        point_set[0], point_set[1], point_set[2],
+        point_set[0] * radius, point_set[1] * radius, point_set[2] * radius,
         domain='cart', convention='right',
         comment='Equal area partitioning of the sphere.')
 

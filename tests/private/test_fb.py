@@ -5,6 +5,7 @@ import haiopy
 from haiopy import Coordinates
 from haiopy.spatial import samplings
 
+%matplotlib qt
 
 # %% test samplings
 
@@ -19,6 +20,7 @@ c = samplings.sph_great_circle(match=90)
 c = samplings.sph_lebedev(sh_order=35)
 c = samplings.sph_fliege(100)
 c = samplings.sph_equal_angle((20, 180))
+c = samplings.sph_equal_area(100)
 
 c.show()
 
