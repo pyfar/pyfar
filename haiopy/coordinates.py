@@ -1510,7 +1510,7 @@ class Coordinates(object):
 
         # check for sampling weights
         if self._weights is None:
-            _repr += "\nDoes not contains sampling weights"
+            _repr += "\nDoes not contain sampling weights"
         else:
             _repr += "\nContains sampling weights"
 
