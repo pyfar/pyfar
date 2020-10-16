@@ -1,8 +1,12 @@
 import scipy.io.wavfile as wavfile
 import os.path
 import warnings
+import numpy as np
+import sofa
+
 
 from haiopy import Signal
+from haiopy import Coordinates
 
 
 def read_wav(filename):
@@ -117,16 +121,54 @@ def read_sofa(filename):
     * Only SOFA files of DataType 'FIR' are supported.
     """
     sofafile = sofa.Database.open(filename)
+    # Check for DataType
     if sofafile.Data.Type == 'FIR':
         domain = 'time'
-        data = sofafile.Data.IR
+        data = np.asarray(sofafile.Data.IR)
         sampling_rate = sofafile.Data.SamplingRate.get_values()
-        # Delay
-        # Coordinates
+        # Check for units
+        if sofafile.Data.SamplingRate.Units != 'hertz':
+            raise ValueError(
+                'SamplingRate:Units ',
+                sofafile.Data.SamplingRate.Units,
+                ' is not supported.')
     else:
-        raise ValueError('DataType ', sofafile.Data.type, ' is not supported.')
-
+        raise ValueError('DataType ', sofafile.Data.Type, ' is not supported.')
     signal = Signal(data, sampling_rate, domain=domain)
+
+    # Receiver
+    r_values = sofafile.Receiver.Position.get_values()
+    r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
+    receiver_coordinates = Coordinates(
+            r_values[:, 0],
+            r_values[:, 1],
+            r_values[:, 2],
+            domain=r_domain,
+            convention=r_convention,
+            unit=r_unit)
+    # Source
+    s_values = sofafile.Source.Position.get_values()
+    s_domain, s_convention, s_unit = _sofa_pos(sofafile.Source.Position.Type)
+    source_coordinates = Coordinates(
+            s_values[:, 0],
+            s_values[:, 1],
+            s_values[:, 2],
+            domain=s_domain,
+            convention=s_convention,
+            unit=s_unit)
+
     return signal, source_coordinates, receiver_coordinates
 
-        
+
+def _sofa_pos(postype):
+    if postype == 'spherical':
+        domain = 'sph'
+        convention = 'top_elev'
+        unit = 'deg'
+    elif postype == 'cartesian':
+        domain = 'cart'
+        convention = 'right'
+        unit = 'met'
+    else:
+        ValueError('Position:Type ', postype, ' is not supported.')
+    return domain, convention, unit
