@@ -260,3 +260,42 @@ class Signal(Audio):
             raise ValueError("The number of samples does not match.")
         if self.signal_type != other.signal_type:
             raise ValueError("The signal types do not match.")
+
+
+def add(data: tuple, domain='freq'):
+    _assert_match_for_math_operation(data, domain)
+    return data
+
+
+def _assert_match_for_math_operation(data: tuple, domain: str):
+    # we need at least two signals
+    if len(data) < 2:
+        assert ValueError(("At least two inputs needed "
+                           f"but found only {len(data)}"))
+
+    # check input types and meta data
+    signal_found = False
+    for d in data:
+        # check or store meta data of signals
+        if isinstance(d, Signal):
+            if not signal_found:
+                sampling_rate = d.sampling_rate
+                n_samples = d.n_samples
+                signal_found = True
+            else:
+                if sampling_rate != d.sampling_rate:
+                    raise ValueError("The sampling rates do not match.")
+                if n_samples != d.n_samples:
+                    raise ValueError("The number of samples does not match.")
+        # check type of non signal input
+        else:
+            dtypes = ['int8', 'int16', 'int32',
+                      'float32', 'float64',
+                      'complex64', 'complex128']
+            if np.asarray(d).dtype not in dtypes:
+                raise ValueError(
+                    f"Input must be of type Signal, {', '.join(dtypes)}")
+            if np.asarray(d).dtype in ['complex64', 'complex128'] \
+                    and domain == 'time':
+                raise ValueError(
+                    "Complex input can not be applied in the time domain.")
