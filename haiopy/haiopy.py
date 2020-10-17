@@ -269,19 +269,18 @@ def add(data: tuple, domain='freq'):
 
 def _assert_match_for_math_operation(data: tuple, domain: str):
     # we need at least two signals
-    if len(data) < 2:
-        assert ValueError(("At least two inputs needed "
-                           f"but found only {len(data)}"))
+    if not isinstance(data, tuple):
+        raise ValueError("Input argument 'data' must be a tuple.")
 
     # check input types and meta data
-    signal_found = False
+    sampling_rate = None
+    n_samples = None
     for d in data:
         # check or store meta data of signals
         if isinstance(d, Signal):
-            if not signal_found:
+            if sampling_rate is None:
                 sampling_rate = d.sampling_rate
                 n_samples = d.n_samples
-                signal_found = True
             else:
                 if sampling_rate != d.sampling_rate:
                     raise ValueError("The sampling rates do not match.")
