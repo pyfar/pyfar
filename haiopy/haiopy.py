@@ -288,7 +288,7 @@ def _assert_match_for_math_operation(data: tuple, domain: str):
                     raise ValueError("The number of samples does not match.")
         # check type of non signal input
         else:
-            dtypes = ['int8', 'int16', 'int32', 'int64'
+            dtypes = ['int8', 'int16', 'int32', 'int64',
                       'float32', 'float64',
                       'complex64', 'complex128']
             if np.asarray(d).dtype not in dtypes:
