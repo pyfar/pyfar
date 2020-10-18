@@ -70,10 +70,12 @@ def test_weights_from_voronoi():
         domain='cart', convention='right')
 
     # test with normalization
-    weights = spatial.calculate_sph_voronoi_weights(s)
+    weights = spatial.calculate_sph_voronoi_weights(s, normalize=True)
     desired = np.ones(6)/6
     np.testing.assert_allclose(weights, desired)
 
+    np.testing.assert_allclose(np.sum(weights), 1.)
+
     # test without normalization
-    weights = spatial.calculate_sph_voronoi_weights(s, False)
+    weights = spatial.calculate_sph_voronoi_weights(s, normalize=False)
     np.testing.assert_allclose(np.sum(weights), 4 * np.pi)
