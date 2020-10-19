@@ -43,24 +43,6 @@ def _prepare_plot(ax=None):
     return fig, ax
 
 
-def _plotstyle(style='light'):
-
-    if style is None:
-        # get the currently used plotstyle
-        style = mpl.matplotlib_fname()
-    elif style in ['light', 'dark']:
-        # use haiopy style
-        style = os.path.join(
-            os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
-    elif style not in plt.style.available:
-        # error if style not found
-        ValueError((f"plotstyle '{style}' not available. Valid styles are "
-                    "None, 'light', 'dark' and styles from "
-                    "matplotlib.pyplot.available"))
-
-    return style
-
-
 def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with haiopy default color if possible."""
 

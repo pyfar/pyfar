@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 # plt.style.use(['default', 'ggplot', 'haiopy.mplstyle'])
 import matplotlib as mpl
+import os
 import numpy as np
 from .. import dsp
 from scipy import signal as sgn
@@ -39,7 +40,7 @@ def plot_time(signal, ax=None, style='light', **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_time(signal, ax, **kwargs)
 
     plt.tight_layout()
@@ -76,7 +77,7 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light',
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_time_dB(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
@@ -113,7 +114,7 @@ def plot_freq(signal, log_prefix=20, log_reference=1, ax=None, style='light', **
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_freq(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
@@ -152,7 +153,7 @@ def plot_phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_phase(signal, deg, unwrap, ax, **kwargs)
 
     plt.tight_layout()
@@ -181,7 +182,7 @@ def plot_group_delay(signal, ax=None, style='light', **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_group_delay(signal, ax, **kwargs)
 
     plt.tight_layout()
@@ -242,7 +243,7 @@ def plot_spectrogram(signal,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_spectrogram_cb(signal, log, nodb, window, window_length,
                                         window_overlap_fct, cmap, ax, **kwargs)
 
@@ -282,7 +283,7 @@ def plot_freq_phase(signal,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_freq_phase(signal, log_prefix, log_reference, deg, unwrap,
                                 **kwargs)
     plt.tight_layout()
@@ -310,7 +311,7 @@ def plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_freq_group_delay(signal, log_prefix, log_reference,
                                         **kwargs)
 
@@ -359,9 +360,27 @@ def plot_all(signal, ax=None, style='light', **kwargs):
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(hplt._plotstyle(style)):
+    with plt.style.context(plotstyle(style)):
         ax = hplt._plot_all(signal, **kwargs)
 
     plt.tight_layout()
 
     return ax
+
+
+def plotstyle(style='light'):
+
+    if style is None:
+        # get the currently used plotstyle
+        style = mpl.matplotlib_fname()
+    elif style in ['light', 'dark']:
+        # use haiopy style
+        style = os.path.join(
+            os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
+    elif style not in plt.style.available:
+        # error if style not found
+        ValueError((f"plotstyle '{style}' not available. Valid styles are "
+                    "None, 'light', 'dark' and styles from "
+                    "matplotlib.pyplot.available"))
+
+    return style
