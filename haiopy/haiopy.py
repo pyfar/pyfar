@@ -180,6 +180,7 @@ class Signal(Audio):
     @signal_type.setter
     def signal_type(self, value):
         if (value in self._VALID_SIGNAL_TYPE) is True:
+            self.domain = 'time'
             self._signal_type = value
         else:
             raise ValueError("Not a valid signal type ('power'/'energy')")

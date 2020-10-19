@@ -194,6 +194,17 @@ def test_setter_signal_type(sine):
     npt.assert_string_equal(signal_type, signal._signal_type)
 
 
+def test_setter_signal_type_freq_domain_data(sine):
+    """Test if attribute signal type is set correctly."""
+    signal_type = "energy"
+    signal = Signal(sine, 44100, signal_type='power')
+    amplitude = np.max(np.abs(signal.freq))
+    signal.signal_type = signal_type
+    amplitude_new = np.max(np.abs(signal.freq))
+    npt.assert_almost_equal(amplitude, 1/np.sqrt(2), decimal=3)
+    npt.assert_almost_equal(amplitude_new, 500.1327464502182, decimal=3)
+
+
 def test_setter_signal_type_false_type(sine):
     """Test if ValueError is raised when signal type is set incorrectly."""
     signal = Signal(sine, 44100)
