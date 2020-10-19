@@ -1,7 +1,8 @@
 import warnings
 import matplotlib as mpl
 import numpy as np
-from . import _plot as hplt
+from . import _plot as _hplt
+from . import plot as hplt
 import matplotlib.pyplot as plt
 from haiopy import Signal
 
@@ -103,30 +104,30 @@ class Interaction(object):
     def toggle_plot(self, event):
         if event.key not in ['ctrl+1', 'ctrl+2', 'ctrl+3', 'ctrl+4', 'ctrl+5', 'ctrl+6', 'ctrl+7', 'ctrl+8', 'ctrl+9']:
             return
-        with plt.style.context(hplt._plotstyle(self.style)):
+        with plt.style.context(hplt.plotstyle(self.style)):
             if event.key in ['ctrl+1']: # plot time domain
                 self.clear_axes()
-                hplt._plot_time(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._plot_time(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+2']: # plot magnitude
                 self.clear_axes()
-                hplt._plot_freq(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._plot_freq(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
             if event.key in ['ctrl+3']: # plot phase
                 self.clear_axes()
-                hplt._plot_phase(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._plot_phase(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+4']: # plot time domain in decibels
                 self.clear_axes()
-                hplt._plot_time_dB(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._plot_time_dB(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
             if event.key in ['ctrl+5']: # plot group delay
                 self.clear_axes()
-                hplt._plot_group_delay(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._plot_group_delay(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+6']: # plot spectrogram
@@ -135,16 +136,16 @@ class Interaction(object):
                                         self.signal.sampling_rate,
                                         'time',
                                         self.signal.signal_type)
-                self.axes = hplt._plot_spectrogram_cb(self._plot_signal, ax=self.axes)
+                self.axes = _hplt._plot_spectrogram_cb(self._plot_signal, ax=self.axes)
                 self.figure.canvas.draw()
                 self.change_modifier('spectrogram')
             if event.key in ['ctrl+7']: # plot magnitude and phase
                 self.clear_axes()
-                self.axes = hplt._plot_freq_phase(self.signal, ax=self.axes, **self.kwargs)
+                self.axes = _hplt._plot_freq_phase(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
             if event.key in ['ctrl+8']: # plot magnitude and group delay
                 self.clear_axes()
-                self.axes = hplt._plot_freq_group_delay(self.signal, ax=self.axes, **self.kwargs)
+                self.axes = _hplt._plot_freq_group_delay(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
             if event.key in ['ctrl+9']: # plot all
                 if self.signal.time.shape[0] > 1:
@@ -153,7 +154,7 @@ class Interaction(object):
                 else:
                     self.clear_axes()
                     self.figure.set_size_inches(6, 6, forward=True)
-                    self.axes = hplt._plot_all(self.signal, ax=self.axes, **self.kwargs)
+                    self.axes = _hplt._plot_all(self.signal, ax=self.axes, **self.kwargs)
                     self.figure.canvas.draw()
 
     def change_modifier(self, plot_type):
@@ -235,7 +236,7 @@ class AxisModifierSpectrogram(AxisModifier):
                                   self.signal.sampling_rate,
                                   'time',
                                   self.signal.signal_type)
-            self.axes = hplt._plot_spectrogram_cb(self._plot_signal, ax=self.axes)
+            self.axes = _hplt._plot_spectrogram_cb(self._plot_signal, ax=self.axes)
             self.figure.canvas.draw()
 
 
