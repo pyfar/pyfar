@@ -15,15 +15,15 @@ def generate_test_plots(dir='tests/test_plot_data/baseline/'):
     """
     matplotlib.use('Agg')
     matplotlib.testing.set_reproducibility_for_testing()
-    function_list = ['plot_time',
-                     'plot_time_dB',
-                     'plot_freq',
-                     'plot_phase',
-                     'plot_group_delay',
-                     'plot_spectrogram',
-                     'plot_freq_phase',
-                     'plot_freq_group_delay',
-                     'plot_all']
+    function_list = ['time',
+                     'time_dB',
+                     'freq',
+                     'phase',
+                     'group_delay',
+                     'spectrogram',
+                     'freq_phase',
+                     'freq_group_delay',
+                     'summary']
 
     for function_name in function_list:
         getattr(plot, function_name)(sine_plus_impulse())
@@ -31,11 +31,11 @@ def generate_test_plots(dir='tests/test_plot_data/baseline/'):
 
 
     # additional plots to check different options:
-    plot.plot_phase(sine_plus_impulse(), deg=True, unwrap=False)
+    plot.phase(sine_plus_impulse(), deg=True, unwrap=False)
     plt.savefig((dir + 'plot_phase_deg' + '.png'))
-    plot.plot_phase(sine_plus_impulse(), deg=False, unwrap=True)
+    plot.phase(sine_plus_impulse(), deg=False, unwrap=True)
     plt.savefig((dir + 'plot_phase_unwrap' + '.png'))
-    plot.plot_phase(sine_plus_impulse(), deg=True, unwrap=True)
+    plot.phase(sine_plus_impulse(), deg=True, unwrap=True)
     plt.savefig((dir + 'plot_phase_unwrap_deg' + '.png'))
 
 
