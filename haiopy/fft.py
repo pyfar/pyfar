@@ -92,7 +92,8 @@ References
 
 .. [2]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
         Scaling of the Discrete Fourier Transform and the Implied Physical
-        Units of the Spectra of Time-Discrete Signals,” p. 5, 2020.
+        Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
+        May 2020, p. e-Brief 600.
 
 
 """
@@ -224,6 +225,116 @@ def irfft(spec, n_samples, signal_type):
     data = fft_lib.irfft(spec, n=n_samples, axis=-1)
 
     return data
+
+
+def normalization(spec, n_samples, sampling_rate,
+                  norm_type="none", inverse=False, single_sided=True):
+    """
+    Normalize spectrum from Discrete Fourier Transform (DFT).
+
+    Apply normalizations defined in _[1] to DFT spectrum. Note that,
+    unlike _[1], the phase is maintained in all cases, i.e., instead of taking
+    the squared absolute spectra in Eq. (5-6), the complex spectra are
+    multiplied with their absolute values.
+
+    Parameters
+    ----------
+    spec : numpy array
+        N dimensional array that which has the frequency bins in the last
+        dimension. E.g., spec.shape == (10,2,129) holds 10 times 2 spectra with
+        129 frequencies each
+    n_samples : int
+        number of samples of the corresponding time signal
+    sampling_rate : number
+        sampling rate of the corresponding time signal in Hz
+    norm_type : string, optional
+        'none' - apply no normalization (usefull for impulse responses)
+        'amplitude' - as in _[1] Eq. (4)
+        'rms' - as in _[1] Eq. (10)
+        'power' - as in _[1] Eq. (5)
+        'psd' - as in _[1] Eq. (6)
+    inverse : bool, optional
+        apply the inverse normalization. The default is false.
+    single_sided : bool, optional
+        denotes if `spec` is a single sided spectrum up half the sampling rate
+        or a both sided (full) spectrum. If `single_sided==True` the
+        normalization according to _[1] Eq. (8) is applied. The default is
+        True.
+
+    Returns
+    -------
+    spec : numpy array
+        normalized version of the input spectrum
+
+    References
+    ----------
+    .. [1] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+           Scaling of the Discrete Fourier Transform and the Implied Physical
+           Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
+           May 2020, p. e-Brief 600.
+    """
+
+    if not isinstance(spec, np.ndarray):
+        raise ValueError("Input 'spec' must be a numpy array.")
+
+    n_bins = spec.shape[-1]
+    norm = np.ones(n_bins)
+
+    # account for type of normalization
+    if norm_type == "amplitude":
+        # Equation 4 in Ahrens et al. 2020
+        norm /= n_samples
+    elif norm_type == 'rms':
+        # Equation 10 in Ahrens et al. 2020
+        if not single_sided:
+            raise ValueError(
+                "'rms' normalization does only exist for single-sided spectra")
+        norm /= n_samples
+        if _is_odd(n_samples):
+            norm[1:] /= np.sqrt(2)
+        else:
+            norm[1:-1] /= np.sqrt(2)
+    elif norm_type == 'power':
+        # Equation 5 in Ahrens et al. 2020
+        norm /= n_samples**2
+        # the phase is kept for being able to switch between normalizations
+        # altoug the power spectrum does usually not have phase information,
+        # i.e., spec = np.abs(spec)**2
+        if not inverse:
+            spec *= np.abs(spec)
+    elif norm_type == 'psd':
+        norm /= (n_samples * sampling_rate)
+        # the phase is kept for being able to switch between normalizations
+        # altoug the power spectrum does usually not have phase information,
+        # i.e., spec = np.abs(spec)**2
+        if not inverse:
+            spec *= np.abs(spec)
+    elif norm_type != 'none':
+        raise ValueError(("norm type must be 'amplitude', 'rms', 'power', or "
+                          f"'psd' but is '{norm_type}'"))
+
+    # account for inverse
+    if inverse:
+        norm = 1 / norm
+
+    # apply normalization
+    spec = spec * norm
+
+    # scaling for single sided spectrum, i.e., to account for the lost
+    # energy in the discarded half of the spectrum. Only the bins at 0 Hz
+    # and Nyquist remain as they are (Equation 8 in Ahrens et al. 2020).
+    if single_sided:
+        scale = 2 if not inverse else 1 / 2
+        if _is_odd(n_samples):
+            spec[..., 1:] *= scale
+        else:
+            spec[..., 1:-1] *= scale
+
+    # reverse the squaring in case of 'power' and 'psd' normalization
+    if inverse and norm_type in ["power", "psd"]:
+        spec /= np.sqrt(np.abs(spec))
+
+    return spec
 
 
 def _is_odd(num):
