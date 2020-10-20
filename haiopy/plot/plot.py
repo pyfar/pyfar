@@ -320,7 +320,7 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
 
     return ax
 
-def plot_all(signal, ax=None, style='light', **kwargs):
+def summary(signal, ax=None, style='light', **kwargs):
     """ TODO: Implement input parameters for this function.
     Plot the time domain, the time domain in dB, the magnitude spectrum,
     the frequency domain, the phase and group delay on shared x axis.
@@ -355,13 +355,13 @@ def plot_all(signal, ax=None, style='light', **kwargs):
             sine = amplitude * np.sin(2 * np.pi * frequency * times)
             signal_object = Signal(sine, sampling_rate, 'time', 'power')
 
-            plot.plot_all(signal_object)
+            plot.signal(signal_object)
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._plot_all(signal, **kwargs)
+        ax = hplt._signal(signal, **kwargs)
 
     plt.tight_layout()
 

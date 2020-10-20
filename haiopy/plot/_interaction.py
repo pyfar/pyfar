@@ -154,7 +154,7 @@ class Interaction(object):
                 else:
                     self.clear_axes()
                     self.figure.set_size_inches(6, 6, forward=True)
-                    self.axes = _hplt._plot_all(self.signal, ax=self.axes, **self.kwargs)
+                    self.axes = _hplt._signal(self.signal, ax=self.axes, **self.kwargs)
                     self.figure.canvas.draw()
 
     def change_modifier(self, plot_type):
