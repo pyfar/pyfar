@@ -119,6 +119,12 @@ def read_sofa(filename):
     -----
     * This function is based on the python-sofa package.
     * Only SOFA files of DataType 'FIR' are supported.
+
+    References
+    ----------
+    .. [1] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
+       File Format.”, 2015.
+
     """
     sofafile = sofa.Database.open(filename)
     # Check for DataType
@@ -129,11 +135,10 @@ def read_sofa(filename):
         # Check for units
         if sofafile.Data.SamplingRate.Units != 'hertz':
             raise ValueError(
-                'SamplingRate:Units ',
-                sofafile.Data.SamplingRate.Units,
-                ' is not supported.')
+                "SamplingRate:Units"
+                "{sofafile.Data.SamplingRate.Units} is not supported.")
     else:
-        raise ValueError('DataType ', sofafile.Data.Type, ' is not supported.')
+        raise ValueError("DataType {sofafile.Data.Type} is not supported.")
     signal = Signal(data, sampling_rate, domain=domain)
 
     # Receiver
@@ -160,15 +165,15 @@ def read_sofa(filename):
     return signal, source_coordinates, receiver_coordinates
 
 
-def _sofa_pos(postype):
-    if postype == 'spherical':
+def _sofa_pos(pos_type):
+    if pos_type == 'spherical':
         domain = 'sph'
         convention = 'top_elev'
         unit = 'deg'
-    elif postype == 'cartesian':
+    elif pos_type == 'cartesian':
         domain = 'cart'
         convention = 'right'
         unit = 'met'
     else:
-        ValueError('Position:Type ', postype, ' is not supported.')
+        raise ValueError("Position:Type {pos_type} is not supported.")
     return domain, convention, unit

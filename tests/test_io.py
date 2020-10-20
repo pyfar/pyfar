@@ -4,6 +4,7 @@ import pytest
 from unittest import mock
 import os.path
 import scipy.io.wavfile as wavfile
+import sofa
 
 from haiopy import io
 from haiopy import Signal
@@ -52,6 +53,16 @@ def test_write_wav_nd(signal_mock_nd):
         signal_reload.reshape(signal_mock_nd.time.shape),
         rtol=1e-10)
     os.remove(filename)
+
+
+def test_read_sofa():
+    dir = 'tests/test_io_data/'
+    # DataTypes
+    io.read_sofa((dir + 'GeneralFIR.sofa'))
+    with pytest.raises(ValueError):
+        io.read_sofa((dir + 'GeneralTF.sofa'))
+    # Units
+    # PositionType
 
 
 @pytest.fixture
