@@ -66,7 +66,7 @@ def _return_default_colors_rgb(**kwargs):
     return kwargs
 
 
-def _plot_time(signal, ax=None, **kwargs):
+def _time(signal, ax=None, **kwargs):
     """Plot the time signal of a haiopy audio signal object.
 
     Parameters
@@ -106,7 +106,7 @@ def _plot_time(signal, ax=None, **kwargs):
 
     return ax
 
-def _plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
+def _time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     """Plot the time signal of a haiopy audio signal object in Decibels.
 
     Parameters
@@ -156,7 +156,7 @@ def _plot_time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     return ax
 
-def _plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
+def _freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     """Plot the absolute values of the spectrum on the positive frequency axis.
 
     Parameters
@@ -212,7 +212,7 @@ def _plot_freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     return ax
 
-def _plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
+def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis.
 
     Parameters
@@ -285,7 +285,7 @@ def _plot_phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
 
     return ax
 
-def _plot_group_delay(signal, ax=None, **kwargs):
+def _group_delay(signal, ax=None, **kwargs):
     """Plot the group delay of a given signal.
 
     Parameters
@@ -329,7 +329,7 @@ def _plot_group_delay(signal, ax=None, **kwargs):
 
     return ax
 
-def _plot_spectrogram(signal,
+def _spectrogram(signal,
                       log=False,
                       nodb=False,
                       window='hann',
@@ -437,15 +437,16 @@ def _plot_spectrogram(signal,
 
     return ax
 
-def _plot_spectrogram_cb(signal,
-                     log=False,
-                     nodb=False,
-                     window='hann',
-                     window_length='auto',
-                     window_overlap_fct=0.5,
-                     cmap=mpl.cm.get_cmap(name='magma'),
-                     ax=None,
-                     **kwargs):
+
+def _spectrogram_cb(signal,
+                    log=False,
+                    nodb=False,
+                    window='hann',
+                    window_length='auto',
+                    window_overlap_fct=0.5,
+                    cmap=mpl.cm.get_cmap(name='magma'),
+                    ax=None,
+                    **kwargs):
     """Plots the spectrogram for a given signal object.
 
     Parameters
@@ -493,7 +494,7 @@ def _plot_spectrogram_cb(signal,
     ax = ax.figure.subplots(1,2,gridspec_kw={"width_ratios":[1, 0.05]})
     fig.axes[0].remove()
 
-    ax[0] = _plot_spectrogram(signal, log, nodb, window,
+    ax[0] = _spectrogram(signal, log, nodb, window,
                      window_length, window_overlap_fct,
                      cmap, ax[0], **kwargs)
 
@@ -508,7 +509,7 @@ def _plot_spectrogram_cb(signal,
 
     return ax
 
-def _plot_freq_phase(signal,
+def _freq_phase(signal,
                     log_prefix=20,
                     log_reference=1,
                     deg=False,
@@ -543,16 +544,16 @@ def _plot_freq_phase(signal,
 
     ax = fig.subplots(2,1,sharex=False)
     fig.axes[0].remove()
-    _plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
-    _plot_phase(signal, deg, unwrap, ax[1], **kwargs)
+    _freq(signal, log_prefix, log_reference, ax[0], **kwargs)
+    _phase(signal, deg, unwrap, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
     plt.tight_layout()
 
     return ax
 
-def _plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
-                           **kwargs):
+def _freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
+                      **kwargs):
     """Plot the magnitude spectrum and group delay on the positive frequency
     axis.
 
@@ -576,8 +577,8 @@ def _plot_freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
 
     ax = fig.subplots(2,1,sharex=False)
     fig.axes[0].remove()
-    _plot_freq(signal, log_prefix, log_reference, ax[0], **kwargs)
-    _plot_group_delay(signal, ax[1], **kwargs)
+    _freq(signal, log_prefix, log_reference, ax[0], **kwargs)
+    _group_delay(signal, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
     plt.tight_layout()
@@ -633,14 +634,14 @@ def _plot_all(signal, ax=None, **kwargs):
     kwargs = _return_default_colors_rgb(**kwargs)
 
     # Time domain plots:
-    _plot_time(signal, ax=ax[0,0], style='light', **kwargs)
-    _plot_time_dB(signal, ax=ax[1,0], **kwargs)
-    _plot_spectrogram(signal, ax=ax[2,0], **kwargs)
+    _time(signal, ax=ax[0,0], **kwargs)
+    _time_dB(signal, ax=ax[1,0], **kwargs)
+    _spectrogram(signal, ax=ax[2,0], **kwargs)
 
     # Frequency domain plots:
-    _plot_freq(signal, ax=ax[0,1], **kwargs)
-    _plot_phase(signal, ax=ax[1,1], **kwargs)
-    _plot_group_delay(signal, ax=ax[2,1], **kwargs)
+    _freq(signal, ax=ax[0,1], **kwargs)
+    _phase(signal, ax=ax[1,1], **kwargs)
+    _group_delay(signal, ax=ax[2,1], **kwargs)
 
     # Colorbar for spectrogram:
     for PCM in ax[2,0].get_children():

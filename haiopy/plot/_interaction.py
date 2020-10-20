@@ -107,27 +107,27 @@ class Interaction(object):
         with plt.style.context(hplt.plotstyle(self.style)):
             if event.key in ['ctrl+1']: # plot time domain
                 self.clear_axes()
-                _hplt._plot_time(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._time(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+2']: # plot magnitude
                 self.clear_axes()
-                _hplt._plot_freq(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._freq(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
             if event.key in ['ctrl+3']: # plot phase
                 self.clear_axes()
-                _hplt._plot_phase(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._phase(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+4']: # plot time domain in decibels
                 self.clear_axes()
-                _hplt._plot_time_dB(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._time_dB(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
             if event.key in ['ctrl+5']: # plot group delay
                 self.clear_axes()
-                _hplt._plot_group_delay(self.signal, ax=self.axes, **self.kwargs)
+                _hplt._group_delay(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+6']: # plot spectrogram
@@ -136,16 +136,16 @@ class Interaction(object):
                                         self.signal.sampling_rate,
                                         'time',
                                         self.signal.signal_type)
-                self.axes = _hplt._plot_spectrogram_cb(self._plot_signal, ax=self.axes)
+                self.axes = _hplt._spectrogram_cb(self._plot_signal, ax=self.axes)
                 self.figure.canvas.draw()
                 self.change_modifier('spectrogram')
             if event.key in ['ctrl+7']: # plot magnitude and phase
                 self.clear_axes()
-                self.axes = _hplt._plot_freq_phase(self.signal, ax=self.axes, **self.kwargs)
+                self.axes = _hplt._freq_phase(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
             if event.key in ['ctrl+8']: # plot magnitude and group delay
                 self.clear_axes()
-                self.axes = _hplt._plot_freq_group_delay(self.signal, ax=self.axes, **self.kwargs)
+                self.axes = _hplt._freq_group_delay(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
             if event.key in ['ctrl+9']: # plot all
                 if self.signal.time.shape[0] > 1:
