@@ -136,7 +136,7 @@ def rfftfreq(n_samples, sampling_rate):
     return fft_lib.rfftfreq(n_samples, d=1/sampling_rate)
 
 
-def rfft(data, n_samples, signal_type):
+def rfft(data, n_samples, sampling_rate, signal_type, fft_norm):
     """
     Calculate the FFT of a real-valued time-signal. The function returns only
     the right-hand side of the axis-symmetric spectrum. The normalization
@@ -154,8 +154,12 @@ def rfft(data, n_samples, signal_type):
         (..., n_samples)
     n_samples : int
         The number of samples
+    sampling_rate : number
+        sampling rate in Hz
     signal_type : 'energy', 'power'
-        The signal type for normalization.
+        see haiopy.Signal for more information
+    fft_norm : 'none', 'amplitude', 'rms', 'power', 'psd'
+        See documentaion of haiopy.fft.normalization().
 
     Returns
     -------
@@ -165,23 +169,16 @@ def rfft(data, n_samples, signal_type):
 
     """
 
-    sqrt_two = np.sqrt(2)
+    # DFT
     spec = fft_lib.rfft(data, n=n_samples, axis=-1)
-
-    if signal_type == 'energy':
-        norm = 1
-    elif signal_type == 'power':
-        norm = 1/n_samples * sqrt_two
-        spec[..., 0] = spec[..., 0] / sqrt_two
-        if not _is_odd(n_samples):
-            spec[..., -1] = spec[..., -1] / sqrt_two
-
-    spec *= norm
+    # Normalization
+    spec = normalization(spec, n_samples, sampling_rate, signal_type, fft_norm,
+                         inverse=False, single_sided=True)
 
     return spec
 
 
-def irfft(spec, n_samples, signal_type):
+def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm):
     """
     Calculate the IFFT of a axis-symmetric Fourier spectum. The function
     takes only the right-hand side of the spectrum and returns a real-valued
@@ -201,8 +198,12 @@ def irfft(spec, n_samples, signal_type):
         The number of samples in the corresponding tim signal. This is crucial
         to allow for the correct transform of time signals with an odd number
         of samples.
+    sampling_rate : number
+        sampling rate in Hz
     signal_type : 'energy', 'power'
-        The signal type for normalization.
+        see haiopy.Signal for more information
+    fft_norm : 'none', 'amplitude', 'rms', 'power', 'psd'
+        See documentaion of haiopy.fft.normalization().
 
     Returns
     -------
@@ -210,25 +211,18 @@ def irfft(spec, n_samples, signal_type):
         Array containing the time domain signal with dimensions
         (..., n_samples)
     """
-    sqrt_two = np.sqrt(2)
 
-    if signal_type == 'energy':
-        norm = 1
-    elif signal_type == 'power':
-        norm = n_samples/sqrt_two
-        spec[..., 0] = spec[..., 0] * sqrt_two
-        if not _is_odd(n_samples):
-            spec[..., -1] = spec[..., -1] * sqrt_two
-
-    spec *= norm
-
+    # Inverse normalization
+    spec = normalization(spec, n_samples, sampling_rate, signal_type, fft_norm,
+                         inverse=True, single_sided=True)
+    # Inverse DFT
     data = fft_lib.irfft(spec, n=n_samples, axis=-1)
 
     return data
 
 
-def normalization(spec, n_samples, sampling_rate,
-                  norm_type="none", inverse=False, single_sided=True):
+def normalization(spec, n_samples, sampling_rate, signal_type,
+                  fft_norm="none", inverse=False, single_sided=True):
     """
     Normalize spectrum from Discrete Fourier Transform (DFT).
 
@@ -247,7 +241,10 @@ def normalization(spec, n_samples, sampling_rate,
         number of samples of the corresponding time signal
     sampling_rate : number
         sampling rate of the corresponding time signal in Hz
-    norm_type : string, optional
+    signal_type : 'energy', 'power'
+        Normalization is only applied if signal_type == 'power'. See
+        haiopy.Signal for more information
+    fft_norm : string, optional
         'none' - apply no normalization (usefull for impulse responses)
         'amplitude' - as in _[1] Eq. (4)
         'rms' - as in _[1] Eq. (10)
@@ -274,17 +271,25 @@ def normalization(spec, n_samples, sampling_rate,
            May 2020, p. e-Brief 600.
     """
 
+    # check input
     if not isinstance(spec, np.ndarray):
         raise ValueError("Input 'spec' must be a numpy array.")
+    if signal_type not in ['energy', 'power']:
+        raise ValueError(("signal_type must be 'energy' or 'power' "
+                          f"but is '{signal_type}'"))
+
+    # nothing to do for energy signals
+    if signal_type == 'energy':
+        return spec
 
     n_bins = spec.shape[-1]
     norm = np.ones(n_bins)
 
     # account for type of normalization
-    if norm_type == "amplitude":
+    if fft_norm == "amplitude":
         # Equation 4 in Ahrens et al. 2020
         norm /= n_samples
-    elif norm_type == 'rms':
+    elif fft_norm == 'rms':
         # Equation 10 in Ahrens et al. 2020
         if not single_sided:
             raise ValueError(
@@ -294,7 +299,7 @@ def normalization(spec, n_samples, sampling_rate,
             norm[1:] /= np.sqrt(2)
         else:
             norm[1:-1] /= np.sqrt(2)
-    elif norm_type == 'power':
+    elif fft_norm == 'power':
         # Equation 5 in Ahrens et al. 2020
         norm /= n_samples**2
         # the phase is kept for being able to switch between normalizations
@@ -302,16 +307,16 @@ def normalization(spec, n_samples, sampling_rate,
         # i.e., spec = np.abs(spec)**2
         if not inverse:
             spec *= np.abs(spec)
-    elif norm_type == 'psd':
+    elif fft_norm == 'psd':
         norm /= (n_samples * sampling_rate)
         # the phase is kept for being able to switch between normalizations
         # altoug the power spectrum does usually not have phase information,
         # i.e., spec = np.abs(spec)**2
         if not inverse:
             spec *= np.abs(spec)
-    elif norm_type != 'none':
+    elif fft_norm != 'none':
         raise ValueError(("norm type must be 'amplitude', 'rms', 'power', or "
-                          f"'psd' but is '{norm_type}'"))
+                          f"'psd' but is '{fft_norm}'"))
 
     # account for inverse
     if inverse:
@@ -331,7 +336,7 @@ def normalization(spec, n_samples, sampling_rate,
             spec[..., 1:-1] *= scale
 
     # reverse the squaring in case of 'power' and 'psd' normalization
-    if inverse and norm_type in ["power", "psd"]:
+    if inverse and fft_norm in ["power", "psd"]:
         spec /= np.sqrt(np.abs(spec))
 
     return spec

@@ -200,6 +200,20 @@ def test_is_not_odd():
     assert not fft._is_odd(num)
 
 
+def test_normalization_energy_signal():
+    spec_single = np.array([1, 1, 1])
+    N = 4       # time signal with even number of samples
+    fs = 40     # arbitrary sampling frequency for psd normalization
+
+    spec_out = fft.normalization(spec_single.copy(), N, fs, "energy",
+                                 "rms", inverse=False)
+    npt.assert_allclose(spec_out, spec_single, atol=1e-15)
+
+    spec_out = fft.normalization(spec_out, N, fs, "energy",
+                                 "rms", inverse=True)
+    npt.assert_allclose(spec_out, spec_single, atol=1e-15)
+
+
 def test_normalization_single_sided_single_channel_even_samples():
     # single sided test spectrum
     v = 1/3 + 1/3j
@@ -230,13 +244,13 @@ def test_normalization_single_sided_single_channel_even_samples():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, normalization,
-                                     inverse=False)
+        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+                                     normalization, inverse=False)
         npt.assert_allclose(spec_out, truth[normalization], atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, normalization,
-                                         inverse=True)
+        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+                                         normalization, inverse=True)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
@@ -270,13 +284,13 @@ def test_normalization_single_sided_single_channel_odd_samples():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, normalization,
-                                     inverse=False)
+        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+                                     normalization, inverse=False)
         npt.assert_allclose(spec_out, truth[normalization], atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, normalization,
-                                         inverse=True)
+        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+                                         normalization, inverse=True)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
@@ -306,13 +320,15 @@ def test_normalization_both_sided_single_channel():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, normalization,
-                                     inverse=False, single_sided=False)
+        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+                                     normalization, inverse=False,
+                                     single_sided=False)
         npt.assert_allclose(spec_out, truth[normalization], atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, normalization,
-                                         inverse=True, single_sided=False)
+        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+                                         normalization, inverse=True,
+                                         single_sided=False)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
@@ -347,22 +363,25 @@ def test_normalization_single_sided_multi_channel_even_samples():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, normalization,
-                                     inverse=False)
+        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+                                     normalization, inverse=False)
         npt.assert_allclose(spec_out, np.tile(truth[normalization], tile),
                             atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, normalization,
-                                         inverse=True)
+        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+                                         normalization, inverse=True)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
 def test_normalization_exceptions():
+    # try without numpy array
     with raises(ValueError):
-        fft.normalization(1, 1, 44100)
+        fft.normalization(1, 1, 44100, 'power')
+    # try rms normalization for power signal
     with raises(ValueError):
-        fft.normalization(np.array([1]), 1, 44100, 'rms', single_sided=False)
+        fft.normalization(np.array([1]), 1, 44100, 'power',
+                          'rms', single_sided=False)
 
 
 def test_rfft_energy_imp_even_samples(impulse):

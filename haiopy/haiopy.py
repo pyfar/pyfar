@@ -1,3 +1,4 @@
+from haiopy.fft import normalization
 import warnings
 import numpy as np
 from haiopy import fft as fft
@@ -35,6 +36,7 @@ class Signal(Audio):
             n_samples=None,
             domain='time',
             signal_type='energy',
+            fft_norm='none',
             dtype=np.double):
         """Init Signal with data, sampling rate and domain and signal type.
 
@@ -84,6 +86,16 @@ class Signal(Audio):
             self._n_samples = n_samples
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
+        self._VALID_FFT_NORMS = ["none", "amplitude", "rms", "power",
+                                     "psd"]
+        if fft_norm in self._VALID_FFT_NORMS:
+            self._fft_norm = None
+            self.fft_norm = fft_norm
+        else:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
+                              f"'{fft_norm}'"))
+
     @property
     def domain(self):
         """The domain the data is stored in"""
@@ -100,12 +112,14 @@ class Signal(Audio):
                 # If the new domain should be time, we had a saved spectrum
                 # and need to do an inverse Fourier Transform
                 self.time = fft.irfft(
-                    self._data, self.n_samples, signal_type=self.signal_type)
+                    self._data, self.n_samples, self._sampling_rate,
+                    self._signal_type, self._fft_norm)
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform
                 self.freq = fft.rfft(
-                    self._data, self.n_samples, signal_type=self.signal_type)
+                    self._data, self.n_samples, self._sampling_rate,
+                    self._signal_type, self._fft_norm)
 
     @property
     def n_samples(self):
@@ -177,10 +191,54 @@ class Signal(Audio):
 
     @signal_type.setter
     def signal_type(self, value):
-        if (value in self._VALID_SIGNAL_TYPE) is True:
-            self._signal_type = value
-        else:
+        # check input
+        if value not in self._VALID_SIGNAL_TYPE:
             raise ValueError("Not a valid signal type ('power'/'energy')")
+        if value == 'energy' and self._fft_norm != 'none':
+            raise ValueError(("Signal type can only be set to 'energy' if "
+                              "fft_norm is 'none'"))
+
+        self._signal_type = value
+
+    @property
+    def fft_norm(self):
+        """
+        The normalization for the Fourier Transform.
+
+        See haiopy.fft.normalization for more information.
+        """
+        return self._fft_norm
+
+    @fft_norm.setter
+    def fft_norm(self, value):
+        """
+        The normalization for the Fourier Transform.
+
+        See haiopy.fft.normalization for more information.
+        """
+        # check input
+        if value not in self._VALID_FFT_NORMS:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
+                              f"'{value}'"))
+        if self._signal_type == 'energy' and value != 'none':
+            raise ValueError(
+                "If signal_type is 'energy', fft_norm must be 'none'.")
+
+        # apply new normalization if Signal is in frequency domain
+        if self._fft_norm != value and self._domain == 'freq':
+            # de-normalize
+            if self._fft_norm != 'none':
+                self._data = fft.normalization(
+                    self._data, self._n_samples, self._sampling_rate,
+                    self._signal_type, self._fft_norm, inverse=True)
+            # normalize
+            if value != 'none':
+                self._data = fft.normalization(
+                    self._data, self._n_samples, self._sampling_rate,
+                     self._signal_type, value, inverse=False)
+
+        self._fft_norm = value
 
     @property
     def dtype(self):
