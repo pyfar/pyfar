@@ -12,6 +12,7 @@ class Audio(object):
 
 class Signal(Audio):
     """Class for audio signals.
+
     Objects of this class contain data which is directly convertable between
     time and frequency domain. Equally spaced samples or frequency bins,
     respectively.
@@ -19,13 +20,26 @@ class Signal(Audio):
     Attributes
     ----------
     data : ndarray, double
-        Raw data of the signal
+        Raw data of the signal in the frequency or time domain
     sampling_rate : double
         Sampling rate in Hertz
-    domain : string
-        Domain of data ('freq'/'time')
-    dtype : string
-        Raw data type of the signal, optional
+    n_samples : int, optional
+        Number of samples of the time signal. Required if domain is 'freq'. The
+        default is None.
+    domain : 'time', 'freq', optional
+        Domain of data. The default is 'time'
+    signal_type : 'energy', 'power', optional
+        Energy signals are finite and have finite energy. An example for an
+        energy signal is an impulse response. Power signals are infinite and
+        have infinite energy. Examples are noise and sine signals. The default
+        is 'energy'
+    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
+        The kind of Discrete Fourier Transform (DFT) normalization. See
+        haiopy.fft.normalization for more information. The normalization is
+        only applied to power signals. The default is 'unitary' for energy
+        signals and 'rms' for power signals.
+    dtype : string, optional
+        Raw data type of the signal. The default is float64
 
     """
     def __init__(
@@ -35,26 +49,34 @@ class Signal(Audio):
             n_samples=None,
             domain='time',
             signal_type='energy',
-            fft_norm='unitary',
+            fft_norm=None,
             dtype=np.double):
-        """Init Signal with data, sampling rate and domain and signal type.
+        """Init Signal with data, and sampling rate.
 
         Attributes
         ----------
         data : ndarray, double
-            Raw data of the signal
+            Raw data of the signal in the frequency or time domain
         sampling_rate : double
             Sampling rate in Hertz
-        domain : string
-            Domain of data ('freq'/'time')
-        signal_type : string
-            Distinguish between power and energy signals
-        dtype : string
-            Raw data type of the signal, optional
-        position : Coordinates
-            Coordinates object
-        orientation : Orientation
-            Orientation object
+        n_samples : int, optional
+            Number of samples of the time signal. Required if domain is 'freq'.
+            The default is None.
+        domain : 'time', 'freq', optional
+            Domain of data. The default is 'time'
+        signal_type : 'energy', 'power', optional
+            Energy signals are finite and have finite energy. An example for an
+            energy signal is an impulse response. Power signals are infinite
+            and have infinite energy. Examples are noise and sine signals. The
+            default is 'energy'
+        fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
+            The kind of Discrete Fourier Transform (DFT) normalization. See
+            haiopy.fft.normalization for more information. The normalization is
+            only applied to power signals. The default is 'unitary' for energy
+            signals and 'rms' for power signals.
+        dtype : string, optional
+            Raw data type of the signal. The default is float64
+
         """
 
         Audio.__init__(self)
@@ -86,6 +108,8 @@ class Signal(Audio):
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
         self._VALID_FFT_NORMS = ["unitary", "amplitude", "rms", "power", "psd"]
+        if fft_norm is None:
+            fft_norm = 'unitary' if signal_type == 'energy' else 'rms'
         if fft_norm in self._VALID_FFT_NORMS:
             self._fft_norm = fft_norm
             self.fft_norm = fft_norm
