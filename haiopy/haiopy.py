@@ -36,7 +36,7 @@ class Signal(Audio):
             n_samples=None,
             domain='time',
             signal_type='energy',
-            fft_norm='none',
+            fft_norm='unitary',
             dtype=np.double):
         """Init Signal with data, sampling rate and domain and signal type.
 
@@ -194,9 +194,9 @@ class Signal(Audio):
         # check input
         if value not in self._VALID_SIGNAL_TYPE:
             raise ValueError("Not a valid signal type ('power'/'energy')")
-        if value == 'energy' and self._fft_norm != 'none':
+        if value == 'energy' and self._fft_norm != 'unitary':
             raise ValueError(("Signal type can only be set to 'energy' if "
-                              "fft_norm is 'none'"))
+                              "fft_norm is 'unitary'"))
 
         self._signal_type = value
 
@@ -221,19 +221,19 @@ class Signal(Audio):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
-        if self._signal_type == 'energy' and value != 'none':
+        if self._signal_type == 'energy' and value != 'unitary':
             raise ValueError(
-                "If signal_type is 'energy', fft_norm must be 'none'.")
+                "If signal_type is 'energy', fft_norm must be 'unitary'.")
 
         # apply new normalization if Signal is in frequency domain
         if self._fft_norm != value and self._domain == 'freq':
             # de-normalize
-            if self._fft_norm != 'none':
+            if self._fft_norm != 'unitary':
                 self._data = fft.normalization(
                     self._data, self._n_samples, self._sampling_rate,
                     self._signal_type, self._fft_norm, inverse=True)
             # normalize
-            if value != 'none':
+            if value != 'unitary':
                 self._data = fft.normalization(
                     self._data, self._n_samples, self._sampling_rate,
                      self._signal_type, value, inverse=False)

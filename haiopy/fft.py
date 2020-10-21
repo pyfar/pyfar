@@ -158,7 +158,7 @@ def rfft(data, n_samples, sampling_rate, signal_type, fft_norm):
         sampling rate in Hz
     signal_type : 'energy', 'power'
         see haiopy.Signal for more information
-    fft_norm : 'none', 'amplitude', 'rms', 'power', 'psd'
+    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentaion of haiopy.fft.normalization().
 
     Returns
@@ -202,7 +202,7 @@ def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm):
         sampling rate in Hz
     signal_type : 'energy', 'power'
         see haiopy.Signal for more information
-    fft_norm : 'none', 'amplitude', 'rms', 'power', 'psd'
+    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentaion of haiopy.fft.normalization().
 
     Returns
@@ -224,12 +224,13 @@ def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm):
 def normalization(spec, n_samples, sampling_rate, signal_type,
                   fft_norm="none", inverse=False, single_sided=True):
     """
-    Normalize spectrum from Discrete Fourier Transform (DFT).
+    Normalize spectrum of power signal.
 
-    Apply normalizations defined in _[1] to DFT spectrum. Note that,
-    unlike _[1], the phase is maintained in all cases, i.e., instead of taking
-    the squared absolute spectra in Eq. (5-6), the complex spectra are
-    multiplied with their absolute values.
+    Apply normalizations defined in _[1] to DFT spectrum of power signals.
+    No normalization is applied to energy signals. Note that, unlike _[1], the
+    phase is maintained in all cases, i.e., instead of taking the squared
+    absolute spectra in Eq. (5-6), the complex spectra are multiplied with
+    their absolute values.
 
     Parameters
     ----------
@@ -245,7 +246,7 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
         Normalization is only applied if signal_type == 'power'. See
         haiopy.Signal for more information
     fft_norm : string, optional
-        'none' - apply no normalization (usefull for impulse responses)
+        'unitary' - apply no normalization
         'amplitude' - as in _[1] Eq. (4)
         'rms' - as in _[1] Eq. (10)
         'power' - as in _[1] Eq. (5)
@@ -314,7 +315,7 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
         # i.e., spec = np.abs(spec)**2
         if not inverse:
             spec *= np.abs(spec)
-    elif fft_norm != 'none':
+    elif fft_norm != 'unitary':
         raise ValueError(("norm type must be 'amplitude', 'rms', 'power', or "
                           f"'psd' but is '{fft_norm}'"))
 

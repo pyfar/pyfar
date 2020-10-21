@@ -227,7 +227,7 @@ def test_normalization_single_sided_single_channel_even_samples():
     # expected results for even number of samples
     sqrt2 = np.sqrt(2)
     truth = {
-        'none': np.array([v, v * 2, v]),
+        'unitary': np.array([v, v * 2, v]),
         'amplitude': np.array([v / N,
                                v / N * 2,
                                v / N]),
@@ -267,7 +267,7 @@ def test_normalization_single_sided_single_channel_odd_samples():
     # expected results for even number of samples
     sqrt2 = np.sqrt(2)
     truth = {
-        'none': np.array([v, v * 2, v * 2]),
+        'unitary': np.array([v, v * 2, v * 2]),
         'amplitude': np.array([v / N,
                                v / N * 2,
                                v / N * 2]),
@@ -306,7 +306,7 @@ def test_normalization_both_sided_single_channel():
 
     # expected results for even number of samples
     truth = {
-        'none': np.array([v, v, v]),
+        'unitary': np.array([v, v, v]),
         'amplitude': np.array([v / N,
                                v / N,
                                v / N]),
@@ -346,7 +346,7 @@ def test_normalization_single_sided_multi_channel_even_samples():
     # expected results for even number of samples
     sqrt2 = np.sqrt(2)
     truth = {
-        'none': np.array([v, v * 2, v]),
+        'unitary': np.array([v, v * 2, v]),
         'amplitude': np.array([v / N,
                                v / N * 2,
                                v / N]),
