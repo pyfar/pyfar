@@ -222,7 +222,7 @@ def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm):
 
 
 def normalization(spec, n_samples, sampling_rate, signal_type,
-                  fft_norm="none", inverse=False, single_sided=True):
+                  fft_norm="unitary", inverse=False, single_sided=True):
     """
     Normalize spectrum of power signal.
 
@@ -235,7 +235,7 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
     Parameters
     ----------
     spec : numpy array
-        N dimensional array that which has the frequency bins in the last
+        N dimensional array which has the frequency bins in the last
         dimension. E.g., spec.shape == (10,2,129) holds 10 times 2 spectra with
         129 frequencies each
     n_samples : int
@@ -316,8 +316,8 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
         if not inverse:
             spec *= np.abs(spec)
     elif fft_norm != 'unitary':
-        raise ValueError(("norm type must be 'amplitude', 'rms', 'power', or "
-                          f"'psd' but is '{fft_norm}'"))
+        raise ValueError(("norm type must be 'unitary', 'amplitude', 'rms', "
+                          f"'power', or 'psd' but is '{fft_norm}'"))
 
     # account for inverse
     if inverse:

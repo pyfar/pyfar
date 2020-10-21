@@ -45,8 +45,12 @@ def test_domain_setter_freq_when_freq(sine):
 
 def test_domain_setter_freq_when_time(sine):
     stype = 'power'
-    spec = np.atleast_2d(fft.rfft(sine, len(sine), stype))
-    signal = Signal(sine, 44100, domain='time', signal_type=stype)
+    fft_norm='rms'
+    samplingrate = 40e3
+    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate,
+                                  stype, fft_norm))
+    signal = Signal(sine, 44100, domain='time',
+                    signal_type=stype, fft_norm=fft_norm)
     domain = 'freq'
     signal.domain = domain
     assert signal.domain == domain
@@ -63,8 +67,12 @@ def test_domain_setter_time_when_time(sine):
 
 def test_domain_setter_time_when_freq(sine):
     stype = 'power'
-    spec = np.atleast_2d(fft.rfft(sine, len(sine), stype))
-    signal = Signal(spec, 44100, domain='freq', signal_type=stype)
+    fft_norm = 'rms'
+    samplingrate = 40e3
+    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate,
+                                  stype, fft_norm))
+    signal = Signal(spec, 44100, domain='freq',
+                    signal_type=stype, fft_norm=fft_norm)
     signal._data = spec
     signal._n_samples = len(sine)
     domain = 'time'
@@ -143,9 +151,10 @@ def test_setter_time(sine, impulse):
 
 def test_getter_freq(sine, impulse):
     """Test if attribute freq is accessed correctly."""
-    signal = Signal(sine, 44100, signal_type='power')
+    samplingrate = 44100
+    signal = Signal(sine, samplingrate, signal_type='power', fft_norm='rms')
     new_sine = sine * 2
-    spec = fft.rfft(new_sine, len(new_sine), 'power')
+    spec = fft.rfft(new_sine, len(new_sine), samplingrate, 'power', 'rms')
     signal._domain = 'freq'
     signal._data = spec
     npt.assert_allclose(signal.freq, spec, atol=1e-15)
@@ -153,8 +162,10 @@ def test_getter_freq(sine, impulse):
 
 def test_setter_freq(sine, impulse):
     """Test if attribute freq is set correctly."""
-    signal = Signal(sine, 44100, signal_type='energy')
-    spec = fft.rfft(impulse, len(impulse), signal_type='energy')
+    samplingrate = 44100
+    signal = Signal(sine, samplingrate, signal_type='energy')
+    spec = fft.rfft(impulse, len(impulse), samplingrate,
+                    signal_type='energy', fft_norm='unitary')
     signal.freq = spec
     assert signal.domain == 'freq'
     npt.assert_allclose(np.atleast_2d(spec), signal._data, atol=1e-15)

@@ -86,10 +86,9 @@ class Signal(Audio):
             self._n_samples = n_samples
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
-        self._VALID_FFT_NORMS = ["none", "amplitude", "rms", "power",
-                                     "psd"]
+        self._VALID_FFT_NORMS = ["unitary", "amplitude", "rms", "power", "psd"]
         if fft_norm in self._VALID_FFT_NORMS:
-            self._fft_norm = None
+            self._fft_norm = fft_norm
             self.fft_norm = fft_norm
         else:
             raise ValueError(("Invalid FFT normalization. Has to be "
