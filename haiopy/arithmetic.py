@@ -143,7 +143,7 @@ def _get_arithmetic_data(data, domain, signal_type):
         if domain == "time":
             data_out = data.time.copy()
         elif domain == "freq":
-            data_out = data.time.copy()
+            data_out = data.freq.copy()
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")
