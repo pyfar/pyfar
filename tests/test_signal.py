@@ -17,6 +17,20 @@ def test_signal_init_list(impulse_list):
     assert isinstance(signal, Signal)
 
 
+def test_signal_init_default_parameter(impulse_list):
+    # using all defaults
+    signal = Signal(impulse_list, 44100)
+    assert signal.domain == 'time'
+    assert signal.signal_type == 'energy'
+    assert signal.fft_norm == 'unitary'
+
+    # default of fft_norm depending on signal type
+    signal = Signal(impulse_list, 44100, signal_type='energy')
+    assert signal.fft_norm == 'unitary'
+    signal = Signal(impulse_list, 44100, signal_type='power')
+    assert signal.fft_norm == 'rms'
+
+
 def test_domain_getter_freq(sine):
     signal = Signal(np.array([1]), 44100)
     signal._domain = 'freq'
@@ -84,7 +98,8 @@ def test_domain_setter_time_when_freq(sine):
 
 def test_signal_init_val(sine):
     """Test to init Signal with complete parameters."""
-    signal = Signal(sine, 44100, domain="time", signal_type="power")
+    signal = Signal(sine, 44100, domain="time",
+                    signal_type="power", fft_norm='rms')
     assert isinstance(signal, Signal)
 
 
@@ -93,22 +108,6 @@ def test_signal_init_false_signal_type(sine):
     with pytest.raises(ValueError):
         Signal(sine, 44100, signal_type="falsetype")
         pytest.fail("Not a valid signal type ('power'/'energy')")
-
-
-def test_signal_init_false_coord(sine):
-    """Test to init Signal with position that is not of type Coordinates."""
-    coord_false = np.array([1, 1, 1])
-    with pytest.raises(TypeError):
-        Signal(sine, 44100, position=coord_false)
-        pytest.fail("Input value has to be coordinates object.")
-
-
-def test_signal_init_false_orientation(sine):
-    """Test to init Signal with orientation that is not of type Orientation."""
-    orientation_false = np.array([[1, 0, 0], [0, 1, 0]])
-    with pytest.raises(TypeError):
-        Signal(sine, 44100, orientation=orientation_false)
-        pytest.fail("Input value has to be coordinates object.")
 
 
 def test_n_samples(impulse):
@@ -209,6 +208,54 @@ def test_setter_signal_type_false_type(sine):
     with pytest.raises(ValueError):
         signal.signal_type = "falsetype"
         pytest.fail("Not a valid signal type ('power'/'energy')")
+
+
+def test_signal_type_conversion():
+    spec_energy_unitary = np.atleast_2d([1, 1, 1])
+    spec_power_unitary = np.atleast_2d([1, 2, 1])
+    signal = Signal(spec_energy_unitary, 44100, n_samples=4, domain='freq',
+                    signal_type='energy')
+
+    # changing the signal type changes the fft_norm and this the spectrum
+    signal.signal_type = 'power'
+    npt.assert_allclose(spec_power_unitary, signal.freq, atol=1e-15)
+
+    signal.signal_type = 'energy'
+    npt.assert_allclose(spec_energy_unitary, signal.freq, atol=1e-15)
+
+
+def test_getter_fft_norm(sine):
+    signal = Signal(sine, 44100, signal_type='power', fft_norm='psd')
+    assert signal.fft_norm == 'psd'
+
+
+def test_setter_fft_norm(sine):
+    spec_power_unitary = np.atleast_2d([1, 2, 1])
+    spec_power_amplitude = np.atleast_2d([1/4, 2/4, 1/4])
+
+    signal = Signal(spec_power_unitary, 44100, n_samples=4, domain='freq',
+                    signal_type='power', fft_norm='unitary')
+
+    # changing the fft_norm also changes the spectrum
+    signal.fft_norm = 'amplitude'
+    assert signal.fft_norm == 'amplitude'
+    npt.assert_allclose(signal.freq, spec_power_amplitude, atol=1e-15)
+
+    # changing the fft norm in the time domain does not change the time data
+    signal.domain = 'time'
+    time_power_amplitude = signal._data.copy()
+    signal.fft_norm = 'unitary'
+    npt.assert_allclose(signal.time, time_power_amplitude)
+    npt.assert_allclose(signal.freq, spec_power_unitary)
+
+    # setting an invalid fft_norm
+    with pytest.raises(ValueError):
+        signal.fft_norm = 'bullshit'
+
+    # setting invalid fft_norm for energy signals
+    signal = Signal(sine, 44100, signal_type='energy')
+    with pytest.raises(ValueError):
+        signal.fft_norm = 'rms'
 
 
 def test_dtype(sine):

@@ -213,6 +213,10 @@ class Signal(Audio):
 
     @signal_type.setter
     def signal_type(self, value):
+        # check if we do anything
+        if value == self._signal_type:
+            return
+
         # check input
         if value not in self._VALID_SIGNAL_TYPE:
             raise ValueError("Not a valid signal type ('power'/'energy')")
@@ -220,6 +224,17 @@ class Signal(Audio):
             raise ValueError(("Signal type can only be set to 'energy' if "
                               "fft_norm is 'unitary'"))
 
+        # normalize or de-normalize spectrum
+        if self._domain == 'freq' and value == 'energy':
+            inverse = True
+        if self._domain == 'freq' and value == 'power':
+            inverse = False
+
+        self._data = fft.normalization(
+            self._data, self._n_samples, self._sampling_rate,
+            'power', self._fft_norm, inverse)
+
+        # set new signal type
         self._signal_type = value
 
     @property
@@ -250,15 +265,13 @@ class Signal(Audio):
         # apply new normalization if Signal is in frequency domain
         if self._fft_norm != value and self._domain == 'freq':
             # de-normalize
-            if self._fft_norm != 'unitary':
-                self._data = fft.normalization(
-                    self._data, self._n_samples, self._sampling_rate,
-                    self._signal_type, self._fft_norm, inverse=True)
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                self._signal_type, self._fft_norm, inverse=True)
             # normalize
-            if value != 'unitary':
-                self._data = fft.normalization(
-                    self._data, self._n_samples, self._sampling_rate,
-                    self._signal_type, value, inverse=False)
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                self._signal_type, value, inverse=False)
 
         self._fft_norm = value
 
