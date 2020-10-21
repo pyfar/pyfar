@@ -17,12 +17,14 @@ Haiopy uses a DFT implementation for purely real-valued time signals resulting
 in Fourier spectra with complex conjugate symmetry for negative and
 positive frequencies :math:`X(\mu) = X(-\mu)^*`. As a result,
 the left-hand side of the spectrum is discarded, yielding
-:math:`X_R(\mu) = X(\mu) \mbox{ }\forall 0 \le \mu \le N/2`.
+:math:`X_R(\mu) = X(\mu) \mbox{ }\forall 0 \le \mu \le N/2`. Complex valued
+time signals can be implemented, if required.
 
-Normalization
--------------
-Bases on a signal's type - namely energy and power signals, haiopy implements
-two different normalization variants.
+Normalization _[2]
+------------------
+Bases on a signal FFT norm - namely 'unitary', 'amplitude', 'rms', 'power' or
+'psd', haiopy implements five different normalization variants, whereby
+'unitary' denotes that no additional normalization is performed.
 
 Energy Signals
 ==============
@@ -39,21 +41,8 @@ For power signals however, which possess a finite power but infinite energy,
 a normalization for the time interval in which the signal is sampled, is
 chosen. In order for Parseval's theorem to remain valid, the single sided
 needs to be multiplied by a factor of 2, compensating for the discarded part
-of the spectrum. Additionally, the implemented DFT uses a normalization by
-:math:`\sqrt{2}`, the crest factor of sine signals, for all frequencies above
-:math:`\mu=0` and below the Nyquist frequency :math:`\mu=N/2`.
-Based on the assumption that in Fourier synthesis, any signal
-may be written as a sum of sine signals, hence yielding a magnitude spectra
-representing the respective amplitudes of the discrete sine tones.
-The resulting spectrum is written as
-
-..  math::
-        X_P(\mu) = \left\{
-            \begin{array}{ll}
-                \frac{1}{N}\frac{2}{\sqrt{2}} X(\mu) & \forall 0 < \mu < N/2 \\
-                \frac{1}{N}X(\mu) & \forall \mu = 0, \mu = N/2
-            \end{array}
-        \right.
+of the spectrum (cf. _[2], Eq. 8). Additionally, the implemented DFT uses
+different introduced above.
 
 >>> import numpy as np
 >>> from haiopy import fft
@@ -69,9 +58,10 @@ The resulting spectrum is written as
     from haiopy import fft
     import matplotlib.pyplot as plt
     n_samples = 1024
+    sampling_rate = 48e3
     times = np.linspace(0, 10, n_samples)
     sine = np.sin(times * 2*np.pi * 100)
-    spec = fft.rfft(sine, n_samples, 'power')
+    spec = fft.rfft(sine, n_samples, sampling_rate, 'power', 'rms')
     freqs = fft.rfftfreq(n_samples, 48e3)
     plt.subplot(1, 2, 1)
     plt.plot(times, sine)
@@ -159,7 +149,7 @@ def rfft(data, n_samples, sampling_rate, signal_type, fft_norm):
     signal_type : 'energy', 'power'
         see haiopy.Signal for more information
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of haiopy.fft.normalization().
+        See documentaion of haiopy.fft.normalization.
 
     Returns
     -------
@@ -203,7 +193,7 @@ def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm):
     signal_type : 'energy', 'power'
         see haiopy.Signal for more information
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of haiopy.fft.normalization().
+        See documentaion of haiopy.fft.normalization.
 
     Returns
     -------
@@ -246,18 +236,19 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
         Normalization is only applied if signal_type == 'power'. See
         haiopy.Signal for more information
     fft_norm : string, optional
-        'unitary' - apply no normalization
-        'amplitude' - as in _[1] Eq. (4)
-        'rms' - as in _[1] Eq. (10)
-        'power' - as in _[1] Eq. (5)
-        'psd' - as in _[1] Eq. (6)
+        'unitary' - Multiplied single sided spextra by factor two for power
+                    signals. Do nothing for energy signals.
+        'amplitude' - as in _[2] Eq. (4)
+        'rms' - as in _[2] Eq. (10)
+        'power' - as in _[2] Eq. (5)
+        'psd' - as in _[2] Eq. (6)
     inverse : bool, optional
         apply the inverse normalization. The default is false.
     single_sided : bool, optional
-        denotes if `spec` is a single sided spectrum up half the sampling rate
-        or a both sided (full) spectrum. If `single_sided==True` the
-        normalization according to _[1] Eq. (8) is applied. The default is
-        True.
+        denotes if `spec` is a single sided spectrum up to half the sampling
+        rate or a both sided (full) spectrum. If `single_sided==True` the
+        normalization according to _[2] Eq. (8) is applied for power signals.
+        The default is True.
 
     Returns
     -------
@@ -266,7 +257,7 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
 
     References
     ----------
-    .. [1] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+    .. [2] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
            Scaling of the Discrete Fourier Transform and the Implied Physical
            Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
            May 2020, p. e-Brief 600.
