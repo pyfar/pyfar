@@ -1,4 +1,3 @@
-from haiopy.fft import normalization
 import warnings
 import numpy as np
 from haiopy import fft as fft
@@ -235,7 +234,7 @@ class Signal(Audio):
             if value != 'unitary':
                 self._data = fft.normalization(
                     self._data, self._n_samples, self._sampling_rate,
-                     self._signal_type, value, inverse=False)
+                    self._signal_type, value, inverse=False)
 
         self._fft_norm = value
 

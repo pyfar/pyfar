@@ -45,7 +45,7 @@ def test_domain_setter_freq_when_freq(sine):
 
 def test_domain_setter_freq_when_time(sine):
     stype = 'power'
-    fft_norm='rms'
+    fft_norm = 'rms'
     samplingrate = 40e3
     spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate,
                                   stype, fft_norm))
