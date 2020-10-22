@@ -142,7 +142,7 @@ class Orientations(Rotation):
                              "of positions as orientations.")
 
         # Create view, up and right vectors from Rotation object
-        views, rights, ups = self.as_view_up_right()
+        views, ups, rights = self.as_view_up_right()
 
         kwargs.pop('color', None)
 

@@ -154,8 +154,18 @@ def test_orientations_from_view_up_show_coordinate_system_change(views, ups):
 
 
 def test_as_view_up_right(views, ups, orientations):
-    """"""
+    """
+    Output of this method must be the normed input vectors.
+    """
+    views = np.atleast_2d(views).astype(np.float64)
+    views /= np.linalg.norm(views, axis=1)[:, np.newaxis]
+    ups = np.atleast_2d(ups).astype(np.float64)
+    ups /= np.linalg.norm(ups, axis=1)[:, np.newaxis]
+    
     views_, ups_, rights_ = orientations.as_view_up_right()
+    
+    assert np.array_equal(views_, views), "views are not preserved"
+    assert np.array_equal(ups_, ups), "ups are not preserved"
 
 
 def test_orientations_indexing(orientations):
