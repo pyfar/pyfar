@@ -63,17 +63,17 @@ def test_orientations_from_view_up_invalid():
 
 @fixture
 def views():
-    return [[1, 0, 0], [2, 0, 0]]
+    return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
 
 
 @fixture
 def ups():
-    return [[0, 1, 0], [0, -2, 0]]
+    return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
 
 
 @fixture
 def positions():
-    return [[0, 0.5, 0], [0, -0.5, 0]]
+    return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
 
 
 @fixture
@@ -112,7 +112,8 @@ def test_orientations_show(views, ups, positions, orientations):
     orientations.show(positions=positions, show_views=False, show_ups=False)
 
     # with positions provided as Coordinates
-    positions = Coordinates([0, 5], [0, 0], [0, 0])
+    positions = np.asarray(positions)
+    positions = Coordinates(positions[:, 0], positions[:, 1], positions[:, 2])
     orientations.show(positions)
     # with non-matching positions
     positions = Coordinates(0, 1, 0)
@@ -120,7 +121,8 @@ def test_orientations_show(views, ups, positions, orientations):
         orientations.show(positions)
 
 
-def test_orientations_from_view_up_show_coordinate_system_change(views, ups):
+def test_orientations_from_view_up_show_coordinate_system_change(
+        views, ups, positions):
     """
     Create `Orientations` from view and up vectors in the spherical domain
     as well as in the carteesian domain, and visualize both to compare them
@@ -132,7 +134,8 @@ def test_orientations_from_view_up_show_coordinate_system_change(views, ups):
     views = Coordinates(views[:, 0], views[:, 1], views[:, 2])
     ups = Coordinates(ups[:, 0], ups[:, 1], ups[:, 2])
 
-    positions = Coordinates([0, 0], [0.5, -0.5], [0, 0])
+    positions = np.asarray(positions)
+    positions = Coordinates(positions[:, 0], positions[:, 1], positions[:, 2])
     orient_from_cart = Orientations.from_view_up(views, ups)
     orient_from_cart.show(positions)
 
@@ -161,9 +164,9 @@ def test_as_view_up_right(views, ups, orientations):
     views /= np.linalg.norm(views, axis=1)[:, np.newaxis]
     ups = np.atleast_2d(ups).astype(np.float64)
     ups /= np.linalg.norm(ups, axis=1)[:, np.newaxis]
-    
+
     views_, ups_, rights_ = orientations.as_view_up_right()
-    
+
     assert np.array_equal(views_, views), "views are not preserved"
     assert np.array_equal(ups_, ups), "ups are not preserved"
 
@@ -175,7 +178,7 @@ def test_orientations_indexing(orientations):
     orientations[0]
     orientations[1]
     with raises(IndexError):
-        orientations[2]
+        orientations[42]
 
     quats = orientations.as_quat()
     assert np.array_equal(quats[0], orientations[0].as_quat()), (
@@ -192,7 +195,7 @@ def test_orientations_indexing_assignment(orientations):
     orientations[0] = Orientations([0, 0, 0, 1])
     orientations[0] = Orientations.from_view_up([0, 0, 1], [1, 0, 0])
     orientations[0] = [0, 0, 0, 1]
-    orientations[:] = [[0, 0, 0, 1], [0, 0, 1, 0]]
+    orientations[:] = [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0]]
     with raises(ValueError):
         orientations[0] = [0, 0, 3]
     with raises(ValueError):

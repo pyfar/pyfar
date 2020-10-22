@@ -13,6 +13,11 @@ class Orientations(Rotation):
     and adds the creation from perpendicular view and up vectors and a
     convenient plot function.
 
+    An orientation can be visualized with the triple of view, up and right
+    vectors and it istied to the object's local coordinate system.
+    Alternatively the object's orientation can be illustrated with help of the
+    right hand: Thumb (view), forefinger (up) and middle finger (right).
+
     Examples
     --------
     from haiopy.orientations import Orientations
@@ -98,6 +103,8 @@ class Orientations(Rotation):
         if not np.allclose(0, np.einsum('ij,kj->k', views, ups)):
             raise ValueError("View and Up vectors must be perpendicular.")
 
+        # Assuming that the direction of the cross product is defined
+        # by the right-hand rule
         rights = np.cross(views, ups)
 
         rotation_matrix = np.empty((views.shape[0], views.shape[1], 3))
@@ -111,7 +118,8 @@ class Orientations(Rotation):
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
         """
-        Visualize Orientations as view, up and right vectors in a quiver plot.
+        Visualize Orientations as triples of view (red), up (green) and
+        right (blue) vectors in a quiver plot.
 
         Parameters
         ----------
