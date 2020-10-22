@@ -1,6 +1,7 @@
 from pytest import raises, fixture
 
 import numpy as np
+import numpy.testing as npt
 from scipy.spatial.transform import Rotation
 
 from haiopy.orientations import Orientations
@@ -170,6 +171,29 @@ def test_as_view_up_right(views, ups, orientations):
     assert np.array_equal(views_, views), "views are not preserved"
     assert np.array_equal(ups_, ups), "ups are not preserved"
 
+
+def test_from_view_as_view_roundtrip():
+    vec = np.array([
+        [1, 0, 0],
+        [-1, 0, 0],
+        [0, 1, 0],
+        [0, -1, 0],
+        [0, 0, 1],
+        [0, 0, -1]])
+
+    for v1 in range(len(vec)):
+        for v2 in range(len(vec)):
+            if np.all(np.abs(vec[v1]) == np.abs(vec[v2])):
+                continue
+            print(f"Testing combination ({v1}, {v2})")
+            views = np.atleast_2d(vec[v1])
+            ups = np.atleast_2d(vec[v2])
+
+            orientations = Orientations.from_view_up(views, ups)
+            _views, _ups, _ = orientations.as_view_up_right()
+
+            npt.assert_allclose(views, _views, atol=1e-15)
+            npt.assert_allclose(ups, _ups, atol=1e-15)
 
 def test_orientations_indexing(orientations):
     """
