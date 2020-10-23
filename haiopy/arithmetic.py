@@ -4,30 +4,32 @@
 # TODO: return comment in `_assert_match_for_arithmetic`
 
 import numpy as np
+from typing import Callable
 from haiopy.haiopy import Signal
 
 
 def add(data: tuple, domain='freq'):
-    return _arithmetic(data, domain, 'add')
+    return _arithmetic(data, domain, _add)
 
 
 def subtract(data: tuple, domain='freq'):
-    return _arithmetic(data, domain, 'subtract')
+    return _arithmetic(data, domain, _subtract)
 
 
 def multiply(data: tuple, domain='freq'):
-    return _arithmetic(data, domain, 'multiply')
+    return _arithmetic(data, domain, _multiply)
 
 
 def divide(data: tuple, domain='freq'):
-    return _arithmetic(data, domain, 'divide')
+    return _arithmetic(data, domain, _divide)
 
 
 def power(data: tuple, domain='freq'):
-    return _arithmetic(data, domain, 'power')
+    return _arithmetic(data, domain, _power)
 
 
-def _arithmetic(data: tuple, domain: str, operation: str):
+def _arithmetic(data: tuple, domain: str, operation: Callable):
+    print('WIP, fft normalization not considered yet')
 
     # check input and obtain meta data of new signal
     sampling_rate, n_samples, signal_type = \
@@ -36,21 +38,8 @@ def _arithmetic(data: tuple, domain: str, operation: str):
     result = _get_arithmetic_data(data[0], domain, signal_type)
 
     for d in range(1, len(data)):
-        if operation == "add":
-            result = _add(
-                result, _get_arithmetic_data(data[d], domain, signal_type))
-        elif operation == "subtract":
-            result = _subtract(
-                result, _get_arithmetic_data(data[d], domain, signal_type))
-        elif operation == "multiply":
-            result = _multiply(
-                result, _get_arithmetic_data(data[d], domain, signal_type))
-        elif operation == "divide":
-            result = _divide(
-                result, _get_arithmetic_data(data[d], domain, signal_type))
-        elif operation == "power":
-            result = _power(
-                result, _get_arithmetic_data(data[d], domain, signal_type))
+        result = operation(
+            result, _get_arithmetic_data(data[d], domain, signal_type))
 
     if sampling_rate is not None:
         result = Signal(result, sampling_rate, n_samples, domain, signal_type)
