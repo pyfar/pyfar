@@ -154,10 +154,7 @@ def _get_arithmetic_data(data, domain, signal_type):
             data_out = data_out
 
         return data_out
-    elif isinstance(data, np.ndarray):
-        return data
-    else:
-        return np.asarray(data)
+    return np.asarray(data)
 
 
 def _add(a, b):
