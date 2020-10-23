@@ -274,3 +274,15 @@ def test_sph_fliege():
         c = samplings.sph_fliege(9, 2)
     with raises(ValueError):
         c = samplings.sph_fliege(30)
+
+
+def test_sph_equal_area():
+    # test with points only
+    c = samplings.sph_equal_area(10)
+    assert isinstance(c, Coordinates)
+    assert c.csize == 10
+    npt.assert_allclose(c.get_sph()[..., 2], 1., atol=1e-15)
+
+    # test with user radius
+    c = samplings.sph_equal_area(10, 1.5)
+    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
