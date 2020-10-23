@@ -13,6 +13,11 @@ class Orientations(Rotation):
     and adds the creation from perpendicular view and up vectors and a
     convenient plot function.
 
+    An orientation can be visualized with the triple of view, up and right
+    vectors and it istied to the object's local coordinate system.
+    Alternatively the object's orientation can be illustrated with help of the
+    right hand: Thumb (view), forefinger (up) and middle finger (right).
+
     Examples
     --------
     from haiopy.orientations import Orientations
@@ -61,14 +66,16 @@ class Orientations(Rotation):
 
         Parameters
         ----------
-        views : array_like, shape (N, 3) or (3,)
+        views : array_like, shape (N, 3) or (3,), Coordinates
             A single vector or a stack of vectors, giving the look-direction of
             an object in three-dimensional space, e.g. from a listener, or the
             acoustic axis of a loudspeaker, or the direction of a main lobe.
+            Views can also be passed as a Coordinates object.
 
-        ups : array_like, shape (N, 3) or (3,)
+        ups : array_like, shape (N, 3) or (3,), Coordinates
             A single vector or a stack of vectors, giving the up-direction of
-            an object, which is usually the up-direction in world-space.
+            an object, which is usually the up-direction in world-space. Views
+            can also be passed as a Coordinates object.
 
         Returns
         -------
@@ -98,20 +105,20 @@ class Orientations(Rotation):
         if not np.allclose(0, np.einsum('ij,kj->k', views, ups)):
             raise ValueError("View and Up vectors must be perpendicular.")
 
+        # Assuming that the direction of the cross product is defined
+        # by the right-hand rule
         rights = np.cross(views, ups)
 
-        rotation_matrix = np.empty((views.shape[0], views.shape[1], 3))
-
-        rotation_matrix[:, 0, :3] = views
-        rotation_matrix[:, 1, :3] = ups
-        rotation_matrix[:, 2, :3] = rights
+        rotation_matrix = np.asarray([views, ups, rights])
+        rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
 
         return super().from_matrix(rotation_matrix)
 
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
         """
-        Visualize Orientations as view, up and right vectors in a quiver plot.
+        Visualize Orientations as triples of view (red), up (green) and
+        right (blue) vectors in a quiver plot.
 
         Parameters
         ----------
@@ -142,7 +149,7 @@ class Orientations(Rotation):
                              "of positions as orientations.")
 
         # Create view, up and right vectors from Rotation object
-        views, rights, ups = self.as_view_up_right()
+        views, ups, rights = self.as_view_up_right()
 
         kwargs.pop('color', None)
 
@@ -177,7 +184,10 @@ class Orientations(Rotation):
         """
         # Apply self as a Rotation (base class) on eye i.e. generate orientions
         # as rotations relative to standard basis in 3d
-        return np.asarray([np.atleast_2d(self.apply(x)) for x in np.eye(3)])
+        vector_triple = super().as_matrix()
+        if vector_triple.ndim == 3:
+            return np.swapaxes(vector_triple, 0, 1)
+        return vector_triple
 
     def __setitem__(self, idx, val):
         """
