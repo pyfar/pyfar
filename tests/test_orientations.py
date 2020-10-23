@@ -190,10 +190,16 @@ def test_from_view_as_view_roundtrip():
             ups = np.atleast_2d(vec[v2])
 
             orientations = Orientations.from_view_up(views, ups)
-            _views, _ups, _ = orientations.as_view_up_right()
+            views_, ups_, _ = orientations.as_view_up_right()
+            # indexed
+            views_0, ups_0, _ = orientations[0].as_view_up_right()
 
-            npt.assert_allclose(views, _views, atol=1e-15)
-            npt.assert_allclose(ups, _ups, atol=1e-15)
+            npt.assert_allclose(views, views_, atol=1e-15)
+            npt.assert_allclose(ups, ups_, atol=1e-15)
+            # indexed
+            npt.assert_allclose(views[0], views_0, atol=1e-15)
+            npt.assert_allclose(ups[0], ups_0, atol=1e-15)
+
 
 def test_orientations_indexing(orientations):
     """

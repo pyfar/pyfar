@@ -106,12 +106,13 @@ class Orientations(Rotation):
         # Assuming that the direction of the cross product is defined
         # by the right-hand rule
         rights = np.cross(views, ups)
+        rotation_matrix = np.asarray([views, ups, rights])
+        rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
+        # rotation_matrix = np.empty((views.shape[0], views.shape[1], 3))
 
-        rotation_matrix = np.empty((views.shape[0], views.shape[1], 3))
-
-        rotation_matrix[:, 0, :3] = views
-        rotation_matrix[:, 1, :3] = ups
-        rotation_matrix[:, 2, :3] = rights
+        # rotation_matrix[:, 0, :3] = views
+        # rotation_matrix[:, 1, :3] = ups
+        # rotation_matrix[:, 2, :3] = rights
 
         return super().from_matrix(rotation_matrix)
 
@@ -185,7 +186,10 @@ class Orientations(Rotation):
         """
         # Apply self as a Rotation (base class) on eye i.e. generate orientions
         # as rotations relative to standard basis in 3d
-        return np.asarray([np.atleast_2d(self.apply(x)) for x in np.eye(3)])
+        vector_triple = super().as_matrix()
+        if vector_triple.ndim == 3:
+            return np.swapaxes(vector_triple, 0, 1)
+        return vector_triple
 
     def __setitem__(self, idx, val):
         """
