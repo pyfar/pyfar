@@ -106,13 +106,9 @@ class Orientations(Rotation):
         # Assuming that the direction of the cross product is defined
         # by the right-hand rule
         rights = np.cross(views, ups)
+
         rotation_matrix = np.asarray([views, ups, rights])
         rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
-        # rotation_matrix = np.empty((views.shape[0], views.shape[1], 3))
-
-        # rotation_matrix[:, 0, :3] = views
-        # rotation_matrix[:, 1, :3] = ups
-        # rotation_matrix[:, 2, :3] = rights
 
         return super().from_matrix(rotation_matrix)
 
