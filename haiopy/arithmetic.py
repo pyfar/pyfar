@@ -152,9 +152,10 @@ def _get_arithmetic_data(data, domain, signal_type):
             # TODO: adjust signal type after normalization is available from
             #       fft module
             data_out = data_out
+    else:
+        data_out = np.asarray(data)
 
-        return data_out
-    return np.asarray(data)
+    return data_out
 
 
 def _add(a, b):
