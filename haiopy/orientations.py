@@ -66,14 +66,16 @@ class Orientations(Rotation):
 
         Parameters
         ----------
-        views : array_like, shape (N, 3) or (3,)
+        views : array_like, shape (N, 3) or (3,), Coordinates
             A single vector or a stack of vectors, giving the look-direction of
             an object in three-dimensional space, e.g. from a listener, or the
             acoustic axis of a loudspeaker, or the direction of a main lobe.
+            Views can also be passed as a Coordinates object.
 
-        ups : array_like, shape (N, 3) or (3,)
+        ups : array_like, shape (N, 3) or (3,), Coordinates
             A single vector or a stack of vectors, giving the up-direction of
-            an object, which is usually the up-direction in world-space.
+            an object, which is usually the up-direction in world-space. Views
+            can also be passed as a Coordinates object.
 
         Returns
         -------
