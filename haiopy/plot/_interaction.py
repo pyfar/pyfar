@@ -337,6 +337,51 @@ class AxisModifierLines(AxisModifier):
                 self.all_visible = True
             self.figure.canvas.draw()
 
+    def move_x_axis(self, event):
+        if event.key in ['left', 'right']:
+            if isinstance(self.axes, (np.ndarray)):
+                for ax in self.axes.ravel():
+                    lims = np.asarray(ax.get_xlim())
+                    dyn_range = (np.diff(lims))
+                    #shift = np.int(np.round(0.1 * dyn_range))   # does not work, if
+                                                                # dyn_range < 5
+                    shift = 0.1 * dyn_range
+                    if event.key in ['left']:
+                        ax.set_xlim(lims - shift)
+                    elif event.key in ['right']:
+                        ax.set_xlim(lims + shift)
+            else:
+                lims = np.asarray(self.axes.get_xlim())
+                dyn_range = (np.diff(lims))
+                #shift = np.int(np.round(0.1 * dyn_range))   # does not work, if
+                                                            # dyn_range < 5
+                shift = 0.1 * dyn_range
+                if event.key in ['left']:
+                    self.axes.set_xlim(lims - shift)
+                elif event.key in ['right']:
+                    self.axes.set_xlim(lims + shift)
+            self.figure.canvas.draw()
+
+
+    def zoom_x_axis(self, event):
+        if event.key in ['shift+left', 'shift+right']:
+            lims = np.asarray(self.axes.get_xlim())
+            dyn_range = (np.diff(lims))
+            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
+                                                        # dyn_range < 5
+            zoom = 0.1 * dyn_range
+            if event.key in ['shift+right']:
+                pass
+            elif event.key in ['shift+left']:
+                zoom = -zoom
+
+            lims[0] = lims[0] + zoom
+            lims[1] = lims[1] - zoom
+
+            self.axes.set_xlim(lims)
+            self.figure.canvas.draw()
+
+
     def move_y_axis(self, event):
         if event.key in ['up', 'down']:
             if isinstance(self.axes, (np.ndarray)):
@@ -373,16 +418,21 @@ class AxisModifierLines(AxisModifier):
             'key_press_event', self.cycle_lines)
         self._toogle_lines = self.figure.canvas.mpl_connect(
             'key_press_event', self.toggle_all_lines)
+        self._move_x_axis = self.figure.canvas.mpl_connect(
+            'key_press_event', self.move_x_axis)
         self._move_y_axis = self.figure.canvas.mpl_connect(
             'key_press_event', self.move_y_axis)
+        self._zoom_x_axis = self.figure.canvas.mpl_connect(
+            'key_press_event', self.zoom_x_axis)
         self._zoom_y_axis = self.figure.canvas.mpl_connect(
             'key_press_event', self.zoom_y_axis)
-
 
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(self._cycle_lines)
         self.figure.canvas.mpl_disconnect(self._toogle_lines)
+        self.figure.canvas.mpl_disconnect(self._move_x_axis)
         self.figure.canvas.mpl_disconnect(self._move_y_axis)
+        self.figure.canvas.mpl_disconnect(self._zoom_x_axis)
         self.figure.canvas.mpl_disconnect(self._zoom_y_axis)
 
 class AxisModifierLinesLogYAxis(AxisModifierLines):
