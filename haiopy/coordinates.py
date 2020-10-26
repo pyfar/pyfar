@@ -1523,11 +1523,17 @@ class Coordinates(object):
             _repr += f"\nComment: {self._comment}"
 
         return _repr
-    
+
     def __eq__(self, other):
+        """Check for equality of two objects."""
         if not isinstance(other, self.__class__):
             return False
-        # TODO
+        for key, value in self.__dict__.items():
+            if isinstance(value, np.ndarray):
+                if not np.array_equal(other.__dict__[key], value):
+                    return False
+            elif other.__dict__[key] != value:
+                return False
         return True
 
 

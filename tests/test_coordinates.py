@@ -565,6 +565,7 @@ def test_converters():
 #                         np.array([[1, 0], [1, 1], [0, 1]]))
 # test_get_nearest_sph()
 
+
 @mark.parametrize(
     'points_1, points_2, points_3, comparable, expected', [
         (1, 1, 1, Coordinates(1, 1, -1), False),

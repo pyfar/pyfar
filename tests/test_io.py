@@ -54,7 +54,7 @@ def test_write_wav_nd(signal_mock_nd):
         signal_reload.reshape(signal_mock_nd.time.shape),
         rtol=1e-10)
     os.remove(filename)
-    
+
 
 @pytest.fixture
 def signal_mock():
@@ -111,12 +111,12 @@ def side_effect_coordinates(filename):
 def test_read_coordinates():
     """Test read for objects of type Coordinates."""
     coordinates1 = Coordinates(1, 1, 1)
-    
+
     coordinates1_loaded = io.read('coordinates1.pk')
-    
+
     assert coordinates1_loaded == coordinates1, (
         "Coordinates are not the same.")
-    
+
 
 def test_write_coordinates():
     """Test read for objects of type Coordinates."""
