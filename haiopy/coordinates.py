@@ -1523,6 +1523,12 @@ class Coordinates(object):
             _repr += f"\nComment: {self._comment}"
 
         return _repr
+    
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        # TODO
+        return True
 
 
 def cart2sph(x, y, z):

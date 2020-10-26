@@ -1,6 +1,9 @@
 import scipy.io.wavfile as wavfile
 import os.path
 import warnings
+import io
+import json
+import copy
 
 from haiopy import Signal
 
@@ -94,3 +97,33 @@ def write_wav(signal, filename, overwrite=True):
                 "use overwrite option to disable error.")
     else:
         wavfile.write(filename, sampling_rate, data.T)
+
+
+def read(filename):
+    """
+    Read any compatible haiopy format from disk.
+    
+    Parameters
+    ----------
+    filename : string or open file handle.
+        Input file must be haiopy compatible.
+
+    Returns
+    -------
+    loaded_dict: dictionary containing haiopy types.
+    """
+    pass
+
+
+def write(filename, *args):
+    """
+    Write any compatible haiopy format to disk.   
+     
+    Parameters
+    ----------
+    filename : string or open file handle.
+        Input file must be haiopy compatible.
+    args: Compatible haiopy types:
+        - 
+    """
+    pass
