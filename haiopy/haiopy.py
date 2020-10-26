@@ -275,7 +275,7 @@ class SignalIterator(object):
         self._array_iterator = array_iterator
         self._signal = signal
         self._iterated_sig = Signal(
-            None,
+            signal._data[..., 0, :],
             sampling_rate=signal.sampling_rate,
             n_samples=signal.n_samples,
             domain=signal.domain,
@@ -285,7 +285,7 @@ class SignalIterator(object):
     def __next__(self):
         if self._signal.domain == self._iterated_sig.domain:
             data = self._array_iterator.__next__()
-            self._iterated_sig._data = data
+            self._iterated_sig._data = np.atleast_2d(data)
         else:
             raise RuntimeError("domain changes during iterations break stuff!")
 
