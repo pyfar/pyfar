@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.testing as npt
-from pytest import raises
+from pytest import raises, mark
 
 from haiopy import Coordinates
 import haiopy.coordinates as coordinates
@@ -565,6 +565,58 @@ def test_converters():
 #                         np.array([[1, 0], [1, 1], [0, 1]]))
 # test_get_nearest_sph()
 
+@mark.parametrize(
+    'points_1, points_2, points_3, comparable, expected', [
+        (1, 1, 1, Coordinates(1, 1, -1), False),
+        ([1, 1], [1, 1], [1, 1], Coordinates([1, 1], [1, 1], [1, 2]), False),
+        ([1, 1], [1, 1], [1, 1], Coordinates([1, 1.0], [1, 1.0], [1, 1]), True)
+    ])
+def test___eq___differ_in_points(
+        points_1, points_2, points_3, comparable, expected):
+    coordinates = Coordinates(points_1, points_2, points_3)
+    comparison = coordinates == comparable
+    assert comparison == expected
 
-def test_equality():
-    pass
+
+def test___eq___differ_in_domain():
+    coordinates = Coordinates(1, 2, 3, domain='sph', convention='side')
+    comparable = Coordinates(1, 2, 3, domain='sph', convention='front')
+    is_equal = coordinates == comparable
+    assert not is_equal
+
+
+def test___eq___differ_in_convention():
+    coordinates = Coordinates(domain='sph', convention='top_elev')
+    comparable = Coordinates(domain='sph', convention='front')
+    is_equal = coordinates == comparable
+    assert not is_equal
+
+
+def test___eq___differ_in_unit():
+    coordinates = Coordinates([1, 1], [1, 1], [1, 1], convention='top_colat',
+                              domain='sph', unit='rad')
+    comparable = Coordinates([1, 1], [1, 1], [1, 1], convention='top_colat',
+                             domain='sph', unit='deg')
+    is_equal = coordinates == comparable
+    assert not is_equal
+
+
+def test___eq___differ_in_weigths():
+    coordinates = Coordinates(1, 2, 3, weights=.5)
+    comparable = Coordinates(1, 2, 3, weights=0.0)
+    is_equal = coordinates == comparable
+    assert not is_equal
+
+
+def test___eq___differ_in_sh_order():
+    coordinates = Coordinates(1, 2, 3, sh_order=2)
+    comparable = Coordinates(1, 2, 3, sh_order=8)
+    is_equal = coordinates == comparable
+    assert not is_equal
+
+
+def test___eq___differ_in_sh_comment():
+    coordinates = Coordinates(1, 2, 3, comment="Madre mia!")
+    comparable = Coordinates(1, 2, 3, comment="Oh my woooooosh!")
+    is_equal = coordinates == comparable
+    assert not is_equal

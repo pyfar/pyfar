@@ -1220,7 +1220,7 @@ class Coordinates(object):
         if convention is not None:
             assert convention in systems[domain] or convention is None,\
                 f"{convention} does not exist in {domain}. Convention must "\
-                "be one of the following: {', '.join(list(systems[domain]))}."
+                f"be one of the following: {', '.join(list(systems[domain]))}."
 
         # check if units exist
         if unit is not None:
