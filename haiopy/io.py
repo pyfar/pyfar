@@ -56,7 +56,7 @@ def write_wav(signal, filename, overwrite=True):
     -----
     * This function is based on scipy.io.wavfile.write().
     * Writes a simple uncompressed WAV file.
-    * The signal data of dimension larger than 2 is reshaped to 2D.
+    * Signals of shape larger than 1D are flattened.
     * The bits-per-sample and PCM/float will be determined by the data-type.
 
     Common data types: [1]_
@@ -85,6 +85,7 @@ def write_wav(signal, filename, overwrite=True):
 
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
+    warnings.warn("Signal flattened to {data.shape[0]} channels.")
 
     # Check for .wav file extension
     if filename.split('.')[-1] != 'wav':
