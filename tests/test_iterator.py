@@ -9,5 +9,5 @@ def test_simple_iter():
 
     idx = 0
     for s in sig:
-        npt.assert_array_equal(s._data, data[idx, :])
+        npt.assert_array_equal(s._data, np.atleast_2d(data[idx, :]))
         idx += 1
