@@ -1,10 +1,15 @@
+from numpy.lib.npyio import save
+from numpy.lib.ufunclike import fix
 from haiopy.coordinates import Coordinates
 from os import read
 import numpy as np
 import numpy.testing as npt
 import pytest
-from unittest import mock
+from pytest import fixture
+from mock import Mock, mock_open, patch
 import os.path
+from io import BytesIO
+import copy
 import scipy.io.wavfile as wavfile
 
 from haiopy import io
@@ -56,7 +61,7 @@ def test_write_wav_nd(signal_mock_nd):
     os.remove(filename)
 
 
-@pytest.fixture
+@fixture
 def signal_mock():
     """ Generate a signal mock object.
     Returns
@@ -72,14 +77,14 @@ def signal_mock():
     time = amplitude * np.random.rand(n_samples)
 
     # create a mock object of Signal class to test independently
-    signal_object = mock.Mock(spec_set=Signal(time, sampling_rate))
+    signal_object = Mock(spec_set=Signal(time, sampling_rate))
     signal_object.time = time[np.newaxis, :]
     signal_object.sampling_rate = sampling_rate
 
     return signal_object
 
 
-@pytest.fixture
+@fixture
 def signal_mock_nd():
     """ Generate a higher dimensional signal mock object.
     Returns
@@ -95,30 +100,40 @@ def signal_mock_nd():
     time = amplitude * np.random.random_sample((3, 3, 3, n_samples))
 
     # create a mock object of Signal class to test independently
-    signal_object = mock.Mock(spec_set=Signal(time, sampling_rate))
+    signal_object = Mock(spec_set=Signal(time, sampling_rate))
     signal_object.time = time
     signal_object.sampling_rate = sampling_rate
 
     return signal_object
 
 
-def side_effect_coordinates(filename):
-    if filename == 'coordinates1.pk':
-        Coordinates(1, 1, 1)
+@fixture
+def filename():
+    return 'data.hpy'
+
+@fixture
+def obj():
+    return Coordinates([1, -1], [2, -2], [3, -3])
+
+@fixture
+def obj_dict_encoded(obj):
+    obj_dict_encoded = obj.__dict__
+    for key, value in obj_dict_encoded.items():
+        if isinstance(value, np.ndarray):
+            memfile = BytesIO()
+            np.save(memfile, value)
+            memfile.seek(0)
+            obj_dict_encoded[key] = memfile.read().decode('latin-1')
+    return obj_dict_encoded
 
 
-@mock.patch('io.json.load', side_effect=side_effect_coordinates)
-def test_read_coordinates():
-    """Test read for objects of type Coordinates."""
-    coordinates1 = Coordinates(1, 1, 1)
+@patch('haiopy.io.json')
+@patch('haiopy.io.open', new_callable=mock_open())
+def test_write_coordinates(m_open, m_json, filename, obj, obj_dict_encoded):
+    # assert False
+    io.write(filename, obj)
 
-    coordinates1_loaded = io.read('coordinates1.pk')
+    m_open.assert_called_with(filename, 'w')
 
-    assert coordinates1_loaded == coordinates1, (
-        "Coordinates are not the same.")
-
-
-def test_write_coordinates():
-    """Test read for objects of type Coordinates."""
-    pass
-
+    # m_json.dump.assert_called_with(
+    #     obj_dict_encoded, m_json.return_value.__enter__.return_value)

@@ -1,4 +1,6 @@
+from build.lib import haiopy
 import scipy.io.wavfile as wavfile
+import numpy as np
 import os.path
 import warnings
 import io
@@ -126,4 +128,19 @@ def write(filename, *args):
     args: Compatible haiopy types:
         - 
     """
+    for obj in args:
+        if isinstance(obj, haiopy.coordinates.Coordinates):
+            encoded_obj = _encode(obj)
     pass
+
+
+def _encode(obj):
+    obj_dict_encoded = obj.__dict__
+    for key, value in obj_dict_encoded.items():
+        if isinstance(value, np.ndarray):
+            memfile = io.BytesIO()
+            np.save(memfile, value)
+            memfile.seek(0)
+            obj_dict_encoded[key] = memfile.read().decode('latin-1')
+    return obj_dict_encoded
+    
