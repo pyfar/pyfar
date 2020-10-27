@@ -57,7 +57,7 @@ def write_wav(signal, filename, overwrite=True):
     -----
     * This function is based on scipy.io.wavfile.write().
     * Writes a simple uncompressed WAV file.
-    * The signal data of dimension larger than 2 is reshaped to 2D.
+    * Signals of shape larger than 1D are flattened.
     * The bits-per-sample and PCM/float will be determined by the data-type.
 
     Common data types: [1]_
@@ -86,6 +86,7 @@ def write_wav(signal, filename, overwrite=True):
 
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
+    warnings.warn("Signal flattened to {data.shape[0]} channels.")
 
     # Check for .wav file extension
     if filename.split('.')[-1] != 'wav':
@@ -129,18 +130,10 @@ def write(filename, *args):
         - 
     """
     for obj in args:
-        if isinstance(obj, haiopy.coordinates.Coordinates):
-            encoded_obj = _encode(obj)
+        encoded_obj = _encode(obj)
+        # if isinstance(obj, haiopy.coordinates.Coordinates):
     pass
 
 
 def _encode(obj):
-    obj_dict_encoded = obj.__dict__
-    for key, value in obj_dict_encoded.items():
-        if isinstance(value, np.ndarray):
-            memfile = io.BytesIO()
-            np.save(memfile, value)
-            memfile.seek(0)
-            obj_dict_encoded[key] = memfile.read().decode('latin-1')
-    return obj_dict_encoded
-    
+    pass
