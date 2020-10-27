@@ -1,6 +1,7 @@
 import numpy as np
 import haiopy.spatial.spatial as spatial
 from haiopy.coordinates import Coordinates
+import pytest
 
 
 def test_sph_voronoi():
@@ -79,3 +80,11 @@ def test_weights_from_voronoi():
     # test without normalization
     weights = spatial.calculate_sph_voronoi_weights(s, normalize=False)
     np.testing.assert_allclose(np.sum(weights), 4 * np.pi)
+
+
+def test_voronoi_error_not_enough_points():
+    points = np.random.randn(3, 3)
+    points = points/np.linalg.norm(points, axis=0)
+    s = Coordinates(points[0], points[1], points[2])
+    with pytest.raises(ValueError, match='points needs to be at least 4'):
+        spatial.calculate_sph_voronoi_weights(s)

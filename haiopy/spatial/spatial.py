@@ -62,6 +62,10 @@ def calculate_sph_voronoi_weights(
 
     """
     # get Voronoi diagram
+    if sampling.csize <= 3:
+        raise ValueError(
+            'The number of points needs to be at least 4',
+            'to generate a valid SphericalVoronoi diagram.')
     sv = SphericalVoronoi(sampling, round_decimals, center)
 
     # get the area
