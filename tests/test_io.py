@@ -1,7 +1,4 @@
-from numpy.lib.npyio import save
-from numpy.lib.ufunclike import fix
 from haiopy.coordinates import Coordinates
-from os import read
 import numpy as np
 import numpy.testing as npt
 import pytest
@@ -11,7 +8,6 @@ import tempfile
 
 import os.path
 from io import BytesIO
-import copy
 import scipy.io.wavfile as wavfile
 
 from haiopy import io
@@ -122,9 +118,11 @@ def signal_mock_nd():
 def filename():
     return 'data.hpy'
 
+
 @fixture
 def obj():
     return Coordinates([1, -1], [2, -2], [3, -3])
+
 
 @fixture
 def obj_dict_encoded(obj):
@@ -135,7 +133,7 @@ def obj_dict_encoded(obj):
             np.save(memfile, value)
             memfile.seek(0)
             obj_dict_encoded[key] = memfile.read().decode('latin-1')
-    return obj_dict_encoded
+    return [obj_dict_encoded]
 
 
 @patch('haiopy.io.json')
@@ -146,5 +144,5 @@ def test_write_coordinates(m_open, m_json, filename, obj, obj_dict_encoded):
 
     m_open.assert_called_with(filename, 'w')
 
-    # m_json.dump.assert_called_with(
-    #     obj_dict_encoded, m_json.return_value.__enter__.return_value)
+    m_json.dump.assert_called_with(
+        obj_dict_encoded, m_open.return_value.__enter__.return_value)

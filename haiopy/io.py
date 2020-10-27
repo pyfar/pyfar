@@ -1,11 +1,9 @@
-from build.lib import haiopy
 import scipy.io.wavfile as wavfile
 import numpy as np
 import os.path
 import warnings
 import io
 import json
-import copy
 
 from haiopy import Signal
 
@@ -105,7 +103,7 @@ def write_wav(signal, filename, overwrite=True):
 def read(filename):
     """
     Read any compatible haiopy format from disk.
-    
+
     Parameters
     ----------
     filename : string or open file handle.
@@ -120,20 +118,30 @@ def read(filename):
 
 def write(filename, *args):
     """
-    Write any compatible haiopy format to disk.   
-     
+    Write any compatible haiopy format to disk.
+
     Parameters
     ----------
     filename : string or open file handle.
         Input file must be haiopy compatible.
     args: Compatible haiopy types:
-        - 
+        -
     """
+    out_list = []
     for obj in args:
-        encoded_obj = _encode(obj)
-        # if isinstance(obj, haiopy.coordinates.Coordinates):
-    pass
+        obj_dict_encoded = _encode(obj)
+        obj_dict_encoded['type'] = type(obj)
+        out_list.append(obj_dict_encoded)
+    with open(filename, 'w') as f:
+        json.dump(out_list, f)
 
 
 def _encode(obj):
-    pass
+    obj_dict_encoded = obj.__dict__
+    for key, value in obj_dict_encoded.items():
+        if isinstance(value, np.ndarray):
+            memfile = io.BytesIO()
+            np.save(memfile, value)
+            memfile.seek(0)
+            obj_dict_encoded[key] = memfile.read().decode('latin-1')
+    return obj_dict_encoded
