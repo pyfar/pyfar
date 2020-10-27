@@ -66,7 +66,7 @@ class Coordinates(object):
     #       because the definition differs from the sperical radius.
 
     def __init__(self, points_1=None, points_2=None, points_3=None,
-                 domain='cart', convention='right', unit=None,
+                 domain='cart', convention=None, unit=None,
                  weights=None, sh_order=None, comment=None):
         """
         Init coordinates container.
@@ -80,12 +80,20 @@ class Coordinates(object):
         points_3 : array like, number
             points for the third coordinate
         domain : string
-            domain of the coordinate system, see self.systems('all')
+            domain of the coordinate system, see self.systems()
+            'cart' - Cartesian
+            'sph' - Spherical
+            'cyl' - Cylindrical
+            The default is 'cart'.
         convention: string
-             coordinate convention, see self.systems('all')
+             coordinate convention, see self.systems()
+             The default for domain='cart' is 'right'.
+             The default for domain='sph' is 'top_colat'.
+             The default for domain='cyl' is 'top'.
         unit: string
              unit of the coordinate system. By default the first available unit
-             is used, see self.systems('all')
+             is used, wich is meters ('met') for domain='cart' and radians
+             ('rad') in all other cases. See self.systems()
         weights: array like, number
             sampling weights for the coordinate points (Optional). Must have
             same size as points_i, i.e., if points_i has five entries, weights
@@ -1202,11 +1210,8 @@ class Coordinates(object):
             degrees, or meters)
         """
 
-        if domain is None and convention is not None:
-            raise ValueError('convention must be None if domain is None')
-
-        if convention is None and unit is not None:
-            raise ValueError('units must be None if convention is None')
+        if domain is None:
+            raise ValueError('The domain must be specified')
 
         # get available coordinate systems
         systems = self._systems()
@@ -1224,6 +1229,11 @@ class Coordinates(object):
 
         # check if units exist
         if unit is not None:
+            # get first convention in domain
+            # (units are the same within a domain)
+            if convention is None:
+                convention = list(systems[domain])[0]
+
             cur_units = [u[0][0:3] for u in
                          systems[domain][convention]['units']]
             assert unit in cur_units, \
@@ -1269,6 +1279,8 @@ class Coordinates(object):
 
         # get the new system
         system = self._systems()
+        if convention is None:
+            convention = list(system[domain])[0]
         system = system[domain][convention]
 
         # get the units
