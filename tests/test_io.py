@@ -133,7 +133,7 @@ def obj_dict_encoded(obj):
             np.save(memfile, value)
             memfile.seek(0)
             obj_dict_encoded[key] = memfile.read().decode('latin-1')
-    obj_dict_encoded['type'] = type(obj)
+    obj_dict_encoded['type'] = type(obj).__name__
     return [obj_dict_encoded]
 
 

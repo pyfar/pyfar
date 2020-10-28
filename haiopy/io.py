@@ -3,6 +3,7 @@ import numpy as np
 import os.path
 import warnings
 import copy
+import sys
 import io
 import json
 
@@ -137,7 +138,7 @@ def write(filename, *args):
     out_list = []
     for obj in args:
         obj_dict_encoded = _encode(obj)
-        obj_dict_encoded['type'] = type(obj)
+        obj_dict_encoded['type'] = type(obj).__name__
         out_list.append(obj_dict_encoded)
     with open(filename, 'w') as f:
         json.dump(out_list, f)
@@ -192,7 +193,11 @@ def _decode(obj_dict_encoded):
             obj_dict[key] = np.load(memfile, allow_pickle=False)
     # TODO: What if there's no such default constructor?
     # Initialize empty object of type
-    obj = obj_dict['type']()
+    obj = _str_to_type(obj_dict['type'])()
     del obj_dict['type']
     obj.__dict__.update(obj_dict)
     return obj
+
+
+def _str_to_type(type_as_string):
+    return getattr(sys.modules['haiopy'], type_as_string)
