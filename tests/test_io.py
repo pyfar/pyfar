@@ -133,7 +133,19 @@ def obj_dict_encoded(obj):
             np.save(memfile, value)
             memfile.seek(0)
             obj_dict_encoded[key] = memfile.read().decode('latin-1')
+    obj_dict_encoded['type'] = type(obj)
     return [obj_dict_encoded]
+
+
+@patch('haiopy.io.json')
+@patch('haiopy.io.open', new_callable=mock_open())
+def test_read_coordinates(m_open, m_json, filename, obj, obj_dict_encoded):
+    m_json.load.return_value = obj_dict_encoded
+    obj_loaded = io.read(filename)[0]
+
+    m_open.assert_called_with(filename, 'r')
+
+    assert obj_loaded == obj
 
 
 @patch('haiopy.io.json')

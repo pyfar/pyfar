@@ -2,6 +2,7 @@ import scipy.io.wavfile as wavfile
 import numpy as np
 import os.path
 import warnings
+import copy
 import io
 import json
 
@@ -113,7 +114,13 @@ def read(filename):
     -------
     loaded_dict: dictionary containing haiopy types.
     """
-    pass
+    with open(filename, 'r') as f:
+        obj_list_encoded = json.load(f)
+    obj_list = []
+    for obj_dict_encoded in obj_list_encoded:
+        obj = _decode(obj_dict_encoded)
+        obj_list.append(obj)
+    return obj_list
 
 
 def write(filename, *args):
@@ -137,11 +144,55 @@ def write(filename, *args):
 
 
 def _encode(obj):
-    obj_dict_encoded = obj.__dict__
+    """
+    Iterates over object's dictionary and encodes all numpy.ndarrays
+    to be able to store in a json format.
+
+    Parameters
+    ----------
+    obj: Compatible haiopy type.
+
+    Returns
+    ----------
+    obj_dict_encoded: dict.
+        Json compatible dictionary.
+    """
+    obj_dict_encoded = copy.deepcopy(obj.__dict__)
     for key, value in obj_dict_encoded.items():
         if isinstance(value, np.ndarray):
             memfile = io.BytesIO()
-            np.save(memfile, value)
+            np.save(memfile, value, allow_pickle=False)
             memfile.seek(0)
             obj_dict_encoded[key] = memfile.read().decode('latin-1')
     return obj_dict_encoded
+
+
+def _decode(obj_dict_encoded):
+    """
+    Iterates over object's encoded dictionary and decodes all
+    numpy.ndarrays to be prepare object initialization.
+
+    Parameters
+    ----------
+    obj_dict_encoded: dict.
+        Dictionary of encoded compatible haiopy types.
+
+    Returns
+    ----------
+    obj_dict: dict.
+        Decoded dictionary ready for initialization of haiopy types.
+    """
+    # Does not have to be copied because read data is thrown away anyway
+    obj_dict = obj_dict_encoded
+    for key, value in obj_dict_encoded.items():
+        if isinstance(value, str) and value.startswith('\x93NUMPY'):
+            memfile = io.BytesIO()
+            memfile.write(value.encode('latin-1'))
+            memfile.seek(0)
+            obj_dict[key] = np.load(memfile, allow_pickle=False)
+    # TODO: What if there's no such default constructor?
+    # Initialize empty object of type
+    obj = obj_dict['type']()
+    del obj_dict['type']
+    obj.__dict__.update(obj_dict)
+    return obj
