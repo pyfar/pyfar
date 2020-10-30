@@ -1,15 +1,9 @@
 import matplotlib.pyplot as plt
-# plt.style.use(['default', 'ggplot', 'haiopy.mplstyle'])
 import matplotlib as mpl
-from matplotlib.pyplot import colorbar
 import numpy as np
 from .. import dsp
-from scipy import signal as sgn
 from haiopy import Signal
 import warnings
-import os
-
-
 from .ticker import (
     LogFormatterITAToolbox,
     LogLocatorITAToolbox,
@@ -37,9 +31,7 @@ def _prepare_plot(ax=None):
         fig.set_size_inches(plt.rcParams.get('figure.figsize'))
     else:
         fig = ax.figure
-        #fig.clear()
-        #ax = fig.add_subplot()
-        #fig.set_size_inches(plt.rcParams.get('figure.figsize'))
+
     return fig, ax
 
 
@@ -67,26 +59,8 @@ def _return_default_colors_rgb(**kwargs):
 
 
 def _time(signal, ax=None, **kwargs):
-    """Plot the time signal of a haiopy audio signal object.
+    """Plot the time data of a signal."""
 
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy Signal class
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-
-    See Also
-    --------
-    matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
-    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -106,31 +80,10 @@ def _time(signal, ax=None, **kwargs):
 
     return ax
 
+
 def _time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
-    """Plot the time signal of a haiopy audio signal object in Decibels.
+    """Plot the time logairhmic data of a signal."""
 
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy Signal class
-    log_prefix : integer
-        Prefix for logarithmic representation of the signal.
-    log_reference : integer
-        Reference for logarithmic representation of the signal.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-
-    See Also
-    --------
-    matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
-    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -156,32 +109,12 @@ def _time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     return ax
 
+
 def _freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
-    """Plot the absolute values of the spectrum on the positive frequency axis.
-
-    Parameters
-    ----------
-    signal : Signal object
-        An adio signal object from the haiopy signal class
-    log_prefix : integer
-        Prefix for logarithmic representation of the signal.
-    log_reference : integer
-        Reference for logarithmic representation of the signal.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-
-    See Also
-    --------
-    matplotlib.pyplot.magnitude_spectrum() : Plot the magnitudes of the
-        corresponding frequencies.
     """
+    Plot the logarithmic absolute spectrum on the positive frequency axis.
+    """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -212,51 +145,25 @@ def _freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     return ax
 
+
 def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
-    """Plot the phase of the spectrum on the positive frequency axis.
+    """Plot the phase of the spectrum on the positive frequency axis."""
 
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    deg : Boolean
-        Specifies, whether the phase is plotted in degrees or radians.
-    unwrap : Boolean
-        Specifies, whether the phase is unwrapped or not.
-        If set to "360", the phase is wrapped to 2 pi.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-
-    See Also
-    --------
-    matplotlib.pyplot.phase_spectrum() : Plot the phase of the
-        corresponding frequencies.
-    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    fig, ax = _prepare_plot(ax)
+    _, ax = _prepare_plot(ax)
 
     kwargs = _return_default_colors_rgb(**kwargs)
-
-    time_data = signal.time
-    sampling_rate = signal.sampling_rate
 
     phase_data = dsp.phase(signal, deg=deg, unwrap=unwrap)
 
     # Construct the correct label string:
     ylabel_string = 'Phase '
-    if(unwrap==True):
-        ylabel_string += '(unwrapped) '
-    elif(unwrap=='360'):
+    if unwrap == '360':
         ylabel_string += '(wrapped to 360) '
+    elif unwrap:
+        ylabel_string += '(unwrapped) '
 
     if deg:
         ylabel_string += 'in degree'
@@ -269,8 +176,8 @@ def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
             nominator=1, denominator=2, base=np.pi, base_str='\pi'))
         y_margin = np.radians(5)
 
-    ymin = np.nanmin(phase_data)-y_margin # more elegant solution possible?
-    ymax = np.nanmax(phase_data)+y_margin
+    ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
+    ymax = np.nanmax(phase_data) + y_margin
 
     ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
     ax.set_xlabel("Frequency in Hz")
@@ -285,27 +192,14 @@ def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
 
     return ax
 
+
 def _group_delay(signal, ax=None, **kwargs):
-    """Plot the group delay of a given signal.
+    """Plot the group delay on the positive frequency axis."""
 
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    fig, ax = _prepare_plot(ax)
+    _, ax = _prepare_plot(ax)
 
     kwargs = _return_default_colors_rgb(**kwargs)
 
@@ -329,60 +223,13 @@ def _group_delay(signal, ax=None, **kwargs):
 
     return ax
 
-def _spectrogram(signal,
-                      log=False,
-                      nodb=False,
-                      window='hann',
-                      window_length='auto',
-                      window_overlap_fct=0.5,
-                      cmap=mpl.cm.get_cmap(name='magma'),
-                      ax=None,
-                      cut=False,
-                      **kwargs):
-    """Plots the spectrogram for a given signal object without colorbar.
 
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    window : String (Default: 'hann')
-        Specifies the window type. See scipy.signal.get_window for details.
-    window_length : integer
-        Specifies the window length. If not set, it will be automatically
-        calculated.
-    window_overlap_fct : double
-        Ratio of points to overlap between fft segments [0...1]
-    log_prefix : integer
-        Prefix for Decibel calculation.
-    log_reference : double
-        Prefix for Decibel calculation.
-    log : Boolean
-        Speciefies, whether the y axis is plotted logarithmically.
-        Defaults to False.
-    scale : String
-        The scaling of the values in the spec. 'linear' is no scaling. 'dB'
-        returns the values in dB scale. When mode is 'psd', this is dB power
-        (10 * log10). Otherwise this is dB amplitude (20 * log10). 'default' is
-        'dB' if mode is 'psd' or 'magnitude' and 'linear' otherwise. This must
-        be 'linear' if mode is 'angle' or 'phase'.
-    cut : Boolean // TODO
-        Cut results to specified clim vector to avoid sparcles.
-        Defaults to False.
-    cmap : matplotlib.colors.Colormap(name, N=256)
-        Colormap for spectrogram. Defaults to matplotlibs 'magma' colormap.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
+def _spectrogram(signal, log=False, nodb=False, window='hann',
+                 window_length='auto', window_overlap_fct=0.5,
+                 cmap=mpl.cm.get_cmap(name='magma'), ax=None,
+                 cut=False, **kwargs):
+    """Plot the magnitude spectrum versus time."""
 
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-
-    See Also
-    --------
-    scipy.signal.spectrogram() : Generate the spectrogram for a given signal.
-    matplotlib.pyplot.specgram() : Plot the spectrogram for a given signal.
-    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -392,35 +239,19 @@ def _spectrogram(signal,
             + str(signal.time.shape) + " signals.")
         signal.time = signal.time[0]
 
-    fig, ax = _prepare_plot(ax)
+    _, ax = _prepare_plot(ax)
 
     if window_length == 'auto':
-        window_length  = 2**dsp.nextpow2(signal.n_samples / 2000)
-        if window_length < 1024: window_length = 1024
-    window_overlap = int(window_length * window_overlap_fct)
+        window_length = 2**dsp.nextpow2(signal.n_samples / 2000)
+        if window_length < 1024:
+            window_length = 1024
 
+    frequencies, times, spectrogram, _ = dsp.spectrogram(
+        signal, window, window_length, window_overlap_fct, 20, 1, log, nodb,
+        cut)
 
-    frequencies, times, spectrogram, clim = dsp.spectrogram(signal,
-                                                            window,
-                                                            window_length,
-                                                            window_overlap_fct,
-                                                            20,
-                                                            1,
-                                                            log,
-                                                            nodb,
-                                                            cut)
-
-    ax.pcolormesh(times, frequencies, spectrogram, cmap=cmap, shading='gouraud')
-    #spectrum, freqs, t, im = ax.specgram(
-    #        x=np.squeeze(signal.time),
-    #        NFFT=window_length,
-    #        Fs=signal.sampling_rate,
-    #        window=sgn.get_window(window, window_length),
-    #        noverlap=window_overlap,
-    #        mode='magnitude',
-    #        scale=scale,
-    #        cmap=cmap,
-    #        **kwargs)
+    ax.pcolormesh(times, frequencies, spectrogram, cmap=cmap,
+                  shading='gouraud')
 
     # Adjust axes:
     ax.set_ylabel('Frequency in Hz')
@@ -438,65 +269,21 @@ def _spectrogram(signal,
     return ax
 
 
-def _spectrogram_cb(signal,
-                    log=False,
-                    nodb=False,
-                    window='hann',
-                    window_length='auto',
-                    window_overlap_fct=0.5,
-                    cmap=mpl.cm.get_cmap(name='magma'),
-                    ax=None,
-                    **kwargs):
-    """Plots the spectrogram for a given signal object.
+def _spectrogram_cb(signal, log=False, nodb=False, window='hann',
+                    window_length='auto', window_overlap_fct=0.5,
+                    cmap=mpl.cm.get_cmap(name='magma'), ax=None, **kwargs):
+    """Plot the magnitude spectrum versus time."""
 
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    window : String (Default: 'hann')
-        Specifies the window type. See scipy.signal.get_window for details.
-    window_length : integer
-        Specifies the window length. If not set, it will be automatically
-        calculated.
-    window_overlap_fct : double
-        Ratio of points to overlap between fft segments [0...1]
-    log_prefix : integer
-        Prefix for Decibel calculation.
-    log_reference : double
-        Prefix for Decibel calculation.
-    log : Boolean
-        Speciefies, whether the y axis is plotted logarithmically.
-        Defaults to False.
-    scale : String
-        The scaling of the values in the spec. 'linear' is no scaling. 'dB'
-        returns the values in dB scale. When mode is 'psd', this is dB power
-        (10 * log10). Otherwise this is dB amplitude (20 * log10). 'default' is
-        'dB' if mode is 'psd' or 'magnitude' and 'linear' otherwise. This must
-        be 'linear' if mode is 'angle' or 'phase'.
-    cut : Boolean // TODO
-        Cut results to specified clim vector to avoid sparcles.
-        Defaults to False.
-    cmap : matplotlib.colors.Colormap(name, N=256)
-        Colormap for spectrogram. Defaults to matplotlibs 'magma' colormap.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     # Define figure and axes for plot:
     fig, ax = _prepare_plot(ax)
-    ax = ax.figure.subplots(1,2,gridspec_kw={"width_ratios":[1, 0.05]})
+    ax = ax.figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 0.05]})
     fig.axes[0].remove()
 
-    ax[0] = _spectrogram(signal, log, nodb, window,
-                     window_length, window_overlap_fct,
-                     cmap, ax[0], **kwargs)
+    ax[0] = _spectrogram(signal, log, nodb, window, window_length,
+                         window_overlap_fct, cmap, ax[0], **kwargs)
 
     # Colorbar:
     for PCM in ax[0].get_children():
@@ -509,40 +296,18 @@ def _spectrogram_cb(signal,
 
     return ax
 
-def _freq_phase(signal,
-                    log_prefix=20,
-                    log_reference=1,
-                    deg=False,
-                    unwrap=False,
-                    ax=None,
-                    **kwargs):
-    """Plot the magnitude and phase of the spectrum on the positive frequency
-    axis.
 
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    deg : Boolean
-        Specifies, whether the phase is plotted in degrees or radians.
-    unwrap : Boolean
-        Specifies, whether the phase is unwrapped or not.
-        If set to "360", the phase is wrapped to 2 pi.
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+def _freq_phase(signal, log_prefix=20, log_reference=1, deg=False,
+                unwrap=False, ax=None, **kwargs):
+    """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
     kwargs = _return_default_colors_rgb(**kwargs)
 
-    ax = fig.subplots(2,1,sharex=False)
+    ax = fig.subplots(2, 1, sharex=False)
     fig.axes[0].remove()
     _freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     _phase(signal, deg, unwrap, ax[1], **kwargs)
@@ -552,30 +317,20 @@ def _freq_phase(signal,
 
     return ax
 
+
 def _freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
                       **kwargs):
-    """Plot the magnitude spectrum and group delay on the positive frequency
-    axis.
-
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
     """
+    Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
+    """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax)
     kwargs = _return_default_colors_rgb(**kwargs)
 
-    ax = fig.subplots(2,1,sharex=False)
+    ax = fig.subplots(2, 1, sharex=False)
     fig.axes[0].remove()
     _freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     _group_delay(signal, ax[1], **kwargs)
@@ -585,82 +340,51 @@ def _freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
 
     return ax
 
+
 def _summary(signal, ax=None, **kwargs):
-    """ TODO: Implement input parameters for this function.
-    Plot the time domain, the time domain in dB, the magnitude spectrum,
-    the frequency domain, the phase and group delay on shared x axis.
-
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
-
-    Examples
-    --------
-    This example creates a Signal object containing a sine wave and plots it
-    using haiopy.
-
-            import numpy as np
-            from haiopy import Signal
-            from haiopy import plot
-
-            amplitude = 1
-            frequency = 440
-            sampling_rate = 44100
-            num_samples = 44100
-
-            times = np.arange(0, num_samples) / sampling_rate
-            sine = amplitude * np.sin(2 * np.pi * frequency * times)
-            signal_object = Signal(sine, sampling_rate, 'time', 'power')
-
-            plot.summary(signal_object)
     """
+    Plot the time domain, the time domain in dB, the magnitude spectrum,
+    the frequency domain, the phase and group delay.
+    """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     # Setup figure, axes and grid:
     fig, ax = _prepare_plot(ax)
-    ax = fig.subplots(4,2, gridspec_kw={'height_ratios':[1,1,1,0.1]})
+    ax = fig.subplots(4, 2, gridspec_kw={'height_ratios': [1, 1, 1, 0.1]})
     fig.axes[0].remove()
     fig.set_size_inches(6, 6)
 
     kwargs = _return_default_colors_rgb(**kwargs)
 
     # Time domain plots:
-    _time(signal, ax=ax[0,0], **kwargs)
-    _time_dB(signal, ax=ax[1,0], **kwargs)
-    _spectrogram(signal, ax=ax[2,0], **kwargs)
+    _time(signal, ax=ax[0, 0], **kwargs)
+    _time_dB(signal, ax=ax[1, 0], **kwargs)
+    _spectrogram(signal, ax=ax[2, 0], **kwargs)
 
     # Frequency domain plots:
-    _freq(signal, ax=ax[0,1], **kwargs)
-    _phase(signal, ax=ax[1,1], **kwargs)
-    _group_delay(signal, ax=ax[2,1], **kwargs)
+    _freq(signal, ax=ax[0, 1], **kwargs)
+    _phase(signal, ax=ax[1, 1], **kwargs)
+    _group_delay(signal, ax=ax[2, 1], **kwargs)
 
     # Colorbar for spectrogram:
-    for PCM in ax[2,0].get_children():
-        if type(PCM) == mpl.collections.QuadMesh: break
-    cb = plt.colorbar(PCM, cax=ax[3,0],orientation='horizontal')
+    for PCM in ax[2, 0].get_children():
+        if type(PCM) == mpl.collections.QuadMesh:
+            break
+    cb = plt.colorbar(PCM, cax=ax[3, 0], orientation='horizontal')
     cb.set_label('Modulus [dB]')
 
     # Remove unnessecary labels and ticks:
-    ax[0,0].set_xlabel(None)
-    ax[1,0].set_xlabel(None)
-    ax[0,1].set_xlabel(None)
-    ax[1,1].set_xlabel(None)
-    ax[3,1].axis('off')
-    #ax[0,0].get_shared_x_axes().join(ax[0,0], ax[1,0], ax[2,0])
-    ax[0,0].set_xticklabels([])
-    ax[1,0].set_xticklabels([])
-    #ax[0,1].get_shared_x_axes().join(ax[0,1], ax[1,1], ax[2,1])
-    ax[0,1].set_xticklabels([])
-    ax[1,1].set_xticklabels([])
+    ax[0, 0].set_xlabel(None)
+    ax[1, 0].set_xlabel(None)
+    ax[0, 1].set_xlabel(None)
+    ax[1, 1].set_xlabel(None)
+    ax[3, 1].axis('off')
+    ax[0, 0].set_xticklabels([])
+    ax[1, 0].set_xticklabels([])
+    ax[0, 1].set_xticklabels([])
+    ax[1, 1].set_xticklabels([])
     fig.align_ylabels()
 
     plt.tight_layout()
