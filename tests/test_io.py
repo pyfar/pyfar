@@ -92,12 +92,12 @@ def test_read_sofa_coordinates():
     source_coordinates_ref = reference_coordinates()[0]
     receiver_coordinates_ref = reference_coordinates()[1]
     npt.assert_allclose(
-            source_coordinates,
+            source_coordinates.get_cart(),
             source_coordinates_ref,
             rtol=1e-10)
     npt.assert_allclose(
-            receiver_coordinates,
-            receiver_coordinates_ref,
+            receiver_coordinates.get_cart(),
+            receiver_coordinates_ref[:, :, 0],
             rtol=1e-10)
     # Check for PositionType
     filename = os.path.join(baseline_path, 'GeneralFIR_postype.sofa')
