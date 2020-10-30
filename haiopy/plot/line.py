@@ -1,29 +1,24 @@
-from haiopy.plot.utils import plotstyle
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import numpy as np
-from .. import dsp
-from scipy import signal as sgn
+from haiopy.plot.utils import plotstyle
 from .. import Signal
 from . import _line as hplt
-
 from ._interaction import Interaction
-from .ticker import (
-    LogFormatterITAToolbox,
-    LogLocatorITAToolbox,
-    MultipleFractionLocator,
-    MultipleFractionFormatter)
 
 
 def time(signal, ax=None, style='light', **kwargs):
-    """Plot the time signal of a haiopy audio signal object.
+    """Plot the time data of a signal.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy Signal class
+    signal : Signal
+        pyfar Signal object.
     ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -34,7 +29,7 @@ def time(signal, ax=None, style='light', **kwargs):
 
     See Also
     --------
-    matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
+    matplotlib.pyplot.plot() for possible **kwargs.
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -43,24 +38,31 @@ def time(signal, ax=None, style='light', **kwargs):
         ax = hplt._time(signal, ax, **kwargs)
 
     plt.tight_layout()
-
-    ia = Interaction('line_lin_Y', ax, signal, style, **kwargs)
+    Interaction('line_lin_Y', ax, signal, style, **kwargs)
 
     return ax
 
-def time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kwargs):
-    """Plot the time signal of a haiopy audio signal object in Decibels.
+
+def time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light',
+            **kwargs):
+    """Plot the time logairhmic data of a signal.
+
+    Plots `prefix * log10(signal.time / log_reference)`.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy Signal class
-    log_prefix : integer
-        Prefix for logarithmic representation of the signal.
+    signal : Signal
+        pyfar Signal object.
+    log_prefix : integer, float
+        Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
-        Reference for logarithmic representation of the signal.
+        Reference for calculating the logarithmic time data. The default is 1.
     ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -71,8 +73,9 @@ def time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kw
 
     See Also
     --------
-    matplotlib.pyplot.plot() : Plot y versus x as lines and/or markers
+    matplotlib.pyplot.plot() for possible **kwargs.
     """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -80,23 +83,32 @@ def time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kw
         ax = hplt._time_dB(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_log_Y', ax, signal, style, **kwargs)
+    Interaction('line_log_Y', ax, signal, style, **kwargs)
 
     return ax
 
-def freq(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kwargs):
-    """Plot the absolute values of the spectrum on the positive frequency axis.
+
+def freq(signal, log_prefix=20, log_reference=1, ax=None, style='light',
+         **kwargs):
+    """
+    Plot the logarithmic absolute spectrum on the positive frequency axis.
+
+    Plots `prefix * log10(signal.freq / log_reference)`.
 
     Parameters
     ----------
-    signal : Signal object
-        An adio signal object from the haiopy signal class
-    log_prefix : integer
-        Prefix for logarithmic representation of the signal.
+    signal : Signal
+        pyfar Signal object.
+    log_prefix : integer, float
+        Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
-        Reference for logarithmic representation of the signal.
+        Reference for calculating the logarithmic time data. The default is 1.
     ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -107,9 +119,9 @@ def freq(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kwarg
 
     See Also
     --------
-    matplotlib.pyplot.magnitude_spectrum() : Plot the magnitudes of the
-        corresponding frequencies.
+    matplotlib.pyplot.plot() for possible **kwargs.
     """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -117,25 +129,28 @@ def freq(signal, log_prefix=20, log_reference=1, ax=None, style='light', **kwarg
         ax = hplt._freq(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
-
-    ia = Interaction('line_log_Y', ax, signal, style, **kwargs)
+    Interaction('line_log_Y', ax, signal, style, **kwargs)
 
     return ax
+
 
 def phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
+    signal : Signal
+        pyfar Signal object.
     deg : Boolean
-        Specifies, whether the phase is plotted in degrees or radians.
-    unwrap : Boolean
-        Specifies, whether the phase is unwrapped or not.
-        If set to "360", the phase is wrapped to 2 pi.
+        Flag to plot the phase in degrees. The default is False.
+    unwrap : Boolean, str
+        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        default is False.
     ax : matplotlib.pyplot.axes object
         Axes to plot on. If not given, the current figure will be used.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -146,8 +161,7 @@ def phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs):
 
     See Also
     --------
-    matplotlib.pyplot.phase_spectrum() : Plot the phase of the
-        corresponding frequencies.
+    matplotlib.pyplot.plot() for possible **kwargs.
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -157,19 +171,24 @@ def phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs):
 
     plt.tight_layout()
 
-    ia = Interaction('line_log_Y', ax, signal, style, **kwargs)
+    Interaction('line_log_Y', ax, signal, style, **kwargs)
 
     return ax
 
+
 def group_delay(signal, ax=None, style='light', **kwargs):
-    """Plot the group delay of a given signal.
+    """Plot the group delay on the positive frequency axis.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
+    signal : Signal
+        pyfar Signal object.
     ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -177,7 +196,12 @@ def group_delay(signal, ax=None, style='light', **kwargs):
     -------
     ax : matplotlib.pyplot.axes object
         Axes or array of axes containing the plot.
+
+    See Also
+    --------
+    matplotlib.pyplot.plot() for possible **kwargs.
     """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -185,54 +209,44 @@ def group_delay(signal, ax=None, style='light', **kwargs):
         ax = hplt._group_delay(signal, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_lin_Y', ax, signal, style, **kwargs)
+    Interaction('line_lin_Y', ax, signal, style, **kwargs)
 
     return ax
 
 
-def spectrogram(signal,
-                log=False,
-                nodb=False,
-                window='hann',
-                window_length='auto',
-                window_overlap_fct=0.5,
+def spectrogram(signal, log=False, db=True, window='hann',
+                window_length='auto', window_overlap_fct=0.5,
                 cmap=mpl.cm.get_cmap(name='magma'),
-                ax=None,
-                style='light',
-                **kwargs):
-    """Plots the spectrogram for a given signal object.
+                ax=None, style='light', **kwargs):
+    """Plot the magnitude spectrum versus time.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
-    window : String (Default: 'hann')
-        Specifies the window type. See scipy.signal.get_window for details.
-    window_length : integer
-        Specifies the window length. If not set, it will be automatically
-        calculated.
-    window_overlap_fct : double
-        Ratio of points to overlap between fft segments [0...1]
-    log_prefix : integer
-        Prefix for Decibel calculation.
-    log_reference : double
-        Prefix for Decibel calculation.
+    signal : Signal
+        pyfar Signal object.
     log : Boolean
         Speciefies, whether the y axis is plotted logarithmically.
-        Defaults to False.
-    scale : String
-        The scaling of the values in the spec. 'linear' is no scaling. 'dB'
-        returns the values in dB scale. When mode is 'psd', this is dB power
-        (10 * log10). Otherwise this is dB amplitude (20 * log10). 'default' is
-        'dB' if mode is 'psd' or 'magnitude' and 'linear' otherwise. This must
-        be 'linear' if mode is 'angle' or 'phase'.
-    cut : Boolean // TODO
-        Cut results to specified clim vector to avoid sparcles.
-        Defaults to False.
+        The default is False.
+    db : Boolean
+        Falg to plot the logarithmic magnitude specturm. The default is True.
+    window : str
+        Specifies the window (See scipy.signal.get_window) The default is
+        'hann'.
+    window_length : integer
+        Specifies the window length in samples. If not set, it will be
+        automatically calculated.
+    window_overlap_fct : double
+        Ratio of points to overlap between fft segments [0...1]. The default is
+        0.5
     cmap : matplotlib.colors.Colormap(name, N=256)
         Colormap for spectrogram. Defaults to matplotlibs 'magma' colormap.
     ax : matplotlib.pyplot.axes object
         Axes to plot on. If not given, the current figure will be used.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
+    **kwargs
+        Keyword arguments that are piped to matplotlib.pyplot.plot
 
     Returns
     -------
@@ -242,35 +256,41 @@ def spectrogram(signal,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
+    nodb = not db
+
     with plt.style.context(plotstyle(style)):
         ax = hplt._spectrogram_cb(signal, log, nodb, window, window_length,
                                   window_overlap_fct, cmap, ax, **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('spectrogram', ax[0], signal, style, **kwargs)
+    Interaction('spectrogram', ax[0], signal, style, **kwargs)
 
     return ax
 
-def freq_phase(signal,
-               log_prefix=20,
-               log_reference=1,
-               deg=False,
-               unwrap=False,
-               ax=None,
-               style='light',
-               **kwargs):
-    """Plot the magnitude and phase of the spectrum on the positive frequency
-    axis.
+
+def freq_phase(signal, log_prefix=20, log_reference=1, deg=False, unwrap=False,
+               ax=None, style='light', **kwargs):
+    """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
+    signal : Signal
+        pyfar Signal object.
+    log_prefix : integer, float
+        Prefix for calculating the logarithmic time data. The default is 20.
+    log_reference : integer
+        Reference for calculating the logarithmic time data. The default is 1.
     deg : Boolean
-        Specifies, whether the phase is plotted in degrees or radians.
-    unwrap : Boolean
-        Specifies, whether the phase is unwrapped or not.
-        If set to "360", the phase is wrapped to 2 pi.
+        Flag to plot the phase in degrees. The default is False.
+    unwrap : Boolean, str
+        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        default is False.
+    ax : matplotlib.pyplot.axes object
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -278,7 +298,12 @@ def freq_phase(signal,
     -------
     ax : matplotlib.pyplot.axes object
         Axes or array of axes containing the plot.
+
+    See Also
+    --------
+    matplotlib.pyplot.plot() for possible **kwargs.
     """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -286,19 +311,29 @@ def freq_phase(signal,
         ax = hplt._freq_phase(signal, log_prefix, log_reference, deg, unwrap,
                               **kwargs)
     plt.tight_layout()
-    ia = Interaction('line_lin_Y', ax[0], signal, style, **kwargs)
+    Interaction('line_lin_Y', ax[0], signal, style, **kwargs)
 
     return ax
 
+
 def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
                      style='light', **kwargs):
-    """Plot the magnitude spectrum and group delay on the positive frequency
-    axis.
+    """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
+    signal : Signal
+        pyfar Signal object.
+    log_prefix : integer, float
+        Prefix for calculating the logarithmic time data. The default is 20.
+    log_reference : integer
+        Reference for calculating the logarithmic time data. The default is 1.
+    ax : matplotlib.pyplot.axes object
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -306,6 +341,10 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
     -------
     ax : matplotlib.pyplot.axes object
         Axes or array of axes containing the plot.
+
+    See Also
+    --------
+    matplotlib.pyplot.plot() for possible **kwargs.
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -315,19 +354,26 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
                                     **kwargs)
 
     plt.tight_layout()
-    ia = Interaction('line_log_Y', ax[0], signal, style, **kwargs)
+    Interaction('line_log_Y', ax[0], signal, style, **kwargs)
 
     return ax
 
+
 def summary(signal, ax=None, style='light', **kwargs):
-    """ TODO: Implement input parameters for this function.
+    """
     Plot the time domain, the time domain in dB, the magnitude spectrum,
-    the frequency domain, the phase and group delay on shared x axis.
+    the frequency domain, the phase and group delay.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the haiopy signal class
+    signal : Signal
+        pyfar Signal object.
+    ax : matplotlib.pyplot.axes object
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -336,7 +382,12 @@ def summary(signal, ax=None, style='light', **kwargs):
     ax : matplotlib.pyplot.axes object
         Axes or array of axes containing the plot.
 
+    See Also
+    --------
+    matplotlib.pyplot.plot() for possible **kwargs.
+
     """
+
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 

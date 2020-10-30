@@ -123,7 +123,7 @@ def sine_plus_impulse_mock():
     frequencies = np.arange(0, int(n_samples/2+1)) / (n_samples/sampling_rate)
 
     # Fourier coefficients of impulse:
-    freq = np.ones(int(n_samples/2+1),dtype=np.complex_) * norm * 2/n_samples
+    freq = np.ones(int(n_samples/2+1), dtype=np.complex_) * norm * 2/n_samples
 
     # superpose Fourier coefficient of sine wave:
     position = int(frequency / sampling_rate * n_samples)
