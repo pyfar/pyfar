@@ -9,6 +9,9 @@ import os
 import haiopy.plot as plot
 from haiopy import Signal
 
+# flag for creating new baseline plots (required if the plot look changed)
+create_baseline = False
+
 # path handling
 base_path = os.path.join('tests', 'test_plot_data')
 baseline_path = os.path.join(base_path, 'baseline')
@@ -22,7 +25,7 @@ if not os.path.isdir(output_path):
     os.mkdir(output_path)
 
 
-def test_line_plots(sine_plus_impulse_mock):
+def test_line_plots(sine_plus_impulse_mock, create_baseline=create_baseline):
 
     # test all plots with default parameters
     function_list = [plot.line.time,
@@ -48,7 +51,7 @@ def test_line_plots(sine_plus_impulse_mock):
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppn creation
-        if not os.path.isfile(baseline):
+        if create_baseline:
             plt.savefig(baseline)
         # safe test image
         plt.savefig(output)
@@ -75,7 +78,7 @@ def test_line_phase_options(sine_plus_impulse_mock):
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppn creation
-        if not os.path.isfile(baseline):
+        if create_baseline:
             plt.savefig(baseline)
         # safe test image
         plt.savefig(output)
