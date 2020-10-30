@@ -115,6 +115,5 @@ venv.bak/
 haiopy/spatial/external/samplings_extremal*
 haiopy/spatial/external/samplings_t_design*
 
-# saved plots for testing
-tests/test_plot_data/baseline/*
+# saved plots from testing
 tests/test_plot_data/output/*
