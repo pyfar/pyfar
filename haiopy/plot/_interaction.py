@@ -1,8 +1,8 @@
 import warnings
 import matplotlib as mpl
 import numpy as np
-from . import _plot as _hplt
-from . import plot as hplt
+from . import _line as _hplt
+from . import line as hplt
 import matplotlib.pyplot as plt
 from haiopy import Signal
 

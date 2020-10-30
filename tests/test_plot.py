@@ -1,159 +1,160 @@
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.testing.compare import compare_images
 import pytest
 import numpy as np
 from unittest import mock
+import os
 import haiopy.plot as plot
 from haiopy import Signal
-from matplotlib.testing.compare import compare_images
+matplotlib.use('Agg')
 
-baseline_path = 'tests/test_plot_data/baseline/'
-output_path = 'tests/test_plot_data/output/'
+baseline_path = os.path.join('tests', 'test_plot_data', 'baseline')
+output_path = os.path.join('tests', 'test_plot_data', 'output')
 
-def test_plot_time(sine_plus_impulse_mock):
+
+def test_line_time(sine_plus_impulse_mock):
     """Test the time plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_time.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_time(sine_plus_impulse_mock)
+    filename = 'line_time.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.time(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_time_dB(sine_plus_impulse_mock):
+
+def test_line_time_dB(sine_plus_impulse_mock):
     """Test the time plot in Decibels."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_time_dB.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_time_dB(sine_plus_impulse_mock)
+    filename = 'line_time_dB.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.time_dB(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_freq(sine_plus_impulse_mock):
+
+def test_line_freq(sine_plus_impulse_mock):
     """Test the magnitude plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_freq.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_freq(sine_plus_impulse_mock)
+    filename = 'line_freq.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.freq(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_phase(sine_plus_impulse_mock):
+
+def test_line_phase(sine_plus_impulse_mock):
     """Test the phase plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_phase.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_phase(sine_plus_impulse_mock, deg=False, unwrap=False)
+    filename = 'line_phase.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.phase(sine_plus_impulse_mock, deg=False, unwrap=False)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_phase_deg(sine_plus_impulse_mock):
+
+def test_line_phase_deg(sine_plus_impulse_mock):
     """Test the phase plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_phase_deg.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_phase(sine_plus_impulse_mock, deg=True, unwrap=False)
+    filename = 'line_phase_deg.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.phase(sine_plus_impulse_mock, deg=True, unwrap=False)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_phase_unwrap(sine_plus_impulse_mock):
+
+def test_line_phase_unwrap(sine_plus_impulse_mock):
     """Test the phase plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_phase_unwrap.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_phase(sine_plus_impulse_mock, deg=False, unwrap=True)
+    filename = 'line_phase_unwrap.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.phase(sine_plus_impulse_mock, deg=False, unwrap=True)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_phase_unwrap_deg(sine_plus_impulse_mock):
+
+def test_line_phase_unwrap_deg(sine_plus_impulse_mock):
     """Test the phase plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_phase_unwrap_deg.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_phase(sine_plus_impulse_mock, deg=True, unwrap=True)
+    filename = 'line_phase_unwrap_deg.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.phase(sine_plus_impulse_mock, deg=True, unwrap=True)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_group_delay(sine_plus_impulse_mock):
+
+def test_line_group_delay(sine_plus_impulse_mock):
     """Test the group delay plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_group_delay.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_group_delay(sine_plus_impulse_mock)
+    filename = 'line_group_delay.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.group_delay(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_spectrogram(sine_plus_impulse_mock):
+
+def test_line_spectrogram(sine_plus_impulse_mock):
     """Test the spectrogram plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_spectrogram.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_spectrogram(sine_plus_impulse_mock)
+    filename = 'line_spectrogram.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.spectrogram(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_freq_phase(sine_plus_impulse_mock):
+
+def test_line_freq_phase(sine_plus_impulse_mock):
     """Test the combined magnitude/phase plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_freq_phase.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_freq_phase(sine_plus_impulse_mock)
+    filename = 'line_freq_phase.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.freq_phase(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_freq_group_delay(sine_plus_impulse_mock):
+
+def test_line_freq_group_delay(sine_plus_impulse_mock):
     """Test the combined magnitude/group delay plot."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_freq_group_delay.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_freq_group_delay(sine_plus_impulse_mock)
+    filename = 'line_freq_group_delay.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.freq_group_delay(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
-def test_plot_all(sine_plus_impulse_mock):
-    """Test the plot_all function."""
+
+def test_line_all(sine_plus_impulse_mock):
+    """Test the summary function."""
     matplotlib.testing.set_reproducibility_for_testing()
-    filename = 'plot_all.png'
-    baseline = baseline_path + filename
-    output = output_path + filename
-    plot.plot_all(sine_plus_impulse_mock)
+    filename = 'line_summary.png'
+    baseline = os.path.join(baseline_path, filename)
+    output = os.path.join(output_path, filename)
+    plot.line.summary(sine_plus_impulse_mock)
     plt.savefig(output)
 
-    assert compare_images(baseline, output, tol=10) == None, \
-            compare_images(baseline, output, tol=10)
+    compare_images(baseline, output, tol=10)
 
 @pytest.fixture
 def sine_plus_impulse_mock():
@@ -169,7 +170,6 @@ def sine_plus_impulse_mock():
     """
     n_samples = 2000
     sampling_rate = 4000
-    amplitude_sine = 1
     amplitude_impulse = 1
     idx_impulse = 0
     frequency = 200

@@ -2,4 +2,5 @@
 
 """Plot sub-package for haiopy."""
 
-from .plot import *
+from . import line
+from . import utils

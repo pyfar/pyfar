@@ -1,11 +1,13 @@
 import matplotlib
-matplotlib.use('Agg')
-import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.testing
+import numpy as np
 import haiopy.plot as plot
 from haiopy import Signal
+matplotlib.use('Agg')
 
-def generate_test_plots(dir='tests/test_plot_data/baseline/'):
+
+def generate_line_test_plots(dir='tests/test_plot_data/baseline/'):
     """ Generate the reference plots used for testing the plot functions.
 
     Parameters
@@ -26,17 +28,16 @@ def generate_test_plots(dir='tests/test_plot_data/baseline/'):
                      'summary']
 
     for function_name in function_list:
-        getattr(plot, function_name)(sine_plus_impulse())
-        plt.savefig((dir + function_name + '.png'))
-
+        getattr(plot.line, function_name)(sine_plus_impulse())
+        plt.savefig((dir + 'line_' + function_name + '.png'))
 
     # additional plots to check different options:
-    plot.phase(sine_plus_impulse(), deg=True, unwrap=False)
-    plt.savefig((dir + 'plot_phase_deg' + '.png'))
-    plot.phase(sine_plus_impulse(), deg=False, unwrap=True)
-    plt.savefig((dir + 'plot_phase_unwrap' + '.png'))
-    plot.phase(sine_plus_impulse(), deg=True, unwrap=True)
-    plt.savefig((dir + 'plot_phase_unwrap_deg' + '.png'))
+    plot.line.phase(sine_plus_impulse(), deg=True, unwrap=False)
+    plt.savefig((dir + 'line_phase_deg' + '.png'))
+    plot.line.phase(sine_plus_impulse(), deg=False, unwrap=True)
+    plt.savefig((dir + 'line_phase_unwrap' + '.png'))
+    plot.line.phase(sine_plus_impulse(), deg=True, unwrap=True)
+    plt.savefig((dir + 'line_phase_unwrap_deg' + '.png'))
 
 
 def sine_plus_impulse():
@@ -51,7 +52,6 @@ def sine_plus_impulse():
     """
     n_samples = 2000
     sampling_rate = 4000
-    amplitude_sine = 1
     amplitude_impulse = 1
     idx_impulse = 0
     frequency = 200

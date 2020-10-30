@@ -1,12 +1,11 @@
+from haiopy.plot.utils import plotstyle
 import matplotlib.pyplot as plt
-# plt.style.use(['default', 'ggplot', 'haiopy.mplstyle'])
 import matplotlib as mpl
-import os
 import numpy as np
 from .. import dsp
 from scipy import signal as sgn
 from .. import Signal
-from . import _plot as hplt
+from . import _line as hplt
 
 from ._interaction import Interaction
 from .ticker import (
@@ -337,105 +336,13 @@ def summary(signal, ax=None, style='light', **kwargs):
     ax : matplotlib.pyplot.axes object
         Axes or array of axes containing the plot.
 
-    Examples
-    --------
-    This example creates a Signal object containing a sine wave and plots it
-    using haiopy.
-
-            import numpy as np
-            from haiopy import Signal
-            from haiopy import plot
-
-            amplitude = 1
-            frequency = 440
-            sampling_rate = 44100
-            num_samples = 44100
-
-            times = np.arange(0, num_samples) / sampling_rate
-            sine = amplitude * np.sin(2 * np.pi * frequency * times)
-            signal_object = Signal(sine, sampling_rate, 'time', 'power')
-
-            plot.signal(signal_object)
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._signal(signal, **kwargs)
+        ax = hplt._summary(signal, **kwargs)
 
     plt.tight_layout()
 
     return ax
-
-
-def plotstyle(style='light'):
-
-    if style is None:
-        # get the currently used plotstyle
-        style = mpl.matplotlib_fname()
-    elif style in ['light', 'dark']:
-        # use haiopy style
-        style = os.path.join(
-            os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
-    elif style not in plt.style.available:
-        # error if style not found
-        ValueError((f"plotstyle '{style}' not available. Valid styles are "
-                    "None, 'light', 'dark' and styles from "
-                    "matplotlib.pyplot.available"))
-
-    return style
-
-
-def shortcuts(show=True):
-    """Show and return keyboard shortcuts for interactive figures.
-
-    Note that shortcuts are only available if using an interactive backend in
-    Matplotlib, e.g., by typing `%matplotlib qt`.
-
-    Parameters
-    ----------
-    show : bool, optional
-        print the keyboard shortcuts to the default console. The default is
-        True.
-
-    Returns
-    -------
-    short_cuts : dict
-        dictionary that contains all the shortcuts
-
-    """
-    short_cuts = {
-        "plots": {
-            "ctr+1": "time signal",
-            "ctr+2": "magnitude response",
-            "ctr+3": "phase response",
-            "ctr+4": "group delay",
-            "ctr+5": "spectrogram",
-            "ctr+6": "time, magnitude, phase, and group delay"
-        },
-        "controls": {
-            "up": "move y-axis view upwards",
-            "down": "move y-axis view downwards",
-            "left": "move x-axis view to the left",
-            "right": "move x-axis view to the right",
-            "shift+up": "zoom out y-axis",
-            "shift+down": "zoom in y-axis",
-            "shift+right": "zoom in x-axis",
-            "shift+left": "zoom out x-axis",
-            "shift+y": "toogle logarithmic y-axis",
-            "shift+x": "toogle logarithmic x-axis",
-            "c": "toogle legend with channel numbers",
-            "a": "toogle show all channels",
-            ".": "show next channel",
-            ",": "show previous chanel"
-        }
-    }
-
-    if show:
-        print("Use these shortcuts to show different plots:")
-        for plot in short_cuts["plots"]:
-            print(f'{plot}: {short_cuts["plots"][plot]}')
-        print(" ")
-        print("Use these shortcuts to control the plot look:")
-        for ctr in short_cuts["controls"]:
-            print(f'{ctr}: {short_cuts["controls"][ctr]}')

@@ -114,3 +114,7 @@ venv.bak/
 # external data that os loaded from the web
 haiopy/spatial/external/samplings_extremal*
 haiopy/spatial/external/samplings_t_design*
+
+# saved plots for testing
+tests/test_plot_data/baseline/*
+tests/test_plot_data/output/*
