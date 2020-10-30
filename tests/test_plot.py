@@ -9,8 +9,17 @@ import os
 import haiopy.plot as plot
 from haiopy import Signal
 
-baseline_path = os.path.join('tests', 'test_plot_data', 'baseline')
-output_path = os.path.join('tests', 'test_plot_data', 'output')
+# path handling
+base_path = os.path.join('tests', 'test_plot_data')
+baseline_path = os.path.join(base_path, 'baseline')
+output_path = os.path.join(base_path, 'output')
+
+if not os.path.isdir(base_path):
+    os.mkdir(base_path)
+if not os.path.isdir(baseline_path):
+    os.mkdir(baseline_path)
+if not os.path.isdir(output_path):
+    os.mkdir(output_path)
 
 
 def test_line_plots(sine_plus_impulse_mock):
