@@ -1,8 +1,9 @@
+from haiopy.orientations import Orientations
 from haiopy.coordinates import Coordinates
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest import fixture
+from pytest import fixture, mark
 from mock import Mock, mock_open, patch
 import tempfile
 
@@ -120,8 +121,8 @@ def filename():
 
 
 @fixture
-def obj():
-    return Coordinates([1, -1], [2, -2], [3, -3])
+def obj(obj_instance):
+    return obj_instance
 
 
 @fixture
@@ -137,8 +138,18 @@ def obj_dict_encoded(obj):
     return [obj_dict_encoded]
 
 
+coordinates = [
+    Coordinates([1, -1], [2, -2], [3, -3]),
+    Coordinates(1, 2, 3, domain='sph', convention='side'),
+    Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0),
+    Orientations.from_view_up([
+        [1, 0, 0], [2, 0, 0], [-1, 0, 0]], [[0, 1, 0], [0, -2, 0], [0, 1, 0]])
+]
+
+
 @patch('haiopy.io.json')
 @patch('haiopy.io.open', new_callable=mock_open())
+@mark.parametrize('obj', coordinates)
 def test_read_coordinates(m_open, m_json, filename, obj, obj_dict_encoded):
     m_json.load.return_value = obj_dict_encoded
     obj_loaded = io.read(filename)[0]
@@ -150,7 +161,9 @@ def test_read_coordinates(m_open, m_json, filename, obj, obj_dict_encoded):
 
 @patch('haiopy.io.json')
 @patch('haiopy.io.open', new_callable=mock_open())
-def test_write_coordinates(m_open, m_json, filename, obj, obj_dict_encoded):
+@mark.parametrize('obj', coordinates)
+def test_write_coordinates(
+        m_open, m_json, filename, obj, obj_dict_encoded):
     # assert False
     io.write(filename, obj)
 

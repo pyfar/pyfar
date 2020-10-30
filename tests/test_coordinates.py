@@ -565,6 +565,17 @@ def test_converters():
 #                         np.array([[1, 0], [1, 1], [0, 1]]))
 # test_get_nearest_sph()
 
+def test___eq___equal():
+    coordinates = Coordinates(1, 2, 3, domain='sph', convention='side')
+    comparable = Coordinates(1, 2, 3, domain='sph', convention='side')
+    is_equal = coordinates == comparable
+    assert is_equal
+
+    coordinates = Coordinates([1, 1], [1, 1], [1, 2])
+    comparable = Coordinates([1.0, 1.0], [1.0, 1.0], [1.0, 2.0])
+    is_equal = coordinates == comparable
+    assert is_equal
+
 
 @mark.parametrize(
     'points_1, points_2, points_3, comparable, expected', [

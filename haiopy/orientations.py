@@ -205,3 +205,7 @@ class Orientations(Rotation):
             raise ValueError(f"Expected assigned value to have shape"
                              f" or (1, 4), got {quat.shape}")
         self._quat[idx] = quat
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return haiopy.utils._eq___dict__(self, other)
