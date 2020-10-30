@@ -142,16 +142,6 @@ def read_sofa(filename):
         raise ValueError("DataType {sofafile.Data.Type} is not supported.")
     signal = Signal(data, sampling_rate, domain=domain)
 
-    # Receiver
-    r_values = sofafile.Receiver.Position.get_values()
-    r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
-    receiver_coordinates = Coordinates(
-            r_values[:, 0],
-            r_values[:, 1],
-            r_values[:, 2],
-            domain=r_domain,
-            convention=r_convention,
-            unit=r_unit)
     # Source
     s_values = sofafile.Source.Position.get_values()
     s_domain, s_convention, s_unit = _sofa_pos(sofafile.Source.Position.Type)
@@ -162,6 +152,16 @@ def read_sofa(filename):
             domain=s_domain,
             convention=s_convention,
             unit=s_unit)
+    # Receiver
+    r_values = sofafile.Receiver.Position.get_values()
+    r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
+    receiver_coordinates = Coordinates(
+            r_values[:, 0],
+            r_values[:, 1],
+            r_values[:, 2],
+            domain=r_domain,
+            convention=r_convention,
+            unit=r_unit)
 
     return signal, source_coordinates, receiver_coordinates
 
