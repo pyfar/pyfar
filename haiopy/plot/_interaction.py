@@ -407,10 +407,23 @@ class AxisModifierLines(AxisModifier):
                     self.axes.set_ylim(lims - shift)
             self.figure.canvas.draw()
 
-
     def zoom_y_axis(self, event):
-        raise NotImplementedError("Use child classes to specify if the zoom \
-            is symmetric or asymmetric.")
+        if event.key in ['shift+up', 'shift+down']:
+            lims = np.asarray(self.axes.get_ylim())
+            dyn_range = (np.diff(lims))
+            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
+                                                        # dyn_range < 5
+            zoom = 0.05 * dyn_range
+            if event.key in ['shift+up']:
+                pass
+            elif event.key in ['shift+down']:
+                zoom = -zoom
+
+            lims[0] = lims[0] + zoom
+            lims[1] = lims[1] - zoom
+
+            self.axes.set_ylim(lims)
+            self.figure.canvas.draw()
 
     def connect(self):
         #super().connect()
@@ -439,44 +452,10 @@ class AxisModifierLinesLogYAxis(AxisModifierLines):
     def __init__(self, axes, signal):
         super(AxisModifierLinesLogYAxis, self).__init__(axes, signal)
 
-    def zoom_y_axis(self, event):
-        if event.key in ['shift+up', 'shift+down']:
-            lims = np.asarray(self.axes.get_ylim())
-            dyn_range = (np.diff(lims))
-            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                        # dyn_range < 5
-            zoom = 0.1 * dyn_range
-
-            if event.key in ['shift+up']:
-                lims[0] = lims[0] + zoom
-            elif event.key in ['shift+down']:
-                lims[0] = lims[0] - zoom
-
-            self.axes.set_ylim(lims)
-            self.figure.canvas.draw()
-
 
 class AxisModifierLinesLinYAxis(AxisModifierLines):
     def __init__(self, axes, signal):
         super(AxisModifierLinesLinYAxis, self).__init__(axes, signal)
-
-    def zoom_y_axis(self, event):
-        if event.key in ['shift+up', 'shift+down']:
-            lims = np.asarray(self.axes.get_ylim())
-            dyn_range = (np.diff(lims))
-            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                        # dyn_range < 5
-            zoom = 0.1 * dyn_range
-            if event.key in ['shift+up']:
-                pass
-            elif event.key in ['shift+down']:
-                zoom = -zoom
-
-            lims[0] = lims[0] + zoom
-            lims[1] = lims[1] - zoom
-
-            self.axes.set_ylim(lims)
-            self.figure.canvas.draw()
 
 
 class AxisModifierDialog(AxisModifier):
