@@ -1,6 +1,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
+import haiopy.plot._line as _line
 
 
 def plotstyle(style='light'):
@@ -37,6 +38,39 @@ def plotstyle(style='light'):
                     "matplotlib.pyplot.available"))
 
     return style
+
+
+def color(color: str) -> str:
+    """Return pyfar default color as HEX string.
+
+    Parameters
+    ----------
+    color : str
+        'p' - purple
+        'b' - blue
+        't' - turqois
+        'g' - green
+        'l' - light green
+        'y' - yellow
+        'o' - orange
+        'r' - red
+
+    Returns
+    -------
+    color : str
+        pyfar default color as HEX string
+
+    """
+    colors = ['p', 'b', 't', 'g', 'l', 'y', 'o', 'r']
+    if color not in colors:
+        raise ValueError((f"color is '{color}' but must be one of the "
+                          f"following {', '.join(colors)}"))
+
+    kwargs = {'c': color}
+    kwargs = _line._return_default_colors_rgb(**kwargs)
+
+    color = kwargs['c']
+    return color
 
 
 # def shortcuts(show=True):
