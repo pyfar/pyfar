@@ -62,13 +62,6 @@ class Interaction(object):
             self.axis_modifier.connect()
             self.connect()
 
-
-        #elif plot_type == 'img':
-        #    ..
-        #elif plot_type == 'split':
-        #    ..
-        #else:
-
     @property
     def plot_type(self):
         return self._plot_type
@@ -100,74 +93,82 @@ class Interaction(object):
     def clear_axes(self):
         self._figure.clear()
         self.axes = self._figure.add_subplot()
-        self._figure.set_size_inches(plt.rcParams.get('figure.figsize'), forward=True)
+        self._figure.set_size_inches(plt.rcParams.get('figure.figsize'),
+                                     forward=True)
 
     def toggle_plot(self, event):
-        if event.key not in ['ctrl+1', 'ctrl+2', 'ctrl+3', 'ctrl+4', 'ctrl+5', 'ctrl+6', 'ctrl+7', 'ctrl+8', 'ctrl+9']:
+        if event.key not in ['ctrl+1', 'ctrl+2', 'ctrl+3', 'ctrl+4', 'ctrl+5',
+                             'ctrl+6', 'ctrl+7', 'ctrl+8', 'ctrl+9']:
             return
         with plt.style.context(hplt.plotstyle(self.style)):
-            if event.key in ['ctrl+1']: # plot time domain
+            if event.key in ['ctrl+1']:  # plot time domain
                 self.clear_axes()
                 _hplt._time(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
-            if event.key in ['ctrl+2']: # plot magnitude
+            if event.key in ['ctrl+2']:  # plot magnitude
                 self.clear_axes()
                 _hplt._freq(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
-            if event.key in ['ctrl+3']: # plot phase
+            if event.key in ['ctrl+3']:  # plot phase
                 self.clear_axes()
                 _hplt._phase(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
-            if event.key in ['ctrl+4']: # plot time domain in decibels
+            if event.key in ['ctrl+4']:  # plot time domain in decibels
                 self.clear_axes()
                 _hplt._time_dB(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
-            if event.key in ['ctrl+5']: # plot group delay
+            if event.key in ['ctrl+5']:  # plot group delay
                 self.clear_axes()
                 _hplt._group_delay(self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_lin_Y')
-            if event.key in ['ctrl+6']: # plot spectrogram
+            if event.key in ['ctrl+6']:  # plot spectrogram
                 self.clear_axes()
-                self._plot_signal = Signal(self.signal.time[0],
-                                        self.signal.sampling_rate,
-                                        'time',
-                                        self.signal.signal_type)
-                self.axes = _hplt._spectrogram_cb(self._plot_signal, ax=self.axes)
+                self._plot_signal = Signal(
+                    self.signal.time[0], self.signal.sampling_rate,
+                    'time', self.signal.signal_type)
+                self.axes = _hplt._spectrogram_cb(
+                    self._plot_signal, ax=self.axes)
                 self.figure.canvas.draw()
                 self.change_modifier('spectrogram')
-            if event.key in ['ctrl+7']: # plot magnitude and phase
+            if event.key in ['ctrl+7']:  # plot magnitude and phase
                 self.clear_axes()
-                self.axes = _hplt._freq_phase(self.signal, ax=self.axes, **self.kwargs)
+                self.axes = _hplt._freq_phase(
+                    self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
-            if event.key in ['ctrl+8']: # plot magnitude and group delay
+            if event.key in ['ctrl+8']:  # plot magnitude and group delay
                 self.clear_axes()
-                self.axes = _hplt._freq_group_delay(self.signal, ax=self.axes, **self.kwargs)
+                self.axes = _hplt._freq_group_delay(
+                    self.signal, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
-            if event.key in ['ctrl+9']: # plot all
+            if event.key in ['ctrl+9']:  # plot all
                 if self.signal.time.shape[0] > 1:
                     warnings.warn(
                         "For multiple dimensions not implemented yet.")
                 else:
                     self.clear_axes()
                     self.figure.set_size_inches(6, 6, forward=True)
-                    self.axes = _hplt._signal(self.signal, ax=self.axes, **self.kwargs)
+                    self.axes = _hplt._signal(
+                        self.signal, ax=self.axes, **self.kwargs)
                     self.figure.canvas.draw()
 
     def change_modifier(self, plot_type):
         self.axis_modifier.disconnect()
         if plot_type == 'line_lin_Y':
-            self.axis_modifier = AxisModifierLinesXLin(self.axes, self.signal)
+            self.axis_modifier = AxisModifierLinesXLin(
+                self.axes, self.signal)
             self.axis_modifier.connect()
         elif plot_type == 'line_log_Y':
-            self.axis_modifier = AxisModifierLinesXLog(self.axes, self.signal)
+            self.axis_modifier = AxisModifierLinesXLog(
+                self.axes, self.signal)
             self.axis_modifier.connect()
         elif plot_type == 'spectrogram':
-            self.axis_modifier = AxisModifierSpectrogram(self.axes[0], self.signal)
+            self.axis_modifier = AxisModifierSpectrogram(
+                self.axes[0], self.signal)
             self.axis_modifier.connect()
 
     def connect(self):
@@ -200,7 +201,8 @@ class AxisModifier(object):
     def clear_axes(self):
         self._figure.clear()
         self.axes = self._figure.add_subplot()
-        self._figure.set_size_inches(plt.rcParams.get('figure.figsize'), forward=True)
+        self._figure.set_size_inches(plt.rcParams.get('figure.figsize'),
+                                     forward=True)
 
 
 class AxisModifierSpectrogram(AxisModifier):
@@ -210,14 +212,10 @@ class AxisModifierSpectrogram(AxisModifier):
     """
     def __init__(self, axes, signal):
         super(AxisModifierSpectrogram, self).__init__(axes)
-        #self.cycle = Cycle(self.axes.lines)
-        #self.current_line = self.cycle.current()
-        #self.all_visible = True
         self.index = 0
         self._signal = signal
         self._plot_signal = 0
         self.axes = axes
-
 
     @property
     def signal(self):
@@ -233,13 +231,12 @@ class AxisModifierSpectrogram(AxisModifier):
                     self.index = self.signal.time.shape[0] + self.index
 
             self.clear_axes()
-            self._plot_signal = Signal(self.signal.time[self.index],
-                                  self.signal.sampling_rate,
-                                  'time',
-                                  self.signal.signal_type)
-            self.axes = _hplt._plot_spectrogram_cb(self._plot_signal, ax=self.axes)
+            self._plot_signal = Signal(
+                self.signal.time[self.index], self.signal.sampling_rate,
+                'time', self.signal.signal_type)
+            self.axes = _hplt._plot_spectrogram_cb(
+                self._plot_signal, ax=self.axes)
             self.figure.canvas.draw()
-
 
     def move_y_axis(self, event):
         if event.key in ['up', 'down']:
@@ -262,7 +259,6 @@ class AxisModifierSpectrogram(AxisModifier):
                     self.axes.set_ylim(lims - shift)
             self.figure.canvas.draw()
 
-
     def zoom_y_axis(self, event):
         if event.key in ['shift+up', 'shift+down']:
             if isinstance(self.axes, (np.ndarray)):
@@ -280,7 +276,6 @@ class AxisModifierSpectrogram(AxisModifier):
             self.figure.canvas.draw()
 
     def connect(self):
-        #super().connect()
         self._move_y_axis = self.figure.canvas.mpl_connect(
             'key_press_event', self.move_y_axis)
         self._zoom_y_axis = self.figure.canvas.mpl_connect(
@@ -288,11 +283,11 @@ class AxisModifierSpectrogram(AxisModifier):
         self._cycle_lines = self.figure.canvas.mpl_connect(
             'key_press_event', self.cycle_lines)
 
-
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(self._move_y_axis)
         self.figure.canvas.mpl_disconnect(self._zoom_y_axis)
         self.figure.canvas.mpl_disconnect(self._cycle_lines)
+
 
 class AxisModifierLines(AxisModifier):
     """ Keybindings for cycling and toggling visible channels. Uses the event
@@ -350,8 +345,7 @@ class AxisModifierLines(AxisModifier):
                 for ax in self.axes.ravel():
                     lims = np.asarray(ax.get_ylim())
                     dyn_range = (np.diff(lims))
-                    #shift = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                                # dyn_range < 5
+
                     shift = 0.1 * dyn_range
                     if event.key in ['up']:
                         ax.set_ylim(lims + shift)
@@ -360,8 +354,7 @@ class AxisModifierLines(AxisModifier):
             else:
                 lims = np.asarray(self.axes.get_ylim())
                 dyn_range = (np.diff(lims))
-                #shift = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                            # dyn_range < 5
+
                 shift = 0.1 * dyn_range
                 if event.key in ['up']:
                     self.axes.set_ylim(lims + shift)
@@ -373,8 +366,7 @@ class AxisModifierLines(AxisModifier):
         if event.key in ['shift+up', 'shift+down']:
             lims = np.asarray(self.axes.get_ylim())
             dyn_range = (np.diff(lims))
-            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                        # dyn_range < 5
+
             zoom = 0.05 * dyn_range
             if event.key in ['shift+up']:
                 pass
@@ -388,7 +380,6 @@ class AxisModifierLines(AxisModifier):
             self.figure.canvas.draw()
 
     def connect(self):
-        #super().connect()
         self._cycle_lines = self.figure.canvas.mpl_connect(
             'key_press_event', self.cycle_lines)
         self._toogle_lines = self.figure.canvas.mpl_connect(
