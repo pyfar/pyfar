@@ -1,4 +1,3 @@
-from numpy.lib.arraysetops import isin
 import haiopy.plot.utils as utils
 import pytest
 
