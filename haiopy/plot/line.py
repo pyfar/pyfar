@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from haiopy.plot.utils import plotstyle
 from .. import Signal
-from . import _line as hplt
+from . import _line
 from ._interaction import Interaction
 
 
@@ -35,7 +35,7 @@ def time(signal, ax=None, style='light', **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._time(signal, ax, **kwargs)
+        ax = _line._time(signal, ax, **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLin', ax, signal, style, **kwargs)
@@ -80,7 +80,7 @@ def time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light',
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._time_dB(signal, log_prefix, log_reference, ax, **kwargs)
+        ax = _line._time_dB(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLin', ax, signal, style, **kwargs)
@@ -126,7 +126,7 @@ def freq(signal, log_prefix=20, log_reference=1, ax=None, style='light',
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._freq(signal, log_prefix, log_reference, ax, **kwargs)
+        ax = _line._freq(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLog', ax, signal, style, **kwargs)
@@ -167,7 +167,7 @@ def phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._phase(signal, deg, unwrap, ax, **kwargs)
+        ax = _line._phase(signal, deg, unwrap, ax, **kwargs)
 
     plt.tight_layout()
 
@@ -206,7 +206,7 @@ def group_delay(signal, ax=None, style='light', **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._group_delay(signal, ax, **kwargs)
+        ax = _line._group_delay(signal, ax, **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLog', ax, signal, style, **kwargs)
@@ -259,8 +259,8 @@ def spectrogram(signal, log=False, db=True, window='hann',
     nodb = not db
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._spectrogram_cb(signal, log, nodb, window, window_length,
-                                  window_overlap_fct, cmap, ax, **kwargs)
+        ax = _line._spectrogram_cb(signal, log, nodb, window, window_length,
+                                   window_overlap_fct, cmap, ax, **kwargs)
 
     plt.tight_layout()
     Interaction('spectrogram', ax[0], signal, style, **kwargs)
@@ -308,8 +308,8 @@ def freq_phase(signal, log_prefix=20, log_reference=1, deg=False, unwrap=False,
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._freq_phase(signal, log_prefix, log_reference, deg, unwrap,
-                              **kwargs)
+        ax = _line._freq_phase(signal, log_prefix, log_reference, deg, unwrap,
+                               **kwargs)
     plt.tight_layout()
     Interaction('LineXLog', ax[0], signal, style, **kwargs)
 
@@ -350,8 +350,8 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._freq_group_delay(signal, log_prefix, log_reference,
-                                    **kwargs)
+        ax = _line._freq_group_delay(signal, log_prefix, log_reference,
+                                     **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLog', ax[0], signal, style, **kwargs)
@@ -392,7 +392,7 @@ def summary(signal, ax=None, style='light', **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = hplt._summary(signal, **kwargs)
+        ax = _line._summary(signal, **kwargs)
 
     plt.tight_layout()
 
