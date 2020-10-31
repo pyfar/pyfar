@@ -222,10 +222,10 @@ class AxisModifierSpectrogram(AxisModifier):
         return self._signal
 
     def cycle_lines(self, event):
-        if event.key in ['*', ']', '[', '/', '7']:
-            if event.key in ['*', ']']:
+        if event.key in [',', '.']:
+            if event.key in ['.']:
                 self.index = (self.index + 1) % self.signal.time.shape[0]
-            elif event.key in ['[', '/', '7']:
+            elif event.key in [',']:
                 self.index = self.index - 1
                 if self.index < 0:
                     self.index = self.signal.time.shape[0] + self.index
@@ -306,15 +306,15 @@ class AxisModifierLines(AxisModifier):
         return self._signal
 
     def cycle_lines(self, event):
-        if event.key in ['*', ']', '[', '/', '7']:
+        if event.key in [',', '.']:
             if self.all_visible:
                 for i in range(len(self.axes.lines)):
                     self.axes.lines[i].set_visible(False)
             else:
                 self.current_line.set_visible(False)
-            if event.key in ['*', ']']:
+            if event.key in ['.']:
                 self.current_line = next(self.cycle)
-            elif event.key in ['[', '/', '7']:
+            elif event.key in [',']:
                 self.current_line = self.cycle.previous()
             self.current_line.set_visible(True)
             self.all_visible = False

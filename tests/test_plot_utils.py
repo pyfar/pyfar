@@ -1,3 +1,4 @@
+from numpy.lib.arraysetops import isin
 import haiopy.plot.utils as utils
 import pytest
 
@@ -7,3 +8,8 @@ def test_color():
 
     with pytest.raises(ValueError):
         utils.color('a')
+
+
+def test_shortcuts():
+    shorts = utils.shortcuts()
+    assert isinstance(shorts, dict)
