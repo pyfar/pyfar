@@ -38,7 +38,7 @@ def time(signal, ax=None, style='light', **kwargs):
         ax = hplt._time(signal, ax, **kwargs)
 
     plt.tight_layout()
-    Interaction('line_lin_Y', ax, signal, style, **kwargs)
+    Interaction('LineXLin', ax, signal, style, **kwargs)
 
     return ax
 
@@ -83,7 +83,7 @@ def time_dB(signal, log_prefix=20, log_reference=1, ax=None, style='light',
         ax = hplt._time_dB(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
-    Interaction('line_log_Y', ax, signal, style, **kwargs)
+    Interaction('LineXLin', ax, signal, style, **kwargs)
 
     return ax
 
@@ -129,7 +129,7 @@ def freq(signal, log_prefix=20, log_reference=1, ax=None, style='light',
         ax = hplt._freq(signal, log_prefix, log_reference, ax, **kwargs)
 
     plt.tight_layout()
-    Interaction('line_log_Y', ax, signal, style, **kwargs)
+    Interaction('LineXLog', ax, signal, style, **kwargs)
 
     return ax
 
@@ -171,7 +171,7 @@ def phase(signal, deg=False, unwrap=False, ax=None, style='light', **kwargs):
 
     plt.tight_layout()
 
-    Interaction('line_log_Y', ax, signal, style, **kwargs)
+    Interaction('LineXLog', ax, signal, style, **kwargs)
 
     return ax
 
@@ -209,7 +209,7 @@ def group_delay(signal, ax=None, style='light', **kwargs):
         ax = hplt._group_delay(signal, ax, **kwargs)
 
     plt.tight_layout()
-    Interaction('line_lin_Y', ax, signal, style, **kwargs)
+    Interaction('LineXLog', ax, signal, style, **kwargs)
 
     return ax
 
@@ -311,7 +311,7 @@ def freq_phase(signal, log_prefix=20, log_reference=1, deg=False, unwrap=False,
         ax = hplt._freq_phase(signal, log_prefix, log_reference, deg, unwrap,
                               **kwargs)
     plt.tight_layout()
-    Interaction('line_lin_Y', ax[0], signal, style, **kwargs)
+    Interaction('LineXLog', ax[0], signal, style, **kwargs)
 
     return ax
 
@@ -354,7 +354,7 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
                                     **kwargs)
 
     plt.tight_layout()
-    Interaction('line_log_Y', ax[0], signal, style, **kwargs)
+    Interaction('LineXLog', ax[0], signal, style, **kwargs)
 
     return ax
 

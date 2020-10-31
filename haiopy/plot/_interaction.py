@@ -6,6 +6,7 @@ from . import line as hplt
 import matplotlib.pyplot as plt
 from haiopy import Signal
 
+
 class Cycle(object):
     """ Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions by using next and previous.
@@ -48,12 +49,12 @@ class Interaction(object):
         self._style = style
         self._kwargs = kwargs
         self._figure = axes.figure
-        if plot_type == 'line_lin_Y':
-            self.axis_modifier = AxisModifierLinesLinYAxis(axes, signal)
+        if plot_type == 'LineXLin':
+            self.axis_modifier = AxisModifierLinesXLin(axes, signal)
             self.axis_modifier.connect()
             self.connect()
-        elif plot_type == 'line_log_Y':
-            self.axis_modifier = AxisModifierLinesLogYAxis(axes, signal)
+        elif plot_type == 'LineXLog':
+            self.axis_modifier = AxisModifierLinesXLog(axes, signal)
             self.axis_modifier.connect()
             self.connect()
         elif plot_type == 'spectrogram':
@@ -160,10 +161,10 @@ class Interaction(object):
     def change_modifier(self, plot_type):
         self.axis_modifier.disconnect()
         if plot_type == 'line_lin_Y':
-            self.axis_modifier = AxisModifierLinesLinYAxis(self.axes, self.signal)
+            self.axis_modifier = AxisModifierLinesXLin(self.axes, self.signal)
             self.axis_modifier.connect()
         elif plot_type == 'line_log_Y':
-            self.axis_modifier = AxisModifierLinesLogYAxis(self.axes, self.signal)
+            self.axis_modifier = AxisModifierLinesXLog(self.axes, self.signal)
             self.axis_modifier.connect()
         elif plot_type == 'spectrogram':
             self.axis_modifier = AxisModifierSpectrogram(self.axes[0], self.signal)
@@ -338,49 +339,10 @@ class AxisModifierLines(AxisModifier):
             self.figure.canvas.draw()
 
     def move_x_axis(self, event):
-        if event.key in ['left', 'right']:
-            if isinstance(self.axes, (np.ndarray)):
-                for ax in self.axes.ravel():
-                    lims = np.asarray(ax.get_xlim())
-                    dyn_range = (np.diff(lims))
-                    #shift = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                                # dyn_range < 5
-                    shift = 0.1 * dyn_range
-                    if event.key in ['left']:
-                        ax.set_xlim(lims - shift)
-                    elif event.key in ['right']:
-                        ax.set_xlim(lims + shift)
-            else:
-                lims = np.asarray(self.axes.get_xlim())
-                dyn_range = (np.diff(lims))
-                #shift = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                            # dyn_range < 5
-                shift = 0.1 * dyn_range
-                if event.key in ['left']:
-                    self.axes.set_xlim(lims - shift)
-                elif event.key in ['right']:
-                    self.axes.set_xlim(lims + shift)
-            self.figure.canvas.draw()
-
+        raise NotImplementedError("Realized in child classes")
 
     def zoom_x_axis(self, event):
-        if event.key in ['shift+left', 'shift+right']:
-            lims = np.asarray(self.axes.get_xlim())
-            dyn_range = (np.diff(lims))
-            #zoom = np.int(np.round(0.1 * dyn_range))   # does not work, if
-                                                        # dyn_range < 5
-            zoom = 0.1 * dyn_range
-            if event.key in ['shift+right']:
-                pass
-            elif event.key in ['shift+left']:
-                zoom = -zoom
-
-            lims[0] = lims[0] + zoom
-            lims[1] = lims[1] - zoom
-
-            self.axes.set_xlim(lims)
-            self.figure.canvas.draw()
-
+        raise NotImplementedError("Realized in child classes")
 
     def move_y_axis(self, event):
         if event.key in ['up', 'down']:
@@ -448,14 +410,170 @@ class AxisModifierLines(AxisModifier):
         self.figure.canvas.mpl_disconnect(self._zoom_x_axis)
         self.figure.canvas.mpl_disconnect(self._zoom_y_axis)
 
-class AxisModifierLinesLogYAxis(AxisModifierLines):
+
+class AxisModifierLinesXLog(AxisModifierLines):
     def __init__(self, axes, signal):
-        super(AxisModifierLinesLogYAxis, self).__init__(axes, signal)
+        super(AxisModifierLinesXLog, self).__init__(axes, signal)
+
+    def move_x_axis(self, event):
+        if event.key in ['left', 'right']:
+            if isinstance(self.axes, (np.ndarray)):
+                for ax in self.axes.ravel():
+                    lims = np.asarray(ax.get_xlim())
+                    exp = np.floor(np.log10(lims))
+
+                    if event.key in ['left']:
+                        lims_new = np.zeros(2)
+
+                        # handling log10 boundaries (e.g., 1, 10, 100, ..)
+                        for n in range(len(lims)):
+
+                            shift = 10**exp[n]
+                            lim_new = lims[n] - shift
+                            exp_new = np.floor(np.log10(lim_new))
+
+                            if exp[n] == np.log10(lims[n]):
+                                # lim is at a boundary - decrease step size
+                                exp[n] -= 1
+                                shift = 10**exp[n]
+                                lims_new[n] = lims[n] - shift
+                            elif exp_new < exp[n]:
+                                # lim passed boundary - avoid this
+                                lims_new[n] = 10**exp[n]
+                            else:
+                                # simple case
+                                lims_new[n] = lim_new
+
+                        ax.set_xlim(lims_new)
+
+                    elif event.key in ['right']:
+                        shift = 10**exp
+                        ax.set_xlim(lims + shift)
+            else:
+                lims = np.asarray(self.axes.get_xlim())
+                exp = np.floor(np.log10(lims))
+
+                if event.key in ['left']:
+                    lims_new = np.zeros(2)
+
+                    # handling log10 boundaries (e.g., 1, 10, 100, ..)
+                    for n in range(len(lims)):
+
+                        shift = 10**exp[n]
+                        lim_new = lims[n] - shift
+                        exp_new = np.floor(np.log10(lim_new))
+
+                        if exp[n] == np.log10(lims[n]):
+                            # lim is at a boundary - decrease step size
+                            exp[n] -= 1
+                            shift = 10**exp[n]
+                            lims_new[n] = lims[n] - shift
+                        elif exp_new < exp[n]:
+                            # lim passed boundary - avoid this
+                            lims_new[n] = 10**exp[n]
+                        else:
+                            # simple case
+                            lims_new[n] = lim_new
+
+                    self.axes.set_xlim(lims_new)
+
+                elif event.key in ['right']:
+                    shift = 10**exp
+                    self.axes.set_xlim(lims + shift)
+
+            self.figure.canvas.draw()
+
+    def zoom_x_axis(self, event):
+        if event.key in ['shift+left', 'shift+right']:
+            lims = np.asarray(self.axes.get_xlim())
+            exp = np.floor(np.log10(lims))
+            shifts = np.array([0, 0])
+
+            zoom_out = True if event.key in ['shift+left'] else False
+            if zoom_out:
+                n = 0
+                shifts[1] = 10**exp[1]
+            else:
+                n = 1
+                shifts[0] = 10**exp[0]
+
+            # handling log10 boundaries (e.g., 1, 10, 100, ..)
+            shift = 10**exp[n]
+            lim_new = lims[n] - shift
+            exp_new = np.floor(np.log10(lim_new))
+
+            if exp[n] == np.log10(lims[n]):
+                # lim is at a boundary - decrease step size
+                exp[n] -= 1
+                shift = 10**exp[n]
+                shifts[n] = -shift
+            elif exp_new < exp[n]:
+                # lim passed boundary - avoid this
+                shifts[n] = 10**exp[n] - lims[n]
+            else:
+                # simple case
+                shifts[n] = -shift
+
+            if zoom_out:
+                lims += shifts
+            else:
+                # avoid flipping the axis
+                lims_new = lims + shifts
+                while lims_new[0] > lims_new[1]:
+                    shifts /= 2
+                    lims_new = lims + shifts
+
+                lims = lims_new
+
+            self.axes.set_xlim(lims)
+            self.figure.canvas.draw()
 
 
-class AxisModifierLinesLinYAxis(AxisModifierLines):
+class AxisModifierLinesXLin(AxisModifierLines):
     def __init__(self, axes, signal):
-        super(AxisModifierLinesLinYAxis, self).__init__(axes, signal)
+        super(AxisModifierLinesXLin, self).__init__(axes, signal)
+
+    def move_x_axis(self, event):
+        if event.key in ['left', 'right']:
+            if isinstance(self.axes, (np.ndarray)):
+                for ax in self.axes.ravel():
+                    lims = np.asarray(ax.get_xlim())
+                    dyn_range = (np.diff(lims))
+
+                    shift = 0.1 * dyn_range
+                    if event.key in ['left']:
+                        ax.set_xlim(lims - shift)
+                    elif event.key in ['right']:
+                        ax.set_xlim(lims + shift)
+            else:
+                lims = np.asarray(self.axes.get_xlim())
+                dyn_range = (np.diff(lims))
+
+                shift = 0.1 * dyn_range
+                if event.key in ['left']:
+                    self.axes.set_xlim(lims - shift)
+                elif event.key in ['right']:
+                    self.axes.set_xlim(lims + shift)
+            self.figure.canvas.draw()
+
+    def zoom_x_axis(self, event):
+        if event.key in ['shift+left', 'shift+right']:
+            lims = np.asarray(self.axes.get_xlim())
+            dyn_range = (np.diff(lims))
+
+            zoom = 0.1 * dyn_range
+            if event.key in ['shift+right']:
+                # zoom in
+                pass
+            elif event.key in ['shift+left']:
+                # zoom out
+                zoom = -zoom
+
+            lims[0] = lims[0] + zoom
+            lims[1] = lims[1] - zoom
+
+            self.axes.set_xlim(lims)
+            self.figure.canvas.draw()
 
 
 class AxisModifierDialog(AxisModifier):
