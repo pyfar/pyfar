@@ -98,6 +98,9 @@ class Filter(object):
         if not isinstance(signal, Signal):
             raise ValueError("The input needs to be a haiopy.Signal object.")
 
+        if reset is True:
+            self.reset()
+
         if self.size > 1:
             filtered_signal_data = np.broadcast_to(
                 signal.time,
