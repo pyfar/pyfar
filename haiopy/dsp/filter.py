@@ -66,6 +66,14 @@ class Filter(object):
         raise NotImplementedError("Abstract class method")
 
     @property
+    def shape(self):
+        return self._coefficients.shape[:-2]
+
+    @property
+    def size(self):
+        return np.prod(self.shape)
+
+    @property
     def state(self):
         return self._state
 
@@ -80,16 +88,33 @@ class Filter(object):
     def process(self, signal, reset=True):
         """Apply the filter to a signal.
         """
-        # if not isinstance(signal, Signal):
-        #     raise ValueError("The input needs to be a haiopy.Signal object.")
+        if not isinstance(signal, Signal):
+            raise ValueError("The input needs to be a haiopy.Signal object.")
 
-        for coeff, state in zip(self._coefficients, self._state):
-            filtered, new_state = self.filter_func(
-                coeff, signal.time, state)
+        if self.size > 1:
+            filtered_signal_data = np.broadcast_to(
+                signal.time,
+                (self.shape[0], *signal.time.shape))
+            filtered_signal_data = filtered_signal_data.copy()
+        else:
+            filtered_signal_data = signal.time.copy()
 
-        # filtered_signal = copy.deepcopy(signal)
-        # filtered_signal.time = filtered
-        return filtered
+        if self.state is not None:
+            for idx, (coeff, state) in enumerate(
+                    zip(self._coefficients, self._state)):
+                filtered_signal_data[idx, ...], new_state = self.filter_func(
+                    coeff, filtered_signal_data[idx, ...], state)
+        else:
+            for idx, coeff in enumerate(self._coefficients):
+                filtered_signal_data[idx, ...] = self.filter_func(
+                    coeff, filtered_signal_data[idx, ...], zi=None)
+
+        filtered_signal = copy.deepcopy(signal)
+        if (signal.time.ndim == 2) and (signal.shape[0] == 1):
+            filtered_signal_data = np.squeeze(filtered_signal_data)
+        filtered_signal.time = filtered_signal_data
+
+        return filtered_signal
 
     def reset(self):
         if self._state is not None:
