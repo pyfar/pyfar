@@ -131,6 +131,30 @@ class Filter(object):
                 "No previous state was set. Initialize a filter state first.")
 
 
+class FilterFIR(Filter):
+    def __init__(
+            self,
+            coefficients,
+            filter_func=lfilter):
+        coeff = np.atleast_2d(coefficients)
+        super().__init__(coefficients=coeff)
+
+        self._FILTER_FUNCS = {
+            'default': lfilter,
+            'zerophase': filtfilt}
+        self._filter_func = filter_func
+
+    @property
+    def filter_func(self):
+        return self._filter_func
+
+    @filter_func.setter
+    def filter_func(self, filter_func):
+        if type('filter_func') == str:
+            filter_func = self._FILTER_FUNCS[filter_func]
+        self._filter_func = filter_func
+
+
 class FilterIIR(Filter):
     def __init__(
             self,
@@ -177,9 +201,3 @@ class FilterSOS(Filter):
     @property
     def filter_func(self):
         return self._filter_func
-
-
-class FilterFIR(Filter):
-    def __init__(self, coefficients):
-        coeff = np.atleast_2d(coefficients)
-        super().__init__()
