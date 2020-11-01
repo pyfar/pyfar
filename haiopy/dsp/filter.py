@@ -119,6 +119,9 @@ class Filter(object):
     def reset(self):
         if self._state is not None:
             self._state = np.zeros_like(self._state)
+        else:
+            warnings.warn(
+                "No previous state was set. Initialize a filter state first.")
 
 
 class FilterIIR(Filter):
