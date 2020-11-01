@@ -139,7 +139,12 @@ class FilterFIR(Filter):
             self,
             coefficients,
             filter_func=lfilter):
-        coeff = np.atleast_2d(coefficients)
+
+        b = np.atleast_2d(coefficients)
+        a = np.zeros_like(b)
+        a[..., 0] = 1
+        coeff = np.stack((b, a), axis=-2)
+
         super().__init__(coefficients=coeff)
 
         self._FILTER_FUNCS = {
