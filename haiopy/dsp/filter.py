@@ -19,12 +19,19 @@ def atleast_3d_first_dim(arr):
         return arr
 
 
+def pop_state_from_kwargs(**kwargs):
+    kwargs.pop('zi', None)
+    warnings.warn(
+        "This filter function does not support saving the filter state")
+    return kwargs
+
+
 def lfilter(coefficients, signal, zi):
     return spsignal.lfilter(coefficients[0], coefficients[1], signal, zi=zi)
 
 
 def filtfilt(coefficients, signal, **kwargs):
-    kwargs.pop('zi', None)
+    kwargs = pop_state_from_kwargs(kwargs)
     return spsignal.filtfilt(
         coefficients[0], coefficients[1], signal, **kwargs)
 
@@ -34,7 +41,7 @@ def sosfilt(sos, signal, zi):
 
 
 def sosfiltfilt(sos, signal, **kwargs):
-    kwargs.pop('zi', None)
+    kwargs = pop_state_from_kwargs(kwargs)
     return spsignal.sosfiltfilt(sos, signal, **kwargs)
 
 
