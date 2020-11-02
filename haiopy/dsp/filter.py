@@ -57,7 +57,8 @@ class Filter(object):
         self._coefficients = coefficients
         if state is not None:
             if coefficients is None:
-                raise ValueError("Cannot set a state without filter coefficients")
+                raise ValueError(
+                    "Cannot set a state without filter coefficients")
             state = atleast_3d_first_dim(state)
             self._initialized = True
         else:
@@ -196,7 +197,9 @@ class FilterSOS(Filter):
             filter_func=sosfilt):
         coeff = np.atleast_2d(coefficients)
         if coeff.shape[-1] != 6:
-            raise ValueError("The coefficients are not in line with a second order section filter structure.")
+            raise ValueError(
+                "The coefficients are not in line with a second order",
+                "section filter structure.")
         super().__init__(
             coefficients=coeff)
 
