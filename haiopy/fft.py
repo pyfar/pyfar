@@ -50,7 +50,7 @@ different introduced above.
 >>> frequency = 100
 >>> sampling_rate = 1000
 >>> sine = np.sin(np.linspace(0, 2*np.pi*frequency/sampling_rate, 1024))
->>> spectrum = fft.rfft(sine, 1024, 'power')
+>>> spectrum = fft.rfft(sine, n_samples, sampling_rate, 'power', 'rms')
 
 .. plot::
 
