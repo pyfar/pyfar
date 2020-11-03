@@ -215,6 +215,7 @@ def test_setter_signal_type_freq_domain_data(sine):
     signal_type = "energy"
     signal = Signal(sine, 44100, signal_type='power')
     amplitude = np.max(np.abs(signal.freq))
+    signal.fft_norm = 'unitary'
     signal.signal_type = signal_type
     amplitude_new = np.max(np.abs(signal.freq))
     npt.assert_almost_equal(amplitude, 1/np.sqrt(2), decimal=3)
@@ -343,10 +344,8 @@ def test_magic_setitem_wrong_sr(sine, impulse):
 def test_magic_setitem_wrong_type(sine, impulse):
     """Test the magic function __setitem__."""
     sr = 44100
-    signal = Signal(sine, sr)
-    signal.signal_type = 'energy'
-    set_signal = Signal(sine*2, sr)
-    set_signal.signal_type = 'power'
+    signal = Signal(impulse, sr, signal_type='energy', fft_norm='unitary')
+    set_signal = Signal(sine*2, sr, signal_type='power', fft_norm='unitary')
     with pytest.raises(ValueError, match='signal types do not match'):
         signal[0] = set_signal
 
