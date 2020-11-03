@@ -764,7 +764,9 @@ class Coordinates(object):
                     print("Coordinates:")
                     for nn, coord in enumerate(coords):
                         cur_units = [u[nn] for u in units]
-                        print(f"points_{nn + 1}: {coord} [{', '.join(cur_units)}]")
+                        print(
+                            f"points_{nn + 1}: {coord} ",
+                            f"[{', '.join(cur_units)}]")
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
     def show(self, mask=None, **kwargs):
