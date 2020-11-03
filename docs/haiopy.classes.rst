@@ -19,7 +19,7 @@ Coordinate Data Classes
    :show-inheritance:
 
 
-.. automodule:: haiopy.orientation
+.. automodule:: haiopy.orientations
    :members:
    :undoc-members:
    :show-inheritance:

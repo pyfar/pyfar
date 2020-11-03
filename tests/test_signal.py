@@ -110,6 +110,14 @@ def test_signal_init_false_signal_type(sine):
         pytest.fail("Not a valid signal type ('power'/'energy')")
 
 
+def test_signal_init_false_coord(sine):
+    """Test to init Signal with position that is not of type Coordinates."""
+    coord_false = np.array([1, 1, 1])
+    with pytest.raises(TypeError):
+        Signal(sine, 44100, position=coord_false)
+        pytest.fail("Input value has to be coordinates object.")
+
+
 def test_n_samples(impulse):
     """Test for number of samples."""
     data = impulse
@@ -200,6 +208,17 @@ def test_setter_signal_type(sine):
     signal = Signal(sine, 44100)
     signal.signal_type = signal_type
     npt.assert_string_equal(signal_type, signal._signal_type)
+
+
+def test_setter_signal_type_freq_domain_data(sine):
+    """Test if attribute signal type is set correctly."""
+    signal_type = "energy"
+    signal = Signal(sine, 44100, signal_type='power')
+    amplitude = np.max(np.abs(signal.freq))
+    signal.signal_type = signal_type
+    amplitude_new = np.max(np.abs(signal.freq))
+    npt.assert_almost_equal(amplitude, 1/np.sqrt(2), decimal=3)
+    npt.assert_almost_equal(amplitude_new, 500.1327464502182, decimal=3)
 
 
 def test_setter_signal_type_false_type(sine):

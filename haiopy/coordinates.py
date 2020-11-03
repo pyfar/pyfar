@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
+import copy
 import re
 
 import haiopy
@@ -624,29 +625,35 @@ class Coordinates(object):
                         print(f"{nn + 1}: {coord} [{', '.join(cur_units)}]")
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
-    def show(self, mask=None):
+    def show(self, mask=None, **kwargs):
         """
         Show a scatter plot of the coordinate points.
 
         Parameters
         ----------
         mask : boolean numpy array, None
-            Plot points in black if mask==True and red if mask==False. The
+            Plot points in red where if mask==True and black elsewhere. The
             default is None, in which case all points are plotted in black.
+        kwargs : optional
+            key value arguments are passed to matplotlib.pyplot.scatter(). If a
+            mask is provided and the key `c` is contained in kwargs, it will be
+            overwritten.
 
         Returns
         -------
-        None.
+        ax : matplotlib.axes._subplots.Axes3DSubplot
+            The axis used for the plot.
 
         """
         if mask is None:
             haiopy.plot.scatter(self)
         else:
+            mask = np.asarray(mask)
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
-            haiopy.plot.scatter(self, c=colors.flatten())
+            haiopy.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',
@@ -1471,9 +1478,17 @@ class Coordinates(object):
 
         return new
 
+    def __array__(self):
+        """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
+        # make the new system
+        new_system = self._make_system('cart', convention='right', unit='met')
+        if self._system == new_system:
+            return self.get_cart()
+        # copy to avoid changing the coordinate system of the original object
+        return copy.deepcopy(self).get_cart()
+
     def __repr__(self):
         """Get info about Coordinates object."""
-
         # object type
         if self.cshape != (0,):
             obj = f"{self.cdim}D Coordinates object with {self.csize} points "\
@@ -1494,7 +1509,9 @@ class Coordinates(object):
         _repr = obj + "\n" + conv + "\n" + "coordinates: " + ", ".join(coords)
 
         # check for sampling weights
-        if self._weights is not None:
+        if self._weights is None:
+            _repr += "\nDoes not contain sampling weights"
+        else:
             _repr += "\nContains sampling weights"
 
         # check for sh_order

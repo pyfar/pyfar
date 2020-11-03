@@ -211,7 +211,9 @@ def test_show():
     coords = Coordinates([-1, 0, 1], 0, 0)
     # show without mask
     coords.show()
-    # show with mask
+    # show with mask as list
+    coords.show([1, 0, 1])
+    # show with mask as ndarray
     coords.show(np.array([1, 0, 1], dtype=bool))
     # test assertion
     with raises(AssertionError):
@@ -561,4 +563,4 @@ def test_converters():
 #     coords[0] = setcoords
 #     npt.assert_allclose(np.squeeze(coords.cartesian),
 #                         np.array([[1, 0], [1, 1], [0, 1]]))
-#test_get_nearest_sph()
+# test_get_nearest_sph()

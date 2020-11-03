@@ -100,8 +100,9 @@ class Signal(Audio):
             self._n_samples = self._data.shape[-1]
         elif domain == 'freq':
             if n_samples is None:
-                warnings.warn("Number of time samples not given, assuming an\
-                    even number of samples from the number of frequency bins.")
+                warnings.warn(
+                    "Number of time samples not given, assuming an even "
+                    "number of samples from the number of frequency bins.")
                 n_bins = data.shape[-1]
                 n_samples = (n_bins - 1)*2
             self._n_samples = n_samples
@@ -189,8 +190,9 @@ class Signal(Audio):
         if new_num_bins == self.n_bins:
             n_samples = self.n_samples
         else:
-            warnings.warn("Number of frequency bins different will change, assuming an\
-                    even number of samples from the number of frequency bins.")
+            warnings.warn("Number of frequency bins different will change, "
+                          "assuming an even number of samples from the number "
+                          "of frequency bins.")
             n_samples = (new_num_bins - 1)*2
 
         self._data = spec
@@ -351,3 +353,33 @@ class Signal(Audio):
             raise ValueError("The number of samples does not match.")
         if self.signal_type != other.signal_type:
             raise ValueError("The signal types do not match.")
+
+    def __iter__(self):
+        """Iterator for signals. The actual iteration is handled through
+        numpy's array iteration.
+        """
+        return SignalIterator(self._data.__iter__(), self)
+
+
+class SignalIterator(object):
+    """Iterator for signals
+    """
+    def __init__(self, array_iterator, signal):
+        self._array_iterator = array_iterator
+        self._signal = signal
+        self._iterated_sig = Signal(
+            signal._data[..., 0, :],
+            sampling_rate=signal.sampling_rate,
+            n_samples=signal.n_samples,
+            domain=signal.domain,
+            signal_type=signal.signal_type,
+            dtype=signal.dtype)
+
+    def __next__(self):
+        if self._signal.domain == self._iterated_sig.domain:
+            data = self._array_iterator.__next__()
+            self._iterated_sig._data = np.atleast_2d(data)
+        else:
+            raise RuntimeError("domain changes during iterations break stuff!")
+
+        return self._iterated_sig
