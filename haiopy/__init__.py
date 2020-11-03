@@ -12,6 +12,7 @@ from .coordinates import Coordinates
 from .orientations import Orientations
 
 import haiopy.plot as plot
+import haiopy.haiopy as haiopy
 
 
-__all__ = ['Signal', 'Coordinates', 'Orientations', 'plot']
+__all__ = ['Signal', 'Coordinates', 'Orientations', 'plot', 'haiopy']
