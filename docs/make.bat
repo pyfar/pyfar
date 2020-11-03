@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=haiopy
+set SPHINXPROJ=pyfar
 
 if "%1" == "" goto help
 

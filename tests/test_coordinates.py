@@ -2,8 +2,8 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-from haiopy import Coordinates
-import haiopy.coordinates as coordinates
+from pyfar.coordinates import Coordinates
+import pyfar.coordinates as coordinates
 
 
 # %% Test Coordinates() class ------------------------------------------------
@@ -109,12 +109,14 @@ def test_exist_systems():
     coords = Coordinates()
 
     # tests that have to pass
-    coords._exist_system()
     coords._exist_system('sph')
     coords._exist_system('sph', 'side')
     coords._exist_system('sph', 'side', 'rad')
+    coords._exist_system('sph', unit='rad')
 
     # tests that have to fail
+    with raises(ValueError):
+        coords._exist_system()
     with raises(AssertionError):
         coords._exist_system('shp')
     with raises(ValueError):
@@ -180,7 +182,7 @@ def test_coordinates_init_val():
         Coordinates(c2, c2, c8)
 
 
-def test_coordinates_init_val_and_sys():
+def test_coordinates_init_val_and_system():
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -190,6 +192,28 @@ def test_coordinates_init_val_and_sys():
         for convention in systems[domain]:
             for unit in systems[domain][convention]['units']:
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
+
+
+def test_coordinates_init_val_no_convention():
+    # get list of available coordinate systems
+    coords = Coordinates()
+    systems = coords._systems()
+
+    # test constructor with all systems, units, and convention=None
+    for domain in systems:
+        convention = list(systems[domain])[0]
+        for unit in systems[domain][convention]['units']:
+            Coordinates(0, 0, 0, domain, unit=unit[0][0:3])
+
+
+def test_coordinates_init_val_no_convention_no_unit():
+    # get list of available coordinate systems
+    coords = Coordinates()
+    systems = coords._systems()
+
+    # test constructor with all systems, units, and convention=None
+    for domain in systems:
+        Coordinates(0, 0, 0, domain)
 
 
 def test_coordinates_init_val_and_weights():

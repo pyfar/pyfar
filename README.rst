@@ -2,7 +2,7 @@
 Readme
 ======
 
-Haiopy Acoustics Input and Output in Python. An open and common base for Python programming in acoustics.
+pyfar - Python package for acoustic research.
 
 Getting Started
 ===============
@@ -25,7 +25,7 @@ You can either clone the public repository
 
 .. code-block:: console
 
-    $ git clone git@github.com:mberz/haiopy.git
+    $ git clone git@github.com:pyfar/pyfar.git
 
 or download the code as zip archive.
 
@@ -35,7 +35,7 @@ You can install it by running
 
     $ python setup.py install
 
-in the haiopy directory.
+in the pyfar directory.
 The required packages to install the package can be installed using pip:
 
 .. code-block:: console
@@ -77,5 +77,5 @@ using any browser.
 inside the `docs` folder. For more information refer to the `contribution guidelines`_.
 
 
-.. _git repository: https://github.com/mberz/haiopy
+.. _git repository: https://github.com/pyfar/pyfar
 .. _`contribution guidelines`: CONTRIBUTING.rst

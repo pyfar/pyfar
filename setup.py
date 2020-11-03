@@ -11,14 +11,14 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = []
 
 setup_requirements = ['pytest-runner', ]
 
 test_requirements = ['pytest', ]
 
 setup(
-    author="The haiopy developers",
+    author="The pyfar developers",
     author_email='',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -35,13 +35,13 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='haiopy',
-    name='haiopy',
+    keywords='pyfar',
+    name='pyfar',
     packages=find_packages(),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/mberz/haiopy',
+    url='https://github.com/pyfar/pyfar',
     version='0.1.0',
     zip_safe=False,
 )

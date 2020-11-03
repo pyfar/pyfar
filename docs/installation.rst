@@ -8,13 +8,13 @@ Installation
 Stable release
 --------------
 
-To install haiopy, run this command in your terminal:
+To install pyfar, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install haiopy
+    $ pip install pyfar
 
-This is the preferred method to install haiopy, as it will always install the most recent stable release.
+This is the preferred method to install pyfar, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -26,13 +26,13 @@ you through the process.
 From sources
 ------------
 
-The sources for haiopy can be downloaded from the `Git repo`_.
+The sources for pyfar can be downloaded from the `Git repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone https://github.com/mberz/haiopy
+    $ git clone https://github.com/pyfar/pyfar
 
 Once you have a copy of the source, you can install it with:
 
@@ -41,4 +41,4 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Git repo: https://github.com/mberz/haiopy
+.. _Git repo: https://github.com/pyfar/pyfar
