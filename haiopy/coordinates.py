@@ -69,7 +69,33 @@ class Coordinates(object):
                  domain='cart', convention=None, unit=None,
                  weights=None, sh_order=None, comment=None):
         """
-        Init coordinates container.
+        Init coordinates container with a set of three points and meta data.
+
+        Input Values
+        ------------
+
+        The points that enter the Coordinates object are defined by the
+        coordinate system, i.e., the `domain` and `convention`:
+
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | points_1 | points_2   | points_3 | units    |
+        +====================+==========+============+==========+==========+
+        | cart, right        | x        | y          | z        | met      |
+        +--------------------+----------+------------+----------+----------+
+        | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, side          | lateral  | polar      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, front         | phi      | theta      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | cyl, top           | azimuth  | z          | radius_z | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+
+        For more information run
+        >>> c = Coordinates()
+        >>> c.systems()
 
         Attributes
         ----------
@@ -132,6 +158,22 @@ class Coordinates(object):
         """
         Set coordinate points in cartesian coordinate systems.
 
+        Input Values
+        ------------
+
+        The points that enter the Coordinates object are defined by the
+        coordinate system, i.e., the `domain` and `convention`:
+
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | points_1 | points_2   | points_3 | units    |
+        +====================+==========+============+==========+==========+
+        | cart, right        | x        | y          | z        | met      |
+        +--------------------+----------+------------+----------+----------+
+
+        For more information run
+        >>> c = Coordinates()
+        >>> c.systems()
+
         Parameters
         ----------
         points_i: array like, number
@@ -161,6 +203,22 @@ class Coordinates(object):
     def get_cart(self, convention='right', unit='met', convert=False):
         """
         Get coordinate points in cartesian coordinate systems.
+
+        Output Values
+        -------------
+
+        The points `p` that are returned are defined by the coordinate system,
+        i.e., the `domain` and `convention`:
+
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | p[...,1] | p[...,1]   | p[...,1] | units    |
+        +====================+==========+============+==========+==========+
+        | cart, right        | x        | y          | z        | met      |
+        +--------------------+----------+------------+----------+----------+
+
+        For more information run
+        >>> c = Coordinates()
+        >>> c.systems()
 
         Parameters
         ----------
@@ -253,6 +311,28 @@ class Coordinates(object):
         """
         Set coordinate points in spherical coordinate systems.
 
+        Input Values
+        ------------
+
+        The points that enter the Coordinates object are defined by the
+        coordinate system, i.e., the `domain` and `convention`:
+
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | points_1 | points_2   | points_3 | units    |
+        +====================+==========+============+==========+==========+
+        | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, side          | lateral  | polar      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, front         | phi      | theta      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+
+        For more information run
+        >>> c = Coordinates()
+        >>> c.systems()
+
         Parameters
         ----------
         points_i: array like, number
@@ -282,6 +362,28 @@ class Coordinates(object):
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         Get coordinate points in spherical coordinate systems.
+
+        Output Values
+        --------------
+
+        The points `p` that are returned are defined by the coordinate system,
+        i.e., the `domain` and `convention`:
+
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | p[...,1] | p[...,1]   | p[...,1] | units    |
+        +====================+==========+============+==========+==========+
+        | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, side          | lateral  | polar      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, front         | phi      | theta      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+
+        For more information run
+        >>> c = Coordinates()
+        >>> c.systems()
 
         Parameters
         ----------
@@ -374,6 +476,22 @@ class Coordinates(object):
         """
         Set coordinate points in cylindrical coordinate systems.
 
+        Input Values
+        ------------
+
+        The points that enter the Coordinates object are defined by the
+        coordinate system, i.e., the `domain` and `convention`:
+
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | points_1 | points_2   | points_3 | units    |
+        +====================+==========+============+==========+==========+
+        | cyl, top           | azimuth  | z          | radius_z | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+
+        For more information run
+        >>> c = Coordinates()
+        >>> c.systems()
+
         Parameters
         ----------
         points_i: array like, number
@@ -403,6 +521,22 @@ class Coordinates(object):
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         Get coordinate points in cylindircal coordinate system.
+
+        Output Values
+        -------------
+
+        The points `p` that are returned are defined by the coordinate system,
+        i.e., the `domain` and `convention`:
+
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | p[...,1] | p[...,1]   | p[...,1] | units    |
+        +====================+==========+============+==========+==========+
+        | cyl, top           | azimuth  | z          | radius_z | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+
+        For more information run
+        >>> c = Coordinates()
+        >>> c.systems()
 
         Parameters
         ----------
@@ -630,7 +764,7 @@ class Coordinates(object):
                     print("Coordinates:")
                     for nn, coord in enumerate(coords):
                         cur_units = [u[nn] for u in units]
-                        print(f"{nn + 1}: {coord} [{', '.join(cur_units)}]")
+                        print(f"points_{nn + 1}: {coord} [{', '.join(cur_units)}]")
                     print('\n' + systems[dd][cc]['description'] + '\n\n')
 
     def show(self, mask=None, **kwargs):
