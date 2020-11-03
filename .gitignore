@@ -112,6 +112,9 @@ venv.bak/
 # macOS
 .DS_Store
 
-# external data that is loaded from the web
+# external data that os loaded from the web
 haiopy/spatial/external/samplings_extremal*
 haiopy/spatial/external/samplings_t_design*
+
+# saved plots from testing
+tests/test_plot_data/output/*.png
