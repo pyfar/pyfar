@@ -2,10 +2,8 @@ import pytest
 from unittest import mock
 import numpy as np
 import numpy.testing as npt
-import haiopy.dsp.filter as hpfilter
-from haiopy import Signal
-
-import matplotlib.pyplot as plt
+import pyfar.dsp.filter as hpfilter
+from pyfar import Signal
 
 
 def test_filter_init_empty_coefficients():
