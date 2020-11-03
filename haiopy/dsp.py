@@ -2,6 +2,7 @@ import numpy as np
 from scipy import signal as sgn
 from haiopy import Signal
 
+
 def phase(signal, deg=False, unwrap=False):
     """Returns the phase for a given signal object.
 
@@ -29,14 +30,15 @@ def phase(signal, deg=False, unwrap=False):
     if np.isnan(phase).any() or np.isinf(phase).any():
         raise ValueError('Your signal has a point with NaN or Inf phase.')
 
-    if(unwrap==True):
+    if unwrap is True:
         phase = np.unwrap(phase)
-    elif(unwrap=='360'):
+    elif unwrap == '360':
         phase = wrap_to_2pi(np.unwrap(phase))
 
     if deg:
         phase = np.degrees(phase)
     return phase
+
 
 def group_delay(signal):
     """Returns the group delay for a given signal object.
@@ -57,7 +59,7 @@ def group_delay(signal):
 
     phase_vec = phase(signal, deg=False, unwrap=True)
     bin_dist = signal.sampling_rate / signal.n_samples
-    group_delay = (- np.diff(phase_vec,1,-1, prepend=0) /
+    group_delay = (- np.diff(phase_vec, 1, -1, prepend=0) /
                    (bin_dist * 2 * np.pi))
     return np.squeeze(group_delay)
 
@@ -131,8 +133,9 @@ def spectrogram(signal,
 
     # If not set, define window length for FFT automatically
     if window_length == 'auto':
-        window_length  = 2**nextpow2(signal.n_samples / 2000)
-        if window_length < 1024: window_length = 1024
+        window_length = 2**nextpow2(signal.n_samples / 2000)
+        if window_length < 1024:
+            window_length = 1024
     window_overlap = int(window_length * window_overlap_fct)
 
     frequencies, times, spectrogram = sgn.spectrogram(
@@ -159,11 +162,12 @@ def spectrogram(signal,
 
     # Cut results to CLIM to avoid sparcles?
     if cut:
-        spectrogram[spectrogram < clim[0]-20] = clim[0]-20;
-        spectrogram[spectrogram > clim[1]+20] = clim[1]+20;
+        spectrogram[spectrogram < clim[0]-20] = clim[0] - 20
+        spectrogram[spectrogram > clim[1]+20] = clim[1] + 20
     spectrogram = np.squeeze(spectrogram)
 
     return frequencies, times, spectrogram, clim
+
 
 def wrap_to_2pi(x):
     """Wraps phase to 2 pi.
@@ -179,10 +183,11 @@ def wrap_to_2pi(x):
         Phase wrapped to 2 pi.
     """
     positive_input = (x > 0)
-    zero_check = np.logical_and(positive_input,(x == 0))
+    zero_check = np.logical_and(positive_input, (x == 0))
     x = np.mod(x, 2*np.pi)
     x[zero_check] = 2*np.pi
     return x
+
 
 def nextpow2(x):
     """Returns the exponent of next higher power of 2.

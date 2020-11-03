@@ -173,7 +173,7 @@ def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
         ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
         ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
         ax.yaxis.set_major_formatter(MultipleFractionFormatter(
-            nominator=1, denominator=2, base=np.pi, base_str='\pi'))
+            nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
         y_margin = np.radians(5)
 
     ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
