@@ -12,6 +12,7 @@ class Audio(object):
 
 class Signal(Audio):
     """Class for audio signals.
+
     Objects of this class contain data which is directly convertable between
     time and frequency domain. Equally spaced samples or frequency bins,
     respectively.
@@ -19,13 +20,26 @@ class Signal(Audio):
     Attributes
     ----------
     data : ndarray, double
-        Raw data of the signal
+        Raw data of the signal in the frequency or time domain
     sampling_rate : double
         Sampling rate in Hertz
-    domain : string
-        Domain of data ('freq'/'time')
-    dtype : string
-        Raw data type of the signal, optional
+    n_samples : int, optional
+        Number of samples of the time signal. Required if domain is 'freq'. The
+        default is None.
+    domain : 'time', 'freq', optional
+        Domain of data. The default is 'time'
+    signal_type : 'energy', 'power', optional
+        Energy signals are finite and have finite energy. An example for an
+        energy signal is an impulse response. Power signals are infinite and
+        have infinite energy. Examples are noise and sine signals. The default
+        is 'energy'
+    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
+        The kind of Discrete Fourier Transform (DFT) normalization. See
+        haiopy.fft.normalization for more information. The normalization is
+        only applied to power signals. The default is 'unitary' for energy
+        signals and 'rms' for power signals.
+    dtype : string, optional
+        Raw data type of the signal. The default is float64
 
     """
     def __init__(
@@ -35,25 +49,34 @@ class Signal(Audio):
             n_samples=None,
             domain='time',
             signal_type='energy',
+            fft_norm=None,
             dtype=np.double):
-        """Init Signal with data, sampling rate and domain and signal type.
+        """Init Signal with data, and sampling rate.
 
         Attributes
         ----------
         data : ndarray, double
-            Raw data of the signal
+            Raw data of the signal in the frequency or time domain
         sampling_rate : double
             Sampling rate in Hertz
-        domain : string
-            Domain of data ('freq'/'time')
-        signal_type : string
-            Distinguish between power and energy signals
-        dtype : string
-            Raw data type of the signal, optional
-        position : Coordinates
-            Coordinates object
-        orientations : Orientations
-            Orientations object
+        n_samples : int, optional
+            Number of samples of the time signal. Required if domain is 'freq'.
+            The default is None.
+        domain : 'time', 'freq', optional
+            Domain of data. The default is 'time'
+        signal_type : 'energy', 'power', optional
+            Energy signals are finite and have finite energy. An example for an
+            energy signal is an impulse response. Power signals are infinite
+            and have infinite energy. Examples are noise and sine signals. The
+            default is 'energy'
+        fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
+            The kind of Discrete Fourier Transform (DFT) normalization. See
+            haiopy.fft.normalization for more information. The normalization is
+            only applied to power signals. The default is 'unitary' for energy
+            signals and 'rms' for power signals.
+        dtype : string, optional
+            Raw data type of the signal. The default is float64
+
         """
 
         Audio.__init__(self)
@@ -85,6 +108,17 @@ class Signal(Audio):
             self._n_samples = n_samples
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
+        self._VALID_FFT_NORMS = ["unitary", "amplitude", "rms", "power", "psd"]
+        if fft_norm is None:
+            fft_norm = 'unitary' if signal_type == 'energy' else 'rms'
+        if fft_norm in self._VALID_FFT_NORMS:
+            self._fft_norm = fft_norm
+            self.fft_norm = fft_norm
+        else:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
+                              f"'{fft_norm}'"))
+
     @property
     def domain(self):
         """The domain the data is stored in"""
@@ -101,12 +135,14 @@ class Signal(Audio):
                 # If the new domain should be time, we had a saved spectrum
                 # and need to do an inverse Fourier Transform
                 self.time = fft.irfft(
-                    self._data, self.n_samples, signal_type=self.signal_type)
+                    self._data, self.n_samples, self._sampling_rate,
+                    self._signal_type, self._fft_norm)
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform
                 self.freq = fft.rfft(
-                    self._data, self.n_samples, signal_type=self.signal_type)
+                    self._data, self.n_samples, self._sampling_rate,
+                    self._signal_type, self._fft_norm)
 
     @property
     def n_samples(self):
@@ -179,11 +215,67 @@ class Signal(Audio):
 
     @signal_type.setter
     def signal_type(self, value):
-        if (value in self._VALID_SIGNAL_TYPE) is True:
-            self.domain = 'time'
-            self._signal_type = value
-        else:
+        # check if we do anything
+        if value == self._signal_type:
+            return
+
+        # check input
+        if value not in self._VALID_SIGNAL_TYPE:
             raise ValueError("Not a valid signal type ('power'/'energy')")
+        if value == 'energy' and self._fft_norm != 'unitary':
+            raise ValueError(("Signal type can only be set to 'energy' if "
+                              "fft_norm is 'unitary'"))
+
+        # normalize or de-normalize spectrum
+        if self._domain == 'freq' and value == 'energy':
+            inverse = True
+        if self._domain == 'freq' and value == 'power':
+            inverse = False
+
+        self._data = fft.normalization(
+            self._data, self._n_samples, self._sampling_rate,
+            'power', self._fft_norm, inverse)
+
+        # set new signal type
+        self._signal_type = value
+
+    @property
+    def fft_norm(self):
+        """
+        The normalization for the Fourier Transform.
+
+        See haiopy.fft.normalization for more information.
+        """
+        return self._fft_norm
+
+    @fft_norm.setter
+    def fft_norm(self, value):
+        """
+        The normalization for the Fourier Transform.
+
+        See haiopy.fft.normalization for more information.
+        """
+        # check input
+        if value not in self._VALID_FFT_NORMS:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
+                              f"'{value}'"))
+        if self._signal_type == 'energy' and value != 'unitary':
+            raise ValueError(
+                "If signal_type is 'energy', fft_norm must be 'unitary'.")
+
+        # apply new normalization if Signal is in frequency domain
+        if self._fft_norm != value and self._domain == 'freq':
+            # de-normalize
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                self._signal_type, self._fft_norm, inverse=True)
+            # normalize
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                self._signal_type, value, inverse=False)
+
+        self._fft_norm = value
 
     @property
     def dtype(self):
