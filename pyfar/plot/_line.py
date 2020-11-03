@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 from .. import dsp
-from haiopy import Signal
+from pyfar import Signal
 import warnings
 from .ticker import (
     LogFormatterITAToolbox,
@@ -36,9 +36,9 @@ def _prepare_plot(ax=None):
 
 
 def _return_default_colors_rgb(**kwargs):
-    """Replace color in kwargs with haiopy default color if possible."""
+    """Replace color in kwargs with pyfar default color if possible."""
 
-    # haiopy default colors
+    # pyfar default colors
     colors = {'p': '#5F4690',  # purple
               'b': '#1471B9',  # blue
               't': '#4EBEBE',  # turqois

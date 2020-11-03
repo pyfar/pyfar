@@ -1,7 +1,7 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
 
-import haiopy
+import pyfar
 
 
 class Orientations(Rotation):
@@ -20,7 +20,7 @@ class Orientations(Rotation):
 
     Examples
     --------
-    from haiopy.orientations import Orientations
+    from pyfar.orientations import Orientations
 
     >>> views = [[1, 0, 0], [2, 0, 0]]
     >>> ups = [[0, 1, 0], [0, -2, 0]]
@@ -155,13 +155,13 @@ class Orientations(Rotation):
 
         ax = None
         if show_views:
-            ax = haiopy.plot.quiver(
+            ax = pyfar.plot.quiver(
                 positions, views, color=(1, 0, 0), **kwargs)
         if show_ups:
-            ax = haiopy.plot.quiver(
+            ax = pyfar.plot.quiver(
                 positions, ups, ax=ax, color=(0, 1, 0), **kwargs)
         if show_rights:
-            ax = haiopy.plot.quiver(
+            ax = pyfar.plot.quiver(
                 positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
 
     def as_view_up_right(self):

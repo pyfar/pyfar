@@ -3,8 +3,8 @@ import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 from unittest import mock
-from haiopy import Signal
-from haiopy import dsp
+from pyfar import Signal
+from pyfar import dsp
 
 def test_phase_rad(sine_plus_impulse_mock):
     """Test the function returning the phase of a signal in radians."""

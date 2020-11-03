@@ -2,8 +2,8 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-from haiopy import Signal
-import haiopy.arithmetic as arithmetic
+from pyfar.signal import Signal
+import pyfar.arithmetic as arithmetic
 
 
 # test adding two Signals

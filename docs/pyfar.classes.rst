@@ -4,7 +4,7 @@ Data Container Classes
 Audio Data Classes
 ==================
 
-.. automodule:: haiopy.haiopy
+.. automodule:: pyfar.pyfar
    :members:
    :undoc-members:
    :show-inheritance:
@@ -13,13 +13,13 @@ Audio Data Classes
 Coordinate Data Classes
 =======================
 
-.. automodule:: haiopy.coordinates
+.. automodule:: pyfar.coordinates
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-.. automodule:: haiopy.orientations
+.. automodule:: pyfar.orientations
    :members:
    :undoc-members:
    :show-inheritance:

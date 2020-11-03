@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import signal as sgn
-from haiopy import Signal
+from pyfar import Signal
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -9,7 +9,7 @@ def phase(signal, deg=False, unwrap=False):
     Parameters
     ----------
     signal : Signal object
-        An audio signal object from the haiopy signal class
+        An audio signal object from the pyfar signal class
     deg : Boolean
         Specifies, whether the phase is returned in degrees or radians.
     unwrap : Boolean
@@ -46,7 +46,7 @@ def group_delay(signal):
     Parameters
     ----------
     signal : Signal object
-        An audio signal object from the haiopy signal class
+        An audio signal object from the pyfar signal class
 
     Returns
     -------
@@ -83,7 +83,7 @@ def spectrogram(signal,
     Parameters
     ----------
     signal : Signal object
-        An audio signal object from the haiopy signal class
+        An audio signal object from the pyfar signal class
     window : String (Default: 'hann')
         Specifies the window type. See scipy.signal.get_window for details.
     window_length : integer

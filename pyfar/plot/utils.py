@@ -1,7 +1,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
-import haiopy.plot._line as _line
+import pyfar.plot._line as _line
 
 
 def plotstyle(style='light'):
@@ -28,7 +28,7 @@ def plotstyle(style='light'):
         # get the currently used plotstyle
         style = mpl.matplotlib_fname()
     elif style in ['light', 'dark']:
-        # use haiopy style
+        # use pyfar style
         style = os.path.join(
             os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
     elif style not in plt.style.available:

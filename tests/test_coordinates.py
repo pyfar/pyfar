@@ -2,8 +2,8 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-from haiopy import Coordinates
-import haiopy.coordinates as coordinates
+from pyfar.coordinates import Coordinates
+import pyfar.coordinates as coordinates
 
 
 # %% Test Coordinates() class ------------------------------------------------

@@ -10,12 +10,12 @@ from .ticker import (
 
 
 def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
-    """Plot the time signal of a haiopy audio signal object.
+    """Plot the time signal of a pyfar audio signal object.
 
     Parameters
     ----------
     signal : Signal
-        An audio signal object from the haiopy Signal class
+        An audio signal object from the pyfar Signal class
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -52,12 +52,12 @@ def plot_time_dB(signal, log_prefix=20, log_reference=1, **kwargs):
 
 
 def plot_time(signal, **kwargs):
-    """Plot the time signal of a haiopy audio signal object.
+    """Plot the time signal of a pyfar audio signal object.
 
     Parameters
     ----------
     signal : Signal
-        An audio signal object from the haiopy Signal class
+        An audio signal object from the pyfar Signal class
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 
@@ -93,7 +93,7 @@ def plot_freq(signal, log_prefix=20, log_reference=1, **kwargs):
     Parameters
     ----------
     signal : Signal object
-        An adio signal object from the haiopy signal class
+        An adio signal object from the pyfar signal class
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
 

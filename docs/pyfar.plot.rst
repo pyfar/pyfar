@@ -1,24 +1,24 @@
-Plotting (haiopy.plot)
+Plotting (pyfar.plot)
 ======================
 
-.. haiopy.plot.gui module
+.. pyfar.plot.gui module
 .. ----------------------
 
-.. .. automodule:: haiopy.plot.gui
+.. .. automodule:: pyfar.plot.gui
 ..    :members:
 ..    :undoc-members:
 ..    :show-inheritance:
 
 
-.. automodule:: haiopy.plot.plot
+.. automodule:: pyfar.plot.plot
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. haiopy.plot.ticker module
+.. pyfar.plot.ticker module
 .. -------------------------
 
-.. .. automodule:: haiopy.plot.ticker
+.. .. automodule:: pyfar.plot.ticker
 ..    :members:
 ..    :undoc-members:
 ..    :show-inheritance:
@@ -27,7 +27,7 @@ Plotting (haiopy.plot)
 .. Module contents
 .. ---------------
 
-.. .. automodule:: haiopy.plot
+.. .. automodule:: pyfar.plot
 ..    :members:
 ..    :undoc-members:
 ..    :show-inheritance:

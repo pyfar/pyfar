@@ -13,7 +13,7 @@ Analogously, the discrete inverse Fourier transform is implemented as
 .. math::
         x(n) = \frac{1}{N} \sum_{\mu=0}^{N-1} X(\mu) e^{i2\pi\frac{\mu n}{N}}
 
-Haiopy uses a DFT implementation for purely real-valued time signals resulting
+Pyfar uses a DFT implementation for purely real-valued time signals resulting
 in Fourier spectra with complex conjugate symmetry for negative and
 positive frequencies :math:`X(\mu) = X(-\mu)^*`. As a result,
 the left-hand side of the spectrum is discarded, yielding
@@ -23,7 +23,7 @@ time signals can be implemented, if required.
 Normalization _[2]
 ------------------
 Bases on a signal FFT norm - namely 'unitary', 'amplitude', 'rms', 'power' or
-'psd', haiopy implements five different normalization variants, whereby
+'psd', pyfar implements five different normalization variants, whereby
 'unitary' denotes that no additional normalization is performed.
 
 Energy Signals
@@ -45,7 +45,7 @@ of the spectrum (cf. _[2], Eq. 8). Additionally, the implemented DFT uses
 different introduced above.
 
 >>> import numpy as np
->>> from haiopy import fft
+>>> from pyfar import fft
 >>> import matplotlib.pyplot as plt
 >>> frequency = 100
 >>> sampling_rate = 1000
@@ -55,7 +55,7 @@ different introduced above.
 .. plot::
 
     import numpy as np
-    from haiopy import fft
+    from pyfar import fft
     import matplotlib.pyplot as plt
     n_samples = 1024
     sampling_rate = 48e3
@@ -147,9 +147,9 @@ def rfft(data, n_samples, sampling_rate, signal_type, fft_norm):
     sampling_rate : number
         sampling rate in Hz
     signal_type : 'energy', 'power'
-        see haiopy.Signal for more information
+        see pyfar.Signal for more information
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of haiopy.fft.normalization.
+        See documentaion of pyfar.fft.normalization.
 
     Returns
     -------
@@ -191,9 +191,9 @@ def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm):
     sampling_rate : number
         sampling rate in Hz
     signal_type : 'energy', 'power'
-        see haiopy.Signal for more information
+        see pyfar.Signal for more information
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of haiopy.fft.normalization.
+        See documentaion of pyfar.fft.normalization.
 
     Returns
     -------
@@ -234,9 +234,9 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
         sampling rate of the corresponding time signal in Hz
     signal_type : 'energy', 'power'
         Normalization is only applied if signal_type == 'power'. See
-        haiopy.Signal for more information
+        pyfar.Signal for more information
     fft_norm : string, optional
-        'unitary' - Multiplied single sided spextra by factor two for power
+        'unitary' - Multiplied single sided spectra by factor two for power
                     signals. Do nothing for energy signals.
         'amplitude' - as in _[2] Eq. (4)
         'rms' - as in _[2] Eq. (10)

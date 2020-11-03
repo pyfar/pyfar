@@ -6,8 +6,8 @@ import pytest
 import numpy as np
 from unittest import mock
 import os
-import haiopy.plot as plot
-from haiopy import Signal
+import pyfar.plot as plot
+from pyfar import Signal
 
 # flag for creating new baseline plots (required if the plot look changed)
 create_baseline = False

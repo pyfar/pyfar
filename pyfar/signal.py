@@ -1,6 +1,6 @@
 import warnings
 import numpy as np
-from haiopy import fft as fft
+from pyfar import fft as fft
 
 
 class Audio(object):
@@ -35,7 +35,7 @@ class Signal(Audio):
         is 'energy'
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
         The kind of Discrete Fourier Transform (DFT) normalization. See
-        haiopy.fft.normalization for more information. The normalization is
+        pyfar.fft.normalization for more information. The normalization is
         only applied to power signals. The default is 'unitary' for energy
         signals and 'rms' for power signals.
     dtype : string, optional
@@ -71,7 +71,7 @@ class Signal(Audio):
             default is 'energy'
         fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
             The kind of Discrete Fourier Transform (DFT) normalization. See
-            haiopy.fft.normalization for more information. The normalization is
+            pyfar.fft.normalization for more information. The normalization is
             only applied to power signals. The default is 'unitary' for energy
             signals and 'rms' for power signals.
         dtype : string, optional
@@ -244,7 +244,7 @@ class Signal(Audio):
         """
         The normalization for the Fourier Transform.
 
-        See haiopy.fft.normalization for more information.
+        See pyfar.fft.normalization for more information.
         """
         return self._fft_norm
 
@@ -253,7 +253,7 @@ class Signal(Audio):
         """
         The normalization for the Fourier Transform.
 
-        See haiopy.fft.normalization for more information.
+        See pyfar.fft.normalization for more information.
         """
         # check input
         if value not in self._VALID_FFT_NORMS:

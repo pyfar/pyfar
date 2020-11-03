@@ -1,4 +1,4 @@
-import haiopy.plot.utils as utils
+import pyfar.plot.utils as utils
 import pytest
 
 

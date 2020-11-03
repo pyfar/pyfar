@@ -1,18 +1,18 @@
-Haiopy User Reference
+PYFAR User Reference
 =====================
 
 .. toctree::
    :maxdepth: 4
 
-   haiopy.classes
-   haiopy.plot
-   haiopy.fft
+   pyfar.classes
+   pyfar.plot
+   pyfar.fft
 
 
 .. Module contents
 .. ---------------
 
-.. .. automodule:: haiopy
+.. .. automodule:: pyfar
 ..    :members:
 ..    :undoc-members:
 ..    :show-inheritance:

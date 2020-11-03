@@ -3,7 +3,7 @@ import numpy.testing as npt
 import pytest
 from pytest import raises
 
-from haiopy import fft
+from pyfar import fft
 
 
 def test_n_bins_even():
@@ -656,10 +656,10 @@ def test_fft_mock_numpy(fft_lib_np):
 
 @pytest.fixture
 def fft_lib_np(monkeypatch):
-    # from haiopy.fft import fft_lib
-    import haiopy.fft
+    # from pyfar.fft import fft_lib
+    import pyfar.fft
     import numpy as np
-    monkeypatch.setattr(haiopy.fft, 'fft_lib', np.fft)
+    monkeypatch.setattr(pyfar.fft, 'fft_lib', np.fft)
 
 
 def test_fft_mock_pyfftw(fft_lib_pyfftw):
@@ -668,10 +668,10 @@ def test_fft_mock_pyfftw(fft_lib_pyfftw):
 
 @pytest.fixture
 def fft_lib_pyfftw(monkeypatch):
-    # from haiopy.fft import fft_lib
-    import haiopy.fft
+    # from pyfar.fft import fft_lib
+    import pyfar.fft
     from pyfftw.interfaces import numpy_fft as npi_fft
-    monkeypatch.setattr(haiopy.fft, 'fft_lib', npi_fft)
+    monkeypatch.setattr(pyfar.fft, 'fft_lib', npi_fft)
 
 
 @pytest.fixture

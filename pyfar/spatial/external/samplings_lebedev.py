@@ -2,7 +2,7 @@
 Generate Lebedev spherical sampling grids.
 
 These are helper functions. For generating Lebedev Grids see
-haiopy.spatial.samplings.
+pyfar.spatial.samplings.
 
 Copyright (c) 2010, Robert Parrish
 All rights reserved.
@@ -38,13 +38,13 @@ def _lebedevSphere(degree):
     Generate  Lebedev sampling grids.
 
     These are helper functions. For generating Lebedev Grids see
-    haiopy.spatial.samplings.
+    pyfar.spatial.samplings.
 
     @author Rob Parrish, The Sherrill Group, CCMST Georgia Tech
     @email robparrish@gmail.com
     @date 03/24/2010
 
-    Ported to Python by the Haiopy developers
+    Ported to Python by the pyfar developers
 
     @description - function to compute normalized points and weights
     for Lebedev quadratures on the surface of the unit sphere at double

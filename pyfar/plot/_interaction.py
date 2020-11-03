@@ -4,7 +4,7 @@ import numpy as np
 from . import _line
 from . import line
 import matplotlib.pyplot as plt
-from haiopy import Signal
+from pyfar import Signal
 
 
 class Cycle(object):

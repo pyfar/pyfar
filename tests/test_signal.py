@@ -2,8 +2,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from haiopy import Signal
-from haiopy import fft
+from pyfar import Signal
+from pyfar import fft
 
 
 def test_signal_init(sine):

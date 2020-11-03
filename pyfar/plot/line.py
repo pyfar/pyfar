@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from haiopy.plot.utils import plotstyle
+from pyfar.plot.utils import plotstyle
 from .. import Signal
 from . import _line
 from ._interaction import Interaction

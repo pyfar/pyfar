@@ -1,7 +1,7 @@
-Discrete Fast Fourier Transform (haiopy.fft)
+Discrete Fast Fourier Transform (pyfar.fft)
 --------------------------------------------
 
-.. automodule:: haiopy.fft
+.. automodule:: pyfar.fft
    :members:
    :undoc-members:
    :show-inheritance:

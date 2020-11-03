@@ -6,8 +6,8 @@ import numpy as np
 import urllib3
 import os
 import scipy.io as sio
-from haiopy.coordinates import Coordinates
-from haiopy.spatial.external import (
+from pyfar.coordinates import Coordinates
+from pyfar.spatial.external import (
     samplings_lebedev, eq_area_partitions)
 
 

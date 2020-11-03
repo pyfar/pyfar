@@ -5,7 +5,7 @@ from scipy.spatial.transform import Rotation as sp_rot
 import copy
 import re
 
-import haiopy
+import pyfar
 
 
 class Coordinates(object):
@@ -790,14 +790,14 @@ class Coordinates(object):
 
         """
         if mask is None:
-            haiopy.plot.scatter(self)
+            pyfar.plot.scatter(self)
         else:
             mask = np.asarray(mask)
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
-            haiopy.plot.scatter(self, c=colors.flatten(), **kwargs)
+            pyfar.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',

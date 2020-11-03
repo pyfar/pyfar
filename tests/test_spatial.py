@@ -1,6 +1,6 @@
 import numpy as np
-import haiopy.spatial.spatial as spatial
-from haiopy.coordinates import Coordinates
+import pyfar.spatial.spatial as spatial
+from pyfar.coordinates import Coordinates
 import pytest
 
 

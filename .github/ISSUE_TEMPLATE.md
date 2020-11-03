@@ -1,4 +1,4 @@
-* haiopy version:
+* p version:
 * Python version:
 * Operating System:
 

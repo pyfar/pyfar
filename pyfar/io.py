@@ -2,7 +2,7 @@ import scipy.io.wavfile as wavfile
 import os.path
 import warnings
 
-from haiopy import Signal
+from pyfar import Signal
 
 
 def read_wav(filename):
@@ -19,7 +19,7 @@ def read_wav(filename):
     Returns
     -------
     signal : signal instance
-        An audio signal object from the haiopy Signal class
+        An audio signal object from the pyfar Signal class
         containing the audio data from the WAV file.
 
     Notes
@@ -39,7 +39,7 @@ def write_wav(signal, filename, overwrite=True):
     Parameters
     ----------
     signal : Signal object
-        An audio signal object from the haiopy Signal class.
+        An audio signal object from the pyfar Signal class.
 
     filename : string or open file handle
         Output wav file.

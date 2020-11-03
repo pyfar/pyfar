@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Plot sub-package for haiopy."""
+"""Plot sub-package for pyfar."""
 
 from .line import (
     freq,
