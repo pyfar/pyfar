@@ -933,7 +933,7 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 
     if shelve_type not in ['I', 'II', 'III']:
         raise ValueError(("shelve_type must be 'I', 'II' or "
-                            f"'III' but is '{shelve_type}'.'"))
+                          f"'III' but is '{shelve_type}'.'"))
 
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
