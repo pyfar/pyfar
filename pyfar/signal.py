@@ -1,6 +1,7 @@
 import warnings
 import numpy as np
 from pyfar import fft as fft
+# import pyfar.arithmetic as arithmetic
 
 
 class Audio(object):
@@ -292,6 +293,9 @@ class Signal(Audio):
     def shape(self):
         """Shape of the data."""
         return self._data.shape[:-1]
+
+    # def __add__(self, data):
+    #     return arithmetic.add((self, data), 'freq')
 
     def __repr__(self):
         """String representation of signal class.
