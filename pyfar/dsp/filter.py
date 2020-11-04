@@ -505,6 +505,106 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     return output
 
 
+def crossover(signal, N, frequency, sampling_rate=None):
+    """
+    Create and apply Linkwitz-Riley crossover network  [1]_, [2]_.
+
+    Linwitz-Riley crossover filters are desined by cascading Butterworth
+    filters of order `N/2`. `N` must this be even.
+
+    Parameters
+    ----------
+    signal : Signal, None
+        The Signal to be filterd. Pass None to create the filter without
+        applying it.
+    N : int
+        The order of the Linkwitz-Riley crossover network
+    frequency : number, array like
+        Characteristic frequencies of the crossover network. If a single number
+        is passed, the network consists of a single lowpass and highpass. If
+        `M` frequencies are passed, the network consists of 1 lowpass, M-1
+        bandpasses, and 1 highpass.
+    order : number
+        The filter order. Must be an even number.
+    sampling_rate : None, number
+        The sampling rate in Hz. Only required if signal is None. The default
+        is None.
+
+    Returns
+    -------
+    signal : Signal
+        The filtered signal. Only returned if `sampling_rate = None`.
+    filter : Filter
+        Filter object. Only returned if `signal = None`.
+
+    References
+    ----------
+    .. [1] S. H. Linkwitz, 'Active crossover networks for noncoincident
+           drivers,' J. Audio Eng. Soc., vol. 24, no. 1, pp. 2–8, Jan. 1976.
+    .. [2] D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
+           2005.
+    """
+
+    # check input
+    if (signal is None and sampling_rate is None) \
+            or (signal is not None and sampling_rate is not None):
+        raise ValueError('Either signal or sampling_rate must be none.')
+
+    if N % 2:
+        raise ValueError("The order 'N' must be an even number.")
+
+    # sampling frequency in Hz
+    fs = signal.sampling_rate if sampling_rate is None else sampling_rate
+    # order of Butterwirth filters
+    N = int(N/2)
+    # normalized frequency (half-cycle / per sample)
+    freq = np.atleast_1d(np.asarray(frequency)) / fs * 2
+
+    # init neutral SOS matrix of shape (freq.size+1, SOS_dim_2, 6)
+    n_sos = int(np.ceil(N / 2))  # number of lowpass sos
+    SOS_dim_2 = n_sos if freq.size == 1 else N
+    SOS = np.tile(np.array([1, 0, 0, 1, 0, 0], dtype='float64'),
+                  (freq.size + 1, SOS_dim_2, 1))
+
+    # get filter coefficients for lowpass
+    # (and bandpass if more than one frequency is provided)
+    for n in range(freq.size):
+        # get coefficients
+        kind = 'lowpass' if n == 0 else 'bandpass'
+        f = freq[n] if n == 0 else freq[n-1:n+1]
+        sos = spsignal.butter(N, f, kind, analog=False, output='sos')
+        # write to sos matrix
+        if n == 0:
+            SOS[n, 0:n_sos] = sos
+        else:
+            SOS[n] = sos
+
+    # get filter coefficients for the highpass
+    sos = spsignal.butter(N, freq[-1], 'highpass', analog=False, output='sos')
+    # write to sos matrix
+    SOS[-1, 0:n_sos] = sos
+
+    # Apply every Butterworth filter twice
+    SOS = np.tile(SOS, (1, 2, 1))
+
+    # invert phase in every second channel if the Butterworth order is odd
+    # (realized by reversing b-coefficients of the first sos)
+    if N % 2:
+        SOS[np.arange(1, freq.size + 1, 2), 0, 0:3] *= -1
+
+    # generate filter object
+    filt = FilterSOS(SOS)
+
+    # return the filter object
+    if signal is None:
+        # return the filter object
+        return filt
+    else:
+        # return the filtered signal
+        signal_filt = filt.process(signal)
+        return signal_filt
+
+
 def atleast_3d_first_dim(arr):
     arr = np.asarray(arr)
     ndim = np.ndim(arr)
