@@ -153,18 +153,21 @@ def _get_arithmetic_data(data, n_samples, domain, signal_type, fft_norm):
             if signal_type == 'energy' and data.signal_type == 'power':
                 # change from 'power' to 'energy' (remove current fft_norm)
                 data_out = normalization(
-                    data_out, n_samples, 'power', data.fft_norm, inverse=True)
+                    data_out, n_samples, data.sampling_rate,
+                    'power', data.fft_norm, inverse=True)
             elif signal_type == 'power' and data.signal_type == 'energy':
                 # change from 'energy' to 'power' (apply desired fft_norm)
                 data_out = normalization(
-                    data_out, n_samples, 'power', fft_norm, inverse=False)
+                    data_out, n_samples, data.sampling_rate,
+                    'power', fft_norm, inverse=False)
             elif fft_norm != data.fft_norm:
                 # revert current and apply desired fft normalization
                 data_out = normalization(
-                    data_out, n_samples, 'power', data.fft_norm, inverse=True)
+                    data_out, n_samples, data.sampling_rate,
+                    'power', data.fft_norm, inverse=True)
                 data_out = normalization(
-                    data_out, n_samples, 'power', fft_norm, inverse=False)
-
+                    data_out, n_samples, data.sampling_rate,
+                    'power', fft_norm, inverse=False)
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")
