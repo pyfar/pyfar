@@ -49,7 +49,7 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
     # normalized frequency (half-cycle / per sample)
-    frequency_norm = frequency / fs * 2
+    frequency_norm = np.asarray(frequency) / fs * 2
 
     # get filter coefficients
     sos = spsignal.butter(N, frequency_norm, btype, analog=False,
@@ -111,7 +111,7 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
     # normalized frequency (half-cycle / per sample)
-    frequency_norm = frequency / fs * 2
+    frequency_norm = np.asarray(frequency) / fs * 2
 
     # get filter coefficients
     sos = spsignal.cheby1(N, ripple, frequency_norm, btype, analog=False,
@@ -174,7 +174,7 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
     # normalized frequency (half-cycle / per sample)
-    frequency_norm = frequency / fs * 2
+    frequency_norm = np.asarray(frequency) / fs * 2
 
     # get filter coefficients
     sos = spsignal.cheby2(N, attenuation, frequency_norm, btype, analog=False,
@@ -239,7 +239,7 @@ def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
     # normalized frequency (half-cycle / per sample)
-    frequency_norm = frequency / fs * 2
+    frequency_norm = np.asarray(frequency) / fs * 2
 
     # get filter coefficients
     sos = spsignal.ellip(N, ripple, attenuation, frequency_norm, btype,
@@ -319,7 +319,7 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
     # normalized frequency (half-cycle / per sample)
-    frequency_norm = frequency / fs * 2
+    frequency_norm = np.asarray(frequency) / fs * 2
 
     # get filter coefficients
     sos = spsignal.bessel(N, frequency_norm, btype, analog=False,
