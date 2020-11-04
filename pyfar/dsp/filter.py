@@ -46,11 +46,38 @@ def sosfiltfilt(sos, signal, **kwargs):
 
 
 class Filter(object):
+    """
+    Container class for digital filters.
+    This is an abstract class method, only used for the shared processing
+    method used for the application of a filter on a signal.
+    """
     def __init__(
             self,
             coefficients=None,
             filter_func=None,
             state=None):
+        """
+        Initialize a general Filter object.
+
+        Parameters
+        ----------
+        coefficients : array, double
+            The filter coefficients as an array.
+        filter_func : default, zerophase
+            Default applies a direct form II transposed time domain filter
+            based on the standard difference equation. Zerophase uses
+            the same filter twice, first forward, then backwards resulting
+            in zero phase.
+        state : array, optional
+            The state of the filter from a priory knowledge.
+
+
+        Returns
+        -------
+        filter : Filter
+            The filter object
+
+        """
         super().__init__()
         if coefficients is not None:
             coefficients = atleast_3d_first_dim(coefficients)
@@ -68,21 +95,31 @@ class Filter(object):
 
         self._FILTER_FUNCS = {
             'default': None,
-            'minimumphase': None}
+            'zerophase': None}
 
     def initialize(self):
         raise NotImplementedError("Abstract class method")
 
     @property
     def shape(self):
+        """
+        The shape of the filter.
+        """
         return self._coefficients.shape[:-2]
 
     @property
     def size(self):
+        """
+        The size of the filter, that is all elements in the filter object.
+        """
         return np.prod(self.shape)
 
     @property
     def state(self):
+        """
+        The current state of the filter as an array with dimensions
+        corresponding to the order of the filter and number of filter channels.
+        """
         return self._state
 
     @property
@@ -95,6 +132,19 @@ class Filter(object):
 
     def process(self, signal, reset=True):
         """Apply the filter to a signal.
+
+        Parameters
+        ----------
+        signal : Signal
+            The data to be filtered as Signal object.
+        reset : bool, True
+            If set to true, the filter state will be reset to zero before the
+            filter is applied to the signal.
+
+        Returns
+        -------
+        filtered : Signal
+            A filtered copy of the input signal.
         """
         if not isinstance(signal, Signal):
             raise ValueError("The input needs to be a haiopy.Signal object.")
