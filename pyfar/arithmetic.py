@@ -32,16 +32,21 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     sampling_rate, n_samples, signal_type, fft_norm = \
         _assert_match_for_arithmetic(data, domain)
 
-    result = _get_arithmetic_data(
-        data[0], n_samples, domain, signal_type, fft_norm)
+    result = _get_arithmetic_data(data[0], n_samples, domain)
 
     for d in range(1, len(data)):
         result = operation(
-            result, _get_arithmetic_data(
-                data[d], n_samples, domain, signal_type, fft_norm))
+            result, _get_arithmetic_data(data[d], n_samples, domain))
 
+    # check if to retun as Signal
     if sampling_rate is not None:
-        result = Signal(result, sampling_rate, n_samples, domain, signal_type)
+        # apply desried fft normalization
+        if domain == 'freq':
+            result = normalization(result, n_samples, sampling_rate,
+                                   signal_type, fft_norm)
+
+        result = Signal(
+            result, sampling_rate, n_samples, domain, signal_type, fft_norm)
 
     return result
 
@@ -122,25 +127,25 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     return sampling_rate, n_samples, signal_type, fft_norm
 
 
-def _get_arithmetic_data(data, n_samples, domain, signal_type, fft_norm):
+def _get_arithmetic_data(data, n_samples, domain):
     """
-    Return signal data in desired domain, signal_type and fft_norm.
+    Return data in desired domain without any fft normalization.
 
     Parameters
     ----------
     data : Signal, array like, number
-        input data
+        Input data
     n_samples :
         Number of samples of data if data is a Signal (required for fft
         normalization).
-    domain, signal_type, fft_norm : attributes
-        Attributes in which data_out has to be returned
+    domain : 'time', 'freq'
+        Domain in which the data is returned
 
     Returns
     -------
     data_out : numpy array
-        signal data as np.array according to `domain` and `signal_type` if data
-        is a Signal and np.array containing `data` otherwise.
+        Data in desired domain without any fft normlaization if data is a
+        Signal. `np.asarray(data)` otherwise.
     """
     if isinstance(data, Signal):
 
@@ -150,24 +155,12 @@ def _get_arithmetic_data(data, n_samples, domain, signal_type, fft_norm):
         elif domain == "freq":
             data_out = data.freq.copy()
 
-            if signal_type == 'energy' and data.signal_type == 'power':
-                # change from 'power' to 'energy' (remove current fft_norm)
+            if data.signal_type == 'power':
+                # remove current fft normalization
                 data_out = normalization(
                     data_out, n_samples, data.sampling_rate,
                     'power', data.fft_norm, inverse=True)
-            elif signal_type == 'power' and data.signal_type == 'energy':
-                # change from 'energy' to 'power' (apply desired fft_norm)
-                data_out = normalization(
-                    data_out, n_samples, data.sampling_rate,
-                    'power', fft_norm, inverse=False)
-            elif fft_norm != data.fft_norm:
-                # revert current and apply desired fft normalization
-                data_out = normalization(
-                    data_out, n_samples, data.sampling_rate,
-                    'power', data.fft_norm, inverse=True)
-                data_out = normalization(
-                    data_out, n_samples, data.sampling_rate,
-                    'power', fft_norm, inverse=False)
+
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")

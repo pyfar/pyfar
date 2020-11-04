@@ -7,7 +7,7 @@ import pyfar.arithmetic as arithmetic
 
 
 # test adding two Signals
-def test_add_two_signals():
+def test_add_two_signals_time():
     # generate test signal
     x = Signal([1, 0, 0], 44100)
 
@@ -19,6 +19,12 @@ def test_add_two_signals():
     assert isinstance(y, Signal)
     assert y.domain == 'time'
     npt.assert_allclose(y.time, np.atleast_2d([2, 0, 0]), atol=1e-15)
+
+
+# test adding two Signals
+def test_add_two_signals_freq():
+    # generate test signal
+    x = Signal([1, 0, 0], 44100)
 
     # frequency domain
     y = arithmetic.add((x, x), 'freq')
@@ -123,7 +129,7 @@ def test_assert_match_for_arithmetic():
 def test_get_arithmetic_data_with_array():
 
     data_in = np.asarray(1)
-    data_out = arithmetic._get_arithmetic_data(data_in, 1, None, None, None)
+    data_out = arithmetic._get_arithmetic_data(data_in, None, None)
     npt.assert_allclose(data_in, data_out)
 
 
@@ -142,25 +148,27 @@ def test_get_arithmetic_data_with_signal():
             ['time', 'power', 'psd'],
             ['freq', 'power', 'psd']]
 
+    # reference signal - _get_arithmetic_data should return the data without
+    # any normalization regardless of the input data
+    s_ref = Signal([1, 0, 0], 44100)
+
     for m_in in meta:
         # create input signal with current domain, type, and norm
         s_in = Signal([1, 0, 0], 44100, signal_type=m_in[1], fft_norm=m_in[2])
         s_in.domain = m_in[0]
-        for m_out in meta:
-            print(f"Testing from {', '.join(m_in)} to {', '.join(m_out)}.")
-            # create output signal with current domain, type, and norm
-            s_out = Signal([1, 0, 0], 44100,
-                           signal_type=m_out[1], fft_norm=m_out[2])
-            s_out.domain = m_out[0]
+        for domain in ['time', 'freq']:
+            print(f"Testing from {', '.join(m_in)} to {domain}.")
 
             # get output data
             data_out = arithmetic._get_arithmetic_data(
-                s_in, n_samples=3, domain=m_out[0], signal_type=m_out[1],
-                fft_norm=m_out[2])
-            npt.assert_allclose(s_out._data, data_out, atol=1e-15)
+                s_in, n_samples=3, domain=domain)
+            if domain == 'time':
+                npt.assert_allclose(s_ref.time, data_out, atol=1e-15)
+            elif domain == 'freq':
+                npt.assert_allclose(s_ref.freq, data_out, atol=1e-15)
 
 
 def test_get_arithmetic_data_assertion():
     with raises(ValueError):
         arithmetic._get_arithmetic_data(
-            Signal(1, 44100), 1, 'space', 'energy', 'unitary')
+            Signal(1, 44100), 1, 'space')
