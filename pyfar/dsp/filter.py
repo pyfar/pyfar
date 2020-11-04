@@ -5,6 +5,7 @@ import numpy as np
 import scipy.signal as spsignal
 
 from pyfar import Signal
+import pyfar.dsp._audiofilter as iir
 
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
@@ -342,25 +343,23 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     """
     Create and apply second order parametric equalizer filter.
 
-    All input parameters except `signal` and `sampling_rate` can also be array
-    likes of the same length to create multiple filters. Uses the
-    implementation of
+    Uses the implementation of
     https://github.com/spatialaudio/digital-signal-processing-lecture
-    (audiofilter in the filter_design lecture)
+    (audiofilter.py in the filter_design lecture)
 
     Paramters
     ---------
     signal : Signal, None
         The Signal to be filterd. Pass None to create the filter without
         applying it.
-    center_frequency : number, array like
+    center_frequency : number
         Center frequency of the parametric equalizer in Hz
-    gain : number, array like
+    gain : number
         Gain of the parametric equalizer in dB
-    quality : number, array like
+    quality : number
         Quality of the parametric equalizer, i.e., the inverse of the
         bandwidth
-    peq_type : str, array like of strings
+    peq_type : str
         Defines the bandwidth/quality. The default is 'II'
 
         I   - not recommended. Also known as 'constant Q'
@@ -369,7 +368,7 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
               negative. Also known as 'symmetric'
         III - defines the bandwidth by the points at gain/2. Also known as
               'half pad loss'.
-    qualtiy_war : str, array like of strings
+    qualtiy_warp : str
         Sets the pre-warping for the quality ('cos', 'sin', or 'tan'). The
         default is 'cos'.
     sampling_rate : None, number
@@ -389,25 +388,19 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
             or (signal is not None and sampling_rate is not None):
         raise ValueError('Either signal or sampling_rate must be none.')
 
-    # check and tile filter parameter
-    p = _tile_filter_parameters(
-        [center_frequency, gain, quality, peq_type, quality_warp])
+    if peq_type not in ['I', 'II', 'III']:
+        raise ValueError(("peq_type must be 'I', 'II' or "
+                          f"'III' but is '{peq_type}'.'"))
 
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
     # get filter coefficients
-    ba = np.zeros((p[0].size, 2, 3))
-    for n, (freq, gain, q, peq_type, warp) in \
-            enumerate(zip(p[0], p[1], p[2], p[3], p[4])):
-
-        if peq_type not in ['I', 'II', 'III']:
-            raise ValueError(("peq_type must be 'I', 'II' or "
-                              f"'III' but is '{peq_type}'.'"))
-
-        _, _, b, a = iir.biquad_peq2nd(freq, gain, q, fs, peq_type, warp)
-        ba[n, 0] = b
-        ba[n, 1] = a
+    ba = np.zeros((2, 3))
+    _, _, b, a = iir.biquad_peq2nd(
+        center_frequency, gain, quality, fs, peq_type, quality_warp)
+    ba[0] = b
+    ba[1] = a
 
     # generate filter object
     filt = FilterIIR(ba)
@@ -427,9 +420,7 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     """
     Create and apply first or second order high shelve filter.
 
-    All input parameters except `signal` and `sampling_rate` can also be array
-    likes of the same length to create multiple filters. Uses the
-    implementation of
+    Uses the implementation of
     https://github.com/spatialaudio/digital-signal-processing-lecture
     (audiofilter in the filter_design lecture)
 
@@ -438,13 +429,13 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     signal : Signal, None
         The Signal to be filterd. Pass None to create the filter without
         applying it.
-    frequency : number, array like
+    frequency : number
         Characteristic frequency of the shelve in Hz
-    gain : number, array like
+    gain : number
         Gain of the shelve in dB
-    order : number, array like
+    order : number
         The shelve order. Must be 1 or 2.
-    shelve_type : str, array like of strings
+    shelve_type : str
         Defines the characteristik frequency. The default is 'I'
 
         I   - defines the characteristic frequency 3 dB below the gain value if
@@ -469,13 +460,12 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     return output
 
 
-def low_shelve(signal, frequency, gain, order, shelve_type, sampling_rate):
+def low_shelve(signal, frequency, gain, order, shelve_type='I',
+               sampling_rate=None):
     """
     Create and apply first or second order low shelve filter.
 
-    All input parameters except `signal` and `sampling_rate` can also be array
-    likes of the same length to create multiple filters. Uses the
-    implementation of
+    Uses the implementation of
     https://github.com/spatialaudio/digital-signal-processing-lecture
     (audiofilter in the filter_design lecture)
 
@@ -484,13 +474,13 @@ def low_shelve(signal, frequency, gain, order, shelve_type, sampling_rate):
     signal : Signal, None
         The Signal to be filterd. Pass None to create the filter without
         applying it.
-    frequency : number, array like
+    frequency : number
         Characteristic frequency of the shelve in Hz
-    gain : number, array like
+    gain : number
         Gain of the shelve in dB
-    order : number, array like
+    order : number
         The shelve order. Must be 1 or 2.
-    shelve_type : str, array like of strings
+    shelve_type : str
         Defines the characteristik frequency. The default is 'I'
 
         I   - defines the characteristic frequency 3 dB below the gain value if
@@ -736,35 +726,30 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
             or (signal is not None and sampling_rate is not None):
         raise ValueError('Either signal or sampling_rate must be none.')
 
-    # check and tile filter parameter
-    p = _tile_filter_parameters([frequency, gain, order, shelve_type])
+    if shelve_type not in ['I', 'II', 'III']:
+        raise ValueError(("shelve_type must be 'I', 'II' or "
+                            f"'III' but is '{shelve_type}'.'"))
 
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
     # get filter coefficients
-    ba = np.zeros((p[0].size, 2, 3))
-    for n, (freq, gain, order, shelve_type) in \
-            enumerate(zip(p[0], p[1], p[2], p[3])):
+    ba = np.zeros((2, 3))
 
-        if shelve_type not in ['I', 'II', 'III']:
-            raise ValueError(("shelve_type must be 'I', 'II' or "
-                              f"'III' but is '{shelve_type}'.'"))
+    if order == 1 and kind == 'high':
+        shelve = iir.biquad_hshv1st
+    elif order != 2 and kind == 'high':
+        shelve = iir.biquad_hshv2nd
+    elif order == 1 and kind == 'low':
+        shelve = iir.biquad_lshv1st
+    elif order != 2 and kind == 'low':
+        shelve = iir.biquad_lshv2nd
+    else:
+        raise ValueError(f"order must be 1 or 2 but is {order}")
 
-        if order == 1 and kind == 'high':
-            shelve = iir.biquad_hshv1st
-        elif order != 2 and kind == 'high':
-            shelve = iir.biquad_hshv2nd
-        elif order == 1 and kind == 'low':
-            shelve = iir.biquad_lshv1st
-        elif order != 2 and kind == 'low':
-            shelve = iir.biquad_lshv2nd
-        else:
-            raise ValueError(f"order must be 1 or 2 but is {order}")
-
-        _, _, b, a = shelve(freq, gain, fs, shelve_type)
-        ba[n, 0] = b
-        ba[n, 1] = a
+    _, _, b, a = shelve(frequency, gain, fs, shelve_type)
+    ba[0] = b
+    ba[1] = a
 
     # generate filter object
     filt = FilterIIR(ba)
@@ -777,37 +762,3 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
         # return the filtered signal
         signal_filt = filt.process(signal)
         return signal_filt
-
-
-def _tile_filter_parameters(parameters: list):
-    """
-    Return parameters as list of flattend numpy arrays if sizes agree and raise
-    ValueError otherwise.
-
-    Parameters
-    ----------
-    parameters : list
-        parameters can be a mixture of single elements and array likes of the
-        same length, e.g., [parameter_1, ..., parameter_N]
-
-    Returns
-    -------
-    parameters : list
-        flattened list of input parameters tiled to be of the same length,
-        e.g., [np.array(parameter_1), ..., np.array(parameter_N)]
-    """
-
-    # cast to numpy arrays
-    params = [np.asarray(p).flatten() for p in parameters]
-    # check number of elements in each parameter
-    len_params = [p.size for p in params]
-    n_filter = max(len_params)
-    # check for equal length
-    for length in len_params:
-        if length > 1 and length != n_filter:
-            raise ValueError(
-                "All parameters must be scalar or have the same length.")
-    # tile
-    params = [np.tile(p, n_filter) if p.size == 1 else p for p in params]
-
-    return params
