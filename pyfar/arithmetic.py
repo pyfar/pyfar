@@ -1,48 +1,174 @@
 """Provide arithmethic operations for Signals and array like data."""
 
-# TODO: Account for signal_type in `_get_arithmetic_data`
-# TODO: return comment in `_assert_match_for_arithmetic`
-
 import numpy as np
 from typing import Callable
-from pyfar import Signal
+from pyfar.signal import Signal
+from pyfar.fft import normalization
 
 
 def add(data: tuple, domain='freq'):
+    """Add signals and/or array likes.
+
+    Parameters
+    ----------
+    data : tuple of the form (data_1, data_2, ..., data_N)
+        Data to be added. Can contain Signal objects, numbers, and, array
+        likes.
+    domain : 'time', 'freq'
+        Flag to indicate if the operation should be performed in the time or
+        frequency domain. If working in the frequency domain, the FFT
+        normalization is removed before the operation (See
+        pyfar.fft.normalization).
+
+    Returns
+    -------
+    results : Signal, numpy array
+        Result of the operation as numpy array, if `data` contains only array
+        likes and numbers. Result as Signal object if `data`contains a Signal.
+        The `Signal.domain` is set by the input parameter `domain`. The
+        `Signal.signal_type` is 'energy' if `data` contains only energy
+        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
+        first signal in `data`.
+
+    """
     return _arithmetic(data, domain, _add)
 
 
 def subtract(data: tuple, domain='freq'):
+    """Subtract signals and/or array likes.
+
+    Parameters
+    ----------
+    data : tuple of the form (data_1, data_2, ..., data_N)
+        Data to be subtracted. Can contain Signal objects, numbers, and, array
+        likes.
+    domain : 'time', 'freq'
+        Flag to indicate if the operation should be performed in the time or
+        frequency domain. If working in the frequency domain, the FFT
+        normalization is removed before the operation (See
+        pyfar.fft.normalization).
+
+    Returns
+    -------
+    results : Signal, numpy array
+        Result of the operation as numpy array, if `data` contains only array
+        likes and numbers. Result as Signal object if `data`contains a Signal.
+        The `Signal.domain` is set by the input parameter `domain`. The
+        `Signal.signal_type` is 'energy' if `data` contains only energy
+        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
+        first signal in `data`.
+
+    """
     return _arithmetic(data, domain, _subtract)
 
 
 def multiply(data: tuple, domain='freq'):
+    """Multiply signals and/or array likes.
+
+    Parameters
+    ----------
+    data : tuple of the form (data_1, data_2, ..., data_N)
+        Data to be multiplied. Can contain Signal objects, numbers, and, array
+        likes.
+    domain : 'time', 'freq'
+        Flag to indicate if the operation should be performed in the time or
+        frequency domain. If working in the frequency domain, the FFT
+        normalization is removed before the operation (See
+        pyfar.fft.normalization).
+
+    Returns
+    -------
+    results : Signal, numpy array
+        Result of the operation as numpy array, if `data` contains only array
+        likes and numbers. Result as Signal object if `data`contains a Signal.
+        The `Signal.domain` is set by the input parameter `domain`. The
+        `Signal.signal_type` is 'energy' if `data` contains only energy
+        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
+        first signal in `data`.
+
+    """
     return _arithmetic(data, domain, _multiply)
 
 
 def divide(data: tuple, domain='freq'):
+    """Divide signals and/or array likes.
+
+    Parameters
+    ----------
+    data : tuple of the form (data_1, data_2, ..., data_N)
+        Data to be divided. Can contain Signal objects, numbers, and, array
+        likes.
+    domain : 'time', 'freq'
+        Flag to indicate if the operation should be performed in the time or
+        frequency domain. If working in the frequency domain, the FFT
+        normalization is removed before the operation (See
+        pyfar.fft.normalization).
+
+    Returns
+    -------
+    results : Signal, numpy array
+        Result of the operation as numpy array, if `data` contains only array
+        likes and numbers. Result as Signal object if `data`contains a Signal.
+        The `Signal.domain` is set by the input parameter `domain`. The
+        `Signal.signal_type` is 'energy' if `data` contains only energy
+        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
+        first signal in `data`.
+
+    """
     return _arithmetic(data, domain, _divide)
 
 
 def power(data: tuple, domain='freq'):
+    """Power of signals and/or array likes.
+
+    Parameters
+    ----------
+    data : tuple of the form (data_1, data_2, ..., data_N)
+        Data to be powerd. Can contain Signal objects, numbers, and, array
+        likes.
+    domain : 'time', 'freq'
+        Flag to indicate if the operation should be performed in the time or
+        frequency domain. If working in the frequency domain, the FFT
+        normalization is removed before the operation (See
+        pyfar.fft.normalization).
+
+    Returns
+    -------
+    results : Signal, numpy array
+        Result of the operation as numpy array, if `data` contains only array
+        likes and numbers. Result as Signal object if `data`contains a Signal.
+        The `Signal.domain` is set by the input parameter `domain`. The
+        `Signal.signal_type` is 'energy' if `data` contains only energy
+        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
+        first signal in `data`.
+
+    """
     return _arithmetic(data, domain, _power)
 
 
 def _arithmetic(data: tuple, domain: str, operation: Callable):
-    print('WIP, fft normalization not considered yet')
+    """Apply arithmetic operations."""
 
     # check input and obtain meta data of new signal
-    sampling_rate, n_samples, signal_type = \
+    sampling_rate, n_samples, signal_type, fft_norm = \
         _assert_match_for_arithmetic(data, domain)
 
-    result = _get_arithmetic_data(data[0], domain, signal_type)
+    # apply arithmetic operation
+    result = _get_arithmetic_data(data[0], n_samples, domain)
 
     for d in range(1, len(data)):
         result = operation(
-            result, _get_arithmetic_data(data[d], domain, signal_type))
+            result, _get_arithmetic_data(data[d], n_samples, domain))
 
+    # check if to retun as Signal
     if sampling_rate is not None:
-        result = Signal(result, sampling_rate, n_samples, domain, signal_type)
+        # apply desried fft normalization
+        if domain == 'freq':
+            result = normalization(result, n_samples, sampling_rate,
+                                   signal_type, fft_norm)
+
+        result = Signal(
+            result, sampling_rate, n_samples, domain, signal_type, fft_norm)
 
     return result
 
@@ -64,13 +190,16 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     Returns
     -------
     sampling_rate : number, None
-        sampling rate of the signals. None, if no signal is contained in `data`
+        Sampling rate of the signals. None, if no signal is contained in `data`
     n_samples : number, None
-        number of samples of the signals. None, if no signal is contained in
+        Number of samples of the signals. None, if no signal is contained in
         `data`
     signal_type : str, None
         'energy' if all signaly are of type energy. 'power' if any power signal
         is contained in `data`. None if no signal is contained in `data`
+    fft_norm : str, None
+        FFT norm of the first signal in `data`. None if no signal is contained
+        in `data`.
 
     """
 
@@ -86,6 +215,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     sampling_rate = None
     n_samples = None
     signal_type = None
+    fft_norm = None
     for d in data:
         # check or store meta data of signals
         if isinstance(d, Signal):
@@ -93,6 +223,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                 sampling_rate = d.sampling_rate
                 n_samples = d.n_samples
                 signal_type = d.signal_type
+                fft_norm = d.fft_norm
             else:
                 if sampling_rate != d.sampling_rate:
                     raise ValueError("The sampling rates do not match.")
@@ -115,32 +246,47 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 
-    return sampling_rate, n_samples, signal_type
+    return sampling_rate, n_samples, signal_type, fft_norm
 
 
-def _get_arithmetic_data(data, domain, signal_type):
-    """Return data for arithmetic operations.
+def _get_arithmetic_data(data, n_samples, domain):
+    """
+    Return data in desired domain without any fft normalization.
+
+    Parameters
+    ----------
+    data : Signal, array like, number
+        Input data
+    n_samples :
+        Number of samples of data if data is a Signal (required for fft
+        normalization).
+    domain : 'time', 'freq'
+        Domain in which the data is returned
 
     Returns
     -------
     data_out : numpy array
-        signal data as np.array according to `domain` and `signal_type` if data
-        is a Signal and np.array containing `data` otherwise.
+        Data in desired domain without any fft normlaization if data is a
+        Signal. `np.asarray(data)` otherwise.
     """
     if isinstance(data, Signal):
+
         # get signal in correct domain
         if domain == "time":
             data_out = data.time.copy()
         elif domain == "freq":
             data_out = data.freq.copy()
+
+            if data.signal_type == 'power':
+                # remove current fft normalization
+                data_out = normalization(
+                    data_out, n_samples, data.sampling_rate,
+                    'power', data.fft_norm, inverse=True)
+
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")
-        # change signal type
-        if domain == "freq" and signal_type != data.signal_type:
-            # TODO: adjust signal type after normalization is available from
-            #       fft module
-            data_out = data_out
+
     else:
         data_out = np.asarray(data)
 
