@@ -30,7 +30,7 @@ URL = ('https://github.com/spatialaudio/'
        'filter_design')
 """
 import matplotlib.pyplot as plt
-from matplotlib.markers import MarkerStyle
+from matplotlib.markers import MarkerStyle  # noqa: F401
 from matplotlib.patches import Circle
 import numpy as np
 from scipy import signal
@@ -366,8 +366,8 @@ def biquad_peq2nd(fm, G, q, fs, filter_type="III", q_warp_method="cos"):
         gamma = g**0.5
         delta = g**0.5
     else:
-        gamma = unknown_filter_type  # TBD: try except
-        delta = unknown_filter_type
+        gamma = unknown_filter_type  # TBD: try except # noqa: F821
+        delta = unknown_filter_type     # noqa: F821
     if np.isclose(G, 0, rtol=1e-05, atol=1e-08, equal_nan=False):
         B = np.array([0., 0, 1])  # flat EQ
         A = B
@@ -493,7 +493,7 @@ def biquad_lshv1st(fc, G, fs, filter_type="III"):
     elif filter_type == "III":  # one-half pad loss, midpoint
         alpha = g**0.25
     else:
-        alpha = unknown_filter_type  # try except TBD
+        alpha = unknown_filter_type  # try except TBD # noqa: F821
     if np.isclose(G, 0, rtol=1e-05, atol=1e-08, equal_nan=False):
         B = np.array([0., 0, 1])  # flat EQ
         A = B
@@ -543,7 +543,7 @@ def biquad_lshv2nd(fc, G, fs,
     elif filter_type == "III":  # one-half pad loss, midpoint
         alpha = g**0.25
     else:
-        alpha = unknown_filter_type  # try except TBD
+        alpha = unknown_filter_type  # try except TBD # noqa: F821
     if np.isclose(G, 0, rtol=1e-05, atol=1e-08, equal_nan=False):
         B = np.array([0., 0, 1])  # flat EQ
         A = B
@@ -668,7 +668,7 @@ def biquad_hshv1st(fc, G, fs, filter_type="III"):
     elif filter_type == "III":  # one-half pad loss, midpoint
         alpha = g**0.25
     else:
-        alpha = unknown_filter_type  # try except TBD
+        alpha = unknown_filter_type  # try except TBD # noqa: F821
     if np.isclose(G, 0, rtol=1e-05, atol=1e-08, equal_nan=False):
         B = np.array([0., 0, 1])  # flat EQ
         A = B
@@ -718,7 +718,7 @@ def biquad_hshv2nd(fc, G, fs,
     elif filter_type == "III":  # one-half pad loss, midpoint
         alpha = g**0.25
     else:
-        alpha = unknown_filter_type  # try except TBD
+        alpha = unknown_filter_type  # try except TBD # noqa: F821
     if np.isclose(G, 0, rtol=1e-05, atol=1e-08, equal_nan=False):
         B = np.array([0., 0, 1])  # flat EQ
         A = B
