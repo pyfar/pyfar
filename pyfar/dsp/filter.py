@@ -186,11 +186,29 @@ class Filter(object):
 
 
 class FilterFIR(Filter):
+    """
+    Filter object for FIR filters.
+    """
     def __init__(
             self,
             coefficients,
             filter_func=lfilter):
+        """
+        Initialize a general Filter object.
 
+        Parameters
+        ----------
+        coefficients : array, double
+            The filter coefficients as an array with dimensions
+            (n_channels_filter, num_coefficients)
+        filter_func : default, zerophase
+            Default applies a direct form II transposed time domain filter
+            based on the standard difference equation. Zerophase uses
+            the same filter twice, first forward, then backwards resulting
+            in zero phase.
+        state : array, optional
+            The state of the filter from a priory knowledge.
+        """
         b = np.atleast_2d(coefficients)
         a = np.zeros_like(b)
         a[..., 0] = 1
@@ -215,11 +233,29 @@ class FilterFIR(Filter):
 
 
 class FilterIIR(Filter):
+    """
+    Filter object for IIR filters. For IIR filters with high orders, second
+    order section IIR filters using FilterSOS should be considered.
+    """
     def __init__(
             self,
             coefficients,
             filter_func=lfilter):
         """IIR filter
+        Initialize a general Filter object.
+
+        Parameters
+        ----------
+        coefficients : array, double
+            The filter coefficients as an array, with shape
+            (n_filter_channels, n_coefficients_num, n_coefficients_denom)
+        filter_func : default, zerophase
+            Default applies a direct form II transposed time domain filter
+            based on the standard difference equation. Zerophase uses
+            the same filter twice, first forward, then backwards resulting
+            in zero phase.
+        state : array, optional
+            The state of the filter from a priory knowledge.
         """
         coeff = np.atleast_2d(coefficients)
         super().__init__(coefficients=coeff)
@@ -241,10 +277,30 @@ class FilterIIR(Filter):
 
 
 class FilterSOS(Filter):
+    """
+    Filter object for IIR filters as second order sections.
+    """
     def __init__(
             self,
             coefficients,
             filter_func=sosfilt):
+        """
+        Initialize a general Filter object.
+
+        Parameters
+        ----------
+        coefficients : array, double
+            The filter coefficients as an array with dimensions
+            (n_filter_chan, n_sections, 6)
+        filter_func : default, zerophase
+            Default applies a direct form II transposed time domain filter
+            based on the standard difference equation. Zerophase uses
+            the same filter twice, first forward, then backwards resulting
+            in zero phase.
+        state : array, optional
+            The state of the filter from a priory knowledge.
+
+        """
         coeff = np.atleast_2d(coefficients)
         if coeff.shape[-1] != 6:
             raise ValueError(
