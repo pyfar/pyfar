@@ -4,7 +4,7 @@ Data Container Classes
 Audio Data Classes
 ==================
 
-.. automodule:: pyfar.pyfar
+.. automodule:: pyfar.signal
    :members:
    :undoc-members:
    :show-inheritance:
