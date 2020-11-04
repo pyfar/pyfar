@@ -9,6 +9,10 @@ Audio Data Classes
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: pyfar.dsp.filter
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Coordinate Data Classes
 =======================
