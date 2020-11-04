@@ -52,8 +52,7 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     frequency_norm = np.asarray(frequency) / fs * 2
 
     # get filter coefficients
-    sos = spsignal.butter(N, frequency_norm, btype, analog=False,
-                          output='sos', fs=sampling_rate)
+    sos = spsignal.butter(N, frequency_norm, btype, analog=False, output='sos')
 
     # generate filter object
     filt = FilterSOS(sos)
@@ -115,7 +114,7 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
 
     # get filter coefficients
     sos = spsignal.cheby1(N, ripple, frequency_norm, btype, analog=False,
-                          output='sos', fs=sampling_rate)
+                          output='sos')
 
     # generate filter object
     filt = FilterSOS(sos)
@@ -178,7 +177,7 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
 
     # get filter coefficients
     sos = spsignal.cheby2(N, attenuation, frequency_norm, btype, analog=False,
-                          output='sos', fs=sampling_rate)
+                          output='sos')
 
     # generate filter object
     filt = FilterSOS(sos)
@@ -243,7 +242,7 @@ def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
 
     # get filter coefficients
     sos = spsignal.ellip(N, ripple, attenuation, frequency_norm, btype,
-                         analog=False, output='sos', fs=sampling_rate)
+                         analog=False, output='sos')
 
     # generate filter object
     filt = FilterSOS(sos)
@@ -323,7 +322,7 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
 
     # get filter coefficients
     sos = spsignal.bessel(N, frequency_norm, btype, analog=False,
-                          output='sos', norm=norm, fs=sampling_rate)
+                          output='sos', norm=norm)
 
     # generate filter object
     filt = FilterSOS(sos)
