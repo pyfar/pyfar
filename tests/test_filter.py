@@ -2,7 +2,7 @@ import pytest
 from unittest import mock
 import numpy as np
 import numpy.testing as npt
-import pyfar.dsp.filter as hpfilter
+import pyfar.dsp.classes as hpfilter
 from pyfar import Signal
 
 
