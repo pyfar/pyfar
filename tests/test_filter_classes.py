@@ -2,30 +2,30 @@ import pytest
 from unittest import mock
 import numpy as np
 import numpy.testing as npt
-import pyfar.dsp.classes as hpfilter
+import pyfar.dsp.classes as fo
 from pyfar import Signal
 
 
 def test_filter_init_empty_coefficients():
-    filt = hpfilter.Filter(coefficients=None, state=None)
+    filt = fo.Filter(coefficients=None, state=None)
     assert filt._coefficients is None
     assert filt._state is None
 
 
 def test_filter_init_empty_coefficients_with_state():
     with pytest.raises(ValueError):
-        hpfilter.Filter(coefficients=None, state=[1, 0])
+        fo.Filter(coefficients=None, state=[1, 0])
 
 
 def test_filter_init():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
-    filt = hpfilter.Filter(coefficients=coeff)
+    filt = fo.Filter(coefficients=coeff)
     npt.assert_array_equal(filt._coefficients, coeff)
 
 
 def test_filter_init_empty_state():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
-    filt = hpfilter.Filter(coefficients=coeff, state=None)
+    filt = fo.Filter(coefficients=coeff, state=None)
     npt.assert_array_equal(filt._coefficients, coeff)
     assert filt._state is None
 
@@ -33,21 +33,21 @@ def test_filter_init_empty_state():
 def test_filter_init_with_state():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
     state = np.array([[[1, 0]]])
-    filt = hpfilter.Filter(coefficients=coeff, state=state)
+    filt = fo.Filter(coefficients=coeff, state=state)
     npt.assert_array_equal(filt._coefficients, coeff)
     npt.assert_array_equal(filt._state, state)
 
 
 def test_filter_iir_init():
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
-    filt = hpfilter.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff)
     npt.assert_array_equal(filt._coefficients, coeff[np.newaxis])
 
 
 def test_filter_fir_init():
     coeff = np.array([1, 1/2, 0])
     desired = np.array([[[1, 1/2, 0], [1, 0, 0]]])
-    filt = hpfilter.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff)
     npt.assert_array_equal(filt._coefficients, desired)
 
 
@@ -59,25 +59,25 @@ def test_filter_fir_init_multi_dim():
         [[1, 1/2, 0], [1, 0, 0]],
         [[1, 1/4, 1/8], [1, 0, 0]]
         ])
-    filt = hpfilter.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff)
     npt.assert_array_equal(filt._coefficients, desired)
 
 
 def test_filter_sos_init():
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = hpfilter.FilterSOS(sos)
+    filt = fo.FilterSOS(sos)
     npt.assert_array_equal(filt._coefficients, sos[np.newaxis])
 
 
 def test_filter_iir_process(impulse_mock):
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
-    filt = hpfilter.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:3], coeff[0])
 
     coeff = np.array([[1, 1/2, 0], [1, 1/8, 0]])
-    filt = hpfilter.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff)
     res = filt.process(impulse_mock)
 
     desired = np.array([
@@ -421,7 +421,7 @@ def test_filter_iir_process(impulse_mock):
 
 def test_filter_fir_process(impulse_mock):
     coeff = np.array([1, 1/2, 0])
-    filt = hpfilter.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:3], coeff)
@@ -431,7 +431,7 @@ def test_filter_iir_process_multi_dim_filt(impulse_mock):
     coeff = np.array([
         [[1, 1/2, 0], [1, 0, 0]],
         [[1, 1/4, 0], [1, 0, 0]]])
-    filt = hpfilter.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff)
 
     res = filt.process(impulse_mock)
 
@@ -443,19 +443,19 @@ def test_filter_fir_process_multi_dim_filt(impulse_mock):
         [1, 1/2, 0],
         [1, 1/4, 0]])
 
-    filt = hpfilter.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff)
     res = filt.process(impulse_mock)
     npt.assert_allclose(res.time[:, :3], coeff)
 
 
 def test_filter_sos_process(impulse_mock):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = hpfilter.FilterSOS(sos)
+    filt = fo.FilterSOS(sos)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     # coeff = np.array([
     #     [[1, 1/2, 0], [1, 0, 0]],
     #     [[1, 1/4, 0], [1, 0, 0]]])
-    filt = hpfilter.FilterSOS(sos)
+    filt = fo.FilterSOS(sos)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:3], coeff[0])
@@ -468,7 +468,7 @@ def test_filter_sos_process_multi_dim_filt(impulse_mock):
     coeff = np.array([
         [[1, 1/2, 0], [1, 0, 0]],
         [[1, 1/4, 0], [1, 0, 0]]])
-    filt = hpfilter.FilterSOS(sos)
+    filt = fo.FilterSOS(sos)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:, :3], coeff[:, 0])
@@ -478,17 +478,17 @@ def test_atleast_3d_first_dim():
     arr = np.array([1, 0, 0])
     desired = np.array([[[1, 0, 0]]])
 
-    arr_3d = hpfilter.atleast_3d_first_dim(arr)
+    arr_3d = fo.atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
     arr = np.array([[1, 0, 0], [2, 2, 2]])
 
     desired = np.array([[[1, 0, 0], [2, 2, 2]]])
-    arr_3d = hpfilter.atleast_3d_first_dim(arr)
+    arr_3d = fo.atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
 
     arr = np.ones((2, 3, 5))
     desired = arr.copy()
-    arr_3d = hpfilter.atleast_3d_first_dim(arr)
+    arr_3d = fo.atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
 
 
