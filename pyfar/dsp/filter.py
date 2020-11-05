@@ -1062,3 +1062,61 @@ def _frequency_indices(frequencies, num_fractions):
             np.log(frequencies/reference_freq) / np.log(octave_ratio) - 1)/2
 
     return indices
+
+
+def filter_fractional_octave_bands(
+        samplingrate, num_fractions,
+        freq_range=(20.0, 20e3), order=14):
+    """Create a fractional octave filter bank.
+
+    Parameters
+    ----------
+    samplingrate : integer
+        samplingrate of the signal
+    num_fractions : integer
+        number of octave fractions
+    order : integer, optional
+        order of the butterworth filter
+
+    Returns
+    -------
+    filter
+
+    Notes
+    -----
+    This function uses second order sections of butterworth filters for
+    increased numeric accuracy and stability.
+    """
+
+    if num_fractions not in (1, 3):
+        raise ValueError("This currently supports only octave and third \
+                octave band filters.")
+
+    octave_ratio = 10**(3/10)
+
+    nominal, exact = center_frequencies_fractional_octaves(num_fractions)
+    mask_frequencies = (nominal > freq_range[0]) & (nominal < freq_range[1])
+
+    nominal = nominal[mask_frequencies]
+    exact = exact[mask_frequencies]
+
+    sos = np.zeros((exact.size, order, 6), np.double)
+
+    for idx, band in enumerate(range(0, exact.size)):
+        freq_upper = exact[band] * octave_ratio**(1/2/num_fractions)
+        freq_lower = exact[band] * octave_ratio**(-1/2/num_fractions)
+
+        # normalize interval such that the Nyquist frequency is 1
+        Wn = np.array([freq_lower, freq_upper]) / samplingrate * 2
+        # in case the upper frequency limit is above Nyquist, use a highpass
+        if Wn[-1] > 1:
+            warnings.warn('Your upper frequency limit [{}] is above the \
+                Nyquist frequency. Using a highpass filter instead of a \
+                bandpass'.format(freq_upper))
+            Wn = Wn[0]
+            btype = 'highpass'
+        else:
+            btype = 'bandpass'
+        sos[idx, :, :] = spsignal.butter(order, Wn, btype=btype, output='sos')
+
+    return sos
