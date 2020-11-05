@@ -1,4 +1,13 @@
-"""Provide Container class and arithmethic operations for audio signals."""
+"""
+Provide a Container class and arithmethic operations for audio signals.
+
+Arithmetic operations can be done on the time and frequency domain data. They
+are implemented in `add`, `subtract`, `multiply`, `divide`, and `power`. The
+operators `+`, `-`, `*`, `/`, and `**` are overloaded with the corresponding
+arithmetic operations in the frequency domain. For time domain operations, the
+functions have to be called explicitly. These the function documentation for
+more details.
+"""
 
 import warnings
 import numpy as np
