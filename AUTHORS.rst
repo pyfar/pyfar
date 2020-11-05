@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* The haiopy developers
+* The pyfar developers
 
 Contributors
 ------------

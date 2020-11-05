@@ -7,8 +7,8 @@ from unittest import mock
 import os.path
 import scipy.io.wavfile as wavfile
 
-from haiopy import io
-from haiopy import Signal
+from pyfar import io
+from pyfar import Signal
 
 from test_io_data.generate_test_io_data import reference_signal
 from test_io_data.generate_test_io_data import reference_coordinates
