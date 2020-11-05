@@ -967,3 +967,98 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
         # return the filtered signal
         signal_filt = filt.process(signal)
         return signal_filt
+
+
+def center_frequencies_fractional_octaves(num_fractions=1):
+    """Return the octave center frequencies according to the IEC 61260:1:2014
+    standard.
+    Returns
+    -------
+    frequencies : ndarray, float
+        Octave center frequencies
+    """
+    if num_fractions == 1:
+        nominal = np.array([
+            31.5, 63, 125, 250, 500, 1e3,
+            2e3, 4e3, 8e3, 16e3], dtype=np.float)
+    elif num_fractions == 3:
+        nominal = np.array([
+            25, 31.5, 40, 50, 63, 80, 100, 125, 160,
+            200, 250, 315, 400, 500, 630, 800, 1000,
+            1250, 1600, 2000, 2500, 3150, 4000, 5000,
+            6300, 8000, 10000, 12500, 16000, 20000], dtype=np.float)
+    else:
+        raise ValueError(
+            "Number of fractions can only be 1 for octaves"
+            "or 3 for third octaves.")
+    indices = _frequency_indices(nominal, num_fractions)
+    exact = exact_center_frequencies_fractional_octaves(indices, num_fractions)
+
+    return nominal, exact
+
+
+def exact_center_frequencies_fractional_octaves(indices, num_fractions):
+    """Returns the exact center frequencies for fractional octave bands
+    according to the IEC 61260:1:2014 standard.
+    octave ratio
+    .. G = 10^{3/10}
+    center frequencies
+    .. f_m = f_r G^{x/b}
+    .. f_m = f_e G^{(2x+1)/(2b)}
+    where b is the number of octave fractions, f_r is the reference frequency
+    chosen as 1000Hz and x is the index of the frequency band.
+    Parameters
+    ----------
+    indices : array
+        The indices for which the center frequencies are calculated.
+    num_fractions : 1, 3
+        The number of octave fractions. 1 returns octave center frequencies,
+        3 returns third octave center frequencies.
+    Returns
+    -------
+    frequencies : ndarray, float
+        center frequencies of the fractional octave bands
+    """
+
+    reference_freq = 1e3
+    octave_ratio = 10**(3/10)
+
+    iseven = np.mod(num_fractions, 2) == 0
+    if ~iseven:
+        exponent = (indices/num_fractions)
+    else:
+        exponent = ((2*indices + 1) / num_fractions / 2)
+
+    center_freq = reference_freq * octave_ratio**exponent
+
+    return center_freq
+
+
+def _frequency_indices(frequencies, num_fractions):
+    """Return the indices for fractional octave filters.
+    Parameters
+    ----------
+    frequencies : array
+        The nominal frequencies for which the indices for exact center
+        frequency calculation are to be calculated.
+    num_fractions : 1, 3
+        Number of fractional bands
+    Returns
+    -------
+    indices : array
+        The indices for exact center frequency calculation.
+    """
+    reference_freq = 1e3
+    octave_ratio = 10**(3/10)
+
+    iseven = np.mod(num_fractions, 2) == 0
+    if ~iseven:
+        indices = np.around(
+            num_fractions * np.log(frequencies/reference_freq)
+            / np.log(octave_ratio))
+    else:
+        indices = np.around(
+            2.0*num_fractions *
+            np.log(frequencies/reference_freq) / np.log(octave_ratio) - 1)/2
+
+    return indices
