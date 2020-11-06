@@ -67,7 +67,8 @@ def test_write_wav_nd(signal_mock_nd):
 
 
 def test_read_sofa_signal():
-    # DataType FIR
+    """Test for sofa signal properties"""
+    # Correct DataType
     filename = os.path.join(baseline_path, 'GeneralFIR.sofa')
     signal = io.read_sofa(filename)[0]
     signal_ref = reference_signal(signal.shape)[0]
@@ -75,17 +76,19 @@ def test_read_sofa_signal():
             signal.time,
             signal_ref,
             rtol=1e-10)
-    # Check for DataType
+    # Wrong DataType
     filename = os.path.join(baseline_path, 'GeneralTF.sofa')
     with pytest.raises(ValueError):
         io.read_sofa(filename)
-    # Check for unit
+    # Wrong sampling rate Unit
     filename = os.path.join(baseline_path, 'GeneralFIR_unit.sofa')
     with pytest.raises(ValueError):
         io.read_sofa(filename)
 
 
 def test_read_sofa_coordinates():
+    """Test for sofa cooridnate properties"""
+    # Correct coordinates
     filename = os.path.join(baseline_path, 'GeneralFIR.sofa')
     source_coordinates = io.read_sofa(filename)[1]
     receiver_coordinates = io.read_sofa(filename)[2]
@@ -99,7 +102,7 @@ def test_read_sofa_coordinates():
             receiver_coordinates.get_cart(),
             receiver_coordinates_ref[:, :, 0],
             rtol=1e-10)
-    # Check for PositionType
+    # Wrong PositionType
     filename = os.path.join(baseline_path, 'GeneralFIR_postype.sofa')
     with pytest.raises(ValueError):
         io.read_sofa(filename)
