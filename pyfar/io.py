@@ -112,8 +112,16 @@ def read_sofa(filename):
     Returns
     -------
     signal : signal instance
-        An audio signal object from the haiopy Signal class
-        containing the data from the WAV file.
+        An audio signal object from the pyfar Signal class
+        containing the IR data from the SOFA file.
+    source_coordinates: coordinates instance
+        An object from the pyfar Coordinates class containing
+        the source coordinates from the SOFA file
+        with matching domain, convention and unit.
+    receiver_coordinates: coordinates instance
+        An object from the pyfar Coordinates class containing
+        the receiver coordinates from the SOFA file
+        with matching domain, convention and unit.
 
     Notes
     -----
@@ -122,7 +130,8 @@ def read_sofa(filename):
 
     References
     ----------
-    .. [1] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
+    .. [1] www.sofaconventions.org
+    .. [2] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
        File Format.”, 2015.
 
     """
