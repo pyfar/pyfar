@@ -1,23 +1,14 @@
-## General
+### Which issue(s) are closed by this pull request?
 
-* pyfar version:
-* Python version:
-* Operating System:
-* Did you install pyfar via pip:
+Closes #
 
-## Description
+### Changes proposed in this pull request:
 
-Describe what you were trying to get done.
-Tell us what happened, what went wrong, and what you expected to happen.
+-
+-
+-
 
-## What I Did
-
-```
-Paste the command(s) you ran and the output.
-If there was a crash, please include the traceback here.
-```
-
-## Labels
+### Labels
 
 Label your issue to make it easier for us to assign and track:
 

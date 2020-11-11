@@ -2,12 +2,10 @@
 Credits
 =======
 
-Development Lead
+The pyfar developers
 ----------------
 
-* The pyfar developers
-
-Contributors
-------------
-
-None yet. Why not be the first?
+- Marco Berzborn
+- Fabian Brinkmann
+- Kai Jurgeit
+- Simon Kersten
