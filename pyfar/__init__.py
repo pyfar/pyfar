@@ -13,6 +13,7 @@ from .orientations import Orientations
 
 from . import plot as plot
 from . import spatial
+from . import io
 
 
-__all__ = ['Signal', 'Coordinates', 'Orientations', 'plot', 'spatial']
+__all__ = ['Signal', 'Coordinates', 'Orientations', 'plot', 'spatial', 'io']

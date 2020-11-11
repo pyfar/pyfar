@@ -1,8 +1,11 @@
 import scipy.io.wavfile as wavfile
 import os.path
 import warnings
+import numpy as np
+import sofa
 
 from pyfar import Signal
+from pyfar import Coordinates
 
 
 def read_wav(filename):
@@ -95,3 +98,91 @@ def write_wav(signal, filename, overwrite=True):
                 "use overwrite option to disable error.")
     else:
         wavfile.write(filename, sampling_rate, data.T)
+
+
+def read_sofa(filename):
+    """
+    Import a SOFA file as signal object.
+
+    Parameters
+    ----------
+    filename : string or open file handle
+        Input wav file.
+
+    Returns
+    -------
+    signal : signal instance
+        An audio signal object from the pyfar Signal class
+        containing the IR data from the SOFA file.
+    source_coordinates: coordinates instance
+        An object from the pyfar Coordinates class containing
+        the source coordinates from the SOFA file
+        with matching domain, convention and unit.
+    receiver_coordinates: coordinates instance
+        An object from the pyfar Coordinates class containing
+        the receiver coordinates from the SOFA file
+        with matching domain, convention and unit.
+
+    Notes
+    -----
+    * This function is based on the python-sofa package.
+    * Only SOFA files of DataType 'FIR' are supported.
+
+    References
+    ----------
+    .. [1] www.sofaconventions.org
+    .. [2] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
+       File Format.”, 2015.
+
+    """
+    sofafile = sofa.Database.open(filename)
+    # Check for DataType
+    if sofafile.Data.Type == 'FIR':
+        domain = 'time'
+        data = np.asarray(sofafile.Data.IR)
+        sampling_rate = sofafile.Data.SamplingRate.get_values()
+        # Check for units
+        if sofafile.Data.SamplingRate.Units != 'hertz':
+            raise ValueError(
+                "SamplingRate:Units"
+                "{sofafile.Data.SamplingRate.Units} is not supported.")
+    else:
+        raise ValueError("DataType {sofafile.Data.Type} is not supported.")
+    signal = Signal(data, sampling_rate, domain=domain)
+
+    # Source
+    s_values = sofafile.Source.Position.get_values()
+    s_domain, s_convention, s_unit = _sofa_pos(sofafile.Source.Position.Type)
+    source_coordinates = Coordinates(
+            s_values[:, 0],
+            s_values[:, 1],
+            s_values[:, 2],
+            domain=s_domain,
+            convention=s_convention,
+            unit=s_unit)
+    # Receiver
+    r_values = sofafile.Receiver.Position.get_values()
+    r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
+    receiver_coordinates = Coordinates(
+            r_values[:, 0],
+            r_values[:, 1],
+            r_values[:, 2],
+            domain=r_domain,
+            convention=r_convention,
+            unit=r_unit)
+
+    return signal, source_coordinates, receiver_coordinates
+
+
+def _sofa_pos(pos_type):
+    if pos_type == 'spherical':
+        domain = 'sph'
+        convention = 'top_elev'
+        unit = 'deg'
+    elif pos_type == 'cartesian':
+        domain = 'cart'
+        convention = 'right'
+        unit = 'met'
+    else:
+        raise ValueError("Position:Type {pos_type} is not supported.")
+    return domain, convention, unit
