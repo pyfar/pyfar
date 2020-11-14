@@ -343,10 +343,18 @@ class Signal(Audio):
         """String representation of signal class.
         """
         repr_string = (
-            "Audio Signal\n"
-            "--------------------\n"
-            "{} channels with {} samples @ {} Hz sampling rate".format(
-                self.cshape, self.n_samples, self._sampling_rate))
+            f"{self.domain} domain audio Signal\n"
+            "--------------------------------\n"
+            f"{self.cshape} channels with {self.n_samples} samples @ "
+            f"{self._sampling_rate} Hz sampling rate\n"
+            f"Sinal type: {self.signal_type}\n"
+            f"FFT normalisation: {self.fft_norm}\n"
+            f"Comment: ")
+        if self.comment is not None:
+            repr_string += f"{self.comment}\n"
+        else:
+            repr_string += "None\n"
+
         return repr_string
 
     def __getitem__(self, key):
