@@ -54,6 +54,8 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
 
     # generate filter object
     filt = FilterSOS(sos)
+    filt.comment = (f"Butterworth {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz.")
 
     # return the filter object
     if signal is None:
@@ -116,6 +118,9 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
 
     # generate filter object
     filt = FilterSOS(sos)
+    filt.comment = (f"Chebychev Type I {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz. "
+                    f"Passband ripple {ripple} dB.")
 
     # return the filter object
     if signal is None:
@@ -179,6 +184,9 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
 
     # generate filter object
     filt = FilterSOS(sos)
+    filt.comment = (f"Chebychev Type II {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz. "
+                    f"Stop band attentuation {attenuation} dB.")
 
     # return the filter object
     if signal is None:
@@ -244,6 +252,10 @@ def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
 
     # generate filter object
     filt = FilterSOS(sos)
+    filt.comment = (f"Elliptic (Cauer) {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz. "
+                    f"Pass band ripple {ripple} dB. "
+                    f"Stop band attentuation {attenuation} dB.")
 
     # return the filter object
     if signal is None:
@@ -324,6 +336,8 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
 
     # generate filter object
     filt = FilterSOS(sos)
+    filt.comment = (f"Bessel/Thomson {btype} of order {N} and '{norm}' "
+                    f"normalization. Cut-off frequency {frequency} Hz.")
 
     # return the filter object
     if signal is None:
@@ -401,6 +415,9 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
 
     # generate filter object
     filt = FilterIIR(ba)
+    filt.comment = ("Second order parametric equalizer (PEQ) "
+                    f"of type {peq_type} with {gain} dB gain at "
+                    f"{center_frequency} Hz (Quality = {quality}).")
 
     # return the filter object
     if signal is None:
@@ -592,6 +609,9 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     # generate filter object
     filt = FilterSOS(SOS)
+    freq_list = [f for f in np.asarray(frequency)]
+    filt.comment = (f"Linkwitz-Riley cross over network of order {N*2} at "
+                    f"{', '.join(freq_list)} Hz.")
 
     # return the filter object
     if signal is None:
@@ -628,11 +648,11 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 
     if order == 1 and kind == 'high':
         shelve = iir.biquad_hshv1st
-    elif order != 2 and kind == 'high':
+    elif order == 2 and kind == 'high':
         shelve = iir.biquad_hshv2nd
     elif order == 1 and kind == 'low':
         shelve = iir.biquad_lshv1st
-    elif order != 2 and kind == 'low':
+    elif order == 2 and kind == 'low':
         shelve = iir.biquad_lshv2nd
     else:
         raise ValueError(f"order must be 1 or 2 but is {order}")
@@ -643,6 +663,9 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 
     # generate filter object
     filt = FilterIIR(ba)
+    order_str = "First" if order == 1 else "Second"
+    filt.comment = (f"{order_str} order {kind}-shelve of type {shelve_type} "
+                    f"with {gain} dB gain at {frequency} Hz.")
 
     # return the filter object
     if signal is None:
