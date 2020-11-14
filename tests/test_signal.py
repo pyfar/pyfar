@@ -298,11 +298,11 @@ def test_signal_length(sine):
     assert signal.signal_length == length
 
 
-def test_shape(sine, impulse):
-    """Test the attribute shape."""
+def test_cshape(sine, impulse):
+    """Test the attribute cshape."""
     data = np.array([sine, impulse])
     signal = Signal(data, 44100)
-    assert signal.shape == (2,)
+    assert signal.cshape == (2,)
 
 
 def test_magic_getitem(sine, impulse):

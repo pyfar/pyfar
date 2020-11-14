@@ -171,7 +171,7 @@ class Filter(object):
                     coeff, filtered_signal_data[idx, ...], zi=None)
 
         filtered_signal = copy.deepcopy(signal)
-        if (signal.time.ndim == 2) and (signal.shape[0] == 1):
+        if (signal.time.ndim == 2) and (signal.cshape[0] == 1):
             filtered_signal_data = np.squeeze(filtered_signal_data)
         filtered_signal.time = filtered_signal_data
 

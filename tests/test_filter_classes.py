@@ -502,7 +502,7 @@ def test_impulse_mock(impulse_mock):
     signal[:, 0] = amplitude
 
     assert impulse_mock.sampling_rate == sampling_rate
-    assert impulse_mock.shape == (1,)
+    assert impulse_mock.cshape == (1,)
     assert impulse_mock.signal_type == signal_type
     npt.assert_allclose(impulse_mock.time, signal)
 
@@ -519,7 +519,7 @@ def impulse_mock():
     sampling_rate = 2000
     amplitude = 1
     signal_type = 'energy'
-    shape = (1,)
+    cshape = (1,)
     domain = 'time'
 
     signal = np.zeros(n_samples, dtype=np.double)
@@ -532,6 +532,6 @@ def impulse_mock():
     signal_object.sampling_rate = sampling_rate
     signal_object.domain = domain
     signal_object.signal_type = signal_type
-    signal_object.shape = shape
+    signal_object.cshape = cshape
 
     return signal_object

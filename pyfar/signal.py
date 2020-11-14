@@ -304,8 +304,14 @@ class Signal(Audio):
         return (self.n_samples - 1) / self.sampling_rate
 
     @property
-    def shape(self):
-        """Shape of the data."""
+    def cshape(self):
+        """
+        Return channel shape.
+
+        The channel shape gives the shape of the signal data excluding the last
+        dimension, which is `self.n_samples` for time domain signals and
+        `self.n_bins` for frequency domain signals.
+        """
         return self._data.shape[:-1]
 
     @property
@@ -340,7 +346,7 @@ class Signal(Audio):
             "Audio Signal\n"
             "--------------------\n"
             "{} channels with {} samples @ {} Hz sampling rate".format(
-                self.shape, self.n_samples, self._sampling_rate))
+                self.cshape, self.n_samples, self._sampling_rate))
         return repr_string
 
     def __getitem__(self, key):
