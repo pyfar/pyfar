@@ -55,7 +55,8 @@ class Filter(object):
             self,
             coefficients=None,
             filter_func=None,
-            state=None):
+            state=None,
+            comment=None):
         """
         Initialize a general Filter object.
 
@@ -96,6 +97,8 @@ class Filter(object):
         self._FILTER_FUNCS = {
             'default': None,
             'zerophase': None}
+
+        self._comment = comment
 
     def initialize(self):
         raise NotImplementedError("Abstract class method")
@@ -183,6 +186,16 @@ class Filter(object):
         else:
             warnings.warn(
                 "No previous state was set. Initialize a filter state first.")
+
+    @property
+    def comment(self):
+        """Get comment."""
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        """Set comment."""
+        self._comment = value
 
 
 class FilterFIR(Filter):
