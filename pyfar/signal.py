@@ -62,7 +62,8 @@ class Signal(Audio):
             domain='time',
             signal_type='energy',
             fft_norm=None,
-            dtype=np.double):
+            dtype=np.double,
+            comment=None):
         """Init Signal with data, and sampling rate.
 
         Attributes
@@ -130,6 +131,8 @@ class Signal(Audio):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{fft_norm}'"))
+
+        self._comment = comment
 
     @property
     def domain(self):
@@ -304,6 +307,16 @@ class Signal(Audio):
     def shape(self):
         """Shape of the data."""
         return self._data.shape[:-1]
+
+    @property
+    def comment(self):
+        """Get comment."""
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        """Set comment."""
+        self._comment = value
 
     def __add__(self, data):
         return add((self, data), 'freq')
