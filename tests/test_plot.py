@@ -50,11 +50,13 @@ def test_line_plots(sine_plus_impulse_mock, create_baseline=create_baseline):
         function(sine_plus_impulse_mock)
 
         # save baseline if it does not exist
-        # make sure to visually check the baseline uppn creation
+        # make sure to visually check the baseline uppon creation
         if create_baseline:
             plt.savefig(baseline)
         # safe test image
         plt.savefig(output)
+        # close current figure
+        plt.close()
 
         # testing
         compare_images(baseline, output, tol=10)
@@ -77,14 +79,38 @@ def test_line_phase_options(sine_plus_impulse_mock):
         plot.line.phase(sine_plus_impulse_mock, deg=param[1], unwrap=param[2])
 
         # save baseline if it does not exist
-        # make sure to visually check the baseline uppn creation
+        # make sure to visually check the baseline uppon creation
         if create_baseline:
             plt.savefig(baseline)
         # safe test image
         plt.savefig(output)
+        # close current figure
+        plt.close()
 
         # testing
         compare_images(baseline, output, tol=10)
+
+
+def test_hold_functionality(sine_plus_impulse_mock):
+    # plot two signals
+    plot.line.time(Signal([1, 0, 0], 44100))
+    plot.line.time(Signal([0, 1, 0], 44100))
+
+    baseline = os.path.join(baseline_path, 'hold.png')
+    output = os.path.join(output_path, 'hold.png')
+
+    # save baseline if it does not exist
+    # make sure to visually check the baseline uppon creation
+    if create_baseline:
+        plt.savefig(baseline)
+    # safe test image
+    plt.savefig(output)
+    # close current figure
+    plt.close()
+
+    # testing
+    compare_images(baseline, output, tol=10)
+
 
 
 @pytest.fixture
