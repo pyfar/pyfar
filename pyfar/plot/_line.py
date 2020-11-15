@@ -25,10 +25,12 @@ def _prepare_plot(ax=None):
         Axes or array of axes.
     """
     if ax is None:
+        # get current figure and axis or create new one
+        num_figures = len(plt.get_fignums())
         fig = plt.gcf()
-        fig.clear()
-        ax = fig.add_subplot()
-        fig.set_size_inches(plt.rcParams.get('figure.figsize'))
+        if num_figures == 0:
+            fig.set_size_inches(plt.rcParams.get('figure.figsize'))
+        ax = plt.gca()
     else:
         fig = ax.figure
 
