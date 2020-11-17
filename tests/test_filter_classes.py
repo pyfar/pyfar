@@ -10,6 +10,7 @@ def test_filter_init_empty_coefficients():
     filt = fo.Filter(coefficients=None, state=None)
     assert filt._coefficients is None
     assert filt._state is None
+    assert filt.comment is None
 
 
 def test_filter_init_empty_coefficients_with_state():
@@ -36,6 +37,15 @@ def test_filter_init_with_state():
     filt = fo.Filter(coefficients=coeff, state=state)
     npt.assert_array_equal(filt._coefficients, coeff)
     npt.assert_array_equal(filt._state, state)
+
+
+def test_filter_comment():
+    filt = fo.Filter(coefficients=None, state=None, comment='Bla')
+    assert filt.comment == 'Bla'
+    filt.comment = 'Blub'
+    assert filt.comment == 'Blub'
+    filt.comment = 500
+    assert filt.comment == '500'
 
 
 def test_filter_iir_init():
