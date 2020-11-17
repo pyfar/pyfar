@@ -195,7 +195,7 @@ class Filter(object):
     @comment.setter
     def comment(self, value):
         """Set comment."""
-        self._comment = value
+        self._comment = str(value)
 
 
 class FilterFIR(Filter):

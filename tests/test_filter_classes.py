@@ -44,6 +44,8 @@ def test_filter_comment():
     assert filt.comment == 'Bla'
     filt.comment = 'Blub'
     assert filt.comment == 'Blub'
+    filt.comment = 500
+    assert filt.comment == '500'
 
 
 def test_filter_iir_init():
