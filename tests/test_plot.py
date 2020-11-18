@@ -10,7 +10,7 @@ import pyfar.plot as plot
 from pyfar import Signal
 
 # flag for creating new baseline plots (required if the plot look changed)
-create_baseline = False
+create_baseline = True
 
 # path handling
 base_path = os.path.join('tests', 'test_plot_data')
@@ -44,9 +44,11 @@ def test_line_plots(sine_plus_impulse_mock, create_baseline=create_baseline):
         filename = 'line_' + function.__name__ + '.png'
         baseline = os.path.join(baseline_path, filename)
         output = os.path.join(output_path, filename)
+
         # plotting
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
+        plt.figure(1, (6.4, 4.8), 100)  # force size and dpi for testing
         function(sine_plus_impulse_mock)
 
         # save baseline if it does not exist
@@ -56,6 +58,9 @@ def test_line_plots(sine_plus_impulse_mock, create_baseline=create_baseline):
         # safe test image
         plt.savefig(output)
         # close current figure
+        plt.close()
+
+        # close figure
         plt.close()
 
         # testing
@@ -76,6 +81,7 @@ def test_line_phase_options(sine_plus_impulse_mock):
         # plotting
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
+        plt.figure(1, (6.4, 4.8), 100)  # force size and dpi for testing
         plot.line.phase(sine_plus_impulse_mock, deg=param[1], unwrap=param[2])
 
         # save baseline if it does not exist
@@ -87,11 +93,18 @@ def test_line_phase_options(sine_plus_impulse_mock):
         # close current figure
         plt.close()
 
+        # close figure
+        plt.close()
+
         # testing
         compare_images(baseline, output, tol=10)
 
 
 def test_hold_functionality(sine_plus_impulse_mock):
+    # plotting
+    matplotlib.use('Agg')
+    mpt.set_reproducibility_for_testing()
+    plt.figure(1, (6.4, 4.8), 100)  # force size and dpi for testing
     # plot two signals
     plot.line.time(Signal([1, 0, 0], 44100))
     plot.line.time(Signal([0, 1, 0], 44100))
