@@ -121,11 +121,10 @@ def filename():
 
 
 @fixture
-def obj(obj_instance):
+def objs(obj_instance):
     return obj_instance
 
 
-@fixture
 def obj_dict_encoded(obj):
     obj_dict_encoded = obj.__dict__
     for key, value in obj_dict_encoded.items():
@@ -135,39 +134,45 @@ def obj_dict_encoded(obj):
             memfile.seek(0)
             obj_dict_encoded[key] = memfile.read().decode('latin-1')
     obj_dict_encoded['type'] = type(obj).__name__
-    return [obj_dict_encoded]
+    return obj_dict_encoded
 
 
-coordinates = [
-    Coordinates([1, -1], [2, -2], [3, -3]),
-    Coordinates(1, 2, 3, domain='sph', convention='side'),
-    Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0),
-    Orientations.from_view_up([
-        [1, 0, 0], [2, 0, 0], [-1, 0, 0]], [[0, 1, 0], [0, -2, 0], [0, 1, 0]])
+@fixture
+def obj_dicts_encoded(objs):
+    return [obj_dict_encoded(obj) for obj in objs]
+
+
+objects = [
+    [Coordinates([1, -1], [2, -2], [3, -3])],
+    # Coordinates(1, 2, 3, domain='sph', convention='side'),
+    # Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0),
+    # Orientations.from_view_up([
+    #     [1, 0, 0], [2, 0, 0], [-1, 0, 0]], [[0, 1, 0], [0, -2, 0], [0, 1, 0]])
 ]
 
 
+
 @patch('haiopy.io.json')
 @patch('haiopy.io.open', new_callable=mock_open())
-@mark.parametrize('obj', coordinates)
-def test_read_coordinates(m_open, m_json, filename, obj, obj_dict_encoded):
-    m_json.load.return_value = obj_dict_encoded
-    obj_loaded = io.read(filename)[0]
+@mark.parametrize('objs', objects)
+def test_read_coordinates(m_open, m_json, filename, objs, obj_dicts_encoded):
+    m_json.load.return_value = obj_dicts_encoded
+    obj_loaded = io.read(filename)
 
     m_open.assert_called_with(filename, 'r')
 
-    assert obj_loaded == obj
+    assert obj_loaded == objs
 
 
 @patch('haiopy.io.json')
 @patch('haiopy.io.open', new_callable=mock_open())
-@mark.parametrize('obj', coordinates)
+@mark.parametrize('objs', objects)
 def test_write_coordinates(
-        m_open, m_json, filename, obj, obj_dict_encoded):
+        m_open, m_json, filename, objs, obj_dicts_encoded):
     # assert False
-    io.write(filename, obj)
+    io.write(filename, objs)
 
     m_open.assert_called_with(filename, 'w')
 
     m_json.dump.assert_called_with(
-        obj_dict_encoded, m_open.return_value.__enter__.return_value)
+        obj_dicts_encoded, m_open.return_value.__enter__.return_value)
