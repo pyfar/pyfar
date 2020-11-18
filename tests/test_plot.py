@@ -50,6 +50,7 @@ def test_line_plots(sine_plus_impulse_mock, create_baseline=create_baseline):
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (6.4, 4.8), 100)  # force size and dpi for testing
         function(sine_plus_impulse_mock)
+        plt.show()
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -83,6 +84,7 @@ def test_line_phase_options(sine_plus_impulse_mock):
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (6.4, 4.8), 100)  # force size and dpi for testing
         plot.line.phase(sine_plus_impulse_mock, deg=param[1], unwrap=param[2])
+        plt.show()
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -108,6 +110,7 @@ def test_hold_functionality(sine_plus_impulse_mock):
     # plot two signals
     plot.line.time(Signal([1, 0, 0], 44100))
     plot.line.time(Signal([0, 1, 0], 44100))
+    plt.show()
 
     baseline = os.path.join(baseline_path, 'hold.png')
     output = os.path.join(output_path, 'hold.png')
