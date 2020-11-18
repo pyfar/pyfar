@@ -437,6 +437,13 @@ def test_filter_fir_process(impulse_mock):
     npt.assert_allclose(res.time[:3], coeff)
 
 
+def test_filter_fir_process_sampling_rate_mismatch(impulse_mock):
+    coeff = np.array([1, 1/2, 0])
+    filt = fo.FilterFIR(coeff, 44100)
+    with pytest.raises(ValueError):
+        filt.process(impulse_mock)
+
+
 def test_filter_iir_process_multi_dim_filt(impulse_mock):
     coeff = np.array([
         [[1, 1/2, 0], [1, 0, 0]],
