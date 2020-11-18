@@ -290,4 +290,4 @@ def _decode(obj_dict_encoded):
 
 
 def _str_to_type(type_as_string):
-    return getattr(sys.modules['haiopy'], type_as_string)
+    return getattr(sys.modules['pyfar'], type_as_string)

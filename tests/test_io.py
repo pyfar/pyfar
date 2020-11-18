@@ -193,8 +193,8 @@ objects = [
 ]
 
 
-@patch('haiopy.io.json')
-@patch('haiopy.io.open', new_callable=mock_open())
+@patch('pyfar.io.json')
+@patch('pyfar.io.open', new_callable=mock_open())
 @mark.parametrize('objs', objects)
 def test_read_coordinates(m_open, m_json, filename, objs, obj_dicts_encoded):
     m_json.load.return_value = obj_dicts_encoded
@@ -205,13 +205,13 @@ def test_read_coordinates(m_open, m_json, filename, objs, obj_dicts_encoded):
     assert obj_loaded == objs
 
 
-@patch('haiopy.io.json')
-@patch('haiopy.io.open', new_callable=mock_open())
+@patch('pyfar.io.json')
+@patch('pyfar.io.open', new_callable=mock_open())
 @mark.parametrize('objs', objects)
 def test_write_coordinates(
         m_open, m_json, filename, objs, obj_dicts_encoded):
     # assert False
-    io.write(filename, objs)
+    io.write(filename, *objs)
 
     m_open.assert_called_with(filename, 'w')
 
