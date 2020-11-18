@@ -11,11 +11,28 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = []
+requirements = [
+    'numpy>=1.14.0',
+    'scipy>=1.5.0',
+    'pyfftw',
+    'matplotlib',
+    'python-sofa>=0.2.0',
+    'urllib3'
+]
 
 setup_requirements = ['pytest-runner', ]
 
-test_requirements = ['pytest', ]
+test_requirements = [
+    'pytest',
+    'bumpversion',
+    'wheel',
+    'watchdog',
+    'flake8',
+    'tox',
+    'coverage',
+    'Sphinx',
+    'twine',
+]
 
 setup(
     author="The pyfar developers",
