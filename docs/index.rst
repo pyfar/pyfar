@@ -1,4 +1,4 @@
-Welcome to haiopy's documentation!
+Welcome to pyfar's documentation!
 ==================================
 
 .. toctree::

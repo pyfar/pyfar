@@ -2,8 +2,8 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-from haiopy import Coordinates
-from haiopy.spatial import samplings
+from pyfar import Coordinates
+from pyfar.spatial import samplings
 
 
 def test_cart_equidistant_cube():

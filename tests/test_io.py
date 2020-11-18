@@ -1,5 +1,3 @@
-from haiopy.orientations import Orientations
-from haiopy.coordinates import Coordinates
 import numpy as np
 import numpy.testing as npt
 import pytest
@@ -11,10 +9,12 @@ import os.path
 from io import BytesIO
 import scipy.io.wavfile as wavfile
 
-from haiopy import io
-from haiopy import Signal
+from pyfar import io
+from pyfar import Signal
+from pyfar import Coordinates
 
-from test_io_data.generate_test_io_data import reference_signal
+from .test_io_data.generate_test_io_data import reference_signal
+from .test_io_data.generate_test_io_data import reference_coordinates
 
 
 baseline_path = 'tests/test_io_data'
@@ -27,9 +27,9 @@ def test_read_wav():
     signal_ref, sampling_rate = reference_signal()
     assert isinstance(signal, Signal)
     npt.assert_allclose(
-            signal.time,
-            np.atleast_2d(signal_ref),
-            rtol=1e-10)
+        signal.time,
+        np.atleast_2d(signal_ref),
+        rtol=1e-10)
     assert signal.sampling_rate == sampling_rate
 
 
@@ -69,7 +69,49 @@ def test_write_wav_nd(signal_mock_nd):
             rtol=1e-10)
 
 
-@fixture
+def test_read_sofa_signal():
+    """Test for sofa signal properties"""
+    # Correct DataType
+    filename = os.path.join(baseline_path, 'GeneralFIR.sofa')
+    signal = io.read_sofa(filename)[0]
+    signal_ref = reference_signal(signal.cshape)[0]
+    npt.assert_allclose(
+        signal.time,
+        signal_ref,
+        rtol=1e-10)
+    # Wrong DataType
+    filename = os.path.join(baseline_path, 'GeneralTF.sofa')
+    with pytest.raises(ValueError):
+        io.read_sofa(filename)
+    # Wrong sampling rate Unit
+    filename = os.path.join(baseline_path, 'GeneralFIR_unit.sofa')
+    with pytest.raises(ValueError):
+        io.read_sofa(filename)
+
+
+def test_read_sofa_coordinates():
+    """Test for sofa cooridnate properties"""
+    # Correct coordinates
+    filename = os.path.join(baseline_path, 'GeneralFIR.sofa')
+    source_coordinates = io.read_sofa(filename)[1]
+    receiver_coordinates = io.read_sofa(filename)[2]
+    source_coordinates_ref = reference_coordinates()[0]
+    receiver_coordinates_ref = reference_coordinates()[1]
+    npt.assert_allclose(
+        source_coordinates.get_cart(),
+        source_coordinates_ref,
+        rtol=1e-10)
+    npt.assert_allclose(
+        receiver_coordinates.get_cart(),
+        receiver_coordinates_ref[:, :, 0],
+        rtol=1e-10)
+    # Wrong PositionType
+    filename = os.path.join(baseline_path, 'GeneralFIR_postype.sofa')
+    with pytest.raises(ValueError):
+        io.read_sofa(filename)
+
+
+@pytest.fixture
 def signal_mock():
     """ Generate a signal mock object.
     Returns
@@ -149,7 +191,6 @@ objects = [
     # Orientations.from_view_up([
     #     [1, 0, 0], [2, 0, 0], [-1, 0, 0]], [[0, 1, 0], [0, -2, 0], [0, 1, 0]])
 ]
-
 
 
 @patch('haiopy.io.json')

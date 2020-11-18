@@ -1,0 +1,76 @@
+#### MATPLOTLIBRC FORMAT
+
+## pyfar light plotting theme for a complete set of options see
+## http://matplotlib.org/users/customizing.html#the-matplotlibrc-file for
+
+
+##### CONFIGURATION BEGINS HERE
+
+### BACKEND
+backend      : Qt5Agg
+
+
+#### LINES
+## See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
+## information on line properties.
+lines.linewidth   : 1.5     ## line width in points
+lines.linestyle   : -       ## solid line
+
+
+#### FONT
+
+font.family         : sans-serif
+font.style          : normal
+font.variant        : normal
+font.weight         : normal
+font.stretch        : normal
+font.size           : 10.0
+font.sans-serif     : Arial, DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Avant Garde, sans-serif
+
+
+#### TEXT
+text.color          : [.2,.2,.2]
+
+
+#### AXES
+axes.facecolor      : white        ## axes background color
+axes.edgecolor      : [.2,.2,.2]   ## axes edge color
+axes.grid           : True         ## display grid or not
+axes.titlesize      : 10           ## fontsize of the axes title
+axes.titleweight    : bold         ## font weight of title
+axes.labelsize      : 10           ## fontsize of the x any y labels
+axes.labelcolor     : [.2,.2,.2]
+# colors from palettable.cartocolors.qualitative.Prism_8
+# slightly changed colors to work with dark and light theme
+# changed the order to improve contrast between the colors and start with blue and red
+axes.prop_cycle     : cycler('color', ['1471B9','D83C27','ECAD20','5F4690','078554','4EBEBE','E07D26','72AF47'])
+                                      # blue     red      yellow   purple   green    turquois  orange  light green
+
+
+#### TICKS
+## see http://matplotlib.org/api/axis_api.html#matplotlib.axis.Tick
+xtick.bottom         : False        ## draw ticks on the bottom side
+xtick.color          : [.2,.2,.2]   ## color of the tick labels
+xtick.labelsize      : 10           ## fontsize of the tick labels
+
+
+ytick.left           : False        ## draw ticks on the left side
+ytick.color          : [.2,.2,.2]   ## color of the tick labels
+ytick.labelsize      : 10           ## fontsize of the tick labels
+
+
+#### GRIDS
+grid.color       :   k      ## grid color
+grid.linewidth   :   0.8    ## in points
+grid.alpha       :   .3     ## transparency, between 0.0 and 1.0
+
+
+#### FIGURE
+## See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
+figure.facecolor : white    ## figure facecolor
+figure.edgecolor : none     ## figure edgecolor
+
+
+#### SAVING FIGURES
+savefig.facecolor   : white    ## figure facecolor when saving
+savefig.edgecolor   : white    ## figure edgecolor when saving

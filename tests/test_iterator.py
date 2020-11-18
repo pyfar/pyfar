@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import numpy.testing as npt
-from haiopy import Signal
+from pyfar import Signal
 
 
 def test_simple_iter():

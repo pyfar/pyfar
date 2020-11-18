@@ -4,8 +4,8 @@ import numpy as np
 import numpy.testing as npt
 from scipy.spatial.transform import Rotation
 
-from haiopy.orientations import Orientations
-from haiopy.coordinates import Coordinates
+from pyfar.orientations import Orientations
+from pyfar.coordinates import Coordinates
 
 
 def test_orientations_init():
