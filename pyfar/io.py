@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 import sofa
 import json
-import gzip
+import zipfile
 import copy
 import io
 import sys
@@ -206,16 +206,18 @@ def read(filename):
     -------
     loaded_dict: dictionary containing haiopy types.
     """
-    with open(filename, 'r') as f:
-        obj_list_encoded = json.load(f)
-    obj_list = []
-    for obj_dict_encoded in obj_list_encoded:
-        obj = _decode(obj_dict_encoded)
-        obj_list.append(obj)
-    return obj_list
+    obj_dict = {}
+    with open(filename, 'rb') as f:
+        zip_buffer = io.BytesIO()
+        zip_buffer.write(f.read())
+        with zipfile.ZipFile(zip_buffer) as zip_file:
+            obj_paths = _unpack_paths(zip_file.namelist())
+            for obj_name, ndarray_names in obj_paths.items():
+                obj_dict[obj_name] = _decode(zip_file, obj_name, ndarray_names)
+    return obj_dict
 
 
-def write(filename, *args, compress=True):
+def write(filename, compress=False, **objs):
     """
     Write any compatible haiopy format to disk.
 
@@ -226,18 +228,16 @@ def write(filename, *args, compress=True):
     args: Compatible haiopy types:
         -
     """
-    out_list = []
-    for obj in args:
-        obj_dict_encoded = _encode(obj)
-        obj_dict_encoded['type'] = type(obj).__name__
-        out_list.append(obj_dict_encoded)
-    contents = json.dumps(out_list)
-    if compress:
-        with gzip.open(filename, 'wt', encoding='latin-1') as f:
-            f.write(contents)
-    else:
-        with open(filename, 'w') as f:
-            f.write(contents)
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_STORED) as zip_file:
+        for name, obj in objs.items():
+            obj_dict_encoded, obj_dict_ndarray = _encode(obj)
+            zip_file.writestr(f'{name}/json', json.dumps(obj_dict_encoded))
+            for key, value in obj_dict_ndarray.items():
+                zip_file.writestr(f'{name}/ndarrays/{key}', value)
+
+    with open(filename, 'wb') as f:
+        f.write(zip_buffer.getvalue())
 
 
 def _encode(obj):
@@ -255,16 +255,21 @@ def _encode(obj):
         Json compatible dictionary.
     """
     obj_dict_encoded = copy.deepcopy(obj.__dict__)
-    for key, value in obj_dict_encoded.items():
+    obj_dict_ndarray = {}
+    for key, value in obj.__dict__.items():
         if isinstance(value, np.ndarray):
             memfile = io.BytesIO()
             np.save(memfile, value, allow_pickle=False)
             memfile.seek(0)
-            obj_dict_encoded[key] = memfile.read().decode('latin-1')
-    return obj_dict_encoded
+            obj_dict_ndarray[key] = memfile.read()
+            del obj_dict_encoded[key]
+
+    obj_dict_encoded['type'] = type(obj).__name__
+
+    return obj_dict_encoded, obj_dict_ndarray
 
 
-def _decode(obj_dict_encoded):
+def _decode(zip_file, obj_name, ndarray_names):
     """
     Iterates over object's encoded dictionary and decodes all
     numpy.ndarrays to be prepare object initialization.
@@ -279,20 +284,31 @@ def _decode(obj_dict_encoded):
     obj_dict: dict.
         Decoded dictionary ready for initialization of haiopy types.
     """
-    # Does not have to be copied because read data is thrown away anyway
-    obj_dict = obj_dict_encoded
-    for key, value in obj_dict_encoded.items():
-        if isinstance(value, str) and value.startswith('\x93NUMPY'):
-            memfile = io.BytesIO()
-            memfile.write(value.encode('latin-1'))
-            memfile.seek(0)
-            obj_dict[key] = np.load(memfile, allow_pickle=False)
-    # TODO: What if there's no such default constructor?
-    # Initialize empty object of type
+    # decoding builtins
+    json_str = zip_file.read(obj_name + '/json').decode('UTF-8')
+    obj_dict = json.loads(json_str)
+    # decoding ndarrays
+    for key in ndarray_names:
+        memfile = io.BytesIO()
+        nd_bytes = zip_file.read(obj_name + '/ndarrays/' + key)
+        memfile.write(nd_bytes)
+        memfile.seek(0)
+        obj_dict[key] = np.load(memfile, allow_pickle=False)
+    # build object from obj_dict
     obj = _str_to_type(obj_dict['type'])()
     del obj_dict['type']
     obj.__dict__.update(obj_dict)
     return obj
+
+
+def _unpack_paths(zip_paths):
+    obj_paths = {} 
+    for path in zip_paths:
+        paths = path.split('/')
+        obj_paths.setdefault(paths[0], [])
+        if paths[1] == 'ndarrays':
+            obj_paths[paths[0]].append(paths[2])
+    return obj_paths
 
 
 def _str_to_type(type_as_string):
