@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 import sofa
 import json
+import gzip
 import copy
 import io
 import sys
@@ -214,7 +215,7 @@ def read(filename):
     return obj_list
 
 
-def write(filename, *args):
+def write(filename, *args, compress=True):
     """
     Write any compatible haiopy format to disk.
 
@@ -230,8 +231,13 @@ def write(filename, *args):
         obj_dict_encoded = _encode(obj)
         obj_dict_encoded['type'] = type(obj).__name__
         out_list.append(obj_dict_encoded)
-    with open(filename, 'w') as f:
-        json.dump(out_list, f)
+    contents = json.dumps(out_list)
+    if compress:
+        with gzip.open(filename, 'wt', encoding='latin-1') as f:
+            f.write(contents)
+    else:
+        with open(filename, 'w') as f:
+            f.write(contents)
 
 
 def _encode(obj):

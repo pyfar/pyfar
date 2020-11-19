@@ -206,14 +206,13 @@ def test_read_coordinates(m_open, m_json, filename, objs, obj_dicts_encoded):
 
 
 @patch('pyfar.io.json')
-@patch('pyfar.io.open', new_callable=mock_open())
+@patch('pyfar.io.gzip.open')
 @mark.parametrize('objs', objects)
 def test_write_coordinates(
-        m_open, m_json, filename, objs, obj_dicts_encoded):
+        m_gzipopen, m_json, filename, objs, obj_dicts_encoded):
     # assert False
     io.write(filename, *objs)
 
-    m_open.assert_called_with(filename, 'w')
+    m_gzipopen.assert_called_with(filename, 'wt', encoding='latin-1')
 
-    m_json.dump.assert_called_with(
-        obj_dicts_encoded, m_open.return_value.__enter__.return_value)
+    m_json.dumps.assert_called_with(obj_dicts_encoded)
