@@ -71,7 +71,7 @@ def test_read_sofa_signal():
     # Correct DataType
     filename = os.path.join(baseline_path, 'GeneralFIR.sofa')
     signal = io.read_sofa(filename)[0]
-    signal_ref = reference_signal(signal.shape)[0]
+    signal_ref = reference_signal(signal.cshape)[0]
     npt.assert_allclose(
             signal.time,
             signal_ref,

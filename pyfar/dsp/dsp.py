@@ -41,7 +41,7 @@ def phase(signal, deg=False, unwrap=False):
 
 
 def group_delay(signal):
-    """Returns the group delay for a given signal object.
+    """Returns the group delay of a signal in samples.
 
     Parameters
     ----------
@@ -50,18 +50,31 @@ def group_delay(signal):
 
     Returns
     -------
-    group_delay : np.array()
-        Group delay.
+    group_delay : numpy array
+        Group delay in sampes at signal.frequencies. The array is flattened if
+        a single channel signal was passed to the function.
     """
 
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    phase_vec = phase(signal, deg=False, unwrap=True)
-    bin_dist = signal.sampling_rate / signal.n_samples
-    group_delay = (- np.diff(phase_vec, 1, -1, prepend=0) /
-                   (bin_dist * 2 * np.pi))
-    return np.squeeze(group_delay)
+    # get time signal and reshape for easy looping
+    time = signal.time
+    time = time.reshape((np.prod(signal.cshape), signal.n_samples))
+    # initialize group delay
+    group_delay = np.zeros((np.prod(signal.cshape), signal.n_bins))
+    # calculate the group delay
+    for cc in range(time.shape[0]):
+        group_delay[cc] = sgn.group_delay(
+            (time[cc], 1), signal.frequencies, fs=signal.sampling_rate)[1]
+    # reshape to match signal
+    group_delay = group_delay.reshape(signal.cshape + (signal.n_bins, ))
+
+    # flatten in numpy fashion if a single channel is returned
+    if signal.cshape == (1, ):
+        group_delay = group_delay.flatten()
+
+    return group_delay
 
 
 def spectrogram(signal,

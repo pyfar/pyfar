@@ -62,7 +62,8 @@ class Signal(Audio):
             domain='time',
             signal_type='energy',
             fft_norm=None,
-            dtype=np.double):
+            dtype=np.double,
+            comment=None):
         """Init Signal with data, and sampling rate.
 
         Attributes
@@ -130,6 +131,8 @@ class Signal(Audio):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{fft_norm}'"))
+
+        self._comment = comment
 
     @property
     def domain(self):
@@ -301,9 +304,25 @@ class Signal(Audio):
         return (self.n_samples - 1) / self.sampling_rate
 
     @property
-    def shape(self):
-        """Shape of the data."""
+    def cshape(self):
+        """
+        Return channel shape.
+
+        The channel shape gives the shape of the signal data excluding the last
+        dimension, which is `self.n_samples` for time domain signals and
+        `self.n_bins` for frequency domain signals.
+        """
         return self._data.shape[:-1]
+
+    @property
+    def comment(self):
+        """Get comment."""
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        """Set comment."""
+        self._comment = str(value)
 
     def __add__(self, data):
         return add((self, data), 'freq')
@@ -324,10 +343,11 @@ class Signal(Audio):
         """String representation of signal class.
         """
         repr_string = (
-            "Audio Signal\n"
-            "--------------------\n"
-            "{} channels with {} samples @ {} Hz sampling rate".format(
-                self.shape, self.n_samples, self._sampling_rate))
+            f"{self.domain} domain {self.signal_type} Signal:\n"
+            f"{self.cshape} channels with {self.n_samples} samples @ "
+            f"{self._sampling_rate} Hz sampling rate and {self.fft_norm} "
+            "FFT normalization\n")
+
         return repr_string
 
     def __getitem__(self, key):

@@ -7,19 +7,20 @@ from pyfar import Signal
 
 
 def test_filter_init_empty_coefficients():
-    filt = fo.Filter(coefficients=None, state=None)
+    filt = fo.Filter(coefficients=None, state=None, sampling_rate=None)
     assert filt._coefficients is None
     assert filt._state is None
+    assert filt.comment is None
 
 
 def test_filter_init_empty_coefficients_with_state():
     with pytest.raises(ValueError):
-        fo.Filter(coefficients=None, state=[1, 0])
+        fo.Filter(coefficients=None, state=[1, 0], sampling_rate=None)
 
 
 def test_filter_init():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
-    filt = fo.Filter(coefficients=coeff)
+    filt = fo.Filter(coefficients=coeff, sampling_rate=None)
     npt.assert_array_equal(filt._coefficients, coeff)
 
 
@@ -38,16 +39,25 @@ def test_filter_init_with_state():
     npt.assert_array_equal(filt._state, state)
 
 
+def test_filter_comment():
+    filt = fo.Filter(coefficients=None, state=None, comment='Bla')
+    assert filt.comment == 'Bla'
+    filt.comment = 'Blub'
+    assert filt.comment == 'Blub'
+    filt.comment = 500
+    assert filt.comment == '500'
+
+
 def test_filter_iir_init():
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
-    filt = fo.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff, sampling_rate=2*np.pi)
     npt.assert_array_equal(filt._coefficients, coeff[np.newaxis])
 
 
 def test_filter_fir_init():
     coeff = np.array([1, 1/2, 0])
     desired = np.array([[[1, 1/2, 0], [1, 0, 0]]])
-    filt = fo.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff, sampling_rate=2*np.pi)
     npt.assert_array_equal(filt._coefficients, desired)
 
 
@@ -59,25 +69,25 @@ def test_filter_fir_init_multi_dim():
         [[1, 1/2, 0], [1, 0, 0]],
         [[1, 1/4, 1/8], [1, 0, 0]]
         ])
-    filt = fo.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff, sampling_rate=2*np.pi)
     npt.assert_array_equal(filt._coefficients, desired)
 
 
 def test_filter_sos_init():
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = fo.FilterSOS(sos)
+    filt = fo.FilterSOS(sos, sampling_rate=2*np.pi)
     npt.assert_array_equal(filt._coefficients, sos[np.newaxis])
 
 
 def test_filter_iir_process(impulse_mock):
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
-    filt = fo.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff, impulse_mock.sampling_rate)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:3], coeff[0])
 
     coeff = np.array([[1, 1/2, 0], [1, 1/8, 0]])
-    filt = fo.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff, impulse_mock.sampling_rate)
     res = filt.process(impulse_mock)
 
     desired = np.array([
@@ -421,17 +431,24 @@ def test_filter_iir_process(impulse_mock):
 
 def test_filter_fir_process(impulse_mock):
     coeff = np.array([1, 1/2, 0])
-    filt = fo.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff, impulse_mock.sampling_rate)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:3], coeff)
+
+
+def test_filter_fir_process_sampling_rate_mismatch(impulse_mock):
+    coeff = np.array([1, 1/2, 0])
+    filt = fo.FilterFIR(coeff, 44100)
+    with pytest.raises(ValueError):
+        filt.process(impulse_mock)
 
 
 def test_filter_iir_process_multi_dim_filt(impulse_mock):
     coeff = np.array([
         [[1, 1/2, 0], [1, 0, 0]],
         [[1, 1/4, 0], [1, 0, 0]]])
-    filt = fo.FilterIIR(coeff)
+    filt = fo.FilterIIR(coeff, impulse_mock.sampling_rate)
 
     res = filt.process(impulse_mock)
 
@@ -443,19 +460,19 @@ def test_filter_fir_process_multi_dim_filt(impulse_mock):
         [1, 1/2, 0],
         [1, 1/4, 0]])
 
-    filt = fo.FilterFIR(coeff)
+    filt = fo.FilterFIR(coeff, impulse_mock.sampling_rate)
     res = filt.process(impulse_mock)
     npt.assert_allclose(res.time[:, :3], coeff)
 
 
 def test_filter_sos_process(impulse_mock):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = fo.FilterSOS(sos)
+    filt = fo.FilterSOS(sos, impulse_mock.sampling_rate)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     # coeff = np.array([
     #     [[1, 1/2, 0], [1, 0, 0]],
     #     [[1, 1/4, 0], [1, 0, 0]]])
-    filt = fo.FilterSOS(sos)
+    filt = fo.FilterSOS(sos, impulse_mock.sampling_rate)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:3], coeff[0])
@@ -468,7 +485,7 @@ def test_filter_sos_process_multi_dim_filt(impulse_mock):
     coeff = np.array([
         [[1, 1/2, 0], [1, 0, 0]],
         [[1, 1/4, 0], [1, 0, 0]]])
-    filt = fo.FilterSOS(sos)
+    filt = fo.FilterSOS(sos, impulse_mock.sampling_rate)
     res = filt.process(impulse_mock)
 
     npt.assert_allclose(res.time[:, :3], coeff[:, 0])
@@ -502,7 +519,7 @@ def test_impulse_mock(impulse_mock):
     signal[:, 0] = amplitude
 
     assert impulse_mock.sampling_rate == sampling_rate
-    assert impulse_mock.shape == (1,)
+    assert impulse_mock.cshape == (1,)
     assert impulse_mock.signal_type == signal_type
     npt.assert_allclose(impulse_mock.time, signal)
 
@@ -519,7 +536,7 @@ def impulse_mock():
     sampling_rate = 2000
     amplitude = 1
     signal_type = 'energy'
-    shape = (1,)
+    cshape = (1,)
     domain = 'time'
 
     signal = np.zeros(n_samples, dtype=np.double)
@@ -532,6 +549,6 @@ def impulse_mock():
     signal_object.sampling_rate = sampling_rate
     signal_object.domain = domain
     signal_object.signal_type = signal_type
-    signal_object.shape = shape
+    signal_object.cshape = cshape
 
     return signal_object
