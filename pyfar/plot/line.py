@@ -309,7 +309,7 @@ def freq_phase(signal, log_prefix=20, log_reference=1, deg=False, unwrap=False,
 
     with plt.style.context(plotstyle(style)):
         ax = _line._freq_phase(signal, log_prefix, log_reference, deg, unwrap,
-                               **kwargs)
+                               ax, **kwargs)
     plt.tight_layout()
     Interaction('LineXLog', ax[0], signal, style, **kwargs)
 
@@ -351,7 +351,7 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
 
     with plt.style.context(plotstyle(style)):
         ax = _line._freq_group_delay(signal, log_prefix, log_reference,
-                                     **kwargs)
+                                     ax, **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLog', ax[0], signal, style, **kwargs)

@@ -11,7 +11,7 @@ from .ticker import (
     MultipleFractionFormatter)
 
 
-def _prepare_plot(ax=None):
+def _prepare_plot(ax=None, subplots=None):
     """Activates the stylesheet and returns a figure to plot on.
 
     Parameters
@@ -27,9 +27,39 @@ def _prepare_plot(ax=None):
     if ax is None:
         # get current figure and axis or create new one
         fig = plt.gcf()
-        ax = plt.gca()
+        ax = fig.get_axes()
+        if not len(ax):
+            ax = plt.gca()
+        elif len(ax) == 1:
+            ax = ax[0]
     else:
-        fig = ax.figure
+        # obtain figure from axis
+        fig = ax[0].figure if isinstance(ax, np.ndarray) else ax.figure
+
+    # check for correct subplot layout
+    if subplots is not None:
+
+        # check type
+        if len(subplots) > 2 or not isinstance(subplots, tuple):
+            raise ValueError(
+                "subplots must be a tuple with one or two elements.")
+        # tuple to check against the shape of current axis
+        ax_subplots = subplots
+        if len(subplots) == 2:
+            if subplots[0] == 1:
+                ax_subplots = (subplots[1], )
+            elif subplots[1] == 1:
+                ax_subplots = (subplots[0], )
+        # check if current axis has the correct numner of subplots
+        create_subplots = False
+        if not isinstance(ax, list):
+            create_subplots = True
+        elif len(ax) != np.prod(ax_subplots):
+            create_subplots = True
+        # create subplots
+        if create_subplots:
+            fig.clf()
+            ax = fig.subplots(subplots[0], subplots[1], sharex=False)
 
     return fig, ax
 
@@ -92,8 +122,9 @@ def _time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 
     x_data = signal.times
     y_data = signal.time.T
-    data_dB = log_prefix*np.log10(np.abs(
-        y_data/np.amax(np.abs(y_data)))/log_reference)
+    # avoid any zero-values because they result in -inf in dB data
+    eps = np.finfo(float).tiny
+    data_dB = log_prefix * np.log10(np.abs(y_data) / log_reference + eps)
     ymax = np.nanmax(data_dB)
     ymin = ymax - 90
     ymax = ymax + 10
@@ -136,7 +167,7 @@ def _freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     ymax = ymax + 10
 
     ax.set_ylim((ymin, ymax))
-    ax.set_xlim((20, signal.sampling_rate/2))
+    ax.set_xlim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
 
     ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
@@ -184,7 +215,7 @@ def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
     ax.set_xscale('log')
     ax.grid(True, 'both')
     ax.set_ylim((ymin, ymax))
-    ax.set_xlim((20, signal.sampling_rate/2))
+    ax.set_xlim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
     ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
     plt.tight_layout()
@@ -202,7 +233,7 @@ def _group_delay(signal, ax=None, **kwargs):
 
     kwargs = _return_default_colors_rgb(**kwargs)
 
-    data = dsp.group_delay(signal)
+    data = dsp.group_delay(signal) / signal.sampling_rate
     ax.semilogx(signal.frequencies, data.T, **kwargs)
 
     ax.set_xlabel("Frequency in Hz")
@@ -211,8 +242,8 @@ def _group_delay(signal, ax=None, **kwargs):
     ax.set_xscale('log')
     ax.grid(True, 'both')
 
-    # TODO: Set y limits correctly.
-    ax.set_xlim((20, signal.sampling_rate/2))
+    ax.set_xlim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
+    ax.set_ylim(.5 * np.min(data), 1.5 * np.max(data))
 
     ax.xaxis.set_major_locator(
         LogLocatorITAToolbox())
@@ -255,8 +286,8 @@ def _spectrogram(signal, log=False, nodb=False, window='hann',
     # Adjust axes:
     ax.set_ylabel('Frequency in Hz')
     ax.set_xlabel('Time in s')
-    ax.set_xlim((signal.times[0], signal.times[-1]))
-    ax.set_ylim((20, signal.sampling_rate/2))
+    ax.set_xlim((times[0], times[-1]))
+    ax.set_ylim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
 
     if log:
         ax.set_yscale('symlog')
@@ -278,6 +309,10 @@ def _spectrogram_cb(signal, log=False, nodb=False, window='hann',
 
     # Define figure and axes for plot:
     fig, ax = _prepare_plot(ax)
+    # clear figure and axis - spectogram does not work with hold
+    fig.clf()
+    ax = plt.gca()
+    # plot the data
     ax = ax.figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 0.05]})
     fig.axes[0].remove()
 
@@ -303,11 +338,9 @@ def _freq_phase(signal, log_prefix=20, log_reference=1, deg=False,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    fig, ax = _prepare_plot(ax)
+    fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)
 
-    ax = fig.subplots(2, 1, sharex=False)
-    fig.axes[0].remove()
     _freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     _phase(signal, deg, unwrap, ax[1], **kwargs)
     ax[0].set_xlabel(None)
@@ -326,11 +359,9 @@ def _freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    fig, ax = _prepare_plot(ax)
+    fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)
 
-    ax = fig.subplots(2, 1, sharex=False)
-    fig.axes[0].remove()
     _freq(signal, log_prefix, log_reference, ax[0], **kwargs)
     _group_delay(signal, ax[1], **kwargs)
     ax[0].set_xlabel(None)
