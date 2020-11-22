@@ -359,15 +359,16 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
     return ax
 
 
-def summary(signal, ax=None, style='light', **kwargs):
+def multi(signal, plots, ax=None, style='light', **kwargs):
     """
-    Plot the time domain, the time domain in dB, the magnitude spectrum,
-    the frequency domain, the phase and group delay.
+    Generate multiple plots of a Signal object.
 
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object.
+        A pyfar Signal object
+    plots : list, nested list
+        list with function handles for plotting (see example below)
     ax : matplotlib.pyplot.axes object
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
@@ -379,21 +380,26 @@ def summary(signal, ax=None, style='light', **kwargs):
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
-        Axes or array of axes containing the plot.
+    ax : axes
+        List of axes handles
 
-    See Also
+    Examples
     --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+    >>> from pyfar import Signal
+    >>> import pyfar.plot.line as ppl
+    >>>
+    >>> # generate a signal
+    >>> s = Signal([0, 0, 1, 0, 0, 0, 0, 0, 0, 0], 1e3)
+    >>>
+    >>> # two by two plot of time and frequency signals
+    >>> ppl.multi(s, [[ppl.time, ppl.time_dB], [ppl.freq, ppl.group_delay]])
 
     """
-
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = _line._summary(signal, **kwargs)
-
+        ax = _line._multi(signal, plots, ax, **kwargs)
     plt.tight_layout()
 
     return ax

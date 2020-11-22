@@ -17,16 +17,18 @@ def _prepare_plot(ax=None, subplots=None):
     Parameters
     ----------
     ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be returned.
+        Axes to plot on. If not given, the axes are obtained from the current
+        figure. A new figure is created if it does not exist
 
     Returns
     -------
     ax : matplotlib.pyplot.axes object
-        Axes or array of axes.
+        Axes or array/list of axes.
     """
     if ax is None:
-        # get current figure and axis or create new one
+        # get current figure or create new one
         fig = plt.gcf()
+        # get current axes or create new one
         ax = fig.get_axes()
         if not len(ax):
             ax = plt.gca()
@@ -371,52 +373,33 @@ def _freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
     return ax
 
 
-def _summary(signal, ax=None, **kwargs):
+def _multi(signal, plots, ax, **kwargs):
     """
-    Plot the time domain, the time domain in dB, the magnitude spectrum,
-    the frequency domain, the phase and group delay.
-    """
+    Generate multiple plots of a Signal object.
 
+    See pyfar.plot.line.multi for more information.
+    """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    # Setup figure, axes and grid:
-    fig, ax = _prepare_plot(ax)
-    ax = fig.subplots(4, 2, gridspec_kw={'height_ratios': [1, 1, 1, 0.1]})
-    fig.axes[0].remove()
-    fig.set_size_inches(6, 6)
+    plots = np.atleast_2d(np.asarray(plots))
+    subplots = plots.shape
+    fig, ax = _prepare_plot(ax, subplots)
 
-    kwargs = _return_default_colors_rgb(**kwargs)
+    rows = subplots[0]
+    cols = subplots[1]
 
-    # Time domain plots:
-    _time(signal, ax=ax[0, 0], **kwargs)
-    _time_dB(signal, ax=ax[1, 0], **kwargs)
-    _spectrogram(signal, ax=ax[2, 0], **kwargs)
-
-    # Frequency domain plots:
-    _freq(signal, ax=ax[0, 1], **kwargs)
-    _phase(signal, ax=ax[1, 1], **kwargs)
-    _group_delay(signal, ax=ax[2, 1], **kwargs)
-
-    # Colorbar for spectrogram:
-    for PCM in ax[2, 0].get_children():
-        if type(PCM) == mpl.collections.QuadMesh:
-            break
-    cb = plt.colorbar(PCM, cax=ax[3, 0], orientation='horizontal')
-    cb.set_label('Modulus [dB]')
-
-    # Remove unnessecary labels and ticks:
-    ax[0, 0].set_xlabel(None)
-    ax[1, 0].set_xlabel(None)
-    ax[0, 1].set_xlabel(None)
-    ax[1, 1].set_xlabel(None)
-    ax[3, 1].axis('off')
-    ax[0, 0].set_xticklabels([])
-    ax[1, 0].set_xticklabels([])
-    ax[0, 1].set_xticklabels([])
-    ax[1, 1].set_xticklabels([])
-    fig.align_ylabels()
-
-    plt.tight_layout()
-
-    return ax
+    for row in range(rows):
+        for col in range(cols):
+            # current_axis
+            # this is a bit tricky: if a new multi plot is created ax will can
+            # be a nested list because it is created by fig.subplots() but ax
+            # will be a flat list if multi plots into an existing plot, because
+            # ax is obtained from ax = plt.gca()
+            try:
+                ca = ax[row][col] if rows > 1 and cols > 1 else \
+                     ax[max(row, col)]
+            except TypeError:
+                ca = ax[row * cols + col]
+            # plot
+            plots[row][col](signal, ax=ca, **kwargs)

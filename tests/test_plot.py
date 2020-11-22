@@ -64,6 +64,9 @@ def test_line_plots(signal_mocks):
         # safe test image
         plt.savefig(output)
 
+        # testing
+        compare_images(baseline, output, tol=10)
+
         # test hold functionality
         # file names
         filename = 'line_' + function.__name__ + '_hold.png'
@@ -116,6 +119,64 @@ def test_line_phase_options(signal_mocks):
         plt.close()
 
         # close figure
+        plt.close()
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+
+def test_line_multi(signal_mocks):
+
+    # plot layouts to be tested
+    plots = {
+        'row': [plot.line.time, plot.line.freq],
+        'col': [[plot.line.time], [plot.line.freq]],
+        'mix': [[plot.line.time, plot.line.time_dB],
+                [plot.line.freq, plot.line.group_delay]]
+    }
+
+    for p in plots:
+        print(f"Testing: {p}")
+        # file names
+        filename = 'line_multi_' + p + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        plot.line.multi(signal_mocks[0], plots[p])
+        plt.show()
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+        # test hold functionality
+        # file names
+        filename = 'line_multi_' + p + '_hold.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        plot.line.multi(signal_mocks[1], plots[p])
+        plt.show()
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # close current figure
         plt.close()
 
         # testing
