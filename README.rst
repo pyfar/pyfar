@@ -13,8 +13,8 @@ package needs to be installed from source.
 Requirements
 ============
 
-- Python 3 (>= 3.6 recommended)
-- Python packages: numpy, scipy, matplotlib
+- Python 3 (>= 3.8 recommended)
+- Python packages: numpy, scipy, matplotlib, python-sofa, urllib3
 
 Installation
 ============
