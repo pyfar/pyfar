@@ -99,8 +99,8 @@ def write_wav(signal, filename, overwrite=True):
     # Check if file exists and for overwrite
     if overwrite is False and os.path.isfile(filename):
         raise FileExistsError(
-                "File already exists,"
-                "use overwrite option to disable error.")
+            "File already exists,"
+            "use overwrite option to disable error.")
     else:
         wavfile.write(filename, sampling_rate, data.T)
 
@@ -159,22 +159,22 @@ def read_sofa(filename):
     s_values = sofafile.Source.Position.get_values()
     s_domain, s_convention, s_unit = _sofa_pos(sofafile.Source.Position.Type)
     source_coordinates = Coordinates(
-            s_values[:, 0],
-            s_values[:, 1],
-            s_values[:, 2],
-            domain=s_domain,
-            convention=s_convention,
-            unit=s_unit)
+        s_values[:, 0],
+        s_values[:, 1],
+        s_values[:, 2],
+        domain=s_domain,
+        convention=s_convention,
+        unit=s_unit)
     # Receiver
     r_values = sofafile.Receiver.Position.get_values()
     r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
     receiver_coordinates = Coordinates(
-            r_values[:, 0],
-            r_values[:, 1],
-            r_values[:, 2],
-            domain=r_domain,
-            convention=r_convention,
-            unit=r_unit)
+        r_values[:, 0],
+        r_values[:, 1],
+        r_values[:, 2],
+        domain=r_domain,
+        convention=r_convention,
+        unit=r_unit)
 
     return signal, source_coordinates, receiver_coordinates
 
@@ -195,7 +195,7 @@ def _sofa_pos(pos_type):
 
 def read(filename):
     """
-    Read any compatible haiopy format from disk.
+    Read any compatible pyfar format from disk.
 
     Parameters
     ----------
@@ -211,7 +211,7 @@ def read(filename):
         zip_buffer = io.BytesIO()
         zip_buffer.write(f.read())
         with zipfile.ZipFile(zip_buffer) as zip_file:
-            obj_paths = _unpack_paths(zip_file.namelist())
+            obj_paths = _unpack_zip_paths(zip_file.namelist())
             for obj_name, ndarray_names in obj_paths.items():
                 obj_dict[obj_name] = _decode(zip_file, obj_name, ndarray_names)
     return obj_dict
@@ -219,17 +219,23 @@ def read(filename):
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible haiopy format to disk.
+    Write any compatible pyfar format to disk.
 
     Parameters
     ----------
     filename : string or open file handle.
-        Input file must be haiopy compatible.
-    args: Compatible haiopy types:
-        -
+        Input file must be pyfar compatible.
+    compress : bool
+        Default is false (uncompressed).
+        If false zipfile.ZIP_STORED mode is used,
+        if True, zipfile.ZIP_DEFLATED mode is used.
+    **objs: named compatible pyfar objects
+        - Coordinates
+        - Orientations
     """
+    compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
     zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_STORED) as zip_file:
+    with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
             obj_dict_encoded, obj_dict_ndarray = _encode(obj)
             zip_file.writestr(f'{name}/json', json.dumps(obj_dict_encoded))
@@ -238,6 +244,38 @@ def write(filename, compress=False, **objs):
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())
+
+
+def _decode(zip_file, obj_name, ndarray_names):
+    """
+    Iterates over object's encoded dictionary and decodes all
+    numpy.ndarrays to be prepare object initialization.
+
+    Parameters
+    ----------
+    obj_dict_encoded: dict.
+        Dictionary of encoded compatible haiopy types.
+
+    Returns
+    ----------
+    obj_dict: dict.
+        Decoded dictionary ready for initialization of haiopy types.
+    """
+    # decoding builtins as json
+    json_str = zip_file.read(obj_name + '/json').decode('UTF-8')
+    obj_dict = json.loads(json_str)
+    # decoding ndarrays
+    for key in ndarray_names:
+        memfile = io.BytesIO()
+        nd_bytes = zip_file.read(obj_name + '/ndarrays/' + key)
+        memfile.write(nd_bytes)
+        memfile.seek(0)
+        obj_dict[key] = np.load(memfile, allow_pickle=False)
+    # build object from obj_dict
+    obj = _str_to_type(obj_dict['type'])()
+    del obj_dict['type']
+    obj.__dict__.update(obj_dict)
+    return obj
 
 
 def _encode(obj):
@@ -269,40 +307,23 @@ def _encode(obj):
     return obj_dict_encoded, obj_dict_ndarray
 
 
-def _decode(zip_file, obj_name, ndarray_names):
+def _unpack_zip_paths(zip_paths):
     """
-    Iterates over object's encoded dictionary and decodes all
-    numpy.ndarrays to be prepare object initialization.
+    This is a helper function for read() to unpack zip-paths,
+    e.g. 'coords/ndarrays/_points' and orientations/ndarrays/_quat
+    becomes {'coords': [_points], 'orientations': '_quat'}
 
     Parameters
     ----------
-    obj_dict_encoded: dict.
-        Dictionary of encoded compatible haiopy types.
+    zip_paths: list of strings.
+        Retreived zipfile.ZipFile.namelist()
 
     Returns
     ----------
-    obj_dict: dict.
-        Decoded dictionary ready for initialization of haiopy types.
+    obj_paths: dict.
+        Dictionary that contains unpacked zip paths.
     """
-    # decoding builtins
-    json_str = zip_file.read(obj_name + '/json').decode('UTF-8')
-    obj_dict = json.loads(json_str)
-    # decoding ndarrays
-    for key in ndarray_names:
-        memfile = io.BytesIO()
-        nd_bytes = zip_file.read(obj_name + '/ndarrays/' + key)
-        memfile.write(nd_bytes)
-        memfile.seek(0)
-        obj_dict[key] = np.load(memfile, allow_pickle=False)
-    # build object from obj_dict
-    obj = _str_to_type(obj_dict['type'])()
-    del obj_dict['type']
-    obj.__dict__.update(obj_dict)
-    return obj
-
-
-def _unpack_paths(zip_paths):
-    obj_paths = {} 
+    obj_paths = {}
     for path in zip_paths:
         paths = path.split('/')
         obj_paths.setdefault(paths[0], [])

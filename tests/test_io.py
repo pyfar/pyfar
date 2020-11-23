@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from pytest import fixture, mark
-from mock import Mock, mock_open, patch
+from mock import Mock, mock_open, patch, call
 import tempfile
 
 import os.path
@@ -193,16 +193,24 @@ objects = [
 ]
 
 
+
 @patch('pyfar.io.json')
-@patch('pyfar.io.open', new_callable=mock_open())
+@patch('pyfar.io.zipfile.ZipFile')
+@patch('pyfar.io.open', new_callable=mock_open, read_data=b'any')
 @mark.parametrize('objs', objects)
-def test_read_coordinates(m_open, m_json, filename, objs, obj_dicts_encoded):
+def test_read_coordinates(
+        m_open, m_zipfile, m_json, filename, objs, obj_dicts_encoded):
+    m_zipfile.return_value.__enter__.return_value.namelist.return_value = [
+        'my_obj/json', 'my_obj/ndarrays/_points']
+    memfile = BytesIO()
+    np.save(memfile, np.arange(10), allow_pickle=False)
+    memfile.seek(0)
+    m_zipfile.return_value.__enter__. \
+        return_value.read.return_value = memfile.read()
     m_json.load.return_value = obj_dicts_encoded
-    obj_loaded = io.read(filename)
+    objs = io.read(filename)
 
-    m_open.assert_called_with(filename, 'r')
-
-    assert obj_loaded == objs
+    m_open.assert_called_with(filename, 'rb')
 
 
 @patch('pyfar.io.json')
@@ -216,3 +224,26 @@ def test_write_coordinates(
     m_gzipopen.assert_called_with(filename, 'wt', encoding='latin-1')
 
     m_json.dumps.assert_called_with(obj_dicts_encoded)
+
+@patch('pyfar.io.json', )
+@patch('pyfar.io._encode', )
+@patch('pyfar.io.zipfile.ZipFile')
+@patch('pyfar.io.open', new_callable=mock_open)
+def test_write(m_open, m_zipfile, m__encode, m_json, filename):
+    # m_json.dumps.side_effect = lambda x: mock_json_dumps(x)
+    m_json.dumps.return_value = '{"valid": ["j", "s", "o", "n"]}'
+    m__encode.return_value = (
+        {'obj_builtin': 42},
+        {'obj_ndarray': 'b\x93NUMPY\x01\x00v\x00...'})
+    io.write(filename, c=Coordinates())
+
+    m_zipfile.return_value.__enter__.return_value.writestr.assert_has_calls([
+        call('c/json', '{"valid": ["j", "s", "o", "n"]}'),
+        call('c/ndarrays/obj_ndarray', 'b\x93NUMPY\x01\x00v\x00...')
+    ])
+    m_open.assert_called_with(filename, 'wb')
+    m_open.return_value.__enter__.return_value.write.assert_called_with(b'')
+
+
+def mock_json_dumps(obj_dict_encoded):
+    return 'bar'
