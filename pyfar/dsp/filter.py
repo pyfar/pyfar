@@ -120,7 +120,7 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
     filt = FilterSOS(sos, fs)
     filt.comment = (f"Chebychev Type I {btype} of order {N}. "
                     f"Cut-off frequency {frequency} Hz. "
-                    f"Passband ripple {ripple} dB.")
+                    f"Pass band ripple {ripple} dB.")
 
     # return the filter object
     if signal is None:
@@ -186,7 +186,7 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
     filt = FilterSOS(sos, fs)
     filt.comment = (f"Chebychev Type II {btype} of order {N}. "
                     f"Cut-off frequency {frequency} Hz. "
-                    f"Stop band attentuation {attenuation} dB.")
+                    f"Stop band attenuation {attenuation} dB.")
 
     # return the filter object
     if signal is None:
@@ -255,7 +255,7 @@ def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
     filt.comment = (f"Elliptic (Cauer) {btype} of order {N}. "
                     f"Cut-off frequency {frequency} Hz. "
                     f"Pass band ripple {ripple} dB. "
-                    f"Stop band attentuation {attenuation} dB.")
+                    f"Stop band attenuation {attenuation} dB.")
 
     # return the filter object
     if signal is None:
@@ -402,6 +402,10 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     if peq_type not in ['I', 'II', 'III']:
         raise ValueError(("peq_type must be 'I', 'II' or "
                           f"'III' but is '{peq_type}'.'"))
+
+    if quality_warp not in ['cos', 'sin', 'tan']:
+        raise ValueError(("quality_warp must be 'cos', 'sin' or "
+                          f"'tan' but is '{quality_warp}'.'"))
 
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
@@ -609,7 +613,7 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     # generate filter object
     filt = FilterSOS(SOS, fs)
-    freq_list = [f for f in np.asarray(frequency)]
+    freq_list = [str(f) for f in np.array(frequency, ndmin=1)]
     filt.comment = (f"Linkwitz-Riley cross over network of order {N*2} at "
                     f"{', '.join(freq_list)} Hz.")
 
@@ -663,9 +667,9 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 
     # generate filter object
     filt = FilterIIR(ba, fs)
-    order_str = "First" if order == 1 else "Second"
-    filt.comment = (f"{order_str} order {kind}-shelve of type {shelve_type} "
-                    f"with {gain} dB gain at {frequency} Hz.")
+    kind = "High" if kind == "high" else "Low"
+    filt.comment = (f"{kind}-shelve of order {order} and type "
+                    f"{shelve_type} with {gain} dB gain at {frequency} Hz.")
 
     # return the filter object
     if signal is None:
