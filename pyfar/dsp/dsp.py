@@ -40,28 +40,48 @@ def phase(signal, deg=False, unwrap=False):
     return phase
 
 
-def group_delay(signal):
-    """Returns the group delay for a given signal object.
+def group_delay(signal, frequencies=None):
+    """Returns the group delay of a signal in samples.
 
     Parameters
     ----------
     signal : Signal object
         An audio signal object from the pyfar signal class
+    frequencies : number array like
+        Frequency or frequencies in Hz at which the group delay is calculated.
+        The default is None, in which case signal.frequencies is used.
 
     Returns
     -------
-    group_delay : np.array()
-        Group delay.
+    group_delay : numpy array
+        Frequency dependent group delay in samples. The array is flattened if
+        a single channel signal was passed to the function.
     """
 
+    # check input and default values
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    phase_vec = phase(signal, deg=False, unwrap=True)
-    bin_dist = signal.sampling_rate / signal.n_samples
-    group_delay = (- np.diff(phase_vec, 1, -1, prepend=0) /
-                   (bin_dist * 2 * np.pi))
-    return np.squeeze(group_delay)
+    frequencies = signal.frequencies if frequencies is None \
+        else np.asarray(frequencies)
+
+    # get time signal and reshape for easy looping
+    time = signal.time
+    time = time.reshape((-1, signal.n_samples))
+    # initialize group delay
+    group_delay = np.zeros((np.prod(signal.cshape), frequencies.size))
+    # calculate the group delay
+    for cc in range(time.shape[0]):
+        group_delay[cc] = sgn.group_delay(
+            (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
+    # reshape to match signal
+    group_delay = group_delay.reshape(signal.cshape + (-1, ))
+
+    # flatten in numpy fashion if a single channel is returned
+    if signal.cshape == (1, ):
+        group_delay = np.squeeze(group_delay)
+
+    return group_delay
 
 
 def spectrogram(signal,
