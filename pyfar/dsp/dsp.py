@@ -72,7 +72,7 @@ def group_delay(signal):
 
     # flatten in numpy fashion if a single channel is returned
     if signal.cshape == (1, ):
-        group_delay = group_delay.flatten()
+        group_delay = np.squeeze(group_delay)
 
     return group_delay
 
