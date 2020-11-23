@@ -67,7 +67,7 @@ def group_delay(signal, frequencies=None):
 
     # get time signal and reshape for easy looping
     time = signal.time
-    time = time.reshape((np.prod(signal.cshape), signal.n_samples))
+    time = time.reshape((-1, signal.n_samples))
     # initialize group delay
     group_delay = np.zeros((np.prod(signal.cshape), frequencies.size))
     # calculate the group delay
@@ -75,7 +75,7 @@ def group_delay(signal, frequencies=None):
         group_delay[cc] = sgn.group_delay(
             (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
     # reshape to match signal
-    group_delay = group_delay.reshape(signal.cshape + (frequencies.size, ))
+    group_delay = group_delay.reshape(signal.cshape + (-1, ))
 
     # flatten in numpy fashion if a single channel is returned
     if signal.cshape == (1, ):
