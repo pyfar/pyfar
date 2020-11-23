@@ -54,7 +54,7 @@ def group_delay(signal, frequencies=None):
     Returns
     -------
     group_delay : numpy array
-        Group delay in sampes at signal.frequencies. The array is flattened if
+        Frequency dependent group delay in samples. The array is flattened if
         a single channel signal was passed to the function.
     """
 
@@ -79,7 +79,7 @@ def group_delay(signal, frequencies=None):
 
     # flatten in numpy fashion if a single channel is returned
     if signal.cshape == (1, ):
-        group_delay = group_delay.flatten()
+        group_delay = np.squeeze(group_delay)
 
     return group_delay
 
