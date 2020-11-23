@@ -35,7 +35,7 @@ def test_phase_deg_unwrap(sine_plus_impulse_mock):
     npt.assert_allclose(phase, truth, rtol=1e-7)
 
 
-def test_group_delay(impulse_mock):
+def test_group_delay_single_channel(impulse_mock):
     """Test the function returning the group delay of a signal."""
     # test single channel signal
     signal = impulse_mock[0]
@@ -43,6 +43,9 @@ def test_group_delay(impulse_mock):
     assert grp.shape == (signal.n_bins, )
     npt.assert_allclose(grp, 1000 * np.ones(signal.n_bins))
 
+
+def test_group_delay_two_channel(impulse_mock):
+    """Test the function returning the group delay of a signal."""
     # test two channel signal
     signal = impulse_mock[1]
     grp = dsp.group_delay(signal)
@@ -50,6 +53,9 @@ def test_group_delay(impulse_mock):
     npt.assert_allclose(grp[0], 1000 * np.ones(signal.n_bins))
     npt.assert_allclose(grp[1],  750 * np.ones(signal.n_bins))
 
+
+def test_group_delay_two_by_two_channel(impulse_mock):
+    """Test the function returning the group delay of a signal."""
     # test two by two channel signal
     signal = impulse_mock[2]
     grp = dsp.group_delay(signal)
@@ -58,6 +64,21 @@ def test_group_delay(impulse_mock):
     npt.assert_allclose(grp[0, 1],  750 * np.ones(signal.n_bins))
     npt.assert_allclose(grp[1, 0],  500 * np.ones(signal.n_bins))
     npt.assert_allclose(grp[1, 1],  250 * np.ones(signal.n_bins))
+
+
+def test_group_delay_custom_frequencies(impulse_mock):
+    """Test the function returning the group delay of a signal."""
+    # test single frequency
+    signal = impulse_mock[0]
+    grp = dsp.group_delay(signal, 1e3)
+    assert grp.shape == (1, )
+    npt.assert_allclose(grp, 1000)
+
+    # test multiple frequencies
+    signal = impulse_mock[0]
+    grp = dsp.group_delay(signal, [1e3, 2e3])
+    assert grp.shape == (2, )
+    npt.assert_allclose(grp, np.array([1e3, 1e3]))
 
 # def test_wrap_to_2pi():
 # def test_nextpow2():

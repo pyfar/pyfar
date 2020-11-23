@@ -40,13 +40,16 @@ def phase(signal, deg=False, unwrap=False):
     return phase
 
 
-def group_delay(signal):
+def group_delay(signal, frequencies=None):
     """Returns the group delay of a signal in samples.
 
     Parameters
     ----------
     signal : Signal object
         An audio signal object from the pyfar signal class
+    frequencies : number array like
+        Frequency or frequencies in Hz at which the group delay is calculated.
+        The default is None, in which case signal.frequencies is used.
 
     Returns
     -------
@@ -55,20 +58,24 @@ def group_delay(signal):
         a single channel signal was passed to the function.
     """
 
+    # check input and default values
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+
+    frequencies = signal.frequencies if frequencies is None \
+        else np.asarray(frequencies)
 
     # get time signal and reshape for easy looping
     time = signal.time
     time = time.reshape((np.prod(signal.cshape), signal.n_samples))
     # initialize group delay
-    group_delay = np.zeros((np.prod(signal.cshape), signal.n_bins))
+    group_delay = np.zeros((np.prod(signal.cshape), frequencies.size))
     # calculate the group delay
     for cc in range(time.shape[0]):
         group_delay[cc] = sgn.group_delay(
-            (time[cc], 1), signal.frequencies, fs=signal.sampling_rate)[1]
+            (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
     # reshape to match signal
-    group_delay = group_delay.reshape(signal.cshape + (signal.n_bins, ))
+    group_delay = group_delay.reshape(signal.cshape + (frequencies.size, ))
 
     # flatten in numpy fashion if a single channel is returned
     if signal.cshape == (1, ):
