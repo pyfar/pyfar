@@ -80,6 +80,36 @@ def _prepare_plot(ax=None, subplots=None):
     return fig, ax
 
 
+def _set_axlim(ax, setter, low, high, limits):
+    """
+    Set axis limits depending on existing data.
+
+    Sets the limits of an axis to `low` and `high` if there are no lines and
+    collections asociated to the axis and to `min(limits[0], low)` and
+    `max(limits[1], high)` otherwise.
+
+    Parameters
+    ----------
+    ax : Matplotlib Axes Object
+        axis for which the limits are to be set.
+    setter : function
+        function for setting the limits, .e.g., `ax.set_xlim`.
+    low : number
+        lower axis limit
+    high : number
+        upper axis limit
+    limits : tuple of length 2
+        current axis limits, e.g., `ax.get_xlim()`.
+    """
+
+    if not ax.lines and not ax.collections:
+        # set desired limit if axis does not contain any lines or points
+        setter((low, high))
+    else:
+        # check against current axes limits
+        setter((min(limits[0], low), max(limits[1], high)))
+
+
 def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with pyfar default color if possible."""
 
@@ -106,21 +136,25 @@ def _return_default_colors_rgb(**kwargs):
 def _time(signal, ax=None, **kwargs):
     """Plot the time data of a signal."""
 
+    # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
+    # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
-
-    fig, ax = _prepare_plot(ax)
     x_data = signal.times
     y_data = signal.time.T
 
-    ax.plot(x_data, y_data, **kwargs)
+    # prepare figure
+    _, ax = _prepare_plot(ax)
     ax.set_xscale('linear')
     ax.set_xlabel("Time in s")
     ax.set_ylabel("Amplitude")
-    ax.set_xlim((signal.times[0], signal.times[-1]))
+    _set_axlim(ax, ax.set_xlim, signal.times[0], signal.times[-1],
+               ax.get_xlim())
 
+    # plot data
+    ax.plot(x_data, y_data, **kwargs)
     plt.tight_layout()
 
     return ax
@@ -129,13 +163,12 @@ def _time(signal, ax=None, **kwargs):
 def _time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     """Plot the time logairhmic data of a signal."""
 
+    # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    fig, ax = _prepare_plot(ax)
-
+    # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
-
     x_data = signal.times
     y_data = signal.time.T
     # avoid any zero-values because they result in -inf in dB data
@@ -145,12 +178,16 @@ def _time_dB(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     ymin = ymax - 90
     ymax = ymax + 10
 
-    ax.plot(x_data, data_dB, **kwargs)
-
-    ax.set_xlim((signal.times[0], signal.times[-1]))
-    ax.set_ylim((ymin, ymax))
+    # prepare figure
+    _, ax = _prepare_plot(ax)
     ax.set_xlabel("Time in s")
     ax.set_ylabel("Amplitude in dB")
+    _set_axlim(ax, ax.set_xlim, signal.times[0], signal.times[-1],
+               ax.get_xlim())
+    _set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
+
+    # plot data
+    ax.plot(x_data, data_dB, **kwargs)
     plt.tight_layout()
 
     return ax
@@ -161,32 +198,32 @@ def _freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
     Plot the logarithmic absolute spectrum on the positive frequency axis.
     """
 
+    # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    fig, ax = _prepare_plot(ax)
-
+    # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
-
     eps = np.finfo(float).tiny
     data_dB = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
-    ax.semilogx(signal.frequencies, data_dB.T, **kwargs)
-
-    ax.set_xlabel("Frequency in Hz")
-    ax.set_ylabel("Magnitude in dB")
-
-    ax.set_xscale('log')
-    ax.grid(True, 'both')
-
     ymax = np.nanmax(data_dB)
     ymin = ymax - 90
     ymax = ymax + 10
 
-    ax.set_ylim((ymin, ymax))
-    ax.set_xlim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
-
+    # prepare figure
+    _, ax = _prepare_plot(ax)
+    ax.set_xlabel("Frequency in Hz")
+    ax.set_ylabel("Magnitude in dB")
+    ax.set_xscale('log')
+    ax.grid(True, 'both')
+    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
+               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
     ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+
+    # plot data
+    ax.semilogx(signal.frequencies, data_dB.T, **kwargs)
     plt.tight_layout()
 
     return ax
@@ -195,15 +232,16 @@ def _freq(signal, log_prefix=20, log_reference=1, ax=None, **kwargs):
 def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis."""
 
+    # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
+    # prepare figure
     _, ax = _prepare_plot(ax)
 
+    # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
-
     phase_data = dsp.phase(signal, deg=deg, unwrap=unwrap)
-
     # Construct the correct label string:
     ylabel_string = 'Phase '
     if unwrap == '360':
@@ -221,19 +259,22 @@ def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
         ax.yaxis.set_major_formatter(MultipleFractionFormatter(
             nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
         y_margin = np.radians(5)
-
     ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
     ymax = np.nanmax(phase_data) + y_margin
 
-    ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
+    # prepare figure
     ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel(ylabel_string)
     ax.set_xscale('log')
     ax.grid(True, 'both')
-    ax.set_ylim((ymin, ymax))
-    ax.set_xlim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
+    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
+               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
     ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+
+    # plot data
+    ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
     plt.tight_layout()
 
     return ax
@@ -242,29 +283,31 @@ def _phase(signal, deg=False, unwrap=False, ax=None, **kwargs):
 def _group_delay(signal, ax=None, **kwargs):
     """Plot the group delay on the positive frequency axis."""
 
+    # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    _, ax = _prepare_plot(ax)
-
+    # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
-
     data = dsp.group_delay(signal) / signal.sampling_rate
-    ax.semilogx(signal.frequencies, data.T, **kwargs)
 
+    # prepare figure
+    _, ax = _prepare_plot(ax)
     ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel("Group delay in s")
-
     ax.set_xscale('log')
     ax.grid(True, 'both')
-
-    ax.set_xlim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
-    ax.set_ylim(.5 * np.min(data), 1.5 * np.max(data))
-
+    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
+               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_ylim, .5 * np.nanmin(data), 1.5 * np.nanmax(data),
+               ax.get_ylim())
     ax.xaxis.set_major_locator(
         LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(
         LogFormatterITAToolbox())
+
+    # plot data
+    ax.semilogx(signal.frequencies, data.T, **kwargs)
     plt.tight_layout()
 
     return ax
