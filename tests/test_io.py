@@ -1,7 +1,8 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest import fixture, mark
+import json
+from pytest import fixture
 from mock import Mock, mock_open, patch, call
 import tempfile
 
@@ -111,7 +112,7 @@ def test_read_sofa_coordinates():
         io.read_sofa(filename)
 
 
-@pytest.fixture
+@fixture
 def signal_mock():
     """ Generate a signal mock object.
     Returns
@@ -184,66 +185,60 @@ def obj_dicts_encoded(objs):
     return [obj_dict_encoded(obj) for obj in objs]
 
 
+# TODO: Use objects in parametrized tests?
 objects = [
     [Coordinates([1, -1], [2, -2], [3, -3])],
     # Coordinates(1, 2, 3, domain='sph', convention='side'),
     # Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0),
     # Orientations.from_view_up([
-    #     [1, 0, 0], [2, 0, 0], [-1, 0, 0]], [[0, 1, 0], [0, -2, 0], [0, 1, 0]])
+    #     [1, 0, 0], [2, 0, 0], [-1, 0, 0]],
+    #     [[0, 1, 0], [0, -2, 0], [0, 1, 0]])
 ]
 
 
-
-@patch('pyfar.io.json')
+# TODO: parametrize test with objects listed above?
+# @mark.parametrize('objs', objects)
 @patch('pyfar.io.zipfile.ZipFile')
 @patch('pyfar.io.open', new_callable=mock_open, read_data=b'any')
-@mark.parametrize('objs', objects)
-def test_read_coordinates(
-        m_open, m_zipfile, m_json, filename, objs, obj_dicts_encoded):
-    m_zipfile.return_value.__enter__.return_value.namelist.return_value = [
+def test_read(m_open, m_zipfile, filename):
+    m_zipenter = m_zipfile.return_value.__enter__.return_value
+    m_zipenter.namelist.return_value = [
         'my_obj/json', 'my_obj/ndarrays/_points']
-    memfile = BytesIO()
-    np.save(memfile, np.arange(10), allow_pickle=False)
-    memfile.seek(0)
-    m_zipfile.return_value.__enter__. \
-        return_value.read.return_value = memfile.read()
-    m_json.load.return_value = obj_dicts_encoded
-    objs = io.read(filename)
-
-    m_open.assert_called_with(filename, 'rb')
+    m_zipenter.read.side_effect = lambda x: mock_zipfile_read(x)
+    io.read(filename)
 
 
-@patch('pyfar.io.json')
-@patch('pyfar.io.gzip.open')
-@mark.parametrize('objs', objects)
-def test_write_coordinates(
-        m_gzipopen, m_json, filename, objs, obj_dicts_encoded):
-    # assert False
-    io.write(filename, *objs)
-
-    m_gzipopen.assert_called_with(filename, 'wt', encoding='latin-1')
-
-    m_json.dumps.assert_called_with(obj_dicts_encoded)
-
-@patch('pyfar.io.json', )
+# TODO: parametrize test with objects listed above?
+# @mark.parametrize('objs', objects)
 @patch('pyfar.io._encode', )
 @patch('pyfar.io.zipfile.ZipFile')
 @patch('pyfar.io.open', new_callable=mock_open)
-def test_write(m_open, m_zipfile, m__encode, m_json, filename):
+def test_write(m_open, m_zipfile, m__encode, filename):
     # m_json.dumps.side_effect = lambda x: mock_json_dumps(x)
-    m_json.dumps.return_value = '{"valid": ["j", "s", "o", "n"]}'
+    # TODO: Should we really mock this function? Shouldn't we
+    # test private functions indirectly through the public interface?
+    # i.e test this function with real objects (parametrized)
     m__encode.return_value = (
-        {'obj_builtin': 42},
-        {'obj_ndarray': 'b\x93NUMPY\x01\x00v\x00...'})
+        json.loads(mock_zipfile_read('json').decode('UTF-8')),
+        {'obj_ndarray': mock_zipfile_read('ndarrays')})
+
     io.write(filename, c=Coordinates())
 
     m_zipfile.return_value.__enter__.return_value.writestr.assert_has_calls([
-        call('c/json', '{"valid": ["j", "s", "o", "n"]}'),
-        call('c/ndarrays/obj_ndarray', 'b\x93NUMPY\x01\x00v\x00...')
+        call('c/json', mock_zipfile_read('json').decode('UTF-8')),
+        call('c/ndarrays/obj_ndarray', mock_zipfile_read('ndarrays'))
     ])
     m_open.assert_called_with(filename, 'wb')
     m_open.return_value.__enter__.return_value.write.assert_called_with(b'')
 
 
-def mock_json_dumps(obj_dict_encoded):
-    return 'bar'
+def mock_zipfile_read(obj_path):
+    obj_path_split = obj_path.split('/')
+    if 'json' in obj_path_split:
+        return b'{"type": "Coordinates"}'
+    elif 'ndarrays' in obj_path_split:
+        return (
+            b'\x93NUMPY\x01\x00v\x00{"descr": "<f8", "fortran_order": False, '
+            b'"shape": (1, 3), }                                             '
+            b'             \n\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00'
+            b'\x00\x00@\x00\x00\x00\x00\x00\x00\x08@')
