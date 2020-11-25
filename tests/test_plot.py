@@ -55,7 +55,6 @@ def test_line_plots(signal_mocks):
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
         function(signal_mocks[0])
-        plt.show()
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -75,7 +74,6 @@ def test_line_plots(signal_mocks):
 
         # plotting
         function(signal_mocks[1])
-        plt.show()
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -107,7 +105,6 @@ def test_line_phase_options(signal_mocks):
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
         plot.line.phase(signal_mocks[0], deg=param[1], unwrap=param[2])
-        plt.show()
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -147,7 +144,6 @@ def test_line_multi(signal_mocks):
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
         plot.line.multi(signal_mocks[0], plots[p])
-        plt.show()
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -167,7 +163,6 @@ def test_line_multi(signal_mocks):
 
         # plotting
         plot.line.multi(signal_mocks[1], plots[p])
-        plt.show()
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
