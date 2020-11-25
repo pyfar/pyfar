@@ -17,8 +17,13 @@ def _prepare_plot(ax=None, subplots=None):
     Parameters
     ----------
     ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the axes are obtained from the current
-        figure. A new figure is created if it does not exist
+        Axes to plot on. The default is None in which case the axes are
+        obtained from the current figure. A new figure is created if it does
+        not exist.
+    subplots : tuple of length 2
+        A tuple giving the desired subplot layout. E.g., (2, 1) creates a
+        subplot layout with two rows and one column. The default is None in
+        which case no layout will be enforced.
 
     Returns
     -------
@@ -36,7 +41,13 @@ def _prepare_plot(ax=None, subplots=None):
             ax = ax[0]
     else:
         # obtain figure from axis
-        fig = ax[0].figure if isinstance(ax, np.ndarray) else ax.figure
+        # (ax objects can be inside an array or list)
+        if isinstance(ax, np.ndarray):
+            fig = ax.flatten()[0].figure
+        elif isinstance(ax, list):
+            fig = ax[0].figure
+        else:
+            fig = ax.figure
 
     # check for correct subplot layout
     if subplots is not None:
@@ -45,19 +56,22 @@ def _prepare_plot(ax=None, subplots=None):
         if len(subplots) > 2 or not isinstance(subplots, tuple):
             raise ValueError(
                 "subplots must be a tuple with one or two elements.")
+
         # tuple to check against the shape of current axis
+        # (convert (N, 1) and (1, N) to (N, ) - this is what Matplotlib does)
         ax_subplots = subplots
-        if len(subplots) == 2:
-            if subplots[0] == 1:
-                ax_subplots = (subplots[1], )
-            elif subplots[1] == 1:
-                ax_subplots = (subplots[0], )
+        if len(ax_subplots) == 2:
+            ax_subplots = tuple(s for s in ax_subplots if s != 1)
+
         # check if current axis has the correct numner of subplots
-        create_subplots = False
-        if not isinstance(ax, list):
-            create_subplots = True
-        elif len(ax) != np.prod(ax_subplots):
-            create_subplots = True
+        create_subplots = True
+        if isinstance(ax, list):
+            if len(ax) == np.prod(ax_subplots):
+                create_subplots = False
+        elif isinstance(ax, np.ndarray):
+            if ax.shape == ax_subplots:
+                create_subplots = False
+
         # create subplots
         if create_subplots:
             fig.clf()

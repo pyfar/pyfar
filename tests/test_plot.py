@@ -183,6 +183,47 @@ def test_line_multi(signal_mocks):
         compare_images(baseline, output, tol=10)
 
 
+def test_prepare_plot():
+    # test without arguments
+    plot._line._prepare_plot()
+
+    # test with single axes object
+    fig = plt.gcf()
+    ax = plt.gca()
+    plot._line._prepare_plot(ax)
+    plt.close()
+
+    # test with list of axes
+    fig = plt.gcf()
+    fig.subplots(2, 2)
+    ax = fig.get_axes()
+    plot._line._prepare_plot(ax)
+    plt.close()
+
+    # test with numpy array of axes
+    fig = plt.gcf()
+    ax = fig.subplots(2, 2)
+    plot._line._prepare_plot(ax)
+    plt.close()
+
+    # test with list of axes and desired subplot layout
+    fig = plt.gcf()
+    fig.subplots(2, 2)
+    ax = fig.get_axes()
+    plot._line._prepare_plot(ax, (2, 2))
+    plt.close()
+
+    # test with numpy array of axes and desired subplot layout
+    fig = plt.gcf()
+    ax = fig.subplots(2, 2)
+    plot._line._prepare_plot(ax, (2, 2))
+    plt.close()
+
+    # test without axes and with desired subplot layout
+    plot._line._prepare_plot(None, (2, 2))
+    plt.close()
+
+
 @pytest.fixture
 def signal_mocks():
     """ Generate two simple dirac signals for testing the hold functionality
