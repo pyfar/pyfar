@@ -55,6 +55,7 @@ class Filter(object):
             self,
             coefficients=None,
             filter_func=None,
+            sampling_rate=None,
             state=None,
             comment=None):
         """
@@ -98,10 +99,19 @@ class Filter(object):
             'default': None,
             'zerophase': None}
 
+        self._sampling_rate = sampling_rate
+
         self._comment = comment
 
     def initialize(self):
         raise NotImplementedError("Abstract class method")
+
+    @property
+    def sampling_rate(self):
+        """Sampling rate of the filter in Hz. The sampling rate is set upon
+        initialization and cannot be changed after the object has been created.
+        """
+        return self._sampling_rate
 
     @property
     def shape(self):
@@ -151,6 +161,10 @@ class Filter(object):
         """
         if not isinstance(signal, Signal):
             raise ValueError("The input needs to be a haiopy.Signal object.")
+
+        if self.sampling_rate != signal.sampling_rate:
+            raise ValueError(
+                "The sampling rates of filter and signal do not match")
 
         if reset is True:
             self.reset()
@@ -205,6 +219,7 @@ class FilterFIR(Filter):
     def __init__(
             self,
             coefficients,
+            sampling_rate,
             filter_func=lfilter):
         """
         Initialize a general Filter object.
@@ -227,7 +242,7 @@ class FilterFIR(Filter):
         a[..., 0] = 1
         coeff = np.stack((b, a), axis=-2)
 
-        super().__init__(coefficients=coeff)
+        super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
 
         self._FILTER_FUNCS = {
             'default': lfilter,
@@ -253,6 +268,7 @@ class FilterIIR(Filter):
     def __init__(
             self,
             coefficients,
+            sampling_rate,
             filter_func=lfilter):
         """IIR filter
         Initialize a general Filter object.
@@ -271,7 +287,7 @@ class FilterIIR(Filter):
             The state of the filter from a priory knowledge.
         """
         coeff = np.atleast_2d(coefficients)
-        super().__init__(coefficients=coeff)
+        super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
 
         self._FILTER_FUNCS = {
             'default': lfilter,
@@ -296,6 +312,7 @@ class FilterSOS(Filter):
     def __init__(
             self,
             coefficients,
+            sampling_rate,
             filter_func=sosfilt):
         """
         Initialize a general Filter object.
@@ -320,7 +337,7 @@ class FilterSOS(Filter):
                 "The coefficients are not in line with a second order",
                 "section filter structure.")
         super().__init__(
-            coefficients=coeff)
+            coefficients=coeff, sampling_rate=sampling_rate)
 
         self._FILTER_FUNCS = {
             'default': sosfilt,
