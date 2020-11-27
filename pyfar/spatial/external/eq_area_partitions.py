@@ -120,8 +120,6 @@ def point_set_polar(dimension, N):
                 points_s[0:dimension-2, point_n+point_l_n-1] = \
                     points_l[:, point_l_n]
 
-            # import ipdb; ipdb.set_trace()
-
             points_s[dimension-1, point_n+point_l_n-1] = a_point
             # point_n = point_n + points_l.shape[1]
             point_n += np.size(points_l)

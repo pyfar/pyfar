@@ -23,12 +23,18 @@ def test_signal_init_default_parameter(impulse_list):
     assert signal.domain == 'time'
     assert signal.signal_type == 'energy'
     assert signal.fft_norm == 'unitary'
+    assert signal.comment is None
 
     # default of fft_norm depending on signal type
     signal = Signal(impulse_list, 44100, signal_type='energy')
     assert signal.fft_norm == 'unitary'
     signal = Signal(impulse_list, 44100, signal_type='power')
     assert signal.fft_norm == 'rms'
+
+
+def test_signal_comment():
+    signal = Signal([1, 0, 0], 44100, comment='Bla')
+    assert signal.comment == 'Bla'
 
 
 def test_domain_getter_freq(sine):
@@ -292,11 +298,11 @@ def test_signal_length(sine):
     assert signal.signal_length == length
 
 
-def test_shape(sine, impulse):
-    """Test the attribute shape."""
+def test_cshape(sine, impulse):
+    """Test the attribute cshape."""
     data = np.array([sine, impulse])
     signal = Signal(data, 44100)
-    assert signal.shape == (2,)
+    assert signal.cshape == (2,)
 
 
 def test_magic_getitem(sine, impulse):

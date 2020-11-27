@@ -137,6 +137,7 @@ def sine_plus_impulse_mock():
     signal_object.frequencies = frequencies
     signal_object.freq = freq
     signal_object.n_samples = n_samples
+    signal_object.cshape = (1, )
     signal_object.signal_type = 'power'
 
     return signal_object

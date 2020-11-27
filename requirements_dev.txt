@@ -1,5 +1,5 @@
 pip
-bumpversion
+bump2version
 wheel
 watchdog
 flake8
@@ -12,6 +12,6 @@ pytest-runner
 numpy>=1.14.0
 scipy>=1.5.0
 pyfftw
-PyQt5
 matplotlib
-python-sofa
+python-sofa>=0.2.0
+urllib3
