@@ -51,7 +51,7 @@ def group_delay(signal):
     Returns
     -------
     group_delay : numpy array
-        Group delay in sampes at signal.frequencies. The array is flattened if
+        Group delay in samples at signal.frequencies. The array is flattened if
         a single channel signal was passed to the function.
     """
 
