@@ -11,7 +11,7 @@ from .line import (
     spectrogram,
     freq_phase,
     freq_group_delay,
-    multi
+    custom_subplots
 )
 from .spatial import (
     scatter,
@@ -29,7 +29,7 @@ __all__ = [
     spectrogram,
     freq_phase,
     freq_group_delay,
-    multi,
+    custom_subplots,
     scatter,
     quiver,
     utils

@@ -122,7 +122,7 @@ def test_line_phase_options(signal_mocks):
         compare_images(baseline, output, tol=10)
 
 
-def test_line_multi(signal_mocks):
+def test_line_custom_subplots(signal_mocks):
 
     # plot layouts to be tested
     plots = {
@@ -135,7 +135,7 @@ def test_line_multi(signal_mocks):
     for p in plots:
         print(f"Testing: {p}")
         # file names
-        filename = 'line_multi_' + p + '.png'
+        filename = 'line_custom_subplots_' + p + '.png'
         baseline = os.path.join(baseline_path, filename)
         output = os.path.join(output_path, filename)
 
@@ -143,7 +143,7 @@ def test_line_multi(signal_mocks):
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
-        plot.line.multi(signal_mocks[0], plots[p])
+        plot.line.custom_subplots(signal_mocks[0], plots[p])
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -157,12 +157,12 @@ def test_line_multi(signal_mocks):
 
         # test hold functionality
         # file names
-        filename = 'line_multi_' + p + '_hold.png'
+        filename = 'line_custom_subplots_' + p + '_hold.png'
         baseline = os.path.join(baseline_path, filename)
         output = os.path.join(output_path, filename)
 
         # plotting
-        plot.line.multi(signal_mocks[1], plots[p])
+        plot.line.custom_subplots(signal_mocks[1], plots[p])
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation

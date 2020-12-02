@@ -359,16 +359,19 @@ def freq_group_delay(signal, log_prefix=20, log_reference=1, ax=None,
     return ax
 
 
-def multi(signal, plots, ax=None, style='light', **kwargs):
+def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     """
-    Generate multiple plots of a Signal object.
+    Generate subplot with a custom layout based on a list of plot function
+    handles. The subplot layout is taken from the shape of the plot function
+    handle list.
 
     Parameters
     ----------
     signal : Signal
         A pyfar Signal object
     plots : list, nested list
-        list with function handles for plotting (see example below)
+        list with function handles for plotting (e.g. pyfar.plot.line.time.
+        See example below)
     ax : matplotlib.pyplot.axes object
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
@@ -399,7 +402,7 @@ def multi(signal, plots, ax=None, style='light', **kwargs):
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = _line._multi(signal, plots, ax, **kwargs)
+        ax = _line._custom_subplots(signal, plots, ax, **kwargs)
     plt.tight_layout()
 
     return ax
