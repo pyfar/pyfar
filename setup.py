@@ -11,11 +11,28 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = []
+requirements = [
+    'numpy>=1.14.0',
+    'scipy>=1.5.0',
+    'pyfftw',
+    'matplotlib',
+    'python-sofa>=0.2.0',
+    'urllib3'
+]
 
 setup_requirements = ['pytest-runner', ]
 
-test_requirements = ['pytest', ]
+test_requirements = [
+    'pytest',
+    'bump2version',
+    'wheel',
+    'watchdog',
+    'flake8',
+    'tox',
+    'coverage',
+    'Sphinx',
+    'twine',
+]
 
 setup(
     author="The pyfar developers",
@@ -26,9 +43,8 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ],
     description="Project for data formats in acoustics.",
     install_requires=requirements,
