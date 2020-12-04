@@ -156,13 +156,18 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     return ax
 
 
-def group_delay(signal, xscale='log', ax=None, style='light', **kwargs):
+def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
+                **kwargs):
     """Plot the group delay on the positive frequency axis.
 
     Parameters
     ----------
     signal : Signal
         pyfar Signal object.
+    unit : str
+        Unit of the group delay. Can be 's', 'ms', 'mus', or 'samples'.
+        The default is None, which sets the unit to 's' (seconds), 'ms'
+        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
     xscale : str
         'linear' or 'log' to plot on a linear or logarithmic x-axis. The
         default is 'log'.
@@ -187,9 +192,12 @@ def group_delay(signal, xscale='log', ax=None, style='light', **kwargs):
 
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    units = ['s', 'ms', 'mus', 'samples', None]
+    if unit not in units:
+        raise ValueError(f"unit must be {', '.join(units)} but is {unit}.")
 
     with plt.style.context(plotstyle(style)):
-        ax = _line._group_delay(signal, xscale, ax, **kwargs)
+        ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLog', ax, signal, style, **kwargs)
@@ -305,7 +313,8 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
 
 def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
-                     xscale='log', ax=None, style='light', **kwargs):
+                     unit=None, xscale='log', ax=None, style='light',
+                     **kwargs):
     """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
 
     Parameters
@@ -318,6 +327,10 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
         Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
         Reference for calculating the logarithmic time data. The default is 1.
+    unit : str
+        Unit of the group delay. Can be 's', 'ms', 'mus', or 'samples'.
+        The default is None, which sets the unit to 's' (seconds), 'ms'
+        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
     xscale : str
         'linear' or 'log' to plot on a linear or logarithmic x-axis. The
         default is 'log'.
@@ -344,7 +357,7 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
 
     with plt.style.context(plotstyle(style)):
         ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
-                                     xscale, ax, **kwargs)
+                                     unit, xscale, ax, **kwargs)
 
     plt.tight_layout()
     Interaction('LineXLog', ax[0], signal, style, **kwargs)

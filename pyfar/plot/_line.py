@@ -277,7 +277,7 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     return ax
 
 
-def _group_delay(signal, xscale='log', ax=None, **kwargs):
+def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     """Plot the group delay on the positive frequency axis."""
 
     # check input
@@ -286,12 +286,24 @@ def _group_delay(signal, xscale='log', ax=None, **kwargs):
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
-    data = dsp.group_delay(signal) / signal.sampling_rate
+    data = dsp.group_delay(signal)
+    # auto detect the unit
+    if unit is None:
+        unit = _group_delay_auto_unit(
+            np.nanmax(np.abs(data) / signal.sampling_rate))
+    # set the unit
+    if unit == 's':
+        data = data / signal.sampling_rate
+    elif unit == 'ms':
+        data = data / signal.sampling_rate * 1e3
+    elif unit == 'mus':
+        data = data / signal.sampling_rate * 1e6
+        unit = 'micro s'
 
     # prepare figure
     _, ax = _prepare_plot(ax)
     ax.set_xlabel("Frequency in Hz")
-    ax.set_ylabel("Group delay in s")
+    ax.set_ylabel(f"Group delay in {unit}")
     ax.grid(True, 'both')
     _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
                signal.sampling_rate/2, ax.get_xlim())
@@ -312,6 +324,31 @@ def _group_delay(signal, xscale='log', ax=None, **kwargs):
         ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
+
+
+def _group_delay_auto_unit(gd_max):
+    """
+    Automatically set the unit for the group delay plot according to the
+    absolute maximum of the input data. This is a separate function for ease of
+    testing.
+
+    Parameters
+    ----------
+
+    gd_max : float
+        Absolute maximum of the group delay in seconds
+    """
+
+    if gd_max == 0:
+        unit = 's'
+    elif gd_max < 1e-3:
+        unit = 'mus'
+    elif gd_max < 1:
+        unit = 'ms'
+    else:
+        unit = 's'
+
+    return unit
 
 
 def _spectrogram(signal, log=False, nodb=False, window='hann',
@@ -411,7 +448,7 @@ def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
 
 def _freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
-                      xscale='log', ax=None, **kwargs):
+                      unit=None, xscale='log', ax=None, **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
@@ -423,7 +460,7 @@ def _freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     kwargs = _return_default_colors_rgb(**kwargs)
 
     _freq(signal, dB, log_prefix, log_reference, xscale, ax[0], **kwargs)
-    _group_delay(signal, xscale, ax[1], **kwargs)
+    _group_delay(signal, unit, xscale, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
     plt.tight_layout()
