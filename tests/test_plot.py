@@ -32,10 +32,9 @@ f_dpi = 100
 
 
 def test_line_plots(signal_mocks):
+    """Test all line plots with default arguments and hold functionality."""
 
-    # test all plots with default parameters
     function_list = [plot.line.time,
-                     plot.line.time_dB,
                      plot.line.freq,
                      plot.line.phase,
                      plot.line.group_delay,
@@ -90,6 +89,8 @@ def test_line_plots(signal_mocks):
 
 
 def test_line_phase_options(signal_mocks):
+    """Test parameters that are unique to the phase plot."""
+
     parameter_list = [['line_phase_deg.png', True, False],
                       ['line_phase_unwrap.png', False, True],
                       ['line_phase_deg_unwrap.png', True, True]]
@@ -115,21 +116,121 @@ def test_line_phase_options(signal_mocks):
         # close current figure
         plt.close()
 
-        # close figure
+        # testing
+        compare_images(baseline, output, tol=10)
+
+
+def test_line_dB_option(signal_mocks):
+    """Test all line plots that have a dB option."""
+
+    function_list = [plot.line.time,
+                     plot.line.freq]
+
+    # test if dB option is working
+    for function in function_list:
+        for dB in [True, False]:
+            print(f"Testing: {function.__name__} (dB={dB})")
+            # file names
+            filename = 'line_' + function.__name__ + '_dB_' + str(dB) + '.png'
+            baseline = os.path.join(baseline_path, filename)
+            output = os.path.join(output_path, filename)
+
+            # plotting
+            matplotlib.use('Agg')
+            mpt.set_reproducibility_for_testing()
+            plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+            function(signal_mocks[0], dB=dB)
+
+            # save baseline if it does not exist
+            # make sure to visually check the baseline uppon creation
+            if create_baseline:
+                plt.savefig(baseline)
+            # safe test image
+            plt.savefig(output)
+
+            # close current figure
+            plt.close()
+
+            # testing
+            compare_images(baseline, output, tol=10)
+
+    # test if log_prefix and log_reference are working
+    for function in function_list:
+        print(f"Testing: {function.__name__} (log parameters)")
+        # file names
+        filename = 'line_' + function.__name__ + '_logParams.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+        function(signal_mocks[0], log_prefix=10, log_reference=.5, dB=True)
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # close current figure
         plt.close()
 
         # testing
         compare_images(baseline, output, tol=10)
 
 
+def test_line_xscale_option(signal_mocks):
+    """Test all line plots that have an xscale option."""
+
+    function_list = [plot.line.freq,
+                     plot.line.phase,
+                     plot.line.group_delay]
+
+    # test if dB option is working
+    for function in function_list:
+        for xscale in ['log', 'linear']:
+            print(f"Testing: {function.__name__} (xscale={xscale})")
+            # file names
+            filename = 'line_' + function.__name__ + '_xscale_' + xscale + \
+                       '.png'
+            baseline = os.path.join(baseline_path, filename)
+            output = os.path.join(output_path, filename)
+
+            # plotting
+            matplotlib.use('Agg')
+            mpt.set_reproducibility_for_testing()
+            plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+            function(signal_mocks[0], xscale=xscale)
+
+            # save baseline if it does not exist
+            # make sure to visually check the baseline uppon creation
+            if create_baseline:
+                plt.savefig(baseline)
+            # safe test image
+            plt.savefig(output)
+
+            # close current figure
+            plt.close()
+
+            # testing
+            compare_images(baseline, output, tol=10)
+
+
 def test_line_custom_subplots(signal_mocks):
+    """
+    Test custom subplots in row, column, and mixed layout including hold
+    functionality.
+    """
 
     # plot layouts to be tested
     plots = {
         'row': [plot.line.time, plot.line.freq],
         'col': [[plot.line.time], [plot.line.freq]],
-        'mix': [[plot.line.time, plot.line.time_dB],
-                [plot.line.freq, plot.line.group_delay]]
+        'mix': [[plot.line.time, plot.line.freq],
+                [plot.line.phase, plot.line.group_delay]]
     }
 
     for p in plots:
