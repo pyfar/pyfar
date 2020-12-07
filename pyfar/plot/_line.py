@@ -189,7 +189,7 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         ymin = ymax - 90
         ymax = ymax + 10
     else:
-        data = signal.freq
+        data = np.abs(signal.freq)
 
     # prepare figure
     _, ax = _prepare_plot(ax)
