@@ -209,10 +209,10 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     else:
         ax.plot(signal.frequencies, data.T, **kwargs)
 
-    # set ticks
+    # set and format ticks
     if xscale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
-        ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+    ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     plt.tight_layout()
 
@@ -268,11 +268,10 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
         ax.plot(signal.frequencies, phase_data.T, **kwargs)
     plt.tight_layout()
 
-    # set ticks
+    # set and format ticks
     if xscale == 'log':
-        ax.set_xscale('log')
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
-        ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+    ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
 
@@ -317,11 +316,10 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
         ax.plot(signal.frequencies, data.T, **kwargs)
     plt.tight_layout()
 
-    # set ticks
+    # set and format ticks
     if xscale == 'log':
-        ax.set_xscale('log')
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
-        ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+    ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
 
