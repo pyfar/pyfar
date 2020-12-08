@@ -508,6 +508,48 @@ def test_normalization_single_sided_multi_channel_even_samples():
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
+def test_normalization_with_window():
+    """
+    Test if the window cancels out if applying the normalization and
+    inverse normalization.
+    """
+
+    # test with window as list and numpy array
+    windows = [[1, 1, 1, 1], np.array([1, 1, 1, 1])]
+
+    # test power signals
+    fft_norms = ['unitary', 'amplitude', 'rms', 'power', 'psd']
+    for window in windows:
+        for fft_norm in fft_norms:
+            print(f"testing: {window}, {fft_norm}")
+            spec = fft.normalization(np.array([.5, 1, .5]), 4, 44100,
+                                     'power', fft_norm, window=window)
+            spec = fft.normalization(spec, 4, 44100, 'power', fft_norm,
+                                     inverse=True, window=window)
+            npt.assert_allclose(np.array([.5, 1, .5]), spec, atol=1e-15)
+
+    # test with energy signals
+    for window in windows:
+        print(f"testing: {window}, energy signal (unitary)")
+        spec = fft.normalization(np.array([.5, 1, .5]), 4, 44100,
+                                 'energy', 'unitary', window=window)
+        spec = fft.normalization(spec, 4, 44100, 'energy', 'unitary',
+                                 inverse=True, window=window)
+        npt.assert_allclose(np.array([.5, 1, .5]), spec, atol=1e-15)
+
+
+def test_normalization_with_window_value_error():
+    """
+    Test if normalization throws a ValueError if the window has the
+    wrong length.
+    """
+
+    with raises(ValueError):
+        # n_samples=5, and len(window)=5
+        fft.normalization(np.array([.5, 1, .5]), 4, 44100, 'power',
+                          'amplitude', window=[1, 1, 1, 1, 1])
+
+
 def test_normalization_exceptions():
     # try without numpy array
     with raises(ValueError):
