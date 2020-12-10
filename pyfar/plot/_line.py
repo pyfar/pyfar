@@ -1,10 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-import scipy.signal as sgn
-from .. import dsp
 from pyfar import Signal
-import pyfar.fft as fft
 import pyfar.dsp as dsp
 import warnings
 from .ticker import (
