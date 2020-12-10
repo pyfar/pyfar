@@ -224,9 +224,6 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ----------
     signal : Signal
         pyfar Signal object.
-    log : Boolean
-        Speciefies, whether the y axis is plotted logarithmically.
-        The default is False.
     db : Boolean
         Falg to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float

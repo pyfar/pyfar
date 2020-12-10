@@ -5,6 +5,7 @@ import scipy.signal as sgn
 from .. import dsp
 from pyfar import Signal
 import pyfar.fft as fft
+import pyfar.dsp as dsp
 import warnings
 from .ticker import (
     LogFormatterITAToolbox,
@@ -336,37 +337,15 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
                        f"{np.prod(signal.cshape)}-channel signal."))
 
     # take only the first channel of time data
-    time_data = signal.time[tuple(np.zeros(len(signal.cshape), dtype='int'))]
+    first_channel = tuple(np.zeros(len(signal.cshape), dtype='int'))
 
-    _, ax = _prepare_plot(ax)
-
-    # get spectrogram from scipy.signal
-    window_overlap = int(window_length * window_overlap_fct)
-    window = sgn.get_window(window, window_length)
-
-    frequencies, times, spectrogram = sgn.spectrogram(
-            x=time_data, fs=signal.sampling_rate, window=window,
-            noverlap=window_overlap, mode='magnitude', scaling='spectrum')
-
-    # remove normalization from scipy.signal.spectrogram
-    spectrogram /= np.sqrt(1 / window.sum()**2)
-
-    # apply normalization from signal
-    spectrogram = fft.normalization(
-        spectrogram, window_length, signal.sampling_rate,
-        signal.signal_type, signal.fft_norm, window=window)
-
-    # get in dB
-    if dB:
-        eps = np.finfo(float).tiny
-        spectrogram = log_prefix*np.log10(
-            np.abs(spectrogram) / log_reference + eps)
-
-    # scipy.signal takes the center of the DFT blocks as time stamp we take the
-    # beginning (looks nicer in plots, both conventions are used)
-    times -= times[0]
+    # get spectrogram
+    frequencies, times, spectrogram = dsp.spectrogram(
+        signal[first_channel], dB, log_prefix, log_reference,
+        window, window_length, window_overlap_fct)
 
     # plot the data
+    _, ax = _prepare_plot(ax)
     ax.pcolormesh(times, frequencies, spectrogram, cmap=cmap,
                   shading='gouraud')
 
@@ -374,7 +353,7 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ax.set_ylabel('Frequency in Hz')
     ax.set_xlabel('Time in s')
     ax.set_xlim((times[0], times[-1]))
-    ax.set_ylim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
+    ax.set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
 
     if yscale == 'log':
         ax.set_yscale('symlog')
