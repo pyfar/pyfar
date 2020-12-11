@@ -383,7 +383,7 @@ class SignalIterator(object):
             sampling_rate=signal.sampling_rate,
             n_samples=signal.n_samples,
             domain=signal.domain,
-            signal_type=signal.signal_type,
+            fft_norm=signal.fft_norm,
             dtype=signal.dtype)
 
     def __next__(self):
