@@ -209,8 +209,8 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     return data
 
 
-def normalization(spec, n_samples, sampling_rate, fft_norm=None, inverse=False,
-                  single_sided=True, window=None):
+def normalization(spec, n_samples, sampling_rate, fft_norm='none',
+                  inverse=False, single_sided=True, window=None):
     """
     Normalize spectrum of power signal.
 
@@ -230,8 +230,8 @@ def normalization(spec, n_samples, sampling_rate, fft_norm=None, inverse=False,
         number of samples of the corresponding time signal
     sampling_rate : number
         sampling rate of the corresponding time signal in Hz
-    fft_norm : None, string, optional
-        None - Do not apply any normalization
+    fft_norm : string, optional
+        'none' - Do not apply any normalization
         'unitary' - Multiplied single sided spectra by factor two
                     (except for 0 Hz and half the sampling rate)
         'amplitude' - as in _[2] Eq. (4)
@@ -265,7 +265,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm=None, inverse=False,
     """
 
     # check if normalization should be applied
-    if (fft_norm is None) or (fft_norm == 'none'):
+    if fft_norm == 'none':
         return spec
 
     # check input

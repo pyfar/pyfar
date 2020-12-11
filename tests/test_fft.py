@@ -326,11 +326,11 @@ def test_normalization_None():
     fs = 40     # arbitrary sampling frequency for psd normalization
 
     spec_out = fft.normalization(spec_single.copy(), N, fs,
-                                 None, inverse=False)
+                                 'none', inverse=False)
     npt.assert_allclose(spec_out, spec_single, atol=1e-15)
 
     spec_out = fft.normalization(spec_out, N, fs,
-                                 None, inverse=True)
+                                 'none', inverse=True)
     npt.assert_allclose(spec_out, spec_single, atol=1e-15)
 
 
@@ -538,7 +538,7 @@ def test_normalization_exceptions():
 def test_rfft_energy_imp_even_samples(impulse):
     n_samples = 1024
     samplingrate = 40e3
-    spec = fft.rfft(impulse, n_samples, samplingrate, None)
+    spec = fft.rfft(impulse, n_samples, samplingrate, 'none')
 
     truth = np.ones(int(n_samples/2+1), dtype=np.complex)
     npt.assert_allclose(spec, truth)
@@ -547,7 +547,7 @@ def test_rfft_energy_imp_even_samples(impulse):
 def test_rfft_energy_imp_even_samples_fftw(impulse, fft_lib_pyfftw):
     n_samples = 1024
     samplingrate = 40e3
-    spec = fft.rfft(impulse, n_samples, samplingrate, None)
+    spec = fft.rfft(impulse, n_samples, samplingrate, 'none')
 
     truth = np.ones(int(n_samples/2+1), dtype=np.complex)
     npt.assert_allclose(spec, truth)
@@ -557,7 +557,7 @@ def test_irfft_energy_imp_even_samples_np(impulse, fft_lib_np):
     n_samples = 1024
     samplingrate = 40e3
     spec = np.ones(int(n_samples/2+1), dtype=np.complex)
-    data = fft.irfft(spec, n_samples, samplingrate, None)
+    data = fft.irfft(spec, n_samples, samplingrate, 'none')
 
     truth = impulse
     npt.assert_allclose(data, truth)
@@ -567,7 +567,7 @@ def test_irfft_energy_imp_even_samples_np_fftw(impulse, fft_lib_pyfftw):
     n_samples = 1024
     samplingrate = 40e3
     spec = np.ones(int(n_samples/2+1), dtype=np.complex)
-    data = fft.irfft(spec, n_samples, samplingrate, None)
+    data = fft.irfft(spec, n_samples, samplingrate, 'none')
 
     truth = impulse
     npt.assert_allclose(data, truth)
