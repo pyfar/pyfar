@@ -366,6 +366,7 @@ class Signal(Audio):
             sampling_rate=self.sampling_rate,
             domain=self.domain,
             signal_type=self.signal_type,
+            fft_norm=self.fft_norm,
             dtype=self.dtype)
 
         return items
