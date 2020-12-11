@@ -180,17 +180,40 @@ class Signal(Audio):
         return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
 
     def find_nearest_frequency(self, value):
-        """Returns the closest frequency index for a given frequency"""
+        """Returns the closest frequency index for a given frequency
+
+        Parameters
+        ----------
+        value : float, array-like
+            The frequency for which the indices are to be returned
+
+        Returns
+        -------
+        indices : int, array-like
+            The index for the given frequency. If the input was an array like,
+            a numpy array of indices is returned.
+        """
         freqs = np.atleast_1d(value)
-        indices = np.zeros_like(freqs)
+        indices = np.zeros_like(freqs).astype(np.int)
         for idx, freq in enumerate(freqs):
             indices[idx] = np.argmin(np.abs(self.frequencies - freq))
         return np.squeeze(indices)
 
     def find_nearest_time(self, value):
-        """Returns the closest time index for a given time"""
+        """Returns the closest time index for a given time
+        Parameters
+        ----------
+        value : float, array-like
+            The times for which the indices are to be returned
+
+        Returns
+        -------
+        indices : int, array-like
+            The index for the given time instance. If the input was an array
+            like, a numpy array of indices is returned.
+        """
         times = np.atleast_1d(value)
-        indices = np.zeros_like(times)
+        indices = np.zeros_like(times).astype(np.int)
         for idx, time in enumerate(times):
             indices[idx] = np.argmin(np.abs(self.times - time))
         return np.squeeze(indices)
