@@ -61,11 +61,9 @@ def test_domain_setter_freq_when_freq(sine):
 
 
 def test_domain_setter_freq_when_time(sine):
-    stype = 'power'
     fft_norm = 'rms'
     samplingrate = 40e3
-    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate,
-                                  stype, fft_norm))
+    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate, fft_norm))
     signal = Signal(sine, 44100, domain='time', fft_norm=fft_norm)
     domain = 'freq'
     signal.domain = domain
@@ -82,11 +80,9 @@ def test_domain_setter_time_when_time(sine):
 
 
 def test_domain_setter_time_when_freq(sine):
-    stype = 'power'
     fft_norm = 'rms'
     samplingrate = 40e3
-    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate,
-                                  stype, fft_norm))
+    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate, fft_norm))
     signal = Signal(spec, 44100, domain='freq', fft_norm=fft_norm)
     signal._data = spec
     signal._n_samples = len(sine)
@@ -154,7 +150,7 @@ def test_getter_freq(sine, impulse):
     samplingrate = 44100
     signal = Signal(sine, samplingrate, fft_norm='rms')
     new_sine = sine * 2
-    spec = fft.rfft(new_sine, len(new_sine), samplingrate, 'power', 'rms')
+    spec = fft.rfft(new_sine, len(new_sine), samplingrate, 'rms')
     signal._domain = 'freq'
     signal._data = spec
     npt.assert_allclose(signal.freq, spec, atol=1e-15)
@@ -236,11 +232,6 @@ def test_setter_fft_norm(sine):
     with pytest.raises(ValueError):
         signal.fft_norm = 'bullshit'
 
-    # setting invalid fft_norm for energy signals
-    signal = Signal(sine, 44100)
-    with pytest.raises(ValueError):
-        signal.fft_norm = 'rms'
-
 
 def test_dtype(sine):
     """Test for the getter od dtype."""
@@ -310,7 +301,7 @@ def test_magic_setitem_wrong_norm(sine, impulse):
     sr = 44100
     signal = Signal(impulse, sr, fft_norm='none')
     set_signal = Signal(sine*2, sr, fft_norm='rms')
-    with pytest.raises(ValueError, match='signal types do not match'):
+    with pytest.raises(ValueError, match='FFT norms do not match'):
         signal[0] = set_signal
 
 
