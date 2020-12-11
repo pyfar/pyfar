@@ -179,6 +179,22 @@ class Signal(Audio):
         """Time instances the signal is sampled at."""
         return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
 
+    def find_nearest_frequency(self, value):
+        """Returns the closest frequency index for a given frequency"""
+        freqs = np.atleast_1d(value)
+        indices = np.zeros_like(freqs)
+        for idx, freq in enumerate(freqs):
+            indices[idx] = np.argmin(np.abs(self.frequencies - freq))
+        return np.squeeze(indices)
+
+    def find_nearest_time(self, value):
+        """Returns the closest time index for a given time"""
+        times = np.atleast_1d(value)
+        indices = np.zeros_like(times)
+        for idx, time in enumerate(times):
+            indices[idx] = np.argmin(np.abs(self.times - time))
+        return np.squeeze(indices)
+
     @property
     def time(self):
         """The signal data in the time domain."""
