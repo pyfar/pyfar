@@ -7,8 +7,8 @@ import urllib3
 import os
 import scipy.io as sio
 from pyfar.coordinates import Coordinates
-from pyfar.spatial.external import (
-    samplings_lebedev, eq_area_partitions)
+
+from .external import (samplings_lebedev, eq_area_partitions)
 
 
 def cart_equidistant_cube(n_points):
