@@ -364,6 +364,8 @@ class Signal(Audio):
             raise ValueError("The sampling rates do not match.")
         if self.n_samples != other.n_samples:
             raise ValueError("The number of samples does not match.")
+        if self.fft_norm != other.fft_norm:
+            raise ValueError("The FFT norms do not match.")
 
     def __iter__(self):
         """Iterator for signals. The actual iteration is handled through
