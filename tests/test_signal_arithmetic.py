@@ -146,8 +146,8 @@ def test_assert_match_for_arithmetic():
     s = Signal([1, 2, 3, 4], 44100)
     s1 = Signal([1, 2, 3, 4], 48000)
     s2 = Signal([1, 2, 3], 44100)
-    s4 = Signal([1, 2, 3, 4], 44100, signal_type="power")
-    s5 = Signal([1, 2, 3, 4], 44100, signal_type="power", fft_norm='amplitude')
+    s4 = Signal([1, 2, 3, 4], 44100, fft_norm="rms")
+    s5 = Signal([1, 2, 3, 4], 44100, fft_norm='amplitude')
 
     # check with two signals
     signal._assert_match_for_arithmetic((s, s), 'time')
@@ -160,12 +160,11 @@ def test_assert_match_for_arithmetic():
     out = signal._assert_match_for_arithmetic((s, s), 'time')
     assert out[0] == 44100
     assert out[1] == 4
-    assert out[2] == 'energy'
+    assert out[2] == 'none'
     out = signal._assert_match_for_arithmetic((s, s4), 'time')
-    assert out[2] == 'power'
+    assert out[2] == 'rms'
     out = signal._assert_match_for_arithmetic((s5, s4), 'time')
-    assert out[2] == 'power'
-    assert out[3] == 'amplitude'
+    assert out[2] == 'amplitude'
 
     # check with only one argument
     with raises(TypeError):
@@ -197,18 +196,18 @@ def test_get_arithmetic_data_with_array():
 
 def test_get_arithmetic_data_with_signal():
     # all possible combinations of `domain`, `signal_type`, and `fft_norm`
-    meta = [['time', 'energy', 'unitary'],
-            ['freq', 'energy', 'unitary'],
-            ['time', 'power', 'unitary'],
-            ['freq', 'power', 'unitary'],
-            ['time', 'power', 'amplitude'],
-            ['freq', 'power', 'amplitude'],
-            ['time', 'power', 'rms'],
-            ['freq', 'power', 'rms'],
-            ['time', 'power', 'power'],
-            ['freq', 'power', 'power'],
-            ['time', 'power', 'psd'],
-            ['freq', 'power', 'psd']]
+    meta = [['time', None],
+            ['freq', None],
+            ['time', 'unitary'],
+            ['freq', 'unitary'],
+            ['time', 'amplitude'],
+            ['freq', 'amplitude'],
+            ['time', 'rms'],
+            ['freq', 'rms'],
+            ['time', 'power'],
+            ['freq', 'power'],
+            ['time', 'psd'],
+            ['freq', 'psd']]
 
     # reference signal - _get_arithmetic_data should return the data without
     # any normalization regardless of the input data
@@ -216,10 +215,10 @@ def test_get_arithmetic_data_with_signal():
 
     for m_in in meta:
         # create input signal with current domain, type, and norm
-        s_in = Signal([1, 0, 0], 44100, signal_type=m_in[1], fft_norm=m_in[2])
+        s_in = Signal([1, 0, 0], 44100, fft_norm=m_in[1])
         s_in.domain = m_in[0]
         for domain in ['time', 'freq']:
-            print(f"Testing from {', '.join(m_in)} to {domain}.")
+            print(f"Testing from {m_in[0]} ({m_in[1]}) to {domain}.")
 
             # get output data
             data_out = signal._get_arithmetic_data(
