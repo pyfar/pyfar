@@ -40,11 +40,6 @@ class Signal(Audio):
         default is None.
     domain : 'time', 'freq', optional
         Domain of data. The default is 'time'
-    signal_type : 'energy', 'power', optional
-        Energy signals are finite and have finite energy. An example for an
-        energy signal is an impulse response. Power signals are infinite and
-        have infinite energy. Examples are noise and sine signals. The default
-        is 'energy'
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
         The kind of Discrete Fourier Transform (DFT) normalization. See
         pyfar.fft.normalization for more information. The normalization is
@@ -60,7 +55,6 @@ class Signal(Audio):
             sampling_rate,
             n_samples=None,
             domain='time',
-            signal_type='energy',
             fft_norm=None,
             dtype=np.double,
             comment=None):
@@ -77,16 +71,11 @@ class Signal(Audio):
             The default is None.
         domain : 'time', 'freq', optional
             Domain of data. The default is 'time'
-        signal_type : 'energy', 'power', optional
-            Energy signals are finite and have finite energy. An example for an
-            energy signal is an impulse response. Power signals are infinite
-            and have infinite energy. Examples are noise and sine signals. The
-            default is 'energy'
-        fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
+        fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
             The kind of Discrete Fourier Transform (DFT) normalization. See
             pyfar.fft.normalization for more information. The normalization is
-            only applied to power signals. The default is 'unitary' for energy
-            signals and 'rms' for power signals.
+            only applied to power signals. The default is 'none', which is
+            typically used to energy signals, such as impulse responses.
         dtype : string, optional
             Raw data type of the signal. The default is float64
 
@@ -97,10 +86,6 @@ class Signal(Audio):
         self._dtype = dtype
 
         self._VALID_SIGNAL_TYPE = ["power", "energy"]
-        if (signal_type in self._VALID_SIGNAL_TYPE) is True:
-            self._signal_type = signal_type
-        else:
-            raise ValueError("Not a valid signal type ('power'/'energy')")
 
         self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
         if domain in self._VALID_SIGNAL_DOMAIN:
@@ -121,12 +106,12 @@ class Signal(Audio):
             self._n_samples = n_samples
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
-        self._VALID_FFT_NORMS = ["unitary", "amplitude", "rms", "power", "psd"]
+        self._VALID_FFT_NORMS = [
+            "none", "unitary", "amplitude", "rms", "power", "psd"]
         if fft_norm is None:
-            fft_norm = 'unitary' if signal_type == 'energy' else 'rms'
+            fft_norm = 'none'
         if fft_norm in self._VALID_FFT_NORMS:
             self._fft_norm = fft_norm
-            self.fft_norm = fft_norm
         else:
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
@@ -151,13 +136,13 @@ class Signal(Audio):
                 # and need to do an inverse Fourier Transform
                 self.time = fft.irfft(
                     self._data, self.n_samples, self._sampling_rate,
-                    self._signal_type, self._fft_norm)
+                    self._fft_norm)
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform
                 self.freq = fft.rfft(
                     self._data, self.n_samples, self._sampling_rate,
-                    self._signal_type, self._fft_norm)
+                    self._fft_norm)
 
     @property
     def n_samples(self):
@@ -226,33 +211,18 @@ class Signal(Audio):
     @property
     def signal_type(self):
         """The signal type."""
-        return self._signal_type
+        if self.fft_norm == 'none':
+            stype = 'energy'
+        elif self.fft_norm in [
+                "unitary", "amplitude", "rms", "power", "psd"]:
+            stype = 'energy'
+        else:
+            raise ValueError("No valid fft norm set.")
+        return stype
 
     @signal_type.setter
     def signal_type(self, value):
-        # check if we do anything
-        if value == self._signal_type:
-            return
-
-        # check input
-        if value not in self._VALID_SIGNAL_TYPE:
-            raise ValueError("Not a valid signal type ('power'/'energy')")
-        if value == 'energy' and self._fft_norm != 'unitary':
-            raise ValueError(("Signal type can only be set to 'energy' if "
-                              "fft_norm is 'unitary'"))
-
-        # normalize or de-normalize spectrum
-        if self._domain == 'freq' and value == 'energy':
-            inverse = True
-        if self._domain == 'freq' and value == 'power':
-            inverse = False
-
-        self._data = fft.normalization(
-            self._data, self._n_samples, self._sampling_rate,
-            'power', self._fft_norm, inverse)
-
-        # set new signal type
-        self._signal_type = value
+        raise DeprecationWarning("Deprecated, use fft_norm instead.")
 
     @property
     def fft_norm(self):
@@ -275,20 +245,17 @@ class Signal(Audio):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
-        if self._signal_type == 'energy' and value != 'unitary':
-            raise ValueError(
-                "If signal_type is 'energy', fft_norm must be 'unitary'.")
 
         # apply new normalization if Signal is in frequency domain
         if self._fft_norm != value and self._domain == 'freq':
             # de-normalize
             self._data = fft.normalization(
                 self._data, self._n_samples, self._sampling_rate,
-                self._signal_type, self._fft_norm, inverse=True)
+                self._fft_norm, inverse=True)
             # normalize
             self._data = fft.normalization(
                 self._data, self._n_samples, self._sampling_rate,
-                self._signal_type, value, inverse=False)
+                value, inverse=False)
 
         self._fft_norm = value
 
@@ -365,7 +332,6 @@ class Signal(Audio):
             data,
             sampling_rate=self.sampling_rate,
             domain=self.domain,
-            signal_type=self.signal_type,
             dtype=self.dtype)
 
         return items
@@ -398,8 +364,6 @@ class Signal(Audio):
             raise ValueError("The sampling rates do not match.")
         if self.n_samples != other.n_samples:
             raise ValueError("The number of samples does not match.")
-        if self.signal_type != other.signal_type:
-            raise ValueError("The signal types do not match.")
 
     def __iter__(self):
         """Iterator for signals. The actual iteration is handled through
