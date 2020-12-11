@@ -418,9 +418,8 @@ def add(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _add)
@@ -446,9 +445,8 @@ def subtract(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _subtract)
@@ -474,9 +472,8 @@ def multiply(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _multiply)
@@ -502,9 +499,8 @@ def divide(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _divide)
@@ -530,9 +526,8 @@ def power(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _power)
@@ -542,7 +537,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     """Apply arithmetic operations."""
 
     # check input and obtain meta data of new signal
-    sampling_rate, n_samples, signal_type, fft_norm = \
+    sampling_rate, n_samples, fft_norm = \
         _assert_match_for_arithmetic(data, domain)
 
     # apply arithmetic operation
@@ -557,10 +552,10 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
         # apply desried fft normalization
         if domain == 'freq':
             result = fft.normalization(result, n_samples, sampling_rate,
-                                       signal_type, fft_norm)
+                                       fft_norm)
 
         result = Signal(
-            result, sampling_rate, n_samples, domain, signal_type, fft_norm)
+            result, sampling_rate, n_samples, domain, fft_norm=fft_norm)
 
     return result
 
@@ -586,12 +581,9 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     n_samples : number, None
         Number of samples of the signals. None, if no signal is contained in
         `data`
-    signal_type : str, None
-        'energy' if all signaly are of type energy. 'power' if any power signal
-        is contained in `data`. None if no signal is contained in `data`
     fft_norm : str, None
-        FFT norm of the first signal in `data`. None if no signal is contained
-        in `data`.
+        FFT norm of the first signal in `data`, if all FFT norms are None.
+        Otherwise the first FFT norm that is not None is taken.
 
     """
 
@@ -606,7 +598,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     # check input types and meta data
     sampling_rate = None
     n_samples = None
-    signal_type = None
     fft_norm = None
     for d in data:
         # check or store meta data of signals
@@ -614,7 +605,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
             if sampling_rate is None:
                 sampling_rate = d.sampling_rate
                 n_samples = d.n_samples
-                signal_type = d.signal_type
                 fft_norm = d.fft_norm
             else:
                 if sampling_rate != d.sampling_rate:
@@ -623,8 +613,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                     raise ValueError("The number of samples does not match.")
             # if there is a power signal, the returned signal will be a power
             # signal
-            if d.signal_type == "power":
-                signal_type = "power"
+            if d.fft_norm != 'none' and fft_norm == 'none':
+                fft_norm = d.fft_norm
         # check type of non signal input
         else:
             dtypes = ['int8', 'int16', 'int32', 'int64',
@@ -638,7 +628,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 
-    return sampling_rate, n_samples, signal_type, fft_norm
+    return sampling_rate, n_samples, fft_norm
 
 
 def _get_arithmetic_data(data, n_samples, domain):
@@ -669,11 +659,11 @@ def _get_arithmetic_data(data, n_samples, domain):
         elif domain == "freq":
             data_out = data.freq.copy()
 
-            if data.signal_type == 'power':
+            if data.fft_norm != 'none':
                 # remove current fft normalization
                 data_out = fft.normalization(
                     data_out, n_samples, data.sampling_rate,
-                    'power', data.fft_norm, inverse=True)
+                    data.fft_norm, inverse=True)
 
         else:
             raise ValueError(
