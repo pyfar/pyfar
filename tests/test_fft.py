@@ -85,10 +85,9 @@ def test_fft_orthogonality_sine_even_np(fft_lib_np):
     times = np.arange(0, num_samples) / samplingrate
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'power', 'rms')
+        signal_spec, num_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
 
@@ -104,10 +103,9 @@ def test_fft_orthogonality_sine_even_fftw(fft_lib_pyfftw):
     times = np.arange(0, num_samples) / samplingrate
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'power', 'rms')
+        signal_spec, num_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
 
@@ -124,9 +122,9 @@ def test_fft_orthogonality_sine_odd_np(fft_lib_np):
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
     signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+        signal_time, num_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'power', 'rms')
+        signal_spec, num_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
 
@@ -142,10 +140,9 @@ def test_fft_orthogonality_sine_odd_fftw(fft_lib_pyfftw):
     times = np.arange(0, num_samples) / samplingrate
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'power', 'rms')
+        signal_spec, num_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
 
@@ -155,10 +152,9 @@ def test_fft_orthogonality_noise_even_np(fft_lib_np):
     np.random.seed(450)
     samplingrate = 40e3
     signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(
-        signal_time, n_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'power', 'rms')
+        signal_spec, n_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
@@ -168,10 +164,9 @@ def test_fft_orthogonality_noise_even_fftw(fft_lib_pyfftw):
     np.random.seed(450)
     samplingrate = 40e3
     signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(
-        signal_time, n_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'power', 'rms')
+        signal_spec, n_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
@@ -181,10 +176,9 @@ def test_fft_orthogonality_noise_odd_np(fft_lib_np):
     np.random.seed(450)
     samplingrate = 40e3
     signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(
-        signal_time, n_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'power', 'rms')
+        signal_spec, n_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
@@ -194,10 +188,9 @@ def test_fft_orthogonality_noise_odd_fftw(fft_lib_pyfftw):
     np.random.seed(450)
     samplingrate = 40e3
     signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(
-        signal_time, n_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'power', 'rms')
+        signal_spec, n_samples, samplingrate, 'rms')
 
     npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
@@ -213,8 +206,7 @@ def test_fft_parsevaL_theorem_sine_even_np(fft_lib_np):
     times = np.arange(0, num_samples) / samplingrate
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
 
     e_time = np.mean(np.abs(signal_time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
@@ -233,8 +225,7 @@ def test_fft_parsevaL_theorem_sine_even_fftw(fft_lib_pyfftw):
     times = np.arange(0, num_samples) / samplingrate
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
 
     e_time = np.mean(np.abs(signal_time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
@@ -253,8 +244,7 @@ def test_fft_parsevaL_theorem_sine_odd_np(fft_lib_np):
     times = np.arange(0, num_samples) / samplingrate
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
 
     e_time = np.mean(np.abs(signal_time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
@@ -273,8 +263,7 @@ def test_fft_parsevaL_theorem_sine_odd_fftw(fft_lib_pyfftw):
     times = np.arange(0, num_samples) / samplingrate
 
     signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'power', 'rms')
+    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
 
     e_time = np.mean(np.abs(signal_time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
@@ -287,8 +276,7 @@ def test_fft_parsevaL_theorem_noise_even_np(fft_lib_np):
     np.random.seed(450)
     samplingrate = 40e3
     noise_time = np.random.normal(0, 1, n_samples)
-    noise_spec = fft.rfft(
-        noise_time, n_samples, samplingrate, 'power', 'rms')
+    noise_spec = fft.rfft(noise_time, n_samples, samplingrate, 'rms')
 
     e_time = np.mean(np.abs(noise_time)**2)
     e_freq = np.sum(np.abs(noise_spec)**2)
@@ -301,8 +289,7 @@ def test_fft_parsevaL_theorem_noise_even_fftw(fft_lib_pyfftw):
     np.random.seed(450)
     samplingrate = 40e3
     noise_time = np.random.normal(0, 1, n_samples)
-    noise_spec = fft.rfft(
-        noise_time, n_samples, samplingrate, 'power', 'rms')
+    noise_spec = fft.rfft(noise_time, n_samples, samplingrate, 'rms')
 
     e_time = np.mean(np.abs(noise_time)**2)
     e_freq = np.sum(np.abs(noise_spec)**2)
@@ -315,8 +302,7 @@ def test_fft_parsevaL_theorem_noise_odd_np(fft_lib_np):
     np.random.seed(450)
     samplingrate = 40e3
     noise_time = np.random.normal(0, 1, n_samples)
-    noise_spec = fft.rfft(
-        noise_time, n_samples, samplingrate, 'power', 'rms')
+    noise_spec = fft.rfft(noise_time, n_samples, samplingrate, 'rms')
 
     e_time = np.mean(np.abs(noise_time)**2)
     e_freq = np.sum(np.abs(noise_spec)**2)
@@ -334,17 +320,17 @@ def test_is_not_odd():
     assert not fft._is_odd(num)
 
 
-def test_normalization_energy_signal():
+def test_normalization_None():
     spec_single = np.array([1, 1, 1])
     N = 4       # time signal with even number of samples
     fs = 40     # arbitrary sampling frequency for psd normalization
 
-    spec_out = fft.normalization(spec_single.copy(), N, fs, "energy",
-                                 "rms", inverse=False)
+    spec_out = fft.normalization(spec_single.copy(), N, fs,
+                                 None, inverse=False)
     npt.assert_allclose(spec_out, spec_single, atol=1e-15)
 
-    spec_out = fft.normalization(spec_out, N, fs, "energy",
-                                 "rms", inverse=True)
+    spec_out = fft.normalization(spec_out, N, fs,
+                                 None, inverse=True)
     npt.assert_allclose(spec_out, spec_single, atol=1e-15)
 
 
@@ -378,12 +364,12 @@ def test_normalization_single_sided_single_channel_even_samples():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+        spec_out = fft.normalization(spec_single.copy(), N, fs,
                                      normalization, inverse=False)
         npt.assert_allclose(spec_out, truth[normalization], atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+        spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
@@ -418,12 +404,12 @@ def test_normalization_single_sided_single_channel_odd_samples():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+        spec_out = fft.normalization(spec_single.copy(), N, fs,
                                      normalization, inverse=False)
         npt.assert_allclose(spec_out, truth[normalization], atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+        spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
@@ -454,13 +440,13 @@ def test_normalization_both_sided_single_channel():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+        spec_out = fft.normalization(spec_single.copy(), N, fs,
                                      normalization, inverse=False,
                                      single_sided=False)
         npt.assert_allclose(spec_out, truth[normalization], atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+        spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True,
                                          single_sided=False)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
@@ -497,13 +483,13 @@ def test_normalization_single_sided_multi_channel_even_samples():
 
     for normalization in truth:
         print(f"Assesing normalization: '{normalization}'")
-        spec_out = fft.normalization(spec_single.copy(), N, fs, "power",
+        spec_out = fft.normalization(spec_single.copy(), N, fs,
                                      normalization, inverse=False)
         npt.assert_allclose(spec_out, np.tile(truth[normalization], tile),
                             atol=1e-15)
 
         print(f"Assesing normalization: '{normalization}' (inverse)")
-        spec_out_inv = fft.normalization(spec_out, N, fs, "power",
+        spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True)
         npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
@@ -517,25 +503,15 @@ def test_normalization_with_window():
     # test with window as list and numpy array
     windows = [[1, 1, 1, 1], np.array([1, 1, 1, 1])]
 
-    # test power signals
     fft_norms = ['unitary', 'amplitude', 'rms', 'power', 'psd']
     for window in windows:
         for fft_norm in fft_norms:
             print(f"testing: {window}, {fft_norm}")
             spec = fft.normalization(np.array([.5, 1, .5]), 4, 44100,
-                                     'power', fft_norm, window=window)
-            spec = fft.normalization(spec, 4, 44100, 'power', fft_norm,
+                                     fft_norm, window=window)
+            spec = fft.normalization(spec, 4, 44100, fft_norm,
                                      inverse=True, window=window)
             npt.assert_allclose(np.array([.5, 1, .5]), spec, atol=1e-15)
-
-    # test with energy signals
-    for window in windows:
-        print(f"testing: {window}, energy signal (unitary)")
-        spec = fft.normalization(np.array([.5, 1, .5]), 4, 44100,
-                                 'energy', 'unitary', window=window)
-        spec = fft.normalization(spec, 4, 44100, 'energy', 'unitary',
-                                 inverse=True, window=window)
-        npt.assert_allclose(np.array([.5, 1, .5]), spec, atol=1e-15)
 
 
 def test_normalization_with_window_value_error():
@@ -546,24 +522,23 @@ def test_normalization_with_window_value_error():
 
     with raises(ValueError):
         # n_samples=5, and len(window)=5
-        fft.normalization(np.array([.5, 1, .5]), 4, 44100, 'power',
+        fft.normalization(np.array([.5, 1, .5]), 4, 44100,
                           'amplitude', window=[1, 1, 1, 1, 1])
 
 
 def test_normalization_exceptions():
     # try without numpy array
     with raises(ValueError):
-        fft.normalization(1, 1, 44100, 'power')
-    # try rms normalization for power signal
+        fft.normalization(1, 1, 44100, 'rms')
+    # try invalid normalization
     with raises(ValueError):
-        fft.normalization(np.array([1]), 1, 44100, 'power',
-                          'rms', single_sided=False)
+        fft.normalization(np.array([1]), 1, 44100, 'goofy')
 
 
 def test_rfft_energy_imp_even_samples(impulse):
     n_samples = 1024
     samplingrate = 40e3
-    spec = fft.rfft(impulse, n_samples, samplingrate, 'energy', 'unitary')
+    spec = fft.rfft(impulse, n_samples, samplingrate, None)
 
     truth = np.ones(int(n_samples/2+1), dtype=np.complex)
     npt.assert_allclose(spec, truth)
@@ -572,7 +547,7 @@ def test_rfft_energy_imp_even_samples(impulse):
 def test_rfft_energy_imp_even_samples_fftw(impulse, fft_lib_pyfftw):
     n_samples = 1024
     samplingrate = 40e3
-    spec = fft.rfft(impulse, n_samples, samplingrate, 'energy', 'unitary')
+    spec = fft.rfft(impulse, n_samples, samplingrate, None)
 
     truth = np.ones(int(n_samples/2+1), dtype=np.complex)
     npt.assert_allclose(spec, truth)
@@ -582,7 +557,7 @@ def test_irfft_energy_imp_even_samples_np(impulse, fft_lib_np):
     n_samples = 1024
     samplingrate = 40e3
     spec = np.ones(int(n_samples/2+1), dtype=np.complex)
-    data = fft.irfft(spec, n_samples, samplingrate, 'energy', 'unitary')
+    data = fft.irfft(spec, n_samples, samplingrate, None)
 
     truth = impulse
     npt.assert_allclose(data, truth)
@@ -592,7 +567,7 @@ def test_irfft_energy_imp_even_samples_np_fftw(impulse, fft_lib_pyfftw):
     n_samples = 1024
     samplingrate = 40e3
     spec = np.ones(int(n_samples/2+1), dtype=np.complex)
-    data = fft.irfft(spec, n_samples, samplingrate, 'energy', 'unitary')
+    data = fft.irfft(spec, n_samples, samplingrate, None)
 
     truth = impulse
     npt.assert_allclose(data, truth)
@@ -601,7 +576,7 @@ def test_irfft_energy_imp_even_samples_np_fftw(impulse, fft_lib_pyfftw):
 def test_rfft_power_imp_even_samples_np(sine, fft_lib_np):
     n_samples = 1024
     sampling_rate = 2e3
-    spec = fft.rfft(sine, n_samples, sampling_rate, 'power', 'rms')
+    spec = fft.rfft(sine, n_samples, sampling_rate, 'rms')
 
     truth = np.zeros(int(n_samples/2+1), dtype=np.complex)
     truth[int(n_samples/16)] = 1/np.sqrt(2)
@@ -612,7 +587,7 @@ def test_rfft_power_imp_even_samples_np(sine, fft_lib_np):
 def test_rfft_power_imp_even_samples_fftw(sine, fft_lib_pyfftw):
     n_samples = 1024
     sampling_rate = 2e3
-    spec = fft.rfft(sine, n_samples, sampling_rate, 'power', 'rms')
+    spec = fft.rfft(sine, n_samples, sampling_rate, 'rms')
 
     truth = np.zeros(int(n_samples/2+1), dtype=np.complex)
     truth[int(n_samples/16)] = 1/np.sqrt(2)
@@ -626,7 +601,7 @@ def test_irfft_power_imp_even_samples_np(sine, fft_lib_np):
     spec = np.zeros(int(n_samples/2+1), dtype=np.complex)
     spec[int(n_samples/16)] = 1/np.sqrt(2)
 
-    data = fft.irfft(spec, n_samples, samplingrate, 'power', 'rms')
+    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
 
     truth = sine
     npt.assert_allclose(data, truth, atol=1e-10)
@@ -638,7 +613,7 @@ def test_irfft_power_imp_even_samples_fftw(sine, fft_lib_pyfftw):
     spec = np.zeros(int(n_samples/2+1), dtype=np.complex)
     spec[int(n_samples/16)] = 1/np.sqrt(2)
 
-    data = fft.irfft(spec, n_samples, samplingrate, 'power', 'rms')
+    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
 
     truth = sine
     npt.assert_allclose(data, truth, atol=1e-10)
@@ -650,7 +625,7 @@ def test_irfft_power_imp_odd_samples_np(sine_odd, fft_lib_np):
     spec = np.zeros(int((n_samples+1)/2), dtype=np.complex)
     spec[int(n_samples/16)] = 1/np.sqrt(2)
 
-    data = fft.irfft(spec, n_samples, samplingrate, 'power', 'rms')
+    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
 
     truth, f = sine_odd
     npt.assert_allclose(data, truth, atol=1e-10)
@@ -662,7 +637,7 @@ def test_irfft_power_imp_odd_samples_fftw(sine_odd, fft_lib_pyfftw):
     spec = np.zeros(int((n_samples+1)/2), dtype=np.complex)
     spec[int(n_samples/16)] = 1/np.sqrt(2)
 
-    data = fft.irfft(spec, n_samples, samplingrate, 'power', 'rms')
+    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
 
     truth, f = sine_odd
     npt.assert_allclose(data, truth, atol=1e-10)
@@ -672,7 +647,7 @@ def test_rfft_power_imp_odd_samples_np(sine_odd, fft_lib_np):
     n_samples = 1023
     s, f = sine_odd
     sampling_rate = 40e3
-    spec = fft.rfft(s, n_samples, sampling_rate, 'power', 'rms')
+    spec = fft.rfft(s, n_samples, sampling_rate, 'rms')
 
     truth = np.zeros(int((n_samples+1)/2), dtype=np.complex)
     truth[int(n_samples/16)] = 1/np.sqrt(2)
@@ -684,7 +659,7 @@ def test_rfft_power_imp_odd_samples_fftw(sine_odd, fft_lib_pyfftw):
     n_samples = 1023
     s, f = sine_odd
     sampling_rate = 40e3
-    spec = fft.rfft(s, n_samples, sampling_rate, 'power', 'rms')
+    spec = fft.rfft(s, n_samples, sampling_rate, 'rms')
 
     truth = np.zeros(int((n_samples+1)/2), dtype=np.complex)
     truth[int(n_samples/16)] = 1/np.sqrt(2)

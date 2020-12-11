@@ -126,7 +126,7 @@ def rfftfreq(n_samples, sampling_rate):
     return fft_lib.rfftfreq(n_samples, d=1/sampling_rate)
 
 
-def rfft(data, n_samples, sampling_rate, signal_type, fft_norm, window=None):
+def rfft(data, n_samples, sampling_rate, fft_norm, window=None):
     """
     Calculate the FFT of a real-valued time-signal. The function returns only
     the right-hand side of the axis-symmetric spectrum. The normalization
@@ -164,13 +164,13 @@ def rfft(data, n_samples, sampling_rate, signal_type, fft_norm, window=None):
     # DFT
     spec = fft_lib.rfft(data, n=n_samples, axis=-1)
     # Normalization
-    spec = normalization(spec, n_samples, sampling_rate, signal_type, fft_norm,
+    spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=False, single_sided=True, window=window)
 
     return spec
 
 
-def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm, window=None):
+def irfft(spec, n_samples, sampling_rate, fft_norm, window=None):
     """
     Calculate the IFFT of a axis-symmetric Fourier spectum. The function
     takes only the right-hand side of the spectrum and returns a real-valued
@@ -207,7 +207,7 @@ def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm, window=None):
     """
 
     # Inverse normalization
-    spec = normalization(spec, n_samples, sampling_rate, signal_type, fft_norm,
+    spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True, window=window)
     # Inverse DFT
     data = fft_lib.irfft(spec, n=n_samples, axis=-1)
@@ -215,9 +215,8 @@ def irfft(spec, n_samples, sampling_rate, signal_type, fft_norm, window=None):
     return data
 
 
-def normalization(spec, n_samples, sampling_rate, signal_type,
-                  fft_norm="unitary", inverse=False, single_sided=True,
-                  window=None):
+def normalization(spec, n_samples, sampling_rate, fft_norm=None, inverse=False,
+                  single_sided=True, window=None):
     """
     Normalize spectrum of power signal.
 
@@ -237,12 +236,10 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
         number of samples of the corresponding time signal
     sampling_rate : number
         sampling rate of the corresponding time signal in Hz
-    signal_type : 'energy', 'power'
-        Normalization is only applied if signal_type == 'power'. See
-        pyfar.Signal for more information
-    fft_norm : string, optional
-        'unitary' - Multiplied single sided spectra by factor two for power
-                    signals. Do nothing for energy signals.
+    fft_norm : None, string, optional
+        None - Do not apply any normalization
+        'unitary' - Multiplied single sided spectra by factor two
+                    (except for 0 Hz and half the sampling rate)
         'amplitude' - as in _[2] Eq. (4)
         'rms' - as in _[2] Eq. (10)
         'power' - as in _[2] Eq. (5)
@@ -273,20 +270,17 @@ def normalization(spec, n_samples, sampling_rate, signal_type,
            May 2020, p. e-Brief 600.
     """
 
+    # check if normalization should be applied
+    if fft_norm is None:
+        return spec
+
     # check input
     if not isinstance(spec, np.ndarray):
         raise ValueError("Input 'spec' must be a numpy array.")
-    if signal_type not in ['energy', 'power']:
-        raise ValueError(("signal_type must be 'energy' or 'power' "
-                          f"but is '{signal_type}'"))
     if window is not None:
         if len(window) != n_samples:
             raise ValueError((f"window must be {n_samples} long "
                               f"but is {len(window)} long."))
-
-    # nothing to do for energy signals
-    if signal_type == 'energy':
-        return spec
 
     n_bins = spec.shape[-1]
     norm = np.ones(n_bins)
