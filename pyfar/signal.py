@@ -29,25 +29,6 @@ class Signal(Audio):
     time and frequency domain. Equally spaced samples or frequency bins,
     respectively.
 
-    Attributes
-    ----------
-    data : ndarray, double
-        Raw data of the signal in the frequency or time domain
-    sampling_rate : double
-        Sampling rate in Hertz
-    n_samples : int, optional
-        Number of samples of the time signal. Required if domain is 'freq'. The
-        default is None.
-    domain : 'time', 'freq', optional
-        Domain of data. The default is 'time'
-    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
-        The kind of Discrete Fourier Transform (DFT) normalization. See
-        pyfar.fft.normalization for more information. The normalization is
-        only applied to power signals. The default is 'unitary' for energy
-        signals and 'rms' for power signals.
-    dtype : string, optional
-        Raw data type of the signal. The default is float64
-
     """
     def __init__(
             self,
