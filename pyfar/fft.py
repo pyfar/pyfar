@@ -126,7 +126,7 @@ def rfftfreq(n_samples, sampling_rate):
     return fft_lib.rfftfreq(n_samples, d=1/sampling_rate)
 
 
-def rfft(data, n_samples, sampling_rate, fft_norm, window=None):
+def rfft(data, n_samples, sampling_rate, fft_norm):
     """
     Calculate the FFT of a real-valued time-signal. The function returns only
     the right-hand side of the axis-symmetric spectrum. The normalization
@@ -146,8 +146,6 @@ def rfft(data, n_samples, sampling_rate, fft_norm, window=None):
         The number of samples
     sampling_rate : number
         sampling rate in Hz
-    signal_type : 'energy', 'power'
-        see pyfar.Signal for more information
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentaion of pyfar.fft.normalization.
     window : None, array like
@@ -165,12 +163,12 @@ def rfft(data, n_samples, sampling_rate, fft_norm, window=None):
     spec = fft_lib.rfft(data, n=n_samples, axis=-1)
     # Normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
-                         inverse=False, single_sided=True, window=window)
+                         inverse=False, single_sided=True)
 
     return spec
 
 
-def irfft(spec, n_samples, sampling_rate, fft_norm, window=None):
+def irfft(spec, n_samples, sampling_rate, fft_norm):
     """
     Calculate the IFFT of a axis-symmetric Fourier spectum. The function
     takes only the right-hand side of the spectrum and returns a real-valued
@@ -192,11 +190,7 @@ def irfft(spec, n_samples, sampling_rate, fft_norm, window=None):
         of samples.
     sampling_rate : number
         sampling rate in Hz
-    signal_type : 'energy', 'power'
-        see pyfar.Signal for more information
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of pyfar.fft.normalization.
-    window : None, array like
         See documentaion of pyfar.fft.normalization.
 
     Returns
@@ -208,7 +202,7 @@ def irfft(spec, n_samples, sampling_rate, fft_norm, window=None):
 
     # Inverse normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
-                         inverse=True, single_sided=True, window=window)
+                         inverse=True, single_sided=True)
     # Inverse DFT
     data = fft_lib.irfft(spec, n=n_samples, axis=-1)
 
@@ -271,7 +265,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm=None, inverse=False,
     """
 
     # check if normalization should be applied
-    if fft_norm is None:
+    if (fft_norm is None) or (fft_norm == 'none'):
         return spec
 
     # check input
