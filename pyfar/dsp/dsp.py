@@ -180,7 +180,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     # apply normalization from signal
     spectrogram = fft.normalization(
         spectrogram, window_length, signal.sampling_rate,
-        signal.signal_type, signal.fft_norm, window=window)
+        signal.fft_norm, window=window)
 
     # get in dB
     if dB:
