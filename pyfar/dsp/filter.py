@@ -3,7 +3,7 @@ import scipy.signal as spsignal
 
 from .classes import (FilterIIR, FilterSOS)
 
-import pyfar.dsp._audiofilter as iir
+from . import _audiofilter as iir
 
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
