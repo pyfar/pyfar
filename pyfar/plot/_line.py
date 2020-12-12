@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-from .. import dsp
 from pyfar import Signal
+import pyfar.dsp as dsp
 import warnings
 from .ticker import (
     LogFormatterITAToolbox,
@@ -349,32 +349,36 @@ def _group_delay_auto_unit(gd_max):
     return unit
 
 
-def _spectrogram(signal, log=False, nodb=False, window='hann',
-                 window_length='auto', window_overlap_fct=0.5,
-                 cmap=mpl.cm.get_cmap(name='magma'), ax=None,
-                 cut=False, **kwargs):
-    """Plot the magnitude spectrum versus time."""
+def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
+                 yscale='linear',
+                 window='hann', window_length=1024, window_overlap_fct=0.5,
+                 cmap=mpl.cm.get_cmap(name='magma'), ax=None):
+    """Plot the magnitude spectrum versus time.
 
+    See pyfar.line.spectogram for more information.
+    """
+
+    # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    if signal.time.shape[0] > 1:
-        warnings.warn(
-            "You are trying to plot a spectrogram of "
-            + str(signal.time.shape) + " signals.")
-        signal.time = signal.time[0]
+    if window_length > signal.n_samples:
+        raise ValueError("window_length exceeds signal length")
 
+    if np.prod(signal.cshape) > 1:
+        warnings.warn(("Using only the first channel of "
+                       f"{np.prod(signal.cshape)}-channel signal."))
+
+    # take only the first channel of time data
+    first_channel = tuple(np.zeros(len(signal.cshape), dtype='int'))
+
+    # get spectrogram
+    frequencies, times, spectrogram = dsp.spectrogram(
+        signal[first_channel], dB, log_prefix, log_reference,
+        window, window_length, window_overlap_fct)
+
+    # plot the data
     _, ax = _prepare_plot(ax)
-
-    if window_length == 'auto':
-        window_length = 2**dsp.nextpow2(signal.n_samples / 2000)
-        if window_length < 1024:
-            window_length = 1024
-
-    frequencies, times, spectrogram, _ = dsp.spectrogram(
-        signal, window, window_length, window_overlap_fct, 20, 1, log, nodb,
-        cut)
-
     ax.pcolormesh(times, frequencies, spectrogram, cmap=cmap,
                   shading='gouraud')
 
@@ -382,22 +386,26 @@ def _spectrogram(signal, log=False, nodb=False, window='hann',
     ax.set_ylabel('Frequency in Hz')
     ax.set_xlabel('Time in s')
     ax.set_xlim((times[0], times[-1]))
-    ax.set_ylim((max(20, signal.frequencies[1]), signal.sampling_rate/2))
+    ax.set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
 
-    if log:
+    if yscale == 'log':
         ax.set_yscale('symlog')
         ax.yaxis.set_major_locator(LogLocatorITAToolbox())
     ax.yaxis.set_major_formatter(LogFormatterITAToolbox())
-    ax.grid(ls='dotted')
+    ax.grid(ls='dotted', color='white')
     plt.tight_layout()
 
-    return ax
+    return ax, spectrogram
 
 
-def _spectrogram_cb(signal, log=False, nodb=False, window='hann',
-                    window_length='auto', window_overlap_fct=0.5,
-                    cmap=mpl.cm.get_cmap(name='magma'), ax=None, **kwargs):
-    """Plot the magnitude spectrum versus time."""
+def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
+                    yscale='linear',
+                    window='hann', window_length=1024, window_overlap_fct=0.5,
+                    cmap=mpl.cm.get_cmap(name='magma'), ax=None):
+    """Plot the magnitude spectrum versus time.
+
+    See pyfar.line.spectogram for more information.
+    """
 
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -411,8 +419,10 @@ def _spectrogram_cb(signal, log=False, nodb=False, window='hann',
     ax = ax.figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 0.05]})
     fig.axes[0].remove()
 
-    ax[0] = _spectrogram(signal, log, nodb, window, window_length,
-                         window_overlap_fct, cmap, ax[0], **kwargs)
+    ax[0], spectrogram = _spectrogram(
+        signal, dB, log_prefix, log_reference, yscale,
+        window, window_length, window_overlap_fct,
+        cmap, ax[0])
 
     # Colorbar:
     for PCM in ax[0].get_children():
@@ -421,6 +431,14 @@ def _spectrogram_cb(signal, log=False, nodb=False, window='hann',
 
     cb = plt.colorbar(PCM, cax=ax[1])
     cb.set_label('Modulus in dB')
+
+    # color limits
+    if dB:
+        ymax = np.nanmax(spectrogram)
+        ymin = ymax - 90
+        ymax = ymax + 10
+        PCM.set_clim(ymin, ymax)
+
     plt.tight_layout()
 
     return ax

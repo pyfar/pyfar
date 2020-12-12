@@ -8,7 +8,6 @@ from unittest import mock
 import os
 import pyfar.plot as plot
 from pyfar import Signal
-import copy
 
 # flag for creating new baseline plots (required if the plot look changed)
 create_baseline = False
@@ -392,23 +391,45 @@ def signal_mocks():
     time_impulse[group_delay] = 1
     freq_impulse = 1 * np.exp(1j * np.arange(n_bins) * dphi)
 
-    # create a mock object of Signal class to test the plot independently
-    signal_1 = mock.Mock(spec_set=Signal(time_sine, sampling_rate))
-    signal_1.time = time_sine[np.newaxis, :]
-    signal_1.sampling_rate = sampling_rate
-    signal_1.times = times
-    signal_1.n_samples = n_samples
-    signal_1.freq = freq_sine[np.newaxis, :]
-    signal_1.frequencies = frequencies
-    signal_1.n_bins = n_bins
-    signal_1.cshape = (1, )
-    signal_1.signal_type = 'power'
-    signal_1.fft_norm = 'amplitude'
+    signal_1 = signal_mock(time_sine[np.newaxis, :], freq_sine[np.newaxis, :],
+                           sampling_rate, times, frequencies,
+                           'power', 'amplitude')
 
-    signal_2 = copy.deepcopy(signal_1)
-    signal_2.time = time_impulse[np.newaxis, :]
-    signal_2.freq = freq_impulse[np.newaxis, :]
-    signal_1.signal_type = 'energy'
-    signal_1.fft_norm = 'unitary'
+    signal_2 = signal_mock(time_impulse[np.newaxis, :],
+                           freq_impulse[np.newaxis, :],
+                           sampling_rate, times, frequencies,
+                           'energy', 'unitary')
 
     return signal_1, signal_2
+
+
+def signal_mock(time, freq, sampling_rate, times, frequencies,
+                signal_type, fft_norm):
+    """MagicMock for Signal including __getitem__ functionality. """
+
+    # use MagicMock and side_effect to mock __getitem__
+    # https://het.as.utexas.edu/HET/Software/mock/examples.html
+    def getitem(slice):
+        time = np.atleast_2d(signal.time[slice])
+        freq = np.atleast_2d(signal.freq[slice])
+        s_getitem = signal_mock(time, freq, signal.sampling_rate,
+                                signal.times, signal.frequencies,
+                                signal.signal_type, signal.fft_norm)
+        return s_getitem
+
+    # TODO: Implement __setitem__ if required in a test
+
+    signal = mock.MagicMock(spec_set=Signal(time, sampling_rate))
+    signal.time = time
+    signal.sampling_rate = sampling_rate
+    signal.times = times
+    signal.n_samples = time.shape[-1]
+    signal.freq = freq
+    signal.frequencies = frequencies
+    signal.n_bins = freq.shape[-1]
+    signal.cshape = time.shape[:-1]
+    signal.signal_type = signal_type
+    signal.fft_norm = fft_norm
+    signal.__getitem__.side_effect = getitem
+
+    return signal

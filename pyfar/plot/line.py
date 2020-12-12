@@ -205,27 +205,30 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     return ax
 
 
-def spectrogram(signal, log=False, db=True, window='hann',
-                window_length='auto', window_overlap_fct=0.5,
-                cmap=mpl.cm.get_cmap(name='magma'),
-                ax=None, style='light', **kwargs):
+def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
+                yscale='linear', window='hann', window_length=1024,
+                window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
+                ax=None, style='light'):
     """Plot the magnitude spectrum versus time.
 
     Parameters
     ----------
     signal : Signal
         pyfar Signal object.
-    log : Boolean
-        Speciefies, whether the y axis is plotted logarithmically.
-        The default is False.
     db : Boolean
         Falg to plot the logarithmic magnitude specturm. The default is True.
+    log_prefix : integer, float
+        Prefix for calculating the logarithmic time data. The default is 20.
+    log_reference : integer
+        Reference for calculating the logarithmic time data. The default is 1.
+    yscale : str
+        'linear' or 'log' to plot on a linear or logarithmic y-axis. The
+        default is 'linear'.
     window : str
-        Specifies the window (See scipy.signal.get_window) The default is
+        Specifies the window (See scipy.signal.get_window). The default is
         'hann'.
     window_length : integer
-        Specifies the window length in samples. If not set, it will be
-        automatically calculated.
+        Specifies the window length in samples. The default ist 1024.
     window_overlap_fct : double
         Ratio of points to overlap between fft segments [0...1]. The default is
         0.5
@@ -236,8 +239,6 @@ def spectrogram(signal, log=False, db=True, window='hann',
     style : str
         'light' or 'dark' to use the pyfar plot styles or stlye from
         matplotlib.pyplot.available. the default is 'light'
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
 
     Returns
     -------
@@ -247,14 +248,14 @@ def spectrogram(signal, log=False, db=True, window='hann',
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    nodb = not db
-
     with plt.style.context(plotstyle(style)):
-        ax = _line._spectrogram_cb(signal, log, nodb, window, window_length,
-                                   window_overlap_fct, cmap, ax, **kwargs)
+        ax = _line._spectrogram_cb(
+            signal, dB, log_prefix, log_reference, yscale,
+            window, window_length, window_overlap_fct,
+            cmap, ax)
 
     plt.tight_layout()
-    Interaction('spectrogram', ax[0], signal, style, **kwargs)
+    Interaction('spectrogram', ax[0], signal, style)
 
     return ax
 
