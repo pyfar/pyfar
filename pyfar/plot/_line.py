@@ -374,8 +374,13 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # get spectrogram
     frequencies, times, spectrogram = dsp.spectrogram(
-        signal[first_channel], dB, log_prefix, log_reference,
-        window, window_length, window_overlap_fct)
+        signal[first_channel], window, window_length, window_overlap_fct)
+
+    # get in dB
+    if dB:
+        eps = np.finfo(float).tiny
+        spectrogram = log_prefix*np.log10(
+            np.abs(spectrogram) / log_reference + eps)
 
     # plot the data
     _, ax = _prepare_plot(ax)
@@ -387,6 +392,17 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ax.set_xlabel('Time in s')
     ax.set_xlim((times[0], times[-1]))
     ax.set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
+
+    # color limits
+    if dB:
+        for PCM in ax.get_children():
+            if type(PCM) == mpl.collections.QuadMesh:
+                break
+
+        ymax = np.nanmax(spectrogram)
+        ymin = ymax - 90
+        ymax = ymax + 10
+        PCM.set_clim(ymin, ymax)
 
     if yscale == 'log':
         ax.set_yscale('symlog')
@@ -431,13 +447,6 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
 
     cb = plt.colorbar(PCM, cax=ax[1])
     cb.set_label('Modulus in dB')
-
-    # color limits
-    if dB:
-        ymax = np.nanmax(spectrogram)
-        ymin = ymax - 90
-        ymax = ymax + 10
-        PCM.set_clim(ymin, ymax)
 
     plt.tight_layout()
 

@@ -182,12 +182,6 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         spectrogram, window_length, signal.sampling_rate,
         signal.fft_norm, window=window)
 
-    # get in dB
-    if dB:
-        eps = np.finfo(float).tiny
-        spectrogram = log_prefix*np.log10(
-            np.abs(spectrogram) / log_reference + eps)
-
     # scipy.signal takes the center of the DFT blocks as time stamp we take the
     # beginning (looks nicer in plots, both conventions are used)
     times -= times[0]
