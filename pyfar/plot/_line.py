@@ -146,7 +146,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1,
     data = signal.time.T
     if dB:
         # avoid any zero-values because they result in -inf in dB data
-        eps = np.finfo(float).tiny
+        eps = np.finfo(float).eps
         data = log_prefix * np.log10(np.abs(data) / log_reference + eps)
         ymax = np.nanmax(data)
         ymin = ymax - 90
@@ -183,7 +183,7 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
     if dB:
-        eps = np.finfo(float).tiny
+        eps = np.finfo(float).eps
         data = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
         ymax = np.nanmax(data)
         ymin = ymax - 90
@@ -378,7 +378,7 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # get in dB
     if dB:
-        eps = np.finfo(float).tiny
+        eps = np.finfo(float).eps
         spectrogram = log_prefix*np.log10(
             np.abs(spectrogram) / log_reference + eps)
 
