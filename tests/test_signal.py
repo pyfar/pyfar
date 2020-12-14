@@ -320,6 +320,30 @@ def test_magic_len(impulse):
     assert len(signal) == 1000
 
 
+def test_find_nearest_time():
+    sampling_rate = 100
+    signal = Signal(np.zeros(100), sampling_rate)
+    actual = signal.find_nearest_time(0.5)
+    expected = 50
+    assert actual == expected
+
+    actual = signal.find_nearest_time([0.5, 0.75])
+    expected = [50, 75]
+    npt.assert_allclose(actual, expected)
+
+
+def test_find_nearest_frequency():
+    sampling_rate = 100
+    signal = Signal(np.zeros(100*2), sampling_rate*2)
+    actual = signal.find_nearest_frequency(50)
+    expected = 50
+    assert actual == expected
+
+    actual = signal.find_nearest_frequency([50, 75])
+    expected = [50, 75]
+    npt.assert_allclose(actual, expected)
+
+
 @pytest.fixture
 def sine():
     """Generate a sine signal with f = 440 Hz and sampling_rate = 44100 Hz.
