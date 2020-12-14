@@ -5,7 +5,6 @@
 from .line import (
     freq,
     time,
-    time_dB,
     phase,
     group_delay,
     spectrogram,
@@ -23,7 +22,6 @@ from . import utils
 __all__ = [
     freq,
     time,
-    time_dB,
     phase,
     group_delay,
     spectrogram,

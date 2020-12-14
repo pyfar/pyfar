@@ -118,7 +118,7 @@ class Interaction(object):
                 self.change_modifier('line_lin_Y')
             if event.key in ['ctrl+4']:  # plot time domain in decibels
                 self.clear_axes()
-                _line._time_dB(self.signal, ax=self.axes, **self.kwargs)
+                _line._time(self.signal, dB=True, ax=self.axes, **self.kwargs)
                 self.figure.canvas.draw()
                 self.change_modifier('line_log_Y')
             if event.key in ['ctrl+5']:  # plot group delay

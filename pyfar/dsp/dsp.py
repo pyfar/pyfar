@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import signal as sgn
 from pyfar import Signal
+import pyfar.fft as fft
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -84,111 +85,6 @@ def group_delay(signal, frequencies=None):
     return group_delay
 
 
-def spectrogram(signal,
-                window='hann',
-                window_length='auto',
-                window_overlap_fct=0.5,
-                log_prefix=20,
-                log_reference=1,
-                log=False,
-                nodb=False,
-                cut=False,
-                clim=None):
-    """TODO: This function might not be necessary, if clipping functionallity
-     is not desired. It is already provided by scipy.signal.spectrogram().
-
-    Generates the spectrogram for a given signal object including frequency,
-    time and colorbar-limit vectors.
-
-    Parameters
-    ----------
-    signal : Signal object
-        An audio signal object from the pyfar signal class
-    window : String (Default: 'hann')
-        Specifies the window type. See scipy.signal.get_window for details.
-    window_length : integer
-        Specifies the window length. If not set, it will be automatically
-        calculated.
-    window_overlap_fct : double
-        Ratio of points to overlap between fft segments [0...1]
-    log_prefix : integer
-        Prefix for Decibel calculation.
-    log_reference : double
-        Prefix for Decibel calculation.
-    log : Boolean
-        Speciefies, whether the y axis is plotted logarithmically.
-        Defaults to False.
-    nodb : Boolean
-        Speciefies, whether the spectrogram is plotted in decibels.
-        Defaults to False.
-    cut : Boolean
-        Cut results to specified clim vector to avoid sparcles.
-        Defaults to False.
-    clim : np.array()
-        Array of limits for the colorbar [lower, upper].
-
-    **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
-
-    Returns
-    -------
-    frequencies : np.array()
-        Array of sample frequencies.
-    times : np.array()
-        Array of segment times.
-    spectrogram : np.array()
-        Spectrogram of signal. By default, the last axis of Sxx corresponds to
-        the segment times.
-    clim : np.array()
-        Array of limits for the colorbar [lower, upper]
-
-    See Also
-    --------
-    scipy.signal.spectrogram() : Generate the spectrogram for a given signal.
-    """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
-    eps = np.finfo(float).tiny
-
-    # If not set, define window length for FFT automatically
-    if window_length == 'auto':
-        window_length = 2**nextpow2(signal.n_samples / 2000)
-        if window_length < 1024:
-            window_length = 1024
-    window_overlap = int(window_length * window_overlap_fct)
-
-    frequencies, times, spectrogram = sgn.spectrogram(
-            x=signal.time,
-            fs=signal.sampling_rate,
-            window=sgn.get_window(window, window_length),
-            noverlap=window_overlap,
-            mode='magnitude',
-            scaling='spectrum')
-
-    spectrogram = spectrogram/(window_length/2)
-
-    if nodb:
-        spectrogram = np.abs(spectrogram)
-    else:
-        spectrogram = log_prefix*np.log10(
-            np.abs(spectrogram) / log_reference + eps)
-
-    # Get CLIMs, TODO: Verify, whether clim was passed correctly.
-    if not clim:
-        upper = 10 * np.ceil(np.max(np.max(spectrogram))/10)
-        lower = upper - 70
-        clim = np.array([lower, upper])
-
-    # Cut results to CLIM to avoid sparcles?
-    if cut:
-        spectrogram[spectrogram < clim[0]-20] = clim[0] - 20
-        spectrogram[spectrogram > clim[1]+20] = clim[1] + 20
-    spectrogram = np.squeeze(spectrogram)
-
-    return frequencies, times, spectrogram, clim
-
-
 def wrap_to_2pi(x):
     """Wraps phase to 2 pi.
 
@@ -223,3 +119,71 @@ def nextpow2(x):
         Exponent of next higher power of 2.
     """
     return np.ceil(np.log2(x))
+
+
+def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
+                window='hann', window_length=1024, window_overlap_fct=0.5):
+    """Compute the magnitude spectrum versus time.
+
+    This is a wrapper for scipy.signal.spectogram with two differences. First,
+    the returned times refer to the start of the FFT blocks, i.e., the first
+    time is always 0 whereas it is window_length/2 in scipy. Second, the
+    returned spectrogram is normalized accroding to `signal.signal_type` and
+    `signal.fft_norm`.
+
+    Parameters
+    ----------
+    signal : Signal
+        pyfar Signal object.
+    db : Boolean
+        Falg to plot the logarithmic magnitude specturm. The default is True.
+    log_prefix : integer, float
+        Prefix for calculating the logarithmic time data. The default is 20.
+    log_reference : integer
+        Reference for calculating the logarithmic time data. The default is 1.
+    window : str
+        Specifies the window (See scipy.signal.get_window). The default is
+        'hann'.
+    window_length : integer
+        Specifies the window length in samples. The default ist 1024.
+    window_overlap_fct : double
+        Ratio of points to overlap between fft segments [0...1]. The default is
+        0.5
+
+    Returns
+    -------
+    frequencies : numpy array
+        Frequencies in Hz at which the magnitude spectrum was computed
+    times : numpy array
+        Times in seconds at which the magnitude spectrum was computed
+    spectrogram : numpy array
+    """
+
+    # check input
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    if window_length > signal.n_samples:
+        raise ValueError("window_length exceeds signal length")
+
+    # get spectrogram from scipy.signal
+    window_overlap = int(window_length * window_overlap_fct)
+    window = sgn.get_window(window, window_length)
+
+    frequencies, times, spectrogram = sgn.spectrogram(
+            x=signal.time.squeeze(), fs=signal.sampling_rate, window=window,
+            noverlap=window_overlap, mode='magnitude', scaling='spectrum')
+
+    # remove normalization from scipy.signal.spectrogram
+    spectrogram /= np.sqrt(1 / window.sum()**2)
+
+    # apply normalization from signal
+    spectrogram = fft.normalization(
+        spectrogram, window_length, signal.sampling_rate,
+        signal.fft_norm, window=window)
+
+    # scipy.signal takes the center of the DFT blocks as time stamp we take the
+    # beginning (looks nicer in plots, both conventions are used)
+    times -= times[0]
+
+    return frequencies, times, spectrogram
