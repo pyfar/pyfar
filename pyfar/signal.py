@@ -13,7 +13,7 @@ import warnings
 import numpy as np
 from pyfar import fft as fft
 from typing import Callable
-from copy import deepcopy
+from . import utils
 
 
 class Audio(object):
@@ -275,7 +275,7 @@ class Signal(Audio):
 
     def copy(self):
         """Return a deep copy of the Signal object."""
-        return deepcopy(self)
+        return utils.copy(self)
 
     def __add__(self, data):
         return add((self, data), 'freq')

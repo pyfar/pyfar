@@ -5,7 +5,7 @@ import numpy as np
 import scipy.signal as spsignal
 
 from pyfar import Signal
-from copy import deepcopy
+from .. import utils
 
 
 def atleast_3d_first_dim(arr):
@@ -214,7 +214,7 @@ class Filter(object):
 
     def copy(self):
         """Return a deep copy of the Filter object."""
-        return deepcopy(self)
+        return utils.copy(self)
 
 
 class FilterFIR(Filter):

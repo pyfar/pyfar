@@ -1,6 +1,6 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
-from copy import deepcopy
+from . import utils
 
 import pyfar
 
@@ -192,7 +192,7 @@ class Orientations(Rotation):
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
-        return deepcopy(self)
+        return utils.copy(self)
 
     def __setitem__(self, idx, val):
         """
