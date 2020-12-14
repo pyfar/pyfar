@@ -30,30 +30,6 @@ class Signal(Audio):
     time and frequency domain. Equally spaced samples or frequency bins,
     respectively.
 
-    Attributes
-    ----------
-    data : ndarray, double
-        Raw data of the signal in the frequency or time domain
-    sampling_rate : double
-        Sampling rate in Hertz
-    n_samples : int, optional
-        Number of samples of the time signal. Required if domain is 'freq'. The
-        default is None.
-    domain : 'time', 'freq', optional
-        Domain of data. The default is 'time'
-    signal_type : 'energy', 'power', optional
-        Energy signals are finite and have finite energy. An example for an
-        energy signal is an impulse response. Power signals are infinite and
-        have infinite energy. Examples are noise and sine signals. The default
-        is 'energy'
-    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
-        The kind of Discrete Fourier Transform (DFT) normalization. See
-        pyfar.fft.normalization for more information. The normalization is
-        only applied to power signals. The default is 'unitary' for energy
-        signals and 'rms' for power signals.
-    dtype : string, optional
-        Raw data type of the signal. The default is float64
-
     """
     def __init__(
             self,
@@ -61,7 +37,6 @@ class Signal(Audio):
             sampling_rate,
             n_samples=None,
             domain='time',
-            signal_type='energy',
             fft_norm=None,
             dtype=np.double,
             comment=None):
@@ -78,16 +53,11 @@ class Signal(Audio):
             The default is None.
         domain : 'time', 'freq', optional
             Domain of data. The default is 'time'
-        signal_type : 'energy', 'power', optional
-            Energy signals are finite and have finite energy. An example for an
-            energy signal is an impulse response. Power signals are infinite
-            and have infinite energy. Examples are noise and sine signals. The
-            default is 'energy'
-        fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd', optional
+        fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
             The kind of Discrete Fourier Transform (DFT) normalization. See
             pyfar.fft.normalization for more information. The normalization is
-            only applied to power signals. The default is 'unitary' for energy
-            signals and 'rms' for power signals.
+            only applied to power signals. The default is 'none', which is
+            typically used to energy signals, such as impulse responses.
         dtype : string, optional
             Raw data type of the signal. The default is float64
 
@@ -98,10 +68,6 @@ class Signal(Audio):
         self._dtype = dtype
 
         self._VALID_SIGNAL_TYPE = ["power", "energy"]
-        if (signal_type in self._VALID_SIGNAL_TYPE) is True:
-            self._signal_type = signal_type
-        else:
-            raise ValueError("Not a valid signal type ('power'/'energy')")
 
         self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
         if domain in self._VALID_SIGNAL_DOMAIN:
@@ -122,12 +88,12 @@ class Signal(Audio):
             self._n_samples = n_samples
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
-        self._VALID_FFT_NORMS = ["unitary", "amplitude", "rms", "power", "psd"]
+        self._VALID_FFT_NORMS = [
+            "none", "unitary", "amplitude", "rms", "power", "psd"]
         if fft_norm is None:
-            fft_norm = 'unitary' if signal_type == 'energy' else 'rms'
+            fft_norm = 'none'
         if fft_norm in self._VALID_FFT_NORMS:
             self._fft_norm = fft_norm
-            self.fft_norm = fft_norm
         else:
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
@@ -152,13 +118,13 @@ class Signal(Audio):
                 # and need to do an inverse Fourier Transform
                 self.time = fft.irfft(
                     self._data, self.n_samples, self._sampling_rate,
-                    self._signal_type, self._fft_norm)
+                    self._fft_norm)
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform
                 self.freq = fft.rfft(
                     self._data, self.n_samples, self._sampling_rate,
-                    self._signal_type, self._fft_norm)
+                    self._fft_norm)
 
     @property
     def n_samples(self):
@@ -227,33 +193,18 @@ class Signal(Audio):
     @property
     def signal_type(self):
         """The signal type."""
-        return self._signal_type
+        if self.fft_norm == 'none':
+            stype = 'energy'
+        elif self.fft_norm in [
+                "unitary", "amplitude", "rms", "power", "psd"]:
+            stype = 'energy'
+        else:
+            raise ValueError("No valid fft norm set.")
+        return stype
 
     @signal_type.setter
     def signal_type(self, value):
-        # check if we do anything
-        if value == self._signal_type:
-            return
-
-        # check input
-        if value not in self._VALID_SIGNAL_TYPE:
-            raise ValueError("Not a valid signal type ('power'/'energy')")
-        if value == 'energy' and self._fft_norm != 'unitary':
-            raise ValueError(("Signal type can only be set to 'energy' if "
-                              "fft_norm is 'unitary'"))
-
-        # normalize or de-normalize spectrum
-        if self._domain == 'freq' and value == 'energy':
-            inverse = True
-        if self._domain == 'freq' and value == 'power':
-            inverse = False
-
-        self._data = fft.normalization(
-            self._data, self._n_samples, self._sampling_rate,
-            'power', self._fft_norm, inverse)
-
-        # set new signal type
-        self._signal_type = value
+        raise DeprecationWarning("Deprecated, use fft_norm instead.")
 
     @property
     def fft_norm(self):
@@ -276,20 +227,17 @@ class Signal(Audio):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
-        if self._signal_type == 'energy' and value != 'unitary':
-            raise ValueError(
-                "If signal_type is 'energy', fft_norm must be 'unitary'.")
 
         # apply new normalization if Signal is in frequency domain
         if self._fft_norm != value and self._domain == 'freq':
             # de-normalize
             self._data = fft.normalization(
                 self._data, self._n_samples, self._sampling_rate,
-                self._signal_type, self._fft_norm, inverse=True)
+                self._fft_norm, inverse=True)
             # normalize
             self._data = fft.normalization(
                 self._data, self._n_samples, self._sampling_rate,
-                self._signal_type, value, inverse=False)
+                value, inverse=False)
 
         self._fft_norm = value
 
@@ -370,7 +318,7 @@ class Signal(Audio):
             data,
             sampling_rate=self.sampling_rate,
             domain=self.domain,
-            signal_type=self.signal_type,
+            fft_norm=self.fft_norm,
             dtype=self.dtype)
 
         return items
@@ -403,8 +351,8 @@ class Signal(Audio):
             raise ValueError("The sampling rates do not match.")
         if self.n_samples != other.n_samples:
             raise ValueError("The number of samples does not match.")
-        if self.signal_type != other.signal_type:
-            raise ValueError("The signal types do not match.")
+        if self.fft_norm != other.fft_norm:
+            raise ValueError("The FFT norms do not match.")
 
     def __iter__(self):
         """Iterator for signals. The actual iteration is handled through
@@ -424,7 +372,7 @@ class SignalIterator(object):
             sampling_rate=signal.sampling_rate,
             n_samples=signal.n_samples,
             domain=signal.domain,
-            signal_type=signal.signal_type,
+            fft_norm=signal.fft_norm,
             dtype=signal.dtype)
 
     def __next__(self):
@@ -457,9 +405,8 @@ def add(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _add)
@@ -485,9 +432,8 @@ def subtract(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _subtract)
@@ -513,9 +459,8 @@ def multiply(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _multiply)
@@ -541,9 +486,8 @@ def divide(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _divide)
@@ -569,9 +513,8 @@ def power(data: tuple, domain='freq'):
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as Signal object if `data`contains a Signal.
         The `Signal.domain` is set by the input parameter `domain`. The
-        `Signal.signal_type` is 'energy' if `data` contains only energy
-        Signals and 'power' otherwise. The `Signal.fft_norm` is taken from the
-        first signal in `data`.
+        `Signal.fft_norm` is `None` if all FFT norms are None. Otherwise the
+        first FFT norm that is not None is taken.
 
     """
     return _arithmetic(data, domain, _power)
@@ -581,7 +524,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     """Apply arithmetic operations."""
 
     # check input and obtain meta data of new signal
-    sampling_rate, n_samples, signal_type, fft_norm = \
+    sampling_rate, n_samples, fft_norm = \
         _assert_match_for_arithmetic(data, domain)
 
     # apply arithmetic operation
@@ -596,10 +539,10 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
         # apply desried fft normalization
         if domain == 'freq':
             result = fft.normalization(result, n_samples, sampling_rate,
-                                       signal_type, fft_norm)
+                                       fft_norm)
 
         result = Signal(
-            result, sampling_rate, n_samples, domain, signal_type, fft_norm)
+            result, sampling_rate, n_samples, domain, fft_norm=fft_norm)
 
     return result
 
@@ -625,12 +568,9 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     n_samples : number, None
         Number of samples of the signals. None, if no signal is contained in
         `data`
-    signal_type : str, None
-        'energy' if all signaly are of type energy. 'power' if any power signal
-        is contained in `data`. None if no signal is contained in `data`
     fft_norm : str, None
-        FFT norm of the first signal in `data`. None if no signal is contained
-        in `data`.
+        FFT norm of the first signal in `data`, if all FFT norms are None.
+        Otherwise the first FFT norm that is not None is taken.
 
     """
 
@@ -645,7 +585,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     # check input types and meta data
     sampling_rate = None
     n_samples = None
-    signal_type = None
     fft_norm = None
     for d in data:
         # check or store meta data of signals
@@ -653,7 +592,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
             if sampling_rate is None:
                 sampling_rate = d.sampling_rate
                 n_samples = d.n_samples
-                signal_type = d.signal_type
                 fft_norm = d.fft_norm
             else:
                 if sampling_rate != d.sampling_rate:
@@ -662,8 +600,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                     raise ValueError("The number of samples does not match.")
             # if there is a power signal, the returned signal will be a power
             # signal
-            if d.signal_type == "power":
-                signal_type = "power"
+            if d.fft_norm != 'none' and fft_norm == 'none':
+                fft_norm = d.fft_norm
         # check type of non signal input
         else:
             dtypes = ['int8', 'int16', 'int32', 'int64',
@@ -677,7 +615,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 
-    return sampling_rate, n_samples, signal_type, fft_norm
+    return sampling_rate, n_samples, fft_norm
 
 
 def _get_arithmetic_data(data, n_samples, domain):
@@ -708,11 +646,11 @@ def _get_arithmetic_data(data, n_samples, domain):
         elif domain == "freq":
             data_out = data.freq.copy()
 
-            if data.signal_type == 'power':
+            if data.fft_norm != 'none':
                 # remove current fft normalization
                 data_out = fft.normalization(
                     data_out, n_samples, data.sampling_rate,
-                    'power', data.fft_norm, inverse=True)
+                    data.fft_norm, inverse=True)
 
         else:
             raise ValueError(

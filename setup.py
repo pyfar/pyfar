@@ -24,7 +24,7 @@ setup_requirements = ['pytest-runner', ]
 
 test_requirements = [
     'pytest',
-    'bumpversion',
+    'bump2version',
     'wheel',
     'watchdog',
     'flake8',

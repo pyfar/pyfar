@@ -31,12 +31,8 @@ Use one of these labels:
 
 Use a second label to let us know to which module the issue is related:
 
-- **signal**
-- **coordinates**
-- **orientations**
-- **io**
-- **dsp**
-- **filter**
-- **plot**
-- **spatial**
-- **fft**
+- **signal**, **coordinates**, **orientations**, etc.
+
+## Project
+
+**Do not assign your issue to a project.** This is done automatically.

@@ -6,10 +6,6 @@
 
 ##### CONFIGURATION BEGINS HERE
 
-### BACKEND
-backend      : Qt5Agg
-
-
 #### LINES
 ## See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
 ## information on line properties.

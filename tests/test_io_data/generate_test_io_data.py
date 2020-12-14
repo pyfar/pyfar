@@ -108,6 +108,3 @@ def reference_coordinates():
     source_coordinates = np.ones((1, 3))
     receiver_coordinates = np.ones((2, 3, 1))
     return source_coordinates, receiver_coordinates
-
-
-generate_test_sofas()
