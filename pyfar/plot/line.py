@@ -215,7 +215,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ----------
     signal : Signal
         pyfar Signal object.
-    db : Boolean
+    dB : Boolean
         Falg to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time data. The default is 20.
@@ -268,7 +268,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     ----------
     signal : Signal
         pyfar Signal object.
-    db : Boolean
+    dB : Boolean
         Falg to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time data. The default is 20.
@@ -322,7 +322,7 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     ----------
     signal : Signal
         pyfar Signal object.
-    db : Boolean
+    dB : Boolean
         Falg to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time data. The default is 20.
