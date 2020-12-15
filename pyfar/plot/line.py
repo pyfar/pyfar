@@ -27,7 +27,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, ax=None,
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -80,7 +80,7 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -129,7 +129,7 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     ax : matplotlib.pyplot.axes object
         Axes to plot on. If not given, the current figure will be used.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -175,7 +175,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -216,7 +216,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     signal : Signal
         pyfar Signal object.
     dB : Boolean
-        Falg to plot the logarithmic magnitude specturm. The default is True.
+        Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
@@ -237,7 +237,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ax : matplotlib.pyplot.axes object
         Axes to plot on. If not given, the current figure will be used.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
 
     Returns
@@ -270,9 +270,9 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     signal : Signal
         pyfar Signal object.
     dB_time : Boolean
-        Falg to plot the logarithmic time signal. The default is False.
+        Flag to plot the logarithmic time signal. The default is False.
     dB_freq : Boolean
-        Falg to plot the logarithmic magnitude specturm. The default is True.
+        Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time/frequency data.
         The default is 20.
@@ -286,7 +286,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -322,7 +322,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     signal : Signal
         pyfar Signal object.
     dB : Boolean
-        Falg to plot the logarithmic magnitude specturm. The default is True.
+        Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
@@ -339,7 +339,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -376,7 +376,7 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     signal : Signal
         pyfar Signal object.
     dB : Boolean
-        Falg to plot the logarithmic magnitude specturm. The default is True.
+        Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
@@ -392,7 +392,7 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
@@ -436,7 +436,7 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or stlye from
+        'light' or 'dark' to use the pyfar plot styles or style from
         matplotlib.pyplot.available. the default is 'light'
     **kwargs
         Keyword arguments that are piped to matplotlib.pyplot.plot
