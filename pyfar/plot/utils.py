@@ -94,42 +94,79 @@ def shortcuts(show=True):
     short_cuts = {
         # not yet implemented as intended
         "plots": {
-            'line': {
-                "ctr+1": "time signal",
-                "ctr+2": "magnitude response",
-                "ctr+3": "phase response",
-                "ctr+4": "group delay",
-                "ctr+5": "spectrogram",
-                "ctr+6": "time, magnitude, phase, and group delay"}
+            "ctr+1": "line.time",
+            "ctr+2": "line.freq",
+            "ctr+3": "line.phase",
+            "ctr+4": "line.group_delay",
+            "ctr+5": "line.spectrogram",
+            "ctr+6": "line.freq_phase",
+            "ctr+7": "line.freq_group_delay"
         },
         "controls": {
-            "up": "move y-axis view upwards",
-            "down": "move y-axis view downwards",
-            "left": "move x-axis view to the left",
-            "right": "move x-axis view to the right",
-            "shift+up": "zoom out y-axis",
-            "shift+down": "zoom in y-axis",
-            "shift+right": "zoom in x-axis",
-            "shift+left": "zoom out x-axis",
-            # "shift+y": "toogle logarithmic y-axis",
-            # "shift+x": "toogle logarithmic x-axis",
-            "c": "toogle legend with channel numbers",
-            "a": "toogle show all channels",
-            ".": "show next channel",
-            ",": "show previous chanel"
+            "move_left": {
+                "key": "left",
+                "info": "move x-axis view to the left"},
+            "move_right": {
+                "key": "right",
+                "info": "move x-axis view to the right"},
+            "move_up": {
+                "key": "up",
+                "info": "move y-axis view upwards"},
+            "move_down": {
+                "key": "down",
+                "info": "y-axis view downwards"},
+            "move_cm_up": {
+                "key": "plus",
+                "info": "move colormap range up"},
+            "move_cm_down": {
+                "key": "minus",
+                "info": "move colormap range down"},
+            "zoom_x_in": {
+                "key": "shift+right",
+                "info": "zoom in x-axis"},
+            "zoom_x_out": {
+                "key": "shift+left",
+                "info": "zoom out x-axis"},
+            "zoom_y_in": {
+                "key": "shift+up",
+                "info": "zoom out y-axis"},
+            "zoom_y_out": {
+                "key": "shift+down",
+                "info": "zoom in y-axis"},
+            "zoom_cm_in": {
+                "key": "shift+plus",
+                "info": "zoom colormap range in"},
+            "zoom_cm_out": {
+                "key": "shift+minus",
+                "info": "zoom colormap range out"},
+            "toggle_x": {
+                "key": "shift+x",
+                "info": "toggle between linear and logarithmic x-axis"},
+            "toggle_y": {
+                "key": "shift+y",
+                "info": "toggle between linear and logarithmic y-axis"},
+            "toogle_all": {
+                "key": "a",
+                "info": ("toggle between plotting all channels and plottinng "
+                         "single channels")},
+            "next": {
+                "key": ".",
+                "info": "show next channel"},
+            "prev": {
+                "key": ",",
+                "info": "show previous channel"}
         }
     }
 
     if show:
         print("Use these shortcuts to show different plots:")
         # not yet implemented as intended
-        # for plot in short_cuts["plots"]:
-        #     print(f'{plot}: {short_cuts["plots"][plot]}')
-        print("Use 'ctr+number' to switch between different plots.")
-        print("Subject to change in the future.")
+        for plot in short_cuts["plots"]:
+            print(f'{plot}: {short_cuts["plots"][plot]}')
         print(" ")
-        print("Use these shortcuts to control the plot look:")
-        for ctr in short_cuts["controls"]:
-            print(f'{ctr}: {short_cuts["controls"][ctr]}')
+        print("Use these shortcuts to control the plot:")
+        ctr = short_cuts["controls"]
+        for action in ctr:
+            print(f'{ctr[action]["key"]}: {ctr[action]["info"]}')
 
     return short_cuts
