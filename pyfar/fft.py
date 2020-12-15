@@ -148,8 +148,6 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
         sampling rate in Hz
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentaion of pyfar.fft.normalization.
-    window : None, array like
-        See documentaion of pyfar.fft.normalization.
 
     Returns
     -------
@@ -281,29 +279,32 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
 
     # account for type of normalization
     if fft_norm == "amplitude":
-        # Equation 4 in Ahrens et al. 2020
         if window is None:
+            # Equation 4 in Ahrens et al. 2020
             norm /= n_samples
         else:
+            # Equation 11 in Ahrens et al. 2020
             norm /= np.sum(window)
     elif fft_norm == 'rms':
-        # Equation 10 in Ahrens et al. 2020
         if not single_sided:
             raise ValueError(
                 "'rms' normalization does only exist for single-sided spectra")
         if window is None:
+            # Equation 10 in Ahrens et al. 2020
             norm /= n_samples
         else:
+            # Equation 11 in Ahrens et al. 2020
             norm /= np.sum(window)
         if _is_odd(n_samples):
             norm[1:] /= np.sqrt(2)
         else:
             norm[1:-1] /= np.sqrt(2)
     elif fft_norm == 'power':
-        # Equation 5 in Ahrens et al. 2020
         if window is None:
+            # Equation 5 in Ahrens et al. 2020
             norm /= n_samples**2
         else:
+            # Equation 12 in Ahrens et al. 2020
             norm /= np.sum(window)**2
         # the phase is kept for being able to switch between normalizations
         # altoug the power spectrum does usually not have phase information,
@@ -312,8 +313,10 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             spec *= np.abs(spec)
     elif fft_norm == 'psd':
         if window is None:
+            # Equation 6 in Ahrens et al. 2020
             norm /= (n_samples * sampling_rate)
         else:
+            # Equation 13 in Ahrens et al. 2020
             norm /= (np.sum(window)**2 * sampling_rate)
         # the phase is kept for being able to switch between normalizations
         # altoug the power spectrum does usually not have phase information,
