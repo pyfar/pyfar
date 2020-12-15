@@ -133,10 +133,10 @@ def shortcuts(show=True):
                 "key": "down",
                 "info": "y-axis view downwards"},
             "move_cm_up": {
-                "key": "plus",
+                "key": "+",
                 "info": "move colormap range up"},
             "move_cm_down": {
-                "key": "minus",
+                "key": "-",
                 "info": "move colormap range down"},
             "zoom_x_in": {
                 "key": "shift+right",
@@ -151,10 +151,10 @@ def shortcuts(show=True):
                 "key": "shift+down",
                 "info": "zoom in y-axis"},
             "zoom_cm_in": {
-                "key": "shift+plus",
+                "key": "*",
                 "info": "zoom colormap range in"},
             "zoom_cm_out": {
-                "key": "shift+minus",
+                "key": "_",
                 "info": "zoom colormap range out"},
             "toggle_x": {
                 "key": "shift+x",
