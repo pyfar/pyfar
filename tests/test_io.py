@@ -1,7 +1,6 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-import tempfile
 
 from unittest import mock
 import os.path
@@ -12,57 +11,53 @@ from pyfar import io
 from pyfar import Signal
 
 
-def test_read_wav():
+def test_read_wav(tmpdir):
     """Test default without optional parameters."""
-    with tempfile.TemporaryDirectory() as td:
-        # Generate test files
-        filename = os.path.join(td, 'test_wav.wav')
-        signal_ref, sampling_rate = reference_signal()
-        wavfile.write(filename, sampling_rate, signal_ref.T)
-        # Read wav
-        signal = io.read_wav(filename)
-        assert isinstance(signal, Signal)
-        npt.assert_allclose(
-                signal.time,
-                np.atleast_2d(signal_ref),
-                rtol=1e-10)
-        assert signal.sampling_rate == sampling_rate
-
-
-def test_write_wav(signal_mock):
-    """Test default without optional parameters."""
-    with tempfile.TemporaryDirectory() as td:
-        filename = os.path.join(td, 'test_wav.wav')
-        io.write_wav(signal_mock, filename)
-        signal_reload = wavfile.read(filename)[-1].T
-        npt.assert_allclose(
-            signal_mock.time,
-            np.atleast_2d(signal_reload),
+    # Generate test files
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    signal_ref, sampling_rate = reference_signal()
+    wavfile.write(filename, sampling_rate, signal_ref.T)
+    # Read wav
+    signal = io.read_wav(filename)
+    assert isinstance(signal, Signal)
+    npt.assert_allclose(
+            signal.time,
+            np.atleast_2d(signal_ref),
             rtol=1e-10)
+    assert signal.sampling_rate == sampling_rate
 
 
-def test_write_wav_overwrite(signal_mock):
+def test_write_wav(signal_mock, tmpdir):
+    """Test default without optional parameters."""
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(signal_mock, filename)
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        signal_mock.time,
+        np.atleast_2d(signal_reload),
+        rtol=1e-10)
+
+
+def test_write_wav_overwrite(signal_mock, tmpdir):
     """Test overwriting behavior."""
-    with tempfile.TemporaryDirectory() as td:
-        filename = os.path.join(td, 'test_wav.wav')
-        io.write_wav(signal_mock, filename)
-        # Call with overwrite disabled
-        with pytest.raises(FileExistsError):
-            io.write_wav(signal_mock, filename, overwrite=False)
-        # Call with overwrite enabled
-        io.write_wav(signal_mock, filename, overwrite=True)
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(signal_mock, filename)
+    # Call with overwrite disabled
+    with pytest.raises(FileExistsError):
+        io.write_wav(signal_mock, filename, overwrite=False)
+    # Call with overwrite enabled
+    io.write_wav(signal_mock, filename, overwrite=True)
 
 
-def test_write_wav_nd(signal_mock_nd):
+def test_write_wav_nd(signal_mock_nd, tmpdir):
     """Test for signals of higher dimension."""
-    with tempfile.TemporaryDirectory() as td:
-        filename = os.path.join(td, 'test_wav.wav')
-        io.write_wav(signal_mock_nd, filename)
-        signal_reload = wavfile.read(filename)[-1].T
-        npt.assert_allclose(
-            signal_mock_nd.time,
-            signal_reload.reshape(signal_mock_nd.time.shape),
-            rtol=1e-10)
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(signal_mock_nd, filename)
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        signal_mock_nd.time,
+        signal_reload.reshape(signal_mock_nd.time.shape),
+        rtol=1e-10)
 
 
 def test_read_sofa(tmpdir):
