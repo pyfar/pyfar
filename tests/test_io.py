@@ -10,24 +10,22 @@ import scipy.io.wavfile as wavfile
 from pyfar import io
 from pyfar import Signal
 
-from test_io_data.generate_test_io_data import reference_signal
-from test_io_data.generate_test_io_data import reference_coordinates
-
-
-baseline_path = 'tests/test_io_data'
-
 
 def test_read_wav():
     """Test default without optional parameters."""
-    filename = baseline_path + "/test_wav.wav"
-    signal = io.read_wav(filename)
-    signal_ref, sampling_rate = reference_signal()
-    assert isinstance(signal, Signal)
-    npt.assert_allclose(
-            signal.time,
-            np.atleast_2d(signal_ref),
-            rtol=1e-10)
-    assert signal.sampling_rate == sampling_rate
+    with tempfile.TemporaryDirectory() as td:
+        # Create testfile
+        filename = os.path.join(td, 'test_wav.wav')
+        signal_ref, sampling_rate = reference_signal()
+        wavfile.write(filename, sampling_rate, signal_ref.T)
+        # Read wav
+        signal = io.read_wav(filename)
+        assert isinstance(signal, Signal)
+        npt.assert_allclose(
+                signal.time,
+                np.atleast_2d(signal_ref),
+                rtol=1e-10)
+        assert signal.sampling_rate == sampling_rate
 
 
 def test_write_wav(signal_mock):
@@ -108,6 +106,44 @@ def test_read_sofa_coordinates():
         io.read_sofa(filename)
 
 
+
+
+def reference_signal(shape=(1,)):
+    """ Generate sine of 440 Hz as numpy array.
+    Returns
+    -------
+    sine : ndarray
+        The sine signal
+    sampling_rate : int
+        The sampling rate
+    """
+    sampling_rate = 44100
+    n_periods = 20
+    amplitude = 1
+    frequency = 440
+
+    # time signal
+    times = np.arange(0, n_periods*frequency) / sampling_rate
+    sine = amplitude * np.sin(2 * np.pi * times * frequency)
+
+    shape + (3,)
+    sine = np.ones(shape + (sine.shape[-1],)) * sine
+
+    return sine, sampling_rate
+
+
+def reference_coordinates():
+    """ Generate coordinate array
+    Returns
+    -------
+    coordinates : ndarray
+        The coordinates
+    """
+    source_coordinates = np.ones((1, 3))
+    receiver_coordinates = np.ones((2, 3, 1))
+    return source_coordinates, receiver_coordinates
+
+
 @pytest.fixture
 def signal_mock():
     """ Generate a signal mock object.
@@ -152,3 +188,5 @@ def signal_mock_nd():
     signal_object.sampling_rate = sampling_rate
 
     return signal_object
+
+
