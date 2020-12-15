@@ -54,12 +54,19 @@ class Signal(Audio):
             Domain of data. The default is 'time'
         fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
             The kind of Discrete Fourier Transform (DFT) normalization. See
-            pyfar.fft.normalization for more information. The normalization is
-            only applied to power signals. The default is 'none', which is
-            typically used to energy signals, such as impulse responses.
+            pyfar.fft.normalization and _[1] for more information. The
+            normalization is only applied to power signals. The default is
+            'none', which is typically used to energy signals, such as impulse
+            responses.
         dtype : string, optional
             Raw data type of the signal. The default is float64
 
+        References
+        ----------
+        .. [1] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+               Scaling of the Discrete Fourier Transform and the Implied
+               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+               Austria, May 2020, p. e-Brief 600.
         """
 
         Audio.__init__(self)
