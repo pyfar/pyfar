@@ -94,14 +94,30 @@ def shortcuts(show=True):
     short_cuts = {
         # not yet implemented as intended
         "plots": {
-            "ctr+1": "line.time",
-            "ctr+2": "line.freq",
-            "ctr+3": "line.phase",
-            "ctr+4": "line.group_delay",
-            "ctr+5": "line.spectrogram",
-            "ctr+6": "line.time_freq",
-            "ctr+7": "line.freq_phase",
-            "ctr+8": "line.freq_group_delay"
+            "line.time": {
+                "key": "ctr+1",
+                "info": "line.time"},
+            "line.freq": {
+                "key": "ctr+2",
+                "info": "line.freq"},
+            "line.phase": {
+                "key": "ctr+3",
+                "info": "line.phase"},
+            "line.group_delay": {
+                "key": "ctr+4",
+                "info": "line.group_delay"},
+            "line.spectrogram": {
+                "key": "ctr+5",
+                "info": "line.spectrogram"},
+            "line.time_freq": {
+                "key": "ctr+6",
+                "info": "line.time_freq"},
+            "line.freq_phase": {
+                "key": "ctr+7",
+                "info": "line.freq_phase"},
+            "line.freq_group_delay": {
+                "key": "ctr+8",
+                "info": "line.freq_group_delay"}
         },
         "controls": {
             "move_left": {
