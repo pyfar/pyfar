@@ -38,6 +38,7 @@ def test_line_plots(signal_mocks):
                      plot.line.phase,
                      plot.line.group_delay,
                      plot.line.spectrogram,
+                     plot.line.time_freq,
                      plot.line.freq_phase,
                      plot.line.freq_group_delay]
 
