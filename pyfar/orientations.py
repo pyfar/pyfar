@@ -1,5 +1,6 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
+from . import utils
 
 import pyfar
 
@@ -188,6 +189,10 @@ class Orientations(Rotation):
         if vector_triple.ndim == 3:
             return np.swapaxes(vector_triple, 0, 1)
         return vector_triple
+
+    def copy(self):
+        """Return a deep copy of the Orientations object."""
+        return utils.copy(self)
 
     def __setitem__(self, idx, val):
         """

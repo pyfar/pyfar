@@ -13,6 +13,7 @@ import warnings
 import numpy as np
 from pyfar import fft as fft
 from typing import Callable
+from . import utils
 
 
 class Audio(object):
@@ -310,6 +311,10 @@ class Signal(Audio):
     def comment(self, value):
         """Set comment."""
         self._comment = str(value)
+
+    def copy(self):
+        """Return a deep copy of the Signal object."""
+        return utils.copy(self)
 
     def __add__(self, data):
         return add((self, data), 'freq')
