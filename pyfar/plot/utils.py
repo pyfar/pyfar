@@ -157,11 +157,14 @@ def shortcuts(show=True):
                 "key": "_",
                 "info": "zoom colormap range out"},
             "toggle_x": {
-                "key": "shift+x",
+                "key": "X",
                 "info": "toggle between linear and logarithmic x-axis"},
             "toggle_y": {
-                "key": "shift+y",
+                "key": "Y",
                 "info": "toggle between linear and logarithmic y-axis"},
+            "toggle_cm": {
+                "key": "C",
+                "info": "toggle between linear and logarithmic color data"},
             "toogle_all": {
                 "key": "a",
                 "info": ("toggle between plotting all channels and plottinng "
