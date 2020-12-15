@@ -1,0 +1,502 @@
+# TODO:
+# - finish update_axis_type (line.group_delay, line.spectrogra,
+#   line.time_freq, ...)
+# - implement toggle all and cycler
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from pyfar.plot import utils
+from pyfar.plot import _line
+
+
+class Cycle(object):
+    """ Cycle class implementation inspired by itertools.cycle. Supports
+    circular iterations into two directions by using next and previous.
+    """
+    def __init__(self, data):
+        """
+        Parameters
+        ----------
+        data : array like
+            The data to be iterated over.
+        """
+        self.data = data
+        self.n_elements = len(self.data)
+        self.index = 0
+
+    def __next__(self):
+        index = (self.index + 1) % self.n_elements
+        self.index = index
+        return self.data[self.index]
+
+    def next(self):
+        return self.__next__()
+
+    def previous(self):
+        index = self.index - 1
+        if index < 0:
+            index = self.n_elements + index
+        self.index = index
+        return self.data[self.index]
+
+    def current(self):
+        return self.data[self.index]
+
+
+class event_emu(object):
+    def __init__(self, key):
+        """
+        Helper class to emulate events. This makes it possible to call
+        functions in Interaction without user input.
+
+        Parameters
+        ----------
+        key : str
+            name of key to emulate, e.g., 'left' for left arrow.
+        """
+        self.key = key
+
+
+class plot_parameter(object):
+    def __init__(self, plot,
+                 dB_time=False, dB_freq=True,              # dB properties
+                 log_prefix=20, log_reference=10,          # same for time/freq
+                 xscale='log', yscale='linear',            # axis scaling
+                 deg=False, unwrap=False,                  # phase properties
+                 unit=None,                                # group delay unit
+                 window='hann', window_length=1014,        # spectrogram
+                 window_overlap_fct=.5,
+                 cmap=mpl.cm.get_cmap(name='magma')):      # colormap
+
+        # store input
+        self.dB_time = dB_time
+        self.dB_freq = dB_freq
+        self.log_prefix = log_prefix
+        self.log_reference = log_reference
+        self.xscale = xscale
+        self.yscale = yscale
+        self.deg = deg
+        self.unwrap = unwrap
+        self.unit = unit
+        self.window = window
+        self.window_length = window_length
+        self.window_overlap_fct = window_overlap_fct
+        self.cmap = cmap
+
+        # set axis types based on `plot`
+        self.update_axis_type(plot)
+
+    def update_axis_type(self, plot):
+        """Set axis types based in module and function.
+
+        cf. Interaction.apply_move_and_zoom)
+        """
+
+        # set the axis and color map parameter for each plot
+        if plot == 'line.time':
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            # y-axis
+            self._y_type = ['other', 'dB']
+            self._y_param = 'dB_time'
+            self._y_values = [False, True]
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = None
+            self._cm_id = None
+
+        elif plot == 'line.freq':
+            # x-axis
+            self._x_type = ['freq', 'positive']
+            self._x_param = 'xscale'
+            self._x_values = ['log', 'linear']
+            self._x_id = self._x_values.index(getattr(self, self._x_param))
+            # y-axis
+            self._y_type = ['dB', 'other']
+            self._y_param = 'dB_freq'
+            self._y_values = [True, False]
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = None
+            self._cm_id = None
+
+        elif plot == 'line.phase':
+            # x-axis
+            self._x_type = ['freq', 'positive']
+            self._x_param = 'xscale'
+            self._x_values = ['log', 'linear']
+            self._x_id = self._x_values.index(getattr(self, self._x_param))
+            # y-axis
+            self._y_type = ['other', 'other', 'other']
+            self._y_id = 0
+            self._y_param = 'unwrap'
+            self._y_values = [True, False, "360"]
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = None
+            self._cm_id = None
+
+        elif plot == 'line.group_delay':
+            if self.xscale == 'log':
+                self._x_type = ['freq', 'positive']
+            else:
+                self._x_type = ['positive', 'freq']
+            self._x_id = 0
+            self._y_type = ['other']
+            self._y_id = 0
+            self._cm_type = None
+            self._cm_id = None
+
+        elif plot == 'line.spectrogram':
+            self._x_type = ['positive']
+            self._x_id = 0
+            if self.yscale == 'log':
+                self._y_type = ['freq', 'positive']
+            else:
+                self._y_type = ['positive', 'freq']
+            self._y_id = 0
+            if self.dB_freq:
+                self._cm_type = ['dB', 'other']
+            else:
+                self._cm_type = ['other', 'dB']
+            self._cm_id = 0
+        else:
+            raise ValueError(f"{plot} not known.")
+
+        self.plot = plot
+
+    def toggle_x(self):
+        """Toogle the x-axis type."""
+        changed = False
+        if self.x_type is not None:
+            if len(self._x_type) > 1:
+                self._x_id = (self._x_id + 1) % len(self._x_type)
+                setattr(self, self._x_param, self._x_values[self._x_id])
+                changed = True
+
+        return changed
+
+    def toggle_y(self):
+        """Toogle the y-axis type."""
+        changed = False
+        if self.y_type is not None:
+            if len(self._y_type) > 1:
+                self._y_id = (self._y_id + 1) % len(self._y_type)
+                setattr(self, self._y_param, self._y_values[self._y_id])
+                changed = True
+
+        return changed
+
+    def toggle_cm(self):
+        """Toogle the color map type."""
+        changed = False
+        if self.cm_type is not None:
+            if len(self._cm_type) > 1:
+                self._cm_id = (self._cm_id + 1) % len(self._cm_type)
+                changed = True
+
+        return changed
+
+    @property
+    def x_type(self):
+        """Return x-axis type."""
+        x_type = self._x_type[self._x_id] if self._x_type is not None else None
+        return x_type
+
+    @property
+    def y_type(self):
+        """Return y-axis type."""
+        y_type = self._y_type[self._y_id] if self._y_type is not None else None
+        return y_type
+
+    @property
+    def cm_type(self):
+        """Return color map type."""
+        cm_type = self._cm_type[self._cm_id] if self._cm_type is not None \
+            else None
+        return cm_type
+
+
+class Interaction(object):
+    def __init__(self, signal, axes, style, plot_parameter, **kwargs):
+        # , cycle
+        pass
+        # TODO:
+        # - test cb_up/down/in/out
+        # - check input pararameter
+        # - handle plot specific arguments, e.g., `log_prefix`
+
+        # save input arguments
+        self.signal = signal
+        self.ax = axes
+        self.figure = axes.figure
+        self.style = style
+        self.params = plot_parameter
+        self.kwargs = kwargs
+
+        # store last key event
+        self.event = None
+
+        # get keyboard shortcuts
+        self.keys = utils.shortcuts(False)
+        # get control shortcuts (we don't need the 'info' field here)
+        self.ctr = self.keys["controls"]
+        for ctr in self.ctr:
+            self.ctr[ctr] = self.ctr[ctr]["key"]
+        # get plot shortcuts (we don't need the 'info' field here)
+        self.plot = self.keys["plots"]
+        for plot in self.plot:
+            self.plot[plot] = self.plot[plot]["key"]
+
+        # connect to Matplotlib
+        self.connect()
+
+    def select_action(self, event):
+
+        ctr = self.ctr
+        self.event = event
+
+        if event.key in [self.plot[plot] for plot in self.plot]:
+            self.toggle_plot(event)
+
+        elif event.key in [ctr["move_left"], ctr["move_right"],
+                           ctr["zoom_x_in"], ctr["zoom_x_out"]]:
+            self.move_and_zoom(event, 'x')
+
+        elif event.key in [ctr["move_up"], ctr["move_down"],
+                           ctr["zoom_y_in"], ctr["zoom_y_out"]]:
+            self.move_and_zoom(event, 'y')
+
+        elif event.key in [ctr["move_cm_up"], ctr["move_cm_down"],
+                           ctr["zoom_cm_in"], ctr["zoom_cm_out"]]:
+            self.move_and_zoom(event, 'cm')
+        elif event.key == ctr["toggle_x"]:
+            changed = self.params.toggle_x()
+            if changed:
+                self.toggle_plot(event_emu(self.plot[self.params.plot]))
+        elif event.key == ctr["toggle_y"]:
+            changed = self.params.toggle_y()
+            if changed:
+                self.toggle_plot(event_emu(self.plot[self.params.plot]))
+
+    def toggle_plot(self, event):
+        plot = self.plot
+        prm = self.params
+
+        with plt.style.context(utils.plotstyle(self.style)):
+            self.figure.clear()
+            self.ax = None
+
+            if event.key in plot['line.time']:
+                self.ax = _line._time(
+                    self.signal, prm.dB_time, prm.log_prefix,
+                    prm.log_reference, self.ax, **self.kwargs)
+                self.params.update_axis_type('line.time')
+
+            elif event.key in plot['line.freq']:
+                self.ax = _line._freq(
+                    self.signal, prm.dB_freq, prm.log_prefix,
+                    prm.log_reference, prm.xscale, self.ax, **self.kwargs)
+                self.params.update_axis_type('line.freq')
+
+            elif event.key in plot['line.phase']:
+                self.ax = _line._phase(
+                    self.signal, prm.deg, prm.unwrap, prm.xscale,
+                    self.ax, **self.kwargs)
+                self.params.update_axis_type('line.phase')
+
+            elif event.key in plot['line.group_delay']:
+                self.ax = _line._group_delay(
+                    self.signal, prm.unit, prm.xscale, self.ax, **self.kwargs)
+                self.params.update_axis_type('line.group_delay')
+
+            elif event.key in plot['line.spectrogram']:
+                self.ax = _line._spectrogram_cb(
+                    self.signal, prm.dB_freq, prm.log_prefix,
+                    prm.log_reference, prm.yscale, prm.window,
+                    prm.window_length, prm.window_overlap_fct, prm.cmap,
+                    self.ax, **self.kwargs)
+                self.params.update_axis_type('line.spectrogram')
+
+            elif event.key in plot['line.time_freq']:
+                ax = _line._time_freq(
+                    self.signal, prm.dB_time, prm.dB_freq, prm.log_prefix,
+                    prm.log_reference, prm.xscale, self.ax, **self.kwargs)
+                self.ax = ax[0]
+                self.params.update_axis_type('line.time')
+
+            elif event.key in plot['line.freq_phase']:
+                ax = _line._freq_phase(
+                    self.signal, prm.dB_freq, prm.log_prefix,
+                    prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
+                    self.ax, **self.kwargs)
+                self.ax = ax[0]
+                self.params.update_axis_type('line.freq')
+
+            elif event.key in plot['line.freq_group_delay']:
+                ax = _line._freq_group_delay(
+                    self.signal, prm.dB_freq, prm.log_prefix,
+                    prm.log_reference, prm.unit, prm.xscale,
+                    self.ax, **self.kwargs)
+                self.params.update_axis_type('line.freq')
+
+            self.figure.canvas.draw()
+
+    def move_and_zoom(self, event, axis):
+        """
+        Get parameters for moving/zoom and call apply_move_and_zoom().
+        See apply_move_and_zoom for more parameter description.
+        """
+
+        ctr = self.ctr
+        getter = None
+
+        # move/zoom x-axis
+        if axis == "x":
+
+            if self.params.x_type is None:
+                return
+
+            getter = self.ax.get_xlim
+            setter = self.ax.set_xlim
+            axis_type = self.params.x_type
+            if event.key == ctr["move_left"] or event.key == ctr["move_right"]:
+                operation = "move"
+            else:
+                operation = "zoom"
+            if event.key == ctr["move_right"] or event.key == ctr["zoom_x_in"]:
+                direction = "increase"
+            else:
+                direction = "decrease"
+
+        # move/zoom y-axis
+        elif axis == "y":
+
+            if self.params.y_type is None:
+                return
+
+            getter = self.ax.get_ylim
+            setter = self.ax.set_ylim
+            axis_type = self.params.y_type
+            if event.key == ctr["move_up"] or event.key == ctr["move_down"]:
+                operation = "move"
+            else:
+                operation = "zoom"
+            if event.key == ctr["move_up"] or event.key == ctr["zoom_y_in"]:
+                direction = "increase"
+            else:
+                direction = "decrease"
+
+        # move/zoom colorbar
+        elif axis == "cm":
+
+            if self.params.cb_type is None:
+                return
+
+            for cm in self.ax.get_children():
+                if type(cm) == mpl.collections.QuadMesh:
+                    break
+
+            getter = cm.get_clim
+            setter = cm.set_clim
+            axis_type = self.params.cm_type
+            if event.key == ctr["move_cb_up"] or \
+                    event.key == ctr["move_cb_down"]:
+                operation = "move"
+            else:
+                operation = "zoom"
+            if event.key == ctr["move_cm_up"] or \
+                    event.key == ctr["zoom_cm_in"]:
+                direction = "increase"
+            else:
+                direction = "decrease"
+
+        # move or zoom
+        if getter is not None:
+            self.apply_move_and_zoom(getter, setter, axis_type,
+                                     operation, direction)
+
+    def apply_move_and_zoom(self, getter_function, setter_function,
+                            axis_type, operation, direction, amount=.1):
+        """
+        Move or zoom axes or colormap by a specified amount.
+
+        Parameters
+        ----------
+        getter_function : callable
+            Function handle, e.g., `ax.get_xlim`
+        setter_function : callable
+            Function handle, e.g., `ax.set_xlim`
+        axis_type : 'positive', 'freq', 'dB', 'other'
+            String that sets constraints on how axis/colormaps are moved and
+            zoomed
+            'positive' : axis limits have to be positve
+            'freq' : axis limits have to be positive. Zoom and move is applied
+                    according to the ratios of the lower to upper axis limit,
+                    i.e., the change is smaller on the lower limit.
+            'dB' : Only the lower axis limit is changed when zooming.
+            'other' : move and zoom without constraints
+        operation : 'move', 'zoom'
+            'move' to shift the section of the axis or colormap to the
+            left/right (if setter_function is an x-axis)or up/down (if setter
+            function is a y-axis or colorbar). 'zoom' to zoom in our out.
+        direction : 'increase', 'decrease'
+            'increase' to move up/right or zoom in. 'decrease' to move
+            down/left or zoom out.
+        amount : number
+            amount to move or zoom in percent. E.g., `amount=.1` will move/zoom
+            10 percent of the current axis/colormap range. The default is 0.1
+
+        """
+
+        # shift 10 percent of the current axis range
+        lims = np.asarray(getter_function())
+        dyn_range = np.diff(lims)
+        shift = amount * dyn_range
+
+        # distribute shift to the lower and upper bound of frequency axes
+        if axis_type == 'freq':
+            shift = np.array([lims[0] / lims[1] * shift,
+                             (1 - lims[0] / lims[1]) * shift]).flatten()
+        else:
+            shift = np.tile(shift, 2)
+
+        if operation == 'move':
+            # reverse the sign
+            if direction == 'decrease':
+                shift *= -1
+
+        elif operation == 'zoom':
+            # reverse one sign for zooming in/out
+            if direction == 'decrease':
+                shift[0] *= -1
+            else:
+                shift[1] *= -1
+
+            # dB axes only zoom at the lower end
+            if axis_type == 'dB':
+                shift = np.array([2 * shift[0], 0])
+        else:
+            raise ValueError(
+                f"operation must be 'move' or 'zoom' but is {operation}")
+
+        # get new limits
+        lims_new = lims + shift
+
+        # time and freq axes should not become negative
+        if axis_type in ['positive', 'freq']:
+            lims_new[0] = np.max([lims_new[0], 0])
+
+        # apply limits
+        setter_function(lims_new[0], lims_new[1])
+
+        self.figure.canvas.draw()
+
+    def connect(self):
+        self.figure.AxisModifier = self
+        self.mpl_id = self.figure.canvas.mpl_connect(
+            'key_press_event', self.select_action)
+
+    def disconnect(self):
+        self.figure.canvas.mpl_disconnect(self.mpl_id)

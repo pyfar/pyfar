@@ -4,6 +4,7 @@ from pyfar.plot.utils import plotstyle
 from .. import Signal
 from . import _line
 from ._interaction import Interaction
+from . import interaction as ia
 
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, ax=None,
@@ -50,9 +51,14 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, ax=None,
                          ax, **kwargs)
 
     plt.tight_layout()
-    Interaction('LineXLin', ax, signal, style, **kwargs)
+    # Interaction('LineXLin', ax, signal, style, **kwargs)
+    plot_parameter = ia.plot_parameter(
+        'line.time', dB_time=dB, log_prefix=log_prefix,
+        log_reference=log_reference)
+    interaction = ia.Interaction(
+        signal, ax, style, plot_parameter, **kwargs)
 
-    return ax
+    return ax, interaction
 
 
 def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
