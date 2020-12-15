@@ -244,8 +244,6 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
         y_margin = 5
     else:
         ylabel_string += 'in radians'
-        # nice tick formatting is not done for unwrap=True. In this case
-        # it can create 1000 or more ticks.
         if not unwrap or unwrap == "360":
             ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
             ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 2))
