@@ -62,11 +62,10 @@ def test_write_wav_nd(signal_mock_nd, tmpdir):
 
 def test_read_sofa(tmpdir):
     """Test for sofa signal properties"""
-    td = tmpdir.strpath
     # Generate test files
-    generate_test_sofas(td)
+    generate_test_sofas(tmpdir)
     # Correct DataType
-    filename = os.path.join(td, 'GeneralFIR.sofa')
+    filename = os.path.join(tmpdir, 'GeneralFIR.sofa')
     signal = io.read_sofa(filename)[0]
     signal_ref = reference_signal(signal.cshape)[0]
     npt.assert_allclose(
@@ -74,16 +73,16 @@ def test_read_sofa(tmpdir):
             signal_ref,
             rtol=1e-10)
     # Wrong DataType
-    filename = os.path.join(td, 'GeneralTF.sofa')
+    filename = os.path.join(tmpdir, 'GeneralTF.sofa')
     with pytest.raises(ValueError):
         io.read_sofa(filename)
     # Wrong sampling rate Unit
-    filename = os.path.join(td, 'GeneralFIR_unit.sofa')
+    filename = os.path.join(tmpdir, 'GeneralFIR_unit.sofa')
     with pytest.raises(ValueError):
         io.read_sofa(filename)
 
     # Correct coordinates
-    filename = os.path.join(td, 'GeneralFIR.sofa')
+    filename = os.path.join(tmpdir, 'GeneralFIR.sofa')
     # Source coordinates
     source_coordinates = io.read_sofa(filename)[1]
     source_coordinates_ref = reference_coordinates()[0]
@@ -99,7 +98,7 @@ def test_read_sofa(tmpdir):
         receiver_coordinates_ref[:, :, 0],
         rtol=1e-10)
     # Wrong PositionType
-    filename = os.path.join(td, 'GeneralFIR_postype.sofa')
+    filename = os.path.join(tmpdir, 'GeneralFIR_postype.sofa')
     with pytest.raises(ValueError):
         io.read_sofa(filename)
 
