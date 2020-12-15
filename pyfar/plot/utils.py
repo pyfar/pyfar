@@ -99,8 +99,9 @@ def shortcuts(show=True):
             "ctr+3": "line.phase",
             "ctr+4": "line.group_delay",
             "ctr+5": "line.spectrogram",
-            "ctr+6": "line.freq_phase",
-            "ctr+7": "line.freq_group_delay"
+            "ctr+6": "line.time_freq",
+            "ctr+7": "line.freq_phase",
+            "ctr+8": "line.freq_group_delay"
         },
         "controls": {
             "move_left": {
