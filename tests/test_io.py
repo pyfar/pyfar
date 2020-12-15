@@ -60,29 +60,39 @@ def test_write_wav_nd(signal_mock_nd, tmpdir):
         rtol=1e-10)
 
 
-def test_read_sofa(tmpdir):
-    """Test for sofa signal properties"""
-    # Generate test files
-    generate_test_sofas(tmpdir)
+def test_read_sofa_GeneralFIR(tmpdir):
+    """Test for sofa datatype GeneralFIR"""
+    sofatype = 'GeneralFIR'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
     # Correct DataType
-    filename = os.path.join(tmpdir, 'GeneralFIR.sofa')
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
     signal = io.read_sofa(filename)[0]
     signal_ref = reference_signal(signal.cshape)[0]
     npt.assert_allclose(
             signal.time,
             signal_ref,
             rtol=1e-10)
+
+
+def test_read_sofa_GeneralTF(tmpdir):
+    """Test for sofa datatype GeneralTF"""
+    sofatype = 'GeneralTF'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
     # Wrong DataType
-    filename = os.path.join(tmpdir, 'GeneralTF.sofa')
-    with pytest.raises(ValueError):
-        io.read_sofa(filename)
-    # Wrong sampling rate Unit
-    filename = os.path.join(tmpdir, 'GeneralFIR_unit.sofa')
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
     with pytest.raises(ValueError):
         io.read_sofa(filename)
 
+
+def test_read_sofa_coordinates(tmpdir):
+    """Test for reading coordinates in sofa file"""
+    sofatype = 'GeneralFIR'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
     # Correct coordinates
-    filename = os.path.join(tmpdir, 'GeneralFIR.sofa')
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
     # Source coordinates
     source_coordinates = io.read_sofa(filename)[1]
     source_coordinates_ref = reference_coordinates()[0]
@@ -97,69 +107,81 @@ def test_read_sofa(tmpdir):
         receiver_coordinates.get_cart(),
         receiver_coordinates_ref[:, :, 0],
         rtol=1e-10)
-    # Wrong PositionType
-    filename = os.path.join(tmpdir, 'GeneralFIR_postype.sofa')
+
+
+def test_read_sofa_sampling_rate_unit(tmpdir):
+    """Test to verify correct sampling rate unit of sofa file"""
+    sofatype = 'GeneralFIR_unit'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
+    # Wrong sampling rate Unit
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
     with pytest.raises(ValueError):
         io.read_sofa(filename)
 
 
-def generate_test_sofas(filedir):
+def test_read_sofa_position_type(tmpdir):
+    """Test for correct position type of sofa file"""
+    sofatype = 'GeneralFIR_postype'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
+    # Wrong PositionType
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    with pytest.raises(ValueError):
+        io.read_sofa(filename)
+
+
+def generate_sofa_file(filedir, sofatype):
     """ Generate the reference sofa files used for testing the read_sofa function.
     Parameters
     -------
     filedir : String
         Path to directory.
     """
-    conventions = [
-        'GeneralFIR',
-        'GeneralTF',
-        'GeneralFIR_unit',
-        'GeneralFIR_postype']
     n_measurements = 1
     n_receivers = 2
     signal, sampling_rate = reference_signal(
         shape=(n_measurements, n_receivers))
     n_samples = signal.shape[-1]
 
-    for convention in conventions:
-        filename = os.path.join(filedir, (convention + '.sofa'))
-        sofafile = sofa.Database.create(
-                        filename,
-                        convention.split('_')[0],
-                        dimensions={
-                            "M": n_measurements,
-                            "R": n_receivers,
-                            "N": n_samples})
-        sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-        sofafile.Source.initialize(fixed=["Position", "View", "Up"])
-        sofafile.Source.Position = reference_coordinates()[0]
-        sofafile.Receiver.initialize(fixed=["Position", "View", "Up"])
-        sofafile.Receiver.Position = reference_coordinates()[1]
-        sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
+    filename = os.path.join(filedir, (sofatype + '.sofa'))
+    sofafile = sofa.Database.create(
+                    filename,
+                    sofatype.split('_')[0],
+                    dimensions={
+                        "M": n_measurements,
+                        "R": n_receivers,
+                        "N": n_samples})
+    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Source.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Source.Position = reference_coordinates()[0]
+    sofafile.Receiver.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Receiver.Position = reference_coordinates()[1]
+    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
 
-        if convention == 'GeneralFIR':
-            sofafile.Data.Type = 'FIR'
-            sofafile.Data.initialize()
-            sofafile.Data.IR = signal
-            sofafile.Data.SamplingRate = sampling_rate
-        elif convention == 'GeneralTF':
-            sofafile.Data.Type = 'TF'
-            sofafile.Data.initialize()
-            sofafile.Data.Real = signal
-            sofafile.Data.Imag = signal
-        elif convention == 'GeneralFIR_unit':
-            sofafile.Data.Type = 'FIR'
-            sofafile.Data.initialize()
-            sofafile.Data.IR = signal
-            sofafile.Data.SamplingRate = sampling_rate
-            sofafile.Data.SamplingRate.Units = 'not_hertz'
-        elif convention == 'GeneralFIR_postype':
-            sofafile.Data.Type = 'FIR'
-            sofafile.Data.initialize()
-            sofafile.Data.IR = signal
-            sofafile.Data.SamplingRate = sampling_rate
-            sofafile.Source.Position.Type = 'not_type'
-        sofafile.close()
+    if sofatype == 'GeneralFIR':
+        sofafile.Data.Type = 'FIR'
+        sofafile.Data.initialize()
+        sofafile.Data.IR = signal
+        sofafile.Data.SamplingRate = sampling_rate
+    elif sofatype == 'GeneralTF':
+        sofafile.Data.Type = 'TF'
+        sofafile.Data.initialize()
+        sofafile.Data.Real = signal
+        sofafile.Data.Imag = signal
+    elif sofatype == 'GeneralFIR_unit':
+        sofafile.Data.Type = 'FIR'
+        sofafile.Data.initialize()
+        sofafile.Data.IR = signal
+        sofafile.Data.SamplingRate = sampling_rate
+        sofafile.Data.SamplingRate.Units = 'not_hertz'
+    elif sofatype == 'GeneralFIR_postype':
+        sofafile.Data.Type = 'FIR'
+        sofafile.Data.initialize()
+        sofafile.Data.IR = signal
+        sofafile.Data.SamplingRate = sampling_rate
+        sofafile.Source.Position.Type = 'not_type'
+    sofafile.close()
 
 
 def reference_signal(shape=(1,)):
