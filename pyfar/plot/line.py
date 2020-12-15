@@ -260,6 +260,59 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return ax
 
 
+def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
+              log_reference=1, xscale='log', ax=None, style='light', **kwargs):
+    """
+    Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
+
+    Parameters
+    ----------
+    signal : Signal
+        pyfar Signal object.
+    dB_time : Boolean
+        Falg to plot the logarithmic time signal. The default is False.
+    dB_freq : Boolean
+        Falg to plot the logarithmic magnitude specturm. The default is True.
+    log_prefix : integer, float
+        Prefix for calculating the logarithmic time/frequency data.
+        The default is 20.
+    log_reference : integer
+        Reference for calculating the logarithmic time/frequency data.
+        The default is 1.
+    xscale : str
+        'linear' or 'log' to plot on a linear or logarithmic x-axis. The
+        default is 'log'.
+    ax : matplotlib.pyplot.axes object
+        Axes to plot on. The default is None, which uses the current figure
+        ore creates a new one if no figure exists.
+    style : str
+        'light' or 'dark' to use the pyfar plot styles or stlye from
+        matplotlib.pyplot.available. the default is 'light'
+    **kwargs
+        Keyword arguments that are piped to matplotlib.pyplot.plot
+
+    Returns
+    -------
+    ax : matplotlib.pyplot.axes object
+        Axes or array of axes containing the plot.
+
+    See Also
+    --------
+    matplotlib.pyplot.plot() for possible **kwargs.
+    """
+
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    with plt.style.context(plotstyle(style)):
+        ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
+                              log_reference, xscale, ax, **kwargs)
+    plt.tight_layout()
+    Interaction('LineXLin', ax[0], signal, style, **kwargs)
+
+    return ax
+
+
 def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
                deg=False, unwrap=False, ax=None, style='light', **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout.

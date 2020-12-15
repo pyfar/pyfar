@@ -453,6 +453,26 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
     return ax
 
 
+def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
+               log_reference=1, xscale='log', ax=None, **kwargs):
+    """
+    Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
+    """
+
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    fig, ax = _prepare_plot(ax, (2, 1))
+    kwargs = _return_default_colors_rgb(**kwargs)
+
+    _time(signal, dB_time, log_prefix, log_reference, ax[0], **kwargs)
+    _freq(signal, dB_freq, log_prefix, log_reference, xscale, ax[1], **kwargs)
+    fig.align_ylabels()
+    plt.tight_layout()
+
+    return ax
+
+
 def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
                 deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""

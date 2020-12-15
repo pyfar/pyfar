@@ -8,6 +8,7 @@ from .line import (
     phase,
     group_delay,
     spectrogram,
+    time_freq,
     freq_phase,
     freq_group_delay,
     custom_subplots
@@ -25,6 +26,7 @@ __all__ = [
     phase,
     group_delay,
     spectrogram,
+    time_freq,
     freq_phase,
     freq_group_delay,
     custom_subplots,
