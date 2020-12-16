@@ -1,5 +1,7 @@
 # TODO:
 # - implement toggle all and cycler
+# - limit freq and time axis move and zoom to reasonable values
+# - use new Interaction class for all plots in .line module
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -41,11 +43,12 @@ class Cycle(object):
         return self.data[self.index]
 
 
-class event_emu(object):
+class EventEmu(object):
     def __init__(self, key):
         """
         Helper class to emulate events. This makes it possible to call
-        functions in Interaction without user input.
+        functions in Interaction without user input and can be helpfull for
+        debugging.
 
         Parameters
         ----------
@@ -55,7 +58,14 @@ class event_emu(object):
         self.key = key
 
 
-class plot_parameter(object):
+class PlotParameter(object):
+    """Store and change plot parameter.
+
+    This class stores all unique input parameters that controll the plot look.
+    The plot parameters are changed upon request from Interaction. The signal
+    and axes are stored in Interaction.
+
+    """
     def __init__(self, plot,
                  dB_time=False, dB_freq=True,              # dB properties
                  log_prefix=20, log_reference=10,          # same for time/freq
@@ -87,7 +97,30 @@ class plot_parameter(object):
     def update_axis_type(self, plot):
         """Set axis types based on plot.
 
-        cf. Interaction.apply_move_and_zoom.
+        A plot can have two or three axis. All plots have x- and y-axis. Some
+        plots also have a colormap (cm, which we see as an axis here). Each
+        axis can have one or multiple display options, e.g., a log or linear
+        frequency axis. These options are set by this function using four
+        variables:
+
+        self._*_type : None, list
+            The axis type as defined in `Interaction.apply_move_and_zoom`
+        self._*_param : str, only if `len(self._*_type) > 1`
+            The name of the plot parameter that changes if `self._*_type`
+            changes
+        self._*_values : str, only if `len(self._*_type) > 1`
+            The values of `self._*_param`. Must have the same length as
+            `self._*_type`
+        self._*_id : int, only if `self._*_type is not None`
+            An id that sets the current state of `self._*_type`
+
+        * can be 'x', 'y', or 'cm'.
+
+        Parameters
+        ----------
+        plot : str
+            Defines the plot by module.plot_function, e.g., 'line.freq'
+
         """
 
         # set the axis and color map parameter for each plot
@@ -258,13 +291,27 @@ class plot_parameter(object):
 
 
 class Interaction(object):
+    """Change the plot and plot parameters based on keyboard shortcuts.
+
+    Actions:
+    Toggle between plots; move or zoom axis or color map; toogle axis types;
+    cycle channels.
+    """
     def __init__(self, signal, axes, style, plot_parameter, **kwargs):
-        # , cycle
-        pass
-        # TODO:
-        # - test cb_up/down/in/out
-        # - check input pararameter
-        # - handle plot specific arguments, e.g., `log_prefix`
+        """
+        Change the plot and plot parameters based on keyboard shortcuts.
+
+        Parameters
+        ----------
+        signal : Signal
+            audio data
+        axes : Matplotlib axes
+            axes handle
+        style : plot style
+            E.g. 'light'
+        plot_parameter : PlotParameter
+            An object of the PlotParameter class
+        """
 
         # save input arguments
         self.signal = signal
@@ -292,6 +339,14 @@ class Interaction(object):
         self.connect()
 
     def select_action(self, event):
+        """
+        Select what to do based on the keyboard event
+
+        Parameters
+        ----------
+        event : mpl_connect event
+            class that contains the action, e.g., the pressed key as a string
+        """
 
         ctr = self.ctr
         self.event = event
@@ -319,21 +374,23 @@ class Interaction(object):
         elif event.key == ctr["toggle_x"]:
             changed = self.params.toggle_x()
             if changed:
-                self.toggle_plot(event_emu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
 
         # y-axis toggle
         elif event.key == ctr["toggle_y"]:
             changed = self.params.toggle_y()
             if changed:
-                self.toggle_plot(event_emu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
 
         # color map toggle
         elif event.key == ctr["toggle_cm"]:
             changed = self.params.toggle_cm()
             if changed:
-                self.toggle_plot(event_emu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
 
     def toggle_plot(self, event):
+        """Toggle between plot types."""
+
         plot = self.plot
         prm = self.params
 
@@ -549,9 +606,11 @@ class Interaction(object):
         self.figure.canvas.draw()
 
     def connect(self):
+        """Connect to Matplotlib figure."""
         self.figure.AxisModifier = self
         self.mpl_id = self.figure.canvas.mpl_connect(
             'key_press_event', self.select_action)
 
     def disconnect(self):
+        """Disconnect from Matplotlib figure."""
         self.figure.canvas.mpl_disconnect(self.mpl_id)

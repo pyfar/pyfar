@@ -51,8 +51,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, ax=None,
                          ax, **kwargs)
 
     plt.tight_layout()
-    # Interaction('LineXLin', ax, signal, style, **kwargs)
-    plot_parameter = ia.plot_parameter(
+    plot_parameter = ia.PlotParameter(
         'line.time', dB_time=dB, log_prefix=log_prefix,
         log_reference=log_reference)
     interaction = ia.Interaction(
