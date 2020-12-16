@@ -157,13 +157,13 @@ def shortcuts(show=True):
                 "key": "_",
                 "info": "zoom colormap range out"},
             "toggle_x": {
-                "key": "X",
+                "key": "x",
                 "info": "toggle between linear and logarithmic x-axis"},
             "toggle_y": {
-                "key": "Y",
+                "key": "y",
                 "info": "toggle between linear and logarithmic y-axis"},
             "toggle_cm": {
-                "key": "C",
+                "key": "c",
                 "info": "toggle between linear and logarithmic color data"},
             "toogle_all": {
                 "key": "a",
