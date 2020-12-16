@@ -449,7 +449,10 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
             break
 
     cb = plt.colorbar(PCM, cax=ax[1])
-    cb.set_label('Modulus in dB')
+    if dB:
+        cb.set_label('Magnitude in dB')
+    else:
+        cb.set_label('Magnitude')
 
     plt.tight_layout()
 
