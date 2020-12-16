@@ -1,6 +1,4 @@
 # TODO:
-# - finish update_axis_type (line.group_delay, line.spectrogra,
-#   line.time_freq, ...)
 # - implement toggle all and cycler
 import numpy as np
 import matplotlib as mpl
@@ -87,9 +85,9 @@ class plot_parameter(object):
         self.update_axis_type(plot)
 
     def update_axis_type(self, plot):
-        """Set axis types based in module and function.
+        """Set axis types based on plot.
 
-        cf. Interaction.apply_move_and_zoom)
+        cf. Interaction.apply_move_and_zoom.
         """
 
         # set the axis and color map parameter for each plot
@@ -138,29 +136,69 @@ class plot_parameter(object):
             self._cm_id = None
 
         elif plot == 'line.group_delay':
-            if self.xscale == 'log':
-                self._x_type = ['freq', 'positive']
-            else:
-                self._x_type = ['positive', 'freq']
-            self._x_id = 0
-            self._y_type = ['other']
-            self._y_id = 0
+            # x-axis
+            self._x_type = ['freq', 'positive']
+            self._x_param = 'xscale'
+            self._x_values = ['log', 'linear']
+            self._x_id = self._x_values.index(getattr(self, self._x_param))
+            # y-axis
+            self._y_type = ['other', 'other', 'other', 'other', 'other']
+            self._y_param = 'unit'
+            self._y_values = [None, 's', 'ms', 'mus', 'samples']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
             self._cm_type = None
             self._cm_id = None
 
         elif plot == 'line.spectrogram':
+            # x-axis
             self._x_type = ['positive']
             self._x_id = 0
-            if self.yscale == 'log':
-                self._y_type = ['freq', 'positive']
-            else:
-                self._y_type = ['positive', 'freq']
-            self._y_id = 0
-            if self.dB_freq:
-                self._cm_type = ['dB', 'other']
-            else:
-                self._cm_type = ['other', 'dB']
-            self._cm_id = 0
+            # y-axis
+            self._y_type = ['freq', 'positive']
+            self._y_param = 'yscale'
+            self._y_values = ['log', 'linear']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = ['dB', 'other']
+            self._cm_param = 'dB_freq'
+            self._cm_values = [True, False]
+            self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+
+        elif plot == 'line.time_freq':
+            # same as time
+            # (currently interaction uses only the axis of the top plot)
+
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            # y-axis
+            self._y_type = ['other', 'dB']
+            self._y_param = 'dB_time'
+            self._y_values = [False, True]
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = None
+            self._cm_id = None
+
+        elif plot in ['line.freq_phase', 'line.freq_group_delay']:
+            # same as freq
+            # (currently interaction uses only the axis of the top plot)
+
+            # x-axis
+            self._x_type = ['freq', 'positive']
+            self._x_param = 'xscale'
+            self._x_values = ['log', 'linear']
+            self._x_id = self._x_values.index(getattr(self, self._x_param))
+            # y-axis
+            self._y_type = ['dB', 'other']
+            self._y_param = 'dB_freq'
+            self._y_values = [True, False]
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = None
+            self._cm_id = None
+
         else:
             raise ValueError(f"{plot} not known.")
 
@@ -194,6 +232,7 @@ class plot_parameter(object):
         if self.cm_type is not None:
             if len(self._cm_type) > 1:
                 self._cm_id = (self._cm_id + 1) % len(self._cm_type)
+                setattr(self, self._cm_param, self._cm_values[self._cm_id])
                 changed = True
 
         return changed
@@ -257,26 +296,40 @@ class Interaction(object):
         ctr = self.ctr
         self.event = event
 
+        # toggle plot
         if event.key in [self.plot[plot] for plot in self.plot]:
             self.toggle_plot(event)
 
+        # x-axis move/zoom
         elif event.key in [ctr["move_left"], ctr["move_right"],
                            ctr["zoom_x_in"], ctr["zoom_x_out"]]:
             self.move_and_zoom(event, 'x')
 
+        # y-axis move/zoom
         elif event.key in [ctr["move_up"], ctr["move_down"],
                            ctr["zoom_y_in"], ctr["zoom_y_out"]]:
             self.move_and_zoom(event, 'y')
 
+        # color map move/zoom
         elif event.key in [ctr["move_cm_up"], ctr["move_cm_down"],
                            ctr["zoom_cm_in"], ctr["zoom_cm_out"]]:
             self.move_and_zoom(event, 'cm')
+
+        # x-axis toggle
         elif event.key == ctr["toggle_x"]:
             changed = self.params.toggle_x()
             if changed:
                 self.toggle_plot(event_emu(self.plot[self.params.plot]))
+
+        # y-axis toggle
         elif event.key == ctr["toggle_y"]:
             changed = self.params.toggle_y()
+            if changed:
+                self.toggle_plot(event_emu(self.plot[self.params.plot]))
+
+        # color map toggle
+        elif event.key == ctr["toggle_cm"]:
+            changed = self.params.toggle_cm()
             if changed:
                 self.toggle_plot(event_emu(self.plot[self.params.plot]))
 
@@ -312,11 +365,12 @@ class Interaction(object):
                 self.params.update_axis_type('line.group_delay')
 
             elif event.key in plot['line.spectrogram']:
-                self.ax = _line._spectrogram_cb(
+                ax = _line._spectrogram_cb(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.yscale, prm.window,
                     prm.window_length, prm.window_overlap_fct, prm.cmap,
                     self.ax, **self.kwargs)
+                self.ax = ax[0]
                 self.params.update_axis_type('line.spectrogram')
 
             elif event.key in plot['line.time_freq']:
@@ -339,6 +393,7 @@ class Interaction(object):
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.unit, prm.xscale,
                     self.ax, **self.kwargs)
+                self.ax = ax[0]
                 self.params.update_axis_type('line.freq')
 
             self.figure.canvas.draw()
@@ -391,7 +446,7 @@ class Interaction(object):
         # move/zoom colorbar
         elif axis == "cm":
 
-            if self.params.cb_type is None:
+            if self.params.cm_type is None:
                 return
 
             for cm in self.ax.get_children():
@@ -401,8 +456,8 @@ class Interaction(object):
             getter = cm.get_clim
             setter = cm.set_clim
             axis_type = self.params.cm_type
-            if event.key == ctr["move_cb_up"] or \
-                    event.key == ctr["move_cb_down"]:
+            if event.key == ctr["move_cm_up"] or \
+                    event.key == ctr["move_cm_down"]:
                 operation = "move"
             else:
                 operation = "zoom"
