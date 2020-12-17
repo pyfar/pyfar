@@ -139,7 +139,7 @@ class PlotParameter(object):
 
         elif plot == 'line.freq':
             # x-axis
-            self._x_type = ['freq', 'positive']
+            self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
             self._x_values = ['log', 'linear']
             self._x_id = self._x_values.index(getattr(self, self._x_param))
@@ -154,7 +154,7 @@ class PlotParameter(object):
 
         elif plot == 'line.phase':
             # x-axis
-            self._x_type = ['freq', 'positive']
+            self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
             self._x_values = ['log', 'linear']
             self._x_id = self._x_values.index(getattr(self, self._x_param))
@@ -170,7 +170,7 @@ class PlotParameter(object):
 
         elif plot == 'line.group_delay':
             # x-axis
-            self._x_type = ['freq', 'positive']
+            self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
             self._x_values = ['log', 'linear']
             self._x_id = self._x_values.index(getattr(self, self._x_param))
@@ -185,10 +185,10 @@ class PlotParameter(object):
 
         elif plot == 'line.spectrogram':
             # x-axis
-            self._x_type = ['positive']
+            self._x_type = ['other']
             self._x_id = 0
             # y-axis
-            self._y_type = ['freq', 'positive']
+            self._y_type = ['freq', 'other']
             self._y_param = 'yscale'
             self._y_values = ['log', 'linear']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
@@ -219,7 +219,7 @@ class PlotParameter(object):
             # (currently interaction uses only the axis of the top plot)
 
             # x-axis
-            self._x_type = ['freq', 'positive']
+            self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
             self._x_values = ['log', 'linear']
             self._x_id = self._x_values.index(getattr(self, self._x_param))
@@ -543,10 +543,9 @@ class Interaction(object):
         axis_type : 'positive', 'freq', 'dB', 'other'
             String that sets constraints on how axis/colormaps are moved and
             zoomed
-            'positive' : axis limits have to be positve
-            'freq' : axis limits have to be positive. Zoom and move is applied
-                    according to the ratios of the lower to upper axis limit,
-                    i.e., the change is smaller on the lower limit.
+            'freq' : zoom and move is applied according to the ratios of the
+                     lower to upper axis limit, i.e., the change is smaller
+                     on the lower limit.
             'dB' : Only the lower axis limit is changed when zooming.
             'other' : move and zoom without constraints
         operation : 'move', 'zoom'
@@ -595,10 +594,6 @@ class Interaction(object):
 
         # get new limits
         lims_new = lims + shift
-
-        # time and freq axes should not become negative
-        if axis_type in ['positive', 'freq']:
-            lims_new[0] = np.max([lims_new[0], 0])
 
         # apply limits
         setter_function(lims_new[0], lims_new[1])
