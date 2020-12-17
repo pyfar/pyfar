@@ -5,10 +5,10 @@
 from .line import (
     freq,
     time,
-    time_dB,
     phase,
     group_delay,
     spectrogram,
+    time_freq,
     freq_phase,
     freq_group_delay,
     custom_subplots
@@ -23,10 +23,10 @@ from . import utils
 __all__ = [
     freq,
     time,
-    time_dB,
     phase,
     group_delay,
     spectrogram,
+    time_freq,
     freq_phase,
     freq_group_delay,
     custom_subplots,

@@ -5,6 +5,7 @@ import numpy as np
 import scipy.signal as spsignal
 
 from pyfar import Signal
+from .. import utils
 
 
 def atleast_3d_first_dim(arr):
@@ -210,6 +211,10 @@ class Filter(object):
     def comment(self, value):
         """Set comment."""
         self._comment = str(value)
+
+    def copy(self):
+        """Return a deep copy of the Filter object."""
+        return utils.copy(self)
 
 
 class FilterFIR(Filter):
