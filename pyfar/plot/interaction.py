@@ -1,6 +1,5 @@
 # TODO:
 # - implement toggle all and cycler
-# - limit freq and time axis move and zoom to reasonable values
 # - use new Interaction class for all plots in .line module
 import numpy as np
 import matplotlib as mpl
@@ -17,11 +16,10 @@ class Cycle(object):
         """
         Parameters
         ----------
-        data : array like
+        data : array like, None
             The data to be iterated over.
         """
         self.data = data
-        self.n_elements = len(self.data)
         self.index = 0
 
     def __next__(self):
@@ -41,6 +39,15 @@ class Cycle(object):
 
     def current(self):
         return self.data[self.index]
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        self._data = data
+        self.n_elements = len(data)
 
 
 class EventEmu(object):
@@ -321,8 +328,13 @@ class Interaction(object):
         self.params = plot_parameter
         self.kwargs = kwargs
 
-        # store last key event
+        # store last key event (done in self.select_action)
         self.event = None
+
+        # initializ.e cycler
+        self.cycle = Cycle(self.ax.lines)
+        self.current_line = self.cycle.current()
+        self.all_visible = True
 
         # get keyboard shortcuts
         self.keys = utils.shortcuts(False)
@@ -387,6 +399,15 @@ class Interaction(object):
             changed = self.params.toggle_cm()
             if changed:
                 self.toggle_plot(EventEmu(self.plot[self.params.plot]))
+
+        # toggle line visibility
+        elif event.key == ctr["toggle_all"]:
+            if self.plot != 'line.spectrogram':
+                self.toggle_all_lines()
+
+        # cycle channels
+        elif event.key in [ctr["next"], ctr["prev"]]:
+            self.cycle_lines(event)
 
     def toggle_plot(self, event):
         """Toggle between plot types."""
@@ -453,7 +474,11 @@ class Interaction(object):
                 self.ax = ax[0]
                 self.params.update_axis_type('line.freq')
 
-            self.figure.canvas.draw()
+            self.update_cycler()
+            if not self.all_visible:
+                self.cycle_lines(EventEmu('redraw'))
+            else:
+                self.figure.canvas.draw()
 
     def move_and_zoom(self, event, axis):
         """
@@ -540,7 +565,7 @@ class Interaction(object):
             Function handle, e.g., `ax.get_xlim`
         setter_function : callable
             Function handle, e.g., `ax.set_xlim`
-        axis_type : 'positive', 'freq', 'dB', 'other'
+        axis_type : 'freq', 'dB', 'other'
             String that sets constraints on how axis/colormaps are moved and
             zoomed
             'freq' : zoom and move is applied according to the ratios of the
@@ -599,6 +624,36 @@ class Interaction(object):
         setter_function(lims_new[0], lims_new[1])
 
         self.figure.canvas.draw()
+
+    def toggle_all_lines(self):
+        if self.all_visible:
+            for i in range(len(self.ax.lines)):
+                self.ax.lines[i].set_visible(False)
+            self.current_line.set_visible(True)
+            self.all_visible = False
+        else:
+            for i in range(len(self.ax.lines)):
+                self.ax.lines[i].set_visible(True)
+            self.all_visible = True
+        self.figure.canvas.draw()
+
+    def cycle_lines(self, event):
+        if self.all_visible or event.key == 'redraw':
+            for i in range(len(self.ax.lines)):
+                self.ax.lines[i].set_visible(False)
+        else:
+            self.current_line.set_visible(False)
+        if event.key == self.ctr["next"]:
+            self.current_line = next(self.cycle)
+        elif event.key == self.ctr["prev"]:
+            self.current_line = self.cycle.previous()
+        self.current_line.set_visible(True)
+        self.all_visible = False
+        self.figure.canvas.draw()
+
+    def update_cycler(self):
+        self.cycle.data = self.ax.lines
+        self.current_line = self.cycle.current()
 
     def connect(self):
         """Connect to Matplotlib figure."""

@@ -165,7 +165,7 @@ def shortcuts(show=True):
             "toggle_cm": {
                 "key": "c",
                 "info": "toggle between linear and logarithmic color data"},
-            "toogle_all": {
+            "toggle_all": {
                 "key": "a",
                 "info": ("toggle between plotting all channels and plottinng "
                          "single channels")},
