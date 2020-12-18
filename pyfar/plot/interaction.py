@@ -439,7 +439,7 @@ class Interaction(object):
 
         # toggle line visibility
         elif event.key == ctr["toggle_all"]:
-            if self.plot != 'line.spectrogram':
+            if self.params._cycler_type == 'line':
                 self.toggle_all_lines()
 
         # cycle channels
@@ -457,59 +457,59 @@ class Interaction(object):
             self.ax = None
 
             if event.key in plot['line.time']:
+                self.params.update_axis_type('line.time')
                 self.ax = _line._time(
                     self.signal, prm.dB_time, prm.log_prefix,
                     prm.log_reference, self.ax, **self.kwargs)
-                self.params.update_axis_type('line.time')
 
             elif event.key in plot['line.freq']:
+                self.params.update_axis_type('line.freq')
                 self.ax = _line._freq(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
-                self.params.update_axis_type('line.freq')
 
             elif event.key in plot['line.phase']:
+                self.params.update_axis_type('line.phase')
                 self.ax = _line._phase(
                     self.signal, prm.deg, prm.unwrap, prm.xscale,
                     self.ax, **self.kwargs)
-                self.params.update_axis_type('line.phase')
 
             elif event.key in plot['line.group_delay']:
+                self.params.update_axis_type('line.group_delay')
                 self.ax = _line._group_delay(
                     self.signal, prm.unit, prm.xscale, self.ax, **self.kwargs)
-                self.params.update_axis_type('line.group_delay')
 
             elif event.key in plot['line.spectrogram']:
+                self.params.update_axis_type('line.spectrogram')
                 ax = _line._spectrogram_cb(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.yscale, prm.window,
                     prm.window_length, prm.window_overlap_fct, prm.cmap,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
-                self.params.update_axis_type('line.spectrogram')
 
             elif event.key in plot['line.time_freq']:
+                self.params.update_axis_type('line.time')
                 ax = _line._time_freq(
                     self.signal, prm.dB_time, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
                 self.ax = ax[0]
-                self.params.update_axis_type('line.time')
 
             elif event.key in plot['line.freq_phase']:
+                self.params.update_axis_type('line.freq')
                 ax = _line._freq_phase(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
-                self.params.update_axis_type('line.freq')
 
             elif event.key in plot['line.freq_group_delay']:
+                self.params.update_axis_type('line.freq')
                 ax = _line._freq_group_delay(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.unit, prm.xscale,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
-                self.params.update_axis_type('line.freq')
 
             self.update_cycler()
             if not self.all_visible:
