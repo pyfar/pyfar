@@ -1,5 +1,4 @@
 # TODO:
-# - toggle all lines if in spectrogram
 # - use new Interaction class for all plots in .line module
 import numpy as np
 import matplotlib as mpl
@@ -21,21 +20,25 @@ class Cycle(object):
         index : int, optional
             index of the current channel. The default is 0
         """
-        self.n_channels = n_channels
-        self.index = index
+        self._n_channels = n_channels
+        self._index = index
 
     def increase_index(self):
-        self.index = (self.index + 1) % self.n_channels
+        self._index = (self.index + 1) % self.n_channels
 
     def decrease_index(self):
         index = self.index - 1
         if index < 0:
             index = self.n_channels + index
-        self.index = index
+        self._index = index
 
     @property
     def index(self):
         return self._index
+
+    @property
+    def n_channels(self):
+        return self._n_channels
 
 
 class EventEmu(object):
@@ -56,9 +59,10 @@ class EventEmu(object):
 class PlotParameter(object):
     """Store and change plot parameter.
 
-    This class stores all unique input parameters that controll the plot look.
-    The plot parameters are changed upon request from Interaction. The signal
-    and axes are stored in Interaction.
+    This class stores all unique input parameters  and axis types that control
+    the plot look. The plot parameters are changed upon request from
+    Interaction. The signal and axes are stored in Interaction. See
+    `self.update_axis_type` for more information.
 
     """
     def __init__(self, plot,
@@ -330,6 +334,8 @@ class Interaction(object):
             E.g. 'light'
         plot_parameter : PlotParameter
             An object of the PlotParameter class
+
+        **kwargs are passed to the plot functions
         """
 
         # save input arguments
@@ -348,6 +354,9 @@ class Interaction(object):
 
         # initialize visibility
         self.all_visible = True
+
+        # set initial value for text object showing the channel number
+        self.txt = None
 
         # get keyboard shortcuts
         self.keys = utils.shortcuts(False)
@@ -415,12 +424,14 @@ class Interaction(object):
 
         # toggle line visibility
         elif event.key == ctr["toggle_all"]:
-            if self.params._cycler_type == 'line':
+            if self.params._cycler_type == 'line' \
+                    and self.cycler.n_channels > 1:
                 self.toggle_all_lines()
 
         # cycle channels
         elif event.key in [ctr["next"], ctr["prev"]]:
-            self.cycle(event)
+            if self.cycler.n_channels > 1:
+                self.cycle(event)
 
     def toggle_plot(self, event):
         """Toggle between plot types."""
@@ -492,9 +503,9 @@ class Interaction(object):
                 if not self.all_visible:
                     self.cycle(EventEmu('redraw'))
                 else:
-                    self.figure.canvas.draw()
+                    self.draw_canvas()
             else:
-                self.figure.canvas.draw()
+                self.draw_canvas()
 
     def move_and_zoom(self, event, axis):
         """
@@ -639,7 +650,7 @@ class Interaction(object):
         # apply limits
         setter_function(lims_new[0], lims_new[1])
 
-        self.figure.canvas.draw()
+        self.draw_canvas()
 
     def toggle_all_lines(self):
         if self.all_visible:
@@ -647,11 +658,16 @@ class Interaction(object):
                 self.ax.lines[i].set_visible(False)
             self.ax.lines[self.cycler.index].set_visible(True)
             self.all_visible = False
+
+            self.write_current_channel_text()
         else:
             for i in range(len(self.ax.lines)):
                 self.ax.lines[i].set_visible(True)
             self.all_visible = True
-        self.figure.canvas.draw()
+
+            self.delete_current_channel_text()
+
+        self.draw_canvas()
 
     def cycle(self, event):
         if self.params._cycler_type == 'line':
@@ -676,7 +692,10 @@ class Interaction(object):
         # set current line visible
         self.ax.lines[self.cycler.index].set_visible(True)
         self.all_visible = False
-        self.figure.canvas.draw()
+
+        self.write_current_channel_text()
+
+        self.draw_canvas()
 
     def cycle_signals(self, event):
         # cycle index
@@ -688,6 +707,42 @@ class Interaction(object):
         # re-plot
         self.all_visible = False
         self.toggle_plot(EventEmu(self.plot['line.spectrogram']))
+        self.write_current_channel_text()
+
+    def write_current_channel_text(self):
+
+        # clear old text
+        self.delete_current_channel_text()
+
+        # position for new text
+        x_lim = self.ax.get_xlim()
+        y_lim = self.ax.get_ylim()
+        x_range = x_lim[1] - x_lim[0]
+        y_range = y_lim[1] - y_lim[0]
+        if self.params.x_type == 'freq':
+            x_pos = x_lim[1] - .075 * x_range
+        else:
+            x_pos = x_lim[1] - .015 * x_range
+        y_pos = y_lim[0] + .025 * y_range
+
+        # write new text
+        with plt.style.context(utils.plotstyle(self.style)):
+            bbox = dict(boxstyle="round", fc=mpl.rcParams["axes.facecolor"],
+                        ec=mpl.rcParams["axes.facecolor"], alpha=.5)
+
+            self.txt = self.ax.text(
+                x_pos, y_pos, f'Ch. {self.cycler.index}',
+                horizontalalignment='right', verticalalignment='baseline',
+                bbox=bbox)
+
+    def delete_current_channel_text(self):
+        if self.txt is not None:
+            self.txt.remove()
+            self.txt = None
+
+    def draw_canvas(self):
+        with plt.style.context(utils.plotstyle(self.style)):
+            self.figure.canvas.draw()
 
     def connect(self):
         """Connect to Matplotlib figure."""
