@@ -1,5 +1,6 @@
 # TODO:
-# - implement toggle all and cycler
+# - toggle all lines if in spectrogram
+# - unify cycler for line and spectrogramm (cycler for spectrogram is not updated)
 # - use new Interaction class for all plots in .line module
 import numpy as np
 import matplotlib as mpl
@@ -444,7 +445,7 @@ class Interaction(object):
 
         # cycle channels
         elif event.key in [ctr["next"], ctr["prev"]]:
-            self.cycle_lines(event)
+            self.cycle(event)
 
     def toggle_plot(self, event):
         """Toggle between plot types."""
@@ -482,8 +483,8 @@ class Interaction(object):
             elif event.key in plot['line.spectrogram']:
                 self.params.update_axis_type('line.spectrogram')
                 ax = _line._spectrogram_cb(
-                    self.signal, prm.dB_freq, prm.log_prefix,
-                    prm.log_reference, prm.yscale, prm.window,
+                    self.signal[self.cycler.index], prm.dB_freq,
+                    prm.log_prefix, prm.log_reference, prm.yscale, prm.window,
                     prm.window_length, prm.window_overlap_fct, prm.cmap,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
@@ -511,9 +512,13 @@ class Interaction(object):
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
 
-            self.update_cycler()
-            if not self.all_visible:
-                self.cycle_lines(EventEmu('redraw'))
+            # update cycler and figure
+            if self.params._cycler_type == 'line':
+                self.init_cycler(self.cycler.index, self.all_visible)
+                if not self.all_visible:
+                    self.cycle(EventEmu('redraw'))
+                else:
+                    self.figure.canvas.draw()
             else:
                 self.figure.canvas.draw()
 
@@ -666,7 +671,7 @@ class Interaction(object):
         if self.all_visible:
             for i in range(len(self.ax.lines)):
                 self.ax.lines[i].set_visible(False)
-            self.current_line.set_visible(True)
+            self.cycler.current().set_visible(True)
             self.all_visible = False
         else:
             for i in range(len(self.ax.lines)):
@@ -681,27 +686,45 @@ class Interaction(object):
             self.cycler = Cycle(self.signal, index)
         else:
             self.cycler = None
+
         if self.cycler is not None:
-            self.cycler_data = self.cycler.current()
             self.all_visible = all_visible
 
+    def cycle(self, event):
+        if self.params._cycler_type == 'line':
+            self.cycle_lines(event)
+        elif self.params._cycler_type == 'signal':
+            self.cycle_signals(event)
+
     def cycle_lines(self, event):
+        # set visible lines invisible
         if self.all_visible or event.key == 'redraw':
             for i in range(len(self.ax.lines)):
                 self.ax.lines[i].set_visible(False)
         else:
-            self.current_line.set_visible(False)
+            self.cycler.current().set_visible(False)
+
+        # cycle
         if event.key == self.ctr["next"]:
-            self.current_line = self.cycler.next()
+            self.cycler.increase_index()
         elif event.key == self.ctr["prev"]:
-            self.current_line = self.cycler.previous()
-        self.current_line.set_visible(True)
+            self.cycler.decrease_index()
+
+        # set current line visible
+        self.cycler.current().set_visible(True)
         self.all_visible = False
         self.figure.canvas.draw()
 
-    def update_cycler(self):
-        self.cycler.data = self.ax.lines
-        self.current_line = self.cycler.current()
+    def cycle_signals(self, event):
+        # cycle index
+        if event.key == self.ctr["next"]:
+            self.cycler.increase_index()
+        elif event.key == self.ctr["prev"]:
+            self.cycler.decrease_index()
+
+        # re-plot
+        self.all_visible = False
+        self.toggle_plot(EventEmu(self.plot['line.spectrogram']))
 
     def connect(self):
         """Connect to Matplotlib figure."""
