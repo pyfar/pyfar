@@ -138,6 +138,16 @@ class PlotParameter(object):
 
         * can be 'x', 'y', or 'cm'.
 
+        In addtition `self._cycler_type` is set:
+
+        self._cycler_type : 'line', 'signal', None
+            determines in which way `Cycle` cycles through the channels.
+            'line'   - cycling is done by toggling line visibility
+                       (e.g. for pyfar.plot.line.time)
+            'signal' - cycling is done by re-calling the plot function with a
+                       signal slice (e.g. for pyfar.plot.line.spectrogram)
+            None     - cycling is not possible
+
         Parameters
         ----------
         plot : str
@@ -145,7 +155,7 @@ class PlotParameter(object):
 
         """
 
-        # set the axis and color map parameter for each plot
+        # set the axis, color map, and cycle, parameter for each plot
         if plot == 'line.time':
             # x-axis
             self._x_type = ['other']
@@ -158,6 +168,8 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # cycler type
+            self._cycler_type = 'line'
 
         elif plot == 'line.freq':
             # x-axis
@@ -173,6 +185,8 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # cycler type
+            self._cycler_type = 'line'
 
         elif plot == 'line.phase':
             # x-axis
@@ -189,6 +203,8 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # cycler type
+            self._cycler_type = 'line'
 
         elif plot == 'line.group_delay':
             # x-axis
@@ -204,6 +220,8 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # cycler type
+            self._cycler_type = 'line'
 
         elif plot == 'line.spectrogram':
             # x-axis
@@ -219,6 +237,8 @@ class PlotParameter(object):
             self._cm_param = 'dB_freq'
             self._cm_values = [True, False]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # cycler type
+            self._cycler_type = 'signal'
 
         elif plot == 'line.time_freq':
             # same as time
@@ -235,6 +255,8 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # cycler type
+            self._cycler_type = 'line'
 
         elif plot in ['line.freq_phase', 'line.freq_group_delay']:
             # same as freq
@@ -253,6 +275,8 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # cycler type
+            self._cycler_type = 'line'
 
         else:
             raise ValueError(f"{plot} not known.")
