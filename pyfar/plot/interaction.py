@@ -1,69 +1,41 @@
 # TODO:
 # - toggle all lines if in spectrogram
-# - unify cycler for line and spectrogramm (cycler for spectrogram is not updated)
 # - use new Interaction class for all plots in .line module
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from pyfar import Signal
 from pyfar.plot import utils
 from pyfar.plot import _line
 
 
 class Cycle(object):
     """ Cycle class implementation inspired by itertools.cycle. Supports
-    circular iterations into two directions by using next and previous.
+    circular iterations into two directions.
     """
-    def __init__(self, data, index=0):
+    def __init__(self, n_channels, index=0):
         """
         Parameters
         ----------
-        data : array like, Signal
-            The data to be iterated over.
+        n_channels : int
+            number of channels in the signal
+        index : int, optional
+            index of the current channel. The default is 0
         """
-        self.data = data
+        self.n_channels = n_channels
         self.index = index
 
-    def next(self):
-        self.increase_index()
-        return self.data[self.index]
-
-    def previous(self):
-        self.decrease_index()
-        return self.data[self.index]
-
-    def current(self):
-        return self.data[self.index]
-
     def increase_index(self):
-        self.index = (self.index + 1) % self.n_elements
+        self.index = (self.index + 1) % self.n_channels
 
     def decrease_index(self):
         index = self.index - 1
         if index < 0:
-            index = self.n_elements + index
+            index = self.n_channels + index
         self.index = index
 
     @property
     def index(self):
         return self._index
-
-    @index.setter
-    def index(self, index):
-        self._index = index
-
-    @property
-    def data(self):
-        return self._data
-
-    @data.setter
-    def data(self, data):
-        self._data = data
-        # set the number of elements
-        if isinstance(data, Signal):
-            self._n_elements = data.cshape[0]
-        else:
-            self.n_elements = len(data)
 
 
 class EventEmu(object):
@@ -372,7 +344,10 @@ class Interaction(object):
         self.event = None
 
         # initialize cycler
-        self.init_cycler()
+        self.cycler = Cycle(self.signal.cshape[0])
+
+        # initialize visibility
+        self.all_visible = True
 
         # get keyboard shortcuts
         self.keys = utils.shortcuts(False)
@@ -512,9 +487,8 @@ class Interaction(object):
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
 
-            # update cycler and figure
+            # update figure
             if self.params._cycler_type == 'line':
-                self.init_cycler(self.cycler.index, self.all_visible)
                 if not self.all_visible:
                     self.cycle(EventEmu('redraw'))
                 else:
@@ -671,24 +645,13 @@ class Interaction(object):
         if self.all_visible:
             for i in range(len(self.ax.lines)):
                 self.ax.lines[i].set_visible(False)
-            self.cycler.current().set_visible(True)
+            self.ax.lines[self.cycler.index].set_visible(True)
             self.all_visible = False
         else:
             for i in range(len(self.ax.lines)):
                 self.ax.lines[i].set_visible(True)
             self.all_visible = True
         self.figure.canvas.draw()
-
-    def init_cycler(self, index=0, all_visible=True):
-        if self.params._cycler_type == 'line':
-            self.cycler = Cycle(self.ax.lines, index)
-        elif self.params._cycler_type == 'signal':
-            self.cycler = Cycle(self.signal, index)
-        else:
-            self.cycler = None
-
-        if self.cycler is not None:
-            self.all_visible = all_visible
 
     def cycle(self, event):
         if self.params._cycler_type == 'line':
@@ -702,7 +665,7 @@ class Interaction(object):
             for i in range(len(self.ax.lines)):
                 self.ax.lines[i].set_visible(False)
         else:
-            self.cycler.current().set_visible(False)
+            self.ax.lines[self.cycler.index].set_visible(False)
 
         # cycle
         if event.key == self.ctr["next"]:
@@ -711,7 +674,7 @@ class Interaction(object):
             self.cycler.decrease_index()
 
         # set current line visible
-        self.cycler.current().set_visible(True)
+        self.ax.lines[self.cycler.index].set_visible(True)
         self.all_visible = False
         self.figure.canvas.draw()
 
