@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from pyfar import Signal
 from pyfar.plot import utils
 from pyfar.plot import _line
 
@@ -12,33 +13,43 @@ class Cycle(object):
     """ Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions by using next and previous.
     """
-    def __init__(self, data):
+    def __init__(self, data, index=0):
         """
         Parameters
         ----------
-        data : array like, None
+        data : array like, Signal
             The data to be iterated over.
         """
         self.data = data
-        self.index = 0
-
-    def __next__(self):
-        index = (self.index + 1) % self.n_elements
         self.index = index
-        return self.data[self.index]
 
     def next(self):
-        return self.__next__()
+        self.increase_index()
+        return self.data[self.index]
 
     def previous(self):
-        index = self.index - 1
-        if index < 0:
-            index = self.n_elements + index
-        self.index = index
+        self.decrease_index()
         return self.data[self.index]
 
     def current(self):
         return self.data[self.index]
+
+    def increase_index(self):
+        self.index = (self.index + 1) % self.n_elements
+
+    def decrease_index(self):
+        index = self.index - 1
+        if index < 0:
+            index = self.n_elements + index
+        self.index = index
+
+    @property
+    def index(self):
+        return self._index
+
+    @index.setter
+    def index(self, index):
+        self._index = index
 
     @property
     def data(self):
@@ -47,7 +58,11 @@ class Cycle(object):
     @data.setter
     def data(self, data):
         self._data = data
-        self.n_elements = len(data)
+        # set the number of elements
+        if isinstance(data, Signal):
+            self._n_elements = data.cshape[0]
+        else:
+            self.n_elements = len(data)
 
 
 class EventEmu(object):
@@ -644,7 +659,7 @@ class Interaction(object):
         else:
             self.current_line.set_visible(False)
         if event.key == self.ctr["next"]:
-            self.current_line = next(self.cycle)
+            self.current_line = self.cycle.next()
         elif event.key == self.ctr["prev"]:
             self.current_line = self.cycle.previous()
         self.current_line.set_visible(True)
