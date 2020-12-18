@@ -80,16 +80,6 @@ def _prepare_plot(ax=None, subplots=None):
     return fig, ax
 
 
-def _flatten_signal(signal):
-    if len(signal.cshape) > 1:
-        signal_cp = signal.copy()
-        signal_cp.time = np.reshape(
-            signal_cp.time, (-1, signal_cp.n_samples))
-        return signal_cp
-    else:
-        return signal
-
-
 def _set_axlim(ax, setter, low, high, limits):
     """
     Set axis limits depending on existing data.
@@ -153,7 +143,6 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1,
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
-    signal = _flatten_signal(signal)
     data = signal.time.T
     if dB:
         # avoid any zero-values because they result in -inf in dB data

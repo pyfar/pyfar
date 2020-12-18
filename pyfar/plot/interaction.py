@@ -1,6 +1,4 @@
 # TODO:
-# - test _signal_flatten
-# - put _signal_flatten everywhere in _line
 # - implement toggle all and cycler
 # - use new Interaction class for all plots in .line module
 import numpy as np
@@ -476,7 +474,6 @@ class Interaction(object):
                 self.ax = ax[0]
                 self.params.update_axis_type('line.freq')
 
-            # update cycler and figure
             self.update_cycler()
             if not self.all_visible:
                 self.cycle_lines(EventEmu('redraw'))
