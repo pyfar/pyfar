@@ -370,10 +370,8 @@ class Interaction(object):
         # store last key event (done in self.select_action)
         self.event = None
 
-        # initializ.e cycler
-        self.cycle = Cycle(self.ax.lines)
-        self.current_line = self.cycle.current()
-        self.all_visible = True
+        # initialize cycler
+        self.init_cycler()
 
         # get keyboard shortcuts
         self.keys = utils.shortcuts(False)
@@ -676,6 +674,17 @@ class Interaction(object):
             self.all_visible = True
         self.figure.canvas.draw()
 
+    def init_cycler(self, index=0, all_visible=True):
+        if self.params._cycler_type == 'line':
+            self.cycler = Cycle(self.ax.lines, index)
+        elif self.params._cycler_type == 'signal':
+            self.cycler = Cycle(self.signal, index)
+        else:
+            self.cycler = None
+        if self.cycler is not None:
+            self.cycler_data = self.cycler.current()
+            self.all_visible = all_visible
+
     def cycle_lines(self, event):
         if self.all_visible or event.key == 'redraw':
             for i in range(len(self.ax.lines)):
@@ -683,16 +692,16 @@ class Interaction(object):
         else:
             self.current_line.set_visible(False)
         if event.key == self.ctr["next"]:
-            self.current_line = self.cycle.next()
+            self.current_line = self.cycler.next()
         elif event.key == self.ctr["prev"]:
-            self.current_line = self.cycle.previous()
+            self.current_line = self.cycler.previous()
         self.current_line.set_visible(True)
         self.all_visible = False
         self.figure.canvas.draw()
 
     def update_cycler(self):
-        self.cycle.data = self.ax.lines
-        self.current_line = self.cycle.current()
+        self.cycler.data = self.ax.lines
+        self.current_line = self.cycler.current()
 
     def connect(self):
         """Connect to Matplotlib figure."""
