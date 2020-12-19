@@ -344,6 +344,44 @@ def test_find_nearest_frequency():
     npt.assert_allclose(actual, expected)
 
 
+def test_reshape():
+
+    # test reshape
+    x = np.random.rand(6, 256)
+    signal_in = Signal(x, 44100)
+    signal_out = signal_in.reshape((3, 2))
+
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    # test assertion for non-tuple input
+    with pytest.raises(ValueError):
+        signal_out = signal_in.reshape([3, 2])
+
+    # test assertion for wrong dimension
+    with pytest.raises(ValueError):
+        signal_out = signal_in.reshape((3, 4))
+
+
+def test_flatten():
+
+    # test 2D signal (flatten should not change anything)
+    x = np.random.rand(2, 256)
+    signal_in = Signal(x, 44100)
+    signal_out = signal_in.flatten()
+
+    npt.assert_allclose(signal_in._data, signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    # test 3D signal
+    x = np.random.rand(3, 2, 256)
+    signal_in = Signal(x, 44100)
+    signal_out = signal_in.flatten()
+
+    npt.assert_allclose(signal_in._data.reshape((6, -1)), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+
 @pytest.fixture
 def sine():
     """Generate a sine signal with f = 440 Hz and sampling_rate = 44100 Hz.

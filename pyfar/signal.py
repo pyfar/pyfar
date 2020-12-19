@@ -309,6 +309,63 @@ class Signal(Audio):
         """
         return self._data.shape[:-1]
 
+    def reshape(self, newshape):
+        """
+        Return reshaped copy of the signal.
+
+        Parameters
+        ----------
+        newshape : int, tuple
+            new cshape of the signal. `np.prod(newshape)` must equal
+            `np.prod(signal.cshape)`.
+
+        Returns
+        -------
+        reshaped : Signal
+            reshaped copy of the signal.
+
+        Note
+        ----
+        The number of samples and frequency bin always remains the same.
+
+        """
+
+        # check input
+        if not isinstance(newshape, int) and not isinstance(newshape, tuple):
+            raise ValueError("newshape must be an integer or tuple")
+        if np.prod(newshape) != np.prod(self.cshape):
+            raise ValueError((f"Can not reshape signal of cshape "
+                              f"{self.cshape} to {newshape}"))
+
+        if isinstance(newshape, int):
+            newshape = (newshape, )
+
+        # reshape
+        reshaped = utils.copy(self)
+        reshaped._data = reshaped._data.reshape(newshape + (-1, ))
+
+        return reshaped
+
+    def flatten(self):
+        """Return flattened copy of the signal.
+
+        Returns
+        -------
+        flat : Signal
+            Flattened copy of signal with
+            `flat.cshape = np.prod(signal.cshape)`
+
+        Note
+        ----
+        The number of samples and frequency bins always remains the same, e.g.,
+        a signal of `cshape=(4,3)` and `n_samples=512` will have
+        `chsape=(12, )` and `n_samples=512` after flattening.
+
+        """
+        newshape = int(np.prod(self.cshape))
+
+        return self.reshape(newshape)
+
     @property
     def comment(self):
         """Get comment."""
