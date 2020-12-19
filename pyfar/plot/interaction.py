@@ -433,6 +433,12 @@ class Interaction(object):
             if self.cycler.n_channels > 1:
                 self.cycle(event)
 
+        # clear/write channel info
+        if not self.all_visible or self.params._cycler_type == 'signal':
+            self.write_current_channel_text()
+        else:
+            self.delete_current_channel_text()
+
     def toggle_plot(self, event):
         """Toggle between plot types."""
 
@@ -658,14 +664,10 @@ class Interaction(object):
                 self.ax.lines[i].set_visible(False)
             self.ax.lines[self.cycler.index].set_visible(True)
             self.all_visible = False
-
-            self.write_current_channel_text()
         else:
             for i in range(len(self.ax.lines)):
                 self.ax.lines[i].set_visible(True)
             self.all_visible = True
-
-            self.delete_current_channel_text()
 
         self.draw_canvas()
 
@@ -692,9 +694,6 @@ class Interaction(object):
         # set current line visible
         self.ax.lines[self.cycler.index].set_visible(True)
         self.all_visible = False
-
-        self.write_current_channel_text()
-
         self.draw_canvas()
 
     def cycle_signals(self, event):
@@ -707,7 +706,6 @@ class Interaction(object):
         # re-plot
         self.all_visible = False
         self.toggle_plot(EventEmu(self.plot['line.spectrogram']))
-        self.write_current_channel_text()
 
     def write_current_channel_text(self):
 
@@ -735,10 +733,13 @@ class Interaction(object):
                 horizontalalignment='right', verticalalignment='baseline',
                 bbox=bbox)
 
+            self.draw_canvas()
+
     def delete_current_channel_text(self):
         if self.txt is not None:
             self.txt.remove()
             self.txt = None
+            self.draw_canvas()
 
     def draw_canvas(self):
         with plt.style.context(utils.plotstyle(self.style)):
