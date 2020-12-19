@@ -726,3 +726,43 @@ def _divide(a, b):
 
 def _power(a, b):
     return a**b
+
+
+def concatenate(first, second, axis=0):
+    """Merge two signal objects if their length, dimensions
+    and sampling rates match. Both signals are copied and
+    a new object is returned.
+
+    Parameters
+    ----------
+    first : Signal
+        The first signal
+    second : Signal
+        The second signal
+
+    Returns
+    -------
+    merged : Signal
+        The merged signal object
+    """
+    first._assert_matching_meta_data(second)
+    if axis < 0:
+        axis -= 1
+    data = np.concatenate(
+        (first._data, second._data),
+        axis=axis)
+
+    if first.comment is not None:
+        if second.comment is None:
+            comment = str(first.comment)
+        else:
+            comment = str(first.comment) + '\n' + str(second.comment)
+    else:
+        comment = None
+
+    return Signal(
+        data,
+        first.sampling_rate,
+        n_samples=first.n_samples,
+        fft_norm=first.fft_norm,
+        comment=comment)
