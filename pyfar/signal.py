@@ -29,24 +29,20 @@ class Audio(object):
         return self._domain
 
     @property
-    def n_samples(self):
-        """Number of samples."""
-        return self._n_samples
+    def signal_type(self):
+        """The signal type."""
+        if self.fft_norm == 'none':
+            stype = 'energy'
+        elif self.fft_norm in [
+                "unitary", "amplitude", "rms", "power", "psd"]:
+            stype = 'energy'
+        else:
+            raise ValueError("No valid fft norm set.")
+        return stype
 
-    @property
-    def n_bins(self):
-        """Number of frequency bins."""
-        return fft._n_bins(self.n_samples)
-
-    @property
-    def frequencies(self):
-        """Frequencies of the discrete signal spectrum."""
-        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
-
-    @property
-    def times(self):
-        """Time instances the signal is sampled at."""
-        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
+    @signal_type.setter
+    def signal_type(self, value):
+        raise DeprecationWarning("Deprecated, use fft_norm instead.")
 
     @property
     def dtype(self):
@@ -117,10 +113,139 @@ class DataTime(Audio):
     def __init__(self, comment, dtype):
         Audio.__init__(self, comment, dtype)
 
+    @property
+    def time(self):
+        """The signal data in the time domain."""
+        self.domain = 'time'
+        return self._data
+
+    @time.setter
+    def time(self, value):
+        data = np.atleast_2d(value)
+        self._domain = 'time'
+        self._data = data
+        self._n_samples = data.shape[-1]
+
+    @property
+    def n_samples(self):
+        """Number of samples."""
+        return self._n_samples
+
+    @property
+    def times(self):
+        """Time instances the signal is sampled at."""
+        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
+
+    def find_nearest_time(self, value):
+        """Returns the closest time index for a given time
+        Parameters
+        ----------
+        value : float, array-like
+            The times for which the indices are to be returned
+
+        Returns
+        -------
+        indices : int, array-like
+            The index for the given time instance. If the input was an array
+            like, a numpy array of indices is returned.
+        """
+        times = np.atleast_1d(value)
+        indices = np.zeros_like(times).astype(np.int)
+        for idx, time in enumerate(times):
+            indices[idx] = np.argmin(np.abs(self.times - time))
+        return np.squeeze(indices)
+
 
 class DataFreq(Audio):
     def __init__(self, comment, dtype):
         Audio.__init__(self, comment, dtype)
+
+    @property
+    def freq(self):
+        """The signal data in the frequency domain."""
+        self.domain = 'freq'
+        return self._data
+
+    @property
+    def frequencies(self):
+        """Frequencies of the discrete signal spectrum."""
+        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
+
+    @property
+    def n_bins(self):
+        """Number of frequency bins."""
+        return fft._n_bins(self.n_samples)
+
+    @freq.setter
+    def freq(self, value):
+        spec = np.atleast_2d(value)
+        new_num_bins = spec.shape[-1]
+        if new_num_bins == self.n_bins:
+            n_samples = self.n_samples
+        else:
+            warnings.warn("Number of frequency bins different will change, "
+                          "assuming an even number of samples from the number "
+                          "of frequency bins.")
+            n_samples = (new_num_bins - 1)*2
+
+        self._data = spec
+        self._n_samples = n_samples
+        self._domain = 'freq'
+
+    @property
+    def fft_norm(self):
+        """
+        The normalization for the Fourier Transform.
+
+        See pyfar.fft.normalization for more information.
+        """
+        return self._fft_norm
+
+    @fft_norm.setter
+    def fft_norm(self, value):
+        """
+        The normalization for the Fourier Transform.
+
+        See pyfar.fft.normalization for more information.
+        """
+        # check input
+        if value not in self._VALID_FFT_NORMS:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
+                              f"'{value}'"))
+
+        # apply new normalization if Signal is in frequency domain
+        if self._fft_norm != value and self._domain == 'freq':
+            # de-normalize
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                self._fft_norm, inverse=True)
+            # normalize
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                value, inverse=False)
+
+        self._fft_norm = value
+
+    def find_nearest_frequency(self, value):
+        """Returns the closest frequency index for a given frequency
+
+        Parameters
+        ----------
+        value : float, array-like
+            The frequency for which the indices are to be returned
+
+        Returns
+        -------
+        indices : int, array-like
+            The index for the given frequency. If the input was an array like,
+            a numpy array of indices is returned.
+        """
+        freqs = np.atleast_1d(value)
+        indices = np.zeros_like(freqs).astype(np.int)
+        for idx, freq in enumerate(freqs):
+            indices[idx] = np.argmin(np.abs(self.frequencies - freq))
+        return np.squeeze(indices)
 
 
 class Signal(DataTime, DataFreq):
@@ -225,80 +350,6 @@ class Signal(DataTime, DataFreq):
                     self._data, self.n_samples, self._sampling_rate,
                     self._fft_norm)
 
-    def find_nearest_frequency(self, value):
-        """Returns the closest frequency index for a given frequency
-
-        Parameters
-        ----------
-        value : float, array-like
-            The frequency for which the indices are to be returned
-
-        Returns
-        -------
-        indices : int, array-like
-            The index for the given frequency. If the input was an array like,
-            a numpy array of indices is returned.
-        """
-        freqs = np.atleast_1d(value)
-        indices = np.zeros_like(freqs).astype(np.int)
-        for idx, freq in enumerate(freqs):
-            indices[idx] = np.argmin(np.abs(self.frequencies - freq))
-        return np.squeeze(indices)
-
-    def find_nearest_time(self, value):
-        """Returns the closest time index for a given time
-        Parameters
-        ----------
-        value : float, array-like
-            The times for which the indices are to be returned
-
-        Returns
-        -------
-        indices : int, array-like
-            The index for the given time instance. If the input was an array
-            like, a numpy array of indices is returned.
-        """
-        times = np.atleast_1d(value)
-        indices = np.zeros_like(times).astype(np.int)
-        for idx, time in enumerate(times):
-            indices[idx] = np.argmin(np.abs(self.times - time))
-        return np.squeeze(indices)
-
-    @property
-    def time(self):
-        """The signal data in the time domain."""
-        self.domain = 'time'
-        return self._data
-
-    @time.setter
-    def time(self, value):
-        data = np.atleast_2d(value)
-        self._domain = 'time'
-        self._data = data
-        self._n_samples = data.shape[-1]
-
-    @property
-    def freq(self):
-        """The signal data in the frequency domain."""
-        self.domain = 'freq'
-        return self._data
-
-    @freq.setter
-    def freq(self, value):
-        spec = np.atleast_2d(value)
-        new_num_bins = spec.shape[-1]
-        if new_num_bins == self.n_bins:
-            n_samples = self.n_samples
-        else:
-            warnings.warn("Number of frequency bins different will change, "
-                          "assuming an even number of samples from the number "
-                          "of frequency bins.")
-            n_samples = (new_num_bins - 1)*2
-
-        self._data = spec
-        self._n_samples = n_samples
-        self._domain = 'freq'
-
     @property
     def sampling_rate(self):
         """The sampling rate of the signal."""
@@ -307,57 +358,6 @@ class Signal(DataTime, DataFreq):
     @sampling_rate.setter
     def sampling_rate(self, value):
         self._sampling_rate = value
-
-    @property
-    def signal_type(self):
-        """The signal type."""
-        if self.fft_norm == 'none':
-            stype = 'energy'
-        elif self.fft_norm in [
-                "unitary", "amplitude", "rms", "power", "psd"]:
-            stype = 'energy'
-        else:
-            raise ValueError("No valid fft norm set.")
-        return stype
-
-    @signal_type.setter
-    def signal_type(self, value):
-        raise DeprecationWarning("Deprecated, use fft_norm instead.")
-
-    @property
-    def fft_norm(self):
-        """
-        The normalization for the Fourier Transform.
-
-        See pyfar.fft.normalization for more information.
-        """
-        return self._fft_norm
-
-    @fft_norm.setter
-    def fft_norm(self, value):
-        """
-        The normalization for the Fourier Transform.
-
-        See pyfar.fft.normalization for more information.
-        """
-        # check input
-        if value not in self._VALID_FFT_NORMS:
-            raise ValueError(("Invalid FFT normalization. Has to be "
-                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
-                              f"'{value}'"))
-
-        # apply new normalization if Signal is in frequency domain
-        if self._fft_norm != value and self._domain == 'freq':
-            # de-normalize
-            self._data = fft.normalization(
-                self._data, self._n_samples, self._sampling_rate,
-                self._fft_norm, inverse=True)
-            # normalize
-            self._data = fft.normalization(
-                self._data, self._n_samples, self._sampling_rate,
-                value, inverse=False)
-
-        self._fft_norm = value
 
     @property
     def signal_length(self):
