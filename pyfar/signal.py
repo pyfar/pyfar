@@ -19,8 +19,9 @@ from . import utils
 class Audio(object):
     """Abstract class for audio objects."""
 
-    def __init__(self):
-        """TODO: to be defined1. """
+    def __init__(self, comment=None, dtype=np.double):
+        self.comment = comment
+        self._dtype = dtype
 
     @property
     def domain(self):
@@ -112,7 +113,17 @@ class Audio(object):
                     "Index must be int, not {}".format(type(key).__name__))
 
 
-class Signal(Audio):
+class DataTime(Audio):
+    def __init__(self, comment, dtype):
+        Audio.__init__(self, comment, dtype)
+
+
+class DataFreq(Audio):
+    def __init__(self, comment, dtype):
+        Audio.__init__(self, comment, dtype)
+
+
+class Signal(DataTime, DataFreq):
     """Class for audio signals.
 
     Objects of this class contain data which is directly convertable between
@@ -159,9 +170,8 @@ class Signal(Audio):
                Austria, May 2020, p. e-Brief 600.
         """
 
-        Audio.__init__(self)
+        DataTime.__init__(self, comment, dtype)
         self._sampling_rate = sampling_rate
-        self._dtype = dtype
 
         self._VALID_SIGNAL_TYPE = ["power", "energy"]
 
@@ -194,8 +204,6 @@ class Signal(Audio):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{fft_norm}'"))
-
-        self._comment = comment
 
     @Audio.domain.setter
     def domain(self, new_domain):

@@ -22,7 +22,7 @@ def test_signal_init_default_parameter(impulse_list):
     signal = Signal(impulse_list, 44100)
     assert signal.domain == 'time'
     assert signal.fft_norm == 'none'
-    assert signal.comment is None
+    assert signal.comment == 'None'
 
     # default of fft_norm depending on signal type
     signal = Signal(impulse_list, 44100)
