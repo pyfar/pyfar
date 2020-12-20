@@ -133,7 +133,7 @@ def _return_default_colors_rgb(**kwargs):
     return kwargs
 
 
-def _time(signal, dB=False, log_prefix=20, log_reference=1,
+def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
           ax=None, **kwargs):
     """Plot the time logairhmic data of a signal."""
 
@@ -152,19 +152,34 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1,
         ymin = ymax - 90
         ymax = ymax + 10
 
+    # auto detect the time unit
+    if unit is None:
+        unit = _time_auto_unit(signal.times[..., -1])
+    # set the unit
+    if unit == 's':
+        times = signal.times.T
+    elif unit == 'ms':
+        times = signal.times.T * 1e3
+    elif unit == 'mus':
+        times = signal.times.T * 1e6
+        unit = 'micro s'
+    else:
+        times = np.arange(signal.times.size)
+        unit = 'samples'
+
     # prepare figure
     _, ax = _prepare_plot(ax)
-    ax.set_xlabel("Time in s")
+    ax.set_xlabel(f"Time in {unit}")
     if dB:
         ax.set_ylabel("Amplitude in dB")
         _set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
     else:
         ax.set_ylabel("Amplitude")
-    _set_axlim(ax, ax.set_xlim, signal.times[0], signal.times[-1],
+    _set_axlim(ax, ax.set_xlim, times[0], times[-1],
                ax.get_xlim())
 
     # plot data
-    ax.plot(signal.times, data, **kwargs)
+    ax.plot(times, data, **kwargs)
     plt.tight_layout()
 
     return ax
@@ -288,7 +303,7 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     data = dsp.group_delay(signal)
     # auto detect the unit
     if unit is None:
-        unit = _group_delay_auto_unit(
+        unit = _time_auto_unit(
             np.nanmax(np.abs(data) / signal.sampling_rate))
     # set the unit
     if unit == 's':
@@ -324,24 +339,24 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     return ax
 
 
-def _group_delay_auto_unit(gd_max):
+def _time_auto_unit(time_max):
     """
-    Automatically set the unit for the group delay plot according to the
-    absolute maximum of the input data. This is a separate function for ease of
-    testing.
+    Automatically set the unit for time axis according to the absolute maximum
+    of the input data. This is a separate function for ease of testing and for
+    use across different plots.
 
     Parameters
     ----------
 
-    gd_max : float
-        Absolute maximum of the group delay in seconds
+    time_max : float
+        Absolute maximum of the time data in seconds
     """
 
-    if gd_max == 0:
+    if time_max == 0:
         unit = 's'
-    elif gd_max < 1e-3:
+    elif time_max < 1e-3:
         unit = 'mus'
-    elif gd_max < 1:
+    elif time_max < 1:
         unit = 'ms'
     else:
         unit = 's'
@@ -454,7 +469,7 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
-               log_reference=1, xscale='log', ax=None, **kwargs):
+               log_reference=1, xscale='log', unit=None, ax=None, **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
@@ -465,7 +480,7 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)
 
-    _time(signal, dB_time, log_prefix, log_reference, ax[0], **kwargs)
+    _time(signal, dB_time, log_prefix, log_reference, unit, ax[0], **kwargs)
     _freq(signal, dB_freq, log_prefix, log_reference, xscale, ax[1], **kwargs)
     fig.align_ylabels()
     plt.tight_layout()
