@@ -22,6 +22,95 @@ class Audio(object):
     def __init__(self):
         """TODO: to be defined1. """
 
+    @property
+    def domain(self):
+        """The domain the data is stored in"""
+        return self._domain
+
+    @property
+    def n_samples(self):
+        """Number of samples."""
+        return self._n_samples
+
+    @property
+    def n_bins(self):
+        """Number of frequency bins."""
+        return fft._n_bins(self.n_samples)
+
+    @property
+    def frequencies(self):
+        """Frequencies of the discrete signal spectrum."""
+        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
+
+    @property
+    def times(self):
+        """Time instances the signal is sampled at."""
+        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
+
+    @property
+    def dtype(self):
+        """The data type of the signal. This can be any data type and precision
+        supported by numpy."""
+        return self._dtype
+
+    @property
+    def cshape(self):
+        """
+        Return channel shape.
+
+        The channel shape gives the shape of the signal data excluding the last
+        dimension, which is `self.n_samples` for time domain signals and
+        `self.n_bins` for frequency domain signals.
+        """
+        return self._data.shape[:-1]
+
+    @property
+    def comment(self):
+        """Get comment."""
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        """Set comment."""
+        self._comment = str(value)
+
+    def copy(self):
+        """Return a deep copy of the Signal object."""
+        return utils.copy(self)
+
+    def __getitem__(self, key):
+        """Get signal channels at key.
+        """
+        if isinstance(key, (int, slice, tuple)):
+            try:
+                data = self._data[key]
+            except KeyError:
+                raise KeyError("Index is out of bounds")
+        else:
+            raise TypeError(
+                    "Index must be int, not {}".format(type(key).__name__))
+        items = Signal(
+            data,
+            sampling_rate=self.sampling_rate,
+            domain=self.domain,
+            fft_norm=self.fft_norm,
+            dtype=self.dtype)
+
+        return items
+
+    def __setitem__(self, key, value):
+        """Set signal channels at key.
+        """
+        self._assert_matching_meta_data(value)
+        if isinstance(key, (int, slice)):
+            try:
+                self._data[key] = value._data
+            except KeyError:
+                raise KeyError("Index is out of bound")
+        else:
+            raise TypeError(
+                    "Index must be int, not {}".format(type(key).__name__))
+
 
 class Signal(Audio):
     """Class for audio signals.
@@ -108,12 +197,7 @@ class Signal(Audio):
 
         self._comment = comment
 
-    @property
-    def domain(self):
-        """The domain the data is stored in"""
-        return self._domain
-
-    @domain.setter
+    @Audio.domain.setter
     def domain(self, new_domain):
         if new_domain not in self._VALID_SIGNAL_DOMAIN:
             raise ValueError("Incorrect domain, needs to be time/freq.")
@@ -132,26 +216,6 @@ class Signal(Audio):
                 self.freq = fft.rfft(
                     self._data, self.n_samples, self._sampling_rate,
                     self._fft_norm)
-
-    @property
-    def n_samples(self):
-        """Number of samples."""
-        return self._n_samples
-
-    @property
-    def n_bins(self):
-        """Number of frequency bins."""
-        return fft._n_bins(self.n_samples)
-
-    @property
-    def frequencies(self):
-        """Frequencies of the discrete signal spectrum."""
-        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
-
-    @property
-    def times(self):
-        """Time instances the signal is sampled at."""
-        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
 
     def find_nearest_frequency(self, value):
         """Returns the closest frequency index for a given frequency
@@ -288,40 +352,9 @@ class Signal(Audio):
         self._fft_norm = value
 
     @property
-    def dtype(self):
-        """The data type of the signal. This can be any data type and precision
-        supported by numpy."""
-        return self._dtype
-
-    @property
     def signal_length(self):
         """The length of the signal in seconds."""
         return (self.n_samples - 1) / self.sampling_rate
-
-    @property
-    def cshape(self):
-        """
-        Return channel shape.
-
-        The channel shape gives the shape of the signal data excluding the last
-        dimension, which is `self.n_samples` for time domain signals and
-        `self.n_bins` for frequency domain signals.
-        """
-        return self._data.shape[:-1]
-
-    @property
-    def comment(self):
-        """Get comment."""
-        return self._comment
-
-    @comment.setter
-    def comment(self, value):
-        """Set comment."""
-        self._comment = str(value)
-
-    def copy(self):
-        """Return a deep copy of the Signal object."""
-        return utils.copy(self)
 
     def __add__(self, data):
         return add((self, data), 'freq')
@@ -348,39 +381,6 @@ class Signal(Audio):
             "FFT normalization\n")
 
         return repr_string
-
-    def __getitem__(self, key):
-        """Get signal channels at key.
-        """
-        if isinstance(key, (int, slice, tuple)):
-            try:
-                data = self._data[key]
-            except KeyError:
-                raise KeyError("Index is out of bounds")
-        else:
-            raise TypeError(
-                    "Index must be int, not {}".format(type(key).__name__))
-        items = Signal(
-            data,
-            sampling_rate=self.sampling_rate,
-            domain=self.domain,
-            fft_norm=self.fft_norm,
-            dtype=self.dtype)
-
-        return items
-
-    def __setitem__(self, key, value):
-        """Set signal channels at key.
-        """
-        self._assert_matching_meta_data(value)
-        if isinstance(key, (int, slice)):
-            try:
-                self._data[key] = value._data
-            except KeyError:
-                raise KeyError("Index is out of bound")
-        else:
-            raise TypeError(
-                    "Index must be int, not {}".format(type(key).__name__))
 
     def __len__(self):
         """Length of the object which is the number of samples stored.
