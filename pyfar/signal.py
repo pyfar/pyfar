@@ -19,14 +19,35 @@ from . import utils
 class Audio(object):
     """Abstract class for audio objects."""
 
-    def __init__(self, comment=None, dtype=np.double):
+    def __init__(self, domain, comment=None, dtype=np.double):
+
+        # initalize valid parameter spaces
+        # NOTE: They are note needed by DataTime but would have to be defined
+        #       DataFreq and Signal if we would not define them here.
+        self._VALID_SIGNAL_TYPE = ["power", "energy"]
+        self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
+        self._VALID_FFT_NORMS = [
+            "none", "unitary", "amplitude", "rms", "power", "psd"]
+
+        # initialize global parameters
         self.comment = comment
         self._dtype = dtype
+        if domain in self._VALID_SIGNAL_DOMAIN:
+            self._domain = domain
+        else:
+            raise ValueError("Incorrect domain, needs to be time/freq.")
 
     @property
     def domain(self):
         """The domain the data is stored in"""
         return self._domain
+
+    @domain.setter
+    def domain(self, new_domain):
+        if new_domain not in self._VALID_SIGNAL_DOMAIN:
+            raise ValueError("Incorrect domain, needs to be time/freq.")
+
+        self._domain = new_domain
 
     @property
     def signal_type(self):
@@ -110,8 +131,19 @@ class Audio(object):
 
 
 class DataTime(Audio):
-    def __init__(self, comment, dtype):
-        Audio.__init__(self, comment, dtype)
+    def __init__(self, data, times, comment, dtype):
+
+        Audio.__init__(self, 'time', comment, dtype)
+
+        # init data and meta data
+        self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+
+        self._n_samples = self._data.shape[-1]
+
+        self._times = np.atleast_1d(times.flatten())
+        if times.size != self.n_samples:
+            raise ValueError(
+                "The number of samples must be data.shape[-1]")
 
     @property
     def time(self):
@@ -134,7 +166,7 @@ class DataTime(Audio):
     @property
     def times(self):
         """Time instances the signal is sampled at."""
-        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
+        return self._times
 
     def find_nearest_time(self, value):
         """Returns the closest time index for a given time
@@ -157,8 +189,27 @@ class DataTime(Audio):
 
 
 class DataFreq(Audio):
-    def __init__(self, comment, dtype):
-        Audio.__init__(self, comment, dtype)
+    def __init__(self, data, frequencies, fft_norm, comment, dtype):
+
+        Audio.__init__(self, 'freq', comment, dtype)
+
+        # init data
+        self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+
+        # init frequencies
+        self._frequencies = np.atleast_1d(frequencies.flatten())
+        if frequencies.size != self.n_bins:
+            raise ValueError(
+                "The number of freqencies must be data.shape[-1]")
+
+        if fft_norm is None:
+            fft_norm = 'none'
+        if fft_norm in self._VALID_FFT_NORMS:
+            self._fft_norm = fft_norm
+        else:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
+                              f"'{fft_norm}'"))
 
     @property
     def freq(self):
@@ -169,12 +220,12 @@ class DataFreq(Audio):
     @property
     def frequencies(self):
         """Frequencies of the discrete signal spectrum."""
-        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
+        return self._frequencies
 
     @property
     def n_bins(self):
         """Number of frequency bins."""
-        return fft._n_bins(self.n_samples)
+        return self._data.shape[-1]
 
     @freq.setter
     def freq(self, value):
@@ -248,7 +299,7 @@ class DataFreq(Audio):
         return np.squeeze(indices)
 
 
-class Signal(DataTime, DataFreq):
+class Signal(DataFreq, DataTime):
     """Class for audio signals.
 
     Objects of this class contain data which is directly convertable between
@@ -295,40 +346,45 @@ class Signal(DataTime, DataFreq):
                Austria, May 2020, p. e-Brief 600.
         """
 
-        DataTime.__init__(self, comment, dtype)
+        # initialze global parameter and valid parameter spaces
+        Audio.__init__(self, domain, comment, dtype)
+
+        # initialize signal specific parameters
         self._sampling_rate = sampling_rate
 
-        self._VALID_SIGNAL_TYPE = ["power", "energy"]
-
-        self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
-        if domain in self._VALID_SIGNAL_DOMAIN:
-            self._domain = domain
-        else:
-            raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
-
+        # initialize domain specific parameters
         if domain == 'time':
             self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
             self._n_samples = self._data.shape[-1]
+
+            if fft_norm is None:
+                fft_norm = 'none'
+            if fft_norm in self._VALID_FFT_NORMS:
+                self._fft_norm = fft_norm
+            else:
+                raise ValueError(("Invalid FFT normalization. Has to be "
+                                  f"{', '.join(self._VALID_FFT_NORMS)}, but "
+                                  f"found '{fft_norm}'"))
+
+            DataTime.__init__(self, data, self.times, comment, dtype)
         elif domain == 'freq':
+            self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+
+            n_bins = data.shape[-1]
             if n_samples is None:
                 warnings.warn(
                     "Number of time samples not given, assuming an even "
                     "number of samples from the number of frequency bins.")
-                n_bins = data.shape[-1]
                 n_samples = (n_bins - 1)*2
+            elif n_samples > 2 * n_bins - 1:
+                raise ValueError(("n_samples can not be larger than "
+                                  "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
-            self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
-        self._VALID_FFT_NORMS = [
-            "none", "unitary", "amplitude", "rms", "power", "psd"]
-        if fft_norm is None:
-            fft_norm = 'none'
-        if fft_norm in self._VALID_FFT_NORMS:
-            self._fft_norm = fft_norm
+            DataFreq.__init__(self, data, self.frequencies, fft_norm, comment,
+                              dtype)
         else:
-            raise ValueError(("Invalid FFT normalization. Has to be "
-                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
-                              f"'{fft_norm}'"))
+            raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
     @Audio.domain.setter
     def domain(self, new_domain):
@@ -358,6 +414,21 @@ class Signal(DataTime, DataFreq):
     @sampling_rate.setter
     def sampling_rate(self, value):
         self._sampling_rate = value
+
+    @property
+    def times(self):
+        """Time instances the signal is sampled at."""
+        return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
+
+    @property
+    def frequencies(self):
+        """Frequencies of the discrete signal spectrum."""
+        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
+
+    @property
+    def n_bins(self):
+        """Number of frequency bins."""
+        return fft._n_bins(self.n_samples)
 
     @property
     def signal_length(self):
