@@ -370,7 +370,7 @@ class Signal(DataFreq, DataTime):
         elif domain == 'freq':
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
-            n_bins = data.shape[-1]
+            n_bins = self._data.shape[-1]
             if n_samples is None:
                 warnings.warn(
                     "Number of time samples not given, assuming an even "

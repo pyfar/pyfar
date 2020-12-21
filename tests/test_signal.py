@@ -16,6 +16,9 @@ def test_signal_init_list(impulse_list):
     signal = Signal(impulse_list, 44100, domain='time')
     assert isinstance(signal, Signal)
 
+    signal = Signal(impulse_list, 44100, domain='freq')
+    assert isinstance(signal, Signal)
+
 
 def test_signal_init_default_parameter(impulse_list):
     # using all defaults
