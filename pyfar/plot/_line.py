@@ -162,7 +162,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
         times = signal.times.T * 1e3
     elif unit == 'mus':
         times = signal.times.T * 1e6
-        unit = 'micro s'
+        unit = '$\mathrm{\mu s}$'
     else:
         times = np.arange(signal.times.size)
         unit = 'samples'
@@ -312,7 +312,7 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
         data = data / signal.sampling_rate * 1e3
     elif unit == 'mus':
         data = data / signal.sampling_rate * 1e6
-        unit = 'micro s'
+        unit = '$\mathrm{\mu s}$'
 
     # prepare figure
     _, ax = _prepare_plot(ax)
