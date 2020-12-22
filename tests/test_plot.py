@@ -10,7 +10,7 @@ import pyfar.plot as plot
 from pyfar import Signal
 
 # flag for creating new baseline plots (required if the plot look changed)
-create_baseline = True
+create_baseline = False
 
 # path handling
 base_path = os.path.join('tests', 'test_plot_data')
