@@ -346,12 +346,16 @@ def test_find_nearest_frequency():
 
 def test_reshape():
 
-    # test reshape
-    x = np.random.rand(6, 256)
-    signal_in = Signal(x, 44100)
+    # test reshape with tuple
+    signal_in = Signal(np.random.rand(6, 256), 44100)
     signal_out = signal_in.reshape((3, 2))
-
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    # test reshape with int
+    signal_in = Signal(np.random.rand(3, 2, 256), 44100)
+    signal_out = signal_in.reshape(6)
+    npt.assert_allclose(signal_in._data.reshape(6, -1), signal_out._data)
     assert id(signal_in) != id(signal_out)
 
     # test assertion for non-tuple input
