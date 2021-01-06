@@ -712,16 +712,9 @@ class Interaction(object):
         # clear old text
         self.delete_current_channel_text()
 
-        # position for new text
-        x_lim = self.ax.get_xlim()
-        y_lim = self.ax.get_ylim()
-        x_range = x_lim[1] - x_lim[0]
-        y_range = y_lim[1] - y_lim[0]
-        if self.params.x_type == 'freq':
-            x_pos = x_lim[1] - .075 * x_range
-        else:
-            x_pos = x_lim[1] - .015 * x_range
-        y_pos = y_lim[0] + .025 * y_range
+        # position for new text (relative to axis)
+        x_pos = .98
+        y_pos = .02
 
         # write new text
         with plt.style.context(utils.plotstyle(self.style)):
@@ -731,7 +724,7 @@ class Interaction(object):
             self.txt = self.ax.text(
                 x_pos, y_pos, f'Ch. {self.cycler.index}',
                 horizontalalignment='right', verticalalignment='baseline',
-                bbox=bbox)
+                bbox=bbox, transform=self.ax.transAxes)
 
             self.draw_canvas()
 
