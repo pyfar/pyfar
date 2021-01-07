@@ -513,14 +513,12 @@ def test_impulse_mock(impulse_mock):
     n_samples = 1000
     sampling_rate = 2000
     amplitude = 1
-    signal_type = 'energy'
 
     signal = np.atleast_2d(np.zeros(n_samples, dtype=np.double))
     signal[:, 0] = amplitude
 
     assert impulse_mock.sampling_rate == sampling_rate
     assert impulse_mock.cshape == (1,)
-    assert impulse_mock.signal_type == signal_type
     npt.assert_allclose(impulse_mock.time, signal)
 
 
@@ -535,7 +533,6 @@ def impulse_mock():
     n_samples = 1000
     sampling_rate = 2000
     amplitude = 1
-    signal_type = 'energy'
     cshape = (1,)
     domain = 'time'
 
@@ -544,11 +541,10 @@ def impulse_mock():
 
     # create a mock object of Signal class to test independently
     signal_object = mock.Mock(
-        spec_set=Signal(signal, sampling_rate, n_samples, domain, signal_type))
+        spec_set=Signal(signal, sampling_rate, n_samples, domain))
     signal_object.time = np.atleast_2d(signal)
     signal_object.sampling_rate = sampling_rate
     signal_object.domain = domain
-    signal_object.signal_type = signal_type
     signal_object.cshape = cshape
 
     return signal_object

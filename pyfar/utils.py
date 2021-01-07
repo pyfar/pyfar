@@ -1,4 +1,8 @@
+"""
+Provide methods used by several Classes.
+"""
 import numpy as np
+from copy import deepcopy
 
 
 def _eq___dict__(obj, other):
@@ -12,3 +16,8 @@ def _eq___dict__(obj, other):
         elif other.__dict__[key] != value:
             return False
     return True
+
+
+def copy(obj):
+    """Return a deep copy of the object."""
+    return deepcopy(obj)

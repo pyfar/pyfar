@@ -4,6 +4,7 @@ from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
 import copy
 import re
+from . import utils
 
 import pyfar
 
@@ -1134,6 +1135,10 @@ class Coordinates(object):
         self.set_cart(points[:, 0].reshape(shape),
                       points[:, 1].reshape(shape),
                       points[:, 2].reshape(shape))
+
+    def copy(self):
+        """Return a deep copy of the Coordinates object."""
+        return utils.copy(self)
 
     @staticmethod
     def _systems():
