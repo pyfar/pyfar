@@ -143,9 +143,9 @@ class Orientations(Rotation):
 
         """
         if positions is None:
-            positions = np.zeros((self._quat.shape[0], 3))
+            positions = np.zeros((self.as_quat().shape[0], 3))
         positions = np.atleast_2d(positions).astype(np.float64)
-        if positions.shape[0] != self._quat.shape[0]:
+        if positions.shape[0] != self.as_quat().shape[0]:
             raise ValueError("If provided, there must be the same number"
                              "of positions as orientations.")
 
@@ -203,10 +203,12 @@ class Orientations(Rotation):
         idx : see NumPy Indexing
         val : array_like quaternion(s), shape (N, 4) or (4,)
         """
-        if isinstance(val, Orientations) and len(val) == 1:
-            val = val[0].as_quat()
+        if isinstance(val, Orientations):
+            val = val.as_quat()
         quat = np.atleast_2d(val)
         if quat.ndim > 2 or quat.shape[-1] != 4:
             raise ValueError(f"Expected assigned value to have shape"
                              f" or (1, 4), got {quat.shape}")
-        self._quat[idx] = quat
+        quats = self.as_quat()
+        quats[idx] = quat
+        self = super().from_quat(quats)
