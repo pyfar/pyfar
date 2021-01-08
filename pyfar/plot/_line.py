@@ -156,16 +156,11 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     if unit is None:
         unit = _time_auto_unit(signal.times[..., -1])
     # set the unit
-    if unit == 's':
-        times = signal.times.T
-    elif unit == 'ms':
-        times = signal.times.T * 1e3
-    elif unit == 'mus':
-        times = signal.times.T * 1e6
-        unit = r'$\mathrm{\mu s}$'
+    if unit == 'samples':
+        times = np.arange(signal.n_samples)
     else:
-        times = np.arange(signal.times.size)
-        unit = 'samples'
+        factor, unit = _deal_time_units(unit)
+        times = signal.times * factor
 
     # prepare figure
     _, ax = _prepare_plot(ax)
@@ -306,13 +301,9 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
         unit = _time_auto_unit(
             np.nanmax(np.abs(data) / signal.sampling_rate))
     # set the unit
-    if unit == 's':
-        data = data / signal.sampling_rate
-    elif unit == 'ms':
-        data = data / signal.sampling_rate * 1e3
-    elif unit == 'mus':
-        data = data / signal.sampling_rate * 1e6
-        unit = r'$\mathrm{\mu s}$'
+    else:
+        factor, unit = _deal_time_units(unit)
+        data = data / signal.sampling_rate * factor
 
     # prepare figure
     _, ax = _prepare_plot(ax)
@@ -362,6 +353,40 @@ def _time_auto_unit(time_max):
         unit = 's'
 
     return unit
+
+
+def _deal_time_units(unit='s'):
+    """Return scaling factor and string representation for unit multiplier
+    modifications.
+
+    Parameters
+    ----------
+    unit : 'str'
+        The unit to be used
+
+    Returns
+    -------
+    factor : float
+        Factor the data is to be multiplied with, i.e. 1e-3 for milliseconds
+    string : str
+        String representation of the unit using LaTeX formatting.
+    """
+    if unit == 's':
+        factor = 1
+        string = 's'
+    elif unit == 'ms':
+        factor = 1e-3
+        string = 'ms'
+    elif unit == 'mus':
+        factor = 1e-6
+        string = r'$\mathrm{\mu s}$'
+    elif unit == 'samples':
+        factor = 1
+        string = 'samples'
+    else:
+        factor = 1
+        string = ''
+    return factor, string
 
 
 def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
