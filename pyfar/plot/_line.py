@@ -301,7 +301,7 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
         unit = _time_auto_unit(
             np.nanmax(np.abs(data) / signal.sampling_rate))
     # set the unit
-    else:
+    if unit != "samples":
         factor, unit = _deal_time_units(unit)
         data = data / signal.sampling_rate * factor
 
@@ -375,10 +375,10 @@ def _deal_time_units(unit='s'):
         factor = 1
         string = 's'
     elif unit == 'ms':
-        factor = 1e-3
+        factor = 1 / 1e-3
         string = 'ms'
     elif unit == 'mus':
-        factor = 1e-6
+        factor = 1 / 1e-6
         string = r'$\mathrm{\mu s}$'
     elif unit == 'samples':
         factor = 1
