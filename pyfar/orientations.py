@@ -1,6 +1,5 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
-from . import utils
 
 import pyfar
 
@@ -86,8 +85,8 @@ class Orientations(Rotation):
         views = np.atleast_2d(views).astype(np.float64)
         ups = np.atleast_2d(ups).astype(np.float64)
 
-        if (views.ndim > 2 or views.shape[-1] != 3
-                or ups.ndim > 2 or ups.shape[-1] != 3):
+        if (views.ndim > 2 or views.shape[-1] != 3 or
+                ups.ndim > 2 or ups.shape[-1] != 3):
             raise ValueError(f"Expected `views` and `ups` to have shape (N, 3)"
                              f" or (3,), got {views.shape}")
         if views.shape == ups.shape:
@@ -100,8 +99,8 @@ class Orientations(Rotation):
             raise ValueError("Expected 1:1, 1:N or N:1 `views` and `ups` "
                              f"not M:N, got {views.shape} and {ups.shape}")
 
-        if not (np.all(np.linalg.norm(views, axis=1))
-                and np.all(np.linalg.norm(ups, axis=1))):
+        if not (np.all(np.linalg.norm(views, axis=1)) and
+                np.all(np.linalg.norm(ups, axis=1))):
             raise ValueError("View and Up Vectors must have a length.")
         if not np.allclose(0, np.einsum('ij,kj->k', views, ups)):
             raise ValueError("View and Up vectors must be perpendicular.")
@@ -192,7 +191,7 @@ class Orientations(Rotation):
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
-        return utils.copy(self)
+        return self.from_quat(self.as_quat())
 
     def __setitem__(self, idx, val):
         """
