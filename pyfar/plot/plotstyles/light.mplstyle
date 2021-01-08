@@ -20,7 +20,6 @@ font.style          : normal
 font.variant        : normal
 font.weight         : normal
 font.stretch        : normal
-font.size           : 9.0
 font.sans-serif     : DejaVu Sans, Arial, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Avant Garde, sans-serif
 mathtext.fontset    : dejavusans
 
@@ -33,9 +32,7 @@ text.color          : [.2,.2,.2]
 axes.facecolor      : white        ## axes background color
 axes.edgecolor      : [.2,.2,.2]   ## axes edge color
 axes.grid           : True         ## display grid or not
-axes.titlesize      : 10           ## fontsize of the axes title
 axes.titleweight    : bold         ## font weight of title
-axes.labelsize      : 10           ## fontsize of the x any y labels
 axes.labelcolor     : [.2,.2,.2]
 # colors from palettable.cartocolors.qualitative.Prism_8
 # slightly changed colors to work with dark and light theme
@@ -48,12 +45,10 @@ axes.prop_cycle     : cycler('color', ['1471B9','D83C27','ECAD20','5F4690','0785
 ## see http://matplotlib.org/api/axis_api.html#matplotlib.axis.Tick
 xtick.bottom         : False        ## draw ticks on the bottom side
 xtick.color          : [.2,.2,.2]   ## color of the tick labels
-xtick.labelsize      : 10           ## fontsize of the tick labels
 
 
 ytick.left           : False        ## draw ticks on the left side
 ytick.color          : [.2,.2,.2]   ## color of the tick labels
-ytick.labelsize      : 10           ## fontsize of the tick labels
 
 
 #### GRIDS
