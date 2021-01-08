@@ -333,16 +333,20 @@ class Signal(Audio):
         # check input
         if not isinstance(newshape, int) and not isinstance(newshape, tuple):
             raise ValueError("newshape must be an integer or tuple")
-        if np.prod(newshape) != np.prod(self.cshape):
-            raise ValueError((f"Can not reshape signal of cshape "
-                              f"{self.cshape} to {newshape}"))
 
         if isinstance(newshape, int):
             newshape = (newshape, )
 
         # reshape
         reshaped = utils.copy(self)
-        reshaped._data = reshaped._data.reshape(newshape + (-1, ))
+        length_last_dimension = reshaped._data.shape[-1]
+        try:
+            reshaped._data = reshaped._data.reshape(
+                newshape + (length_last_dimension, ))
+        except ValueError:
+            if np.prod(newshape) != np.prod(self.cshape):
+                raise ValueError((f"Can not reshape signal of cshape "
+                                  f"{self.cshape} to {newshape}"))
 
         return reshaped
 

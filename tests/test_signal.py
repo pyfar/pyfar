@@ -352,18 +352,27 @@ def test_reshape():
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     assert id(signal_in) != id(signal_out)
 
+    signal_out = signal_in.reshape((3, -1))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
     # test reshape with int
     signal_in = Signal(np.random.rand(3, 2, 256), 44100)
     signal_out = signal_in.reshape(6)
     npt.assert_allclose(signal_in._data.reshape(6, -1), signal_out._data)
     assert id(signal_in) != id(signal_out)
 
+
+def test_reshape_exceptions():
+    signal_in = Signal(np.random.rand(6, 256), 44100)
+    signal_out = signal_in.reshape((3, 2))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     # test assertion for non-tuple input
     with pytest.raises(ValueError):
         signal_out = signal_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Can not reshape signal of cshape'):
         signal_out = signal_in.reshape((3, 4))
 
 
