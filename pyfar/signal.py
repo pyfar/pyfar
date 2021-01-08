@@ -316,8 +316,9 @@ class Signal(Audio):
         Parameters
         ----------
         newshape : int, tuple
-            new cshape of the signal. `np.prod(newshape)` must equal
-            `np.prod(signal.cshape)`.
+            new cshape of the signal. One entry of newshape dimension can be
+            -1. In this case, the value is inferred from the remaining
+            dimensions.
 
         Returns
         -------
