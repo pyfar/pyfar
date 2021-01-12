@@ -23,7 +23,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
         Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
         Reference for calculating the logarithmic time data. The default is 1.
-    unit : str
+    unit : str, None
         Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
         The default is None, which sets the unit to 's' (seconds), 'ms'
         (milli seconds), or 'mus' (micro seconds) depending on the maximum.
@@ -168,7 +168,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     ----------
     signal : Signal
         pyfar Signal object.
-    unit : str
+    unit : str, None
         Unit of the group delay. Can be 's', 'ms', 'mus', or 'samples'.
         The default is None, which sets the unit to 's' (seconds), 'ms'
         (milli seconds), or 'mus' (micro seconds) depending on the maximum.
