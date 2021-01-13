@@ -124,7 +124,7 @@ class Audio(object):
 
 
 class DataTime(Audio):
-    def __init__(self, data, times, comment, dtype):
+    def __init__(self, data, times, comment=None, dtype=np.double):
 
         Audio.__init__(self, 'time', comment, dtype)
 
@@ -133,20 +133,27 @@ class DataTime(Audio):
 
         self._n_samples = self._data.shape[-1]
 
-        self._times = np.atleast_1d(times.flatten())
-        if times.size != self.n_samples:
+        self._times = np.atleast_1d(np.asarray(times).flatten())
+        if self._times.size != self.n_samples:
             raise ValueError(
-                "The number of samples must be data.shape[-1]")
+                "The length of times must be data.shape[-1]")
+        if np.any(np.diff(self._times)) <= 0 and len(times) > 1:
+            raise ValueError("Times must be monotonously increasing.")
 
     @property
     def time(self):
-        """The signal data in the time domain."""
-        self.domain = 'time'
+        """The data in the time domain."""
+        if isinstance(self, Signal):
+            # the setter also converts the data from 'freq' to 'time'
+            self.domain = 'time'
+        else:
+            # this only changes the class internal variable
+            self._domain = 'time'
         return self._data
 
     @time.setter
     def time(self, value):
-        data = np.atleast_2d(value)
+        data = np.atleast_2d(np.asarray(value))
         self._domain = 'time'
         self._data = data
         self._n_samples = data.shape[-1]
@@ -155,6 +162,11 @@ class DataTime(Audio):
     def n_samples(self):
         """Number of samples."""
         return self._n_samples
+
+    @property
+    def signal_length(self):
+        """The length of the signal in seconds."""
+        return self.times[-1]
 
     @property
     def times(self):
@@ -182,7 +194,8 @@ class DataTime(Audio):
 
 
 class DataFrequency(Audio):
-    def __init__(self, data, frequencies, fft_norm, comment, dtype):
+    def __init__(self, data, frequencies, fft_norm=None, comment=None,
+                 dtype=np.double):
 
         Audio.__init__(self, 'freq', comment, dtype)
 
@@ -190,8 +203,8 @@ class DataFrequency(Audio):
         self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
         # init frequencies
-        self._frequencies = np.atleast_1d(frequencies.flatten())
-        if frequencies.size != self.n_bins:
+        self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
+        if self._frequencies.size != self.n_bins:
             raise ValueError(
                 "The number of freqencies must be data.shape[-1]")
 
@@ -206,8 +219,13 @@ class DataFrequency(Audio):
 
     @property
     def freq(self):
-        """The signal data in the frequency domain."""
-        self.domain = 'freq'
+        """The data in the frequency domain."""
+        if isinstance(self, Signal):
+            # the setter also converts the data from 'time' to 'freq'
+            self.domain = 'freq'
+        else:
+            # this only changes the class internal variable
+            self._domain = 'freq'
         return self._data
 
     @property
@@ -222,19 +240,21 @@ class DataFrequency(Audio):
 
     @freq.setter
     def freq(self, value):
-        spec = np.atleast_2d(value)
+        spec = np.atleast_2d(np.atleast_2d(value))
         new_num_bins = spec.shape[-1]
-        if new_num_bins == self.n_bins:
-            n_samples = self.n_samples
-        else:
-            warnings.warn("Number of frequency bins different will change, "
-                          "assuming an even number of samples from the number "
-                          "of frequency bins.")
-            n_samples = (new_num_bins - 1)*2
-
         self._data = spec
-        self._n_samples = n_samples
         self._domain = 'freq'
+
+        # also set n_samples in case of a Signal object
+        if isinstance(self, Signal):
+            if new_num_bins == self.n_bins:
+                n_samples = self.n_samples
+            else:
+                warnings.warn(
+                    "Number of frequency bins changed, assuming an even "
+                    "number of samples from the number of frequency bins.")
+                n_samples = (new_num_bins - 1)*2
+            self._n_samples = n_samples
 
     @property
     def fft_norm(self):
@@ -244,32 +264,6 @@ class DataFrequency(Audio):
         See pyfar.fft.normalization for more information.
         """
         return self._fft_norm
-
-    @fft_norm.setter
-    def fft_norm(self, value):
-        """
-        The normalization for the Fourier Transform.
-
-        See pyfar.fft.normalization for more information.
-        """
-        # check input
-        if value not in self._VALID_FFT_NORMS:
-            raise ValueError(("Invalid FFT normalization. Has to be "
-                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
-                              f"'{value}'"))
-
-        # apply new normalization if Signal is in frequency domain
-        if self._fft_norm != value and self._domain == 'freq':
-            # de-normalize
-            self._data = fft.normalization(
-                self._data, self._n_samples, self._sampling_rate,
-                self._fft_norm, inverse=True)
-            # normalize
-            self._data = fft.normalization(
-                self._data, self._n_samples, self._sampling_rate,
-                value, inverse=False)
-
-        self._fft_norm = value
 
     def find_nearest_frequency(self, value):
         """Returns the closest frequency index for a given frequency
@@ -423,10 +417,31 @@ class Signal(DataFrequency, DataTime):
         """Number of frequency bins."""
         return fft._n_bins(self.n_samples)
 
-    @property
-    def signal_length(self):
-        """The length of the signal in seconds."""
-        return (self.n_samples - 1) / self.sampling_rate
+    @DataFrequency.fft_norm.setter
+    def fft_norm(self, value):
+        """
+        The normalization for the Fourier Transform.
+
+        See pyfar.fft.normalization for more information.
+        """
+        # check input
+        if value not in self._VALID_FFT_NORMS:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
+                              f"'{value}'"))
+
+        # apply new normalization if Signal is in frequency domain
+        if self._fft_norm != value and self._domain == 'freq':
+            # de-normalize
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                self._fft_norm, inverse=True)
+            # normalize
+            self._data = fft.normalization(
+                self._data, self._n_samples, self._sampling_rate,
+                value, inverse=False)
+
+        self._fft_norm = value
 
     def __add__(self, data):
         return add((self, data), 'freq')
