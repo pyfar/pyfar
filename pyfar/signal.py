@@ -42,13 +42,6 @@ class Audio(object):
         """The domain the data is stored in"""
         return self._domain
 
-    @domain.setter
-    def domain(self, new_domain):
-        if new_domain not in self._VALID_SIGNAL_DOMAIN:
-            raise ValueError("Incorrect domain, needs to be time/freq.")
-
-        self._domain = new_domain
-
     @property
     def signal_type(self):
         """The signal type."""
