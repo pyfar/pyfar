@@ -22,17 +22,17 @@ class Audio(object):
     def __init__(self, domain, comment=None, dtype=np.double):
 
         # initalize valid parameter spaces
-        # NOTE: They are note needed by DataTime but would have to be defined
-        #       in DataFrequqncy and Signal if we would not define them here.
-        self._VALID_SIGNAL_TYPE = ["power", "energy"]
-        self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
+        # NOTE: Some are note needed by DataTime but would have to be defined
+        #       in DataFrequqncy and Signal otherwise.
+        self._VALID_TYPES = ["power", "energy"]
+        self._VALID_DOMAINS = ["time", "freq"]
         self._VALID_FFT_NORMS = [
             "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # initialize global parameters
         self.comment = comment
         self._dtype = dtype
-        if domain in self._VALID_SIGNAL_DOMAIN:
+        if domain in self._VALID_DOMAINS:
             self._domain = domain
         else:
             raise ValueError("Incorrect domain, needs to be time/freq.")
@@ -381,7 +381,7 @@ class Signal(DataFrequency, DataTime):
 
     @Audio.domain.setter
     def domain(self, new_domain):
-        if new_domain not in self._VALID_SIGNAL_DOMAIN:
+        if new_domain not in self._VALID_DOMAINS:
             raise ValueError("Incorrect domain, needs to be time/freq.")
 
         if not (self._domain == new_domain):
