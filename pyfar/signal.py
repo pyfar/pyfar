@@ -23,7 +23,7 @@ class Audio(object):
 
         # initalize valid parameter spaces
         # NOTE: They are note needed by DataTime but would have to be defined
-        #       DataFreq and Signal if we would not define them here.
+        #       in DataFrequqncy and Signal if we would not define them here.
         self._VALID_SIGNAL_TYPE = ["power", "energy"]
         self._VALID_SIGNAL_DOMAIN = ["time", "freq"]
         self._VALID_FFT_NORMS = [
@@ -188,7 +188,7 @@ class DataTime(Audio):
         return np.squeeze(indices)
 
 
-class DataFreq(Audio):
+class DataFrequency(Audio):
     def __init__(self, data, frequencies, fft_norm, comment, dtype):
 
         Audio.__init__(self, 'freq', comment, dtype)
@@ -299,7 +299,7 @@ class DataFreq(Audio):
         return np.squeeze(indices)
 
 
-class Signal(DataFreq, DataTime):
+class Signal(DataFrequency, DataTime):
     """Class for audio signals.
 
     Objects of this class contain data which is directly convertable between
@@ -381,8 +381,8 @@ class Signal(DataFreq, DataTime):
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
 
-            DataFreq.__init__(self, data, self.frequencies, fft_norm, comment,
-                              dtype)
+            DataFrequency.__init__(self, data, self.frequencies, fft_norm,
+                                   comment, dtype)
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
