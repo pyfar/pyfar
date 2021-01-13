@@ -104,7 +104,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
 
 
 # TO DO cshape
-def sine_func(frequency, sampling_rate, n_samples, fft_norm):
+def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     """ Generate time and frequency data of sine signal.
     The frequency is adjusted resulting in a fully periodic signal in the
     given time interval.
@@ -119,6 +119,8 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm):
         Number of samples
     fft_norm : 'none', 'rms'
         See documentaion of pyfar.fft.normalization.
+    cshape : tuple
+        Channel shape
 
     Returns
     -------
@@ -130,21 +132,27 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm):
         adjusted frequency
 
     """
-    if frequency >= sampling_rate/2:
-        raise ValueError(f"Frequency can be {sampling_rate/2} maximum,"
-                         f"but is {frequency}")
+    # Convert frequency to array
+    frequency = np.atleast_1d(frequency)
+    if np.shape(frequency) != cshape:
+        raise ValueError("Shape of frequency needs to equal cshape.")
+    if np.any(frequency >= sampling_rate/2):
+        raise ValueError(f"Frequency is larger than Nyquist frequency,"
+                         f"which is {sampling_rate/2}.")
     # Round to the nearest frequency bin
     n_periods = np.floor(n_samples / sampling_rate * frequency)
     frequency = n_periods * sampling_rate / n_samples
 
     # Time vector
     times = np.arange(0, n_samples) / sampling_rate
-    time = np.atleast_2d(np.sin(2 * np.pi * frequency * times))
+    times = np.broadcast_to(times, (cshape+(n_samples,)))
+    time = np.sin(2 * np.pi * frequency[..., np.newaxis] * times)
     # Spectrum
     n_bins = int(n_samples / 2) + 1
-    freq = np.atleast_2d(np.zeros(n_bins, dtype=np.complex))
-    freq_bin = int(frequency / sampling_rate * n_samples)
-    freq[..., freq_bin] = -1j
+    freq = np.zeros(cshape+(n_bins,), dtype=np.complex)
+    for idx, f in np.ndenumerate(frequency):
+        f_bin = int(f / sampling_rate * n_samples)
+        freq[idx+(f_bin,)] = -1j
     # Normalization
     freq = _normalization(freq, n_samples, fft_norm)
     return time, freq, frequency
