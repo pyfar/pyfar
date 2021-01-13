@@ -36,6 +36,9 @@ def test_signal_comment():
     signal = Signal([1, 0, 0], 44100, comment='Bla')
     assert signal.comment == 'Bla'
 
+    signal.comment = 'Blub'
+    assert signal.comment == 'Blub'
+
 
 def test_domain_getter_freq(sine):
     signal = Signal(np.array([1]), 44100)
