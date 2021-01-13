@@ -210,7 +210,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
 
 
 def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                yscale='linear', window='hann', window_length=1024,
+                yscale='linear', unit=None, window='hann', window_length=1024,
                 window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
                 ax=None, style='light'):
     """Plot the magnitude spectrum versus time.
@@ -228,6 +228,10 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     yscale : str
         'linear' or 'log' to plot on a linear or logarithmic y-axis. The
         default is 'linear'.
+    unit : str, None
+        Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
+        The default is None, which sets the unit to 's' (seconds), 'ms'
+        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
     window : str
         Specifies the window (See scipy.signal.get_window). The default is
         'hann'.
@@ -254,7 +258,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     with plt.style.context(plotstyle(style)):
         ax = _line._spectrogram_cb(
-            signal, dB, log_prefix, log_reference, yscale,
+            signal, dB, log_prefix, log_reference, yscale, unit,
             window, window_length, window_overlap_fct,
             cmap, ax)
 
