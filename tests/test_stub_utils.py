@@ -1,9 +1,26 @@
 import pytest
 import numpy as np
 import numpy.testing as npt
-import scipy.stats as stats
+
+from pyfar import Signal
 
 import stub_utils
+
+
+def test_signal_stub_properties():
+    """ Test, which compares properties of Signal stub
+    with actual Signal implementation.
+    """
+    time = np.ones((1, 1024))
+    freq = np.ones((1, 1024))
+    sampling_rate = 44100
+    fft_norm = 'none'
+
+    signal_stub = stub_utils.signal_stub(time, freq, sampling_rate, fft_norm)
+    stub_dir = dir(signal_stub)
+    signal_dir = dir(Signal(time, sampling_rate))
+
+    assert stub_dir.sort() == signal_dir.sort()
 
 
 def test_impulse_func_single_channel():
@@ -55,7 +72,7 @@ def test_impulse_func_multi_channel():
                             [1,  1j, -1]]])
 
     time, freq = stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
-   
+  
     npt.assert_allclose(time, time_truth, atol=1e-10)
     npt.assert_allclose(np.real(freq), np.real(freq_truth), atol=1e-10)
     npt.assert_allclose(np.imag(freq), np.imag(freq_truth), atol=1e-10)
