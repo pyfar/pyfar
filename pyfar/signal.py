@@ -1,12 +1,17 @@
 """
-Provide a Container class and arithmethic operations for audio signals.
+Provide Container classes and arithmethic operations for audio data.
 
-Arithmetic operations can be done on the time and frequency domain data. They
-are implemented in `add`, `subtract`, `multiply`, `divide`, and `power`. The
-operators `+`, `-`, `*`, `/`, and `**` are overloaded with the corresponding
-arithmetic operations in the frequency domain. For time domain operations, the
-functions have to be called explicitly. These the function documentation for
-more details.
+The classes `DataTime` and `DataFrequqncy` are intended to store incomplete or
+non-equidistant audio data in the time and frequency domain. The class `Signal`
+can be used to store equidistant and complete audio data that can be converted
+between the time and frequency domain by means of the Fourier transform.
+
+Arithmetic operations can be applied in the time and frequency domain data and
+are implemented in the methods `add`, `subtract`, `multiply`, `divide`, and
+`power`. The operators `+`, `-`, `*`, `/`, and `**` are overloaded with the
+corresponding operations in the frequency domain. For time domain operations,
+the functions have to be called explicitly.
+
 """
 
 import warnings
@@ -17,7 +22,11 @@ from . import utils
 
 
 class Audio(object):
-    """Abstract class for audio objects."""
+    """Abstract class for audio objects.
+
+    This class holds all the methods and properties that are common to its
+    three sub-classes `DataTime`, `DataFrequency`, and `Signal`.
+    """
 
     def __init__(self, domain, comment=None, dtype=np.double):
 
@@ -124,7 +133,30 @@ class Audio(object):
 
 
 class DataTime(Audio):
+    """Class for time data.
+
+    Objects of this class contain time data which is not directly convertable
+    to thefrequency domain, i.e., non-equidistantly spaced samples.
+
+    """
     def __init__(self, data, times, comment=None, dtype=np.double):
+        """Init DataTime with data, and times.
+
+        Attributes
+        ----------
+        data : ndarray, double
+            Raw data in the time domain. The memory layout of data is 'C'.
+            E.g. data of shape (3, 2, 1024) has 3 x 2 channels with
+            1024 samples each.
+        times : ndarray, double
+            Times of the data in seconds. The number of times must match
+            the size of the last dimension of data.
+        comment : str
+            A comment related to the data. The default is None.
+        dtype : string, optional
+            Raw data type of the signal. The default is float64
+
+        """
 
         Audio.__init__(self, 'time', comment, dtype)
 
@@ -194,8 +226,44 @@ class DataTime(Audio):
 
 
 class DataFrequency(Audio):
+    """Class for frequency data.
+
+    Objects of this class contain frequency data which is not directly
+    convertable to the time domain, i.e., non-equidistantly spaced bins or
+    incomplete spectra.
+
+    """
     def __init__(self, data, frequencies, fft_norm=None, comment=None,
-                 dtype=np.double):
+                 dtype=np.complex):
+        """Init DataFrequency with data, and frequencies.
+
+        Attributes
+        ----------
+        data : ndarray, double
+            Raw data in the frequency domain. The memory layout of Data is 'C'.
+            E.g. data of shape (3, 2, 1024) has 3 x 2 channles with 1024
+            frequency bins each.
+        frequencies : ndarray, double
+            Frequencies of the data in Hz. The number of frequencies must match
+            the size of the last dimension of data.
+        fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
+            The kind of Discrete Fourier Transform (DFT) normalization. See
+            pyfar.fft.normalization and _[1] for more information. The default
+            is 'none', which is typically used for energy signals, such as
+            impulse responses.
+        comment : str
+            A comment related to the data. The default is None.
+        dtype : string, optional
+            Raw data type of the signal. The default is float64
+
+        References
+        ----------
+        .. [1] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+               Scaling of the Discrete Fourier Transform and the Implied
+               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+               Austria, May 2020, p. e-Brief 600.
+
+        """
 
         Audio.__init__(self, 'freq', comment, dtype)
 
@@ -301,14 +369,16 @@ class Signal(DataFrequency, DataTime):
             n_samples=None,
             domain='time',
             fft_norm=None,
-            dtype=np.double,
-            comment=None):
+            comment=None,
+            dtype=np.double):
         """Init Signal with data, and sampling rate.
 
         Attributes
         ----------
         data : ndarray, double
-            Raw data of the signal in the frequency or time domain
+            Raw data of the signal in the frequency or time domain. The memory
+            layout of data is 'C'. E.g. data of shape (3, 2, 1024) has 3 x 2
+            channels with 1024 samples or frequency bins each.
         sampling_rate : double
             Sampling rate in Hertz
         n_samples : int, optional
@@ -318,10 +388,11 @@ class Signal(DataFrequency, DataTime):
             Domain of data. The default is 'time'
         fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
             The kind of Discrete Fourier Transform (DFT) normalization. See
-            pyfar.fft.normalization and _[1] for more information. The
-            normalization is only applied to power signals. The default is
-            'none', which is typically used to energy signals, such as impulse
-            responses.
+            pyfar.fft.normalization and _[1] for more information. The default
+            is 'none', which is typically used for energy signals, such as
+            impulse responses.
+        comment : str
+            A comment related to the data. The default is None.
         dtype : string, optional
             Raw data type of the signal. The default is float64
 
@@ -331,6 +402,7 @@ class Signal(DataFrequency, DataTime):
                Scaling of the Discrete Fourier Transform and the Implied
                Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
                Austria, May 2020, p. e-Brief 600.
+
         """
 
         # initialze global parameter and valid parameter spaces
