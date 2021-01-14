@@ -72,7 +72,7 @@ def test_impulse_func_multi_channel():
                             [1,  1j, -1]]])
 
     time, freq = stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
-  
+
     npt.assert_allclose(time, time_truth, atol=1e-10)
     npt.assert_allclose(np.real(freq), np.real(freq_truth), atol=1e-10)
     npt.assert_allclose(np.imag(freq), np.imag(freq_truth), atol=1e-10)
@@ -119,7 +119,7 @@ def test_sine_func():
     frequency_truth = 1
     time_truth = np.array([[0, 1, 0, -1]])
     freq_truth = np.array([[0, -1.j, 0]], dtype=complex)
-  
+
     time, freq, frequency = stub_utils.sine_func(
                                 frequency_truth,
                                 sampling_rate,
@@ -158,7 +158,7 @@ def test_sine_func_multi_channel():
          [[0, 0, 0, -1j, 0, 0, 0],
           [0, 0, 0, 0, -1j, 0, 0]]],
         dtype=complex)
-   
+
     time, freq, frequency = stub_utils.sine_func(
                                 frequency_truth,
                                 sampling_rate,
@@ -184,7 +184,7 @@ def test_sine_func_frequency_adjustment():
     frequency_truth = 1.
     time_truth = np.array([[0, 1, 0, -1]])
     freq_truth = np.array([[0, -1.j, 0]], dtype=complex)
-  
+
     time, freq, frequency = stub_utils.sine_func(
                                 frequency_in,
                                 sampling_rate,

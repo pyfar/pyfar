@@ -1,12 +1,6 @@
 import pytest
-import numpy as np
-import copy
 
-from unittest import mock
-
-from pyfar import Signal
-from pyfar import fft
-from pyfar.orientations import Orientations
+import stub_utils
 
 
 # Sine stubs
@@ -23,20 +17,59 @@ def sine():
     signal : Signal
         Stub of sine signal
     """
-    pass
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 1000
+    fft_norm = 'rms'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+                        frequency,
+                        sampling_rate,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+
+    return signal
 
 
 # test_fft.py
 @pytest.fixture
 def sine_odd():
-    """Sine signal stub with static properties.
+    """Sine signal stub with static properties,
+    odd number of samples.
 
     Returns
     -------
     signal : Signal
         Stub of sine signal
     """
-    pass
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 999
+    fft_norm = 'rms'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+                        frequency,
+                        sampling_rate,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+
+    return signal
 
 
 # Impulse stubs
@@ -109,5 +142,3 @@ def impulse_rms():
         Stub of impulse signal
     """
     pass
-
-

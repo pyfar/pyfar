@@ -88,7 +88,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
     if delay.max() >= n_samples:
         raise ValueError("Delay is larger than number of samples,"
                          f"which is {n_samples}")
-    
+
     # Time vector
     time = np.zeros(cshape+(n_samples,))
     for idx, d in np.ndenumerate(delay):
@@ -223,4 +223,3 @@ def _normalization(freq, n_samples, fft_norm):
                           f"but is '{fft_norm}'"))
     freq_norm = norm * freq
     return freq_norm
-
