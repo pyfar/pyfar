@@ -64,12 +64,12 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
 
     Parameters
     ----------
+    delay  : ndarray, int
+        Delay in samples
     n_samples : int
         Number of samples
     fft_norm : 'unitary', 'rms'
         See documentaion of pyfar.fft.normalization.
-    delay  : ndarray, int
-        Delay in samples
     cshape : tuple
         Channel shape
 
@@ -103,7 +103,6 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
     return time, freq
 
 
-# TO DO cshape
 def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     """ Generate time and frequency data of sine signal.
     The frequency is adjusted resulting in a fully periodic signal in the
@@ -156,6 +155,33 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     # Normalization
     freq = _normalization(freq, n_samples, fft_norm)
     return time, freq, frequency
+
+
+def noise_func(sigma, n_samples, cshape):
+    """ Generate time data of zero-mean, gaussian white noise.
+
+    Parameters
+    ----------
+    sigma : float
+        Standard deviation
+    n_samples : int
+        Number of samples
+    cshape : tuple
+        Channel shape
+
+    Returns
+    -------
+    time : ndarray, float
+        time vector
+    freq : ndarray, complex
+        Spectrum
+
+    """
+    np.random.seed(1000)
+    # Time vector
+    time = np.random.normal(0, sigma, (cshape + (n_samples,)))
+
+    return time
 
 
 def _normalization(freq, n_samples, fft_norm):

@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import numpy.testing as npt
+import scipy.stats as stats
 
 import stub_utils
 
@@ -208,3 +209,27 @@ def test_sine_func_value_error():
                             n_samples,
                             fft_norm,
                             cshape)
+
+
+def test_noise_func():
+    """Test generation of noise data, single channel.
+    """
+    n_samples = 2**18
+    sigma = 1
+    cshape = (1,)
+    time = stub_utils.noise_func(sigma, n_samples, cshape)
+
+    npt.assert_array_almost_equal(np.mean(time), 0, decimal=1)
+    npt.assert_array_almost_equal(np.std(time, ddof=1), sigma, decimal=1)
+
+
+def test_noise_func_multi_channel():
+    """Test generation of noise data, multiple channels.
+    """
+    n_samples = 2**10
+    sigma = 1
+    cshape = (2, 2)
+    time = stub_utils.noise_func(sigma, n_samples, cshape)
+
+    npt.assert_array_almost_equal(np.mean(time), 0, decimal=1)
+    npt.assert_array_almost_equal(np.std(time, ddof=1), sigma, decimal=1)
