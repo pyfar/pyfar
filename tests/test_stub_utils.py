@@ -35,9 +35,8 @@ def test_impulse_func_single_channel():
 
     time, freq = stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
 
-    npt.assert_allclose(time, time_truth, atol=1e-10)
-    npt.assert_allclose(np.real(freq), np.real(freq_truth), atol=1e-10)
-    npt.assert_allclose(np.imag(freq), np.imag(freq_truth), atol=1e-10)
+    npt.assert_allclose(time, time_truth, rtol=1e-10)
+    npt.assert_allclose(freq, freq_truth, rtol=1e-10)
 
 
 def test_impulse_func_value_error():
@@ -73,9 +72,8 @@ def test_impulse_func_multi_channel():
 
     time, freq = stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
 
-    npt.assert_allclose(time, time_truth, atol=1e-10)
-    npt.assert_allclose(np.real(freq), np.real(freq_truth), atol=1e-10)
-    npt.assert_allclose(np.imag(freq), np.imag(freq_truth), atol=1e-10)
+    npt.assert_allclose(time, time_truth, rtol=1e-10)
+    npt.assert_allclose(freq, freq_truth, rtol=1e-10)
 
 
 def test_normalization_none():
@@ -127,9 +125,9 @@ def test_sine_func():
                                 fft_norm,
                                 cshape)
 
-    npt.assert_allclose(time, time_truth, atol=1e-10)
-    npt.assert_allclose(np.real(freq), np.real(freq_truth), atol=1e-10)
-    npt.assert_allclose(np.imag(freq), np.imag(freq_truth), atol=1e-10)
+    npt.assert_allclose(time, time_truth,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
+    npt.assert_allclose(freq, freq_truth, rtol=1e-10)
     assert frequency == frequency_truth
 
 
@@ -166,10 +164,10 @@ def test_sine_func_multi_channel():
                                 fft_norm,
                                 cshape)
 
-    npt.assert_allclose(time, time_truth, atol=1e-10)
-    npt.assert_allclose(np.real(freq), np.real(freq_truth), atol=1e-10)
-    npt.assert_allclose(np.imag(freq), np.imag(freq_truth), atol=1e-10)
-    npt.assert_allclose(frequency, frequency_truth, atol=1e-10)
+    npt.assert_allclose(time, time_truth,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
+    npt.assert_allclose(freq, freq_truth, rtol=1e-10)
+    npt.assert_allclose(frequency, frequency_truth, rtol=1e-10)
 
 
 def test_sine_func_frequency_adjustment():
@@ -192,9 +190,9 @@ def test_sine_func_frequency_adjustment():
                                 fft_norm,
                                 cshape)
 
-    npt.assert_allclose(time, time_truth, atol=1e-10)
-    npt.assert_allclose(np.real(freq), np.real(freq_truth), atol=1e-10)
-    npt.assert_allclose(np.imag(freq), np.imag(freq_truth), atol=1e-10)
+    npt.assert_allclose(time, time_truth,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
+    npt.assert_allclose(freq, freq_truth, rtol=1e-10)
     assert frequency == frequency_truth
 
 

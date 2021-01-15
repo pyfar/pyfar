@@ -47,9 +47,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     signal.freq = np.atleast_2d(freq)
     signal.sampling_rate = sampling_rate
     signal.fft_norm = fft_norm
-    signal.n_samples = time.shape[-1]
-    signal.n_bins = freq.shape[-1]
-    signal.cshape = time.shape[:-1]
+    signal.n_samples = signal.time.shape[-1]
+    signal.n_bins = signal.freq.shape[-1]
+    signal.cshape = signal.time.shape[:-1]
     signal.times = np.atleast_1d(
                         np.arange(0, signal.n_samples) / sampling_rate)
     signal.frequencies = np.atleast_1d(
