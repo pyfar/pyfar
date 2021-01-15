@@ -7,81 +7,79 @@ from pyfar import Signal
 from pyfar import dsp
 
 
-def test_phase_rad(sine_plus_impulse_mock):
+def test_phase_rad(sine_plus_impulse):
     """Test the function returning the phase of a signal in radians."""
-    phase = dsp.phase(sine_plus_impulse_mock, deg=False, unwrap=False)
-    truth = np.angle(sine_plus_impulse_mock.freq)
-    npt.assert_allclose(phase, truth, rtol=1e-7)
+    phase = dsp.phase(sine_plus_impulse, deg=False, unwrap=False)
+    truth = np.angle(sine_plus_impulse.freq)
+    npt.assert_allclose(phase, truth, rtol=1e-10)
 
 
-def test_phase_deg(sine_plus_impulse_mock):
+def test_phase_deg(sine_plus_impulse):
     """Test the function returning the phase of a signal in degrees."""
-    phase = dsp.phase(sine_plus_impulse_mock, deg=True, unwrap=False)
-    truth = np.degrees(np.angle(sine_plus_impulse_mock.freq))
-    npt.assert_allclose(phase, truth, rtol=1e-7)
+    phase = dsp.phase(sine_plus_impulse, deg=True, unwrap=False)
+    truth = np.degrees(np.angle(sine_plus_impulse.freq))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
 
 
-def test_phase_unwrap(sine_plus_impulse_mock):
+def test_phase_unwrap(sine_plus_impulse):
     """Test the function returning the unwrapped phase of a signal."""
-    phase = dsp.phase(sine_plus_impulse_mock, deg=False, unwrap=True)
-    truth = np.unwrap(np.angle(sine_plus_impulse_mock.freq))
-    npt.assert_allclose(phase, truth, rtol=1e-7)
+    phase = dsp.phase(sine_plus_impulse, deg=False, unwrap=True)
+    truth = np.unwrap(np.angle(sine_plus_impulse.freq))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
 
 
-def test_phase_deg_unwrap(sine_plus_impulse_mock):
+def test_phase_deg_unwrap(sine_plus_impulse):
     """Test the function returning the unwrapped phase of a signal in deg."""
-    phase = dsp.phase(sine_plus_impulse_mock, deg=True, unwrap=True)
-    truth = np.degrees(np.unwrap(np.angle(sine_plus_impulse_mock.freq)))
-    npt.assert_allclose(phase, truth, rtol=1e-7)
+    phase = dsp.phase(sine_plus_impulse, deg=True, unwrap=True)
+    truth = np.degrees(np.unwrap(np.angle(sine_plus_impulse.freq)))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
 
 
-def test_group_delay_single_channel(impulse_mock):
-    """Test the function returning the group delay of a signal."""
-    # test single channel signal
-    signal = impulse_mock[0]
+def test_group_delay_single_channel(impulse_group_delay):
+    """Test the function returning the group delay of a signal,
+    single channel."""
+    signal = impulse_group_delay[0]
     grp = dsp.group_delay(signal)
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_mock[3][0] * np.ones(signal.n_bins))
+    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
 
 
-def test_group_delay_two_channel(impulse_mock):
-    """Test the function returning the group delay of a signal."""
-    # test two channel signal
-    signal = impulse_mock[1]
+def test_group_delay_two_channel(impulse_group_delay_two_channel):
+    """Test the function returning the group delay of a signal,
+    two channels."""
+    signal = impulse_group_delay_two_channel[0]
     grp = dsp.group_delay(signal)
-    assert grp.shape == (2, signal.n_bins)
-    npt.assert_allclose(grp[0], impulse_mock[3][0] * np.ones(signal.n_bins))
-    npt.assert_allclose(grp[1], impulse_mock[3][1] * np.ones(signal.n_bins))
+    assert grp.shape == (signal.cshape + (signal.n_bins,))
+    npt.assert_allclose(grp, impulse_group_delay_two_channel[1], rtol=1e-10)
 
 
-def test_group_delay_two_by_two_channel(impulse_mock):
-    """Test the function returning the group delay of a signal."""
-    # test two by two channel signal
-    signal = impulse_mock[2]
+def test_group_delay_two_by_two_channel(impulse_group_delay_two_by_two_channel):
+    """Test the function returning the group delay of a signal,
+    2-by-2 channels."""
+    signal = impulse_group_delay_two_by_two_channel[0]
     grp = dsp.group_delay(signal)
-    assert grp.shape == (2, 2, signal.n_bins)
-    npt.assert_allclose(grp[0, 0], impulse_mock[3][0] * np.ones(signal.n_bins))
-    npt.assert_allclose(grp[0, 1], impulse_mock[3][1] * np.ones(signal.n_bins))
-    npt.assert_allclose(grp[1, 0], impulse_mock[3][2] * np.ones(signal.n_bins))
-    npt.assert_allclose(grp[1, 1], impulse_mock[3][3] * np.ones(signal.n_bins))
+    assert grp.shape == (signal.cshape + (signal.n_bins,))
+    npt.assert_allclose(
+        grp, impulse_group_delay_two_by_two_channel[1], rtol=1e-10)
 
 
-def test_group_delay_custom_frequencies(impulse_mock):
-    """Test the function returning the group delay of a signal."""
-    # test single frequency
-    signal = impulse_mock[0]
-    grp = dsp.group_delay(signal, 1e3)
+def test_group_delay_custom_frequencies(impulse_group_delay):
+    """Test the function returning the group delay of a signal,
+    called for specific frequencies."""
+    signal = impulse_group_delay[0]
+    # Single frequency
+    frequency = 1000
+    frequency_idx = np.abs(signal.frequencies-frequency).argmin()
+    grp = dsp.group_delay(signal, frequency)
     assert grp.shape == ()
-    npt.assert_allclose(grp, 1000)
+    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
 
-    # test multiple frequencies
-    signal = impulse_mock[0]
-    grp = dsp.group_delay(signal, [1e3, 2e3])
-    assert grp.shape == (2, )
-    npt.assert_allclose(grp, np.array([1e3, 1e3]))
-
-# def test_wrap_to_2pi():
-# def test_nextpow2():
+    # Multiple frequencies
+    frequency = np.array([1e3, 2e3])
+    frequency_idx = np.abs(signal.frequencies-frequency[...,np.newaxis]).argmin(axis=-1)
+    grp = dsp.group_delay(signal, frequency)
+    assert grp.shape == (2,)
+    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
 
 
 @pytest.fixture
@@ -134,58 +132,3 @@ def impulse_mock():
     signal_3.cshape = (2, 2)
 
     return signal_1, signal_2, signal_3, group_delays
-
-
-@pytest.fixture
-def sine_plus_impulse_mock():
-    """ Generate a sine signal, superposed with an impulse at the beginning
-        and sampling_rate = 4000 Hz. The Fourier transform is calculated
-        analytically in order to test independently of the Signal object.
-
-    Returns
-    -------
-    signal : Signal
-        The sine signal
-
-    """
-    n_samples = 2000
-    sampling_rate = 4000
-    amplitude_impulse = 1
-    idx_impulse = 0
-    frequency = 200
-    fullperiod = True
-
-    norm = 1/np.sqrt(2)
-
-    if fullperiod:
-        # round to the nearest frequency resulting in a fully periodic sine
-        # signal in the given time interval
-        num_periods = np.floor(n_samples / sampling_rate * frequency)
-        frequency = num_periods * sampling_rate / n_samples
-
-    # time signal:
-    times = np.arange(0, n_samples) / sampling_rate
-    time = np.sin(2 * np.pi * times * frequency)
-    time[idx_impulse] = amplitude_impulse
-
-    # frequency vector:
-    frequencies = np.arange(0, int(n_samples/2+1)) / (n_samples/sampling_rate)
-
-    # Fourier coefficients of impulse:
-    freq = np.ones(int(n_samples/2+1), dtype=np.complex_) * norm * 2/n_samples
-
-    # superpose Fourier coefficient of sine wave:
-    position = int(frequency / sampling_rate * n_samples)
-    freq[position] += -1j * norm
-
-    # create a mock object of Signal class to test the plot independently
-    signal_object = mock.Mock(spec_set=Signal(time, sampling_rate))
-    signal_object.time = time
-    signal_object.sampling_rate = sampling_rate
-    signal_object.times = times
-    signal_object.frequencies = frequencies
-    signal_object.freq = freq
-    signal_object.n_samples = n_samples
-    signal_object.signal_type = 'power'
-
-    return signal_object
