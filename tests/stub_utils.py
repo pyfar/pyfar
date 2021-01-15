@@ -68,7 +68,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
         Delay in samples
     n_samples : int
         Number of samples
-    fft_norm : 'unitary', 'rms'
+    fft_norm : 'none', 'rms'
         See documentaion of pyfar.fft.normalization.
     cshape : tuple
         Channel shape
@@ -151,7 +151,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     freq = np.zeros(cshape+(n_bins,), dtype=np.complex)
     for idx, f in np.ndenumerate(frequency):
         f_bin = int(f / sampling_rate * n_samples)
-        freq[idx+(f_bin,)] = -1j
+        freq[idx+(f_bin,)] = -2j * n_periods
     # Normalization
     freq = _normalization(freq, n_samples, fft_norm)
     return time, freq, frequency
@@ -215,9 +215,9 @@ def _normalization(freq, n_samples, fft_norm):
         norm /= n_samples
         # Equation 8 and 10 in Ahrens et al. 2020
         if n_samples % 2 != 0:
-            norm[1:] *= np.sqrt(2)
+            norm[..., 1:] *= np.sqrt(2)
         else:
-            norm[1:-1] *= np.sqrt(2)
+            norm[..., 1:-1] *= np.sqrt(2)
     elif fft_norm != 'none':
         raise ValueError(("norm type must be 'none' or 'rms', "
                           f"but is '{fft_norm}'"))
