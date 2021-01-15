@@ -20,7 +20,7 @@ def sine():
     """
     frequency = 441
     sampling_rate = 44100
-    n_samples = 1000
+    n_samples = 10000
     fft_norm = 'rms'
     cshape = (1,)
 
@@ -53,7 +53,7 @@ def sine_odd():
     """
     frequency = 441
     sampling_rate = 44100
-    n_samples = 999
+    n_samples = 9999
     fft_norm = 'rms'
     cshape = (1,)
 
@@ -87,7 +87,7 @@ def impulse():
     """
     delay = 0
     sampling_rate = 44100
-    n_samples = 1000
+    n_samples = 10000
     fft_norm = 'none'
     cshape = (1,)
 
@@ -120,7 +120,7 @@ def impulse_group_delay():
     """
     delay = 100
     sampling_rate = 44100
-    n_samples = 1000
+    n_samples = 10000
     fft_norm = 'none'
     cshape = (1,)
 
@@ -154,7 +154,7 @@ def impulse_group_delay_two_channel():
     """
     delay = np.atleast_1d([100, 200])
     sampling_rate = 44100
-    n_samples = 1000
+    n_samples = 10000
     fft_norm = 'none'
     cshape = (2,)
 
@@ -188,7 +188,7 @@ def impulse_group_delay_two_by_two_channel():
     """
     delay = np.array([[100, 200], [300, 400]])
     sampling_rate = 44100
-    n_samples = 1000
+    n_samples = 10000
     fft_norm = 'none'
     cshape = (2, 2)
 
@@ -234,7 +234,7 @@ def sine_plus_impulse():
     frequency = 441
     delay = 100
     sampling_rate = 44100
-    n_samples = 1000
+    n_samples = 10000
     fft_norm = 'none'
     cshape = (1,)
 
@@ -257,6 +257,7 @@ def sine_plus_impulse():
                         fft_norm)
 
     return signal
+
 
 # test_fft.py
 @pytest.fixture
