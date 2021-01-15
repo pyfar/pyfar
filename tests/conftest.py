@@ -183,7 +183,7 @@ def impulse_group_delay():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    delay = 100
+    delay = 1000
     sampling_rate = 44100
     n_samples = 10000
     fft_norm = 'none'
@@ -217,7 +217,7 @@ def impulse_group_delay_two_channel():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    delay = np.atleast_1d([100, 200])
+    delay = np.atleast_1d([1000, 2000])
     sampling_rate = 44100
     n_samples = 10000
     fft_norm = 'none'
@@ -251,7 +251,7 @@ def impulse_group_delay_two_by_two_channel():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    delay = np.array([[100, 200], [300, 400]])
+    delay = np.array([[1000, 2000], [3000, 4000]])
     sampling_rate = 44100
     n_samples = 10000
     fft_norm = 'none'
