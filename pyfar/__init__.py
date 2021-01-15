@@ -7,7 +7,7 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .signal import Signal
+from .signal import Signal, concatenate
 from .coordinates import Coordinates
 from .orientations import Orientations
 
@@ -16,4 +16,10 @@ from . import spatial
 from . import io
 
 
-__all__ = ['Signal', 'Coordinates', 'Orientations', 'plot', 'spatial', 'io']
+__all__ = [
+    'Signal', 'concatenate',
+    'Coordinates',
+    'Orientations',
+    'plot',
+    'spatial',
+    'io']
