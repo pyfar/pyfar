@@ -8,7 +8,7 @@ import stub_utils
 
 
 def test_signal_stub_properties():
-    """ Test, which compares properties of Signal stub
+    """ Test comparing properties of Signal stub
     with actual Signal implementation.
     """
     time = np.ones((1, 1024))
@@ -21,6 +21,50 @@ def test_signal_stub_properties():
     signal_dir = dir(Signal(time, sampling_rate))
 
     assert stub_dir.sort() == signal_dir.sort()
+
+
+def test_signal_stub_times():
+    """ Test times vector of Signal stub.
+    """
+    time = np.ones((1, 4))
+    freq = np.ones((1, 3))
+    sampling_rate = 1
+    fft_norm = 'none'
+    times = np.array([0., 1., 2., 3.])
+
+    signal_stub = stub_utils.signal_stub(time, freq, sampling_rate, fft_norm)
+
+    npt.assert_allclose(signal_stub.times, times, rtol=1e-10)
+
+
+def test_signal_stub_frequencies_even():
+    """ Test frequencies vector of Signal stub,
+    even number of samples.
+    """
+    time = np.ones((1, 4))
+    freq = np.ones((1, 3))
+    sampling_rate = 1
+    fft_norm = 'none'
+    frequencies = np.array([0., 0.25, 0.5])
+
+    signal_stub = stub_utils.signal_stub(time, freq, sampling_rate, fft_norm)
+
+    npt.assert_allclose(signal_stub.frequencies, frequencies, rtol=1e-10)
+
+
+def test_signal_stub_frequencies_odd():
+    """ Test frequencies vector of Signal stub,
+    odd number of samples.
+    """
+    time = np.ones((1, 5))
+    freq = np.ones((1, 3))
+    sampling_rate = 1
+    fft_norm = 'none'
+    frequencies = np.array([0., 0.2, 0.4])
+
+    signal_stub = stub_utils.signal_stub(time, freq, sampling_rate, fft_norm)
+
+    npt.assert_allclose(signal_stub.frequencies, frequencies, rtol=1e-10)
 
 
 def test_impulse_func_single_channel():

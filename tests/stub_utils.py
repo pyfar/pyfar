@@ -53,7 +53,7 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     signal.times = np.atleast_1d(
                         np.arange(0, signal.n_samples) / sampling_rate)
     signal.frequencies = np.atleast_1d(
-                        np.fft.rfftfreq(signal.n_samples, sampling_rate))
+                        np.fft.rfftfreq(signal.n_samples, 1/sampling_rate))
     signal.__getitem__.side_effect = getitem
 
     return signal
