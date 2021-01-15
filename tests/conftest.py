@@ -21,6 +21,38 @@ def sine():
     frequency = 441
     sampling_rate = 44100
     n_samples = 10000
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+                        frequency,
+                        sampling_rate,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+
+    return signal
+
+
+@pytest.fixture
+def sine_rms():
+    """Sine signal stub,
+    RMS FFT-normalization.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 10000
     fft_norm = 'rms'
     cshape = (1,)
 
@@ -45,6 +77,39 @@ def sine():
 def sine_odd():
     """Sine signal stub,
     odd number of samples.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 9999
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+                        frequency,
+                        sampling_rate,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+
+    return signal
+
+
+@pytest.fixture
+def sine_odd_rms():
+    """Sine signal stub,
+    odd number of samples,
+    RMS FFT-normalization
 
     Returns
     -------
