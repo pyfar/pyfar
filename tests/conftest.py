@@ -118,7 +118,26 @@ def impulse_group_delay():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    pass
+    delay = 100
+    sampling_rate = 44100
+    n_samples = 1000
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq = stub_utils.impulse_func(
+                        delay,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+    group_delay = delay * np.ones_like(freq, dtype=float)
+
+    return signal, group_delay
 
 
 # test_dsp.py
@@ -133,7 +152,26 @@ def impulse_group_delay_two_channel():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    pass
+    delay = np.atleast_1d([100, 200])
+    sampling_rate = 44100
+    n_samples = 1000
+    fft_norm = 'none'
+    cshape = (2,)
+
+    time, freq = stub_utils.impulse_func(
+                        delay,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+    group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
+
+    return signal, group_delay
 
 
 # test_dsp.py
@@ -148,7 +186,26 @@ def impulse_group_delay_two_by_two_channel():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    pass
+    delay = np.array([[100, 200], [300, 400]])
+    sampling_rate = 44100
+    n_samples = 1000
+    fft_norm = 'none'
+    cshape = (2, 2)
+
+    time, freq = stub_utils.impulse_func(
+                        delay,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+    group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
+
+    return signal, group_delay
 
 
 # test_fft.py
@@ -163,6 +220,43 @@ def impulse_rms():
     """
     pass
 
+
+# test_dsp.py
+@pytest.fixture
+def sine_plus_impulse():
+    """Combined sine and delta impulse signal stub.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    delay = 100
+    sampling_rate = 44100
+    n_samples = 1000
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time_sine, freq_sine, frequency = stub_utils.sine_func(
+                        frequency,
+                        sampling_rate,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+    time_imp, freq_imp = stub_utils.impulse_func(
+                        delay,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time_sine + time_imp,
+                        freq_sine + freq_imp,
+                        sampling_rate,
+                        fft_norm)
+
+    return signal
 
 # test_fft.py
 @pytest.fixture
