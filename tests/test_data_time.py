@@ -41,6 +41,57 @@ def test_data_time_setter_time():
     npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data_b)))
 
 
+def test_reshape():
+
+    # test reshape with tuple
+    data_in = DataTime(np.random.rand(6, 256), range(256))
+    data_out = data_in.reshape((3, 2))
+    npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
+    assert id(data_in) != id(data_out)
+
+    data_out = data_in.reshape((3, -1))
+    npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
+    assert id(data_in) != id(data_out)
+
+    # test reshape with int
+    data_in = DataTime(np.random.rand(3, 2, 256), range(256))
+    data_out = data_in.reshape(6)
+    npt.assert_allclose(data_in._data.reshape(6, -1), data_out._data)
+    assert id(data_in) != id(data_out)
+
+
+def test_reshape_exceptions():
+    data_in = DataTime(np.random.rand(6, 256), range(256))
+    data_out = data_in.reshape((3, 2))
+    npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
+    # test assertion for non-tuple input
+    with pytest.raises(ValueError):
+        data_out = data_in.reshape([3, 2])
+
+    # test assertion for wrong dimension
+    with pytest.raises(ValueError, match='Can not reshape signal of cshape'):
+        data_out = data_in.reshape((3, 4))
+
+
+def test_flatten():
+
+    # test 2D signal (flatten should not change anything)
+    x = np.random.rand(2, 256)
+    data_in = DataTime(x, range(256))
+    data_out = data_in.flatten()
+
+    npt.assert_allclose(data_in._data, data_out._data)
+    assert id(data_in) != id(data_out)
+
+    # test 3D signal
+    x = np.random.rand(3, 2, 256)
+    data_in = DataTime(x, range(256))
+    data_out = data_in.flatten()
+
+    npt.assert_allclose(data_in._data.reshape((6, -1)), data_out._data)
+    assert id(data_in) != id(data_out)
+
+
 def test_data_time_find_nearest():
     """Test the find nearest function for a single number and list entry."""
     data = [1, 0, -1]
