@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pyfar.signal import DataFrequency as DataFrequency
+from pyfar.signal import DataFrequency
 
 
 def test_data_frequency_init_with_defaults():
