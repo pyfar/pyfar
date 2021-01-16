@@ -30,6 +30,15 @@ def test_data_time_init_wrong_number_of_times():
         TimeData(data, times)
 
 
+def test_data_time_with_non_monotonously_increasing_time():
+    """Test if non monotnously increasing of times raises an assertion."""
+    data = [1, 0, -1]
+    times = [0, .2, .1]
+
+    with pytest.raises(ValueError):
+        TimeData(data, times)
+
+
 def test_data_time_setter_time():
     """Test the setter for the time data."""
     data_a = [1, 0, -1]

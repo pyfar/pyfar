@@ -29,6 +29,14 @@ def test_data_frequency_init_wrong_number_of_freqs():
         FrequencyData(data, freqs)
 
 
+def test_data_frequency_with_wrong_fft_norm():
+    data = [1, 0, -1]
+    freqs = [0, .1, .2]
+
+    with pytest.raises(ValueError):
+        FrequencyData(data, freqs, fft_norm='bull shit')
+
+
 def test_data_frequency_setter_freq():
     """Test the setter for the frequency data."""
     data_a = [1, 0, -1]

@@ -172,6 +172,13 @@ def test_setter_freq(sine, impulse):
     npt.assert_allclose(np.atleast_2d(spec), signal._data, atol=1e-15)
 
 
+def test_re_setter_freq():
+    """Test the warning for estimating the number of samples from n_bins."""
+    signal = Signal([1, 2, 3], 44100, domain='freq', n_samples=4)
+    with pytest.warns(UserWarning):
+        signal.freq = [1, 2, 3, 4]
+
+
 def test_getter_sampling_rate(sine):
     """Test if attribute sampling rate is accessed correctly."""
     sampling_rate = 48000

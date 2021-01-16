@@ -231,7 +231,7 @@ class TimeData(Audio):
         if self._times.size != self.n_samples:
             raise ValueError(
                 "The length of times must be data.shape[-1]")
-        if np.any(np.diff(self._times)) <= 0 and len(times) > 1:
+        if np.any(np.diff(self._times) <= 0) and len(times) > 1:
             raise ValueError("Times must be monotonously increasing.")
 
     @property
@@ -380,9 +380,9 @@ class FrequencyData(Audio):
             if new_num_bins == self.n_bins:
                 n_samples = self.n_samples
             else:
-                warnings.warn(
+                warnings.warn(UserWarning((
                     "Number of frequency bins changed, assuming an even "
-                    "number of samples from the number of frequency bins.")
+                    "number of samples from the number of frequency bins.")))
                 n_samples = (new_num_bins - 1)*2
             self._n_samples = n_samples
 
