@@ -1,7 +1,7 @@
 """
 Provide Container classes and arithmethic operations for audio data.
 
-The classes `DataTime` and `DataFrequqncy` are intended to store incomplete or
+The classes `TimeData` and `DataFrequqncy` are intended to store incomplete or
 non-equidistant audio data in the time and frequency domain. The class `Signal`
 can be used to store equidistant and complete audio data that can be converted
 between the time and frequency domain by means of the Fourier transform.
@@ -25,13 +25,13 @@ class Audio(object):
     """Abstract class for audio objects.
 
     This class holds all the methods and properties that are common to its
-    three sub-classes `DataTime`, `DataFrequency`, and `Signal`.
+    three sub-classes `TimeData`, `FrequencyData`, and `Signal`.
     """
 
     def __init__(self, domain, comment=None, dtype=np.double):
 
         # initalize valid parameter spaces
-        # NOTE: Some are note needed by DataTime but would have to be defined
+        # NOTE: Some are note needed by TimeData but would have to be defined
         #       in DataFrequqncy and Signal otherwise.
         self._VALID_TYPES = ["power", "energy"]
         self._VALID_DOMAINS = ["time", "freq"]
@@ -194,7 +194,7 @@ class Audio(object):
                     "Index must be int, not {}".format(type(key).__name__))
 
 
-class DataTime(Audio):
+class TimeData(Audio):
     """Class for time data.
 
     Objects of this class contain time data which is not directly convertable
@@ -202,7 +202,7 @@ class DataTime(Audio):
 
     """
     def __init__(self, data, times, comment=None, dtype=np.double):
-        """Init DataTime with data, and times.
+        """Init TimeData with data, and times.
 
         Attributes
         ----------
@@ -287,7 +287,7 @@ class DataTime(Audio):
         return np.squeeze(indices)
 
 
-class DataFrequency(Audio):
+class FrequencyData(Audio):
     """Class for frequency data.
 
     Objects of this class contain frequency data which is not directly
@@ -297,7 +297,7 @@ class DataFrequency(Audio):
     """
     def __init__(self, data, frequencies, fft_norm=None, comment=None,
                  dtype=np.complex):
-        """Init DataFrequency with data, and frequencies.
+        """Init FrequencyData with data, and frequencies.
 
         Attributes
         ----------
@@ -416,7 +416,7 @@ class DataFrequency(Audio):
         return np.squeeze(indices)
 
 
-class Signal(DataFrequency, DataTime):
+class Signal(FrequencyData, TimeData):
     """Class for audio signals.
 
     Objects of this class contain data which is directly convertable between
@@ -487,7 +487,7 @@ class Signal(DataFrequency, DataTime):
                                   f"{', '.join(self._VALID_FFT_NORMS)}, but "
                                   f"found '{fft_norm}'"))
 
-            DataTime.__init__(self, data, self.times, comment, dtype)
+            TimeData.__init__(self, data, self.times, comment, dtype)
         elif domain == 'freq':
             self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
 
@@ -502,7 +502,7 @@ class Signal(DataFrequency, DataTime):
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
 
-            DataFrequency.__init__(self, data, self.frequencies, fft_norm,
+            FrequencyData.__init__(self, data, self.frequencies, fft_norm,
                                    comment, dtype)
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
@@ -551,7 +551,7 @@ class Signal(DataFrequency, DataTime):
         """Number of frequency bins."""
         return fft._n_bins(self.n_samples)
 
-    @DataFrequency.fft_norm.setter
+    @FrequencyData.fft_norm.setter
     def fft_norm(self, value):
         """
         The normalization for the Fourier Transform.

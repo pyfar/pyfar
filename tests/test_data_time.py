@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pyfar.signal import DataTime
+from pyfar.signal import TimeData as TimeData
 
 
 def test_data_time_init_with_defaults():
@@ -12,8 +12,8 @@ def test_data_time_init_with_defaults():
     data = [1, 0, -1]
     times = [0, .1, .3]
 
-    time = DataTime(data, times)
-    assert isinstance(time, DataTime)
+    time = TimeData(data, times)
+    assert isinstance(time, TimeData)
     npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data)))
     npt.assert_allclose(time.times, np.atleast_1d(np.asarray(times)))
     assert time.signal_length == .3
@@ -27,7 +27,7 @@ def test_data_time_init_wrong_number_of_times():
     times = [0, .1]
 
     with pytest.raises(ValueError):
-        DataTime(data, times)
+        TimeData(data, times)
 
 
 def test_data_time_setter_time():
@@ -36,7 +36,7 @@ def test_data_time_setter_time():
     data_b = [2, 0, -2]
     times = [0, .1, .3]
 
-    time = DataTime(data_a, times)
+    time = TimeData(data_a, times)
     time.time = data_b
     npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data_b)))
 
@@ -44,7 +44,7 @@ def test_data_time_setter_time():
 def test_reshape():
 
     # test reshape with tuple
-    data_in = DataTime(np.random.rand(6, 256), range(256))
+    data_in = TimeData(np.random.rand(6, 256), range(256))
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     assert id(data_in) != id(data_out)
@@ -54,14 +54,14 @@ def test_reshape():
     assert id(data_in) != id(data_out)
 
     # test reshape with int
-    data_in = DataTime(np.random.rand(3, 2, 256), range(256))
+    data_in = TimeData(np.random.rand(3, 2, 256), range(256))
     data_out = data_in.reshape(6)
     npt.assert_allclose(data_in._data.reshape(6, -1), data_out._data)
     assert id(data_in) != id(data_out)
 
 
 def test_reshape_exceptions():
-    data_in = DataTime(np.random.rand(6, 256), range(256))
+    data_in = TimeData(np.random.rand(6, 256), range(256))
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     # test assertion for non-tuple input
@@ -77,7 +77,7 @@ def test_flatten():
 
     # test 2D signal (flatten should not change anything)
     x = np.random.rand(2, 256)
-    data_in = DataTime(x, range(256))
+    data_in = TimeData(x, range(256))
     data_out = data_in.flatten()
 
     npt.assert_allclose(data_in._data, data_out._data)
@@ -85,7 +85,7 @@ def test_flatten():
 
     # test 3D signal
     x = np.random.rand(3, 2, 256)
-    data_in = DataTime(x, range(256))
+    data_in = TimeData(x, range(256))
     data_out = data_in.flatten()
 
     npt.assert_allclose(data_in._data.reshape((6, -1)), data_out._data)
@@ -96,7 +96,7 @@ def test_data_time_find_nearest():
     """Test the find nearest function for a single number and list entry."""
     data = [1, 0, -1]
     times = [0, .1, .3]
-    time = DataTime(data, times)
+    time = TimeData(data, times)
 
     # test for a single number
     idx = time.find_nearest_time(.15)
@@ -111,7 +111,7 @@ def test_separation_from_data_frequency():
     """Check if attributes from DataFrequency are really not available."""
     data = [1, 0, -1]
     times = [0, .1, .3]
-    time = DataTime(data, times)
+    time = TimeData(data, times)
 
     with pytest.raises(AttributeError):
         time.freq
@@ -127,7 +127,7 @@ def test_separation_from_signal():
     """Check if attributes from Signal are really not available."""
     data = [1, 0, -1]
     times = [0, .1, .3]
-    time = DataTime(data, times)
+    time = TimeData(data, times)
 
     with pytest.raises(AttributeError):
         time.sampling_rate
