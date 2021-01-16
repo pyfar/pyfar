@@ -154,7 +154,7 @@ class Audio(object):
     @comment.setter
     def comment(self, value):
         """Set comment."""
-        self._comment = str(value)
+        self._comment = 'none' if value is None else str(value)
 
     def copy(self):
         """Return a deep copy of the Signal object."""
