@@ -416,14 +416,52 @@ def test_normalization_exceptions():
         fft.normalization(np.array([1]), 1, 44100, 'goofy')
 
 
-def test_rfft(impulse):
+def test_rfft_normalization_impulse(impulse):
+    """ Test for call of normalization in rfft.
+    """
     signal_spec = fft.rfft(
         impulse.time, impulse.n_samples, impulse.sampling_rate,
         impulse.fft_norm)
 
     npt.assert_allclose(
         signal_spec, impulse.freq,
-        rtol=1e-10, atol=10*np.finfo(float).eps)
+        rtol=1e-10, atol=1e-10)
+
+
+def test_rfft_normalization_impulse_rms(impulse_rms):
+    """ Test for call of normalization in rfft.
+    """
+    signal_spec = fft.rfft(
+        impulse_rms.time, impulse_rms.n_samples, impulse_rms.sampling_rate,
+        impulse_rms.fft_norm)
+
+    npt.assert_allclose(
+        signal_spec, impulse_rms.freq,
+        rtol=1e-10, atol=1e-10)
+
+
+def test_rfft_normalization_sine(sine):
+    """ Test for correct call of normalization in rfft.
+    """
+    signal_spec = fft.rfft(
+        sine.time, sine.n_samples, sine.sampling_rate,
+        sine.fft_norm)
+
+    npt.assert_allclose(
+        signal_spec, sine.freq,
+        rtol=1e-10, atol=1e-10)
+
+
+def test_rfft_normalization_sine_rms(sine_rms):
+    """ Test for correct call of normalization in rfft.
+    """
+    signal_spec = fft.rfft(
+        sine_rms.time, sine_rms.n_samples, sine_rms.sampling_rate,
+        sine_rms.fft_norm)
+
+    npt.assert_allclose(
+        signal_spec, sine_rms.freq,
+        rtol=1e-10, atol=1e-10)
 
 
 def test_fft_mock_numpy(fft_lib_np):
