@@ -166,7 +166,7 @@ def test_getter_signal_type(sine, sine_rms):
 
     signal = Signal(
         sine_rms.time, sine_rms.sampling_rate, fft_norm=sine_rms.fft_norm)
-    npt.assert_string_equal(signal.signal_type, 'energy')
+    npt.assert_string_equal(signal.signal_type, 'power')
 
 
 def test_setter_signal_type(sine):
