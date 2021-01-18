@@ -171,6 +171,37 @@ def impulse():
     return signal
 
 
+@pytest.fixture
+def impulse_rms():
+    """Delta impulse signal stub,
+    RMS FFT-normalization.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of impulse signal
+    """
+    delay = 0
+    sampling_rate = 44100
+    n_samples = 10000
+    fft_norm = 'rms'
+    cshape = (1,)
+
+    time, freq = stub_utils.impulse_func(
+                        delay,
+                        n_samples,
+                        fft_norm,
+                        cshape)
+
+    signal = stub_utils.signal_stub(
+                        time,
+                        freq,
+                        sampling_rate,
+                        fft_norm)
+
+    return signal
+
+
 # test_dsp.py
 @pytest.fixture
 def impulse_group_delay():
@@ -271,19 +302,6 @@ def impulse_group_delay_two_by_two_channel():
     group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
 
     return signal, group_delay
-
-
-# test_fft.py
-@pytest.fixture
-def impulse_rms():
-    """Delta impulse signal stub with static properties, rms-FFT normalization.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of impulse signal
-    """
-    pass
 
 
 # test_dsp.py
