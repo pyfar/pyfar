@@ -87,11 +87,12 @@ def test_impulse_func_rms():
     """Test generation of delta impulse,
     RMS FFT normalization.
     """
-    n_samples = 4
+    n_samples = 6
     cshape = (1,)
     delay = 0
     fft_norm = 'rms'
-    freq_truth = np.array([[1, np.sqrt(2), 1]], dtype=complex) / n_samples
+    freq_truth = 1 / n_samples * np.array(
+                        [[1, np.sqrt(2), np.sqrt(2), 1]], dtype=complex)
     _, freq = stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
     npt.assert_allclose(freq, freq_truth, rtol=1e-10, atol=1e-15)
 
@@ -229,10 +230,10 @@ def test_sine_func_multi_channel():
           [0, sq3/2, -sq3/2, 0, sq3/2, -sq3/2,
            0, sq3/2, -sq3/2, 0, sq3/2, -sq3/2]]])
     freq_truth = np.array(
-        [[[0, -1j, 0, 0, 0, 0, 0],
-          [0, 0, -1j, 0, 0, 0, 0]],
-         [[0, 0, 0, -1j, 0, 0, 0],
-          [0, 0, 0, 0, -1j, 0, 0]]],
+        [[[0, -6j, 0, 0, 0, 0, 0],
+          [0, 0, -6j, 0, 0, 0, 0]],
+         [[0, 0, 0, -6j, 0, 0, 0],
+          [0, 0, 0, 0, -6j, 0, 0]]],
         dtype=complex)
 
     time, freq, frequency = stub_utils.sine_func(
@@ -259,7 +260,7 @@ def test_sine_func_frequency_adjustment():
 
     frequency_truth = 1.
     time_truth = np.array([[0, 1, 0, -1]])
-    freq_truth = np.array([[0, -1.j, 0]], dtype=complex)
+    freq_truth = np.array([[0, -2.j, 0]], dtype=complex)
 
     time, freq, frequency = stub_utils.sine_func(
                                 frequency_in,

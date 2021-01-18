@@ -151,7 +151,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     freq = np.zeros(cshape+(n_bins,), dtype=np.complex)
     for idx, f in np.ndenumerate(frequency):
         f_bin = int(f / sampling_rate * n_samples)
-        freq[idx+(f_bin,)] = -2j * n_periods
+        freq[idx+(f_bin,)] = -0.5j * float(n_samples)
     # Normalization
     freq = _normalization(freq, n_samples, fft_norm)
     return time, freq, frequency
