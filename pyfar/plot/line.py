@@ -6,7 +6,7 @@ from . import _line
 from ._interaction import Interaction
 
 
-def time(signal, dB=False, log_prefix=20, log_reference=1, ax=None,
+def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
          style='light', **kwargs):
     """Plot the time data of a signal.
 
@@ -23,6 +23,10 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, ax=None,
         Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
         Reference for calculating the logarithmic time data. The default is 1.
+    unit : str, None
+        Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
+        The default is None, which sets the unit to 's' (seconds), 'ms'
+        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
     ax : matplotlib.pyplot.axes object
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
@@ -46,7 +50,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, ax=None,
         raise TypeError('Input data has to be of type: Signal.')
 
     with plt.style.context(plotstyle(style)):
-        ax = _line._time(signal, dB, log_prefix, log_reference,
+        ax = _line._time(signal, dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
 
     plt.tight_layout()
@@ -164,7 +168,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     ----------
     signal : Signal
         pyfar Signal object.
-    unit : str
+    unit : str, None
         Unit of the group delay. Can be 's', 'ms', 'mus', or 'samples'.
         The default is None, which sets the unit to 's' (seconds), 'ms'
         (milli seconds), or 'mus' (micro seconds) depending on the maximum.
@@ -206,7 +210,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
 
 
 def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                yscale='linear', window='hann', window_length=1024,
+                yscale='linear', unit=None, window='hann', window_length=1024,
                 window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
                 ax=None, style='light'):
     """Plot the magnitude spectrum versus time.
@@ -224,6 +228,10 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     yscale : str
         'linear' or 'log' to plot on a linear or logarithmic y-axis. The
         default is 'linear'.
+    unit : str, None
+        Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
+        The default is None, which sets the unit to 's' (seconds), 'ms'
+        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
     window : str
         Specifies the window (See scipy.signal.get_window). The default is
         'hann'.
@@ -250,7 +258,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     with plt.style.context(plotstyle(style)):
         ax = _line._spectrogram_cb(
-            signal, dB, log_prefix, log_reference, yscale,
+            signal, dB, log_prefix, log_reference, yscale, unit,
             window, window_length, window_overlap_fct,
             cmap, ax)
 
@@ -261,7 +269,8 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
-              log_reference=1, xscale='log', ax=None, style='light', **kwargs):
+              log_reference=1, xscale='log', unit=None,
+              ax=None, style='light', **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
 
@@ -280,8 +289,13 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         Reference for calculating the logarithmic time/frequency data.
         The default is 1.
     xscale : str
-        'linear' or 'log' to plot on a linear or logarithmic x-axis. The
-        default is 'log'.
+        'linear' or 'log' to plot on a linear or logarithmic x-axis for the
+        frequency plot. The default is 'log'.
+    unit : str
+        Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
+        The default is None, which sets the unit to 's' (seconds), 'ms'
+        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
+    ax : matplotlib.pyplot.axes object
     ax : matplotlib.pyplot.axes object
         Axes to plot on. The default is None, which uses the current figure
         ore creates a new one if no figure exists.
@@ -306,7 +320,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
 
     with plt.style.context(plotstyle(style)):
         ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
-                              log_reference, xscale, ax, **kwargs)
+                              log_reference, xscale, unit, ax, **kwargs)
     plt.tight_layout()
     Interaction('LineXLin', ax[0], signal, style, **kwargs)
 

@@ -121,7 +121,8 @@ def test_line_dB_option(sine):
     """Test all line plots that have a dB option."""
 
     function_list = [plot.line.time,
-                     plot.line.freq]
+                     plot.line.freq,
+                     plot.line.spectrogram]
 
     # test if dB option is working
     for function in function_list:
@@ -216,42 +217,46 @@ def test_line_xscale_option(sine):
             compare_images(baseline, output, tol=10)
 
 
-def test_line_group_delay_unit(sine, impulse_group_delay):
-    """Test plottin the group delay with different units."""
+def test_time_unit(sine, impulse_group_delay):
+    """Test plottin with different units."""
+    function_list = [plot.line.time,
+                     plot.line.group_delay,
+                     plot.line.spectrogram]
 
-    for unit in [None, 's', 'ms', 'mus', 'samples']:
-        print(f"Testing: group_delay (unit={unit})")
-        # file names
-        filename = 'line_group_delay_unit_' + str(unit) + '.png'
-        baseline = os.path.join(baseline_path, filename)
-        output = os.path.join(output_path, filename)
+    for function in function_list:
+        for unit in [None, 's', 'ms', 'mus', 'samples']:
+            print(f"Testing: {function.__name__} (unit={unit})")
+            # file names
+            filename = f'line_{function.__name__}_unit_{str(unit)}.png'
+            baseline = os.path.join(baseline_path, filename)
+            output = os.path.join(output_path, filename)
 
-        # plotting
-        matplotlib.use('Agg')
-        mpt.set_reproducibility_for_testing()
-        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
-        plot.line.group_delay(impulse_group_delay[0], unit=unit)
+            # plotting
+            matplotlib.use('Agg')
+            mpt.set_reproducibility_for_testing()
+            plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+            plot.line.group_delay(impulse_group_delay[0], unit=unit)
 
-        # save baseline if it does not exist
-        # make sure to visually check the baseline uppon creation
-        if create_baseline:
-            plt.savefig(baseline)
-        # safe test image
-        plt.savefig(output)
+            # save baseline if it does not exist
+            # make sure to visually check the baseline uppon creation
+            if create_baseline:
+                plt.savefig(baseline)
+            # safe test image
+            plt.savefig(output)
 
-        # close current figure
-        plt.close()
+            # close current figure
+            plt.close()
 
-        # testing
-        compare_images(baseline, output, tol=10)
+            # testing
+            compare_images(baseline, output, tol=10)
 
 
-def test_line_group_delay_auto_unit():
+def test_line_time_auto_unit():
     """Test automatically assigning the unit in group delay plots."""
-    assert plot._line._group_delay_auto_unit(0) == 's'
-    assert plot._line._group_delay_auto_unit(1e-4) == 'mus'
-    assert plot._line._group_delay_auto_unit(2e-2) == 'ms'
-    assert plot._line._group_delay_auto_unit(2) == 's'
+    assert plot._line._time_auto_unit(0) == 's'
+    assert plot._line._time_auto_unit(1e-4) == 'mus'
+    assert plot._line._time_auto_unit(2e-2) == 'ms'
+    assert plot._line._time_auto_unit(2) == 's'
 
 
 def test_line_custom_subplots(sine, impulse_group_delay):
