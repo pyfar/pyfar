@@ -2,17 +2,13 @@ import pytest
 import numpy as np
 import os.path
 import sofa
-
 import scipy.io.wavfile as wavfile
+
+from pyfar.orientations import Orientations
 
 import stub_utils
 
 
-# Sine stubs
-# test_dsp.py
-# test_fft.py
-# test_plot.py
-# test_signal.py
 @pytest.fixture
 def sine():
     """Sine signal stub.
@@ -29,17 +25,9 @@ def sine():
     cshape = (1,)
 
     time, freq, frequency = stub_utils.sine_func(
-                        frequency,
-                        sampling_rate,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
 
     return signal
 
@@ -61,22 +49,13 @@ def sine_rms():
     cshape = (1,)
 
     time, freq, frequency = stub_utils.sine_func(
-                        frequency,
-                        sampling_rate,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
 
     return signal
 
 
-# test_fft.py
 @pytest.fixture
 def sine_odd():
     """Sine signal stub,
@@ -94,17 +73,9 @@ def sine_odd():
     cshape = (1,)
 
     time, freq, frequency = stub_utils.sine_func(
-                        frequency,
-                        sampling_rate,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
 
     return signal
 
@@ -127,17 +98,9 @@ def sine_odd_rms():
     cshape = (1,)
 
     time, freq, frequency = stub_utils.sine_func(
-                        frequency,
-                        sampling_rate,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
 
     return signal
 
@@ -155,27 +118,16 @@ def sine_two_by_two_channel():
     sampling_rate = 44100
     n_samples = 10000
     fft_norm = 'none'
-    cshape = (2,2)
+    cshape = (2, 2)
 
     time, freq, frequency = stub_utils.sine_func(
-                        frequency,
-                        sampling_rate,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
 
     return signal
 
 
-# Impulse stubs
-# test_fft.py
-# test_dsp.py
 @pytest.fixture
 def impulse():
     """Delta impulse signal stub.
@@ -192,16 +144,9 @@ def impulse():
     cshape = (1,)
 
     time, freq = stub_utils.impulse_func(
-                        delay,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        delay, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
 
     return signal
 
@@ -223,21 +168,13 @@ def impulse_rms():
     cshape = (1,)
 
     time, freq = stub_utils.impulse_func(
-                        delay,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        delay, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
 
     return signal
 
 
-# test_dsp.py
 @pytest.fixture
 def impulse_group_delay():
     """Delayed delta impulse signal stub with static properties.
@@ -256,22 +193,14 @@ def impulse_group_delay():
     cshape = (1,)
 
     time, freq = stub_utils.impulse_func(
-                        delay,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        delay, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
     group_delay = delay * np.ones_like(freq, dtype=float)
 
     return signal, group_delay
 
 
-# test_dsp.py
 @pytest.fixture
 def impulse_group_delay_two_channel():
     """Delayed 2 channel delta impulse signal stub with static properties.
@@ -290,22 +219,14 @@ def impulse_group_delay_two_channel():
     cshape = (2,)
 
     time, freq = stub_utils.impulse_func(
-                        delay,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        delay, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
     group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
 
     return signal, group_delay
 
 
-# test_dsp.py
 @pytest.fixture
 def impulse_group_delay_two_by_two_channel():
     """Delayed 2-by-2 channel delta impulse signal stub with static properties.
@@ -324,22 +245,14 @@ def impulse_group_delay_two_by_two_channel():
     cshape = (2, 2)
 
     time, freq = stub_utils.impulse_func(
-                        delay,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        delay, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time,
-                        freq,
-                        sampling_rate,
-                        fft_norm)
+        time, freq, sampling_rate, fft_norm)
     group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
 
     return signal, group_delay
 
 
-# test_dsp.py
 @pytest.fixture
 def sine_plus_impulse():
     """Combined sine and delta impulse signal stub.
@@ -357,27 +270,15 @@ def sine_plus_impulse():
     cshape = (1,)
 
     time_sine, freq_sine, frequency = stub_utils.sine_func(
-                        frequency,
-                        sampling_rate,
-                        n_samples,
-                        fft_norm,
-                        cshape)
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
     time_imp, freq_imp = stub_utils.impulse_func(
-                        delay,
-                        n_samples,
-                        fft_norm,
-                        cshape)
-
+        delay, n_samples, fft_norm, cshape)
     signal = stub_utils.signal_stub(
-                        time_sine + time_imp,
-                        freq_sine + freq_imp,
-                        sampling_rate,
-                        fft_norm)
+        time_sine + time_imp, freq_sine + freq_imp, sampling_rate, fft_norm)
 
     return signal
 
 
-# test_fft.py
 @pytest.fixture
 def noise():
     """Gaussian white noise signal stub.
@@ -396,12 +297,9 @@ def noise():
     freq = None
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
-
     signal = stub_utils.signal_stub(
-                    time,
-                    freq,
-                    sampling_rate,
-                    fft_norm)
+        time, freq, sampling_rate, fft_norm)
+
     return signal
 
 
@@ -424,12 +322,9 @@ def noise_odd():
     freq = None
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
-
     signal = stub_utils.signal_stub(
-                    time,
-                    freq,
-                    sampling_rate,
-                    fft_norm)
+        time, freq, sampling_rate, fft_norm)
+
     return signal
 
 
@@ -451,12 +346,9 @@ def noise_two_by_two_channel():
     freq = None
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
-
     signal = stub_utils.signal_stub(
-                    time,
-                    freq,
-                    sampling_rate,
-                    fft_norm)
+        time, freq, sampling_rate, fft_norm)
+
     return signal
 
 
@@ -478,16 +370,12 @@ def noise_two_by_three_channel():
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
     freq = np.fft.rfft(time)
-
     signal = stub_utils.signal_stub(
-                    time,
-                    freq,
-                    sampling_rate,
-                    fft_norm)
+        time, freq, sampling_rate, fft_norm)
+
     return signal
 
 
-# test_fft.py
 @pytest.fixture
 def fft_lib_np(monkeypatch):
     """Set numpy.fft as fft library.
@@ -505,7 +393,15 @@ def fft_lib_pyfftw(monkeypatch):
     monkeypatch.setattr(pyfar.fft, 'fft_lib', npi_fft)
 
 
-# test_io.py
+@pytest.fixture
+def generate_wav_file(tmpdir, noise):
+    """Create wav file in temporary folder.
+    """
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    wavfile.write(filename, noise.sampling_rate, noise.time.T)
+    return filename
+
+
 @pytest.fixture
 def sofa_reference_coordinates(noise_two_by_three_channel):
     """Define coordinates to write in reference files.
@@ -515,15 +411,6 @@ def sofa_reference_coordinates(noise_two_by_three_channel):
     source_coordinates = np.random.rand(n_measurements, 3)
     receiver_coordinates = np.random.rand(n_receivers, n_measurements, 3)
     return source_coordinates, receiver_coordinates
-
-
-@pytest.fixture
-def generate_wav_file(tmpdir, noise):
-    """Create wav file in temporary folder.
-    """
-    filename = os.path.join(tmpdir, 'test_wav.wav')
-    wavfile.write(filename, noise.sampling_rate, noise.time.T)
-    return filename
 
 
 @pytest.fixture
@@ -650,52 +537,6 @@ def generate_sofa_postype_error(
     return filename
 
 
-@pytest.fixture
-def generate_sofa_GeneralKAck(tmpdir, noise_two_by_three_channel):
-    """ Generate the reference sofa files of type GeneralFIR.
-    """
-    sofatype = 'GeneralFIR'
-    n_measurements = 1
-    n_receivers = noise_two_channel.cshape[0]
-    n_samples = noise_two_channel.n_samples
-    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
-
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
-
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.Position = np.ones((1, 3))
-    sofafile.Receiver.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Receiver.Position = np.ones((2, 3, 1))
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-
-    if sofatype == 'GeneralFIR':
-        sofafile.Data.Type = 'FIR'
-        sofafile.Data.initialize()
-        sofafile.Data.IR = signal
-        sofafile.Data.SamplingRate = sampling_rate
-    elif sofatype == 'GeneralTF':
-        sofafile.Data.Type = 'TF'
-        sofafile.Data.initialize()
-        sofafile.Data.Real = signal
-        sofafile.Data.Imag = signal
-    elif sofatype == 'GeneralFIR_unit':
-        sofafile.Data.Type = 'FIR'
-        sofafile.Data.initialize()
-        sofafile.Data.IR = signal
-        sofafile.Data.SamplingRate = sampling_rate
-        sofafile.Data.SamplingRate.Units = 'not_hertz'
-    elif sofatype == 'GeneralFIR_postype':
-        sofafile.Data.Type = 'FIR'
-        sofafile.Data.initialize()
-        sofafile.Data.IR = signal
-        sofafile.Data.SamplingRate = sampling_rate
-        sofafile.Source.Position.Type = 'not_type'
-    sofafile.close()
-
-
-# test_orientations.py
 @pytest.fixture
 def views():
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]

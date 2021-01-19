@@ -1,4 +1,4 @@
-from pytest import raises, fixture
+from pytest import raises
 
 import numpy as np
 import numpy.testing as npt

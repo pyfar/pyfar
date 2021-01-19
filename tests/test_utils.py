@@ -26,4 +26,3 @@ def test_copy():
                 npt.assert_allclose(value, value_copy)
             else:
                 assert value == value_copy
-

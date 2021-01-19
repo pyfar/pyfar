@@ -3,7 +3,6 @@ import numpy.testing as npt
 import pytest
 
 from pyfar import Signal
-from pyfar import fft
 
 
 def test_signal_init(sine):
@@ -278,7 +277,7 @@ def test_magic_setitem_wrong_norm(sine, sine_rms):
 def test_magic_setitem_wrong_n_samples(sine, impulse):
     """Test the magic function __setitem__."""
     signal = Signal(sine.time, sine.sampling_rate)
-    set_signal = Signal(sine.time[...,:-10], sine.sampling_rate)
+    set_signal = Signal(sine.time[..., :-10], sine.sampling_rate)
     with pytest.raises(ValueError, match='number of samples does not match'):
         signal[0] = set_signal
 

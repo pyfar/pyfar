@@ -1,11 +1,8 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-
-from unittest import mock
 import os.path
 import scipy.io.wavfile as wavfile
-import sofa
 
 from pyfar import io
 from pyfar import Signal
