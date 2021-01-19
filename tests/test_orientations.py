@@ -62,26 +62,6 @@ def test_orientations_from_view_up_invalid():
         Orientations.from_view_up(views, ups)
 
 
-@fixture
-def views():
-    return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
-
-
-@fixture
-def ups():
-    return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
-
-
-@fixture
-def positions():
-    return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
-
-
-@fixture
-def orientations(views, ups):
-    return Orientations.from_view_up(views, ups)
-
-
 def test_orientations_show(views, ups, positions, orientations):
     """
     Visualize orientations via `Orientations.show()`

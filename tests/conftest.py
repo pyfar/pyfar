@@ -693,3 +693,24 @@ def generate_sofa_GeneralKAck(tmpdir, noise_two_by_three_channel):
         sofafile.Data.SamplingRate = sampling_rate
         sofafile.Source.Position.Type = 'not_type'
     sofafile.close()
+
+
+# test_orientations.py
+@pytest.fixture
+def views():
+    return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
+
+
+@pytest.fixture
+def ups():
+    return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
+
+
+@pytest.fixture
+def positions():
+    return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
+
+
+@pytest.fixture
+def orientations(views, ups):
+    return Orientations.from_view_up(views, ups)
