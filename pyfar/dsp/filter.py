@@ -969,7 +969,8 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
         return signal_filt
 
 
-def center_frequencies_fractional_octaves(num_fractions=1):
+def center_frequencies_fractional_octaves(
+        num_fractions=1, frequency_range=None):
     """Return the octave center frequencies according to the IEC 61260:1:2014
     standard.
     Returns
@@ -994,6 +995,19 @@ def center_frequencies_fractional_octaves(num_fractions=1):
     indices = _frequency_indices(nominal, num_fractions)
     exact = _exact_center_frequencies_fractional_octaves(
         indices, num_fractions)
+
+    if frequency_range is not None:
+        f_lims = np.asarray(frequency_range)
+        if f_lims.size != 2:
+            raise ValueError(
+                "You need to specify a lower and upper limit frequency.")
+        if f_lims[0] > f_lims[1]:
+            raise ValueError(
+                "The second frequency needs to be higher than the first.")
+
+        mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
+        nominal = nominal[mask]
+        exact = exact[mask]
 
     return nominal, exact
 

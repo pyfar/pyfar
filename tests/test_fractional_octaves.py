@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from numpy import testing as npt
 
@@ -18,3 +19,20 @@ def test_center_frequencies_iec():
         num_fractions=3)
     actual_thirds_nom = actual_thirds[0]
     npt.assert_allclose(actual_thirds_nom, nominal_thirds)
+
+    with pytest.raises(ValueError, match="lower and upper limit"):
+        filter.center_frequencies_fractional_octaves(f_lims=(1,))
+
+    with pytest.raises(ValueError, match="lower and upper limit"):
+        filter.center_frequencies_fractional_octaves(f_lims=(3, 4, 5))
+
+    with pytest.raises(
+            ValueError, match="second frequency needs to be higher"):
+        filter.center_frequencies_fractional_octaves(
+            f_lims=(8e3, 1e3))
+
+    actual_octs = filter.center_frequencies_fractional_octaves(
+        num_fractions=1, f_lims=(100, 4e3))
+    actual_octs_nom = actual_octs[0]
+    nominal_octs_part = [125, 250, 500, 1000, 2000, 4000]
+    npt.assert_allclose(actual_octs_nom, nominal_octs_part)
