@@ -67,6 +67,14 @@ def test_fractional_coeff_oct_filter_iec():
         sr, 1, freq_range=(1e3, 4e3), order=order)
     np.testing.assert_allclose(actual, expected)
 
+    sr = 16e3
+    order = 2
+
+    actual = filter._coefficients_fractional_octave_bands(
+        sr, 1, freq_range=(5e3, 20e3), order=order)
+
+    assert actual.shape == (1, order, 6)
+
 
 def test_fract_oct_filter_iec(impulse_mock):
     # Test only Filter object related stuff here, testing of coefficients is

@@ -1,9 +1,10 @@
+import warnings
+
 import numpy as np
 import scipy.signal as spsignal
 
-from .classes import (FilterIIR, FilterSOS)
-
 from . import _audiofilter as iir
+from .classes import FilterIIR, FilterSOS
 
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
@@ -879,19 +880,27 @@ def _coefficients_fractional_octave_bands(
     nominal, exact = center_frequencies_fractional_octaves(
         num_fractions, freq_range)
 
-    sos = np.zeros((exact.size, order, 6), np.double)
+    freqs_upper = exact * octave_ratio**(1/2/num_fractions)
+    freqs_lower = exact * octave_ratio**(-1/2/num_fractions)
 
-    for idx, band in enumerate(range(0, exact.size)):
-        freq_upper = exact[band] * octave_ratio**(1/2/num_fractions)
-        freq_lower = exact[band] * octave_ratio**(-1/2/num_fractions)
+    # normalize interval such that the Nyquist frequency is 1
+    Wns = np.vstack((freqs_lower, freqs_upper)).T / sampling_rate * 2
 
-        # normalize interval such that the Nyquist frequency is 1
-        Wn = np.array([freq_lower, freq_upper]) / sampling_rate * 2
+    mask_skip = Wns[:, 0] >= 1
+
+    if np.any(mask_skip):
+        Wns = Wns[~mask_skip]
+        warnings.warn("Skipping bands above the Nyquist frequency")
+
+    num_bands = np.sum(~mask_skip)
+    sos = np.zeros((num_bands, order, 6), np.double)
+
+    for idx, Wn in enumerate(Wns):
         # in case the upper frequency limit is above Nyquist, use a highpass
         if Wn[-1] > 1:
             warnings.warn('Your upper frequency limit [{}] is above the \
                 Nyquist frequency. Using a highpass filter instead of a \
-                bandpass'.format(freq_upper))
+                bandpass'.format(freqs_upper[idx]))
             Wn = Wn[0]
             btype = 'highpass'
         else:
