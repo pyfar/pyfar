@@ -992,12 +992,13 @@ def center_frequencies_fractional_octaves(num_fractions=1):
             "Number of fractions can only be 1 for octaves"
             "or 3 for third octaves.")
     indices = _frequency_indices(nominal, num_fractions)
-    exact = exact_center_frequencies_fractional_octaves(indices, num_fractions)
+    exact = _exact_center_frequencies_fractional_octaves(
+        indices, num_fractions)
 
     return nominal, exact
 
 
-def exact_center_frequencies_fractional_octaves(indices, num_fractions):
+def _exact_center_frequencies_fractional_octaves(indices, num_fractions):
     """Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
     octave ratio
