@@ -1,26 +1,24 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-import tempfile
 
 from unittest import mock
 import os.path
 import scipy.io.wavfile as wavfile
+import sofa
 
 from pyfar import io
 from pyfar import Signal
 
-from test_io_data.generate_test_io_data import reference_signal
 
-
-baseline_path = 'tests/test_io_data'
-
-
-def test_read_wav():
+def test_read_wav(tmpdir):
     """Test default without optional parameters."""
-    filename = baseline_path + "/test_wav.wav"
-    signal = io.read_wav(filename)
+    # Generate test files
+    filename = os.path.join(tmpdir, 'test_wav.wav')
     signal_ref, sampling_rate = reference_signal()
+    wavfile.write(filename, sampling_rate, signal_ref.T)
+    # Read wav
+    signal = io.read_wav(filename)
     assert isinstance(signal, Signal)
     npt.assert_allclose(
             signal.time,
@@ -29,40 +27,197 @@ def test_read_wav():
     assert signal.sampling_rate == sampling_rate
 
 
-def test_write_wav(signal_mock):
+def test_write_wav(signal_mock, tmpdir):
     """Test default without optional parameters."""
-    with tempfile.TemporaryDirectory() as td:
-        filename = os.path.join(td, 'test_wav.wav')
-        io.write_wav(signal_mock, filename)
-        signal_reload = wavfile.read(filename)[-1].T
-        npt.assert_allclose(
-            signal_mock.time,
-            np.atleast_2d(signal_reload),
-            rtol=1e-10)
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(signal_mock, filename)
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        signal_mock.time,
+        np.atleast_2d(signal_reload),
+        rtol=1e-10)
 
 
-def test_write_wav_overwrite(signal_mock):
+def test_write_wav_overwrite(signal_mock, tmpdir):
     """Test overwriting behavior."""
-    with tempfile.TemporaryDirectory() as td:
-        filename = os.path.join(td, 'test_wav.wav')
-        io.write_wav(signal_mock, filename)
-        # Call with overwrite disabled
-        with pytest.raises(FileExistsError):
-            io.write_wav(signal_mock, filename, overwrite=False)
-        # Call with overwrite enabled
-        io.write_wav(signal_mock, filename, overwrite=True)
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(signal_mock, filename)
+    # Call with overwrite disabled
+    with pytest.raises(FileExistsError):
+        io.write_wav(signal_mock, filename, overwrite=False)
+    # Call with overwrite enabled
+    io.write_wav(signal_mock, filename, overwrite=True)
 
 
-def test_write_wav_nd(signal_mock_nd):
+def test_write_wav_nd(signal_mock_nd, tmpdir):
     """Test for signals of higher dimension."""
-    with tempfile.TemporaryDirectory() as td:
-        filename = os.path.join(td, 'test_wav.wav')
-        io.write_wav(signal_mock_nd, filename)
-        signal_reload = wavfile.read(filename)[-1].T
-        npt.assert_allclose(
-            signal_mock_nd.time,
-            signal_reload.reshape(signal_mock_nd.time.shape),
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(signal_mock_nd, filename)
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        signal_mock_nd.time,
+        signal_reload.reshape(signal_mock_nd.time.shape),
+        rtol=1e-10)
+
+
+def test_read_sofa_GeneralFIR(tmpdir):
+    """Test for sofa datatype GeneralFIR"""
+    sofatype = 'GeneralFIR'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
+    # Correct DataType
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    signal = io.read_sofa(filename)[0]
+    signal_ref = reference_signal(signal.cshape)[0]
+    npt.assert_allclose(
+            signal.time,
+            signal_ref,
             rtol=1e-10)
+
+
+def test_read_sofa_GeneralTF(tmpdir):
+    """Test for sofa datatype GeneralTF"""
+    sofatype = 'GeneralTF'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
+    # Wrong DataType
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    with pytest.raises(ValueError):
+        io.read_sofa(filename)
+
+
+def test_read_sofa_coordinates(tmpdir):
+    """Test for reading coordinates in sofa file"""
+    sofatype = 'GeneralFIR'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
+    # Correct coordinates
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    # Source coordinates
+    source_coordinates = io.read_sofa(filename)[1]
+    source_coordinates_ref = reference_coordinates()[0]
+    npt.assert_allclose(
+        source_coordinates.get_cart(),
+        source_coordinates_ref,
+        rtol=1e-10)
+    # Receiver coordinates
+    receiver_coordinates = io.read_sofa(filename)[2]
+    receiver_coordinates_ref = reference_coordinates()[1]
+    npt.assert_allclose(
+        receiver_coordinates.get_cart(),
+        receiver_coordinates_ref[:, :, 0],
+        rtol=1e-10)
+
+
+def test_read_sofa_sampling_rate_unit(tmpdir):
+    """Test to verify correct sampling rate unit of sofa file"""
+    sofatype = 'GeneralFIR_unit'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
+    # Wrong sampling rate Unit
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    with pytest.raises(ValueError):
+        io.read_sofa(filename)
+
+
+def test_read_sofa_position_type(tmpdir):
+    """Test for correct position type of sofa file"""
+    sofatype = 'GeneralFIR_postype'
+    # Generate test file
+    generate_sofa_file(tmpdir, sofatype)
+    # Wrong PositionType
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    with pytest.raises(ValueError):
+        io.read_sofa(filename)
+
+
+def generate_sofa_file(filedir, sofatype):
+    """ Generate the reference sofa files used for testing the read_sofa function.
+    Parameters
+    -------
+    filedir : String
+        Path to directory.
+    """
+    n_measurements = 1
+    n_receivers = 2
+    signal, sampling_rate = reference_signal(
+        shape=(n_measurements, n_receivers))
+    n_samples = signal.shape[-1]
+
+    filename = os.path.join(filedir, (sofatype + '.sofa'))
+    sofafile = sofa.Database.create(
+                    filename,
+                    sofatype.split('_')[0],
+                    dimensions={
+                        "M": n_measurements,
+                        "R": n_receivers,
+                        "N": n_samples})
+    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Source.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Source.Position = reference_coordinates()[0]
+    sofafile.Receiver.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Receiver.Position = reference_coordinates()[1]
+    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
+
+    if sofatype == 'GeneralFIR':
+        sofafile.Data.Type = 'FIR'
+        sofafile.Data.initialize()
+        sofafile.Data.IR = signal
+        sofafile.Data.SamplingRate = sampling_rate
+    elif sofatype == 'GeneralTF':
+        sofafile.Data.Type = 'TF'
+        sofafile.Data.initialize()
+        sofafile.Data.Real = signal
+        sofafile.Data.Imag = signal
+    elif sofatype == 'GeneralFIR_unit':
+        sofafile.Data.Type = 'FIR'
+        sofafile.Data.initialize()
+        sofafile.Data.IR = signal
+        sofafile.Data.SamplingRate = sampling_rate
+        sofafile.Data.SamplingRate.Units = 'not_hertz'
+    elif sofatype == 'GeneralFIR_postype':
+        sofafile.Data.Type = 'FIR'
+        sofafile.Data.initialize()
+        sofafile.Data.IR = signal
+        sofafile.Data.SamplingRate = sampling_rate
+        sofafile.Source.Position.Type = 'not_type'
+    sofafile.close()
+
+
+def reference_signal(shape=(1,)):
+    """ Generate sine of 440 Hz as numpy array.
+    Returns
+    -------
+    sine : ndarray
+        The sine signal
+    sampling_rate : int
+        The sampling rate
+    """
+    sampling_rate = 44100
+    n_periods = 20
+    amplitude = 1
+    frequency = 440
+
+    # time signal
+    times = np.arange(0, n_periods*frequency) / sampling_rate
+    sine = amplitude * np.sin(2 * np.pi * times * frequency)
+
+    shape + (3,)
+    sine = np.ones(shape + (sine.shape[-1],)) * sine
+
+    return sine, sampling_rate
+
+
+def reference_coordinates():
+    """ Generate coordinate array
+    Returns
+    -------
+    coordinates : ndarray
+        The coordinates
+    """
+    source_coordinates = np.ones((1, 3))
+    receiver_coordinates = np.ones((2, 3, 1))
+    return source_coordinates, receiver_coordinates
 
 
 @pytest.fixture

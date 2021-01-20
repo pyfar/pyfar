@@ -21,14 +21,17 @@ def test_signal_init_default_parameter(impulse_list):
     # using all defaults
     signal = Signal(impulse_list, 44100)
     assert signal.domain == 'time'
-    assert signal.signal_type == 'energy'
-    assert signal.fft_norm == 'unitary'
+    assert signal.fft_norm == 'none'
+    assert signal.comment is None
 
     # default of fft_norm depending on signal type
-    signal = Signal(impulse_list, 44100, signal_type='energy')
-    assert signal.fft_norm == 'unitary'
-    signal = Signal(impulse_list, 44100, signal_type='power')
-    assert signal.fft_norm == 'rms'
+    signal = Signal(impulse_list, 44100)
+    assert signal.fft_norm == 'none'
+
+
+def test_signal_comment():
+    signal = Signal([1, 0, 0], 44100, comment='Bla')
+    assert signal.comment == 'Bla'
 
 
 def test_domain_getter_freq(sine):
@@ -58,13 +61,10 @@ def test_domain_setter_freq_when_freq(sine):
 
 
 def test_domain_setter_freq_when_time(sine):
-    stype = 'power'
     fft_norm = 'rms'
     samplingrate = 40e3
-    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate,
-                                  stype, fft_norm))
-    signal = Signal(sine, 44100, domain='time',
-                    signal_type=stype, fft_norm=fft_norm)
+    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate, fft_norm))
+    signal = Signal(sine, 44100, domain='time', fft_norm=fft_norm)
     domain = 'freq'
     signal.domain = domain
     assert signal.domain == domain
@@ -80,13 +80,10 @@ def test_domain_setter_time_when_time(sine):
 
 
 def test_domain_setter_time_when_freq(sine):
-    stype = 'power'
     fft_norm = 'rms'
     samplingrate = 40e3
-    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate,
-                                  stype, fft_norm))
-    signal = Signal(spec, 44100, domain='freq',
-                    signal_type=stype, fft_norm=fft_norm)
+    spec = np.atleast_2d(fft.rfft(sine, len(sine), samplingrate, fft_norm))
+    signal = Signal(spec, 44100, domain='freq', fft_norm=fft_norm)
     signal._data = spec
     signal._n_samples = len(sine)
     domain = 'time'
@@ -98,16 +95,8 @@ def test_domain_setter_time_when_freq(sine):
 
 def test_signal_init_val(sine):
     """Test to init Signal with complete parameters."""
-    signal = Signal(sine, 44100, domain="time",
-                    signal_type="power", fft_norm='rms')
+    signal = Signal(sine, 44100, domain="time", fft_norm='rms')
     assert isinstance(signal, Signal)
-
-
-def test_signal_init_false_signal_type(sine):
-    """Test to init Signal with invalid signal type."""
-    with pytest.raises(ValueError):
-        Signal(sine, 44100, signal_type="falsetype")
-        pytest.fail("Not a valid signal type ('power'/'energy')")
 
 
 def test_signal_init_false_coord(sine):
@@ -159,9 +148,9 @@ def test_setter_time(sine, impulse):
 def test_getter_freq(sine, impulse):
     """Test if attribute freq is accessed correctly."""
     samplingrate = 44100
-    signal = Signal(sine, samplingrate, signal_type='power', fft_norm='rms')
+    signal = Signal(sine, samplingrate, fft_norm='rms')
     new_sine = sine * 2
-    spec = fft.rfft(new_sine, len(new_sine), samplingrate, 'power', 'rms')
+    spec = fft.rfft(new_sine, len(new_sine), samplingrate, 'rms')
     signal._domain = 'freq'
     signal._data = spec
     npt.assert_allclose(signal.freq, spec, atol=1e-15)
@@ -170,9 +159,8 @@ def test_getter_freq(sine, impulse):
 def test_setter_freq(sine, impulse):
     """Test if attribute freq is set correctly."""
     samplingrate = 44100
-    signal = Signal(sine, samplingrate, signal_type='energy')
-    spec = fft.rfft(impulse, len(impulse), samplingrate,
-                    signal_type='energy', fft_norm='unitary')
+    signal = Signal(sine, samplingrate)
+    spec = fft.rfft(impulse, len(impulse), samplingrate, fft_norm='unitary')
     signal.freq = spec
     assert signal.domain == 'freq'
     npt.assert_allclose(np.atleast_2d(spec), signal._data, atol=1e-15)
@@ -197,7 +185,12 @@ def test_setter_sampligrate(sine):
 def test_getter_signal_type(sine):
     """Test if attribute signal type is accessed correctly."""
     signal_type = "energy"
-    signal = Signal(sine, 44100)
+    signal = Signal(sine, 44100, fft_norm='none')
+    signal._signal_type = signal_type
+    npt.assert_string_equal(signal.signal_type, signal_type)
+
+    signal_type = "power"
+    signal = Signal(sine, 44100, fft_norm='rms')
     signal._signal_type = signal_type
     npt.assert_string_equal(signal.signal_type, signal_type)
 
@@ -206,46 +199,12 @@ def test_setter_signal_type(sine):
     """Test if attribute signal type is set correctly."""
     signal_type = "energy"
     signal = Signal(sine, 44100)
-    signal.signal_type = signal_type
-    npt.assert_string_equal(signal_type, signal._signal_type)
-
-
-def test_setter_signal_type_freq_domain_data(sine):
-    """Test if attribute signal type is set correctly."""
-    signal_type = "energy"
-    signal = Signal(sine, 44100, signal_type='power')
-    amplitude = np.max(np.abs(signal.freq))
-    signal.fft_norm = 'unitary'
-    signal.signal_type = signal_type
-    amplitude_new = np.max(np.abs(signal.freq))
-    npt.assert_almost_equal(amplitude, 1/np.sqrt(2), decimal=3)
-    npt.assert_almost_equal(amplitude_new, 500.1327464502182, decimal=3)
-
-
-def test_setter_signal_type_false_type(sine):
-    """Test if ValueError is raised when signal type is set incorrectly."""
-    signal = Signal(sine, 44100)
-    with pytest.raises(ValueError):
-        signal.signal_type = "falsetype"
-        pytest.fail("Not a valid signal type ('power'/'energy')")
-
-
-def test_signal_type_conversion():
-    spec_energy_unitary = np.atleast_2d([1, 1, 1])
-    spec_power_unitary = np.atleast_2d([1, 2, 1])
-    signal = Signal(spec_energy_unitary, 44100, n_samples=4, domain='freq',
-                    signal_type='energy')
-
-    # changing the signal type changes the fft_norm and this the spectrum
-    signal.signal_type = 'power'
-    npt.assert_allclose(spec_power_unitary, signal.freq, atol=1e-15)
-
-    signal.signal_type = 'energy'
-    npt.assert_allclose(spec_energy_unitary, signal.freq, atol=1e-15)
+    with pytest.raises(DeprecationWarning):
+        signal.signal_type = signal_type
 
 
 def test_getter_fft_norm(sine):
-    signal = Signal(sine, 44100, signal_type='power', fft_norm='psd')
+    signal = Signal(sine, 44100, fft_norm='psd')
     assert signal.fft_norm == 'psd'
 
 
@@ -253,8 +212,9 @@ def test_setter_fft_norm(sine):
     spec_power_unitary = np.atleast_2d([1, 2, 1])
     spec_power_amplitude = np.atleast_2d([1/4, 2/4, 1/4])
 
-    signal = Signal(spec_power_unitary, 44100, n_samples=4, domain='freq',
-                    signal_type='power', fft_norm='unitary')
+    signal = Signal(
+        spec_power_unitary, 44100, n_samples=4, domain='freq',
+        fft_norm='unitary')
 
     # changing the fft_norm also changes the spectrum
     signal.fft_norm = 'amplitude'
@@ -272,11 +232,6 @@ def test_setter_fft_norm(sine):
     with pytest.raises(ValueError):
         signal.fft_norm = 'bullshit'
 
-    # setting invalid fft_norm for energy signals
-    signal = Signal(sine, 44100, signal_type='energy')
-    with pytest.raises(ValueError):
-        signal.fft_norm = 'rms'
-
 
 def test_dtype(sine):
     """Test for the getter od dtype."""
@@ -292,11 +247,11 @@ def test_signal_length(sine):
     assert signal.signal_length == length
 
 
-def test_shape(sine, impulse):
-    """Test the attribute shape."""
+def test_cshape(sine, impulse):
+    """Test the attribute cshape."""
     data = np.array([sine, impulse])
     signal = Signal(data, 44100)
-    assert signal.shape == (2,)
+    assert signal.cshape == (2,)
 
 
 def test_magic_getitem(sine, impulse):
@@ -341,12 +296,12 @@ def test_magic_setitem_wrong_sr(sine, impulse):
         signal[0] = set_signal
 
 
-def test_magic_setitem_wrong_type(sine, impulse):
+def test_magic_setitem_wrong_norm(sine, impulse):
     """Test the magic function __setitem__."""
     sr = 44100
-    signal = Signal(impulse, sr, signal_type='energy', fft_norm='unitary')
-    set_signal = Signal(sine*2, sr, signal_type='power', fft_norm='unitary')
-    with pytest.raises(ValueError, match='signal types do not match'):
+    signal = Signal(impulse, sr, fft_norm='none')
+    set_signal = Signal(sine*2, sr, fft_norm='rms')
+    with pytest.raises(ValueError, match='FFT norms do not match'):
         signal[0] = set_signal
 
 
@@ -363,6 +318,81 @@ def test_magic_len(impulse):
     """Test the magic function __len__."""
     signal = Signal(impulse, 44100)
     assert len(signal) == 1000
+
+
+def test_find_nearest_time():
+    sampling_rate = 100
+    signal = Signal(np.zeros(100), sampling_rate)
+    actual = signal.find_nearest_time(0.5)
+    expected = 50
+    assert actual == expected
+
+    actual = signal.find_nearest_time([0.5, 0.75])
+    expected = [50, 75]
+    npt.assert_allclose(actual, expected)
+
+
+def test_find_nearest_frequency():
+    sampling_rate = 100
+    signal = Signal(np.zeros(100*2), sampling_rate*2)
+    actual = signal.find_nearest_frequency(50)
+    expected = 50
+    assert actual == expected
+
+    actual = signal.find_nearest_frequency([50, 75])
+    expected = [50, 75]
+    npt.assert_allclose(actual, expected)
+
+
+def test_reshape():
+
+    # test reshape with tuple
+    signal_in = Signal(np.random.rand(6, 256), 44100)
+    signal_out = signal_in.reshape((3, 2))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    signal_out = signal_in.reshape((3, -1))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    # test reshape with int
+    signal_in = Signal(np.random.rand(3, 2, 256), 44100)
+    signal_out = signal_in.reshape(6)
+    npt.assert_allclose(signal_in._data.reshape(6, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+
+def test_reshape_exceptions():
+    signal_in = Signal(np.random.rand(6, 256), 44100)
+    signal_out = signal_in.reshape((3, 2))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    # test assertion for non-tuple input
+    with pytest.raises(ValueError):
+        signal_out = signal_in.reshape([3, 2])
+
+    # test assertion for wrong dimension
+    with pytest.raises(ValueError, match='Can not reshape signal of cshape'):
+        signal_out = signal_in.reshape((3, 4))
+
+
+def test_flatten():
+
+    # test 2D signal (flatten should not change anything)
+    x = np.random.rand(2, 256)
+    signal_in = Signal(x, 44100)
+    signal_out = signal_in.flatten()
+
+    npt.assert_allclose(signal_in._data, signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    # test 3D signal
+    x = np.random.rand(3, 2, 256)
+    signal_in = Signal(x, 44100)
+    signal_out = signal_in.flatten()
+
+    npt.assert_allclose(signal_in._data.reshape((6, -1)), signal_out._data)
+    assert id(signal_in) != id(signal_out)
 
 
 @pytest.fixture

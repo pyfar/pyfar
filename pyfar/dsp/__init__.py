@@ -1,12 +1,9 @@
-from .filter import Filter
-from .filter import FilterFIR
-from .filter import FilterIIR
-from .filter import FilterSOS
+from .classes import (Filter, FilterFIR, FilterIIR, FilterSOS)
 from .dsp import (
-    phase, group_delay, spectrogram, wrap_to_2pi, nextpow2)
+    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram)
 
 
 __all__ = [
     Filter, FilterFIR, FilterIIR, FilterSOS,
-    phase, group_delay, spectrogram, wrap_to_2pi, nextpow2
+    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram
 ]

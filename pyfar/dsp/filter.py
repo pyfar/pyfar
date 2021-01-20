@@ -1,11 +1,9 @@
-import copy
-import warnings
-
 import numpy as np
 import scipy.signal as spsignal
 
-from pyfar import Signal
-import pyfar.dsp._audiofilter as iir
+from .classes import (FilterIIR, FilterSOS)
+
+from . import _audiofilter as iir
 
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
@@ -55,7 +53,9 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     sos = spsignal.butter(N, frequency_norm, btype, analog=False, output='sos')
 
     # generate filter object
-    filt = FilterSOS(sos)
+    filt = FilterSOS(sos, fs)
+    filt.comment = (f"Butterworth {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz.")
 
     # return the filter object
     if signal is None:
@@ -117,7 +117,10 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
                           output='sos')
 
     # generate filter object
-    filt = FilterSOS(sos)
+    filt = FilterSOS(sos, fs)
+    filt.comment = (f"Chebychev Type I {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz. "
+                    f"Pass band ripple {ripple} dB.")
 
     # return the filter object
     if signal is None:
@@ -180,7 +183,10 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
                           output='sos')
 
     # generate filter object
-    filt = FilterSOS(sos)
+    filt = FilterSOS(sos, fs)
+    filt.comment = (f"Chebychev Type II {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz. "
+                    f"Stop band attenuation {attenuation} dB.")
 
     # return the filter object
     if signal is None:
@@ -245,7 +251,11 @@ def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
                          analog=False, output='sos')
 
     # generate filter object
-    filt = FilterSOS(sos)
+    filt = FilterSOS(sos, fs)
+    filt.comment = (f"Elliptic (Cauer) {btype} of order {N}. "
+                    f"Cut-off frequency {frequency} Hz. "
+                    f"Pass band ripple {ripple} dB. "
+                    f"Stop band attenuation {attenuation} dB.")
 
     # return the filter object
     if signal is None:
@@ -325,7 +335,9 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
                           output='sos', norm=norm)
 
     # generate filter object
-    filt = FilterSOS(sos)
+    filt = FilterSOS(sos, fs)
+    filt.comment = (f"Bessel/Thomson {btype} of order {N} and '{norm}' "
+                    f"normalization. Cut-off frequency {frequency} Hz.")
 
     # return the filter object
     if signal is None:
@@ -391,6 +403,10 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
         raise ValueError(("peq_type must be 'I', 'II' or "
                           f"'III' but is '{peq_type}'.'"))
 
+    if quality_warp not in ['cos', 'sin', 'tan']:
+        raise ValueError(("quality_warp must be 'cos', 'sin' or "
+                          f"'tan' but is '{quality_warp}'.'"))
+
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
@@ -402,7 +418,10 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     ba[1] = a
 
     # generate filter object
-    filt = FilterIIR(ba)
+    filt = FilterIIR(ba, fs)
+    filt.comment = ("Second order parametric equalizer (PEQ) "
+                    f"of type {peq_type} with {gain} dB gain at "
+                    f"{center_frequency} Hz (Quality = {quality}).")
 
     # return the filter object
     if signal is None:
@@ -593,7 +612,10 @@ def crossover(signal, N, frequency, sampling_rate=None):
         SOS[np.arange(1, freq.size + 1, 2), 0, 0:3] *= -1
 
     # generate filter object
-    filt = FilterSOS(SOS)
+    filt = FilterSOS(SOS, fs)
+    freq_list = [str(f) for f in np.array(frequency, ndmin=1)]
+    filt.comment = (f"Linkwitz-Riley cross over network of order {N*2} at "
+                    f"{', '.join(freq_list)} Hz.")
 
     # return the filter object
     if signal is None:
@@ -603,319 +625,6 @@ def crossover(signal, N, frequency, sampling_rate=None):
         # return the filtered signal
         signal_filt = filt.process(signal)
         return signal_filt
-
-
-def atleast_3d_first_dim(arr):
-    arr = np.asarray(arr)
-    ndim = np.ndim(arr)
-
-    if ndim < 2:
-        arr = np.atleast_2d(arr)
-    if ndim < 3:
-        return arr[np.newaxis]
-    else:
-        return arr
-
-
-def pop_state_from_kwargs(**kwargs):
-    kwargs.pop('zi', None)
-    warnings.warn(
-        "This filter function does not support saving the filter state")
-    return kwargs
-
-
-def lfilter(coefficients, signal, zi):
-    return spsignal.lfilter(coefficients[0], coefficients[1], signal, zi=zi)
-
-
-def filtfilt(coefficients, signal, **kwargs):
-    kwargs = pop_state_from_kwargs(kwargs)
-    return spsignal.filtfilt(
-        coefficients[0], coefficients[1], signal, **kwargs)
-
-
-def sosfilt(sos, signal, zi):
-    return spsignal.sosfilt(sos, signal, zi=zi)
-
-
-def sosfiltfilt(sos, signal, **kwargs):
-    kwargs = pop_state_from_kwargs(kwargs)
-    return spsignal.sosfiltfilt(sos, signal, **kwargs)
-
-
-class Filter(object):
-    """
-    Container class for digital filters.
-    This is an abstract class method, only used for the shared processing
-    method used for the application of a filter on a signal.
-    """
-    def __init__(
-            self,
-            coefficients=None,
-            filter_func=None,
-            state=None):
-        """
-        Initialize a general Filter object.
-
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array.
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
-            in zero phase.
-        state : array, optional
-            The state of the filter from a priory knowledge.
-
-
-        Returns
-        -------
-        filter : Filter
-            The filter object
-
-        """
-        super().__init__()
-        if coefficients is not None:
-            coefficients = atleast_3d_first_dim(coefficients)
-        self._coefficients = coefficients
-        if state is not None:
-            if coefficients is None:
-                raise ValueError(
-                    "Cannot set a state without filter coefficients")
-            state = atleast_3d_first_dim(state)
-            self._initialized = True
-        else:
-            self._initialized = False
-        self._state = state
-        self._filter_func = None
-
-        self._FILTER_FUNCS = {
-            'default': None,
-            'zerophase': None}
-
-    def initialize(self):
-        raise NotImplementedError("Abstract class method")
-
-    @property
-    def shape(self):
-        """
-        The shape of the filter.
-        """
-        return self._coefficients.shape[:-2]
-
-    @property
-    def size(self):
-        """
-        The size of the filter, that is all elements in the filter object.
-        """
-        return np.prod(self.shape)
-
-    @property
-    def state(self):
-        """
-        The current state of the filter as an array with dimensions
-        corresponding to the order of the filter and number of filter channels.
-        """
-        return self._state
-
-    @property
-    def filter_func(self):
-        raise NotImplementedError("Abstract class method")
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        raise NotImplementedError("Abstract class method")
-
-    def process(self, signal, reset=True):
-        """Apply the filter to a signal.
-
-        Parameters
-        ----------
-        signal : Signal
-            The data to be filtered as Signal object.
-        reset : bool, True
-            If set to true, the filter state will be reset to zero before the
-            filter is applied to the signal.
-
-        Returns
-        -------
-        filtered : Signal
-            A filtered copy of the input signal.
-        """
-        if not isinstance(signal, Signal):
-            raise ValueError("The input needs to be a haiopy.Signal object.")
-
-        if reset is True:
-            self.reset()
-
-        if self.size > 1:
-            filtered_signal_data = np.broadcast_to(
-                signal.time,
-                (self.shape[0], *signal.time.shape))
-            filtered_signal_data = filtered_signal_data.copy()
-        else:
-            filtered_signal_data = signal.time.copy()
-
-        if self.state is not None:
-            for idx, (coeff, state) in enumerate(
-                    zip(self._coefficients, self._state)):
-                filtered_signal_data[idx, ...], new_state = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], state)
-        else:
-            for idx, coeff in enumerate(self._coefficients):
-                filtered_signal_data[idx, ...] = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], zi=None)
-
-        filtered_signal = copy.deepcopy(signal)
-        if (signal.time.ndim == 2) and (signal.shape[0] == 1):
-            filtered_signal_data = np.squeeze(filtered_signal_data)
-        filtered_signal.time = filtered_signal_data
-
-        return filtered_signal
-
-    def reset(self):
-        if self._state is not None:
-            self._state = np.zeros_like(self._state)
-        else:
-            warnings.warn(
-                "No previous state was set. Initialize a filter state first.")
-
-
-class FilterFIR(Filter):
-    """
-    Filter object for FIR filters.
-    """
-    def __init__(
-            self,
-            coefficients,
-            filter_func=lfilter):
-        """
-        Initialize a general Filter object.
-
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array with dimensions
-            (n_channels_filter, num_coefficients)
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
-            in zero phase.
-        state : array, optional
-            The state of the filter from a priory knowledge.
-        """
-        b = np.atleast_2d(coefficients)
-        a = np.zeros_like(b)
-        a[..., 0] = 1
-        coeff = np.stack((b, a), axis=-2)
-
-        super().__init__(coefficients=coeff)
-
-        self._FILTER_FUNCS = {
-            'default': lfilter,
-            'zerophase': filtfilt}
-        self._filter_func = filter_func
-
-    @property
-    def filter_func(self):
-        return self._filter_func
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        if type('filter_func') == str:
-            filter_func = self._FILTER_FUNCS[filter_func]
-        self._filter_func = filter_func
-
-
-class FilterIIR(Filter):
-    """
-    Filter object for IIR filters. For IIR filters with high orders, second
-    order section IIR filters using FilterSOS should be considered.
-    """
-    def __init__(
-            self,
-            coefficients,
-            filter_func=lfilter):
-        """IIR filter
-        Initialize a general Filter object.
-
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array, with shape
-            (n_filter_channels, n_coefficients_num, n_coefficients_denom)
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
-            in zero phase.
-        state : array, optional
-            The state of the filter from a priory knowledge.
-        """
-        coeff = np.atleast_2d(coefficients)
-        super().__init__(coefficients=coeff)
-
-        self._FILTER_FUNCS = {
-            'default': lfilter,
-            'zerophase': filtfilt}
-        self._filter_func = filter_func
-
-    @property
-    def filter_func(self):
-        return self._filter_func
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        if type('filter_func') == str:
-            filter_func = self._FILTER_FUNCS[filter_func]
-        self._filter_func = filter_func
-
-
-class FilterSOS(Filter):
-    """
-    Filter object for IIR filters as second order sections.
-    """
-    def __init__(
-            self,
-            coefficients,
-            filter_func=sosfilt):
-        """
-        Initialize a general Filter object.
-
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array with dimensions
-            (n_filter_chan, n_sections, 6)
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
-            in zero phase.
-        state : array, optional
-            The state of the filter from a priory knowledge.
-
-        """
-        coeff = np.atleast_2d(coefficients)
-        if coeff.shape[-1] != 6:
-            raise ValueError(
-                "The coefficients are not in line with a second order",
-                "section filter structure.")
-        super().__init__(
-            coefficients=coeff)
-
-        self._FILTER_FUNCS = {
-            'default': sosfilt,
-            'zerophase': sosfiltfilt
-        }
-        self._filter_func = filter_func
-
-    @property
-    def filter_func(self):
-        return self._filter_func
 
 
 def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
@@ -943,11 +652,11 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 
     if order == 1 and kind == 'high':
         shelve = iir.biquad_hshv1st
-    elif order != 2 and kind == 'high':
+    elif order == 2 and kind == 'high':
         shelve = iir.biquad_hshv2nd
     elif order == 1 and kind == 'low':
         shelve = iir.biquad_lshv1st
-    elif order != 2 and kind == 'low':
+    elif order == 2 and kind == 'low':
         shelve = iir.biquad_lshv2nd
     else:
         raise ValueError(f"order must be 1 or 2 but is {order}")
@@ -957,7 +666,10 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
     ba[1] = a
 
     # generate filter object
-    filt = FilterIIR(ba)
+    filt = FilterIIR(ba, fs)
+    kind = "High" if kind == "high" else "Low"
+    filt.comment = (f"{kind}-shelve of order {order} and type "
+                    f"{shelve_type} with {gain} dB gain at {frequency} Hz.")
 
     # return the filter object
     if signal is None:

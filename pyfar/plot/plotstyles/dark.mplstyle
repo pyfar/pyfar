@@ -6,10 +6,6 @@
 
 ##### CONFIGURATION BEGINS HERE
 
-### BACKEND
-backend      : Qt5Agg
-
-
 #### LINES
 ## See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
 ## information on line properties.
@@ -24,9 +20,8 @@ font.style          : normal
 font.variant        : normal
 font.weight         : normal
 font.stretch        : normal
-font.size           : 10.0
-font.sans-serif     : Arial, DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Avant Garde, sans-serif
-
+font.sans-serif     : DejaVu Sans, Arial, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Avant Garde, sans-serif
+mathtext.fontset    : dejavusans
 
 #### TEXT
 text.color          : white
@@ -36,9 +31,7 @@ text.color          : white
 axes.facecolor      : [.1,.1,.1]    ## axes background color
 axes.edgecolor      : white         ## axes edge color
 axes.grid           : True          ## display grid or not
-axes.titlesize      : 10            ## fontsize of the axes title
 axes.titleweight    : bold          ## font weight of title
-axes.labelsize      : 10            ## fontsize of the x any y labels
 axes.labelcolor     : white
 # colors from palettable.cartocolors.qualitative.Prism_8
 # slightly changed colors to work with dark and light theme
@@ -51,12 +44,10 @@ axes.prop_cycle     : cycler('color', ['1471B9','D83C27','ECAD20','5F4690','0785
 ## see http://matplotlib.org/api/axis_api.html#matplotlib.axis.Tick
 xtick.bottom         : False    ## draw ticks on the bottom side
 xtick.color          : white    ## color of the tick labels
-xtick.labelsize      : 10       ## fontsize of the tick labels
 
 
 ytick.left           : False    ## draw ticks on the left side
 ytick.color          : white    ## color of the tick labels
-ytick.labelsize      : 10       ## fontsize of the tick labels
 
 
 #### GRIDS
