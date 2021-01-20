@@ -1080,7 +1080,7 @@ def _frequency_indices(frequencies, num_fractions):
 
 
 def filter_fractional_octave_bands(
-        samplingrate, num_fractions,
+        sampling_rate, num_fractions,
         freq_range=(20.0, 20e3), order=14):
     """Create a fractional octave filter bank.
 
@@ -1109,11 +1109,8 @@ def filter_fractional_octave_bands(
 
     octave_ratio = 10**(3/10)
 
-    nominal, exact = center_frequencies_fractional_octaves(num_fractions)
-    mask_frequencies = (nominal > freq_range[0]) & (nominal < freq_range[1])
-
-    nominal = nominal[mask_frequencies]
-    exact = exact[mask_frequencies]
+    nominal, exact = center_frequencies_fractional_octaves(
+        num_fractions, freq_range)
 
     sos = np.zeros((exact.size, order, 6), np.double)
 
@@ -1122,7 +1119,7 @@ def filter_fractional_octave_bands(
         freq_lower = exact[band] * octave_ratio**(-1/2/num_fractions)
 
         # normalize interval such that the Nyquist frequency is 1
-        Wn = np.array([freq_lower, freq_upper]) / samplingrate * 2
+        Wn = np.array([freq_lower, freq_upper]) / sampling_rate * 2
         # in case the upper frequency limit is above Nyquist, use a highpass
         if Wn[-1] > 1:
             warnings.warn('Your upper frequency limit [{}] is above the \
