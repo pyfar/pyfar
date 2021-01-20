@@ -791,7 +791,62 @@ def _frequency_indices(frequencies, num_fractions):
     return indices
 
 
-def filter_fractional_octave_bands(
+def fractional_octave_bands(
+        signal,
+        num_fractions,
+        sampling_rate=None,
+        freq_range=(20.0, 20e3),
+        order=14):
+    """Create a fractional octave filter bank.
+
+    Parameters
+    ----------
+    samplingrate : integer
+        samplingrate of the signal
+    num_fractions : integer
+        number of octave fractions
+    order : integer, optional
+        order of the butterworth filter
+
+    Returns
+    -------
+    signal : Signal
+        The filtered signal. Only returned if `sampling_rate = None`.
+    filter : Filter
+        Filter object. Only returned if `signal = None`.
+
+    Notes
+    -----
+    This function uses second order sections of butterworth filters for
+    increased numeric accuracy and stability.
+    """
+    # check input
+    if (signal is None and sampling_rate is None) \
+            or (signal is not None and sampling_rate is not None):
+        raise ValueError('Either signal or sampling_rate must be none.')
+
+    fs = signal.sampling_rate if sampling_rate is None else sampling_rate
+
+    sos = _coefficients_fractional_octave_bands(
+        sampling_rate=fs, num_fractions=num_fractions,
+        freq_range=freq_range, order=order)
+
+    filt = FilterSOS(sos, fs)
+    filt.comment = (
+        "Second order section 1/{num_fractions} fractional octave band"
+        "filter of order {order}")
+
+    # return the filter object
+    if signal is None:
+        # return the filter object
+        return filt
+    else:
+        # return the filtered signal
+        signal_filt = filt.process(signal)
+        return signal_filt
+
+
+def _coefficients_fractional_octave_bands(
         sampling_rate, num_fractions,
         freq_range=(20.0, 20e3), order=14):
     """Create a fractional octave filter bank.

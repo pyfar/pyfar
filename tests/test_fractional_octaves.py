@@ -1,9 +1,12 @@
-from numpy.testing._private.utils import assert_raises
-import pytest
+from unittest import mock
+
 import numpy as np
+import pytest
 from numpy import testing as npt
 
 from pyfar.dsp import filter
+from pyfar.dsp.classes import FilterSOS
+from pyfar.signal import Signal
 
 
 def test_center_frequencies_iec():
@@ -42,10 +45,9 @@ def test_center_frequencies_iec():
     npt.assert_allclose(actual_octs_nom, nominal_octs_part)
 
 
-def test_fractional_oct_filter_iec():
+def test_fractional_coeff_oct_filter_iec():
     sr = 48e3
     order = 2
-    expected = np.zeros((3, order, 6))
 
     expected = np.array([
         [[1.99518917e-03,  3.99037834e-03,  1.99518917e-03,
@@ -61,6 +63,66 @@ def test_fractional_oct_filter_iec():
          [1.00000000e+00, -2.00000000e+00,  1.00000000e+00,
           1.00000000e+00, -1.67171842e+00,  8.18664740e-01]]])
 
-    actual = filter.filter_fractional_octave_bands(
+    actual = filter._coefficients_fractional_octave_bands(
         sr, 1, freq_range=(1e3, 4e3), order=order)
     np.testing.assert_allclose(actual, expected)
+
+
+def test_fract_oct_filter_iec(impulse_mock):
+    # Test only Filter object related stuff here, testing of coefficients is
+    # done in separate test.
+    sr = 48e3
+    order = 2
+
+    f_obj = filter.fractional_octave_bands(
+        None, 3, sampling_rate=sr, order=order)
+    assert isinstance(f_obj, FilterSOS)
+
+    sig = filter.fractional_octave_bands(impulse_mock, 3, order=order)
+    assert isinstance(sig, Signal)
+
+    ir_actual = filter.fractional_octave_bands(
+        impulse_mock, 1, freq_range=(1e3, 4e3), order=order)
+
+    assert ir_actual.time.shape[0] == 3
+
+
+@pytest.fixture
+def impulse_mock():
+    """ Generate impulse signals, in order to test independently of the Signal
+    object.
+
+    Returns
+    -------
+    signal : Signal
+        single channel dirac signal, delay 0 samples, length 1024 samples,
+        sampling rate 44.1 kHz
+
+    """
+    n_samples = 1024
+    n_bins = int(n_samples / 2 + 1)
+    sampling_rate = 48e3
+    times = np.arange(0, n_samples) / sampling_rate
+    frequencies = np.arange(n_bins) * sampling_rate / n_bins
+
+    # time signal:
+    time = np.zeros(n_samples, dtype='float64')
+    time[0] = 1
+
+    # frequency signal
+    freq = np.ones(n_bins)
+
+    # create a mock object of Signal class to test the plot independently
+    signal = mock.Mock(spec_set=Signal(time, sampling_rate))
+    signal.sampling_rate = sampling_rate
+    signal.time = time[np.newaxis, :]
+    signal.times = times
+    signal.n_samples = n_samples
+    signal.freq = freq[np.newaxis, :]
+    signal.frequencies = frequencies
+    signal.n_bins = n_bins
+    signal.cshape = (1, )
+    signal.signal_type = 'energy'
+    signal.fft_norm = 'unitary'
+
+    return signal
