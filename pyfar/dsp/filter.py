@@ -876,7 +876,6 @@ def _coefficients_fractional_octave_bands(
                 octave band filters.")
 
     octave_ratio = 10**(3/10)
-
     nominal, exact = center_frequencies_fractional_octaves(
         num_fractions, freq_range)
 
@@ -887,7 +886,6 @@ def _coefficients_fractional_octave_bands(
     Wns = np.vstack((freqs_lower, freqs_upper)).T / sampling_rate * 2
 
     mask_skip = Wns[:, 0] >= 1
-
     if np.any(mask_skip):
         Wns = Wns[~mask_skip]
         warnings.warn("Skipping bands above the Nyquist frequency")
@@ -898,9 +896,9 @@ def _coefficients_fractional_octave_bands(
     for idx, Wn in enumerate(Wns):
         # in case the upper frequency limit is above Nyquist, use a highpass
         if Wn[-1] > 1:
-            warnings.warn('Your upper frequency limit [{}] is above the \
+            warnings.warn('The upper frequency limit {} Hz is above the \
                 Nyquist frequency. Using a highpass filter instead of a \
-                bandpass'.format(freqs_upper[idx]))
+                bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
             Wn = Wn[0]
             btype = 'highpass'
         else:
