@@ -122,7 +122,7 @@ def test_data_frequency_find_nearest():
     npt.assert_allclose(idx, np.asarray([1, 2]))
 
 
-def test_separation_from_data_frequency():
+def test_separation_from_time_data():
     """Check if attributes from FrequencyData are really not available."""
     data = [1, 0, -1]
     freqs = [0, .1, .3]
