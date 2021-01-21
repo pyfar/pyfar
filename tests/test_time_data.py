@@ -116,6 +116,26 @@ def test_data_time_find_nearest():
     npt.assert_allclose(idx, np.asarray([1, 2]))
 
 
+def test_magic_setitem():
+    """Test the setimtem for TimeData."""
+    times = [0, .1, .3]
+
+    time_a = TimeData([[1, 0, -1], [1, 0, -1]], times)
+    time_b = TimeData([2, 0, -2], times)
+    time_a[0] = time_b
+
+    npt.assert_allclose(time_a.time, np.asarray([[2, 0, -2], [1, 0, -1]]))
+
+
+def test_magic_setitem_wrong_n_samples():
+    """Test the setimtem for TimeData with wrong number of samples."""
+
+    time_a = TimeData([1, 0, -1], [0, .1, .3])
+    time_b = TimeData([2, 0, -2, 0], [0, .1, .3, .7])
+    with pytest.raises(ValueError):
+        time_a[0] = time_b
+
+
 def test_separation_from_data_frequency():
     """Check if attributes from DataFrequency are really not available."""
     data = [1, 0, -1]

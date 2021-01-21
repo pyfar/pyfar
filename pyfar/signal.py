@@ -270,6 +270,14 @@ class TimeData(Audio):
             indices[idx] = np.argmin(np.abs(self.times - time))
         return np.squeeze(indices)
 
+    def _assert_matching_meta_data(self, other):
+        """Check if the meta data matches across two TimeData objects."""
+        if not isinstance(other, TimeData):
+            raise ValueError(("Comparison only valid against Signal, "
+                              "TimeData, and FrequencyData objects."))
+        if self.n_samples != other.n_samples:
+            raise ValueError("The number of samples does not match.")
+
 
 class FrequencyData(Audio):
     """Class for frequency data.
@@ -401,6 +409,17 @@ class FrequencyData(Audio):
         for idx, freq in enumerate(freqs):
             indices[idx] = np.argmin(np.abs(self.frequencies - freq))
         return np.squeeze(indices)
+
+    def _assert_matching_meta_data(self, other):
+        """Check if the meta data matches across two FrequencyData objects."""
+        if not isinstance(other, FrequencyData):
+            raise ValueError(
+                "Comparison only valid against FrequencyData objects.")
+        if self.n_bins != other.n_bins:
+            raise ValueError(
+                "The number of frequency bins does not match.")
+        if self.fft_norm != other.fft_norm:
+            raise ValueError("The FFT norms do not match.")
 
 
 class Signal(FrequencyData, TimeData):
@@ -576,6 +595,17 @@ class Signal(FrequencyData, TimeData):
             raise ValueError("No valid fft norm set.")
         return stype
 
+    def _assert_matching_meta_data(self, other):
+        """Check if the meta data matches across two Signal objects."""
+        if not isinstance(other, Signal):
+            raise ValueError("Comparison only valid against Signal objects.")
+        if self.sampling_rate != other.sampling_rate:
+            raise ValueError("The sampling rates do not match.")
+        if self.n_samples != other.n_samples:
+            raise ValueError("The number of samples does not match.")
+        if self.fft_norm != other.fft_norm:
+            raise ValueError("The FFT norms do not match.")
+
     @signal_type.setter
     def signal_type(self, value):
         raise DeprecationWarning("Deprecated, use fft_norm instead.")
@@ -610,19 +640,6 @@ class Signal(FrequencyData, TimeData):
         """Length of the object which is the number of samples stored.
         """
         return self.n_samples
-
-    def _assert_matching_meta_data(self, other):
-        """Check if the sampling rate, the number of samples, and the signal
-        type of two Signal objects match.
-        """
-        if not isinstance(other, Signal):
-            raise ValueError("Comparison only valid against Signal objects.")
-        if self.sampling_rate != other.sampling_rate:
-            raise ValueError("The sampling rates do not match.")
-        if self.n_samples != other.n_samples:
-            raise ValueError("The number of samples does not match.")
-        if self.fft_norm != other.fft_norm:
-            raise ValueError("The FFT norms do not match.")
 
     def __iter__(self):
         """Iterator for signals. The actual iteration is handled through

@@ -131,6 +131,38 @@ def test_data_frequency_find_nearest():
     npt.assert_allclose(idx, np.asarray([1, 2]))
 
 
+def test_magic_setitem():
+    """Test the setitem for FrequencyData."""
+    freqs = [0, .1, .3]
+
+    freq_a = FrequencyData([[1, 0, -1], [1, 0, -1]], freqs)
+    freq_b = FrequencyData([2, 0, -2], freqs)
+    freq_a[0] = freq_b
+
+    npt.assert_allclose(freq_a.freq, np.asarray([[2, 0, -2], [1, 0, -1]]))
+
+
+def test_magic_setitem_wrong_fft_norm():
+    """Test the setitem for FrequencyData with wrong FFT norm."""
+    freqs = [0, .1, .3]
+
+    freq_a = FrequencyData([1, 0, -1], freqs)
+    freq_b = FrequencyData([2, 0, -2], freqs, fft_norm='psd')
+
+    with pytest.raises(ValueError):
+        freq_a[0] = freq_b
+
+
+def test_magic_setitem_wrong_n_bins():
+    """Test the setitem for FrequencyData with wrong number of bins."""
+
+    freq_a = FrequencyData([1, 0, -1], [0, .1, .3])
+    freq_b = FrequencyData([2, 0, -2, 0], [0, .1, .3, .7])
+
+    with pytest.raises(ValueError):
+        freq_a[0] = freq_b
+
+
 def test_separation_from_time_data():
     """Check if attributes from FrequencyData are really not available."""
     data = [1, 0, -1]
