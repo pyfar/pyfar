@@ -3,6 +3,7 @@ from unittest import mock
 import numpy as np
 import pytest
 from numpy import testing as npt
+import scipy.signal as spsignal
 
 from pyfar.dsp import filter
 from pyfar.dsp.classes import FilterSOS
@@ -68,7 +69,7 @@ def test_fractional_coeff_oct_filter_iec():
     np.testing.assert_allclose(actual, expected)
 
     sr = 16e3
-    order = 2
+    order = 6
 
     actual = filter._coefficients_fractional_octave_bands(
         sr, 1, freq_range=(5e3, 20e3), order=order)
@@ -93,6 +94,29 @@ def test_fract_oct_filter_iec(impulse_mock):
         impulse_mock, 1, freq_range=(1e3, 4e3), order=order)
 
     assert ir_actual.time.shape[0] == 3
+
+
+def test_extend_sos_coefficients():
+    sos = np.array([
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+    ])
+
+    expected = np.array([
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+    ])
+
+    actual = filter._extend_sos_coefficients(sos, 4)
+    npt.assert_allclose(actual, expected)
+
+    # test if the extended filter has an ideal impulse response.
+    imp = np.zeros(512)
+    imp[0] = 1
+    imp_filt = spsignal.sosfilt(actual, imp)
+    npt.assert_allclose(imp_filt, imp)
 
 
 @pytest.fixture
