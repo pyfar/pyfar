@@ -52,22 +52,6 @@ class Audio(object):
         return self._domain
 
     @property
-    def signal_type(self):
-        """The signal type."""
-        if self.fft_norm == 'none':
-            stype = 'energy'
-        elif self.fft_norm in [
-                "unitary", "amplitude", "rms", "power", "psd"]:
-            stype = 'energy'
-        else:
-            raise ValueError("No valid fft norm set.")
-        return stype
-
-    @signal_type.setter
-    def signal_type(self, value):
-        raise DeprecationWarning("Deprecated, use fft_norm instead.")
-
-    @property
     def dtype(self):
         """The data type of the signal. This can be any data type and precision
         supported by numpy."""
@@ -576,6 +560,22 @@ class Signal(FrequencyData, TimeData):
                 value, inverse=False)
 
         self._fft_norm = value
+
+    @property
+    def signal_type(self):
+        """The signal type."""
+        if self.fft_norm == 'none':
+            stype = 'energy'
+        elif self.fft_norm in [
+                "unitary", "amplitude", "rms", "power", "psd"]:
+            stype = 'energy'
+        else:
+            raise ValueError("No valid fft norm set.")
+        return stype
+
+    @signal_type.setter
+    def signal_type(self, value):
+        raise DeprecationWarning("Deprecated, use fft_norm instead.")
 
     def __add__(self, data):
         return add((self, data), 'freq')
