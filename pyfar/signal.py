@@ -155,14 +155,8 @@ class Audio(object):
         else:
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
-        items = Signal(
-            data,
-            sampling_rate=self.sampling_rate,
-            domain=self.domain,
-            fft_norm=self.fft_norm,
-            dtype=self.dtype)
 
-        return items
+        return self._return_item(data)
 
     def __setitem__(self, key, value):
         """Set signal channels at key.
@@ -277,6 +271,12 @@ class TimeData(Audio):
                               "TimeData, and FrequencyData objects."))
         if self.n_samples != other.n_samples:
             raise ValueError("The number of samples does not match.")
+
+    def _return_item(self, data):
+        """Return new TimeData object with data."""
+        item = TimeData(
+            data, times=self.times, comment=self.comment, dtype=self.dtype)
+        return item
 
 
 class FrequencyData(Audio):
@@ -420,6 +420,13 @@ class FrequencyData(Audio):
                 "The number of frequency bins does not match.")
         if self.fft_norm != other.fft_norm:
             raise ValueError("The FFT norms do not match.")
+
+    def _return_item(self, data):
+        """Return new FrequencyData object with data."""
+        item = FrequencyData(
+            data, frequencies=self.frequencies, fft_norm=self.fft_norm,
+            comment=self.comment, dtype=self.dtype)
+        return item
 
 
 class Signal(FrequencyData, TimeData):
@@ -605,6 +612,14 @@ class Signal(FrequencyData, TimeData):
             raise ValueError("The number of samples does not match.")
         if self.fft_norm != other.fft_norm:
             raise ValueError("The FFT norms do not match.")
+
+    def _return_item(self, data):
+        """Return new Signal object with data."""
+        item = Signal(data, sampling_rate=self.sampling_rate,
+                      n_samples=self.n_samples, domain=self.domain,
+                      fft_norm=self.fft_norm, comment=self.comment,
+                      dtype=self.dtype)
+        return item
 
     @signal_type.setter
     def signal_type(self, value):

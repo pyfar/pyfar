@@ -116,6 +116,14 @@ def test_data_time_find_nearest():
     npt.assert_allclose(idx, np.asarray([1, 2]))
 
 
+def test_magic_getitem_slice():
+    """Test slicing operations by the magic function __getitem__."""
+    data = np.array([[1, 0, -1], [2, 0, -2]])
+    times = [0, .1, .3]
+    time = TimeData(data, times)
+    npt.assert_allclose(TimeData(data[0], times)._data, time[0]._data)
+
+
 def test_magic_setitem():
     """Test the setimtem for TimeData."""
     times = [0, .1, .3]
