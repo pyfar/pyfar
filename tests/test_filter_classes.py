@@ -4,6 +4,7 @@ import numpy as np
 import numpy.testing as npt
 import pyfar.dsp.classes as fo
 from pyfar import Signal
+from scipy import signal as spsignal
 
 
 def test_filter_init_empty_coefficients():
@@ -507,6 +508,29 @@ def test_atleast_3d_first_dim():
     desired = arr.copy()
     arr_3d = fo.atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
+
+
+def test_extend_sos_coefficients():
+    sos = np.array([
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+    ])
+
+    expected = np.array([
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+    ])
+
+    actual = fo.extend_sos_coefficients(sos, 4)
+    npt.assert_allclose(actual, expected)
+
+    # test if the extended filter has an ideal impulse response.
+    imp = np.zeros(512)
+    imp[0] = 1
+    imp_filt = spsignal.sosfilt(actual, imp)
+    npt.assert_allclose(imp_filt, imp)
 
 
 def test_impulse_mock(impulse_mock):

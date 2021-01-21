@@ -4,7 +4,7 @@ import numpy as np
 import scipy.signal as spsignal
 
 from . import _audiofilter as iir
-from .classes import FilterIIR, FilterSOS
+from .classes import FilterIIR, FilterSOS, extend_sos_coefficients
 
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
@@ -904,7 +904,7 @@ def _coefficients_fractional_octave_bands(
             sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
             sos_hp_order = sos_hp.shape[0]
             if sos_hp_order < order:
-                sos_coeff = _extend_sos_coefficients(sos_hp, order)
+                sos_coeff = extend_sos_coefficients(sos_hp, order)
             else:
                 sos_coeff = sos_hp
         else:
@@ -913,18 +913,3 @@ def _coefficients_fractional_octave_bands(
                 order, Wn, btype=btype, output='sos')
         sos[idx, :, :] = sos_coeff
     return sos
-
-
-def _extend_sos_coefficients(sos, order):
-    """Extend a set of SOS filter coefficients to match a required filter order
-    by adding sections with coefficients resulting in an ideal frequency
-    response.
-    """
-    # sos = np.asarray(sos)
-    sos_order = sos.shape[0]
-    pad_len = order-sos_order
-    sos_ext = np.zeros((pad_len, 6))
-    sos_ext[:, 3] = 1.
-    sos_ext[:, 0] = 1.
-
-    return np.vstack((sos, sos_ext))

@@ -46,6 +46,20 @@ def sosfiltfilt(sos, signal, **kwargs):
     return spsignal.sosfiltfilt(sos, signal, **kwargs)
 
 
+def extend_sos_coefficients(sos, order):
+    """Extend a set of SOS filter coefficients to match a required filter order
+    by adding sections with coefficients resulting in an ideal frequency
+    response.
+    """
+    sos_order = sos.shape[0]
+    pad_len = order-sos_order
+    sos_ext = np.zeros((pad_len, 6))
+    sos_ext[:, 3] = 1.
+    sos_ext[:, 0] = 1.
+
+    return np.vstack((sos, sos_ext))
+
+
 class Filter(object):
     """
     Container class for digital filters.

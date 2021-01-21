@@ -96,29 +96,6 @@ def test_fract_oct_filter_iec(impulse_mock):
     assert ir_actual.time.shape[0] == 3
 
 
-def test_extend_sos_coefficients():
-    sos = np.array([
-        [1, 0, 0, 1, 0, 0],
-        [1, 0, 0, 1, 0, 0],
-    ])
-
-    expected = np.array([
-        [1, 0, 0, 1, 0, 0],
-        [1, 0, 0, 1, 0, 0],
-        [1, 0, 0, 1, 0, 0],
-        [1, 0, 0, 1, 0, 0],
-    ])
-
-    actual = filter._extend_sos_coefficients(sos, 4)
-    npt.assert_allclose(actual, expected)
-
-    # test if the extended filter has an ideal impulse response.
-    imp = np.zeros(512)
-    imp[0] = 1
-    imp_filt = spsignal.sosfilt(actual, imp)
-    npt.assert_allclose(imp_filt, imp)
-
-
 @pytest.fixture
 def impulse_mock():
     """ Generate impulse signals, in order to test independently of the Signal
