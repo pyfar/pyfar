@@ -29,6 +29,15 @@ def test_data_frequency_init_wrong_number_of_freqs():
         FrequencyData(data, freqs)
 
 
+def test_data_frequency_with_non_monotonously_increasing_frequencies():
+    """Test if non monotnously increasing frequencies raises an assertion."""
+    data = [1, 0, -1]
+    freqs = [0, .2, .1]
+
+    with pytest.raises(ValueError):
+        FrequencyData(data, freqs)
+
+
 def test_data_frequency_with_wrong_fft_norm():
     data = [1, 0, -1]
     freqs = [0, .1, .2]

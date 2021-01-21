@@ -215,7 +215,7 @@ class TimeData(Audio):
         if self._times.size != self.n_samples:
             raise ValueError(
                 "The length of times must be data.shape[-1]")
-        if np.any(np.diff(self._times) <= 0) and len(times) > 1:
+        if np.any(np.diff(self._times) <= 0) and len(self._times) > 1:
             raise ValueError("Times must be monotonously increasing.")
 
     @property
@@ -321,6 +321,9 @@ class FrequencyData(Audio):
         if self._frequencies.size != self.n_bins:
             raise ValueError(
                 "The number of freqencies must be data.shape[-1]")
+        if np.any(np.diff(self._frequencies) <= 0) and \
+                len(self._frequencies) > 1:
+            raise ValueError("Frequencies must be monotonously increasing.")
 
         if fft_norm is None:
             fft_norm = 'none'
