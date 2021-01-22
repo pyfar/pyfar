@@ -683,49 +683,97 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 
 
 def center_frequencies_fractional_octaves(
-        num_fractions=1, frequency_range=None):
+        num_fractions=1, frequency_range=(20, 20e3)):
     """Return the octave center frequencies according to the IEC 61260:1:2014
     standard.
+
+    Parameters
+    ----------
+    num_fractions : int, 1
+        The number of fractional octaves
+    frequency_range : array, tuple, (20, 20e3)
+        The lower and upper frequency limits
+
     Returns
     -------
     frequencies : ndarray, float
         Octave center frequencies
-    """
-    if num_fractions == 1:
-        nominal = np.array([
-            31.5, 63, 125, 250, 500, 1e3,
-            2e3, 4e3, 8e3, 16e3], dtype=np.float)
-    elif num_fractions == 3:
-        nominal = np.array([
-            25, 31.5, 40, 50, 63, 80, 100, 125, 160,
-            200, 250, 315, 400, 500, 630, 800, 1000,
-            1250, 1600, 2000, 2500, 3150, 4000, 5000,
-            6300, 8000, 10000, 12500, 16000, 20000], dtype=np.float)
-    else:
-        raise ValueError(
-            "Number of fractions can only be 1 for octaves"
-            "or 3 for third octaves.")
-    indices = _frequency_indices(nominal, num_fractions)
-    exact = _exact_center_frequencies_fractional_octaves(
-        indices, num_fractions)
 
-    if frequency_range is not None:
-        f_lims = np.asarray(frequency_range)
-        if f_lims.size != 2:
-            raise ValueError(
-                "You need to specify a lower and upper limit frequency.")
-        if f_lims[0] > f_lims[1]:
-            raise ValueError(
-                "The second frequency needs to be higher than the first.")
+    Note
+    ----
+    For numbers of fractions other than 1 and 3, only the exact center
+    frequencies are returned, since nominal frequencies are not specified by
+    corresponding standards.
+    """
+    nominal = None
+
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "You need to specify a lower and upper limit frequency.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The second frequency needs to be higher than the first.")
+
+    if num_fractions in [1, 3]:
+        if num_fractions == 1:
+            nominal = np.array([
+                31.5, 63, 125, 250, 500, 1e3,
+                2e3, 4e3, 8e3, 16e3], dtype=np.float)
+        elif num_fractions == 3:
+            nominal = np.array([
+                25, 31.5, 40, 50, 63, 80, 100, 125, 160,
+                200, 250, 315, 400, 500, 630, 800, 1000,
+                1250, 1600, 2000, 2500, 3150, 4000, 5000,
+                6300, 8000, 10000, 12500, 16000, 20000], dtype=np.float)
+
+        exact = _exact_center_frequencies_fractional_octaves_iec(
+            nominal, num_fractions)
 
         mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
         nominal = nominal[mask]
         exact = exact[mask]
 
+    else:
+        warnings.warn(
+            "The nominal bands are only valid for octaves and third octaves. "
+            "For all other fractional octave bands only exact frequencies "
+            "are returned.")
+        exact = _exact_center_frequencies_fractional_octaves(
+            num_fractions, f_lims)
+
     return nominal, exact
 
 
-def _exact_center_frequencies_fractional_octaves(indices, num_fractions):
+def _exact_center_frequencies_fractional_octaves(
+        num_fractions, frequency_range):
+    """Calculate the center frequencies of arbitrary fractional octave bands.
+
+    Parameters
+    ----------
+    num_fractions : int
+        The number of fractions
+    frequency_range
+        The upper and lower frequency limits
+
+    Returns
+    -------
+    exact : array, float
+        An array containing the center frequencies of the respective fractional
+        octave bands
+
+    """
+    ref_freq = 1e3
+    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
+    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
+
+    indices = np.arange(-Nmin, Nmax+1)
+    exact = ref_freq * 2**(indices / num_fractions)
+
+    return exact
+
+
+def _exact_center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     """Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
     octave ratio
@@ -735,6 +783,7 @@ def _exact_center_frequencies_fractional_octaves(indices, num_fractions):
     .. f_m = f_e G^{(2x+1)/(2b)}
     where b is the number of octave fractions, f_r is the reference frequency
     chosen as 1000Hz and x is the index of the frequency band.
+
     Parameters
     ----------
     indices : array
@@ -747,7 +796,7 @@ def _exact_center_frequencies_fractional_octaves(indices, num_fractions):
     frequencies : ndarray, float
         center frequencies of the fractional octave bands
     """
-
+    indices = _frequency_indices(nominal, num_fractions)
     reference_freq = 1e3
     octave_ratio = 10**(3/10)
 

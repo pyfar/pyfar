@@ -36,9 +36,6 @@ def test_center_frequencies_iec():
         filter.center_frequencies_fractional_octaves(
             frequency_range=(8e3, 1e3))
 
-    with pytest.raises(ValueError, match="Number of fractions can only be"):
-        filter.center_frequencies_fractional_octaves(5)
-
     actual_octs = filter.center_frequencies_fractional_octaves(
         num_fractions=1, frequency_range=(100, 4e3))
     actual_octs_nom = actual_octs[0]
@@ -94,6 +91,18 @@ def test_fract_oct_filter_iec(impulse_mock):
         impulse_mock, 1, freq_range=(1e3, 4e3), order=order)
 
     assert ir_actual.time.shape[0] == 3
+
+
+def test_fract_oct_bands_non_iec():
+    exact = filter._exact_center_frequencies_fractional_octaves(
+        1, (2e3, 20e3))
+    expected = np.array([2e3, 4e3, 8e3, 16e3])
+
+    np.testing.assert_allclose(exact, expected)
+
+    nominal, exact = filter.center_frequencies_fractional_octaves(
+        5, (2e3, 20e3))
+    assert nominal is None
 
 
 @pytest.fixture
