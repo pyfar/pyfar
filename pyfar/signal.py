@@ -610,18 +610,6 @@ class Signal(FrequencyData, TimeData):
 
         self._fft_norm = value
 
-    @property
-    def signal_type(self):
-        """The signal type."""
-        if self.fft_norm == 'none':
-            stype = 'energy'
-        elif self.fft_norm in [
-                "unitary", "amplitude", "rms", "power", "psd"]:
-            stype = 'energy'
-        else:
-            raise ValueError("No valid fft norm set.")
-        return stype
-
     def _assert_matching_meta_data(self, other):
         """Check if the meta data matches across two Signal objects."""
         if not isinstance(other, Signal):
@@ -640,6 +628,18 @@ class Signal(FrequencyData, TimeData):
                       fft_norm=self.fft_norm, comment=self.comment,
                       dtype=self.dtype)
         return item
+
+    @property
+    def signal_type(self):
+        """The signal type."""
+        if self.fft_norm == 'none':
+            stype = 'energy'
+        elif self.fft_norm in [
+                "unitary", "amplitude", "rms", "power", "psd"]:
+            stype = 'power'
+        else:
+            raise ValueError("No valid fft norm set.")
+        return stype
 
     @signal_type.setter
     def signal_type(self, value):
