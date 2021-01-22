@@ -219,21 +219,18 @@ class TimeData(_Audio):
 
     @property
     def time(self):
-        """The data in the time domain."""
-        if isinstance(self, Signal):
-            # the setter also converts the data from 'freq' to 'time'
-            self.domain = 'time'
-        else:
-            # this only changes the class internal variable
-            self._domain = 'time'
+        """Return the data in the time domain."""
         return self._data
 
     @time.setter
     def time(self, value):
+        """Set the time data."""
         data = np.atleast_2d(np.asarray(value))
-        self._domain = 'time'
         self._data = data
         self._n_samples = data.shape[-1]
+        # setting the domain is only required for Signal. Setting it here
+        # avoids the need for overloading the setter and does not harm TimeData
+        self._domain = 'time'
 
     @property
     def n_samples(self):
@@ -349,14 +346,17 @@ class FrequencyData(_Audio):
 
     @property
     def freq(self):
-        """The data in the frequency domain."""
-        if isinstance(self, Signal):
-            # the setter also converts the data from 'time' to 'freq'
-            self.domain = 'freq'
-        else:
-            # this only changes the class internal variable
-            self._domain = 'freq'
+        """Return the data in the frequency domain."""
         return self._data
+
+    @freq.setter
+    def freq(self, value):
+        """Set the frequency data."""
+        self._data = np.atleast_2d(np.atleast_2d(value))
+        # setting the domain is only required for Signal. Setting it here
+        # avoids the need for overloading the setter and does not harm
+        # FrequencyData
+        self._domain = 'freq'
 
     @property
     def frequencies(self):
@@ -367,24 +367,6 @@ class FrequencyData(_Audio):
     def n_bins(self):
         """Number of frequency bins."""
         return self._data.shape[-1]
-
-    @freq.setter
-    def freq(self, value):
-        spec = np.atleast_2d(np.atleast_2d(value))
-        new_num_bins = spec.shape[-1]
-        self._data = spec
-        self._domain = 'freq'
-
-        # also set n_samples in case of a Signal object
-        if isinstance(self, Signal):
-            if new_num_bins == self.n_bins:
-                n_samples = self.n_samples
-            else:
-                warnings.warn(UserWarning((
-                    "Number of frequency bins changed, assuming an even "
-                    "number of samples from the number of frequency bins.")))
-                n_samples = (new_num_bins - 1)*2
-            self._n_samples = n_samples
 
     @property
     def fft_norm(self):
@@ -525,8 +507,41 @@ class Signal(FrequencyData, TimeData):
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
+    @TimeData.time.getter
+    def time(self):
+        """Return the data in the time domain."""
+        # converts the data from 'freq' to 'time'
+        self.domain = 'time'
+
+        return super().time
+
+    @FrequencyData.freq.getter
+    def freq(self):
+        """Return the data in the frequency domain."""
+        # converts the data from 'time' to 'freq'
+        self.domain = 'freq'
+
+        return super().freq
+
+    @freq.setter
+    def freq(self, value):
+        """Set the data in the frequency domain."""
+        # The intuitive version does not work: super().freq = value
+        super(Signal, type(self)).freq.fset(self, value)
+
+        # set n_samples in case of a Signal object
+        if self._data.shape[-1] == self.n_bins:
+            n_samples = self.n_samples
+        else:
+            warnings.warn(UserWarning((
+                "Number of frequency bins changed, assuming an even "
+                "number of samples from the number of frequency bins.")))
+            n_samples = (self._data.shape[-1] - 1)*2
+        self._n_samples = n_samples
+
     @_Audio.domain.setter
     def domain(self, new_domain):
+        """Set the domain of the signal."""
         if new_domain not in self._VALID_DOMAINS:
             raise ValueError("Incorrect domain, needs to be time/freq.")
 
