@@ -1,6 +1,5 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
-from . import utils
 
 import pyfar
 
@@ -86,8 +85,8 @@ class Orientations(Rotation):
         views = np.atleast_2d(views).astype(np.float64)
         ups = np.atleast_2d(ups).astype(np.float64)
 
-        if (views.ndim > 2 or views.shape[-1] != 3
-                or ups.ndim > 2 or ups.shape[-1] != 3):
+        if (views.ndim > 2 or views.shape[-1] != 3 or
+                ups.ndim > 2 or ups.shape[-1] != 3):
             raise ValueError(f"Expected `views` and `ups` to have shape (N, 3)"
                              f" or (3,), got {views.shape}")
         if views.shape == ups.shape:
@@ -100,8 +99,8 @@ class Orientations(Rotation):
             raise ValueError("Expected 1:1, 1:N or N:1 `views` and `ups` "
                              f"not M:N, got {views.shape} and {ups.shape}")
 
-        if not (np.all(np.linalg.norm(views, axis=1))
-                and np.all(np.linalg.norm(ups, axis=1))):
+        if not (np.all(np.linalg.norm(views, axis=1)) and
+                np.all(np.linalg.norm(ups, axis=1))):
             raise ValueError("View and Up Vectors must have a length.")
         if not np.allclose(0, np.einsum('ij,kj->k', views, ups)):
             raise ValueError("View and Up vectors must be perpendicular.")
@@ -143,9 +142,9 @@ class Orientations(Rotation):
 
         """
         if positions is None:
-            positions = np.zeros((self._quat.shape[0], 3))
+            positions = np.zeros((self.as_quat().shape[0], 3))
         positions = np.atleast_2d(positions).astype(np.float64)
-        if positions.shape[0] != self._quat.shape[0]:
+        if positions.shape[0] != self.as_quat().shape[0]:
             raise ValueError("If provided, there must be the same number"
                              "of positions as orientations.")
 
@@ -192,7 +191,7 @@ class Orientations(Rotation):
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
-        return utils.copy(self)
+        return self.from_quat(self.as_quat())
 
     def __setitem__(self, idx, val):
         """
@@ -203,13 +202,15 @@ class Orientations(Rotation):
         idx : see NumPy Indexing
         val : array_like quaternion(s), shape (N, 4) or (4,)
         """
-        if isinstance(val, Orientations) and len(val) == 1:
-            val = val[0].as_quat()
+        if isinstance(val, Orientations):
+            val = val.as_quat()
         quat = np.atleast_2d(val)
         if quat.ndim > 2 or quat.shape[-1] != 4:
             raise ValueError(f"Expected assigned value to have shape"
                              f" or (1, 4), got {quat.shape}")
-        self._quat[idx] = quat
+        quats = self.as_quat()
+        quats[idx] = quat
+        self = super().from_quat(quats)
 
     def __eq__(self, other):
         """Check for equality of two objects."""

@@ -243,7 +243,7 @@ class Signal(Audio):
             stype = 'energy'
         elif self.fft_norm in [
                 "unitary", "amplitude", "rms", "power", "psd"]:
-            stype = 'energy'
+            stype = 'power'
         else:
             raise ValueError("No valid fft norm set.")
         return stype
@@ -308,6 +308,68 @@ class Signal(Audio):
         `self.n_bins` for frequency domain signals.
         """
         return self._data.shape[:-1]
+
+    def reshape(self, newshape):
+        """
+        Return reshaped copy of the signal.
+
+        Parameters
+        ----------
+        newshape : int, tuple
+            new cshape of the signal. One entry of newshape dimension can be
+            -1. In this case, the value is inferred from the remaining
+            dimensions.
+
+        Returns
+        -------
+        reshaped : Signal
+            reshaped copy of the signal.
+
+        Note
+        ----
+        The number of samples and frequency bin always remains the same.
+
+        """
+
+        # check input
+        if not isinstance(newshape, int) and not isinstance(newshape, tuple):
+            raise ValueError("newshape must be an integer or tuple")
+
+        if isinstance(newshape, int):
+            newshape = (newshape, )
+
+        # reshape
+        reshaped = utils.copy(self)
+        length_last_dimension = reshaped._data.shape[-1]
+        try:
+            reshaped._data = reshaped._data.reshape(
+                newshape + (length_last_dimension, ))
+        except ValueError:
+            if np.prod(newshape) != np.prod(self.cshape):
+                raise ValueError((f"Can not reshape signal of cshape "
+                                  f"{self.cshape} to {newshape}"))
+
+        return reshaped
+
+    def flatten(self):
+        """Return flattened copy of the signal.
+
+        Returns
+        -------
+        flat : Signal
+            Flattened copy of signal with
+            `flat.cshape = np.prod(signal.cshape)`
+
+        Note
+        ----
+        The number of samples and frequency bins always remains the same, e.g.,
+        a signal of `cshape=(4,3)` and `n_samples=512` will have
+        `chsape=(12, )` and `n_samples=512` after flattening.
+
+        """
+        newshape = int(np.prod(self.cshape))
+
+        return self.reshape(newshape)
 
     @property
     def comment(self):

@@ -189,7 +189,7 @@ def test_getter_signal_type(sine):
     signal._signal_type = signal_type
     npt.assert_string_equal(signal.signal_type, signal_type)
 
-    signal_type = "energy"
+    signal_type = "power"
     signal = Signal(sine, 44100, fft_norm='rms')
     signal._signal_type = signal_type
     npt.assert_string_equal(signal.signal_type, signal_type)
@@ -342,6 +342,57 @@ def test_find_nearest_frequency():
     actual = signal.find_nearest_frequency([50, 75])
     expected = [50, 75]
     npt.assert_allclose(actual, expected)
+
+
+def test_reshape():
+
+    # test reshape with tuple
+    signal_in = Signal(np.random.rand(6, 256), 44100)
+    signal_out = signal_in.reshape((3, 2))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    signal_out = signal_in.reshape((3, -1))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    # test reshape with int
+    signal_in = Signal(np.random.rand(3, 2, 256), 44100)
+    signal_out = signal_in.reshape(6)
+    npt.assert_allclose(signal_in._data.reshape(6, -1), signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+
+def test_reshape_exceptions():
+    signal_in = Signal(np.random.rand(6, 256), 44100)
+    signal_out = signal_in.reshape((3, 2))
+    npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
+    # test assertion for non-tuple input
+    with pytest.raises(ValueError):
+        signal_out = signal_in.reshape([3, 2])
+
+    # test assertion for wrong dimension
+    with pytest.raises(ValueError, match='Can not reshape signal of cshape'):
+        signal_out = signal_in.reshape((3, 4))
+
+
+def test_flatten():
+
+    # test 2D signal (flatten should not change anything)
+    x = np.random.rand(2, 256)
+    signal_in = Signal(x, 44100)
+    signal_out = signal_in.flatten()
+
+    npt.assert_allclose(signal_in._data, signal_out._data)
+    assert id(signal_in) != id(signal_out)
+
+    # test 3D signal
+    x = np.random.rand(3, 2, 256)
+    signal_in = Signal(x, 44100)
+    signal_out = signal_in.flatten()
+
+    npt.assert_allclose(signal_in._data.reshape((6, -1)), signal_out._data)
+    assert id(signal_in) != id(signal_out)
 
 
 @pytest.fixture
