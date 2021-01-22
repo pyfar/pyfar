@@ -21,7 +21,7 @@ from typing import Callable
 from . import utils
 
 
-class Audio(object):
+class _Audio(object):
     """Abstract class for audio objects.
 
     This class holds all the methods and properties that are common to its
@@ -45,6 +45,11 @@ class Audio(object):
             self._domain = domain
         else:
             raise ValueError("Incorrect domain, needs to be time/freq.")
+
+        # initialize data with nan (this should make clear that this is an
+        # abstract private class that does not hold data and prevent class
+        # methods to fail that require data.)
+        self._data = np.atleast_2d(np.nan)
 
     @property
     def domain(self):
@@ -172,7 +177,7 @@ class Audio(object):
                     "Index must be int, not {}".format(type(key).__name__))
 
 
-class TimeData(Audio):
+class TimeData(_Audio):
     """Class for time data.
 
     Objects of this class contain time data which is not directly convertable
@@ -198,7 +203,7 @@ class TimeData(Audio):
 
         """
 
-        Audio.__init__(self, 'time', comment, dtype)
+        _Audio.__init__(self, 'time', comment, dtype)
 
         # init data and meta data
         self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
@@ -279,7 +284,7 @@ class TimeData(Audio):
         return item
 
 
-class FrequencyData(Audio):
+class FrequencyData(_Audio):
     """Class for frequency data.
 
     Objects of this class contain frequency data which is not directly
@@ -319,7 +324,7 @@ class FrequencyData(Audio):
 
         """
 
-        Audio.__init__(self, 'freq', comment, dtype)
+        _Audio.__init__(self, 'freq', comment, dtype)
 
         # init data
         self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
@@ -481,7 +486,7 @@ class Signal(FrequencyData, TimeData):
         """
 
         # initialze global parameter and valid parameter spaces
-        Audio.__init__(self, domain, comment, dtype)
+        _Audio.__init__(self, domain, comment, dtype)
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
@@ -520,7 +525,7 @@ class Signal(FrequencyData, TimeData):
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
-    @Audio.domain.setter
+    @_Audio.domain.setter
     def domain(self, new_domain):
         if new_domain not in self._VALID_DOMAINS:
             raise ValueError("Incorrect domain, needs to be time/freq.")
