@@ -202,7 +202,7 @@ def test_getter_signal_type(sine):
     signal._signal_type = signal_type
     npt.assert_string_equal(signal.signal_type, signal_type)
 
-    signal_type = "energy"
+    signal_type = "power"
     signal = Signal(sine, 44100, fft_norm='rms')
     signal._signal_type = signal_type
     npt.assert_string_equal(signal.signal_type, signal_type)
