@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import json
 import pyfar.plot._line as _line
-from pyfar.plot.interaction import PlotParameter
+from pyfar.plot._interaction import PlotParameter
 
 
 def plotstyle(style='light'):

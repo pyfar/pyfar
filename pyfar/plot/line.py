@@ -3,8 +3,7 @@ import matplotlib as mpl
 from pyfar.plot.utils import plotstyle
 from .. import Signal
 from . import _line
-from ._interaction import Interaction
-from . import interaction as ia
+from . import _interaction as ia
 
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
