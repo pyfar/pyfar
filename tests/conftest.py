@@ -1,28 +1,44 @@
-from pyfar.coordinates import Coordinates
-from pyfar.orientations import Orientations
-from pyfar.Signal import Signal
-import pyfar.io
 import pytest
 import numpy as np
 import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
+from pyfar.orientations import Orientations
+from pyfar.coordinates import Coordinates
+from pyfar.signal import Signal
+import pyfar.io
 
-import stub_utils
+# import stub_utils
 
 
 @pytest.fixture
-def generate_far_file(tmpdir, orientations, coordinates, signal):
+def generate_far_file_orientations(tmpdir, orientations):
     """Create a far file in temporary folder that contains an orientations
-    object
+    object.
     """
     filename = os.path.join(tmpdir, 'test_orientations.far')
-    pyfar.io.write(
-        filename,
-        orientations=orientations,
-        coordinates=coordinates,
-        signal=signal)
+    pyfar.io.write(filename, orientations=orientations)
+    return filename
+
+
+@pytest.fixture
+def generate_far_file_coordinates(tmpdir, coordinates):
+    """Create a far file in temporary folder that contains an orientations
+    object.
+    """
+    filename = os.path.join(tmpdir, 'test_coordinates.far')
+    pyfar.io.write(filename, coordinates=coordinates)
+    return filename
+
+
+@pytest.fixture
+def generate_far_file_signal(tmpdir, signal):
+    """Create a far file in temporary folder that contains an orientations
+    object.
+    """
+    filename = os.path.join(tmpdir, 'test_signal.far')
+    pyfar.io.write(filename, signal=signal)
     return filename
 
 
@@ -52,6 +68,8 @@ def coordinates():
     return Coordinates([0, 1], [2, 3], [4, 5])
 
 
-# @pytest.fixture
-# def signal(sine):
-#     return Signal(sine, 44100, domain='time')
+@pytest.fixture
+def signal():
+    # TODO: replace sine with fixture sine
+    sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
+    return Signal(sine, 44100, len(sine), domain='time')

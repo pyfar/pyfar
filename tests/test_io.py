@@ -359,20 +359,20 @@ def mock_zipfile_read(obj_path):
             b'\x00\x00@\x00\x00\x00\x00\x00\x00\x08@')
 
 
-def test_read_orientations(generate_far_file, orientations):
+def test_read_orientations(generate_far_file_orientations, orientations):
     """Write is already called in the `generate_orientations_file` fixture"""
-    actual = io.read(generate_far_file)['orientations']
+    actual = io.read(generate_far_file_orientations)['orientations']
     assert isinstance(actual, Orientations)
     assert actual == orientations
 
 
-def test_read_coordinates(generate_far_file, coordinates):
-    actual = io.read(generate_far_file)['coordinates']
+def test_read_coordinates(generate_far_file_coordinates, coordinates):
+    actual = io.read(generate_far_file_coordinates)['coordinates']
     assert isinstance(actual, Coordinates)
     assert actual == coordinates
 
 
-def test_read_signal(generate_far_file, signal):
-    actual = io.read(generate_far_file)['signal']
+def test_read_signal(generate_far_file_signal, signal):
+    actual = io.read(generate_far_file_signal)['signal']
     assert isinstance(actual, Signal)
     assert actual == signal
