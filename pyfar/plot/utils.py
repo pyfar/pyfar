@@ -1,6 +1,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
+import json
 import pyfar.plot._line as _line
 
 
@@ -91,96 +92,14 @@ def shortcuts(show=True):
         dictionary that contains all the shortcuts
 
     """
-    short_cuts = {
-        # not yet implemented as intended
-        "plots": {
-            "line.time": {
-                "key": ["1"],
-                "info": "line.time"},
-            "line.freq": {
-                "key": ["2"],
-                "info": "line.freq"},
-            "line.phase": {
-                "key": ["3"],
-                "info": "line.phase"},
-            "line.group_delay": {
-                "key": ["4"],
-                "info": "line.group_delay"},
-            "line.spectrogram": {
-                "key": ["5"],
-                "info": "line.spectrogram"},
-            "line.time_freq": {
-                "key": ["6"],
-                "info": "line.time_freq"},
-            "line.freq_phase": {
-                "key": ["7"],
-                "info": "line.freq_phase"},
-            "line.freq_group_delay": {
-                "key": ["8"],
-                "info": "line.freq_group_delay"}
-        },
-        "controls": {
-            "move_left": {
-                "key": ["left"],
-                "info": "move x-axis view to the left"},
-            "move_right": {
-                "key": ["right"],
-                "info": "move x-axis view to the right"},
-            "move_up": {
-                "key": ["up"],
-                "info": "move y-axis view upwards"},
-            "move_down": {
-                "key": ["down"],
-                "info": "y-axis view downwards"},
-            "move_cm_up": {
-                "key": ["+"],
-                "info": "move colormap range up"},
-            "move_cm_down": {
-                "key": ["-"],
-                "info": "move colormap range down"},
-            "zoom_x_in": {
-                "key": ["shift+right"],
-                "info": "zoom in x-axis"},
-            "zoom_x_out": {
-                "key": ["shift+left"],
-                "info": "zoom out x-axis"},
-            "zoom_y_in": {
-                "key": ["shift+up"],
-                "info": "zoom out y-axis"},
-            "zoom_y_out": {
-                "key": ["shift+down"],
-                "info": "zoom in y-axis"},
-            "zoom_cm_in": {
-                "key": ["*"],
-                "info": "zoom colormap range in"},
-            "zoom_cm_out": {
-                "key": ["_"],
-                "info": "zoom colormap range out"},
-            "toggle_x": {
-                "key": ["x"],
-                "info": "toggle between linear and logarithmic x-axis"},
-            "toggle_y": {
-                "key": ["y"],
-                "info": "toggle between linear and logarithmic y-axis"},
-            "toggle_cm": {
-                "key": ["c"],
-                "info": "toggle between linear and logarithmic color data"},
-            "toggle_all": {
-                "key": ["a"],
-                "info": ("toggle between plotting all channels and plottinng "
-                         "single channels")},
-            "next": {
-                "key": ["."],
-                "info": "show next channel"},
-            "prev": {
-                "key": [","],
-                "info": "show previous channel"}
-        }
-    }
+    # load short cuts from json file
+    sc = os.path.join(os.path.dirname(__file__), 'shortcuts', 'shortcuts.json')
+    with open(sc, "r") as read_file:
+        short_cuts = json.load(read_file)
 
+    # print list of short cuts
     if show:
         print("Use these shortcuts to show different plots:")
-        # not yet implemented as intended
         for plot in short_cuts["plots"]:
             print(f'{plot}: {short_cuts["plots"][plot]}')
         print(" ")
