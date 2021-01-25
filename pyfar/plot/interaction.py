@@ -75,7 +75,7 @@ class PlotParameter(object):
                  log_prefix=20, log_reference=10,          # same for time/freq
                  xscale='log', yscale='linear',            # axis scaling
                  deg=False, unwrap=False,                  # phase properties
-                 unit=None,                                # group delay unit
+                 unit=None,                                # time unit
                  window='hann', window_length=1014,        # spectrogram
                  window_overlap_fct=.5,
                  cmap=mpl.cm.get_cmap(name='magma')):      # colormap

@@ -53,15 +53,16 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     with plt.style.context(plotstyle(style)):
         ax = _line._time(signal, dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
-
     plt.tight_layout()
+
+    # manage interaction
     plot_parameter = ia.PlotParameter(
         'line.time', dB_time=dB, log_prefix=log_prefix,
         log_reference=log_reference)
-    interaction = ia.Interaction(
-        signal, ax, style, plot_parameter, **kwargs)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
 
-    return ax, interaction
+    return ax
 
 
 def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
@@ -112,9 +113,14 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     with plt.style.context(plotstyle(style)):
         ax = _line._freq(signal, dB, log_prefix, log_reference, xscale, ax,
                          **kwargs)
-
     plt.tight_layout()
-    Interaction('LineXLog', ax, signal, style, **kwargs)
+
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'line.freq', dB_freq=dB, log_prefix=log_prefix,
+        log_reference=log_reference, xscale=xscale)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
 
     return ax
 
@@ -157,10 +163,13 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
 
     with plt.style.context(plotstyle(style)):
         ax = _line._phase(signal, deg, unwrap, xscale, ax, **kwargs)
-
     plt.tight_layout()
 
-    Interaction('LineXLog', ax, signal, style, **kwargs)
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'line.phase', deg=deg, unwrap=unwrap, xscale=xscale)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
 
     return ax
 
@@ -207,9 +216,13 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
 
     with plt.style.context(plotstyle(style)):
         ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
-
     plt.tight_layout()
-    Interaction('LineXLog', ax, signal, style, **kwargs)
+
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'line.group_delay', unit=unit, xscale=xscale)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
 
     return ax
 
@@ -262,9 +275,16 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
             signal, dB, log_prefix, log_reference, yscale,
             window, window_length, window_overlap_fct,
             cmap, ax)
-
     plt.tight_layout()
-    Interaction('spectrogram', ax[0], signal, style)
+
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'line.spectrogram', dB_freq=dB, log_prefix=log_prefix,
+        log_reference=log_reference, yscale=yscale, window=window,
+        window_length=window_length, window_overlap_fct=window_overlap_fct,
+        cmap=cmap)
+    interaction = ia.Interaction(signal, ax[0], style, plot_parameter)
+    ax[0].interaction = interaction
 
     return ax
 
@@ -323,7 +343,14 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
                               log_reference, xscale, unit, ax, **kwargs)
     plt.tight_layout()
-    Interaction('LineXLin', ax[0], signal, style, **kwargs)
+
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'line.time', dB_time=dB_time, log_prefix=log_prefix,
+        log_reference=log_reference)
+    interaction = ia.Interaction(
+        signal, ax[0], style, plot_parameter, **kwargs)
+    ax[0].interaction = interaction
 
     return ax
 
@@ -376,7 +403,14 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         ax = _line._freq_phase(signal, dB, log_prefix, log_reference, xscale,
                                deg, unwrap, ax, **kwargs)
     plt.tight_layout()
-    Interaction('LineXLog', ax[0], signal, style, **kwargs)
+
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'line.freq', dB_freq=dB, log_prefix=log_prefix,
+        log_reference=log_reference, xscale=xscale)
+    interaction = ia.Interaction(
+        signal, ax[0], style, plot_parameter, **kwargs)
+    ax[0].interaction = interaction
 
     return ax
 
@@ -427,9 +461,15 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     with plt.style.context(plotstyle(style)):
         ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
                                      unit, xscale, ax, **kwargs)
-
     plt.tight_layout()
-    Interaction('LineXLog', ax[0], signal, style, **kwargs)
+
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'line.freq', dB_freq=dB, log_prefix=log_prefix,
+        log_reference=log_reference, xscale=xscale)
+    interaction = ia.Interaction(
+        signal, ax[0], style, plot_parameter, **kwargs)
+    ax[0].interaction = interaction
 
     return ax
 
