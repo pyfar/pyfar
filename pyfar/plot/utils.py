@@ -95,85 +95,85 @@ def shortcuts(show=True):
         # not yet implemented as intended
         "plots": {
             "line.time": {
-                "key": "1",
+                "key": ["1"],
                 "info": "line.time"},
             "line.freq": {
-                "key": "2",
+                "key": ["2"],
                 "info": "line.freq"},
             "line.phase": {
-                "key": "3",
+                "key": ["3"],
                 "info": "line.phase"},
             "line.group_delay": {
-                "key": "4",
+                "key": ["4"],
                 "info": "line.group_delay"},
             "line.spectrogram": {
-                "key": "5",
+                "key": ["5"],
                 "info": "line.spectrogram"},
             "line.time_freq": {
-                "key": "6",
+                "key": ["6"],
                 "info": "line.time_freq"},
             "line.freq_phase": {
-                "key": "7",
+                "key": ["7"],
                 "info": "line.freq_phase"},
             "line.freq_group_delay": {
-                "key": "8",
+                "key": ["8"],
                 "info": "line.freq_group_delay"}
         },
         "controls": {
             "move_left": {
-                "key": "left",
+                "key": ["left"],
                 "info": "move x-axis view to the left"},
             "move_right": {
-                "key": "right",
+                "key": ["right"],
                 "info": "move x-axis view to the right"},
             "move_up": {
-                "key": "up",
+                "key": ["up"],
                 "info": "move y-axis view upwards"},
             "move_down": {
-                "key": "down",
+                "key": ["down"],
                 "info": "y-axis view downwards"},
             "move_cm_up": {
-                "key": "+",
+                "key": ["+"],
                 "info": "move colormap range up"},
             "move_cm_down": {
-                "key": "-",
+                "key": ["-"],
                 "info": "move colormap range down"},
             "zoom_x_in": {
-                "key": "shift+right",
+                "key": ["shift+right"],
                 "info": "zoom in x-axis"},
             "zoom_x_out": {
-                "key": "shift+left",
+                "key": ["shift+left"],
                 "info": "zoom out x-axis"},
             "zoom_y_in": {
-                "key": "shift+up",
+                "key": ["shift+up"],
                 "info": "zoom out y-axis"},
             "zoom_y_out": {
-                "key": "shift+down",
+                "key": ["shift+down"],
                 "info": "zoom in y-axis"},
             "zoom_cm_in": {
-                "key": "*",
+                "key": ["*"],
                 "info": "zoom colormap range in"},
             "zoom_cm_out": {
-                "key": "_",
+                "key": ["_"],
                 "info": "zoom colormap range out"},
             "toggle_x": {
-                "key": "x",
+                "key": ["x"],
                 "info": "toggle between linear and logarithmic x-axis"},
             "toggle_y": {
-                "key": "y",
+                "key": ["y"],
                 "info": "toggle between linear and logarithmic y-axis"},
             "toggle_cm": {
-                "key": "c",
+                "key": ["c"],
                 "info": "toggle between linear and logarithmic color data"},
             "toggle_all": {
-                "key": "a",
+                "key": ["a"],
                 "info": ("toggle between plotting all channels and plottinng "
                          "single channels")},
             "next": {
-                "key": ".",
+                "key": ["."],
                 "info": "show next channel"},
             "prev": {
-                "key": ",",
+                "key": [","],
                 "info": "show previous channel"}
         }
     }

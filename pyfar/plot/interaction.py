@@ -50,10 +50,15 @@ class EventEmu(object):
 
         Parameters
         ----------
-        key : str
-            name of key to emulate, e.g., 'left' for left arrow.
+        key : str, list
+            name of key or list of keys to emulate a key event (e.g., 'left'
+            for left arrow). If a list is passed, it is assumed that the keys
+            all trigger the same event and only `key[0]` ist used
         """
-        self.key = key
+        if isinstance(key, str):
+            self.key = key
+        elif isinstance(key, list):
+            self.key = key[0]
 
 
 class PlotParameter(object):
@@ -386,50 +391,54 @@ class Interaction(object):
         self.event = event
 
         # toggle plot
-        if event.key in [self.plot[plot] for plot in self.plot]:
-            self.toggle_plot(event)
+        toogle_plot = False
+        for plot in self.plot:
+            if event.key in self.plot[plot]:
+                toogle_plot = True
 
+        if toogle_plot:
+            self.toggle_plot(event)
         # x-axis move/zoom
-        elif event.key in [ctr["move_left"], ctr["move_right"],
-                           ctr["zoom_x_in"], ctr["zoom_x_out"]]:
+        elif event.key in ctr["move_left"] + ctr["move_right"] + \
+                ctr["zoom_x_in"] + ctr["zoom_x_out"]:
             self.move_and_zoom(event, 'x')
 
         # y-axis move/zoom
-        elif event.key in [ctr["move_up"], ctr["move_down"],
-                           ctr["zoom_y_in"], ctr["zoom_y_out"]]:
+        elif event.key in ctr["move_up"] + ctr["move_down"] + \
+                ctr["zoom_y_in"] + ctr["zoom_y_out"]:
             self.move_and_zoom(event, 'y')
 
         # color map move/zoom
-        elif event.key in [ctr["move_cm_up"], ctr["move_cm_down"],
-                           ctr["zoom_cm_in"], ctr["zoom_cm_out"]]:
+        elif event.key in ctr["move_cm_up"] + ctr["move_cm_down"] + \
+                ctr["zoom_cm_in"] + ctr["zoom_cm_out"]:
             self.move_and_zoom(event, 'cm')
 
         # x-axis toggle
-        elif event.key == ctr["toggle_x"]:
+        elif event.key in ctr["toggle_x"]:
             changed = self.params.toggle_x()
             if changed:
                 self.toggle_plot(EventEmu(self.plot[self.params.plot]))
 
         # y-axis toggle
-        elif event.key == ctr["toggle_y"]:
+        elif event.key in ctr["toggle_y"]:
             changed = self.params.toggle_y()
             if changed:
                 self.toggle_plot(EventEmu(self.plot[self.params.plot]))
 
         # color map toggle
-        elif event.key == ctr["toggle_cm"]:
+        elif event.key in ctr["toggle_cm"]:
             changed = self.params.toggle_cm()
             if changed:
                 self.toggle_plot(EventEmu(self.plot[self.params.plot]))
 
         # toggle line visibility
-        elif event.key == ctr["toggle_all"]:
+        elif event.key in ctr["toggle_all"]:
             if self.params._cycler_type == 'line' \
                     and self.cycler.n_channels > 1:
                 self.toggle_all_lines()
 
         # cycle channels
-        elif event.key in [ctr["next"], ctr["prev"]]:
+        elif event.key in ctr["next"] + ctr["prev"]:
             if self.cycler.n_channels > 1:
                 self.cycle(event)
 
@@ -531,11 +540,11 @@ class Interaction(object):
             getter = self.ax.get_xlim
             setter = self.ax.set_xlim
             axis_type = self.params.x_type
-            if event.key == ctr["move_left"] or event.key == ctr["move_right"]:
+            if event.key in ctr["move_left"] + ctr["move_right"]:
                 operation = "move"
             else:
                 operation = "zoom"
-            if event.key == ctr["move_right"] or event.key == ctr["zoom_x_in"]:
+            if event.key in ctr["move_right"] + ctr["zoom_x_in"]:
                 direction = "increase"
             else:
                 direction = "decrease"
@@ -549,11 +558,11 @@ class Interaction(object):
             getter = self.ax.get_ylim
             setter = self.ax.set_ylim
             axis_type = self.params.y_type
-            if event.key == ctr["move_up"] or event.key == ctr["move_down"]:
+            if event.key in ctr["move_up"] + ctr["move_down"]:
                 operation = "move"
             else:
                 operation = "zoom"
-            if event.key == ctr["move_up"] or event.key == ctr["zoom_y_in"]:
+            if event.key in ctr["move_up"] + ctr["zoom_y_in"]:
                 direction = "increase"
             else:
                 direction = "decrease"
@@ -571,13 +580,11 @@ class Interaction(object):
             getter = cm.get_clim
             setter = cm.set_clim
             axis_type = self.params.cm_type
-            if event.key == ctr["move_cm_up"] or \
-                    event.key == ctr["move_cm_down"]:
+            if event.key in ctr["move_cm_up"] + ctr["move_cm_down"]:
                 operation = "move"
             else:
                 operation = "zoom"
-            if event.key == ctr["move_cm_up"] or \
-                    event.key == ctr["zoom_cm_in"]:
+            if event.key in ctr["move_cm_up"] + ctr["zoom_cm_in"]:
                 direction = "increase"
             else:
                 direction = "decrease"
@@ -686,9 +693,9 @@ class Interaction(object):
             self.ax.lines[self.cycler.index].set_visible(False)
 
         # cycle
-        if event.key == self.ctr["next"]:
+        if event.key in self.ctr["next"]:
             self.cycler.increase_index()
-        elif event.key == self.ctr["prev"]:
+        elif event.key in self.ctr["prev"]:
             self.cycler.decrease_index()
 
         # set current line visible
@@ -698,9 +705,9 @@ class Interaction(object):
 
     def cycle_signals(self, event):
         # cycle index
-        if event.key == self.ctr["next"]:
+        if event.key in self.ctr["next"]:
             self.cycler.increase_index()
-        elif event.key == self.ctr["prev"]:
+        elif event.key in self.ctr["prev"]:
             self.cycler.decrease_index()
 
         # re-plot
