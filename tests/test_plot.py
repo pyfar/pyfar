@@ -124,7 +124,8 @@ def test_line_dB_option(signal_mocks):
     """Test all line plots that have a dB option."""
 
     function_list = [plot.line.time,
-                     plot.line.freq]
+                     plot.line.freq,
+                     plot.line.spectrogram]
 
     # test if dB option is working
     for function in function_list:
@@ -223,7 +224,8 @@ def test_time_unit(signal_mocks):
     """Test plottin with different units."""
 
     function_list = [plot.line.time,
-                     plot.line.group_delay]
+                     plot.line.group_delay,
+                     plot.line.spectrogram]
 
     for function in function_list:
         for unit in [None, 's', 'ms', 'mus', 'samples']:

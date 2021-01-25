@@ -243,7 +243,7 @@ class Signal(Audio):
             stype = 'energy'
         elif self.fft_norm in [
                 "unitary", "amplitude", "rms", "power", "psd"]:
-            stype = 'energy'
+            stype = 'power'
         else:
             raise ValueError("No valid fft norm set.")
         return stype
