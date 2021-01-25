@@ -258,7 +258,7 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
         # it can create 1000 or more ticks.
         if not unwrap or unwrap == "360":
             ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
-            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 2))
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
             ax.yaxis.set_major_formatter(MultipleFractionFormatter(
                 nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
         y_margin = np.radians(5)

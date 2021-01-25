@@ -266,7 +266,9 @@ class PlotParameter(object):
         self.plot = plot
 
     def toggle_x(self):
-        """Toogle the x-axis type."""
+        """Toogle the x-axis type.
+
+        For example toggle between lin and log frequency axis."""
         changed = False
         if self.x_type is not None:
             if len(self._x_type) > 1:
@@ -277,7 +279,9 @@ class PlotParameter(object):
         return changed
 
     def toggle_y(self):
-        """Toogle the y-axis type."""
+        """Toogle the y-axis type.
+
+        For example toggle between showing lin and log time signals."""
         changed = False
         if self.y_type is not None:
             if len(self._y_type) > 1:
@@ -287,8 +291,10 @@ class PlotParameter(object):
 
         return changed
 
-    def toggle_cm(self):
-        """Toogle the color map type."""
+    def toggle_colormap(self):
+        """Toogle the color map type.
+
+        For example toggle between showing lin and log magnitude."""
         changed = False
         if self.cm_type is not None:
             if len(self._cm_type) > 1:
@@ -427,7 +433,7 @@ class Interaction(object):
 
         # color map toggle
         elif event.key in ctr["toggle_cm"]:
-            changed = self.params.toggle_cm()
+            changed = self.params.toggle_colormap()
             if changed:
                 self.toggle_plot(EventEmu(self.plot[self.params.plot]))
 
