@@ -1,3 +1,4 @@
+from pyfar.orientations import Orientations
 import numpy as np
 import numpy.testing as npt
 import pytest
@@ -356,3 +357,10 @@ def mock_zipfile_read(obj_path):
             b'"shape": (1, 3), }                                             '
             b'             \n\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00'
             b'\x00\x00@\x00\x00\x00\x00\x00\x00\x08@')
+
+
+def test_read_write_orientations(generate_orientations_file, orientations):
+    """Write is already called in the `generate_orientations_file` fixture"""
+    actual = io.read(generate_orientations_file)['orientations']
+    assert isinstance(actual, Orientations)
+    assert actual == orientations
