@@ -393,7 +393,7 @@ def _deal_time_units(unit='s'):
 
 
 def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                 yscale='linear',
+                 yscale='linear', unit=None,
                  window='hann', window_length=1024, window_overlap_fct=0.5,
                  cmap=mpl.cm.get_cmap(name='magma'), ax=None):
     """Plot the magnitude spectrum versus time.
@@ -419,11 +419,21 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     frequencies, times, spectrogram = dsp.spectrogram(
         signal[first_channel], window, window_length, window_overlap_fct)
 
-    # get in dB
+    # get magnitude data in dB
     if dB:
         eps = np.finfo(float).eps
         spectrogram = log_prefix*np.log10(
             np.abs(spectrogram) / log_reference + eps)
+
+    # auto detect the time unit
+    if unit is None:
+        unit = _time_auto_unit(times[..., -1])
+    # set the unit
+    if unit == 'samples':
+        times *= signal.sampling_rate
+    else:
+        factor, unit = _deal_time_units(unit)
+        times = times * factor
 
     # plot the data
     _, ax = _prepare_plot(ax)
@@ -432,7 +442,7 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # Adjust axes:
     ax.set_ylabel('Frequency in Hz')
-    ax.set_xlabel('Time in s')
+    ax.set_xlabel(f'Time in {unit}')
     ax.set_xlim((times[0], times[-1]))
     ax.set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
 
@@ -458,7 +468,7 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
-                    yscale='linear',
+                    yscale='linear', unit=None,
                     window='hann', window_length=1024, window_overlap_fct=0.5,
                     cmap=mpl.cm.get_cmap(name='magma'), ax=None):
     """Plot the magnitude spectrum versus time.
@@ -478,8 +488,8 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
     ax = ax.figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 0.05]})
     fig.axes[0].remove()
 
-    ax[0], spectrogram = _spectrogram(
-        signal, dB, log_prefix, log_reference, yscale,
+    ax[0], _ = _spectrogram(
+        signal, dB, log_prefix, log_reference, yscale, unit,
         window, window_length, window_overlap_fct,
         cmap, ax[0])
 
@@ -489,10 +499,8 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
             break
 
     cb = plt.colorbar(PCM, cax=ax[1])
-    if dB:
-        cb.set_label('Magnitude in dB')
-    else:
-        cb.set_label('Magnitude')
+    cb_label = 'Magnitude in dB' if dB else 'Magnitude'
+    cb.set_label(cb_label)
 
     plt.tight_layout()
 
