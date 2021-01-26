@@ -217,7 +217,7 @@ def test_line_xscale_option(sine):
             compare_images(baseline, output, tol=10)
 
 
-def test_time_unit(sine, impulse_group_delay):
+def test_time_unit(impulse_group_delay):
     """Test plottin with different units."""
     function_list = [plot.line.time,
                      plot.line.group_delay,

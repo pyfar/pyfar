@@ -274,7 +274,7 @@ def test_magic_setitem_wrong_norm(sine, sine_rms):
         signal[0] = set_signal
 
 
-def test_magic_setitem_wrong_n_samples(sine, impulse):
+def test_magic_setitem_wrong_n_samples(sine):
     """Test the magic function __setitem__."""
     signal = Signal(sine.time, sine.sampling_rate)
     set_signal = Signal(sine.time[..., :-10], sine.sampling_rate)
