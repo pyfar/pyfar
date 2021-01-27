@@ -11,7 +11,7 @@ import sys
 
 from pyfar import Signal
 from pyfar import Coordinates
-
+from pyfar.spatial.spatial import SphericalVoronoi
 
 def read_wav(filename):
     """
@@ -277,9 +277,15 @@ def _decode(zip_file, obj_name, ndarray_names):
     # build object from obj_dict
     PyfarType = _str_to_type(obj_dict['type'])
     if PyfarType == Signal:
-        obj = PyfarType(obj_dict['_data'],
-        obj_dict['_sampling_rate'],
-        obj_dict['_n_samples'])
+        obj = PyfarType(
+            obj_dict['_data'],
+            obj_dict['_sampling_rate'],
+            obj_dict['_n_samples'])
+    if PyfarType == SphericalVoronoi:
+        obj = PyfarType(
+            obj_dict['type'],
+            obj_dict['sampling'],
+            obj_dict['radius'])
     else:
         obj = PyfarType()
     del obj_dict['type']
@@ -301,14 +307,22 @@ def _encode(obj):
     obj_dict_encoded: dict.
         Json compatible dictionary.
     """
+
+    # encode by constructor params
+    if isinstance(obj, SphericalVoronoi):
+        obj_dict_encoded = {}
+        obj_dict_ndarray = {}
+        obj_dict_encoded['type'] = type(obj).__name__
+        obj_dict_ndarray['sampling'] = _encode_ndarray(obj.points)
+        obj_dict_encoded['radius'] = obj.radius
+        return obj_dict_encoded, obj_dict_ndarray
+
+    # encode by dict
     obj_dict_encoded = copy.deepcopy(obj.__dict__)
     obj_dict_ndarray = {}
     for key, value in obj.__dict__.items():
         if isinstance(value, np.ndarray):
-            memfile = io.BytesIO()
-            np.save(memfile, value, allow_pickle=False)
-            memfile.seek(0)
-            obj_dict_ndarray[key] = memfile.read()
+            obj_dict_ndarray[key] = _encode_ndarray(value)
             del obj_dict_encoded[key]
         if isinstance(value, type) and value.__module__ == 'numpy':
             obj_dict_encoded[key] = np.dtype(value).name
@@ -316,6 +330,13 @@ def _encode(obj):
     obj_dict_encoded['type'] = type(obj).__name__
 
     return obj_dict_encoded, obj_dict_ndarray
+    
+
+def _encode_ndarray(ndarray):
+    memfile = io.BytesIO()
+    np.save(memfile, ndarray, allow_pickle=False)
+    memfile.seek(0)
+    return memfile.read()
 
 
 def _unpack_zip_paths(zip_paths):

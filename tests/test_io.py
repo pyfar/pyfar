@@ -14,6 +14,7 @@ import sofa
 from pyfar import io
 from pyfar import Signal
 from pyfar import Coordinates
+from pyfar.spatial.spatial import SphericalVoronoi
 
 
 def test_read_wav(tmpdir):
@@ -376,3 +377,12 @@ def test_read_signal(generate_far_file_signal, signal):
     actual = io.read(generate_far_file_signal)['signal']
     assert isinstance(actual, Signal)
     assert actual == signal
+
+
+def test_read_sphericalvoronoi(
+    generate_far_file_sphericalvoronoi,
+    sphericalvoronoi):
+    pass
+    # actual = io.read(generate_far_file_sphericalvoronoi)['sphericalvoronoi']
+    # assert isinstance(actual, SphericalVoronoi)
+    # assert actual == sphericalvoronoi
