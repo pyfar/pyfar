@@ -264,6 +264,9 @@ def _decode(zip_file, obj_name, ndarray_names):
     # decoding builtins as json
     json_str = zip_file.read(obj_name + '/json').decode('UTF-8')
     obj_dict = json.loads(json_str)
+    # decode numpy.dtypes
+    if '_dtype' in obj_dict:
+        obj_dict['_dtype'] = getattr(np, obj_dict['_dtype'].split('.')[-1])
     # decoding ndarrays
     for key in ndarray_names:
         memfile = io.BytesIO()
@@ -272,7 +275,13 @@ def _decode(zip_file, obj_name, ndarray_names):
         memfile.seek(0)
         obj_dict[key] = np.load(memfile, allow_pickle=False)
     # build object from obj_dict
-    obj = _str_to_type(obj_dict['type'])()
+    PyfarType = _str_to_type(obj_dict['type'])
+    if PyfarType == Signal:
+        obj = PyfarType(obj_dict['_data'],
+        obj_dict['_sampling_rate'],
+        obj_dict['_n_samples'])
+    else:
+        obj = PyfarType()
     del obj_dict['type']
     obj.__dict__.update(obj_dict)
     return obj
@@ -301,6 +310,8 @@ def _encode(obj):
             memfile.seek(0)
             obj_dict_ndarray[key] = memfile.read()
             del obj_dict_encoded[key]
+        if isinstance(value, type) and value.__module__ == 'numpy':
+            obj_dict_encoded[key] = np.dtype(value).name
 
     obj_dict_encoded['type'] = type(obj).__name__
 

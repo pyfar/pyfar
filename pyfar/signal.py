@@ -468,6 +468,10 @@ class Signal(Audio):
         """
         return SignalIterator(self._data.__iter__(), self)
 
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return utils._eq___dict__(self, other)
+
 
 class SignalIterator(object):
     """Iterator for signals
