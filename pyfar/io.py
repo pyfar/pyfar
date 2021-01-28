@@ -295,29 +295,41 @@ def _decode(zip_file, obj_name, ndarray_names):
 
 def _encode(obj):
     """
-    Iterates over object's dictionary and encodes all numpy.ndarrays
-    to be able to store in a json format.
+    Chooses the right encoding depending on the object type.
 
     Parameters
     ----------
-    obj: Compatible haiopy type.
+    obj: Compatible Pyfar type.
 
     Returns
     ----------
     obj_dict_encoded: dict.
         Json compatible dictionary.
+    obj_dict_ndarray: dict
+        Numpy arrays are not JSON serializable thus encoded differently.
     """
 
-    # encode by constructor params
     if isinstance(obj, SphericalVoronoi):
-        obj_dict_encoded = {}
-        obj_dict_ndarray = {}
-        obj_dict_encoded['type'] = type(obj).__name__
-        obj_dict_ndarray['sampling'] = _encode_ndarray(obj.points)
-        obj_dict_encoded['radius'] = obj.radius
-        return obj_dict_encoded, obj_dict_ndarray
+        return _encode_sphericalvoronoi(obj)
 
-    # encode by dict
+    return _encode_obj_by_dict(obj)
+
+def _encode_obj_by_dict(obj):
+    """
+    The encoding of objects that are composed of primitive and numpy types
+    utilizes `obj.__dict__()` and numpy encoding methods.
+
+    Parameters
+    ----------
+    obj: Compatible Pyfar type.
+
+    Returns
+    ----------
+    obj_dict_encoded: dict.
+        Json compatible dictionary.
+    obj_dict_ndarray: dict
+        Numpy arrays are not JSON serializable thus encoded differently.
+    """
     obj_dict_encoded = copy.deepcopy(obj.__dict__)
     obj_dict_ndarray = {}
     for key, value in obj.__dict__.items():
@@ -330,9 +342,50 @@ def _encode(obj):
     obj_dict_encoded['type'] = type(obj).__name__
 
     return obj_dict_encoded, obj_dict_ndarray
+
+
+def _encode_sphericalvoronoi(obj):
+    """
+    The encoding of objects that are composed of primitive and numpy types
+    utilizes `obj.__dict__()` and numpy encoding methods.
+
+    Parameters
+    ----------
+    obj: Compatible Pyfar type.
+
+    Returns
+    ----------
+    obj_dict_encoded: dict.
+        Json compatible dictionary.
+    obj_dict_ndarray: dict
+        Numpy arrays are not JSON serializable thus encoded differently.
+    """
+    obj_dict_encoded = {}
+    obj_dict_ndarray = {}
+    obj_dict_encoded['type'] = type(obj).__name__
+    obj_dict_ndarray['sampling'] = _encode_ndarray(obj.points)
+    obj_dict_encoded['radius'] = obj.radius
+    return obj_dict_encoded, obj_dict_ndarray
     
 
 def _encode_ndarray(ndarray):
+    """
+    The encoding of objects that are composed of primitive and numpy types
+    utilizes `obj.__dict__()` and numpy encoding methods.
+
+    Parameters
+    ----------
+    ndarray: numpy.array.
+
+    Returns
+    -------
+    bytes.
+        They bytes that where written by `numpy.save` into a memfile.
+
+    Notes
+    -----
+    * Do not allow pickling. This is not safe!
+    """
     memfile = io.BytesIO()
     np.save(memfile, ndarray, allow_pickle=False)
     memfile.seek(0)
@@ -365,6 +418,22 @@ def _unpack_zip_paths(zip_paths):
 
 
 def str_to_type(type_as_string, module='pyfar'):
+    """
+    Recursively find a PyfarType by passing in a valid type as a string.
+
+    Parameters
+    ----------
+    type_as_string: string.
+        A valid PyfarType.
+    module: string.
+        Either 'pyfar' or a submodule of pyfar, e.g. 'pyfar.spatial'
+        The default is 'pyfar'.
+
+    Returns
+    ----------
+    PyfarType: type.
+        A valid PyfarType.
+    """
     try:
         return getattr(sys.modules[module], type_as_string)
     except AttributeError:
