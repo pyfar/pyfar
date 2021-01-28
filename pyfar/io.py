@@ -318,6 +318,15 @@ def _encode(obj):
     obj_dict_ndarray: dict
         Numpy arrays are not JSON serializable thus encoded differently.
     """
+    pyfarTypes =[
+        'Orientations',
+        'Coordinates',
+        'Signal',
+        'SphericalVoronoi',
+        'Filter']
+    if not any(pyfarType == type(obj).__name__ for pyfarType in pyfarTypes):
+        raise TypeError(
+            f'Objects of type {type(obj)} connot be written to disk')
 
     if isinstance(obj, SphericalVoronoi):
         return _encode_sphericalvoronoi(obj)

@@ -15,6 +15,7 @@ from pyfar import io
 from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.spatial.spatial import SphericalVoronoi
+import pyfar.dsp.classes as fo
 
 
 def test_read_wav(tmpdir):
@@ -395,3 +396,11 @@ def test_read_sphericalvoronoi(
     actual = io.read(generate_far_file_sphericalvoronoi)['sphericalvoronoi']
     assert isinstance(actual, SphericalVoronoi)
     assert actual == sphericalvoronoi
+
+
+def test_read_filter(
+    generate_far_file_filter,
+    filter):
+    actual = io.read(generate_far_file_filter)['filter']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filter

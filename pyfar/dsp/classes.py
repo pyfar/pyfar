@@ -217,6 +217,11 @@ class Filter(object):
         return utils.copy(self)
 
 
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return utils._eq___dict__(self, other)
+
+
 class FilterFIR(Filter):
     """
     Filter object for FIR filters.

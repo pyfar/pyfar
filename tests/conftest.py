@@ -54,6 +54,26 @@ def generate_far_file_sphericalvoronoi(tmpdir, sphericalvoronoi):
     return filename
 
 
+@pytest.fixture
+def generate_far_file_filter(tmpdir, filter):
+    """Create a far file in temporary folder that contains an SphericalVoronoi
+    object.
+    """
+    filename = os.path.join(tmpdir, 'test_filter.far')
+    pyfar.io.write(filename, filter=filter)
+    return filename
+
+
+@pytest.fixture
+def generate_far_file_filterIIR(tmpdir, filterIIR):
+    """Create a far file in temporary folder that contains an SphericalVoronoi
+    object.
+    """
+    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+    pyfar.io.write(filename, filterIIR=filterIIR)
+    return filename
+
+
 # TODO: Merge the following with harmonizing_tests
 @pytest.fixture
 def views():
@@ -126,13 +146,14 @@ def sphericalvoronoi():
 @pytest.fixture
 def filter():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
+    state = np.array([[[1, 0]]])
     return fo.Filter(coefficients=coeff, state=state, comment='my comment')
 
 
 @pytest.fixture
 def filterIIR():
-    coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
-    return fo.FilterIIR(coeff, sampling_rate=2*np.pi)
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
