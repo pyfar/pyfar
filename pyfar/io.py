@@ -275,7 +275,7 @@ def _decode(zip_file, obj_name, ndarray_names):
         memfile.seek(0)
         obj_dict[key] = np.load(memfile, allow_pickle=False)
     # build object from obj_dict
-    PyfarType = _str_to_type(obj_dict['type'])
+    PyfarType = str_to_type(obj_dict['type'])
     if PyfarType == Signal:
         obj = PyfarType(
             obj_dict['_data'],
@@ -364,5 +364,15 @@ def _unpack_zip_paths(zip_paths):
     return obj_paths
 
 
-def _str_to_type(type_as_string):
-    return getattr(sys.modules['pyfar'], type_as_string)
+def str_to_type(type_as_string, module='pyfar'):
+    try:
+        return getattr(sys.modules[module], type_as_string)
+    except AttributeError:
+        submodules = [attrib for attrib in dir(sys.modules[module])
+            if not attrib.startswith('__') and attrib.islower()]
+    except KeyError:
+        return
+    for submodule in submodules:
+        PyfarType = str_to_type(type_as_string, module=f'{module}.{submodule}')
+        if PyfarType:
+            return PyfarType

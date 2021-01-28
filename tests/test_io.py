@@ -360,6 +360,16 @@ def mock_zipfile_read(obj_path):
             b'\x00\x00@\x00\x00\x00\x00\x00\x00\x08@')
 
 
+def test_str_to_type():
+    PyfarType = io.str_to_type('Coordinates')
+    assert PyfarType.__module__.startswith('pyfar')
+    PyfarType = io.str_to_type('Orientations')
+    assert PyfarType.__module__.startswith('pyfar')
+    PyfarType = io.str_to_type('SphericalVoronoi')
+    assert PyfarType.__module__.startswith('pyfar')
+    pass
+
+
 def test_read_orientations(generate_far_file_orientations, orientations):
     """Write is already called in the `generate_orientations_file` fixture"""
     actual = io.read(generate_far_file_orientations)['orientations']
@@ -382,7 +392,6 @@ def test_read_signal(generate_far_file_signal, signal):
 def test_read_sphericalvoronoi(
     generate_far_file_sphericalvoronoi,
     sphericalvoronoi):
-    pass
-    # actual = io.read(generate_far_file_sphericalvoronoi)['sphericalvoronoi']
+    actual = io.read(generate_far_file_sphericalvoronoi)['sphericalvoronoi']
     # assert isinstance(actual, SphericalVoronoi)
     # assert actual == sphericalvoronoi
