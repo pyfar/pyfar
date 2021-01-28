@@ -281,7 +281,7 @@ def _decode(zip_file, obj_name, ndarray_names):
             obj_dict['_data'],
             obj_dict['_sampling_rate'],
             obj_dict['_n_samples'])
-    if PyfarType == SphericalVoronoi:
+    elif PyfarType == SphericalVoronoi:
         obj = PyfarType(
             obj_dict['type'],
             obj_dict['sampling'],
