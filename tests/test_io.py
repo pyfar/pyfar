@@ -393,5 +393,5 @@ def test_read_sphericalvoronoi(
     generate_far_file_sphericalvoronoi,
     sphericalvoronoi):
     actual = io.read(generate_far_file_sphericalvoronoi)['sphericalvoronoi']
-    # assert isinstance(actual, SphericalVoronoi)
-    # assert actual == sphericalvoronoi
+    assert isinstance(actual, SphericalVoronoi)
+    assert actual == sphericalvoronoi

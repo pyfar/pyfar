@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import spatial as spat
+from pyfar import utils
 
 
 class SphericalVoronoi(spat.SphericalVoronoi):
@@ -31,6 +32,11 @@ class SphericalVoronoi(spat.SphericalVoronoi):
             raise ValueError("All sampling points need to be on the \
                     same radius.")
         super().__init__(points, radius_round, center)
+
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return utils._eq___dict__(self, other)
 
 
 def calculate_sph_voronoi_weights(

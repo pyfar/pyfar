@@ -282,14 +282,23 @@ def _decode(zip_file, obj_name, ndarray_names):
             obj_dict['_sampling_rate'],
             obj_dict['_n_samples'])
     elif PyfarType == SphericalVoronoi:
-        obj = PyfarType(
-            obj_dict['type'],
-            obj_dict['sampling'],
-            obj_dict['radius'])
+        obj = _decode_sphericalvoronoi(PyfarType, obj_dict)
     else:
         obj = PyfarType()
-    del obj_dict['type']
-    obj.__dict__.update(obj_dict)
+        del obj_dict['type']
+        obj.__dict__.update(obj_dict)
+    return obj
+
+
+def _decode_sphericalvoronoi(PyfarType, obj_dict):    
+    sampling = Coordinates(
+        obj_dict['sampling'][:, 0],
+        obj_dict['sampling'][:, 1],
+        obj_dict['sampling'][:, 2],
+        domain='cart')
+    obj = PyfarType(
+        sampling,
+        center=obj_dict['center'])
     return obj
 
 
@@ -314,6 +323,7 @@ def _encode(obj):
 
     return _encode_obj_by_dict(obj)
 
+
 def _encode_obj_by_dict(obj):
     """
     The encoding of objects that are composed of primitive and numpy types
@@ -336,8 +346,10 @@ def _encode_obj_by_dict(obj):
         if isinstance(value, np.ndarray):
             obj_dict_ndarray[key] = _encode_ndarray(value)
             del obj_dict_encoded[key]
-        if isinstance(value, type) and value.__module__ == 'numpy':
+        elif isinstance(value, type) and value.__module__ == 'numpy':
             obj_dict_encoded[key] = np.dtype(value).name
+        elif type(value) is not type and type(value).__module__ != 'builtins':
+            del obj_dict_encoded[key]
 
     obj_dict_encoded['type'] = type(obj).__name__
 
@@ -364,7 +376,7 @@ def _encode_sphericalvoronoi(obj):
     obj_dict_ndarray = {}
     obj_dict_encoded['type'] = type(obj).__name__
     obj_dict_ndarray['sampling'] = _encode_ndarray(obj.points)
-    obj_dict_encoded['radius'] = obj.radius
+    obj_dict_ndarray['center'] = _encode_ndarray(obj.center)
     return obj_dict_encoded, obj_dict_ndarray
     
 
