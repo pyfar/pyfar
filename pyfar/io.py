@@ -12,6 +12,7 @@ import sys
 from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.spatial.spatial import SphericalVoronoi
+from pyfar.utils import str_to_type
 
 def read_wav(filename):
     """
@@ -427,33 +428,3 @@ def _unpack_zip_paths(zip_paths):
         if paths[1] == 'ndarrays':
             obj_paths[paths[0]].append(paths[2])
     return obj_paths
-
-
-def str_to_type(type_as_string, module='pyfar'):
-    """
-    Recursively find a PyfarType by passing in a valid type as a string.
-
-    Parameters
-    ----------
-    type_as_string: string.
-        A valid PyfarType.
-    module: string.
-        Either 'pyfar' or a submodule of pyfar, e.g. 'pyfar.spatial'
-        The default is 'pyfar'.
-
-    Returns
-    ----------
-    PyfarType: type.
-        A valid PyfarType.
-    """
-    try:
-        return getattr(sys.modules[module], type_as_string)
-    except AttributeError:
-        submodules = [attrib for attrib in dir(sys.modules[module])
-            if not attrib.startswith('__') and attrib.islower()]
-    except KeyError:
-        return
-    for submodule in submodules:
-        PyfarType = str_to_type(type_as_string, module=f'{module}.{submodule}')
-        if PyfarType:
-            return PyfarType

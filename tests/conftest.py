@@ -8,6 +8,7 @@ import scipy.io.wavfile as wavfile
 from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
 from pyfar.signal import Signal
+import pyfar.dsp.classes as fo
 import pyfar.io
 
 # import stub_utils
@@ -120,3 +121,33 @@ def sphericalvoronoi():
         phi, theta, rad,
         domain='sph', convention='top_colat')
     return SphericalVoronoi(s)
+
+
+@pytest.fixture
+def filter():
+    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
+    return fo.Filter(coefficients=coeff, state=state, comment='my comment')
+
+
+@pytest.fixture
+def filterIIR():
+    coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterFIR():
+    coeff = np.array([
+        [1, 1/2, 0],
+        [1, 1/4, 1/8]])
+    desired = np.array([
+        [[1, 1/2, 0], [1, 0, 0]],
+        [[1, 1/4, 1/8], [1, 0, 0]]
+        ])
+    return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterSOS():
+    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
+    return fo.FilterSOS(sos, sampling_rate=2*np.pi)
