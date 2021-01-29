@@ -13,6 +13,7 @@ from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.utils import str_to_type
+import pyfar.dsp.classes as fo
 
 def read_wav(filename):
     """
@@ -283,7 +284,9 @@ def _decode(zip_file, obj_name, ndarray_names):
             obj_dict['_sampling_rate'],
             obj_dict['_n_samples'])
     elif PyfarType == SphericalVoronoi:
-        obj = _decode_sphericalvoronoi(PyfarType, obj_dict)
+        obj = _decode_sphericalvoronoi(obj_dict)
+    elif PyfarType in [fo.FilterIIR]:
+        obj = _decode_filterFIR(PyfarType, obj_dict)
     else:
         obj = PyfarType()
         del obj_dict['type']
@@ -291,17 +294,23 @@ def _decode(zip_file, obj_name, ndarray_names):
     return obj
 
 
-def _decode_sphericalvoronoi(PyfarType, obj_dict):    
+def _decode_sphericalvoronoi(obj_dict):    
     sampling = Coordinates(
         obj_dict['sampling'][:, 0],
         obj_dict['sampling'][:, 1],
         obj_dict['sampling'][:, 2],
         domain='cart')
-    obj = PyfarType(
+    obj = SphericalVoronoi(
         sampling,
         center=obj_dict['center'])
     return obj
 
+
+def _decode_filterFIR(PyfarType, obj_dict):
+    obj = fo.FilterIIR(
+        coefficients=obj_dict['_coefficients'][0, :, :],
+        sampling_rate=obj_dict['_sampling_rate'])
+    return obj
 
 def _encode(obj):
     """
@@ -323,13 +332,17 @@ def _encode(obj):
         'Coordinates',
         'Signal',
         'SphericalVoronoi',
-        'Filter']
+        'Filter',
+        'FilterIIR']
     if not any(pyfarType == type(obj).__name__ for pyfarType in pyfarTypes):
         raise TypeError(
             f'Objects of type {type(obj)} connot be written to disk')
 
     if isinstance(obj, SphericalVoronoi):
         return _encode_sphericalvoronoi(obj)
+
+    if isinstance(obj, fo.FilterIIR):
+        return _encode_filterFIR(obj)
 
     return _encode_obj_by_dict(obj)
 
@@ -388,6 +401,18 @@ def _encode_sphericalvoronoi(obj):
     obj_dict_ndarray['sampling'] = _encode_ndarray(obj.points)
     obj_dict_ndarray['center'] = _encode_ndarray(obj.center)
     return obj_dict_encoded, obj_dict_ndarray
+
+
+def _encode_filterFIR(obj):
+    warnings.warn(f'`io.write` writing object of type {type(obj)}: ' 
+        'It is not possible to save `filter_func` to disk.')
+    obj_dict_encoded = {}
+    obj_dict_ndarray = {}
+    obj_dict_encoded['type'] = type(obj).__name__
+    obj_dict_ndarray['_coefficients'] = _encode_ndarray(
+        obj.__dict__['_coefficients'])
+    obj_dict_encoded['_sampling_rate'] = obj.__dict__['_sampling_rate']
+    return obj_dict_encoded, obj_dict_ndarray
     
 
 def _encode_ndarray(ndarray):
@@ -406,7 +431,7 @@ def _encode_ndarray(ndarray):
 
     Notes
     -----
-    * Do not allow pickling. This is not safe!
+    * Do not allow pickling. It is not safe!
     """
     memfile = io.BytesIO()
     np.save(memfile, ndarray, allow_pickle=False)

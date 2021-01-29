@@ -404,3 +404,13 @@ def test_read_filter(
     actual = io.read(generate_far_file_filter)['filter']
     assert isinstance(actual, fo.Filter)
     assert actual == filter
+
+
+def test_read_filterIIR(
+    generate_far_file_filterIIR,
+    filterIIR):
+    actual = io.read(generate_far_file_filterIIR)['filterIIR']
+    assert isinstance(actual, fo.FilterIIR)
+    assert actual == filterIIR
+
+    
