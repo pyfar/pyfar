@@ -6,7 +6,7 @@ import scipy.io.wavfile as wavfile
 
 from pyfar.orientations import Orientations
 
-import stub_utils
+from . import stub_utils
 
 
 @pytest.fixture
