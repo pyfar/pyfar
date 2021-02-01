@@ -20,3 +20,17 @@ def test_audio_comment():
 
     audio.comment = 'Blub'
     assert audio.comment == 'Blub'
+
+
+def test_return_item():
+    audio = _Audio(domain='time')
+
+    with pytest.raises(NotImplementedError):
+        audio._return_item()
+
+
+def test_assert_matching_meta_data():
+    audio = _Audio(domain='time')
+
+    with pytest.raises(NotImplementedError):
+        audio._assert_matching_meta_data()

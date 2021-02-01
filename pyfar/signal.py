@@ -149,6 +149,12 @@ class _Audio(object):
         """Return a deep copy of the Signal object."""
         return utils.copy(self)
 
+    def _return_item(self):
+        raise NotImplementedError("To be implemented by derived classes.")
+
+    def _assert_matching_meta_data(self):
+        raise NotImplementedError("To be implemented by derived classes.")
+
     def __getitem__(self, key):
         """Get signal channels at key.
         """
