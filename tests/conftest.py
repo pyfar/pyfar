@@ -6,7 +6,7 @@ import scipy.io.wavfile as wavfile
 
 from pyfar.orientations import Orientations
 
-from . import stub_utils
+import stub_utils
 
 
 @pytest.fixture
@@ -315,7 +315,7 @@ def noise_odd():
         Stub of noise signal
     """
     sigma = 1
-    n_samples = int(1e5-1)
+    n_samples = int(1e5 - 1)
     cshape = (1,)
     sampling_rate = 44100
     fft_norm = 'rms'

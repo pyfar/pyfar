@@ -33,16 +33,14 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
         time = np.atleast_2d(signal.time[slice])
         freq = np.atleast_2d(signal.freq[slice])
         item = signal_stub(
-                        time,
-                        freq,
-                        signal.sampling_rate,
-                        signal.fft_norm)
+            time,
+            freq,
+            signal.sampling_rate,
+            signal.fft_norm)
         return item
 
-    signal = mock.MagicMock(spec_set=Signal(
-                                        time,
-                                        sampling_rate,
-                                        domain='time'))
+    signal = mock.MagicMock(
+        spec_set=Signal(time, sampling_rate, domain='time'))
     signal.time = np.atleast_2d(time)
     signal.freq = np.atleast_2d(freq)
     signal.sampling_rate = sampling_rate
@@ -51,9 +49,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     signal.n_bins = signal.freq.shape[-1]
     signal.cshape = signal.time.shape[:-1]
     signal.times = np.atleast_1d(
-                        np.arange(0, signal.n_samples) / sampling_rate)
+        np.arange(0, signal.n_samples) / sampling_rate)
     signal.frequencies = np.atleast_1d(
-                        np.fft.rfftfreq(signal.n_samples, 1/sampling_rate))
+        np.fft.rfftfreq(signal.n_samples, 1 / sampling_rate))
     signal.__getitem__.side_effect = getitem
 
     return signal
@@ -90,12 +88,12 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
                          f"which is {n_samples}")
 
     # Time vector
-    time = np.zeros(cshape+(n_samples,))
+    time = np.zeros(cshape + (n_samples,))
     for idx, d in np.ndenumerate(delay):
-        time[idx+(d,)] = 1
+        time[idx + (d,)] = 1
     # Spectrum
     n_bins = int(n_samples / 2) + 1
-    bins = np.broadcast_to(np.arange(n_bins), (cshape+(n_bins,)))
+    bins = np.broadcast_to(np.arange(n_bins), (cshape + (n_bins,)))
     freq = np.exp(-1j * 2 * np.pi * bins * delay[..., np.newaxis] / n_samples)
     # Normalization
     freq = _normalization(freq, n_samples, fft_norm)
@@ -135,7 +133,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     frequency = np.atleast_1d(frequency)
     if np.shape(frequency) != cshape:
         raise ValueError("Shape of frequency needs to equal cshape.")
-    if np.any(frequency >= sampling_rate/2):
+    if np.any(frequency >= sampling_rate / 2):
         raise ValueError(f"Frequency is larger than Nyquist frequency,"
                          f"which is {sampling_rate/2}.")
     # Round to the nearest frequency bin
@@ -144,14 +142,14 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
 
     # Time vector
     times = np.arange(0, n_samples) / sampling_rate
-    times = np.broadcast_to(times, (cshape+(n_samples,)))
+    times = np.broadcast_to(times, (cshape + (n_samples,)))
     time = np.sin(2 * np.pi * frequency[..., np.newaxis] * times)
     # Spectrum
     n_bins = int(n_samples / 2) + 1
-    freq = np.zeros(cshape+(n_bins,), dtype=np.complex)
+    freq = np.zeros(cshape + (n_bins,), dtype=np.complex)
     for idx, f in np.ndenumerate(frequency):
         f_bin = int(f / sampling_rate * n_samples)
-        freq[idx+(f_bin,)] = -0.5j * float(n_samples)
+        freq[idx + (f_bin,)] = -0.5j * float(n_samples)
     # Normalization
     freq = _normalization(freq, n_samples, fft_norm)
     return time, freq, frequency

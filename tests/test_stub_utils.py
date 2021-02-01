@@ -4,7 +4,7 @@ import numpy.testing as npt
 
 from pyfar import Signal
 
-from . import stub_utils
+import stub_utils
 
 
 def test_signal_stub_properties():
@@ -91,8 +91,8 @@ def test_impulse_func_rms():
     cshape = (1,)
     delay = 0
     fft_norm = 'rms'
-    freq_truth = 1 / n_samples * np.array(
-                        [[1, np.sqrt(2), np.sqrt(2), 1]], dtype=complex)
+    freq_truth = np.array([[1, np.sqrt(2), np.sqrt(2), 1]], dtype=complex)
+    freq_truth /= n_samples
     _, freq = stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
     npt.assert_allclose(freq, freq_truth, rtol=1e-10, atol=1e-15)
 
@@ -125,8 +125,8 @@ def test_impulse_func_multi_channel():
                            [[0, 0, 1, 0], [0, 0, 0, 1]]])
     freq_truth = np.array([[[1, 1, 1],
                             [1, -1j, -1]],
-                           [[1, -1,  1],
-                            [1,  1j, -1]]])
+                           [[1, -1, 1],
+                            [1, 1j, -1]]])
 
     time, freq = stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
 
@@ -177,14 +177,14 @@ def test_sine_func():
     freq_truth = np.array([[0, -2.j, 0]], dtype=complex)
 
     time, freq, frequency = stub_utils.sine_func(
-                                frequency_truth,
-                                sampling_rate,
-                                n_samples,
-                                fft_norm,
-                                cshape)
+        frequency_truth,
+        sampling_rate,
+        n_samples,
+        fft_norm,
+        cshape)
 
     npt.assert_allclose(
-        time, time_truth, rtol=1e-10, atol=10*np.finfo(float).eps)
+        time, time_truth, rtol=1e-10, atol=10 * np.finfo(float).eps)
     npt.assert_allclose(freq, freq_truth, rtol=1e-10)
     assert frequency == frequency_truth
 
@@ -199,14 +199,15 @@ def test_sine_func_rms():
     cshape = (1,)
 
     frequency_truth = 1
-    freq_truth = np.array([[0, -2j*np.sqrt(2)/n_samples, 0]], dtype=complex)
+    freq_truth = np.array(
+        [[0, -2j * np.sqrt(2) / n_samples, 0]], dtype=complex)
 
     _, freq, _ = stub_utils.sine_func(
-                                frequency_truth,
-                                sampling_rate,
-                                n_samples,
-                                fft_norm,
-                                cshape)
+        frequency_truth,
+        sampling_rate,
+        n_samples,
+        fft_norm,
+        cshape)
     npt.assert_allclose(freq, freq_truth, rtol=1e-10)
 
 
@@ -219,16 +220,16 @@ def test_sine_func_multi_channel():
     cshape = (2, 2)
 
     frequency_truth = np.array([[1, 2], [3, 4]])
-    sq3 = np.sqrt(3)
+    sq3_2 = np.sqrt(3) / 2
     time_truth = np.array(
-        [[[0, 0.5, sq3/2, 1, sq3/2, 0.5,
-           0, -0.5, -sq3/2, -1, -sq3/2, -0.5],
-          [0, sq3/2, sq3/2, 0, -sq3/2, -sq3/2,
-           0, sq3/2, sq3/2, 0, -sq3/2, -sq3/2]],
+        [[[0, 0.5, sq3_2, 1, sq3_2, 0.5,
+           0, -0.5, -sq3_2, -1, -sq3_2, -0.5],
+          [0, sq3_2, sq3_2, 0, -sq3_2, -sq3_2,
+           0, sq3_2, sq3_2, 0, -sq3_2, -sq3_2]],
          [[0, 1, 0, -1, 0, 1,
           0, -1, 0, 1, 0, -1],
-          [0, sq3/2, -sq3/2, 0, sq3/2, -sq3/2,
-           0, sq3/2, -sq3/2, 0, sq3/2, -sq3/2]]])
+          [0, sq3_2, -sq3_2, 0, sq3_2, -sq3_2,
+           0, sq3_2, -sq3_2, 0, sq3_2, -sq3_2]]])
     freq_truth = np.array(
         [[[0, -6j, 0, 0, 0, 0, 0],
           [0, 0, -6j, 0, 0, 0, 0]],
@@ -237,14 +238,14 @@ def test_sine_func_multi_channel():
         dtype=complex)
 
     time, freq, frequency = stub_utils.sine_func(
-                                frequency_truth,
-                                sampling_rate,
-                                n_samples,
-                                fft_norm,
-                                cshape)
+        frequency_truth,
+        sampling_rate,
+        n_samples,
+        fft_norm,
+        cshape)
 
     npt.assert_allclose(
-        time, time_truth, rtol=1e-10, atol=10*np.finfo(float).eps)
+        time, time_truth, rtol=1e-10, atol=10 * np.finfo(float).eps)
     npt.assert_allclose(freq, freq_truth, rtol=1e-10)
     npt.assert_allclose(frequency, frequency_truth, rtol=1e-10)
 
@@ -263,14 +264,14 @@ def test_sine_func_frequency_adjustment():
     freq_truth = np.array([[0, -2.j, 0]], dtype=complex)
 
     time, freq, frequency = stub_utils.sine_func(
-                                frequency_in,
-                                sampling_rate,
-                                n_samples,
-                                fft_norm,
-                                cshape)
+        frequency_in,
+        sampling_rate,
+        n_samples,
+        fft_norm,
+        cshape)
 
     npt.assert_allclose(
-        time, time_truth, rtol=1e-10, atol=10*np.finfo(float).eps)
+        time, time_truth, rtol=1e-10, atol=10 * np.finfo(float).eps)
     npt.assert_allclose(freq, freq_truth, rtol=1e-10)
     assert frequency == frequency_truth
 
@@ -286,11 +287,11 @@ def test_sine_func_value_error():
     frequency_in = 2
     with pytest.raises(ValueError):
         stub_utils.sine_func(
-                            frequency_in,
-                            sampling_rate,
-                            n_samples,
-                            fft_norm,
-                            cshape)
+            frequency_in,
+            sampling_rate,
+            n_samples,
+            fft_norm,
+            cshape)
 
     # Inconsistent input shape
     cshape = (2, 2)
@@ -298,11 +299,11 @@ def test_sine_func_value_error():
     frequency_in = [1, 1]
     with pytest.raises(ValueError):
         stub_utils.sine_func(
-                            frequency_in,
-                            sampling_rate,
-                            n_samples,
-                            fft_norm,
-                            cshape)
+            frequency_in,
+            sampling_rate,
+            n_samples,
+            fft_norm,
+            cshape)
 
 
 def test_noise_func():
