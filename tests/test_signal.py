@@ -16,13 +16,16 @@ def test_signal_init_list(impulse_list):
     signal = Signal(impulse_list, 44100, domain='time')
     assert isinstance(signal, Signal)
 
+    signal = Signal(impulse_list, 44100, domain='freq')
+    assert isinstance(signal, Signal)
+
 
 def test_signal_init_default_parameter(impulse_list):
     # using all defaults
     signal = Signal(impulse_list, 44100)
     assert signal.domain == 'time'
     assert signal.fft_norm == 'none'
-    assert signal.comment is None
+    assert signal.comment == 'none'
 
     # default of fft_norm depending on signal type
     signal = Signal(impulse_list, 44100)
@@ -32,6 +35,9 @@ def test_signal_init_default_parameter(impulse_list):
 def test_signal_comment():
     signal = Signal([1, 0, 0], 44100, comment='Bla')
     assert signal.comment == 'Bla'
+
+    signal.comment = 'Blub'
+    assert signal.comment == 'Blub'
 
 
 def test_domain_getter_freq(sine):
@@ -164,6 +170,13 @@ def test_setter_freq(sine, impulse):
     signal.freq = spec
     assert signal.domain == 'freq'
     npt.assert_allclose(np.atleast_2d(spec), signal._data, atol=1e-15)
+
+
+def test_re_setter_freq():
+    """Test the warning for estimating the number of samples from n_bins."""
+    signal = Signal([1, 2, 3], 44100, domain='freq', n_samples=4)
+    with pytest.warns(UserWarning):
+        signal.freq = [1, 2, 3, 4]
 
 
 def test_getter_sampling_rate(sine):
