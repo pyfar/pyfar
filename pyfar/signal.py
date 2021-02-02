@@ -1,7 +1,7 @@
 """
 Provide Container classes and arithmethic operations for audio data.
 
-The classes `TimeData` and `DataFrequqncy` are intended to store incomplete or
+The classes `TimeData` and `DataFrequency` are intended to store incomplete or
 non-equidistant audio data in the time and frequency domain. The class `Signal`
 can be used to store equidistant and complete audio data that can be converted
 between the time and frequency domain by means of the Fourier transform.
@@ -30,9 +30,9 @@ class _Audio(object):
 
     def __init__(self, domain, comment=None, dtype=np.double):
 
-        # initalize valid parameter spaces
+        # initialize valid parameter spaces
         # NOTE: Some are note needed by TimeData but would have to be defined
-        #       in DataFrequqncy and Signal otherwise.
+        #       in DataFrequency and Signal otherwise.
         self._VALID_TYPES = ["power", "energy"]
         self._VALID_DOMAINS = ["time", "freq"]
         self._VALID_FFT_NORMS = [
@@ -195,11 +195,11 @@ class TimeData(_Audio):
 
         Attributes
         ----------
-        data : ndarray, double
+        data : array, double
             Raw data in the time domain. The memory layout of data is 'C'.
             E.g. data of shape (3, 2, 1024) has 3 x 2 channels with
             1024 samples each.
-        times : ndarray, double
+        times : array, double
             Times of the data in seconds. The number of times must match
             the size of the last dimension of data.
         comment : str
@@ -301,11 +301,11 @@ class FrequencyData(_Audio):
 
         Attributes
         ----------
-        data : ndarray, double
+        data : array, double
             Raw data in the frequency domain. The memory layout of Data is 'C'.
-            E.g. data of shape (3, 2, 1024) has 3 x 2 channles with 1024
+            E.g. data of shape (3, 2, 1024) has 3 x 2 channels with 1024
             frequency bins each.
-        frequencies : ndarray, double
+        frequencies : array, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
         fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
@@ -336,7 +336,7 @@ class FrequencyData(_Audio):
         self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
         if self._frequencies.size != self.n_bins:
             raise ValueError(
-                "The number of freqencies must be data.shape[-1]")
+                "The number of frequencies must be data.shape[-1]")
         if np.any(np.diff(self._frequencies) <= 0) and \
                 len(self._frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
@@ -827,8 +827,8 @@ def power(data: tuple, domain='freq'):
     Parameters
     ----------
     data : tuple of the form (data_1, data_2, ..., data_N)
-        Data to be powerd. Can contain Signal objects, numbers, and, array
-        likes.
+        Data to be which is the base. Can contain Signal objects, numbers, and
+        array likes.
     domain : 'time', 'freq'
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -862,9 +862,9 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
         result = operation(
             result, _get_arithmetic_data(data[d], n_samples, domain))
 
-    # check if to retun as Signal
+    # check if to return as Signal
     if sampling_rate is not None:
-        # apply desried fft normalization
+        # apply desired fft normalization
         if domain == 'freq':
             result = fft.normalization(result, n_samples, sampling_rate,
                                        fft_norm)
@@ -963,7 +963,7 @@ def _get_arithmetic_data(data, n_samples, domain):
     Returns
     -------
     data_out : numpy array
-        Data in desired domain without any fft normlaization if data is a
+        Data in desired domain without any fft normalization if data is a
         Signal. `np.asarray(data)` otherwise.
     """
     if isinstance(data, Signal):
