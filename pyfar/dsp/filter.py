@@ -717,18 +717,7 @@ def center_frequencies_fractional_octaves(
             "The second frequency needs to be higher than the first.")
 
     if num_fractions in [1, 3]:
-        if num_fractions == 1:
-            nominal = np.array([
-                31.5, 63, 125, 250, 500, 1e3,
-                2e3, 4e3, 8e3, 16e3], dtype=np.float)
-        elif num_fractions == 3:
-            nominal = np.array([
-                25, 31.5, 40, 50, 63, 80, 100, 125, 160,
-                200, 250, 315, 400, 500, 630, 800, 1000,
-                1250, 1600, 2000, 2500, 3150, 4000, 5000,
-                6300, 8000, 10000, 12500, 16000, 20000], dtype=np.float)
-
-        exact = _exact_center_frequencies_fractional_octaves_iec(
+        nominal, exact = _center_frequencies_fractional_octaves_iec(
             nominal, num_fractions)
 
         mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
@@ -770,7 +759,7 @@ def _exact_center_frequencies_fractional_octaves(
     return exact
 
 
-def _exact_center_frequencies_fractional_octaves_iec(nominal, num_fractions):
+def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     """Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
     octave ratio
@@ -783,17 +772,33 @@ def _exact_center_frequencies_fractional_octaves_iec(nominal, num_fractions):
 
     Parameters
     ----------
-    indices : array
-        The indices for which the center frequencies are calculated.
     num_fractions : 1, 3
         The number of octave fractions. 1 returns octave center frequencies,
         3 returns third octave center frequencies.
+
     Returns
     -------
-    frequencies : ndarray, float
-        center frequencies of the fractional octave bands
+    nominal : array, float
+        The nominal (rounded) center frequencies specified in the standard.
+        Nominal frequencies are only returned for octave bands and third octave
+        bands
+    exact : array, float
+        The exact center frequencies, resulting in a uniform distribution of
+        frequency bands over the frequency range.
     """
+    if num_fractions == 1:
+        nominal = np.array([
+            31.5, 63, 125, 250, 500, 1e3,
+            2e3, 4e3, 8e3, 16e3], dtype=np.float)
+    elif num_fractions == 3:
+        nominal = np.array([
+            25, 31.5, 40, 50, 63, 80, 100, 125, 160,
+            200, 250, 315, 400, 500, 630, 800, 1000,
+            1250, 1600, 2000, 2500, 3150, 4000, 5000,
+            6300, 8000, 10000, 12500, 16000, 20000], dtype=np.float)
+
     indices = _frequency_indices(nominal, num_fractions)
+
     reference_freq = 1e3
     octave_ratio = 10**(3/10)
 
@@ -803,9 +808,9 @@ def _exact_center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     else:
         exponent = ((2*indices + 1) / num_fractions / 2)
 
-    center_freq = reference_freq * octave_ratio**exponent
+    exact = reference_freq * octave_ratio**exponent
 
-    return center_freq
+    return nominal, exact
 
 
 def _frequency_indices(frequencies, num_fractions):
@@ -844,16 +849,19 @@ def fractional_octave_bands(
         sampling_rate=None,
         freq_range=(20.0, 20e3),
         order=14):
-    """Create a fractional octave filter bank.
+    """Create and/or apply a fractional octave filter bank.
 
     Parameters
     ----------
-    samplingrate : integer
-        samplingrate of the signal
+    sampling_rate : integer
+        Sampling rate of the signal
     num_fractions : integer
-        number of octave fractions
+        Number of octave fractions
+    freq_range : array like, float
+        The lowest and highest frequency to be considered for filter
+        generation
     order : integer, optional
-        order of the butterworth filter
+        Order of the butterworth filter
 
     Returns
     -------
@@ -896,20 +904,25 @@ def fractional_octave_bands(
 def _coefficients_fractional_octave_bands(
         sampling_rate, num_fractions,
         freq_range=(20.0, 20e3), order=14):
-    """Create a fractional octave filter bank.
+    """Calculate the second order section filter coefficients of a fractional
+    octave band filter bank.
 
     Parameters
     ----------
-    samplingrate : integer
-        samplingrate of the signal
+    sampling_rate : integer
+        Sampling rate of the signal
     num_fractions : integer
-        number of octave fractions
+        Number of octave fractions
+    freq_range : array like, float
+        The lowest and highest frequency to be considered for filter
+        generation
     order : integer, optional
-        order of the butterworth filter
+        Order of the butterworth filter
 
     Returns
     -------
-    filter
+    sos : array, float
+        Second order section filter coefficients with shape (.., 6)
 
     Notes
     -----
