@@ -685,9 +685,9 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 def center_frequencies_fractional_octaves(
         num_fractions=1, frequency_range=(20, 20e3)):
     """Return the octave center frequencies according to the IEC 61260:1:2014
-    standard. For numbers of fractions other than 1 and 3, only the exact center
-    frequencies are returned, since nominal frequencies are not specified by
-    corresponding standards.
+    standard. For numbers of fractions other than 1 and 3, only the exact
+    center frequencies are returned, since nominal frequencies are not
+    specified by corresponding standards.
 
     Parameters
     ----------
