@@ -2,7 +2,7 @@ import numpy as np
 
 from unittest import mock
 
-from pyfar import Signal
+from pyfar import Signal, TimeData, FrequencyData
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):
@@ -55,6 +55,46 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     signal.__getitem__.side_effect = getitem
 
     return signal
+
+
+def time_data_stub(time, times):
+    """Function to generate stub of pyfar TimeData class based on MagicMock.
+    The properties of the signal are set without any further check.
+
+    Parameters
+    ----------
+    time : ndarray
+        Time data
+    times : ndarray
+        Times of time in second
+
+    Returns
+    -------
+    timeData
+        stub of pyfar TimeData class
+    """
+
+    # Use MagicMock and side_effect to mock __getitem__
+    # See "Mocking a dictionary with MagicMock",
+    # https://het.as.utexas.edu/HET/Software/mock/examples.html
+    def getitem(slice):
+        time = np.atleast_2d(time_data.time[slice])
+        times = np.atleast_2d(time_data.times[slice])
+        item = signal_stub(
+            time,
+            times)
+        return item
+
+    time_data = mock.MagicMock(
+        spec_set=TimeData(time, times))
+    time_data.time = np.atleast_2d(time)
+    time_data.times = np.atleast_1d(times)
+    time_data.domain = 'time'
+    time_data.n_samples = time_data.time.shape[-1]
+    time_data.cshape = time_data.time.shape[:-1]
+    time_data.__getitem__.side_effect = getitem
+
+    return time_data
 
 
 def impulse_func(delay, n_samples, fft_norm, cshape):

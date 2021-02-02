@@ -377,6 +377,20 @@ def noise_two_by_three_channel():
 
 
 @pytest.fixture
+def time_data_three_points():
+    """
+    TimeData stub with three data points.
+
+    Returns
+    -------
+    timeData
+        stub of pyfar TimeData class
+    """
+    time_data = stub_utils.time_data_stub([1, 0, -1], [0, .1, .4])
+    return time_data
+
+
+@pytest.fixture
 def fft_lib_np(monkeypatch):
     """Set numpy.fft as fft library.
     """
