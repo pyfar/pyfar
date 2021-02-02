@@ -11,7 +11,7 @@ from pyfar.signal import Signal
 import pyfar.dsp.classes as fo
 import pyfar.io
 
-# import stub_utils
+import stub_utils
 
 
 @pytest.fixture
@@ -71,6 +71,23 @@ def generate_far_file_filterIIR(tmpdir, filterIIR):
     """
     filename = os.path.join(tmpdir, 'test_filterIIR.far')
     pyfar.io.write(filename, filterIIR=filterIIR)
+    return filename
+
+
+@pytest.fixture
+def generate_far_file_filterFIR(tmpdir, filterFIR):
+    """Create a far file in temporary folder that contains an SphericalVoronoi
+    object.
+    """
+    filename = os.path.join(tmpdir, 'test_filterFIR.far')
+    pyfar.io.write(filename, filterFIR=filterFIR)
+    return filename
+
+
+@pytest.fixture
+def generate_far_file_nested_data_struct(tmpdir, nested_data_struct):
+    filename = os.path.join(tmpdir, 'test_nested_data_struct.far')
+    pyfar.io.write(filename, nested_data_struct=nested_data_struct)
     return filename
 
 
@@ -172,3 +189,19 @@ def filterFIR():
 def filterSOS():
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def nested_data_struct():
+    n = 42
+    comment = 'My String'
+    matrix = np.arange(0, 24).reshape((2, 3, 4))
+    subobj = stub_utils.MyOtherClass()
+    mylist = [1, np.int32, np.arange(10), stub_utils.MyOtherClass()]
+    mydict = {
+        'a': 1,
+        'b': np.int32,
+        'c': np.arange(10),
+        'd': stub_utils.MyOtherClass()}
+    return stub_utils.NestedDataStruct(
+        n, comment, matrix, subobj, mylist, mydict)

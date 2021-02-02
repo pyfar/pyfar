@@ -312,6 +312,7 @@ def _decode_filterFIR(PyfarType, obj_dict):
         sampling_rate=obj_dict['_sampling_rate'])
     return obj
 
+
 def _encode(obj):
     """
     Chooses the right encoding depending on the object type.
@@ -327,24 +328,57 @@ def _encode(obj):
     obj_dict_ndarray: dict
         Numpy arrays are not JSON serializable thus encoded differently.
     """
-    pyfarTypes =[
+    if type(obj).__name__ == 'NestedDataStruct':
+        pass
+
+    pyfarTypes = [
         'Orientations',
         'Coordinates',
         'Signal',
         'SphericalVoronoi',
         'Filter',
-        'FilterIIR']
+        'FilterIIR',
+        'FilterFIR',
+        'NestedDataStruct']
     if not any(pyfarType == type(obj).__name__ for pyfarType in pyfarTypes):
         raise TypeError(
-            f'Objects of type {type(obj)} connot be written to disk')
+            f'Objects of type {type(obj)} cannot be written to disk')
 
     if isinstance(obj, SphericalVoronoi):
         return _encode_sphericalvoronoi(obj)
 
-    if isinstance(obj, fo.FilterIIR):
-        return _encode_filterFIR(obj)
+    # if isinstance(obj, fo.Filter) or issubclass(obj, fo.Filter):
+    #     return _encode_filter(obj)
 
     return _encode_obj_by_dict(obj)
+
+
+def pyfar_types():
+    return [
+        'Orientations',
+        'Coordinates',
+        'Signal',
+        'SphericalVoronoi',
+        'Filter',
+        'FilterIIR',
+        'FilterFIR',
+        'NestedDataStruct']
+
+
+def encode_recursively(node, name):
+    if any(pyfarType == type(node).__name__ for pyfarType in pyfar_types()):
+        node = node.__dict__
+
+    if isinstance(node, dict):
+        for key, value in node.items():
+            pass
+    elif isinstance(node, list):
+        pass
+    elif not type(node).__name__ != 'builtins':
+        pass
+    # The actual encoding
+
+    pass
 
 
 def _encode_obj_by_dict(obj):
@@ -371,7 +405,8 @@ def _encode_obj_by_dict(obj):
             del obj_dict_encoded[key]
         elif isinstance(value, type) and value.__module__ == 'numpy':
             obj_dict_encoded[key] = np.dtype(value).name
-        elif type(value) is not type and type(value).__module__ != 'builtins':
+        elif (type(value) is not type and type(value).__module__ != 'builtins'
+            or isinstance(value, dict)):
             del obj_dict_encoded[key]
 
     obj_dict_encoded['type'] = type(obj).__name__
@@ -403,7 +438,7 @@ def _encode_sphericalvoronoi(obj):
     return obj_dict_encoded, obj_dict_ndarray
 
 
-def _encode_filterFIR(obj):
+def _encode_filter(obj):
     warnings.warn(f'`io.write` writing object of type {type(obj)}: ' 
         'It is not possible to save `filter_func` to disk.')
     obj_dict_encoded = {}
@@ -412,6 +447,8 @@ def _encode_filterFIR(obj):
     obj_dict_ndarray['_coefficients'] = _encode_ndarray(
         obj.__dict__['_coefficients'])
     obj_dict_encoded['_sampling_rate'] = obj.__dict__['_sampling_rate']
+    obj_dict_encoded['_comment'] = obj.__dict__['_comment']
+    obj_dict_ndarray['_state'] = _encode_ndarray(obj.__dict__['_state'])
     return obj_dict_encoded, obj_dict_ndarray
     
 

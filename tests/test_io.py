@@ -413,4 +413,17 @@ def test_read_filterIIR(
     assert isinstance(actual, fo.FilterIIR)
     assert actual == filterIIR
 
-    
+
+def test_read_filterFIR(
+    generate_far_file_filterFIR,
+    filterFIR):
+    pass
+    # actual = io.read(generate_far_file_filterFIR)['filterFIR']
+    # assert isinstance(actual, fo.FilterIIR)
+    # assert actual == filterFIR
+
+
+def test_read_nested_data_struct(
+    generate_far_file_nested_data_struct,
+    nested_data_struct):
+    pass
