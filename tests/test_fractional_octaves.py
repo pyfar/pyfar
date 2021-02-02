@@ -8,6 +8,7 @@ import scipy.signal as spsignal
 from pyfar.dsp import filter
 from pyfar.dsp.classes import FilterSOS
 from pyfar.signal import Signal
+from pyfar import fft
 
 
 def test_center_frequencies_iec():
@@ -105,6 +106,35 @@ def test_fract_oct_bands_non_iec():
     assert nominal is None
 
 
+def test_sum_bands_din(impulse_mock):
+    """Check if the error in the sum of the quared magnitude of all bands is
+    less than 1 dB. DIN 61260 requires this criterion to be fulfilled between
+    two bands.
+    """
+    ideal = np.squeeze(np.abs(fft.rfft(
+        impulse_mock.time,
+        impulse_mock.n_samples,
+        impulse_mock.sampling_rate,
+        impulse_mock.fft_norm))**2)
+
+    bp_imp = filter.fractional_octave_bands(
+        impulse_mock, num_fractions=3, order=14)
+
+    tf = fft.rfft(
+        bp_imp.time,
+        bp_imp.n_samples,
+        bp_imp.sampling_rate,
+        bp_imp.fft_norm)
+
+    sum_bands = np.sum(np.abs(tf)**2, axis=0)
+    diff = ideal / sum_bands
+
+    mask = (impulse_mock.frequencies > 30) & (impulse_mock.frequencies < 20e3)
+
+    assert not np.any(diff[mask] > 10**(1/10))
+    assert not np.any(diff[mask] < 10**(-1/10))
+
+
 @pytest.fixture
 def impulse_mock():
     """ Generate impulse signals, in order to test independently of the Signal
@@ -117,11 +147,11 @@ def impulse_mock():
         sampling rate 44.1 kHz
 
     """
-    n_samples = 1024
+    n_samples = 2**16
     n_bins = int(n_samples / 2 + 1)
     sampling_rate = 48e3
     times = np.arange(0, n_samples) / sampling_rate
-    frequencies = np.arange(n_bins) * sampling_rate / n_bins
+    frequencies = np.fft.rfftfreq(n_samples, 1/sampling_rate)
 
     # time signal:
     time = np.zeros(n_samples, dtype='float64')
@@ -136,7 +166,7 @@ def impulse_mock():
     signal.time = time[np.newaxis, :]
     signal.times = times
     signal.n_samples = n_samples
-    signal.freq = freq[np.newaxis, :]
+    # signal.freq = freq[np.newaxis, :]
     signal.frequencies = frequencies
     signal.n_bins = n_bins
     signal.cshape = (1, )
