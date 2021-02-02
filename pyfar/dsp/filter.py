@@ -690,14 +690,17 @@ def center_frequencies_fractional_octaves(
     Parameters
     ----------
     num_fractions : int, 1
-        The number of fractional octaves
+        The number of bands a octaves is divided into.
     frequency_range : array, tuple, (20, 20e3)
         The lower and upper frequency limits
 
     Returns
     -------
-    frequencies : ndarray, float
-        Octave center frequencies
+    nominal : array, float
+        The nominal (rounded) center frequencies specified in the standard.
+    exact : array, float
+        The exact center frequencies, resulting in a uniform distribution of
+        frequency bands over the frequency range.
 
     Note
     ----
