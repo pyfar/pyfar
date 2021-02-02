@@ -685,7 +685,9 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 def center_frequencies_fractional_octaves(
         num_fractions=1, frequency_range=(20, 20e3)):
     """Return the octave center frequencies according to the IEC 61260:1:2014
-    standard.
+    standard. For numbers of fractions other than 1 and 3, only the exact center
+    frequencies are returned, since nominal frequencies are not specified by
+    corresponding standards.
 
     Parameters
     ----------
@@ -698,15 +700,11 @@ def center_frequencies_fractional_octaves(
     -------
     nominal : array, float
         The nominal (rounded) center frequencies specified in the standard.
+        Nominal frequencies are only returned for octave bands and third octave
+        bands
     exact : array, float
         The exact center frequencies, resulting in a uniform distribution of
         frequency bands over the frequency range.
-
-    Note
-    ----
-    For numbers of fractions other than 1 and 3, only the exact center
-    frequencies are returned, since nominal frequencies are not specified by
-    corresponding standards.
     """
     nominal = None
 
@@ -738,10 +736,6 @@ def center_frequencies_fractional_octaves(
         exact = exact[mask]
 
     else:
-        warnings.warn(
-            "The nominal bands are only valid for octaves and third octaves. "
-            "For all other fractional octave bands only exact frequencies "
-            "are returned.")
         exact = _exact_center_frequencies_fractional_octaves(
             num_fractions, f_lims)
 
