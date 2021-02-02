@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-from pyfar import Signal
+from pyfar import Signal, TimeData, FrequencyData
 import pyfar.dsp as dsp
 import warnings
 from .ticker import (
@@ -110,6 +110,19 @@ def _set_axlim(ax, setter, low, high, limits):
         setter((min(limits[0], low), max(limits[1], high)))
 
 
+def _lower_frequency_limit(signal):
+    """Return the lower frequency limit for plotting."""
+    if isinstance(signal, Signal):
+        lower_frequency_limit = max(20, signal.frequencies[1])
+    elif isinstance(signal, FrequencyData):
+        lower_frequency_limit = max(20, signal.frequencies[0])
+    else:
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
+
+    return lower_frequency_limit
+
+
 def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with pyfar default color if possible."""
 
@@ -138,8 +151,8 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     """Plot the time logairhmic data of a signal."""
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and not isinstance(signal, TimeData):
+        raise TypeError('Input data has to be of type: Signal or TimeData.')
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -187,8 +200,10 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     """
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -210,8 +225,8 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     else:
         ax.set_ylabel("Magnitude")
     ax.set_xlabel("Frequency in Hz")
-    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
-               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_xlim, _lower_frequency_limit(signal),
+               signal.frequencies[-1], ax.get_xlim())
 
     # plot data
     if xscale == 'log':
@@ -233,8 +248,10 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis."""
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
 
     # prepare figure
     _, ax = _prepare_plot(ax)
@@ -269,8 +286,8 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel(ylabel_string)
     ax.grid(True, 'both')
-    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
-               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_xlim, _lower_frequency_limit(signal),
+               signal.frequencies[-1], ax.get_xlim())
     _set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
 
     # plot data
@@ -313,8 +330,8 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel(f"Group delay in {unit}")
     ax.grid(True, 'both')
-    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
-               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_xlim, _lower_frequency_limit(signal),
+               signal.frequencies[-1], ax.get_xlim())
     _set_axlim(ax, ax.set_ylim, .5 * np.nanmin(data), 1.5 * np.nanmax(data),
                ax.get_ylim())
 
@@ -531,8 +548,10 @@ def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
                 deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
 
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)

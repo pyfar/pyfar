@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from pyfar.plot.utils import plotstyle
-from .. import Signal
+from .. import Signal, TimeData, FrequencyData
 from . import _line
 from . import _interaction as ia
 
@@ -15,8 +15,8 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, TimeData
+        pyfar Signal or TimeData object.
     dB : boolean
         Indicate if the data should be plotted in dB. The default is False.
     log_prefix : integer, float
@@ -46,8 +46,8 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and not isinstance(signal, TimeData):
+        raise TypeError('Input data has to be of type: Signal or TimeData.')
 
     with plt.style.context(plotstyle(style)):
         ax = _line._time(signal, dB, log_prefix, log_reference, unit,
@@ -74,8 +74,8 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     dB : boolean
         Indicate if the data should be plotted in dB. The default is True.
     log_prefix : integer, float
@@ -104,8 +104,10 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
     if xscale not in ['linear', 'log']:
         raise ValueError(f"xscale must be 'linear' or 'log' but is '{xscale}'")
 
@@ -130,8 +132,8 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     deg : Boolean
         Flag to plot the phase in degrees. The default is False.
     unwrap : Boolean, str
@@ -157,8 +159,10 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
 
     with plt.style.context(plotstyle(style)):
         ax = _line._phase(signal, deg, unwrap, xscale, ax, **kwargs)
@@ -364,8 +368,8 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     dB : Boolean
         Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
@@ -399,8 +403,10 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
 
     with plt.style.context(plotstyle(style)):
         ax = _line._freq_phase(signal, dB, log_prefix, log_reference, xscale,
@@ -425,8 +431,8 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     dB : Boolean
         Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
@@ -458,8 +464,10 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
 
     with plt.style.context(plotstyle(style)):
         ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
