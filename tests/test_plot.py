@@ -351,6 +351,40 @@ def test_line_plots_time_data(time_data_three_points):
         plt.close()
 
 
+def test_line_plots_frequency_data(frequency_data_three_points):
+    """Test all line plots with default arguments and hold functionality."""
+
+    function_list = [plot.line.freq,
+                     plot.line.phase,
+                     plot.line.freq_phase]
+
+    for function in function_list:
+        print(f"Testing: {function.__name__}")
+        # file names
+        filename = 'line_frequency_data_' + function.__name__ + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        function(frequency_data_three_points)
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+        # close current figure
+        plt.close()
+
+
 def test_prepare_plot():
     # test without arguments
     plot._line._prepare_plot()

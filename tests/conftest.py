@@ -383,11 +383,26 @@ def time_data_three_points():
 
     Returns
     -------
-    timeData
+    time_data
         stub of pyfar TimeData class
     """
     time_data = stub_utils.time_data_stub([1, 0, -1], [0, .1, .4])
     return time_data
+
+
+@pytest.fixture
+def frequency_data_three_points():
+    """
+    FrequencyData stub with three data points.
+
+    Returns
+    -------
+    frequency_data
+        stub of pyfar FrequencyData class
+    """
+    frequency_data = stub_utils.frequency_data_stub(
+        [2, .25, .5], [100, 1_000, 20_000])
+    return frequency_data
 
 
 @pytest.fixture
