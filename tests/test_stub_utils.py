@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 
-from pyfar import Signal
+from pyfar import Signal, TimeData, FrequencyData
 
 import stub_utils
 
@@ -65,6 +65,32 @@ def test_signal_stub_frequencies_odd():
     signal_stub = stub_utils.signal_stub(time, freq, sampling_rate, fft_norm)
 
     npt.assert_allclose(signal_stub.frequencies, frequencies, rtol=1e-10)
+
+
+def test_time_data_stub_properties():
+    """ Test comparing properties of TimeData stub
+    with actual TimeData implementation.
+    """
+    time = [1, 0, -1]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+    stub_dir = dir(time_data_stub)
+    time_data_dir = dir(TimeData(time, times))
+
+    assert stub_dir.sort() == time_data_dir.sort()
+
+
+def test_time_data_stub_data():
+    """Test the data contained in the TimeData stub."""
+
+    time = [1, 0, -1]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+
+    npt.assert_allclose(time_data_stub.time, np.atleast_2d(time))
+    npt.assert_allclose(time_data_stub.times, np.atleast_1d(times))
 
 
 def test_impulse_func_single_channel():
