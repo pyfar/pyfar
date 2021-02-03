@@ -93,6 +93,59 @@ def test_time_data_stub_data():
     npt.assert_allclose(time_data_stub.times, np.atleast_1d(times))
 
 
+def test_time_data_stub_slice():
+    """Test slicing the TimeData stub."""
+
+    time = [[1, 0, -1], [2, 0, -2]]
+    times = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.time_data_stub(time, times)
+    stub_slice = frequency_data_stub[0]
+
+    npt.assert_allclose(stub_slice.time, np.atleast_2d(time[0]))
+    npt.assert_allclose(stub_slice.times, np.atleast_1d(times))
+
+
+def test_frequency_data_stub_properties():
+    """ Test comparing properties of FrequencyData stub
+    with actual FrequencyData implementation.
+    """
+    freq = [1, 0, -1]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+    stub_dir = dir(frequency_data_stub)
+    frequency_data_dir = dir(FrequencyData(freq, frequencies))
+
+    assert stub_dir.sort() == frequency_data_dir.sort()
+
+
+def test_frequency_data_stub_data():
+    """Test the data contained in the FrequencyData stub."""
+
+    freq = [1, 0, -1]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+
+    npt.assert_allclose(frequency_data_stub.freq, np.atleast_2d(freq))
+    npt.assert_allclose(
+        frequency_data_stub.frequencies, np.atleast_1d(frequencies))
+
+
+def test_frequency_data_stub_slice():
+    """Test slicing the FrequencyData stub."""
+
+    freq = [[1, 0, -1], [2, 0, -2]]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+    stub_slice = frequency_data_stub[0]
+
+    npt.assert_allclose(stub_slice.freq, np.atleast_2d(freq[0]))
+    npt.assert_allclose(stub_slice.frequencies, np.atleast_1d(frequencies))
+
+
 def test_impulse_func_single_channel():
     """Test generation of delta impulse, single channel.
     """

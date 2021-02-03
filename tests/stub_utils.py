@@ -70,7 +70,7 @@ def time_data_stub(time, times):
 
     Returns
     -------
-    timeData
+    time_data
         stub of pyfar TimeData class
     """
 
@@ -79,10 +79,7 @@ def time_data_stub(time, times):
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
     def getitem(slice):
         time = np.atleast_2d(time_data.time[slice])
-        times = np.atleast_2d(time_data.times[slice])
-        item = signal_stub(
-            time,
-            times)
+        item = time_data_stub(time, time_data.times)
         return item
 
     time_data = mock.MagicMock(
@@ -95,6 +92,44 @@ def time_data_stub(time, times):
     time_data.__getitem__.side_effect = getitem
 
     return time_data
+
+
+def frequency_data_stub(freq, frequencies):
+    """
+    Function to generate stub of pyfar FrequencyData class based onMagicMock.
+    The properties of the signal are set without any further check.
+
+    Parameters
+    ----------
+    freq : ndarray
+        Frequency data
+    frequencies : ndarray
+        Frequencies of freq in Hz
+
+    Returns
+    -------
+    frequency_data
+        stub of pyfar FrequencyData class
+    """
+
+    # Use MagicMock and side_effect to mock __getitem__
+    # See "Mocking a dictionary with MagicMock",
+    # https://het.as.utexas.edu/HET/Software/mock/examples.html
+    def getitem(slice):
+        freq = np.atleast_2d(frequency_data.freq[slice])
+        item = frequency_data_stub(freq, frequency_data.frequencies)
+        return item
+
+    frequency_data = mock.MagicMock(
+        spec_set=FrequencyData(freq, frequencies))
+    frequency_data.freq = np.atleast_2d(freq)
+    frequency_data.frequencies = np.atleast_1d(frequencies)
+    frequency_data.domain = 'freq'
+    frequency_data.n_bins = frequency_data.freq.shape[-1]
+    frequency_data.cshape = frequency_data.freq.shape[:-1]
+    frequency_data.__getitem__.side_effect = getitem
+
+    return frequency_data
 
 
 def impulse_func(delay, n_samples, fft_norm, cshape):
