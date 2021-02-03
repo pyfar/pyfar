@@ -683,7 +683,7 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 
 
 def center_frequencies_fractional_octaves(
-        num_fractions=1, frequency_range=(20, 20e3)):
+        num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
     """Return the octave center frequencies according to the IEC 61260:1:2014
     standard. For numbers of fractions other than 1 and 3, only the exact
     center frequencies are returned, since nominal frequencies are not
@@ -705,6 +705,9 @@ def center_frequencies_fractional_octaves(
     exact : array, float
         The exact center frequencies, resulting in a uniform distribution of
         frequency bands over the frequency range.
+    cutoff_freq : tuple, array, float
+        The lower and upper critical frequencies of the bandpass filters for
+        each band as a tuple corresponding to (f_lower, f_upper)
     """
     nominal = None
 
@@ -728,7 +731,14 @@ def center_frequencies_fractional_octaves(
         exact = _exact_center_frequencies_fractional_octaves(
             num_fractions, f_lims)
 
-    return nominal, exact
+    if return_cutoff:
+        octave_ratio = 10**(3/10)
+        freqs_upper = exact * octave_ratio**(1/2/num_fractions)
+        freqs_lower = exact * octave_ratio**(-1/2/num_fractions)
+        f_crit = (freqs_lower, freqs_upper)
+        return nominal, exact, f_crit
+    else:
+        return nominal, exact
 
 
 def _exact_center_frequencies_fractional_octaves(
@@ -908,12 +918,11 @@ def _coefficients_fractional_octave_bands(
         raise ValueError("This currently supports only octave and third \
                 octave band filters.")
 
-    octave_ratio = 10**(3/10)
-    nominal, exact = center_frequencies_fractional_octaves(
-        num_fractions, freq_range)
+    f_crit = center_frequencies_fractional_octaves(
+        num_fractions, freq_range, return_cutoff=True)[2]
 
-    freqs_upper = exact * octave_ratio**(1/2/num_fractions)
-    freqs_lower = exact * octave_ratio**(-1/2/num_fractions)
+    freqs_upper = f_crit[1]
+    freqs_lower = f_crit[0]
 
     # normalize interval such that the Nyquist frequency is 1
     Wns = np.vstack((freqs_lower, freqs_upper)).T / sampling_rate * 2

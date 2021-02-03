@@ -102,8 +102,18 @@ def test_fract_oct_bands_non_iec():
     np.testing.assert_allclose(exact, expected)
 
     nominal, exact = filter.center_frequencies_fractional_octaves(
-        5, (2e3, 20e3))
+        5, (2e3, 20e3), return_cutoff=False)
     assert nominal is None
+
+    frac = 5
+    nominal, exact, f_crit = filter.center_frequencies_fractional_octaves(
+        frac, (2e3, 20e3), return_cutoff=True)
+
+    octave_ratio = 10**(3/10)
+    np.testing.assert_allclose(
+        f_crit[0], exact*octave_ratio**(-1/2/frac))
+    np.testing.assert_allclose(
+        f_crit[1], exact*octave_ratio**(1/2/frac))
 
 
 def test_sum_bands_din(impulse_mock):
