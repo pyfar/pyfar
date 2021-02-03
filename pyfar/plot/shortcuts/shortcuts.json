@@ -1,19 +1,24 @@
 {
 "plots": {
     "line.time": {
-        "key": ["1"],
+        "key": ["1", "T"],
+        "key_verbose": ["1", "shift+t"],
         "info": "line.time"},
     "line.freq": {
-        "key": ["2"],
+        "key": ["2", "F"],
+        "key_verbose": ["2", "shift+f"],
         "info": "line.freq"},
     "line.phase": {
-        "key": ["3"],
+        "key": ["3", "P"],
+        "key_verbose": ["3", "shift+p"],
         "info": "line.phase"},
     "line.group_delay": {
-        "key": ["4"],
+        "key": ["4", "G"],
+        "key_verbose": ["4", "shift+g"],
         "info": "line.group_delay"},
     "line.spectrogram": {
-        "key": ["5"],
+        "key": ["5", "S"],
+        "key_verbose": ["5", "shift+s"],
         "info": "line.spectrogram"},
     "line.time_freq": {
         "key": ["6"],
@@ -56,23 +61,28 @@
     "zoom_y_out": {
         "key": ["shift+down"],
         "info": "zoom in y-axis"},
-    "zoom_cm_in": {"key": ["*"],
+    "zoom_cm_in": {
+        "key": ["*"],
         "info": "zoom colormap range in"},
     "zoom_cm_out": {
         "key": ["_"],
         "info": "zoom colormap range out"},
     "toggle_x": {
-        "key": ["x"],
+        "key": ["X"],
+        "key_verbose": ["shift+x"],
         "info": "toggle between linear and logarithmic x-axis"},
     "toggle_y": {
-        "key": ["y"],
+        "key": ["Y"],
+        "key_verbose": ["shift+y"],
         "info": "toggle between linear and logarithmic y-axis"},
     "toggle_cm": {
-        "key": ["c"],
+        "key": ["C"],
+        "key_verbose": ["shift+c"],
         "info": "toggle between linear and logarithmic color data"},
     "toggle_all": {
-        "key": ["a"],
-        "info": "toggle between plotting all channels and plottinng single channels"},
+        "key": ["A"],
+        "key_verbose": ["shift+a"],
+        "info": "toggle between plotting all channels and plotting single channels"},
     "next": {
         "key": ["."],
         "info": "show next channel"},
