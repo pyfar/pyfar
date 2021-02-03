@@ -935,11 +935,7 @@ def _coefficients_fractional_octave_bands(
             Wn = Wn[0]
             btype = 'highpass'
             sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
-            sos_hp_order = sos_hp.shape[0]
-            if sos_hp_order < order:
-                sos_coeff = extend_sos_coefficients(sos_hp, order)
-            else:
-                sos_coeff = sos_hp
+            sos_coeff = extend_sos_coefficients(sos_hp, order)
         else:
             btype = 'bandpass'
             sos_coeff = spsignal.butter(
