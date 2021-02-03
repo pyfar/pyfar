@@ -516,6 +516,9 @@ def test_extend_sos_coefficients():
         [1, 0, 0, 1, 0, 0],
     ])
 
+    actual = fo.extend_sos_coefficients(sos, 2)
+    npt.assert_allclose(actual, sos)
+
     expected = np.array([
         [1, 0, 0, 1, 0, 0],
         [1, 0, 0, 1, 0, 0],

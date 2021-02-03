@@ -52,6 +52,8 @@ def extend_sos_coefficients(sos, order):
     response.
     """
     sos_order = sos.shape[0]
+    if sos_order == order:
+        return sos
     pad_len = order-sos_order
     sos_ext = np.zeros((pad_len, 6))
     sos_ext[:, 3] = 1.
