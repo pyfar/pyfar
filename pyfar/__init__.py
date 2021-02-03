@@ -7,7 +7,7 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .signal import(Signal, TimeData, FrequencyData)
+from .signal import Signal, TimeData, FrequencyData
 from .coordinates import Coordinates
 from .orientations import Orientations
 
