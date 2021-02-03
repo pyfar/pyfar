@@ -175,6 +175,9 @@ def shortcuts(show=True):
         for p in plt:
             print(f'{", ".join(plt[p]["key"])}: {p}')
         print(" ")
+        print(("Note that not all plots are available for TimeData and "
+               "FrequencyData objects as detailed in the documentation of "
+               "plots.\n\n"))
 
         print("Use these shortcuts to control the plot")
         print("---------------------------------------")
