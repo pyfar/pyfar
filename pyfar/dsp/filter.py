@@ -797,50 +797,24 @@ def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
             1250, 1600, 2000, 2500, 3150, 4000, 5000,
             6300, 8000, 10000, 12500, 16000, 20000], dtype=np.float)
 
-    indices = _frequency_indices(nominal, num_fractions)
-
     reference_freq = 1e3
     octave_ratio = 10**(3/10)
 
     iseven = np.mod(num_fractions, 2) == 0
     if ~iseven:
+        indices = np.around(
+            num_fractions * np.log(nominal/reference_freq)
+            / np.log(octave_ratio))
         exponent = (indices/num_fractions)
     else:
+        indices = np.around(
+            2.0*num_fractions *
+            np.log(nominal/reference_freq) / np.log(octave_ratio) - 1)/2
         exponent = ((2*indices + 1) / num_fractions / 2)
 
     exact = reference_freq * octave_ratio**exponent
 
     return nominal, exact
-
-
-def _frequency_indices(frequencies, num_fractions):
-    """Return the indices for fractional octave filters.
-    Parameters
-    ----------
-    frequencies : array
-        The nominal frequencies for which the indices for exact center
-        frequency calculation are to be calculated.
-    num_fractions : 1, 3
-        Number of fractional bands
-    Returns
-    -------
-    indices : array
-        The indices for exact center frequency calculation.
-    """
-    reference_freq = 1e3
-    octave_ratio = 10**(3/10)
-
-    iseven = np.mod(num_fractions, 2) == 0
-    if ~iseven:
-        indices = np.around(
-            num_fractions * np.log(frequencies/reference_freq)
-            / np.log(octave_ratio))
-    else:
-        indices = np.around(
-            2.0*num_fractions *
-            np.log(frequencies/reference_freq) / np.log(octave_ratio) - 1)/2
-
-    return indices
 
 
 def fractional_octave_bands(
