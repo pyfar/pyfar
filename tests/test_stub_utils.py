@@ -99,8 +99,8 @@ def test_time_data_stub_slice():
     time = [[1, 0, -1], [2, 0, -2]]
     times = [0, .1, .4]
 
-    frequency_data_stub = stub_utils.time_data_stub(time, times)
-    stub_slice = frequency_data_stub[0]
+    time_data_stub = stub_utils.time_data_stub(time, times)
+    stub_slice = time_data_stub[0]
 
     npt.assert_allclose(stub_slice.time, np.atleast_2d(time[0]))
     npt.assert_allclose(stub_slice.times, np.atleast_1d(times))
