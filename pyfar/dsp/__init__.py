@@ -1,9 +1,10 @@
 from .classes import (Filter, FilterFIR, FilterIIR, FilterSOS)
 from .dsp import (
-    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram)
-from .normalize import(normalize)
+    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram,
+    normalize)
 
 __all__ = [
     Filter, FilterFIR, FilterIIR, FilterSOS,
-    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram
+    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram,
+    normalize
 ]
