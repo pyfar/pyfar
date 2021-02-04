@@ -12,7 +12,6 @@ import sys
 from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.spatial.spatial import SphericalVoronoi
-from pyfar.utils import str_to_type
 import pyfar.dsp.classes as fo
 
 
@@ -221,7 +220,7 @@ def read(filename):
                 json_str = zip_file.read(name + '/json').decode('UTF-8')
                 obj_type, obj_dict = json.loads(json_str)
                 obj_dict = _decode(obj_dict, zip_file)
-                ObjType = str_to_type(obj_type)
+                ObjType = _str_to_type(obj_type)
                 collection[name] = ObjType._decode(obj_dict)
                 
 
@@ -271,7 +270,7 @@ def _inner_decode(obj, key, zipfile):
     if not _is_type_hint(obj[key]):
         _decode(obj[key], zipfile)
     elif _is_mylib_type(obj[key][0]):
-        MyType = str_to_type(obj[key][0])
+        MyType = _str_to_type(obj[key][0])
         obj[key] = MyType._decode(obj[key][1])
     elif obj[key][0] == 'dtype':
         obj[key] = getattr(np, obj[key][1])
@@ -344,6 +343,30 @@ def _inner_encode(obj, key, zip_path, zipfile):
         _encode(obj[key], zip_path, zipfile)
 
 
+def _encode_ndarray(ndarray):
+    """
+    The encoding of objects that are composed of primitive and numpy types
+    utilizes `obj.__dict__()` and numpy encoding methods.
+
+    Parameters
+    ----------
+    ndarray: numpy.array.
+
+    Returns
+    -------
+    bytes.
+        They bytes that where written by `numpy.save` into a memfile.
+
+    Notes
+    -----
+    * Do not allow pickling. It is not safe!
+    """
+    memfile = io.BytesIO()
+    np.save(memfile, ndarray, allow_pickle=False)
+    memfile.seek(0)
+    return memfile.read()
+
+
 def _is_mylib_type(obj):
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
@@ -356,6 +379,36 @@ def _is_dtype(obj):
 
 def _is_type_hint(obj):
     return isinstance(obj, list) and len(obj) == 2
+
+
+def _str_to_type(type_as_string, module='pyfar'):
+    """
+    Recursively find a PyfarType by passing in a valid type as a string.
+
+    Parameters
+    ----------
+    type_as_string: string.
+        A valid PyfarType.
+    module: string.
+        Either 'pyfar' or a submodule of pyfar, e.g. 'pyfar.spatial'
+        The default is 'pyfar'.
+
+    Returns
+    ----------
+    PyfarType: type.
+        A valid PyfarType.
+    """
+    try:
+        return getattr(sys.modules[module], type_as_string)
+    except AttributeError:
+        submodules = [attrib for attrib in dir(sys.modules[module])
+            if not attrib.startswith('__') and attrib.islower()]
+    except KeyError:
+        return
+    for submodule in submodules:
+        PyfarType = _str_to_type(type_as_string, module=f'{module}.{submodule}')
+        if PyfarType:
+            return PyfarType
 
 
 def _encode_sphericalvoronoi(obj):
@@ -394,30 +447,6 @@ def _encode_filter(obj):
     obj_dict_encoded['_comment'] = obj.__dict__['_comment']
     obj_dict_ndarray['_state'] = _encode_ndarray(obj.__dict__['_state'])
     return obj_dict_encoded, obj_dict_ndarray
-    
-
-def _encode_ndarray(ndarray):
-    """
-    The encoding of objects that are composed of primitive and numpy types
-    utilizes `obj.__dict__()` and numpy encoding methods.
-
-    Parameters
-    ----------
-    ndarray: numpy.array.
-
-    Returns
-    -------
-    bytes.
-        They bytes that where written by `numpy.save` into a memfile.
-
-    Notes
-    -----
-    * Do not allow pickling. It is not safe!
-    """
-    memfile = io.BytesIO()
-    np.save(memfile, ndarray, allow_pickle=False)
-    memfile.seek(0)
-    return memfile.read()
 
 
 def _unpack_zip_paths(zip_paths):
