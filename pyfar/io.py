@@ -219,14 +219,11 @@ def read(filename):
             obj_names = set([path.split('/')[0] for path in zip_paths])
             for name in obj_names:
                 json_str = zip_file.read(name + '/json').decode('UTF-8')
-                obj_dict = json.loads(json_str)
-                collection[name] = _decode(obj_dict, zip_file)
-
-
-            # obj_paths = _unpack_zip_paths(zip_file.namelist())
-            # for obj_name, ndarray_names in obj_paths.items():
-            #     json_str = zip_file.read(obj_name + '/json').decode('UTF-8')
-            #     obj_dict = json.loads(json_str)
+                obj_type, obj_dict = json.loads(json_str)
+                obj_dict = _decode(obj_dict, zip_file)
+                ObjType = str_to_type(obj_type)
+                collection[name] = ObjType._decode(obj_dict)
+                
 
     return collection
 
@@ -252,7 +249,8 @@ def write(filename, compress=False, **objs):
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
             obj_dict = _encode(copy.deepcopy(obj.__dict__), name, zip_file)
-            zip_file.writestr(f'{name}/json', json.dumps(obj_dict))
+            type_obj_pair = [type(obj).__name__, obj_dict]
+            zip_file.writestr(f'{name}/json', json.dumps(type_obj_pair))
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())

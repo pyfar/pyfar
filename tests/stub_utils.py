@@ -3,6 +3,7 @@ from unittest import mock
 
 from pyfar.coordinates import Coordinates
 from pyfar.signal import Signal
+import pyfar.utils
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):
@@ -249,8 +250,11 @@ class NestedDataStruct:
             obj_dict['_n'],
             obj_dict['_comment'],
             obj_dict['_matrix'],
-            obj_dict['_subobjec'],
-            obj_dict['_mylist'],
-            obj_dict['_mydict'])
+            obj_dict['_subobj'],
+            obj_dict['_list'],
+            obj_dict['_dict'])
         obj.__dict__.update(obj_dict)
         return obj
+
+    def __eq__(self, other):        
+        return pyfar.utils._eq___dict__(self, other)

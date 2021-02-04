@@ -247,9 +247,8 @@ def test_read_nested_data_struct(
     str_to_type = {
         'MyOtherClass': type(other_class),
         'NestedDataStruct': type(nested_data_struct)}
-    def side_effect(arg):
-        return str_to_type[arg]
-    patched_str_to_type.side_effect = side_effect
+    patched_str_to_type.side_effect = str_to_type.get
     actual = io.read(generate_far_file_nested_data_struct)[
         'nested_data_struct']
+    assert actual == nested_data_struct
     pass
