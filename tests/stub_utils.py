@@ -226,9 +226,9 @@ def _normalization(freq, n_samples, fft_norm):
 
 
 class MyOtherClass:
-    def __init__(self):
+    def __init__(self, m=49):
         self.signal = np.sin(2 * np.pi * np.arange(0, 1, 1 / 10))
-        self._m = 49
+        self._m = m
 
     @classmethod
     def _decode(cls, obj_dict):

@@ -735,6 +735,6 @@ def nested_data_struct():
         'a': 1,
         'b': np.int32,
         'c': np.arange(10),
-        'd': stub_utils.MyOtherClass()}
+        'd': stub_utils.MyOtherClass(-1)}
     return stub_utils.NestedDataStruct(
         n, comment, matrix, subobj, mylist, mydict)

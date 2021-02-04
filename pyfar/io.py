@@ -272,6 +272,7 @@ def _inner_decode(obj, key, zipfile):
     elif _is_mylib_type(obj[key][0]):
         MyType = _str_to_type(obj[key][0])
         obj[key] = MyType._decode(obj[key][1])
+        _decode(obj[key].__dict__, zipfile)
     elif obj[key][0] == 'dtype':
         obj[key] = getattr(np, obj[key][1])
     elif obj[key][0] == 'ndarray':
