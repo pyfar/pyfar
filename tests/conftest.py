@@ -714,6 +714,13 @@ def filterFIR():
 
 
 @pytest.fixture
+def anyObj():
+    class AnyClass:
+        pass
+    return AnyClass()
+
+
+@pytest.fixture
 def filterSOS():
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2*np.pi)

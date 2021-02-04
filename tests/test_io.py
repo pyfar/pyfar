@@ -105,8 +105,32 @@ def test__str_to_type():
 
 def test_write_filterIIR_TypeError(tmpdir, filterIIR):
     filename = os.path.join(tmpdir, 'test_filterIIR.far')
-    with pytest.raises(AttributeError):
+    with pytest.raises(TypeError):
         io.write(filename, filterIIR=filterIIR)
+
+
+def test_write_filterIIR_TypeError(tmpdir, filterIIR):
+    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterIIR=filterIIR)
+
+
+def test_write_filterFIR_TypeError(tmpdir, filterFIR):
+    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterFIR=filterFIR)
+
+
+def test_write_filterSOS_TypeError(tmpdir, filterSOS):
+    filename = os.path.join(tmpdir, 'test_filterSOS.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterSOS=filterSOS)
+
+
+def test_write_anyObj_TypeError(tmpdir, anyObj):
+    filename = os.path.join(tmpdir, 'test_anyObj.far')
+    with pytest.raises(TypeError):
+        io.write(filename, anyObj=anyObj)
 
 
 def test_read_orientations(generate_far_file_orientations, orientations):
@@ -142,23 +166,6 @@ def test_read_filter(
     actual = io.read(generate_far_file_filter)['filter']
     assert isinstance(actual, fo.Filter)
     assert actual == filter
-
-
-def test_read_filterIIR(
-    generate_far_file_filterIIR,
-    filterIIR):
-    actual = io.read(generate_far_file_filterIIR)['filterIIR']
-    assert isinstance(actual, fo.FilterIIR)
-    assert actual == filterIIR
-
-
-def test_read_filterFIR(
-    generate_far_file_filterFIR,
-    filterFIR):
-    pass
-    # actual = io.read(generate_far_file_filterFIR)['filterFIR']
-    # assert isinstance(actual, fo.FilterIIR)
-    # assert actual == filterFIR
 
 
 def test__eq___dict__nested_data_struct(nested_data_struct):

@@ -221,7 +221,12 @@ def read(filename):
                 obj_type, obj_dict = json.loads(json_str)
                 obj_dict = _decode(obj_dict, zip_file)
                 ObjType = _str_to_type(obj_type)
-                collection[name] = ObjType._decode(obj_dict)
+                obj = ObjType._decode(obj_dict)
+                if not _is_mylib_type(obj):
+                    raise TypeError(
+                        f'Objects of type {type(obj)}'
+                        'cannot be read from disk.')
+                collection[name] = obj
 
     return collection
 
@@ -246,6 +251,12 @@ def write(filename, compress=False, **objs):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
+            if not _is_mylib_type(obj):
+                error = f'Objects of type {type(obj)} cannot be written to disk.'
+                if isinstance(obj, fo.Filter):
+                    error = f'{error}. Consider casting to {fo.Filter}'
+                raise TypeError(error)
+
             obj_dict = _encode(
                 copy.deepcopy(obj.__dict__), name, zip_file)
             type_obj_pair = [type(obj).__name__, obj_dict]
@@ -386,7 +397,13 @@ def _encode_ndarray(ndarray):
 def _is_mylib_type(obj):
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
-        'NestedDataStruct', 'MyOtherClass', ]
+        'Orientations',
+        'Coordinates',
+        'Signal',
+        'Filter',
+        'SphericalVoronoi'
+        'NestedDataStruct',
+        'MyOtherClass']
 
 
 def _is_dtype(obj):
