@@ -1,4 +1,5 @@
 import numpy as np
+import deepdiff
 from unittest import mock
 
 from pyfar.coordinates import Coordinates
@@ -256,5 +257,11 @@ class NestedDataStruct:
         obj.__dict__.update(obj_dict)
         return obj
 
+
+    def copy(self):
+        """Return a deep copy of the Orientations object."""
+        return pyfar.utils.copy(self)
+
+
     def __eq__(self, other):        
-        return pyfar.utils._eq___dict__(self, other)
+        return not deepdiff.DeepDiff(self, other)

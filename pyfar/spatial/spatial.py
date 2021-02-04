@@ -1,3 +1,4 @@
+import deepdiff
 import numpy as np
 from scipy import spatial as spat
 from pyfar import utils
@@ -36,7 +37,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return utils._eq___dict__(self, other)
+        return not deepdiff.DeepDiff(obj, other)
 
 
 def calculate_sph_voronoi_weights(

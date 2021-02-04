@@ -1,4 +1,5 @@
 import copy
+import deepdiff
 import warnings
 
 import numpy as np
@@ -219,7 +220,7 @@ class Filter(object):
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return utils._eq___dict__(self, other)
+        return not deepdiff.DeepDiff(obj, other)
 
 
 class FilterFIR(Filter):

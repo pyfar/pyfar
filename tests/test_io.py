@@ -238,6 +238,12 @@ def test_read_filterFIR(
     # assert isinstance(actual, fo.FilterIIR)
     # assert actual == filterFIR
 
+
+def test__eq___dict__nested_data_struct(nested_data_struct):
+    actual = nested_data_struct.copy()
+    assert actual == nested_data_struct
+
+
 @patch('pyfar.io.str_to_type')
 def test_read_nested_data_struct(
         patched_str_to_type,

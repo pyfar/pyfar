@@ -15,6 +15,7 @@ the functions have to be called explicitly.
 """
 
 import warnings
+import deepdiff
 import numpy as np
 from pyfar import fft as fft
 from typing import Callable
@@ -690,7 +691,7 @@ class Signal(FrequencyData, TimeData):
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return utils._eq___dict__(self, other)
+        return not deepdiff.DeepDiff(self, other)
 
 
 class SignalIterator(object):
