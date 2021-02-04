@@ -92,98 +92,13 @@ def test_read_sofa_position_type_unit(generate_sofa_postype_error):
     with pytest.raises(ValueError):
         io.read_sofa(generate_sofa_postype_error)
 
-@fixture
-def filename():
-    return 'data.hpy'
 
-
-@fixture
-def objs(obj_instance):
-    return obj_instance
-
-
-def obj_dict_encoded(obj):
-    obj_dict_encoded = obj.__dict__
-    for key, value in obj_dict_encoded.items():
-        if isinstance(value, np.ndarray):
-            memfile = BytesIO()
-            np.save(memfile, value)
-            memfile.seek(0)
-            obj_dict_encoded[key] = memfile.read().decode('latin-1')
-    obj_dict_encoded['type'] = type(obj).__name__
-    return obj_dict_encoded
-
-
-@fixture
-def obj_dicts_encoded(objs):
-    return [obj_dict_encoded(obj) for obj in objs]
-
-
-# TODO: Use objects in parametrized tests?
-objects = [
-    [Coordinates([1, -1], [2, -2], [3, -3])],
-    # Coordinates(1, 2, 3, domain='sph', convention='side'),
-    # Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0),
-    # Orientations.from_view_up([
-    #     [1, 0, 0], [2, 0, 0], [-1, 0, 0]],
-    #     [[0, 1, 0], [0, -2, 0], [0, 1, 0]])
-]
-
-
-# TODO: parametrize test with objects listed above?
-# @mark.parametrize('objs', objects)
-@patch('pyfar.io.zipfile.ZipFile')
-@patch('pyfar.io.open', new_callable=mock_open, read_data=b'any')
-def test_read(m_open, m_zipfile, filename):
-    m_zipenter = m_zipfile.return_value.__enter__.return_value
-    m_zipenter.namelist.return_value = [
-        'my_obj/json', 'my_obj/ndarrays/_points']
-    m_zipenter.read.side_effect = lambda x: mock_zipfile_read(x)
-    io.read(filename)
-
-
-# TODO: parametrize test with objects listed above?
-# @mark.parametrize('objs', objects)
-@patch('pyfar.io._encode', )
-@patch('pyfar.io.zipfile.ZipFile')
-@patch('pyfar.io.open', new_callable=mock_open)
-def test_write(m_open, m_zipfile, m__encode, filename):
-    # m_json.dumps.side_effect = lambda x: mock_json_dumps(x)
-    # TODO: Should we really mock this function? Shouldn't we
-    # test private functions indirectly through the public interface?
-    # i.e test this function with real objects (parametrized)
-    m__encode.return_value = (
-        json.loads(mock_zipfile_read('json').decode('UTF-8')),
-        {'obj_ndarray': mock_zipfile_read('ndarrays')})
-
-    io.write(filename, c=Coordinates())
-
-    m_zipfile.return_value.__enter__.return_value.writestr.assert_has_calls([
-        call('c/json', mock_zipfile_read('json').decode('UTF-8')),
-        call('c/ndarrays/obj_ndarray', mock_zipfile_read('ndarrays'))
-    ])
-    m_open.assert_called_with(filename, 'wb')
-    m_open.return_value.__enter__.return_value.write.assert_called_with(b'')
-
-
-def mock_zipfile_read(obj_path):
-    obj_path_split = obj_path.split('/')
-    if 'json' in obj_path_split:
-        return b'{"type": "Coordinates"}'
-    elif 'ndarrays' in obj_path_split:
-        return (
-            b'\x93NUMPY\x01\x00v\x00{"descr": "<f8", "fortran_order": False, '
-            b'"shape": (1, 3), }                                             '
-            b'             \n\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00'
-            b'\x00\x00@\x00\x00\x00\x00\x00\x00\x08@')
-
-
-def test_str_to_type():
-    PyfarType = io.str_to_type('Coordinates')
+def test__str_to_type():
+    PyfarType = io._str_to_type('Coordinates')
     assert PyfarType.__module__.startswith('pyfar')
-    PyfarType = io.str_to_type('Orientations')
+    PyfarType = io._str_to_type('Orientations')
     assert PyfarType.__module__.startswith('pyfar')
-    PyfarType = io.str_to_type('SphericalVoronoi')
+    PyfarType = io._str_to_type('SphericalVoronoi')
     assert PyfarType.__module__.startswith('pyfar')
     pass
 
@@ -245,20 +160,16 @@ def test__eq___dict__nested_data_struct(nested_data_struct):
     assert actual == nested_data_struct
 
 
-@patch('pyfar.io.str_to_type')
-@patch('pyfar.codec.str_to_type')
+@patch('pyfar.io._str_to_type')
 def test_read_nested_data_struct(
-        codec_str_to_type,
-        io_str_to_type,
+        patched__str_to_type,
         generate_far_file_nested_data_struct,
         nested_data_struct,
         other_class):
-    str_to_type = {
+    _str_to_type = {
         'MyOtherClass': type(other_class),
         'NestedDataStruct': type(nested_data_struct)}
-    codec_str_to_type.side_effect = str_to_type.get
-    io_str_to_type.side_effect = str_to_type.get
+    patched__str_to_type.side_effect = _str_to_type.get
     actual = io.read(generate_far_file_nested_data_struct)[
         'nested_data_struct']
     assert actual == nested_data_struct
-    pass

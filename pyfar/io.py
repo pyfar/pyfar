@@ -12,9 +12,7 @@ import sys
 from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.spatial.spatial import SphericalVoronoi
-from pyfar.utils import str_to_type
 import pyfar.dsp.classes as fo
-import pyfar.codec
 
 
 def read_wav(filename):
@@ -221,8 +219,8 @@ def read(filename):
             for name in obj_names:
                 json_str = zip_file.read(name + '/json').decode('UTF-8')
                 obj_type, obj_dict = json.loads(json_str)
-                obj_dict = pyfar.codec._decode(obj_dict, zip_file)
-                ObjType = str_to_type(obj_type)
+                obj_dict = _decode(obj_dict, zip_file)
+                ObjType = _str_to_type(obj_type)
                 collection[name] = ObjType._decode(obj_dict)
 
     return collection
@@ -248,10 +246,229 @@ def write(filename, compress=False, **objs):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
-            obj_dict = pyfar.codec._encode(
+            obj_dict = _encode(
                 copy.deepcopy(obj.__dict__), name, zip_file)
             type_obj_pair = [type(obj).__name__, obj_dict]
             zip_file.writestr(f'{name}/json', json.dumps(type_obj_pair))
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())
+
+
+def _decode(obj, zipfile):
+    if isinstance(obj, dict):
+        for key in obj.keys():
+            _inner_decode(obj, key, zipfile)
+    elif isinstance(obj, list):
+        for i in range(0, len(obj)):
+            _inner_decode(obj, i, zipfile)
+
+    return obj
+
+
+def _inner_decode(obj, key, zipfile):
+    if not _is_type_hint(obj[key]):
+        _decode(obj[key], zipfile)
+    elif _is_mylib_type(obj[key][0]):
+        MyType = _str_to_type(obj[key][0])
+        obj[key] = MyType._decode(obj[key][1])
+    elif obj[key][0] == 'dtype':
+        obj[key] = getattr(np, obj[key][1])
+    elif obj[key][0] == 'ndarray':
+        obj[key] = _decode_ndarray(obj[key][1], zipfile)
+
+
+def _decode_ndarray(obj, zipfile):
+    memfile = io.BytesIO()
+    nd_bytes = zipfile.read(obj)
+    memfile.write(nd_bytes)
+    memfile.seek(0)
+    return np.load(memfile, allow_pickle=False)
+
+
+def _decode_sphericalvoronoi(obj_dict):    
+    sampling = Coordinates(
+        obj_dict['sampling'][:, 0],
+        obj_dict['sampling'][:, 1],
+        obj_dict['sampling'][:, 2],
+        domain='cart')
+    obj = SphericalVoronoi(
+        sampling,
+        center=obj_dict['center'])
+    return obj
+
+
+def _decode_filterFIR(PyfarType, obj_dict):
+    obj = fo.FilterIIR(
+        coefficients=obj_dict['_coefficients'][0, :, :],
+        sampling_rate=obj_dict['_sampling_rate'])
+    return obj
+
+
+def _encode(obj, zip_path, zipfile):
+    """
+    Chooses the right encoding depending on the object type.
+
+    Parameters
+    ----------
+    obj: Compatible Pyfar type.
+
+    Returns
+    ----------
+    obj_dict_encoded: dict.
+        Json compatible dictionary.
+    obj_dict_ndarray: dict
+        Numpy arrays are not JSON serializable thus encoded differently.
+    """
+    if isinstance(obj, dict):
+        for key in obj.keys():
+            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile)
+    elif isinstance(obj, list):
+        for i in range(0, len(obj)):
+            _inner_encode(obj, i, f'{zip_path}/{i}', zipfile)
+
+    return obj
+
+
+def _inner_encode(obj, key, zip_path, zipfile):
+    if _is_dtype(obj[key]):
+        obj[key] = ['dtype', obj[key].__name__]
+    elif isinstance(obj[key], np.ndarray):
+        zipfile.writestr(zip_path, _encode_ndarray(obj[key]))
+        obj[key] = ['ndarray', zip_path]
+    elif _is_mylib_type(obj[key]):
+        obj[key] = [type(obj[key]).__name__, obj[key].__dict__]
+        _encode(obj[key][1], zip_path, zipfile)
+    else:
+        _encode(obj[key], zip_path, zipfile)
+
+
+def _encode_ndarray(ndarray):
+    """
+    The encoding of objects that are composed of primitive and numpy types
+    utilizes `obj.__dict__()` and numpy encoding methods.
+
+    Parameters
+    ----------
+    ndarray: numpy.array.
+
+    Returns
+    -------
+    bytes.
+        They bytes that where written by `numpy.save` into a memfile.
+
+    Notes
+    -----
+    * Do not allow pickling. It is not safe!
+    """
+    memfile = io.BytesIO()
+    np.save(memfile, ndarray, allow_pickle=False)
+    memfile.seek(0)
+    return memfile.read()
+
+
+def _is_mylib_type(obj):
+    type_str = obj if isinstance(obj, str) else type(obj).__name__
+    return type_str in [
+        'NestedDataStruct', 'MyOtherClass']
+
+
+def _is_dtype(obj):
+    return isinstance(obj, type) and obj.__module__ == 'numpy'
+
+
+def _is_type_hint(obj):
+    return isinstance(obj, list) and len(obj) == 2
+
+
+def _str_to_type(type_as_string, module='pyfar'):
+    """
+    Recursively find a PyfarType by passing in a valid type as a string.
+
+    Parameters
+    ----------
+    type_as_string: string.
+        A valid PyfarType.
+    module: string.
+        Either 'pyfar' or a submodule of pyfar, e.g. 'pyfar.spatial'
+        The default is 'pyfar'.
+
+    Returns
+    ----------
+    PyfarType: type.
+        A valid PyfarType.
+    """
+    try:
+        return getattr(sys.modules[module], type_as_string)
+    except AttributeError:
+        submodules = [attrib for attrib in dir(sys.modules[module])
+            if not attrib.startswith('__') and attrib.islower()]
+    except KeyError:
+        return
+    for submodule in submodules:
+        PyfarType = _str_to_type(type_as_string, module=f'{module}.{submodule}')
+        if PyfarType:
+            return PyfarType
+
+
+def _encode_sphericalvoronoi(obj):
+    """
+    The encoding of objects that are composed of primitive and numpy types
+    utilizes `obj.__dict__()` and numpy encoding methods.
+
+    Parameters
+    ----------
+    obj: Compatible Pyfar type.
+
+    Returns
+    ----------
+    obj_dict_encoded: dict.
+        Json compatible dictionary.
+    obj_dict_ndarray: dict
+        Numpy arrays are not JSON serializable thus encoded differently.
+    """
+    obj_dict_encoded = {}
+    obj_dict_ndarray = {}
+    obj_dict_encoded['type'] = type(obj).__name__
+    obj_dict_ndarray['sampling'] = _encode_ndarray(obj.points)
+    obj_dict_ndarray['center'] = _encode_ndarray(obj.center)
+    return obj_dict_encoded, obj_dict_ndarray
+
+
+def _encode_filter(obj):
+    warnings.warn(f'`io.write` writing object of type {type(obj)}: ' 
+        'It is not possible to save `filter_func` to disk.')
+    obj_dict_encoded = {}
+    obj_dict_ndarray = {}
+    obj_dict_encoded['type'] = type(obj).__name__
+    obj_dict_ndarray['_coefficients'] = _encode_ndarray(
+        obj.__dict__['_coefficients'])
+    obj_dict_encoded['_sampling_rate'] = obj.__dict__['_sampling_rate']
+    obj_dict_encoded['_comment'] = obj.__dict__['_comment']
+    obj_dict_ndarray['_state'] = _encode_ndarray(obj.__dict__['_state'])
+    return obj_dict_encoded, obj_dict_ndarray
+
+
+def _unpack_zip_paths(zip_paths):
+    """
+    This is a helper function for read() to unpack zip-paths,
+    e.g. 'coords/ndarrays/_points' and orientations/ndarrays/_quat
+    becomes {'coords': [_points], 'orientations': '_quat'}
+
+    Parameters
+    ----------
+    zip_paths: list of strings.
+        Retreived zipfile.ZipFile.namelist()
+
+    Returns
+    ----------
+    obj_paths: dict.
+        Dictionary that contains unpacked zip paths.
+    """
+    obj_paths = {}
+    for path in zip_paths:
+        paths = path.split('/')
+        obj_paths.setdefault(paths[0], [])
+        if paths[1] == 'ndarrays':
+            obj_paths[paths[0]].append(paths[2])
+    return obj_paths
