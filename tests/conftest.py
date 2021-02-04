@@ -715,6 +715,11 @@ def filterSOS():
 
 
 @pytest.fixture
+def other_class():
+    return stub_utils.MyOtherClass()
+
+
+@pytest.fixture
 def nested_data_struct():
     n = 42
     comment = 'My String'

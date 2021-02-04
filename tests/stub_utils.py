@@ -227,6 +227,12 @@ class MyOtherClass:
     def __init__(self):
         self.signal = np.sin(2 * np.pi * np.arange(0, 1, 1 / 10))
 
+    @classmethod
+    def _decode(cls, obj_dict):
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
+
 
 class NestedDataStruct:
     def __init__(self, n, comment, matrix, subobj, mylist, mydict):
@@ -236,3 +242,15 @@ class NestedDataStruct:
         self._subobj = subobj
         self._list = mylist
         self._dict = mydict
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        obj = cls(
+            obj_dict['_n'],
+            obj_dict['_comment'],
+            obj_dict['_matrix'],
+            obj_dict['_subobjec'],
+            obj_dict['_mylist'],
+            obj_dict['_mydict'])
+        obj.__dict__.update(obj_dict)
+        return obj
