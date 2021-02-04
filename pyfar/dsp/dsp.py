@@ -214,8 +214,8 @@ def normalize(signal, norm_type='time', operation='max', channelwise='max',
         'min' - Normalize to min or operation across all channels
         'mean' - Normalize to mean of operation across all channels
        The default is 'max'
-    value: int
-        Normalizes to `value` which can be a scalor or a vector with
+    value:
+        Normalizes to 'value' which can be a scalor or a vector with
         a number of elements equal to channels
         The default is 0 for norm_type='db' and 1 otherwise
     freq_range: tuple
@@ -228,47 +228,53 @@ def normalize(signal, norm_type='time', operation='max', channelwise='max',
     normalized_signal: Signal
         The normalized signal
     """
-    # set default
+
+    # check input
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    # set default values
     if value is None:
         value = 0 if norm_type == 'dB' else 1
 
-    # transform data to the desired domain
+    # copy and transform data to the desired domain
     if norm_type == 'time':
         normalized_input = np.abs(signal.time.copy())
     elif norm_type == 'abs':
         normalized_input = np.abs(signal.freq.copy())
     elif norm_type == 'dB':
-        normalized_input = np.log(signal.freq.copy())
+        normalized_input = 20 * np.log10(signal.freq.copy())
     else:
-        raise ValueError(("norm _type must be 'time', 'abs' or 'dB'"))
+        raise ValueError(("norm _type must be 'time', 'abs' or 'dB'."))
 
     # take logarithm of the data here instead of later?
 
     # get bounds for normalization
     if norm_type == 'time':
-        lim = (0, signal.n_samples - 1)
+        lim = (0, signal.n_samples)
 
     else:
-        lim = signal.find_nearest_frequency(f)
+        lim = signal.find_nearest_frequency(freq_range)
+        print(lim)
 
         # remove 0 hz and nyquist due to normalization dependency
         if signal.n_samples % 2:
-            lim[0] = np.max([lim[0, 1])
+            lim[0] = np.max([lim[0, 1]])
         else:
             lim = np.clip(lim, 0)
 
     # get values for normalization
     if operation == 'max':
-        values = np.max(...,normalized_input[...,lim[0]:lim[1]], axis=-1,
-        keepdims=True)
+        values = np.max(normalized_input[..., lim[0]:lim[1]], axis=-1,
+                        keepdims=True)
     elif operation == 'mean':
-        values = np.mean(...,normalized_input[...,lim[0]:lim[1]],axis=-1,
-        keepdims=True)
+        values = np.mean(normalized_input[..., lim[0]:lim[1]], axis=-1,
+                         keepdims=True)
     elif operation == 'rms':
-        values = np.sqrt(np.mean(...,(normalized_input[...,lim[0]:lim[1]])**2,
-        axis,=-1, keepdims=True)
+        values = np.sqrt(np.mean((normalized_input[..., lim[0]:lim[1]])**2,
+                         axis=-1, keepdims=True))
     else:
-        raise ValueError(("operation must be 'abs', 'mean' or 'rms'"))
+        raise ValueError(("operation must be 'abs', 'mean' or 'rms'."))
 
     # manipulate values
     if channelwise == 'each':
@@ -280,13 +286,13 @@ def normalize(signal, norm_type='time', operation='max', channelwise='max',
     elif channelwise == 'mean':
         values = np.mean(values)
     else:
-        raise ValueError(("channelwise must be 'each', 'max', 'min' or 'mean'")
-    )
+        raise ValueError(("channelwise must be 'each', 'max', 'min' or 'mean'."
+                          ))
     # apply normalization
-    normalized_input = (input_normalized / values) * value
+    normalized_input = (normalized_input / values) * value
 
     # replace input with normlaized_input
     normalized_signal = signal.copy()
     normalized_signal.time = normalized_input
 
-    return normalized_signal
+    return normalized_input
