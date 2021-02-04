@@ -291,7 +291,6 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     _set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
 
     # plot data
-    # plot data
     if xscale == 'log':
         ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
     else:
