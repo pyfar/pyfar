@@ -2,6 +2,7 @@ import deepdiff
 import numpy as np
 from scipy import spatial as spat
 from pyfar import utils
+from pyfar import Coordinates
 
 
 class SphericalVoronoi(spat.SphericalVoronoi):
@@ -34,10 +35,23 @@ class SphericalVoronoi(spat.SphericalVoronoi):
                     same radius.")
         super().__init__(points, radius_round, center)
 
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""    
+        sampling = Coordinates(
+            obj_dict['points'][:, 0],
+            obj_dict['points'][:, 1],
+            obj_dict['points'][:, 2],
+            domain='cart')
+        obj = cls(
+            sampling,
+            center=obj_dict['center'])
+        obj.__dict__.update(obj_dict)
+        return obj
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(obj, other)
+        return not deepdiff.DeepDiff(self, other)
 
 
 def calculate_sph_voronoi_weights(

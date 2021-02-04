@@ -194,6 +194,15 @@ class Orientations(Rotation):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
 
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
+
+
     def __setitem__(self, idx, val):
         """
         Assign orientations(s) at given index(es) from object.

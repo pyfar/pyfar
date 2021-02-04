@@ -103,6 +103,12 @@ def test__str_to_type():
     pass
 
 
+def test_write_filterIIR_TypeError(tmpdir, filterIIR):
+    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+    with pytest.raises(AttributeError):
+        io.write(filename, filterIIR=filterIIR)
+
+
 def test_read_orientations(generate_far_file_orientations, orientations):
     """Write is already called in the `generate_orientations_file` fixture"""
     actual = io.read(generate_far_file_orientations)['orientations']

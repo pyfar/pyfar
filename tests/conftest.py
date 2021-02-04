@@ -641,6 +641,11 @@ def generate_far_file_nested_data_struct(tmpdir, nested_data_struct):
 
 
 @pytest.fixture
+def coordinates():
+    return Coordinates([0, 1], [2, 3], [4, 5])
+
+
+@pytest.fixture
 def signal():
     # TODO: replace sine with fixture sine
     sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))

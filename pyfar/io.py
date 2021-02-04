@@ -276,6 +276,19 @@ def _inner_decode(obj, key, zipfile):
         obj[key] = getattr(np, obj[key][1])
     elif obj[key][0] == 'ndarray':
         obj[key] = _decode_ndarray(obj[key][1], zipfile)
+    else:
+        _decode_numpy_scalar(obj, key)
+
+
+def _decode_numpy_scalar(obj, key):
+    try:
+        numpy_scalar = getattr(np, obj[key][0])
+    except AttributeError:
+        pass
+    else:
+        obj[key] = numpy_scalar(obj[key][1])
+
+
 
 
 def _decode_ndarray(obj, zipfile):
@@ -339,6 +352,8 @@ def _inner_encode(obj, key, zip_path, zipfile):
     elif _is_mylib_type(obj[key]):
         obj[key] = [type(obj[key]).__name__, obj[key].__dict__]
         _encode(obj[key][1], zip_path, zipfile)
+    elif _is_numpy_scalar(obj[key]):
+        obj[key] = [type(obj[key]).__name__, obj[key].item()]
     else:
         _encode(obj[key], zip_path, zipfile)
 
@@ -370,11 +385,15 @@ def _encode_ndarray(ndarray):
 def _is_mylib_type(obj):
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
-        'NestedDataStruct', 'MyOtherClass']
+        'NestedDataStruct', 'MyOtherClass', ]
 
 
 def _is_dtype(obj):
     return isinstance(obj, type) and obj.__module__ == 'numpy'
+
+
+def _is_numpy_scalar(obj):
+    return type(obj).__module__ == 'numpy'
 
 
 def _is_type_hint(obj):

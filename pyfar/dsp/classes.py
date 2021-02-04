@@ -218,9 +218,17 @@ class Filter(object):
         return utils.copy(self)
 
 
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
+
+
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(obj, other)
+        return not deepdiff.DeepDiff(self, other)
 
 
 class FilterFIR(Filter):

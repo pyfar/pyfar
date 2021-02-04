@@ -234,7 +234,7 @@ class MyOtherClass:
     def _decode(cls, obj_dict):
         obj = cls()
         obj.__dict__.update(obj_dict)
-        return cls()
+        return obj
 
 
 class NestedDataStruct:
