@@ -228,12 +228,13 @@ def _normalization(freq, n_samples, fft_norm):
 class MyOtherClass:
     def __init__(self):
         self.signal = np.sin(2 * np.pi * np.arange(0, 1, 1 / 10))
+        self._m = 49
 
     @classmethod
     def _decode(cls, obj_dict):
         obj = cls()
         obj.__dict__.update(obj_dict)
-        return obj
+        return cls()
 
 
 class NestedDataStruct:

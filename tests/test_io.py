@@ -2,6 +2,7 @@ from pyfar.orientations import Orientations
 import numpy as np
 import numpy.testing as npt
 import pytest
+import deepdiff
 import json
 from pytest import fixture
 from mock import Mock, mock_open, patch, call
