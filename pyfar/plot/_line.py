@@ -151,7 +151,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     """Plot the time logairhmic data of a signal."""
 
     # check input
-    if not isinstance(signal, Signal) and not isinstance(signal, TimeData):
+    if not isinstance(signal, (Signal, TimeData)):
         raise TypeError('Input data has to be of type: Signal or TimeData.')
 
     # prepare input
@@ -200,8 +200,7 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     """
 
     # check input
-    if not isinstance(signal, Signal) and \
-            not isinstance(signal, FrequencyData):
+    if not isinstance(signal, (Signal, FrequencyData)):
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')
 
@@ -248,8 +247,7 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis."""
 
     # check input
-    if not isinstance(signal, Signal) and \
-            not isinstance(signal, FrequencyData):
+    if not isinstance(signal, (Signal, FrequencyData)):
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')
 
