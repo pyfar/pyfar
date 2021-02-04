@@ -246,15 +246,18 @@ def test__eq___dict__nested_data_struct(nested_data_struct):
 
 
 @patch('pyfar.io.str_to_type')
+@patch('pyfar.codec.str_to_type')
 def test_read_nested_data_struct(
-        patched_str_to_type,
+        codec_str_to_type,
+        io_str_to_type,
         generate_far_file_nested_data_struct,
         nested_data_struct,
         other_class):
     str_to_type = {
         'MyOtherClass': type(other_class),
         'NestedDataStruct': type(nested_data_struct)}
-    patched_str_to_type.side_effect = str_to_type.get
+    codec_str_to_type.side_effect = str_to_type.get
+    io_str_to_type.side_effect = str_to_type.get
     actual = io.read(generate_far_file_nested_data_struct)[
         'nested_data_struct']
     assert actual == nested_data_struct

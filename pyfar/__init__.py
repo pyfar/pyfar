@@ -24,4 +24,5 @@ __all__ = [
     'plot',
     'spatial',
     'io',
-    'utils']
+    'utils',
+    'codec']
