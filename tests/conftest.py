@@ -577,3 +577,39 @@ def signal():
     """
     sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
     return Signal(sine, 44100, len(sine), domain='time')
+
+
+
+@pytest.fixture
+def filter():
+    """ Filter object.
+    """
+    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
+    state = np.array([[[1, 0]]])
+    return fo.Filter(coefficients=coeff, state=state, comment='my comment')
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
+
+
+@pytest.fixture
+def filterFIR():
+    """ FilterFIR objectr.
+    """
+    coeff = np.array([
+        [1, 1 / 2, 0],
+        [1, 1 / 4, 1 / 8]])
+    return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterSOS():
+    """ FilterSOS objectr.
+    """
+    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
+    return fo.FilterSOS(sos, sampling_rate=2*np.pi)

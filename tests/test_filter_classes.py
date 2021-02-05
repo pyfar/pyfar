@@ -171,3 +171,15 @@ def test_atleast_3d_first_dim():
     desired = arr.copy()
     arr_3d = fo.atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
+
+
+def test___eq___equal(filter):
+    actual = filter.copy()
+    assert filter == actual
+
+
+def test___eq___notEqual(filter):
+    coeff = np.array([[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]])
+    state = np.array([[[1.0, 0.0]]])
+    actual = fo.Filter(coefficients=coeff, state=state, comment='my comment')
+    assert not filter == actual
