@@ -1,3 +1,4 @@
+import deepdiff
 import numpy as np
 from scipy import spatial as spat
 
@@ -31,6 +32,12 @@ class SphericalVoronoi(spat.SphericalVoronoi):
             raise ValueError("All sampling points need to be on the \
                     same radius.")
         super().__init__(points, radius_round, center)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(
+            self, other, ignore_type_in_groups=[
+                (np.int32, np.intc), (np.int64, np.intc)])
 
 
 def calculate_sph_voronoi_weights(

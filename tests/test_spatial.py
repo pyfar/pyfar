@@ -88,3 +88,14 @@ def test_voronoi_error_not_enough_points():
     s = Coordinates(points[0], points[1], points[2])
     with pytest.raises(ValueError, match='points needs to be at least 4'):
         spatial.calculate_sph_voronoi_weights(s)
+
+
+def test___eq___equal(sphericalvoronoi):
+    actual = sphericalvoronoi.copy()
+    assert sphericalvoronoi == actual
+
+
+def test___eq___notEqual(sphericalvoronoi):
+    actual = sphericalvoronoi.copy()
+    actual.center += 42
+    assert not sphericalvoronoi == actual
