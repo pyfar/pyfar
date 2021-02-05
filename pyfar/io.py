@@ -290,6 +290,7 @@ def _inner_decode(obj, key, zipfile):
         obj[key] = _decode_ndarray(obj[key][1], zipfile)
     else:
         _decode_numpy_scalar(obj, key)
+        pass
 
 
 def _decode_numpy_scalar(obj, key):
@@ -401,7 +402,7 @@ def _is_mylib_type(obj):
         'Coordinates',
         'Signal',
         'Filter',
-        'SphericalVoronoi'
+        'SphericalVoronoi',
         'NestedDataStruct',
         'MyOtherClass']
 

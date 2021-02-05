@@ -109,12 +109,6 @@ def test_write_filterIIR_TypeError(tmpdir, filterIIR):
         io.write(filename, filterIIR=filterIIR)
 
 
-def test_write_filterIIR_TypeError(tmpdir, filterIIR):
-    filename = os.path.join(tmpdir, 'test_filterIIR.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterIIR=filterIIR)
-
-
 def test_write_filterFIR_TypeError(tmpdir, filterFIR):
     filename = os.path.join(tmpdir, 'test_filterIIR.far')
     with pytest.raises(TypeError):

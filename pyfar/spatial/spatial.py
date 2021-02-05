@@ -51,7 +51,8 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(self, other)
+        return not deepdiff.DeepDiff(
+            self, other, ignore_type_in_groups=[(np.int32, np.intc)])
 
 
 def calculate_sph_voronoi_weights(
