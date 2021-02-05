@@ -97,5 +97,5 @@ def test___eq___equal(sphericalvoronoi):
 
 def test___eq___notEqual(sphericalvoronoi):
     actual = sphericalvoronoi.copy()
-    actual.center += 42
+    actual.center = 42
     assert not sphericalvoronoi == actual
