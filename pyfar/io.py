@@ -207,13 +207,14 @@ def read(filename):
 
     Returns
     -------
-    loaded_dict: dictionary containing haiopy types.
+    collection: dictionary
+        containing PyFar types.
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
         warnings.warn("Extending filename by .far.")
         filename += '.far'
-        
+
     collection = {}
     with open(filename, 'rb') as f:
         zip_buffer = io.BytesIO()

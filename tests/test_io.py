@@ -185,12 +185,26 @@ def test_read_filter(
     assert actual == filter
 
 
-def test_write_read_mixedTypes(tmpdir, orientations, coordinates):
+def test_write_read_multipleObjects(tmpdir, orientations, coordinates):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
     """
-    filename = os.path.join(tmpdir, 'test_write_mixedTypes.far')
+    filename = os.path.join(tmpdir, 'test_write_read_multipleObjects.far')
     io.write(filename, orientations=orientations, coordinates=coordinates)
+    actual = io.read(filename)
+    assert actual['orientations'] == orientations
+    assert actual['coordinates'] == coordinates
+
+
+def test_write_read_multipleObjectsWithCompression(
+    tmpdir, orientations, coordinates):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
+    """
+    filename = os.path.join(
+        tmpdir, 'test_write_read_multipleObjectsWithCompression.far')
+    io.write(filename, compress=True,
+        orientations=orientations, coordinates=coordinates)
     actual = io.read(filename)
     assert actual['orientations'] == orientations
     assert actual['coordinates'] == coordinates
