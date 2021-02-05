@@ -1,5 +1,6 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
+import deepdiff
 
 import pyfar
 
@@ -211,3 +212,7 @@ class Orientations(Rotation):
         quats = self.as_quat()
         quats[idx] = quat
         self = super().from_quat(quats)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
