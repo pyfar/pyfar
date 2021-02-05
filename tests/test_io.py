@@ -143,6 +143,7 @@ def test_read_coordinates(generate_far_file_coordinates, coordinates):
 def test_read_signal(generate_far_file_signal, signal):
     actual = io.read(generate_far_file_signal)['signal']
     assert isinstance(actual, Signal)
+    # TODO: Resolve Error in signal iterator
     assert actual == signal
 
 

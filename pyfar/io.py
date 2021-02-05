@@ -280,13 +280,13 @@ def _decode(obj, zipfile):
 def _inner_decode(obj, key, zipfile):
     if not _is_type_hint(obj[key]):
         _decode(obj[key], zipfile)
-    elif _is_mylib_type(obj[key][0]):
-        MyType = _str_to_type(obj[key][0])
+    elif _is_mylib_type(obj[key][0][1:]):
+        MyType = _str_to_type(obj[key][0][1:])
         obj[key] = MyType._decode(obj[key][1])
         _decode(obj[key].__dict__, zipfile)
-    elif obj[key][0] == 'dtype':
+    elif obj[key][0][1:] == 'dtype':
         obj[key] = getattr(np, obj[key][1])
-    elif obj[key][0] == 'ndarray':
+    elif obj[key][0][1:] == 'ndarray':
         obj[key] = _decode_ndarray(obj[key][1], zipfile)
     else:
         _decode_numpy_scalar(obj, key)
@@ -295,13 +295,11 @@ def _inner_decode(obj, key, zipfile):
 
 def _decode_numpy_scalar(obj, key):
     try:
-        numpy_scalar = getattr(np, obj[key][0])
+        numpy_scalar = getattr(np, obj[key][0][1:])
     except AttributeError:
         pass
     else:
         obj[key] = numpy_scalar(obj[key][1])
-
-
 
 
 def _decode_ndarray(obj, zipfile):
@@ -358,15 +356,15 @@ def _encode(obj, zip_path, zipfile):
 
 def _inner_encode(obj, key, zip_path, zipfile):
     if _is_dtype(obj[key]):
-        obj[key] = ['dtype', obj[key].__name__]
+        obj[key] = ['$dtype', obj[key].__name__]
     elif isinstance(obj[key], np.ndarray):
         zipfile.writestr(zip_path, _encode_ndarray(obj[key]))
-        obj[key] = ['ndarray', zip_path]
+        obj[key] = ['$ndarray', zip_path]
     elif _is_mylib_type(obj[key]):
-        obj[key] = [type(obj[key]).__name__, obj[key].__dict__]
+        obj[key] = [f'${type(obj[key]).__name__}', obj[key].__dict__]
         _encode(obj[key][1], zip_path, zipfile)
     elif _is_numpy_scalar(obj[key]):
-        obj[key] = [type(obj[key]).__name__, obj[key].item()]
+        obj[key] = [f'${type(obj[key]).__name__}', obj[key].item()]
     else:
         _encode(obj[key], zip_path, zipfile)
 
@@ -416,7 +414,10 @@ def _is_numpy_scalar(obj):
 
 
 def _is_type_hint(obj):
-    return isinstance(obj, list) and len(obj) == 2
+    return isinstance(obj, list) \
+        and len(obj) == 2 \
+        and isinstance(obj[0], str) \
+        and obj[0][0] == '$'
 
 
 def _str_to_type(type_as_string, module='pyfar'):
