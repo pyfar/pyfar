@@ -1,5 +1,6 @@
 import deepdiff
 import numpy as np
+from pyfar import utils
 from scipy import spatial as spat
 
 
@@ -38,6 +39,10 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         return not deepdiff.DeepDiff(
             self, other, ignore_type_in_groups=[
                 (np.int32, np.intc), (np.int64, np.intc)])
+
+    def copy(self):
+        """Return a deep copy of the Coordinates object."""
+        return utils.copy(self)
 
 
 def calculate_sph_voronoi_weights(
