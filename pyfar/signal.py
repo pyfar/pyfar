@@ -56,7 +56,6 @@ class _Audio(object):
         """Check for equality of two objects."""
         return not deepdiff.DeepDiff(self, other)
 
-
     @property
     def domain(self):
         """The domain the data is stored in"""
