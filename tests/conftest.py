@@ -543,29 +543,8 @@ def generate_sofa_postype_error(
 
 
 @pytest.fixture
-def views():
-    return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
-
-
-@pytest.fixture
-def ups():
-    return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
-
-
-@pytest.fixture
-def positions():
-    return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
-
-
-@pytest.fixture
-def orientations(views, ups):
-    return Orientations.from_view_up(views, ups)
-
-
-
-@pytest.fixture
 def generate_far_file_orientations(tmpdir, orientations):
-    """Create a far file in temporary folder that contains an Orientations
+    """ Creates a far file in a temporary folder that contains an Orientations
     object.
     """
     filename = os.path.join(tmpdir, 'test_orientations.far')
@@ -575,7 +554,7 @@ def generate_far_file_orientations(tmpdir, orientations):
 
 @pytest.fixture
 def generate_far_file_coordinates(tmpdir, coordinates):
-    """Create a far file in temporary folder that contains an Coordinates
+    """ Creates a far file in temporary folder that contains an Coordinates
     object.
     """
     filename = os.path.join(tmpdir, 'test_coordinates.far')
@@ -585,8 +564,7 @@ def generate_far_file_coordinates(tmpdir, coordinates):
 
 @pytest.fixture
 def generate_far_file_signal(tmpdir, signal):
-    """Create a far file in temporary folder that contains an Signal
-    object.
+    """ Creates a far file in temporary folder that contains an Signal object.
     """
     filename = os.path.join(tmpdir, 'test_signal.far')
     pyfar.io.write(filename, signal=signal)
@@ -595,7 +573,7 @@ def generate_far_file_signal(tmpdir, signal):
 
 @pytest.fixture
 def generate_far_file_sphericalvoronoi(tmpdir, sphericalvoronoi):
-    """Create a far file in temporary folder that contains an SphericalVoronoi
+    """ Creates a far file in temporary folder that contains a SphericalVoronoi
     object.
     """
     filename = os.path.join(tmpdir, 'test_sphericalvoronoi.far')
@@ -605,8 +583,7 @@ def generate_far_file_sphericalvoronoi(tmpdir, sphericalvoronoi):
 
 @pytest.fixture
 def generate_far_file_filter(tmpdir, filter):
-    """Create a far file in temporary folder that contains an SphericalVoronoi
-    object.
+    """ Creates a far file in temporary folder that contains a Filter object.
     """
     filename = os.path.join(tmpdir, 'test_filter.far')
     pyfar.io.write(filename, filter=filter)
@@ -614,46 +591,64 @@ def generate_far_file_filter(tmpdir, filter):
 
 
 @pytest.fixture
-def generate_far_file_filterIIR(tmpdir, filterIIR):
-    """Create a far file in temporary folder that contains an SphericalVoronoi
-    object.
-    """
-    filename = os.path.join(tmpdir, 'test_filterIIR.far')
-    pyfar.io.write(filename, filterIIR=filterIIR)
-    return filename
-
-
-@pytest.fixture
-def generate_far_file_filterFIR(tmpdir, filterFIR):
-    """Create a far file in temporary folder that contains an SphericalVoronoi
-    object.
-    """
-    filename = os.path.join(tmpdir, 'test_filterFIR.far')
-    pyfar.io.write(filename, filterFIR=filterFIR)
-    return filename
-
-
-@pytest.fixture
 def generate_far_file_nested_data_struct(tmpdir, nested_data_struct):
+    """ Creates a far file in temporary folder that contains a
+    general nested data structure .
+    """
     filename = os.path.join(tmpdir, 'test_nested_data_struct.far')
     pyfar.io.write(filename, nested_data_struct=nested_data_struct)
     return filename
 
 
 @pytest.fixture
+def views():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
+    return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
+
+
+@pytest.fixture
+def ups():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
+    return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
+
+
+@pytest.fixture
+def positions():
+    """ Used for the visualization of Orientation objects with
+    `Orientations.show`
+    """
+    return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
+
+
+@pytest.fixture
+def orientations(views, ups):
+    """ Orientations object uses fixtures `views` and `ups`.
+    """
+    return Orientations.from_view_up(views, ups)
+
+@pytest.fixture
 def coordinates():
+    """ Coordinates object.
+    """
     return Coordinates([0, 1], [2, 3], [4, 5])
 
 
 @pytest.fixture
 def signal():
-    # TODO: replace sine with fixture sine
+    """ Signal object without Mock or MagicMock wrapper.
+    """
     sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
     return Signal(sine, 44100, len(sine), domain='time')
 
 
 @pytest.fixture
 def sphericalvoronoi():
+    """ SphericalVoronoi object.
+    """
     dihedral = 2 * np.arcsin(np.cos(np.pi / 3) / np.sin(np.pi / 5))
     R = np.tan(np.pi / 3) * np.tan(dihedral / 2)
     rho = np.cos(np.pi / 5) / np.sin(np.pi / 10)
@@ -690,6 +685,8 @@ def sphericalvoronoi():
 
 @pytest.fixture
 def filter():
+    """ Filter object.
+    """
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
     state = np.array([[[1, 0]]])
     return fo.Filter(coefficients=coeff, state=state, comment='my comment')
@@ -697,12 +694,16 @@ def filter():
 
 @pytest.fixture
 def filterIIR():
+    """ FilterIIR object.
+    """
     coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
     return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
 def filterFIR():
+    """ FilterFIR objectr.
+    """
     coeff = np.array([
         [1, 1 / 2, 0],
         [1, 1 / 4, 1 / 8]])
@@ -714,25 +715,33 @@ def filterFIR():
 
 
 @pytest.fixture
-def anyObj():
-    class AnyClass:
-        pass
-    return AnyClass()
-
-
-@pytest.fixture
 def filterSOS():
+    """ FilterSOS objectr.
+    """
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2*np.pi)
 
 
 @pytest.fixture
+def anyObj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    class AnyClass:
+        pass
+    return AnyClass()
+
+@pytest.fixture
 def other_class():
+    """ Class being primarily used as a subclass of the nested data object.
+    """
     return stub_utils.MyOtherClass()
 
 
 @pytest.fixture
 def nested_data_struct():
+    """ General nested data structure primarily used to illustrate mechanism of
+    `io.write` and `io.read`.
+    """
     n = 42
     comment = 'My String'
     matrix = np.arange(0, 24).reshape((2, 3, 4))
