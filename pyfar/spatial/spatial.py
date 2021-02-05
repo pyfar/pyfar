@@ -1,4 +1,5 @@
 import numpy as np
+from pyfar import utils
 from scipy import spatial as spat
 
 
@@ -31,6 +32,10 @@ class SphericalVoronoi(spat.SphericalVoronoi):
             raise ValueError("All sampling points need to be on the \
                     same radius.")
         super().__init__(points, radius_round, center)
+
+    def copy(self):
+        """Return a deep copy of the Coordinates object."""
+        return utils.copy(self)
 
 
 def calculate_sph_voronoi_weights(
