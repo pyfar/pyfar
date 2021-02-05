@@ -190,7 +190,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def normalize(signal, norm_type='time', operation='max', channelwise='max',
-              value=None, freq_range=(20, 22000)):
+              value=None, freq_range=(20, 22e3)):
     """
     Normalize signal in the time or frequency domain.
 
