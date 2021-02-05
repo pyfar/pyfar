@@ -215,11 +215,11 @@ def normalize(signal, norm_type='time', operation='max', channelwise='max',
         'mean' - Normalize to mean of operation across all channels
        The default is 'max'
     value:
-        Normalizes to 'value' which can be a scalor or a vector with
+        Normalizes to 'value' which can be a scalar or a vector with
         a number of elements equal to channels
         The default is 0 for norm_type='db' and 1 otherwise
     freq_range: tuple
-        two element vector specifiying upper and lower frequenzy bounds
+        two element vector specifying upper and lower frequency bounds
         for normalization or scalar specifying the centre frequency for
         normalization
         The default is (20,22000)
@@ -291,7 +291,7 @@ def normalize(signal, norm_type='time', operation='max', channelwise='max',
     # apply normalization
     normalized_input = (normalized_input / values) * value
 
-    # replace input with normlaized_input
+    # replace input with normalized_input
     normalized_signal = signal.copy()
     normalized_signal.time = normalized_input
 
