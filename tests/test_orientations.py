@@ -230,13 +230,11 @@ def test_orientations_rotation(views, ups, positions, orientations):
 
 
 def test___eq___equal(orientations, views, ups):
-    comparable = Orientations.from_view_up(views, ups)
-    is_equal = orientations == comparable
-    assert is_equal
+    actual = Orientations.from_view_up(views, ups)
+    assert orientations == actual
 
 
-def test___eq___not_equal(orientations, views, ups):
+def test___eq___notEqual(orientations, views, ups):
     rot_z45 = Rotation.from_euler('z', 45, degrees=True)
-    comparable = Orientations.from_view_up(views, ups) * rot_z45
-    is_equal = orientations == comparable
-    assert not is_equal
+    actual = Orientations.from_view_up(views, ups) * rot_z45
+    assert not orientations == actual

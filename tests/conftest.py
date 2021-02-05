@@ -4,7 +4,12 @@ import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
+from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.orientations import Orientations
+from pyfar.coordinates import Coordinates
+from pyfar.signal import Signal
+import pyfar.dsp.classes as fo
+import pyfar.io
 
 import stub_utils
 
@@ -554,4 +559,21 @@ def positions():
 
 @pytest.fixture
 def orientations(views, ups):
+    """ Orientations object uses fixtures `views` and `ups`.
+    """
     return Orientations.from_view_up(views, ups)
+
+
+@pytest.fixture
+def coordinates():
+    """ Coordinates object.
+    """
+    return Coordinates([0, 1], [2, 3], [4, 5])
+
+
+@pytest.fixture
+def signal():
+    """ Signal object without Mock or MagicMock wrapper.
+    """
+    sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
+    return Signal(sine, 44100, len(sine), domain='time')
