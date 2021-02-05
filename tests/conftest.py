@@ -544,16 +544,25 @@ def generate_sofa_postype_error(
 
 @pytest.fixture
 def views():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
 
 
 @pytest.fixture
 def ups():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
     return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
 
 
 @pytest.fixture
 def positions():
+    """ Used for the visualization of Orientation objects with
+    `Orientations.show`
+    """
     return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
 
 
