@@ -3,8 +3,7 @@ import numpy as np
 import numpy.testing as npt
 
 from pyfar import Signal
-
-import stub_utils
+from pyfar.testing import stub_utils
 
 
 def test_signal_stub_properties():
