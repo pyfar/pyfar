@@ -185,6 +185,17 @@ def test_read_filter(
     assert actual == filter
 
 
+def test_write_read_mixedTypes(tmpdir, orientations, coordinates):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
+    """
+    filename = os.path.join(tmpdir, 'test_write_mixedTypes.far')
+    io.write(filename, orientations=orientations, coordinates=coordinates)
+    actual = io.read(filename)
+    assert actual['orientations'] == orientations
+    assert actual['coordinates'] == coordinates
+
+
 def test__eq___dict__nested_data_struct(nested_data_struct):
     actual = nested_data_struct.copy()
     assert actual == nested_data_struct
