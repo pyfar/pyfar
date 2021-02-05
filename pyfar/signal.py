@@ -636,7 +636,6 @@ class Signal(FrequencyData, TimeData):
                       dtype=self.dtype)
         return item
 
-    
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective object dictionary."""
@@ -646,7 +645,6 @@ class Signal(FrequencyData, TimeData):
             obj_dict['_n_samples'])
         obj.__dict__.update(obj_dict)
         return obj
-
 
     @property
     def signal_type(self):

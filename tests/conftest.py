@@ -630,6 +630,7 @@ def orientations(views, ups):
     """
     return Orientations.from_view_up(views, ups)
 
+
 @pytest.fixture
 def coordinates():
     """ Coordinates object.

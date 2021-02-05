@@ -1,7 +1,6 @@
 import deepdiff
 import numpy as np
 from scipy import spatial as spat
-from pyfar import utils
 from pyfar import Coordinates
 
 
@@ -37,7 +36,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
     @classmethod
     def _decode(cls, obj_dict):
-        """Decode object based on its respective object dictionary."""    
+        """Decode object based on its respective object dictionary."""
         sampling = Coordinates(
             obj_dict['points'][:, 0],
             obj_dict['points'][:, 1],
