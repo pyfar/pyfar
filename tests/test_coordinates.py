@@ -577,32 +577,43 @@ def test_converters():
     coordinates.cart2cyl(0, 0, 1)
     coordinates.cyl2cart(0, 0, 1)
 
+
 @pytest.mark.parametrize(
     'points_1, points_2, points_3, actual, expected', [
         (1, 1, 1,                Coordinates(1, 1, -1),                 False),
         ([1, 1], [1, 1], [1, 1], Coordinates([1, 1], [1, 1], [1, 2]),   False),
-        ([1, 1], [1, 1], [1, 1], Coordinates([1, 1.0],[1, 1.0],[1, 1]), True)
+        ([1, 1], [1, 1], [1, 1], Coordinates([1, 1.0], [1, 1.0], [1, 1]), True)
     ])
 def test___eq___differInPoints(
         points_1, points_2, points_3, actual, expected):
+    """ This function checks against 3 different pairings of Coordinates.
+    """
     coordinates = Coordinates(points_1, points_2, points_3)
     comparison = coordinates == actual
     assert comparison == expected
 
 
-def test___eq___differInDomain():
+def test___eq___ForwardAndBackwardsDomainTransform_Equal():
+    coordinates = Coordinates(1, 2, 3, domain='cart')
+    actual = coordinates.copy()
+    actual.get_sph()
+    actual.get_cart()
+    assert coordinates == actual
+
+
+def test___eq___differInDomain_notEqual():
     coordinates = Coordinates(1, 2, 3, domain='sph', convention='side')
     actual = Coordinates(1, 2, 3, domain='sph', convention='front')
     assert not coordinates == actual
 
 
-def test___eq___differInConvention():
+def test___eq___differInConvention_notEqual():
     coordinates = Coordinates(domain='sph', convention='top_elev')
     actual = Coordinates(domain='sph', convention='front')
     assert not coordinates == actual
 
 
-def test___eq___differInUnit():
+def test___eq___differInUnit_notEqual():
     coordinates = Coordinates(
         [1, 1], [1, 1], [1, 1],
         convention='top_colat', domain='sph', unit='rad')
@@ -613,19 +624,19 @@ def test___eq___differInUnit():
     assert not is_equal
 
 
-def test___eq___differInWeigths():
+def test___eq___differInWeigths_notEqual():
     coordinates = Coordinates(1, 2, 3, weights=.5)
     actual = Coordinates(1, 2, 3, weights=0.0)
     assert not coordinates == actual
 
 
-def test___eq___differInShOrder():
+def test___eq___differInShOrder_notEqual():
     coordinates = Coordinates(1, 2, 3, sh_order=2)
     actual = Coordinates(1, 2, 3, sh_order=8)
     assert not coordinates == actual
 
 
-def test___eq___differInShComment():
+def test___eq___differInShComment_notEqual():
     coordinates = Coordinates(1, 2, 3, comment="Madre mia!")
     actual = Coordinates(1, 2, 3, comment="Oh my woooooosh!")
     assert not coordinates == actual

@@ -216,6 +216,10 @@ class Filter(object):
         """Return a deep copy of the Filter object."""
         return utils.copy(self)
 
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
+
 
 class FilterFIR(Filter):
     """
