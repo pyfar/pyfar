@@ -209,6 +209,11 @@ def read(filename):
     -------
     loaded_dict: dictionary containing haiopy types.
     """
+    # Check for .far file extension
+    if filename.split('.')[-1] != 'far':
+        warnings.warn("Extending filename by .far.")
+        filename += '.far'
+        
     collection = {}
     with open(filename, 'rb') as f:
         zip_buffer = io.BytesIO()
@@ -247,6 +252,11 @@ def write(filename, compress=False, **objs):
         - Coordinates
         - Orientations
     """
+    # Check for .far file extension
+    if filename.split('.')[-1] != 'far':
+        warnings.warn("Extending filename by .far.")
+        filename += '.far'
+
     compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:

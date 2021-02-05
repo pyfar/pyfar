@@ -127,6 +127,28 @@ def test_write_anyObj_TypeError(tmpdir, anyObj):
         io.write(filename, anyObj=anyObj)
 
 
+def test_write_WithoutExtension_ExtendAndWarn(tmpdir, orientations):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
+    """
+    filename = os.path.join(
+        tmpdir, 'test_write_WithoutExtension_ExtendAndWarn.anyAfterDot')
+    io.write(filename, orientations=orientations)
+    actual = io.read(f'{filename}.far')['orientations']
+    assert actual == orientations
+
+
+def test_read_WithoutExtension_ExtendAndWarn(tmpdir, orientations):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
+    """
+    filename = os.path.join(
+        tmpdir, 'test_read_WithoutExtension_ExtendAndWarn.anyAfterDot')
+    io.write(f'{filename}.far', orientations=orientations)
+    actual = io.read(filename)['orientations']
+    assert actual == orientations
+
+
 def test_read_orientations(generate_far_file_orientations, orientations):
     """Write is already called in the `generate_orientations_file` fixture"""
     actual = io.read(generate_far_file_orientations)['orientations']
