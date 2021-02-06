@@ -376,12 +376,11 @@ def test_flatten():
 def test___eq___equal(signal):
     sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
     actual = Signal(sine, 44100, len(sine), domain='time')
-    # TODO: This will fail due to infinite recursion error, see SignalIterator
     assert signal == actual
 
+import deepdiff
 
 def test___eq___notEqual(signal):
     sine = np.sin(2 * np.pi * 220 * np.arange(0, 1, 1 / 44100))
     actual = Signal(sine, 44100, len(sine), domain='time')
-    # TODO: This will fail due to infinite recursion error, see SignalIterator
     assert not signal == actual

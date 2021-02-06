@@ -215,4 +215,5 @@ class Orientations(Rotation):
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(self, other)
+        return not deepdiff.DeepDiff(self, other) \
+            and not deepdiff.DeepDiff(self.as_quat(), other.as_quat())
