@@ -270,7 +270,7 @@ def write(filename, compress=False, **objs):
                 raise TypeError(error)
 
             obj_dict = _encode(
-                copy.deepcopy(obj.__dict__), name, zip_file)
+                obj._encode(), name, zip_file)
             type_obj_pair = [type(obj).__name__, obj_dict]
             zip_file.writestr(f'{name}/json', json.dumps(type_obj_pair))
 

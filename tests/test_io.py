@@ -140,7 +140,7 @@ def test_write_read_nested_data(
         nested_data,
         flat_data):
     patched__str_to_type.side_effect = stub_str_to_type.get
-    filename = os.path.join(tmpdir, 'test_write_read_flat_data.far')
+    filename = os.path.join(tmpdir, 'test_write_nested_flat_data.far')
     io.write(filename, nested_data=nested_data)
     actual = io.read(filename)
     assert actual['nested_data'] == nested_data
@@ -231,9 +231,11 @@ def test_read_WithoutExtension_ExtendAndWarn(
     assert actual['flat_data'] == flat_data
 
 
-def test_read_orientations(generate_far_file_orientations, orientations):
+def test_read_orientations(orientations, tmpdir):
     """Write is already called in the `generate_orientations_file` fixture"""
-    actual = io.read(generate_far_file_orientations)['orientations']
+    filename = os.path.join(tmpdir, 'test_orientations.far')
+    io.write(filename, orientations=orientations)
+    actual = io.read(filename)['orientations']
     assert isinstance(actual, Orientations)
     assert actual == orientations
 

@@ -194,12 +194,17 @@ class Orientations(Rotation):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
 
+    def _encode(self):
+        """Encoding must be done through its public interface because
+        Orientations inherits from scipy Rotation, which is a compiled class
+        whose __dict__ method returns an empty dict `{}`.
+        """
+        return {'quat': self.as_quat()}
+
     @classmethod
     def _decode(cls, obj_dict):
-        """Decode object based on its respective object dictionary."""
-        obj = cls()
-        obj.__dict__.update(obj_dict)
-        return obj
+        """Decode object based on its respective `_encode` counterpart."""
+        return cls.from_quat(obj_dict['quat'])
 
     def __setitem__(self, idx, val):
         """
