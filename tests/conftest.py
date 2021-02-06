@@ -682,6 +682,7 @@ def filterSOS():
     return fo.FilterSOS(sos, sampling_rate=2*np.pi)
 
 
+@pytest.fixture
 def sphericalvoronoi():
     """ SphericalVoronoi object.
     """

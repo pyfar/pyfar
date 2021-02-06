@@ -1142,9 +1142,13 @@ class Coordinates(object):
         """Return a deep copy of the Coordinates object."""
         return utils.copy(self)
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
     @classmethod
     def _decode(cls, obj_dict):
-        """Decode object based on its respective object dictionary."""
+        """Decode object based on its respective `_encode` counterpart."""
         obj = cls()
         obj.__dict__.update(obj_dict)
         return obj

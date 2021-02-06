@@ -249,16 +249,16 @@ def test_read_coordinates(generate_far_file_coordinates, coordinates):
 def test_read_signal(generate_far_file_signal, signal):
     actual = io.read(generate_far_file_signal)['signal']
     assert isinstance(actual, Signal)
-    # TODO: Resolve Error in signal iterator
     assert actual == signal
 
 
-def test_read_sphericalvoronoi(
-    generate_far_file_sphericalvoronoi,
-    sphericalvoronoi):
-    actual = io.read(generate_far_file_sphericalvoronoi)['sphericalvoronoi']
+def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
+    filename = os.path.join(tmpdir, 'sphericalvoronoi.far')
+    io.write(filename, sphericalvoronoi=sphericalvoronoi)
+    actual = io.read(filename)['sphericalvoronoi']
     assert isinstance(actual, SphericalVoronoi)
     assert actual == sphericalvoronoi
+
 
 
 def test_read_filter(

@@ -230,8 +230,13 @@ class FlatData:
         self.signal = np.sin(2 * np.pi * np.arange(0, 1, 1 / 10))
         self._m = m
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
     @classmethod
     def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
         obj = cls()
         obj.__dict__.update(obj_dict)
         return obj
@@ -252,6 +257,10 @@ class NestedData:
         self._subobj = subobj
         self._list = mylist
         self._dict = mydict
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
 
     @classmethod
     def _decode(cls, obj_dict):

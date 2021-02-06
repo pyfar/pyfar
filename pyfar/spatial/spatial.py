@@ -35,15 +35,29 @@ class SphericalVoronoi(spat.SphericalVoronoi):
                     same radius.")
         super().__init__(points, radius_round, center)
 
+    def copy(self):
+        """Return a deep copy of the Coordinates object."""
+        return utils.copy(self)
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        sampling = Coordinates(
+        obj_dict['points'][:, 0],
+        obj_dict['points'][:, 1],
+        obj_dict['points'][:, 2],
+        domain='cart')
+        return cls(sampling, center=obj_dict['center'])
+
     def __eq__(self, other):
         """Check for equality of two objects."""
         return not deepdiff.DeepDiff(
             self, other, ignore_type_in_groups=[
                 (np.int32, np.intc), (np.int64, np.intc)])
-
-    def copy(self):
-        """Return a deep copy of the Coordinates object."""
-        return utils.copy(self)
 
 
 def calculate_sph_voronoi_weights(

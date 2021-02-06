@@ -217,6 +217,10 @@ class Filter(object):
         """Return a deep copy of the Filter object."""
         return utils.copy(self)
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective object dictionary."""

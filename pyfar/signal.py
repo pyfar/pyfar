@@ -640,6 +640,10 @@ class Signal(FrequencyData, TimeData):
                       dtype=self.dtype)
         return item
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective object dictionary."""
