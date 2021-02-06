@@ -126,7 +126,7 @@ def test_write_anyObj_TypeError(tmpdir, anyObj):
     with pytest.raises(TypeError):
         io.write(filename, anyObj=anyObj)
 
-
+import deepdiff
 def test_write_WithoutExtension_ExtendAndWarn(tmpdir, orientations):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.

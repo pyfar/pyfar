@@ -3,12 +3,13 @@ import numpy as np
 import numpy.testing as npt
 
 
-def test_copy():
+def test_copy(sphericalvoronoi):
     """ Test copy method used by several classes."""
     obj_list = [pyfar.Signal(1000, 44100),
                 pyfar.Orientations(),
                 pyfar.Coordinates(),
-                pyfar.dsp.Filter()]
+                pyfar.dsp.Filter(),
+                sphericalvoronoi]
 
     for obj in obj_list:
         # Create copy

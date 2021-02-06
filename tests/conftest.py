@@ -5,6 +5,7 @@ import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
+from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
 from pyfar.signal import Signal
@@ -647,6 +648,40 @@ def signal():
 
 
 @pytest.fixture
+def filter():
+    """ Filter object.
+    """
+    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
+    state = np.array([[[1, 0]]])
+    return fo.Filter(coefficients=coeff, state=state, comment='my comment')
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
+
+
+@pytest.fixture
+def filterFIR():
+    """ FilterFIR objectr.
+    """
+    coeff = np.array([
+        [1, 1 / 2, 0],
+        [1, 1 / 4, 1 / 8]])
+    return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterSOS():
+    """ FilterSOS objectr.
+    """
+    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
+    return fo.FilterSOS(sos, sampling_rate=2*np.pi)
+
+
 def sphericalvoronoi():
     """ SphericalVoronoi object.
     """
@@ -682,45 +717,6 @@ def sphericalvoronoi():
         phi, theta, rad,
         domain='sph', convention='top_colat')
     return SphericalVoronoi(s)
-
-
-@pytest.fixture
-def filter():
-    """ Filter object.
-    """
-    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
-    state = np.array([[[1, 0]]])
-    return fo.Filter(coefficients=coeff, state=state, comment='my comment')
-
-
-@pytest.fixture
-def filterIIR():
-    """ FilterIIR object.
-    """
-    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
-    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
-
-
-@pytest.fixture
-def filterFIR():
-    """ FilterFIR objectr.
-    """
-    coeff = np.array([
-        [1, 1 / 2, 0],
-        [1, 1 / 4, 1 / 8]])
-    desired = np.array([
-        [[1, 1 / 2, 0], [1, 0, 0]],
-        [[1, 1 / 4, 1 / 8], [1, 0, 0]]
-        ])
-    return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
-
-
-@pytest.fixture
-def filterSOS():
-    """ FilterSOS objectr.
-    """
-    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    return fo.FilterSOS(sos, sampling_rate=2*np.pi)
 
 
 @pytest.fixture

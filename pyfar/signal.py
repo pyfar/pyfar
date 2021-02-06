@@ -52,6 +52,10 @@ class _Audio(object):
         # methods to fail that require data.)
         self._data = np.atleast_2d(np.nan)
 
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self.__dict__, other.__dict__)
+
     @property
     def domain(self):
         """The domain the data is stored in"""
@@ -698,10 +702,6 @@ class Signal(FrequencyData, TimeData):
         numpy's array iteration.
         """
         return SignalIterator(self._data.__iter__(), self)
-
-    def __eq__(self, other):
-        """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(self, other)
 
 
 class SignalIterator(object):
