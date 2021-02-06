@@ -54,7 +54,7 @@ class _Audio(object):
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(self, other)
+        return not deepdiff.DeepDiff(self.__dict__, other.__dict__)
 
     @property
     def domain(self):
