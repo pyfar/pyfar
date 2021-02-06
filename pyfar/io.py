@@ -436,8 +436,8 @@ def _is_parfy_type(obj):
         'Signal',
         'Filter',
         'SphericalVoronoi',
-        'NestedDataStruct',
-        'MyOtherClass']
+        'NestedData',
+        'FlatData']
 
 
 def _is_dtype(obj):

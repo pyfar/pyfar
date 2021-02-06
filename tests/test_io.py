@@ -94,6 +94,7 @@ def test_read_sofa_position_type_unit(generate_sofa_postype_error):
 
 
 def test__str_to_type():
+    """ Test if str_to_type works properly. """
     PyfarType = io._str_to_type('Coordinates')
     assert PyfarType.__module__.startswith('pyfar')
     PyfarType = io._str_to_type('Orientations')
@@ -103,50 +104,131 @@ def test__str_to_type():
     pass
 
 
-def test_write_filterIIR_TypeError(tmpdir, filterIIR):
-    filename = os.path.join(tmpdir, 'test_filterIIR.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterIIR=filterIIR)
+def test__eq___dict__flat_data(flat_data):
+    """ Test equality for stub. """
+    actual = flat_data.copy()
+    assert actual == flat_data
 
 
-def test_write_filterFIR_TypeError(tmpdir, filterFIR):
-    filename = os.path.join(tmpdir, 'test_filterIIR.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterFIR=filterFIR)
+def test__eq___dict__nested_data(nested_data):
+    """ Test equality for stub. """
+    actual = nested_data.copy()
+    assert actual == nested_data
 
 
-def test_write_filterSOS_TypeError(tmpdir, filterSOS):
-    filename = os.path.join(tmpdir, 'test_filterSOS.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterSOS=filterSOS)
+@patch('pyfar.io._str_to_type')
+def test_write_read_flat_data(
+        stubbed_str_to_type,
+        stub_str_to_type,
+        tmpdir,
+        flat_data):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
+    """
+    stubbed_str_to_type.side_effect = stub_str_to_type.get
+    filename = os.path.join(tmpdir, 'test_write_read_flat_data.far')
+    io.write(filename, flat_data=flat_data)
+    actual = io.read(filename)
+    assert actual['flat_data'] == flat_data
 
 
-def test_write_anyObj_TypeError(tmpdir, anyObj):
+@patch('pyfar.io._str_to_type')
+def test_write_read_nested_data(
+        patched__str_to_type,
+        stub_str_to_type,
+        tmpdir,
+        nested_data,
+        flat_data):
+    patched__str_to_type.side_effect = stub_str_to_type.get
+    filename = os.path.join(tmpdir, 'test_write_read_flat_data.far')
+    io.write(filename, nested_data=nested_data)
+    actual = io.read(filename)
+    assert actual['nested_data'] == nested_data
+
+
+@patch('pyfar.io._str_to_type')
+def test_write_read_multipleObjects(
+        stubbed_str_to_type,
+        stub_str_to_type,
+        tmpdir,
+        flat_data):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
+    """
+    stubbed_str_to_type.side_effect = stub_str_to_type.get
+    filename = os.path.join(
+        tmpdir, 'test_write_read_multipleObjects.far')
+    io.write(
+        filename,
+        obj1=flat_data,
+        obj2=flat_data)
+    actual = io.read(filename)
+    assert actual['obj1'] == flat_data
+    assert actual['obj2'] == flat_data
+
+
+@patch('pyfar.io._str_to_type')
+def test_write_read_multipleObjectsWithCompression(
+        stubbed_str_to_type,
+        stub_str_to_type,
+        tmpdir,
+        flat_data):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
+    """
+    stubbed_str_to_type.side_effect = stub_str_to_type.get
+    filename = os.path.join(
+        tmpdir, 'test_write_read_multipleObjectsWithCompression.far')
+    io.write(
+        filename,
+        compress=True,
+        obj1=flat_data,
+        obj2=flat_data)
+    actual = io.read(filename)
+    assert actual['obj1'] == flat_data
+    assert actual['obj2'] == flat_data
+
+
+def test_write_anyObj_TypeError(tmpdir, any_obj):
+    """ Check if a TypeError is raised when writing an arbitrary object. 
+    """
     filename = os.path.join(tmpdir, 'test_anyObj.far')
     with pytest.raises(TypeError):
-        io.write(filename, anyObj=anyObj)
+        io.write(filename, any_obj=any_obj)
 
-import deepdiff
-def test_write_WithoutExtension_ExtendAndWarn(tmpdir, orientations):
+
+@patch('pyfar.io._str_to_type')
+def test_write_WithoutExtension_ExtendAndWarn(
+        stubbed_str_to_type,
+        stub_str_to_type,
+        tmpdir,
+        flat_data):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
     """
+    stubbed_str_to_type.side_effect = stub_str_to_type.get
     filename = os.path.join(
         tmpdir, 'test_write_WithoutExtension_ExtendAndWarn.anyAfterDot')
-    io.write(filename, orientations=orientations)
-    actual = io.read(f'{filename}.far')['orientations']
-    assert actual == orientations
+    io.write(filename, flat_data=flat_data)
+    actual = io.read(f'{filename}.far')
+    assert actual['flat_data'] == flat_data
 
 
-def test_read_WithoutExtension_ExtendAndWarn(tmpdir, orientations):
-    """ Check if file can be read back after writing without explicitply
+@patch('pyfar.io._str_to_type')
+def test_read_WithoutExtension_ExtendAndWarn(
+        stubbed_str_to_type,
+        stub_str_to_type,
+        tmpdir,
+        flat_data):
+    """ Check if file can be read back after without explicitply
     passing the .far-extension.
     """
+    stubbed_str_to_type.side_effect = stub_str_to_type.get
     filename = os.path.join(
         tmpdir, 'test_read_WithoutExtension_ExtendAndWarn.anyAfterDot')
-    io.write(f'{filename}.far', orientations=orientations)
-    actual = io.read(filename)['orientations']
-    assert actual == orientations
+    io.write(f'{filename}.far', flat_data=flat_data)
+    actual = io.read(filename)
+    assert actual['flat_data'] == flat_data
 
 
 def test_read_orientations(generate_far_file_orientations, orientations):
@@ -185,46 +267,19 @@ def test_read_filter(
     assert actual == filter
 
 
-def test_write_read_multipleObjects(tmpdir, orientations, coordinates):
-    """ Check if file can be read back after writing without explicitply
-    passing the .far-extension.
-    """
-    filename = os.path.join(tmpdir, 'test_write_read_multipleObjects.far')
-    io.write(filename, orientations=orientations, coordinates=coordinates)
-    actual = io.read(filename)
-    assert actual['orientations'] == orientations
-    assert actual['coordinates'] == coordinates
+def test_write_filterIIR_TypeError(tmpdir, filterIIR):
+    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterIIR=filterIIR)
 
 
-def test_write_read_multipleObjectsWithCompression(
-    tmpdir, orientations, coordinates):
-    """ Check if file can be read back after writing without explicitply
-    passing the .far-extension.
-    """
-    filename = os.path.join(
-        tmpdir, 'test_write_read_multipleObjectsWithCompression.far')
-    io.write(filename, compress=True,
-        orientations=orientations, coordinates=coordinates)
-    actual = io.read(filename)
-    assert actual['orientations'] == orientations
-    assert actual['coordinates'] == coordinates
+def test_write_filterFIR_TypeError(tmpdir, filterFIR):
+    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterFIR=filterFIR)
 
 
-def test__eq___dict__nested_data_struct(nested_data_struct):
-    actual = nested_data_struct.copy()
-    assert actual == nested_data_struct
-
-
-@patch('pyfar.io._str_to_type')
-def test_read_nested_data_struct(
-        patched__str_to_type,
-        generate_far_file_nested_data_struct,
-        nested_data_struct,
-        other_class):
-    _str_to_type = {
-        'MyOtherClass': type(other_class),
-        'NestedDataStruct': type(nested_data_struct)}
-    patched__str_to_type.side_effect = _str_to_type.get
-    actual = io.read(generate_far_file_nested_data_struct)[
-        'nested_data_struct']
-    assert actual == nested_data_struct
+def test_write_filterSOS_TypeError(tmpdir, filterSOS):
+    filename = os.path.join(tmpdir, 'test_filterSOS.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterSOS=filterSOS)

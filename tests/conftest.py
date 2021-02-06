@@ -592,12 +592,12 @@ def generate_far_file_filter(tmpdir, filter):
 
 
 @pytest.fixture
-def generate_far_file_nested_data_struct(tmpdir, nested_data_struct):
+def generate_far_file_nested_data_struct(tmpdir, nested_data):
     """ Creates a far file in temporary folder that contains a
     general nested data structure .
     """
     filename = os.path.join(tmpdir, 'test_nested_data_struct.far')
-    pyfar.io.write(filename, nested_data_struct=nested_data_struct)
+    pyfar.io.write(filename, nested_data_struct=nested_data)
     return filename
 
 
@@ -720,34 +720,45 @@ def sphericalvoronoi():
 
 
 @pytest.fixture
-def anyObj():
+def any_obj():
     """ Any object acting as placeholder for non-PyFar-objects.
     """
     class AnyClass:
-        pass
+        def __init__(self, x=42):
+            self.x = x
     return AnyClass()
 
 @pytest.fixture
-def other_class():
+def flat_data():
     """ Class being primarily used as a subclass of the nested data object.
     """
-    return stub_utils.MyOtherClass()
+    return stub_utils.FlatData()
 
 
 @pytest.fixture
-def nested_data_struct():
+def nested_data():
     """ General nested data structure primarily used to illustrate mechanism of
     `io.write` and `io.read`.
     """
     n = 42
     comment = 'My String'
     matrix = np.arange(0, 24).reshape((2, 3, 4))
-    subobj = stub_utils.MyOtherClass()
-    mylist = [1, np.int32, np.arange(10), stub_utils.MyOtherClass()]
+    subobj = stub_utils.FlatData()
+    mylist = [1, np.int32, np.arange(10), stub_utils.FlatData()]
     mydict = {
         'a': 1,
         'b': np.int32,
         'c': np.arange(10),
-        'd': stub_utils.MyOtherClass(-1)}
-    return stub_utils.NestedDataStruct(
+        'd': stub_utils.FlatData(-1)}
+    return stub_utils.NestedData(
         n, comment, matrix, subobj, mylist, mydict)
+
+
+@pytest.fixture
+def stub_str_to_type(any_obj, flat_data, nested_data):
+    """ Fakes `io.str_to_type` for tests that use general data structures.
+    """
+    return {
+        'AnyClass': type(any_obj),
+        'FlatData': type(flat_data),
+        'NestedData': type(nested_data)}

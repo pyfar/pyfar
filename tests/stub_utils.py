@@ -225,7 +225,7 @@ def _normalization(freq, n_samples, fft_norm):
     return freq_norm
 
 
-class MyOtherClass:
+class FlatData:
     def __init__(self, m=49):
         self.signal = np.sin(2 * np.pi * np.arange(0, 1, 1 / 10))
         self._m = m
@@ -236,8 +236,15 @@ class MyOtherClass:
         obj.__dict__.update(obj_dict)
         return obj
 
+    def copy(self):
+        """Return a deep copy of the Orientations object."""
+        return pyfar.utils.copy(self)
 
-class NestedDataStruct:
+    def __eq__(self, other):        
+        return not deepdiff.DeepDiff(self, other)
+
+
+class NestedData:
     def __init__(self, n, comment, matrix, subobj, mylist, mydict):
         self._n = n
         self._comment = comment
@@ -257,7 +264,6 @@ class NestedDataStruct:
             obj_dict['_dict'])
         obj.__dict__.update(obj_dict)
         return obj
-
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
