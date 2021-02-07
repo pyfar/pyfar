@@ -2,7 +2,6 @@ import numpy as np
 import deepdiff
 from unittest import mock
 
-from pyfar.coordinates import Coordinates
 from pyfar.signal import Signal
 import pyfar.utils
 
@@ -224,11 +223,16 @@ def _normalization(freq, n_samples, fft_norm):
     freq_norm = norm * freq
     return freq_norm
 
+
 class AnyClass:
+    """Placeholder class"""
     def __init__(self, x=42):
         self.x = x
 
+
 class FlatData:
+    """Class only containing flat data and methods.
+    """
     def __init__(self, m=49):
         self.signal = np.sin(2 * np.pi * np.arange(0, 1, 1 / 10))
         self._m = m
@@ -248,11 +252,14 @@ class FlatData:
         """Return a deep copy of the Orientations object."""
         return pyfar.utils.copy(self)
 
-    def __eq__(self, other):        
+    def __eq__(self, other):
         return not deepdiff.DeepDiff(self, other)
 
 
 class NestedData:
+    """Class containing nested data such as lists, dicts and other objects
+    as well as methods.
+    """
     def __init__(self, n, comment, matrix, subobj, mylist, mydict):
         self._n = n
         self._comment = comment
@@ -262,7 +269,7 @@ class NestedData:
         self._dict = mydict
 
     @classmethod
-    def create(cls):        
+    def create(cls):
         n = 42
         comment = 'My String'
         matrix = np.arange(0, 24).reshape((2, 3, 4))
@@ -296,8 +303,7 @@ class NestedData:
         """Return a deep copy of the Orientations object."""
         return pyfar.utils.copy(self)
 
-
-    def __eq__(self, other):        
+    def __eq__(self, other):
         return not deepdiff.DeepDiff(self, other)
 
 
@@ -306,9 +312,9 @@ def stub_str_to_type():
     """
     def side_effect(type_str):
         return {
-        'AnyClass': type(AnyClass()),
-        'FlatData': type(FlatData()),
-        'NestedData': type(NestedData.create())}.get(type_str)
+            'AnyClass': type(AnyClass()),
+            'FlatData': type(FlatData()),
+            'NestedData': type(NestedData.create())}.get(type_str)
     return mock.MagicMock(side_effect=side_effect)
 
 

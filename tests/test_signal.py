@@ -378,7 +378,6 @@ def test___eq___equal(signal):
     actual = Signal(sine, 44100, len(sine), domain='time')
     assert signal == actual
 
-import deepdiff
 
 def test___eq___notEqual(signal):
     sine = np.sin(2 * np.pi * 220 * np.arange(0, 1, 1 / 44100))

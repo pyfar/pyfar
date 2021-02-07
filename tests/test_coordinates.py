@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest import raises, mark
+from pytest import raises
 
 from pyfar.coordinates import Coordinates
 import pyfar.coordinates as coordinates

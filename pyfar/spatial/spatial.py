@@ -47,10 +47,10 @@ class SphericalVoronoi(spat.SphericalVoronoi):
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
         sampling = Coordinates(
-        obj_dict['points'][:, 0],
-        obj_dict['points'][:, 1],
-        obj_dict['points'][:, 2],
-        domain='cart')
+            obj_dict['points'][:, 0],
+            obj_dict['points'][:, 1],
+            obj_dict['points'][:, 2],
+            domain='cart')
         return cls(sampling, center=obj_dict['center'])
 
     def __eq__(self, other):

@@ -5,9 +5,7 @@ import numpy as np
 import sofa
 import json
 import zipfile
-import copy
 import io
-import sys
 
 from pyfar import Signal
 from pyfar import Coordinates
