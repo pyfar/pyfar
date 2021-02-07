@@ -271,7 +271,7 @@ def write(filename, compress=False, **objs):
             try:
                 obj_dict = _encode(obj._encode(), name, zip_file)
             except AttributeError as e:
-                e.message=f'You must implement `{type}._encode` first.'
+                e.message = f'You must implement `{type}._encode` first.'
                 raise
             type_obj_pair = [type(obj).__name__, obj_dict]
             zip_file.writestr(f'{name}/json', json.dumps(type_obj_pair))

@@ -664,10 +664,7 @@ def sphericalvoronoi():
 def any_obj():
     """ Any object acting as placeholder for non-PyFar-objects.
     """
-    class AnyClass:
-        def __init__(self, x=42):
-            self.x = x
-    return AnyClass()
+    return stub_utils.AnyClass()
 
 
 @pytest.fixture
@@ -682,25 +679,10 @@ def nested_data():
     """ General nested data structure primarily used to illustrate mechanism of
     `io.write` and `io.read`.
     """
-    n = 42
-    comment = 'My String'
-    matrix = np.arange(0, 24).reshape((2, 3, 4))
-    subobj = stub_utils.FlatData()
-    mylist = [1, np.int32, np.arange(10), stub_utils.FlatData()]
-    mydict = {
-        'a': 1,
-        'b': np.int32,
-        'c': np.arange(10),
-        'd': stub_utils.FlatData(-1)}
-    return stub_utils.NestedData(
-        n, comment, matrix, subobj, mylist, mydict)
+    return stub_utils.NestedData.create()
 
 
-@pytest.fixture
-def stub_str_to_type(any_obj, flat_data, nested_data):
+def stub_str_to_type():
     """ Fakes `io.str_to_type` for tests that use general data structures.
     """
-    return {
-        'AnyClass': type(any_obj),
-        'FlatData': type(flat_data),
-        'NestedData': type(nested_data)}
+    return stub_utils.stub_str_to_type()

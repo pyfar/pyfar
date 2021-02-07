@@ -224,6 +224,9 @@ def _normalization(freq, n_samples, fft_norm):
     freq_norm = norm * freq
     return freq_norm
 
+class AnyClass:
+    def __init__(self, x=42):
+        self.x = x
 
 class FlatData:
     def __init__(self, m=49):
@@ -258,6 +261,21 @@ class NestedData:
         self._list = mylist
         self._dict = mydict
 
+    @classmethod
+    def create(cls):        
+        n = 42
+        comment = 'My String'
+        matrix = np.arange(0, 24).reshape((2, 3, 4))
+        subobj = FlatData()
+        mylist = [1, np.int32, np.arange(10), FlatData()]
+        mydict = {
+            'a': 1,
+            'b': np.int32,
+            'c': np.arange(10),
+            'd': FlatData(-1)}
+        return NestedData(
+            n, comment, matrix, subobj, mylist, mydict)
+
     def _encode(self):
         """Return dictionary for the encoding."""
         return self.copy().__dict__
@@ -281,3 +299,14 @@ class NestedData:
 
     def __eq__(self, other):        
         return not deepdiff.DeepDiff(self, other)
+
+
+def stub_str_to_type():
+    """ Fakes `io.str_to_type` for tests that use general data structures.
+    """
+    def side_effect(type_str):
+        return {
+        'AnyClass': type(AnyClass()),
+        'FlatData': type(FlatData()),
+        'NestedData': type(NestedData.create())}.get(type_str)
+    return mock.MagicMock(side_effect=side_effect)
