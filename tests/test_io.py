@@ -6,6 +6,7 @@ from mock import patch
 from tests.conftest import stub_str_to_type
 
 import os.path
+import pyfar._codec as codec
 import scipy.io.wavfile as wavfile
 
 from pyfar import io
@@ -92,11 +93,11 @@ def test_read_sofa_position_type_unit(generate_sofa_postype_error):
 
 def test__str_to_type():
     """ Test if str_to_type works properly. """
-    PyfarType = io._str_to_type('Coordinates')
+    PyfarType = codec._str_to_type('Coordinates')
     assert PyfarType.__module__.startswith('pyfar')
-    PyfarType = io._str_to_type('Orientations')
+    PyfarType = codec._str_to_type('Orientations')
     assert PyfarType.__module__.startswith('pyfar')
-    PyfarType = io._str_to_type('SphericalVoronoi')
+    PyfarType = codec._str_to_type('SphericalVoronoi')
     assert PyfarType.__module__.startswith('pyfar')
     pass
 
@@ -113,7 +114,7 @@ def test__eq___dict__nested_data(nested_data):
     assert actual == nested_data
 
 
-@patch('pyfar.io._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
 def test_write_read_flat_data(tmpdir, flat_data):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
@@ -124,7 +125,7 @@ def test_write_read_flat_data(tmpdir, flat_data):
     assert actual['flat_data'] == flat_data
 
 
-@patch('pyfar.io._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
 def test_write_read_nested_data(nested_data, flat_data, tmpdir):
     filename = os.path.join(tmpdir, 'write_nested_flat_data.far')
     io.write(filename, nested_data=nested_data)
@@ -132,7 +133,7 @@ def test_write_read_nested_data(nested_data, flat_data, tmpdir):
     assert actual['nested_data'] == nested_data
 
 
-@patch('pyfar.io._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
 def test_write_read_multipleObjects(flat_data, tmpdir):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
@@ -147,23 +148,6 @@ def test_write_read_multipleObjects(flat_data, tmpdir):
     assert actual['obj2'] == flat_data
 
 
-@patch('pyfar.io._str_to_type', new=stub_str_to_type())
-def test_write_read_multipleObjects(flat_data, tmpdir):
-    """ Check if file can be read back after writing without explicitply
-    passing the .far-extension.
-    """
-    filename = os.path.join(
-        tmpdir, 'write_read_multipleObjectsWithCompression.far')
-    io.write(
-        filename,
-        compress=True,
-        obj1=flat_data,
-        obj2=flat_data)
-    actual = io.read(filename)
-    assert actual['obj1'] == flat_data
-    assert actual['obj2'] == flat_data
-
-
 def test_write_anyObj_TypeError(any_obj, tmpdir):
     """ Check if a TypeError is raised when writing an arbitrary
     object.
@@ -171,19 +155,6 @@ def test_write_anyObj_TypeError(any_obj, tmpdir):
     filename = os.path.join(tmpdir, 'test_anyObj.far')
     with pytest.raises(TypeError):
         io.write(filename, any_obj=any_obj)
-
-
-@patch('pyfar.io._str_to_type', new=stub_str_to_type())
-def test_write_read_multipleObjects(flat_data, tmpdir):
-    """ Check if file can be read back after writing without explicitply
-    passing the .far-extension.
-    """
-    filename = os.path.join(
-        tmpdir, 'write_WithoutExtension_ExtendAndWarn.anyAfterDot')
-    io.write(filename, flat_data=flat_data)
-    actual = io.read(f'{filename}.far')
-    assert actual['flat_data'] == flat_data
-
 
 
 def test_read_orientations(orientations, tmpdir):
