@@ -229,7 +229,7 @@ def read(filename):
                 obj_dict = codec._decode(obj_dict, zip_file)
                 ObjType = codec._str_to_type(obj_type)
                 obj = ObjType._decode(obj_dict)
-                if not codec._is_parfy_type(obj):
+                if not codec._is_pyfar_type(obj):
                     raise TypeError(
                         f'Objects of type {type(obj)}'
                         'cannot be read from disk.')
@@ -263,7 +263,7 @@ def write(filename, compress=False, **objs):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
-            if not codec._is_parfy_type(obj):
+            if not codec._is_pyfar_type(obj):
                 error = f'Objects of type {type(obj)}'
                 'cannot be written to disk.'
                 if isinstance(obj, fo.Filter):

@@ -302,11 +302,20 @@ class NestedData:
 
 
 def stub_str_to_type():
-    """ Fakes `io.str_to_type` for tests that use general data structures.
+    """ Stubs `_codec.str_to_type` for tests that use general data structures.
     """
     def side_effect(type_str):
         return {
         'AnyClass': type(AnyClass()),
         'FlatData': type(FlatData()),
         'NestedData': type(NestedData.create())}.get(type_str)
+    return mock.MagicMock(side_effect=side_effect)
+
+
+def stub_is_pyfar_type():
+    """ Stubs `_codec._is_pyfar_type` for tests that use general data structures.
+    """
+    def side_effect(obj):
+        type_str = obj if isinstance(obj, str) else type(obj).__name__
+        return type_str in ['NestedData', 'FlatData']
     return mock.MagicMock(side_effect=side_effect)

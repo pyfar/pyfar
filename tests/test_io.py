@@ -3,7 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from mock import patch
-from tests.conftest import stub_str_to_type
+from tests.conftest import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
 import pyfar._codec as codec
@@ -115,6 +115,7 @@ def test__eq___dict__nested_data(nested_data):
 
 
 @patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_flat_data(tmpdir, flat_data):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
@@ -126,6 +127,7 @@ def test_write_read_flat_data(tmpdir, flat_data):
 
 
 @patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_nested_data(nested_data, flat_data, tmpdir):
     filename = os.path.join(tmpdir, 'write_nested_flat_data.far')
     io.write(filename, nested_data=nested_data)
@@ -134,6 +136,7 @@ def test_write_read_nested_data(nested_data, flat_data, tmpdir):
 
 
 @patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_multipleObjects(flat_data, tmpdir):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.

@@ -40,7 +40,7 @@ def _inner_decode(obj, key, zipfile):
     """
     if not _is_type_hint(obj[key]):
         _decode(obj[key], zipfile)
-    elif _is_parfy_type(obj[key][0][1:]):
+    elif _is_pyfar_type(obj[key][0][1:]):
         ParfyType = _str_to_type(obj[key][0][1:])
         obj[key] = ParfyType._decode(obj[key][1])
         _decode(obj[key].__dict__, zipfile)
@@ -118,7 +118,7 @@ def _inner_encode(obj, key, zip_path, zipfile):
     elif isinstance(obj[key], np.ndarray):
         zipfile.writestr(zip_path, _encode_ndarray(obj[key]))
         obj[key] = ['$ndarray', zip_path]
-    elif _is_parfy_type(obj[key]):
+    elif _is_pyfar_type(obj[key]):
         obj[key] = [f'${type(obj[key]).__name__}', obj[key].__dict__]
         _encode(obj[key][1], zip_path, zipfile)
     elif _is_numpy_scalar(obj[key]):
@@ -151,7 +151,7 @@ def _encode_ndarray(ndarray):
     return memfile.read()
 
 
-def _is_parfy_type(obj):
+def _is_pyfar_type(obj):
     """ True if object is a Parfy-type.
     """
     type_str = obj if isinstance(obj, str) else type(obj).__name__
@@ -160,9 +160,7 @@ def _is_parfy_type(obj):
         'Coordinates',
         'Signal',
         'Filter',
-        'SphericalVoronoi',
-        'NestedData',
-        'FlatData']
+        'SphericalVoronoi']
 
 
 def _is_dtype(obj):
