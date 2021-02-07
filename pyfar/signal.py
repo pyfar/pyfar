@@ -646,7 +646,7 @@ class Signal(FrequencyData, TimeData):
 
     @classmethod
     def _decode(cls, obj_dict):
-        """Decode object based on its respective object dictionary."""
+        """Decode object based on its respective `_encode` counterpart."""
         obj = cls(
             obj_dict['_data'],
             obj_dict['_sampling_rate'],

@@ -2,13 +2,9 @@ from pyfar.orientations import Orientations
 import numpy as np
 import numpy.testing as npt
 import pytest
-import deepdiff
-import json
-from pytest import fixture
-from mock import Mock, mock_open, patch, call
+from mock import patch
 
 import os.path
-from io import BytesIO
 import scipy.io.wavfile as wavfile
 
 from pyfar import io
@@ -126,7 +122,7 @@ def test_write_read_flat_data(
     passing the .far-extension.
     """
     stubbed_str_to_type.side_effect = stub_str_to_type.get
-    filename = os.path.join(tmpdir, 'test_write_read_flat_data.far')
+    filename = os.path.join(tmpdir, 'write_read_flat_data.far')
     io.write(filename, flat_data=flat_data)
     actual = io.read(filename)
     assert actual['flat_data'] == flat_data
@@ -136,11 +132,11 @@ def test_write_read_flat_data(
 def test_write_read_nested_data(
         patched__str_to_type,
         stub_str_to_type,
-        tmpdir,
         nested_data,
-        flat_data):
+        flat_data,
+        tmpdir):
     patched__str_to_type.side_effect = stub_str_to_type.get
-    filename = os.path.join(tmpdir, 'test_write_nested_flat_data.far')
+    filename = os.path.join(tmpdir, 'write_nested_flat_data.far')
     io.write(filename, nested_data=nested_data)
     actual = io.read(filename)
     assert actual['nested_data'] == nested_data
@@ -150,14 +146,14 @@ def test_write_read_nested_data(
 def test_write_read_multipleObjects(
         stubbed_str_to_type,
         stub_str_to_type,
-        tmpdir,
-        flat_data):
+        flat_data,
+        tmpdir):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
     """
     stubbed_str_to_type.side_effect = stub_str_to_type.get
     filename = os.path.join(
-        tmpdir, 'test_write_read_multipleObjects.far')
+        tmpdir, 'write_read_multipleObjects.far')
     io.write(
         filename,
         obj1=flat_data,
@@ -171,14 +167,14 @@ def test_write_read_multipleObjects(
 def test_write_read_multipleObjectsWithCompression(
         stubbed_str_to_type,
         stub_str_to_type,
-        tmpdir,
-        flat_data):
+        flat_data,
+        tmpdir):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
     """
     stubbed_str_to_type.side_effect = stub_str_to_type.get
     filename = os.path.join(
-        tmpdir, 'test_write_read_multipleObjectsWithCompression.far')
+        tmpdir, 'write_read_multipleObjectsWithCompression.far')
     io.write(
         filename,
         compress=True,
@@ -189,8 +185,9 @@ def test_write_read_multipleObjectsWithCompression(
     assert actual['obj2'] == flat_data
 
 
-def test_write_anyObj_TypeError(tmpdir, any_obj):
-    """ Check if a TypeError is raised when writing an arbitrary object. 
+def test_write_anyObj_TypeError(any_obj, tmpdir):
+    """ Check if a TypeError is raised when writing an arbitrary
+    object.
     """
     filename = os.path.join(tmpdir, 'test_anyObj.far')
     with pytest.raises(TypeError):
@@ -201,14 +198,14 @@ def test_write_anyObj_TypeError(tmpdir, any_obj):
 def test_write_WithoutExtension_ExtendAndWarn(
         stubbed_str_to_type,
         stub_str_to_type,
-        tmpdir,
-        flat_data):
+        flat_data,
+        tmpdir):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
     """
     stubbed_str_to_type.side_effect = stub_str_to_type.get
     filename = os.path.join(
-        tmpdir, 'test_write_WithoutExtension_ExtendAndWarn.anyAfterDot')
+        tmpdir, 'write_WithoutExtension_ExtendAndWarn.anyAfterDot')
     io.write(filename, flat_data=flat_data)
     actual = io.read(f'{filename}.far')
     assert actual['flat_data'] == flat_data
@@ -218,41 +215,56 @@ def test_write_WithoutExtension_ExtendAndWarn(
 def test_read_WithoutExtension_ExtendAndWarn(
         stubbed_str_to_type,
         stub_str_to_type,
-        tmpdir,
-        flat_data):
+        flat_data,
+        tmpdir):
     """ Check if file can be read back after without explicitply
     passing the .far-extension.
     """
     stubbed_str_to_type.side_effect = stub_str_to_type.get
     filename = os.path.join(
-        tmpdir, 'test_read_WithoutExtension_ExtendAndWarn.anyAfterDot')
+        tmpdir, 'read_WithoutExtension_ExtendAndWarn.anyAfterDot')
     io.write(f'{filename}.far', flat_data=flat_data)
     actual = io.read(filename)
     assert actual['flat_data'] == flat_data
 
 
 def test_read_orientations(orientations, tmpdir):
-    """Write is already called in the `generate_orientations_file` fixture"""
-    filename = os.path.join(tmpdir, 'test_orientations.far')
+    """ Orientations
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'orientations.far')
     io.write(filename, orientations=orientations)
     actual = io.read(filename)['orientations']
     assert isinstance(actual, Orientations)
     assert actual == orientations
 
 
-def test_read_coordinates(generate_far_file_coordinates, coordinates):
-    actual = io.read(generate_far_file_coordinates)['coordinates']
+def test_read_coordinates(coordinates, tmpdir):
+    """ Coordinates
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'coordinates.far')
+    io.write(filename, coordinates=coordinates)
+    actual = io.read(filename)['coordinates']
     assert isinstance(actual, Coordinates)
     assert actual == coordinates
 
 
-def test_read_signal(generate_far_file_signal, signal):
-    actual = io.read(generate_far_file_signal)['signal']
+def test_read_signal(signal, tmpdir):
+    """ Signal
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'signal.far')
+    io.write(filename, signal=signal)
+    actual = io.read(filename)['signal']
     assert isinstance(actual, Signal)
     assert actual == signal
 
 
 def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
+    """ SphericalVoronoi
+    Make sure `read` understands the bits written by `write`
+    """
     filename = os.path.join(tmpdir, 'sphericalvoronoi.far')
     io.write(filename, sphericalvoronoi=sphericalvoronoi)
     actual = io.read(filename)['sphericalvoronoi']
@@ -260,28 +272,94 @@ def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     assert actual == sphericalvoronoi
 
 
-
-def test_read_filter(
-    generate_far_file_filter,
-    filter):
-    actual = io.read(generate_far_file_filter)['filter']
+def test_read_filter(filter, tmpdir):
+    """ Filter
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'filter.far')
+    io.write(filename, filter=filter)
+    actual = io.read(filename)['filter']
     assert isinstance(actual, fo.Filter)
     assert actual == filter
 
 
-def test_write_filterIIR_TypeError(tmpdir, filterIIR):
-    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+def test_write_filterIIR_TypeError(filterIIR, tmpdir):
+    """ FilterIIR
+    Can't be written to disk because objects store user-defined function.
+    """
+    filename = os.path.join(tmpdir, 'filterIIR.far')
     with pytest.raises(TypeError):
         io.write(filename, filterIIR=filterIIR)
 
 
-def test_write_filterFIR_TypeError(tmpdir, filterFIR):
-    filename = os.path.join(tmpdir, 'test_filterIIR.far')
+def test_write_filterFIR_TypeError(filterFIR, tmpdir):
+    """ FilterFIR
+    Can't be written to disk because objects store user-defined function.
+    """
+    filename = os.path.join(tmpdir, 'filterIIR.far')
     with pytest.raises(TypeError):
         io.write(filename, filterFIR=filterFIR)
 
 
-def test_write_filterSOS_TypeError(tmpdir, filterSOS):
-    filename = os.path.join(tmpdir, 'test_filterSOS.far')
+def test_write_filterSOS_TypeError(filterSOS, tmpdir):
+    """ FilterIIR
+    Can't be written to disk because objects store user-defined function.
+    """
+    filename = os.path.join(tmpdir, 'filterSOS.far')
     with pytest.raises(TypeError):
         io.write(filename, filterSOS=filterSOS)
+
+
+def test_write_read_multiplePyfarObjects(
+        filter,
+        coordinates,
+        orientations,
+        sphericalvoronoi,
+        tmpdir):
+    """ Check if multiple different PyFar-objects can be written to disk
+    and read back.
+    """
+    filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    io.write(
+        filename,
+        filter=filter,
+        coordinates=coordinates,
+        orientations=orientations,
+        sphericalvoronoi=sphericalvoronoi)
+    actual = io.read(filename)
+    assert isinstance(actual['filter'], fo.Filter)
+    assert actual['filter'] == filter
+    assert isinstance(actual['coordinates'], Coordinates)
+    assert actual['coordinates'] == coordinates
+    assert isinstance(actual['orientations'], Orientations)
+    assert actual['orientations'] == orientations
+    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
+    assert actual['sphericalvoronoi'] == sphericalvoronoi
+
+
+def test_write_read_multiplePyfarObjectsWithCompression(
+        filter,
+        coordinates,
+        orientations,
+        sphericalvoronoi,
+        tmpdir):
+    """ Check if multiple different PyFar-objects can be written to disk
+    and read back with zip compression.
+    """
+    filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    io.write(
+        filename,
+        compress=True,
+        filter=filter,
+        coordinates=coordinates,
+        orientations=orientations,
+        sphericalvoronoi=sphericalvoronoi)
+    actual = io.read(filename)
+    assert isinstance(actual['filter'], fo.Filter)
+    assert actual['filter'] == filter
+    assert isinstance(actual['coordinates'], Coordinates)
+    assert actual['coordinates'] == coordinates
+    assert isinstance(actual['orientations'], Orientations)
+    assert actual['orientations'] == orientations
+    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
+    assert actual['sphericalvoronoi'] == sphericalvoronoi

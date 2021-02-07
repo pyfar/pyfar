@@ -1,4 +1,3 @@
-from pyfar.spatial.spatial import SphericalVoronoi
 import pytest
 import numpy as np
 import os.path
@@ -10,7 +9,6 @@ from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
 from pyfar.signal import Signal
 import pyfar.dsp.classes as fo
-import pyfar.io
 
 import stub_utils
 
@@ -544,64 +542,6 @@ def generate_sofa_postype_error(
 
 
 @pytest.fixture
-def generate_far_file_orientations(tmpdir, orientations):
-    """ Creates a far file in a temporary folder that contains an Orientations
-    object.
-    """
-    filename = os.path.join(tmpdir, 'test_orientations.far')
-    pyfar.io.write(filename, orientations=orientations)
-    return filename
-
-
-@pytest.fixture
-def generate_far_file_coordinates(tmpdir, coordinates):
-    """ Creates a far file in temporary folder that contains an Coordinates
-    object.
-    """
-    filename = os.path.join(tmpdir, 'test_coordinates.far')
-    pyfar.io.write(filename, coordinates=coordinates)
-    return filename
-
-
-@pytest.fixture
-def generate_far_file_signal(tmpdir, signal):
-    """ Creates a far file in temporary folder that contains an Signal object.
-    """
-    filename = os.path.join(tmpdir, 'test_signal.far')
-    pyfar.io.write(filename, signal=signal)
-    return filename
-
-
-@pytest.fixture
-def generate_far_file_sphericalvoronoi(tmpdir, sphericalvoronoi):
-    """ Creates a far file in temporary folder that contains a SphericalVoronoi
-    object.
-    """
-    filename = os.path.join(tmpdir, 'test_sphericalvoronoi.far')
-    pyfar.io.write(filename, sphericalvoronoi=sphericalvoronoi)
-    return filename
-
-
-@pytest.fixture
-def generate_far_file_filter(tmpdir, filter):
-    """ Creates a far file in temporary folder that contains a Filter object.
-    """
-    filename = os.path.join(tmpdir, 'test_filter.far')
-    pyfar.io.write(filename, filter=filter)
-    return filename
-
-
-@pytest.fixture
-def generate_far_file_nested_data_struct(tmpdir, nested_data):
-    """ Creates a far file in temporary folder that contains a
-    general nested data structure .
-    """
-    filename = os.path.join(tmpdir, 'test_nested_data_struct.far')
-    pyfar.io.write(filename, nested_data_struct=nested_data)
-    return filename
-
-
-@pytest.fixture
 def views():
     """ Used for the creation of Orientation objects with
     `Orientations.from_view_up`
@@ -678,8 +618,8 @@ def filterFIR():
 def filterSOS():
     """ FilterSOS objectr.
     """
-    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    return fo.FilterSOS(sos, sampling_rate=2*np.pi)
+    sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
+    return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
@@ -728,6 +668,7 @@ def any_obj():
         def __init__(self, x=42):
             self.x = x
     return AnyClass()
+
 
 @pytest.fixture
 def flat_data():
