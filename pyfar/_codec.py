@@ -1,3 +1,85 @@
+"""
+Brief
+=====
+
+This module is not part of the public API. It contains encoding and decoding
+functionality which is exclusively used by `io.write` and `io.read`. It enables
+storing and transmitting Pyfar-Objects without using the unsafe pickle
+protocoll.
+
+Design and Function
+===================
+The `_encode` and `_decode` functions are entry points for an algorithm
+that recursively processes Parfy-objects of varying depths. The result can be
+stored in a zipfile or similar structure.
+
+There are three basic encoding/decoding types:
+
+    (1) Builtins types are directly written in a JSON-format.
+
+    (2) Types that can be trivially derived from builtins are first
+        cast into their builtin-counterparts. The result and a type-hint
+        are put into a pair of list-type and written into the same JSON-string.
+        The pair looks as follows:
+            [str, builtin] e.g. ['$int64', 42]
+
+    (2) Types that cannot be easily derived from builtins, such as
+        numpy.ndarrays, are encoded separately with a dedicated function like
+        `_encode_ndarray`. The result is written to a dedicated path in the
+        zip-archive. This zip-path is stored as a reference together with a
+        type-hint as a pair into the JSON-form
+            [str, str] e.g. ['$ndarray', '/my_obj/_signal']
+
+Class-Level
+===========
+
+Actually pyfar_obj.__dict__ could be passed to `_encode` or `_decode`
+respectively. Some objects however need special treatment at the highest level
+of encoding and decoding. Therefore `PyfarClass._encode` and
+`PyfarClass._decode` must be implemented in each class. E.g.:
+
+class MyClass:
+
+    def _encode(self):
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
+
+Data Inspection
+===============
+
+Once data is written to disk you can rename the file-extension to .zip, open
+and inspect the archive. The JSON-file in the archive must reflect the
+data structure, e.g. like this:
+
+JSON
+----
+{
+    "_n": 42,
+    "_comment": "My String",
+    "_subobj": {
+        "signal": [
+            "ndarray",
+            "my_obj/_subobj/signal"
+        ],
+        "_m": 49
+    }
+    "_list": [
+        1,
+        [
+            "dtype",
+            "int32"
+        ],
+    ]
+}
+----
+
+"""
+
 import io
 import sys
 import numpy as np
