@@ -374,13 +374,15 @@ def test_flatten():
 
 
 def test___eq___equal(signal):
-    sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
-    actual = Signal(sine, 44100, len(sine), domain='time')
+    actual = signal.copy()
     assert signal == actual
 
-import deepdiff
 
-def test___eq___notEqual(signal):
-    sine = np.sin(2 * np.pi * 220 * np.arange(0, 1, 1 / 44100))
-    actual = Signal(sine, 44100, len(sine), domain='time')
+def test___eq___notEqual(signal, sine):
+    actual = Signal(0.5 * sine.time, sine.sampling_rate, domain='time')
+    assert not signal == actual
+    actual = Signal(sine.time, 2 * sine.sampling_rate, domain='time')
+    assert not signal == actual
+    actual = signal.copy()
+    actual.comment = "A completely different thing"
     assert not signal == actual

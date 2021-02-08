@@ -178,8 +178,11 @@ def test___eq___equal(filter):
     assert filter == actual
 
 
-def test___eq___notEqual(filter):
-    coeff = np.array([[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]])
-    state = np.array([[[1.0, 0.0]]])
-    actual = fo.Filter(coefficients=coeff, state=state, comment='my comment')
+def test___eq___notEqual(filter, coeffs, state):
+    actual = fo.Filter(coefficients=2 * coeffs, state=state)
+    assert not filter == actual
+    actual = fo.Filter(coefficients=coeffs, state=2 * state)
+    assert not filter == actual
+    actual = filter.copy()
+    actual.comment = "A completely different thing"
     assert not filter == actual

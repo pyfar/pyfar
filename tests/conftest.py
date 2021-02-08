@@ -9,7 +9,6 @@ from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
 from pyfar.signal import Signal
 import pyfar.dsp.classes as fo
-import pyfar.io
 
 import stub_utils
 
@@ -589,12 +588,25 @@ def signal():
 
 
 @pytest.fixture
-def filter():
+def coeffs():
+    return np.array([[[1, 0, 0], [1, 0, 0]]])
+
+
+@pytest.fixture
+def state():
+    return np.array([[[1, 0]]])
+
+
+@pytest.fixture
+def comment():
+    return 'any comment'
+
+
+@pytest.fixture
+def filter(coeffs, state):
     """ Filter object.
     """
-    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
-    state = np.array([[[1, 0]]])
-    return fo.Filter(coefficients=coeff, state=state, comment='my comment')
+    return fo.Filter(coefficients=coeffs, state=state)
 
 
 @pytest.fixture

@@ -36,9 +36,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(
-            self, other, ignore_type_in_groups=[
-                (np.int32, np.intc), (np.int64, np.intc)])
+        return not deepdiff.DeepDiff(self, other)
 
     def copy(self):
         """Return a deep copy of the Coordinates object."""
