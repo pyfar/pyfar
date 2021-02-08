@@ -184,5 +184,5 @@ def test___eq___notEqual(filter, coeffs, state):
     actual = fo.Filter(coefficients=coeffs, state=2 * state)
     assert not filter == actual
     actual = filter.copy()
-    actual.comment = "A completely different thing"
+    actual.comment = f'{actual.comment} A completely different thing'
     assert not filter == actual

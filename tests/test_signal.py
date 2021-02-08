@@ -373,16 +373,16 @@ def test_flatten():
     assert id(signal_in) != id(signal_out)
 
 
-def test___eq___equal(signal):
-    actual = signal.copy()
-    assert signal == actual
+def test___eq___equal(sine_signal):
+    actual = sine_signal.copy()
+    assert sine_signal == actual
 
 
-def test___eq___notEqual(signal, sine):
+def test___eq___notEqual(sine_signal, sine):
     actual = Signal(0.5 * sine.time, sine.sampling_rate, domain='time')
-    assert not signal == actual
+    assert not sine_signal == actual
     actual = Signal(sine.time, 2 * sine.sampling_rate, domain='time')
-    assert not signal == actual
-    actual = signal.copy()
-    actual.comment = "A completely different thing"
-    assert not signal == actual
+    assert not sine_signal == actual
+    actual = sine_signal.copy()
+    actual.comment += "A completely different thing"
+    assert not sine_signal == actual

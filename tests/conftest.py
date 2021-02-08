@@ -580,11 +580,10 @@ def coordinates():
 
 
 @pytest.fixture
-def signal():
+def sine_signal(sine):
     """ Signal object without Mock or MagicMock wrapper.
     """
-    sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
-    return Signal(sine, 44100, len(sine), domain='time')
+    return Signal(sine.time, sine.sampling_rate, domain='time')
 
 
 @pytest.fixture
@@ -639,35 +638,7 @@ def filterSOS():
 def sphericalvoronoi():
     """ SphericalVoronoi object.
     """
-    dihedral = 2 * np.arcsin(np.cos(np.pi / 3) / np.sin(np.pi / 5))
-    R = np.tan(np.pi / 3) * np.tan(dihedral / 2)
-    rho = np.cos(np.pi / 5) / np.sin(np.pi / 10)
-
-    theta1 = np.arccos(
-        (np.cos(np.pi / 5) / np.sin(np.pi / 5)) /
-        np.tan(np.pi / 3))
-
-    a2 = 2 * np.arccos(rho / R)
-
-    theta2 = theta1 + a2
-    theta3 = np.pi - theta2
-    theta4 = np.pi - theta1
-
-    phi1 = 0
-    phi2 = 2 * np.pi / 3
-    phi3 = 4 * np.pi / 3
-
-    theta = np.concatenate((
-        np.tile(theta1, 3),
-        np.tile(theta2, 3),
-        np.tile(theta3, 3),
-        np.tile(theta4, 3)))
-    phi = np.tile(np.array(
-            [phi1, phi2, phi3, phi1 + np.pi / 3,
-             phi2 + np.pi / 3, phi3 + np.pi / 3]), 2)
-    rad = np.ones(np.size(theta))
-
-    s = Coordinates(
-        phi, theta, rad,
-        domain='sph', convention='top_colat')
-    return SphericalVoronoi(s)
+    points = np.array(
+        [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
+    sampling = Coordinates(points[:, 0], points[:, 1], points[:, 2])
+    return SphericalVoronoi(sampling)
