@@ -10,7 +10,7 @@ from pyfar.coordinates import Coordinates
 from pyfar.signal import Signal
 import pyfar.dsp.classes as fo
 
-import stub_utils
+from pyfar.testing import stub_utils
 
 
 @pytest.fixture

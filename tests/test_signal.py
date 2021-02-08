@@ -384,5 +384,5 @@ def test___eq___notEqual(sine_signal, sine):
     actual = Signal(sine.time, 2 * sine.sampling_rate, domain='time')
     assert not sine_signal == actual
     actual = sine_signal.copy()
-    actual.comment += "A completely different thing"
+    actual.comment = f'{actual.comment} A completely different thing'
     assert not sine_signal == actual
