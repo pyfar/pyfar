@@ -251,7 +251,8 @@ def normalize(signal, normalize='time', normalize_to='max',
     elif normalize == 'log_magnitude':
         input_data = 20 * np.log10(signal.freq.copy())
     else:
-        raise ValueError(("normalize must be 'time', 'magnitude' or 'log_magnitude'"))
+        raise ValueError(
+                    "normalize must be 'time', 'magnitude' or 'log_magnitude'")
 
     # get bounds for normalization
     if normalize == 'time':
@@ -264,8 +265,6 @@ def normalize(signal, normalize='time', normalize_to='max',
         else:
             lim = np.clip(lim, 1, signal.b_bins-1)
 
-        # remove 0 hz and nyquist due to normalization dependency!
-
     # get values for normalization
     if normalize_to == 'max':
         values = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
@@ -277,7 +276,7 @@ def normalize(signal, normalize='time', normalize_to='max',
         values = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
                          axis=-1, keepdims=True), axis=-1, keepdims=True)
     else:
-        raise ValueError(("normalize_to must be 'max', 'mean' or 'rms'"))
+        raise ValueError("normalize_to must be 'max', 'mean' or 'rms'")
 
     # manipulate values
     if channel_handling == 'each':
@@ -289,7 +288,8 @@ def normalize(signal, normalize='time', normalize_to='max',
     elif channel_handling == 'mean':
         values = np.mean(values)
     else:
-        raise ValueError(("channel_handling must be 'each', 'max', 'min' or 'mean'"))
+        raise ValueError(
+                    "channel_handling must be 'each', 'max', 'min' or 'mean'")
 
     # de-logarthimize value
     if normalize == 'log_magnitude':
