@@ -6,10 +6,7 @@ from pyfar.coordinates import Coordinates
 import pyfar.coordinates as coordinates
 
 
-# %% Test Coordinates() class ------------------------------------------------
-
-# TODO: AssertionError vs. ValueError vs. Exception
-
+# Test Coordinates() class ----------------------------------------------------
 def test_coordinates_init():
     # get class instance
     coords = Coordinates()
@@ -569,9 +566,8 @@ def test_rotation():
     c.rotate('z', 90, inverse=True)
     npt.assert_allclose(c._points, xyz, atol=1e-15)
 
-# %% Test coordinate conversions ----------------------------------------------
 
-
+# Test coordinate conversions -------------------------------------------------
 def test_converters():
     # test if converterts can handle numbers
     # (correctness of the rotation is tested in test_setter_and_getter)
@@ -579,12 +575,3 @@ def test_converters():
     coordinates.sph2cart(0, 0, 1)
     coordinates.cart2cyl(0, 0, 1)
     coordinates.cyl2cart(0, 0, 1)
-
-
-# def test_setitem():
-#     coords = Coordinates([0, 0], [1, 1], [0, 1])
-#     setcoords = Coordinates(1, 1, 0)
-#     coords[0] = setcoords
-#     npt.assert_allclose(np.squeeze(coords.cartesian),
-#                         np.array([[1, 0], [1, 1], [0, 1]]))
-# test_get_nearest_sph()

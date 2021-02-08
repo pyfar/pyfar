@@ -113,7 +113,8 @@ def read_sofa(filename):
     -------
     signal : signal instance
         An audio signal object from the pyfar Signal class
-        containing the IR data from the SOFA file.
+        containing the IR data from the SOFA file with cshape being
+        equal to (number of measurements, number of receivers).
     source_coordinates: coordinates instance
         An object from the pyfar Coordinates class containing
         the source coordinates from the SOFA file
