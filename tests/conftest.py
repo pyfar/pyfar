@@ -7,8 +7,7 @@ import scipy.io.wavfile as wavfile
 from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
-
-import stub_utils
+from pyfar.testing import stub_utils
 
 
 @pytest.fixture
