@@ -4,7 +4,9 @@ import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
+from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.orientations import Orientations
+from pyfar.coordinates import Coordinates
 from pyfar.testing import stub_utils
 
 
@@ -554,3 +556,13 @@ def positions():
 @pytest.fixture
 def orientations(views, ups):
     return Orientations.from_view_up(views, ups)
+
+
+@pytest.fixture
+def sphericalvoronoi():
+    """ SphericalVoronoi object.
+    """
+    points = np.array(
+        [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
+    sampling = Coordinates(points[:, 0], points[:, 1], points[:, 2])
+    return SphericalVoronoi(sampling)
