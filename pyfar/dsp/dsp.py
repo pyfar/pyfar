@@ -189,8 +189,9 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-def normalize(signal, norm_type='time', operation='max', channelwise='max',
-              value=None, freq_range=(20, 22e3)):
+def normalize(signal, normalize='time', normalize_to='max',
+              channel_handling='max', value=None, freq_range=None,
+              return_values=False):
     """
     Normalize signal in the time or frequency domain.
 
@@ -198,35 +199,38 @@ def normalize(signal, norm_type='time', operation='max', channelwise='max',
     ----------
     signal: Signal
         Input signal of the signal class
-    norm_type: string
+    normalize: string
         'time' - Normalize the time signal to 'value'
-        'abs' - Normalize the magnitude spectrum to 'value'
-        'dB' - Normalize the db magnitude spectrum to 'value'
+        'magnitude' - Normalize the magnitude spectrum to 'value'
+        'log_magnitude' - Normalize the log magnitude spectrum to 'value'
         The default is 'time'
-    operation: string
+    normalize_to: string
         'max' - Normalize to the absolute maximum of the signal data
         'mean' - Normalize to the mean of the signal data
         'rms' - Normalize to the rms of the signal data
         The default is 'max'
-    channelwise: string
+    channel_handling: string
         'each' - Normalize each channel separately
-        'max' - Normalize to the max or operation across all channels
-        'min' - Normalize to min or operation across all channels
-        'mean' - Normalize to mean of operation across all channels
+        'max' - Normalize to the max of 'normalize_to' across all channels
+        'min' - Normalize to min or 'normalize_to' across all channels
+        'mean' - Normalize to mean of 'normalize_to' across all channels
        The default is 'max'
     value:
-        Normalizes to 'value' which can be a scalar or a vector with
-        a number of elements equal to channels
-        The default is 0 for norm_type='db' and 1 otherwise
+        Normalizes to `value` which can be a scalar or a vector with
+        a number of elements equal to channels. The unit of `value`
+        is defined by `norm_type`, i.e., it is either dB or linear.
+        The default is 0 for normalize='log_magnitude' and 1 otherwise
     freq_range: tuple
-        two element vector specifying upper and lower frequency bounds
+        Two element vector specifying upper and lower frequency bounds
         for normalization or scalar specifying the centre frequency for
         normalization
-        The default is (20,22000)
     Returns
     --------
     normalized_signal: Signal
         The normalized signal
+    values: numpy array
+        If return_values=True returns values, the values of all channels
+        before normalization.
     """
 
     # check input
@@ -235,64 +239,67 @@ def normalize(signal, norm_type='time', operation='max', channelwise='max',
 
     # set default values
     if value is None:
-        value = 0 if norm_type == 'dB' else 1
+        value = 0 if normalize == 'log_magnitude' else 1
+    if freq_range is None:
+        freq_range = (0, signal.frequencies[-1])
 
     # copy and transform data to the desired domain
-    if norm_type == 'time':
-        normalized_input = np.abs(signal.time.copy())
-    elif norm_type == 'abs':
-        normalized_input = np.abs(signal.freq.copy())
-    elif norm_type == 'dB':
-        normalized_input = 20 * np.log10(signal.freq.copy())
+    if normalize == 'time':
+        input_data = np.abs(signal.time.copy())
+    elif normalize == 'magnitude':
+        input_data = np.abs(signal.freq.copy())
+    elif normalize == 'log_magnitude':
+        input_data = 20 * np.log10(signal.freq.copy())
     else:
-        raise ValueError(("norm _type must be 'time', 'abs' or 'dB'."))
-
-    # take logarithm of the data here instead of later?
+        raise ValueError(("normalize must be 'time', 'magnitude' or 'log_magnitude'"))
 
     # get bounds for normalization
-    if norm_type == 'time':
+    if normalize == 'time':
         lim = (0, signal.n_samples)
 
     else:
         lim = signal.find_nearest_frequency(freq_range)
-        print(lim)
-
-        # remove 0 hz and nyquist due to normalization dependency
         if signal.n_samples % 2:
-            lim[0] = np.max([lim[0, 1]])
+            lim[0] = np.max([lim[0], 1])
         else:
-            lim = np.clip(lim, 0)
+            lim = np.clip(lim, 1, signal.b_bins-1)
+
+        # remove 0 hz and nyquist due to normalization dependency!
 
     # get values for normalization
-    if operation == 'max':
-        values = np.max(normalized_input[..., lim[0]:lim[1]], axis=-1,
+    if normalize_to == 'max':
+        values = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
                         keepdims=True)
-    elif operation == 'mean':
-        values = np.mean(normalized_input[..., lim[0]:lim[1]], axis=-1,
+    elif normalize_to == 'mean':
+        values = np.mean(input_data[..., lim[0]:lim[1]], axis=-1,
                          keepdims=True)
-    elif operation == 'rms':
-        values = np.sqrt(np.mean((normalized_input[..., lim[0]:lim[1]])**2,
-                         axis=-1, keepdims=True))
+    elif normalize_to == 'rms':
+        values = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
+                         axis=-1, keepdims=True), axis=-1, keepdims=True)
     else:
-        raise ValueError(("operation must be 'abs', 'mean' or 'rms'."))
+        raise ValueError(("normalize_to must be 'max', 'mean' or 'rms'"))
 
     # manipulate values
-    if channelwise == 'each':
+    if channel_handling == 'each':
         pass
-    elif channelwise == 'max':
+    elif channel_handling == 'max':
         values = np.max(values)
-    elif channelwise == 'min':
+    elif channel_handling == 'min':
         values = np.min(values)
-    elif channelwise == 'mean':
+    elif channel_handling == 'mean':
         values = np.mean(values)
     else:
-        raise ValueError(("channelwise must be 'each', 'max', 'min' or 'mean'."
-                          ))
-    # apply normalization
-    normalized_input = (normalized_input / values) * value
+        raise ValueError(("channel_handling must be 'each', 'max', 'min' or 'mean'"))
+
+    # de-logarthimize value
+    if normalize == 'log_magnitude':
+        value = 10**(value/20)
 
     # replace input with normalized_input
     normalized_signal = signal.copy()
-    normalized_signal.time = normalized_input
+    normalized_signal.time = signal.time.copy() / values * value
 
-    return normalized_input
+    if return_values:
+        return normalized_signal, values
+    else:
+        return normalized_signal
