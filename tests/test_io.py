@@ -2,7 +2,7 @@ from pyfar.orientations import Orientations
 import numpy as np
 import numpy.testing as npt
 import pytest
-from mock import patch
+from unittest.mock import patch
 from tests.conftest import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
