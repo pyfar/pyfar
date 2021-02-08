@@ -5,8 +5,7 @@ import sofa
 import scipy.io.wavfile as wavfile
 
 from pyfar.orientations import Orientations
-
-import stub_utils
+from pyfar.testing import stub_utils
 
 
 @pytest.fixture
