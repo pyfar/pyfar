@@ -326,7 +326,8 @@ def stub_str_to_type():
 
 
 def stub_is_pyfar_type():
-    """ Stubs `_codec._is_pyfar_type` for tests that use general data structures.
+    """ Stubs `_codec._is_pyfar_type` for tests that use general data
+    structures.
     """
     def side_effect(obj):
         type_str = obj if isinstance(obj, str) else type(obj).__name__
