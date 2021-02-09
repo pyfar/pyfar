@@ -194,10 +194,9 @@ class Orientations(Rotation):
         return self.from_quat(self.as_quat())
 
     def _encode(self):
-        """Encoding must be done through its public interface because
-        Orientations inherits from scipy Rotation, which is a compiled class
-        whose __dict__ method returns an empty dict `{}`.
-        """
+        """Return object in a proper encoding format."""
+        # Use public interface of the scipy super-class to prevent
+        # error in case of chaning super-class implementations
         return {'quat': self.as_quat()}
 
     @classmethod

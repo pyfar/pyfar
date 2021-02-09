@@ -63,7 +63,7 @@ JSON
     "_comment": "My String",
     "_subobj": {
         "signal": [
-            "ndarray",
+            "$ndarray",
             "my_obj/_subobj/signal"
         ],
         "_m": 49
@@ -71,7 +71,7 @@ JSON
     "_list": [
         1,
         [
-            "dtype",
+            "$dtype",
             "int32"
         ],
     ]

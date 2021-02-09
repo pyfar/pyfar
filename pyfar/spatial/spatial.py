@@ -40,8 +40,10 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         return utils.copy(self)
 
     def _encode(self):
-        """Return dictionary for the encoding."""
-        return self.copy().__dict__
+        """Return object in a proper encoding format."""
+        # Use public interface of the scipy super-class to prevent
+        # error in case of chaning super-class implementations
+        return {'points': self.points, 'center': self.center}
 
     @classmethod
     def _decode(cls, obj_dict):
