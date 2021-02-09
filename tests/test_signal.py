@@ -373,13 +373,16 @@ def test_flatten():
     assert id(signal_in) != id(signal_out)
 
 
-def test___eq___equal(signal):
-    sine = np.sin(2 * np.pi * 440 * np.arange(0, 1, 1 / 44100))
-    actual = Signal(sine, 44100, len(sine), domain='time')
-    assert signal == actual
+def test___eq___equal(sine_signal):
+    actual = sine_signal.copy()
+    assert sine_signal == actual
 
 
-def test___eq___notEqual(signal):
-    sine = np.sin(2 * np.pi * 220 * np.arange(0, 1, 1 / 44100))
-    actual = Signal(sine, 44100, len(sine), domain='time')
-    assert not signal == actual
+def test___eq___notEqual(sine_signal, sine):
+    actual = Signal(0.5 * sine.time, sine.sampling_rate, domain='time')
+    assert not sine_signal == actual
+    actual = Signal(sine.time, 2 * sine.sampling_rate, domain='time')
+    assert not sine_signal == actual
+    actual = sine_signal.copy()
+    actual.comment = f'{actual.comment} A completely different thing'
+    assert not sine_signal == actual

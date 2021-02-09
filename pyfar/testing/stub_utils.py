@@ -1,3 +1,10 @@
+"""
+Contains tools to easily generate stubs for the most common pyfar Classes.
+
+Stubs are used instead of pyfar objects for testing functions that have pyfar
+objects as input arguments. This makes testing such functions independent from
+the pyfar objects themselves and helps to find bugs.
+"""
 import numpy as np
 import deepdiff
 from unittest import mock
@@ -19,7 +26,7 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     sampling_rate : float
         Sampling rate
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of pyfar.fft.normalization.
+        See documentation of pyfar.fft.normalization.
 
     Returns
     -------
@@ -68,7 +75,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
     n_samples : int
         Number of samples
     fft_norm : 'none', 'rms'
-        See documentaion of pyfar.fft.normalization.
+        See documentation of pyfar.fft.normalization.
     cshape : tuple
         Channel shape
 
@@ -116,7 +123,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     n_samples : int
         Number of samples
     fft_norm : 'none', 'rms'
-        See documentaion of pyfar.fft.normalization.
+        See documentation of pyfar.fft.normalization.
     cshape : tuple
         Channel shape
 
@@ -185,7 +192,7 @@ def noise_func(sigma, n_samples, cshape):
 
 def _normalization(freq, n_samples, fft_norm):
     """Normalized spectrum as defined in _[1],
-    see documentaion of pyfar.fft.normalization.
+    see documentation of pyfar.fft.normalization.
 
     Parameters
     ----------
@@ -194,7 +201,7 @@ def _normalization(freq, n_samples, fft_norm):
     n_samples : int
         Number of samples
     fft_norm : 'none', 'rms'
-        See documentaion of pyfar.fft.normalization.
+        See documentation of pyfar.fft.normalization.
 
     Returns
     -------

@@ -182,15 +182,15 @@ def test_read_coordinates(coordinates, tmpdir):
     assert actual == coordinates
 
 
-def test_read_signal(signal, tmpdir):
+def test_read_signal(sine_signal, tmpdir):
     """ Signal
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'signal.far')
-    io.write(filename, signal=signal)
+    io.write(filename, signal=sine_signal)
     actual = io.read(filename)['signal']
     assert isinstance(actual, Signal)
-    assert actual == signal
+    assert actual == sine_signal
 
 
 def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
