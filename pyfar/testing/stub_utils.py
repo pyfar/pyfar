@@ -286,7 +286,8 @@ class NestedData:
             'a': 1,
             'b': np.int32,
             'c': np.arange(10),
-            'd': FlatData(-1)}
+            'd': FlatData(-1),
+            'e': 3 + 4j}
         return NestedData(
             n, comment, matrix, subobj, mylist, mydict)
 

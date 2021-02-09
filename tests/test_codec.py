@@ -11,4 +11,3 @@ def test__str_to_type():
     assert PyfarType.__module__.startswith('pyfar')
     PyfarType = codec._str_to_type('SphericalVoronoi')
     assert PyfarType.__module__.startswith('pyfar')
-    pass

@@ -130,6 +130,8 @@ def _inner_decode(obj, key, zipfile):
         obj[key] = getattr(np, obj[key][1])
     elif obj[key][0][1:] == 'ndarray':
         obj[key] = _decode_ndarray(obj[key][1], zipfile)
+    elif obj[key][0][1:] == 'complex':
+        obj[key] = complex(obj[key][1][0], obj[key][1][1])
     else:
         _decode_numpy_scalar(obj, key)
         pass
@@ -201,10 +203,12 @@ def _inner_encode(obj, key, zip_path, zipfile):
         zipfile.writestr(zip_path, _encode_ndarray(obj[key]))
         obj[key] = ['$ndarray', zip_path]
     elif _is_pyfar_type(obj[key]):
-        obj[key] = [f'${type(obj[key]).__name__}', obj[key].__dict__]
+        obj[key] = [f'${type(obj[key]).__name__}', obj[key]._encode()]
         _encode(obj[key][1], zip_path, zipfile)
     elif _is_numpy_scalar(obj[key]):
         obj[key] = [f'${type(obj[key]).__name__}', obj[key].item()]
+    elif isinstance(obj[key], complex):
+        obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
     else:
         _encode(obj[key], zip_path, zipfile)
 
