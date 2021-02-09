@@ -275,6 +275,11 @@ class NestedData:
         self._subobj = subobj
         self._list = mylist
         self._dict = mydict
+        self._complex = 3 + 4j
+        print('foo')
+        self._tuple = (1, 2, 3)
+        self._set = set(('a', 1, 2))
+        self._frozenset = frozenset(('a', 1, 2))
 
     @classmethod
     def create(cls):

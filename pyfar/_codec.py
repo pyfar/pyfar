@@ -100,8 +100,8 @@ def _decode(obj, zipfile):
     """
     if isinstance(obj, dict):
         for key in obj.keys():
-            _inner_decode(obj, key, zipfile)
-    elif isinstance(obj, list):
+            _inner_decode(obj, key, zipfile)    
+    elif any([isinstance(obj, x) for x in [list, tuple, set, frozenset]]):
         for i in range(0, len(obj)):
             _inner_decode(obj, i, zipfile)
 
@@ -194,8 +194,8 @@ def _encode(obj, zip_path, zipfile):
     """
     if isinstance(obj, dict):
         for key in obj.keys():
-            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile)
-    elif isinstance(obj, list):
+            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile)    
+    elif any([isinstance(obj, x) for x in [list, tuple, set, frozenset]]):
         for i in range(0, len(obj)):
             _inner_encode(obj, i, f'{zip_path}/{i}', zipfile)
 
@@ -215,7 +215,7 @@ def _inner_encode(obj, key, zip_path, zipfile):
         obj[key] = [f'${type(obj[key]).__name__}', obj[key].item()]
     elif isinstance(obj[key], complex):
         obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
-    elif type(obj[key]).__name__ in ['tuple', 'frozenset', 'set']:
+    elif any([isinstance(obj[key], x) for x in [tuple, set, frozenset]]):
         obj[key] = [f'${type(obj[key]).__name__ }', list(obj[key])]
     else:
         _encode(obj[key], zip_path, zipfile)
