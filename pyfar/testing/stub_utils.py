@@ -11,6 +11,7 @@ from unittest import mock
 
 from pyfar.signal import Signal
 import pyfar.utils
+import pyfar._codec
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):
@@ -283,11 +284,14 @@ class NestedData:
         subobj = FlatData()
         mylist = [1, np.int32, np.arange(10), FlatData()]
         mydict = {
-            'a': 1,
-            'b': np.int32,
-            'c': np.arange(10),
-            'd': FlatData(-1),
-            'e': 3 + 4j}
+            'number': 1,
+            'numpy-type': np.int32,
+            'numpy-ndarray': np.arange(10),
+            'subobject': FlatData(-1),
+            'complex-number': 3 + 4j,
+            'a tuple': (1, 2, 3),
+            'a set': set(('a', 1, 2)),
+            'a frozenset': frozenset(('a', 1, 2))}
         return NestedData(
             n, comment, matrix, subobj, mylist, mydict)
 
@@ -322,7 +326,8 @@ def stub_str_to_type():
         return {
             'AnyClass': type(AnyClass()),
             'FlatData': type(FlatData()),
-            'NestedData': type(NestedData.create())}.get(type_str)
+            'NestedData': type(NestedData.create())
+            }.get(type_str)
     return mock.MagicMock(side_effect=side_effect)
 
 

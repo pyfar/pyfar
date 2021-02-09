@@ -132,6 +132,12 @@ def _inner_decode(obj, key, zipfile):
         obj[key] = _decode_ndarray(obj[key][1], zipfile)
     elif obj[key][0][1:] == 'complex':
         obj[key] = complex(obj[key][1][0], obj[key][1][1])
+    elif obj[key][0][1:] == 'tuple':
+        obj[key] = tuple(obj[key][1])
+    elif obj[key][0][1:] == 'set':
+        obj[key] = set(tuple(obj[key][1]))
+    elif obj[key][0][1:] == 'frozenset':
+        obj[key] = frozenset(tuple(obj[key][1]))
     else:
         _decode_numpy_scalar(obj, key)
         pass
@@ -209,6 +215,8 @@ def _inner_encode(obj, key, zip_path, zipfile):
         obj[key] = [f'${type(obj[key]).__name__}', obj[key].item()]
     elif isinstance(obj[key], complex):
         obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
+    elif type(obj[key]).__name__ in ['tuple', 'frozenset', 'set']:
+        obj[key] = [f'${type(obj[key]).__name__ }', list(obj[key])]
     else:
         _encode(obj[key], zip_path, zipfile)
 
