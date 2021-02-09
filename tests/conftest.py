@@ -659,15 +659,3 @@ def nested_data():
     `io.write` and `io.read`.
     """
     return stub_utils.NestedData.create()
-
-
-def stub_str_to_type():
-    """ Stubs `_codec._str_to_type` for tests that use general data structures.
-    """
-    return stub_utils.stub_str_to_type()
-
-
-def stub_is_pyfar_type():
-    """ Stubs `_codec._is_pyfar_type` for tests that use general data structures.
-    """
-    return stub_utils.stub_is_pyfar_type()
