@@ -226,7 +226,11 @@ def read(filename):
                 obj_type, obj_dict = json.loads(json_str)
                 obj_dict = codec._decode(obj_dict, zip_file)
                 ObjType = codec._str_to_type(obj_type)
-                obj = ObjType._decode(obj_dict)
+                try:
+                    obj = ObjType._decode(obj_dict)
+                except AttributeError:
+                    raise NotImplementedError(
+                        f'You must implement `{type}._decode` first.')
                 if not codec._is_pyfar_type(obj):
                     raise TypeError(
                         f'Objects of type {type(obj)}'
@@ -269,9 +273,9 @@ def write(filename, compress=False, **objs):
                 raise TypeError(error)
             try:
                 obj_dict = codec._encode(obj._encode(), name, zip_file)
-            except AttributeError as e:
-                e.message = f'You must implement `{type}._encode` first.'
-                raise
+            except AttributeError:
+                raise NotImplementedError(
+                    f'You must implement `{type}._encode` first.')
             type_obj_pair = [type(obj).__name__, obj_dict]
             zip_file.writestr(f'{name}/json', json.dumps(type_obj_pair))
 

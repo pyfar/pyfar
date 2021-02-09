@@ -10,7 +10,7 @@ protocoll.
 Design and Function
 ===================
 The `_encode` and `_decode` functions are entry points for an algorithm
-that recursively processes Parfy-objects of varying depths. The result can be
+that recursively processes Pyfar-objects of varying depths. The result can be
 stored in a zipfile or similar structure.
 
 There are three basic encoding/decoding types:
@@ -123,8 +123,8 @@ def _inner_decode(obj, key, zipfile):
     if not _is_type_hint(obj[key]):
         _decode(obj[key], zipfile)
     elif _is_pyfar_type(obj[key][0][1:]):
-        ParfyType = _str_to_type(obj[key][0][1:])
-        obj[key] = ParfyType._decode(obj[key][1])
+        PyfarType = _str_to_type(obj[key][0][1:])
+        obj[key] = PyfarType._decode(obj[key][1])
         _decode(obj[key].__dict__, zipfile)
     elif obj[key][0][1:] == 'dtype':
         obj[key] = getattr(np, obj[key][1])
@@ -140,7 +140,6 @@ def _inner_decode(obj, key, zipfile):
         obj[key] = frozenset(tuple(obj[key][1]))
     else:
         _decode_numpy_scalar(obj, key)
-        pass
 
 
 def _decode_numpy_scalar(obj, key):
@@ -157,8 +156,9 @@ def _decode_numpy_scalar(obj, key):
 
 def _decode_ndarray(obj, zipfile):
     """ This function is exclusively used by `io._inner_decode` and
-    decodes `numpy.ndarrays`.
+    decodes `numpy.ndarrays` from a memfile.
     """
+    # Numpy.load is applied on a memory file instead of a physical file
     memfile = io.BytesIO()
     nd_bytes = zipfile.read(obj)
     memfile.write(nd_bytes)
@@ -241,6 +241,7 @@ def _encode_ndarray(ndarray):
     -----
     * Do not allow pickling. It is not safe!
     """
+    # `Numpy.save` is applied on a memory file instead of a physical file
     memfile = io.BytesIO()
     np.save(memfile, ndarray, allow_pickle=False)
     memfile.seek(0)
@@ -248,7 +249,7 @@ def _encode_ndarray(ndarray):
 
 
 def _is_pyfar_type(obj):
-    """ True if object is a Parfy-type.
+    """ True if object is a Pyfar-type.
     """
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
