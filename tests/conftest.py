@@ -597,11 +597,6 @@ def state():
 
 
 @pytest.fixture
-def comment():
-    return 'any comment'
-
-
-@pytest.fixture
 def filter(coeffs, state):
     """ Filter object.
     """
