@@ -6,7 +6,6 @@ from unittest.mock import patch
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
-import pyfar._codec as codec
 import scipy.io.wavfile as wavfile
 
 from pyfar import io
@@ -89,29 +88,6 @@ def test_read_sofa_position_type_unit(generate_sofa_postype_error):
     """Test to verify correct position type of sofa file"""
     with pytest.raises(ValueError):
         io.read_sofa(generate_sofa_postype_error)
-
-
-def test__str_to_type():
-    """ Test if str_to_type works properly. """
-    PyfarType = codec._str_to_type('Coordinates')
-    assert PyfarType.__module__.startswith('pyfar')
-    PyfarType = codec._str_to_type('Orientations')
-    assert PyfarType.__module__.startswith('pyfar')
-    PyfarType = codec._str_to_type('SphericalVoronoi')
-    assert PyfarType.__module__.startswith('pyfar')
-    pass
-
-
-def test__eq___dict__flat_data(flat_data):
-    """ Test equality for stub. """
-    actual = flat_data.copy()
-    assert actual == flat_data
-
-
-def test__eq___dict__nested_data(nested_data):
-    """ Test equality for stub. """
-    actual = nested_data.copy()
-    assert actual == nested_data
 
 
 @patch('pyfar._codec._str_to_type', new=stub_str_to_type())
