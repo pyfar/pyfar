@@ -23,7 +23,7 @@ There are three basic encoding/decoding types:
         The pair looks as follows:
             [str, builtin] e.g. ['$int64', 42]
 
-    (2) Types that cannot be easily derived from builtins, such as
+    (3) Types that cannot be easily derived from builtins, such as
         numpy.ndarrays, are encoded separately with a dedicated function like
         `_encode_ndarray`. The result is written to a dedicated path in the
         zip-archive. This zip-path is stored as a reference together with a
@@ -54,7 +54,7 @@ Data Inspection
 
 Once data is written to disk you can rename the file-extension to .zip, open
 and inspect the archive. The JSON-file in the archive must reflect the
-data structure, e.g. like this:
+data structure of an object, e.g. like this:
 
 JSON
 ----
@@ -100,7 +100,7 @@ def _decode(obj, zipfile):
     """
     if isinstance(obj, dict):
         for key in obj.keys():
-            _inner_decode(obj, key, zipfile)    
+            _inner_decode(obj, key, zipfile)
     elif any([isinstance(obj, x) for x in [list, tuple, set, frozenset]]):
         for i in range(0, len(obj)):
             _inner_decode(obj, i, zipfile)
@@ -188,13 +188,15 @@ def _encode(obj, zip_path, zipfile):
         A dict derived from the original object that must be  JSON-serializable
         and encodes all not-JSON-serializable objects as:
         (1) A pair of type-hint and value:
-            [str, JSON-serializable] e.g. ['$numpy.int32', 42], or
+            [str, JSON-serializable] e.g.
+            ['$numpy.int32', 42], ['$tuple', [1, 2, 3]]
+            or
         (2) A pair of ndarray-hint and reference/zip_path:
             [str, str] e.g. ['ndarray', 'my_coordinates/_points']
     """
     if isinstance(obj, dict):
         for key in obj.keys():
-            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile)    
+            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile)
     elif any([isinstance(obj, x) for x in [list, tuple, set, frozenset]]):
         for i in range(0, len(obj)):
             _inner_encode(obj, i, f'{zip_path}/{i}', zipfile)
@@ -270,6 +272,9 @@ def _is_numpy_scalar(obj):
 
 
 def _is_type_hint(obj):
+    """ Check if object is stored along with its type in the typical format:
+            [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)]
+    """
     return isinstance(obj, list) \
         and len(obj) == 2 \
         and isinstance(obj[0], str) \

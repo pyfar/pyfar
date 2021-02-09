@@ -266,7 +266,8 @@ class FlatData:
 
 class NestedData:
     """Class containing nested data such as lists, dicts and other objects
-    as well as methods.
+    as well as methods. The purpose of this class is, to define and test
+    general requirements for the encoding and decoding process.
     """
     def __init__(self, n, comment, matrix, subobj, mylist, mydict):
         self._n = n

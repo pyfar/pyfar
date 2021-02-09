@@ -1,5 +1,3 @@
-
-import pytest
 import pyfar._codec as codec
 
 
