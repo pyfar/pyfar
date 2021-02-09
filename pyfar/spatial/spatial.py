@@ -1,3 +1,4 @@
+import deepdiff
 import numpy as np
 from pyfar import utils
 from scipy import spatial as spat
@@ -32,6 +33,10 @@ class SphericalVoronoi(spat.SphericalVoronoi):
             raise ValueError("All sampling points need to be on the \
                     same radius.")
         super().__init__(points, radius_round, center)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
 
     def copy(self):
         """Return a deep copy of the Coordinates object."""

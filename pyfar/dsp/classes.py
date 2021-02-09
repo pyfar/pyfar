@@ -1,4 +1,5 @@
 import copy
+import deepdiff
 import warnings
 
 import numpy as np
@@ -215,6 +216,10 @@ class Filter(object):
     def copy(self):
         """Return a deep copy of the Filter object."""
         return utils.copy(self)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
 
 
 class FilterFIR(Filter):

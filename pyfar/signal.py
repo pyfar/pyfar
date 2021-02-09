@@ -15,6 +15,7 @@ the functions have to be called explicitly.
 """
 
 import warnings
+import deepdiff
 import numpy as np
 from pyfar import fft as fft
 from typing import Callable
@@ -50,6 +51,10 @@ class _Audio(object):
         # abstract private class that does not hold data and prevent class
         # methods to fail that require data.)
         self._data = np.atleast_2d(np.nan)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self.__dict__, other.__dict__)
 
     @property
     def domain(self):

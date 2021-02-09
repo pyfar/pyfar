@@ -17,7 +17,8 @@ requirements = [
     'pyfftw',
     'matplotlib',
     'python-sofa>=0.2.0',
-    'urllib3'
+    'urllib3',
+    'deepdiff'
 ]
 
 setup_requirements = ['pytest-runner', ]
@@ -31,7 +32,7 @@ test_requirements = [
     'tox',
     'coverage',
     'Sphinx',
-    'twine',
+    'twine'
 ]
 
 setup(

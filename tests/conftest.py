@@ -7,6 +7,9 @@ import scipy.io.wavfile as wavfile
 from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
+from pyfar.signal import Signal
+import pyfar.dsp.classes as fo
+
 from pyfar.testing import stub_utils
 
 
@@ -540,22 +543,90 @@ def generate_sofa_postype_error(
 
 @pytest.fixture
 def views():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
 
 
 @pytest.fixture
 def ups():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
     return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
 
 
 @pytest.fixture
 def positions():
+    """ Used for the visualization of Orientation objects with
+    `Orientations.show`
+    """
     return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
 
 
 @pytest.fixture
 def orientations(views, ups):
+    """ Orientations object uses fixtures `views` and `ups`.
+    """
     return Orientations.from_view_up(views, ups)
+
+
+@pytest.fixture
+def coordinates():
+    """ Coordinates object.
+    """
+    return Coordinates([0, 1], [2, 3], [4, 5])
+
+
+@pytest.fixture
+def sine_signal(sine):
+    """ Signal object without Mock or MagicMock wrapper.
+    """
+    return Signal(sine.time, sine.sampling_rate, domain='time')
+
+
+@pytest.fixture
+def coeffs():
+    return np.array([[[1, 0, 0], [1, 0, 0]]])
+
+
+@pytest.fixture
+def state():
+    return np.array([[[1, 0]]])
+
+
+@pytest.fixture
+def filter(coeffs, state):
+    """ Filter object.
+    """
+    return fo.Filter(coefficients=coeffs, state=state)
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
+
+
+@pytest.fixture
+def filterFIR():
+    """ FilterFIR objectr.
+    """
+    coeff = np.array([
+        [1, 1 / 2, 0],
+        [1, 1 / 4, 1 / 8]])
+    return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterSOS():
+    """ FilterSOS objectr.
+    """
+    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
+    return fo.FilterSOS(sos, sampling_rate=2*np.pi)
 
 
 @pytest.fixture

@@ -3,6 +3,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
 import copy
+import deepdiff
 import re
 from . import utils
 
@@ -1676,6 +1677,10 @@ class Coordinates(object):
             _repr += f"\nComment: {self._comment}"
 
         return _repr
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
 
 
 def cart2sph(x, y, z):

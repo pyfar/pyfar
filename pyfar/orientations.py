@@ -211,3 +211,7 @@ class Orientations(Rotation):
         quats = self.as_quat()
         quats[idx] = quat
         self = super().from_quat(quats)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return np.array_equal(self.as_quat(), other.as_quat())
