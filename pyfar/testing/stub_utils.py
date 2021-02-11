@@ -7,12 +7,10 @@ the pyfar objects themselves and helps to find bugs.
 """
 import numpy as np
 import deepdiff
+from copy import deepcopy
 from unittest import mock
 
 from pyfar.signal import Signal
-import pyfar.utils
-import pyfar._codec
-from copy import deepcopy
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):

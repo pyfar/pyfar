@@ -156,7 +156,7 @@ def test_write_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
     filename = os.path.join(tmpdir, 'no_decode_obj.far')
     io.write(filename, no_decode_obj=no_decode_obj)
     with pytest.raises(NotImplementedError):
-        actual = io.read(filename)
+        io.read(filename)
 
 
 def test_read_orientations(orientations, tmpdir):

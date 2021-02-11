@@ -47,6 +47,7 @@ class Orientations(Rotation):
             Each row is a (possibly non-unit norm) quaternion in scalar-last
             (x, y, z, w) format. Each quaternion will be normalized to unit
             norm.
+
     """
 
     def __init__(self, quat=None, normalize=True, copy=True):

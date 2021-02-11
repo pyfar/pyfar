@@ -200,14 +200,22 @@ def read(filename):
 
     Parameters
     ----------
-    filename : string or open file handle.
-        Input file must be haiopy compatible.
+    filename : string
+        Full path or filename. If now extension is provided, .far-suffix
+        will be add to filename.
 
     Returns
     -------
     collection: dictionary
         containing PyFar types like
         { 'name1': 'obj1', 'name2': 'obj2' ... }.
+
+    Examples
+    --------
+    collection = pyfar.read('my_objs.far')
+    my_signal = collection['my_signal']
+    my_orientations = collection['my_orientations']
+
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
@@ -246,15 +254,28 @@ def write(filename, compress=False, **objs):
 
     Parameters
     ----------
-    filename : string or open file handle.
-        Input file must be pyfar compatible.
+    filename : string
+        Full path or filename. If now extension is provided, .far-suffix
+        will be add to filename.
     compress : bool
         Default is false (uncompressed).
-        If false zipfile.ZIP_STORED mode is used,
-        if True, zipfile.ZIP_DEFLATED mode is used.
-    **objs: named compatible pyfar objects
-        - Coordinates
-        - Orientations
+        Compressed files take less disk space but probalby need more time
+        for writing and reading.
+    **objs:
+        Objects to be saved as key-value arguments.
+
+    Examples
+    --------
+
+    # Create Pyfar-objects
+    signal = pyfar.Signal([1, 2, 3], 44100)
+    orientations = Orientations.from_view_up([1, 0, 0], [0, 1, 0])
+
+    # Save a signal to disk, replace 'my_signal' and 'my_orientations'
+    # with whatever you'd like to name your objects
+    pyfar.io.write(
+        'my_objs.far', my_signal=signal, my_orientations=orientations)
+
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
@@ -266,8 +287,8 @@ def write(filename, compress=False, **objs):
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
             if not codec._is_pyfar_type(obj):
-                error = f'Objects of type {type(obj)}'
-                'cannot be written to disk.'
+                error = (
+                    f'Objects of type {type(obj)} cannot be written to disk.')
                 if isinstance(obj, fo.Filter):
                     error = f'{error}. Consider casting to {fo.Filter}'
                 raise TypeError(error)
