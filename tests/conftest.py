@@ -647,6 +647,20 @@ def any_obj():
 
 
 @pytest.fixture
+def no_encode_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.NoEncodeClass()
+
+
+@pytest.fixture
+def no_decode_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.NoDecodeClass()
+
+
+@pytest.fixture
 def flat_data():
     """ Class being primarily used as a subclass of the nested data object.
     """

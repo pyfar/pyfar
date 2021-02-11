@@ -131,32 +131,30 @@ def test_write_anyObj_TypeError(any_obj, tmpdir):
     """ Check if a TypeError is raised when writing an arbitrary
     object.
     """
-    filename = os.path.join(tmpdir, 'test_anyObj.far')
+    filename = os.path.join(tmpdir, 'anyObj.far')
     with pytest.raises(TypeError):
         io.write(filename, any_obj=any_obj)
 
 
 @patch('pyfar._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
-def test_write_FlatDataNoEncode_NotImplemented(flat_data, tmpdir):
+def test_write_NoEncode_NotImplemented(no_encode_obj, tmpdir):
     """ Check if a TypeError is raised when writing an arbitrary
     object.
     """
-    delattr(type(flat_data), '_encode')
-    filename = os.path.join(tmpdir, 'flat_data.far')
+    filename = os.path.join(tmpdir, 'no_encode_obj.far')
     with pytest.raises(NotImplementedError):
-        io.write(filename, flat_data_no_encode=flat_data)
+        io.write(filename, no_encode_obj=no_encode_obj)
 
 
 @patch('pyfar._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
-def test_write_FlatDataNoDecode_NotImplemented(flat_data, tmpdir):
+def test_write_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
     """ Check if a TypeError is raised when writing an arbitrary
     object.
     """
-    delattr(type(flat_data), '_decode')
-    filename = os.path.join(tmpdir, 'flat_data.far')
-    io.write(filename, flat_data_no_decode=flat_data)
+    filename = os.path.join(tmpdir, 'no_decode_obj.far')
+    io.write(filename, no_decode_obj=no_decode_obj)
     with pytest.raises(NotImplementedError):
         actual = io.read(filename)
 

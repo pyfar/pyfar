@@ -12,6 +12,7 @@ from unittest import mock
 from pyfar.signal import Signal
 import pyfar.utils
 import pyfar._codec
+from copy import deepcopy
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):
@@ -232,17 +233,41 @@ def _normalization(freq, n_samples, fft_norm):
     return freq_norm
 
 
+def any_ndarray():
+    return np.arange(0, 24).reshape((2, 3, 4))
+
+
 class AnyClass:
     """Placeholder class"""
     def __init__(self, x=42):
         self.x = x
 
 
+class NoEncodeClass:
+    """Placeholder class to Raise NotImplementedError for `_encode`."""
+    def __init__(self, x=42):
+        self.x = x
+
+
+class NoDecodeClass:
+    """Placeholder class to Raise NotImplementedError for `_decode`"""
+    def __init__(self, x=42):
+        self.x = x
+
+    def copy(self):
+        """Return a deep copy of the Orientations object."""
+        return deepcopy(self)
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+
 class FlatData:
     """Class only containing flat data and methods.
     """
     def __init__(self, m=49):
-        self.signal = np.sin(2 * np.pi * np.arange(0, 1, 1 / 10))
+        self.signal = any_ndarray()
         self._m = m
 
     def _encode(self):
@@ -258,7 +283,7 @@ class FlatData:
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
-        return pyfar.utils.copy(self)
+        return deepcopy(self)
 
     def __eq__(self, other):
         return not deepdiff.DeepDiff(self, other)
@@ -286,7 +311,7 @@ class NestedData:
     def create(cls):
         n = 42
         comment = 'My String'
-        matrix = np.arange(0, 24).reshape((2, 3, 4))
+        matrix = any_ndarray()
         subobj = FlatData()
         mylist = [1, np.int32, np.arange(10), FlatData()]
         mydict = {
@@ -319,7 +344,7 @@ class NestedData:
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
-        return pyfar.utils.copy(self)
+        return deepcopy(self)
 
     def __eq__(self, other):
         return not deepdiff.DeepDiff(self, other)
@@ -331,6 +356,8 @@ def stub_str_to_type():
     def side_effect(type_str):
         return {
             'AnyClass': type(AnyClass()),
+            'NoEncodeClass': type(NoEncodeClass()),
+            'NoDecodeClass': type(NoDecodeClass()),
             'FlatData': type(FlatData()),
             'NestedData': type(NestedData.create())
             }.get(type_str)
@@ -343,5 +370,6 @@ def stub_is_pyfar_type():
     """
     def side_effect(obj):
         type_str = obj if isinstance(obj, str) else type(obj).__name__
-        return type_str in ['NestedData', 'FlatData']
+        return type_str in [
+            'NestedData', 'FlatData', 'NoEncodeClass', 'NoDecodeClass']
     return mock.MagicMock(side_effect=side_effect)

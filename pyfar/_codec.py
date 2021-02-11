@@ -110,7 +110,12 @@ def _decode(obj, zipfile):
 
 def _inner_decode(obj, key, zipfile):
     """
-    This function is exclusively used by `io._decode`
+    This function is exclusively used by `_codec._encode` and casts the obj
+    in case it was not JSON-serializable back into ther original type
+    e.g. by using a typehint (str) like: '$ndarray', '$tuple' etc.
+
+    If the obj is nested, _innner_decode goes one level deeper by reentering
+    _decode again.
 
     Parameters
     ----------
@@ -119,6 +124,8 @@ def _inner_decode(obj, key, zipfile):
     key :  str or int
         The key provided by the dict or list over which currently is being
         iterated.
+
+    zipfile: zipfile
     """
     if not _is_type_hint(obj[key]):
         _decode(obj[key], zipfile)
@@ -205,6 +212,28 @@ def _encode(obj, zip_path, zipfile):
 
 
 def _inner_encode(obj, key, zip_path, zipfile):
+    """
+    This function is exclusively used by `_codec._encode` and casts the obj
+    in case it is not JSON-serializable into a proper format for the zipfile
+    e.g. by adding a typehint (str) like: '$ndarray', '$tuple' etc. and
+    a proper zip path/reference if necessary like it's the case for ndarrays.
+
+    If the obj is nested, _innner_ecode goes one level deeper by reentering
+    _encode again.
+
+    Parameters
+    ----------
+    obj : PyFar-object.
+
+    key :  str or int
+        The key provided by the dict or list over which currently is being
+        iterated.
+
+    zip_path: str
+        The potential zip path looped through all recursions.
+
+    zipfile: zipfile
+    """
     if _is_dtype(obj[key]):
         obj[key] = ['$dtype', obj[key].__name__]
     elif isinstance(obj[key], np.ndarray):
