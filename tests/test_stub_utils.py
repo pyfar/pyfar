@@ -327,3 +327,15 @@ def test_noise_func_multi_channel():
 
     npt.assert_array_almost_equal(np.mean(time), 0, decimal=1)
     npt.assert_array_almost_equal(np.std(time, ddof=1), sigma, decimal=1)
+
+
+def test__eq___dict__flat_data(flat_data):
+    """ Test equality for stub. """
+    actual = flat_data.copy()
+    assert actual == flat_data
+
+
+def test__eq___dict__nested_data(nested_data):
+    """ Test equality for stub. """
+    actual = nested_data.copy()
+    assert actual == nested_data

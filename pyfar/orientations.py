@@ -47,6 +47,7 @@ class Orientations(Rotation):
             Each row is a (possibly non-unit norm) quaternion in scalar-last
             (x, y, z, w) format. Each quaternion will be normalized to unit
             norm.
+
     """
 
     def __init__(self, quat=None, normalize=True, copy=True):
@@ -192,6 +193,17 @@ class Orientations(Rotation):
     def copy(self):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
+
+    def _encode(self):
+        """Return object in a proper encoding format."""
+        # Use public interface of the scipy super-class to prevent
+        # error in case of chaning super-class implementations
+        return {'quat': self.as_quat()}
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        return cls.from_quat(obj_dict['quat'])
 
     def __setitem__(self, idx, val):
         """

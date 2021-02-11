@@ -568,7 +568,6 @@ def test_rotation():
     npt.assert_allclose(c._points, xyz, atol=1e-15)
 
 
-# Test coordinate conversions -------------------------------------------------
 def test_converters():
     # test if converterts can handle numbers
     # (correctness of the rotation is tested in test_setter_and_getter)

@@ -625,8 +625,8 @@ def filterFIR():
 def filterSOS():
     """ FilterSOS objectr.
     """
-    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    return fo.FilterSOS(sos, sampling_rate=2*np.pi)
+    sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
+    return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
@@ -637,3 +637,39 @@ def sphericalvoronoi():
         [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
     sampling = Coordinates(points[:, 0], points[:, 1], points[:, 2])
     return SphericalVoronoi(sampling)
+
+
+@pytest.fixture
+def any_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.AnyClass()
+
+
+@pytest.fixture
+def no_encode_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.NoEncodeClass()
+
+
+@pytest.fixture
+def no_decode_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.NoDecodeClass()
+
+
+@pytest.fixture
+def flat_data():
+    """ Class being primarily used as a subclass of the nested data object.
+    """
+    return stub_utils.FlatData()
+
+
+@pytest.fixture
+def nested_data():
+    """ General nested data structure primarily used to illustrate mechanism of
+    `io.write` and `io.read`.
+    """
+    return stub_utils.NestedData.create()
