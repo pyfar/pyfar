@@ -666,10 +666,6 @@ class Signal(FrequencyData, TimeData):
             raise ValueError("No valid fft norm set.")
         return stype
 
-    @signal_type.setter
-    def signal_type(self, value):
-        raise DeprecationWarning("Deprecated, use fft_norm instead.")
-
     def __add__(self, data):
         return add((self, data), 'freq')
 
