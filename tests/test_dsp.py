@@ -79,3 +79,20 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     grp = dsp.group_delay(signal, frequency)
     assert grp.shape == (2,)
     npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+
+
+def test_xfade(impulse):
+    first = np.ones(5001)
+    idx_1 = 500
+    second = np.ones(5001)*2
+    idx_2 = 1000
+
+    res = dsp.dsp._cross_fade(first, second, [idx_1, idx_2])
+    np.testing.assert_array_almost_equal(first[:idx_1], res[:idx_1])
+    np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
+
+    idx_1 = 501
+    idx_2 = 1000
+    res = dsp.dsp._cross_fade(first, second, [idx_1, idx_2])
+    np.testing.assert_array_almost_equal(first[:idx_1], res[:idx_1])
+    np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])

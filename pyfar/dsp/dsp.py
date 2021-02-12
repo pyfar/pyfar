@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.numeric import ones
 from scipy import signal as sgn
 from pyfar import Signal
 import pyfar.fft as fft
@@ -187,3 +188,44 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     times -= times[0]
 
     return frequencies, times, spectrogram
+
+
+def _cross_fade(first, second, indices):
+    """Cross-fade two numpy arrays by multiplication with a raised cosine
+    window inside the range specified by the indices. Outside the range, the
+    result will be the respective first or second array, without distortions.
+
+    Parameters
+    ----------
+    first : array, double
+        The first array.
+    second : array, double
+        The second array.
+    indices : array-like, tuple, int
+        The lower and upper cross-fade indices.
+
+    Returns
+    -------
+    result : array, double
+        The resulting array after cross-fading.
+    """
+    indices = np.asarray(indices)
+    if np.shape(first)[-1] != np.shape(first)[-1]:
+        raise ValueError("Both arrays need to be of same length.")
+    len_arrays = np.shape(first)[-1]
+    if np.any(indices > np.shape(first)[-1]):
+        raise IndexError("Index is out of range.")
+
+    len_xfade = np.squeeze(np.abs(np.diff(indices)))
+    window = sgn.windows.windows.hann(len_xfade*2 + 1, sym=True)
+    window_rising = window[:len_xfade]
+    window_falling = window[len_xfade+1:]
+
+    window_first = np.concatenate(
+        (np.ones(indices[0]), window_falling, np.zeros(len_arrays-indices[1])))
+    window_second = np.concatenate(
+        (np.zeros(indices[0]), window_rising, np.ones(len_arrays-indices[1])))
+
+    result = first * window_first + second * window_second
+
+    return result
