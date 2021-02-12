@@ -1,8 +1,9 @@
 import numpy as np
 from scipy import special as sp
+from pyfar import Signal
 
 
-# different window types; for even window lengths  window maximum not 1, especially for short windows!! set maximum to 1 by hand?
+# different window types; for even window lengths window maximum not 1, especially for short windows!! set maximum to 1 somehow?
 def rect(length):
     """returns a rectangular window of given length.
 
@@ -240,9 +241,7 @@ def dolphChebychev(length,sideLobeLevel = 60):
         
     Reference
     ---------
-       [1] Oppenheim, A. V., & Schafer, R. W. (2010). Discrete-time Signal Processing. Pearson.
-       [2] Meyer, M. (2017). Signalverarbeitung. Springer Publishing.
-       [3] https://ccrma.stanford.edu/~jos/sasp/Dolph_Chebyshev_Window.html
+       [1] Lyons, R. G. (2011). Understanding digital signal processing. Upper Saddle River etc.: Prentice Hall.
     """
     
     if length >= 0:
@@ -293,3 +292,87 @@ def dolphChebychev(length,sideLobeLevel = 60):
         return w
     else:
         raise ValueError('window length has to be >=0 !')
+        
+
+def window(signal, windowType, windowLength, windowStartIndex=0):
+    """windows a  pyfar signal with selected window type and length
+
+    Parameters
+    ----------
+    signal : Signal object
+        An audio signal object from the pyfar signal class
+    
+    windowType: string
+        select window type from 'rect', 'hann', 'hamming', 'blackman', 
+        'bartlett', 'kaiser', 'kaiserBessel' , 'flattop' or 'dolphChebychev'
+    
+    windowLength: int
+        sets window length in samples of selected window
+        
+    windowStartIndex: int
+        sets the start index! of the window
+        
+    Returns
+    -------
+    out : pyfar
+        window coefficients
+    """
+    
+    #check input and default values
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+        
+    if not isinstance(windowType, str):
+        raise TypeError('''windowType has to be a string of the following:
+                        'rect', 'hann', 'hamming', 'blackman', 'bartlett', 'kaiser',
+                        'kaiserBessel' , 'flattop' or 'dolphChebychev'.''')
+    if not isinstance(windowLength,int):
+        raise TypeError('windowLength has to be of type int.')
+        
+    if not isinstance(windowStartIndex,int) or windowStartIndex < 0:
+        raise TypeError('windowStartIndex has to be of type int and >= 0 .')
+    
+    #create selected window with simulated switch case   
+    switcher = {
+        'rect':rect,
+        'hann':hann,
+        'hamming':hamming,
+        'blackman':blackman,
+        'bartlett':bartlett,
+        'kaiser':kaiser,
+        'kaiserBessel':kaiserBessel,
+        'flattop':flattop,
+        'dolphChebychev':dolphChebychev,
+        }
+    if windowType in switcher:
+        win = switcher.get(windowType)(windowLength)
+    else:
+        raise NameError('''windowType has to be a sting of the following:
+                        'rect', 'hann', 'hamming', 'blackman', 'bartlett', 'kaiser',
+                        'kaiserBessel' , 'flattop' or 'dolphChebychev'.''')
+    #%% apply windowing to time domain copy of signal
+    signalCopy = signal.copy()
+    signalCopyFlat= signalCopy.flatten()
+    if windowLength > np.size(signalCopyFlat.time[0]):
+        print('>>>>>>> window is longer than signal!')
+    # create zeropadded window with shape of signal
+    windowShape = np.zeros(np.size(signalCopyFlat.time[0]))
+    
+    #%% check if window is not being set within signal bounds
+    if windowStartIndex+np.size(win) <= np.size(windowShape):
+        windowShape[windowStartIndex:windowStartIndex+np.size(win)] = win
+    elif windowStartIndex+np.size(win)-np.size(windowShape) >= np.size(win)-1:
+        # return not windowed signal with warning
+        signalCopy = signalCopyFlat.reshape(signal.cshape)
+        print('>>>>>>> No windowing applied!')
+        return signalCopy
+    else:
+        #apply window only partially if windowStartIndex set, so that the window doesn't fit at the end
+        win = win[:-(windowStartIndex+np.size(win)-np.size(windowShape))]
+        windowShape[windowStartIndex:windowStartIndex+np.size(win)] = win
+        
+    #apply window
+    signalCopyFlat.time = signalCopyFlat.time * windowShape
+    signalCopy = signalCopyFlat.reshape(signal.cshape)
+    
+    return signalCopy
