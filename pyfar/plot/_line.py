@@ -146,13 +146,29 @@ def _return_default_colors_rgb(**kwargs):
     return kwargs
 
 
+def _check_time_unit(unit):
+    """Check if a valid time unit is passed."""
+    units = ['s', 'ms', 'mus', 'samples']
+    if unit is not None and unit not in units:
+        raise ValueError(
+            f"Unit is {unit} but must be {', '.join(units)}, or None.")
+
+
+def _check_axis_scale(scale, axis='x'):
+    """Check if a valid axis scale is passed."""
+    if scale not in ['linear', 'log']:
+        raise ValueError(
+            f"{axis}scale is {scale} but must be 'linear', or 'log'.")
+
+
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
           ax=None, **kwargs):
-    """Plot the time logairhmic data of a signal."""
+    """Plot the time data of a signal."""
 
     # check input
     if not isinstance(signal, (Signal, TimeData)):
         raise TypeError('Input data has to be of type: Signal or TimeData.')
+    _check_time_unit(unit)
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -203,6 +219,7 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     if not isinstance(signal, (Signal, FrequencyData)):
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')
+    _check_axis_scale(xscale)
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -250,6 +267,7 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     if not isinstance(signal, (Signal, FrequencyData)):
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')
+    _check_axis_scale(xscale)
 
     # prepare figure
     _, ax = _prepare_plot(ax)
@@ -263,6 +281,8 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
         ylabel_string += '(wrapped to 360) '
     elif unwrap:
         ylabel_string += '(unwrapped) '
+    elif not isinstance(unwrap, bool):
+        raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
     if deg:
         ylabel_string += 'in degree'
@@ -309,6 +329,8 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    _check_time_unit(unit)
+    _check_axis_scale(xscale)
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -418,6 +440,8 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    _check_time_unit(unit)
+    _check_axis_scale(yscale, 'y')
 
     if window_length > signal.n_samples:
         raise ValueError("window_length exceeds signal length")
@@ -492,6 +516,8 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
 
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    _check_time_unit(unit)
+    _check_axis_scale(yscale, 'y')
 
     # Define figure and axes for plot:
     fig, ax = _prepare_plot(ax)
@@ -527,9 +553,6 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)
 
@@ -544,11 +567,6 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
 def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
                 deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
-
-    if not isinstance(signal, Signal) and \
-            not isinstance(signal, FrequencyData):
-        raise TypeError(
-            'Input data has to be of type: Signal or FrequencyData.')
 
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -567,9 +585,6 @@ def _freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)

@@ -195,10 +195,6 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    units = ['s', 'ms', 'mus', 'samples', None]
-    if unit not in units:
-        raise ValueError(f"unit must be {', '.join(units)} but is {unit}.")
-
     with plt.style.context(plotstyle(style)):
         ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
     plt.tight_layout()

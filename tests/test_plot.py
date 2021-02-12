@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.testing as mpt
 from matplotlib.testing.compare import compare_images
 import os
+from pytest import raises
 
 import pyfar.plot as plot
 
@@ -117,6 +118,13 @@ def test_line_phase_options(sine):
         compare_images(baseline, output, tol=10)
 
 
+def test_line_phase_unwrap_assertion(sine):
+    """Test assertion for unwrap parameter."""
+    with raises(ValueError):
+        plot.line.phase(sine, unwrap='infinity')
+    plt.close()
+
+
 def test_line_dB_option(sine):
     """Test all line plots that have a dB option."""
 
@@ -217,6 +225,29 @@ def test_line_xscale_option(sine):
             compare_images(baseline, output, tol=10)
 
 
+def test_line_xscale_assertion(sine):
+    """
+    Test if all line plots raise an assertion for a wrong scale parameter.
+    """
+
+    with raises(ValueError):
+        plot.line.freq(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.phase(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot._line._spectrogram(sine, yscale="warped")
+
+    with raises(ValueError):
+        plot._line._spectrogram_cb(sine, yscale="warped")
+
+    plt.close("all")
+
+
 def test_time_unit(impulse_group_delay):
     """Test plottin with different units."""
     function_list = [plot.line.time,
@@ -249,6 +280,24 @@ def test_time_unit(impulse_group_delay):
 
             # testing
             compare_images(baseline, output, tol=10)
+
+
+def test_time_unit_assertion(sine):
+    """Test if all line plots raise an assertion for a wrong unit parameter."""
+
+    with raises(ValueError):
+        plot.line.time(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot._line._spectrogram(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line._line._spectrogram_cb(sine, unit="pascal")
+
+    plt.close("all")
 
 
 def test_line_time_auto_unit():
