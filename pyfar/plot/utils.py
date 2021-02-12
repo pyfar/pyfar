@@ -1,14 +1,14 @@
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+import matplotlib.style as mpl_style
 import os
 import json
+import contextlib
 import pyfar.plot._line as _line
 from pyfar.plot._interaction import PlotParameter
 
 
 def plotstyle(style='light'):
     """
-    Get name and fullpath of plotstyle.
+    Get fullpath of pyfar plotstyle 'light' or 'dark'.
 
     Can be used to plot the pyfar plotstyles 'light' and 'dark' saved as
     mplstyle-file inside the pyfar package.
@@ -16,30 +16,106 @@ def plotstyle(style='light'):
     Parameters
     ----------
     style : str
-        'light', 'dark', or stlye from matplotlib.pyplot.available. Raises a
-        ValueError if style is not known.
+        'light', or 'dark'
 
     Returns
     -------
     style : str
-        Full path to the pyfar plotstyle or name of the matplotlib plotstyle
+        Full path to the pyfar plotstyle. Input parameter style otherwise.
 
     """
 
-    if style is None:
-        # get the currently used plotstyle
-        style = mpl.matplotlib_fname()
-    elif style in ['light', 'dark']:
-        # use pyfar style
+    if style in ['light', 'dark']:
         style = os.path.join(
             os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
-    elif style not in plt.style.available:
-        # error if style not found
-        ValueError((f"plotstyle '{style}' not available. Valid styles are "
-                    "None, 'light', 'dark' and styles from "
-                    "matplotlib.pyplot.available"))
 
     return style
+
+
+@contextlib.contextmanager
+def context(style='light', after_reset=False):
+    """Context manager for using plot styles temporarily.
+
+    This context manager supports the two pyfar styles 'light' and 'dark'. It
+    is a wrapper for `matplotlib.pyplot.style.context()`.
+
+    Parameters
+    ----------
+    style : str, dict, Path or list
+        A style specification. Valid options are:
+
+        +------+-------------------------------------------------------------+
+        | str  | The name of a style or a path/URL to a style file. For a    |
+        |      | list of available style names, see `style.available`.       |
+        +------+-------------------------------------------------------------+
+        | dict | Dictionary with valid key/value pairs for                   |
+        |      | `matplotlib.rcParams`.                                      |
+        +------+-------------------------------------------------------------+
+        | Path | A path-like object which is a path to a style file.         |
+        +------+-------------------------------------------------------------+
+        | list | A list of style specifiers (str, Path or dict) applied from |
+        |      | first to last in the list.                                  |
+        +------+-------------------------------------------------------------+
+
+    after_reset : bool
+        If True, apply style after resetting settings to their defaults;
+        otherwise, apply style on top of the current settings.
+
+    Examples
+    --------
+    >>> import pyfar
+    >>> import matplotlib.pyplot as plt
+    >>>
+    >>> with pyfar.plot.context():
+    >>>     fig, ax = plt.subplot(2, 1)
+    >>>     pyfar.plot.time(Signal([0, 1, 0, -1], 44100))
+    """
+
+    # get pyfar plotstyle if desired
+    style = plotstyle(style)
+
+    # apply plot style
+    with mpl_style.context(style):
+        yield
+
+
+def use(style="light"):
+    """
+    Use plot style settings from a style specification.
+
+    The style name of 'default' is reserved for reverting back to
+    the default style settings. This is a wrapper for `matplotlib.style.use`
+    that supports the pyfar plot styles 'light' and 'dark'.
+
+    .. note::
+
+       This updates the `.rcParams` with the settings from the style.
+       `.rcParams` not defined in the style are kept.
+
+    Parameters
+    ----------
+    style : str, dict, Path or list
+        A style specification. Valid options are:
+
+        +------+-------------------------------------------------------------+
+        | str  | The name of a style or a path/URL to a style file. For a    |
+        |      | list of available style names, see `style.available`.       |
+        +------+-------------------------------------------------------------+
+        | dict | Dictionary with valid key/value pairs for                   |
+        |      | `matplotlib.rcParams`.                                      |
+        +------+-------------------------------------------------------------+
+        | Path | A path-like object which is a path to a style file.         |
+        +------+-------------------------------------------------------------+
+        | list | A list of style specifiers (str, Path or dict) applied from |
+        |      | first to last in the list.                                  |
+        +------+-------------------------------------------------------------+
+
+    """
+
+    # get pyfar plotstyle if desired
+    style = plotstyle(style)
+    # use plot style
+    mpl_style.use(style)
 
 
 def color(color: str) -> str:
