@@ -178,13 +178,6 @@ def test_getter_signal_type(sine, sine_rms):
     npt.assert_string_equal(signal.signal_type, 'power')
 
 
-def test_setter_signal_type(sine):
-    """Test if attribute signal type is set correctly."""
-    signal = Signal(sine.time, sine.sampling_rate)
-    with pytest.raises(DeprecationWarning):
-        signal.signal_type = 'energy'
-
-
 def test_getter_fft_norm(sine):
     signal = Signal(sine.time, sine.sampling_rate, fft_norm='psd')
     assert signal.fft_norm == 'psd'
