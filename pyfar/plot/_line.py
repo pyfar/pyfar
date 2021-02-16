@@ -279,7 +279,7 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     ylabel_string = 'Phase '
     if unwrap == '360':
         ylabel_string += '(wrapped to 360) '
-    elif unwrap:
+    elif unwrap is True:
         ylabel_string += '(unwrapped) '
     elif not isinstance(unwrap, bool):
         raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
