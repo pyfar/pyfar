@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.core.numeric import ones
 from scipy import signal as sgn
 from pyfar import Signal
 import pyfar.fft as fft
