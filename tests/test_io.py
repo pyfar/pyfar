@@ -1,266 +1,296 @@
+from pyfar.orientations import Orientations
 import numpy as np
 import numpy.testing as npt
 import pytest
+from unittest.mock import patch
+from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
-from unittest import mock
 import os.path
 import scipy.io.wavfile as wavfile
-import sofa
 
 from pyfar import io
 from pyfar import Signal
+from pyfar import Coordinates
+from pyfar.spatial.spatial import SphericalVoronoi
+import pyfar.dsp.classes as fo
 
 
-def test_read_wav(tmpdir):
+def test_read_wav(generate_wav_file, noise):
     """Test default without optional parameters."""
-    # Generate test files
-    filename = os.path.join(tmpdir, 'test_wav.wav')
-    signal_ref, sampling_rate = reference_signal()
-    wavfile.write(filename, sampling_rate, signal_ref.T)
-    # Read wav
-    signal = io.read_wav(filename)
+    signal = io.read_wav(generate_wav_file)
     assert isinstance(signal, Signal)
-    npt.assert_allclose(
-            signal.time,
-            np.atleast_2d(signal_ref),
-            rtol=1e-10)
-    assert signal.sampling_rate == sampling_rate
+    npt.assert_allclose(signal.time, noise.time)
+    assert signal.sampling_rate == noise.sampling_rate
 
 
-def test_write_wav(signal_mock, tmpdir):
+def test_write_wav(tmpdir, noise):
     """Test default without optional parameters."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
-    io.write_wav(signal_mock, filename)
+    io.write_wav(noise, filename)
     signal_reload = wavfile.read(filename)[-1].T
     npt.assert_allclose(
-        signal_mock.time,
+        noise.time,
         np.atleast_2d(signal_reload),
         rtol=1e-10)
 
 
-def test_write_wav_overwrite(signal_mock, tmpdir):
+def test_write_wav_overwrite(noise, tmpdir):
     """Test overwriting behavior."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
-    io.write_wav(signal_mock, filename)
+    io.write_wav(noise, filename)
     # Call with overwrite disabled
     with pytest.raises(FileExistsError):
-        io.write_wav(signal_mock, filename, overwrite=False)
+        io.write_wav(noise, filename, overwrite=False)
     # Call with overwrite enabled
-    io.write_wav(signal_mock, filename, overwrite=True)
+    io.write_wav(noise, filename, overwrite=True)
 
 
-def test_write_wav_nd(signal_mock_nd, tmpdir):
+def test_write_wav_nd(noise_two_by_two_channel, tmpdir):
     """Test for signals of higher dimension."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
-    io.write_wav(signal_mock_nd, filename)
+    io.write_wav(noise_two_by_two_channel, filename)
     signal_reload = wavfile.read(filename)[-1].T
     npt.assert_allclose(
-        signal_mock_nd.time,
-        signal_reload.reshape(signal_mock_nd.time.shape),
-        rtol=1e-10)
+        signal_reload.reshape(noise_two_by_two_channel.time.shape),
+        noise_two_by_two_channel.time)
 
 
-def test_read_sofa_GeneralFIR(tmpdir):
+def test_read_sofa_GeneralFIR(
+        generate_sofa_GeneralFIR, noise_two_by_three_channel):
     """Test for sofa datatype GeneralFIR"""
-    sofatype = 'GeneralFIR'
-    # Generate test file
-    generate_sofa_file(tmpdir, sofatype)
-    # Correct DataType
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    signal = io.read_sofa(filename)[0]
-    signal_ref = reference_signal(signal.cshape)[0]
-    npt.assert_allclose(
-            signal.time,
-            signal_ref,
-            rtol=1e-10)
+    signal = io.read_sofa(generate_sofa_GeneralFIR)[0]
+    npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
 
 
-def test_read_sofa_GeneralTF(tmpdir):
+def test_read_sofa_GeneralTF(generate_sofa_GeneralTF):
     """Test for sofa datatype GeneralTF"""
-    sofatype = 'GeneralTF'
-    # Generate test file
-    generate_sofa_file(tmpdir, sofatype)
-    # Wrong DataType
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
     with pytest.raises(ValueError):
-        io.read_sofa(filename)
+        io.read_sofa(generate_sofa_GeneralTF)
 
 
-def test_read_sofa_coordinates(tmpdir):
+def test_read_sofa_coordinates(
+        generate_sofa_GeneralFIR, sofa_reference_coordinates):
     """Test for reading coordinates in sofa file"""
-    sofatype = 'GeneralFIR'
-    # Generate test file
-    generate_sofa_file(tmpdir, sofatype)
-    # Correct coordinates
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    # Source coordinates
-    source_coordinates = io.read_sofa(filename)[1]
-    source_coordinates_ref = reference_coordinates()[0]
+    _, s_coords, r_coords, = io.read_sofa(generate_sofa_GeneralFIR)
     npt.assert_allclose(
-        source_coordinates.get_cart(),
-        source_coordinates_ref,
-        rtol=1e-10)
-    # Receiver coordinates
-    receiver_coordinates = io.read_sofa(filename)[2]
-    receiver_coordinates_ref = reference_coordinates()[1]
+        s_coords.get_cart(), sofa_reference_coordinates[0])
     npt.assert_allclose(
-        receiver_coordinates.get_cart(),
-        receiver_coordinates_ref[:, :, 0],
-        rtol=1e-10)
+        r_coords.get_cart(), sofa_reference_coordinates[1])
 
 
-def test_read_sofa_sampling_rate_unit(tmpdir):
+def test_read_sofa_sampling_rate_unit(generate_sofa_unit_error):
     """Test to verify correct sampling rate unit of sofa file"""
-    sofatype = 'GeneralFIR_unit'
-    # Generate test file
-    generate_sofa_file(tmpdir, sofatype)
-    # Wrong sampling rate Unit
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
     with pytest.raises(ValueError):
-        io.read_sofa(filename)
+        io.read_sofa(generate_sofa_unit_error)
 
 
-def test_read_sofa_position_type(tmpdir):
-    """Test for correct position type of sofa file"""
-    sofatype = 'GeneralFIR_postype'
-    # Generate test file
-    generate_sofa_file(tmpdir, sofatype)
-    # Wrong PositionType
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+def test_read_sofa_position_type_unit(generate_sofa_postype_error):
+    """Test to verify correct position type of sofa file"""
     with pytest.raises(ValueError):
-        io.read_sofa(filename)
+        io.read_sofa(generate_sofa_postype_error)
 
 
-def generate_sofa_file(filedir, sofatype):
-    """ Generate the reference sofa files used for testing the read_sofa function.
-    Parameters
-    -------
-    filedir : String
-        Path to directory.
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+def test_write_read_flat_data(tmpdir, flat_data):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
     """
-    n_measurements = 1
-    n_receivers = 2
-    signal, sampling_rate = reference_signal(
-        shape=(n_measurements, n_receivers))
-    n_samples = signal.shape[-1]
-
-    filename = os.path.join(filedir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(
-                    filename,
-                    sofatype.split('_')[0],
-                    dimensions={
-                        "M": n_measurements,
-                        "R": n_receivers,
-                        "N": n_samples})
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.Position = reference_coordinates()[0]
-    sofafile.Receiver.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Receiver.Position = reference_coordinates()[1]
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-
-    if sofatype == 'GeneralFIR':
-        sofafile.Data.Type = 'FIR'
-        sofafile.Data.initialize()
-        sofafile.Data.IR = signal
-        sofafile.Data.SamplingRate = sampling_rate
-    elif sofatype == 'GeneralTF':
-        sofafile.Data.Type = 'TF'
-        sofafile.Data.initialize()
-        sofafile.Data.Real = signal
-        sofafile.Data.Imag = signal
-    elif sofatype == 'GeneralFIR_unit':
-        sofafile.Data.Type = 'FIR'
-        sofafile.Data.initialize()
-        sofafile.Data.IR = signal
-        sofafile.Data.SamplingRate = sampling_rate
-        sofafile.Data.SamplingRate.Units = 'not_hertz'
-    elif sofatype == 'GeneralFIR_postype':
-        sofafile.Data.Type = 'FIR'
-        sofafile.Data.initialize()
-        sofafile.Data.IR = signal
-        sofafile.Data.SamplingRate = sampling_rate
-        sofafile.Source.Position.Type = 'not_type'
-    sofafile.close()
+    filename = os.path.join(tmpdir, 'write_read_flat_data.far')
+    io.write(filename, flat_data=flat_data)
+    actual = io.read(filename)
+    assert actual['flat_data'] == flat_data
 
 
-def reference_signal(shape=(1,)):
-    """ Generate sine of 440 Hz as numpy array.
-    Returns
-    -------
-    sine : ndarray
-        The sine signal
-    sampling_rate : int
-        The sampling rate
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+def test_write_read_nested_data(nested_data, flat_data, tmpdir):
+    filename = os.path.join(tmpdir, 'write_nested_flat_data.far')
+    io.write(filename, nested_data=nested_data)
+    actual = io.read(filename)
+    assert actual['nested_data'] == nested_data
+
+
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+def test_write_read_multipleObjects(flat_data, nested_data, tmpdir):
+    """ Check if file can be read back after writing without explicitply
+    passing the .far-extension.
     """
-    sampling_rate = 44100
-    n_periods = 20
-    amplitude = 1
-    frequency = 440
-
-    # time signal
-    times = np.arange(0, n_periods*frequency) / sampling_rate
-    sine = amplitude * np.sin(2 * np.pi * times * frequency)
-
-    shape + (3,)
-    sine = np.ones(shape + (sine.shape[-1],)) * sine
-
-    return sine, sampling_rate
+    filename = os.path.join(tmpdir, 'write_read_multipleObjects.far')
+    io.write(
+        filename,
+        any_flat_data=flat_data,
+        any_nested_data=nested_data)
+    actual = io.read(filename)
+    assert actual['any_flat_data'] == flat_data
+    assert actual['any_nested_data'] == nested_data
 
 
-def reference_coordinates():
-    """ Generate coordinate array
-    Returns
-    -------
-    coordinates : ndarray
-        The coordinates
+def test_write_anyObj_TypeError(any_obj, tmpdir):
+    """ Check if a TypeError is raised when writing an arbitrary
+    object.
     """
-    source_coordinates = np.ones((1, 3))
-    receiver_coordinates = np.ones((2, 3, 1))
-    return source_coordinates, receiver_coordinates
+    filename = os.path.join(tmpdir, 'anyObj.far')
+    with pytest.raises(TypeError):
+        io.write(filename, any_obj=any_obj)
 
 
-@pytest.fixture
-def signal_mock():
-    """ Generate a signal mock object.
-    Returns
-    -------
-    signal : Signal
-        The noise signal
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+def test_write_NoEncode_NotImplemented(no_encode_obj, tmpdir):
+    """ Check if a TypeError is raised when writing an arbitrary
+    object.
     """
-    n_samples = 1000
-    sampling_rate = 44100
-    amplitude = 1
-
-    # time signal:
-    time = amplitude * np.random.rand(n_samples)
-
-    # create a mock object of Signal class to test independently
-    signal_object = mock.Mock(spec_set=Signal(time, sampling_rate))
-    signal_object.time = time[np.newaxis, :]
-    signal_object.sampling_rate = sampling_rate
-
-    return signal_object
+    filename = os.path.join(tmpdir, 'no_encode_obj.far')
+    with pytest.raises(NotImplementedError):
+        io.write(filename, no_encode_obj=no_encode_obj)
 
 
-@pytest.fixture
-def signal_mock_nd():
-    """ Generate a higher dimensional signal mock object.
-    Returns
-    -------
-    signal : Signal
-        The signal
+@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+def test_write_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
+    """ Check if a TypeError is raised when writing an arbitrary
+    object.
     """
-    n_samples = 1000
-    sampling_rate = 44100
-    amplitude = 1
+    filename = os.path.join(tmpdir, 'no_decode_obj.far')
+    io.write(filename, no_decode_obj=no_decode_obj)
+    with pytest.raises(NotImplementedError):
+        io.read(filename)
 
-    # time signal:
-    time = amplitude * np.random.random_sample((3, 3, 3, n_samples))
 
-    # create a mock object of Signal class to test independently
-    signal_object = mock.Mock(spec_set=Signal(time, sampling_rate))
-    signal_object.time = time
-    signal_object.sampling_rate = sampling_rate
+def test_read_orientations(orientations, tmpdir):
+    """ Orientations
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'orientations.far')
+    io.write(filename, orientations=orientations)
+    actual = io.read(filename)['orientations']
+    assert isinstance(actual, Orientations)
+    assert actual == orientations
 
-    return signal_object
+
+def test_read_coordinates(coordinates, tmpdir):
+    """ Coordinates
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'coordinates.far')
+    io.write(filename, coordinates=coordinates)
+    actual = io.read(filename)['coordinates']
+    assert isinstance(actual, Coordinates)
+    assert actual == coordinates
+
+
+def test_read_signal(sine_signal, tmpdir):
+    """ Signal
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'signal.far')
+    io.write(filename, signal=sine_signal)
+    actual = io.read(filename)['signal']
+    assert isinstance(actual, Signal)
+    assert actual == sine_signal
+
+
+def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
+    """ SphericalVoronoi
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'sphericalvoronoi.far')
+    io.write(filename, sphericalvoronoi=sphericalvoronoi)
+    actual = io.read(filename)['sphericalvoronoi']
+    assert isinstance(actual, SphericalVoronoi)
+    assert actual == sphericalvoronoi
+
+
+def test_read_filter(filter, tmpdir):
+    """ Filter
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'filter.far')
+    io.write(filename, filter=filter)
+    actual = io.read(filename)['filter']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filter
+
+
+def test_write_filterIIR_TypeError(filterIIR, tmpdir):
+    """ FilterIIR
+    Can't be written to disk because objects store user-defined function.
+    """
+    filename = os.path.join(tmpdir, 'filterIIR.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterIIR=filterIIR)
+
+
+def test_write_filterFIR_TypeError(filterFIR, tmpdir):
+    """ FilterFIR
+    Can't be written to disk because objects store user-defined function.
+    """
+    filename = os.path.join(tmpdir, 'filterIIR.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterFIR=filterFIR)
+
+
+def test_write_filterSOS_TypeError(filterSOS, tmpdir):
+    """ FilterIIR
+    Can't be written to disk because objects store user-defined function.
+    """
+    filename = os.path.join(tmpdir, 'filterSOS.far')
+    with pytest.raises(TypeError):
+        io.write(filename, filterSOS=filterSOS)
+
+
+def test_write_read_multiplePyfarObjects(
+        filter,
+        coordinates,
+        orientations,
+        sphericalvoronoi,
+        tmpdir):
+    """ Check if multiple different PyFar-objects can be written to disk
+    and read back.
+    """
+    filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    io.write(
+        filename,
+        filter=filter,
+        coordinates=coordinates,
+        orientations=orientations,
+        sphericalvoronoi=sphericalvoronoi)
+    actual = io.read(filename)
+    assert isinstance(actual['filter'], fo.Filter)
+    assert actual['filter'] == filter
+    assert isinstance(actual['coordinates'], Coordinates)
+    assert actual['coordinates'] == coordinates
+    assert isinstance(actual['orientations'], Orientations)
+    assert actual['orientations'] == orientations
+    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
+    assert actual['sphericalvoronoi'] == sphericalvoronoi
+
+
+def test_write_read_multiplePyfarObjectsWithCompression(
+        filter,
+        coordinates,
+        orientations,
+        sphericalvoronoi,
+        tmpdir):
+    """ Check if multiple different PyFar-objects can be written to disk
+    and read back with zip compression.
+    """
+    filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    io.write(
+        filename,
+        compress=True,
+        filter=filter,
+        coordinates=coordinates,
+        orientations=orientations,
+        sphericalvoronoi=sphericalvoronoi)
+    actual = io.read(filename)
+    assert isinstance(actual['filter'], fo.Filter)
+    assert actual['filter'] == filter
+    assert isinstance(actual['coordinates'], Coordinates)
+    assert actual['coordinates'] == coordinates
+    assert isinstance(actual['orientations'], Orientations)
+    assert actual['orientations'] == orientations
+    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
+    assert actual['sphericalvoronoi'] == sphericalvoronoi

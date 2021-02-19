@@ -3,9 +3,14 @@ import os.path
 import warnings
 import numpy as np
 import sofa
+import json
+import zipfile
+import io
 
 from pyfar import Signal
 from pyfar import Coordinates
+import pyfar._codec as codec
+import pyfar.dsp.classes as fo
 
 
 def read_wav(filename):
@@ -94,8 +99,8 @@ def write_wav(signal, filename, overwrite=True):
     # Check if file exists and for overwrite
     if overwrite is False and os.path.isfile(filename):
         raise FileExistsError(
-                "File already exists,"
-                "use overwrite option to disable error.")
+            "File already exists,"
+            "use overwrite option to disable error.")
     else:
         wavfile.write(filename, sampling_rate, data.T)
 
@@ -113,7 +118,8 @@ def read_sofa(filename):
     -------
     signal : signal instance
         An audio signal object from the pyfar Signal class
-        containing the IR data from the SOFA file.
+        containing the IR data from the SOFA file with cshape being
+        equal to (number of measurements, number of receivers).
     source_coordinates: coordinates instance
         An object from the pyfar Coordinates class containing
         the source coordinates from the SOFA file
@@ -154,22 +160,22 @@ def read_sofa(filename):
     s_values = sofafile.Source.Position.get_values()
     s_domain, s_convention, s_unit = _sofa_pos(sofafile.Source.Position.Type)
     source_coordinates = Coordinates(
-            s_values[:, 0],
-            s_values[:, 1],
-            s_values[:, 2],
-            domain=s_domain,
-            convention=s_convention,
-            unit=s_unit)
+        s_values[:, 0],
+        s_values[:, 1],
+        s_values[:, 2],
+        domain=s_domain,
+        convention=s_convention,
+        unit=s_unit)
     # Receiver
     r_values = sofafile.Receiver.Position.get_values()
     r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
     receiver_coordinates = Coordinates(
-            r_values[:, 0],
-            r_values[:, 1],
-            r_values[:, 2],
-            domain=r_domain,
-            convention=r_convention,
-            unit=r_unit)
+        r_values[:, 0],
+        r_values[:, 1],
+        r_values[:, 2],
+        domain=r_domain,
+        convention=r_convention,
+        unit=r_unit)
 
     return signal, source_coordinates, receiver_coordinates
 
@@ -186,3 +192,113 @@ def _sofa_pos(pos_type):
     else:
         raise ValueError("Position:Type {pos_type} is not supported.")
     return domain, convention, unit
+
+
+def read(filename):
+    """
+    Read any compatible pyfar format from disk.
+
+    Parameters
+    ----------
+    filename : string
+        Full path or filename. If now extension is provided, .far-suffix
+        will be add to filename.
+
+    Returns
+    -------
+    collection: dictionary
+        containing PyFar types like
+        { 'name1': 'obj1', 'name2': 'obj2' ... }.
+
+    Examples
+    --------
+    collection = pyfar.read('my_objs.far')
+    my_signal = collection['my_signal']
+    my_orientations = collection['my_orientations']
+
+    """
+    # Check for .far file extension
+    if filename.split('.')[-1] != 'far':
+        warnings.warn("Extending filename by .far.")
+        filename += '.far'
+
+    collection = {}
+    with open(filename, 'rb') as f:
+        zip_buffer = io.BytesIO()
+        zip_buffer.write(f.read())
+        with zipfile.ZipFile(zip_buffer) as zip_file:
+            zip_paths = zip_file.namelist()
+            obj_names = set([path.split('/')[0] for path in zip_paths])
+            for name in obj_names:
+                json_str = zip_file.read(name + '/json').decode('UTF-8')
+                obj_type, obj_dict = json.loads(json_str)
+                obj_dict = codec._decode(obj_dict, zip_file)
+                ObjType = codec._str_to_type(obj_type)
+                try:
+                    obj = ObjType._decode(obj_dict)
+                except AttributeError:
+                    raise NotImplementedError(
+                        f'You must implement `{type}._decode` first.')
+                if not codec._is_pyfar_type(obj):
+                    raise TypeError(
+                        f'Objects of type {type(obj)}'
+                        'cannot be read from disk.')
+                collection[name] = obj
+
+    return collection
+
+
+def write(filename, compress=False, **objs):
+    """
+    Write any compatible pyfar format to disk.
+
+    Parameters
+    ----------
+    filename : string
+        Full path or filename. If now extension is provided, .far-suffix
+        will be add to filename.
+    compress : bool
+        Default is false (uncompressed).
+        Compressed files take less disk space but probalby need more time
+        for writing and reading.
+    **objs:
+        Objects to be saved as key-value arguments.
+
+    Examples
+    --------
+
+    # Create Pyfar-objects
+    signal = pyfar.Signal([1, 2, 3], 44100)
+    orientations = Orientations.from_view_up([1, 0, 0], [0, 1, 0])
+
+    # Save a signal to disk, replace 'my_signal' and 'my_orientations'
+    # with whatever you'd like to name your objects
+    pyfar.io.write(
+        'my_objs.far', my_signal=signal, my_orientations=orientations)
+
+    """
+    # Check for .far file extension
+    if filename.split('.')[-1] != 'far':
+        warnings.warn("Extending filename by .far.")
+        filename += '.far'
+
+    compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
+        for name, obj in objs.items():
+            if not codec._is_pyfar_type(obj):
+                error = (
+                    f'Objects of type {type(obj)} cannot be written to disk.')
+                if isinstance(obj, fo.Filter):
+                    error = f'{error}. Consider casting to {fo.Filter}'
+                raise TypeError(error)
+            try:
+                obj_dict = codec._encode(obj._encode(), name, zip_file)
+            except AttributeError:
+                raise NotImplementedError(
+                    f'You must implement `{type}._encode` first.')
+            type_obj_pair = [type(obj).__name__, obj_dict]
+            zip_file.writestr(f'{name}/json', json.dumps(type_obj_pair))
+
+    with open(filename, 'wb') as f:
+        f.write(zip_buffer.getvalue())

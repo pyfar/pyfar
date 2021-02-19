@@ -1,6 +1,5 @@
 import numpy as np
 import numpy.testing as npt
-import pytest
 from pytest import raises
 
 from pyfar import fft
@@ -20,294 +19,178 @@ def test_n_bins_odd():
     assert n_bins == truth
 
 
-def test_fft_orthogonality_sine_even_lib():
-    num_samples = 2**10
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = np.fft.rfft(signal_time, n=num_samples, axis=-1)
-    transformed_signal_time = np.fft.irfft(signal_spec, n=num_samples, axis=-1)
-
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
-
-
-def test_fft_orthogonality_sine_odd_lib():
-    num_samples = 2**10+3
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = np.fft.rfft(signal_time, n=num_samples, axis=-1)
-    transformed_signal_time = np.fft.irfft(signal_spec, n=num_samples, axis=-1)
-
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
-
-
-def test_fft_orthogonality_noise_even_lib():
-    n_samples = 2**18
-    np.random.seed(450)
-    signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = np.fft.rfft(signal_time, n=n_samples, axis=-1)
-    transformed_signal_time = np.fft.irfft(signal_spec, n=n_samples, axis=-1)
-
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
-
-
-def test_fft_orthogonality_noise_odd_lib():
-    n_samples = 2**18+1
-    np.random.seed(450)
-    signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = np.fft.rfft(signal_time, n=n_samples, axis=-1)
-    transformed_signal_time = np.fft.irfft(signal_spec, n=n_samples, axis=-1)
-
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
-
-
-def test_fft_orthogonality_sine_even_np(fft_lib_np):
-    num_samples = 2**10
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
-    transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'rms')
-
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
-
-
-def test_fft_orthogonality_sine_even_fftw(fft_lib_pyfftw):
-    num_samples = 2**10
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
-    transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'rms')
-
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
-
-
-def test_fft_orthogonality_sine_odd_np(fft_lib_np):
-    num_samples = 2**10+3
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
+def test_fft_orthogonality_sine_even_np(sine, fft_lib_np):
     signal_spec = fft.rfft(
-        signal_time, num_samples, samplingrate, 'rms')
+        sine.time, sine.n_samples, sine.sampling_rate, sine.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'rms')
+        signal_spec, sine.n_samples, sine.sampling_rate, sine.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, sine.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
 
-
-def test_fft_orthogonality_sine_odd_fftw(fft_lib_pyfftw):
-    num_samples = 2**10+3
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
+def test_fft_orthogonality_sine_even_fftw(sine, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        sine.time, sine.n_samples, sine.sampling_rate, sine.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, num_samples, samplingrate, 'rms')
+        signal_spec, sine.n_samples, sine.sampling_rate, sine.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, sine.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-10)
 
-
-def test_fft_orthogonality_noise_even_np(fft_lib_np):
-    n_samples = 2**18
-    np.random.seed(450)
-    samplingrate = 40e3
-    signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
+def test_fft_orthogonality_sine_odd_np(sine_odd, fft_lib_np):
+    signal_spec = fft.rfft(
+        sine_odd.time, sine_odd.n_samples, sine_odd.sampling_rate,
+        sine_odd.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'rms')
+        signal_spec, sine_odd.n_samples, sine_odd.sampling_rate,
+        sine_odd.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, sine_odd.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
-
-def test_fft_orthogonality_noise_even_fftw(fft_lib_pyfftw):
-    n_samples = 2**18
-    np.random.seed(450)
-    samplingrate = 40e3
-    signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
+def test_fft_orthogonality_sine_odd_fftw(sine_odd, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        sine_odd.time, sine_odd.n_samples, sine_odd.sampling_rate,
+        sine_odd.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'rms')
+        signal_spec, sine_odd.n_samples, sine_odd.sampling_rate,
+        sine_odd.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, sine_odd.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
-
-def test_fft_orthogonality_noise_odd_np(fft_lib_np):
-    n_samples = 2**18+1
-    np.random.seed(450)
-    samplingrate = 40e3
-    signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
+def test_fft_orthogonality_noise_even_np(noise, fft_lib_np):
+    signal_spec = fft.rfft(
+        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'rms')
+        signal_spec, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, noise.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
 
-
-def test_fft_orthogonality_noise_odd_fftw(fft_lib_pyfftw):
-    n_samples = 2**18+1
-    np.random.seed(450)
-    samplingrate = 40e3
-    signal_time = np.random.normal(0, 1, n_samples)
-    signal_spec = fft.rfft(signal_time, n_samples, samplingrate, 'rms')
+def test_fft_orthogonality_noise_even_fftw(noise, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, n_samples, samplingrate, 'rms')
+        signal_spec, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, noise.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
-    npt.assert_allclose(signal_time, transformed_signal_time, rtol=1e-8)
+
+def test_fft_orthogonality_noise_odd_np(noise_odd, fft_lib_np):
+    signal_spec = fft.rfft(
+        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
+        noise_odd.fft_norm)
+    transformed_signal_time = fft.irfft(
+        signal_spec, noise_odd.n_samples, noise_odd.sampling_rate,
+        noise_odd.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, noise_odd.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_parsevaL_theorem_sine_even_np(fft_lib_np):
-    num_samples = 2**10
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
+def test_fft_orthogonality_noise_odd_fftw(noise_odd, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
+        noise_odd.fft_norm)
+    transformed_signal_time = fft.irfft(
+        signal_spec, noise_odd.n_samples, noise_odd.sampling_rate,
+        noise_odd.fft_norm)
+    npt.assert_allclose(
+        transformed_signal_time, noise_odd.time,
+        rtol=1e-10, atol=10*np.finfo(float).eps)
 
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
 
-    e_time = np.mean(np.abs(signal_time)**2)
+def test_fft_parsevaL_theorem_sine_even_np(sine_rms, fft_lib_np):
+    signal_spec = fft.rfft(
+        sine_rms.time, sine_rms.n_samples, sine_rms.sampling_rate,
+        sine_rms.fft_norm)
+
+    e_time = np.mean(np.abs(sine_rms.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
-    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_sine_even_fftw(fft_lib_pyfftw):
-    num_samples = 2**10
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
+def test_fft_parsevaL_theorem_sine_even_fftw(sine_rms, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        sine_rms.time, sine_rms.n_samples, sine_rms.sampling_rate,
+        sine_rms.fft_norm)
 
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
-
-    e_time = np.mean(np.abs(signal_time)**2)
+    e_time = np.mean(np.abs(sine_rms.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
-    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_sine_odd_np(fft_lib_np):
-    num_samples = 2**10+3
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
+def test_fft_parsevaL_theorem_sine_odd_np(sine_odd_rms, fft_lib_np):
+    signal_spec = fft.rfft(
+        sine_odd_rms.time, sine_odd_rms.n_samples, sine_odd_rms.sampling_rate,
+        sine_odd_rms.fft_norm)
 
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
-
-    e_time = np.mean(np.abs(signal_time)**2)
+    e_time = np.mean(np.abs(sine_odd_rms.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
-    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_sine_odd_fftw(fft_lib_pyfftw):
-    num_samples = 2**10+3
-    frequency = 10e3
-    samplingrate = 40e3
-    num_periods = np.floor(num_samples / samplingrate * frequency)
-    # round to the nearest frequency resulting in a fully periodic sine signal
-    # in the given time interval
-    frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
+def test_fft_parsevaL_theorem_sine_odd_fftw(sine_odd_rms, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        sine_odd_rms.time, sine_odd_rms.n_samples, sine_odd_rms.sampling_rate,
+        sine_odd_rms.fft_norm)
 
-    signal_time = 1 * np.cos(2 * np.pi * frequency * times)
-    signal_spec = fft.rfft(signal_time, num_samples, samplingrate, 'rms')
-
-    e_time = np.mean(np.abs(signal_time)**2)
+    e_time = np.mean(np.abs(sine_odd_rms.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
-    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_even_np(fft_lib_np):
-    n_samples = 2**20
-    np.random.seed(450)
-    samplingrate = 40e3
-    noise_time = np.random.normal(0, 1, n_samples)
-    noise_spec = fft.rfft(noise_time, n_samples, samplingrate, 'rms')
+def test_fft_parsevaL_theorem_noise_even_np(noise, fft_lib_np):
+    signal_spec = fft.rfft(
+        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
 
-    e_time = np.mean(np.abs(noise_time)**2)
-    e_freq = np.sum(np.abs(noise_spec)**2)
+    e_time = np.mean(np.abs(noise.time)**2)
+    e_freq = np.sum(np.abs(signal_spec)**2)
 
-    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_even_fftw(fft_lib_pyfftw):
-    n_samples = 2**20
-    np.random.seed(450)
-    samplingrate = 40e3
-    noise_time = np.random.normal(0, 1, n_samples)
-    noise_spec = fft.rfft(noise_time, n_samples, samplingrate, 'rms')
+def test_fft_parsevaL_theorem_noise_even_fftw(noise, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
 
-    e_time = np.mean(np.abs(noise_time)**2)
-    e_freq = np.sum(np.abs(noise_spec)**2)
+    e_time = np.mean(np.abs(noise.time)**2)
+    e_freq = np.sum(np.abs(signal_spec)**2)
 
-    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_odd_np(fft_lib_np):
-    n_samples = 2**20+1
-    np.random.seed(450)
-    samplingrate = 40e3
-    noise_time = np.random.normal(0, 1, n_samples)
-    noise_spec = fft.rfft(noise_time, n_samples, samplingrate, 'rms')
+def test_fft_parsevaL_theorem_noise_odd_np(noise_odd, fft_lib_np):
+    signal_spec = fft.rfft(
+        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
+        noise_odd.fft_norm)
 
-    e_time = np.mean(np.abs(noise_time)**2)
-    e_freq = np.sum(np.abs(noise_spec)**2)
+    e_time = np.mean(np.abs(noise_odd.time)**2)
+    e_freq = np.sum(np.abs(signal_spec)**2)
 
-    npt.assert_allclose(e_time, e_freq, rtol=1e-10)
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
+
+
+def test_fft_parsevaL_theorem_noise_odd_fftw(noise_odd, fft_lib_pyfftw):
+    signal_spec = fft.rfft(
+        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
+        noise_odd.fft_norm)
+
+    e_time = np.mean(np.abs(noise_odd.time)**2)
+    e_freq = np.sum(np.abs(signal_spec)**2)
+
+    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
 def test_is_odd():
@@ -320,18 +203,16 @@ def test_is_not_odd():
     assert not fft._is_odd(num)
 
 
-def test_normalization_None():
-    spec_single = np.array([1, 1, 1])
-    N = 4       # time signal with even number of samples
-    fs = 40     # arbitrary sampling frequency for psd normalization
+def test_normalization_none(impulse):
+    spec_out = fft.normalization(
+        impulse.freq.copy(), impulse.n_samples, impulse.sampling_rate,
+        impulse.fft_norm, inverse=False)
+    npt.assert_allclose(spec_out, impulse.freq, atol=10*np.finfo(float).eps)
 
-    spec_out = fft.normalization(spec_single.copy(), N, fs,
-                                 'none', inverse=False)
-    npt.assert_allclose(spec_out, spec_single, atol=1e-15)
-
-    spec_out = fft.normalization(spec_out, N, fs,
-                                 'none', inverse=True)
-    npt.assert_allclose(spec_out, spec_single, atol=1e-15)
+    spec_out = fft.normalization(
+        impulse.freq.copy(), impulse.n_samples, impulse.sampling_rate,
+        impulse.fft_norm, inverse=True)
+    npt.assert_allclose(spec_out, impulse.freq, atol=10*np.finfo(float).eps)
 
 
 def test_normalization_single_sided_single_channel_even_samples():
@@ -511,7 +392,7 @@ def test_normalization_with_window():
                                      fft_norm, window=window)
             spec = fft.normalization(spec, 4, 44100, fft_norm,
                                      inverse=True, window=window)
-            npt.assert_allclose(np.array([.5, 1, .5]), spec, atol=1e-15)
+            npt.assert_allclose(spec, np.array([.5, 1, .5]), atol=1e-15)
 
 
 def test_normalization_with_window_value_error():
@@ -527,246 +408,65 @@ def test_normalization_with_window_value_error():
 
 
 def test_normalization_exceptions():
-    # try without numpy array
+    # Call without numpy array
     with raises(ValueError):
         fft.normalization(1, 1, 44100, 'rms')
-    # try invalid normalization
+    # Invalid normalization
     with raises(ValueError):
         fft.normalization(np.array([1]), 1, 44100, 'goofy')
 
 
-def test_rfft_energy_imp_even_samples(impulse):
-    n_samples = 1024
-    samplingrate = 40e3
-    spec = fft.rfft(impulse, n_samples, samplingrate, 'none')
+def test_rfft_normalization_impulse(impulse):
+    """ Test for call of normalization in rfft.
+    """
+    signal_spec = fft.rfft(
+        impulse.time, impulse.n_samples, impulse.sampling_rate,
+        impulse.fft_norm)
 
-    truth = np.ones(int(n_samples/2+1), dtype=np.complex)
-    npt.assert_allclose(spec, truth)
-
-
-def test_rfft_energy_imp_even_samples_fftw(impulse, fft_lib_pyfftw):
-    n_samples = 1024
-    samplingrate = 40e3
-    spec = fft.rfft(impulse, n_samples, samplingrate, 'none')
-
-    truth = np.ones(int(n_samples/2+1), dtype=np.complex)
-    npt.assert_allclose(spec, truth)
+    npt.assert_allclose(
+        signal_spec, impulse.freq,
+        rtol=1e-10, atol=1e-10)
 
 
-def test_irfft_energy_imp_even_samples_np(impulse, fft_lib_np):
-    n_samples = 1024
-    samplingrate = 40e3
-    spec = np.ones(int(n_samples/2+1), dtype=np.complex)
-    data = fft.irfft(spec, n_samples, samplingrate, 'none')
+def test_rfft_normalization_impulse_rms(impulse_rms):
+    """ Test for call of normalization in rfft.
+    """
+    signal_spec = fft.rfft(
+        impulse_rms.time, impulse_rms.n_samples, impulse_rms.sampling_rate,
+        impulse_rms.fft_norm)
 
-    truth = impulse
-    npt.assert_allclose(data, truth)
-
-
-def test_irfft_energy_imp_even_samples_np_fftw(impulse, fft_lib_pyfftw):
-    n_samples = 1024
-    samplingrate = 40e3
-    spec = np.ones(int(n_samples/2+1), dtype=np.complex)
-    data = fft.irfft(spec, n_samples, samplingrate, 'none')
-
-    truth = impulse
-    npt.assert_allclose(data, truth)
+    npt.assert_allclose(
+        signal_spec, impulse_rms.freq,
+        rtol=1e-10, atol=1e-10)
 
 
-def test_rfft_power_imp_even_samples_np(sine, fft_lib_np):
-    n_samples = 1024
-    sampling_rate = 2e3
-    spec = fft.rfft(sine, n_samples, sampling_rate, 'rms')
+def test_rfft_normalization_sine(sine):
+    """ Test for correct call of normalization in rfft.
+    """
+    signal_spec = fft.rfft(
+        sine.time, sine.n_samples, sine.sampling_rate,
+        sine.fft_norm)
 
-    truth = np.zeros(int(n_samples/2+1), dtype=np.complex)
-    truth[int(n_samples/16)] = 1/np.sqrt(2)
-    npt.assert_allclose(np.real(spec), np.real(truth), atol=1e-10)
-    npt.assert_allclose(np.imag(spec), np.imag(truth), atol=1e-10)
-
-
-def test_rfft_power_imp_even_samples_fftw(sine, fft_lib_pyfftw):
-    n_samples = 1024
-    sampling_rate = 2e3
-    spec = fft.rfft(sine, n_samples, sampling_rate, 'rms')
-
-    truth = np.zeros(int(n_samples/2+1), dtype=np.complex)
-    truth[int(n_samples/16)] = 1/np.sqrt(2)
-    npt.assert_allclose(np.real(spec), np.real(truth), atol=1e-10)
-    npt.assert_allclose(np.imag(spec), np.imag(truth), atol=1e-10)
+    npt.assert_allclose(
+        signal_spec, sine.freq,
+        rtol=1e-10, atol=1e-10)
 
 
-def test_irfft_power_imp_even_samples_np(sine, fft_lib_np):
-    n_samples = 1024
-    samplingrate = 40e3
-    spec = np.zeros(int(n_samples/2+1), dtype=np.complex)
-    spec[int(n_samples/16)] = 1/np.sqrt(2)
+def test_rfft_normalization_sine_rms(sine_rms):
+    """ Test for correct call of normalization in rfft.
+    """
+    signal_spec = fft.rfft(
+        sine_rms.time, sine_rms.n_samples, sine_rms.sampling_rate,
+        sine_rms.fft_norm)
 
-    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
-
-    truth = sine
-    npt.assert_allclose(data, truth, atol=1e-10)
-
-
-def test_irfft_power_imp_even_samples_fftw(sine, fft_lib_pyfftw):
-    n_samples = 1024
-    samplingrate = 40e3
-    spec = np.zeros(int(n_samples/2+1), dtype=np.complex)
-    spec[int(n_samples/16)] = 1/np.sqrt(2)
-
-    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
-
-    truth = sine
-    npt.assert_allclose(data, truth, atol=1e-10)
-
-
-def test_irfft_power_imp_odd_samples_np(sine_odd, fft_lib_np):
-    n_samples = 1023
-    samplingrate = 40e3
-    spec = np.zeros(int((n_samples+1)/2), dtype=np.complex)
-    spec[int(n_samples/16)] = 1/np.sqrt(2)
-
-    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
-
-    truth, f = sine_odd
-    npt.assert_allclose(data, truth, atol=1e-10)
-
-
-def test_irfft_power_imp_odd_samples_fftw(sine_odd, fft_lib_pyfftw):
-    n_samples = 1023
-    samplingrate = 40e3
-    spec = np.zeros(int((n_samples+1)/2), dtype=np.complex)
-    spec[int(n_samples/16)] = 1/np.sqrt(2)
-
-    data = fft.irfft(spec, n_samples, samplingrate, 'rms')
-
-    truth, f = sine_odd
-    npt.assert_allclose(data, truth, atol=1e-10)
-
-
-def test_rfft_power_imp_odd_samples_np(sine_odd, fft_lib_np):
-    n_samples = 1023
-    s, f = sine_odd
-    sampling_rate = 40e3
-    spec = fft.rfft(s, n_samples, sampling_rate, 'rms')
-
-    truth = np.zeros(int((n_samples+1)/2), dtype=np.complex)
-    truth[int(n_samples/16)] = 1/np.sqrt(2)
-    npt.assert_allclose(np.real(spec), np.real(truth), atol=1e-10)
-    npt.assert_allclose(np.imag(spec), np.imag(truth), atol=1e-10)
-
-
-def test_rfft_power_imp_odd_samples_fftw(sine_odd, fft_lib_pyfftw):
-    n_samples = 1023
-    s, f = sine_odd
-    sampling_rate = 40e3
-    spec = fft.rfft(s, n_samples, sampling_rate, 'rms')
-
-    truth = np.zeros(int((n_samples+1)/2), dtype=np.complex)
-    truth[int(n_samples/16)] = 1/np.sqrt(2)
-    npt.assert_allclose(np.real(spec), np.real(truth), atol=1e-10)
-    npt.assert_allclose(np.imag(spec), np.imag(truth), atol=1e-10)
+    npt.assert_allclose(
+        signal_spec, sine_rms.freq,
+        rtol=1e-10, atol=1e-10)
 
 
 def test_fft_mock_numpy(fft_lib_np):
     assert 'numpy.fft' in fft.fft_lib.__name__
 
 
-@pytest.fixture
-def fft_lib_np(monkeypatch):
-    # from pyfar.fft import fft_lib
-    import pyfar.fft
-    import numpy as np
-    monkeypatch.setattr(pyfar.fft, 'fft_lib', np.fft)
-
-
 def test_fft_mock_pyfftw(fft_lib_pyfftw):
     assert 'pyfftw' in fft.fft_lib.__name__
-
-
-@pytest.fixture
-def fft_lib_pyfftw(monkeypatch):
-    # from pyfar.fft import fft_lib
-    import pyfar.fft
-    from pyfftw.interfaces import numpy_fft as npi_fft
-    monkeypatch.setattr(pyfar.fft, 'fft_lib', npi_fft)
-
-
-@pytest.fixture
-def impulse():
-    """Generate an impulse, also known as the Dirac delta function
-
-    .. math::
-
-        s(n) =
-        \\begin{cases}
-        a,  & \\text{if $n$ = 0} \\newline
-        0, & \\text{else}
-        \\end{cases}
-
-    Returns
-    -------
-    signal : ndarray, double
-        The impulse signal
-
-    """
-    amplitude = 1
-    num_samples = 1024
-
-    signal = np.zeros(num_samples, dtype=np.double)
-    signal[0] = amplitude
-
-    return signal
-
-
-@pytest.fixture
-def sine():
-    """Generate a sine signal with f = 440 Hz and samplingrate = 44100 Hz.
-
-    Returns
-    -------
-    signal : ndarray, double
-        The sine signal
-
-    """
-    amplitude = 1
-    frequency = 125
-    samplingrate = 2e3
-    num_samples = 1024
-    fullperiod = False
-
-    if fullperiod:
-        num_periods = np.floor(num_samples / samplingrate * frequency)
-        # round to the nearest frequency resulting in a fully periodic
-        # sine signal in the given time interval
-        frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-    signal = amplitude * np.cos(2 * np.pi * frequency * times)
-
-    return signal
-
-
-@pytest.fixture
-def sine_odd():
-    """Generate a sine signal with f = 440 Hz and samplingrate = 44100 Hz.
-
-    Returns
-    -------
-    signal : ndarray, double
-        The sine signal
-
-    """
-    amplitude = 1
-    frequency = 125
-    samplingrate = 2e3
-    num_samples = 1023
-    fullperiod = True
-
-    if fullperiod:
-        num_periods = np.floor(num_samples / samplingrate * frequency)
-        # round to the nearest frequency resulting in a fully periodic
-        # sine signal in the given time interval
-        frequency = num_periods * samplingrate / num_samples
-    times = np.arange(0, num_samples) / samplingrate
-    signal = amplitude * np.cos(2 * np.pi * frequency * times)
-
-    return signal, frequency

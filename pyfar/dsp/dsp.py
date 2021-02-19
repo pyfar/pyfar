@@ -64,7 +64,7 @@ def group_delay(signal, frequencies=None):
         raise TypeError('Input data has to be of type: Signal.')
 
     frequencies = signal.frequencies if frequencies is None \
-        else np.asarray(frequencies)
+        else np.asarray(frequencies, dtype=float)
 
     # get time signal and reshape for easy looping
     time = signal.time
