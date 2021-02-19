@@ -691,23 +691,24 @@ def center_frequencies_fractional_octaves(
 
     Parameters
     ----------
-    num_fractions : int, 1
-        The number of bands a octaves is divided into.
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., 1 refers to octave
+        bands and 3 to third octave bands. The default is 1.
     frequency_range : array, tuple, (20, 20e3)
         The lower and upper frequency limits
 
     Returns
     -------
     nominal : array, float
-        The nominal (rounded) center frequencies specified in the standard.
+        The nominal center frequencies in Hz specified in the standard.
         Nominal frequencies are only returned for octave bands and third octave
         bands
     exact : array, float
-        The exact center frequencies, resulting in a uniform distribution of
-        frequency bands over the frequency range.
+        The exact center frequencies in Hz, resulting in a uniform distribution
+        of frequency bands over the frequency range.
     cutoff_freq : tuple, array, float
-        The lower and upper critical frequencies of the bandpass filters for
-        each band as a tuple corresponding to (f_lower, f_upper)
+        The lower and upper critical frequencies in Hz of the bandpass filters
+        for each band as a tuple corresponding to (f_lower, f_upper)
     """
     nominal = None
 
@@ -837,15 +838,19 @@ def fractional_octave_bands(
 
     Parameters
     ----------
-    sampling_rate : integer
-        Sampling rate of the signal
-    num_fractions : integer
-        Number of octave fractions
-    freq_range : array like, float
-        The lowest and highest frequency to be considered for filter
-        generation
+    signal : Signal, None
+        The Signal to be filtered. Pass None to create the filter without
+        applying it.
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., 1 refers to octave
+        bands and 3 to third octave bands. The default is 1.
+    sampling_rate : None, int
+        The sampling rate in Hz. Only required if signal is None. The default
+        is None.
+    frequency_range : array, tuple, optional
+        The lower and upper frequency limits. The default is (20, 20e3)
     order : integer, optional
-        Order of the butterworth filter
+        Order of the Butterworth filter. The default is 14.
 
     Returns
     -------
@@ -893,15 +898,17 @@ def _coefficients_fractional_octave_bands(
 
     Parameters
     ----------
-    sampling_rate : integer
-        Sampling rate of the signal
-    num_fractions : integer
-        Number of octave fractions
-    freq_range : array like, float
-        The lowest and highest frequency to be considered for filter
-        generation
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., 1 refers to octave
+        bands and 3 to third octave bands. The default is 1.
+    sampling_rate : None, int
+        The sampling rate in Hz. Only required if signal is None. The default
+        is None.
+    frequency_range : array, tuple, optional
+        The lower and upper frequency limits. The default is (20, 20e3)
     order : integer, optional
-        Order of the butterworth filter
+        Order of the Butterworth filter. The default is 14.
+
 
     Returns
     -------
