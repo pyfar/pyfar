@@ -192,14 +192,24 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 def regularized_spectrum_inversion(
         signal, freq_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None):
-    """Invert the spectrum of a signal applying frequency dependent
+    r"""Invert the spectrum of a signal applying frequency dependent
     regularization. Regularization can either be specified within a given
     frequency range using two different regularization factors, or for each
     frequency individually using the parameter `regu_final`. In the first case
-    the regularziation factors for the frequency regions are cross-faded using
-    a raised cosine window function. Note that in the latter case all
-    remaining options are ignored and an array matching the number of
-    frequency bins of the signal needs to be given.
+    the regularization factors for the frequency regions are cross-faded using
+    a raised cosine window function with a width of `math:f*\sqrt(2)` above and
+    below the given frequency range. Note that the resulting regularization
+    function is adjusted to the quadratic maximum of the given signal.
+    In case the `regu_final` parameter is used, all remaining options are
+    ignored and an array matching the number of frequency bins of the signal
+    needs to be given. In this case, no normalization of the regularization
+    function is applied. Finally, the inverse spectrum is calculated as
+    [1]_, [2]_,
+
+    .. math::
+
+        S^{-1}(f) = \frac{S^*(f)}{S^*(f)S(f) + \epsilon(f)}
+
 
     Parameters
     ----------
@@ -207,46 +217,54 @@ def regularized_spectrum_inversion(
         The signals which spectra are to be inverted.
     freq_range : tuple, array_like, double
         The upper and lower frequency limits outside of which the
-        outside regularization factor is to be applied.
+        regularization factor is to be applied.
     regu_outside : float, optional
-        The regularization factor outside the frequency range, by default 1.
+        The normalized regularization factor outside the frequency range.
+        The default is 1.
     regu_inside : float, optional
-        The regularization factor inside the frequency range, by
-        default 10**(-200/20)
+        The normalized regularization factor inside the frequency range.
+        The default is 10**(-200/20).
     regu_final : float, array_like, optional
         The final regularization factor for each frequency, by default None.
-        If this parameter is set, the regularization factors inside and
-        outside the frequency range are ignored.
+        If this parameter is set, the remaining regularization factors are
+        ignored.
 
     Returns
     -------
     pyfar.Signal
-        The reslting signal after inversion.
+        The resulting signal after inversion.
+
+    References
+    ----------
+    .. [1]  O. Kirkeby and P. A. Nelson, “Digital Filter Designfor Inversion
+            Problems in Sound Reproduction,” J. Audio Eng. Soc., vol. 47,
+            no. 7, p. 13, 1999.
+
+    .. [2]  P. C. Hansen, Rank-deficient and discrete ill-posed problems:
+            numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
+
     """
+    data = signal.freq
+
     if regu_final is None:
         regu_inside = np.ones(signal.n_bins, dtype=np.double) * regu_inside
         regu_outside = np.ones(signal.n_bins, dtype=np.double) * regu_outside
 
-        regu_final = np.ones(signal.n_bins, dtype=np.double)
-
         idx_xfade_lower = [
-            signal.find_nearest_frequency(freq_range[0]/np.sqrt(2)),
-            signal.find_nearest_frequency(freq_range[0])]
+            signal.find_nearest_frequency(
+                [freq_range[0]/np.sqrt(2), freq_range[0]])]
 
         regu_final = _cross_fade(regu_outside, regu_inside, idx_xfade_lower)
 
-        if freq_range[1] < signal.sampling_rate:
+        if freq_range[1] < signal.sampling_rate/2:
             idx_xfade_upper = [
                 signal.find_nearest_frequency(freq_range[1]),
                 signal.find_nearest_frequency(np.min(
                     [freq_range[1]*np.sqrt(2), signal.sampling_rate/2]))]
 
-        regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
+            regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
 
-        data = signal.freq
         regu_final *= np.max(np.abs(data)**2)
-    else:
-        data = signal.freq
 
     inverse = signal.copy()
     inverse.freq = np.conj(data) / (np.conj(data)*data + regu_final)
