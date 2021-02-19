@@ -41,7 +41,7 @@ def phase(signal, deg=False, unwrap=False):
     return phase
 
 
-def group_delay(signal, frequencies=None):
+def group_delay(signal, frequencies=None, method='scipy'):
     """Returns the group delay of a signal in samples.
 
     Parameters
@@ -51,6 +51,11 @@ def group_delay(signal, frequencies=None):
     frequencies : number array like
         Frequency or frequencies in Hz at which the group delay is calculated.
         The default is None, in which case signal.frequencies is used.
+    method : 'scipy', 'gradient', optional
+        Calculate the group delay using straight forward calculation of the
+        gradient or the algorithm implemented in scipy. Note that the scipy
+        version uses a more robust implementation than the gradient method, at
+        the cost of an increased computation time.
 
     Returns
     -------
@@ -66,15 +71,31 @@ def group_delay(signal, frequencies=None):
     frequencies = signal.frequencies if frequencies is None \
         else np.asarray(frequencies, dtype=float)
 
-    # get time signal and reshape for easy looping
-    time = signal.time
-    time = time.reshape((-1, signal.n_samples))
-    # initialize group delay
-    group_delay = np.zeros((np.prod(signal.cshape), frequencies.size))
-    # calculate the group delay
-    for cc in range(time.shape[0]):
-        group_delay[cc] = sgn.group_delay(
-            (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
+    if method == 'scipy':
+        # get time signal and reshape for easy looping
+        time = signal.time
+        time = time.reshape((-1, signal.n_samples))
+
+        # initialize group delay
+        group_delay = np.zeros((np.prod(signal.cshape), frequencies.size))
+
+        # calculate the group delay
+        for cc in range(time.shape[0]):
+            group_delay[cc] = sgn.group_delay(
+                (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
+    else:
+        phi = np.reshape(
+            phase(signal, unwrap=True, deg=False),
+            (-1, signal.n_bins))
+        if frequencies is not None:
+            df = signal.sampling_rate / signal.n_samples
+        else:
+            df = np.gradient(frequencies)
+
+        # Calculate the gradient d phi / d omega
+        group_delay = -np.gradient(
+            phi, 2*np.pi*df, axis=-1)*signal.sampling_rate
+
     # reshape to match signal
     group_delay = group_delay.reshape(signal.cshape + (-1, ))
 

@@ -36,7 +36,16 @@ def test_group_delay_single_channel(impulse_group_delay):
     """Test the function returning the group delay of a signal,
     single channel."""
     signal = impulse_group_delay[0]
-    grp = dsp.group_delay(signal)
+    grp = dsp.group_delay(signal, method='scipy')
+    assert grp.shape == (signal.n_bins, )
+    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+
+    grp = dsp.group_delay(signal, method='gradient')
+    assert grp.shape == (signal.n_bins, )
+    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+
+    grp = dsp.group_delay(
+        signal, method='gradient', frequencies=signal.frequencies)
     assert grp.shape == (signal.n_bins, )
     npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
 
@@ -45,7 +54,11 @@ def test_group_delay_two_channel(impulse_group_delay_two_channel):
     """Test the function returning the group delay of a signal,
     two channels."""
     signal = impulse_group_delay_two_channel[0]
-    grp = dsp.group_delay(signal)
+    grp = dsp.group_delay(signal, method='scipy')
+    assert grp.shape == (signal.cshape + (signal.n_bins,))
+    npt.assert_allclose(grp, impulse_group_delay_two_channel[1], rtol=1e-10)
+
+    grp = dsp.group_delay(signal, method='gradient')
     assert grp.shape == (signal.cshape + (signal.n_bins,))
     npt.assert_allclose(grp, impulse_group_delay_two_channel[1], rtol=1e-10)
 
