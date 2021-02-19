@@ -921,10 +921,6 @@ def _coefficients_fractional_octave_bands(
     increased numeric accuracy and stability.
     """
 
-    if num_fractions not in (1, 3):
-        raise ValueError("This currently supports only octave and third \
-                octave band filters.")
-
     f_crit = center_frequencies_fractional_octaves(
         num_fractions, freq_range, return_cutoff=True)[2]
 
