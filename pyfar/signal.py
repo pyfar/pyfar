@@ -15,6 +15,7 @@ the functions have to be called explicitly.
 """
 
 import warnings
+import deepdiff
 import numpy as np
 from pyfar import fft as fft
 from typing import Callable
@@ -50,6 +51,10 @@ class _Audio(object):
         # abstract private class that does not hold data and prevent class
         # methods to fail that require data.)
         self._data = np.atleast_2d(np.nan)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self.__dict__, other.__dict__)
 
     @property
     def domain(self):
@@ -664,6 +669,20 @@ class Signal(FrequencyData, TimeData):
                       dtype=self.dtype)
         return item
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_sampling_rate'],
+            obj_dict['_n_samples'])
+        obj.__dict__.update(obj_dict)
+        return obj
+
     @property
     def signal_type(self):
         """The signal type."""
@@ -675,10 +694,6 @@ class Signal(FrequencyData, TimeData):
         else:
             raise ValueError("No valid fft norm set.")
         return stype
-
-    @signal_type.setter
-    def signal_type(self, value):
-        raise DeprecationWarning("Deprecated, use fft_norm instead.")
 
     def __repr__(self):
         """String representation of signal class.

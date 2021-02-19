@@ -1,4 +1,5 @@
 import copy
+import deepdiff
 import warnings
 
 import numpy as np
@@ -44,6 +45,22 @@ def sosfilt(sos, signal, zi):
 def sosfiltfilt(sos, signal, **kwargs):
     kwargs = pop_state_from_kwargs(kwargs)
     return spsignal.sosfiltfilt(sos, signal, **kwargs)
+
+
+def extend_sos_coefficients(sos, order):
+    """Extend a set of SOS filter coefficients to match a required filter order
+    by adding sections with coefficients resulting in an ideal frequency
+    response.
+    """
+    sos_order = sos.shape[0]
+    if sos_order == order:
+        return sos
+    pad_len = order-sos_order
+    sos_ext = np.zeros((pad_len, 6))
+    sos_ext[:, 3] = 1.
+    sos_ext[:, 0] = 1.
+
+    return np.vstack((sos, sos_ext))
 
 
 class Filter(object):
@@ -215,6 +232,21 @@ class Filter(object):
     def copy(self):
         """Return a deep copy of the Filter object."""
         return utils.copy(self)
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
 
 
 class FilterFIR(Filter):
