@@ -292,7 +292,7 @@ def _cross_fade(first, second, indices):
         The resulting array after cross-fading.
     """
     indices = np.asarray(indices)
-    if np.shape(first)[-1] != np.shape(first)[-1]:
+    if np.shape(first)[-1] != np.shape(second)[-1]:
         raise ValueError("Both arrays need to be of same length.")
     len_arrays = np.shape(first)[-1]
     if np.any(indices > np.shape(first)[-1]):
