@@ -20,7 +20,7 @@ from . import utils
 __all__ = [
     'Signal',
     'TimeData',
-    'FrequencyData'
+    'FrequencyData',
     'Coordinates',
     'Orientations',
     'plot',
