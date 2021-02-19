@@ -106,7 +106,7 @@ class Filter(object):
             if coefficients is None:
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
-            state = atleast_3d_first_dim(state)
+            state = np.atleast_2d(state)
             self._initialized = True
         else:
             self._initialized = False
@@ -188,27 +188,30 @@ class Filter(object):
             self.reset()
 
         if self.size > 1:
-            filtered_signal_data = np.broadcast_to(
+            filtered = np.broadcast_to(
                 signal.time,
                 (self.shape[0], *signal.time.shape))
-            filtered_signal_data = filtered_signal_data.copy()
+            filtered = filtered.copy()
         else:
-            filtered_signal_data = signal.time.copy()
+            filtered = signal.time.copy()
 
         if self.state is not None:
+            new_state = np.zeros_like(self._state)
             for idx, (coeff, state) in enumerate(
                     zip(self._coefficients, self._state)):
-                filtered_signal_data[idx, ...], new_state = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], state)
+                filtered[idx, ...], new_state[idx, ...] = self.filter_func(
+                    coeff, filtered[idx, ...], zi=state)
+            self._state = new_state
+
         else:
             for idx, coeff in enumerate(self._coefficients):
-                filtered_signal_data[idx, ...] = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], zi=None)
+                filtered[idx, ...] = self.filter_func(
+                    coeff, filtered[idx, ...], zi=None)
 
         filtered_signal = copy.deepcopy(signal)
         if (signal.time.ndim == 2) and (signal.cshape[0] == 1):
-            filtered_signal_data = np.squeeze(filtered_signal_data)
-        filtered_signal.time = filtered_signal_data
+            filtered = np.squeeze(filtered)
+        filtered_signal.time = filtered
 
         return filtered_signal
 
@@ -257,6 +260,7 @@ class FilterFIR(Filter):
             self,
             coefficients,
             sampling_rate,
+            state=None,
             filter_func=lfilter):
         """
         Initialize a general Filter object.
@@ -279,7 +283,8 @@ class FilterFIR(Filter):
         a[..., 0] = 1
         coeff = np.stack((b, a), axis=-2)
 
-        super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
+        super().__init__(
+            coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
         self._FILTER_FUNCS = {
             'default': lfilter,
@@ -306,6 +311,7 @@ class FilterIIR(Filter):
             self,
             coefficients,
             sampling_rate,
+            state=None,
             filter_func=lfilter):
         """IIR filter
         Initialize a general Filter object.
@@ -324,7 +330,9 @@ class FilterIIR(Filter):
             The state of the filter from a priory knowledge.
         """
         coeff = np.atleast_2d(coefficients)
-        super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
+        state = np.asarray(state)
+        super().__init__(
+            coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
         self._FILTER_FUNCS = {
             'default': lfilter,
