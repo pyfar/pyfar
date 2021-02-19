@@ -33,8 +33,7 @@ class _Audio(object):
 
         # initialize valid parameter spaces
         # NOTE: Some are note needed by TimeData but would have to be defined
-        #       in DataFrequency and Signal otherwise.
-        self._VALID_TYPES = ["power", "energy"]
+        #       in FrequencyData and Signal otherwise.
         self._VALID_DOMAINS = ["time", "freq"]
         self._VALID_FFT_NORMS = [
             "none", "unitary", "amplitude", "rms", "power", "psd"]
