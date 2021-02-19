@@ -282,6 +282,7 @@ class FilterFIR(Filter):
         a = np.zeros_like(b)
         a[..., 0] = 1
         coeff = np.stack((b, a), axis=-2)
+        state = np.atleast_2d(state)
 
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
