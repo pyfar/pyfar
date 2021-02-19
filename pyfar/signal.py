@@ -6,11 +6,39 @@ non-equidistant audio data in the time and frequency domain. The class `Signal`
 can be used to store equidistant and complete audio data that can be converted
 between the time and frequency domain by means of the Fourier transform.
 
-Arithmetic operations can be applied in the time and frequency domain data and
+Arithmetic operations can be applied in the time and frequency domain and
 are implemented in the methods `add`, `subtract`, `multiply`, `divide`, and
-`power`. The operators `+`, `-`, `*`, `/`, and `**` are overloaded with the
-corresponding operations in the frequency domain. For time domain operations,
-the functions have to be called explicitly.
+`power`. For example, two Signal, TimeData, or FrequencyData instances can be
+added in the time domain by
+
+> result = pyfar.signal.add((signal_1, signal_2), 'time')
+
+and in the frequency domain by
+
+> result = pyfar.signal.add((signal_1, signal_2), 'freq')
+
+This also works with more than two instances and supports array likes and
+scalar values, e.g.,
+
+> result = pyfar.signal.add((signal_1, 1), 'time')
+
+The operators `+`, `-`, `*`, `/`, and `**` are overloaded for convenience.
+Note, however, that their behavior depends on the Audio object. Frequency
+domain operations are applied for `Signal` and `FrequencyData` objects, i.e,
+
+> result = signal1 + signal2
+
+is equivalent to
+
+> result = pyfar.signal.add((signal1, signal2), 'freq')
+
+Time domain operations are applied for `TimeData` objects, i.e.,
+
+> result = time_data_1 + time_data_2
+
+is equivalent to
+
+> result = pyfar.signal.add((time_data_1, time_data_2), 'time')
 
 """
 
