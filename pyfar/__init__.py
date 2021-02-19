@@ -14,7 +14,17 @@ from .orientations import Orientations
 from . import plot as plot
 from . import spatial
 from . import io
+from . import utils
 
 
-__all__ = ['Signal', 'TimeData', 'FrequencyData', 'Coordinates',
-           'Orientations', 'plot', 'spatial', 'io']
+__all__ = [
+    'Signal',
+    'TimeData',
+    'FrequencyData'
+    'Coordinates',
+    'Orientations',
+    'plot',
+    'spatial',
+    'io',
+    'utils',
+    'codec']

@@ -178,13 +178,6 @@ def test_getter_signal_type(sine, sine_rms):
     npt.assert_string_equal(signal.signal_type, 'power')
 
 
-def test_setter_signal_type(sine):
-    """Test if attribute signal type is set correctly."""
-    signal = Signal(sine.time, sine.sampling_rate)
-    with pytest.raises(DeprecationWarning):
-        signal.signal_type = 'energy'
-
-
 def test_getter_fft_norm(sine):
     signal = Signal(sine.time, sine.sampling_rate, fft_norm='psd')
     assert signal.fft_norm == 'psd'
@@ -371,3 +364,18 @@ def test_flatten():
 
     npt.assert_allclose(signal_in._data.reshape((6, -1)), signal_out._data)
     assert id(signal_in) != id(signal_out)
+
+
+def test___eq___equal(sine_signal):
+    actual = sine_signal.copy()
+    assert sine_signal == actual
+
+
+def test___eq___notEqual(sine_signal, sine):
+    actual = Signal(0.5 * sine.time, sine.sampling_rate, domain='time')
+    assert not sine_signal == actual
+    actual = Signal(sine.time, 2 * sine.sampling_rate, domain='time')
+    assert not sine_signal == actual
+    actual = sine_signal.copy()
+    actual.comment = f'{actual.comment} A completely different thing'
+    assert not sine_signal == actual
