@@ -165,9 +165,6 @@ def test_filter_sos_process(impulse):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
-    # coeff = np.array([
-    #     [[1, 1/2, 0], [1, 0, 0]],
-    #     [[1, 1/4, 0], [1, 0, 0]]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
 
