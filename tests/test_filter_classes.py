@@ -170,6 +170,14 @@ def test_filter_sos_process(impulse):
 
     npt.assert_allclose(res.time[:3], coeff[0])
 
+    sos = np.array([[1, 0, 0, 1, 1, 0]])
+    filt = fo.FilterSOS(sos, impulse.sampling_rate)
+    res = filt.process(impulse)
+    desired = np.ones(impulse.n_samples)
+    desired[1::2] *= -1
+
+    npt.assert_allclose(res.time, desired)
+
 
 def test_filter_sos_process_state(impulse):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
