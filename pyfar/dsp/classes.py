@@ -282,7 +282,6 @@ class FilterFIR(Filter):
         a = np.zeros_like(b)
         a[..., 0] = 1
         coeff = np.stack((b, a), axis=-2)
-        state = np.atleast_2d(state)
 
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
@@ -331,7 +330,6 @@ class FilterIIR(Filter):
             The state of the filter from a priory knowledge.
         """
         coeff = np.atleast_2d(coefficients)
-        state = np.asarray(state)
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
@@ -359,6 +357,7 @@ class FilterSOS(Filter):
             self,
             coefficients,
             sampling_rate,
+            state=None,
             filter_func=sosfilt):
         """
         Initialize a general Filter object.
@@ -382,8 +381,11 @@ class FilterSOS(Filter):
             raise ValueError(
                 "The coefficients are not in line with a second order",
                 "section filter structure.")
+
+        if state is not None:
+            state = atleast_3d_first_dim(state)
         super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate)
+            coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
         self._FILTER_FUNCS = {
             'default': sosfilt,
