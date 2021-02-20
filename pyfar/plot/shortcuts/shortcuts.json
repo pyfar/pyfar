@@ -65,9 +65,11 @@
         "info": "zoom in y-axis"},
     "zoom_cm_in": {
         "key": ["*", "alt+shift+up"],
+        "key_verbose": ["shift+plus", "alt+shift+up"],
         "info": "zoom colormap range in"},
     "zoom_cm_out": {
         "key": ["_", "alt+shift+down"],
+        "key_verbose": ["shift+minus", "alt+shift+down"],
         "info": "zoom colormap range out"},
     "toggle_x": {
         "key": ["X"],
