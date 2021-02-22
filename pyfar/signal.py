@@ -22,6 +22,9 @@ scalar values, e.g.,
 
 > result = pyfar.signal.add((signal_1, 1), 'time')
 
+In this case the scalar `1` is broadcasted, i.e., 1 is added to every sample of
+the Signal (or every bin in case of a frequency domain operation).
+
 The operators `+`, `-`, `*`, `/`, and `**` are overloaded for convenience.
 Note, however, that their behavior depends on the Audio object. Frequency
 domain operations are applied for `Signal` and `FrequencyData` objects, i.e,
