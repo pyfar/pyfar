@@ -109,7 +109,7 @@ Before you submit a pull request, check that it meets these guidelines:
 
 Testing Guidelines
 -----------------------
-Test-Driven-Development (TDD) is the fundamental technique we agreed upon in developing the pyfar software packages to ensure a good software development practice. In principle, it is based on `three steps<https://martinfowler.com/bliki/TestDrivenDevelopment.html>`
+Test-Driven-Development (TDD) is the fundamental technique followed in developing the pyfar software packages to ensure a good software development practice. In principle, it is based on `three steps <https://martinfowler.com/bliki/TestDrivenDevelopment.html>`_
 
 - Write a test for the next bit of functionality you want to add.
 - Write the functional code until the test passes.
@@ -144,7 +144,7 @@ To get an idea of the recommended stub workflow have a look at the ``sine`` fixu
 
 Beside the use of stubs replacing objects, it is highly recommended to use **stubs as dummies**. Dummies could provide some data or several related variables needed to call a certain function (i.e. time data and sampling rate), while the actual values are of no importance.
 
-A good example is``test_signal_init`` in *test_signal.py*.
+A good example is ´´test_signal_init´´ in *test_signal.py*.
 
 **When Not to Use Stubs**
 
@@ -154,25 +154,17 @@ Sometimes, the dependency on another pyfar functionality is desired, so a stub m
 
 Mocks are similar to stubs but used for **behavioral verification**. For example, a mock can replace a function or an object to check if it is called with correct parameters. A main motivation for using mocks is to avoid complex or time-consuming external dependencies, for example database queries.
 
-- A typical use case of mocks in the pyfar context is hardware communication, for example reading and writing of large files or audio in and output. These use cases are rare compared to tests performing state verification with stubs.
-- In contrast to some other guidelines on mocks, we agreed that external depencies do *not* need to be generally mocked. Failing tests due to changes in external packages are seen as meaningful warnings.
+- A typical use case of mocks in the pyfar context is hardware communication, for example reading and writing of large files or audio in- and output. These use cases are rare compared to tests performing state verification with stubs.
+- In contrast to some other guidelines on mocks, external depencies do *not* need to be mocked in general. Failing tests due to changes in external packages are meaningful hints to modify the code.
 - Examples of internal mocking can be found in *test_io.py*, indicated by the pytest ``@patch`` calls.
 
-
-Pytest Functionalities
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pytest Tips
+~~~~~~~~~~~
 Pytest provides several, sophisticated functionalities which could reduce the effort of implementing tests.
 
-- Similar tests executing the same code with different variables can be `parametrized<https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
+- Similar tests executing the same code with different variables can be `parametrized <https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
 
 Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
-
-Tips
-~~~~
-
-To run a subset of tests:
-
-$ py.test tests.test_pyfar
 
 
 Deploying
