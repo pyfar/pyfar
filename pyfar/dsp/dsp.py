@@ -83,6 +83,21 @@ def group_delay(signal, frequencies=None, method='scipy'):
         for cc in range(time.shape[0]):
             group_delay[cc] = sgn.group_delay(
                 (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
+    elif method == 'lyons':
+
+        freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
+                          signal.n_samples, signal.sampling_rate,
+                          fft_norm='none')
+
+        freq = fft.normalization(
+            signal.freq, signal.n_samples, signal.sampling_rate,
+            signal.fft_norm, inverse=True)
+
+        group_delay = np.real(freq_k / freq)
+
+        # catch zeros in the denominator
+        group_delay[np.abs(freq) < 1e-15] = 0
+
     else:
         phi = np.reshape(
             phase(signal, unwrap=True, deg=False),
