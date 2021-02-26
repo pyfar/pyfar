@@ -21,7 +21,8 @@
         "key_verbose": ["5", "shift+s"],
         "info": "line.spectrogram"},
     "line.time_freq": {
-        "key": ["6"],
+        "key": ["6", "ctrl+T", "ctrl+F"],
+        "key_verbose": ["6", "ctrl+shift+t", "ctrl+shift+f"],
         "info": "line.time_freq"},
     "line.freq_phase": {
         "key": ["7", "ctrl+P"],
