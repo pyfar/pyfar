@@ -160,6 +160,14 @@ class _Audio(object):
     def _assert_matching_meta_data(self):
         raise NotImplementedError("To be implemented by derived classes.")
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    def _decode(self):
+        """Return dictionary for the encoding."""
+        raise NotImplementedError("To be implemented by derived classes.")
+
     def __getitem__(self, key):
         """Get signal channels at key.
         """
@@ -290,6 +298,17 @@ class TimeData(_Audio):
         item = TimeData(
             data, times=self.times, comment=self.comment, dtype=self.dtype)
         return item
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_times'],
+            obj_dict['_comment'],
+            obj_dict['_dtype'])
+        obj.__dict__.update(obj_dict)
+        return obj
 
 
 class FrequencyData(_Audio):
@@ -425,6 +444,18 @@ class FrequencyData(_Audio):
             data, frequencies=self.frequencies, fft_norm=self.fft_norm,
             comment=self.comment, dtype=self.dtype)
         return item
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_frequencies'],
+            obj_dict['_fft_norm'],
+            obj_dict['_comment'],
+            obj_dict['_dtype'])
+        obj.__dict__.update(obj_dict)
+        return obj
 
 
 class Signal(FrequencyData, TimeData):
@@ -639,10 +670,6 @@ class Signal(FrequencyData, TimeData):
                       fft_norm=self.fft_norm, comment=self.comment,
                       dtype=self.dtype)
         return item
-
-    def _encode(self):
-        """Return dictionary for the encoding."""
-        return self.copy().__dict__
 
     @classmethod
     def _decode(cls, obj_dict):
