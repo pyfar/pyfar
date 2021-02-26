@@ -173,7 +173,11 @@ def shortcuts(show=True):
         print("-------------------------------------------")
         plt = short_cuts["plots"]
         for p in plt:
-            print(f'{", ".join(plt[p]["key"])}: {p}')
+            if "key_verbose" in plt[p]:
+                key = plt[p]["key_verbose"]
+            else:
+                key = plt[p]["key"]
+            print(f'{", ".join(key)}: {p}')
         print(" ")
         print(("Note that not all plots are available for TimeData and "
                "FrequencyData objects as detailed in the documentation of "
@@ -183,7 +187,11 @@ def shortcuts(show=True):
         print("---------------------------------------")
         ctr = short_cuts["controls"]
         for action in ctr:
-            print(f'{", ".join(ctr[action]["key"])}: {ctr[action]["info"]}')
+            if "key_verbose" in ctr[action]:
+                key = ctr[action]["key_verbose"]
+            else:
+                key = ctr[action]["key"]
+            print(f'{", ".join(key)}: {ctr[action]["info"]}')
         print(" ")
 
         print("Notes on plot controls")
