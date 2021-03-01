@@ -3,7 +3,7 @@ import numpy.testing as npt
 from pytest import raises
 
 import pyfar.signal as signal
-from pyfar.signal import Signal
+from pyfar.signal import Signal, TimeData, FrequencyData
 
 
 # test adding two Signals
@@ -81,6 +81,106 @@ def test_add_number_and_signal():
     npt.assert_allclose(y.time, np.atleast_2d([2, 1, 1]), atol=1e-15)
 
 
+def test_add_time_data_and_number():
+    # generate and add signals
+    x = TimeData([1, 0, 0], [0, .1, .5])
+    y = signal.add((x, 1), 'time')
+
+    # check if old signal did not change
+    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
+    npt.assert_allclose(x.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+    # check result
+    assert isinstance(y, TimeData)
+    npt.assert_allclose(y.time, np.atleast_2d([2, 1, 1]), atol=1e-15)
+    npt.assert_allclose(y.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+
+def test_add_time_data_and_time_data():
+    # generate and add signals
+    x = TimeData([1, 0, 0], [0, .1, .5])
+    y = signal.add((x, x), 'time')
+
+    # check if old signal did not change
+    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
+    npt.assert_allclose(x.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+    # check result
+    assert isinstance(y, TimeData)
+    npt.assert_allclose(y.time, np.atleast_2d([2, 0, 0]), atol=1e-15)
+    npt.assert_allclose(y.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+
+def test_add_time_data_and_number_wrong_domain():
+    # generate and add signals
+    x = TimeData([1, 0, 0], [0, .1, .5])
+    with raises(ValueError):
+        signal.add((x, 1), 'freq')
+
+
+def test_add_time_data_and_number_wrong_times():
+    # generate and add signals
+    x = TimeData([1, 0, 0], [0, .1, .5])
+    y = TimeData([1, 0, 0], [0, .1, .4])
+    with raises(ValueError):
+        signal.add((x, y), 'time')
+
+
+def test_add_frequency_data_and_number():
+    # generate and add signals
+    x = FrequencyData([1, 0, 0], [0, .1, .5])
+    y = signal.add((x, 1), 'freq')
+    with raises(ValueError):
+        signal.add((x, 1), 'time')
+
+    # check if old signal did not change
+    npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
+    npt.assert_allclose(x.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+    # check result
+    assert isinstance(y, FrequencyData)
+    npt.assert_allclose(y.freq, np.atleast_2d([2, 1, 1]), atol=1e-15)
+    npt.assert_allclose(y.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+
+def test_add_frequency_data_and_frequency_data():
+    # generate and add signals
+    x = FrequencyData([1, 0, 0], [0, .1, .5])
+    y = signal.add((x, x), 'freq')
+
+    # check if old signal did not change
+    npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
+    npt.assert_allclose(x.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+    # check result
+    assert isinstance(y, FrequencyData)
+    npt.assert_allclose(y.freq, np.atleast_2d([2, 0, 0]), atol=1e-15)
+    npt.assert_allclose(y.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
+
+
+def test_add_frequency_data_and_number_wrong_domain():
+    # generate and add signals
+    x = FrequencyData([1, 0, 0], [0, .1, .5])
+    with raises(ValueError):
+        signal.add((x, 1), 'time')
+
+
+def test_add_frequency_data_and_number_wrong_frequencies():
+    # generate and add signals
+    x = FrequencyData([1, 0, 0], [0, .1, .5])
+    y = FrequencyData([1, 0, 0], [0, .1, .4])
+    with raises(ValueError):
+        signal.add((x, y), 'freq')
+
+
+def test_add_frequency_data_and_number_wrong_fft_norm():
+    # generate and add signals
+    x = FrequencyData([1, 0, 0], [0, .1, .5])
+    y = FrequencyData([1, 0, 0], [0, .1, .5], fft_norm='rms')
+    with raises(ValueError):
+        signal.add((x, y), 'freq')
+
+
 def test_subtraction():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
@@ -121,9 +221,51 @@ def test_power():
     npt.assert_allclose(z.time, np.atleast_2d([4, 1, 0]), atol=1e-15)
 
 
-def test_overloaded_operators():
+def test_overloaded_operators_signal():
     x = Signal([2, 1, 0], 44100, n_samples=5, domain='freq')
     y = Signal([2, 2, 2], 44100, n_samples=5, domain='freq')
+
+    # addition
+    z = x + y
+    npt.assert_allclose(z.freq, np.array([4, 3, 2], ndmin=2), atol=1e-15)
+    # subtraction
+    z = x - y
+    npt.assert_allclose(z.freq, np.array([0, -1, -2], ndmin=2), atol=1e-15)
+    # multiplication
+    z = x * y
+    npt.assert_allclose(z.freq, np.array([4, 2, 0], ndmin=2), atol=1e-15)
+    # division
+    z = x / y
+    npt.assert_allclose(z.freq, np.array([1, .5, 0], ndmin=2), atol=1e-15)
+    # power
+    z = x**y
+    npt.assert_allclose(z.freq, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+
+
+def test_overloaded_operators_time_data():
+    x = TimeData([2, 1, 0], [0, 1, 2])
+    y = TimeData([2, 2, 2], [0, 1, 2])
+
+    # addition
+    z = x + y
+    npt.assert_allclose(z.time, np.array([4, 3, 2], ndmin=2), atol=1e-15)
+    # subtraction
+    z = x - y
+    npt.assert_allclose(z.time, np.array([0, -1, -2], ndmin=2), atol=1e-15)
+    # multiplication
+    z = x * y
+    npt.assert_allclose(z.time, np.array([4, 2, 0], ndmin=2), atol=1e-15)
+    # division
+    z = x / y
+    npt.assert_allclose(z.time, np.array([1, .5, 0], ndmin=2), atol=1e-15)
+    # power
+    z = x**y
+    npt.assert_allclose(z.time, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+
+
+def test_overloaded_operators_frequency_data():
+    x = FrequencyData([2, 1, 0], [0, 1, 2])
+    y = FrequencyData([2, 2, 2], [0, 1, 2])
 
     # addition
     z = x + y
@@ -229,7 +371,17 @@ def test_get_arithmetic_data_with_signal():
                 npt.assert_allclose(s_ref.freq, data_out, atol=1e-15)
 
 
-def test_get_arithmetic_data_assertion():
+def test_assert_match_for_arithmetic_data_different_audio_classes():
     with raises(ValueError):
-        signal._get_arithmetic_data(
-            Signal(1, 44100), 1, 'space')
+        signal._assert_match_for_arithmetic(
+            (Signal(1, 1), TimeData(1, 1)), 'time')
+
+
+def test_assert_match_for_arithmetic_data_wrong_domain():
+    with raises(ValueError):
+        signal._assert_match_for_arithmetic((1, 1), 'space')
+
+
+def test_get_arithmetic_data_wrong_domain():
+    with raises(ValueError):
+        signal._get_arithmetic_data(Signal(1, 44100), 1, 'space')
