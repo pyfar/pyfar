@@ -338,7 +338,7 @@ class TimeData(_Audio):
             obj_dict['_dtype'])
         obj.__dict__.update(obj_dict)
         return obj
-      
+
     def __add__(self, data):
         return add((self, data), 'time')
 
