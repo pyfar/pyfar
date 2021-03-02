@@ -89,7 +89,8 @@ def write_wav(signal, filename, overwrite=True):
 
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
-    warnings.warn("Signal flattened to {data.shape[0]} channels.")
+    if len(signal.cshape) != 1:
+        warnings.warn(f"Signal flattened to {data.shape[0]} channels.")
 
 
     # Check if file exists and for overwrite
