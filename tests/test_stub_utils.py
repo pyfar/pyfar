@@ -136,7 +136,7 @@ def test_impulse_func_multi_channel():
 def test_normalization_none():
     """ Test unitary FFT normalization implemented in stubs_utils.py"""
     n_samples = 4
-    freq = np.array([1, 1, 1], dtype=np.complex)
+    freq = np.array([1, 1, 1], dtype=complex)
     freq_norm = stub_utils._normalization(freq, n_samples, 'none')
     npt.assert_allclose(freq, freq_norm, rtol=1e-10)
 
@@ -145,8 +145,8 @@ def test_normalization_rms_even():
     """ Test RMS FFT normalization implemented in stubs_utils.py,
     even number of samples."""
     n_samples = 4
-    freq = np.array([1, 1, 1], dtype=np.complex)
-    freq_norm_truth = np.array([1, np.sqrt(2), 1], dtype=np.complex)
+    freq = np.array([1, 1, 1], dtype=complex)
+    freq_norm_truth = np.array([1, np.sqrt(2), 1], dtype=complex)
     freq_norm_truth /= n_samples
     freq_norm = stub_utils._normalization(freq, n_samples, 'rms')
     npt.assert_allclose(freq_norm, freq_norm_truth, rtol=1e-10)
@@ -156,8 +156,8 @@ def test_normalization_rms_odd():
     """ Test RMS FFT normalization implemented in stubs_utils.py,
     odd number of samples."""
     n_samples = 5
-    freq = np.array([1, 1, 1], dtype=np.complex)
-    freq_norm_truth = np.array([1, np.sqrt(2), np.sqrt(2)], dtype=np.complex)
+    freq = np.array([1, 1, 1], dtype=complex)
+    freq_norm_truth = np.array([1, np.sqrt(2), np.sqrt(2)], dtype=complex)
     freq_norm_truth /= n_samples
     freq_norm = stub_utils._normalization(freq, n_samples, 'rms')
     npt.assert_allclose(freq_norm, freq_norm_truth, rtol=1e-10)

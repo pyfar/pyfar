@@ -154,7 +154,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     time = np.sin(2 * np.pi * frequency[..., np.newaxis] * times)
     # Spectrum
     n_bins = int(n_samples / 2) + 1
-    freq = np.zeros(cshape + (n_bins,), dtype=np.complex)
+    freq = np.zeros(cshape + (n_bins,), dtype=complex)
     for idx, f in np.ndenumerate(frequency):
         f_bin = int(f / sampling_rate * n_samples)
         freq[idx + (f_bin,)] = -0.5j * float(n_samples)
