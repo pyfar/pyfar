@@ -310,7 +310,7 @@ class TimeData(_Audio):
             like, a numpy array of indices is returned.
         """
         times = np.atleast_1d(value)
-        indices = np.zeros_like(times).astype(np.int)
+        indices = np.zeros_like(times).astype(int)
         for idx, time in enumerate(times):
             indices[idx] = np.argmin(np.abs(self.times - time))
         return np.squeeze(indices)
@@ -466,7 +466,7 @@ class FrequencyData(_Audio):
             a numpy array of indices is returned.
         """
         freqs = np.atleast_1d(value)
-        indices = np.zeros_like(freqs).astype(np.int)
+        indices = np.zeros_like(freqs).astype(int)
         for idx, freq in enumerate(freqs):
             indices[idx] = np.argmin(np.abs(self.frequencies - freq))
         return np.squeeze(indices)
