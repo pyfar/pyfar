@@ -109,17 +109,16 @@ Before you submit a pull request, check that it meets these guidelines:
 
 Testing Guidelines
 -----------------------
-Test-Driven-Development (TDD) is the fundamental technique followed in developing the pyfar software packages to ensure a good software development practice. In principle, it is based on `three steps <https://martinfowler.com/bliki/TestDrivenDevelopment.html>`_
-
-- Write a test for the next bit of functionality you want to add.
-- Write the functional code until the test passes.
-- Refactor both new and old code to make it well structured.
-
+Pyfar uses test-driven development based on `three steps <https://martinfowler.com/bliki/TestDrivenDevelopment.html>`_ and `continuous integration <https://en.wikipedia.org/wiki/Continuous_integration>`_ to test and monitor the code.
 In the following, you'll find a more specific guideline. Note: these instructions are not generally applicable outside of pyfar.
 
 - The main tool used for testing is `pytest <https://docs.pytest.org/en/stable/index.html>`_.
 - All tests are located in the *tests/* folder.
-- Avoid dependencies on other pyfar functionalities. This allows easier debugging in case of failing tests due to errorneous implementations. The recommended workflow is given in the following sections.
+- Avoid dependencies on other pyfar functionalities. Otherwise, your test might fail in the future due to bugs in other parts of pyfar.
+- Use fixtures in your tests whenever possible to avoid duplicate code (see below).
+- Make sure that all important parts of pyfar are covered by the tests. This can be checked using *coverage* (see below).
+
+The recommended workflow is given in the following sections.
 
 Fixtures
 ~~~~~~~~
@@ -158,14 +157,16 @@ Mocks are similar to stubs but used for **behavioral verification**. For example
 - In contrast to some other guidelines on mocks, external depencies do *not* need to be mocked in general. Failing tests due to changes in external packages are meaningful hints to modify the code.
 - Examples of internal mocking can be found in *test_io.py*, indicated by the pytest ``@patch`` calls.
 
-Pytest Tips
+Tips
 ~~~~~~~~~~~
 Pytest provides several, sophisticated functionalities which could reduce the effort of implementing tests.
 
 - Similar tests executing the same code with different variables can be `parametrized <https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
+- Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
 
-Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
+You can create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ by calling
 
+$ pytest --cov=. --cov-report=html
 
 Deploying
 ---------
