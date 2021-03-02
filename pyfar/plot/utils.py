@@ -66,9 +66,9 @@ def context(style='light', after_reset=False):
     >>> import pyfar
     >>> import matplotlib.pyplot as plt
     >>>
-    >>> with pyfar.plot.context():
-    >>>     fig, ax = plt.subplot(2, 1)
-    >>>     pyfar.plot.time(Signal([0, 1, 0, -1], 44100))
+    >>> with pyfar.plot.utils.context():
+    >>>     fig, ax = plt.subplots(2, 1)
+    >>>     pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
     """
 
     # get pyfar plotstyle if desired
@@ -109,6 +109,15 @@ def use(style="light"):
         | list | A list of style specifiers (str, Path or dict) applied from |
         |      | first to last in the list.                                  |
         +------+-------------------------------------------------------------+
+
+    Examples
+    --------
+    >>> import pyfar
+    >>> import matplotlib.pyplot as plt
+    >>>
+    >>> pyfar.plot.utils.use()
+    >>> fig, ax = plt.subplots(2, 1)
+    >>> pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
 
     """
 
