@@ -91,10 +91,6 @@ def write_wav(signal, filename, overwrite=True):
     data = data.reshape(-1, data.shape[-1])
     warnings.warn("Signal flattened to {data.shape[0]} channels.")
 
-    # Check for .wav file extension
-    if filename.split('.')[-1] != 'wav':
-        warnings.warn("Extending filename by .wav.")
-        filename += '.wav'
 
     # Check if file exists and for overwrite
     if overwrite is False and os.path.isfile(filename):

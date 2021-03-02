@@ -6,6 +6,7 @@ from unittest.mock import patch
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
+import pathlib
 import scipy.io.wavfile as wavfile
 
 from pyfar import io
@@ -38,6 +39,17 @@ def test_write_wav(tmpdir, noise):
 def test_write_wav_overwrite(noise, tmpdir):
     """Test overwriting behavior."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(noise, filename)
+    # Call with overwrite disabled
+    with pytest.raises(FileExistsError):
+        io.write_wav(noise, filename, overwrite=False)
+    # Call with overwrite enabled
+    io.write_wav(noise, filename, overwrite=True)
+
+
+def test_write_wav_pathlib(noise, tmpdir):
+    """Test write functionality with filename as pathlib Path object."""
+    filename = pathlib.Path(tmpdir, 'test_wav.wav')
     io.write_wav(noise, filename)
     # Call with overwrite disabled
     with pytest.raises(FileExistsError):
