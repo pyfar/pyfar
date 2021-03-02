@@ -107,7 +107,7 @@ def point_set_polar(dimension, N):
 
             a_point = (a_top + a_bot)/2
 
-            point_l_n = np.arange(0, np.size(points_l), dtype=np.int)
+            point_l_n = np.arange(0, np.size(points_l), dtype=int)
             # points_l = points_l[np.newaxis]
 
             if dimension == 2:
@@ -172,7 +172,7 @@ def caps(dimension, N):
     """
     if dimension == 1:
         s_cap = np.linspace(2*np.pi/N, 2*np.pi, N)
-        n_regions = np.ones(10, dtype=np.int)
+        n_regions = np.ones(10, dtype=int)
     elif N == 1:
         s_cap = np.pi
         n_regions = 1
@@ -282,7 +282,7 @@ def round_to_naturals(N, r_regions):
         The rounded integer number per collar.
     """
     r_regions = np.asarray(r_regions)
-    n_regions = np.zeros(r_regions.shape, dtype=np.int)
+    n_regions = np.zeros(r_regions.shape, dtype=int)
     discrepancy = 0
 
     for zone_n in range(0, np.size(r_regions)):
@@ -351,12 +351,12 @@ def num_collars(N, c_polar, a_ideal):
         The real number of collars.
 
     """
-    if np.int((N > 2) and (a_ideal > 0)):
+    if int((N > 2) and (a_ideal > 0)):
         n_collars = np.maximum(1, np.rint((np.pi - 2*c_polar) / a_ideal))
     else:
         n_collars = 0
 
-    return np.int(n_collars)
+    return int(n_collars)
 
 
 def circle_offset(n_top, n_bot, extra_twist=False):

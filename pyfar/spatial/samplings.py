@@ -482,7 +482,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
         raise ValueError('degree must be between 1 and 180.')
 
     # get the number of points
-    n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
+    n_points = int(np.ceil((degree + 1)**2 / 2) + 1)
     n_points_exceptions = {3: 8, 5: 18, 7: 32, 9: 50, 11: 72, 13: 98, 15: 128}
     if degree in n_points_exceptions:
         n_points = n_points_exceptions[degree]
@@ -1020,7 +1020,7 @@ def _sph_t_design_load_data(degrees='all'):
 
     for degree in degrees:
         # number of sampling points
-        n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
+        n_points = int(np.ceil((degree + 1)**2 / 2) + 1)
         if degree in n_points_exceptions:
             n_points = n_points_exceptions[degree]
 
