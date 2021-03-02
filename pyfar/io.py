@@ -92,7 +92,6 @@ def write_wav(signal, filename, overwrite=True):
     if len(signal.cshape) != 1:
         warnings.warn(f"Signal flattened to {data.shape[0]} channels.")
 
-
     # Check if file exists and for overwrite
     if overwrite is False and os.path.isfile(filename):
         raise FileExistsError(
