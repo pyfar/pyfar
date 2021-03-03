@@ -56,7 +56,7 @@ def group_delay(signal, frequencies=None, method='fft'):
         the group delay using the method presented in [1]_ avoiding issues
         due to discontinuities in the unwrapped phase. Note that the scipy
         version additionally allows to specify frequencies for which the
-        group delay is evaluated. The default is 'fft'.
+        group delay is evaluated. The default is 'fft', which is faster.
 
     Returns
     -------
@@ -75,7 +75,7 @@ def group_delay(signal, frequencies=None, method='fft'):
 
     if frequencies is not None and method == 'fft':
         raise ValueError(
-            "Specifying frequencies is not supported using the chosen method.")
+            "Specifying frequencies is not supported for the 'fft' method.")
 
     frequencies = signal.frequencies if frequencies is None \
         else np.asarray(frequencies, dtype=float)
@@ -92,6 +92,9 @@ def group_delay(signal, frequencies=None, method='fft'):
         for cc in range(time.shape[0]):
             group_delay[cc] = sgn.group_delay(
                 (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
+
+        # reshape to match signal
+        group_delay = group_delay.reshape(signal.cshape + (-1, ))
 
     elif method == 'fft':
         freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
@@ -110,9 +113,6 @@ def group_delay(signal, frequencies=None, method='fft'):
     else:
         raise ValueError(
             "Invalid method, needs to be either 'scipy' or 'fft'.")
-
-    # reshape to match signal
-    group_delay = group_delay.reshape(signal.cshape + (-1, ))
 
     # flatten in numpy fashion if a single channel is returned
     if signal.cshape == (1, ):
