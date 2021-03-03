@@ -291,6 +291,12 @@ def _is_pyfar_type(obj):
         'FrequencyData']
 
 
+def _is_numpy_type(obj):
+    """ True if object is a Numpy-type.
+    """
+    return type(obj).__module__ == np.__name__
+
+
 def _is_dtype(obj):
     """ True if object is `numpy.dtype`.
     """

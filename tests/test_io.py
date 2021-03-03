@@ -264,6 +264,44 @@ def test_write_filterSOS_TypeError(filterSOS, tmpdir):
         io.write(filename, filterSOS=filterSOS)
 
 
+def test_read_write_ndarrays(tmpdir):
+    """ Numpy ndarray
+    Make sure `read` understands the bits written by `write`
+    """
+    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
+    matrix_2d_float = matrix_2d_int.astype(np.float)
+    matrix_2d_complex = matrix_2d_int.astype(np.complex)
+
+    matrix_3d_int = np.arange(0, 24, dtype=np.int).reshape((2, 3, 4))
+    matrix_3d_float = matrix_3d_int.astype(np.float)
+    matrix_3d_complex = matrix_3d_int.astype(np.complex)
+
+    filename = os.path.join(tmpdir, 'ndarray.far')
+
+    io.write(
+        filename,
+        matrix_2d_int=matrix_2d_int,
+        matrix_2d_float=matrix_2d_float,
+        matrix_2d_complex=matrix_2d_complex,
+        matrix_3d_int=matrix_3d_int,
+        matrix_3d_float=matrix_3d_float,
+        matrix_3d_complex=matrix_3d_complex)
+
+    actual = io.read(filename)
+    assert isinstance(actual['matrix_2d_int'], np.ndarray)
+    assert np.array_equal(actual['matrix_2d_int'], matrix_2d_int)
+    assert isinstance(actual['matrix_2d_float'], np.ndarray)
+    assert np.array_equal(actual['matrix_2d_float'], matrix_2d_float)
+    assert isinstance(actual['matrix_2d_complex'], np.ndarray)
+    assert np.array_equal(actual['matrix_2d_complex'], matrix_2d_complex)
+    assert isinstance(actual['matrix_3d_int'], np.ndarray)
+    assert np.array_equal(actual['matrix_3d_int'], matrix_3d_int)
+    assert isinstance(actual['matrix_2d_float'], np.ndarray)
+    assert np.array_equal(actual['matrix_3d_float'], matrix_3d_float)
+    assert isinstance(actual['matrix_2d_complex'], np.ndarray)
+    assert np.array_equal(actual['matrix_3d_complex'], matrix_3d_complex)
+
+
 def test_write_read_multiplePyfarObjects(
         filter,
         coordinates,
