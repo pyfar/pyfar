@@ -193,6 +193,30 @@ def _decode_ndarray(obj, zipfile):
     return np.load(memfile, allow_pickle=False)
 
 
+def _decode_object_json_aided(name, type_hint, zipfile):
+    """
+    Decodes composed objects with the help of JSON.
+
+    Parameters
+    ----------
+    name: str
+        The object name, usually keys from **objs, see `io.write`.
+    type_hint: str
+        The object's type hint, starts with '$'.
+    zipfile: zipfile
+        The zipfile from where we'd like to read data.
+    """
+    json_str = zipfile.read(f'{name}/{type_hint}').decode('UTF-8')
+    obj_dict_encoded = json.loads(json_str)
+    obj_dict = _decode(obj_dict_encoded, zipfile)
+    ObjType = _str_to_type(type_hint[1:])
+    try:
+        return ObjType._decode(obj_dict)
+    except AttributeError:
+        raise NotImplementedError(
+            f'You must implement `{type}._decode` first.')
+
+
 def _encode(obj, zip_path, zipfile):
     """
     Chooses the right encoding depending on the object type.
@@ -297,16 +321,28 @@ def _encode_ndarray(ndarray):
     return memfile.read()
 
 
-def _encode_object_json_aided(name, hint, zipfile):
-    json_str = zipfile.read(f'{name}/{hint}').decode('UTF-8')
-    obj_dict_encoded = json.loads(json_str)
-    obj_dict = _decode(obj_dict_encoded, zipfile)
-    ObjType = _str_to_type(hint[1:])
+def _encode_object_json_aided(obj, name, zipfile):
+    """
+    Encodes composed objects with the help of JSON.
+
+    Parameters
+    ----------
+    obj: PyFar-type
+        The object, usually values from **objs, see `io.write`.
+    name: str
+        The object's name, usually keys from **objs, see `io.write`.
+    zipfile: zipfile
+        The zipfile where we'd like to write data.
+    """
     try:
-        return ObjType._decode(obj_dict)
+        obj_dict = _encode(obj._encode(), name, zipfile)
+        type_hint = f'${type(obj).__name__}'
+        zipfile.writestr(
+            f'{name}/{type_hint}',
+            json.dumps(obj_dict))
     except AttributeError:
         raise NotImplementedError(
-            f'You must implement `{type}._decode` first.')
+            f'You must implement `{type}._encode` first.')
 
 
 def _is_pyfar_type(obj):

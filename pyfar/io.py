@@ -3,7 +3,6 @@ import os.path
 import warnings
 import numpy as np
 import sofa
-import json
 import zipfile
 import io
 
@@ -231,7 +230,7 @@ def read(filename):
                 path.split('/')[:2] for path in zip_paths if '/$' in path]
             for name, hint in obj_names_hints:
                 if codec._is_pyfar_type(hint[1:]):
-                    obj = codec._encode_object_json_aided(name, hint, zip_file)
+                    obj = codec._decode_object_json_aided(name, hint, zip_file)
                 elif hint == '$ndarray':
                     obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
                 else:
@@ -282,15 +281,7 @@ def write(filename, compress=False, **objs):
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
             if codec._is_pyfar_type(obj):
-                try:
-                    obj_dict = codec._encode(obj._encode(), name, zip_file)
-                    type_hint = f'${type(obj).__name__}'
-                    zip_file.writestr(
-                        f'{name}/{type_hint}',
-                        json.dumps(obj_dict))
-                except AttributeError:
-                    raise NotImplementedError(
-                        f'You must implement `{type}._encode` first.')
+                codec._encode_object_json_aided(obj, name, zip_file)
             elif codec._is_numpy_type(obj):
                 codec._encode({f'${type(obj).__name__}': obj}, name, zip_file)
             else:
