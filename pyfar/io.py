@@ -196,7 +196,7 @@ def _sofa_pos(pos_type):
 
 def read(filename):
     """
-    Read any compatible pyfar format from disk.
+    Read any compatible pyfar object or numpy array from disk.
 
     Parameters
     ----------
@@ -245,7 +245,7 @@ def read(filename):
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible pyfar format to disk.
+    Write any compatible pyfar object or numpy array to disk.
 
     Parameters
     ----------
