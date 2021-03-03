@@ -393,3 +393,7 @@ class FilterSOS(Filter):
     @property
     def filter_func(self):
         return self._filter_func
+
+    @property
+    def n_sections(self):
+        return self._coefficients.shape[-2]
