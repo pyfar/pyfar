@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.testing as npt
+import pytest
 
 from pyfar import dsp
 
@@ -36,16 +37,23 @@ def test_group_delay_single_channel(impulse_group_delay):
     """Test the function returning the group delay of a signal,
     single channel."""
     signal = impulse_group_delay[0]
+
+    with pytest.raises(ValueError, match="Invalid method"):
+        dsp.group_delay(signal, method='invalid')
+
+    with pytest.raises(ValueError, match="not supported"):
+        dsp.group_delay(signal, method='fft', frequencies=[1, 2, 3])
+
     grp = dsp.group_delay(signal, method='scipy')
     assert grp.shape == (signal.n_bins, )
     npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
 
-    grp = dsp.group_delay(signal, method='gradient')
+    grp = dsp.group_delay(signal, method='fft')
     assert grp.shape == (signal.n_bins, )
     npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
 
     grp = dsp.group_delay(
-        signal, method='gradient', frequencies=signal.frequencies)
+        signal, method='fft')
     assert grp.shape == (signal.n_bins, )
     npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
 
@@ -58,7 +66,7 @@ def test_group_delay_two_channel(impulse_group_delay_two_channel):
     assert grp.shape == (signal.cshape + (signal.n_bins,))
     npt.assert_allclose(grp, impulse_group_delay_two_channel[1], rtol=1e-10)
 
-    grp = dsp.group_delay(signal, method='gradient')
+    grp = dsp.group_delay(signal, method='fft')
     assert grp.shape == (signal.cshape + (signal.n_bins,))
     npt.assert_allclose(grp, impulse_group_delay_two_channel[1], rtol=1e-10)
 

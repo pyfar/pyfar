@@ -51,22 +51,31 @@ def group_delay(signal, frequencies=None, method='scipy'):
     frequencies : number array like
         Frequency or frequencies in Hz at which the group delay is calculated.
         The default is None, in which case signal.frequencies is used.
-    method : 'scipy', 'gradient', optional
-        Calculate the group delay using straight forward calculation of the
-        gradient or the algorithm implemented in scipy. Note that the scipy
-        version uses a more robust implementation than the gradient method, at
-        the cost of an increased computation time.
+    method : 'scipy', 'fft', optional
+        Method to calculate the group delay of a Signal. Both methods calculate
+        the group delay using the method presented in [1]_ avoiding issues
+        due to discontinuities in the unwrapped phase. Note that the scipy
+        version additionally allows to specify frequencies for which the
+        group delay is evaluated.
 
     Returns
     -------
     group_delay : numpy array
         Frequency dependent group delay in samples. The array is flattened if
         a single channel signal was passed to the function.
+
+    References
+    ----------
+    .. [1]  https://www.dsprelated.com/showarticle/69.php
     """
 
     # check input and default values
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+
+    if frequencies is not None and method == 'fft':
+        raise ValueError(
+            "Specifying frequencies is not supported using the chosen method.")
 
     frequencies = signal.frequencies if frequencies is None \
         else np.asarray(frequencies, dtype=float)
@@ -83,8 +92,8 @@ def group_delay(signal, frequencies=None, method='scipy'):
         for cc in range(time.shape[0]):
             group_delay[cc] = sgn.group_delay(
                 (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
-    elif method == 'lyons':
 
+    elif method == 'fft':
         freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
                           signal.n_samples, signal.sampling_rate,
                           fft_norm='none')
@@ -99,17 +108,8 @@ def group_delay(signal, frequencies=None, method='scipy'):
         group_delay[np.abs(freq) < 1e-15] = 0
 
     else:
-        phi = np.reshape(
-            phase(signal, unwrap=True, deg=False),
-            (-1, signal.n_bins))
-        if frequencies is not None:
-            df = signal.sampling_rate / signal.n_samples
-        else:
-            df = np.gradient(frequencies)
-
-        # Calculate the gradient d phi / d omega
-        group_delay = -np.gradient(
-            phi, 2*np.pi*df, axis=-1)*signal.sampling_rate
+        raise ValueError(
+            "Invalid method, needs to be either 'scipy' or 'fft'.")
 
     # reshape to match signal
     group_delay = group_delay.reshape(signal.cshape + (-1, ))
