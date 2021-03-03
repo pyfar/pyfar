@@ -8,7 +8,7 @@ import os
 import scipy.io as sio
 from pyfar.coordinates import Coordinates
 
-from .external import (samplings_lebedev, eq_area_partitions)
+from . import external
 
 
 def cart_equidistant_cube(n_points):
@@ -482,7 +482,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
         raise ValueError('degree must be between 1 and 180.')
 
     # get the number of points
-    n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
+    n_points = int(np.ceil((degree + 1)**2 / 2) + 1)
     n_points_exceptions = {3: 8, 5: 18, 7: 32, 9: 50, 11: 72, 13: 98, 15: 128}
     if degree in n_points_exceptions:
         n_points = n_points_exceptions[degree]
@@ -742,7 +742,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     sh_order = int(orders[degrees == n_points])
 
     # get the samlpling
-    leb = samplings_lebedev._lebedevSphere(n_points)
+    leb = external.lebedev_sphere(n_points)
 
     # normalize the weights
     weights = leb["w"] / (4 * np.pi)
@@ -940,7 +940,7 @@ def sph_equal_area(n_points, radius=1.):
 
     """
 
-    point_set = eq_area_partitions.point_set(2, n_points)
+    point_set = external.eq_point_set(2, n_points)
     sampling = Coordinates(
         point_set[0] * radius, point_set[1] * radius, point_set[2] * radius,
         domain='cart', convention='right',
@@ -1020,7 +1020,7 @@ def _sph_t_design_load_data(degrees='all'):
 
     for degree in degrees:
         # number of sampling points
-        n_points = np.int(np.ceil((degree + 1)**2 / 2) + 1)
+        n_points = int(np.ceil((degree + 1)**2 / 2) + 1)
         if degree in n_points_exceptions:
             n_points = n_points_exceptions[degree]
 

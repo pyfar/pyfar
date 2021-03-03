@@ -13,6 +13,7 @@ from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.spatial.spatial import SphericalVoronoi
 import pyfar.dsp.classes as fo
+from pyfar.signal import FrequencyData, TimeData
 
 
 def test_read_wav(generate_wav_file, noise):
@@ -192,6 +193,28 @@ def test_read_signal(sine_signal, tmpdir):
     assert actual == sine_signal
 
 
+def test_read_write_timedata(timedata, tmpdir):
+    """ TimeData
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'timedata.far')
+    io.write(filename, timedata=timedata)
+    actual = io.read(filename)['timedata']
+    assert isinstance(actual, TimeData)
+    assert actual == timedata
+
+
+def test_read_write_frequencydata(frequencydata, tmpdir):
+    """ TimeData
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'frequencydata.far')
+    io.write(filename, frequencydata=frequencydata)
+    actual = io.read(filename)['frequencydata']
+    assert isinstance(actual, FrequencyData)
+    assert actual == frequencydata
+
+
 def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     """ SphericalVoronoi
     Make sure `read` understands the bits written by `write`
@@ -246,6 +269,9 @@ def test_write_read_multiplePyfarObjects(
         coordinates,
         orientations,
         sphericalvoronoi,
+        timedata,
+        frequencydata,
+        sine_signal,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back.
@@ -256,7 +282,10 @@ def test_write_read_multiplePyfarObjects(
         filter=filter,
         coordinates=coordinates,
         orientations=orientations,
-        sphericalvoronoi=sphericalvoronoi)
+        sphericalvoronoi=sphericalvoronoi,
+        timedata=timedata,
+        frequencydata=frequencydata,
+        signal=sine_signal)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -266,6 +295,12 @@ def test_write_read_multiplePyfarObjects(
     assert actual['orientations'] == orientations
     assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
     assert actual['sphericalvoronoi'] == sphericalvoronoi
+    assert isinstance(actual['timedata'], TimeData)
+    assert actual['timedata'] == timedata
+    assert isinstance(actual['frequencydata'], FrequencyData)
+    assert actual['frequencydata'] == frequencydata
+    assert isinstance(actual['signal'], Signal)
+    assert actual['signal'] == sine_signal
 
 
 def test_write_read_multiplePyfarObjectsWithCompression(
@@ -273,6 +308,9 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         coordinates,
         orientations,
         sphericalvoronoi,
+        timedata,
+        frequencydata,
+        sine_signal,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back with zip compression.
@@ -284,7 +322,10 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filter=filter,
         coordinates=coordinates,
         orientations=orientations,
-        sphericalvoronoi=sphericalvoronoi)
+        sphericalvoronoi=sphericalvoronoi,
+        timedata=timedata,
+        frequencydata=frequencydata,
+        signal=sine_signal)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -294,3 +335,9 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     assert actual['orientations'] == orientations
     assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
     assert actual['sphericalvoronoi'] == sphericalvoronoi
+    assert isinstance(actual['timedata'], TimeData)
+    assert actual['timedata'] == timedata
+    assert isinstance(actual['frequencydata'], FrequencyData)
+    assert actual['frequencydata'] == frequencydata
+    assert isinstance(actual['signal'], Signal)
+    assert actual['signal'] == sine_signal

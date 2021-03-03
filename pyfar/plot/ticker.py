@@ -140,7 +140,7 @@ class MultipleFractionFormatter(Formatter):
 
     def __call__(self, x, pos=None):
         den = self._denominator
-        num = np.int(np.rint(den*x/self._base))
+        num = int(np.rint(den*x/self._base))
         com = self._gcd(num, den)
         (num, den) = (int(num / com), int(den/com))
         if den == 1:

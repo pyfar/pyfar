@@ -7,7 +7,7 @@ import scipy.io.wavfile as wavfile
 from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
-from pyfar.signal import Signal
+from pyfar.signal import FrequencyData, Signal, TimeData
 import pyfar.dsp.classes as fo
 
 from pyfar.testing import stub_utils
@@ -613,6 +613,20 @@ def sine_signal(sine):
     """ Signal object without Mock or MagicMock wrapper.
     """
     return Signal(sine.time, sine.sampling_rate, domain='time')
+
+
+@pytest.fixture
+def timedata():
+    data = [1, 0, -1]
+    times = [0, .1, .3]
+    return TimeData(data, times)
+
+
+@pytest.fixture
+def frequencydata():
+    data = [1, 0, -1]
+    freqs = [0, .1, .3]
+    return FrequencyData(data, freqs)
 
 
 @pytest.fixture

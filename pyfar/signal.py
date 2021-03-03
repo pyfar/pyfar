@@ -190,6 +190,14 @@ class _Audio(object):
     def _assert_matching_meta_data(self):
         raise NotImplementedError("To be implemented by derived classes.")
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    def _decode(self):
+        """Return dictionary for the encoding."""
+        raise NotImplementedError("To be implemented by derived classes.")
+
     def __getitem__(self, key):
         """Get signal channels at key.
         """
@@ -302,7 +310,7 @@ class TimeData(_Audio):
             like, a numpy array of indices is returned.
         """
         times = np.atleast_1d(value)
-        indices = np.zeros_like(times).astype(np.int)
+        indices = np.zeros_like(times).astype(int)
         for idx, time in enumerate(times):
             indices[idx] = np.argmin(np.abs(self.times - time))
         return np.squeeze(indices)
@@ -319,6 +327,17 @@ class TimeData(_Audio):
         item = TimeData(
             data, times=self.times, comment=self.comment, dtype=self.dtype)
         return item
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_times'],
+            obj_dict['_comment'],
+            obj_dict['_dtype'])
+        obj.__dict__.update(obj_dict)
+        return obj
 
     def __add__(self, data):
         return add((self, data), 'time')
@@ -345,7 +364,7 @@ class FrequencyData(_Audio):
 
     """
     def __init__(self, data, frequencies, fft_norm=None, comment=None,
-                 dtype=np.complex):
+                 dtype=complex):
         """Init FrequencyData with data, and frequencies.
 
         Attributes
@@ -379,7 +398,7 @@ class FrequencyData(_Audio):
         _Audio.__init__(self, 'freq', comment, dtype)
 
         # init data
-        self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+        self._data = np.atleast_2d(np.asarray(data, dtype=complex))
 
         # init frequencies
         self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
@@ -447,7 +466,7 @@ class FrequencyData(_Audio):
             a numpy array of indices is returned.
         """
         freqs = np.atleast_1d(value)
-        indices = np.zeros_like(freqs).astype(np.int)
+        indices = np.zeros_like(freqs).astype(int)
         for idx, freq in enumerate(freqs):
             indices[idx] = np.argmin(np.abs(self.frequencies - freq))
         return np.squeeze(indices)
@@ -469,6 +488,18 @@ class FrequencyData(_Audio):
             data, frequencies=self.frequencies, fft_norm=self.fft_norm,
             comment=self.comment, dtype=self.dtype)
         return item
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_frequencies'],
+            obj_dict['_fft_norm'],
+            obj_dict['_comment'],
+            obj_dict['_dtype'])
+        obj.__dict__.update(obj_dict)
+        return obj
 
     def __add__(self, data):
         return add((self, data), 'freq')
@@ -559,7 +590,7 @@ class Signal(FrequencyData, TimeData):
 
             TimeData.__init__(self, data, self.times, comment, dtype)
         elif domain == 'freq':
-            self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+            self._data = np.atleast_2d(np.asarray(data, dtype=complex))
 
             n_bins = self._data.shape[-1]
             if n_samples is None:
@@ -698,10 +729,6 @@ class Signal(FrequencyData, TimeData):
                       fft_norm=self.fft_norm, comment=self.comment,
                       dtype=self.dtype)
         return item
-
-    def _encode(self):
-        """Return dictionary for the encoding."""
-        return self.copy().__dict__
 
     @classmethod
     def _decode(cls, obj_dict):
