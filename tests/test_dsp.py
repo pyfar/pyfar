@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+import scipy
 
 from pyfar import dsp
 
@@ -89,7 +90,7 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     # Single frequency, of type int
     frequency = 1000
     frequency_idx = np.abs(signal.frequencies-frequency).argmin()
-    grp = dsp.group_delay(signal, frequency)
+    grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == ()
     npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
 
@@ -97,6 +98,6 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency = np.array([1000, 2000])
     frequency_idx = np.abs(
         signal.frequencies-frequency[..., np.newaxis]).argmin(axis=-1)
-    grp = dsp.group_delay(signal, frequency)
+    grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == (2,)
     npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])

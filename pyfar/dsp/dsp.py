@@ -41,7 +41,7 @@ def phase(signal, deg=False, unwrap=False):
     return phase
 
 
-def group_delay(signal, frequencies=None, method='scipy'):
+def group_delay(signal, frequencies=None, method='fft'):
     """Returns the group delay of a signal in samples.
 
     Parameters
@@ -56,7 +56,7 @@ def group_delay(signal, frequencies=None, method='scipy'):
         the group delay using the method presented in [1]_ avoiding issues
         due to discontinuities in the unwrapped phase. Note that the scipy
         version additionally allows to specify frequencies for which the
-        group delay is evaluated.
+        group delay is evaluated. The default is 'fft'.
 
     Returns
     -------
