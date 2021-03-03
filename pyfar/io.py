@@ -215,7 +215,6 @@ def read(filename):
     collection = pyfar.read('my_objs.far')
     my_signal = collection['my_signal']
     my_orientations = collection['my_orientations']
-
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
@@ -228,30 +227,17 @@ def read(filename):
         zip_buffer.write(f.read())
         with zipfile.ZipFile(zip_buffer) as zip_file:
             zip_paths = zip_file.namelist()
-            # 1) Object names are the keys of **objs in `io.write` and only
-            #    exist at the first hierarchical layer of zip_paths ([0])
-            # 2) Object hints are `$json` for Pyfar-objects, `$ndarray` etc.
-            #    and exist only at the second layer of zip_paths ([1])
             obj_names_hints = [
-                path.split('/')[:2] for path in zip_paths
-                if '/$' in path]
+                path.split('/')[:2] for path in zip_paths if '/$' in path]
             for name, hint in obj_names_hints:
-                if hint == '$json':
-                    json_str = zip_file.read(name + '/$json').decode('UTF-8')
-                    obj_type, obj_dict = json.loads(json_str)
-                    obj_dict = codec._decode(obj_dict, zip_file)
-                    ObjType = codec._str_to_type(obj_type)
-                    try:
-                        obj = ObjType._decode(obj_dict)
-                    except AttributeError:
-                        raise NotImplementedError(
-                            f'You must implement `{type}._decode` first.')
-                    if not codec._is_pyfar_type(obj):
-                        raise TypeError(
-                            f'Objects of type {type(obj)}'
-                            'cannot be read from disk.')
-                if hint == '$ndarray':
+                if codec._is_pyfar_type(hint[1:]):
+                    obj = codec._encode_object_json_aided(name, hint, zip_file)
+                elif hint == '$ndarray':
                     obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
+                else:
+                    raise TypeError(
+                        f'Objects of type {type(obj)}'
+                        'cannot be read from disk.')
                 collection[name] = obj
 
     return collection
@@ -298,9 +284,10 @@ def write(filename, compress=False, **objs):
             if codec._is_pyfar_type(obj):
                 try:
                     obj_dict = codec._encode(obj._encode(), name, zip_file)
-                    type_obj_pair = [type(obj).__name__, obj_dict]
+                    type_hint = f'${type(obj).__name__}'
                     zip_file.writestr(
-                        f'{name}/$json', json.dumps(type_obj_pair))
+                        f'{name}/{type_hint}',
+                        json.dumps(obj_dict))
                 except AttributeError:
                     raise NotImplementedError(
                         f'You must implement `{type}._encode` first.')
