@@ -106,13 +106,65 @@ Before you submit a pull request, check that it meets these guidelines:
    https://travis-ci.com/pyfar/pyfar/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
+
+Testing Guidelines
+-----------------------
+Pyfar uses test-driven development based on `three steps <https://martinfowler.com/bliki/TestDrivenDevelopment.html>`_ and `continuous integration <https://en.wikipedia.org/wiki/Continuous_integration>`_ to test and monitor the code.
+In the following, you'll find a guideline. Note: these instructions are not generally applicable outside of pyfar.
+
+- The main tool used for testing is `pytest <https://docs.pytest.org/en/stable/index.html>`_.
+- All tests are located in the *tests/* folder.
+- Avoid dependencies on other pyfar functionalities. Otherwise, your test might fail in the future due to bugs in other parts of pyfar.
+- Use fixtures in your tests whenever possible to avoid duplicate code (see below).
+- Make sure that all important parts of pyfar are covered by the tests. This can be checked using *coverage* (see below).
+
+Fixtures
+~~~~~~~~
+"Software test fixtures initialize test functions. They provide a fixed baseline so that tests execute reliably and produce consistent, repeatable, results. Initialization may setup services, state, or other operating environments. These are accessed by test functions through arguments; for each fixture used by a test function there is typically a parameter (named after the fixture) in the test function’s definition." (from https://docs.pytest.org/en/stable/fixture.html)
+
+- All fixtures are implemented in *conftest.py*, whick makes them automatically available to all tests. This prevents from implementing redundant, unreliable code in several test files.
+- Define the variables used in the test only once, either in the test itself or, preferably, in the definition of the fixture. This assures consistency and prevents from failing tests due to the definition of variables  with the same purpose at different positions or in different files.
+
+Stubs
+~~~~~
+In case of pyfar, mainly **state verification** is applied in the tests. This means that the outcome of a function is compared to a desired value (``assert ...``). For more information, it is reffered to `Martin Fowler's article <https://martinfowler.com/articles/mocksArentStubs.html.>`_.
+To follow the principle of avoiding the dependency on other functionalities in case of objects, **stubs** are used. Stubs mimic the actual objects, but have minimum functionality and *fixed, well defined properties* used for assertions.
+
+It requires a little more effort to implement stubs of the pyfar classes. Therefore, stub utilities are provided in *pyfar/testing/stub_utils.py* and imported in *confest.py*, where the actual stubs are implemented.
+
+- Note: the stub utilities are not meant to be imported to test files directly or used for other purposes than testing. They solely provide functionality to create fixtures.
+- The utilities simplify and harmonize testing within the pyfar package and improve the readability and reliability.
+- The implementation as the private submodule ``pyfar.testing.stub_utils``  further allows the use of similar stubs in related packages with pyfar dependency (e.g. other packages from the pyfar family).
+To get an idea of the recommended stub workflow have a look at the ``sine`` fixure in *conftest.py*.
+
+**Pyfar Stubs as Dummies**
+
+Beside the use of stubs replacing objects, it is highly recommended to use **stubs as dummies**. Dummies could provide some data or several related variables needed to call a certain function (i.e. time data and sampling rate), while the actual values are arbitrary.
+
+A good example is ´´test_signal_init´´ in *test_signal.py*.
+
+**When Not to Use Stubs**
+
+Sometimes, the dependency on another pyfar functionality is desired, so a stub makes no sense. Nevertheless, consider using a fixture, as for example done with the ``sine_signal`` fixture in *conftest.py*.
+
+**Mocks**
+
+Mocks are similar to stubs but used for **behavioral verification**. For example, a mock can replace a function or an object to check if it is called with correct parameters. A main motivation for using mocks is to avoid complex or time-consuming external dependencies, for example database queries.
+
+- A typical use case of mocks in the pyfar context is hardware communication, for example reading and writing of large files or audio in- and output. These use cases are rare compared to tests performing state verification with stubs.
+- In contrast to some other guidelines on mocks, external depencies do *not* need to be mocked in general. Failing tests due to changes in external packages are meaningful hints to modify the code.
+- Examples of internal mocking can be found in *test_io.py*, indicated by the pytest ``@patch`` calls.
+
 Tips
-----
+~~~~~~~~~~~
+Pytest provides several, sophisticated functionalities which could reduce the effort of implementing tests.
 
-To run a subset of tests::
+- Similar tests executing the same code with different variables can be `parametrized <https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
+- Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
 
-$ py.test tests.test_pyfar
+You can create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ by calling
 
+    $ pytest --cov=. --cov-report=html
 
 Deploying
 ---------
