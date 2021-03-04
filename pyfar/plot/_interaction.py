@@ -1,5 +1,52 @@
-# TODO:
-# - use new Interaction class for all plots in .line module
+"""Private class for managing interactive plots through keyboard shortcuts.
+
+It is possible to interact with pyfar plots, i.e., to zoom an axis, through
+keyboard shortcuts. Keyboard shortcuts are managed and documented by
+`pyfar.plot.utils.shortcuts`
+
+How this works
+--------------
+
+The interaction is managed by three classes:
+1. `Cycle` stores the currently active channel and cycles channels. This is
+   only used internally.
+2. `PlotParameter` stores parameters for all plots. An object of this class
+    must be created inside each plot to enable interaction.
+3. `Interaction` is the main class that handles the interaction. An object of
+   this class must also be created inside each plot to enable interaction. The
+   object is added to the axes mostly for debugging purposes. Therefore this
+   is not documented in the docstring of the plot functions.
+
+What to do when changing plot functions?
+----------------------------------------
+
+If you change or add parameters of a plot function you have to do at least two
+changes:
+1. Make sure that the `PlotParameter` object created in that plot function is
+   up to date.
+2. Make sure that the call of that plot function in `Interaction.toogle_plot()`
+   is up to data.
+
+How to debug interaction
+------------------------
+
+Debugging is a bit tricky because you do not see errors in the terminal. It can
+be done this way
+
+>>> # %% plot something
+>>> import pyfar
+>>> import numpy as np
+>>> from pyfar.plot._interaction import EventEmu as EventEmu
+>>> %matplotlib qt
+>>>
+>>> sig = pyfar.Signal(np.random.normal(0, 1, 2**16), 48e3)
+>>> ax = pyfar.plot.time(sig)
+>>>
+>>> # %% debug this cell
+>>> # EventEmu can be used to simulate pressing a key
+>>> ax[0].interaction.select_action(EventEmu('Y'))
+
+"""
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
