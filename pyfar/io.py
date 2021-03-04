@@ -3,7 +3,6 @@ import os.path
 import warnings
 import numpy as np
 import sofa
-import json
 import zipfile
 import io
 
@@ -196,7 +195,7 @@ def _sofa_pos(pos_type):
 
 def read(filename):
     """
-    Read any compatible pyfar format from disk.
+    Read any compatible pyfar object or numpy array from disk.
 
     Parameters
     ----------
@@ -215,7 +214,6 @@ def read(filename):
     collection = pyfar.read('my_objs.far')
     my_signal = collection['my_signal']
     my_orientations = collection['my_orientations']
-
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
@@ -228,18 +226,14 @@ def read(filename):
         zip_buffer.write(f.read())
         with zipfile.ZipFile(zip_buffer) as zip_file:
             zip_paths = zip_file.namelist()
-            obj_names = set([path.split('/')[0] for path in zip_paths])
-            for name in obj_names:
-                json_str = zip_file.read(name + '/json').decode('UTF-8')
-                obj_type, obj_dict = json.loads(json_str)
-                obj_dict = codec._decode(obj_dict, zip_file)
-                ObjType = codec._str_to_type(obj_type)
-                try:
-                    obj = ObjType._decode(obj_dict)
-                except AttributeError:
-                    raise NotImplementedError(
-                        f'You must implement `{type}._decode` first.')
-                if not codec._is_pyfar_type(obj):
+            obj_names_hints = [
+                path.split('/')[:2] for path in zip_paths if '/$' in path]
+            for name, hint in obj_names_hints:
+                if codec._is_pyfar_type(hint[1:]):
+                    obj = codec._decode_object_json_aided(name, hint, zip_file)
+                elif hint == '$ndarray':
+                    obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
+                else:
                     raise TypeError(
                         f'Objects of type {type(obj)}'
                         'cannot be read from disk.')
@@ -250,14 +244,14 @@ def read(filename):
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible pyfar format to disk.
+    Write any compatible pyfar object or numpy array to disk.
 
     Parameters
     ----------
     filename : string
         Full path or filename. If now extension is provided, .far-suffix
         will be add to filename.
-    compress : bool
+    compress : bools
         Default is false (uncompressed).
         Compressed files take less disk space but probalby need more time
         for writing and reading.
@@ -286,19 +280,16 @@ def write(filename, compress=False, **objs):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
-            if not codec._is_pyfar_type(obj):
+            if codec._is_pyfar_type(obj):
+                codec._encode_object_json_aided(obj, name, zip_file)
+            elif codec._is_numpy_type(obj):
+                codec._encode({f'${type(obj).__name__}': obj}, name, zip_file)
+            else:
                 error = (
                     f'Objects of type {type(obj)} cannot be written to disk.')
                 if isinstance(obj, fo.Filter):
                     error = f'{error}. Consider casting to {fo.Filter}'
                 raise TypeError(error)
-            try:
-                obj_dict = codec._encode(obj._encode(), name, zip_file)
-            except AttributeError:
-                raise NotImplementedError(
-                    f'You must implement `{type}._encode` first.')
-            type_obj_pair = [type(obj).__name__, obj_dict]
-            zip_file.writestr(f'{name}/json', json.dumps(type_obj_pair))
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())
