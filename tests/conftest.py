@@ -37,6 +37,31 @@ def sine():
 
 
 @pytest.fixture
+def sine_short():
+    """Short sine signal stub where the first frequency is > 20 Hz.
+
+    This is used for testing plot._line._lower_frequency_limit.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 100
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm)
+
+    return signal
+
+
+@pytest.fixture
 def sine_rms():
     """Sine signal stub,
     RMS FFT-normalization.
@@ -406,6 +431,20 @@ def frequency_data_three_points():
     """
     frequency_data = stub_utils.frequency_data_stub(
         [2, .25, .5], [100, 1_000, 20_000])
+    return frequency_data
+
+
+@pytest.fixture
+def frequency_data_one_point():
+    """
+    FrequencyData stub with one data points.
+
+    Returns
+    -------
+    frequency_data
+        stub of pyfar FrequencyData class
+    """
+    frequency_data = stub_utils.frequency_data_stub([2], [0])
     return frequency_data
 
 

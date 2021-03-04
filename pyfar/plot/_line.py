@@ -111,11 +111,19 @@ def _set_axlim(ax, setter, low, high, limits):
 
 
 def _lower_frequency_limit(signal):
-    """Return the lower frequency limit for plotting."""
-    if isinstance(signal, Signal):
-        lower_frequency_limit = max(20, signal.frequencies[1])
-    elif isinstance(signal, FrequencyData):
-        lower_frequency_limit = max(20, signal.frequencies[0])
+    """Return the lower frequency limit for plotting.
+
+    pyfar frequency plots start at 20 Hz if data is availabe . If this is not
+    the case, they start at the lowest available frequency.
+    """
+    if isinstance(signal, (Signal, FrequencyData)):
+        # indices of non-zero frequencies
+        idx = np.flatnonzero(signal.frequencies)
+        if len(idx) == 0:
+            raise ValueError(
+                "Signals must have frequencies > 0 Hz for plotting.")
+        # get the frequency limit
+        lower_frequency_limit = max(20, signal.frequencies[idx[0]])
     else:
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')

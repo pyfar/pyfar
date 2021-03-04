@@ -473,3 +473,31 @@ def test_prepare_plot():
     # test without axes and with desired subplot layout
     plot._line._prepare_plot(None, (2, 2))
     plt.close()
+
+
+def test_lower_frequency_limit(
+        sine, sine_short, frequency_data_three_points,
+        frequency_data_one_point, time_data_three_points):
+    """Test the private function plot._line._lower_frequency_limit"""
+
+    # test Signal with frequencies below 20 Hz
+    low = plot._line._lower_frequency_limit(sine)
+    assert low == 20
+
+    # test Signal with frequencies above 20 Hz
+    low = plot._line._lower_frequency_limit(sine_short)
+    assert low == 44100/100  # lowest frequency fs=44100 / n_samples=100
+
+    # test with FrequencyData
+    # (We only need to test if FrequencyData works. The frequency dependent
+    # cases are already tested above)
+    low = plot._line._lower_frequency_limit(frequency_data_three_points)
+    assert low == 100
+
+    # test only 0 Hz assertions
+    with raises(ValueError, match="Signals must have frequencies > 0 Hz"):
+        plot._line._lower_frequency_limit(frequency_data_one_point)
+
+    # test TimeData assertions
+    with raises(TypeError, match="Input data has to be of type"):
+        plot._line._lower_frequency_limit(time_data_three_points)
