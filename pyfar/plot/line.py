@@ -262,7 +262,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'line.spectrogram', dB_freq=dB, log_prefix=log_prefix,
-        log_reference=log_reference, yscale=yscale, window=window,
+        log_reference=log_reference, yscale=yscale, unit=unit, window=window,
         window_length=window_length, window_overlap_fct=window_overlap_fct,
         cmap=cmap)
     interaction = ia.Interaction(signal, ax[0], style, plot_parameter)

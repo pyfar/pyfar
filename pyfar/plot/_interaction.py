@@ -491,9 +491,9 @@ class Interaction(object):
                 self.params.update_axis_type('line.spectrogram')
                 ax = _line._spectrogram_cb(
                     self.signal[self.cycler.index], prm.dB_freq,
-                    prm.log_prefix, prm.log_reference, prm.yscale, prm.window,
-                    prm.window_length, prm.window_overlap_fct, prm.cmap,
-                    self.ax, **self.kwargs)
+                    prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
+                    prm.window, prm.window_length, prm.window_overlap_fct,
+                    prm.cmap, self.ax, **self.kwargs)
                 self.ax = ax[0]
 
             elif event.key in plot['line.time_freq']:
