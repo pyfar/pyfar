@@ -1,9 +1,10 @@
+import warnings
+
 import numpy as np
 import scipy.signal as spsignal
 
-from .classes import (FilterIIR, FilterSOS)
-
 from . import _audiofilter as iir
+from .classes import FilterIIR, FilterSOS, extend_sos_coefficients
 
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
@@ -679,3 +680,277 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
         # return the filtered signal
         signal_filt = filt.process(signal)
         return signal_filt
+
+
+def fractional_octave_frequencies(
+        num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
+    """Return the octave center frequencies according to the IEC 61260:1:2014
+    standard. For numbers of fractions other than 1 and 3, only the exact
+    center frequencies are returned, since nominal frequencies are not
+    specified by corresponding standards.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., 1 refers to octave
+        bands and 3 to third octave bands. The default is 1.
+    frequency_range : array, tuple, (20, 20e3)
+        The lower and upper frequency limits
+
+    Returns
+    -------
+    nominal : array, float
+        The nominal center frequencies in Hz specified in the standard.
+        Nominal frequencies are only returned for octave bands and third octave
+        bands
+    exact : array, float
+        The exact center frequencies in Hz, resulting in a uniform distribution
+        of frequency bands over the frequency range.
+    cutoff_freq : tuple, array, float
+        The lower and upper critical frequencies in Hz of the bandpass filters
+        for each band as a tuple corresponding to (f_lower, f_upper)
+    """
+    nominal = None
+
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "You need to specify a lower and upper limit frequency.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The second frequency needs to be higher than the first.")
+
+    if num_fractions in [1, 3]:
+        nominal, exact = _center_frequencies_fractional_octaves_iec(
+            nominal, num_fractions)
+
+        mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
+        nominal = nominal[mask]
+        exact = exact[mask]
+
+    else:
+        exact = _exact_center_frequencies_fractional_octaves(
+            num_fractions, f_lims)
+
+    if return_cutoff:
+        octave_ratio = 10**(3/10)
+        freqs_upper = exact * octave_ratio**(1/2/num_fractions)
+        freqs_lower = exact * octave_ratio**(-1/2/num_fractions)
+        f_crit = (freqs_lower, freqs_upper)
+        return nominal, exact, f_crit
+    else:
+        return nominal, exact
+
+
+def _exact_center_frequencies_fractional_octaves(
+        num_fractions, frequency_range):
+    """Calculate the center frequencies of arbitrary fractional octave bands.
+
+    Parameters
+    ----------
+    num_fractions : int
+        The number of fractions
+    frequency_range
+        The upper and lower frequency limits
+
+    Returns
+    -------
+    exact : array, float
+        An array containing the center frequencies of the respective fractional
+        octave bands
+
+    """
+    ref_freq = 1e3
+    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
+    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
+
+    indices = np.arange(-Nmin, Nmax+1)
+    exact = ref_freq * 2**(indices / num_fractions)
+
+    return exact
+
+
+def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
+    """Returns the exact center frequencies for fractional octave bands
+    according to the IEC 61260:1:2014 standard.
+    octave ratio
+    .. G = 10^{3/10}
+    center frequencies
+    .. f_m = f_r G^{x/b}
+    .. f_m = f_e G^{(2x+1)/(2b)}
+    where b is the number of octave fractions, f_r is the reference frequency
+    chosen as 1000Hz and x is the index of the frequency band.
+
+    Parameters
+    ----------
+    num_fractions : 1, 3
+        The number of octave fractions. 1 returns octave center frequencies,
+        3 returns third octave center frequencies.
+
+    Returns
+    -------
+    nominal : array, float
+        The nominal (rounded) center frequencies specified in the standard.
+        Nominal frequencies are only returned for octave bands and third octave
+        bands
+    exact : array, float
+        The exact center frequencies, resulting in a uniform distribution of
+        frequency bands over the frequency range.
+    """
+    if num_fractions == 1:
+        nominal = np.array([
+            31.5, 63, 125, 250, 500, 1e3,
+            2e3, 4e3, 8e3, 16e3], dtype=float)
+    elif num_fractions == 3:
+        nominal = np.array([
+            25, 31.5, 40, 50, 63, 80, 100, 125, 160,
+            200, 250, 315, 400, 500, 630, 800, 1000,
+            1250, 1600, 2000, 2500, 3150, 4000, 5000,
+            6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
+
+    reference_freq = 1e3
+    octave_ratio = 10**(3/10)
+
+    iseven = np.mod(num_fractions, 2) == 0
+    if ~iseven:
+        indices = np.around(
+            num_fractions * np.log(nominal/reference_freq)
+            / np.log(octave_ratio))
+        exponent = (indices/num_fractions)
+    else:
+        indices = np.around(
+            2.0*num_fractions *
+            np.log(nominal/reference_freq) / np.log(octave_ratio) - 1)/2
+        exponent = ((2*indices + 1) / num_fractions / 2)
+
+    exact = reference_freq * octave_ratio**exponent
+
+    return nominal, exact
+
+
+def fractional_octave_bands(
+        signal,
+        num_fractions,
+        sampling_rate=None,
+        freq_range=(20.0, 20e3),
+        order=14):
+    """Create and/or apply a fractional octave filter bank.
+
+    Parameters
+    ----------
+    signal : Signal, None
+        The Signal to be filtered. Pass None to create the filter without
+        applying it.
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., 1 refers to octave
+        bands and 3 to third octave bands. The default is 1.
+    sampling_rate : None, int
+        The sampling rate in Hz. Only required if signal is None. The default
+        is None.
+    frequency_range : array, tuple, optional
+        The lower and upper frequency limits. The default is (20, 20e3)
+    order : integer, optional
+        Order of the Butterworth filter. The default is 14.
+
+    Returns
+    -------
+    signal : Signal
+        The filtered signal. Only returned if `sampling_rate = None`.
+    filter : Filter
+        Filter object. Only returned if `signal = None`.
+
+    Notes
+    -----
+    This function uses second order sections of butterworth filters for
+    increased numeric accuracy and stability.
+    """
+    # check input
+    if (signal is None and sampling_rate is None) \
+            or (signal is not None and sampling_rate is not None):
+        raise ValueError('Either signal or sampling_rate must be none.')
+
+    fs = signal.sampling_rate if sampling_rate is None else sampling_rate
+
+    sos = _coefficients_fractional_octave_bands(
+        sampling_rate=fs, num_fractions=num_fractions,
+        freq_range=freq_range, order=order)
+
+    filt = FilterSOS(sos, fs)
+    filt.comment = (
+        "Second order section 1/{num_fractions} fractional octave band"
+        "filter of order {order}")
+
+    # return the filter object
+    if signal is None:
+        # return the filter object
+        return filt
+    else:
+        # return the filtered signal
+        signal_filt = filt.process(signal)
+        return signal_filt
+
+
+def _coefficients_fractional_octave_bands(
+        sampling_rate, num_fractions,
+        freq_range=(20.0, 20e3), order=14):
+    """Calculate the second order section filter coefficients of a fractional
+    octave band filter bank.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., 1 refers to octave
+        bands and 3 to third octave bands. The default is 1.
+    sampling_rate : None, int
+        The sampling rate in Hz. Only required if signal is None. The default
+        is None.
+    frequency_range : array, tuple, optional
+        The lower and upper frequency limits. The default is (20, 20e3)
+    order : integer, optional
+        Order of the Butterworth filter. The default is 14.
+
+
+    Returns
+    -------
+    sos : array, float
+        Second order section filter coefficients with shape (.., 6)
+
+    Notes
+    -----
+    This function uses second order sections of butterworth filters for
+    increased numeric accuracy and stability.
+    """
+
+    f_crit = fractional_octave_frequencies(
+        num_fractions, freq_range, return_cutoff=True)[2]
+
+    freqs_upper = f_crit[1]
+    freqs_lower = f_crit[0]
+
+    # normalize interval such that the Nyquist frequency is 1
+    Wns = np.vstack((freqs_lower, freqs_upper)).T / sampling_rate * 2
+
+    mask_skip = Wns[:, 0] >= 1
+    if np.any(mask_skip):
+        Wns = Wns[~mask_skip]
+        warnings.warn("Skipping bands above the Nyquist frequency")
+
+    num_bands = np.sum(~mask_skip)
+    sos = np.zeros((num_bands, order, 6), np.double)
+
+    for idx, Wn in enumerate(Wns):
+        # in case the upper frequency limit is above Nyquist, use a highpass
+        if Wn[-1] > 1:
+            warnings.warn('The upper frequency limit {} Hz is above the \
+                Nyquist frequency. Using a highpass filter instead of a \
+                bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
+            Wn = Wn[0]
+            btype = 'highpass'
+            sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
+            sos_coeff = extend_sos_coefficients(sos_hp, order)
+        else:
+            btype = 'bandpass'
+            sos_coeff = spsignal.butter(
+                order, Wn, btype=btype, output='sos')
+        sos[idx, :, :] = sos_coeff
+    return sos

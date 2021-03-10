@@ -4,7 +4,12 @@ import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
+from pyfar.spatial.spatial import SphericalVoronoi
 from pyfar.orientations import Orientations
+from pyfar.coordinates import Coordinates
+from pyfar.signal import FrequencyData, Signal, TimeData
+import pyfar.dsp.classes as fo
+
 from pyfar.testing import stub_utils
 
 
@@ -538,19 +543,147 @@ def generate_sofa_postype_error(
 
 @pytest.fixture
 def views():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
 
 
 @pytest.fixture
 def ups():
+    """ Used for the creation of Orientation objects with
+    `Orientations.from_view_up`
+    """
     return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
 
 
 @pytest.fixture
 def positions():
+    """ Used for the visualization of Orientation objects with
+    `Orientations.show`
+    """
     return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
 
 
 @pytest.fixture
 def orientations(views, ups):
+    """ Orientations object uses fixtures `views` and `ups`.
+    """
     return Orientations.from_view_up(views, ups)
+
+
+@pytest.fixture
+def coordinates():
+    """ Coordinates object.
+    """
+    return Coordinates([0, 1], [2, 3], [4, 5])
+
+
+@pytest.fixture
+def sine_signal(sine):
+    """ Signal object without Mock or MagicMock wrapper.
+    """
+    return Signal(sine.time, sine.sampling_rate, domain='time')
+
+
+@pytest.fixture
+def timedata():
+    data = [1, 0, -1]
+    times = [0, .1, .3]
+    return TimeData(data, times)
+
+
+@pytest.fixture
+def frequencydata():
+    data = [1, 0, -1]
+    freqs = [0, .1, .3]
+    return FrequencyData(data, freqs)
+
+
+@pytest.fixture
+def coeffs():
+    return np.array([[[1, 0, 0], [1, 0, 0]]])
+
+
+@pytest.fixture
+def state():
+    return np.array([[[1, 0]]])
+
+
+@pytest.fixture
+def filter(coeffs, state):
+    """ Filter object.
+    """
+    return fo.Filter(coefficients=coeffs, state=state)
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
+
+
+@pytest.fixture
+def filterFIR():
+    """ FilterFIR objectr.
+    """
+    coeff = np.array([
+        [1, 1 / 2, 0],
+        [1, 1 / 4, 1 / 8]])
+    return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterSOS():
+    """ FilterSOS objectr.
+    """
+    sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
+    return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
+
+
+@pytest.fixture
+def sphericalvoronoi():
+    """ SphericalVoronoi object.
+    """
+    points = np.array(
+        [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
+    sampling = Coordinates(points[:, 0], points[:, 1], points[:, 2])
+    return SphericalVoronoi(sampling)
+
+
+@pytest.fixture
+def any_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.AnyClass()
+
+
+@pytest.fixture
+def no_encode_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.NoEncodeClass()
+
+
+@pytest.fixture
+def no_decode_obj():
+    """ Any object acting as placeholder for non-PyFar-objects.
+    """
+    return stub_utils.NoDecodeClass()
+
+
+@pytest.fixture
+def flat_data():
+    """ Class being primarily used as a subclass of the nested data object.
+    """
+    return stub_utils.FlatData()
+
+
+@pytest.fixture
+def nested_data():
+    """ General nested data structure primarily used to illustrate mechanism of
+    `io.write` and `io.read`.
+    """
+    return stub_utils.NestedData.create()
