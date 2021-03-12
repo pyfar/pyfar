@@ -6,6 +6,7 @@ from unittest.mock import patch
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
+import pathlib
 import scipy.io.wavfile as wavfile
 
 from pyfar import io
@@ -44,6 +45,33 @@ def test_write_wav_overwrite(noise, tmpdir):
         io.write_wav(noise, filename, overwrite=False)
     # Call with overwrite enabled
     io.write_wav(noise, filename, overwrite=True)
+
+
+def test_write_wav_pathlib(noise, tmpdir):
+    """Test write functionality with filename as pathlib Path object."""
+    filename = pathlib.Path(tmpdir, 'test_wav.wav')
+    io.write_wav(noise, filename)
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        noise.time,
+        np.atleast_2d(signal_reload),
+        rtol=1e-10)
+
+
+def test_write_wav_suffix(noise, tmpdir):
+    """Test for .wav extension of filename."""
+    filename = pathlib.Path(tmpdir, 'test_wav')
+    io.write_wav(noise, filename)
+    # Without suffix
+    with pytest.raises(FileNotFoundError):
+        wavfile.read(filename)
+    # With suffix added
+    filename = filename.with_suffix('.wav')
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        noise.time,
+        np.atleast_2d(signal_reload),
+        rtol=1e-10)
 
 
 def test_write_wav_nd(noise_two_by_two_channel, tmpdir):

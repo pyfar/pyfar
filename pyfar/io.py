@@ -1,10 +1,12 @@
 import scipy.io.wavfile as wavfile
 import os.path
+import pathlib
 import warnings
 import numpy as np
 import sofa
 import zipfile
 import io
+
 
 from pyfar import Signal
 from pyfar import Coordinates
@@ -88,12 +90,11 @@ def write_wav(signal, filename, overwrite=True):
 
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
-    warnings.warn("Signal flattened to {data.shape[0]} channels.")
+    if len(signal.cshape) != 1:
+        warnings.warn(f"Signal flattened to {data.shape[0]} channels.")
 
-    # Check for .wav file extension
-    if filename.split('.')[-1] != 'wav':
-        warnings.warn("Extending filename by .wav.")
-        filename += '.wav'
+    # .wav file extension
+    filename = pathlib.Path(filename).with_suffix('.wav')
 
     # Check if file exists and for overwrite
     if overwrite is False and os.path.isfile(filename):
