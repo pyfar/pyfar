@@ -358,3 +358,33 @@ def test_prepare_plot():
     # test without axes and with desired subplot layout
     plot._line._prepare_plot(None, (2, 2))
     plt.close()
+
+
+def test_use():
+    """Test if use changes the plot style."""
+
+    for style in ["dark", "default"]:
+
+        # file names
+        filename = 'use_' + style + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plot.utils.use(style)
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        plt.plot([1, 2, 3], [1, 2, 3])
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        plt.close()
+
+        # testing
+        compare_images(baseline, output, tol=10)
