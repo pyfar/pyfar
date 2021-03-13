@@ -43,7 +43,7 @@ def phase(signal, deg=False, unwrap=False):
     return phase
 
 
-def group_delay(signal, frequencies=None):
+def group_delay(signal, frequencies=None, method='fft'):
     """Returns the group delay of a signal in samples.
 
     Parameters
@@ -53,32 +53,68 @@ def group_delay(signal, frequencies=None):
     frequencies : number array like
         Frequency or frequencies in Hz at which the group delay is calculated.
         The default is None, in which case signal.frequencies is used.
+    method : 'scipy', 'fft', optional
+        Method to calculate the group delay of a Signal. Both methods calculate
+        the group delay using the method presented in [1]_ avoiding issues
+        due to discontinuities in the unwrapped phase. Note that the scipy
+        version additionally allows to specify frequencies for which the
+        group delay is evaluated. The default is 'fft', which is faster.
 
     Returns
     -------
     group_delay : numpy array
         Frequency dependent group delay in samples. The array is flattened if
         a single channel signal was passed to the function.
+
+    References
+    ----------
+    .. [1]  https://www.dsprelated.com/showarticle/69.php
     """
 
     # check input and default values
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
+    if frequencies is not None and method == 'fft':
+        raise ValueError(
+            "Specifying frequencies is not supported for the 'fft' method.")
+
     frequencies = signal.frequencies if frequencies is None \
         else np.asarray(frequencies, dtype=float)
 
-    # get time signal and reshape for easy looping
-    time = signal.time
-    time = time.reshape((-1, signal.n_samples))
-    # initialize group delay
-    group_delay = np.zeros((np.prod(signal.cshape), frequencies.size))
-    # calculate the group delay
-    for cc in range(time.shape[0]):
-        group_delay[cc] = sgn.group_delay(
-            (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
-    # reshape to match signal
-    group_delay = group_delay.reshape(signal.cshape + (-1, ))
+    if method == 'scipy':
+        # get time signal and reshape for easy looping
+        time = signal.time
+        time = time.reshape((-1, signal.n_samples))
+
+        # initialize group delay
+        group_delay = np.zeros((np.prod(signal.cshape), frequencies.size))
+
+        # calculate the group delay
+        for cc in range(time.shape[0]):
+            group_delay[cc] = sgn.group_delay(
+                (time[cc], 1), frequencies, fs=signal.sampling_rate)[1]
+
+        # reshape to match signal
+        group_delay = group_delay.reshape(signal.cshape + (-1, ))
+
+    elif method == 'fft':
+        freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
+                          signal.n_samples, signal.sampling_rate,
+                          fft_norm='none')
+
+        freq = fft.normalization(
+            signal.freq, signal.n_samples, signal.sampling_rate,
+            signal.fft_norm, inverse=True)
+
+        group_delay = np.real(freq_k / freq)
+
+        # catch zeros in the denominator
+        group_delay[np.abs(freq) < 1e-15] = 0
+
+    else:
+        raise ValueError(
+            "Invalid method, needs to be either 'scipy' or 'fft'.")
 
     # flatten in numpy fashion if a single channel is returned
     if signal.cshape == (1, ):
