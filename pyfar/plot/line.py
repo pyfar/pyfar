@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from pyfar.plot.utils import context
-from .. import Signal
+from .. import Signal, TimeData, FrequencyData
 from . import _line
 from . import _interaction as ia
 
@@ -45,9 +45,6 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     with context(style):
         ax = _line._time(signal, dB, log_prefix, log_reference, unit,
@@ -104,11 +101,6 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-    if xscale not in ['linear', 'log']:
-        raise ValueError(f"xscale must be 'linear' or 'log' but is '{xscale}'")
-
     with context(style):
         ax = _line._freq(signal, dB, log_prefix, log_reference, xscale, ax,
                          **kwargs)
@@ -157,8 +149,6 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     with context(style):
         ax = _line._phase(signal, deg, unwrap, xscale, ax, **kwargs)
@@ -206,12 +196,6 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-    units = ['s', 'ms', 'mus', 'samples', None]
-    if unit not in units:
-        raise ValueError(f"unit must be {', '.join(units)} but is {unit}.")
 
     with context(style):
         ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
@@ -339,9 +323,6 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
     with context(style):
         ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
                               log_reference, xscale, unit, ax, **kwargs)
@@ -399,9 +380,6 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
     with context(style):
         ax = _line._freq_phase(signal, dB, log_prefix, log_reference, xscale,
                                deg, unwrap, ax, **kwargs)
@@ -458,8 +436,6 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     with context(style):
         ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
@@ -516,8 +492,6 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     >>> ppl.multi(s, [[ppl.time, ppl.time_dB], [ppl.freq, ppl.group_delay]])
 
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     with context(style):
         ax = _line._custom_subplots(signal, plots, ax, **kwargs)
