@@ -180,14 +180,14 @@ def shortcuts(show=True):
 
     Use these shortcuts to show different plots
     -------------------------------------------
-    1: line.time
-    2: line.freq
-    3: line.phase
-    4: line.group_delay
-    5: line.spectrogram
-    6: line.time_freq
-    7: line.freq_phase
-    8: line.freq_group_delay
+    1, T: line.time
+    2, F: line.freq
+    3, P: line.phase
+    4, G: line.group_delay
+    5, S: line.spectrogram
+    6, ctrl+T, ctrl+F: line.time_freq
+    7, ctrl+P: line.freq_phase
+    8, ctrl+G: line.freq_group_delay
 
     Use these shortcuts to control the plot
     ---------------------------------------
@@ -195,20 +195,20 @@ def shortcuts(show=True):
     right: move x-axis view to the right
     up: move y-axis view upwards
     down: y-axis view downwards
-    +: move colormap range up
-    -: move colormap range down
+    +, ctrl+shift+up: move colormap range up
+    -, ctrl+shift+down: move colormap range down
     shift+right: zoom in x-axis
     shift+left: zoom out x-axis
     shift+up: zoom out y-axis
     shift+down: zoom in y-axis
-    *: zoom colormap range in
-    _: zoom colormap range out
-    x: toggle between linear and logarithmic x-axis
-    y: toggle between linear and logarithmic y-axis
-    c: toggle between linear and logarithmic color data
-    a: toggle between plotting all channels and plottinng single channels
-    .: show next channel
-    ,: show previous channel
+    *, alt+shift+up: zoom colormap range in
+    _, alt+shift+down: zoom colormap range out
+    X: toggle between linear and logarithmic x-axis
+    Y: toggle between linear and logarithmic y-axis
+    C: toggle between linear and logarithmic color data
+    A: toggle between plotting all channels and plotting single channels
+    ., ]: show next channel
+    ,, [: show previous channel
 
     Notes on plot controls
     ----------------------
