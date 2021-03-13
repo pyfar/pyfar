@@ -857,7 +857,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     .. [1] J. Fliege and U. Maier, "The distribution of points on the sphere
            and corresponding cubature formulae,” IMA J. Numerical Analysis,
            Vol. 19, pp. 317–334, Apr. 1999, doi: 10.1093/imanum/19.2.317.
-    .. [2] https://audiogroup.web.th-koeln.de/SOFiA_wiki/WELCOME.html
+    .. [2] https://audiogroup.web.th-koeln.de/SOFiA_wiki/DOWNLOAD.html
 
     """
 
