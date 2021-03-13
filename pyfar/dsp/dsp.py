@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from scipy import signal as sgn
 from pyfar import Signal
@@ -223,3 +224,75 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     times -= times[0]
 
     return frequencies, times, spectrogram
+
+
+def deconv(measurement, excitation, **kwargs):
+    """Function to calculate the deconvolution of two signals.
+
+    Parameters
+    ----------
+    measurement : pyfar.Signal
+        The measurement signal, recorded after passing the device under test.
+    excitation : pyfar.Signal
+        The excitation signal, used to perform the measurement.
+    kwargs : Parameters for regu_inversion, can include:
+        freq_range, regu_outside, regu_inside, regu_final
+        refer to function regularized_spectrum_inversion for deatiled
+        documentation.
+
+    Returns
+    -------
+    pyfar.Signal
+        The resulting signal after deconvolution.
+    """
+    # Check if both inputs are type Signal
+    if not isinstance(measurement, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(excitation, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    # Check if both signals have the same sampling rate
+    if not measurement.sampling_rate == excitation.sampling_rate:
+        raise ValueError("The two signals have different sampling rates!")
+    # Check if both signals have the same fft norm, if not: warn
+    if not measurement.fft_norm == excitation.fft_norm:
+        warnings.warn("The two signals have different fft_norms.")
+
+    # Check if both signals have the same length,
+    # if not: bring them to the same length
+    if measurement.n_samples > excitation.n_samples:
+        # Add Zeros to excitation
+        excitation = Signal(np.concatenate((excitation.time,
+                                            np.zeros(measurement.n_samples -
+                                                     excitation.n_samples))),
+                            excitation.sampling_rate,
+                            fft_norm=excitation.fft_norm,
+                            dtype=excitation.dtype,
+                            comment=excitation.comment)
+
+    if measurement.n_samples < excitation.n_samples:
+        # Add Zeros to measurement
+        measurement = Signal(np.concatenate((measurement.time,
+                                             np.zeros(excitation.n_samples -
+                                                      measurement.n_samples))),
+                             measurement.sampling_rate,
+                             fft_norm=measurement.fft_norm,
+                             dtype=measurement.dtype,
+                             comment=measurement.comment)
+
+    # multiply measurement signal with regularized inversed excitation signal
+    # to get the transfer function
+    result = measurement * regularized_spectrum_inversion(excitation, **kwargs)
+
+    # Check if the signals have any comments,
+    # if yes: concatenate the comments for the result
+    if not (measurement.comment is None and excitation.comment is None):
+        result.comment = (f"IR calculated with deconvolution: [1]"
+                          f"{measurement.comment}; [2]{excitation.comment}")
+    else:
+        result.comment = "IR calculated with deconvolution"
+
+    # Transform back to time domain and return the impulse resonse
+    result.fft_norm = None
+    result.domain = 'time'
+    return result
