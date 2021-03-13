@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from pyfar.plot.utils import context
-from .. import Signal, TimeData, FrequencyData
+from .. import Signal
 from . import _line
 from . import _interaction as ia
 
