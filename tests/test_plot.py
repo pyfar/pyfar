@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.testing as mpt
 from matplotlib.testing.compare import compare_images
 import os
+from pytest import raises
 
 import pyfar.plot as plot
 
@@ -117,6 +118,13 @@ def test_line_phase_options(sine):
         compare_images(baseline, output, tol=10)
 
 
+def test_line_phase_unwrap_assertion(sine):
+    """Test assertion for unwrap parameter."""
+    with raises(ValueError):
+        plot.line.phase(sine, unwrap='infinity')
+    plt.close()
+
+
 def test_line_dB_option(sine):
     """Test all line plots that have a dB option."""
 
@@ -217,6 +225,29 @@ def test_line_xscale_option(sine):
             compare_images(baseline, output, tol=10)
 
 
+def test_line_xscale_assertion(sine):
+    """
+    Test if all line plots raise an assertion for a wrong scale parameter.
+    """
+
+    with raises(ValueError):
+        plot.line.freq(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.phase(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot._line._spectrogram(sine, yscale="warped")
+
+    with raises(ValueError):
+        plot._line._spectrogram_cb(sine, yscale="warped")
+
+    plt.close("all")
+
+
 def test_time_unit(impulse_group_delay):
     """Test plottin with different units."""
     function_list = [plot.line.time,
@@ -249,6 +280,24 @@ def test_time_unit(impulse_group_delay):
 
             # testing
             compare_images(baseline, output, tol=10)
+
+
+def test_time_unit_assertion(sine):
+    """Test if all line plots raise an assertion for a wrong unit parameter."""
+
+    with raises(ValueError):
+        plot.line.time(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot._line._spectrogram(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line._line._spectrogram_cb(sine, unit="pascal")
+
+    plt.close("all")
 
 
 def test_line_time_auto_unit():
@@ -319,6 +368,72 @@ def test_line_custom_subplots(sine, impulse_group_delay):
         compare_images(baseline, output, tol=10)
 
 
+def test_line_plots_time_data(time_data_three_points):
+    """Test all line plots with default arguments and hold functionality."""
+
+    function_list = [plot.line.time]
+
+    for function in function_list:
+        print(f"Testing: {function.__name__}")
+        # file names
+        filename = 'line_time_data_' + function.__name__ + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        function(time_data_three_points)
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+        # close current figure
+        plt.close()
+
+
+def test_line_plots_frequency_data(frequency_data_three_points):
+    """Test all line plots with default arguments and hold functionality."""
+
+    function_list = [plot.line.freq,
+                     plot.line.phase,
+                     plot.line.freq_phase]
+
+    for function in function_list:
+        print(f"Testing: {function.__name__}")
+        # file names
+        filename = 'line_frequency_data_' + function.__name__ + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        function(frequency_data_three_points)
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+        # close current figure
+        plt.close()
+
+
 def test_prepare_plot():
     # test without arguments
     plot._line._prepare_plot()
@@ -358,6 +473,34 @@ def test_prepare_plot():
     # test without axes and with desired subplot layout
     plot._line._prepare_plot(None, (2, 2))
     plt.close()
+
+
+def test_lower_frequency_limit(
+        sine, sine_short, frequency_data_three_points,
+        frequency_data_one_point, time_data_three_points):
+    """Test the private function plot._line._lower_frequency_limit"""
+
+    # test Signal with frequencies below 20 Hz
+    low = plot._line._lower_frequency_limit(sine)
+    assert low == 20
+
+    # test Signal with frequencies above 20 Hz
+    low = plot._line._lower_frequency_limit(sine_short)
+    assert low == 44100/100  # lowest frequency fs=44100 / n_samples=100
+
+    # test with FrequencyData
+    # (We only need to test if FrequencyData works. The frequency dependent
+    # cases are already tested above)
+    low = plot._line._lower_frequency_limit(frequency_data_three_points)
+    assert low == 100
+
+    # test only 0 Hz assertions
+    with raises(ValueError, match="Signals must have frequencies > 0 Hz"):
+        plot._line._lower_frequency_limit(frequency_data_one_point)
+
+    # test TimeData assertions
+    with raises(TypeError, match="Input data has to be of type"):
+        plot._line._lower_frequency_limit(time_data_three_points)
 
 
 def test_use():

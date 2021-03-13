@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import signal as sgn
-from pyfar import Signal
+from pyfar import Signal, FrequencyData
 import pyfar.fft as fft
 
 
@@ -9,8 +9,8 @@ def phase(signal, deg=False, unwrap=False):
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the pyfar signal class
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     deg : Boolean
         Specifies, whether the phase is returned in degrees or radians.
     unwrap : Boolean
@@ -23,8 +23,10 @@ def phase(signal, deg=False, unwrap=False):
         Phase.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, Signal) and \
+            not isinstance(signal, FrequencyData):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
 
     phase = np.angle(signal.freq)
 

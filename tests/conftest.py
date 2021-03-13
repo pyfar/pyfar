@@ -37,6 +37,31 @@ def sine():
 
 
 @pytest.fixture
+def sine_short():
+    """Short sine signal stub where the first frequency is > 20 Hz.
+
+    This is used for testing plot._line._lower_frequency_limit.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 100
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm)
+
+    return signal
+
+
+@pytest.fixture
 def sine_rms():
     """Sine signal stub,
     RMS FFT-normalization.
@@ -378,6 +403,49 @@ def noise_two_by_three_channel():
         time, freq, sampling_rate, fft_norm)
 
     return signal
+
+
+@pytest.fixture
+def time_data_three_points():
+    """
+    TimeData stub with three data points.
+
+    Returns
+    -------
+    time_data
+        stub of pyfar TimeData class
+    """
+    time_data = stub_utils.time_data_stub([1, 0, -1], [0, .1, .4])
+    return time_data
+
+
+@pytest.fixture
+def frequency_data_three_points():
+    """
+    FrequencyData stub with three data points.
+
+    Returns
+    -------
+    frequency_data
+        stub of pyfar FrequencyData class
+    """
+    frequency_data = stub_utils.frequency_data_stub(
+        [2, .25, .5], [100, 1_000, 20_000])
+    return frequency_data
+
+
+@pytest.fixture
+def frequency_data_one_point():
+    """
+    FrequencyData stub with one data points.
+
+    Returns
+    -------
+    frequency_data
+        stub of pyfar FrequencyData class
+    """
+    frequency_data = stub_utils.frequency_data_stub([2], [0])
+    return frequency_data
 
 
 @pytest.fixture

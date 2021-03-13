@@ -7,7 +7,7 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .signal import Signal
+from .signal import Signal, TimeData, FrequencyData
 from .coordinates import Coordinates
 from .orientations import Orientations
 
@@ -19,6 +19,8 @@ from . import utils
 
 __all__ = [
     'Signal',
+    'TimeData',
+    'FrequencyData',
     'Coordinates',
     'Orientations',
     'plot',

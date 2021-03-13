@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 
-from pyfar import Signal
+from pyfar import Signal, TimeData, FrequencyData
 from pyfar.testing import stub_utils
 
 
@@ -64,6 +64,85 @@ def test_signal_stub_frequencies_odd():
     signal_stub = stub_utils.signal_stub(time, freq, sampling_rate, fft_norm)
 
     npt.assert_allclose(signal_stub.frequencies, frequencies, rtol=1e-10)
+
+
+def test_time_data_stub_properties():
+    """ Test comparing properties of TimeData stub
+    with actual TimeData implementation.
+    """
+    time = [1, 0, -1]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+    stub_dir = dir(time_data_stub)
+    time_data_dir = dir(TimeData(time, times))
+
+    assert stub_dir.sort() == time_data_dir.sort()
+
+
+def test_time_data_stub_data():
+    """Test the data contained in the TimeData stub."""
+
+    time = [1, 0, -1]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+
+    npt.assert_allclose(time_data_stub.time, np.atleast_2d(time))
+    npt.assert_allclose(time_data_stub.times, np.atleast_1d(times))
+
+
+def test_time_data_stub_slice():
+    """Test slicing the TimeData stub."""
+
+    time = [[1, 0, -1], [2, 0, -2]]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+    stub_slice = time_data_stub[0]
+
+    npt.assert_allclose(stub_slice.time, np.atleast_2d(time[0]))
+    npt.assert_allclose(stub_slice.times, np.atleast_1d(times))
+
+
+def test_frequency_data_stub_properties():
+    """ Test comparing properties of FrequencyData stub
+    with actual FrequencyData implementation.
+    """
+    freq = [1, 0, -1]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+    stub_dir = dir(frequency_data_stub)
+    frequency_data_dir = dir(FrequencyData(freq, frequencies))
+
+    assert stub_dir.sort() == frequency_data_dir.sort()
+
+
+def test_frequency_data_stub_data():
+    """Test the data contained in the FrequencyData stub."""
+
+    freq = [1, 0, -1]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+
+    npt.assert_allclose(frequency_data_stub.freq, np.atleast_2d(freq))
+    npt.assert_allclose(
+        frequency_data_stub.frequencies, np.atleast_1d(frequencies))
+
+
+def test_frequency_data_stub_slice():
+    """Test slicing the FrequencyData stub."""
+
+    freq = [[1, 0, -1], [2, 0, -2]]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+    stub_slice = frequency_data_stub[0]
+
+    npt.assert_allclose(stub_slice.freq, np.atleast_2d(freq[0]))
+    npt.assert_allclose(stub_slice.frequencies, np.atleast_1d(frequencies))
 
 
 def test_impulse_func_single_channel():
