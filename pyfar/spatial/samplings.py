@@ -913,6 +913,11 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
                            sh_order=sh_order, weights=fliege[:, 2],
                            comment='spherical Fliege sampling grid')
 
+    # switch and invert coordinates in Cartesian representation to be
+    # consistent with [1]
+    xyz = sampling.get_cart(convention='right')
+    sampling.set_cart(xyz[:, 1], xyz[:, 0], -xyz[:, 2])
+
     return sampling
 
 
