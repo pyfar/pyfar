@@ -413,6 +413,11 @@ def test_getitem():
     assert isinstance(new, Coordinates)
     assert new.cshape == (1, 5)
 
+    # test if sliced object stays untouched
+    coords = Coordinates([0, 1], [0, 1], [0, 1])
+    new = coords[0]
+    assert coords.cshape == (2,)
+
 
 def test_get_nearest_k():
     # 1D cartesian, nearest point
