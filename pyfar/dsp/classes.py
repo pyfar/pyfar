@@ -121,7 +121,7 @@ class Filter(object):
 
         self._comment = comment
 
-    def initialize(self):
+    def init_state(self, state='empty'):
         raise NotImplementedError("Abstract class method")
 
     @property
@@ -185,7 +185,7 @@ class Filter(object):
                 "The sampling rates of filter and signal do not match")
 
         if reset is True:
-            self.reset()
+            self.reset_state()
 
         if self.size > 1:
             filtered = np.broadcast_to(
@@ -215,7 +215,7 @@ class Filter(object):
 
         return filtered_signal
 
-    def reset(self):
+    def reset_state(self):
         if self._state is not None:
             self._state = np.zeros_like(self._state)
 
@@ -288,6 +288,15 @@ class FilterFIR(Filter):
             'zerophase': filtfilt}
         self._filter_func = filter_func
 
+    def init_state(self, state):
+        n_coeff = self._coefficients.shape[-1]
+        state = np.zeros(
+            (self._coefficients.shape[0], n_coeff-1))
+        if state == 'step':
+            for idx, coeff in enumerate(self._coefficients):
+                state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
+        return super().init_state(state=state)
+
     @property
     def filter_func(self):
         return self._filter_func
@@ -334,6 +343,15 @@ class FilterIIR(Filter):
             'default': lfilter,
             'zerophase': filtfilt}
         self._filter_func = filter_func
+
+    def init_state(self, state):
+        n_coeff = self._coefficients.shape[-1]
+        state = np.zeros(
+            (self._coefficients.shape[0], n_coeff-1))
+        if state == 'step':
+            for idx, coeff in enumerate(self._coefficients):
+                state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
+        return super().init_state(state=state)
 
     @property
     def filter_func(self):
@@ -389,6 +407,14 @@ class FilterSOS(Filter):
             'zerophase': sosfiltfilt
         }
         self._filter_func = filter_func
+
+    def init_state(self, state='zeros'):
+        state = np.zeros(
+            (self._coefficients.shape[0], self.n_sections, 2))
+        if state == 'step':
+            for idx, coeff in enumerate(self._coefficients):
+                state[idx, ...] = spsignal.sosfilt_zi(coeff)
+        return super().init_state(state=state)
 
     @property
     def filter_func(self):
