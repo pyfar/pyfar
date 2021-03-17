@@ -416,7 +416,9 @@ def test_getitem():
     # test if sliced object stays untouched
     coords = Coordinates([0, 1], [0, 1], [0, 1])
     new = coords[0]
+    new.set_cart(2, 2, 2)
     assert coords.cshape == (2,)
+    npt.assert_allclose(coords.get_cart()[0], np.array([0, 0, 0]))
 
 
 def test_get_nearest_k():
