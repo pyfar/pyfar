@@ -1,8 +1,8 @@
 import deepdiff
 import numpy as np
-from pyfar import utils
 from scipy import spatial as spat
 from pyfar import Coordinates
+from copy import deepcopy
 
 
 class SphericalVoronoi(spat.SphericalVoronoi):
@@ -37,7 +37,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
     def copy(self):
         """Return a deep copy of the Coordinates object."""
-        return utils.copy(self)
+        return deepcopy(self)
 
     def _encode(self):
         """Return object in a proper encoding format."""

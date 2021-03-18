@@ -45,12 +45,12 @@ is equivalent to
 
 """
 
+from copy import deepcopy
 import warnings
 import deepdiff
 import numpy as np
 from pyfar import fft as fft
 from typing import Callable
-from . import utils
 
 
 class _Audio(object):
@@ -138,7 +138,7 @@ class _Audio(object):
             newshape = (newshape, )
 
         # reshape
-        reshaped = utils.copy(self)
+        reshaped = deepcopy(self)
         length_last_dimension = reshaped._data.shape[-1]
         try:
             reshaped._data = reshaped._data.reshape(
@@ -182,7 +182,7 @@ class _Audio(object):
 
     def copy(self):
         """Return a deep copy of the Signal object."""
-        return utils.copy(self)
+        return deepcopy(self)
 
     def _return_item(self):
         raise NotImplementedError("To be implemented by derived classes.")

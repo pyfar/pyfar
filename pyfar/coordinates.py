@@ -5,7 +5,7 @@ from scipy.spatial.transform import Rotation as sp_rot
 import deepdiff
 import copy
 import re
-from . import utils
+from copy import deepcopy
 
 import pyfar
 
@@ -1139,7 +1139,7 @@ class Coordinates(object):
 
     def copy(self):
         """Return a deep copy of the Coordinates object."""
-        return utils.copy(self)
+        return deepcopy(self)
 
     def _encode(self):
         """Return dictionary for the encoding."""
