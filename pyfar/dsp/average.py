@@ -34,8 +34,6 @@ def average(signal, average_mode='time', phase_copy=None,
 
     # check if 'weights' is right size
 
-
-
     # average the data
 
     if average_mode == 'time':
@@ -43,14 +41,14 @@ def average(signal, average_mode='time', phase_copy=None,
             data = np.mean(signal.time.copy(), axis=-1, keepdims=True)
         else:
             data = np.sum(signal.time.copy() * weights, axis=-1,
-                              keepdims=True)
+                          keepdims=True)
 
     elif average_mode == 'complex':
         if average_weights is None:
             data = np.mean(signal.freq.copy(), axis=-1, keepdims=True)
         else:
             data = np.sum(signal.freq.copy() * weights, axis=-1,
-                              keepdims=True)
+                          keepdims=True)
 
         # do I need to ifft here, or just put straight back into signal
 
@@ -87,6 +85,7 @@ def average(signal, average_mode='time', phase_copy=None,
     if phase_copy is None:
         pass
 
+    # unsure of how to access and edit phase data in signal class
     else:
         # copy phase from particular channel from phase_copy
         data_ang =
