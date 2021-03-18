@@ -47,6 +47,18 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
             signal.fft_norm)
         return item
 
+    def find_nearest_time(times):
+        samples = np.zeros(len(times), dtype=int)
+        for idx, time in enumerate(times):
+            samples[idx] = np.argmin(np.abs(signal.times-time))
+        return samples
+
+    def find_nearest_frequency(freqs):
+        bin = np.zeros(len(freqs), dtype=int)
+        for idx, freq in enumerate(freqs):
+            bin[idx] = np.argmin(np.abs(signal.frequencies-freq))
+        return bin
+
     signal = mock.MagicMock(
         spec_set=Signal(time, sampling_rate, domain='time'))
     signal.time = np.atleast_2d(time)
@@ -61,6 +73,8 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     signal.frequencies = np.atleast_1d(
         np.fft.rfftfreq(signal.n_samples, 1 / sampling_rate))
     signal.__getitem__.side_effect = getitem
+    signal.find_nearest_time = find_nearest_time
+    signal.find_nearest_frequency = find_nearest_frequency
 
     return signal
 

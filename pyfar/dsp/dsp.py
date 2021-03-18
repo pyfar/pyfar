@@ -245,22 +245,21 @@ def regularized_spectrum_inversion(
 
     """
     data = signal.freq
+    freq_range = np.asarray(freq_range)
 
     if regu_final is None:
         regu_inside = np.ones(signal.n_bins, dtype=np.double) * regu_inside
         regu_outside = np.ones(signal.n_bins, dtype=np.double) * regu_outside
 
-        idx_xfade_lower = [
-            signal.find_nearest_frequency(
-                [freq_range[0]/np.sqrt(2), freq_range[0]])]
+        idx_xfade_lower = signal.find_nearest_frequency(
+                [freq_range[0]/np.sqrt(2), freq_range[0]])
 
         regu_final = _cross_fade(regu_outside, regu_inside, idx_xfade_lower)
 
         if freq_range[1] < signal.sampling_rate/2:
-            idx_xfade_upper = [
-                signal.find_nearest_frequency(freq_range[1]),
-                signal.find_nearest_frequency(np.min(
-                    [freq_range[1]*np.sqrt(2), signal.sampling_rate/2]))]
+            idx_xfade_upper = signal.find_nearest_frequency([
+                freq_range[1],
+                np.min([freq_range[1]*np.sqrt(2), signal.sampling_rate/2])])
 
             regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
 

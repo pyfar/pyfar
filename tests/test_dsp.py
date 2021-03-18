@@ -2,6 +2,8 @@ import numpy as np
 import numpy.testing as npt
 
 from pyfar import dsp
+from scipy.signal import chirp
+import pyfar.plot
 
 
 def test_phase_rad(sine_plus_impulse):
@@ -96,3 +98,18 @@ def test_xfade(impulse):
     res = dsp.dsp._cross_fade(first, second, [idx_1, idx_2])
     np.testing.assert_array_almost_equal(first[:idx_1], res[:idx_1])
     np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
+
+
+def test_regu_inversion(impulse):
+    impulse.freq = impulse.freq*2
+    impulse.time = impulse.time*2
+
+    res = dsp.regularized_spectrum_inversion(impulse, [200, 10e3])
+
+    ind = impulse.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5)
+
+    npt.assert_allclose(res.freq[:, 0], [0.25])
+    npt.assert_allclose(res.freq[:, -1], [0.25])
