@@ -1,9 +1,46 @@
-from .classes import (Filter, FilterFIR, FilterIIR, FilterSOS)
+from .classes import (
+    FilterFIR,
+    FilterIIR,
+    FilterSOS)
+
 from .dsp import (
-    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram)
+    phase,
+    group_delay,
+    wrap_to_2pi,
+    spectrogram)
+
+from .filter import (
+    butter,
+    cheby1,
+    cheby2,
+    ellip,
+    bessel,
+    peq,
+    high_shelve,
+    low_shelve,
+    crossover,
+    fractional_octave_bands,
+    fractional_octave_frequencies,
+)
 
 
 __all__ = [
-    Filter, FilterFIR, FilterIIR, FilterSOS,
-    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram
+    'FilterFIR',
+    'FilterIIR',
+    'FilterSOS',
+    'phase',
+    'group_delay',
+    'wrap_to_2pi',
+    'spectrogram',
+    'butter',
+    'cheby1',
+    'cheby2',
+    'ellip',
+    'bessel',
+    'peq',
+    'high_shelve',
+    'low_shelve',
+    'crossover',
+    'fractional_octave_bands',
+    'fractional_octave_frequencies',
 ]

@@ -11,10 +11,11 @@ from .signal import Signal, TimeData, FrequencyData
 from .coordinates import Coordinates
 from .orientations import Orientations
 
-from . import plot as plot
+from . import plot
 from . import spatial
 from . import io
 from . import utils
+from . import dsp
 
 
 __all__ = [
@@ -27,4 +28,4 @@ __all__ = [
     'spatial',
     'io',
     'utils',
-    'codec']
+    'dsp']
