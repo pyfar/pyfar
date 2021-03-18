@@ -14,7 +14,6 @@ from .orientations import Orientations
 from . import plot
 from . import spatial
 from . import io
-from . import utils
 from . import dsp
 
 
@@ -27,5 +26,4 @@ __all__ = [
     'plot',
     'spatial',
     'io',
-    'utils',
     'dsp']
