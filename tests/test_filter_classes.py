@@ -124,13 +124,13 @@ def test_filter_fir_process(impulse):
 
 
 def test_filter_fir_process_state(impulse):
-    coeff = np.array([1, 1/2, 0])
-    filt = fo.FilterFIR(coeff, impulse.sampling_rate, state=[0, 0])
+    coeff = np.array([1, 1/2, 0, 0, 0, 0])
+    filt = fo.FilterFIR(coeff, impulse.sampling_rate, state=[0, 0, 0, 0, 0])
     res = filt.process(impulse, reset=False)
     state = filt._state
 
-    npt.assert_allclose([[0, 0]], state)
-    npt.assert_allclose(res.time[:3], coeff)
+    npt.assert_allclose([[0, 0, 0, 0, 0]], state)
+    npt.assert_allclose(res.time[:6], coeff)
 
 
 def test_filter_fir_process_sampling_rate_mismatch(impulse):
