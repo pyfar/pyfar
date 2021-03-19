@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import signal as sgn
 from pyfar import Signal, FrequencyData
-import pyfar.fft as fft
+from pyfar.dsp import fft
 
 
 def phase(signal, deg=False, unwrap=False):

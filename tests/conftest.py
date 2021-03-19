@@ -4,10 +4,10 @@ import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
-from pyfar.spatial.spatial import SphericalVoronoi
-from pyfar.orientations import Orientations
-from pyfar.coordinates import Coordinates
-from pyfar.signal import FrequencyData, Signal, TimeData
+from pyfar.spatial import SphericalVoronoi
+from pyfar import Orientations
+from pyfar import Coordinates
+from pyfar import FrequencyData, Signal, TimeData
 import pyfar.dsp.classes as fo
 
 from pyfar.testing import stub_utils
@@ -452,17 +452,17 @@ def frequency_data_one_point():
 def fft_lib_np(monkeypatch):
     """Set numpy.fft as fft library.
     """
-    import pyfar.fft
-    monkeypatch.setattr(pyfar.fft, 'fft_lib', np.fft)
+    import pyfar.dsp.fft
+    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', np.fft)
 
 
 @pytest.fixture
 def fft_lib_pyfftw(monkeypatch):
     """Set pyfftw as fft library.
     """
-    import pyfar.fft
+    import pyfar.dsp.fft
     from pyfftw.interfaces import numpy_fft as npi_fft
-    monkeypatch.setattr(pyfar.fft, 'fft_lib', npi_fft)
+    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', npi_fft)
 
 
 @pytest.fixture
