@@ -1,146 +1,282 @@
 """
-Signal generation
+This module contains functions for generating common audio signals such as
+sine, impulse, and noise signals.
 """
 import numpy as np
+from pyfar import Signal
+import pyfar.fft as fft
 
 
-def sine(
-        amplitude,
-        frequency,
-        sampling_rate,
-        num_samples,
-        full_period=False):
+def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
+         full_period=False):
     """Generate a sine signal.
 
     Parameters
     ----------
-    amplitude : double
-        The amplitude
-    frequency : double
-        Frequency of the sine signal. f < f_s/2
-    sampling_rate : int
-        The sampling rate f_s
-    num_samples : int
-        Length of the signal in samples
-    full_period : bool, optional
-        If True, the returned sine signal will have an integer number of
-        periods resulting in a periodic signal.
+    frequency : double, array like
+        Frequency of the sine in Hz (0 <= frequency <= sampling_rate/2).
+    n_samples : int
+        Length of the signal in samples.
+    amplitude : double, array like, optional
+        The amplitude. The default is 1.
+    phase : double, array like, optional
+        The phase in radians. The default is 0.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is 44100.
+    full_period : boolean, optional
+        Make sure that the returned signal contains an integer number of
+        periods resulting in a periodic signal. This is done by adjusting the
+        frequency of the sine. The default is False.
 
     Returns
     -------
-    signal : ndarray, double
-        The sine signal
+    signal : Signal
+        The sine as a Signal object. The Signal is in the time domain and has
+        the 'rms' FFT normalization (see pyfar.fft.normalization). The exact
+        frequency is written to Signal.commtent.
 
+    Note
+    ----
+    The parameters frequency, amplitude, and samples must all be scalars
+    or of the same shape.
     """
 
-    if full_period:
-        num_periods = np.floor(num_samples / sampling_rate * frequency)
-        # round to the nearest frequency resulting in a fully periodic sine
-        # signal in the given time interval
-        frequency = num_periods * sampling_rate / num_samples
-    times = np.arange(0, num_samples) / sampling_rate
-    signal = amplitude * np.sin(2 * np.pi * frequency * times)
+    # check and match the shape
+    shape = _get_common_shape(frequency, amplitude, phase)
+    frequency, amplitude, phase = _match_shape(
+        shape, frequency, amplitude, phase)
+
+    if np.any(frequency < 0) or np.any(frequency > sampling_rate/2):
+        raise ValueError(
+            f"The frequencies but must be between 0 and {sampling_rate/2} Hz")
+
+    # generate the sine signal
+    times = np.arange(n_samples) / sampling_rate
+    sine = np.zeros(shape + (n_samples, ))
+    for idx in np.ndindex(shape):
+        if full_period:
+            # nearest number of full periods
+            num_periods = np.round(
+                n_samples / sampling_rate * frequency[idx])
+            # corresponding frequency
+            frequency[idx] = num_periods * sampling_rate / n_samples
+
+        sine[idx] = amplitude[idx] * \
+            np.sin(2 * np.pi * frequency[idx] * times + phase[idx])
+
+    # save to Signal
+    if shape == (1, ):
+        frequency = frequency[0]  # nicer comments :)
+
+    signal = Signal(sine, sampling_rate, fft_norm="rms",
+                    comment=f"f = {frequency} Hz")
 
     return signal
 
 
-def exponential_sweep(
-        amplitude,
-        sampling_rate,
-        num_samples,
-        frequency_range,
-        sweeprate=None):
-    """Generate an exponential sine sweep signal.
-    The sine sweep is generated in the time domain according to:
+def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
+    """Generate an impulse signal, also known as the Dirac delta function
 
     .. math::
-
-        s(t) = \\sin(2\\pi f_l L \\left( \\mathrm{e}^{t/L} - 1 \\right))
-
-    Parameters
-    ----------
-    amplitude : double
-        The envelope amplitude of the signal
-    sampling_rate : integer
-        Sampling rate of the signal
-    num_samples : integer
-        Length of the signal in samples
-    frequency_range : tuple, double, (20, 20e3)
-        Lower and upper frequency range limits of the sweep signal
-    sweeprate : double, optional
-        Rate at which the sine frequency increases over time
-
-    Returns
-    -------
-    signal : ndarray, float
-        Time domain data of the sweep signal
-
-    """
-    freq_upper = frequency_range[1]
-    freq_lower = frequency_range[0]
-
-    if sweeprate:
-        L = 1 / sweeprate / np.log(2)
-        T = L * np.log(freq_upper / freq_lower)
-        num_samples = np.round(T * sampling_rate)
-    else:
-        L = (num_samples - 1) / sampling_rate / np.log(freq_upper / freq_lower)
-        sweeprate = 1 / L / np.log(2)
-
-    times = np.arange(0, num_samples) / sampling_rate
-    signal = np.sin(2 * np.pi * freq_lower * L * (np.exp(times / L ) - 1))
-    signal *= amplitude
-
-    return signal
-
-
-def impulse(amplitude, num_samples):
-    """Generate an impulse, also known as the Dirac delta function
-
-    .. math::
-
         s(n) =
         \\begin{cases}
-        a,  & \\text{if $n$ = 0} \\newline
+        amplitude,  & \\text{if $n$ = delay} \\newline
         0, & \\text{else}
         \\end{cases}
 
     Parameters
     ----------
-    amplitude : double
-        The peak amplitude of the impulse
-    num_samples : int
+    n_samples : int
         Length of the impulse in samples
+    delay : double, array like
+        Delay in samples. The default is 0.
+    amplitude : double
+        The peak amplitude of the impulse. The default is 1.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is 44100.
 
     Returns
     -------
-    signal : ndarray, double
-        The impulse signal
+    signal : Signal
+        The impulse as a Signal object. The Signal is in the time domain and
+        has the 'none' FFT normalization (see pyfar.fft.normalization).
 
+    Note
+    ----
+    The parameters delay and amplitude must all be scalars or of the same
+    shape.
     """
-    signal = np.zeros(num_samples, dtype=np.double)
-    signal[0] = amplitude
+    # check and match the shape
+    shape = _get_common_shape(delay, amplitude)
+    delay, amplitude = _match_shape(shape, delay, amplitude)
+
+    # generate the impulse signal
+    signal = np.zeros(shape + (n_samples, ), dtype=np.double)
+    for idx in np.ndindex(shape):
+        signal[idx + (delay[idx], )] = amplitude[idx]
+
+    # get pyfar Signal
+    signal = Signal(signal, sampling_rate)
 
     return signal
 
 
-def white_noise(amplitude, num_samples, num_channels=1):
-    """Generate white noise.
+def white_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
+    """Generate normally distributed white noise.
 
     Parameters
     ----------
-    amplitude : double
-        The RMS amplitude of the white noise signal.
-    num_samples : int
+    n_samples : int
         The length of the signal in samples
+    amplitude : double, array like, optional
+        The RMS amplitude of the white noise signal. A multi channel noise
+        signal is generated if an array of amplitudes is passed. The default
+        is 1.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is 44100.
+    seed : int, None
+        The seed for the random generator. Pass a seed to obtain identical
+        results for multiple calls of white noise. The default is None, which
+        will yield different results with every call.
 
     Returns
     -------
-    signal : ndarray, double
-        The white noise signal
-
+    signal : Signal
+        The noise as a Signal object. The Signal is in the time domain and
+        has the 'rms' FFT normalization (see pyfar.fft.normalization).
     """
-    signal = np.random.randn(num_samples, num_channels)
-    rms = np.sqrt(np.mean(signal**2, axis=0))
-    signal = signal / rms * amplitude
-    return signal.T
+
+    # generate the noise
+    amplitude = np.atleast_1d(amplitude)
+    signal = _generate_normal_noise(n_samples, amplitude, seed)
+
+    # level the noise
+    signal = _normalize_rms(signal, amplitude)
+
+    # save to Signal
+    signal = Signal(signal, sampling_rate, fft_norm="rms")
+
+    return signal
+
+
+def pink_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
+    """Generate normally distributed pink noise.
+
+    The pink noise is generated by applying a sqrt(1/f) filter to the spectrum.
+
+    Parameters
+    ----------
+    n_samples : int
+        The length of the signal in samples
+    amplitude : double, array like, optional
+        The RMS amplitude of the white noise signal. A multi channel noise
+        signal is generated if an array of amplitudes is passed. The default
+        is 1.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is 44100.
+    seed : int, None
+        The seed for the random generator. Pass a seed to obtain identical
+        results for multiple calls of white noise. The default is None, which
+        will yield different results with every call.
+
+    Returns
+    -------
+    signal : Signal
+        The noise as a Signal object. The Signal is in the time domain and
+        has the 'rms' FFT normalization (see pyfar.fft.normalization).
+    """
+
+    # generate the noise
+    amplitude = np.atleast_1d(amplitude)
+    signal = _generate_normal_noise(n_samples, amplitude, seed)
+
+    # apply 1/f filter in the frequency domain
+    signal = fft.rfft(signal, n_samples, sampling_rate, 'none')
+    signal /= np.sqrt(np.arange(1, signal.shape[-1]+1))
+    signal = fft.irfft(signal, n_samples, sampling_rate, 'none')
+
+    # level the noise
+    signal = _normalize_rms(signal, amplitude)
+
+    # save to Signal
+    signal = Signal(signal, sampling_rate, fft_norm="rms")
+
+    return signal
+
+
+def _generate_normal_noise(n_samples, amplitude, seed=None):
+    """Generate normally distributed noise."""
+
+    shape = np.atleast_1d(amplitude).shape
+    rng = np.random.default_rng(seed)
+    noise = rng.standard_normal(np.prod(shape + (n_samples, )))
+    noise = noise.reshape(shape + (n_samples, ))
+
+    return noise
+
+
+def _normalize_rms(signal, amplitude):
+    """Level signal to RMS amplitude."""
+
+    rms = np.atleast_1d(np.sqrt(np.mean(signal**2, axis=-1)))
+    for idx in np.ndindex(amplitude.shape):
+        signal[idx] = signal[idx] / rms[idx] * amplitude[idx]
+    return signal
+
+
+def _get_common_shape(*data):
+    """Check if all entries in data have the same shape or shape (1, )
+
+    Parameters
+    ----------
+    data : *args
+       Numbers and array likes for which the shape is checked.
+
+    Returns
+    -------
+    shape : tuple
+        Common shape of data, e.g., (1, ) if al entries in data are numbers or
+        (2, 3) if data has entries with shape (2, 3) (and (1, )).
+    """
+
+    shape = None
+    for d in data:
+        d = np.atleast_1d(d)
+        if shape is None or shape == (1, ):
+            shape = d.shape
+        elif d.shape != (1, ):
+            if d.shape != shape:
+                raise ValueError(
+                    "Input data must be of the same shape or of shape (1, ).")
+
+    return shape
+
+
+def _match_shape(shape, *args):
+    """
+    Match the shape of *args by using np.tile(shape) if the shape is not (1, 0)
+
+    Note that calling _get_common_shape before might be a good idea.
+
+    Parameters
+    ----------
+    shape : tuple
+        The desired shape
+    *args : number array likes
+        All *args must be of shape (1, ) or shape
+
+    Returns
+    -------
+    args : tuple
+        (*arg_1, *arg_2, ..., arg_N)
+    """
+
+    result = []
+    for arg in args:
+        arg = np.atleast_1d(arg)
+        if arg.shape == (1, ):
+            arg = np.tile(arg, shape)
+
+        result.append(arg)
+
+    return tuple(result)
