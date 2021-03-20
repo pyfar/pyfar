@@ -206,6 +206,47 @@ def pink_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
     return signal
 
 
+def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
+                 color="pink", frozen=True, sampling_rate=44100, seed=None):
+
+    if n_pulse < 2 * n_fade:
+        raise ValueError(
+            "n_fade too large. It must be smaller than n_pulse/2.")
+
+    # get the noise sample
+    n_pulse = int(n_pulse)
+    repetitions = int(repetitions)
+    n_samples = n_pulse if frozen else n_pulse * repetitions
+
+    if color == "pink":
+        noise = pink_noise(n_samples, amplitude, sampling_rate, seed).time
+    elif color == "white":
+        noise = white_noise(n_samples, amplitude, sampling_rate, seed).time
+    else:
+        raise ValueError(f"color is {color} but must be 'pink' or 'white'.")
+
+    noise = np.tile(noise, (repetitions, 1)) if frozen else \
+        noise.reshape((repetitions, n_pulse))
+
+    # fade the noise
+    if n_fade > 0:
+        n_fade = int(n_fade)
+        fade = np.sin(np.linspace(0, np.pi/4, n_fade))
+        noise[..., 0:n_fade] *= fade
+        noise[..., -n_fade:] *= fade[::-1]
+
+    # add the pause
+    noise = np.concatenate((noise, np.zeros((repetitions, int(n_pause)))), -1)
+
+    # reshape to single channel signal and discard final pause
+    noise = noise.reshape((1, -1))[..., :-n_pause]
+
+    # save to Signal
+    signal = Signal(noise, sampling_rate, fft_norm="rms")
+
+    return signal
+
+
 def _generate_normal_noise(n_samples, amplitude, seed=None):
     """Generate normally distributed noise."""
 

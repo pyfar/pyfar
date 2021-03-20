@@ -82,8 +82,7 @@ def test_white_noise_with_defaults():
     assert isinstance(signal, Signal)
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
-    npt.assert_allclose(
-        np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
+    npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
 
 
 def test_white_noise_with_user_parameters():
@@ -123,8 +122,7 @@ def test_pink_noise_with_defaults():
     assert isinstance(signal, Signal)
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
-    npt.assert_allclose(
-        np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
+    npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
 
 
 def test_pink_noise_rms_spectrum():
@@ -150,6 +148,73 @@ def test_pink_noise_seed():
     b = pfs.pink_noise(100)
     with pytest.raises(AssertionError):
         assert a == b
+
+
+def test_pulsed_noise_with_defaults():
+    """Test pulsed noise signal generation with default values."""
+    signal = pfs.pulsed_noise(n_pulse=200, n_pause=100)
+
+    assert isinstance(signal, Signal)
+    assert signal.sampling_rate == 44100
+    assert signal.fft_norm == "rms"
+    assert signal.n_samples == 5 * 200 + 4 * 100
+    assert signal.cshape == (1, )
+    assert np.all(signal.time[..., 200:300] == 0)
+    assert np.all(signal.time[..., 500:600] == 0)
+    assert np.all(signal.time[..., 800:900] == 0)
+    assert np.all(signal.time[..., 1100:1200] == 0)
+
+
+def test_pulsed_noise_fade_color_and_seed():
+    """
+    Test pulsed noise signal generation with custom n_fade, color, and seed.
+    """
+    # pink noise with 50 samples fade
+    signal = pfs.pulsed_noise(
+        n_pulse=200, n_pause=100, n_fade=50, color="pink", seed=1)
+
+    noise = pfs.pink_noise(200, seed=1).time
+    fade = np.sin(np.linspace(0, np.pi/4, 50))
+    noise[..., 0:50] *= fade
+    noise[..., -50:] *= fade[::-1]
+
+    npt.assert_allclose(signal.time[..., 0:200], noise)
+
+    # white noise without fade
+    signal = pfs.pulsed_noise(
+        n_pulse=200, n_pause=100, n_fade=0, color="white", seed=1)
+    npt.assert_allclose(
+        signal.time[..., 0:200], pfs.white_noise(200, seed=1).time)
+
+
+def test_pulsed_noise_repetitions():
+    """Test pulsed noise signal generation with custom repetitions."""
+    signal = pfs.pulsed_noise(n_pulse=200, n_pause=100, repetitions=6)
+    assert signal.n_samples == 6 * 200 + 5 * 100
+
+
+def test_pulsed_noise_amplitude():
+    """Test pulsed noise signal generation with custom amplitude."""
+    signal = pfs.pulsed_noise(n_pulse=200, n_pause=100, n_fade=0, amplitude=2)
+    npt.assert_allclose(
+        np.sqrt(np.mean(signal.time[..., 0:200]**2, axis=-1)),
+        np.atleast_1d(2))
+
+
+def test_pulsed_noise_freeze():
+    """Test pulsed noise signal generation with frozen option."""
+    signal = pfs.pulsed_noise(200, 100, 50, frozen=True)
+    npt.assert_allclose(signal.time[..., 0:200], signal.time[..., 300:500])
+
+    signal = pfs.pulsed_noise(200, 100, 50, frozen=False)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(signal.time[..., 0:200], signal.time[..., 300:500])
+
+
+def test_pulsed_noise_sampling_rate():
+    """Test pulsed noise signal generation with cutsom sampling_rate."""
+    signal = pfs.pulsed_noise(200, 100, sampling_rate=48000)
+    assert signal.sampling_rate == 48000
 
 
 def test_get_common_shape():
