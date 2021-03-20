@@ -290,7 +290,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
     return signal
 
 
-def linear_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
+def linear_sweep(n_samples, frequency_range, n_fade=90, amplitude=1,
                  sampling_rate=44100):
     """Generate sine sweep with linearly increasing frequency.
 
@@ -305,7 +305,7 @@ def linear_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
     ----------
     n_samples : int
         The length of the sweep in samples
-    freq_range : array like
+    frequency_range : array like
         Frequency range of the sweep given by the lower and upper cut-off
         frequency in Hz.
     n_fade : int, optional
@@ -332,10 +332,111 @@ def linear_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
             Convention, Paris: France.
     """
 
-    if n_samples < n_fade:
-        raise ValueError("n_samples must be larger than n_fade.")
-    if np.atleast_1d(freq_range).size != 2:
-        raise ValueError("freq_range must be an array like with to elements.")
+    signal = _time_domain_sweep(
+        n_samples, frequency_range, n_fade, amplitude, sampling_rate, "linear")
+
+    return signal
+
+
+def exponential_sweep(n_samples, frequency_range, n_fade=90, amplitude=1,
+                      sweep_rate=None, sampling_rate=44100):
+    """Generate sine sweep with exponentially increasing frequency.
+
+    Time domain sweep generation according to _[1]:
+
+    .. math::
+        s(t) = \\sin(2\\pi f_{low} L \\left( \\mathrm{e}^{t/L} - 1 \\right))
+
+    with
+
+    .. math::
+        L = T / \\log(f_{high}/f_{low}),
+
+    T the duration in seconds, and t the sampling points in seconds.
+
+    Parameters
+    ----------
+     n_samples : int
+        The length of the sweep in samples
+    frequency_range : array like
+        Frequency range of the sweep given by the lower and upper cut-off
+        frequency in Hz.
+    n_fade : int, optional
+        The length of the squared cosine fade-out in samples. This is done to
+        avoid discontinuities at the end of the sweep. The default is 90, which
+        equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
+    amplitude : double, array like, optional
+        The RMS amplitude of the white noise signal. A multi channel noise
+        signal is generated if an array of amplitudes is passed. The default
+        is 1.
+    sweeprate : double, optional
+        Rate at which the sine frequency increases over time. If this is given
+        n_samples is calculated according to the sweep rate. The default is
+        None, which uses n_samples without modifications.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is 44100.
+
+    Returns
+    -------
+    sweep : pyfar Signal
+        The sweep as a Signal object. The Signal is in the time domain and
+        has the 'rms' FFT normalization (see pyfar.fft.normalization).
+
+    References
+    ----------
+    .. [1]  Farina, Angelo (2000): "Simultaneous measurement of impulse
+            response and distortion with a swept-sine technique." 108th AES
+            Convention, Paris: France.
+    """
+
+    signal = _time_domain_sweep(
+        n_samples, frequency_range, n_fade, amplitude, sampling_rate,
+        "exponential", sweep_rate)
+
+    return signal
+
+
+def _time_domain_sweep(n_samples, frequency_range, n_fade, amplitude,
+                       sampling_rate, sweep_type, sweep_rate=None):
+
+    # check input
+    if np.atleast_1d(frequency_range).size != 2:
+        raise ValueError(
+            "frequency_range must be an array like with to elements.")
+    if frequency_range[1] > sampling_rate/2:
+        raise ValueError(
+            "Upper frequency limit is larger than half the sampling rate.")
+    if frequency_range[0] == 0 and sweep_type == "exponential":
+        raise ValueError("The exponential sweep can not start at 0 Hz.")
+
+    # generate sweep
+    if sweep_type == "linear":
+        signal = _linear_sweep(
+            n_samples, frequency_range, amplitude, sampling_rate)
+    elif sweep_type == 'exponential':
+        signal = _exponential_sweep(
+            n_samples, frequency_range, amplitude, sweep_rate, sampling_rate)
+
+    # fade out
+    n_fade = int(n_fade)
+    if n_fade > 0:
+        # check must be done here because n_samples might not be defined if
+        # using the sweep_rate for exponential sweeps
+        if signal.size < n_fade:
+            raise ValueError("The sweep must be longer than n_fade.")
+
+        signal[-n_fade:] *= np.cos(np.linspace(0, np.pi/2, n_fade))
+
+    # save to signal
+    comment = (f"{sweep_type} sweep between {frequency_range[0]} "
+               f"and {frequency_range[1]} Hz "
+               f"with {n_fade} samples squared cosine fade-out.")
+    signal = Signal(signal, sampling_rate, fft_norm="rms", comment=comment)
+
+    return signal
+
+
+def _linear_sweep(n_samples, frequency_range, amplitude, sampling_rate):
 
     # generate sweep
     n_samples = int(n_samples)
@@ -344,24 +445,34 @@ def linear_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
 
     # [1, page 5]
     signal = amplitude * np.sin(
-        2 * np.pi * freq_range[0] * t +
-        2 * np.pi * (freq_range[1]-freq_range[0]) / T * t**2 / 2)
-
-    # fade out
-    n_fade = int(n_fade)
-    if n_fade > 0:
-        signal[-n_fade:] *= np.cos(np.linspace(0, np.pi/2, n_fade))
-
-    # save to signal
-    comment = (f"Linear sweep between {freq_range[0]} and {freq_range[1]} Hz "
-               f"with {n_fade} samples squared cosine fade-out.")
-    signal = Signal(signal, sampling_rate, fft_norm="rms", comment=comment)
+        2 * np.pi * frequency_range[0] * t +
+        2 * np.pi * (frequency_range[1]-frequency_range[0]) / T * t**2 / 2)
 
     return signal
 
 
-# def exponential_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
-#                  sampling_rate=44100):
+def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
+                       sampling_rate):
+
+    c = np.log(frequency_range[1] / frequency_range[0])
+
+    # get n_samples
+    if sweep_rate is not None:
+        L = 1 / sweep_rate / np.log(2)
+        T = L * c
+        n_samples = np.round(T * sampling_rate)
+    else:
+        n_samples = int(n_samples)
+
+    # L for actual n_samples
+    L = n_samples / sampling_rate / c
+
+    # make the sweep
+    times = np.arange(n_samples) / sampling_rate
+    signal = amplitude * np.sin(
+        2 * np.pi * frequency_range[0] * L * (np.exp(times / L) - 1))
+
+    return signal
 
 
 def _generate_normal_noise(n_samples, amplitude, seed=None):
