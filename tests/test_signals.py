@@ -48,6 +48,12 @@ def test_sine_multi_channel():
     npt.assert_allclose(signal.time, sin)
 
 
+def test_sine_float():
+    """Test sine signal with float duration."""
+    signal = pfs.sine(100, 441.8)
+    assert signal.n_samples == 441
+
+
 def test_impulse_with_defaults():
     """Test impulse with default parameters"""
     signal = pfs.impulse(3)
@@ -73,6 +79,12 @@ def test_impulse_multi_channel():
     signal = pfs.impulse(3, [0, 1], [1, 2])
     ref = np.atleast_2d([[1, 0, 0], [0, 2, 0]])
     npt.assert_allclose(signal.time, ref)
+
+
+def test_impulse_float():
+    """Test sine signal with float duration."""
+    signal = pfs.impulse(441.8)
+    assert signal.n_samples == 441
 
 
 def test_white_noise_with_defaults():
@@ -112,6 +124,12 @@ def test_white_noise_seed():
         assert a == b
 
 
+def test_white_noise_float():
+    """Test sine signal with float duration."""
+    signal = pfs.white_noise(441.8)
+    assert signal.n_samples == 441
+
+
 def test_pink_noise_with_defaults():
     """
     Test only the defaults because pink noise uses the same private functions
@@ -148,6 +166,12 @@ def test_pink_noise_seed():
     b = pfs.pink_noise(100)
     with pytest.raises(AssertionError):
         assert a == b
+
+
+def test_pink_noise_float():
+    """Test sine signal with float duration."""
+    signal = pfs.pink_noise(441.8)
+    assert signal.n_samples == 441
 
 
 def test_pulsed_noise_with_defaults():
@@ -215,6 +239,12 @@ def test_pulsed_noise_sampling_rate():
     """Test pulsed noise signal generation with cutsom sampling_rate."""
     signal = pfs.pulsed_noise(200, 100, sampling_rate=48000)
     assert signal.sampling_rate == 48000
+
+
+def test_pulsed_noise_float():
+    """Test sine signal with float duration."""
+    signal = pfs.pulsed_noise(200.8, 100.8, 50.8)
+    assert signal.n_samples == 5 * 200 + 4 * 100
 
 
 def test_get_common_shape():

@@ -1,6 +1,12 @@
 """
 This module contains functions for generating common audio signals such as
 sine, impulse, and noise signals.
+
+Note
+----
+All signal length are given in samles. The value for the length are caseted to
+integer numbers in all cases. This makes it possible to pass float numbers for
+convenience, e.g., `n_samples=.015 * sampling_rate`.
 """
 import numpy as np
 from pyfar import Signal
@@ -276,7 +282,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
     noise = np.concatenate((noise, np.zeros((repetitions, int(n_pause)))), -1)
 
     # reshape to single channel signal and discard final pause
-    noise = noise.reshape((1, -1))[..., :-n_pause]
+    noise = noise.reshape((1, -1))[..., :-int(n_pause)]
 
     # save to Signal
     signal = Signal(noise, sampling_rate, fft_norm="rms")
