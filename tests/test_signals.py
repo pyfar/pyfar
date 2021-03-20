@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+import os
 from pyfar import Signal
 import pyfar.dsp.filter as pff
 import pyfar.signals as pfs
@@ -198,7 +199,7 @@ def test_pulsed_noise_fade_color_and_seed():
         n_pulse=200, n_pause=100, n_fade=50, color="pink", seed=1)
 
     noise = pfs.pink_noise(200, seed=1).time
-    fade = np.sin(np.linspace(0, np.pi/4, 50))
+    fade = np.sin(np.linspace(0, np.pi / 2, 50))
     noise[..., 0:50] *= fade
     noise[..., -50:] *= fade[::-1]
 
@@ -245,6 +246,37 @@ def test_pulsed_noise_float():
     """Test sine signal with float duration."""
     signal = pfs.pulsed_noise(200.8, 100.8, 50.8)
     assert signal.n_samples == 5 * 200 + 4 * 100
+
+
+def test_linear_sweep_against_reference():
+    """Test linear sweep against manually verified reference."""
+    sweep = pfs.linear_sweep(2**10, [1e3, 20e3])
+    reference = np.loadtxt(os.path.join(
+        os.path.dirname(__file__), "references", "signals.linear_sweep.csv"))
+
+    npt.assert_allclose(sweep.time, np.atleast_2d(reference))
+    assert sweep.cshape == (1, )
+    assert sweep.n_samples == 2**10
+    assert sweep.sampling_rate == 44100
+    assert sweep.fft_norm == "rms"
+    assert sweep.comment == ("Linear sweep between 1000.0 and 20000.0 Hz with "
+                             "90 samples squared cosine fade-out.")
+
+
+def test_linear_sweep_amplitude_sampling_rate():
+    """Test linear sweep with custom amplitude and sampling rate."""
+    sweep = pfs.linear_sweep(
+        2**10, [1e3, 20e3], amplitude=2, sampling_rate=48000)
+
+    assert sweep.sampling_rate == 48000
+    npt.assert_allclose(
+        np.max(np.abs(sweep.time)), np.array(2), rtol=1e-6, atol=1e-6)
+
+
+def test_linear_sweep_float():
+    """Test linear sweep with float duration."""
+    sweep = pfs.linear_sweep(100.6, [1e3, 20e3])
+    assert sweep.n_samples == 100
 
 
 def test_get_common_shape():

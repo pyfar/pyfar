@@ -274,7 +274,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
     # fade the noise
     if n_fade > 0:
         n_fade = int(n_fade)
-        fade = np.sin(np.linspace(0, np.pi/4, n_fade))
+        fade = np.sin(np.linspace(0, np.pi/2, n_fade))
         noise[..., 0:n_fade] *= fade
         noise[..., -n_fade:] *= fade[::-1]
 
@@ -286,6 +286,76 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
 
     # save to Signal
     signal = Signal(noise, sampling_rate, fft_norm="rms")
+
+    return signal
+
+
+def linear_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
+                 sampling_rate=44100):
+    """Generate sine sweep with linearly increasing frequency.
+
+    Time domain sweep generation according to _[1]:
+
+    .. math::
+        x(t) = \\sin(2\\pi\f_{low} t + 2\\pi (f_{high}-f_{low}) / T t^2 / 2),
+
+    with T the duration in seconds and t the sampling points in seconds.
+
+    Parameters
+    ----------
+    n_samples : int
+        The length of the sweep in samples
+    freq_range : array like
+        Frequency range of the sweep given by the lower and upper cut-off
+        frequency in Hz.
+    n_fade : int, optional
+        The length of the squared cosine fade-out in samples. This is done to
+        avoid discontinuities at the end of the sweep. The default is 90, which
+        equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
+    amplitude : double, array like, optional
+        The RMS amplitude of the white noise signal. A multi channel noise
+        signal is generated if an array of amplitudes is passed. The default
+        is 1.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is 44100.
+
+    Returns
+    -------
+    sweep : pyfar Signal
+        The sweep as a Signal object. The Signal is in the time domain and
+        has the 'rms' FFT normalization (see pyfar.fft.normalization).
+
+    References
+    ----------
+    .. [1]  Farina, Angelo (2000): "Simultaneous measurement of impulse
+            response and distortion with a swept-sine technique." 108th AES
+            Convention, Paris: France.
+    """
+
+    if n_samples < n_fade:
+        raise ValueError("n_samples must be larger than n_fade.")
+    if len(freq_range) != 2:
+        raise ValueError("freq_range must be an array like with to elements.")
+
+    # generate sweep
+    n_samples = int(n_samples)
+    t = np.arange(n_samples) / sampling_rate
+    T = n_samples / sampling_rate
+
+    # [1, page 5]
+    signal = amplitude * np.sin(
+        2 * np.pi * freq_range[0] * t +
+        2 * np.pi * (freq_range[1]-freq_range[0]) / T * t**2 / 2)
+
+    # fade out
+    n_fade = int(n_fade)
+    if n_fade > 0:
+        signal[-n_fade:] *= np.cos(np.linspace(0, np.pi/2, n_fade))
+
+    # save to signal
+    comment = (f"Linear sweep between {freq_range[0]} and {freq_range[1]} Hz "
+               f"with {n_fade} samples squared cosine fade-out.")
+    signal = Signal(signal, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 
