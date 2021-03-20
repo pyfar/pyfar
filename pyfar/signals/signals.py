@@ -54,7 +54,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
     if np.any(frequency < 0) or np.any(frequency > sampling_rate/2):
         raise ValueError(
-            f"The frequencies but must be between 0 and {sampling_rate/2} Hz")
+            f"The frequency must be between 0 and {sampling_rate/2} Hz")
 
     # generate the sine signal
     n_samples = int(n_samples)
@@ -334,7 +334,7 @@ def linear_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
 
     if n_samples < n_fade:
         raise ValueError("n_samples must be larger than n_fade.")
-    if len(freq_range) != 2:
+    if np.atleast_1d(freq_range).size != 2:
         raise ValueError("freq_range must be an array like with to elements.")
 
     # generate sweep
@@ -358,6 +358,10 @@ def linear_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
     signal = Signal(signal, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
+
+
+# def exponential_sweep(n_samples, freq_range, n_fade=90, amplitude=1,
+#                  sampling_rate=44100):
 
 
 def _generate_normal_noise(n_samples, amplitude, seed=None):

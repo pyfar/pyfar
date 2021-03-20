@@ -55,6 +55,12 @@ def test_sine_float():
     assert signal.n_samples == 441
 
 
+def test_sine_assertions():
+    """Test assertions for sine."""
+    with pytest.raises(ValueError, match="The frequency must be"):
+        pfs.sine(40000, 100)
+
+
 def test_impulse_with_defaults():
     """Test impulse with default parameters"""
     signal = pfs.impulse(3)
@@ -248,6 +254,15 @@ def test_pulsed_noise_float():
     assert signal.n_samples == 5 * 200 + 4 * 100
 
 
+def test_pulsed_noise_assertions():
+    """Test assertions for pulsed noise."""
+    with pytest.raises(ValueError, match="n_fade too large."):
+        pfs.pulsed_noise(100, 100)
+
+    with pytest.raises(ValueError, match="color is brown"):
+        pfs.pulsed_noise(200, 100, color="brown")
+
+
 def test_linear_sweep_against_reference():
     """Test linear sweep against manually verified reference."""
     sweep = pfs.linear_sweep(2**10, [1e3, 20e3])
@@ -277,6 +292,14 @@ def test_linear_sweep_float():
     """Test linear sweep with float duration."""
     sweep = pfs.linear_sweep(100.6, [1e3, 20e3])
     assert sweep.n_samples == 100
+
+
+def test_linear_sweep_assertions():
+    """Test assertoins for linear sweep."""
+    with pytest.raises(ValueError, match="n_samples must be larger"):
+        pfs.linear_sweep(50, [1, 2])
+    with pytest.raises(ValueError, match="freq_range must be an array"):
+        pfs.linear_sweep(100, 1)
 
 
 def test_get_common_shape():
