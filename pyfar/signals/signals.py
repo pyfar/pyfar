@@ -51,6 +51,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
             f"The frequencies but must be between 0 and {sampling_rate/2} Hz")
 
     # generate the sine signal
+    n_samples = int(n_samples)
     times = np.arange(n_samples) / sampling_rate
     sine = np.zeros(shape + (n_samples, ))
     for idx in np.ndindex(shape):
@@ -111,6 +112,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     delay, amplitude = _match_shape(shape, delay, amplitude)
 
     # generate the impulse signal
+    n_samples = int(n_samples)
     signal = np.zeros(shape + (n_samples, ), dtype=np.double)
     for idx in np.ndindex(shape):
         signal[idx + (delay[idx], )] = amplitude[idx]
@@ -207,6 +209,7 @@ def pink_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
 def _generate_normal_noise(n_samples, amplitude, seed=None):
     """Generate normally distributed noise."""
 
+    n_samples = int(n_samples)
     shape = np.atleast_1d(amplitude).shape
     rng = np.random.default_rng(seed)
     noise = rng.standard_normal(np.prod(shape + (n_samples, )))
