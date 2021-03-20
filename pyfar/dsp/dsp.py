@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import signal as sgn
-from pyfar import Signal, FrequencyData
+import pyfar
 from pyfar.dsp import fft
 
 
@@ -23,8 +23,8 @@ def phase(signal, deg=False, unwrap=False):
         Phase.
     """
 
-    if not isinstance(signal, Signal) and \
-            not isinstance(signal, FrequencyData):
+    if not isinstance(signal, pyfar.Signal) and \
+            not isinstance(signal, pyfar.FrequencyData):
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')
 
@@ -72,7 +72,7 @@ def group_delay(signal, frequencies=None, method='fft'):
     """
 
     # check input and default values
-    if not isinstance(signal, Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     if frequencies is not None and method == 'fft':
@@ -198,7 +198,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     """
 
     # check input
-    if not isinstance(signal, Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     if window_length > signal.n_samples:
