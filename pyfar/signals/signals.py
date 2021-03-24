@@ -329,10 +329,8 @@ def linear_sweep(n_samples, frequency_range, n_fade=90, amplitude=1,
         The length of the squared cosine fade-out in samples. This is done to
         avoid discontinuities at the end of the sweep. The default is 90, which
         equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
-    amplitude : double, array like, optional
-        The RMS amplitude of the white noise signal. A multi channel noise
-        signal is generated if an array of amplitudes is passed. The default
-        is 1.
+    amplitude : double, optional
+        The amplitude of the signal. The default is 1.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is 44100.
 
@@ -383,10 +381,8 @@ def exponential_sweep(n_samples, frequency_range, n_fade=90, amplitude=1,
         The length of the squared cosine fade-out in samples. This is done to
         avoid discontinuities at the end of the sweep. The default is 90, which
         equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
-    amplitude : double, array like, optional
-        The RMS amplitude of the white noise signal. A multi channel noise
-        signal is generated if an array of amplitudes is passed. The default
-        is 1.
+    amplitude : double, optional
+        The amplitude of the signal. The default is 1.
     sweeprate : double, optional
         Rate at which the sine frequency increases over time. If this is given
         n_samples is calculated according to the sweep rate. The default is
