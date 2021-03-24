@@ -15,7 +15,7 @@ def test_sine_with_defaults():
     sin = np.sin(np.arange(441) / 44100 * 2 * np.pi * 99)
 
     assert isinstance(signal, Signal)
-    assert signal.comment == "f = 99 Hz"
+    assert signal.comment == "Sine signal (f = [99] Hz, amplitude = [1])"
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
     assert signal.time.shape == (1, 441)
@@ -34,7 +34,7 @@ def test_sine_full_period():
     signal = pfs.sine(99, 441, full_period=True)
     sin = np.sin(np.arange(441) / 44100 * 2 * np.pi * 100)
 
-    assert signal.comment == "f = 100 Hz"
+    assert signal.comment == "Sine signal (f = [100] Hz, amplitude = [1])"
     npt.assert_allclose(signal.time, np.atleast_2d(sin))
 
 
@@ -45,12 +45,12 @@ def test_sine_multi_channel():
         (np.atleast_2d(np.sin(np.arange(441) / 44100 * 2 * np.pi * 99)),
          np.atleast_2d(np.sin(np.arange(441) / 44100 * 2 * np.pi * 50))), 0)
 
-    assert signal.comment == "f = [99 50] Hz"
+    assert signal.comment == "Sine signal (f = [99 50] Hz, amplitude = [1 1])"
     npt.assert_allclose(signal.time, sin)
 
 
 def test_sine_float():
-    """Test sine signal with float duration."""
+    """Test sine signal with float number of samples."""
     signal = pfs.sine(100, 441.8)
     assert signal.n_samples == 441
 
@@ -68,12 +68,15 @@ def test_impulse_with_defaults():
     npt.assert_allclose(signal.time, np.atleast_2d([1, 0, 0]))
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == 'none'
+    assert signal.comment == ("Impulse signal (delay = [0] samples, "
+                              "amplitude = [1])")
 
 
 def test_impulse_with_user_parameters():
     """Test impulse with custom delay, amplitude and sampling rate"""
     signal = pfs.impulse(3, 1, 2, 48000)
     npt.assert_allclose(signal.time, np.atleast_2d([0, 2, 0]))
+    assert signal.sampling_rate == 48000
 
 
 def test_impulse_multi_channel():
@@ -89,7 +92,7 @@ def test_impulse_multi_channel():
 
 
 def test_impulse_float():
-    """Test sine signal with float duration."""
+    """Test impulse signal with float duration."""
     signal = pfs.impulse(441.8)
     assert signal.n_samples == 441
 
@@ -101,11 +104,12 @@ def test_white_noise_with_defaults():
     assert isinstance(signal, Signal)
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
+    assert signal.comment == "White noise signal (rms = [1])"
     npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
 
 
 def test_white_noise_with_user_parameters():
-    """Test wite noise with amplitude and sampling rate."""
+    """Test wite noise with rms and sampling rate."""
     signal = pfs.white_noise(100, 2, 48000)
 
     assert signal.sampling_rate == 48000
@@ -113,7 +117,7 @@ def test_white_noise_with_user_parameters():
 
 
 def test_white_noise_multi_channel():
-    """Test wite noise with amplitude and sampling rate."""
+    """Test multi channel wite noise."""
     rms = [[1, 2, 3], [4, 5, 6]]
     signal = pfs.white_noise(100, rms)
     npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), rms)
@@ -132,7 +136,7 @@ def test_white_noise_seed():
 
 
 def test_white_noise_float():
-    """Test sine signal with float duration."""
+    """Test white noise signal with float number of samples."""
     signal = pfs.white_noise(441.8)
     assert signal.n_samples == 441
 
@@ -147,6 +151,7 @@ def test_pink_noise_with_defaults():
     assert isinstance(signal, Signal)
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
+    assert signal.comment == "Pink noise signal (rms = [1])"
     npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
 
 
@@ -176,7 +181,7 @@ def test_pink_noise_seed():
 
 
 def test_pink_noise_float():
-    """Test sine signal with float duration."""
+    """Test pink noise signal with float number of samples."""
     signal = pfs.pink_noise(441.8)
     assert signal.n_samples == 441
 
@@ -194,6 +199,9 @@ def test_pulsed_noise_with_defaults():
     assert np.all(signal.time[..., 500:600] == 0)
     assert np.all(signal.time[..., 800:900] == 0)
     assert np.all(signal.time[..., 1100:1200] == 0)
+    assert signal.comment == ("frozen pink pulsed noise signal (rms = 1, "
+                              "5 repetitions, 200 samples pulse duration, "
+                              "100 samples pauses, and 90 samples fades.")
 
 
 def test_pulsed_noise_fade_color_and_seed():
@@ -205,7 +213,7 @@ def test_pulsed_noise_fade_color_and_seed():
         n_pulse=200, n_pause=100, n_fade=50, color="pink", seed=1)
 
     noise = pfs.pink_noise(200, seed=1).time
-    fade = np.sin(np.linspace(0, np.pi / 2, 50))
+    fade = np.sin(np.linspace(0, np.pi / 2, 50))**2
     noise[..., 0:50] *= fade
     noise[..., -50:] *= fade[::-1]
 
@@ -224,9 +232,9 @@ def test_pulsed_noise_repetitions():
     assert signal.n_samples == 6 * 200 + 5 * 100
 
 
-def test_pulsed_noise_amplitude():
-    """Test pulsed noise signal generation with custom amplitude."""
-    signal = pfs.pulsed_noise(n_pulse=200, n_pause=100, n_fade=0, amplitude=2)
+def test_pulsed_noise_rms():
+    """Test pulsed noise signal generation with custom rms."""
+    signal = pfs.pulsed_noise(n_pulse=200, n_pause=100, n_fade=0, rms=2)
     npt.assert_allclose(
         np.sqrt(np.mean(signal.time[..., 0:200]**2, axis=-1)),
         np.atleast_1d(2))
@@ -243,13 +251,13 @@ def test_pulsed_noise_freeze():
 
 
 def test_pulsed_noise_sampling_rate():
-    """Test pulsed noise signal generation with cutsom sampling_rate."""
+    """Test pulsed noise signal generation with custom sampling_rate."""
     signal = pfs.pulsed_noise(200, 100, sampling_rate=48000)
     assert signal.sampling_rate == 48000
 
 
 def test_pulsed_noise_float():
-    """Test sine signal with float duration."""
+    """Test pulsed noise signal with float number of samples."""
     signal = pfs.pulsed_noise(200.8, 100.8, 50.8)
     assert signal.n_samples == 5 * 200 + 4 * 100
 
@@ -289,7 +297,7 @@ def test_linear_sweep_amplitude_sampling_rate():
 
 
 def test_linear_sweep_float():
-    """Test linear sweep with float duration."""
+    """Test linear sweep with float number of samples."""
     sweep = pfs.linear_sweep(100.6, [1e3, 20e3])
     assert sweep.n_samples == 100
 

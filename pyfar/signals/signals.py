@@ -4,7 +4,7 @@ sine, impulse, and noise signals.
 
 Note
 ----
-All signal length are given in samles. The value for the length are caseted to
+All signal length are given in samples. The value for the length are caseted to
 integer numbers in all cases. This makes it possible to pass float numbers for
 convenience, e.g., `n_samples=.015 * sampling_rate`.
 """
@@ -39,7 +39,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     signal : Signal
         The sine as a Signal object. The Signal is in the time domain and has
         the 'rms' FFT normalization (see pyfar.fft.normalization). The exact
-        frequency is written to Signal.commtent.
+        frequency is written to Signal.comment.
 
     Note
     ----
@@ -47,10 +47,10 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     or of the same shape.
     """
 
-    # check and match the shape
-    shape = _get_common_shape(frequency, amplitude, phase)
+    # check and match the cshape
+    cshape = _get_common_shape(frequency, amplitude, phase)
     frequency, amplitude, phase = _match_shape(
-        shape, frequency, amplitude, phase)
+        cshape, frequency, amplitude, phase)
 
     if np.any(frequency < 0) or np.any(frequency > sampling_rate/2):
         raise ValueError(
@@ -59,8 +59,8 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     # generate the sine signal
     n_samples = int(n_samples)
     times = np.arange(n_samples) / sampling_rate
-    sine = np.zeros(shape + (n_samples, ))
-    for idx in np.ndindex(shape):
+    sine = np.zeros(cshape + (n_samples, ))
+    for idx in np.ndindex(cshape):
         if full_period:
             # nearest number of full periods
             num_periods = np.round(
@@ -72,11 +72,12 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
             np.sin(2 * np.pi * frequency[idx] * times + phase[idx])
 
     # save to Signal
-    if shape == (1, ):
-        frequency = frequency[0]  # nicer comments :)
+    nl = "\n"  # required as variable because f-strings cannot contain "\"
+    comment = (f"Sine signal (f = {str(frequency).replace(nl, ',')} Hz, "
+               f"amplitude = {str(amplitude).replace(nl, ',')})")
 
     signal = Signal(sine, sampling_rate, fft_norm="rms",
-                    comment=f"f = {frequency} Hz")
+                    comment=comment)
 
     return signal
 
@@ -113,33 +114,37 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     The parameters delay and amplitude must all be scalars or of the same
     shape.
     """
-    # check and match the shape
-    shape = _get_common_shape(delay, amplitude)
-    delay, amplitude = _match_shape(shape, delay, amplitude)
+    # check and match the cshape
+    cshape = _get_common_shape(delay, amplitude)
+    delay, amplitude = _match_shape(cshape, delay, amplitude)
 
-    # generate the impulse signal
+    # generate the impulse
     n_samples = int(n_samples)
-    signal = np.zeros(shape + (n_samples, ), dtype=np.double)
-    for idx in np.ndindex(shape):
-        signal[idx + (delay[idx], )] = amplitude[idx]
+    impulse = np.zeros(cshape + (n_samples, ), dtype=np.double)
+    for idx in np.ndindex(cshape):
+        impulse[idx + (delay[idx], )] = amplitude[idx]
 
-    # get pyfar Signal
-    signal = Signal(signal, sampling_rate)
+    # save to Signal
+    nl = "\n"  # required as variable because f-strings cannot contain "\"
+    comment = (f"Impulse signal (delay = {str(delay).replace(nl, ',')} "
+               f"samples, amplitude = {str(amplitude).replace(nl, ',')})")
+
+    signal = Signal(impulse, sampling_rate, comment=comment)
 
     return signal
 
 
-def white_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
+def white_noise(n_samples, rms=1, sampling_rate=44100, seed=None):
     """Generate normally distributed white noise.
 
     Parameters
     ----------
     n_samples : int
         The length of the signal in samples
-    amplitude : double, array like, optional
-        The RMS amplitude of the white noise signal. A multi channel noise
-        signal is generated if an array of amplitudes is passed. The default
-        is 1.
+    rms : double, array like, optional
+        The route mean square (RMS) value of the noise signal. A multi channel
+        noise signal is generated if an array of RMS values is passed.
+        The default is 1.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is 44100.
     seed : int, None
@@ -155,19 +160,22 @@ def white_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
     """
 
     # generate the noise
-    amplitude = np.atleast_1d(amplitude)
-    signal = _generate_normal_noise(n_samples, amplitude, seed)
+    rms = np.atleast_1d(rms)
+    noise = _generate_normal_noise(n_samples, rms, seed)
 
     # level the noise
-    signal = _normalize_rms(signal, amplitude)
+    noise = _normalize_rms(noise, rms)
 
     # save to Signal
-    signal = Signal(signal, sampling_rate, fft_norm="rms")
+    nl = "\n"  # required as variable because f-strings cannot contain "\"
+    comment = f"White noise signal (rms = {str(rms).replace(nl, ',')})"
+
+    signal = Signal(noise, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 
 
-def pink_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
+def pink_noise(n_samples, rms=1, sampling_rate=44100, seed=None):
     """Generate normally distributed pink noise.
 
     The pink noise is generated by applying a sqrt(1/f) filter to the spectrum.
@@ -176,10 +184,10 @@ def pink_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
     ----------
     n_samples : int
         The length of the signal in samples
-    amplitude : double, array like, optional
-        The RMS amplitude of the white noise signal. A multi channel noise
-        signal is generated if an array of amplitudes is passed. The default
-        is 1.
+    rms : double, array like, optional
+        The route mean square (RMS) value of the noise signal. A multi channel
+        noise signal is generated if an array of RMS values is passed.
+        The default is 1.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is 44100.
     seed : int, None
@@ -195,24 +203,27 @@ def pink_noise(n_samples, amplitude=1, sampling_rate=44100, seed=None):
     """
 
     # generate the noise
-    amplitude = np.atleast_1d(amplitude)
-    signal = _generate_normal_noise(n_samples, amplitude, seed)
+    rms = np.atleast_1d(rms)
+    noise = _generate_normal_noise(n_samples, rms, seed)
 
     # apply 1/f filter in the frequency domain
-    signal = fft.rfft(signal, n_samples, sampling_rate, 'none')
-    signal /= np.sqrt(np.arange(1, signal.shape[-1]+1))
-    signal = fft.irfft(signal, n_samples, sampling_rate, 'none')
+    noise = fft.rfft(noise, n_samples, sampling_rate, 'none')
+    noise /= np.sqrt(np.arange(1, noise.shape[-1]+1))
+    noise = fft.irfft(noise, n_samples, sampling_rate, 'none')
 
     # level the noise
-    signal = _normalize_rms(signal, amplitude)
+    noise = _normalize_rms(noise, rms)
 
     # save to Signal
-    signal = Signal(signal, sampling_rate, fft_norm="rms")
+    nl = "\n"  # reqiured as variable because f-strings cannot contain "\"
+    comment = f"Pink noise signal (rms = {str(rms).replace(nl, ',')})"
+
+    signal = Signal(noise, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 
 
-def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
+def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
                  color="pink", frozen=True, sampling_rate=44100, seed=None):
     """Generate normally distributed pulsed white and pink noise.
 
@@ -229,13 +240,13 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
         The default is 90, which equals approximately 2 ms at sampling rates of
         44.1 and 48 kHz.
     repetitions : int, optional
-    amplitude : double, array like, optional
+    rms : double, array like, optional
         The RMS amplitude of the white noise signal. A multi channel noise
         signal is generated if an array of amplitudes is passed. The default
         is 1.
     color: string, optional
         The noise color, which can be 'pink' or 'white'. The default is 'pink'.
-    frozen : boolena, optional
+    frozen : boolean, optional
         If True, all noise pulses are identical. If False each noise pulse is
         a separate stochastic process. The default is True.
     sampling_rate : int, optional
@@ -262,9 +273,9 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
     n_samples = n_pulse if frozen else n_pulse * repetitions
 
     if color == "pink":
-        noise = pink_noise(n_samples, amplitude, sampling_rate, seed).time
+        noise = pink_noise(n_samples, rms, sampling_rate, seed).time
     elif color == "white":
-        noise = white_noise(n_samples, amplitude, sampling_rate, seed).time
+        noise = white_noise(n_samples, rms, sampling_rate, seed).time
     else:
         raise ValueError(f"color is {color} but must be 'pink' or 'white'.")
 
@@ -274,7 +285,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
     # fade the noise
     if n_fade > 0:
         n_fade = int(n_fade)
-        fade = np.sin(np.linspace(0, np.pi/2, n_fade))
+        fade = np.sin(np.linspace(0, np.pi/2, n_fade))**2
         noise[..., 0:n_fade] *= fade
         noise[..., -n_fade:] *= fade[::-1]
 
@@ -285,7 +296,12 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, amplitude=1,
     noise = noise.reshape((1, -1))[..., :-int(n_pause)]
 
     # save to Signal
-    signal = Signal(noise, sampling_rate, fft_norm="rms")
+    frozen_str = "frozen" if frozen else ""
+    comment = (f"{frozen_str } {color} pulsed noise signal (rms = {rms}, "
+               f"{repetitions} repetitions, {n_pulse} samples pulse duration, "
+               f"{n_pause} samples pauses, and {n_fade} samples fades.")
+
+    signal = Signal(noise, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 
@@ -411,10 +427,10 @@ def _time_domain_sweep(n_samples, frequency_range, n_fade, amplitude,
 
     # generate sweep
     if sweep_type == "linear":
-        signal = _linear_sweep(
+        sweep = _linear_sweep(
             n_samples, frequency_range, amplitude, sampling_rate)
     elif sweep_type == 'exponential':
-        signal = _exponential_sweep(
+        sweep = _exponential_sweep(
             n_samples, frequency_range, amplitude, sweep_rate, sampling_rate)
 
     # fade out
@@ -422,16 +438,16 @@ def _time_domain_sweep(n_samples, frequency_range, n_fade, amplitude,
     if n_fade > 0:
         # check must be done here because n_samples might not be defined if
         # using the sweep_rate for exponential sweeps
-        if signal.size < n_fade:
+        if sweep.size < n_fade:
             raise ValueError("The sweep must be longer than n_fade.")
 
-        signal[-n_fade:] *= np.cos(np.linspace(0, np.pi/2, n_fade))
+        sweep[-n_fade:] *= np.cos(np.linspace(0, np.pi/2, n_fade))
 
     # save to signal
     comment = (f"{sweep_type} sweep between {frequency_range[0]} "
                f"and {frequency_range[1]} Hz "
                f"with {n_fade} samples squared cosine fade-out.")
-    signal = Signal(signal, sampling_rate, fft_norm="rms", comment=comment)
+    signal = Signal(sweep, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 
@@ -444,11 +460,11 @@ def _linear_sweep(n_samples, frequency_range, amplitude, sampling_rate):
     T = n_samples / sampling_rate
 
     # [1, page 5]
-    signal = amplitude * np.sin(
+    sweep = amplitude * np.sin(
         2 * np.pi * frequency_range[0] * t +
         2 * np.pi * (frequency_range[1]-frequency_range[0]) / T * t**2 / 2)
 
-    return signal
+    return sweep
 
 
 def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
@@ -469,31 +485,31 @@ def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
 
     # make the sweep
     times = np.arange(n_samples) / sampling_rate
-    signal = amplitude * np.sin(
+    sweep = amplitude * np.sin(
         2 * np.pi * frequency_range[0] * L * (np.exp(times / L) - 1))
 
-    return signal
+    return sweep
 
 
 def _generate_normal_noise(n_samples, amplitude, seed=None):
     """Generate normally distributed noise."""
 
     n_samples = int(n_samples)
-    shape = np.atleast_1d(amplitude).shape
+    cshape = np.atleast_1d(amplitude).shape
     rng = np.random.default_rng(seed)
-    noise = rng.standard_normal(np.prod(shape + (n_samples, )))
-    noise = noise.reshape(shape + (n_samples, ))
+    noise = rng.standard_normal(np.prod(cshape + (n_samples, )))
+    noise = noise.reshape(cshape + (n_samples, ))
 
     return noise
 
 
-def _normalize_rms(signal, amplitude):
-    """Level signal to RMS amplitude."""
+def _normalize_rms(data, amplitude):
+    """Level data to RMS amplitude."""
 
-    rms = np.atleast_1d(np.sqrt(np.mean(signal**2, axis=-1)))
+    rms = np.atleast_1d(np.sqrt(np.mean(data**2, axis=-1)))
     for idx in np.ndindex(amplitude.shape):
-        signal[idx] = signal[idx] / rms[idx] * amplitude[idx]
-    return signal
+        data[idx] = data[idx] / rms[idx] * amplitude[idx]
+    return data
 
 
 def _get_common_shape(*data):
@@ -506,22 +522,22 @@ def _get_common_shape(*data):
 
     Returns
     -------
-    shape : tuple
+    cshape : tuple
         Common shape of data, e.g., (1, ) if al entries in data are numbers or
         (2, 3) if data has entries with shape (2, 3) (and (1, )).
     """
 
-    shape = None
+    cshape = None
     for d in data:
         d = np.atleast_1d(d)
-        if shape is None or shape == (1, ):
-            shape = d.shape
+        if cshape is None or cshape == (1, ):
+            cshape = d.shape
         elif d.shape != (1, ):
-            if d.shape != shape:
+            if d.shape != cshape:
                 raise ValueError(
                     "Input data must be of the same shape or of shape (1, ).")
 
-    return shape
+    return cshape
 
 
 def _match_shape(shape, *args):
