@@ -92,7 +92,7 @@ def test_impulse_multi_channel():
 
 
 def test_impulse_float():
-    """Test impulse signal with float duration."""
+    """Test impulse signal with float number of samples."""
     signal = pfs.impulse(441.8)
     assert signal.n_samples == 441
 
@@ -117,7 +117,7 @@ def test_white_noise_with_user_parameters():
 
 
 def test_white_noise_multi_channel():
-    """Test multi channel wite noise."""
+    """Test multi channel white noise."""
     rms = [[1, 2, 3], [4, 5, 6]]
     signal = pfs.white_noise(100, rms)
     npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), rms)
