@@ -310,7 +310,7 @@ class TimeData(_Audio):
             like, a numpy array of indices is returned.
         """
         times = np.atleast_1d(value)
-        indices = np.zeros_like(times).astype(np.int)
+        indices = np.zeros_like(times).astype(int)
         for idx, time in enumerate(times):
             indices[idx] = np.argmin(np.abs(self.times - time))
         return np.squeeze(indices)
@@ -364,7 +364,7 @@ class FrequencyData(_Audio):
 
     """
     def __init__(self, data, frequencies, fft_norm=None, comment=None,
-                 dtype=np.complex):
+                 dtype=complex):
         """Init FrequencyData with data, and frequencies.
 
         Attributes
@@ -398,7 +398,7 @@ class FrequencyData(_Audio):
         _Audio.__init__(self, 'freq', comment, dtype)
 
         # init data
-        self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+        self._data = np.atleast_2d(np.asarray(data, dtype=complex))
 
         # init frequencies
         self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
@@ -466,7 +466,7 @@ class FrequencyData(_Audio):
             a numpy array of indices is returned.
         """
         freqs = np.atleast_1d(value)
-        indices = np.zeros_like(freqs).astype(np.int)
+        indices = np.zeros_like(freqs).astype(int)
         for idx, freq in enumerate(freqs):
             indices[idx] = np.argmin(np.abs(self.frequencies - freq))
         return np.squeeze(indices)
@@ -590,7 +590,7 @@ class Signal(FrequencyData, TimeData):
 
             TimeData.__init__(self, data, self.times, comment, dtype)
         elif domain == 'freq':
-            self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+            self._data = np.atleast_2d(np.asarray(data, dtype=complex))
 
             n_bins = self._data.shape[-1]
             if n_samples is None:

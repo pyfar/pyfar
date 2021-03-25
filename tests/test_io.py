@@ -6,6 +6,7 @@ from unittest.mock import patch
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
+import pathlib
 import scipy.io.wavfile as wavfile
 
 from pyfar import io
@@ -44,6 +45,33 @@ def test_write_wav_overwrite(noise, tmpdir):
         io.write_wav(noise, filename, overwrite=False)
     # Call with overwrite enabled
     io.write_wav(noise, filename, overwrite=True)
+
+
+def test_write_wav_pathlib(noise, tmpdir):
+    """Test write functionality with filename as pathlib Path object."""
+    filename = pathlib.Path(tmpdir, 'test_wav.wav')
+    io.write_wav(noise, filename)
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        noise.time,
+        np.atleast_2d(signal_reload),
+        rtol=1e-10)
+
+
+def test_write_wav_suffix(noise, tmpdir):
+    """Test for .wav extension of filename."""
+    filename = pathlib.Path(tmpdir, 'test_wav')
+    io.write_wav(noise, filename)
+    # Without suffix
+    with pytest.raises(FileNotFoundError):
+        wavfile.read(filename)
+    # With suffix added
+    filename = filename.with_suffix('.wav')
+    signal_reload = wavfile.read(filename)[-1].T
+    npt.assert_allclose(
+        noise.time,
+        np.atleast_2d(signal_reload),
+        rtol=1e-10)
 
 
 def test_write_wav_nd(noise_two_by_two_channel, tmpdir):
@@ -150,7 +178,7 @@ def test_write_NoEncode_NotImplemented(no_encode_obj, tmpdir):
 
 @patch('pyfar._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
-def test_write_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
+def test_write_read_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
     """ Check if a TypeError is raised when writing an arbitrary
     object.
     """
@@ -160,7 +188,7 @@ def test_write_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
         io.read(filename)
 
 
-def test_read_orientations(orientations, tmpdir):
+def test_write_read_orientations(orientations, tmpdir):
     """ Orientations
     Make sure `read` understands the bits written by `write`
     """
@@ -171,7 +199,7 @@ def test_read_orientations(orientations, tmpdir):
     assert actual == orientations
 
 
-def test_read_coordinates(coordinates, tmpdir):
+def test_write_read_coordinates(coordinates, tmpdir):
     """ Coordinates
     Make sure `read` understands the bits written by `write`
     """
@@ -182,7 +210,7 @@ def test_read_coordinates(coordinates, tmpdir):
     assert actual == coordinates
 
 
-def test_read_signal(sine_signal, tmpdir):
+def test_write_read_signal(sine_signal, tmpdir):
     """ Signal
     Make sure `read` understands the bits written by `write`
     """
@@ -193,7 +221,7 @@ def test_read_signal(sine_signal, tmpdir):
     assert actual == sine_signal
 
 
-def test_read_write_timedata(timedata, tmpdir):
+def test_write_read_timedata(timedata, tmpdir):
     """ TimeData
     Make sure `read` understands the bits written by `write`
     """
@@ -204,7 +232,7 @@ def test_read_write_timedata(timedata, tmpdir):
     assert actual == timedata
 
 
-def test_read_write_frequencydata(frequencydata, tmpdir):
+def test_write_read_frequencydata(frequencydata, tmpdir):
     """ TimeData
     Make sure `read` understands the bits written by `write`
     """
@@ -215,7 +243,7 @@ def test_read_write_frequencydata(frequencydata, tmpdir):
     assert actual == frequencydata
 
 
-def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
+def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     """ SphericalVoronoi
     Make sure `read` understands the bits written by `write`
     """
@@ -226,7 +254,7 @@ def test_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     assert actual == sphericalvoronoi
 
 
-def test_read_filter(filter, tmpdir):
+def test_write_read_filter(filter, tmpdir):
     """ Filter
     Make sure `read` understands the bits written by `write`
     """
@@ -264,6 +292,44 @@ def test_write_filterSOS_TypeError(filterSOS, tmpdir):
         io.write(filename, filterSOS=filterSOS)
 
 
+def test_write_read_numpy_ndarrays(tmpdir):
+    """ Numpy ndarray
+    Make sure `read` understands the bits written by `write`
+    """
+    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
+    matrix_2d_float = matrix_2d_int.astype(np.float)
+    matrix_2d_complex = matrix_2d_int.astype(np.complex)
+
+    matrix_3d_int = np.arange(0, 24, dtype=np.int).reshape((2, 3, 4))
+    matrix_3d_float = matrix_3d_int.astype(np.float)
+    matrix_3d_complex = matrix_3d_int.astype(np.complex)
+
+    filename = os.path.join(tmpdir, 'ndarray.far')
+
+    io.write(
+        filename,
+        matrix_2d_int=matrix_2d_int,
+        matrix_2d_float=matrix_2d_float,
+        matrix_2d_complex=matrix_2d_complex,
+        matrix_3d_int=matrix_3d_int,
+        matrix_3d_float=matrix_3d_float,
+        matrix_3d_complex=matrix_3d_complex)
+
+    actual = io.read(filename)
+    assert isinstance(actual['matrix_2d_int'], np.ndarray)
+    assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
+    assert isinstance(actual['matrix_2d_float'], np.ndarray)
+    assert np.allclose(actual['matrix_2d_float'], matrix_2d_float)
+    assert isinstance(actual['matrix_2d_complex'], np.ndarray)
+    assert np.allclose(actual['matrix_2d_complex'], matrix_2d_complex)
+    assert isinstance(actual['matrix_3d_int'], np.ndarray)
+    assert np.allclose(actual['matrix_3d_int'], matrix_3d_int)
+    assert isinstance(actual['matrix_2d_float'], np.ndarray)
+    assert np.allclose(actual['matrix_3d_float'], matrix_3d_float)
+    assert isinstance(actual['matrix_2d_complex'], np.ndarray)
+    assert np.allclose(actual['matrix_3d_complex'], matrix_3d_complex)
+
+
 def test_write_read_multiplePyfarObjects(
         filter,
         coordinates,
@@ -277,6 +343,7 @@ def test_write_read_multiplePyfarObjects(
     and read back.
     """
     filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
     io.write(
         filename,
         filter=filter,
@@ -285,7 +352,8 @@ def test_write_read_multiplePyfarObjects(
         sphericalvoronoi=sphericalvoronoi,
         timedata=timedata,
         frequencydata=frequencydata,
-        signal=sine_signal)
+        signal=sine_signal,
+        matrix_2d_int=matrix_2d_int)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -301,6 +369,8 @@ def test_write_read_multiplePyfarObjects(
     assert actual['frequencydata'] == frequencydata
     assert isinstance(actual['signal'], Signal)
     assert actual['signal'] == sine_signal
+    assert isinstance(actual['matrix_2d_int'], np.ndarray)
+    assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
 
 
 def test_write_read_multiplePyfarObjectsWithCompression(
@@ -316,6 +386,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     and read back with zip compression.
     """
     filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
     io.write(
         filename,
         compress=True,
@@ -325,7 +396,8 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         sphericalvoronoi=sphericalvoronoi,
         timedata=timedata,
         frequencydata=frequencydata,
-        signal=sine_signal)
+        signal=sine_signal,
+        matrix_2d_int=matrix_2d_int)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -341,3 +413,5 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     assert actual['frequencydata'] == frequencydata
     assert isinstance(actual['signal'], Signal)
     assert actual['signal'] == sine_signal
+    assert isinstance(actual['matrix_2d_int'], np.ndarray)
+    assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)

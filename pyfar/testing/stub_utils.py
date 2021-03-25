@@ -10,7 +10,7 @@ import deepdiff
 from copy import deepcopy
 from unittest import mock
 
-from pyfar.signal import Signal
+from pyfar import Signal, TimeData, FrequencyData
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):
@@ -77,6 +77,81 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     signal.find_nearest_frequency = find_nearest_frequency
 
     return signal
+
+
+def time_data_stub(time, times):
+    """Function to generate stub of pyfar TimeData class based on MagicMock.
+    The properties of the signal are set without any further check.
+
+    Parameters
+    ----------
+    time : ndarray
+        Time data
+    times : ndarray
+        Times of time in second
+
+    Returns
+    -------
+    time_data
+        stub of pyfar TimeData class
+    """
+
+    # Use MagicMock and side_effect to mock __getitem__
+    # See "Mocking a dictionary with MagicMock",
+    # https://het.as.utexas.edu/HET/Software/mock/examples.html
+    def getitem(slice):
+        time = np.atleast_2d(time_data.time[slice])
+        item = time_data_stub(time, time_data.times)
+        return item
+
+    time_data = mock.MagicMock(
+        spec_set=TimeData(time, times))
+    time_data.time = np.atleast_2d(time)
+    time_data.times = np.atleast_1d(times)
+    time_data.domain = 'time'
+    time_data.n_samples = time_data.time.shape[-1]
+    time_data.cshape = time_data.time.shape[:-1]
+    time_data.__getitem__.side_effect = getitem
+
+    return time_data
+
+
+def frequency_data_stub(freq, frequencies):
+    """
+    Function to generate stub of pyfar FrequencyData class based onMagicMock.
+    The properties of the signal are set without any further check.
+
+    Parameters
+    ----------
+    freq : ndarray
+        Frequency data
+    frequencies : ndarray
+        Frequencies of freq in Hz
+
+    Returns
+    -------
+    frequency_data
+        stub of pyfar FrequencyData class
+    """
+
+    # Use MagicMock and side_effect to mock __getitem__
+    # See "Mocking a dictionary with MagicMock",
+    # https://het.as.utexas.edu/HET/Software/mock/examples.html
+    def getitem(slice):
+        freq = np.atleast_2d(frequency_data.freq[slice])
+        item = frequency_data_stub(freq, frequency_data.frequencies)
+        return item
+
+    frequency_data = mock.MagicMock(
+        spec_set=FrequencyData(freq, frequencies))
+    frequency_data.freq = np.atleast_2d(freq)
+    frequency_data.frequencies = np.atleast_1d(frequencies)
+    frequency_data.domain = 'freq'
+    frequency_data.n_bins = frequency_data.freq.shape[-1]
+    frequency_data.cshape = frequency_data.freq.shape[:-1]
+    frequency_data.__getitem__.side_effect = getitem
+
+    return frequency_data
 
 
 def impulse_func(delay, n_samples, fft_norm, cshape):
@@ -168,7 +243,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
     time = np.sin(2 * np.pi * frequency[..., np.newaxis] * times)
     # Spectrum
     n_bins = int(n_samples / 2) + 1
-    freq = np.zeros(cshape + (n_bins,), dtype=np.complex)
+    freq = np.zeros(cshape + (n_bins,), dtype=complex)
     for idx, f in np.ndenumerate(frequency):
         f_bin = int(f / sampling_rate * n_samples)
         freq[idx + (f_bin,)] = -0.5j * float(n_samples)

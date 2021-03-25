@@ -1632,9 +1632,9 @@ class Coordinates(object):
         return kdtree
 
     def __getitem__(self, index):
-        """Return mutable slice of Coordinates object at index."""
+        """Return copied slice of Coordinates object at index."""
 
-        new = self
+        new = self.copy()
         # slice points
         new._points = new._points[index]
         # slice weights

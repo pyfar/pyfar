@@ -1,14 +1,14 @@
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+import matplotlib.style as mpl_style
 import os
 import json
+import contextlib
 import pyfar.plot._line as _line
 from pyfar.plot._interaction import PlotParameter
 
 
 def plotstyle(style='light'):
     """
-    Get name and fullpath of plotstyle.
+    Get fullpath of pyfar plotstyle 'light' or 'dark'.
 
     Can be used to plot the pyfar plotstyles 'light' and 'dark' saved as
     mplstyle-file inside the pyfar package.
@@ -16,30 +16,115 @@ def plotstyle(style='light'):
     Parameters
     ----------
     style : str
-        'light', 'dark', or stlye from matplotlib.pyplot.available. Raises a
-        ValueError if style is not known.
+        'light', or 'dark'
 
     Returns
     -------
     style : str
-        Full path to the pyfar plotstyle or name of the matplotlib plotstyle
+        Full path to the pyfar plotstyle. Input parameter style otherwise.
 
     """
 
-    if style is None:
-        # get the currently used plotstyle
-        style = mpl.matplotlib_fname()
-    elif style in ['light', 'dark']:
-        # use pyfar style
+    if style in ['light', 'dark']:
         style = os.path.join(
             os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
-    elif style not in plt.style.available:
-        # error if style not found
-        ValueError((f"plotstyle '{style}' not available. Valid styles are "
-                    "None, 'light', 'dark' and styles from "
-                    "matplotlib.pyplot.available"))
 
     return style
+
+
+@contextlib.contextmanager
+def context(style='light', after_reset=False):
+    """Context manager for using plot styles temporarily.
+
+    This context manager supports the two pyfar styles 'light' and 'dark'. It
+    is a wrapper for `matplotlib.pyplot.style.context()`.
+
+    Parameters
+    ----------
+    style : str, dict, Path or list
+        A style specification. Valid options are:
+
+        +------+-------------------------------------------------------------+
+        | str  | The name of a style or a path/URL to a style file. For a    |
+        |      | list of available style names, see `style.available`.       |
+        +------+-------------------------------------------------------------+
+        | dict | Dictionary with valid key/value pairs for                   |
+        |      | `matplotlib.rcParams`.                                      |
+        +------+-------------------------------------------------------------+
+        | Path | A path-like object which is a path to a style file.         |
+        +------+-------------------------------------------------------------+
+        | list | A list of style specifiers (str, Path or dict) applied from |
+        |      | first to last in the list.                                  |
+        +------+-------------------------------------------------------------+
+
+    after_reset : bool
+        If True, apply style after resetting settings to their defaults;
+        otherwise, apply style on top of the current settings.
+
+    Examples
+    --------
+    >>> import pyfar
+    >>> import matplotlib.pyplot as plt
+    >>>
+    >>> with pyfar.plot.utils.context():
+    >>>     fig, ax = plt.subplots(2, 1)
+    >>>     pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
+    """
+
+    # get pyfar plotstyle if desired
+    style = plotstyle(style)
+
+    # apply plot style
+    with mpl_style.context(style):
+        yield
+
+
+def use(style="light"):
+    """
+    Use plot style settings from a style specification.
+
+    The style name of 'default' is reserved for reverting back to
+    the default style settings. This is a wrapper for `matplotlib.style.use`
+    that supports the pyfar plot styles 'light' and 'dark'.
+
+    .. note::
+
+       This updates the `.rcParams` with the settings from the style.
+       `.rcParams` not defined in the style are kept.
+
+    Parameters
+    ----------
+    style : str, dict, Path or list
+        A style specification. Valid options are:
+
+        +------+-------------------------------------------------------------+
+        | str  | The name of a style or a path/URL to a style file. For a    |
+        |      | list of available style names, see `style.available`.       |
+        +------+-------------------------------------------------------------+
+        | dict | Dictionary with valid key/value pairs for                   |
+        |      | `matplotlib.rcParams`.                                      |
+        +------+-------------------------------------------------------------+
+        | Path | A path-like object which is a path to a style file.         |
+        +------+-------------------------------------------------------------+
+        | list | A list of style specifiers (str, Path or dict) applied from |
+        |      | first to last in the list.                                  |
+        +------+-------------------------------------------------------------+
+
+    Examples
+    --------
+    >>> import pyfar
+    >>> import matplotlib.pyplot as plt
+    >>>
+    >>> pyfar.plot.utils.use()
+    >>> fig, ax = plt.subplots(2, 1)
+    >>> pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
+
+    """
+
+    # get pyfar plotstyle if desired
+    style = plotstyle(style)
+    # use plot style
+    mpl_style.use(style)
 
 
 def color(color: str) -> str:
@@ -95,14 +180,14 @@ def shortcuts(show=True):
 
     Use these shortcuts to show different plots
     -------------------------------------------
-    1: line.time
-    2: line.freq
-    3: line.phase
-    4: line.group_delay
-    5: line.spectrogram
-    6: line.time_freq
-    7: line.freq_phase
-    8: line.freq_group_delay
+    1, T: line.time
+    2, F: line.freq
+    3, P: line.phase
+    4, G: line.group_delay
+    5, S: line.spectrogram
+    6, ctrl+T, ctrl+F: line.time_freq
+    7, ctrl+P: line.freq_phase
+    8, ctrl+G: line.freq_group_delay
 
     Use these shortcuts to control the plot
     ---------------------------------------
@@ -110,20 +195,20 @@ def shortcuts(show=True):
     right: move x-axis view to the right
     up: move y-axis view upwards
     down: y-axis view downwards
-    +: move colormap range up
-    -: move colormap range down
+    +, ctrl+shift+up: move colormap range up
+    -, ctrl+shift+down: move colormap range down
     shift+right: zoom in x-axis
     shift+left: zoom out x-axis
     shift+up: zoom out y-axis
     shift+down: zoom in y-axis
-    *: zoom colormap range in
-    _: zoom colormap range out
-    x: toggle between linear and logarithmic x-axis
-    y: toggle between linear and logarithmic y-axis
-    c: toggle between linear and logarithmic color data
-    a: toggle between plotting all channels and plottinng single channels
-    .: show next channel
-    ,: show previous channel
+    *, alt+shift+up: zoom colormap range in
+    _, alt+shift+down: zoom colormap range out
+    X: toggle between linear and logarithmic x-axis
+    Y: toggle between linear and logarithmic y-axis
+    C: toggle between linear and logarithmic color data
+    A: toggle between plotting all channels and plotting single channels
+    ., ]: show next channel
+    ,, [: show previous channel
 
     Notes on plot controls
     ----------------------
@@ -179,6 +264,9 @@ def shortcuts(show=True):
                 key = plt[p]["key"]
             print(f'{", ".join(key)}: {p}')
         print(" ")
+        print(("Note that not all plots are available for TimeData and "
+               "FrequencyData objects as detailed in the documentation of "
+               "plots.\n\n"))
 
         print("Use these shortcuts to control the plot")
         print("---------------------------------------")
