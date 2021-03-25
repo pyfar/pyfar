@@ -177,28 +177,6 @@ def sine_odd_rms():
 
 
 @pytest.fixture
-def sine_two_by_two_channel():
-    """2-by-2 channel sine signal.
-
-    Returns
-    -------
-    signal : Signal
-        Sine signal
-    """
-    frequency = np.array([[1, 2], [3, 4]]) * 441
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'none'
-    cshape = (2, 2)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-
-    return signal
-
-
-@pytest.fixture
 def impulse():
     """Delta impulse signal.
 
