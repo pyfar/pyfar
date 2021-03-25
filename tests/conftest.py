@@ -16,8 +16,9 @@ from pyfar.testing import stub_utils
 @pytest.fixture
 def sine_stub():
     """Sine signal stub.
-    Used in cases, when a dependence on the Signal class is prohibited,
-    e.g. testing of the Signal class itself.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -39,10 +40,37 @@ def sine_stub():
 
 
 @pytest.fixture
+def sine_stub_odd():
+    """Sine signal stub, odd number of samples
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
+
+    Returns
+    -------
+    signal : Signal
+        Sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 9999
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm)
+
+    return signal
+
+
+@pytest.fixture
 def sine_stub_rms():
-    """Sine signal stub.
-    Used in cases, when a dependence on the Signal class is prohibited,
-    e.g. testing of the Signal class itself.
+    """Sine signal stub, RMS FFT-normalization.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -64,10 +92,37 @@ def sine_stub_rms():
 
 
 @pytest.fixture
+def sine_stub_odd_rms():
+    """Sine signal stub, odd number of samples, RMS FFT-normalization.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 9999
+    fft_norm = 'rms'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm)
+
+    return signal
+
+
+@pytest.fixture
 def impulse_stub():
     """Delta impulse signal stub.
-    Used in cases, when a dependence on the Signal class is prohibited,
-    e.g. testing of the Signal class itself.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -91,8 +146,9 @@ def impulse_stub():
 @pytest.fixture
 def impulse_stub_rms():
     """Delta impulse signal stub, RMS FFT-normalization.
-    Used in cases, when a dependence on the Signal class is prohibited,
-    e.g. testing of the Signal class itself.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -171,51 +227,6 @@ def sine_rms():
     frequency = 441
     sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'rms'
-    cshape = (1,)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def sine_odd():
-    """Sine signal, odd number of samples.
-
-    Returns
-    -------
-    signal : Signal
-        Sine signal
-    """
-    frequency = 441
-    sampling_rate = 44100
-    n_samples = 9999
-    fft_norm = 'none'
-    cshape = (1,)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def sine_odd_rms():
-    """Sine signal, odd number of samples,
-    RMS FFT-normalization.
-
-    Returns
-    -------
-    signal : Signal
-        Sine signal
-    """
-    frequency = 441
-    sampling_rate = 44100
-    n_samples = 9999
     fft_norm = 'rms'
     cshape = (1,)
 
