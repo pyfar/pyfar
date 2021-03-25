@@ -97,93 +97,69 @@ def test_impulse_float():
     assert signal.n_samples == 441
 
 
-def test_white_noise_with_defaults():
-    """Test wite noise with default parameters."""
-    signal = pfs.white_noise(100)
+def test_noise_with_defaults():
+    """Test noise with default parameters."""
+    signal = pfs.noise(100)
 
     assert isinstance(signal, Signal)
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
-    assert signal.comment == "White noise signal (rms = [1])"
+    assert signal.comment == "white noise signal (rms = [1])"
     npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
 
 
-def test_white_noise_with_user_parameters():
+def test_white_with_user_parameters():
     """Test wite noise with rms and sampling rate."""
-    signal = pfs.white_noise(100, 2, 48000)
+    signal = pfs.noise(100, "pink", rms=2, sampling_rate=48000)
 
     assert signal.sampling_rate == 48000
+    assert signal.comment == "pink noise signal (rms = [2])"
     npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), 2)
 
 
-def test_white_noise_multi_channel():
-    """Test multi channel white noise."""
+def test_noise_multi_channel():
+    """Test multi channel noise."""
     rms = [[1, 2, 3], [4, 5, 6]]
-    signal = pfs.white_noise(100, rms)
+    signal = pfs.noise(100, rms=rms)
     npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), rms)
 
 
-def test_white_noise_seed():
+def test_noise_seed():
     """Test passing seeds to the random generator."""
-    a = pfs.white_noise(100, seed=1)
-    b = pfs.white_noise(100, seed=1)
+    a = pfs.noise(100, seed=1)
+    b = pfs.noise(100, seed=1)
     assert a == b
 
-    a = pfs.white_noise(100)
-    b = pfs.white_noise(100)
+    a = pfs.noise(100)
+    b = pfs.noise(100)
     with pytest.raises(AssertionError):
         assert a == b
 
 
-def test_white_noise_float():
-    """Test white noise signal with float number of samples."""
-    signal = pfs.white_noise(441.8)
+def test_white_float():
+    """Test noise signal with float number of samples."""
+    signal = pfs.noise(441.8)
     assert signal.n_samples == 441
 
 
-def test_pink_noise_with_defaults():
+def test_noise_rms_pink_spectrum():
     """
-    Test only the defaults because pink noise uses the same private functions
-    as white noise.
-    """
-    signal = pfs.pink_noise(100)
-
-    assert isinstance(signal, Signal)
-    assert signal.sampling_rate == 44100
-    assert signal.fft_norm == "rms"
-    assert signal.comment == "Pink noise signal (rms = [1])"
-    npt.assert_allclose(np.sqrt(np.mean(signal.time**2, axis=-1)), 1)
-
-
-def test_pink_noise_rms_spectrum():
-    """
-    Test for constant energy across filters of constant relative band width.
+    Test for constant energy across filters of constant relative band width
+    for pink noise.
     """
     # filtered pink noise
     # (use only center octaves, because the spectrum is less stochastic there)
-    signal = pfs.pink_noise(5000, seed=1)
+    signal = pfs.noise(5000, "pink", seed=1)
     signal = pff.fractional_octave_bands(signal, 1, freq_range=(1e3, 16e3))
     # check if stdandard deviation is less then 1%
     rms = np.atleast_1d(np.sqrt(np.mean(signal.time**2, axis=-1)))
     assert np.std(rms) < .01
 
 
-def test_pink_noise_seed():
-    """Test passing seeds to the random generator."""
-    a = pfs.pink_noise(100, seed=1)
-    b = pfs.pink_noise(100, seed=1)
-    assert a == b
-
-    a = pfs.pink_noise(100)
-    b = pfs.pink_noise(100)
-    with pytest.raises(AssertionError):
-        assert a == b
-
-
-def test_pink_noise_float():
-    """Test pink noise signal with float number of samples."""
-    signal = pfs.pink_noise(441.8)
-    assert signal.n_samples == 441
+def test_noise_assertion():
+    """Test noise with invalid spectrum."""
+    with pytest.raises(ValueError, match="spectrum is 'brown'"):
+        pfs.noise(200, "brown")
 
 
 def test_pulsed_noise_with_defaults():
@@ -204,15 +180,15 @@ def test_pulsed_noise_with_defaults():
                               "100 samples pauses, and 90 samples fades.")
 
 
-def test_pulsed_noise_fade_color_and_seed():
+def test_pulsed_noise_fade_spectrum_and_seed():
     """
-    Test pulsed noise signal generation with custom n_fade, color, and seed.
+    Test pulsed noise signal generation with custom n_fade, spectrum, and seed.
     """
     # pink noise with 50 samples fade
     signal = pfs.pulsed_noise(
-        n_pulse=200, n_pause=100, n_fade=50, color="pink", seed=1)
+        n_pulse=200, n_pause=100, n_fade=50, spectrum="pink", seed=1)
 
-    noise = pfs.pink_noise(200, seed=1).time
+    noise = pfs.noise(200, "pink", seed=1).time
     fade = np.sin(np.linspace(0, np.pi / 2, 50))**2
     noise[..., 0:50] *= fade
     noise[..., -50:] *= fade[::-1]
@@ -221,9 +197,9 @@ def test_pulsed_noise_fade_color_and_seed():
 
     # white noise without fade
     signal = pfs.pulsed_noise(
-        n_pulse=200, n_pause=100, n_fade=0, color="white", seed=1)
+        n_pulse=200, n_pause=100, n_fade=0, spectrum="white", seed=1)
     npt.assert_allclose(
-        signal.time[..., 0:200], pfs.white_noise(200, seed=1).time)
+        signal.time[..., 0:200], pfs.noise(200, "white", seed=1).time)
 
 
 def test_pulsed_noise_repetitions():
@@ -267,8 +243,8 @@ def test_pulsed_noise_assertions():
     with pytest.raises(ValueError, match="n_fade too large."):
         pfs.pulsed_noise(100, 100)
 
-    with pytest.raises(ValueError, match="color is brown"):
-        pfs.pulsed_noise(200, 100, color="brown")
+    with pytest.raises(ValueError, match="spectrum is 'brown'"):
+        pfs.pulsed_noise(200, 100, spectrum="brown")
 
 
 def test_linear_sweep_against_reference():
