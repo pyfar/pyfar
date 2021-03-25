@@ -3,8 +3,6 @@ import numpy.testing as npt
 import pytest
 
 from pyfar import dsp
-from scipy.signal import chirp
-import pyfar.plot
 
 
 def test_phase_rad(sine_plus_impulse):
