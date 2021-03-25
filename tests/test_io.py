@@ -74,14 +74,14 @@ def test_write_wav_suffix(noise, tmpdir):
         rtol=1e-10)
 
 
-def test_write_wav_nd(noise_two_by_two_channel, tmpdir):
+def test_write_wav_nd(noise_two_by_three_channel, tmpdir):
     """Test for signals of higher dimension."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
-    io.write_wav(noise_two_by_two_channel, filename)
+    io.write_wav(noise_two_by_three_channel, filename)
     signal_reload = wavfile.read(filename)[-1].T
     npt.assert_allclose(
-        signal_reload.reshape(noise_two_by_two_channel.time.shape),
-        noise_two_by_two_channel.time)
+        signal_reload.reshape(noise_two_by_three_channel.time.shape),
+        noise_two_by_three_channel.time)
 
 
 def test_read_sofa_GeneralFIR(

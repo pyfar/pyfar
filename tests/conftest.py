@@ -386,27 +386,6 @@ def noise_odd():
 
 
 @pytest.fixture
-def noise_two_by_two_channel():
-    """ 2-by-2 channel gaussian white noise signal.
-
-    Returns
-    -------
-    signal : Signal
-        Noise signal
-    """
-    sigma = 1
-    n_samples = int(1e5)
-    cshape = (2, 2)
-    sampling_rate = 44100
-    fft_norm = 'rms'
-
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-
-    return signal
-
-
-@pytest.fixture
 def noise_two_by_three_channel():
     """ 2-by-3 channel gaussian white noise signal.
 
