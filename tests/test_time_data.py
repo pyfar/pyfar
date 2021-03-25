@@ -172,18 +172,20 @@ def test_separation_from_signal():
         time.domain = 'time'
 
 
-def test___eq___equal(timedata):
-    """Check if copied timedata is equal."""
-    actual = timedata.copy()
-    assert timedata == actual
+def test___eq___equal():
+    """Check if copied TimeData is equal."""
+    time_data = TimeData([1, 2, 3], [0.1, 0.2, 0.3])
+    actual = time_data.copy()
+    assert time_data == actual
 
 
-def test___eq___notEqual(timedata, sine):
-    """Check if timedata signal is equal."""
-    actual = TimeData(0.5 * timedata.time, timedata.times)
-    assert not timedata == actual
-    actual = TimeData(timedata.time, 0.5 * timedata.times)
-    assert not timedata == actual
-    actual = timedata.copy()
-    actual.comment = f'{actual.comment} A completely different thing'
-    assert not timedata == actual
+def test___eq___notEqual():
+    """Check if TimeData object is equal."""
+    time_data = TimeData([1, 2, 3], [0.1, 0.2, 0.3])
+    actual = TimeData([2, 3, 4], [0.1, 0.2, 0.3])
+    assert not time_data == actual
+    actual = TimeData([1, 2, 3], [0.2, 0.3, 0.4])
+    assert not time_data == actual
+    comment = f'{time_data.comment} A completely different thing'
+    actual = TimeData([1, 2, 3], [0.1, 0.2, 0.3], comment=comment)
+    assert not time_data == actual

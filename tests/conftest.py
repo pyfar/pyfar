@@ -446,45 +446,44 @@ def noise_two_by_three_channel():
 
 
 @pytest.fixture
-def time_data_three_points():
+def time_data():
     """
-    TimeData stub with three data points.
+    TimeData object with three data points.
 
     Returns
     -------
-    time_data
-        stub of pyfar TimeData class
+    time_data TimeData
+        Data
     """
-    time_data = stub_utils.time_data_stub([1, 0, -1], [0, .1, .4])
+    time_data = TimeData([1, 0, -1], [0, .1, .4])
     return time_data
 
 
 @pytest.fixture
-def frequency_data_three_points():
+def frequency_data():
     """
-    FrequencyData stub with three data points.
+    FrequencyData object with three data points.
 
     Returns
     -------
-    frequency_data
-        stub of pyfar FrequencyData class
+    frequency_data FrequencyData
+        Data
     """
-    frequency_data = stub_utils.frequency_data_stub(
-        [2, .25, .5], [100, 1_000, 20_000])
+    frequency_data = FrequencyData([2, .25, .5], [100, 1000, 20000])
     return frequency_data
 
 
 @pytest.fixture
 def frequency_data_one_point():
     """
-    FrequencyData stub with one data points.
+    FrequencyData object with one data point.
 
     Returns
     -------
-    frequency_data
-        stub of pyfar FrequencyData class
+    frequency_data FrequencyData
+        Data
     """
-    frequency_data = stub_utils.frequency_data_stub([2], [0])
+    frequency_data = FrequencyData([2], [0])
     return frequency_data
 
 
@@ -685,20 +684,6 @@ def coordinates():
     """ Coordinates object.
     """
     return Coordinates([0, 1], [2, 3], [4, 5])
-
-
-@pytest.fixture
-def timedata():
-    data = [1, 0, -1]
-    times = [0, .1, .3]
-    return TimeData(data, times)
-
-
-@pytest.fixture
-def frequencydata():
-    data = [1, 0, -1]
-    freqs = [0, .1, .3]
-    return FrequencyData(data, freqs)
 
 
 @pytest.fixture
