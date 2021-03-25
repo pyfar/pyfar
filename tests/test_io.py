@@ -210,15 +210,15 @@ def test_write_read_coordinates(coordinates, tmpdir):
     assert actual == coordinates
 
 
-def test_write_read_signal(sine_signal, tmpdir):
+def test_write_read_signal(sine, tmpdir):
     """ Signal
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'signal.far')
-    io.write(filename, signal=sine_signal)
+    io.write(filename, signal=sine)
     actual = io.read(filename)['signal']
     assert isinstance(actual, Signal)
-    assert actual == sine_signal
+    assert actual == sine
 
 
 def test_write_read_timedata(timedata, tmpdir):
@@ -337,7 +337,7 @@ def test_write_read_multiplePyfarObjects(
         sphericalvoronoi,
         timedata,
         frequencydata,
-        sine_signal,
+        sine,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back.
@@ -352,7 +352,7 @@ def test_write_read_multiplePyfarObjects(
         sphericalvoronoi=sphericalvoronoi,
         timedata=timedata,
         frequencydata=frequencydata,
-        signal=sine_signal,
+        signal=sine,
         matrix_2d_int=matrix_2d_int)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
@@ -368,7 +368,7 @@ def test_write_read_multiplePyfarObjects(
     assert isinstance(actual['frequencydata'], FrequencyData)
     assert actual['frequencydata'] == frequencydata
     assert isinstance(actual['signal'], Signal)
-    assert actual['signal'] == sine_signal
+    assert actual['signal'] == sine
     assert isinstance(actual['matrix_2d_int'], np.ndarray)
     assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
 
@@ -380,7 +380,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         sphericalvoronoi,
         timedata,
         frequencydata,
-        sine_signal,
+        sine,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back with zip compression.
@@ -396,7 +396,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         sphericalvoronoi=sphericalvoronoi,
         timedata=timedata,
         frequencydata=frequencydata,
-        signal=sine_signal,
+        signal=sine,
         matrix_2d_int=matrix_2d_int)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
@@ -412,6 +412,6 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     assert isinstance(actual['frequencydata'], FrequencyData)
     assert actual['frequencydata'] == frequencydata
     assert isinstance(actual['signal'], Signal)
-    assert actual['signal'] == sine_signal
+    assert actual['signal'] == sine
     assert isinstance(actual['matrix_2d_int'], np.ndarray)
     assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
