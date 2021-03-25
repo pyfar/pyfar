@@ -5,7 +5,7 @@ import os
 from pyfar import Signal
 import pyfar.dsp.filter as pff
 import pyfar.signals as pfs
-from pyfar.signals.signals import _get_common_shape, _match_shape
+from pyfar.signals.deterministic import _get_common_shape, _match_shape
 
 
 def test_sine_with_defaults():
