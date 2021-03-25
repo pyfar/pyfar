@@ -217,7 +217,7 @@ def pink_noise(n_samples, rms=1, sampling_rate=44100, seed=None):
     noise = _normalize_rms(noise, rms)
 
     # save to Signal
-    nl = "\n"  # reqiured as variable because f-strings cannot contain "\"
+    nl = "\n"  # required as variable because f-strings cannot contain "\"
     comment = f"Pink noise signal (rms = {str(rms).replace(nl, ',')})"
 
     signal = Signal(noise, sampling_rate, fft_norm="rms", comment=comment)
@@ -298,7 +298,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
 
     # save to Signal
     frozen_str = "frozen" if frozen else ""
-    comment = (f"{frozen_str } {color} pulsed noise signal (rms = {rms}, "
+    comment = (f"{frozen_str} {color} pulsed noise signal (rms = {rms}, "
                f"{repetitions} repetitions, {n_pulse} samples pulse duration, "
                f"{n_pause} samples pauses, and {n_fade} samples fades.")
 
