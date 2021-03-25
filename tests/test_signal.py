@@ -5,20 +5,20 @@ import pytest
 from pyfar import Signal
 
 
-def test_signal_init(sine_stub):
+def test_signal_init():
     """Test to init Signal without optional parameters."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, domain='time')
+    signal = Signal(np.array([1., 2., 3.]), 44100)
     assert isinstance(signal, Signal)
 
 
-def test_signal_init_list(sine_stub):
-    signal = Signal(sine_stub.time.tolist(), sine_stub.sampling_rate, domain='time')
+def test_signal_init_list():
+    signal = Signal([1, 2, 3], 44100)
     assert isinstance(signal, Signal)
 
 
-def test_signal_init_default_parameter(sine_stub):
+def test_signal_init_default_parameter():
     # using all defaults
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
+    signal = Signal([1, 2, 3], 44100)
     assert signal.domain == 'time'
     assert signal.fft_norm == 'none'
     assert signal.comment == 'none'
@@ -26,7 +26,7 @@ def test_signal_init_default_parameter(sine_stub):
 
 
 def test_signal_comment():
-    signal = Signal([1, 0, 0], 44100, comment='Bla')
+    signal = Signal([1, 2, 3], 44100, comment='Bla')
     assert signal.comment == 'Bla'
 
     signal.comment = 'Blub'
@@ -89,62 +89,62 @@ def test_domain_setter_time_when_freq(sine_stub):
         signal._data, sine_stub.time, atol=1e-10, rtol=1e-10)
 
 
-def test_signal_init_val(sine_stub):
+def test_signal_init_val():
     """Test to init Signal with complete parameters."""
-    signal = Signal(
-        sine_stub.time, sine_stub.sampling_rate, domain='time',
-        fft_norm=sine_stub.fft_norm)
+    signal = Signal([1, 2, 3], 44100, domain='time', fft_norm='none')
     assert isinstance(signal, Signal)
 
 
-def test_n_samples(sine_stub):
+def test_n_samples():
     """Test for number of samples."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, domain='time')
-    assert signal.n_samples == sine_stub.n_samples
+    signal = Signal([1, 2, 3], 44100)
+    assert signal.n_samples == 3
 
 
-def test_n_bins(sine_stub):
+def test_n_bins():
     """Test for number of freq bins."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, domain='time')
-    assert signal.n_bins == sine_stub.n_bins
+    signal = Signal([1, 2, 3], 44100)
+    assert signal.n_bins == 2
+    signal = Signal([1, 2, 3, 4], 44100)
+    assert signal.n_bins == 3
 
 
-def test_times(sine_stub):
+def test_times():
     """Test for the time instances."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, domain='time')
-    npt.assert_allclose(signal.times, sine_stub.times)
+    signal = Signal([1, 2, 3, 4], 2, domain='time')
+    npt.assert_allclose(signal.times, [0., 0.5, 1., 1.5])
 
 
-def test_getter_time(sine_stub, impulse_stub):
+def test_getter_time():
     """Test if attribute time is accessed correctly."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
+    signal = Signal([1, 2, 3], 44100)
     signal._domain = 'time'
-    signal._data = impulse_stub.time
-    npt.assert_allclose(signal.time, impulse_stub.time)
+    signal._data = np.array([[1., 2., 3.]])
+    npt.assert_allclose(signal.time, np.array([[1., 2., 3.]]))
 
 
-def test_setter_time(sine_stub, impulse_stub):
+def test_setter_time():
     """Test if attribute time is set correctly."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
-    signal.time = impulse_stub.time
+    signal = Signal([1, 2, 3], 44100)
+    signal.time = np.array([1., 2., 3.])
     assert signal._domain == 'time'
-    npt.assert_allclose(signal._data, impulse_stub.time)
+    npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
 
 
-def test_getter_freq(sine_stub, impulse_stub):
+def test_getter_freq():
     """Test if attribute freq is accessed correctly."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, fft_norm='rms')
+    signal = Signal([1, 2, 3], 44100, fft_norm='rms')
     signal._domain = 'freq'
-    signal._data = impulse_stub.freq
-    npt.assert_allclose(signal.freq, impulse_stub.freq)
+    signal._data = np.array([[1., 2., 3.]])
+    npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]))
 
 
-def test_setter_freq(sine_stub, impulse_stub):
+def test_setter_freq():
     """Test if attribute freq is set correctly."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
-    signal.freq = impulse_stub.freq
+    signal = Signal([1, 2, 3], 44100, fft_norm='rms')
+    signal.freq = np.array([[1., 2., 3.]])
     assert signal.domain == 'freq'
-    npt.assert_allclose(signal._data, impulse_stub.freq)
+    npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
 
 
 def test_re_setter_freq():
@@ -154,31 +154,31 @@ def test_re_setter_freq():
         signal.freq = [1, 2, 3, 4]
 
 
-def test_getter_sampling_rate(sine_stub):
+def test_getter_sampling_rate():
     """Test if attribute sampling rate is accessed correctly."""
-    signal = Signal(sine_stub, sine_stub.sampling_rate)
+    signal = Signal([1, 2, 3], 44100)
     signal._sampling_rate = 1000
     assert signal.sampling_rate == 1000
 
 
-def test_setter_sampligrate(sine_stub):
+def test_setter_sampligrate():
     """Test if attribute sampling rate is set correctly."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
+    signal = Signal([1, 2, 3], 44100)
     signal.sampling_rate = 1000
     assert signal._sampling_rate == 1000
 
 
-def test_getter_signal_type(sine_stub):
+def test_getter_signal_type():
     """Test if attribute signal type is accessed correctly."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, fft_norm='none')
+    signal = Signal([1, 2, 3], 44100, fft_norm='none')
     npt.assert_string_equal(signal.signal_type, 'energy')
 
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, fft_norm='rms')
+    signal = Signal([1, 2, 3], 44100, fft_norm='rms')
     npt.assert_string_equal(signal.signal_type, 'power')
 
 
-def test_getter_fft_norm(sine_stub):
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, fft_norm='psd')
+def test_getter_fft_norm():
+    signal = Signal([1, 2, 3], 44100, fft_norm='psd')
     assert signal.fft_norm == 'psd'
 
 
@@ -207,84 +207,83 @@ def test_setter_fft_norm():
         signal.fft_norm = 'bullshit'
 
 
-def test_dtype(sine_stub):
-    """Test for the getter od dtype."""
-    dtype = np.float64
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, dtype=dtype)
+def test_dtype():
+    """Test for the getter of dtype."""
+    dtype = float
+    signal = Signal([1, 2, 3], 44100, dtype=dtype)
     assert signal.dtype == dtype
 
 
-def test_signal_length(sine_stub):
+def test_signal_length():
     """Test for the signal length."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
-    assert signal.signal_length == sine_stub.times[-1]
+    signal = Signal([1, 2, 3, 4], 2)
+    assert signal.signal_length == 1.5
 
 
 def test_cshape():
     """Test the attribute cshape."""
-    time = np.arange(2*3*4).reshape((2, 3, 4))
+    time = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     signal = Signal(time, 44100)
     assert signal.cshape == (2, 3)
 
 
 def test_magic_getitem():
     """Test slicing operations by the magic function __getitem__."""
-    time = np.arange(2*3*4).reshape((2, 3, 4))
+    time = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     signal = Signal(time, 44100, domain='time')
     npt.assert_allclose(signal[0]._data, time[0])
 
 
 def test_magic_getitem_slice():
     """Test slicing operations by the magic function __getitem__."""
-    time = np.arange(2*3*4).reshape((2, 3, 4))
+    time = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     signal = Signal(time, 44100, domain='time')
     npt.assert_allclose(signal[:1]._data, time[:1])
 
 
 def test_magic_getitem_allslice():
     """Test slicing operations by the magic function __getitem__."""
-    time = np.arange(2*3*4).reshape((2, 3, 4))
+    time = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     signal = Signal(time, 44100, domain='time')
     npt.assert_allclose(signal[:]._data, time[:])
 
 
-def test_magic_setitem(sine_stub, impulse_stub):
+def test_magic_setitem():
     """Test the magic function __setitem__."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
-    set_signal = Signal(impulse_stub.time, impulse_stub.sampling_rate)
+    signal = Signal([1, 2, 3], 44100)
+    set_signal = Signal([2, 3, 4], 44100)
     signal[0] = set_signal
     npt.assert_allclose(signal._data, set_signal._data)
 
 
-def test_magic_setitem_wrong_sr(sine_stub):
+def test_magic_setitem_wrong_sr():
     """Test the magic function __setitem__."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
-    set_signal = Signal(sine_stub.time, 48000)
+    signal = Signal([1, 2, 3], 44100)
+    set_signal = Signal([1, 2, 3], 48000)
     with pytest.raises(ValueError, match='sampling rates do not match'):
         signal[0] = set_signal
 
 
-def test_magic_setitem_wrong_norm(sine_stub):
+def test_magic_setitem_wrong_norm():
     """Test the magic function __setitem__."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate, fft_norm='none')
-    set_signal = Signal(
-        sine_stub.time, sine_stub.sampling_rate, fft_norm='rms')
+    signal = Signal([1, 2, 3], 44100, fft_norm='none')
+    set_signal = Signal([1, 2, 3], 44100, fft_norm='rms')
     with pytest.raises(ValueError, match='FFT norms do not match'):
         signal[0] = set_signal
 
 
-def test_magic_setitem_wrong_n_samples(sine_stub):
+def test_magic_setitem_wrong_n_samples():
     """Test the magic function __setitem__."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
-    set_signal = Signal(sine_stub.time[..., :-10], sine_stub.sampling_rate)
+    signal = Signal([1, 2, 3, 4], 44100)
+    set_signal = Signal([1, 2, 3], 44100)
     with pytest.raises(ValueError, match='number of samples does not match'):
         signal[0] = set_signal
 
 
-def test_magic_len(sine_stub):
+def test_magic_len():
     """Test the magic function __len__."""
-    signal = Signal(sine_stub.time, sine_stub.sampling_rate)
-    assert len(signal) == sine_stub.n_samples
+    signal = Signal([1, 2, 3], 44100)
+    assert len(signal) == 3
 
 
 def test_find_nearest_time():
