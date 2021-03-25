@@ -170,3 +170,20 @@ def test_separation_from_signal():
         time.sampling_rate
     with pytest.raises(AttributeError):
         time.domain = 'time'
+
+
+def test___eq___equal(timedata):
+    """Check if copied timedata is equal."""
+    actual = timedata.copy()
+    assert timedata == actual
+
+
+def test___eq___notEqual(timedata, sine):
+    """Check if timedata signal is equal."""
+    actual = TimeData(0.5 * timedata.time, timedata.times)
+    assert not timedata == actual
+    actual = TimeData(timedata.time, 0.5 * timedata.times)
+    assert not timedata == actual
+    actual = timedata.copy()
+    actual.comment = f'{actual.comment} A completely different thing'
+    assert not timedata == actual

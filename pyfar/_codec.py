@@ -286,13 +286,16 @@ def _is_pyfar_type(obj):
         'Coordinates',
         'Signal',
         'Filter',
-        'SphericalVoronoi']
+        'SphericalVoronoi',
+        'TimeData',
+        'FrequencyData']
 
 
 def _is_dtype(obj):
     """ True if object is `numpy.dtype`.
     """
-    return isinstance(obj, type) and obj.__module__ == 'numpy'
+    return isinstance(obj, type) and (
+        obj.__module__ == 'numpy' or obj == np.complex)
 
 
 def _is_numpy_scalar(obj):
