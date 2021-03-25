@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.testing as npt
+import pytest
 
 from pyfar import dsp
 from scipy.signal import chirp
@@ -101,6 +102,15 @@ def test_xfade(impulse):
 
 
 def test_regu_inversion(impulse):
+
+    with pytest.raises(
+            ValueError, match='needs to be of type pyfar.Signal'):
+        dsp.regularized_spectrum_inversion('error', (1, 2))
+
+    with pytest.raises(
+            ValueError, match='lower and upper limits'):
+        dsp.regularized_spectrum_inversion(impulse, (2))
+
     impulse.freq = impulse.freq*2
     impulse.time = impulse.time*2
 

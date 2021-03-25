@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import signal as sgn
 from pyfar import Signal
+import pyfar
 import pyfar.fft as fft
 
 
@@ -244,8 +245,15 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError("The input signal needs to be of type pyfar.Signal.")
+
     data = signal.freq
     freq_range = np.asarray(freq_range)
+
+    if freq_range.size < 2:
+        raise ValueError(
+            "The frequency range needs to specify lower and upper limits.")
 
     if regu_final is None:
         regu_inside = np.ones(signal.n_bins, dtype=np.double) * regu_inside
