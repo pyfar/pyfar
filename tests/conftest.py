@@ -65,12 +65,12 @@ def impulse_stub():
 
 @pytest.fixture
 def sine():
-    """Sine signal stub.
+    """Sine signal.
 
     Returns
     -------
     signal : Signal
-        Stub of sine signal
+        Sine signal
     """
     frequency = 441
     sampling_rate = 44100
@@ -87,14 +87,14 @@ def sine():
 
 @pytest.fixture
 def sine_short():
-    """Short sine signal stub where the first frequency is > 20 Hz.
+    """Short sine signal where the first frequency is > 20 Hz.
 
     This is used for testing plot._line._lower_frequency_limit.
 
     Returns
     -------
     signal : Signal
-        Stub of sine signal
+        Sine signal
     """
     frequency = 441
     sampling_rate = 44100
@@ -111,13 +111,12 @@ def sine_short():
 
 @pytest.fixture
 def sine_rms():
-    """Sine signal stub,
-    RMS FFT-normalization.
+    """Sine signal, RMS FFT-normalization.
 
     Returns
     -------
     signal : Signal
-        Stub of sine signal
+        Sine signal
     """
     frequency = 441
     sampling_rate = 44100
@@ -134,13 +133,12 @@ def sine_rms():
 
 @pytest.fixture
 def sine_odd():
-    """Sine signal stub,
-    odd number of samples.
+    """Sine signal, odd number of samples.
 
     Returns
     -------
     signal : Signal
-        Stub of sine signal
+        Sine signal
     """
     frequency = 441
     sampling_rate = 44100
@@ -157,14 +155,13 @@ def sine_odd():
 
 @pytest.fixture
 def sine_odd_rms():
-    """Sine signal stub,
-    odd number of samples,
-    RMS FFT-normalization
+    """Sine signal, odd number of samples,
+    RMS FFT-normalization.
 
     Returns
     -------
     signal : Signal
-        Stub of sine signal
+        Sine signal
     """
     frequency = 441
     sampling_rate = 44100
@@ -181,12 +178,12 @@ def sine_odd_rms():
 
 @pytest.fixture
 def sine_two_by_two_channel():
-    """2-by-2 channel sine signal stub.
+    """2-by-2 channel sine signal.
 
     Returns
     -------
     signal : Signal
-        Stub of sine signal
+        Sine signal
     """
     frequency = np.array([[1, 2], [3, 4]]) * 441
     sampling_rate = 44100
@@ -203,12 +200,12 @@ def sine_two_by_two_channel():
 
 @pytest.fixture
 def impulse():
-    """Delta impulse signal stub.
+    """Delta impulse signal.
 
     Returns
     -------
     signal : Signal
-        Stub of impulse signal
+        Impulse signal
     """
     delay = 0
     sampling_rate = 44100
@@ -225,13 +222,12 @@ def impulse():
 
 @pytest.fixture
 def impulse_rms():
-    """Delta impulse signal stub,
-    RMS FFT-normalization.
+    """Delta impulse signal, RMS FFT-normalization.
 
     Returns
     -------
     signal : Signal
-        Stub of impulse signal
+        Impulse signal
     """
     delay = 0
     sampling_rate = 44100
@@ -248,12 +244,12 @@ def impulse_rms():
 
 @pytest.fixture
 def impulse_group_delay():
-    """Delayed delta impulse signal stub with static properties.
+    """Delayed delta impulse signal with analytical group delay.
 
     Returns
     -------
     signal : Signal
-        Stub of impulse signal
+        Impulse signal
     group_delay : ndarray
         Group delay of impulse signal
     """
@@ -273,12 +269,12 @@ def impulse_group_delay():
 
 @pytest.fixture
 def impulse_group_delay_two_channel():
-    """Delayed 2 channel delta impulse signal stub with static properties.
+    """Delayed 2 channel delta impulse signal with analytical group delay.
 
     Returns
     -------
     signal : Signal
-        Stub of impulse signal
+        Impulse signal
     group_delay : ndarray
         Group delay of impulse signal
     """
@@ -298,12 +294,12 @@ def impulse_group_delay_two_channel():
 
 @pytest.fixture
 def impulse_group_delay_two_by_two_channel():
-    """Delayed 2-by-2 channel delta impulse signal stub with static properties.
+    """Delayed 2-by-2 channel delta impulse signal with analytical group delay.
 
     Returns
     -------
     signal : Signal
-        Stub of impulse signal
+        Impulse signal
     group_delay : ndarray
         Group delay of impulse signal
     """
@@ -323,12 +319,12 @@ def impulse_group_delay_two_by_two_channel():
 
 @pytest.fixture
 def sine_plus_impulse():
-    """Combined sine and delta impulse signal stub.
+    """Added sine and delta impulse signals.
 
     Returns
     -------
     signal : Signal
-        Stub of sine signal
+        Combined signal
     """
     frequency = 441
     delay = 100
@@ -349,13 +345,12 @@ def sine_plus_impulse():
 
 @pytest.fixture
 def noise():
-    """Gaussian white noise signal stub.
-    The frequency spectrum is set to dummy value None.
+    """Gaussian white noise signal.
 
     Returns
     -------
     signal : Signal
-        Stub of noise signal
+        Noise signal
     """
     sigma = 1
     n_samples = int(1e5)
@@ -371,14 +366,12 @@ def noise():
 
 @pytest.fixture
 def noise_odd():
-    """Gaussian white noise signal stub,
-    odd number of samples.
-    The frequency spectrum is set to dummy value None.
+    """Gaussian white noise signal, odd number of samples.
 
     Returns
     -------
     signal : Signal
-        Stub of noise signal
+        Noise signal
     """
     sigma = 1
     n_samples = int(1e5 - 1)
@@ -394,13 +387,12 @@ def noise_odd():
 
 @pytest.fixture
 def noise_two_by_two_channel():
-    """ 2-by-2 channel gaussian white noise signal stub.
-    The frequency spectrum is set to dummy value None.
+    """ 2-by-2 channel gaussian white noise signal.
 
     Returns
     -------
     signal : Signal
-        Stub of noise signal
+        Noise signal
     """
     sigma = 1
     n_samples = int(1e5)
@@ -416,19 +408,18 @@ def noise_two_by_two_channel():
 
 @pytest.fixture
 def noise_two_by_three_channel():
-    """ 2-by-3 channel gaussian white noise signal stub.
-    The frequency spectrum is created with np.fft.rfft.
+    """ 2-by-3 channel gaussian white noise signal.
 
     Returns
     -------
     signal : Signal
-        Stub of noise signal
+        Noise signal
     """
     sigma = 1
     n_samples = int(1e5)
     cshape = (2, 3)
     sampling_rate = 44100
-    fft_norm = 'none'
+    fft_norm = 'rms'
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
     signal = Signal(time, sampling_rate, fft_norm=fft_norm)
