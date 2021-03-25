@@ -163,7 +163,7 @@ def white_noise(n_samples, rms=1, sampling_rate=44100, seed=None):
 
     # generate the noise
     rms = np.atleast_1d(rms)
-    noise = _generate_normal_noise(n_samples, rms, seed)
+    noise = _generate_white_noise(n_samples, rms, seed)
 
     # level the noise
     noise = _normalize_rms(noise, rms)
@@ -206,7 +206,7 @@ def pink_noise(n_samples, rms=1, sampling_rate=44100, seed=None):
 
     # generate the noise
     rms = np.atleast_1d(rms)
-    noise = _generate_normal_noise(n_samples, rms, seed)
+    noise = _generate_white_noise(n_samples, rms, seed)
 
     # apply 1/f filter in the frequency domain
     noise = fft.rfft(noise, n_samples, sampling_rate, 'none')
@@ -489,7 +489,7 @@ def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
     return sweep
 
 
-def _generate_normal_noise(n_samples, amplitude, seed=None):
+def _generate_white_noise(n_samples, amplitude, seed=None):
     """Generate normally distributed noise."""
 
     n_samples = int(n_samples)
