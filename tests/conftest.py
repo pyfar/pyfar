@@ -80,8 +80,7 @@ def sine():
 
     time, freq, frequency = stub_utils.sine_func(
         frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -105,8 +104,7 @@ def sine_short():
 
     time, freq, frequency = stub_utils.sine_func(
         frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -129,8 +127,7 @@ def sine_rms():
 
     time, freq, frequency = stub_utils.sine_func(
         frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -153,8 +150,7 @@ def sine_odd():
 
     time, freq, frequency = stub_utils.sine_func(
         frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -178,8 +174,7 @@ def sine_odd_rms():
 
     time, freq, frequency = stub_utils.sine_func(
         frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -201,8 +196,7 @@ def sine_two_by_two_channel():
 
     time, freq, frequency = stub_utils.sine_func(
         frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -224,8 +218,7 @@ def impulse():
 
     time, freq = stub_utils.impulse_func(
         delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -248,8 +241,7 @@ def impulse_rms():
 
     time, freq = stub_utils.impulse_func(
         delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -273,8 +265,7 @@ def impulse_group_delay():
 
     time, freq = stub_utils.impulse_func(
         delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
     group_delay = delay * np.ones_like(freq, dtype=float)
 
     return signal, group_delay
@@ -299,8 +290,7 @@ def impulse_group_delay_two_channel():
 
     time, freq = stub_utils.impulse_func(
         delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
     group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
 
     return signal, group_delay
@@ -325,8 +315,7 @@ def impulse_group_delay_two_by_two_channel():
 
     time, freq = stub_utils.impulse_func(
         delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
     group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
 
     return signal, group_delay
@@ -352,8 +341,8 @@ def sine_plus_impulse():
         frequency, sampling_rate, n_samples, fft_norm, cshape)
     time_imp, freq_imp = stub_utils.impulse_func(
         delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time_sine + time_imp, freq_sine + freq_imp, sampling_rate, fft_norm)
+    signal = Signal(
+        time_sine + time_imp, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -373,11 +362,9 @@ def noise():
     cshape = (1,)
     sampling_rate = 44100
     fft_norm = 'rms'
-    freq = None
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -398,11 +385,9 @@ def noise_odd():
     cshape = (1,)
     sampling_rate = 44100
     fft_norm = 'rms'
-    freq = None
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -422,11 +407,9 @@ def noise_two_by_two_channel():
     cshape = (2, 2)
     sampling_rate = 44100
     fft_norm = 'rms'
-    freq = None
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -448,9 +431,7 @@ def noise_two_by_three_channel():
     fft_norm = 'none'
 
     time = stub_utils.noise_func(sigma, n_samples, cshape)
-    freq = np.fft.rfft(time)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
 
     return signal
 
@@ -695,13 +676,6 @@ def coordinates():
     """ Coordinates object.
     """
     return Coordinates([0, 1], [2, 3], [4, 5])
-
-
-@pytest.fixture
-def sine_signal(sine):
-    """ Signal object without Mock or MagicMock wrapper.
-    """
-    return Signal(sine.time, sine.sampling_rate, domain='time')
 
 
 @pytest.fixture
