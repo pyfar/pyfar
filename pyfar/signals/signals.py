@@ -4,7 +4,7 @@ sine, impulse, and noise signals.
 
 Note
 ----
-All signal length are given in samples. The value for the length are caseted to
+All signal length are given in samples. The value for the length are casted to
 integer numbers in all cases. This makes it possible to pass float numbers for
 convenience, e.g., `n_samples=.015 * sampling_rate`.
 """
@@ -356,7 +356,7 @@ def linear_sweep(n_samples, frequency_range, n_fade=90, amplitude=1,
 def exponential_sweep(n_samples, frequency_range, n_fade=90, amplitude=1,
                       sweep_rate=None, sampling_rate=44100):
     """
-    Generate singel channel sine sweep with exponentially increasing frequency.
+    Generate single channel sine sweep with exponentially increasing frequency.
 
     Time domain sweep generation according to _[1]:
 
@@ -383,7 +383,7 @@ def exponential_sweep(n_samples, frequency_range, n_fade=90, amplitude=1,
         equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
     amplitude : double, optional
         The amplitude of the signal. The default is 1.
-    sweeprate : double, optional
+    sweep_rate : double, optional
         Rate at which the sine frequency increases over time. If this is given
         n_samples is calculated according to the sweep rate. The default is
         None, which uses n_samples without modifications.
