@@ -199,47 +199,6 @@ def test_extend_sos_coefficients():
     npt.assert_allclose(imp_filt, imp)
 
 
-def test_impulse_mock(impulse_mock):
-    n_samples = 1000
-    sampling_rate = 2000
-    amplitude = 1
-
-    signal = np.atleast_2d(np.zeros(n_samples, dtype=np.double))
-    signal[:, 0] = amplitude
-
-    assert impulse_mock.sampling_rate == sampling_rate
-    assert impulse_mock.cshape == (1,)
-    npt.assert_allclose(impulse_mock.time, signal)
-
-
-@pytest.fixture
-def impulse_mock():
-    """ Generate a signal mock object.
-    Returns
-    -------
-    signal : Signal
-        The noise signal
-    """
-    n_samples = 1000
-    sampling_rate = 2000
-    amplitude = 1
-    cshape = (1,)
-    domain = 'time'
-
-    signal = np.zeros(n_samples, dtype=np.double)
-    signal[0] = amplitude
-
-    # create a mock object of Signal class to test independently
-    signal_object = mock.Mock(
-        spec_set=Signal(signal, sampling_rate, n_samples, domain))
-    signal_object.time = np.atleast_2d(signal)
-    signal_object.sampling_rate = sampling_rate
-    signal_object.domain = domain
-    signal_object.cshape = cshape
-
-    return signal_object
-
-
 def test___eq___equal(filter):
     actual = filter.copy()
     assert filter == actual

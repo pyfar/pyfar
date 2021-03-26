@@ -100,3 +100,44 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == (2,)
     npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+
+
+def test_xfade(impulse):
+    first = np.ones(5001)
+    idx_1 = 500
+    second = np.ones(5001)*2
+    idx_2 = 1000
+
+    res = dsp.dsp._cross_fade(first, second, [idx_1, idx_2])
+    np.testing.assert_array_almost_equal(first[:idx_1], res[:idx_1])
+    np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
+
+    idx_1 = 501
+    idx_2 = 1000
+    res = dsp.dsp._cross_fade(first, second, [idx_1, idx_2])
+    np.testing.assert_array_almost_equal(first[:idx_1], res[:idx_1])
+    np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
+
+
+def test_regu_inversion(impulse):
+
+    with pytest.raises(
+            ValueError, match='needs to be of type pyfar.Signal'):
+        dsp.regularized_spectrum_inversion('error', (1, 2))
+
+    with pytest.raises(
+            ValueError, match='lower and upper limits'):
+        dsp.regularized_spectrum_inversion(impulse, (2))
+
+    impulse.freq = impulse.freq*2
+    impulse.time = impulse.time*2
+
+    res = dsp.regularized_spectrum_inversion(impulse, [200, 10e3])
+
+    ind = impulse.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5)
+
+    npt.assert_allclose(res.freq[:, 0], [0.25])
+    npt.assert_allclose(res.freq[:, -1], [0.25])
