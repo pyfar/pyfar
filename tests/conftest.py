@@ -9,6 +9,7 @@ from pyfar.orientations import Orientations
 from pyfar.coordinates import Coordinates
 from pyfar.signal import FrequencyData, Signal, TimeData
 import pyfar.dsp.classes as fo
+import pyfar.signals
 
 from pyfar.testing import stub_utils
 
@@ -231,14 +232,13 @@ def sine():
         Sine signal
     """
     frequency = 441
-    sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'none'
-    cshape = (1,)
+    sampling_rate = 44100
+    amplitude = 1
 
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
+    signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
 
     return signal
 
@@ -255,14 +255,13 @@ def sine_short():
         Sine signal
     """
     frequency = 441
-    sampling_rate = 44100
     n_samples = 100
-    fft_norm = 'none'
-    cshape = (1,)
+    sampling_rate = 44100
+    amplitude = 1
 
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
+    signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
 
     return signal
 
@@ -276,15 +275,14 @@ def impulse():
     signal : Signal
         Impulse signal
     """
-    delay = 0
-    sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'none'
-    cshape = (1,)
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
 
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
 
     return signal
 
@@ -300,16 +298,15 @@ def impulse_group_delay():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    delay = 1000
-    sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'none'
-    cshape = (1,)
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
 
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-    group_delay = delay * np.ones_like(freq, dtype=float)
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    group_delay = delay * np.ones_like(signal.freq, dtype=float)
 
     return signal, group_delay
 
@@ -325,16 +322,16 @@ def impulse_group_delay_two_channel():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    delay = np.atleast_1d([1000, 2000])
-    sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'none'
-    cshape = (2,)
+    delay = np.atleast_1d([1000, 2000])
+    amplitude = np.atleast_1d([1, 1])
+    sampling_rate = 44100
 
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-    group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    group_delay = delay[..., np.newaxis] * np.ones_like(
+        signal.freq, dtype=float)
 
     return signal, group_delay
 
@@ -350,16 +347,16 @@ def impulse_group_delay_two_by_two_channel():
     group_delay : ndarray
         Group delay of impulse signal
     """
-    delay = np.array([[1000, 2000], [3000, 4000]])
-    sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'none'
-    cshape = (2, 2)
+    delay = np.array([[1000, 2000], [3000, 4000]])
+    amplitude = np.atleast_1d([[1, 1], [1, 1]])
+    sampling_rate = 44100
 
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-    group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    group_delay = delay[..., np.newaxis] * np.ones_like(
+        signal.freq, dtype=float)
 
     return signal, group_delay
 
@@ -375,17 +372,19 @@ def sine_plus_impulse():
     """
     frequency = 441
     delay = 100
-    sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'none'
-    cshape = (1,)
+    sampling_rate = 44100
+    amplitude = 1
 
-    time_sine, freq_sine, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    time_imp, freq_imp = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = Signal(
-        time_sine + time_imp, sampling_rate, fft_norm=fft_norm)
+    sine_signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    sine_signal.fft_norm = 'none'
+
+    impulse_signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    signal = sine_signal + impulse_signal
 
     return signal
 
@@ -399,14 +398,14 @@ def noise():
     signal : Signal
         Noise signal
     """
-    sigma = 1
-    n_samples = int(1e5)
-    cshape = (1,)
+    n_samples = 10000
+    rms = 1
     sampling_rate = 44100
-    fft_norm = 'rms'
+    seed = 1234
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
+    signal = pyfar.signals.noise(
+        n_samples, spectrum="white", rms=rms, sampling_rate=sampling_rate,
+        seed=seed)
 
     return signal
 
@@ -420,14 +419,14 @@ def noise_two_by_three_channel():
     signal : Signal
         Noise signal
     """
-    sigma = 1
-    n_samples = int(1e5)
-    cshape = (2, 3)
+    n_samples = 10000
+    rms = np.ones((2, 3))
     sampling_rate = 44100
-    fft_norm = 'rms'
+    seed = 1234
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
+    signal = pyfar.signals.noise(
+        n_samples, spectrum="white", rms=rms, sampling_rate=sampling_rate,
+        seed=seed)
 
     return signal
 
