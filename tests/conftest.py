@@ -170,6 +170,58 @@ def impulse_stub_rms():
 
 
 @pytest.fixture
+def noise_stub():
+    """Gaussian white noise signal stub.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
+
+    Returns
+    -------
+    signal : Signal
+        Noise signal
+    """
+    sigma = 1
+    n_samples = int(1e5)
+    cshape = (1,)
+    sampling_rate = 44100
+    fft_norm = 'rms'
+
+    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    freq = None
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm)
+
+    return signal
+
+
+@pytest.fixture
+def noise_stub_odd():
+    """Gaussian white noise signal stub, odd number of samples.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
+
+    Returns
+    -------
+    signal : Signal
+        Noise signal
+    """
+    sigma = 1
+    n_samples = int(1e5 - 1)
+    cshape = (1,)
+    sampling_rate = 44100
+    fft_norm = 'rms'
+
+    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    freq = None
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm)
+
+    return signal
+
+
+@pytest.fixture
 def sine():
     """Sine signal.
 
@@ -216,28 +268,6 @@ def sine_short():
 
 
 @pytest.fixture
-def sine_rms():
-    """Sine signal, RMS FFT-normalization.
-
-    Returns
-    -------
-    signal : Signal
-        Sine signal
-    """
-    frequency = 441
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'rms'
-    cshape = (1,)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-
-    return signal
-
-
-@pytest.fixture
 def impulse():
     """Delta impulse signal.
 
@@ -250,28 +280,6 @@ def impulse():
     sampling_rate = 44100
     n_samples = 10000
     fft_norm = 'none'
-    cshape = (1,)
-
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def impulse_rms():
-    """Delta impulse signal, RMS FFT-normalization.
-
-    Returns
-    -------
-    signal : Signal
-        Impulse signal
-    """
-    delay = 0
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'rms'
     cshape = (1,)
 
     time, freq = stub_utils.impulse_func(
@@ -393,27 +401,6 @@ def noise():
     """
     sigma = 1
     n_samples = int(1e5)
-    cshape = (1,)
-    sampling_rate = 44100
-    fft_norm = 'rms'
-
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = Signal(time, sampling_rate, fft_norm=fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def noise_odd():
-    """Gaussian white noise signal, odd number of samples.
-
-    Returns
-    -------
-    signal : Signal
-        Noise signal
-    """
-    sigma = 1
-    n_samples = int(1e5 - 1)
     cshape = (1,)
     sampling_rate = 44100
     fft_norm = 'rms'

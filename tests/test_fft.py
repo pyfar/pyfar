@@ -67,47 +67,51 @@ def test_fft_orthogonality_sine_odd_fftw(sine_stub_odd, fft_lib_pyfftw):
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_noise_even_np(noise, fft_lib_np):
+def test_fft_orthogonality_noise_even_np(noise_stub, fft_lib_np):
     signal_spec = fft.rfft(
-        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+        noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
+        noise_stub.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+        signal_spec, noise_stub.n_samples, noise_stub.sampling_rate,
+        noise_stub.fft_norm)
     npt.assert_allclose(
-        transformed_signal_time, noise.time,
+        transformed_signal_time, noise_stub.time,
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_noise_even_fftw(noise, fft_lib_pyfftw):
+def test_fft_orthogonality_noise_even_fftw(noise_stub, fft_lib_pyfftw):
     signal_spec = fft.rfft(
-        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+        noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
+        noise_stub.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+        signal_spec, noise_stub.n_samples, noise_stub.sampling_rate,
+        noise_stub.fft_norm)
     npt.assert_allclose(
-        transformed_signal_time, noise.time,
+        transformed_signal_time, noise_stub.time,
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_noise_odd_np(noise_odd, fft_lib_np):
+def test_fft_orthogonality_noise_odd_np(noise_stub_odd, fft_lib_np):
     signal_spec = fft.rfft(
-        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
-        noise_odd.fft_norm)
+        noise_stub_odd.time, noise_stub_odd.n_samples,
+        noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, noise_odd.n_samples, noise_odd.sampling_rate,
-        noise_odd.fft_norm)
+        signal_spec, noise_stub_odd.n_samples, noise_stub_odd.sampling_rate,
+        noise_stub_odd.fft_norm)
     npt.assert_allclose(
-        transformed_signal_time, noise_odd.time,
+        transformed_signal_time, noise_stub_odd.time,
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_noise_odd_fftw(noise_odd, fft_lib_pyfftw):
+def test_fft_orthogonality_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
     signal_spec = fft.rfft(
-        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
-        noise_odd.fft_norm)
+        noise_stub_odd.time, noise_stub_odd.n_samples,
+        noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
     transformed_signal_time = fft.irfft(
-        signal_spec, noise_odd.n_samples, noise_odd.sampling_rate,
-        noise_odd.fft_norm)
+        signal_spec, noise_stub_odd.n_samples, noise_stub_odd.sampling_rate,
+        noise_stub_odd.fft_norm)
     npt.assert_allclose(
-        transformed_signal_time, noise_odd.time,
+        transformed_signal_time, noise_stub_odd.time,
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
@@ -155,43 +159,45 @@ def test_fft_parsevaL_theorem_sine_odd_fftw(sine_stub_odd_rms, fft_lib_pyfftw):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_even_np(noise, fft_lib_np):
+def test_fft_parsevaL_theorem_noise_even_np(noise_stub, fft_lib_np):
     signal_spec = fft.rfft(
-        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+        noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
+        noise_stub.fft_norm)
 
-    e_time = np.mean(np.abs(noise.time)**2)
+    e_time = np.mean(np.abs(noise_stub.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_even_fftw(noise, fft_lib_pyfftw):
+def test_fft_parsevaL_theorem_noise_even_fftw(noise_stub, fft_lib_pyfftw):
     signal_spec = fft.rfft(
-        noise.time, noise.n_samples, noise.sampling_rate, noise.fft_norm)
+        noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
+        noise_stub.fft_norm)
 
-    e_time = np.mean(np.abs(noise.time)**2)
+    e_time = np.mean(np.abs(noise_stub.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_odd_np(noise_odd, fft_lib_np):
+def test_fft_parsevaL_theorem_noise_odd_np(noise_stub_odd, fft_lib_np):
     signal_spec = fft.rfft(
-        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
-        noise_odd.fft_norm)
+        noise_stub_odd.time, noise_stub_odd.n_samples,
+        noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
 
-    e_time = np.mean(np.abs(noise_odd.time)**2)
+    e_time = np.mean(np.abs(noise_stub_odd.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_odd_fftw(noise_odd, fft_lib_pyfftw):
+def test_fft_parsevaL_theorem_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
     signal_spec = fft.rfft(
-        noise_odd.time, noise_odd.n_samples, noise_odd.sampling_rate,
-        noise_odd.fft_norm)
+        noise_stub_odd.time, noise_stub_odd.n_samples,
+        noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
 
-    e_time = np.mean(np.abs(noise_odd.time)**2)
+    e_time = np.mean(np.abs(noise_stub_odd.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
