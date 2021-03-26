@@ -2,13 +2,16 @@ from .classes import (
     Filter,
     FilterFIR,
     FilterIIR,
-    FilterSOS)
+    FilterSOS
+)
 
 from .dsp import (
     phase,
     group_delay,
     wrap_to_2pi,
-    spectrogram)
+    spectrogram,
+    regularized_spectrum_inversion
+)
 
 from .filter import (
     butter,
@@ -48,4 +51,5 @@ __all__ = [
     'crossover',
     'fractional_octave_bands',
     'fractional_octave_frequencies',
+    'regularized_spectrum_inversion'
 ]
