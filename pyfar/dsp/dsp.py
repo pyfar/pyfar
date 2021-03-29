@@ -55,7 +55,7 @@ def group_delay(signal, frequencies=None, method='fft'):
         The default is None, in which case signal.frequencies is used.
     method : 'scipy', 'fft', optional
         Method to calculate the group delay of a Signal. Both methods calculate
-        the group delay using the method presented in [1]_ avoiding issues
+        the group delay using the method presented in [#]_ avoiding issues
         due to discontinuities in the unwrapped phase. Note that the scipy
         version additionally allows to specify frequencies for which the
         group delay is evaluated. The default is 'fft', which is faster.
@@ -68,7 +68,7 @@ def group_delay(signal, frequencies=None, method='fft'):
 
     References
     ----------
-    .. [1]  https://www.dsprelated.com/showarticle/69.php
+    .. [#]  https://www.dsprelated.com/showarticle/69.php
     """
 
     # check input and default values
@@ -174,7 +174,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     signal : Signal
         pyfar Signal object.
     db : Boolean
-        Falg to plot the logarithmic magnitude specturm. The default is True.
+        False to plot the logarithmic magnitude spectrum. The default is True.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time data. The default is 20.
     log_reference : integer
@@ -242,7 +242,7 @@ def regularized_spectrum_inversion(
     ignored and an array matching the number of frequency bins of the signal
     needs to be given. In this case, no normalization of the regularization
     function is applied. Finally, the inverse spectrum is calculated as
-    [1]_, [2]_,
+    [#]_, [#]_,
 
     .. math::
 
@@ -274,11 +274,11 @@ def regularized_spectrum_inversion(
 
     References
     ----------
-    .. [1]  O. Kirkeby and P. A. Nelson, “Digital Filter Designfor Inversion
+    .. [#]  O. Kirkeby and P. A. Nelson, “Digital Filter Designfor Inversion
             Problems in Sound Reproduction,” J. Audio Eng. Soc., vol. 47,
             no. 7, p. 13, 1999.
 
-    .. [2]  P. C. Hansen, Rank-deficient and discrete ill-posed problems:
+    .. [#]  P. C. Hansen, Rank-deficient and discrete ill-posed problems:
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """

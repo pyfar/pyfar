@@ -1,5 +1,5 @@
 pyfar.signals
-==========
+=============
 
 .. automodule:: pyfar.signals
    :members:

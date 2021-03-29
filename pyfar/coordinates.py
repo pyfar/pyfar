@@ -73,9 +73,6 @@ class Coordinates(object):
         """
         Init coordinates container with a set of three points and meta data.
 
-        Input Values
-        ------------
-
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
 
@@ -160,9 +157,6 @@ class Coordinates(object):
         """
         Set coordinate points in cartesian coordinate systems.
 
-        Input Values
-        ------------
-
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
 
@@ -206,9 +200,6 @@ class Coordinates(object):
         """
         Get coordinate points in cartesian coordinate systems.
 
-        Output Values
-        -------------
-
         The points `p` that are returned are defined by the coordinate system,
         i.e., the `domain` and `convention`:
 
@@ -238,14 +229,14 @@ class Coordinates(object):
 
         Returns
         -------
-        points np.array
+        points : np.array
             array that holds the coordinate points. points[...,0] holds the
             points for the first coordinate, points[...,1] the points for the
             second, and points[...,2] the points for the third coordinate.
 
         Note
         ----
-        The current and all availanle coordinate systems can be seen with
+        The current and all available coordinate systems can be seen with
 
         >>> c = Coordinates()
         >>> c.systems()
@@ -313,9 +304,6 @@ class Coordinates(object):
         """
         Set coordinate points in spherical coordinate systems.
 
-        Input Values
-        ------------
-
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
 
@@ -364,9 +352,6 @@ class Coordinates(object):
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         Get coordinate points in spherical coordinate systems.
-
-        Output Values
-        --------------
 
         The points `p` that are returned are defined by the coordinate system,
         i.e., the `domain` and `convention`:
@@ -478,9 +463,6 @@ class Coordinates(object):
         """
         Set coordinate points in cylindrical coordinate systems.
 
-        Input Values
-        ------------
-
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
 
@@ -523,9 +505,6 @@ class Coordinates(object):
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         Get coordinate points in cylindircal coordinate system.
-
-        Output Values
-        -------------
 
         The points `p` that are returned are defined by the coordinate system,
         i.e., the `domain` and `convention`:

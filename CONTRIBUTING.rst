@@ -135,6 +135,7 @@ It requires a little more effort to implement stubs of the pyfar classes. Theref
 - Note: the stub utilities are not meant to be imported to test files directly or used for other purposes than testing. They solely provide functionality to create fixtures.
 - The utilities simplify and harmonize testing within the pyfar package and improve the readability and reliability.
 - The implementation as the private submodule ``pyfar.testing.stub_utils``  further allows the use of similar stubs in related packages with pyfar dependency (e.g. other packages from the pyfar family).
+
 To get an idea of the recommended stub workflow have a look at the ``sine`` fixure in *conftest.py*.
 
 **Pyfar Stubs as Dummies**
