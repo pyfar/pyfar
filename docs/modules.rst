@@ -5,14 +5,9 @@ PYFAR User Reference
    :maxdepth: 4
 
    pyfar.classes
+   pyfar.dsp
+   pyfar.dsp.fft
    pyfar.plot
-   pyfar.fft
-
-
-.. Module contents
-.. ---------------
-
-.. .. automodule:: pyfar
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+   pyfar.signals
+   pyfar.spatial
+   pyfar.spatial.samplings
