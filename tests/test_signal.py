@@ -97,15 +97,15 @@ def test_signal_init_val():
 
 def test_n_samples():
     """Test for number of samples."""
-    signal = Signal([1, 2, 3], 44100, domain='time)
+    signal = Signal([1, 2, 3], 44100, domain='time')
     assert signal.n_samples == 3
 
 
 def test_n_bins():
     """Test for number of freq bins."""
-    signal = Signal([1, 2, 3], 44100, domain='time)
+    signal = Signal([1, 2, 3], 44100, domain='time')
     assert signal.n_bins == 2
-    signal = Signal([1, 2, 3, 4], 44100, domain='time)
+    signal = Signal([1, 2, 3, 4], 44100, domain='time')
     assert signal.n_bins == 3
 
 
@@ -117,7 +117,7 @@ def test_times():
 
 def test_getter_time():
     """Test if attribute time is accessed correctly."""
-    signal = Signal([1, 2, 3], 44100, domain='time)
+    signal = Signal([1, 2, 3], 44100, domain='time')
     signal._domain = 'time'
     signal._data = np.array([[1., 2., 3.]])
     npt.assert_allclose(signal.time, np.array([[1., 2., 3.]]))
@@ -125,7 +125,7 @@ def test_getter_time():
 
 def test_setter_time():
     """Test if attribute time is set correctly."""
-    signal = Signal([1, 2, 3], 44100, domain='time)
+    signal = Signal([1, 2, 3], 44100, domain='time')
     signal.time = np.array([1., 2., 3.])
     assert signal._domain == 'time'
     npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
