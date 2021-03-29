@@ -303,3 +303,104 @@ def normalize(signal, normalize='time', normalize_to='max',
         return normalized_signal, values
     else:
         return normalized_signal
+
+def average(signal, average_mode='time', phase_copy=None,
+            weights=None):
+    """
+    Can be used to average multichannel Signals in different ways.
+
+    Parameters
+    ----------
+    signal: Signal
+        Input signal of the Signal class
+    average_mode: string
+        'time' - averages in time domain
+        'complex' - averages the complex spectra
+        'magnitude' - averages the magnitude spectra
+        'power' - averages the power spectra
+        'log_magnitude' - averages the log magnitude spectra
+        The default is 'time'
+    phase_copy: vector
+        indicates signal channel from which phase is to be coppied
+        to the averaged signal
+        None - ignores the phase. Resulting in zero phase
+        The default is None
+    weights: array
+        array that gives channel weighting for averaging the data
+        The default is None
+    Returns
+    --------
+    averaged_signal: Signal
+        averaged input Signal
+    """
+
+    # check input
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal')
+
+    # check weights size
+    if weights.shape != signal.cshape:
+        raise TypeError(
+            'Shape of weights must be equal to that of signal channel shape')
+
+    # set weights default
+    if weights is None:
+        weights = 1/(signal.cshape)
+        # HOW TO MULTIPLY INDIVIDUAL ELEMENTS OF .CSHAPE TO GET NUMBER OF CHANNELS TO SCALE WEIGHTS???
+    else:
+        weights = weights/np.sum(weights)
+
+    # convert data to desired domain
+    if average_mode == 'time':
+        data = signal.time.copy()
+    elif average_mode == 'complex':
+        data = signal.freq.copy()
+    elif averaged_mode == 'magnitude':
+        data = np.abs(signal.freq.copy())
+    elif average_mode == 'power':
+        data = np.abs(signal.freq.copy())**2
+    elif average_mode == 'log_magnitude':
+        data = 20 * np.log10(signal.freq.copy())
+
+    # apply weights
+    data = data * weights
+
+    # average the data
+    if average_mode == 'time' or average_mode == 'complex' or average_mode == 'magnitude':
+        # NOT SURE HOW TO FIX THIS FLAKE8 CHARACTER ISSUE AS I STILL GET AN ISSUE GOING TO A NEW LINE
+        data = np.sum(data, axis=-2, keepdims=True)
+    elif average_mode == 'power':
+        data = np.sum(data, axis=-2, keepdims=True)
+        data = np.sqrt(data)
+    elif average_mode == 'log_magnitude':
+        data = np.sum(data, axis=-2, keepdims=True)
+        data = 10**(data/20)
+    else:
+        raise ValueError(
+            "average_mode must be 'time', 'complex', 'magnitude', 'power' or  'log_magnitude'"
+            # NOT SURE HOW TO FIX THIS FLAKE8 CHARACTER ISSUE AS I STILL GET AN ISSUE GOING TO A NEW LINE
+            )
+
+    # phase handling
+    if phase_copy is None:
+        pass
+    else:
+        # need to access channel correctly
+        if average_mode == 'time':
+            data_ang = signal.time.copy()
+            data_ang = np.angle(data_ang[phase_copy, ...])
+        else:
+            data_ang = signal.freq.copy()
+            data_ang = np.angle(data_ang[phase_copy, ...])
+
+        # insert into 'averaged'
+        data = data * exp(1j * data_ang)
+
+    # input data into averaged_signal
+    averaged_signal = signal.copy()
+    if average_mode == 'time':
+        averaged_signal.time() = data
+    else:
+        averaged_signal.freq() = data
+
+    return averaged_signal
