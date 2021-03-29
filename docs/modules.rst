@@ -1,6 +1,3 @@
-PYFAR User Reference
-=====================
-
 .. toctree::
    :maxdepth: 4
 

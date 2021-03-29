@@ -1,15 +1,35 @@
-Welcome to pyfar's documentation!
-==================================
+Welcome to the pyfar documentation!
+-----------------------------------
+
+
+`Getting Started`_
+==================
+.. _Getting Started: readme.html
+
+
+`Documentation`_
+================
+.. _Documentation: modules.html
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
 
-   readme
    modules
-   contributing
-   authors
-   history
+
+`Contributing`_
+===============
+.. _Contributing: contributing.html
+
+
+`Authors`_
+===========
+.. _Authors: authors.html
+
+
+`History`_
+===========
+.. _History: history.html
+
 
 Indices and tables
 ==================

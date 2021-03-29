@@ -1,5 +1,5 @@
-Data Container Classes
-----------------------
+pyfar.classes
+-------------
 
 Audio Data Classes
 ==================

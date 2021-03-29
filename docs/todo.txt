@@ -3,5 +3,8 @@ Delete before merging
 README.rst:
 - update binder path to master branch
 
+docs/pyfar.classes.rst
+- adjust to new structure once finished
+
 examples/pyfar_demo.ipynb
 - update for latest features
