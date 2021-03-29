@@ -2,7 +2,7 @@ Classes
 =======
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    pyfar.classes_audio
    pyfar.classes_filter
@@ -13,7 +13,7 @@ Modules
 =======
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    pyfar.dsp
    pyfar.dsp.fft

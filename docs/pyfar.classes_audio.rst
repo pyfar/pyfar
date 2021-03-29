@@ -5,3 +5,4 @@ Audio (Signal, TimeData, FrequencyData)
    :members:
    :undoc-members:
    :special-members: __init__
+   :show-inheritance:
