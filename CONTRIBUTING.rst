@@ -166,6 +166,34 @@ You can create an html report on the test `coverage <https://coverage.readthedoc
 
     $ pytest --cov=. --cov-report=html
 
+
+Building the Documentation
+--------------------------
+
+You can build the documentation of your branch using Sphinx by executing the
+make script inside the docs folder.
+
+.. code-block:: console
+
+    $ cd docs/
+    $ make html
+
+After Sphinx finishes you can open the generated html using any browser
+
+.. code-block:: console
+
+    $ docs/_build/index.html
+
+Note that some warnings are only shown the first time you build the
+documentation. To show the warnings again delete the build folder
+
+.. code-block:: console
+
+    $ rm -r docs/_build
+
+before building the documentation.
+
+
 Deploying
 ---------
 
