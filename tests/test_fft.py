@@ -115,7 +115,7 @@ def test_fft_orthogonality_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_parsevaL_theorem_sine_even_np(sine_stub_rms, fft_lib_np):
+def test_fft_parseval_theorem_sine_even_np(sine_stub_rms, fft_lib_np):
     signal_spec = fft.rfft(
         sine_stub_rms.time, sine_stub_rms.n_samples,
         sine_stub_rms.sampling_rate, sine_stub_rms.fft_norm)
@@ -126,7 +126,7 @@ def test_fft_parsevaL_theorem_sine_even_np(sine_stub_rms, fft_lib_np):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_sine_even_fftw(sine_stub_rms, fft_lib_pyfftw):
+def test_fft_parseval_theorem_sine_even_fftw(sine_stub_rms, fft_lib_pyfftw):
     signal_spec = fft.rfft(
         sine_stub_rms.time, sine_stub_rms.n_samples,
         sine_stub_rms.sampling_rate, sine_stub_rms.fft_norm)
@@ -137,7 +137,7 @@ def test_fft_parsevaL_theorem_sine_even_fftw(sine_stub_rms, fft_lib_pyfftw):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_sine_odd_np(sine_stub_odd_rms, fft_lib_np):
+def test_fft_parseval_theorem_sine_odd_np(sine_stub_odd_rms, fft_lib_np):
     signal_spec = fft.rfft(
         sine_stub_odd_rms.time, sine_stub_odd_rms.n_samples,
         sine_stub_odd_rms.sampling_rate, sine_stub_odd_rms.fft_norm)
@@ -148,7 +148,7 @@ def test_fft_parsevaL_theorem_sine_odd_np(sine_stub_odd_rms, fft_lib_np):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_sine_odd_fftw(sine_stub_odd_rms, fft_lib_pyfftw):
+def test_fft_parseval_theorem_sine_odd_fftw(sine_stub_odd_rms, fft_lib_pyfftw):
     signal_spec = fft.rfft(
         sine_stub_odd_rms.time, sine_stub_odd_rms.n_samples,
         sine_stub_odd_rms.sampling_rate, sine_stub_odd_rms.fft_norm)
@@ -159,7 +159,7 @@ def test_fft_parsevaL_theorem_sine_odd_fftw(sine_stub_odd_rms, fft_lib_pyfftw):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_even_np(noise_stub, fft_lib_np):
+def test_fft_parseval_theorem_noise_even_np(noise_stub, fft_lib_np):
     signal_spec = fft.rfft(
         noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
         noise_stub.fft_norm)
@@ -170,7 +170,7 @@ def test_fft_parsevaL_theorem_noise_even_np(noise_stub, fft_lib_np):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_even_fftw(noise_stub, fft_lib_pyfftw):
+def test_fft_parseval_theorem_noise_even_fftw(noise_stub, fft_lib_pyfftw):
     signal_spec = fft.rfft(
         noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
         noise_stub.fft_norm)
@@ -181,7 +181,7 @@ def test_fft_parsevaL_theorem_noise_even_fftw(noise_stub, fft_lib_pyfftw):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_odd_np(noise_stub_odd, fft_lib_np):
+def test_fft_parseval_theorem_noise_odd_np(noise_stub_odd, fft_lib_np):
     signal_spec = fft.rfft(
         noise_stub_odd.time, noise_stub_odd.n_samples,
         noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
@@ -192,7 +192,7 @@ def test_fft_parsevaL_theorem_noise_odd_np(noise_stub_odd, fft_lib_np):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parsevaL_theorem_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
+def test_fft_parseval_theorem_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
     signal_spec = fft.rfft(
         noise_stub_odd.time, noise_stub_odd.n_samples,
         noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
