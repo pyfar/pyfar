@@ -61,4 +61,5 @@ setup(
     url='https://github.com/pyfar/pyfar',
     version='0.1.0',
     zip_safe=False,
+    python_requires='>=3.7,<3.9'
 )
