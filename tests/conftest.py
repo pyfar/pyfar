@@ -29,7 +29,7 @@ def sine_stub():
     frequency = 441
     sampling_rate = 44100
     n_samples = 10000
-    fft_norm = 'none'
+    fft_norm = 'rms'
     cshape = (1,)
 
     time, freq, frequency = stub_utils.sine_func(
@@ -43,58 +43,6 @@ def sine_stub():
 @pytest.fixture
 def sine_stub_odd():
     """Sine signal stub, odd number of samples
-    To be used in cases, when a dependence on the Signal class is prohibited,
-    but a correct, fixed relation of the time signal and the spectrum is
-    needed.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of sine signal
-    """
-    frequency = 441
-    sampling_rate = 44100
-    n_samples = 9999
-    fft_norm = 'none'
-    cshape = (1,)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def sine_stub_rms():
-    """Sine signal stub, RMS FFT-normalization.
-    To be used in cases, when a dependence on the Signal class is prohibited,
-    but a correct, fixed relation of the time signal and the spectrum is
-    needed.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of sine signal
-    """
-    frequency = 441
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'rms'
-    cshape = (1,)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def sine_stub_odd_rms():
-    """Sine signal stub, odd number of samples, RMS FFT-normalization.
     To be used in cases, when a dependence on the Signal class is prohibited,
     but a correct, fixed relation of the time signal and the spectrum is
     needed.
@@ -134,32 +82,6 @@ def impulse_stub():
     sampling_rate = 44100
     n_samples = 10000
     fft_norm = 'none'
-    cshape = (1,)
-
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def impulse_stub_rms():
-    """Delta impulse signal stub, RMS FFT-normalization.
-    To be used in cases, when a dependence on the Signal class is prohibited,
-    but a correct, fixed relation of the time signal and the spectrum is
-    needed.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of impulse signal
-    """
-    delay = 0
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'rms'
     cshape = (1,)
 
     time, freq = stub_utils.impulse_func(

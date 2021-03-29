@@ -115,45 +115,45 @@ def test_fft_orthogonality_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_parseval_theorem_sine_even_np(sine_stub_rms, fft_lib_np):
+def test_fft_parseval_theorem_sine_even_np(sine_stub, fft_lib_np):
     signal_spec = fft.rfft(
-        sine_stub_rms.time, sine_stub_rms.n_samples,
-        sine_stub_rms.sampling_rate, sine_stub_rms.fft_norm)
+        sine_stub.time, sine_stub.n_samples,
+        sine_stub.sampling_rate, sine_stub.fft_norm)
 
-    e_time = np.mean(np.abs(sine_stub_rms.time)**2)
+    e_time = np.mean(np.abs(sine_stub.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parseval_theorem_sine_even_fftw(sine_stub_rms, fft_lib_pyfftw):
+def test_fft_parseval_theorem_sine_even_fftw(sine_stub, fft_lib_pyfftw):
     signal_spec = fft.rfft(
-        sine_stub_rms.time, sine_stub_rms.n_samples,
-        sine_stub_rms.sampling_rate, sine_stub_rms.fft_norm)
+        sine_stub.time, sine_stub.n_samples,
+        sine_stub.sampling_rate, sine_stub.fft_norm)
 
-    e_time = np.mean(np.abs(sine_stub_rms.time)**2)
+    e_time = np.mean(np.abs(sine_stub.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parseval_theorem_sine_odd_np(sine_stub_odd_rms, fft_lib_np):
+def test_fft_parseval_theorem_sine_odd_np(sine_stub_odd, fft_lib_np):
     signal_spec = fft.rfft(
-        sine_stub_odd_rms.time, sine_stub_odd_rms.n_samples,
-        sine_stub_odd_rms.sampling_rate, sine_stub_odd_rms.fft_norm)
+        sine_stub_odd.time, sine_stub_odd.n_samples,
+        sine_stub_odd.sampling_rate, sine_stub_odd.fft_norm)
 
-    e_time = np.mean(np.abs(sine_stub_odd_rms.time)**2)
+    e_time = np.mean(np.abs(sine_stub_odd.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parseval_theorem_sine_odd_fftw(sine_stub_odd_rms, fft_lib_pyfftw):
+def test_fft_parseval_theorem_sine_odd_fftw(sine_stub_odd, fft_lib_pyfftw):
     signal_spec = fft.rfft(
-        sine_stub_odd_rms.time, sine_stub_odd_rms.n_samples,
-        sine_stub_odd_rms.sampling_rate, sine_stub_odd_rms.fft_norm)
+        sine_stub_odd.time, sine_stub_odd.n_samples,
+        sine_stub_odd.sampling_rate, sine_stub_odd.fft_norm)
 
-    e_time = np.mean(np.abs(sine_stub_odd_rms.time)**2)
+    e_time = np.mean(np.abs(sine_stub_odd.time)**2)
     e_freq = np.sum(np.abs(signal_spec)**2)
 
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
@@ -440,18 +440,6 @@ def test_rfft_normalization_impulse(impulse_stub):
         rtol=1e-10, atol=1e-10)
 
 
-def test_rfft_normalization_impulse_rms(impulse_stub_rms):
-    """ Test for call of normalization in rfft.
-    """
-    signal_spec = fft.rfft(
-        impulse_stub_rms.time, impulse_stub_rms.n_samples,
-        impulse_stub_rms.sampling_rate, impulse_stub_rms.fft_norm)
-
-    npt.assert_allclose(
-        signal_spec, impulse_stub_rms.freq,
-        rtol=1e-10, atol=1e-10)
-
-
 def test_rfft_normalization_sine(sine_stub):
     """ Test for correct call of normalization in rfft.
     """
@@ -461,18 +449,6 @@ def test_rfft_normalization_sine(sine_stub):
 
     npt.assert_allclose(
         signal_spec, sine_stub.freq,
-        rtol=1e-10, atol=1e-10)
-
-
-def test_rfft_normalization_sine_rms(sine_stub_rms):
-    """ Test for correct call of normalization in rfft.
-    """
-    signal_spec = fft.rfft(
-        sine_stub_rms.time, sine_stub_rms.n_samples,
-        sine_stub_rms.sampling_rate, sine_stub_rms.fft_norm)
-
-    npt.assert_allclose(
-        signal_spec, sine_stub_rms.freq,
         rtol=1e-10, atol=1e-10)
 
 
