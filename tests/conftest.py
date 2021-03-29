@@ -50,7 +50,7 @@ def sine_stub_odd():
     Returns
     -------
     signal : Signal
-        Sine signal
+        Stub of sine signal
     """
     frequency = 441
     sampling_rate = 44100
@@ -180,7 +180,7 @@ def noise_stub():
     Returns
     -------
     signal : Signal
-        Noise signal
+        Stub of noise signal
     """
     sigma = 1
     n_samples = int(1e5)
@@ -206,7 +206,7 @@ def noise_stub_odd():
     Returns
     -------
     signal : Signal
-        Noise signal
+        Stub of noise signal
     """
     sigma = 1
     n_samples = int(1e5 - 1)
