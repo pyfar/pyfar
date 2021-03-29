@@ -3,7 +3,6 @@ import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
 import deepdiff
-import copy
 import re
 from copy import deepcopy
 
@@ -1650,7 +1649,7 @@ class Coordinates(object):
         if self._system == new_system:
             return self.get_cart()
         # copy to avoid changing the coordinate system of the original object
-        return copy.deepcopy(self).get_cart()
+        return self.copy().get_cart()
 
     def __repr__(self):
         """Get info about Coordinates object."""

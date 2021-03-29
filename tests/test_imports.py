@@ -45,3 +45,4 @@ def test_import_submodules():
     assert pyfar.io
     assert pyfar.spatial
     assert pyfar.plot
+    assert pyfar.signals
