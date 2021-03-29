@@ -26,7 +26,7 @@ pyfar.FrequencyData
    :show-inheritance:
 
 pyfar.FilterFIR
-============
+===============
 
 .. automodule:: pyfar.dsp.classes.FilterFIR
    :members:
@@ -34,7 +34,7 @@ pyfar.FilterFIR
    :show-inheritance:
 
 pyfar.FilterIIR
-============
+===============
 
 .. automodule:: pyfar.dsp.classes.FilterIIR
    :members:
@@ -42,7 +42,7 @@ pyfar.FilterIIR
    :show-inheritance:
 
 pyfar.FilterSOS
-============
+===============
 
 .. automodule:: pyfar.dsp.classes.FilterSOS
    :members:
