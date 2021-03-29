@@ -110,8 +110,7 @@ def noise_stub():
     sampling_rate = 44100
     fft_norm = 'rms'
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    freq = None
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
     signal = stub_utils.signal_stub(
         time, freq, sampling_rate, fft_norm)
 
@@ -136,8 +135,7 @@ def noise_stub_odd():
     sampling_rate = 44100
     fft_norm = 'rms'
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    freq = None
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
     signal = stub_utils.signal_stub(
         time, freq, sampling_rate, fft_norm)
 

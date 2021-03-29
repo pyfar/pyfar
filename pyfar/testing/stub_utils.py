@@ -253,7 +253,8 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
 
 
 def noise_func(sigma, n_samples, cshape):
-    """ Generate time data of zero-mean, gaussian white noise.
+    """ Generate time and frequency data of zero-mean, gaussian white noise,
+    RMS FFT normalization.
 
     Parameters
     ----------
@@ -275,8 +276,11 @@ def noise_func(sigma, n_samples, cshape):
     np.random.seed(1000)
     # Time vector
     time = np.random.normal(0, sigma, (cshape + (n_samples,)))
+    freq = np.fft.rfft(time)
+    norm = 1 / n_samples / np.sqrt(2) * 2
+    freq *= norm
 
-    return time
+    return time, freq
 
 
 def _normalization(freq, n_samples, fft_norm):
