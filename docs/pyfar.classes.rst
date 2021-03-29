@@ -1,27 +1,64 @@
 pyfar.classes
 -------------
 
-Audio Data Classes
-==================
+pyfar.Signal
+============
 
-.. automodule:: pyfar.signal
+.. automodule:: pyfar.signal.Signal
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: pyfar.dsp.filter
+pyfar.TimeData
+==============
+
+.. automodule:: pyfar.signal.TimeData
    :members:
    :undoc-members:
    :show-inheritance:
 
-Coordinate Data Classes
-=======================
+pyfar.FrequencyData
+===================
+
+.. automodule:: pyfar.signal.FrequencyData
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyfar.FilterFIR
+============
+
+.. automodule:: pyfar.dsp.classes.FilterFIR
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyfar.FilterIIR
+============
+
+.. automodule:: pyfar.dsp.classes.FilterIIR
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyfar.FilterSOS
+============
+
+.. automodule:: pyfar.dsp.classes.FilterSOS
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyfar.Coordinates
+=================
 
 .. automodule:: pyfar.coordinates
    :members:
    :undoc-members:
    :show-inheritance:
 
+pyfar.Orientations
+==================
 
 .. automodule:: pyfar.orientations
    :members:
