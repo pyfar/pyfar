@@ -86,6 +86,8 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# default language for highlighting in source code
+highlight_language = "python3"
 
 # -- Options for HTML output -------------------------------------------
 
