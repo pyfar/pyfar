@@ -1,12 +1,11 @@
-import copy
 import deepdiff
 import warnings
 
 import numpy as np
 import scipy.signal as spsignal
 
-from pyfar import Signal
-from .. import utils
+import pyfar
+from copy import deepcopy
 
 
 def atleast_3d_first_dim(arr):
@@ -177,7 +176,7 @@ class Filter(object):
         filtered : Signal
             A filtered copy of the input signal.
         """
-        if not isinstance(signal, Signal):
+        if not isinstance(signal, pyfar.Signal):
             raise ValueError("The input needs to be a haiopy.Signal object.")
 
         if self.sampling_rate != signal.sampling_rate:
@@ -205,7 +204,7 @@ class Filter(object):
                 filtered_signal_data[idx, ...] = self.filter_func(
                     coeff, filtered_signal_data[idx, ...], zi=None)
 
-        filtered_signal = copy.deepcopy(signal)
+        filtered_signal = deepcopy(signal)
         if (signal.time.ndim == 2) and (signal.cshape[0] == 1):
             filtered_signal_data = np.squeeze(filtered_signal_data)
         filtered_signal.time = filtered_signal_data
@@ -231,7 +230,7 @@ class Filter(object):
 
     def copy(self):
         """Return a deep copy of the Filter object."""
-        return utils.copy(self)
+        return deepcopy(self)
 
     def _encode(self):
         """Return dictionary for the encoding."""

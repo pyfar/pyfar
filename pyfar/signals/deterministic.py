@@ -9,7 +9,7 @@ integer numbers in all cases. This makes it possible to pass float numbers for
 convenience, e.g., `n_samples=.015 * sampling_rate`.
 """
 import numpy as np
-from pyfar import Signal
+import pyfar
 
 
 def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
@@ -35,7 +35,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
     Returns
     -------
-    signal : Signal
+    signal : pyfar.Signal
         The sine as a Signal object. The Signal is in the time domain and has
         the 'rms' FFT normalization (see pyfar.fft.normalization). The exact
         frequency is written to Signal.comment.
@@ -75,8 +75,8 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     comment = (f"Sine signal (f = {str(frequency).replace(nl, ',')} Hz, "
                f"amplitude = {str(amplitude).replace(nl, ',')})")
 
-    signal = Signal(sine, sampling_rate, fft_norm="rms",
-                    comment=comment)
+    signal = pyfar.Signal(
+        sine, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 
@@ -106,7 +106,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
     Returns
     -------
-    signal : Signal
+    signal : pyfar.Signal
         The impulse as a Signal object. The Signal is in the time domain and
         has the 'none' FFT normalization (see pyfar.fft.normalization).
 
@@ -130,7 +130,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     comment = (f"Impulse signal (delay = {str(delay).replace(nl, ',')} "
                f"samples, amplitude = {str(amplitude).replace(nl, ',')})")
 
-    signal = Signal(impulse, sampling_rate, comment=comment)
+    signal = pyfar.Signal(impulse, sampling_rate, comment=comment)
 
     return signal
 
@@ -164,7 +164,7 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     Returns
     -------
-    sweep : pyfar Signal
+    sweep : pyfar.Signal
         The sweep as a Signal object. The Signal is in the time domain and
         has the 'rms' FFT normalization (see pyfar.fft.normalization).
 
@@ -274,7 +274,8 @@ def _time_domain_sweep(n_samples, frequency_range, n_fade_out, amplitude,
     comment = (f"{sweep_type} sweep between {frequency_range[0]} "
                f"and {frequency_range[1]} Hz "
                f"with {n_fade_out} samples squared cosine fade-out.")
-    signal = Signal(sweep, sampling_rate, fft_norm="rms", comment=comment)
+    signal = pyfar.Signal(
+        sweep, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 

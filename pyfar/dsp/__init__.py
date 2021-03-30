@@ -1,11 +1,32 @@
-from .classes import (Filter, FilterFIR, FilterIIR, FilterSOS)
+from .classes import (
+    Filter,
+    FilterFIR,
+    FilterIIR,
+    FilterSOS
+)
+
 from .dsp import (
-    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram,
-    regularized_spectrum_inversion)
+    phase,
+    group_delay,
+    wrap_to_2pi,
+    spectrogram,
+    regularized_spectrum_inversion
+)
+
+from . import filter
+from . import fft
 
 
 __all__ = [
-    'Filter', 'FilterFIR', 'FilterIIR', 'FilterSOS',
-    'phase', 'group_delay', 'wrap_to_2pi', 'nextpow2', 'spectrogram',
+    'fft',
+    'filter',
+    'Filter',
+    'FilterFIR',
+    'FilterIIR',
+    'FilterSOS',
+    'phase',
+    'group_delay',
+    'wrap_to_2pi',
+    'spectrogram',
     'regularized_spectrum_inversion'
 ]

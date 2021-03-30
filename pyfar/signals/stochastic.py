@@ -9,8 +9,8 @@ integer numbers in all cases. This makes it possible to pass float numbers for
 convenience, e.g., `n_samples=.015 * sampling_rate`.
 """
 import numpy as np
-from pyfar import Signal
-import pyfar.fft as fft
+import pyfar
+from pyfar.dsp import fft
 
 
 def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
@@ -40,7 +40,7 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
 
     Returns
     -------
-    signal : Signal
+    signal : pyfar.Signal
         The noise as a Signal object. The Signal is in the time domain and
         has the 'rms' FFT normalization (see pyfar.fft.normalization).
     """
@@ -71,7 +71,8 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
     nl = "\n"  # required as variable because f-strings cannot contain "\"
     comment = f"{spectrum} noise signal (rms = {str(rms).replace(nl, ',')})"
 
-    signal = Signal(noise, sampling_rate, fft_norm="rms", comment=comment)
+    signal = pyfar.Signal(
+        noise, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
 
@@ -111,7 +112,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
 
     Returns
     -------
-    signal : Signal
+    signal : pyfar.Signal
         The noise as a Signal object. The Signal is in the time domain and
         has the 'rms' FFT normalization (see pyfar.fft.normalization).
     """
@@ -149,6 +150,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
                f"{repetitions} repetitions, {n_pulse} samples pulse duration, "
                f"{n_pause} samples pauses, and {n_fade} samples fades.")
 
-    signal = Signal(p_noise, sampling_rate, fft_norm="rms", comment=comment)
+    signal = pyfar.Signal(
+        p_noise, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
