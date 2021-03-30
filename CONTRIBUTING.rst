@@ -190,7 +190,7 @@ documentation. To show the warnings again delete the build folder
 
 .. code-block:: console
 
-    $ rm -r docs/_build
+    $ make clean
 
 before building the documentation.
 
