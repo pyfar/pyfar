@@ -212,12 +212,12 @@ def normalize(signal, normalize='time', normalize_to='max',
     channel_handling: string
         'each' - Normalize each channel separately
         'max' - Normalize to the max of 'normalize_to' across all channels
-        'min' - Normalize to min or 'normalize_to' across all channels
+        'min' - Normalize to min of 'normalize_to' across all channels
         'mean' - Normalize to mean of 'normalize_to' across all channels
        The default is 'max'
-    value:
-        Normalizes to `value` which can be a scalar or a vector with
-        a number of elements equal to channels. The unit of `value`
+    value: scalar, array
+        Normalizes to `value` which can be a scalar or an array with
+        shape equal to signal cshape. The unit of `value`
         is defined by `norm_type`, i.e., it is either dB or linear.
         The default is 0 for normalize='log_magnitude' and 1 otherwise
     freq_range: tuple
@@ -274,7 +274,7 @@ def normalize(signal, normalize='time', normalize_to='max',
                          keepdims=True)
     elif normalize_to == 'rms':
         values = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
-                         axis=-1, keepdims=True), axis=-1, keepdims=True)
+                         axis=-1, keepdims=True))
     else:
         raise ValueError("normalize_to must be 'max', 'mean' or 'rms'")
 
@@ -297,7 +297,10 @@ def normalize(signal, normalize='time', normalize_to='max',
 
     # replace input with normalized_input
     normalized_signal = signal.copy()
-    normalized_signal.time = signal.time.copy() / values * value
+    if normalize == 'time':
+        normalized_signal.time = signal.time.copy() / values * value
+    else:
+        normalized_signal.freq = signal.time.freq() / values * value
 
     if return_values:
         return normalized_signal, values
@@ -326,7 +329,8 @@ def average(signal, average_mode='time', phase_copy=None,
         None - ignores the phase. Resulting in zero phase
         The default is None
     weights: array
-        array that gives channel weighting for averaging the data
+        array that gives channel weighting for averaging the data. Must
+        have same shape as channels
         The default is None
     Returns
     --------
@@ -355,7 +359,7 @@ def average(signal, average_mode='time', phase_copy=None,
         data = signal.time.copy()
     elif average_mode == 'complex':
         data = signal.freq.copy()
-    elif averaged_mode == 'magnitude':
+    elif average_mode == 'magnitude':
         data = np.abs(signal.freq.copy())
     elif average_mode == 'power':
         data = np.abs(signal.freq.copy())**2
@@ -394,13 +398,13 @@ def average(signal, average_mode='time', phase_copy=None,
             data_ang = np.angle(data_ang[phase_copy, ...])
 
         # insert into 'averaged'
-        data = data * exp(1j * data_ang)
+        data = data * np.exp(1j * data_ang)
 
     # input data into averaged_signal
     averaged_signal = signal.copy()
     if average_mode == 'time':
-        averaged_signal.time() = data
+        averaged_signal.time = data
     else:
-        averaged_signal.freq() = data
+        averaged_signal.freq = data
 
     return averaged_signal
