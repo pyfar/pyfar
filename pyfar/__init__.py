@@ -15,6 +15,7 @@ from . import plot
 from . import spatial
 from . import io
 from . import dsp
+from . import signals
 
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     'plot',
     'spatial',
     'io',
-    'dsp']
+    'dsp',
+    'signals']
