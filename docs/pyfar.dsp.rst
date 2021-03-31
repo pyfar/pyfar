@@ -1,7 +1,7 @@
-pyfar.plot
+pyfar.dsp
 ==========
 
-.. automodule:: pyfar.plot
+.. automodule:: pyfar.dsp
    :members:
    :undoc-members:
    :show-inheritance:

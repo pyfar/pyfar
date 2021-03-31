@@ -70,7 +70,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development.
     $ cd pyfar/
     $ python setup.py develop
 
-4. Create a branch for local development::
+4. Create a branch for local development. Indicate the intention of your branch in its respective name (i.e. `feature/branch-name` or `bugfix/branch-name`)::
 
     $ git checkout -b name-of-your-bugfix-or-feature
 
@@ -100,9 +100,8 @@ Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 3.5 and 3.6. Check
+   your new functionality into a function with a docstring.
+3. The pull request should work for Python 3.7 and 3.8. Check
    https://travis-ci.com/pyfar/pyfar/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
@@ -135,6 +134,7 @@ It requires a little more effort to implement stubs of the pyfar classes. Theref
 - Note: the stub utilities are not meant to be imported to test files directly or used for other purposes than testing. They solely provide functionality to create fixtures.
 - The utilities simplify and harmonize testing within the pyfar package and improve the readability and reliability.
 - The implementation as the private submodule ``pyfar.testing.stub_utils``  further allows the use of similar stubs in related packages with pyfar dependency (e.g. other packages from the pyfar family).
+
 To get an idea of the recommended stub workflow have a look at the ``sine`` fixure in *conftest.py*.
 
 **Pyfar Stubs as Dummies**
@@ -165,6 +165,34 @@ Pytest provides several, sophisticated functionalities which could reduce the ef
 You can create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ by calling
 
     $ pytest --cov=. --cov-report=html
+
+
+Building the Documentation
+--------------------------
+
+You can build the documentation of your branch using Sphinx by executing the
+make script inside the docs folder.
+
+.. code-block:: console
+
+    $ cd docs/
+    $ make html
+
+After Sphinx finishes you can open the generated html using any browser
+
+.. code-block:: console
+
+    $ docs/_build/index.html
+
+Note that some warnings are only shown the first time you build the
+documentation. To show the warnings again delete the build folder
+
+.. code-block:: console
+
+    $ make clean
+
+before building the documentation.
+
 
 Deploying
 ---------
