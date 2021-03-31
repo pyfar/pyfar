@@ -6,19 +6,51 @@ non-equidistant audio data in the time and frequency domain. The class `Signal`
 can be used to store equidistant and complete audio data that can be converted
 between the time and frequency domain by means of the Fourier transform.
 
-Arithmetic operations can be applied in the time and frequency domain data and
+Arithmetic operations can be applied in the time and frequency domain and
 are implemented in the methods `add`, `subtract`, `multiply`, `divide`, and
-`power`. The operators `+`, `-`, `*`, `/`, and `**` are overloaded with the
-corresponding operations in the frequency domain. For time domain operations,
-the functions have to be called explicitly.
+`power`. For example, two Signal, TimeData, or FrequencyData instances can be
+added in the time domain by
+
+> result = pyfar.signal.add((signal_1, signal_2), 'time')
+
+and in the frequency domain by
+
+> result = pyfar.signal.add((signal_1, signal_2), 'freq')
+
+This also works with more than two instances and supports array likes and
+scalar values, e.g.,
+
+> result = pyfar.signal.add((signal_1, 1), 'time')
+
+In this case the scalar `1` is broadcasted, i.e., 1 is added to every sample of
+the Signal (or every bin in case of a frequency domain operation).
+
+The operators `+`, `-`, `*`, `/`, and `**` are overloaded for convenience.
+Note, however, that their behavior depends on the Audio object. Frequency
+domain operations are applied for `Signal` and `FrequencyData` objects, i.e,
+
+> result = signal1 + signal2
+
+is equivalent to
+
+> result = pyfar.signal.add((signal1, signal2), 'freq')
+
+Time domain operations are applied for `TimeData` objects, i.e.,
+
+> result = time_data_1 + time_data_2
+
+is equivalent to
+
+> result = pyfar.signal.add((time_data_1, time_data_2), 'time')
 
 """
 
+from copy import deepcopy
 import warnings
+import deepdiff
 import numpy as np
-from pyfar import fft as fft
+import pyfar.dsp.fft as fft
 from typing import Callable
-from . import utils
 
 
 class _Audio(object):
@@ -32,8 +64,7 @@ class _Audio(object):
 
         # initialize valid parameter spaces
         # NOTE: Some are note needed by TimeData but would have to be defined
-        #       in DataFrequency and Signal otherwise.
-        self._VALID_TYPES = ["power", "energy"]
+        #       in FrequencyData and Signal otherwise.
         self._VALID_DOMAINS = ["time", "freq"]
         self._VALID_FFT_NORMS = [
             "none", "unitary", "amplitude", "rms", "power", "psd"]
@@ -50,6 +81,10 @@ class _Audio(object):
         # abstract private class that does not hold data and prevent class
         # methods to fail that require data.)
         self._data = np.atleast_2d(np.nan)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self.__dict__, other.__dict__)
 
     @property
     def domain(self):
@@ -103,7 +138,7 @@ class _Audio(object):
             newshape = (newshape, )
 
         # reshape
-        reshaped = utils.copy(self)
+        reshaped = deepcopy(self)
         length_last_dimension = reshaped._data.shape[-1]
         try:
             reshaped._data = reshaped._data.reshape(
@@ -147,12 +182,20 @@ class _Audio(object):
 
     def copy(self):
         """Return a deep copy of the Signal object."""
-        return utils.copy(self)
+        return deepcopy(self)
 
     def _return_item(self):
         raise NotImplementedError("To be implemented by derived classes.")
 
     def _assert_matching_meta_data(self):
+        raise NotImplementedError("To be implemented by derived classes.")
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    def _decode(self):
+        """Return dictionary for the encoding."""
         raise NotImplementedError("To be implemented by derived classes.")
 
     def __getitem__(self, key):
@@ -267,7 +310,7 @@ class TimeData(_Audio):
             like, a numpy array of indices is returned.
         """
         times = np.atleast_1d(value)
-        indices = np.zeros_like(times).astype(np.int)
+        indices = np.zeros_like(times).astype(int)
         for idx, time in enumerate(times):
             indices[idx] = np.argmin(np.abs(self.times - time))
         return np.squeeze(indices)
@@ -275,8 +318,7 @@ class TimeData(_Audio):
     def _assert_matching_meta_data(self, other):
         """Check if the meta data matches across two TimeData objects."""
         if not isinstance(other, TimeData):
-            raise ValueError(("Comparison only valid against Signal, "
-                              "TimeData, and FrequencyData objects."))
+            raise ValueError("Comparison only valid against TimeData objects.")
         if self.n_samples != other.n_samples:
             raise ValueError("The number of samples does not match.")
 
@@ -285,6 +327,32 @@ class TimeData(_Audio):
         item = TimeData(
             data, times=self.times, comment=self.comment, dtype=self.dtype)
         return item
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_times'],
+            obj_dict['_comment'],
+            obj_dict['_dtype'])
+        obj.__dict__.update(obj_dict)
+        return obj
+
+    def __add__(self, data):
+        return add((self, data), 'time')
+
+    def __sub__(self, data):
+        return subtract((self, data), 'time')
+
+    def __mul__(self, data):
+        return multiply((self, data), 'time')
+
+    def __truediv__(self, data):
+        return divide((self, data), 'time')
+
+    def __pow__(self, data):
+        return power((self, data), 'time')
 
 
 class FrequencyData(_Audio):
@@ -296,7 +364,7 @@ class FrequencyData(_Audio):
 
     """
     def __init__(self, data, frequencies, fft_norm=None, comment=None,
-                 dtype=np.complex):
+                 dtype=complex):
         """Init FrequencyData with data, and frequencies.
 
         Attributes
@@ -330,7 +398,7 @@ class FrequencyData(_Audio):
         _Audio.__init__(self, 'freq', comment, dtype)
 
         # init data
-        self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+        self._data = np.atleast_2d(np.asarray(data, dtype=complex))
 
         # init frequencies
         self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
@@ -398,7 +466,7 @@ class FrequencyData(_Audio):
             a numpy array of indices is returned.
         """
         freqs = np.atleast_1d(value)
-        indices = np.zeros_like(freqs).astype(np.int)
+        indices = np.zeros_like(freqs).astype(int)
         for idx, freq in enumerate(freqs):
             indices[idx] = np.argmin(np.abs(self.frequencies - freq))
         return np.squeeze(indices)
@@ -420,6 +488,33 @@ class FrequencyData(_Audio):
             data, frequencies=self.frequencies, fft_norm=self.fft_norm,
             comment=self.comment, dtype=self.dtype)
         return item
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_frequencies'],
+            obj_dict['_fft_norm'],
+            obj_dict['_comment'],
+            obj_dict['_dtype'])
+        obj.__dict__.update(obj_dict)
+        return obj
+
+    def __add__(self, data):
+        return add((self, data), 'freq')
+
+    def __sub__(self, data):
+        return subtract((self, data), 'freq')
+
+    def __mul__(self, data):
+        return multiply((self, data), 'freq')
+
+    def __truediv__(self, data):
+        return divide((self, data), 'freq')
+
+    def __pow__(self, data):
+        return power((self, data), 'freq')
 
 
 class Signal(FrequencyData, TimeData):
@@ -473,7 +568,7 @@ class Signal(FrequencyData, TimeData):
 
         """
 
-        # initialze global parameter and valid parameter spaces
+        # initialize global parameter and valid parameter spaces
         _Audio.__init__(self, domain, comment, dtype)
 
         # initialize signal specific parameters
@@ -495,7 +590,7 @@ class Signal(FrequencyData, TimeData):
 
             TimeData.__init__(self, data, self.times, comment, dtype)
         elif domain == 'freq':
-            self._data = np.atleast_2d(np.asarray(data, dtype=np.complex))
+            self._data = np.atleast_2d(np.asarray(data, dtype=complex))
 
             n_bins = self._data.shape[-1]
             if n_samples is None:
@@ -635,6 +730,16 @@ class Signal(FrequencyData, TimeData):
                       dtype=self.dtype)
         return item
 
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_sampling_rate'],
+            obj_dict['_n_samples'])
+        obj.__dict__.update(obj_dict)
+        return obj
+
     @property
     def signal_type(self):
         """The signal type."""
@@ -646,25 +751,6 @@ class Signal(FrequencyData, TimeData):
         else:
             raise ValueError("No valid fft norm set.")
         return stype
-
-    @signal_type.setter
-    def signal_type(self, value):
-        raise DeprecationWarning("Deprecated, use fft_norm instead.")
-
-    def __add__(self, data):
-        return add((self, data), 'freq')
-
-    def __sub__(self, data):
-        return subtract((self, data), 'freq')
-
-    def __mul__(self, data):
-        return multiply((self, data), 'freq')
-
-    def __truediv__(self, data):
-        return divide((self, data), 'freq')
-
-    def __pow__(self, data):
-        return power((self, data), 'freq')
 
     def __repr__(self):
         """String representation of signal class.
@@ -852,7 +938,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     """Apply arithmetic operations."""
 
     # check input and obtain meta data of new signal
-    sampling_rate, n_samples, fft_norm = \
+    sampling_rate, n_samples, fft_norm, times, frequencies, audio_type = \
         _assert_match_for_arithmetic(data, domain)
 
     # apply arithmetic operation
@@ -862,8 +948,8 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
         result = operation(
             result, _get_arithmetic_data(data[d], n_samples, domain))
 
-    # check if to return as Signal
-    if sampling_rate is not None:
+    # check if to return an audio object
+    if audio_type == Signal:
         # apply desired fft normalization
         if domain == 'freq':
             result = fft.normalization(result, n_samples, sampling_rate,
@@ -871,6 +957,10 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
 
         result = Signal(
             result, sampling_rate, n_samples, domain, fft_norm=fft_norm)
+    elif audio_type == TimeData:
+        result = TimeData(result, times)
+    elif audio_type == FrequencyData:
+        result = FrequencyData(result, frequencies, fft_norm)
 
     return result
 
@@ -884,7 +974,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
 
     Input:
     data : tuple
-        Can contain signal and array like data
+        Can contain Signal, TimeData, FrequencyData, and array like data
     domain : str
         Domain in which the arithmetic operation should be performed. 'time' or
         'freq'.
@@ -899,6 +989,12 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     fft_norm : str, None
         FFT norm of the first signal in `data`, if all FFT norms are None.
         Otherwise the first FFT norm that is not None is taken.
+    times : numpy array, None
+        The times if a TimeData object was passed. None otherwise.
+    frequencies : numpy array, None
+        The frequencies if a FrequencyData object was passed. None otherwise.
+    audio_type : type, None
+        Type of the audio class if contained in data. Otherwise None.
 
     """
 
@@ -910,26 +1006,64 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     if domain not in ['time', 'freq']:
         raise ValueError(f"domain must be time or freq but is {domain}.")
 
-    # check input types and meta data
+    # properties that must match
     sampling_rate = None
     n_samples = None
     fft_norm = None
+    times = None
+    frequencies = None
+    audio_type = type(None)
+
+    # check input types and meta data
+    found_audio_data = False
     for d in data:
-        # check or store meta data of signals
-        if isinstance(d, Signal):
-            if sampling_rate is None:
-                sampling_rate = d.sampling_rate
-                n_samples = d.n_samples
-                fft_norm = d.fft_norm
+        if isinstance(d, (Signal, TimeData, FrequencyData)):
+            # store meta data upon first appearance
+            if not found_audio_data:
+                if isinstance(d, Signal):
+                    sampling_rate = d.sampling_rate
+                    n_samples = d.n_samples
+                    fft_norm = d.fft_norm
+                elif isinstance(d, TimeData):
+                    if domain != "time":
+                        raise ValueError("The domain must be 'time'.")
+                    times = d.times
+                elif isinstance(d, FrequencyData):
+                    if domain != "freq":
+                        raise ValueError("The domain must be 'freq'.")
+                    frequencies = d.frequencies
+                    fft_norm = d.fft_norm
+
+                found_audio_data = True
+                audio_type = type(d)
+
+            # check if type and meta data matches after first appearance
             else:
-                if sampling_rate != d.sampling_rate:
-                    raise ValueError("The sampling rates do not match.")
-                if n_samples != d.n_samples:
-                    raise ValueError("The number of samples does not match.")
-            # if there is a power signal, the returned signal will be a power
-            # signal
-            if d.fft_norm != 'none' and fft_norm == 'none':
-                fft_norm = d.fft_norm
+                if not isinstance(d, audio_type):
+                    raise ValueError("The audio objects do not match.")
+                if isinstance(d, Signal):
+                    if sampling_rate != d.sampling_rate:
+                        raise ValueError("The sampling rates do not match.")
+                    if n_samples != d.n_samples:
+                        raise ValueError(
+                            "The number of samples does not match.")
+                    # if there is a power signal, the returned signal will be
+                    # a power signal
+                    if d.fft_norm != 'none' and fft_norm == 'none':
+                        fft_norm = d.fft_norm
+                elif isinstance(d, TimeData):
+                    if not np.allclose(times, d.times, atol=1e-15):
+                        raise ValueError(
+                            "The times does not match.")
+                elif isinstance(d, FrequencyData):
+                    if not np.allclose(
+                            frequencies, d.frequencies, atol=1e-15):
+                        raise ValueError(
+                            "The frequencies do not match.")
+                    if fft_norm != d.fft_norm:
+                        raise ValueError(
+                            "The FFT norm does not match.")
+
         # check type of non signal input
         else:
             dtypes = ['int8', 'int16', 'int32', 'int64',
@@ -943,7 +1077,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 
-    return sampling_rate, n_samples, fft_norm
+    return sampling_rate, n_samples, fft_norm, times, frequencies, audio_type
 
 
 def _get_arithmetic_data(data, n_samples, domain):
@@ -966,7 +1100,7 @@ def _get_arithmetic_data(data, n_samples, domain):
         Data in desired domain without any fft normalization if data is a
         Signal. `np.asarray(data)` otherwise.
     """
-    if isinstance(data, Signal):
+    if isinstance(data, (Signal, TimeData, FrequencyData)):
 
         # get signal in correct domain
         if domain == "time":
@@ -974,11 +1108,12 @@ def _get_arithmetic_data(data, n_samples, domain):
         elif domain == "freq":
             data_out = data.freq.copy()
 
-            if data.fft_norm != 'none':
-                # remove current fft normalization
-                data_out = fft.normalization(
-                    data_out, n_samples, data.sampling_rate,
-                    data.fft_norm, inverse=True)
+            if isinstance(data, Signal):
+                if data.fft_norm != 'none':
+                    # remove current fft normalization
+                    data_out = fft.normalization(
+                        data_out, n_samples, data.sampling_rate,
+                        data.fft_norm, inverse=True)
 
         else:
             raise ValueError(

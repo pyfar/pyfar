@@ -16,3 +16,5 @@ pyfftw
 matplotlib
 python-sofa>=0.2.0
 urllib3
+deepdiff
+tox-wheel

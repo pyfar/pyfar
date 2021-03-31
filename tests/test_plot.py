@@ -2,12 +2,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.testing as mpt
 from matplotlib.testing.compare import compare_images
-import pytest
-import numpy as np
-from unittest import mock
 import os
+from pytest import raises
+
 import pyfar.plot as plot
-from pyfar import Signal
 
 # flag for creating new baseline plots (required if the plot look changed)
 create_baseline = False
@@ -30,7 +28,7 @@ f_height = 4.8
 f_dpi = 100
 
 
-def test_line_plots(signal_mocks):
+def test_line_plots(sine, impulse_group_delay):
     """Test all line plots with default arguments and hold functionality."""
 
     function_list = [plot.line.time,
@@ -53,7 +51,7 @@ def test_line_plots(signal_mocks):
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
-        function(signal_mocks[0])
+        function(sine)
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -72,7 +70,7 @@ def test_line_plots(signal_mocks):
         output = os.path.join(output_path, filename)
 
         # plotting
-        function(signal_mocks[1])
+        function(impulse_group_delay[0])
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -88,7 +86,7 @@ def test_line_plots(signal_mocks):
         compare_images(baseline, output, tol=10)
 
 
-def test_line_phase_options(signal_mocks):
+def test_line_phase_options(sine):
     """Test parameters that are unique to the phase plot."""
 
     parameter_list = [['line_phase_deg.png', True, False],
@@ -105,7 +103,7 @@ def test_line_phase_options(signal_mocks):
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
-        plot.line.phase(signal_mocks[0], deg=param[1], unwrap=param[2])
+        plot.line.phase(sine, deg=param[1], unwrap=param[2])
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -120,7 +118,14 @@ def test_line_phase_options(signal_mocks):
         compare_images(baseline, output, tol=10)
 
 
-def test_line_dB_option(signal_mocks):
+def test_line_phase_unwrap_assertion(sine):
+    """Test assertion for unwrap parameter."""
+    with raises(ValueError):
+        plot.line.phase(sine, unwrap='infinity')
+    plt.close()
+
+
+def test_line_dB_option(sine):
     """Test all line plots that have a dB option."""
 
     function_list = [plot.line.time,
@@ -140,7 +145,7 @@ def test_line_dB_option(signal_mocks):
             matplotlib.use('Agg')
             mpt.set_reproducibility_for_testing()
             plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
-            function(signal_mocks[0], dB=dB)
+            function(sine, dB=dB)
 
             # save baseline if it does not exist
             # make sure to visually check the baseline uppon creation
@@ -167,7 +172,7 @@ def test_line_dB_option(signal_mocks):
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
-        function(signal_mocks[0], log_prefix=10, log_reference=.5, dB=True)
+        function(sine, log_prefix=10, log_reference=.5, dB=True)
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -183,7 +188,7 @@ def test_line_dB_option(signal_mocks):
         compare_images(baseline, output, tol=10)
 
 
-def test_line_xscale_option(signal_mocks):
+def test_line_xscale_option(sine):
     """Test all line plots that have an xscale option."""
 
     function_list = [plot.line.freq,
@@ -204,7 +209,7 @@ def test_line_xscale_option(signal_mocks):
             matplotlib.use('Agg')
             mpt.set_reproducibility_for_testing()
             plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
-            function(signal_mocks[0], xscale=xscale)
+            function(sine, xscale=xscale)
 
             # save baseline if it does not exist
             # make sure to visually check the baseline uppon creation
@@ -220,9 +225,31 @@ def test_line_xscale_option(signal_mocks):
             compare_images(baseline, output, tol=10)
 
 
-def test_time_unit(signal_mocks):
-    """Test plottin with different units."""
+def test_line_xscale_assertion(sine):
+    """
+    Test if all line plots raise an assertion for a wrong scale parameter.
+    """
 
+    with raises(ValueError):
+        plot.line.freq(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.phase(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot._line._spectrogram(sine, yscale="warped")
+
+    with raises(ValueError):
+        plot._line._spectrogram_cb(sine, yscale="warped")
+
+    plt.close("all")
+
+
+def test_time_unit(impulse_group_delay):
+    """Test plottin with different units."""
     function_list = [plot.line.time,
                      plot.line.group_delay,
                      plot.line.spectrogram]
@@ -239,7 +266,7 @@ def test_time_unit(signal_mocks):
             matplotlib.use('Agg')
             mpt.set_reproducibility_for_testing()
             plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
-            function(signal_mocks[1], unit=unit)
+            plot.line.group_delay(impulse_group_delay[0], unit=unit)
 
             # save baseline if it does not exist
             # make sure to visually check the baseline uppon creation
@@ -255,6 +282,24 @@ def test_time_unit(signal_mocks):
             compare_images(baseline, output, tol=10)
 
 
+def test_time_unit_assertion(sine):
+    """Test if all line plots raise an assertion for a wrong unit parameter."""
+
+    with raises(ValueError):
+        plot.line.time(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot._line._spectrogram(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line._line._spectrogram_cb(sine, unit="pascal")
+
+    plt.close("all")
+
+
 def test_line_time_auto_unit():
     """Test automatically assigning the unit in group delay plots."""
     assert plot._line._time_auto_unit(0) == 's'
@@ -263,7 +308,7 @@ def test_line_time_auto_unit():
     assert plot._line._time_auto_unit(2) == 's'
 
 
-def test_line_custom_subplots(signal_mocks):
+def test_line_custom_subplots(sine, impulse_group_delay):
     """
     Test custom subplots in row, column, and mixed layout including hold
     functionality.
@@ -288,7 +333,7 @@ def test_line_custom_subplots(signal_mocks):
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
-        plot.line.custom_subplots(signal_mocks[0], plots[p])
+        plot.line.custom_subplots(sine, plots[p])
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -307,7 +352,7 @@ def test_line_custom_subplots(signal_mocks):
         output = os.path.join(output_path, filename)
 
         # plotting
-        plot.line.custom_subplots(signal_mocks[1], plots[p])
+        plot.line.custom_subplots(impulse_group_delay[0], plots[p])
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -321,6 +366,72 @@ def test_line_custom_subplots(signal_mocks):
 
         # testing
         compare_images(baseline, output, tol=10)
+
+
+def test_line_plots_time_data(time_data_three_points):
+    """Test all line plots with default arguments and hold functionality."""
+
+    function_list = [plot.line.time]
+
+    for function in function_list:
+        print(f"Testing: {function.__name__}")
+        # file names
+        filename = 'line_time_data_' + function.__name__ + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        function(time_data_three_points)
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+        # close current figure
+        plt.close()
+
+
+def test_line_plots_frequency_data(frequency_data_three_points):
+    """Test all line plots with default arguments and hold functionality."""
+
+    function_list = [plot.line.freq,
+                     plot.line.phase,
+                     plot.line.freq_phase]
+
+    for function in function_list:
+        print(f"Testing: {function.__name__}")
+        # file names
+        filename = 'line_frequency_data_' + function.__name__ + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        function(frequency_data_three_points)
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+        # close current figure
+        plt.close()
 
 
 def test_prepare_plot():
@@ -364,79 +475,59 @@ def test_prepare_plot():
     plt.close()
 
 
-@pytest.fixture
-def signal_mocks():
-    """ Generate two simple dirac signals for testing the hold functionality
-    independently.
+def test_lower_frequency_limit(
+        sine, sine_short, frequency_data_three_points,
+        frequency_data_one_point, time_data_three_points):
+    """Test the private function plot._line._lower_frequency_limit"""
 
-    Returns
-    -------
-    signal_1: Signal
-        sine signal
-    signal_2: Signal
-        dirac signal
+    # test Signal with frequencies below 20 Hz
+    low = plot._line._lower_frequency_limit(sine)
+    assert low == 20
 
-    """
-    # signal parameters
-    n_samples = int(2e3)
-    n_bins = int(n_samples / 2) + 1
-    sampling_rate = 40e3
-    df = sampling_rate / n_samples
-    times = np.arange(n_samples) / sampling_rate
-    frequencies = np.arange(n_bins) * df
+    # test Signal with frequencies above 20 Hz
+    low = plot._line._lower_frequency_limit(sine_short)
+    assert low == 44100/100  # lowest frequency fs=44100 / n_samples=100
 
-    # sine signal
-    f = 10 * df
-    time_sine = np.sin(2 * np.pi * f * times)
-    freq_sine = np.zeros(n_bins)
-    freq_sine[frequencies == f] = 1
+    # test with FrequencyData
+    # (We only need to test if FrequencyData works. The frequency dependent
+    # cases are already tested above)
+    low = plot._line._lower_frequency_limit(frequency_data_three_points)
+    assert low == 100
 
-    # impulse
-    group_delay = 1000
-    dphi = -group_delay / sampling_rate * df * 2 * np.pi
-    time_impulse = np.zeros(n_samples)
-    time_impulse[group_delay] = 1
-    freq_impulse = 1 * np.exp(1j * np.arange(n_bins) * dphi)
+    # test only 0 Hz assertions
+    with raises(ValueError, match="Signals must have frequencies > 0 Hz"):
+        plot._line._lower_frequency_limit(frequency_data_one_point)
 
-    signal_1 = signal_mock(time_sine[np.newaxis, :], freq_sine[np.newaxis, :],
-                           sampling_rate, times, frequencies,
-                           'power', 'amplitude')
-
-    signal_2 = signal_mock(time_impulse[np.newaxis, :],
-                           freq_impulse[np.newaxis, :],
-                           sampling_rate, times, frequencies,
-                           'energy', 'unitary')
-
-    return signal_1, signal_2
+    # test TimeData assertions
+    with raises(TypeError, match="Input data has to be of type"):
+        plot._line._lower_frequency_limit(time_data_three_points)
 
 
-def signal_mock(time, freq, sampling_rate, times, frequencies,
-                signal_type, fft_norm):
-    """MagicMock for Signal including __getitem__ functionality. """
+def test_use():
+    """Test if use changes the plot style."""
 
-    # use MagicMock and side_effect to mock __getitem__
-    # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        time = np.atleast_2d(signal.time[slice])
-        freq = np.atleast_2d(signal.freq[slice])
-        s_getitem = signal_mock(time, freq, signal.sampling_rate,
-                                signal.times, signal.frequencies,
-                                signal.signal_type, signal.fft_norm)
-        return s_getitem
+    for style in ["dark", "default"]:
 
-    # TODO: Implement __setitem__ if required in a test
+        # file names
+        filename = 'use_' + style + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
 
-    signal = mock.MagicMock(spec_set=Signal(time, sampling_rate))
-    signal.time = time
-    signal.sampling_rate = sampling_rate
-    signal.times = times
-    signal.n_samples = time.shape[-1]
-    signal.freq = freq
-    signal.frequencies = frequencies
-    signal.n_bins = freq.shape[-1]
-    signal.cshape = time.shape[:-1]
-    signal.signal_type = signal_type
-    signal.fft_norm = fft_norm
-    signal.__getitem__.side_effect = getitem
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plot.utils.use(style)
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        plt.plot([1, 2, 3], [1, 2, 3])
 
-    return signal
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        plt.close()
+
+        # testing
+        compare_images(baseline, output, tol=10)

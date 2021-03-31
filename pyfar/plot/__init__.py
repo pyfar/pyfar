@@ -18,19 +18,29 @@ from .spatial import (
     quiver
 )
 
-from . import utils
+from .utils import (
+    plotstyle,
+    context,
+    use,
+    color,
+    shortcuts
+)
 
 __all__ = [
-    freq,
-    time,
-    phase,
-    group_delay,
-    spectrogram,
-    time_freq,
-    freq_phase,
-    freq_group_delay,
-    custom_subplots,
-    scatter,
-    quiver,
-    utils
+    'freq',
+    'time',
+    'phase',
+    'group_delay',
+    'spectrogram',
+    'time_freq',
+    'freq_phase',
+    'freq_group_delay',
+    'custom_subplots',
+    'scatter',
+    'quiver',
+    'plotstyle',
+    'context',
+    'use',
+    'color',
+    'shortcuts'
 ]
