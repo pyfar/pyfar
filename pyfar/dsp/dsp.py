@@ -307,10 +307,12 @@ def normalize(signal, normalize='time', normalize_to='max',
     else:
         return normalized_signal
 
+
 def average(signal, average_mode='time', phase_copy=None,
             weights=None):
     """
-    Can be used to average multichannel Signals in different ways.
+    Used to average multichannel Signals in different ways. You may want to
+    align your data first.
 
     Parameters
     ----------
@@ -324,13 +326,13 @@ def average(signal, average_mode='time', phase_copy=None,
         'log_magnitude' - averages the log magnitude spectra
         The default is 'time'
     phase_copy: vector
-        indicates signal channel from which phase is to be coppied
-        to the averaged signal
+        indicates signal channel from which phase is to be copied to the
+        averaged signal
         None - ignores the phase. Resulting in zero phase
         The default is None
     weights: array
         array that gives channel weighting for averaging the data. Must
-        have same shape as channels
+        have same shape as channel shape of signal.
         The default is None
     Returns
     --------
@@ -345,12 +347,11 @@ def average(signal, average_mode='time', phase_copy=None,
     # check weights size
     if weights.shape != signal.cshape:
         raise TypeError(
-            'Shape of weights must be equal to that of signal channel shape')
+            'Shape of weights must be equal to that of signal channels')
 
     # set weights default
     if weights is None:
-        weights = 1/(signal.cshape)
-        # HOW TO MULTIPLY INDIVIDUAL ELEMENTS OF .CSHAPE TO GET NUMBER OF CHANNELS TO SCALE WEIGHTS???
+        weights = 1/(np.prod(signal.cshape))
     else:
         weights = weights/np.sum(weights)
 
@@ -370,8 +371,8 @@ def average(signal, average_mode='time', phase_copy=None,
     data = data * weights
 
     # average the data
-    if average_mode == 'time' or average_mode == 'complex' or average_mode == 'magnitude':
-        # NOT SURE HOW TO FIX THIS FLAKE8 CHARACTER ISSUE AS I STILL GET AN ISSUE GOING TO A NEW LINE
+    if (average_mode == 'time' or
+            average_mode == 'complex' or average_mode == 'magnitude'):
         data = np.sum(data, axis=-2, keepdims=True)
     elif average_mode == 'power':
         data = np.sum(data, axis=-2, keepdims=True)
@@ -381,15 +382,14 @@ def average(signal, average_mode='time', phase_copy=None,
         data = 10**(data/20)
     else:
         raise ValueError(
-            "average_mode must be 'time', 'complex', 'magnitude', 'power' or  'log_magnitude'"
-            # NOT SURE HOW TO FIX THIS FLAKE8 CHARACTER ISSUE AS I STILL GET AN ISSUE GOING TO A NEW LINE
+            """average_mode must be 'time', 'complex', 'magnitude', 'power' or
+            'log_magnitude'"""
             )
 
     # phase handling
     if phase_copy is None:
         pass
     else:
-        # need to access channel correctly
         if average_mode == 'time':
             data_ang = signal.time.copy()
             data_ang = np.angle(data_ang[phase_copy, ...])
@@ -397,7 +397,6 @@ def average(signal, average_mode='time', phase_copy=None,
             data_ang = signal.freq.copy()
             data_ang = np.angle(data_ang[phase_copy, ...])
 
-        # insert into 'averaged'
         data = data * np.exp(1j * data_ang)
 
     # input data into averaged_signal

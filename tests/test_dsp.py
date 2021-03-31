@@ -80,6 +80,7 @@ def test_group_delay_custom_frequencies(impulse_mock):
     assert grp.shape == (2, )
     npt.assert_allclose(grp, np.array([1e3, 1e3]))
 
+
 def test_normalization_time_max_max_value():
     """Test the function along time, max, max & value path."""
     signal = Signal([1, 2, 1], [1, 4, 1], 44100)
@@ -88,6 +89,7 @@ def test_normalization_time_max_max_value():
                            channel_handling='max')
     assert answer == truth
 
+
 def test_normalization_magnitude_mean_min_freqrange():
     """Test the function along magnitude, mean, min & value path."""
     signal = Signal([1, 4, 1], [1, 10, 1], 44100, domain='freq')
@@ -95,6 +97,7 @@ def test_normalization_magnitude_mean_min_freqrange():
     answer = dsp.normalize(signal, normalize='magnitude', normalize_to='mean',
                            channel_handling='min', value=10)
     assert answer == truth
+
 
 def test_normalization_logmagnitude_rms():
     """Test the function along logmagnitude, rms,mean  & freq path."""
@@ -106,6 +109,22 @@ def test_normalization_logmagnitude_rms():
                            freq_range=[0, 60])
     npt.assert_allclose(answer, truth, rtol=1e-7)
 
+
+def test_average_time_phase():
+    """Test the function in time domain and phase copy"""
+    signal = Signal([1, 2+1j, 1], [1, 4, 1], 44100, domain='time')
+    truth = Signal([1, 3+1j, 1], 44100, domain='time')
+    answer = dsp.average(signal, average_mode='time', phase_copy=True)
+    assert answer == truth
+
+
+def test_average_log_magnitude_weights():
+    """Test the function in freq domain and weights"""
+    signal = Signal([1, 2, 1], [1, 4, 1], 44100, domain='freq')
+    truth = Signal([3.16227766, 316.22776602, 31.6227766], 44100,
+                   domain='freq')
+    answer = dsp.average(signal, average_mode='log_magnitude', weights=None)
+    assert answer == truth
 
 # def test_wrap_to_2pi():
 # def test_nextpow2():
