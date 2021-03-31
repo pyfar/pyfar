@@ -126,16 +126,16 @@ Fixtures
 - Typical fixtures are pyfar objects with varying properties, stubs as well as functions need for initiliazing tests.
 - Define the variables used in the tests only once, either in the test itself or in the definition of the fixture. This assures consistency and prevents from failing tests due to the definition of variables with the same purpose at different positions or in different files.
 
-To get an idea of the recommended fixture workflow, have a look at *confest.py*.
+Have a look at already implemented fixtures in *confest.py*.
 
 **Dummies**
 
-If the objects used in the tests have arbitrary properties, tests are usually better to read, if these objects are initialized within the tests. If the initialization requires several operations or the object has non-arbitrary properties, this is a hint to use a fixture.
+If the objects used in the tests have arbitrary properties, tests are usually better to read, when these objects are initialized within the tests. If the initialization requires several operations or the object has non-arbitrary properties, this is a hint to use a fixture.
 Good examples illustrating these two cases are the initializations in *test_signal.py* vs. the sine and impulse signal fixtures in *conftest.py*.
 
 **Stubs**
 
-Stubs mimic the actual objects, but have minimum functionality and *fixed, well defined properties*. They are **only used in cases, when a dependence on the actual pyfar class is prohibited**. This is the case, when functionalities of the class itself or methods it depends on are tested. Examples are the tests of the Signal class and its methods in *test_signal.py* and *test_fft.py*.
+Stubs mimic actual objects, but have minimum functionality and **fixed, well defined properties**. They are **only used in cases, when a dependence on the actual pyfar class is prohibited**. This is the case, when functionalities of the class itself or methods it depends on are tested. Examples are the tests of the Signal class and its methods in *test_signal.py* and *test_fft.py*.
 
 It requires a little more effort to implement stubs of the pyfar classes. Therefore, stub utilities are provided in *pyfar/testing/stub_utils.py* and imported in *confest.py*, where the actual stubs are implemented.
 
@@ -148,7 +148,7 @@ It requires a little more effort to implement stubs of the pyfar classes. Theref
 Mocks are similar to stubs but used for **behavioral verification**. For example, a mock can replace a function or an object to check if it is called with correct parameters. A main motivation for using mocks is to avoid complex or time-consuming external dependencies, for example database queries.
 
 - A typical use case of mocks in the pyfar context is hardware communication, for example reading and writing of large files or audio in- and output. These use cases are rare compared to tests performing state verification.
-- In contrast to some other guidelines on mocks, external dependencies do *not* need to be mocked in general. Failing tests due to changes in external packages are meaningful hints to modify the code.
+- In contrast to some other guidelines on mocks, external dependencies do **not** need to be mocked in general. Failing tests due to changes in external packages are meaningful hints to modify the code.
 - Examples of internal mocking can be found in *test_io.py*, indicated by the pytest ``@patch`` calls.
 
 Tips
