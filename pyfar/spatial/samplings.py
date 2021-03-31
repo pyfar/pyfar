@@ -144,7 +144,7 @@ def sph_icosahedron(radius=1.):
 
 
 def sph_equiangular(n_points=None, sh_order=None, radius=1.):
-    """Generate an equiangular sampling of the sphere [#]_, Chapter 3.2.
+    """Generate an equiangular sampling of the sphere [1]_, Chapter 3.2.
 
     This sampling does not contain points at the North and South Pole and is
     typically used for spherical harmonics processing. See `sph_equal_angle()`
@@ -169,7 +169,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
 
     References
     ----------
-    .. [#] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
+    .. [1] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
@@ -225,7 +225,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
 
 
 def sph_gaussian(n_points=None, sh_order=None, radius=1.):
-    """Generate sampling of the sphere based on the Gaussian quadrature [#]_.
+    """Generate sampling of the sphere based on the Gaussian quadrature [2]_.
 
     This sampling does not contain points at the North and South Pole and is
     typically used for spherical harmonics processing. See `sph_equal_angle()`
@@ -250,7 +250,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
 
     References
     ----------
-    .. [#] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
+    .. [2] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
@@ -302,7 +302,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
 
 def sph_extremal(n_points=None, sh_order=None, radius=1.):
     """Gives the points of a Hyperinterpolation sampling grid
-    after Sloan and Womersley [#]_. The samplings are available for
+    after Sloan and Womersley [3]_. The samplings are available for
     `1 <= sh_order <= 200` (`n_points = (sh_order + 1)^2`).
 
     Parameters
@@ -325,16 +325,16 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
     Notes
     -----
-    This implementation uses precalculated sets of points from [#]_. The data
+    This implementation uses precalculated sets of points from [4]_. The data
     up to `sh_order = 99` are loaded the first time this function is called.
     The remaining data is loaded upon request.
 
     References
     ----------
-    .. [#]  I. H. Sloan and R. S. Womersley, “Extremal Systems of Points and
+    .. [3]  I. H. Sloan and R. S. Womersley, “Extremal Systems of Points and
             Numerical Integration on the Sphere,” Advances in Computational
             Mathematics, vol. 21, no. 1/2, pp. 107–125, 2004.
-    .. [#]  https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/
+    .. [4]  https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/
 
     """
 
@@ -392,11 +392,11 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
 def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
                  radius=1.):
-    r"""Return spherical t-design sampling grid [#]_.
+    r"""Return spherical t-design sampling grid [5]_.
 
     For a spherical harmonic order :math:`n_{sh}`, a t-Design of degree
     :math:`t=2n_{sh}` for constant energy or :math:`t=2n_{sh}+1` additionally
-    ensuring a constant angular spread of energy is required [#]_. For a given
+    ensuring a constant angular spread of energy is required [6]_. For a given
     degree t
 
     .. math::
@@ -432,21 +432,21 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     Notes
     -----
-    This function downloads a pre-calculated set of points from [#]_ . The data
+    This function downloads a pre-calculated set of points from [7]_ . The data
     up to `degree = 99` are loaded the first time this function is called.
     The remaining data is loaded upon request.
 
     References
     ----------
 
-    .. [#]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
+    .. [5]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
             Spherical Designs for Integration and Interpolation on the
             Two-Sphere,” SIAM Journal on Numerical Analysis, vol. 48, no. 6,
             pp. 2135–2157, Jan. 2010.
-    .. [#]  F. Zotter, M. Frank, and A. Sontacchi, “The Virtual T-Design
+    .. [6]  F. Zotter, M. Frank, and A. Sontacchi, “The Virtual T-Design
             Ambisonics-Rig Using VBAP,” in Proceedings on the Congress on
             Sound and Vibration, 2010.
-    .. [#]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
+    .. [7]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
 
     """
 
@@ -584,7 +584,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     Spherical sampling grid according to the great circle distance criterion.
 
     Sampling grid where neighboring points of the same elevation have approx.
-    the same great circle distance across elevations [#]_.
+    the same great circle distance across elevations [8]_.
 
     Parameters
     ----------
@@ -613,7 +613,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
 
     References
     ----------
-    .. [#]  B. P. Bovbjerg, F. Christensen, P. Minnaar, and X. Chen, “Measuring
+    .. [8]  B. P. Bovbjerg, F. Christensen, P. Minnaar, and X. Chen, “Measuring
             the head-related transfer functions of an artificial head with a
             high directional resolution,” Los Angeles, USA, Sep. 2000.
 
@@ -665,7 +665,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
 
 def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     """
-    Return Lebedev spherical sampling grid [#]_. For a list of available values
+    Return Lebedev spherical sampling grid [9]_. For a list of available values
     for `n_points`and `sh_order` call `sph_lebedev()`.
 
     Parameters
@@ -688,15 +688,15 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
 
     Notes
     -----
-    This implementation is based on Matlab Code written by Rob Parrish [#]_.
+    This implementation is based on Matlab Code written by Rob Parrish [10]_.
 
     References
     ----------
-    .. [#] V.I. Lebedev, and D.N. Laikov
+    .. [9] V.I. Lebedev, and D.N. Laikov
            "A quadrature formula for the sphere of the 131st
            algebraic order of accuracy"
            Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
-    .. [#] https://de.mathworks.com/matlabcentral/fileexchange/27097-\
+    .. [10] https://de.mathworks.com/matlabcentral/fileexchange/27097-\
         getlebedevsphere
 
     """
@@ -759,7 +759,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
 
 def sph_fliege(n_points=None, sh_order=None, radius=1.):
     """
-    Return Fliege-Maier spherical sampling grid [#]_. See
+    Return Fliege-Maier spherical sampling grid [11]_. See
     below for a list of possible values for `n_points`and `sh_order` or call
     `sph_fliege()`.
 
@@ -783,8 +783,8 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
     Notes
     -----
-    This implementation uses pre-calculated points from the SOFiA toolbox [#]_.
-    Possible combinations of n_points and sh_order are:
+    This implementation uses pre-calculated points from the SOFiA
+    toolbox [12]_. Possible combinations of n_points and sh_order are:
 
     +------------+------------+
     | `n_points` | `sh_order` |
@@ -850,10 +850,10 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
     References
     ----------
-    .. [#] J. Fliege and U. Maier, "The distribution of points on the sphere
+    .. [11] J. Fliege and U. Maier, "The distribution of points on the sphere
            and corresponding cubature formulae,” IMA J. Numerical Analysis,
            Vol. 19, pp. 317–334, Apr. 1999, doi: 10.1093/imanum/19.2.317.
-    .. [#] https://audiogroup.web.th-koeln.de/SOFiA_wiki/DOWNLOAD.html
+    .. [12] https://audiogroup.web.th-koeln.de/SOFiA_wiki/DOWNLOAD.html
 
     """
 
@@ -918,7 +918,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
 
 def sph_equal_area(n_points, radius=1.):
-    """Sampling based on partitioning into faces with equal area [#]_.
+    """Sampling based on partitioning into faces with equal area [13]_.
 
     Parameters
     ----------
@@ -935,7 +935,7 @@ def sph_equal_area(n_points, radius=1.):
 
     References
     ----------
-    .. [#]  P. Leopardi, “A partition of the unit sphere into regions of equal
+    .. [13]  P. Leopardi, “A partition of the unit sphere into regions of equal
             area and small diameter,” Electronic Transactions on Numerical
             Analysis, vol. 25, no. 12, pp. 309–327, 2006.
 
