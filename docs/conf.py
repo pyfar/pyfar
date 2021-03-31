@@ -38,7 +38,12 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'matplotlib.sphinxext.plot_directive',
-    'sphinx.ext.imgmath']
+    'sphinx.ext.imgmath',
+    'autodocsumm']
+
+# show tocs for classes and functions of modules using the autodocsumm
+# package
+autodoc_default_options = {'autosummary': True}
 
 imgmath_latex_preamble = r'\usepackage{array}'
 
