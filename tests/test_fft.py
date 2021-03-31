@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-from pyfar import fft
+from pyfar.dsp import fft
 
 
 def test_n_bins_even():
