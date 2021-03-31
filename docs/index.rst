@@ -20,6 +20,11 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
+   classes
+
+.. toctree::
+   :maxdepth: 2
+
    modules
 
 Contributing
