@@ -13,8 +13,8 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
         Parameters
         ----------
-        sampling : SamplingSphere
-            Spherical sampling points in Carthesian coordinates
+        sampling : pyfar.Coordinates
+            Spherical sampling as pyfar coordinates object.
         round_decimals : int
             Number of decimals to be rounded for checking for equal radius.
             The default is 12.

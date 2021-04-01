@@ -378,7 +378,7 @@ class FrequencyData(_Audio):
             the size of the last dimension of data.
         fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
             The kind of Discrete Fourier Transform (DFT) normalization. See
-            pyfar.fft.normalization and _[1] for more information. The default
+            pyfar.fft.normalization and _[#] for more information. The default
             is 'none', which is typically used for energy signals, such as
             impulse responses.
         comment : str
@@ -388,7 +388,7 @@ class FrequencyData(_Audio):
 
         References
         ----------
-        .. [1] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
                Scaling of the Discrete Fourier Transform and the Implied
                Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
                Austria, May 2020, p. e-Brief 600.
@@ -551,7 +551,7 @@ class Signal(FrequencyData, TimeData):
             Domain of data. The default is 'time'
         fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
             The kind of Discrete Fourier Transform (DFT) normalization. See
-            pyfar.fft.normalization and _[1] for more information. The default
+            pyfar.fft.normalization and [#]_ for more information. The default
             is 'none', which is typically used for energy signals, such as
             impulse responses.
         comment : str
@@ -561,7 +561,7 @@ class Signal(FrequencyData, TimeData):
 
         References
         ----------
-        .. [1] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
                Scaling of the Discrete Fourier Transform and the Implied
                Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
                Austria, May 2020, p. e-Brief 600.

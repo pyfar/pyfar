@@ -89,9 +89,10 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     .. math::
         s(n) =
         \\begin{cases}
-        amplitude,  & \\text{if $n$ = delay} \\newline
+        amplitude,  & \\text{if $n$ = delay}\\\\
         0, & \\text{else}
         \\end{cases}
+
 
     Parameters
     ----------
@@ -139,10 +140,11 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
                  sampling_rate=44100):
     """Generate single channel sine sweep with linearly increasing frequency.
 
-    Time domain sweep generation according to _[1]:
+    Time domain sweep generation according to [#]_:
 
     .. math::
-        x(t) = \\sin(2\\pi\f_{low} t + 2\\pi (f_{high}-f_{low}) / T t^2 / 2),
+        s(t) = \\sin(2\\pi f_{low} t + 2\\pi (f_{high}-f_{low}) / T
+        \\cdot t^2 / 2),
 
     with T the duration in seconds and t the sampling points in seconds.
 
@@ -170,7 +172,7 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     References
     ----------
-    .. [1]  Farina, Angelo (2000): "Simultaneous measurement of impulse
+    .. [#]  Farina, Angelo (2000): "Simultaneous measurement of impulse
             response and distortion with a swept-sine technique." 108th AES
             Convention, Paris: France.
     """
@@ -187,7 +189,7 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     """
     Generate single channel sine sweep with exponentially increasing frequency.
 
-    Time domain sweep generation according to _[1]:
+    Time domain sweep generation according to [#]_:
 
     .. math::
         s(t) = \\sin(2\\pi f_{low} L \\left( \\mathrm{e}^{t/L} - 1 \\right))
@@ -227,7 +229,7 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     References
     ----------
-    .. [1]  Farina, Angelo (2000): "Simultaneous measurement of impulse
+    .. [#]  Farina, Angelo (2000): "Simultaneous measurement of impulse
             response and distortion with a swept-sine technique." 108th AES
             Convention, Paris: France.
     """
