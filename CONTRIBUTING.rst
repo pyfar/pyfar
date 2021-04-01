@@ -171,16 +171,19 @@ Writing the Documentation
 -------------------------
 
 Pyfar follows the `numpy style guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_ for the docstring. A docstring has to consist at least of
+
 - A short and/or extended summary,
 - the Parameters section, and
 - the Returns section
 
 Optional fields that are often used are
+
 - References,
 - Examples, and
 - Notes
 
 Here are a few tips to make things run smoothly
+
 - Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
 - Do not use footnotes in the short summary.
 - Only use footnotes in the extended summary if there is a short summary.
