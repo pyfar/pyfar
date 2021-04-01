@@ -7,7 +7,7 @@ import scipy.io.wavfile as wavfile
 from pyfar.spatial import SphericalVoronoi
 from pyfar import Orientations
 from pyfar import Coordinates
-from pyfar import FrequencyData, Signal, TimeData
+from pyfar import FrequencyData, TimeData
 import pyfar.dsp.classes as fo
 import pyfar.signals
 

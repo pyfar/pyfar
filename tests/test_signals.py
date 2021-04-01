@@ -326,7 +326,7 @@ def test_exponential_sweep_rate():
 
 
 def test_exponential_sweep_assertion():
-    with pytest.raises(ValueError, match="The exponential sweep can not start"):
+    with pytest.raises(ValueError, match="The exponential sweep can not"):
         pfs.exponential_sweep(2**10, [0, 20e3])
 
 
