@@ -167,11 +167,29 @@ You can create an html report on the test `coverage <https://coverage.readthedoc
     $ pytest --cov=. --cov-report=html
 
 
+Writing the Documentation
+-------------------------
+
+Pyfar follows the `numpy style guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_ for the docstring. A docstring has to consist at least of
+- A short and/or extended summary,
+- the Parameters section, and
+- the Returns section
+
+Optional fields that are often used are
+- References,
+- Examples, and
+- Notes
+
+Here are a few tips to make things run smoothly
+- Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
+- Do not use footnotes in the short summary.
+- Only use footnotes in the extended summary if there is a short summary.
+- If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
+
 Building the Documentation
 --------------------------
 
-You can build the documentation of your branch using Sphinx by executing the
-make script inside the docs folder.
+You can build the documentation of your branch using Sphinx by executing the make script inside the docs folder.
 
 .. code-block:: console
 
