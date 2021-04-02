@@ -72,6 +72,9 @@ def context(style='light', after_reset=False):
 
     Examples
     --------
+
+    Generate customizable subplots with the default pyfar plot style
+
     >>> import pyfar
     >>> import matplotlib.pyplot as plt
     >>>
@@ -125,6 +128,9 @@ def use(style="light"):
 
     Examples
     --------
+
+    Permanently use the pyfar default plot style
+
     >>> import pyfar
     >>> import matplotlib.pyplot as plt
     >>>
@@ -146,35 +152,22 @@ def color(color: str):
     Parameters
     ----------
     color : str
-        'p'
-            purple
-        'b'
-            blue
-        't'
-            turqois
-        'g'
-            green
-        'l'
-            light green
-        'y'
-            yellow
-        'o'
-            orange
-        'r'
-            red
+        Available colors are purple ,blue, turquoise, green, light green,
+        yellow, orange, and red. The colors can be specified by their full
+        name, e.g., 'red' or the first letter, e.g., 'r'.
 
     Returns
     -------
     color : str
         pyfar default color as HEX string
-
     """
+
     colors = ['p', 'b', 't', 'g', 'l', 'y', 'o', 'r']
-    if color not in colors:
+    if color[0] not in colors:
         raise ValueError((f"color is '{color}' but must be one of the "
                           f"following {', '.join(colors)}"))
 
-    kwargs = {'c': color}
+    kwargs = {'c': color[0]}
     kwargs = _line._return_default_colors_rgb(**kwargs)
 
     color = kwargs['c']
