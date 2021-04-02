@@ -39,6 +39,10 @@ from .line import (
     freq_group_delay,
     custom_subplots
 )
+from .spatial import (
+    scatter,
+    quiver
+)
 
 from .utils import (
     plotstyle,
@@ -58,6 +62,8 @@ __all__ = [
     'freq_phase',
     'freq_group_delay',
     'custom_subplots',
+    'scatter',
+    'quiver',
     'plotstyle',
     'context',
     'use',
