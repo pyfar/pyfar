@@ -1,4 +1,22 @@
-"""Generate, store, and manipulate points in 3D coordinate systems."""
+"""
+Generate, store, and manipulate points in 3D coordinate systems.
+
+The core of this module is the Coordinates class. It can convert between
+coordinate conventions and rotate, query and plot coordinates points.
+Functions for converting coordinates not stored in a Coordinates object are
+available for convenience. However, it is strongly recommended to use the
+Coordinates class for all conversions.
+
+Coordinate systems are defined by their 'domain' (e.g. spherical), the
+'convention' (e.g. 'top_elev'), and 'unit' (e.g. 'deg'). A complete list and
+description of supported coordinate systems can be obtained by
+
+>>> coords = Coordinates()  # get an empty instance of the class
+>>> coords.systems()        # list all systems
+
+A plethora of sampling schemes to generate coordinate objects is contained in
+:py:mod:`pyfar.spatial.samplings`.
+"""
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
@@ -9,34 +27,10 @@ from copy import deepcopy
 import pyfar
 
 
-class Coordinates(object):
+class Coordinates():
     """
-    Container class for coordinates in a three-dimensional space, allowing
-    for compact representation and convenient conversion from and to cartesian,
-    spherical, and cylindrical coordinate systems.
-
-    To obtain a list of all available coordinate systems, use
-
-    >>> coords = Coordinates()          # get an instance of the class
-    >>> coords.systems()                # list all systems
-
-    A coordinate system is defined by it's 'domain', 'convention', and 'unit'
-    as given in the list obtained above. The current coordinate system is
-    obtained from
-
-    >>> coords.systems('current')
-
-    and is also echoed by
-
-    >>> coords
-
-    To enter coordinates into the class, for example use
-
-    >>> coords = Coordinates([0, 1], [1, 0], [1, 1])
-
-    which will use the default cartesian right handed coordinate system in
-    meters. For more information, please refer to the documentation of the
-    class methods.
+    Container class for storing, converting, rotating, querrying, and plotting
+    3D coordinate systems.
     """
 
     # Notes on the structure for developing -----------------------------------
@@ -70,13 +64,13 @@ class Coordinates(object):
                  domain='cart', convention=None, unit=None,
                  weights=None, sh_order=None, comment=None):
         """
-        Init coordinates container with a set of three points and meta data.
+        Create Coordinates object with or without coordinate points.
 
         The points that enter the Coordinates object are defined by the
-        coordinate system, i.e., the `domain` and `convention`:
+        `domain`, `convention`, and `unit`:
 
         +--------------------+----------+------------+----------+----------+
-        | domain, convention | points_1 | points_2   | points_3 | units    |
+        | domain, convention | points_1 | points_2   | points_3 | unit     |
         +====================+==========+============+==========+==========+
         | cart, right        | x        | y          | z        | met      |
         +--------------------+----------+------------+----------+----------+
@@ -92,10 +86,10 @@ class Coordinates(object):
         +--------------------+----------+------------+----------+----------+
 
         For more information run
-        >>> c = Coordinates()
-        >>> c.systems()
+        >>> coords = Coordinates()
+        >>> coords.systems()
 
-        Attributes
+        Parameters
         ----------
         points_1 : array like, number
             points for the first coordinate
@@ -104,30 +98,34 @@ class Coordinates(object):
         points_3 : array like, number
             points for the third coordinate
         domain : string
-            domain of the coordinate system, see self.systems()
-            'cart' - Cartesian
-            'sph' - Spherical
-            'cyl' - Cylindrical
+            domain of the coordinate system
+
+            'cart'
+                Cartesian
+            'sph'
+                Spherical
+            'cyl'
+                Cylindrical
+
             The default is 'cart'.
         convention: string
-             coordinate convention, see self.systems()
-             The default for domain='cart' is 'right'.
-             The default for domain='sph' is 'top_colat'.
-             The default for domain='cyl' is 'top'.
+             coordinate convention (see above)
+             The default is 'right' if domain is 'cart', 'top_colat' if domain
+             is 'sph', and 'top' if domain is 'cyl'.
         unit: string
              unit of the coordinate system. By default the first available unit
-             is used, wich is meters ('met') for domain='cart' and radians
-             ('rad') in all other cases. See self.systems()
+             is used, which is meters ('met') for domain='cart' and radians
+             ('rad') in all other cases (See above).
         weights: array like, number
-            sampling weights for the coordinate points (Optional). Must have
-            same size as points_i, i.e., if points_i has five entries, weights
-            must also have five entries. The default is None.
+            Optional sampling weights for the coordinate points. Must have
+            same size as the points points, i.e., if points have five entries,
+            the weights must also have five entries. The default is None.
         sh_order : int
-            maximum sperical harmonic order of the sampling grid (Optional).
+            Optional maximum spherical harmonic order of the sampling grid.
             The default is None.
         comment : str
-            Any comment about the stored coordinate points (Optional). The
-            default is None.
+            Optional comment about the stored coordinate points. The default
+            is None.
         """
 
         if points_1 is None:
@@ -154,39 +152,31 @@ class Coordinates(object):
     def set_cart(self, points_1, points_2, points_3,
                  convention='right', unit='met'):
         """
-        Set coordinate points in cartesian coordinate systems.
+        Enter coordinate points in cartesian coordinate systems.
 
         The points that enter the Coordinates object are defined by the
-        coordinate system, i.e., the `domain` and `convention`:
+        `domain`, `convention`, and `unit`
 
         +--------------------+----------+------------+----------+----------+
-        | domain, convention | points_1 | points_2   | points_3 | units    |
+        | domain, convention | points_1 | points_2   | points_3 | unit     |
         +====================+==========+============+==========+==========+
         | cart, right        | x        | y          | z        | met      |
         +--------------------+----------+------------+----------+----------+
 
         For more information run
-        >>> c = Coordinates()
-        >>> c.systems()
+        >>> coords = Coordinates()
+        >>> coords.systems()
 
         Parameters
         ----------
         points_i: array like, number
             points for the first, second, and third coordinate
         convention : string, optional
-            convention in which the coordinate points are returned. The default
+            convention in which the coordinate points are stored. The default
             is 'right'.
         unit : string, optional
-            unit in which the coordinate points are returned. The default is
-            'met'.
-
-        Note
-        ----
-        The current and all availanle coordinate systems can be seen with
-
-        >>> c = Coordinates()
-        >>> c.systems()
-        >>> c.systems('current')
+            unit in which the coordinate points are stored. The default is
+            'met' for meters.
         """
 
         # set the coordinate system
@@ -199,8 +189,8 @@ class Coordinates(object):
         """
         Get coordinate points in cartesian coordinate systems.
 
-        The points `p` that are returned are defined by the coordinate system,
-        i.e., the `domain` and `convention`:
+        The points `p` that are returned are defined by the `domain`,
+        `convention`, and `unit`:
 
         +--------------------+----------+------------+----------+----------+
         | domain, convention | p[...,1] | p[...,1]   | p[...,1] | units    |
@@ -209,37 +199,28 @@ class Coordinates(object):
         +--------------------+----------+------------+----------+----------+
 
         For more information run
-        >>> c = Coordinates()
-        >>> c.systems()
+        >>> coords = Coordinates()
+        >>> coords.systems()
 
         Parameters
         ----------
         convention : string, optional
-            convention in which the coordinate points are returned. The default
+            convention in which the coordinate points are stored. The default
             is 'right'.
         unit : string, optional
-            unit in which the coordinate points are returned. The default is
+            unit in which the coordinate points are stored. The default is
             'met'.
         convert : boolean, optional
             if True, the internal representation of the samplings points will
-            be converted to the querried coordinate systems as defined by the
-            convention and unit. The default is Falsee, i.e., the internal
-            presentation remains as it is.
+            be converted to the queried coordinate system. The default is
+            False, i.e., the internal presentation remains as it is.
 
         Returns
         -------
-        points : np.array
-            array that holds the coordinate points. points[...,0] holds the
-            points for the first coordinate, points[...,1] the points for the
-            second, and points[...,2] the points for the third coordinate.
-
-        Note
-        ----
-        The current and all available coordinate systems can be seen with
-
-        >>> c = Coordinates()
-        >>> c.systems()
-        >>> c.systems('current')
+        points : numpy array
+            coordinate points. points[...,0] holds the points for the first
+            coordinate, points[...,1] the points for the second, and
+            points[...,2] the points for the third coordinate.
         """
 
         # check if object is empty
@@ -301,13 +282,13 @@ class Coordinates(object):
     def set_sph(self, points_1, points_2, points_3,
                 convention='top_colat', unit='rad'):
         """
-        Set coordinate points in spherical coordinate systems.
+        Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
-        coordinate system, i.e., the `domain` and `convention`:
+        `domain`, `convention`, and `unit`
 
         +--------------------+----------+------------+----------+----------+
-        | domain, convention | points_1 | points_2   | points_3 | units    |
+        | domain, convention | points_1 | points_2   | points_3 | unit     |
         +====================+==========+============+==========+==========+
         | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
         +--------------------+----------+------------+----------+----------+
@@ -319,27 +300,19 @@ class Coordinates(object):
         +--------------------+----------+------------+----------+----------+
 
         For more information run
-        >>> c = Coordinates()
-        >>> c.systems()
+        >>> coords = Coordinates()
+        >>> coords.systems()
 
         Parameters
         ----------
         points_i: array like, number
             points for the first, second, and third coordinate
         convention : string, optional
-            convention in which the coordinate points are returned. The default
-            is 'right'.
+            convention in which the coordinate points are stored. The default
+            is 'top_colat'.
         unit : string, optional
-            unit in which the coordinate points are returned. The default is
-            'met'.
-
-        Note
-        ----
-        The current and all availanle coordinate systems can be seen with
-
-        >>> c = Coordinates()
-        >>> c.systems()
-        >>> c.systems('current')
+            unit in which the coordinate points are stored. The default is
+            'rad'.
         """
 
         # set the coordinate system
@@ -352,8 +325,8 @@ class Coordinates(object):
         """
         Get coordinate points in spherical coordinate systems.
 
-        The points `p` that are returned are defined by the coordinate system,
-        i.e., the `domain` and `convention`:
+        The points `p` that are returned are defined by the `domain`,
+        `convention`, and `unit`:
 
         +--------------------+----------+------------+----------+----------+
         | domain, convention | p[...,1] | p[...,1]   | p[...,1] | units    |
@@ -368,37 +341,28 @@ class Coordinates(object):
         +--------------------+----------+------------+----------+----------+
 
         For more information run
-        >>> c = Coordinates()
-        >>> c.systems()
+        >>> coords = Coordinates()
+        >>> coords.systems()
 
         Parameters
         ----------
         convention : string, optional
-            convention in which the coordinate points are returned. The default
-            is 'right'.
+            convention in which the coordinate points are stored. The default
+            is 'top_colat'.
         unit : string, optional
-            unit in which the coordinate points are returned. The default is
-            'met'.
+            unit in which the coordinate points are stored. The default is
+            'rad'.
         convert : boolean, optional
             if True, the internal representation of the samplings points will
-            be converted to the querried coordinate systems as defined by the
-            convention and unit. The default is Falsee, i.e., the internal
-            presentation remains as it is.
+            be converted to the queried coordinate system. The default is
+            False, i.e., the internal presentation remains as it is.
 
         Returns
         -------
-        points np.array
-            array that holds the coordinate points. points[...,0] holds the
-            points for the first coordinate, points[...,1] the points for the
-            second, and points[...,2] the points for the third coordinate.
-
-        Note
-        ----
-        The current and all availanle coordinate systems can be seen with
-
-        >>> c = Coordinates()
-        >>> c.systems()
-        >>> c.systems('current')
+        points numpy array
+            coordinate points. points[...,0] holds the points for the first
+            coordinate, points[...,1] the points for the second, and
+            points[...,2] the points for the third coordinate.
         """
 
         # check if object is empty
@@ -460,39 +424,31 @@ class Coordinates(object):
     def set_cyl(self, points_1, points_2, points_3,
                 convention='top', unit='rad'):
         """
-        Set coordinate points in cylindrical coordinate systems.
+        Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
-        coordinate system, i.e., the `domain` and `convention`:
+        `domain`, `convention`, and `unit`
 
         +--------------------+----------+------------+----------+----------+
-        | domain, convention | points_1 | points_2   | points_3 | units    |
+        | domain, convention | points_1 | points_2   | points_3 | unit     |
         +====================+==========+============+==========+==========+
         | cyl, top           | azimuth  | z          | radius_z | rad, deg |
         +--------------------+----------+------------+----------+----------+
 
         For more information run
-        >>> c = Coordinates()
-        >>> c.systems()
+        >>> coords = Coordinates()
+        >>> coords.systems()
 
         Parameters
         ----------
         points_i: array like, number
             points for the first, second, and third coordinate
         convention : string, optional
-            convention in which the coordinate points are returned. The default
-            is 'right'.
+            convention in which the coordinate points are stored. The default
+            is 'top'.
         unit : string, optional
-            unit in which the coordinate points are returned. The default is
-            'met'.
-
-        Note
-        ----
-        The current and all availanle coordinate systems can be seen with
-
-        >>> c = Coordinates()
-        >>> c.systems()
-        >>> c.systems('current')
+            unit in which the coordinate points are stored. The default is
+            'rad'.
         """
 
         # set the coordinate system
@@ -505,8 +461,8 @@ class Coordinates(object):
         """
         Get coordinate points in cylindircal coordinate system.
 
-        The points `p` that are returned are defined by the coordinate system,
-        i.e., the `domain` and `convention`:
+        The points `p` that are returned are defined by the `domain`,
+        `convention`, and `unit`:
 
         +--------------------+----------+------------+----------+----------+
         | domain, convention | p[...,1] | p[...,1]   | p[...,1] | units    |
@@ -515,37 +471,28 @@ class Coordinates(object):
         +--------------------+----------+------------+----------+----------+
 
         For more information run
-        >>> c = Coordinates()
-        >>> c.systems()
+        >>> coords = Coordinates()
+        >>> coords.systems()
 
         Parameters
         ----------
         convention : string, optional
-            convention in which the coordinate points are returned. The default
+            convention in which the coordinate points are stored. The default
             is 'right'.
         unit : string, optional
-            unit in which the coordinate points are returned. The default is
+            unit in which the coordinate points are stored. The default is
             'met'.
         convert : boolean, optional
             if True, the internal representation of the samplings points will
-            be converted to the querried coordinate systems as defined by the
-            convention and unit. The default is Falsee, i.e., the internal
-            presentation remains as it is.
+            be converted to the queried coordinate system. The default is
+            False, i.e., the internal presentation remains as it is.
 
         Returns
         -------
-        points np.array
-            array that holds the coordinate points. points[...,0] holds the
-            points for the first coordinate, points[...,1] the points for the
-            second, and points[...,2] the points for the third coordinate.
-
-        Note
-        ----
-        The current and all availanle coordinate systems can be seen with
-
-        >>> c = Coordinates()
-        >>> c.systems()
-        >>> c.systems('current')
+        points numpy array
+            coordinate points. points[...,0] holds the points for the first
+            coordinate, points[...,1] the points for the second, and
+            points[...,2] the points for the third coordinate.
         """
 
         # check if object is empty
@@ -648,7 +595,7 @@ class Coordinates(object):
         Return channel size.
 
         The channel size gives the number of points stored in the coordinates
-        object excluding the last dimension.
+        object.
         """
         return self._points.size // 3
 
@@ -667,7 +614,7 @@ class Coordinates(object):
         ----------
         show: string
             'current' to list the current corrdinate system or 'all' to list
-            all coordinate systems. The default is 'all'
+            all coordinate systems. The default is 'all'.
         brief : boolean
             Will only list the domains, conventions and units if True. The
             default is False.
@@ -675,17 +622,6 @@ class Coordinates(object):
         Returns
         -------
         Prints to console.
-
-        Examples
-        --------
-        List information for all coordinate systems
-
-        >>> self.list_systems()
-
-        List information for a specific coordinate system, e.g.,
-
-        >>> self.list_systems('sph', 'top_elev', 'deg')
-
         """
 
         if show == 'current':
@@ -756,12 +692,12 @@ class Coordinates(object):
         Parameters
         ----------
         mask : boolean numpy array, None
-            Plot points in red where if mask==True and black elsewhere. The
-            default is None, in which case all points are plotted in black.
+            Plot points in red if mask==True and black elsewhere. The default
+            is None, which uses the default color.
         kwargs : optional
-            key value arguments are passed to matplotlib.pyplot.scatter(). If a
-            mask is provided and the key `c` is contained in kwargs, it will be
-            overwritten.
+            key value arguments are passed to ``matplotlib.pyplot.scatter()``.
+            If a mask is provided and the key `c` is contained in kwargs, it
+            will be overwritten.
 
         Returns
         -------
@@ -783,7 +719,7 @@ class Coordinates(object):
                       domain='cart', convention='right', unit='met',
                       show=False):
         """
-        Find k nearest coordinates of one or more points.
+        Find the k nearest coordinates points.
 
         Parameters
         ----------
@@ -793,26 +729,25 @@ class Coordinates(object):
         k : int
             Number of points to return. k must be > 0. The default is 1.
         domain : string
-            domain of point, see self.systems('all').
+            domain of the points.
         convention: string
-             coordinate convention of point, see self.systems('all').
+            convention of points.
         unit : string
-             unit of point, see self.systems('all').
+            unit of the points.
         show : bool
             show a plot of the coordinate points. The default is False.
 
         Returns
         -------
-        distance : array of floats
-            The eucledian distances to the nearest neighbors.
-            If ``points`` have shape ``tuple``, then ``distance`` has shape
-            ``tuple+(k,)``. When k == 1, the last dimension of the output is
+        distance : numpy array of floats
+            The euclidian distances to the nearest neighbors.
+            If the ``points`` have the shape ``tuple``, then the ``distance``
+            has the shape ``tuple+(k,)``. When k == 1, the last dimension is
             squeezed. Missing neighbors are indicated with infinite distances.
-        index : ndarray of ints
-            The locations of the neighbors in ``self.data``.
-            If ``points`` have shape ``tuple``, then ``index`` has shape
-            ``tuple+(k,)``. When k == 1, the last dimension of the output is
-            squeezed. Missing neighbors are indicated with ``self.csize``.
+        index : numpy array of ints
+            The locations of the neighbors in ``self.data``. Dimension
+            according to distance (see above). Missing neighbors are indicated
+            with ``self.csize``. Also see Notes below.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -824,6 +759,20 @@ class Coordinates(object):
         (self.csize, 3) before they are passed to cKDTree. The index that
         is returned referres to the reshaped coordinate points.
 
+        Examples
+        --------
+
+        Get frontal point from a spherical coordinate system
+
+        >>> import pyfar
+        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+        >>> result = coords.get_nearest_k(1, 0, 0, show=True)
+
+        .. plot::
+
+            import pyfar
+            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            result = coords.get_nearest_k(1, 0, 0, show=True)
         """
 
         # check the input
@@ -841,7 +790,7 @@ class Coordinates(object):
                          domain='cart', convention='right', unit='met',
                          show=False, atol=1e-15):
         """
-        Find coordinates within certain distance in meters to querry points.
+        Find coordinates within a certain distance in meters to query points.
 
         Parameters
         ----------
@@ -852,24 +801,24 @@ class Coordinates(object):
             Euclidean distance in meters in which the nearest points are
             searched. Must be >= 0.
         domain : string
-            domain of point, see self.systems('all').
+            domain of the intput points.
         convention: string
-             coordinate convention of point, see self.systems('all').
+            convention of the input points.
         unit: string
-             unit of point, see self.systems('all').
+            unit of the input points.
         show : bool
             show a plot of the coordinate points. The default is False.
         atol : float
-            search for everything within ``distance + atol``. The default is
-            1e-15.
+            a tolerance that is added to `distance`. The default is 1e-15.
 
         Returns
         -------
-        index : ndarray of ints
+        index : numpy array of ints
             The locations of the neighbors in ``self.data``.
             If ``points`` have shape ``tuple``, then ``index`` has shape
             ``tuple+(k,)``. When k == 1, the last dimension of the output is
             squeezed. Missing neighbors are indicated with ``self.csize``.
+            Also see Notes below.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -880,6 +829,21 @@ class Coordinates(object):
         (N, 3) array. The coordinate points in self are thus reshaped to
         (self.csize, 3) before they are passed to cKDTree. The index that
         is returned referres to the reshaped coordinate points.
+
+        Examples
+        --------
+
+        Get frontal points within a distance of 0.5 meters
+
+        >>> import pyfar
+        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+        >>> result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
+
+        .. plot::
+
+            import pyfar
+            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
 
@@ -897,7 +861,7 @@ class Coordinates(object):
                         domain='sph', convention='top_colat', unit='rad',
                         show=False, atol=1e-15):
         """
-        Find coordinates within certain angular distance to querry points.
+        Find coordinates within certain angular distance to the query points.
 
         Parameters
         ----------
@@ -908,24 +872,24 @@ class Coordinates(object):
             Great circle distance in degrees in which the nearest points are
             searched. Must be >= 0 and <= 180.
         domain : string
-            domain of point, see self.systems('all').
+            domain of the input points.
         convention: string
-             coordinate convention of point, see self.systems('all').
+            convention of the input points.
         unit: string
-             unit of point, see self.systems('all').
+            unit of the input points.
         show : bool
             show a plot of the coordinate points. The default is False.
         atol : float
-            search for everything within ``distance + atol``. The default is
-            1e-15.
+            a tolerance that is added to `distance`. The default is 1e-15.
 
         Returns
         -------
-        index : ndarray of ints
+        index : numpy array of ints
             The locations of the neighbors in ``self.data``.
             If ``points`` have shape ``tuple``, then ``index`` has shape
             ``tuple+(k,)``. When k == 1, the last dimension of the output is
-            squeezed. Missing neighbors are indicated with ``self.csize``.
+            squeezed. Missing neighbors are indicated with ``self.csize``. See
+            also Notes below.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -937,6 +901,20 @@ class Coordinates(object):
         (self.csize, 3) before they are passed to cKDTree. The index that
         is returned referres to the reshaped coordinate points.
 
+        Examples
+        --------
+
+        Get top points within a distance of 45 degrees
+
+        >>> import pyfar
+        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+        >>> result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
+
+        .. plot::
+
+            import pyfar
+            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
         """
 
         # check the input
@@ -964,27 +942,21 @@ class Coordinates(object):
         """
         Get a slice of the coordinates points.
 
-        A slice is defined by a coordinate and a value range, e.g., all points
-        with an elevation between -10 and 10 degree could be selected. The
-        range is calculated as ``[value-tol, value+tol]``.
-
         Parameters
         ----------
         coordinate : str
-            coordinate for slicing. See self.systems('all').
+            coordinate for slicing.
         unit : str
-            first three letters of the coordinate's unit ('met', 'rad', or
-            'deg').
+            unit in which the value is passed
         value : number
-            value of the coordinate around the points are sliced.
+            value of the coordinate around which the points are sliced.
         tol : number, optional
            tolerance for slicing. Points are sliced within the range
            ``[value-tol, value+tol]``. The default is 0.
         show : bool, optional
             show a plot of the coordinate points. The default is False.
         atol : number, optional
-            search for everything within ``[value-tol-atol, value+tol+atol]``.
-            The default is 1e-15.
+            a tolerance that is added to `tol`. The default is 1e-15.
 
         Returns
         -------
@@ -995,7 +967,24 @@ class Coordinates(object):
         Notes
         -----
         ``value`` must be inside the range of the coordinate
-        (see self.systems). However, ``value +/-tol`` may exceed the range.
+        (see ``self.systems()``). However, ``value +/-tol`` may exceed the
+        range.
+
+        Examples
+        --------
+
+        Get horizontal slice of spherical coordinate system within a ring of
+        +/- 10 degrees
+
+        >>> import pyfar
+        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+        >>> result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
+
+        .. plot::
+
+            import pyfar
+            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
 
         """
 
@@ -1044,28 +1033,30 @@ class Coordinates(object):
 
     def rotate(self, rotation: str, value=None, degrees=True, inverse=False):
         """
-        Rotate points stored in the object.
+        Rotate points stored in the object around the origin of coordinates.
 
-        This is a wrapper for scipy.spatial.transform.Rotation (see this class
-        for more detailed information).
+        This is a wrapper for ``scipy.spatial.transform.Rotation`` (see this
+        class for more detailed information).
 
         Parameters
         ----------
         rotation : str
-            'quat' - rotation given by quaternions.
-
-            'matrix' - rotation given by matrixes.
-
-            'rotvec' - rotation using rotation vectors.
-
-            'xyz' - rotation using euler angles. Up to three letters. E.g., 'x'
-            will rotate about the x-axis only, while 'xz' will rotate about
-            the x-axis and then about the z-axis. Use lower letters for
-            extrinsic rotations (rotations about the axes of the original
-            coordinate system xyz, which remains motionless) and upper letters
-            for instrinsic rotations (rotations about the axes of the rotating
-            coordinate system XYZ, solidary with the moving body, which changes
-            its orientation after each elemental rotation).
+            'quat'
+                rotation given by quaternions.
+            'matrix'
+                rotation given by matrixes.
+            'rotvec'
+                rotation using rotation vectors.
+            'xyz'
+                rotation using euler angles. Up to three letters. E.g., 'x'
+                will rotate about the x-axis only, while 'xz' will rotate about
+                the x-axis and then about the z-axis. Use lower letters for
+                extrinsic rotations (rotations about the axes of the original
+                coordinate system xyz, which remains motionless) and upper
+                letters for intrinsic rotations (rotations about the axes of
+                the rotating coordinate system XYZ, solidary with the moving
+                body, which changes its orientation after each elemental
+                rotation).
         value : number, array like
             amount of rotation in the format specified by 'rotation' (see
             above).
@@ -1074,10 +1065,6 @@ class Coordinates(object):
             The default is True. Use False to pass angles in radians.
         inverse : bool, optional
             Apply inverse rotation. The default is False.
-
-        Returns
-        -------
-        None.
 
         Notes
         -----
@@ -1698,26 +1685,27 @@ def cart2sph(x, y, z):
         0 < colatitude < \\pi
 
 
-    Notes
-    -----
-    To ensure proper handling of the azimuth angle, the arctan2 implementation
-    from numpy is used.
+    .. note::
+        To ensure proper handling of the azimuth angle, the arctan2
+        implementation from numpy is used.
 
     Parameters
     ----------
-    x : ndarray, number
-
-    y : ndarray, number
-
-    z : ndarray, number
+    x : numpy array, number
+        x values
+    y : numpy array, number
+        y values
+    z : numpy array, number
+        z values
 
     Returns
     -------
-    azimuth : ndarray, number
-
-    colatitude : ndarray, number
-
-    radius : ndarray, number
+    azimuth : numpy array, number
+        azimuth values
+    colatitude : numpy array, number
+        colatitude values
+    radius : numpy array, number
+        radii
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.where(radius != 0, z / radius, 0)
@@ -1755,19 +1743,21 @@ def sph2cart(azimuth, colatitude, radius):
 
     Parameters
     ----------
-    azimuth : ndarray, number
-
-    colatitude : ndarray, number
-
-    radius : ndarray, number
+    azimuth : numpy array, number
+        azimuth values
+    colatitude : numpy array, number
+        colatitude vlues
+    radius : numpy array, number
+        radii
 
     Returns
     -------
-    x : ndarray, number
-
-    y : ndarray, number
-
-    z : ndarray, number
+    x : numpy array, number
+        x values
+    y : numpy array, number
+        y values
+    z : numpy array, number
+        z vales
     """
     r_sin_cola = radius * np.sin(colatitude)
     x = r_sin_cola * np.cos(azimuth)
@@ -1808,19 +1798,21 @@ def cart2cyl(x, y, z):
 
     Parameters
     ----------
-    x : ndarray, number
-
-    y : ndarray, number
-
-    z : ndarray, number
+    x : numpy array, number
+        x values
+    y : numpy array, number
+        y values
+    z : numpy array, number
+        z values
 
     Returns
     -------
-    azimuth : ndarray, number
-
-    height : ndarray, number
-
-    radius : ndarray, number
+    azimuth : numpy array, number
+        azimuth values
+    height : numpy array, number
+        height values
+    radius : numpy array, number
+        radii
     """
     azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
     if isinstance(z, np.ndarray):
@@ -1856,26 +1848,27 @@ def cyl2cart(azimuth, height, radius):
         0 < azimuth < 2 \\pi
 
 
-    Notes
-    -----
-    To ensure proper handling of the azimuth angle, the arctan2 implementation
-    from numpy is used.
+    .. note::
+        To ensure proper handling of the azimuth angle, the arctan2
+        implementation from numpy is used.
 
     Parameters
     ----------
-    azimuth : ndarray, number
-
-    height : ndarray, number
-
-    radius : ndarray, number
+    azimuth : numpy array, number
+        azimuth values
+    height : numpy array, number
+        height values
+    radius : numpy array, number
+        radii
 
     Returns
     -------
-    x : ndarray, number
-
-    y : ndarray, number
-
-    z : ndarray, number
+    x : numpy array, number
+        x values
+    y : numpy array, number
+        y values
+    z : numpy array, number
+        z values
     """
     x = radius * np.cos(azimuth)
     y = radius * np.sin(azimuth)
@@ -1885,10 +1878,3 @@ def cyl2cart(azimuth, height, radius):
         z = height
 
     return x, y, z
-
-    # def __setitem__(self, index, item):
-    #     """Set Coordinates at index
-    #     """
-    #     self.x[index] = item.x
-    #     self.y[index] = item.y
-    #     self.z[index] = item.z
