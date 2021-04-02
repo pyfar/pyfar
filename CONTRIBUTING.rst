@@ -184,6 +184,7 @@ Optional fields that are often used are
 
 Here are a few tips to make things run smoothly
 
+- Use the tags ``:py:func:``, ``:py:mod:``, and ``:py:class:`` to reference functions, modules, and classes (e.g. ``:py:func:\`pyfar.plot.time\``` or ``:py:func:\`plot time data <pyfar.plot.time>\```
 - Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
 - Do not use footnotes in the short summary. Only use footnotes in the extended summary if there is a short summary. Otherwise, it messes with the auto-footnotes.
 - If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
