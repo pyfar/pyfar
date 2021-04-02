@@ -190,6 +190,8 @@ Here are a few tips to make things run smoothly
 - If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
 - Plots can be included in by using the prefix ``.. plot::`` followed by an empty line and an indented block containing the code for the plot. See `pyfar.plot.line.time.py` for examples.
 
+See the `Sphinx homepage <https://www.sphinx-doc.org>`_ for more information.
+
 Building the Documentation
 --------------------------
 
