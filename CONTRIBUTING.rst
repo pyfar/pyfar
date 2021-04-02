@@ -189,6 +189,7 @@ Here are a few tips to make things run smoothly
 - If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
 - Plots can be included in by
 ``.. plot::``
+
 ``  your code here``
 
 Building the Documentation
