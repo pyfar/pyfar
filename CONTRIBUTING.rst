@@ -185,9 +185,11 @@ Optional fields that are often used are
 Here are a few tips to make things run smoothly
 
 - Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
-- Do not use footnotes in the short summary.
-- Only use footnotes in the extended summary if there is a short summary.
+- Do not use footnotes in the short summary. Only use footnotes in the extended summary if there is a short summary. Otherwise, it messes with the auto-footnotes.
 - If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
+- Plots can be included in by
+``.. plot::``
+``  your code here``
 
 Building the Documentation
 --------------------------
