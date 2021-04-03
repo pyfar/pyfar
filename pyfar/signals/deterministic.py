@@ -25,14 +25,15 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
     Returns
     -------
-    signal : pyfar.Signal
+    signal : Signal
         The sine as a Signal object. The Signal is in the time domain and has
-        the 'rms' FFT normalization (see pyfar.fft.normalization). The exact
-        frequency is written to Signal.comment.
+        the 'rms' FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`). The exact frequency, amplitude
+        and phase are written to signal.comment.
 
     Note
     ----
-    The parameters frequency, amplitude, and samples must must be scalars
+    The parameters frequency, amplitude, and phase must must be scalars
     and/or array likes of the same shape.
     """
 
@@ -63,7 +64,8 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     # save to Signal
     nl = "\n"  # required as variable because f-strings cannot contain "\"
     comment = (f"Sine signal (f = {str(frequency).replace(nl, ',')} Hz, "
-               f"amplitude = {str(amplitude).replace(nl, ',')})")
+               f"amplitude = {str(amplitude).replace(nl, ',')}, "
+               f"phase = {str(phase).replace(nl, ',')})")
 
     signal = pyfar.Signal(
         sine, sampling_rate, fft_norm="rms", comment=comment)
@@ -97,9 +99,11 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
     Returns
     -------
-    signal : pyfar.Signal
+    signal : Signal
         The impulse as a Signal object. The Signal is in the time domain and
-        has the 'none' FFT normalization (see pyfar.fft.normalization).
+        has the 'none' FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`). The delay and amplitude are
+        written to signal.comment.
 
     Note
     ----
@@ -136,7 +140,8 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
         s(t) = \\sin(2\\pi f_{low} t + 2\\pi (f_{high}-f_{low}) / T
         \\cdot t^2 / 2),
 
-    with T the duration in seconds and t the sampling points in seconds.
+    with :math:`T` the duration in seconds, :math:`t` the sampling points in
+    seconds, and the frequency limits :math:`f_{low}` and :math:`f_{high}`.
 
     Parameters
     ----------
@@ -156,9 +161,11 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     Returns
     -------
-    sweep : pyfar.Signal
+    sweep : Signal
         The sweep as a Signal object. The Signal is in the time domain and
-        has the 'rms' FFT normalization (see pyfar.fft.normalization).
+        has the 'rms' FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`). The Sweep type, frequency
+        range, and length of the fade our are written to signal.comment.
 
     References
     ----------
@@ -189,11 +196,12 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     .. math::
         L = T / \\log(f_{high}/f_{low}),
 
-    T the duration in seconds, and t the sampling points in seconds.
+    :math:`T` the duration in seconds, :math:`t` the sampling points in
+    seconds, and the frequency limits :math:`f_{low}` and :math:`f_{high}`.
 
     Parameters
     ----------
-     n_samples : int
+    n_samples : int
         The length of the sweep in samples
     frequency_range : array like
         Frequency range of the sweep given by the lower and upper cut-off
@@ -213,9 +221,11 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     Returns
     -------
-    sweep : pyfar Signal
+    sweep : Signal
         The sweep as a Signal object. The Signal is in the time domain and
-        has the 'rms' FFT normalization (see pyfar.fft.normalization).
+        has the 'rms' FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`). The Sweep type, frequency
+        range, and length of the fade our are written to signal.comment.
 
     References
     ----------

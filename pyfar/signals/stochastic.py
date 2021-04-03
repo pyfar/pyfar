@@ -1,13 +1,3 @@
-"""
-This module contains functions for generating common stochastic audio signals
-such as noise and pulsed noise signals.
-
-Note
-----
-All signal length are given in samples. The value for the length are casted to
-integer numbers in all cases. This makes it possible to pass float numbers for
-convenience, e.g., `n_samples=.015 * sampling_rate`.
-"""
 import numpy as np
 import pyfar
 from pyfar.dsp import fft
@@ -26,23 +16,25 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
     spectrum : str, optional
         'white' to generate noise with constant energy across frequency.
         'pink' to generate noise with constant energy across filters with
-        constant relative bandwith.
+        constant relative bandwith. The default is 'white'.
     rms : double, array like, optional
         The route mean square (RMS) value of the noise signal. A multi channel
         noise signal is generated if an array of RMS values is passed.
         The default is 1.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is 44100.
-    seed : int, None
+    seed : int, None, optional
         The seed for the random generator. Pass a seed to obtain identical
         results for multiple calls of white noise. The default is None, which
         will yield different results with every call.
 
     Returns
     -------
-    signal : pyfar.Signal
+    signal : Signal
         The noise as a Signal object. The Signal is in the time domain and
-        has the 'rms' FFT normalization (see pyfar.fft.normalization).
+        has the 'rms' FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`). The spectrum and rms amplitude
+        are written to signal.comment.
     """
 
     # generate the noise
@@ -95,26 +87,29 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
         The default is 90, which equals approximately 2 ms at sampling rates of
         44.1 and 48 kHz.
     repetitions : int, optional
+        Specifies the number of noise pulses. The default is 5.
     rms : double, array like, optional
         The RMS amplitude of the white noise signal. The default is 1.
     spectrum: string, optional
-        The noise spectrum, which can be 'pink' or 'white'.
-        The default is 'pink'.
+        The noise spectrum, which can be 'pink' or 'white'. The default is
+        'pink'.
     frozen : boolean, optional
         If True, all noise pulses are identical. If False each noise pulse is
         a separate stochastic process. The default is True.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is 44100.
-    seed : int, None
+    seed : int, None, optional
         The seed for the random generator. Pass a seed to obtain identical
         results for multiple calls of white noise. The default is None, which
         will yield different results with every call.
 
     Returns
     -------
-    signal : pyfar.Signal
+    signal : Signal
         The noise as a Signal object. The Signal is in the time domain and
-        has the 'rms' FFT normalization (see pyfar.fft.normalization).
+        has the 'rms' FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`). signal.comment contains
+        information abaout the selected parameters.
     """
 
     if n_pulse < 2 * n_fade:
