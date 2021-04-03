@@ -65,7 +65,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     nl = "\n"  # required as variable because f-strings cannot contain "\"
     comment = (f"Sine signal (f = {str(frequency).replace(nl, ',')} Hz, "
                f"amplitude = {str(amplitude).replace(nl, ',')}, "
-               f"phase = {str(phase).replace(nl, ',')})")
+               f"phase = {str(phase).replace(nl, ',')} rad)")
 
     signal = pyfar.Signal(
         sine, sampling_rate, fft_norm="rms", comment=comment)

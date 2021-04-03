@@ -15,7 +15,8 @@ def test_sine_with_defaults():
     sin = np.sin(np.arange(441) / 44100 * 2 * np.pi * 99)
 
     assert isinstance(signal, Signal)
-    assert signal.comment == "Sine signal (f = [99] Hz, amplitude = [1])"
+    assert signal.comment == ("Sine signal (f = [99] Hz, amplitude = [1], "
+                              "phase = [0] rad)")
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
     assert signal.time.shape == (1, 441)
@@ -34,7 +35,8 @@ def test_sine_full_period():
     signal = pfs.sine(99, 441, full_period=True)
     sin = np.sin(np.arange(441) / 44100 * 2 * np.pi * 100)
 
-    assert signal.comment == "Sine signal (f = [100] Hz, amplitude = [1])"
+    assert signal.comment == ("Sine signal (f = [100] Hz, amplitude = [1], "
+                              "phase = [0] rad)")
     npt.assert_allclose(signal.time, np.atleast_2d(sin))
 
 
@@ -45,7 +47,9 @@ def test_sine_multi_channel():
         (np.atleast_2d(np.sin(np.arange(441) / 44100 * 2 * np.pi * 99)),
          np.atleast_2d(np.sin(np.arange(441) / 44100 * 2 * np.pi * 50))), 0)
 
-    assert signal.comment == "Sine signal (f = [99 50] Hz, amplitude = [1 1])"
+    assert signal.comment == ("Sine signal (f = [99 50] Hz, "
+                              "amplitude = [1 1], "
+                              "phase = [0 0] rad)")
     npt.assert_allclose(signal.time, sin)
 
 
@@ -326,7 +330,7 @@ def test_exponential_sweep_rate():
 
 
 def test_exponential_sweep_assertion():
-    with pytest.raises(ValueError, match="The exponential sweep can not start"):
+    with pytest.raises(ValueError, match="The exponential sweep can not"):
         pfs.exponential_sweep(2**10, [0, 20e3])
 
 
