@@ -1,13 +1,3 @@
-"""
-This module contains functions for generating common deterministic audio
-signals such as impulses and sine sweeps.
-
-Note
-----
-All signal length are given in samples. The value for the length are casted to
-integer numbers in all cases. This makes it possible to pass float numbers for
-convenience, e.g., `n_samples=.015 * sampling_rate`.
-"""
 import numpy as np
 import pyfar
 
@@ -42,8 +32,8 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
     Note
     ----
-    The parameters frequency, amplitude, and samples must all be scalars
-    or of the same shape.
+    The parameters frequency, amplitude, and samples must must be scalars
+    and/or array likes of the same shape.
     """
 
     # check and match the cshape
@@ -98,9 +88,9 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     ----------
     n_samples : int
         Length of the impulse in samples
-    delay : double, array like
+    delay : double, array like, optional
         Delay in samples. The default is 0.
-    amplitude : double
+    amplitude : double, optional
         The peak amplitude of the impulse. The default is 1.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is 44100.
@@ -113,8 +103,8 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
     Note
     ----
-    The parameters delay and amplitude must all be scalars or of the same
-    shape.
+    The parameters delay and amplitude must be scalars and/or array likes of
+    the same shape.
     """
     # check and match the cshape
     cshape = _get_common_shape(delay, amplitude)
