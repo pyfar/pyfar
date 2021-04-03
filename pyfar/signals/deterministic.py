@@ -75,13 +75,13 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
 def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     """
-    Generate an single or multi channel impulse signal, also known as the
+    Generate a single or multi channel impulse signal, also known as the
     Dirac delta function.
 
     .. math::
         s(n) =
         \\begin{cases}
-        amplitude,  & \\text{if $n$ = delay}\\\\
+        \\text{amplitude},  & \\text{if $n$ = delay}\\\\
         0, & \\text{else}
         \\end{cases}
 
