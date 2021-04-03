@@ -116,16 +116,15 @@ class Coordinates():
              unit of the coordinate system. By default the first available unit
              is used, which is meters ('met') for domain='cart' and radians
              ('rad') in all other cases (See above).
-        weights: array like, number
-            Optional sampling weights for the coordinate points. Must have
-            same size as the points points, i.e., if points have five entries,
-            the weights must also have five entries. The default is None.
-        sh_order : int
-            Optional maximum spherical harmonic order of the sampling grid.
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same size as
+            the points points, i.e., if points have five entries, the weights
+            must also have five entries. The default is None.
+        sh_order : int, optional
+            maximum spherical harmonic order of the sampling grid.
             The default is None.
-        comment : str
-            Optional comment about the stored coordinate points. The default
-            is None.
+        comment : str, optional
+            comment about the stored coordinate points. The default is None.
         """
 
         if points_1 is None:
@@ -612,10 +611,10 @@ class Coordinates():
 
         Parameters
         ----------
-        show: string
+        show: string, optional
             'current' to list the current corrdinate system or 'all' to list
             all coordinate systems. The default is 'all'.
-        brief : boolean
+        brief : boolean, optional
             Will only list the domains, conventions and units if True. The
             default is False.
 
@@ -691,11 +690,11 @@ class Coordinates():
 
         Parameters
         ----------
-        mask : boolean numpy array, None
+        mask : boolean numpy array, None, optional
             Plot points in red if mask==True and black elsewhere. The default
             is None, which uses the default color.
         kwargs : optional
-            key value arguments are passed to ``matplotlib.pyplot.scatter()``.
+            keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
             If a mask is provided and the key `c` is contained in kwargs, it
             will be overwritten.
 
@@ -726,15 +725,15 @@ class Coordinates():
         points_i : array like, number
             first, second and third coordinate of the points to which the
             nearest neighbors are searched.
-        k : int
+        k : int, optional
             Number of points to return. k must be > 0. The default is 1.
-        domain : string
-            domain of the points.
-        convention: string
-            convention of points.
-        unit : string
-            unit of the points.
-        show : bool
+        domain : string, optional
+            domain of the points. The default is 'cart'.
+        convention: string, optional
+            convention of points. The default is 'right'.
+        unit : string, optional
+            unit of the points. The default is 'met' for meters.
+        show : bool, optional
             show a plot of the coordinate points. The default is False.
 
         Returns
@@ -800,15 +799,15 @@ class Coordinates():
         distance : number
             Euclidean distance in meters in which the nearest points are
             searched. Must be >= 0.
-        domain : string
-            domain of the intput points.
-        convention: string
-            convention of the input points.
-        unit: string
-            unit of the input points.
-        show : bool
+        domain : string, optional
+            domain of the points. The default is 'cart'.
+        convention: string, optional
+            convention of points. The default is 'right'.
+        unit : string, optional
+            unit of the points. The default is 'met' for meters.
+        show : bool, optional
             show a plot of the coordinate points. The default is False.
-        atol : float
+        atol : float, optional
             a tolerance that is added to `distance`. The default is 1e-15.
 
         Returns
@@ -871,15 +870,15 @@ class Coordinates():
         distance : number
             Great circle distance in degrees in which the nearest points are
             searched. Must be >= 0 and <= 180.
-        domain : string
-            domain of the input points.
-        convention: string
-            convention of the input points.
-        unit: string
-            unit of the input points.
-        show : bool
+        domain : string, optional
+            domain of the input points. The default is 'sph' for spherical.
+        convention: string, optional
+            convention of the input points. The default is 'top_colat'.
+        unit: string, optional
+            unit of the input points. The default is 'rad'.
+        show : bool, optional
             show a plot of the coordinate points. The default is False.
-        atol : float
+        atol : float, optional
             a tolerance that is added to `distance`. The default is 1e-15.
 
         Returns
