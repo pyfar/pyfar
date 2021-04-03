@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-from pyfar import Signal
+from pyfar import Signal, TimeData, FrequencyData
 import pyfar.dsp as dsp
 import warnings
 from .ticker import (
@@ -110,6 +110,27 @@ def _set_axlim(ax, setter, low, high, limits):
         setter((min(limits[0], low), max(limits[1], high)))
 
 
+def _lower_frequency_limit(signal):
+    """Return the lower frequency limit for plotting.
+
+    pyfar frequency plots start at 20 Hz if data is availabe . If this is not
+    the case, they start at the lowest available frequency.
+    """
+    if isinstance(signal, (Signal, FrequencyData)):
+        # indices of non-zero frequencies
+        idx = np.flatnonzero(signal.frequencies)
+        if len(idx) == 0:
+            raise ValueError(
+                "Signals must have frequencies > 0 Hz for plotting.")
+        # get the frequency limit
+        lower_frequency_limit = max(20, signal.frequencies[idx[0]])
+    else:
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
+
+    return lower_frequency_limit
+
+
 def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with pyfar default color if possible."""
 
@@ -133,13 +154,29 @@ def _return_default_colors_rgb(**kwargs):
     return kwargs
 
 
+def _check_time_unit(unit):
+    """Check if a valid time unit is passed."""
+    units = ['s', 'ms', 'mus', 'samples']
+    if unit is not None and unit not in units:
+        raise ValueError(
+            f"Unit is {unit} but must be {', '.join(units)}, or None.")
+
+
+def _check_axis_scale(scale, axis='x'):
+    """Check if a valid axis scale is passed."""
+    if scale not in ['linear', 'log']:
+        raise ValueError(
+            f"{axis}scale is {scale} but must be 'linear', or 'log'.")
+
+
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
           ax=None, **kwargs):
-    """Plot the time logairhmic data of a signal."""
+    """Plot the time data of a signal."""
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, (Signal, TimeData)):
+        raise TypeError('Input data has to be of type: Signal or TimeData.')
+    _check_time_unit(unit)
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -187,8 +224,10 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     """
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, (Signal, FrequencyData)):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
+    _check_axis_scale(xscale)
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -210,8 +249,8 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     else:
         ax.set_ylabel("Magnitude")
     ax.set_xlabel("Frequency in Hz")
-    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
-               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_xlim, _lower_frequency_limit(signal),
+               signal.frequencies[-1], ax.get_xlim())
 
     # plot data
     if xscale == 'log':
@@ -233,8 +272,10 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis."""
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(signal, (Signal, FrequencyData)):
+        raise TypeError(
+            'Input data has to be of type: Signal or FrequencyData.')
+    _check_axis_scale(xscale)
 
     # prepare figure
     _, ax = _prepare_plot(ax)
@@ -246,18 +287,23 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     ylabel_string = 'Phase '
     if unwrap == '360':
         ylabel_string += '(wrapped to 360) '
-    elif unwrap:
+    elif unwrap is True:
         ylabel_string += '(unwrapped) '
+    elif not isinstance(unwrap, bool):
+        raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
     if deg:
         ylabel_string += 'in degree'
         y_margin = 5
     else:
         ylabel_string += 'in radians'
-        ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
-        ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
-        ax.yaxis.set_major_formatter(MultipleFractionFormatter(
-            nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
+        # nice tick formatting is not done for unwrap=True. In this case
+        # it can create 1000 or more ticks.
+        if not unwrap or unwrap == "360":
+            ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
+            ax.yaxis.set_major_formatter(MultipleFractionFormatter(
+                nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
         y_margin = np.radians(5)
     ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
     ymax = np.nanmax(phase_data) + y_margin
@@ -266,11 +312,10 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel(ylabel_string)
     ax.grid(True, 'both')
-    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
-               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_xlim, _lower_frequency_limit(signal),
+               signal.frequencies[-1], ax.get_xlim())
     _set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
 
-    # plot data
     # plot data
     if xscale == 'log':
         ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
@@ -292,6 +337,8 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    _check_time_unit(unit)
+    _check_axis_scale(xscale)
 
     # prepare input
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -310,8 +357,8 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel(f"Group delay in {unit}")
     ax.grid(True, 'both')
-    _set_axlim(ax, ax.set_xlim, max(20, signal.frequencies[1]),
-               signal.sampling_rate/2, ax.get_xlim())
+    _set_axlim(ax, ax.set_xlim, _lower_frequency_limit(signal),
+               signal.frequencies[-1], ax.get_xlim())
     _set_axlim(ax, ax.set_ylim, .5 * np.nanmin(data), 1.5 * np.nanmax(data),
                ax.get_ylim())
 
@@ -390,7 +437,7 @@ def _deal_time_units(unit='s'):
 
 
 def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                 yscale='linear',
+                 yscale='linear', unit=None,
                  window='hann', window_length=1024, window_overlap_fct=0.5,
                  cmap=mpl.cm.get_cmap(name='magma'), ax=None):
     """Plot the magnitude spectrum versus time.
@@ -401,6 +448,8 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    _check_time_unit(unit)
+    _check_axis_scale(yscale, 'y')
 
     if window_length > signal.n_samples:
         raise ValueError("window_length exceeds signal length")
@@ -416,11 +465,21 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     frequencies, times, spectrogram = dsp.spectrogram(
         signal[first_channel], window, window_length, window_overlap_fct)
 
-    # get in dB
+    # get magnitude data in dB
     if dB:
         eps = np.finfo(float).eps
         spectrogram = log_prefix*np.log10(
             np.abs(spectrogram) / log_reference + eps)
+
+    # auto detect the time unit
+    if unit is None:
+        unit = _time_auto_unit(times[..., -1])
+    # set the unit
+    if unit == 'samples':
+        times *= signal.sampling_rate
+    else:
+        factor, unit = _deal_time_units(unit)
+        times = times * factor
 
     # plot the data
     _, ax = _prepare_plot(ax)
@@ -429,7 +488,7 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # Adjust axes:
     ax.set_ylabel('Frequency in Hz')
-    ax.set_xlabel('Time in s')
+    ax.set_xlabel(f'Time in {unit}')
     ax.set_xlim((times[0], times[-1]))
     ax.set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
 
@@ -455,7 +514,7 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
-                    yscale='linear',
+                    yscale='linear', unit=None,
                     window='hann', window_length=1024, window_overlap_fct=0.5,
                     cmap=mpl.cm.get_cmap(name='magma'), ax=None):
     """Plot the magnitude spectrum versus time.
@@ -465,6 +524,8 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
 
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    _check_time_unit(unit)
+    _check_axis_scale(yscale, 'y')
 
     # Define figure and axes for plot:
     fig, ax = _prepare_plot(ax)
@@ -475,8 +536,8 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
     ax = ax.figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 0.05]})
     fig.axes[0].remove()
 
-    ax[0], spectrogram = _spectrogram(
-        signal, dB, log_prefix, log_reference, yscale,
+    ax[0], _ = _spectrogram(
+        signal, dB, log_prefix, log_reference, yscale, unit,
         window, window_length, window_overlap_fct,
         cmap, ax[0])
 
@@ -486,7 +547,8 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
             break
 
     cb = plt.colorbar(PCM, cax=ax[1])
-    cb.set_label('Modulus in dB')
+    cb_label = 'Magnitude in dB' if dB else 'Magnitude'
+    cb.set_label(cb_label)
 
     plt.tight_layout()
 
@@ -498,9 +560,6 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -516,9 +575,6 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
 def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
                 deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)
@@ -537,9 +593,6 @@ def _freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
     fig, ax = _prepare_plot(ax, (2, 1))
     kwargs = _return_default_colors_rgb(**kwargs)

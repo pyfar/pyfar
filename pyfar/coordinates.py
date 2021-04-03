@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
+import deepdiff
 import copy
 import re
 from . import utils
@@ -1140,6 +1141,17 @@ class Coordinates(object):
         """Return a deep copy of the Coordinates object."""
         return utils.copy(self)
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
+
     @staticmethod
     def _systems():
         """
@@ -1366,7 +1378,7 @@ class Coordinates(object):
         if convention is not None:
             assert convention in systems[domain] or convention is None,\
                 f"{convention} does not exist in {domain}. Convention must "\
-                "be one of the following: {', '.join(list(systems[domain]))}."
+                f"be one of the following: {', '.join(list(systems[domain]))}."
 
         # check if units exist
         if unit is not None:
@@ -1620,9 +1632,9 @@ class Coordinates(object):
         return kdtree
 
     def __getitem__(self, index):
-        """Return mutable slice of Coordinates object at index."""
+        """Return copied slice of Coordinates object at index."""
 
-        new = self
+        new = self.copy()
         # slice points
         new._points = new._points[index]
         # slice weights
@@ -1676,6 +1688,10 @@ class Coordinates(object):
             _repr += f"\nComment: {self._comment}"
 
         return _repr
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
 
 
 def cart2sph(x, y, z):
