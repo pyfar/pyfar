@@ -53,7 +53,7 @@ import pyfar.dsp.fft as fft
 from typing import Callable
 
 
-class _Audio(object):
+class _Audio():
     """Abstract class for audio objects.
 
     This class holds all the methods and properties that are common to its
@@ -124,9 +124,9 @@ class _Audio(object):
         reshaped : Signal
             reshaped copy of the signal.
 
-        Note
-        ----
-        The number of samples and frequency bin always remains the same.
+        Notes
+        -----
+        The number of samples and frequency bins always remains the same.
 
         """
 
@@ -159,8 +159,8 @@ class _Audio(object):
             Flattened copy of signal with
             `flat.cshape = np.prod(signal.cshape)`
 
-        Note
-        ----
+        Notes
+        -----
         The number of samples and frequency bins always remains the same, e.g.,
         a signal of `cshape=(4,3)` and `n_samples=512` will have
         `chsape=(12, )` and `n_samples=512` after flattening.
@@ -181,7 +181,7 @@ class _Audio(object):
         self._comment = 'none' if value is None else str(value)
 
     def copy(self):
-        """Return a deep copy of the Signal object."""
+        """Return a copy of the Signal object."""
         return deepcopy(self)
 
     def _return_item(self):
@@ -234,22 +234,21 @@ class TimeData(_Audio):
 
     """
     def __init__(self, data, times, comment=None, dtype=np.double):
-        """Init TimeData with data, and times.
+        """Create TimeData object with data, and times.
 
-        Attributes
+        Parameters
         ----------
         data : array, double
             Raw data in the time domain. The memory layout of data is 'C'.
             E.g. data of shape (3, 2, 1024) has 3 x 2 channels with
             1024 samples each.
         times : array, double
-            Times of the data in seconds. The number of times must match
-            the size of the last dimension of data.
-        comment : str
+            Times in seconds at which the data is sampled. The number of times
+            must match the size of the last dimension of data.
+        comment : str, optional
             A comment related to the data. The default is None.
         dtype : string, optional
             Raw data type of the signal. The default is float64
-
         """
 
         _Audio.__init__(self, 'time', comment, dtype)
@@ -283,7 +282,7 @@ class TimeData(_Audio):
 
     @property
     def n_samples(self):
-        """Number of samples."""
+        """The number of samples."""
         return self._n_samples
 
     @property
@@ -293,11 +292,12 @@ class TimeData(_Audio):
 
     @property
     def times(self):
-        """Time instances the signal is sampled at."""
+        """Time in seconds at which the signal is sampled."""
         return self._times
 
     def find_nearest_time(self, value):
-        """Returns the closest time index for a given time
+        """Returns the index that is closest to the query time.
+
         Parameters
         ----------
         value : float, array-like
@@ -367,7 +367,7 @@ class FrequencyData(_Audio):
                  dtype=complex):
         """Init FrequencyData with data, and frequencies.
 
-        Attributes
+        Parameters
         ----------
         data : array, double
             Raw data in the frequency domain. The memory layout of Data is 'C'.
@@ -536,7 +536,7 @@ class Signal(FrequencyData, TimeData):
             dtype=np.double):
         """Init Signal with data, and sampling rate.
 
-        Attributes
+        Parameters
         ----------
         data : ndarray, double
             Raw data of the signal in the frequency or time domain. The memory
