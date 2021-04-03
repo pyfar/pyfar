@@ -1,5 +1,5 @@
 """
-Provide Container classes and arithmethic operations for audio data.
+Container classes and arithmethic operations for audio data.
 
 The classes `TimeData` and `DataFrequency` are intended to store incomplete or
 non-equidistant audio data in the time and frequency domain. The class `Signal`
@@ -11,16 +11,16 @@ are implemented in the methods `add`, `subtract`, `multiply`, `divide`, and
 `power`. For example, two Signal, TimeData, or FrequencyData instances can be
 added in the time domain by
 
-> result = pyfar.signal.add((signal_1, signal_2), 'time')
+``result = pyfar.signal.add((signal_1, signal_2), 'time')``
 
 and in the frequency domain by
 
-> result = pyfar.signal.add((signal_1, signal_2), 'freq')
+``result = pyfar.signal.add((signal_1, signal_2), 'freq')``
 
 This also works with more than two instances and supports array likes and
 scalar values, e.g.,
 
-> result = pyfar.signal.add((signal_1, 1), 'time')
+``result = pyfar.signal.add((signal_1, 1), 'time')``
 
 In this case the scalar `1` is broadcasted, i.e., 1 is added to every sample of
 the Signal (or every bin in case of a frequency domain operation).
@@ -29,19 +29,19 @@ The operators `+`, `-`, `*`, `/`, and `**` are overloaded for convenience.
 Note, however, that their behavior depends on the Audio object. Frequency
 domain operations are applied for `Signal` and `FrequencyData` objects, i.e,
 
-> result = signal1 + signal2
+``result = signal1 + signal2``
 
 is equivalent to
 
-> result = pyfar.signal.add((signal1, signal2), 'freq')
+``result = pyfar.signal.add((signal1, signal2), 'freq')``
 
 Time domain operations are applied for `TimeData` objects, i.e.,
 
-> result = time_data_1 + time_data_2
+``result = time_data_1 + time_data_2``
 
 is equivalent to
 
-> result = pyfar.signal.add((time_data_1, time_data_2), 'time')
+``result = pyfar.signal.add((time_data_1, time_data_2), 'time')``
 
 """
 
