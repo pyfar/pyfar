@@ -381,7 +381,7 @@ class FrequencyData(_Audio):
         fft_norm : str, optional
             The normalization of the Discrete Fourier Transform (DFT). Can be
             'none', 'unitary', 'amplitude', 'rms', 'power', or 'psd'. See
-            :py:func:`pyfar.dsp.fft.normalization` and _[#] for more
+            :py:func:`pyfar.dsp.fft.normalization` and [#]_ for more
             information. The default is 'none', which is typically used for
             energy signals, such as impulse responses.
         comment : str, optional
@@ -558,7 +558,7 @@ class Signal(FrequencyData, TimeData):
         fft_norm : str, optional
             The normalization of the Discrete Fourier Transform (DFT). Can be
             'none', 'unitary', 'amplitude', 'rms', 'power', or 'psd'. See
-            :py:func:`pyfar.dsp.fft.normalization` and _[#] for more
+            :py:func:`pyfar.dsp.fft.normalization` and [#]_ for more
             information. The default is 'none', which is typically used for
             energy signals, such as impulse responses.
         comment : str
