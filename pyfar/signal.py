@@ -225,6 +225,12 @@ class _Audio():
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
 
+    def __iter__(self):
+        """Iterator for signals. The actual iteration is handled through
+        numpy's array iteration.
+        """
+        return _SignalIterator(self._data.__iter__(), self)
+
 
 class TimeData(_Audio):
     """Class for time data.
@@ -778,14 +784,8 @@ class Signal(FrequencyData, TimeData):
         """
         return self.n_samples
 
-    def __iter__(self):
-        """Iterator for signals. The actual iteration is handled through
-        numpy's array iteration.
-        """
-        return SignalIterator(self._data.__iter__(), self)
 
-
-class SignalIterator(object):
+class _SignalIterator(object):
     """Iterator for signals
     """
     def __init__(self, array_iterator, signal):
