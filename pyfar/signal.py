@@ -400,7 +400,7 @@ class TimeData(_Audio):
 
 
 class FrequencyData(_Audio):
-    """Class for frequency data object.
+    """Class for frequency data.
 
     Objects of this class contain frequency data which is not directly
     convertable to the time domain, i.e., non-equidistantly spaced bins or
@@ -416,9 +416,7 @@ class FrequencyData(_Audio):
         data : array, double
             Raw data in the frequency domain. The memory layout of Data is 'C'.
             E.g. data of shape (3, 2, 1024) has 3 x 2 channels with 1024
-            frequency bins each. Frequency data must be provided as single
-            sided spectra, i.e., for all frequencies between 0 Hz and half the
-            sampling rate.
+            frequency bins each.
         frequencies : array, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
