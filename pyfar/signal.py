@@ -250,25 +250,6 @@ class _Audio():
             raise TypeError(
                     "Index must be int, not {}".format(type(key).__name__))
 
-    def __iter__(self):
-        """Iterator for audio objects.
-
-        Iterate across the first dimension of an audio object. The actual
-        iteration is handled through numpy's array iteration.
-
-        Examples
-        --------
-        Iterate channels of a Signal object
-
-        >>> import pyfar
-        >>>
-        >>> signal = pyfar.signals.impulse(2, amplitude=[1, 1, 1])
-        >>> for idx, channel in enumerate(signal):
-        >>>     channel.time *= idx
-        >>>     signal[idx] = channel
-        """
-        return _SignalIterator(self._data.__iter__(), self)
-
 
 class TimeData(_Audio):
     """Class for time data.
@@ -819,6 +800,25 @@ class Signal(FrequencyData, TimeData):
         """Length of the object which is the number of samples stored.
         """
         return self.n_samples
+
+    def __iter__(self):
+        """Iterator for audio objects.
+
+        Iterate across the first dimension of an audio object. The actual
+        iteration is handled through numpy's array iteration.
+
+        Examples
+        --------
+        Iterate channels of a Signal object
+
+        >>> import pyfar
+        >>>
+        >>> signal = pyfar.signals.impulse(2, amplitude=[1, 1, 1])
+        >>> for idx, channel in enumerate(signal):
+        >>>     channel.time *= idx
+        >>>     signal[idx] = channel
+        """
+        return _SignalIterator(self._data.__iter__(), self)
 
 
 class _SignalIterator(object):
