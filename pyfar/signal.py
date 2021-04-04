@@ -43,6 +43,11 @@ is equivalent to
 
 ``result = pyfar.signal.add((time_data_1, time_data_2), 'time')``
 
+In addition to the arithmetic operations, the is equal operator is overloaded
+to allow comparisons
+
+``signal_1 == signal_2``.
+
 """
 
 from copy import deepcopy
@@ -199,7 +204,18 @@ class _Audio():
         raise NotImplementedError("To be implemented by derived classes.")
 
     def __getitem__(self, key):
-        """Get signal channels at key.
+        """
+        Get copied slice of the audio object at key.
+
+        Examples
+        --------
+        Get the first channel of a multi channel Signal object
+
+        >>> import pyfar
+        >>> signal = pyfar.signals.noise(10, rms=[1, 1])
+        >>> first_channel = signal[0]
+
+
         """
         if isinstance(key, (int, slice, tuple)):
             try:
@@ -213,7 +229,16 @@ class _Audio():
         return self._return_item(data)
 
     def __setitem__(self, key, value):
-        """Set signal channels at key.
+        """
+        Set channels of audio object at key.
+
+        Examples
+        --------
+        Set the first channel of a multi channel Signal object
+
+        >>> import pyfar
+        >>> signal = pyfar.signals.noise(10, rms=[1, 1])
+        >>> signal[0] = pyfar.signals.noise(10, rms=2)
         """
         self._assert_matching_meta_data(value)
         if isinstance(key, (int, slice)):
@@ -226,8 +251,21 @@ class _Audio():
                     "Index must be int, not {}".format(type(key).__name__))
 
     def __iter__(self):
-        """Iterator for signals. The actual iteration is handled through
-        numpy's array iteration.
+        """Iterator for audio objects.
+
+        Iterate across the first dimension of an audio object. The actual
+        iteration is handled through numpy's array iteration.
+
+        Examples
+        --------
+        Iterate channels of a Signal object
+
+        >>> import pyfar
+        >>>
+        >>> signal = pyfar.signals.impulse(2, amplitude=[1, 1, 1])
+        >>> for idx, channel in enumerate(signal):
+        >>>     channel.time *= idx
+        >>>     signal[idx] = channel
         """
         return _SignalIterator(self._data.__iter__(), self)
 
