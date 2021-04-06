@@ -217,13 +217,13 @@ def shortcuts(show=True):
     - Moving and zooming the x and y axes is supported by all plots.
     - Moving and zooming the colormap is only supported by plots that have a
       colormap.
-    - Toggling the x-axis is supported by: line.time, line.freq, line.phase,
-      line.group_delay, line.spectrogram, line.time_freq, line.freq_phase,
-      line.freq_group_delay
-    - Toggling the y-axis is supported by: line.time, line.freq, line.phase,
-      line.group_delay, line.spectrogram, line.time_freq, line.freq_phase,
-      line.freq_group_delay
-    - Toggling the colormap is supported by: line.spectrogram
+    - Toggling the x-axis is supported by: plot.time, plot.freq, plot.phase,
+      plot.group_delay, plot.spectrogram, plot.time_freq, plot.freq_phase,
+      plot.freq_group_delay
+    - Toggling the y-axis is supported by: plot.time, plot.freq, plot.phase,
+      plot.group_delay, plot.spectrogram, plot.time_freq, plot.freq_phase,
+      plot.freq_group_delay
+    - Toggling the colormap is supported by: plot.spectrogram
 
     Parameters
     ----------
