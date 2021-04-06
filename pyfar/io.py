@@ -64,7 +64,7 @@ def write_wav(signal, filename, overwrite=True):
     * Signals of shape larger than 1D are flattened.
     * The bits-per-sample and PCM/float will be determined by the data-type.
 
-    Common data types: [1]_
+    Common data types: [#]_
 
     =====================  ===========  ===========  =============
          WAV format            Min          Max       NumPy dtype
@@ -79,7 +79,7 @@ def write_wav(signal, filename, overwrite=True):
 
     References
     ----------
-    .. [1] IBM Corporation and Microsoft Corporation, "Multimedia Programming
+    .. [#] IBM Corporation and Microsoft Corporation, "Multimedia Programming
        Interface and Data Specifications 1.0", section "Data Format of the
        Samples", August 1991
        http://www.tactilemedia.com/info/MCI_Control_Info.html
@@ -112,7 +112,7 @@ def read_sofa(filename):
     Parameters
     ----------
     filename : string or open file handle
-        Input wav file.
+        Input SOFA file (cf. [#]_, [#]_).
 
     Returns
     -------
@@ -136,8 +136,8 @@ def read_sofa(filename):
 
     References
     ----------
-    .. [1] www.sofaconventions.org
-    .. [2] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
+    .. [#] www.sofaconventions.org
+    .. [#] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
        File Format.”, 2015.
 
     """
@@ -268,8 +268,7 @@ def write(filename, compress=False, **objs):
 
     # Save a signal to disk, replace 'my_signal' and 'my_orientations'
     # with whatever you'd like to name your objects
-    pyfar.io.write(
-        'my_objs.far', my_signal=signal, my_orientations=orientations)
+    pyfar.io.write('my_objs.far', signal=signal, orientations=orientations)
 
     """
     # Check for .far file extension

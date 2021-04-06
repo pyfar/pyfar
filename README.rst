@@ -10,7 +10,8 @@ Getting Started
 ===============
 
 Check out the `examples notebook`_ for a tour of the most important pyfar
-functionality and `read the docs`_ for the complete documentation.
+functionality and `read the docs`_ for the complete documentation. Packages
+related to pyfar are listed at `pyfar.org`_.
 
 Installation
 ============
@@ -31,4 +32,5 @@ Refer to the `contribution guidelines`_ for more information.
 
 .. _contribution guidelines: https://github.com/pyfar/pyfar/blob/develop/CONTRIBUTING.rst
 .. _examples notebook: https://mybinder.org/v2/gh/pyfar/pyfar/develop?filepath=examples%2Fpyfar_demo.ipynb
+.. _pyfar.org: https://pyfar.org
 .. _read the docs: https://pyfar.readthedocs.io/en/latest

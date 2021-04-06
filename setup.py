@@ -37,7 +37,7 @@ test_requirements = [
 
 setup(
     author="The pyfar developers",
-    author_email='',
+    author_email='info@pyfar.org',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Scientists',
