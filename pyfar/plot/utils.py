@@ -78,7 +78,7 @@ def context(style='light', after_reset=False):
     >>> import pyfar
     >>> import matplotlib.pyplot as plt
     >>>
-    >>> with pyfar.plot.utils.context():
+    >>> with pyfar.plot.context():
     >>>     fig, ax = plt.subplots(2, 1)
     >>>     pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
     """
