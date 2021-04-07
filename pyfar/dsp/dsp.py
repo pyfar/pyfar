@@ -228,10 +228,9 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-<<<<<<< HEAD
-def windows(signal, window_function='hann', times=None,
-            window_shape='symmetric', unit='samples', **kwargs):
-    """Returns a windowed pyfar signal with selected window_function.
+def windows(signal, times=None, unit='samples', window_shape='symmetric',
+            window_function='hann', truncate=True, **kwargs):
+    """Return a windowed pyfar signal with selected window_function.
 
     Parameters
     ----------
@@ -253,36 +252,62 @@ def windows(signal, window_function='hann', times=None,
     out : pyfar
         window coefficients
     """
-
     # check input and default values
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    if not isinstance(times, int):
-        raise TypeError('times has to be of type int.')
+    # convert times to samples
+    if unit == 'samples':
+        # do nothing
+        times
+    elif unit == 's':
+        for x in range(np.size(times)):
+            times[x] = round(times[x] * signal.sampling_rate)
+    elif unit == 'ms':
+        for x in range(np.size(times)):
+            times[x] = round(times[x] * signal.sampling_rate / 1e3)
+    else:
+        raise ValueError(f"unit is {unit} but has to be"
+                         f" one of the following:"
+                         f" 'samples', 's' or 'ms'.")
 
-    window_shape_list = ['symmteric', 'left', 'right']
+    # copy signal object
+    signal_copy = signal.copy()
+
+    if not isinstance(times, (int, list, type(None))):
+        raise ValueError('times has to be of type int, list or None.')
+
+    # check different use cases of times
+    if times is None:
+        window_shape_list = ['symmetric']
+        # assign window limits
+        times_left = 0
+        times_right = signal_copy.n_samples
+    elif np.size(times) == 1:
+        window_shape_list = ['symmetric']
+        times_left = 0
+        times_right = times
+    elif np.size(times) == 2:
+        window_shape_list = ['symmetric', 'left', 'right']
+        # assign window limits
+        times_left = times[0]
+        times_right = times[1]
+    elif np.size(times) == 4:
+        window_shape_list = ['symmetric']
+        # assign window limits
+        times_left_in = times[0]
+        times_right_in = times[1]
+        times_left_out = times[2]
+        times_right_out = times[3]
+    else:
+        raise ValueError(f"times has size {np.size(times)} but has to be"
+                         f" of size: 1, 2 or 4")
     if window_shape not in window_shape_list:
         raise ValueError(f"window_shape is {window_shape} but has to be"
                          f" one of the following:"
                          f" {', '.join(list(window_shape_list))}.")
 
-    if not isinstance(unit, str):
-        raise TypeError('''window_shape has to be a sting of the following:
-                        'samples', 's','ms','mus'.''')
-    # copy signal object
-    signal_copy = signal.copy()
-
-    if times is None:
-        times_left = 0
-        times_right = signal_copy.n_samples
-    elif len(times) = 2:
-        times_left = times(1)
-        times_right = times(2)
-
-    # copy signal object
-    signal_copy = signal.copy()
-    # create selected window with simulated switch case
+    # create selected window
     switcher_window = {
         'rect': sgn.windows.boxcar,
         'hann': sgn.windows.hann,
@@ -293,40 +318,69 @@ def windows(signal, window_function='hann', times=None,
         'flattop': sgn.windows.flattop,
         'chebwin': sgn.windows.chebwin,
     }
-    if window_function in switcher_window:
-        win = switcher_window[window_function](times, **kwargs)
-    else:
-        raise ValueError(f"window_function is {window_function} but has to be"
-                         f" one of the following:"
-                         f" {', '.join(list(switcher_window))}.")
+    if times is None or np.size(times) == 1 or np.size(times) == 2:
+        if window_function in switcher_window:
+            if window_shape == 'left':
+                window_length = (times_right-times_left)*2
+                win = switcher_window[window_function](window_length,
+                                                       **kwargs)
+                # get half of window
+                win = win[0:int(np.ceil(np.size(win)/2))]
+                win = np.append(win, np.ones(signal.n_samples-times_right))
+                times_right = signal.n_samples
+            elif window_shape == 'right':
+                window_length = (times_right-times_left)*2
+                win = switcher_window[window_function](window_length,
+                                                       **kwargs)
+                # get half of window
+                win = win[int(np.floor(np.size(win)/2)):]
+                win = np.append(np.ones(times_left), win)
+                times_left = 0
+            else:
+                window_length = times_right-times_left
+                win = switcher_window[window_function](window_length,
+                                                       **kwargs)
+        else:
+            raise ValueError(f"window_function is {window_function} but has"
+                             f" to be one of the following:"
+                             f" {', '.join(list(switcher_window))}.")
+    elif np.size(times) == 4:
+        if window_function in switcher_window:
+            # fade in
+            window_length_in = (times_right_in - times_left_in)*2
+            win_in = switcher_window[window_function](window_length_in,
+                                                      **kwargs)
+            win_in = win_in[0:int(np.ceil(np.size(win_in)/2))]
+            # fade out
+            window_length_out = (times_right_out - times_left_out)*2
+            win_out = switcher_window[window_function](window_length_out,
+                                                       **kwargs)
+            win_out = win_out[int(np.floor(np.size(win_out)/2)):]
+            win = np.concatenate((win_in, np.ones(times_left_out -
+                                                  times_right_in), win_out))
+            times_left = times_left_in
+            times_right = times_right_out
+        else:
+            raise ValueError(f"window_function is {window_function} but has"
+                             f" to be one of the following:"
+                             f" {', '.join(list(switcher_window))}.")
 
     # apply windowing to time domain copy of signal
-    # if times > np.size(signal_copy.time[..., :]):
-    #     ValueError('>>>>>>> window is longer than signal!')
-
-    # create zeropadded window with shape of signal
-    windowShape = np.zeros(np.size(signalCopyFlat.time[0]))
-
-    # check if window is not being set within signal bounds
-    if windowStartIndex+np.size(win) <= np.size(windowShape):
-        windowShape[windowStartIndex:windowStartIndex+np.size(win)] = win
-    elif windowStartIndex+np.size(win)-np.size(windowShape) >= np.size(win)-1:
-        # return not windowed signal with warning
-        signalCopy = signalCopyFlat.reshape(signal.cshape)
-        print('>>>>>>> No windowing applied!')
-        return signalCopy
-    else:
-        # apply window only partially if windowStartIndex set, so that the
-        # window doesn't fit at the end
-        win = win[:-(windowStartIndex+np.size(win)-np.size(windowShape))]
-        windowShape[windowStartIndex:windowStartIndex+np.size(win)] = win
+    if np.size(win) > signal.n_samples:
+        ValueError('>>>>>>> window is longer than signal!')
 
     # apply window
-    signalCopyFlat.time = signalCopyFlat.time * windowShape
-    signalCopy = signalCopyFlat.reshape(signal.cshape)
+    if truncate:
+        signal_copy.time = signal_copy[..., times_left:times_right].time*win
+    else:
+        # create zeropadded window with shape of signal
+        window_zeropadded = np.zeros(signal.n_samples)
+        window_zeropadded[times_left:times_right] = win
+        signal_copy.time = signal_copy.time*window_zeropadded
 
-    return signalCopy
-=======
+    return signal_copy
+
+
 def regularized_spectrum_inversion(
         signal, freq_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None):
@@ -397,7 +451,7 @@ def regularized_spectrum_inversion(
         regu_outside = np.ones(signal.n_bins, dtype=np.double) * regu_outside
 
         idx_xfade_lower = signal.find_nearest_frequency(
-                [freq_range[0]/np.sqrt(2), freq_range[0]])
+            [freq_range[0]/np.sqrt(2), freq_range[0]])
 
         regu_final = _cross_fade(regu_outside, regu_inside, idx_xfade_lower)
 
@@ -455,4 +509,3 @@ def _cross_fade(first, second, indices):
     result = first * window_first + second * window_second
 
     return result
->>>>>>> develop
