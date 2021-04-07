@@ -9,7 +9,15 @@ Coordinates class for all conversions.
 
 Coordinate systems are defined by their 'domain' (e.g. spherical), the
 'convention' (e.g. 'top_elev'), and 'unit' (e.g. 'deg'). A complete list and
-description of supported coordinate systems can be obtained by
+description of supported coordinate systems is given in the image below
+
+.. |coordinate_systems| image:: resources/coordinate_systems.png
+   :width: 100%
+   :alt: Alternative text
+
+|coordinate_systems|
+
+and can be obtained by
 
 >>> coords = Coordinates()  # get an empty instance of the class
 >>> coords.systems()        # list all systems
