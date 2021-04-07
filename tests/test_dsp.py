@@ -142,6 +142,7 @@ def test_regu_inversion(impulse):
     npt.assert_allclose(res.freq[:, 0], [0.25])
     npt.assert_allclose(res.freq[:, -1], [0.25])
 
+
 def test_windows_truncation_two_by_two_channel():
     """Test the function returning correctly truncated signal,
     2-by-2 channels."""
@@ -149,13 +150,16 @@ def test_windows_truncation_two_by_two_channel():
     length = 1024
     signal = signals.noise(length, rms=[[1, 1], [1, 1]])
     # window signal
-    times = [100,1000]
+    times = [100, 1000]
     signal_windowed = dsp.windows(signal, times, truncate=False)
     signal_windowed_truncated = dsp.windows(signal, times)
 
     # check if signal dimensions changed
-    assert signal.cshape == signal_windowed.cshape, "windowind changed signal dimensions!"
+    assert signal.cshape == signal_windowed.cshape,\
+        "windowind changed signal dimensions!"
     # check if signal is not truncated
-    assert signal.n_samples == signal_windowed.n_samples, "windowing signal should not truncate!"
+    assert signal.n_samples == signal_windowed.n_samples,\
+        "windowing signal should not truncate!"
     # check if signal is truncated correctly
-    assert times[1]-times[0] == signal_windowed_truncated.n_samples, "windowing signal did not truncate correctly!"
+    assert times[1]-times[0] == signal_windowed_truncated.n_samples,\
+        "windowing signal did not truncate correctly!"
