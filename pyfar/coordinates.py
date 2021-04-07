@@ -751,9 +751,10 @@ class Coordinates():
             has the shape ``tuple+(k,)``. When k == 1, the last dimension is
             squeezed. Missing neighbors are indicated with infinite distances.
         index : numpy array of ints
-            The locations of the neighbors in ``self.data``. Dimension
-            according to distance (see above). Missing neighbors are indicated
-            with ``self.csize``. Also see Notes below.
+            The locations of the neighbors in the getter methods (e.g.,
+            ``self.get_cart``). Dimension according to distance (see above).
+            Missing neighbors are indicated with ``self.csize``. Also see Notes
+            below.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -763,7 +764,11 @@ class Coordinates():
         numpy.spatial.cKDTree is used for the search, which requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (self.csize, 3) before they are passed to cKDTree. The index that
-        is returned referres to the reshaped coordinate points.
+        is returned referres to the reshaped coordinate points. To access the
+        points for example use
+
+        >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
+        >>> points_reshaped[index]
 
         Examples
         --------
@@ -834,7 +839,11 @@ class Coordinates():
         numpy.spatial.cKDTree is used for the search, which requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (self.csize, 3) before they are passed to cKDTree. The index that
-        is returned referres to the reshaped coordinate points.
+        is returned referres to the reshaped coordinate points. To access the
+        points for example use
+
+        >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
+        >>> points_reshaped[index]
 
         Examples
         --------
@@ -905,7 +914,11 @@ class Coordinates():
         numpy.spatial.cKDTree is used for the search, which requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (self.csize, 3) before they are passed to cKDTree. The index that
-        is returned referres to the reshaped coordinate points.
+        is returned referres to the reshaped coordinate points. To access the
+        points for example use
+
+        >>> points_reshaped = self.get_sph().reshape((self.csize, 3))
+        >>> points_reshaped[index]
 
         Examples
         --------
@@ -1076,6 +1089,39 @@ class Coordinates():
         -----
         Points are converted to the cartesian right handed coordinate system
         for the rotation.
+
+        Examples
+        --------
+
+        Get a coordinates object
+
+        >>> import pyfar
+        >>> coordinates = pyfar.spatial.samplings.sph_gaussian(sh_order=3)
+
+        Rotate 45 degrees about the y-axis using
+
+        1. quaternions
+
+        >>> coordinates.rotate('quat', [0 , 0.38268343, 0 , 0.92387953])
+
+        2. a rotation matrix
+
+        >>> coordinates.rotate('matrix',
+        ...    [[ 0.70710678,  0 ,  0.70710678],
+        ...     [ 0         ,  1 ,  0.        ],
+        ...     [-0.70710678,  0 ,  0.70710678]])
+
+        3. a rotation vector
+
+        >>> coordinates.rotate('rotvec', [0, 45, 0])
+
+        4. euler angles
+
+        >>> coordinates.rotate('XYZ', [0, 45, 0])
+
+        To see the result of the rotation use
+
+        >>> coordinates.show()
 
         """
 
