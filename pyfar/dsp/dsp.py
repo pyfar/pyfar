@@ -269,6 +269,7 @@ def windows(signal, times=None, unit='samples', window_shape='symmetric',
         'kaiser': kaiser window
         'flattop': flattop window
         'chebwin': chebyshev window
+        see window function definitions for **kwargs
 
     truncate: boolean
         select True to truncate pyfar singal to window length
