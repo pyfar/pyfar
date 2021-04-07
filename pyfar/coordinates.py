@@ -1736,11 +1736,6 @@ def cart2sph(x, y, z):
 
         0 < colatitude < \\pi
 
-
-    .. note::
-        To ensure proper handling of the azimuth angle, the arctan2
-        implementation from numpy is used.
-
     Parameters
     ----------
     x : numpy array, number
@@ -1758,6 +1753,11 @@ def cart2sph(x, y, z):
         colatitude values
     radius : numpy array, number
         radii
+
+    Notes
+    -----
+    To ensure proper handling of the azimuth angle, the arctan2
+    implementation from numpy is used.
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.where(radius != 0, z / radius, 0)
@@ -1842,12 +1842,6 @@ def cart2cyl(x, y, z):
 
         0 < azimuth < 2 \\pi
 
-
-    Notes
-    -----
-    To ensure proper handling of the azimuth angle, the arctan2 implementation
-    from numpy is used.
-
     Parameters
     ----------
     x : numpy array, number
@@ -1865,6 +1859,11 @@ def cart2cyl(x, y, z):
         height values
     radius : numpy array, number
         radii
+
+    Notes
+    -----
+    To ensure proper handling of the azimuth angle, the arctan2 implementation
+    from numpy is used.
     """
     azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
     if isinstance(z, np.ndarray):
