@@ -263,7 +263,7 @@ def normalize(signal, normalize='time', normalize_to='max',
         if signal.n_samples % 2:
             lim[0] = np.max([lim[0], 1])
         else:
-            lim = np.clip(lim, 1, signal.b_bins-1)
+            lim = np.clip(lim, 1, signal.n_bins-1)
 
     # get values for normalization
     if normalize_to == 'max':
@@ -300,7 +300,7 @@ def normalize(signal, normalize='time', normalize_to='max',
     if normalize == 'time':
         normalized_signal.time = signal.time.copy() / values * value
     else:
-        normalized_signal.freq = signal.time.freq() / values * value
+        normalized_signal.freq = signal.freq.copy() / values * value
 
     if return_values:
         return normalized_signal, values
@@ -330,7 +330,7 @@ def average(signal, average_mode='time', phase_copy=None,
         averaged signal
         None - ignores the phase. Resulting in zero phase
         The default is None
-    weights: array
+    weights: numpy array
         array that gives channel weighting for averaging the data. Must
         have same shape as channel shape of signal.
         The default is None
@@ -343,11 +343,6 @@ def average(signal, average_mode='time', phase_copy=None,
     # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal')
-
-    # check weights size
-    if weights.shape != signal.cshape:
-        raise TypeError(
-            'Shape of weights must be equal to that of signal channels')
 
     # set weights default
     if weights is None:
@@ -368,7 +363,8 @@ def average(signal, average_mode='time', phase_copy=None,
         data = 20 * np.log10(signal.freq.copy())
 
     # apply weights
-    data = data * weights
+    # NOT SURE IF THIS WORKS WITH MORE THAN FOR SIGNALS GREATER THAN 3D
+    data = data * np.transpose(np.array([weights, ]*len(data[-1])))
 
     # average the data
     if (average_mode == 'time' or
@@ -392,6 +388,7 @@ def average(signal, average_mode='time', phase_copy=None,
     else:
         if average_mode == 'time':
             data_ang = signal.time.copy()
+            # NOT SURE IF THIS COPPIES PHASE_COPY INDEX IN CORRECTLY
             data_ang = np.angle(data_ang[phase_copy, ...])
         else:
             data_ang = signal.freq.copy()
