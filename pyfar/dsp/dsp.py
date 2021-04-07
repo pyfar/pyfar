@@ -237,15 +237,41 @@ def windows(signal, times=None, unit='samples', window_shape='symmetric',
     signal : Signal object
         An audio signal object from the pyfar signal class
 
-    window_function: string
-        select window type from 'rect', 'hann', 'hamming', 'blackman',
-        'bartlett', 'kaiser', 'kaiserBessel' , 'flattop' or 'dolphChebychev'
+    times: int, list of int, None
+        times = a
+            symmetric window of length a with start at 0 samples
+        times = [a,b]
+            window_shape='symmetric'
+                symmetric window between a and b
+            window_shape='left'
+                fade-in between a and b
+            window_shape='right'
+                fade-out between a and b
+        times = [a,b,c,d]
+            fade_in between a and b
+            no change between b and c
+            fade-out between c and d
 
-    times: int
-        sets window length in unit('samples') of selected window
+    unit: string
+        times can be set in seconds 's', miliseconds 'ms' or 'samples'(default)
 
     window_shape: string
         'symmetric' (default), 'left', 'right'
+        see argument times for more explanation
+
+    window_function: string
+        select window type from:
+        'rect':no window
+        'hann': hanning window
+        'hamming': hamming window
+        'blackman': blackman window
+        'bartlett': bartlett window (triangle)
+        'kaiser': kaiser window
+        'flattop': flattop window
+        'chebwin': chebyshev window
+
+    truncate: boolean
+        select True to truncate pyfar singal to window length
 
     Returns
     -------
