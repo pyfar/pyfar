@@ -29,7 +29,7 @@ import pyfar
 
 class Coordinates():
     """
-    Container class for storing, converting, rotating, querrying, and plotting
+    Container class for storing, converting, rotating, querying, and plotting
     3D coordinate systems.
     """
 
@@ -86,6 +86,7 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
 
         For more information run
+
         >>> coords = Coordinates()
         >>> coords.systems()
 
@@ -163,6 +164,7 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
 
         For more information run
+
         >>> coords = Coordinates()
         >>> coords.systems()
 
@@ -198,6 +200,7 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
 
         For more information run
+
         >>> coords = Coordinates()
         >>> coords.systems()
 
@@ -299,6 +302,7 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
 
         For more information run
+
         >>> coords = Coordinates()
         >>> coords.systems()
 
@@ -340,6 +344,7 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
 
         For more information run
+
         >>> coords = Coordinates()
         >>> coords.systems()
 
@@ -358,7 +363,7 @@ class Coordinates():
 
         Returns
         -------
-        points numpy array
+        points : numpy array
             coordinate points. points[...,0] holds the points for the first
             coordinate, points[...,1] the points for the second, and
             points[...,2] the points for the third coordinate.
@@ -435,6 +440,7 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
 
         For more information run
+
         >>> coords = Coordinates()
         >>> coords.systems()
 
@@ -470,6 +476,7 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
 
         For more information run
+
         >>> coords = Coordinates()
         >>> coords.systems()
 
@@ -488,7 +495,7 @@ class Coordinates():
 
         Returns
         -------
-        points numpy array
+        points : numpy array
             coordinate points. points[...,0] holds the points for the first
             coordinate, points[...,1] the points for the second, and
             points[...,2] the points for the third coordinate.
@@ -1727,11 +1734,11 @@ def sph2cart(azimuth, colatitude, radius):
 
     .. math::
 
-        x &= radius * \\sin(colatitude) * \\cos(azimuth),
+        x &= radius \\cdot \\sin(colatitude) \\cdot \\cos(azimuth),
 
-        y &= radius * \\sin(colatitude) * \\sin(azimuth),
+        y &= radius \\cdot \\sin(colatitude) \\cdot \\sin(azimuth),
 
-        z &= radius * \\cos(colatitude)
+        z &= radius \\cdot \\cos(colatitude)
 
     .. math::
 
@@ -1836,9 +1843,9 @@ def cyl2cart(azimuth, height, radius):
 
     .. math::
 
-        x &= radius * \\cos(azimuth),
+        x &= radius \\cdot \\cos(azimuth),
 
-        y &= radius * \\sin(azimuth),
+        y &= radius \\cdot \\sin(azimuth),
 
         z &= height
 
