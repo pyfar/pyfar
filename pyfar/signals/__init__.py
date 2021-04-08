@@ -3,8 +3,8 @@
 This module contains functions for generating common deterministic and
 stochastic audio signals such as impulses, sine sweeps, and noise signals.
 
-All signal length are given in samples. The value for the length is casted to
-an integer numbers in all cases. This makes it possible to pass float numbers.
+All signal lengths are given in samples. The value for the length is casted to
+an integer number in all cases. This makes it possible to pass float numbers.
 For example:
 
 ``n_samples = .015 * sampling_rate``.
