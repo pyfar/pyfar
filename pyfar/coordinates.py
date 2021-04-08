@@ -772,7 +772,7 @@ class Coordinates():
         numpy.spatial.cKDTree is used for the search, which requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (self.csize, 3) before they are passed to cKDTree. The index that
-        is returned referres to the reshaped coordinate points. To access the
+        is returned refers to the reshaped coordinate points. To access the
         points for example use
 
         >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
@@ -833,11 +833,10 @@ class Coordinates():
         Returns
         -------
         index : numpy array of ints
-            The locations of the neighbors in ``self.data``.
-            If ``points`` have shape ``tuple``, then ``index`` has shape
-            ``tuple+(k,)``. When k == 1, the last dimension of the output is
-            squeezed. Missing neighbors are indicated with ``self.csize``.
-            Also see Notes below.
+            The locations of the neighbors in the getter methods (e.g.,
+            ``self.get_cart``). Dimension according to distance (see above).
+            Missing neighbors are indicated with ``self.csize``. Also see Notes
+            below.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -847,7 +846,7 @@ class Coordinates():
         numpy.spatial.cKDTree is used for the search, which requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (self.csize, 3) before they are passed to cKDTree. The index that
-        is returned referres to the reshaped coordinate points. To access the
+        is returned refers to the reshaped coordinate points. To access the
         points for example use
 
         >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
@@ -908,11 +907,10 @@ class Coordinates():
         Returns
         -------
         index : numpy array of ints
-            The locations of the neighbors in ``self.data``.
-            If ``points`` have shape ``tuple``, then ``index`` has shape
-            ``tuple+(k,)``. When k == 1, the last dimension of the output is
-            squeezed. Missing neighbors are indicated with ``self.csize``. See
-            also Notes below.
+            The locations of the neighbors in the getter methods (e.g.,
+            ``self.get_cart``). Dimension according to distance (see above).
+            Missing neighbors are indicated with ``self.csize``. Also see Notes
+            below.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -922,7 +920,7 @@ class Coordinates():
         numpy.spatial.cKDTree is used for the search, which requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (self.csize, 3) before they are passed to cKDTree. The index that
-        is returned referres to the reshaped coordinate points. To access the
+        is returned refers to the reshaped coordinate points. To access the
         points for example use
 
         >>> points_reshaped = self.get_sph().reshape((self.csize, 3))
@@ -1906,11 +1904,6 @@ def cyl2cart(azimuth, height, radius):
 
         0 < azimuth < 2 \\pi
 
-
-    .. note::
-        To ensure proper handling of the azimuth angle, the arctan2
-        implementation from numpy is used.
-
     Parameters
     ----------
     azimuth : numpy array, number
@@ -1928,6 +1921,11 @@ def cyl2cart(azimuth, height, radius):
         y values
     z : numpy array, number
         z values
+
+    Notes
+    -----
+    To ensure proper handling of the azimuth angle, the arctan2 implementation
+    from numpy is used.
     """
     x = radius * np.cos(azimuth)
     y = radius * np.sin(azimuth)
