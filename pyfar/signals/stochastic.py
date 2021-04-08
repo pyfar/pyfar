@@ -25,8 +25,8 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
         The sampling rate in Hz. The default is 44100.
     seed : int, None, optional
         The seed for the random generator. Pass a seed to obtain identical
-        results for multiple calls of white noise. The default is None, which
-        will yield different results with every call.
+        results for multiple calls. The default is None, which will yield
+        different results with every call.
 
     Returns
     -------
@@ -100,8 +100,8 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
         The sampling rate in Hz. The default is 44100.
     seed : int, None, optional
         The seed for the random generator. Pass a seed to obtain identical
-        results for multiple calls of white noise. The default is None, which
-        will yield different results with every call.
+        results for multiple calls. The default is None, which will yield
+        different results with every call.
 
     Returns
     -------
@@ -109,7 +109,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
         The noise as a Signal object. The Signal is in the time domain and
         has the 'rms' FFT normalization (see
         :py:func:`pyfar.dsp.fft.normalization`). signal.comment contains
-        information abaout the selected parameters.
+        information about the selected parameters.
     """
 
     if n_pulse < 2 * n_fade:

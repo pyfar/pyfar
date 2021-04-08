@@ -213,7 +213,7 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     amplitude : double, optional
         The amplitude of the signal. The default is 1.
     sweep_rate : double, optional
-        Rate at which the sine frequency increases over time. If this is given
+        Rate at which the sine frequency increases over time. If this is given,
         n_samples is calculated according to the sweep rate. The default is
         None, which uses n_samples without modifications.
     sampling_rate : int, optional
@@ -224,7 +224,7 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     sweep : Signal
         The sweep as a Signal object. The Signal is in the time domain and
         has the 'rms' FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The Sweep type, frequency
+        :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
         range, and length of the fade our are written to signal.comment.
 
     References
