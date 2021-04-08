@@ -87,10 +87,7 @@ def test_normalization_time_max_max_value():
     truth = Signal([[0.25, 0.5, 0.25], [0.25, 1., 0.25]], 44100)
     answer = dsp.normalize(signal, normalize='time', normalize_to='max',
                            channel_handling='max')
-    answer = answer.time
-    truth = truth.time
     assert answer == truth
-
 
 def test_normalization_magnitude_mean_min_freqrange():
     """Test the function along magnitude, mean, min & value path."""
