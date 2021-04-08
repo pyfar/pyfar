@@ -27,7 +27,7 @@ the Signal (or every bin in case of a frequency domain operation).
 
 The operators `+`, `-`, `*`, `/`, and `**` are overloaded for convenience.
 Note, however, that their behavior depends on the Audio object. Frequency
-domain operations are applied for `Signal` and `FrequencyData` objects, i.e,
+domain operations are applied for Signal and FrequencyData objects, i.e,
 
 ``result = signal1 + signal2``
 
@@ -35,7 +35,7 @@ is equivalent to
 
 ``result = pyfar.signal.add((signal1, signal2), 'freq')``
 
-Time domain operations are applied for `TimeData` objects, i.e.,
+Time domain operations are applied for TimeData objects, i.e.,
 
 ``result = time_data_1 + time_data_2``
 
@@ -43,7 +43,7 @@ is equivalent to
 
 ``result = pyfar.signal.add((time_data_1, time_data_2), 'time')``
 
-In addition to the arithmetic operations, the is equal operator is overloaded
+In addition to the arithmetic operations, the equality operator is overloaded
 to allow comparisons
 
 ``signal_1 == signal_2``.
@@ -93,12 +93,12 @@ class _Audio():
 
     @property
     def domain(self):
-        """The domain the data is stored in"""
+        """The domain the data is stored in."""
         return self._domain
 
     @property
     def dtype(self):
-        """The data type of the signal. This can be any data type and precision
+        """The data type of the audio object. This can be any data type and precision
         supported by numpy."""
         return self._dtype
 
@@ -107,27 +107,27 @@ class _Audio():
         """
         Return channel shape.
 
-        The channel shape gives the shape of the signal data excluding the last
-        dimension, which is `self.n_samples` for time domain signals and
-        `self.n_bins` for frequency domain signals.
+        The channel shape gives the shape of the audio data excluding the last
+        dimension, which is `n_samples` for time domain objects and
+        `n_bins` for frequency domain objects.
         """
         return self._data.shape[:-1]
 
     def reshape(self, newshape):
         """
-        Return reshaped copy of the signal.
+        Return reshaped copy of the audio object.
 
         Parameters
         ----------
         newshape : int, tuple
-            new cshape of the signal. One entry of newshape dimension can be
+            new cshape of the audio object. One entry of newshape dimension can be
             -1. In this case, the value is inferred from the remaining
             dimensions.
 
         Returns
         -------
-        reshaped : Signal
-            reshaped copy of the signal.
+        reshaped : Signal, FrequencyData, TimeData
+            reshaped copy of the audio object.
 
         Notes
         -----
@@ -150,25 +150,25 @@ class _Audio():
                 newshape + (length_last_dimension, ))
         except ValueError:
             if np.prod(newshape) != np.prod(self.cshape):
-                raise ValueError((f"Can not reshape signal of cshape "
+                raise ValueError((f"Can not reshape audio object of cshape "
                                   f"{self.cshape} to {newshape}"))
 
         return reshaped
 
     def flatten(self):
-        """Return flattened copy of the signal.
+        """Return flattened copy of the audio object.
 
         Returns
         -------
-        flat : Signal
-            Flattened copy of signal with
-            `flat.cshape = np.prod(signal.cshape)`
+        flat : Signal, FrequencyData, TimeData
+            Flattened copy of audio object with
+            `flat.cshape = np.prod(audio.cshape)`
 
         Notes
         -----
         The number of samples and frequency bins always remains the same, e.g.,
-        a signal of `cshape=(4,3)` and `n_samples=512` will have
-        `chsape=(12, )` and `n_samples=512` after flattening.
+        an audio object of `cshape=(4,3)` and `n_samples=512` will have
+        `cshape=(12, )` and `n_samples=512` after flattening.
 
         """
         newshape = int(np.prod(self.cshape))
@@ -186,7 +186,7 @@ class _Audio():
         self._comment = 'none' if value is None else str(value)
 
     def copy(self):
-        """Return a copy of the Signal object."""
+        """Return a copy of the audio object."""
         return deepcopy(self)
 
     def _return_item(self):
@@ -255,7 +255,7 @@ class TimeData(_Audio):
     """Class for time data.
 
     Objects of this class contain time data which is not directly convertable
-    to thefrequency domain, i.e., non-equidistantly spaced samples.
+    to frequency domain, i.e., non-equidistant samples.
 
     """
     def __init__(self, data, times, comment=None, dtype=np.double):
@@ -273,7 +273,7 @@ class TimeData(_Audio):
         comment : str, optional
             A comment related to the data. The default is None.
         dtype : string, optional
-            Raw data type of the signal. The default is float64.
+            Raw data type of the audio object. The default is float64.
         """
 
         _Audio.__init__(self, 'time', comment, dtype)
@@ -312,7 +312,7 @@ class TimeData(_Audio):
 
     @property
     def signal_length(self):
-        """The length of the signal in seconds."""
+        """The length of the data in seconds."""
         return self.times[-1]
 
     @property
@@ -410,7 +410,7 @@ class FrequencyData(_Audio):
         comment : str, optional
             A comment related to the data. The default is None.
         dtype : string, optional
-            Raw data type of the signal. The default is float64.
+            Raw data type of the audio object. The default is float64.
 
         References
         ----------
@@ -547,8 +547,7 @@ class Signal(FrequencyData, TimeData):
     """Class for audio signals.
 
     Objects of this class contain data which is directly convertable between
-    time and frequency domain. Equally spaced samples or frequency bins,
-    respectively.
+    time and frequency domain (equally spaced samples and frequency bins).
 
     """
     def __init__(
@@ -571,7 +570,7 @@ class Signal(FrequencyData, TimeData):
             must be provided as single sided spectra, i.e., for all frequencies
             between 0 Hz and half the sampling rate.
         sampling_rate : double
-            Sampling rate in Hertz
+            Sampling rate in Hz
         n_samples : int, optional
             Number of samples of the time signal. Required if domain is 'freq'.
             The default is None, which assumes an even number of samples if the
@@ -587,7 +586,7 @@ class Signal(FrequencyData, TimeData):
         comment : str
             A comment related to the data. The default is None.
         dtype : string, optional
-            Raw data type of the signal. The default is float64
+            Raw data type of the audio object. The default is float64
 
         References
         ----------
@@ -846,7 +845,7 @@ class _SignalIterator(object):
 
 
 def add(data: tuple, domain='freq'):
-    """Add pyfar audio objects, array likes, an scalars.
+    """Add pyfar audio objects, array likes, and scalars.
 
     Pyfar audio objects are: Signal, TimeData, and FrequencyData.
 
@@ -866,7 +865,7 @@ def add(data: tuple, domain='freq'):
     -------
     results : Signal, numpy array
         Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data`contains a an
+        likes and numbers. Result as pyfar audio object if `data` contains an
         audio object. The ``fft_norm`` is 'none' if all FFT norms are 'none'.
         Otherwise the first ``fft_norm`` that is not 'none' is used.
 
@@ -875,7 +874,7 @@ def add(data: tuple, domain='freq'):
 
 
 def subtract(data: tuple, domain='freq'):
-    """Subtract pyfar audio objects, array likes, an scalars.
+    """Subtract pyfar audio objects, array likes, and scalars.
 
     Pyfar audio objects are: Signal, TimeData, and FrequencyData.
 
@@ -895,7 +894,7 @@ def subtract(data: tuple, domain='freq'):
     -------
     results : Signal, numpy array
         Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data`contains a an
+        likes and numbers. Result as pyfar audio object if `data` contains an
         audio object. The ``fft_norm`` is 'none' if all FFT norms are 'none'.
         Otherwise the first ``fft_norm`` that is not 'none' is used.
 
@@ -904,7 +903,7 @@ def subtract(data: tuple, domain='freq'):
 
 
 def multiply(data: tuple, domain='freq'):
-    """Multiply pyfar audio objects, array likes, an scalars.
+    """Multiply pyfar audio objects, array likes, and scalars.
 
     Pyfar audio objects are: Signal, TimeData, and FrequencyData.
 
@@ -924,7 +923,7 @@ def multiply(data: tuple, domain='freq'):
     -------
     results : Signal, numpy array
         Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data`contains a an
+        likes and numbers. Result as pyfar audio object if `data` contains an
         audio object. The ``fft_norm`` is 'none' if all FFT norms are 'none'.
         Otherwise the first ``fft_norm`` that is not 'none' is used.
 
@@ -933,7 +932,7 @@ def multiply(data: tuple, domain='freq'):
 
 
 def divide(data: tuple, domain='freq'):
-    """Divide pyfar audio objects, array likes, an scalars.
+    """Divide pyfar audio objects, array likes, and scalars.
 
     Parameters
     ----------
@@ -951,7 +950,7 @@ def divide(data: tuple, domain='freq'):
     -------
     results : Signal, numpy array
         Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data`contains a an
+        likes and numbers. Result as pyfar audio object if `data` contains an
         audio object. The ``fft_norm`` is 'none' if all FFT norms are 'none'.
         Otherwise the first ``fft_norm`` that is not 'none' is used.
 
@@ -960,7 +959,7 @@ def divide(data: tuple, domain='freq'):
 
 
 def power(data: tuple, domain='freq'):
-    """Power of pyfar audio objects, array likes, an scalars.
+    """Power of pyfar audio objects, array likes, and scalars.
 
     Parameters
     ----------
@@ -978,7 +977,7 @@ def power(data: tuple, domain='freq'):
     -------
     results : Signal, numpy array
         Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data`contains a an
+        likes and numbers. Result as pyfar audio object if `data` contains an
         audio object. The ``fft_norm`` is 'none' if all FFT norms are 'none'.
         Otherwise the first ``fft_norm`` that is not 'none' is used.
 
