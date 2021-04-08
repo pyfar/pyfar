@@ -1,7 +1,6 @@
 """
 Provide methods used by several Classes.
 """
-
 from copy import deepcopy
 
 

@@ -23,7 +23,7 @@ def test_caps_dim_1():
          2.513274122871834, 3.141592653589793, 3.769911184307752,
          4.398229715025710, 5.026548245743669, 5.654866776461628,
          6.283185307179586])
-    reference_regions = np.ones(10, dtype=np.int)
+    reference_regions = np.ones(10, dtype=int)
     dim = 1
     N = 10
     s_cap, n_regions = eq.caps(dim, N)
