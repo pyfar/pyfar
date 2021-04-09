@@ -120,8 +120,8 @@ class _Audio():
         Parameters
         ----------
         newshape : int, tuple
-            new cshape of the audio object. One entry of newshape dimension can be
-            -1. In this case, the value is inferred from the remaining
+            new cshape of the audio object. One entry of newshape dimension
+            can be -1. In this case, the value is inferred from the remaining
             dimensions.
 
         Returns
