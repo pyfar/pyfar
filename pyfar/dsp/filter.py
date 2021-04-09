@@ -357,8 +357,7 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     """
     Create and apply second order parametric equalizer filter.
 
-    Uses the implementation of
-    https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
+    Uses the implementation of [#]_.
 
     Parameters
     ----------
@@ -397,6 +396,11 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterIIR
         Filter object. Only returned if ``signal = None``.
+
+    References
+    ----------
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
+blob/master/filter_design/audiofilter.py
     """
 
     # check input
@@ -443,8 +447,8 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     """
     Create and/or apply first or second order high shelve filter.
 
-    Uses the implementation of
-    https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
+    Uses the implementation of [#]_.
+
 
     Parameters
     ----------
@@ -476,6 +480,11 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterIIR
         Filter object. Only returned if ``signal = None``.
+
+    References
+    ----------
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
+blob/master/filter_design/audiofilter.py
     """
 
     output = _shelve(
@@ -489,8 +498,7 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     """
     Create and apply first or second order low shelve filter.
 
-    Uses the implementation of
-    https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
+    Uses the implementation of [#]_.
 
     Parameters
     ----------
@@ -524,6 +532,11 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterIIR
         Filter object. Only returned if ``signal = None``.
+
+    References
+    ----------
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
+blob/master/filter_design/audiofilter.py
     """
 
     output = _shelve(
@@ -564,10 +577,10 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     References
     ----------
-    .. [1] S. H. Linkwitz, 'Active crossover networks for noncoincident
-           drivers,' J. Audio Eng. Soc., vol. 24, no. 1, pp. 2–8, Jan. 1976.
-    .. [2] D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
-           2005.
+    .. [1]  S. H. Linkwitz, 'Active crossover networks for noncoincident
+            drivers,' J. Audio Eng. Soc., vol. 24, no. 1, pp. 2–8, Jan. 1976.
+    .. [2]  D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
+            2005.
     """
 
     # check input
