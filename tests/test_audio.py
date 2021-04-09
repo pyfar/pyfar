@@ -1,5 +1,5 @@
 import pytest
-from pyfar.signal import _Audio
+from pyfar.classes.signal import _Audio
 
 
 def test_audio_init_with_defaults():
