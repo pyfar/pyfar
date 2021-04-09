@@ -1,11 +1,12 @@
 """
 Read and write objects to disk, read and write WAV files, read SOFA files.
 
-The methods ``read`` and ``write`` allow to save or load several
-pyfar objects and other variables. So, e.g., workspaces in notebooks can be
-stored. Signal objects can be imported and exported as WAV files using
-``read_wav`` and ``write_wav``. ``read_sofa`` provides functionality
-to read the data stored in a SOFA file.
+The functions :py:func:`read` and :py:func:`write` allow to save or load
+several pyfar objects and other variables. So, e.g., workspaces in notebooks
+can be stored. :py:class:`Signal <pyfar.signal.Signal>` objects can be
+imported and exported as WAV files using :py:func:`read_wav` and
+:py:func:`write_wav`. :py:func:`read_sofa` provides functionality to read the
+data stored in a SOFA file.
 """
 import scipy.io.wavfile as wavfile
 import os.path
@@ -25,7 +26,7 @@ import pyfar.dsp.classes as fo
 
 def read_wav(filename):
     """
-    Import a WAV file as Signal object.
+    Import a WAV file as :py:class:`Signal <pyfar.signal.Signal>` object.
 
     Parameters
     ----------
@@ -35,11 +36,12 @@ def read_wav(filename):
     Returns
     -------
     signal : Signal
-        Signal object containing the audio data from the WAV file.
+        :py:class:`Signal <pyfar.signal.Signal>` object containing the audio
+        data from the WAV file.
 
     Notes
     -----
-    * This function is based on scipy.io.wavfile.read.
+    * This function is based on ``scipy.io.wavfile.read``.
     * 24-bit data cannot be read.
     """
     sampling_rate, data = wavfile.read(filename)
@@ -49,25 +51,26 @@ def read_wav(filename):
 
 def write_wav(signal, filename, overwrite=True):
     """
-    Write a Signal object as a WAV file to disk.
+    Write a :py:class:`Signal <pyfar.signal.Signal>` object as a WAV file to
+    disk.
 
     Parameters
     ----------
     signal : Signal
-        Signal to be written.
+        Object to be written.
     filename : string, Path
         Output file.
     overwrite : bool
         Select wether to overwrite the WAV file, if it already exists.
-        The default is True.
+        The default is ``True``.
 
     Notes
     -----
     * Signals are flattened before writing to disk (e.g. a signal with
       ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
-    * This function is based on scipy.io.wavfile.write.
+    * This function is based on ``scipy.io.wavfile.write``.
     * The bits-per-sample and PCM/float is determined by the data-type, see
-      documentation for scipy.io.wavfile.write.
+      documentation for ``scipy.io.wavfile.write``.
 
     """
     sampling_rate = signal.sampling_rate
@@ -92,7 +95,7 @@ def write_wav(signal, filename, overwrite=True):
 
 def read_sofa(filename):
     """
-    Import a SOFA file as Signal object.
+    Import a SOFA file as :py:class:`Signal <pyfar.signal.Signal>` object.
 
     Parameters
     ----------
@@ -102,21 +105,22 @@ def read_sofa(filename):
     Returns
     -------
     signal : Signal
-        Signal object containing the data stored in SOFA_Object.Data.IR.
-        ``cshape`` is equal to (number of measurements, number of receivers).
+        :py:class:`Signal <pyfar.signal.Signal>` object containing the data
+        stored in `SOFA_Object.Data.IR`.
+        `cshape` is equal to ``(number of measurements, number of receivers)``.
     source_coordinates : Coordinates
         Coordinates object containing the data stored in
-        SOFA_object.SourcePosition. The domain, convention and unit are
+        `SOFA_object.SourcePosition`. The domain, convention and unit are
         automatically matched.
     receiver_coordinates : Coordinates
         Coordinates object containing the data stored in
-        SOFA_object.RecevierPosition. The domain, convention and unit are
+        `SOFA_object.RecevierPosition`. The domain, convention and unit are
         automatically matched.
 
     Notes
     -----
     * This function is based on the python-sofa [#]_.
-    * Currently, only SOFA files of DataType 'FIR' are supported.
+    * Currently, only SOFA files of `DataType` ``FIR`` are supported.
 
     References
     ----------
@@ -192,7 +196,7 @@ def read(filename):
     -------
     collection: dict
         Contains pyfar objects like
-        { 'name1': 'obj1', 'name2': 'obj2' ... }.
+        ``{ 'name1': 'obj1', 'name2': 'obj2' ... }``.
 
     Examples
     --------
@@ -237,7 +241,7 @@ def write(filename, compress=False, **objs):
         Full path or filename. If now extension is provided, .far-suffix
         will be add to filename.
     compress : bool
-        Default is false (uncompressed).
+        Default is ``False`` (uncompressed).
         Compressed files take less disk space but need more time for writing
         and reading.
     **objs:
