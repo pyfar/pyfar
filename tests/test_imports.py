@@ -44,6 +44,6 @@ def test_import_submodules():
     assert pyfar.dsp.fft
     assert pyfar.dsp.filter
     assert pyfar.io
-    assert pyfar.spatial
+    assert pyfar.samplings
     assert pyfar.plot
     assert pyfar.signals

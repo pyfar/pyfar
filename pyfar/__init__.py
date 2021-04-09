@@ -12,7 +12,7 @@ from .coordinates import Coordinates
 from .orientations import Orientations
 
 from . import plot
-from . import spatial
+from . import samplings
 from . import io
 from . import dsp
 from . import signals
@@ -25,7 +25,7 @@ __all__ = [
     'Coordinates',
     'Orientations',
     'plot',
-    'spatial',
+    'samplings',
     'io',
     'dsp',
     'signals']
