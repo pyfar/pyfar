@@ -2,9 +2,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 import pyfar.dsp.classes as fo
-from pyfar import Signal
 from scipy import signal as spsignal
-from unittest import mock
 
 
 def test_filter_init_empty_coefficients():
