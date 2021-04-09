@@ -137,11 +137,11 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     Time domain sweep generation according to [#]_:
 
     .. math::
-        s(t) = \\sin(2\\pi f_{low} t + 2\\pi (f_{high}-f_{low}) / T
+        s(t) = \\sin(2\\pi f_\\mathrm{low} t + 2\\pi (f_\\mathrm{high}-f_\\mathrm{low}) / T
         \\cdot t^2 / 2),
 
     with :math:`T` the duration in seconds, :math:`t` the sampling points in
-    seconds, and the frequency limits :math:`f_{low}` and :math:`f_{high}`.
+    seconds, and the frequency limits :math:`f_\\mathrm{low}` and :math:`f_\\mathrm{high}`.
 
     Parameters
     ----------
@@ -189,15 +189,15 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     Time domain sweep generation according to [#]_:
 
     .. math::
-        s(t) = \\sin(2\\pi f_{low} L \\left( \\mathrm{e}^{t/L} - 1 \\right))
+        s(t) = \\sin(2\\pi f_\\mathrm{low} L \\left( e^{t/L} - 1 \\right))
 
     with
 
     .. math::
-        L = T / \\log(f_{high}/f_{low}),
+        L = T / \\log(f_\\mathrm{high}/f_\\mathrm{low}),
 
     :math:`T` the duration in seconds, :math:`t` the sampling points in
-    seconds, and the frequency limits :math:`f_{low}` and :math:`f_{high}`.
+    seconds, and the frequency limits :math:`f_\\mathrm{low}` and :math:`f_\\mathrm{high}`.
 
     Parameters
     ----------
