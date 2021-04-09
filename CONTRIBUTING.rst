@@ -167,11 +167,37 @@ You can create an html report on the test `coverage <https://coverage.readthedoc
     $ pytest --cov=. --cov-report=html
 
 
+Writing the Documentation
+-------------------------
+
+Pyfar follows the `numpy style guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_ for the docstring. A docstring has to consist at least of
+
+- A short and/or extended summary,
+- the Parameters section, and
+- the Returns section
+
+Optional fields that are often used are
+
+- References,
+- Examples, and
+- Notes
+
+Here are a few tips to make things run smoothly
+
+- Use the tags ``:py:func:``, ``:py:mod:``, and ``:py:class:`` to reference pyfar functions, modules, and classes (e.g. ``:py:func:`pyfar.plot.time``` or ``:py:func:`plot time data <pyfar.plot.time>```
+- Code snippets and values as well as external modules, classes, functions are marked by double ticks \`\` to appear in mono spaced font, e.g., ``x=3`` or ``pyfar.Signal``.
+- Parameters, returns, and attributes are marked by single ticks \` to appear as emphasized text, e.g., *unit*.
+- Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
+- Do not use footnotes in the short summary. Only use footnotes in the extended summary if there is a short summary. Otherwise, it messes with the auto-footnotes.
+- If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
+- Plots can be included in by using the prefix ``.. plot::`` followed by an empty line and an indented block containing the code for the plot. See `pyfar.plot.line.time.py` for examples.
+
+See the `Sphinx homepage <https://www.sphinx-doc.org>`_ for more information.
+
 Building the Documentation
 --------------------------
 
-You can build the documentation of your branch using Sphinx by executing the
-make script inside the docs folder.
+You can build the documentation of your branch using Sphinx by executing the make script inside the docs folder.
 
 .. code-block:: console
 
