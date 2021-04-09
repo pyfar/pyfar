@@ -7,9 +7,9 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .signal import Signal, TimeData, FrequencyData
-from .coordinates import Coordinates
-from .orientations import Orientations
+from .classes import Signal, TimeData, FrequencyData
+from .classes import Coordinates
+from .classes import Orientations
 
 from . import plot
 from . import spatial
