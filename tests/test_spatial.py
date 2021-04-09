@@ -1,5 +1,5 @@
 import numpy as np
-import pyfar.spatial as spatial
+import pyfar.samplings as samplings
 from pyfar.coordinates import Coordinates
 import pytest
 
@@ -57,7 +57,7 @@ def test_sph_voronoi():
         [-1.27322004e-01,  9.34172359e-01,  3.33333333e-01],
         [-7.45355992e-01,  5.77350269e-01,  3.33333333e-01]])
 
-    sv = spatial.SphericalVoronoi(s)
+    sv = samplings.SphericalVoronoi(s)
     np.testing.assert_allclose(
         np.sort(np.sum(verts, axis=-1)),
         np.sort(np.sum(sv.vertices, axis=-1)),
@@ -71,14 +71,14 @@ def test_weights_from_voronoi():
         domain='cart', convention='right')
 
     # test with normalization
-    weights = spatial.calculate_sph_voronoi_weights(s, normalize=True)
+    weights = samplings.calculate_sph_voronoi_weights(s, normalize=True)
     desired = np.ones(6)/6
     np.testing.assert_allclose(weights, desired)
 
     np.testing.assert_allclose(np.sum(weights), 1.)
 
     # test without normalization
-    weights = spatial.calculate_sph_voronoi_weights(s, normalize=False)
+    weights = samplings.calculate_sph_voronoi_weights(s, normalize=False)
     np.testing.assert_allclose(np.sum(weights), 4 * np.pi)
 
 
@@ -87,7 +87,7 @@ def test_voronoi_error_not_enough_points():
     points = points/np.linalg.norm(points, axis=0)
     s = Coordinates(points[0], points[1], points[2])
     with pytest.raises(ValueError, match='points needs to be at least 4'):
-        spatial.calculate_sph_voronoi_weights(s)
+        samplings.calculate_sph_voronoi_weights(s)
 
 
 def test___eq___equal(sphericalvoronoi):
