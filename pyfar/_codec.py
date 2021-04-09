@@ -3,16 +3,16 @@ Brief
 =====
 
 This module is not part of the public API. It contains encoding and decoding
-functionality which is exclusively used by `io.write` and `io.read`. It enables
-storing and transmitting Pyfar- and Numpy-objects without using the unsafe
-pickle protocoll.
+functionality which is exclusively used by :py:func:`io.write` and
+:py:func:`io.read`. It enables storing and transmitting Pyfar- and
+Numpy-objects without using the unsafe pickle protocol.
 
 Design and Function
 ===================
 
-The `_encode` and `_decode` functions are entry points for an algorithm
-that recursively processes data structures of varying depths. The result is
-stored in a zipfile or similar structure.
+The :py:func:`_encode` and :py:func:`_decode` functions are entry points for an
+algorithm that recursively processes data structures of varying depths. The
+result is stored in a zipfile.
 
 Data structures are decomposed into one of the following
 three basic encoding/decoding types:

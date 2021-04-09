@@ -18,7 +18,7 @@ def read_wav(filename):
     """
     Import a WAV file as signal object.
 
-    This method is based on scipy.io.wavfile.read().
+    This method is based on ``scipy.io.wavfile.read``.
 
     Parameters
     ----------
@@ -27,13 +27,13 @@ def read_wav(filename):
 
     Returns
     -------
-    signal : signal instance
-        An audio signal object from the pyfar Signal class
+    signal : Signal
+        An audio signal object from the Signal class
         containing the audio data from the WAV file.
 
     Notes
     -----
-    * This function is based on scipy.io.wavfile.write().
+    * This function is based on ``scipy.io.wavfile.write``.
     * This function cannot read wav files with 24-bit data.
     """
     sampling_rate, data = wavfile.read(filename)
@@ -47,7 +47,7 @@ def write_wav(signal, filename, overwrite=True):
 
     Parameters
     ----------
-    signal : Signal object
+    signal : Signal
         An audio signal object from the pyfar Signal class.
 
     filename : string or open file handle
@@ -55,11 +55,11 @@ def write_wav(signal, filename, overwrite=True):
 
     overwrite : bool
         Select wether to overwrite the WAV file, if it already exists.
-        The default is True.
+        The default is ``True``.
 
     Notes
     -----
-    * This function is based on scipy.io.wavfile.write().
+    * This function is based on ``scipy.io.wavfile.write``.
     * Writes a simple uncompressed WAV file.
     * Signals of shape larger than 1D are flattened.
     * The bits-per-sample and PCM/float will be determined by the data-type.
@@ -107,7 +107,7 @@ def write_wav(signal, filename, overwrite=True):
 
 def read_sofa(filename):
     """
-    Import a SOFA file as signal object.
+    Import a SOFA file as :py:class:`Signal <pyfar.signal.Signal>` object.
 
     Parameters
     ----------
@@ -116,23 +116,23 @@ def read_sofa(filename):
 
     Returns
     -------
-    signal : signal instance
+    signal : Signal
         An audio signal object from the pyfar Signal class
-        containing the IR data from the SOFA file with cshape being
+        containing the IR data from the SOFA file with `cshape` being
         equal to (number of measurements, number of receivers).
-    source_coordinates: coordinates instance
+    source_coordinates: Coordinates
         An object from the pyfar Coordinates class containing
         the source coordinates from the SOFA file
-        with matching domain, convention and unit.
-    receiver_coordinates: coordinates instance
+        with matching `domain`, `convention` and `unit`.
+    receiver_coordinates: Coordinates
         An object from the pyfar Coordinates class containing
         the receiver coordinates from the SOFA file
-        with matching domain, convention and unit.
+        with matching `domain`, `convention` and `unit`.
 
     Notes
     -----
     * This function is based on the python-sofa package.
-    * Only SOFA files of DataType 'FIR' are supported.
+    * Only SOFA files of datatype 'FIR' are supported.
 
     References
     ----------
@@ -153,7 +153,7 @@ def read_sofa(filename):
                 "SamplingRate:Units"
                 "{sofafile.Data.SamplingRate.Units} is not supported.")
     else:
-        raise ValueError("DataType {sofafile.Data.Type} is not supported.")
+        raise ValueError("Datatype {sofafile.Data.Type} is not supported.")
     signal = Signal(data, sampling_rate, domain=domain)
 
     # Source
@@ -196,25 +196,25 @@ def _sofa_pos(pos_type):
 
 def read(filename):
     """
-    Read any compatible pyfar object or numpy array from disk.
+    Read any compatible pyfar object or ``numpy.ndarray`` from disk.
 
     Parameters
     ----------
     filename : string
         Full path or filename. If now extension is provided, .far-suffix
-        will be add to filename.
+        will be add to `filename`.
 
     Returns
     -------
     collection: dictionary
-        containing PyFar types like
-        { 'name1': 'obj1', 'name2': 'obj2' ... }.
+        containing pyfar types like
+        ``{ 'name1': 'obj1', 'name2': 'obj2' ... }``.
 
     Examples
     --------
-    collection = pyfar.read('my_objs.far')
-    my_signal = collection['my_signal']
-    my_orientations = collection['my_orientations']
+    >>> collection = pyfar.read('my_objs.far')
+    >>> my_signal = collection['my_signal']
+    >>> my_orientations = collection['my_orientations']
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
@@ -245,30 +245,32 @@ def read(filename):
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible pyfar object or numpy array to disk.
+    Write any compatible pyfar object or ``numpy.ndarray`` array to disk.
 
     Parameters
     ----------
     filename : string
         Full path or filename. If now extension is provided, .far-suffix
-        will be add to filename.
-    compress : bools
-        Default is false (uncompressed).
-        Compressed files take less disk space but probalby need more time
-        for writing and reading.
+        will be add to `filename`.
+    compress : bool
+        Default is ``False`` (uncompressed).
+        Compressed files take less disk space but need more time to be
+        written and read.
     **objs:
         Objects to be saved as key-value arguments.
 
     Examples
     --------
 
-    # Create Pyfar-objects
-    signal = pyfar.Signal([1, 2, 3], 44100)
-    orientations = Orientations.from_view_up([1, 0, 0], [0, 1, 0])
+    Create pyfar objects
 
-    # Save a signal to disk, replace 'my_signal' and 'my_orientations'
-    # with whatever you'd like to name your objects
-    pyfar.io.write('my_objs.far', signal=signal, orientations=orientations)
+    >>> signal = pyfar.Signal([1, 2, 3], 44100)
+    >>> orientations = Orientations.from_view_up([1, 0, 0], [0, 1, 0])
+
+    Save a signal to disk, replace `my_signal` and `my_orientations`
+    with whatever you'd like to name your objects
+
+    >>> pyfar.io.write('my_objs.far', signal=signal, orientations=orientations)
 
     """
     # Check for .far file extension
