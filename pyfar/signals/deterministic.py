@@ -164,8 +164,8 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     -------
     sweep : Signal
         The sweep as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        Signal is in the time domain and has the ``rms`` FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
+        Signal is in the time domain and has the ``none`` FFT normalization
+        (see :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
         range, and length of the fade our are written to `comment`.
 
     References
@@ -225,8 +225,8 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     -------
     sweep : Signal
         The sweep as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        Signal is in the time domain and has the ``rms`` FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
+        Signal is in the time domain and has the ``none`` FFT normalization
+        (see :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
         range, and length of the fade our are written to `comment`.
 
     References
@@ -279,7 +279,7 @@ def _time_domain_sweep(n_samples, frequency_range, n_fade_out, amplitude,
                f"and {frequency_range[1]} Hz "
                f"with {n_fade_out} samples squared cosine fade-out.")
     signal = pyfar.Signal(
-        sweep, sampling_rate, fft_norm="rms", comment=comment)
+        sweep, sampling_rate, fft_norm="none", comment=comment)
 
     return signal
 
