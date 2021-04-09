@@ -1,6 +1,6 @@
 import numpy as np
 import pyfar.spatial as spatial
-from pyfar.coordinates import Coordinates
+from pyfar import Coordinates
 import pytest
 
 
