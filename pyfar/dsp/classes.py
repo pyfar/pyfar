@@ -186,13 +186,9 @@ class Filter(object):
         if reset is True:
             self.reset()
 
-        if self.size > 1:
-            filtered_signal_data = np.broadcast_to(
-                signal.time,
-                (self.shape[0], *signal.time.shape))
-            filtered_signal_data = filtered_signal_data.copy()
-        else:
-            filtered_signal_data = signal.time.copy()
+        filtered_signal_data = np.zeros(
+            (self.size, *signal.time.shape),
+            dtype=signal.time.dtype)
 
         if self.state is not None:
             for idx, (coeff, state) in enumerate(
@@ -202,12 +198,10 @@ class Filter(object):
         else:
             for idx, coeff in enumerate(self._coefficients):
                 filtered_signal_data[idx, ...] = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], zi=None)
+                    coeff, signal.time, zi=None)
 
         filtered_signal = deepcopy(signal)
-        if (signal.time.ndim == 2) and (signal.cshape[0] == 1):
-            filtered_signal_data = np.squeeze(filtered_signal_data)
-        filtered_signal.time = filtered_signal_data
+        filtered_signal.time = np.squeeze(filtered_signal_data)
 
         return filtered_signal
 
