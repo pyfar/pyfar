@@ -6,7 +6,7 @@ import numpy as np
 import urllib3
 import os
 import scipy.io as sio
-from pyfar.coordinates import Coordinates
+import pyfar
 
 from . import external
 
@@ -46,7 +46,7 @@ def cart_equidistant_cube(n_points):
 
     x_grid, y_grid, z_grid = np.meshgrid(x, y, z)
 
-    sampling = Coordinates(
+    sampling = pyfar.Coordinates(
         x_grid.flatten(),
         y_grid.flatten(),
         z_grid.flatten(),
@@ -104,7 +104,7 @@ def sph_dodecahedron(radius=1.):
         phi3 + np.pi / 3]), 2)
     rad = radius * np.ones(np.size(theta))
 
-    sampling = Coordinates(
+    sampling = pyfar.Coordinates(
         phi, theta, rad, domain='sph', convention='top_colat',
         comment='dodecahedral sampling grid')
     return sampling
@@ -137,9 +137,10 @@ def sph_icosahedron(radius=1.):
     phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi / 5, 2)))
 
     rad = radius * np.ones(20)
-    sampling = Coordinates(phi, theta, rad,
-                           domain='sph', convention='top_colat',
-                           comment='icosahedral spherical sampling grid')
+    sampling = pyfar.Coordinates(
+        phi, theta, rad,
+        domain='sph', convention='top_colat',
+        comment='icosahedral spherical sampling grid')
     return sampling
 
 
@@ -216,10 +217,11 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     w = w / np.sum(w)
 
     # make Coordinates object
-    sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
-                           domain='sph', convention='top_colat',
-                           comment='equiangular spherical sampling grid',
-                           weights=w, sh_order=n_max)
+    sampling = pyfar.Coordinates(
+        phi.reshape(-1), theta.reshape(-1), rad,
+        domain='sph', convention='top_colat',
+        comment='equiangular spherical sampling grid',
+        weights=w, sh_order=n_max)
 
     return sampling
 
@@ -292,10 +294,11 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     weights = weights / np.sum(weights)
 
     # make Coordinates object
-    sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
-                           domain='sph', convention='top_colat',
-                           comment='gaussian spherical sampling grid',
-                           weights=weights, sh_order=n_max)
+    sampling = pyfar.Coordinates(
+        phi.reshape(-1), theta.reshape(-1), rad,
+        domain='sph', convention='top_colat',
+        comment='gaussian spherical sampling grid',
+        weights=weights, sh_order=n_max)
 
     return sampling
 
@@ -381,11 +384,12 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     weights = file_data[:, 3] / 4 / np.pi
 
     # generate Coordinates object
-    sampling = Coordinates(file_data[:, 0] * radius,
-                           file_data[:, 1] * radius,
-                           file_data[:, 2] * radius,
-                           sh_order=sh_order, weights=weights,
-                           comment='extremal spherical sampling grid')
+    sampling = pyfar.Coordinates(
+        file_data[:, 0] * radius,
+        file_data[:, 1] * radius,
+        file_data[:, 2] * radius,
+        sh_order=sh_order, weights=weights,
+        comment='extremal spherical sampling grid')
 
     return sampling
 
@@ -508,11 +512,12 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
         sep=' ').reshape((n_points, 3))
 
     # generate Coordinates object
-    sampling = Coordinates(points[..., 0] * radius,
-                           points[..., 1] * radius,
-                           points[..., 2] * radius,
-                           sh_order=sh_order,
-                           comment='spherical T-design sampling grid')
+    sampling = pyfar.Coordinates(
+        points[..., 0] * radius,
+        points[..., 1] * radius,
+        points[..., 2] * radius,
+        sh_order=sh_order,
+        comment='spherical T-design sampling grid')
 
     return sampling
 
@@ -571,9 +576,10 @@ def sph_equal_angle(delta_angles, radius=1.):
     theta = np.concatenate(([0], theta, [180]))
 
     # make Coordinates object
-    sampling = Coordinates(phi, theta, radius,
-                           domain='sph', convention='top_colat', unit='deg',
-                           comment='equal angle spherical sampling grid')
+    sampling = pyfar.Coordinates(
+        phi, theta, radius,
+        domain='sph', convention='top_colat', unit='deg',
+        comment='equal angle spherical sampling grid')
 
     return sampling
 
@@ -657,8 +663,9 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     azim = np.round(azim/azimuth_res) * azimuth_res
 
     # make Coordinates object
-    sampling = Coordinates(azim, elev, radius, 'sph', 'top_elev', 'deg',
-                           comment='spherical great circle sampling grid')
+    sampling = pyfar.Coordinates(
+        azim, elev, radius, 'sph', 'top_elev', 'deg',
+        comment='spherical great circle sampling grid')
 
     return sampling
 
@@ -748,11 +755,12 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     weights = leb["w"] / (4 * np.pi)
 
     # generate Coordinates object
-    sampling = Coordinates(leb["x"] * radius,
-                           leb["y"] * radius,
-                           leb["z"] * radius,
-                           sh_order=sh_order, weights=weights,
-                           comment='spherical Lebedev sampling grid')
+    sampling = pyfar.Coordinates(
+        leb["x"] * radius,
+        leb["y"] * radius,
+        leb["z"] * radius,
+        sh_order=sh_order, weights=weights,
+        comment='spherical Lebedev sampling grid')
 
     return sampling
 
@@ -902,12 +910,13 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     fliege = fliege[f"Fliege_{int(n_points)}"]
 
     # generate Coordinates object
-    sampling = Coordinates(fliege[:, 0],
-                           fliege[:, 1],
-                           radius,
-                           domain='sph', convention='top_colat', unit='rad',
-                           sh_order=sh_order, weights=fliege[:, 2],
-                           comment='spherical Fliege sampling grid')
+    sampling = pyfar.Coordinates(
+        fliege[:, 0],
+        fliege[:, 1],
+        radius,
+        domain='sph', convention='top_colat', unit='rad',
+        sh_order=sh_order, weights=fliege[:, 2],
+        comment='spherical Fliege sampling grid')
 
     # switch and invert coordinates in Cartesian representation to be
     # consistent with [1]
@@ -942,7 +951,7 @@ def sph_equal_area(n_points, radius=1.):
     """
 
     point_set = external.eq_point_set(2, n_points)
-    sampling = Coordinates(
+    sampling = pyfar.Coordinates(
         point_set[0] * radius, point_set[1] * radius, point_set[2] * radius,
         domain='cart', convention='right',
         comment='Equal area partitioning of the sphere.')
