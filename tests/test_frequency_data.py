@@ -93,7 +93,7 @@ def test_reshape_exceptions():
         data_out = data_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape signal of cshape'):
+    with pytest.raises(ValueError, match='Can not reshape audio object'):
         data_out = data_in.reshape((3, 4))
 
 
