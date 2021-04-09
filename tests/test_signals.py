@@ -261,7 +261,7 @@ def test_linear_sweep_against_reference():
     assert sweep.cshape == (1, )
     assert sweep.n_samples == 2**10
     assert sweep.sampling_rate == 44100
-    assert sweep.fft_norm == "rms"
+    assert sweep.fft_norm == "none"
     assert sweep.comment == ("linear sweep between 1000.0 and 20000.0 Hz with "
                              "90 samples squared cosine fade-out.")
 
@@ -302,7 +302,7 @@ def test_exponential_sweep_against_reference():
     assert sweep.cshape == (1, )
     assert sweep.n_samples == 2**10
     assert sweep.sampling_rate == 44100
-    assert sweep.fft_norm == "rms"
+    assert sweep.fft_norm == "none"
     assert sweep.comment == ("exponential sweep between 1000.0 and 20000.0 Hz "
                              "with 90 samples squared cosine fade-out.")
 
