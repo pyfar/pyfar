@@ -33,8 +33,8 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
     signal : Signal
         The noise as a Signal object. The Signal is in the time domain and
         has the 'rms' FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The spectrum and rms amplitude
-        are written to signal.comment.
+        :py:func:`pyfar.dsp.fft.normalization`). The type of the spectrum
+        ('white', 'pink') and the rms amplitude are written to signal.comment.
     """
 
     # generate the noise
@@ -89,7 +89,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
     repetitions : int, optional
         Specifies the number of noise pulses. The default is 5.
     rms : double, array like, optional
-        The RMS amplitude of the white noise signal. The default is 1.
+        The RMS amplitude of the white signal. The default is 1.
     spectrum: string, optional
         The noise spectrum, which can be 'pink' or 'white'. The default is
         'pink'.

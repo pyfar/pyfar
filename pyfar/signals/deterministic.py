@@ -31,8 +31,8 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
         :py:func:`pyfar.dsp.fft.normalization`). The exact frequency, amplitude
         and phase are written to signal.comment.
 
-    Note
-    ----
+    Notes
+    -----
     The parameters frequency, amplitude, and phase must must be scalars
     and/or array likes of the same shape.
     """
