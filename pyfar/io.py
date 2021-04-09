@@ -65,9 +65,9 @@ def write_wav(signal, filename, overwrite=True):
 
     Notes
     -----
-    * Signals are flattend before writing to disk.
+    * Signals are flattend before writing to disk (e.g. a signal with
+      ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
     * This function is based on scipy.io.wavfile.write().
-    * Writes a simple uncompressed WAV file.
     * The bits-per-sample and PCM/float is determined by the data-type.
 
     Common data types: [#]_
@@ -254,10 +254,10 @@ def write(filename, compress=False, **objs):
     filename : string
         Full path or filename. If now extension is provided, .far-suffix
         will be add to filename.
-    compress : bools
+    compress : bool
         Default is false (uncompressed).
-        Compressed files take less disk space but probalby need more time
-        for writing and reading.
+        Compressed files take less disk space but need more time for writing
+        and reading.
     **objs:
         Objects to be saved as key-value arguments, e.g.,
         ``name1=object1, name2=object2``.
