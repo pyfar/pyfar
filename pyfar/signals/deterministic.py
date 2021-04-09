@@ -9,31 +9,31 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     Parameters
     ----------
     frequency : double, array like
-        Frequency of the sine in Hz (0 <= frequency <= sampling_rate/2).
+        Frequency of the sine in Hz (0 <= `frequency` <= `sampling_rate`/2).
     n_samples : int
         Length of the signal in samples.
     amplitude : double, array like, optional
-        The amplitude. The default is 1.
+        The amplitude. The default is ``1``.
     phase : double, array like, optional
-        The phase in radians. The default is 0.
+        The phase in radians. The default is ``0``.
     sampling_rate : int, optional
-        The sampling rate in Hz. The default is 44100.
+        The sampling rate in Hz. The default is ``44100``.
     full_period : boolean, optional
         Make sure that the returned signal contains an integer number of
         periods resulting in a periodic signal. This is done by adjusting the
-        frequency of the sine. The default is False.
+        frequency of the sine. The default is ``False``.
 
     Returns
     -------
     signal : Signal
-        The sine as a Signal object. The Signal is in the time domain and has
-        the 'rms' FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The exact frequency, amplitude
-        and phase are written to signal.comment.
+        The sine as a :py:class:`Signal <pyfar.signal.Signal>` object. The
+        Signal is in the time domain and has the ``rms`` FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`).
+        The exact frequency, amplitude and phase are written to `comment`.
 
     Notes
     -----
-    The parameters frequency, amplitude, and phase must must be scalars
+    The parameters `frequency`, `amplitude`, and `phase` must must be scalars
     and/or array likes of the same shape.
     """
 
@@ -91,24 +91,24 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     n_samples : int
         Length of the impulse in samples
     delay : double, array like, optional
-        Delay in samples. The default is 0.
+        Delay in samples. The default is ``0``.
     amplitude : double, optional
-        The peak amplitude of the impulse. The default is 1.
+        The peak amplitude of the impulse. The default is ``1``.
     sampling_rate : int, optional
-        The sampling rate in Hz. The default is 44100.
+        The sampling rate in Hz. The default is ``44100``.
 
     Returns
     -------
     signal : Signal
-        The impulse as a Signal object. The Signal is in the time domain and
-        has the 'none' FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The delay and amplitude are
-        written to signal.comment.
+        The impulse as a :py:class:`Signal <pyfar.signal.Signal>` object. The
+        Signal is in the time domain and has the ``none`` FFT normalization
+        (see :py:func:`pyfar.dsp.fft.normalization`). The delay and amplitude
+        are written to `comment`.
 
-    Note
-    ----
-    The parameters delay and amplitude must be scalars and/or array likes of
-    the same shape.
+    Notes
+    -----
+    The parameters `delay` and `amplitude` must be scalars and/or array likes
+    of the same shape.
     """
     # check and match the cshape
     cshape = _get_common_shape(delay, amplitude)
@@ -137,11 +137,12 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     Time domain sweep generation according to [#]_:
 
     .. math::
-        s(t) = \\sin(2\\pi f_\\mathrm{low} t + 2\\pi (f_\\mathrm{high}-f_\\mathrm{low}) / T
-        \\cdot t^2 / 2),
+        s(t) = \\sin(2\\pi f_\\mathrm{low} t + 2\\pi (f_\\mathrm{high}-
+        f_\\mathrm{low}) / T \\cdot t^2 / 2),
 
     with :math:`T` the duration in seconds, :math:`t` the sampling points in
-    seconds, and the frequency limits :math:`f_\\mathrm{low}` and :math:`f_\\mathrm{high}`.
+    seconds, and the frequency limits :math:`f_\\mathrm{low}` and
+    :math:`f_\\mathrm{high}`.
 
     Parameters
     ----------
@@ -152,20 +153,20 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
         frequency in Hz.
     n_fade_out : int, optional
         The length of the squared cosine fade-out in samples. This is done to
-        avoid discontinuities at the end of the sweep. The default is 90, which
-        equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
+        avoid discontinuities at the end of the sweep. The default is ``90``,
+        which equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
     amplitude : double, optional
-        The amplitude of the signal. The default is 1.
+        The amplitude of the signal. The default is ``1``.
     sampling_rate : int, optional
-        The sampling rate in Hz. The default is 44100.
+        The sampling rate in Hz. The default is ``44100``.
 
     Returns
     -------
     sweep : Signal
-        The sweep as a Signal object. The Signal is in the time domain and
-        has the 'rms' FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The Sweep type, frequency
-        range, and length of the fade our are written to signal.comment.
+        The sweep as a :py:class:`Signal <pyfar.signal.Signal>` object. The
+        Signal is in the time domain and has the ``rms`` FFT normalization (see
+        :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
+        range, and length of the fade our are written to `comment`.
 
     References
     ----------
@@ -197,7 +198,8 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
         L = T / \\log(f_\\mathrm{high}/f_\\mathrm{low}),
 
     :math:`T` the duration in seconds, :math:`t` the sampling points in
-    seconds, and the frequency limits :math:`f_\\mathrm{low}` and :math:`f_\\mathrm{high}`.
+    seconds, and the frequency limits :math:`f_\\mathrm{low}` and
+    :math:`f_\\mathrm{high}`.
 
     Parameters
     ----------
@@ -208,24 +210,24 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
         frequency in Hz.
     n_fade_out : int, optional
         The length of the squared cosine fade-out in samples. This is done to
-        avoid discontinuities at the end of the sweep. The default is 90, which
-        equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
+        avoid discontinuities at the end of the sweep. The default is ``90``,
+        which equals approximately 2 ms at sampling rates of 44.1 and 48 kHz.
     amplitude : double, optional
-        The amplitude of the signal. The default is 1.
+        The amplitude of the signal. The default is ``1``.
     sweep_rate : double, optional
         Rate at which the sine frequency increases over time. If this is given,
-        n_samples is calculated according to the sweep rate. The default is
-        None, which uses n_samples without modifications.
+        `n_samples` is calculated according to the sweep rate. The default is
+        ``None``, which uses `n_samples` without modifications.
     sampling_rate : int, optional
-        The sampling rate in Hz. The default is 44100.
+        The sampling rate in Hz. The default is ``44100``.
 
     Returns
     -------
     sweep : Signal
-        The sweep as a Signal object. The Signal is in the time domain and
-        has the 'rms' FFT normalization (see
+        The sweep as a :py:class:`Signal <pyfar.signal.Signal>` object. The
+        Signal is in the time domain and has the ``rms`` FFT normalization (see
         :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
-        range, and length of the fade our are written to signal.comment.
+        range, and length of the fade our are written to `comment`.
 
     References
     ----------
