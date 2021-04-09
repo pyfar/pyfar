@@ -209,8 +209,7 @@ class Filter(object):
         if self._state is not None:
             self._state = np.zeros_like(self._state)
         else:
-            warnings.warn(
-                "No previous state was set. Initialize a filter state first.")
+            self._state = None
 
     @property
     def comment(self):
