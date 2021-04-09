@@ -1,13 +1,11 @@
 """
 Read and write objects to disk, read and write WAV files, read SOFA files.
 
-The methods ``read(...)`` and ``write(...)`` allow to save or load several
+The methods ``read`` and ``write`` allow to save or load several
 pyfar objects and other variables. So, e.g., workspaces in notebooks can be
 stored. Signal objects can be imported and exported as WAV files using
-``read_wav()`` and ``write_wav()``. ``read_sofa()`` provides functionality
-to read the data stored in a SOFA file. The impulse response is
-imported as Signal object, the source and receiver positions are imported as
-Coordinates objects.
+``read_wav`` and ``write_wav``. ``read_sofa`` provides functionality
+to read the data stored in a SOFA file.
 """
 import scipy.io.wavfile as wavfile
 import os.path
@@ -41,7 +39,7 @@ def read_wav(filename):
 
     Notes
     -----
-    * This function is based on scipy.io.wavfile.read().
+    * This function is based on scipy.io.wavfile.read.
     * 24-bit data cannot be read.
     """
     sampling_rate, data = wavfile.read(filename)
@@ -65,30 +63,11 @@ def write_wav(signal, filename, overwrite=True):
 
     Notes
     -----
-    * Signals are flattend before writing to disk (e.g. a signal with
+    * Signals are flattened before writing to disk (e.g. a signal with
       ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
-    * This function is based on scipy.io.wavfile.write().
-    * The bits-per-sample and PCM/float is determined by the data-type.
-
-    Common data types: [#]_
-
-    =====================  ===========  ===========  =============
-         WAV format            Min          Max       NumPy dtype
-    =====================  ===========  ===========  =============
-    32-bit floating-point  -1.0         +1.0         float32
-    32-bit PCM             -2147483648  +2147483647  int32
-    16-bit PCM             -32768       +32767       int16
-    8-bit PCM              0            255          uint8
-    =====================  ===========  ===========  =============
-
-    Note that 8-bit PCM is unsigned.
-
-    References
-    ----------
-    .. [#] IBM Corporation and Microsoft Corporation, "Multimedia Programming
-       Interface and Data Specifications 1.0", section "Data Format of the
-       Samples", August 1991
-       http://www.tactilemedia.com/info/MCI_Control_Info.html
+    * This function is based on scipy.io.wavfile.write.
+    * The bits-per-sample and PCM/float is determined by the data-type, see
+      documentation for scipy.io.wavfile.write.
 
     """
     sampling_rate = signal.sampling_rate
@@ -123,25 +102,28 @@ def read_sofa(filename):
     Returns
     -------
     signal : Signal
-        Signal object containing the IR data. cshape is
-        equal to (number of measurements, number of receivers).
+        Signal object containing the data stored in SOFA_Object.Data.IR.
+        ``cshape`` is equal to (number of measurements, number of receivers).
     source_coordinates : Coordinates
-        Coordinates object containing the source coordinates.
-        The domain, convention and unit are automatically matched.
+        Coordinates object containing the data stored in
+        SOFA_object.SourcePosition. The domain, convention and unit are
+        automatically matched.
     receiver_coordinates : Coordinates
-        Coordinates object containing the receiver coordinates.
-        The domain, convention and unit are automatically matched.
+        Coordinates object containing the data stored in
+        SOFA_object.RecevierPosition. The domain, convention and unit are
+        automatically matched.
 
     Notes
     -----
-    * This function is based on the python-sofa.
+    * This function is based on the python-sofa [#]_.
     * Currently, only SOFA files of DataType 'FIR' are supported.
 
     References
     ----------
-    .. [#] www.sofaconventions.org
+    .. [#] https://www.sofaconventions.org
     .. [#] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
-       File Format.”, 2015.
+        File Format.”, 2015.
+    .. [#] https://github.com/spatialaudio/python-sofa
 
     """
     sofafile = sofa.Database.open(filename)
