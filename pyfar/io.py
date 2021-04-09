@@ -1,3 +1,14 @@
+"""
+Read and write objects to disk, read and write WAV files, read SOFA files.
+
+The methods ``read(...)`` and ``write(...)`` allow to save or load several
+pyfar objects and other variables. So, e.g., workspaces in notebooks can be
+stored. Signal objects can be imported and exported as WAV files using
+``read_wav()`` and ``write_wav()``. ``read_sofa()`` provides functionality
+to read the data stored in a SOFA file. The impulse response is
+imported as Signal object, the source and receiver positions are imported as
+Coordinates objects.
+"""
 import scipy.io.wavfile as wavfile
 import os.path
 import pathlib
@@ -16,25 +27,22 @@ import pyfar.dsp.classes as fo
 
 def read_wav(filename):
     """
-    Import a WAV file as signal object.
-
-    This method is based on scipy.io.wavfile.read().
+    Import a WAV file as Signal object.
 
     Parameters
     ----------
-    filename : string or open file handle
-        Input wav file.
+    filename : string, Path
+        Input file.
 
     Returns
     -------
-    signal : signal instance
-        An audio signal object from the pyfar Signal class
-        containing the audio data from the WAV file.
+    signal : Signal
+        Signal object containing the audio data from the WAV file.
 
     Notes
     -----
-    * This function is based on scipy.io.wavfile.write().
-    * This function cannot read wav files with 24-bit data.
+    * This function is based on scipy.io.wavfile.read().
+    * 24-bit data cannot be read.
     """
     sampling_rate, data = wavfile.read(filename)
     signal = Signal(data.T, sampling_rate, domain='time')
@@ -43,26 +51,24 @@ def read_wav(filename):
 
 def write_wav(signal, filename, overwrite=True):
     """
-    Write a signal as a WAV file.
+    Write a Signal object as a WAV file to disk.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the pyfar Signal class.
-
-    filename : string or open file handle
-        Output wav file.
-
+    signal : Signal
+        Signal to be written.
+    filename : string, Path
+        Output file.
     overwrite : bool
         Select wether to overwrite the WAV file, if it already exists.
         The default is True.
 
     Notes
     -----
+    * Signals are flattend before writing to disk.
     * This function is based on scipy.io.wavfile.write().
     * Writes a simple uncompressed WAV file.
-    * Signals of shape larger than 1D are flattened.
-    * The bits-per-sample and PCM/float will be determined by the data-type.
+    * The bits-per-sample and PCM/float is determined by the data-type.
 
     Common data types: [#]_
 
@@ -107,32 +113,29 @@ def write_wav(signal, filename, overwrite=True):
 
 def read_sofa(filename):
     """
-    Import a SOFA file as signal object.
+    Import a SOFA file as Signal object.
 
     Parameters
     ----------
-    filename : string or open file handle
+    filename : string, Path
         Input SOFA file (cf. [#]_, [#]_).
 
     Returns
     -------
-    signal : signal instance
-        An audio signal object from the pyfar Signal class
-        containing the IR data from the SOFA file with cshape being
+    signal : Signal
+        Signal object containing the IR data. cshape is
         equal to (number of measurements, number of receivers).
-    source_coordinates: coordinates instance
-        An object from the pyfar Coordinates class containing
-        the source coordinates from the SOFA file
-        with matching domain, convention and unit.
-    receiver_coordinates: coordinates instance
-        An object from the pyfar Coordinates class containing
-        the receiver coordinates from the SOFA file
-        with matching domain, convention and unit.
+    source_coordinates : Coordinates
+        Coordinates object containing the source coordinates.
+        The domain, convention and unit are automatically matched.
+    receiver_coordinates : Coordinates
+        Coordinates object containing the receiver coordinates.
+        The domain, convention and unit are automatically matched.
 
     Notes
     -----
-    * This function is based on the python-sofa package.
-    * Only SOFA files of DataType 'FIR' are supported.
+    * This function is based on the python-sofa.
+    * Currently, only SOFA files of DataType 'FIR' are supported.
 
     References
     ----------
@@ -196,25 +199,26 @@ def _sofa_pos(pos_type):
 
 def read(filename):
     """
-    Read any compatible pyfar object or numpy array from disk.
+    Read any compatible pyfar object or numpy array (.far file) from disk.
 
     Parameters
     ----------
-    filename : string
-        Full path or filename. If now extension is provided, .far-suffix
-        will be add to filename.
+    filename : string, Path
+        Input file. If no extension is provided, .far-suffix is added.
 
     Returns
     -------
-    collection: dictionary
-        containing PyFar types like
+    collection: dict
+        Contains pyfar objects like
         { 'name1': 'obj1', 'name2': 'obj2' ... }.
 
     Examples
     --------
-    collection = pyfar.read('my_objs.far')
-    my_signal = collection['my_signal']
-    my_orientations = collection['my_orientations']
+    Read signal and orientations objects stored in a .far file.
+
+    >>> collection = pyfar.read('my_objs.far')
+    >>> my_signal = collection['my_signal']
+    >>> my_orientations = collection['my_orientations']
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
@@ -245,7 +249,7 @@ def read(filename):
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible pyfar object or numpy array to disk.
+    Write any compatible pyfar object or numpy array as .far file to disk.
 
     Parameters
     ----------
@@ -257,25 +261,24 @@ def write(filename, compress=False, **objs):
         Compressed files take less disk space but probalby need more time
         for writing and reading.
     **objs:
-        Objects to be saved as key-value arguments.
+        Objects to be saved as key-value arguments, e.g.,
+        ``name1=object1, name2=object2``.
 
     Examples
     --------
 
-    # Create Pyfar-objects
-    signal = pyfar.Signal([1, 2, 3], 44100)
-    orientations = Orientations.from_view_up([1, 0, 0], [0, 1, 0])
+    Save Signal object, Orientations objects and numpy array to disk.
 
-    # Save a signal to disk, replace 'my_signal' and 'my_orientations'
-    # with whatever you'd like to name your objects
-    pyfar.io.write('my_objs.far', signal=signal, orientations=orientations)
+    >>> s = pyfar.Signal([1, 2, 3], 44100)
+    >>> o = pyfar.Orientations.from_view_up([1, 0, 0], [0, 1, 0])
+    >>> a = np.array([1,2,3])
+    >>> pyfar.io.write('my_objs.far', signal=s, orientations=o, array=a)
 
     """
     # Check for .far file extension
     if filename.split('.')[-1] != 'far':
         warnings.warn("Extending filename by .far.")
         filename += '.far'
-
     compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
