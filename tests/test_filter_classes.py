@@ -2,9 +2,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 import pyfar.dsp.classes as fo
-from pyfar import Signal
 from scipy import signal as spsignal
-from unittest import mock
 
 
 def test_filter_init_empty_coefficients():
@@ -121,6 +119,16 @@ def test_filter_iir_process_multi_dim_filt(impulse):
 
     npt.assert_allclose(res.time[:, :3], coeff[:, 0])
 
+    impulse.time = np.vstack((impulse.time, impulse.time))
+    filt = fo.FilterIIR(coeff, impulse.sampling_rate)
+    res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, 0, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 0, :3], coeff[1, 0, :], atol=1e-16)
+
+    npt.assert_allclose(res.time[0, 1, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 1, :3], coeff[1, 0, :], atol=1e-16)
+
 
 def test_filter_fir_process_multi_dim_filt(impulse):
     coeff = np.array([
@@ -130,6 +138,16 @@ def test_filter_fir_process_multi_dim_filt(impulse):
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
     npt.assert_allclose(res.time[:, :3], coeff)
+
+    impulse.time = np.vstack((impulse.time, impulse.time))
+    filt = fo.FilterFIR(coeff, impulse.sampling_rate)
+    res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, 0, :3], coeff[0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 0, :3], coeff[1, :], atol=1e-16)
+
+    npt.assert_allclose(res.time[0, 1, :3], coeff[0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 1, :3], coeff[1, :], atol=1e-16)
 
 
 def test_filter_sos_process(impulse):
@@ -153,6 +171,16 @@ def test_filter_sos_process_multi_dim_filt(impulse):
     res = filt.process(impulse)
 
     npt.assert_allclose(res.time[:, :3], coeff[:, 0])
+
+    impulse.time = np.vstack((impulse.time, impulse.time))
+    filt = fo.FilterSOS(sos, impulse.sampling_rate)
+    res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, 0, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 0, :3], coeff[1, 0, :], atol=1e-16)
+
+    npt.assert_allclose(res.time[0, 1, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 1, :3], coeff[1, 0, :], atol=1e-16)
 
 
 def test_atleast_3d_first_dim():
