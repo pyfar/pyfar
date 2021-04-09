@@ -80,7 +80,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development.
    tests, including testing other Python versions with tox::
 
     $ flake8 pyfar tests
-    $ python setup.py test or py.test
+    $ pytest
     $ tox
 
    To get flake8 and tox, pip install them into your virtualenv. The flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust the your flake8 and linting configuration in your IDE accordingly.
