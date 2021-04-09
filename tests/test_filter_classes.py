@@ -103,7 +103,7 @@ def test_filter_iir_process_state(impulse):
     state = filt._state
 
     npt.assert_allclose([[0, 0]], state)
-    npt.assert_allclose(res.time[:3], coeff[0])
+    npt.assert_allclose(res.time[0, :3], coeff[0])
 
     coeff = np.array([[1, 0, 0], [1, 1, 0]])
     filt = fo.FilterIIR(coeff, impulse.sampling_rate,  state=[0, 0])
@@ -111,7 +111,7 @@ def test_filter_iir_process_state(impulse):
     desired = np.ones(impulse.n_samples)
     desired[1::2] *= -1
 
-    npt.assert_allclose(res.time, desired)
+    npt.assert_allclose(res.time, np.atleast_2d(desired))
     npt.assert_allclose(filt._state, [[1, 0]])
 
 
@@ -130,7 +130,7 @@ def test_filter_fir_process_state(impulse):
     state = filt._state
 
     npt.assert_allclose([[0, 0, 0, 0, 0]], state)
-    npt.assert_allclose(res.time[:6], coeff)
+    npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff))
 
 
 def test_filter_fir_process_sampling_rate_mismatch(impulse):
@@ -176,7 +176,7 @@ def test_filter_sos_process(impulse):
     desired = np.ones(impulse.n_samples)
     desired[1::2] *= -1
 
-    npt.assert_allclose(res.time, desired)
+    npt.assert_allclose(res.time, np.atleast_2d(desired))
 
 
 def test_filter_sos_process_state(impulse):
