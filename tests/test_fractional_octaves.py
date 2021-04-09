@@ -166,9 +166,6 @@ def impulse_mock():
     time = np.zeros(n_samples, dtype='float64')
     time[0] = 1
 
-    # frequency signal
-    freq = np.ones(n_bins)
-
     # create a mock object of Signal class to test the plot independently
     signal = mock.Mock(spec_set=Signal(time, sampling_rate))
     signal.sampling_rate = sampling_rate
