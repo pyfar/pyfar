@@ -201,3 +201,22 @@ def test_separation_from_signal():
         freq.domain = 'freq'
     with pytest.raises(AttributeError):
         freq.fft_norm = 'amplitude'
+
+
+def test___eq___equal():
+    """Check if copied FrequencyData is equal."""
+    frequency_data = FrequencyData([1, 2, 3], [1, 2, 3])
+    actual = frequency_data.copy()
+    assert frequency_data == actual
+
+
+def test___eq___notEqual():
+    """Check if FrequencyData is equal."""
+    frequency_data = FrequencyData([1, 2, 3], [1, 2, 3])
+    actual = FrequencyData([2, 3, 4], [1, 2, 3])
+    assert not frequency_data == actual
+    actual = FrequencyData([1, 2, 3], [2, 3, 4])
+    assert not frequency_data == actual
+    comment = f'{frequency_data.comment} A completely different thing'
+    actual = FrequencyData([1, 2, 3], [1, 2, 3], comment=comment)
+    assert not frequency_data == actual

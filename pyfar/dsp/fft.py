@@ -1,5 +1,4 @@
 r"""
-
 The discrete Fourier spectrum of an arbitrary, but band-limited signal
 :math:`x(n)` is defined as
 
@@ -20,7 +19,7 @@ the left-hand side of the spectrum is discarded, yielding
 :math:`X_R(\mu) = X(\mu) \mbox{ }\forall 0 \le \mu \le N/2`. Complex valued
 time signals can be implemented, if required.
 
-Normalization _[2]
+Normalization [1]_
 ------------------
 Bases on a signal FFT norm - namely 'unitary', 'amplitude', 'rms', 'power' or
 'psd', pyfar implements five different normalization variants, whereby
@@ -41,27 +40,29 @@ For power signals however, which possess a finite power but infinite energy,
 a normalization for the time interval in which the signal is sampled, is
 chosen. In order for Parseval's theorem to remain valid, the single sided
 needs to be multiplied by a factor of 2, compensating for the discarded part
-of the spectrum (cf. _[2], Eq. 8). Additionally, the implemented DFT uses
+of the spectrum (cf. [1]_, Eq. 8). Additionally, the implemented DFT uses
 different introduced above.
 
 >>> import numpy as np
->>> from pyfar import fft
+>>> from pyfar.dsp import fft
 >>> import matplotlib.pyplot as plt
 >>> frequency = 100
 >>> sampling_rate = 1000
->>> sine = np.sin(np.linspace(0, 2*np.pi*frequency/sampling_rate, 1024))
->>> spectrum = fft.rfft(sine, n_samples, sampling_rate, 'power', 'rms')
+>>> n_samples = 1024
+>>> sampling_rate = 48e3
+>>> sine = np.sin(np.linspace(0, 2*np.pi*frequency/sampling_rate, n_samples))
+>>> spectrum = fft.rfft(sine, n_samples, sampling_rate, 'rms')
 
 .. plot::
 
     import numpy as np
-    from pyfar import fft
+    from pyfar.dsp import fft
     import matplotlib.pyplot as plt
     n_samples = 1024
     sampling_rate = 48e3
     times = np.linspace(0, 10, n_samples)
     sine = np.sin(times * 2*np.pi * 100)
-    spec = fft.rfft(sine, n_samples, sampling_rate, 'power', 'rms')
+    spec = fft.rfft(sine, n_samples, sampling_rate, 'rms')
     freqs = fft.rfftfreq(n_samples, 48e3)
     plt.subplot(1, 2, 1)
     plt.plot(times, sine)
@@ -76,11 +77,7 @@ different introduced above.
 
 References
 ----------
-.. [1]  J.-R. Ohm and H. D. Lüke, Signalübertragung: Grundlagen der
-        digitalen und analogen Nachrichtenübertragungssysteme.
-        Springer DE, 2002.
-
-.. [2]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+.. [1]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
         Scaling of the Discrete Fourier Transform and the Implied Physical
         Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
         May 2020, p. e-Brief 600.
@@ -212,11 +209,11 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     """
     Normalize spectrum of power signal.
 
-    Apply normalizations defined in _[1] to DFT spectrum of power signals.
-    No normalization is applied to energy signals. Note that, unlike _[1], the
-    phase is maintained in all cases, i.e., instead of taking the squared
-    absolute spectra in Eq. (5-6), the complex spectra are multiplied with
-    their absolute values.
+    Apply normalizations defined in [2]_ to DFT spectrum of power signals.
+    No normalization is applied to energy signals. Note that, the phase is
+    maintained in all cases, i.e., instead of taking the squared absolute
+    spectra in Eq. (5-6), the complex spectra are multiplied with their
+    absolute values.
 
     Parameters
     ----------
@@ -229,13 +226,19 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     sampling_rate : number
         sampling rate of the corresponding time signal in Hz
     fft_norm : string, optional
-        'none' - Do not apply any normalization
-        'unitary' - Multiplied single sided spectra by factor two
-                    (except for 0 Hz and half the sampling rate)
-        'amplitude' - as in _[2] Eq. (4)
-        'rms' - as in _[2] Eq. (10)
-        'power' - as in _[2] Eq. (5)
-        'psd' - as in _[2] Eq. (6)
+        'none'
+            Do not apply any normalization
+        'unitary'
+            Multiplied single sided spectra by factor two (except for 0 Hz and
+            half the sampling rate)
+        'amplitude'
+            as in _[2] Eq. (4)
+        'rms'
+            as in _[2] Eq. (10)
+        'power'
+            as in _[2] Eq. (5)
+        'psd'
+            as in _[2] Eq. (6)
     inverse : bool, optional
         apply the inverse normalization. The default is false.
     single_sided : bool, optional

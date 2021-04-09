@@ -1,13 +1,15 @@
 import pyfar
 
 
-def test_copy(sphericalvoronoi):
+def test_copy(sphericalvoronoi, time_data, frequency_data):
     """ Test copy method used by several classes."""
     obj_list = [pyfar.Signal(1000, 44100),
                 pyfar.Orientations(),
                 pyfar.Coordinates(),
                 pyfar.dsp.Filter(),
-                sphericalvoronoi]
+                sphericalvoronoi,
+                time_data,
+                frequency_data]
 
     for obj in obj_list:
         # Create copy

@@ -220,7 +220,7 @@ def test_crossover(impulse):
         x = pfilt.crossover(impulse, order, 4000)
         x_sum = np.sum(x.freq, axis=-2).flatten()
         x_ref = np.ones(x.n_bins)
-        npt.assert_allclose(x_ref, x_sum)
+        npt.assert_allclose(x_ref, np.abs(x_sum))
 
     # check network with multiple cross-over frequencies
     f_obj = pfilt.crossover(None, 2, [100, 10_000], 44100)

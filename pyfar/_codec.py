@@ -4,23 +4,25 @@ Brief
 
 This module is not part of the public API. It contains encoding and decoding
 functionality which is exclusively used by `io.write` and `io.read`. It enables
-storing and transmitting Pyfar-Objects without using the unsafe pickle
-protocoll.
+storing and transmitting Pyfar- and Numpy-objects without using the unsafe
+pickle protocoll.
 
 Design and Function
 ===================
+
 The `_encode` and `_decode` functions are entry points for an algorithm
-that recursively processes Pyfar-objects of varying depths. The result can be
+that recursively processes data structures of varying depths. The result is
 stored in a zipfile or similar structure.
 
-There are three basic encoding/decoding types:
+Data structures are decomposed into one of the following
+three basic encoding/decoding types:
 
     (1) Builtins types are directly written in a JSON-format.
 
     (2) Types that can be trivially derived from builtins are first
         cast into their builtin-counterparts. The result and a type-hint
-        are put into a pair of list-type and written into the same JSON-string.
-        The pair looks as follows:
+        are put into a list-type pair of type hint and object and written into
+        the same JSON-string. The pair looks as follows:
             [str, builtin] e.g. ['$int64', 42]
 
     (3) Types that cannot be easily derived from builtins, such as
@@ -29,6 +31,10 @@ There are three basic encoding/decoding types:
         zip-archive. This zip-path is stored as a reference together with a
         type-hint as a pair into the JSON-form
             [str, str] e.g. ['$ndarray', '/my_obj/_signal']
+
+Numpy-types can be stored directly in the zipfile. In this case type hints,
+such as `$ndarray`, become the name of the file in the archive.
+
 
 Class-Level
 ===========
@@ -78,10 +84,24 @@ JSON
 }
 ----
 
+Names, Type Hints and Zippath
+=============================
+
+    (1) Object names are the keys of **objs in `io.write` and only
+        exist at the first hierarchical layer of zip_paths ([0])
+
+    (2) Object hints are e.g. `$Coordinates` for Pyfar-objects, `$ndarray` etc.
+        and exist only at the second layer of zip_paths ([1])
+
+    E.g. in a single zip_path: `MyMicrophonePositions/$Coordinates`
+    - `MyMicrophonePositions` is the name of the object and
+    - `$Coordinates` is the type hint.
+
 """
 
 import io
 import sys
+import json
 import numpy as np
 
 
@@ -171,6 +191,30 @@ def _decode_ndarray(obj, zipfile):
     memfile.write(nd_bytes)
     memfile.seek(0)
     return np.load(memfile, allow_pickle=False)
+
+
+def _decode_object_json_aided(name, type_hint, zipfile):
+    """
+    Decodes composed objects with the help of JSON.
+
+    Parameters
+    ----------
+    name: str
+        The object name, usually keys from **objs, see `io.write`.
+    type_hint: str
+        The object's type hint, starts with '$'.
+    zipfile: zipfile
+        The zipfile from where we'd like to read data.
+    """
+    json_str = zipfile.read(f'{name}/{type_hint}').decode('UTF-8')
+    obj_dict_encoded = json.loads(json_str)
+    obj_dict = _decode(obj_dict_encoded, zipfile)
+    ObjType = _str_to_type(type_hint[1:])
+    try:
+        return ObjType._decode(obj_dict)
+    except AttributeError:
+        raise NotImplementedError(
+            f'You must implement `{type}._decode` first.')
 
 
 def _encode(obj, zip_path, zipfile):
@@ -266,8 +310,8 @@ def _encode_ndarray(ndarray):
     bytes.
         They bytes that where written by `numpy.save` into a memfile.
 
-    Notes
-    -----
+    Note
+    ----
     * Do not allow pickling. It is not safe!
     """
     # `Numpy.save` is applied on a memory file instead of a physical file
@@ -275,6 +319,30 @@ def _encode_ndarray(ndarray):
     np.save(memfile, ndarray, allow_pickle=False)
     memfile.seek(0)
     return memfile.read()
+
+
+def _encode_object_json_aided(obj, name, zipfile):
+    """
+    Encodes composed objects with the help of JSON.
+
+    Parameters
+    ----------
+    obj: PyFar-type
+        The object, usually values from **objs, see `io.write`.
+    name: str
+        The object's name, usually keys from **objs, see `io.write`.
+    zipfile: zipfile
+        The zipfile where we'd like to write data.
+    """
+    try:
+        obj_dict = _encode(obj._encode(), name, zipfile)
+        type_hint = f'${type(obj).__name__}'
+        zipfile.writestr(
+            f'{name}/{type_hint}',
+            json.dumps(obj_dict))
+    except AttributeError:
+        raise NotImplementedError(
+            f'You must implement `{type}._encode` first.')
 
 
 def _is_pyfar_type(obj):
@@ -286,13 +354,22 @@ def _is_pyfar_type(obj):
         'Coordinates',
         'Signal',
         'Filter',
-        'SphericalVoronoi']
+        'SphericalVoronoi',
+        'TimeData',
+        'FrequencyData']
+
+
+def _is_numpy_type(obj):
+    """ True if object is a Numpy-type.
+    """
+    return type(obj).__module__ == np.__name__
 
 
 def _is_dtype(obj):
     """ True if object is `numpy.dtype`.
     """
-    return isinstance(obj, type) and obj.__module__ == 'numpy'
+    return isinstance(obj, type) and (
+        obj.__module__ == 'numpy' or obj == complex)
 
 
 def _is_numpy_scalar(obj):

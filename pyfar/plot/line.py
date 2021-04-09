@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from pyfar.plot.utils import plotstyle
+from pyfar.plot.utils import context
 from .. import Signal
 from . import _line
 from . import _interaction as ia
@@ -15,8 +15,8 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, TimeData
+        pyfar Signal or TimeData object.
     dB : boolean
         Indicate if the data should be plotted in dB. The default is False.
     log_prefix : integer, float
@@ -46,10 +46,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._time(signal, dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
     plt.tight_layout()
@@ -74,8 +71,8 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     dB : boolean
         Indicate if the data should be plotted in dB. The default is True.
     log_prefix : integer, float
@@ -104,12 +101,7 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-    if xscale not in ['linear', 'log']:
-        raise ValueError(f"xscale must be 'linear' or 'log' but is '{xscale}'")
-
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._freq(signal, dB, log_prefix, log_reference, xscale, ax,
                          **kwargs)
     plt.tight_layout()
@@ -130,8 +122,8 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     deg : Boolean
         Flag to plot the phase in degrees. The default is False.
     unwrap : Boolean, str
@@ -157,10 +149,8 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._phase(signal, deg, unwrap, xscale, ax, **kwargs)
     plt.tight_layout()
 
@@ -207,13 +197,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-    units = ['s', 'ms', 'mus', 'samples', None]
-    if unit not in units:
-        raise ValueError(f"unit must be {', '.join(units)} but is {unit}.")
-
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
     plt.tight_layout()
 
@@ -273,7 +257,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._spectrogram_cb(
             signal, dB, log_prefix, log_reference, yscale, unit,
             window, window_length, window_overlap_fct,
@@ -283,7 +267,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'line.spectrogram', dB_freq=dB, log_prefix=log_prefix,
-        log_reference=log_reference, yscale=yscale, window=window,
+        log_reference=log_reference, yscale=yscale, unit=unit, window=window,
         window_length=window_length, window_overlap_fct=window_overlap_fct,
         cmap=cmap)
     interaction = ia.Interaction(signal, ax[0], style, plot_parameter)
@@ -339,10 +323,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
                               log_reference, xscale, unit, ax, **kwargs)
     plt.tight_layout()
@@ -364,8 +345,8 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     dB : Boolean
         Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
@@ -399,10 +380,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     matplotlib.pyplot.plot() for possible **kwargs.
     """
 
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._freq_phase(signal, dB, log_prefix, log_reference, xscale,
                                deg, unwrap, ax, **kwargs)
     plt.tight_layout()
@@ -425,8 +403,8 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
 
     Parameters
     ----------
-    signal : Signal
-        pyfar Signal object.
+    signal : Signal, FrequencyData
+        pyfar Signal or FrequencyData object.
     dB : Boolean
         Flag to plot the logarithmic magnitude specturm. The default is True.
     log_prefix : integer, float
@@ -458,10 +436,8 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     --------
     matplotlib.pyplot.plot() for possible **kwargs.
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
                                      unit, xscale, ax, **kwargs)
     plt.tight_layout()
@@ -516,10 +492,8 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     >>> ppl.multi(s, [[ppl.time, ppl.time_dB], [ppl.freq, ppl.group_delay]])
 
     """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
 
-    with plt.style.context(plotstyle(style)):
+    with context(style):
         ax = _line._custom_subplots(signal, plots, ax, **kwargs)
     plt.tight_layout()
 

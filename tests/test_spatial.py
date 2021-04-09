@@ -1,5 +1,5 @@
 import numpy as np
-import pyfar.spatial.spatial as spatial
+import pyfar.spatial as spatial
 from pyfar.coordinates import Coordinates
 import pytest
 

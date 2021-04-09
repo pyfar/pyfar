@@ -7,22 +7,25 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .signal import Signal
+from .signal import Signal, TimeData, FrequencyData
 from .coordinates import Coordinates
 from .orientations import Orientations
 
-from . import plot as plot
+from . import plot
 from . import spatial
 from . import io
-from . import utils
+from . import dsp
+from . import signals
 
 
 __all__ = [
     'Signal',
+    'TimeData',
+    'FrequencyData',
     'Coordinates',
     'Orientations',
     'plot',
     'spatial',
     'io',
-    'utils',
-    'codec']
+    'dsp',
+    'signals']

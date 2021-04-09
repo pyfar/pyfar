@@ -3,9 +3,8 @@ import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
 import deepdiff
-import copy
 import re
-from . import utils
+from copy import deepcopy
 
 import pyfar
 
@@ -72,9 +71,6 @@ class Coordinates(object):
                  weights=None, sh_order=None, comment=None):
         """
         Init coordinates container with a set of three points and meta data.
-
-        Input Values
-        ------------
 
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
@@ -160,9 +156,6 @@ class Coordinates(object):
         """
         Set coordinate points in cartesian coordinate systems.
 
-        Input Values
-        ------------
-
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
 
@@ -206,9 +199,6 @@ class Coordinates(object):
         """
         Get coordinate points in cartesian coordinate systems.
 
-        Output Values
-        -------------
-
         The points `p` that are returned are defined by the coordinate system,
         i.e., the `domain` and `convention`:
 
@@ -238,14 +228,14 @@ class Coordinates(object):
 
         Returns
         -------
-        points np.array
+        points : np.array
             array that holds the coordinate points. points[...,0] holds the
             points for the first coordinate, points[...,1] the points for the
             second, and points[...,2] the points for the third coordinate.
 
         Note
         ----
-        The current and all availanle coordinate systems can be seen with
+        The current and all available coordinate systems can be seen with
 
         >>> c = Coordinates()
         >>> c.systems()
@@ -313,9 +303,6 @@ class Coordinates(object):
         """
         Set coordinate points in spherical coordinate systems.
 
-        Input Values
-        ------------
-
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
 
@@ -364,9 +351,6 @@ class Coordinates(object):
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         Get coordinate points in spherical coordinate systems.
-
-        Output Values
-        --------------
 
         The points `p` that are returned are defined by the coordinate system,
         i.e., the `domain` and `convention`:
@@ -478,9 +462,6 @@ class Coordinates(object):
         """
         Set coordinate points in cylindrical coordinate systems.
 
-        Input Values
-        ------------
-
         The points that enter the Coordinates object are defined by the
         coordinate system, i.e., the `domain` and `convention`:
 
@@ -523,9 +504,6 @@ class Coordinates(object):
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         Get coordinate points in cylindircal coordinate system.
-
-        Output Values
-        -------------
 
         The points `p` that are returned are defined by the coordinate system,
         i.e., the `domain` and `convention`:
@@ -1139,7 +1117,7 @@ class Coordinates(object):
 
     def copy(self):
         """Return a deep copy of the Coordinates object."""
-        return utils.copy(self)
+        return deepcopy(self)
 
     def _encode(self):
         """Return dictionary for the encoding."""
@@ -1632,9 +1610,9 @@ class Coordinates(object):
         return kdtree
 
     def __getitem__(self, index):
-        """Return mutable slice of Coordinates object at index."""
+        """Return copied slice of Coordinates object at index."""
 
-        new = self
+        new = self.copy()
         # slice points
         new._points = new._points[index]
         # slice weights
@@ -1650,7 +1628,7 @@ class Coordinates(object):
         if self._system == new_system:
             return self.get_cart()
         # copy to avoid changing the coordinate system of the original object
-        return copy.deepcopy(self).get_cart()
+        return self.copy().get_cart()
 
     def __repr__(self):
         """Get info about Coordinates object."""

@@ -292,7 +292,8 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
         default is 'lowpass'.
     norm : str
         Critical frequency normalization:
-        ``phase``
+
+        'phase'
             The filter is normalized such that the phase response reaches its
             midpoint at angular (e.g. rad/s) frequency `Wn`. This happens for
             both low-pass and high-pass filters, so this is the
@@ -300,15 +301,15 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
             The magnitude response asymptotes are the same as a Butterworth
             filter of the same order with a cutoff of `Wn`.
             This is the default, and matches MATLAB's implementation.
-        ``delay``
+        'delay'
             The filter is normalized such that the group delay in the passband
             is 1/`Wn` (e.g., seconds). This is the "natural" type obtained by
             solving Bessel polynomials.
-        ``mag``
+        'mag'
             The filter is normalized such that the gain magnitude is -3 dB at
             angular frequency `Wn`.
 
-        The default is ``phase``.
+        The default is 'phase'.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is None. The default
         is None.
@@ -359,8 +360,8 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     https://github.com/spatialaudio/digital-signal-processing-lecture
     (audiofilter.py in the filter_design lecture)
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     signal : Signal, None
         The Signal to be filterd. Pass None to create the filter without
         applying it.
@@ -374,13 +375,16 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     peq_type : str
         Defines the bandwidth/quality. The default is 'II'
 
-        I   - not recommended. Also known as 'constant Q'
-        II  - defines the bandwidth by the points 3 dB below the maximum if the
-              gain is positve and 3 dB above the minimum if the gain is
-              negative. Also known as 'symmetric'
-        III - defines the bandwidth by the points at gain/2. Also known as
-              'half pad loss'.
-    qualtiy_warp : str
+        'I'
+            not recommended. Also known as 'constant Q'
+        'II'
+            defines the bandwidth by the points 3 dB below the maximum if the
+            gain is positive and 3 dB above the minimum if the gain is
+            negative. Also known as 'symmetric'
+        'III'
+            defines the bandwidth by the points at gain/2. Also known as
+            'half pad loss'.
+    quality_warp : str
         Sets the pre-warping for the quality ('cos', 'sin', or 'tan'). The
         default is 'cos'.
     sampling_rate : None, number
@@ -443,8 +447,8 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     https://github.com/spatialaudio/digital-signal-processing-lecture
     (audiofilter in the filter_design lecture)
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     signal : Signal, None
         The Signal to be filterd. Pass None to create the filter without
         applying it.
@@ -455,12 +459,14 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     order : number
         The shelve order. Must be 1 or 2.
     shelve_type : str
-        Defines the characteristik frequency. The default is 'I'
+        Defines the characteristic frequency. The default is 'I'
 
-        I   - defines the characteristic frequency 3 dB below the gain value if
-              the gain is positive and 3 dB above the gain value otherwise
-        II  - defines the characteristic frequency at 3 dB if the gain is
-              positive and at -3 dB if the gain is negative.
+        I
+            defines the characteristic frequency 3 dB below the gain value if
+            the gain is positive and 3 dB above the gain value otherwise
+        II
+            defines the characteristic frequency at 3 dB if the gain is
+            positive and at -3 dB if the gain is negative.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is None. The default
         is None.
@@ -488,8 +494,8 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     https://github.com/spatialaudio/digital-signal-processing-lecture
     (audiofilter in the filter_design lecture)
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     signal : Signal, None
         The Signal to be filterd. Pass None to create the filter without
         applying it.
@@ -500,13 +506,16 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     order : number
         The shelve order. Must be 1 or 2.
     shelve_type : str
-        Defines the characteristik frequency. The default is 'I'
+        Defines the characteristic frequency. The default is 'I'
 
-        I   - defines the characteristic frequency 3 dB below the gain value if
-              the gain is positive and 3 dB above the gain value otherwise
-        II  - defines the characteristic frequency at 3 dB if the gain is
-              positive and at -3 dB if the gain is negative.
-        III - defines the characteristic frequency at gain/2 dB
+        'I'
+            defines the characteristic frequency 3 dB below the gain value if
+            the gain is positive and 3 dB above the gain value otherwise
+        'II'
+            defines the characteristic frequency at 3 dB if the gain is
+            positive and at -3 dB if the gain is negative.
+        'III'
+            defines the characteristic frequency at gain/2 dB
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is None. The default
         is None.
@@ -527,7 +536,7 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 
 def crossover(signal, N, frequency, sampling_rate=None):
     """
-    Create and apply Linkwitz-Riley crossover network  [1]_, [2]_.
+    Create and apply Linkwitz-Riley crossover network  [#]_, [#]_.
 
     Linwitz-Riley crossover filters are desined by cascading Butterworth
     filters of order `N/2`. `N` must this be even.
@@ -559,9 +568,9 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     References
     ----------
-    .. [1] S. H. Linkwitz, 'Active crossover networks for noncoincident
+    .. [#] S. H. Linkwitz, 'Active crossover networks for noncoincident
            drivers,' J. Audio Eng. Soc., vol. 24, no. 1, pp. 2–8, Jan. 1976.
-    .. [2] D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
+    .. [#] D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
            2005.
     """
 
@@ -800,13 +809,13 @@ def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     if num_fractions == 1:
         nominal = np.array([
             31.5, 63, 125, 250, 500, 1e3,
-            2e3, 4e3, 8e3, 16e3], dtype=np.float)
+            2e3, 4e3, 8e3, 16e3], dtype=float)
     elif num_fractions == 3:
         nominal = np.array([
             25, 31.5, 40, 50, 63, 80, 100, 125, 160,
             200, 250, 315, 400, 500, 630, 800, 1000,
             1250, 1600, 2000, 2500, 3150, 4000, 5000,
-            6300, 8000, 10000, 12500, 16000, 20000], dtype=np.float)
+            6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
 
     reference_freq = 1e3
     octave_ratio = 10**(3/10)
