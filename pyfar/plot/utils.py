@@ -8,15 +8,15 @@ from pyfar.plot._interaction import PlotParameter
 
 def plotstyle(style='light'):
     """
-    Get the fullpath of the pyfar plotstyles 'light' or 'dark'.
+    Get the fullpath of the pyfar plotstyles ``light`` or ``dark``.
 
     The plotstyles are defined by mplstyle files, which is Matplotlibs format
-    to define styles. By default, pyfar uses the 'light' plotstyle.
+    to define styles. By default, pyfar uses the ``light`` plotstyle.
 
     Parameters
     ----------
     style : str
-        'light', or 'dark'
+        ``light``, or ``dark``
 
     Returns
     -------
@@ -41,8 +41,8 @@ def plotstyle(style='light'):
 def context(style='light', after_reset=False):
     """Context manager for using plot styles temporarily.
 
-    This context manager supports the two pyfar styles 'light' and 'dark'. It
-    is a wrapper for ``matplotlib.pyplot.style.context()``.
+    This context manager supports the two pyfar styles ``light`` and ``dark``.
+    It is a wrapper for ``matplotlib.pyplot.style.context()``.
 
     Parameters
     ----------
@@ -51,10 +51,11 @@ def context(style='light', after_reset=False):
 
         +------+-------------------------------------------------------------+
         | str  | The name of a style or a path/URL to a style file. For a    |
-        |      | list of available style names, see `style.available`.       |
+        |      | list of available style names, see                          |
+        |      | ``matplotlib.style.available``.                             |
         +------+-------------------------------------------------------------+
         | dict | Dictionary with valid key/value pairs for                   |
-        |      | `matplotlib.rcParams`.                                      |
+        |      | ``matplotlib.rcParams``.                                    |
         +------+-------------------------------------------------------------+
         | Path | A path-like object which is a path to a style file.         |
         +------+-------------------------------------------------------------+
@@ -63,7 +64,7 @@ def context(style='light', after_reset=False):
         +------+-------------------------------------------------------------+
 
     after_reset : bool
-        If True, apply style after resetting settings to their defaults;
+        If ``True``, apply style after resetting settings to their defaults;
         otherwise, apply style on top of the current settings.
 
     See also
@@ -95,9 +96,9 @@ def use(style="light"):
     """
     Use plot style settings from a style specification.
 
-    The style name of 'default' is reserved for reverting back to
+    The style name of ``default`` is reserved for reverting back to
     the default style settings. This is a wrapper for ``matplotlib.style.use``
-    that supports the pyfar plot styles 'light' and 'dark'.
+    that supports the pyfar plot styles ``light`` and ``dark``.
 
     Parameters
     ----------
@@ -106,10 +107,11 @@ def use(style="light"):
 
         +------+-------------------------------------------------------------+
         | str  | The name of a style or a path/URL to a style file. For a    |
-        |      | list of available style names, see `style.available`.       |
+        |      | list of available style names, see                          |
+        |      | ``matplotlib.style.available``.                             |
         +------+-------------------------------------------------------------+
         | dict | Dictionary with valid key/value pairs for                   |
-        |      | `matplotlib.rcParams`.                                      |
+        |      | ``matplotlib.rcParams``.                                    |
         +------+-------------------------------------------------------------+
         | Path | A path-like object which is a path to a style file.         |
         +------+-------------------------------------------------------------+
@@ -123,7 +125,7 @@ def use(style="light"):
 
     Notes
     -----
-    This updates the `.rcParams` with the settings from the style. `.rcParams`
+    This updates the `rcParams` with the settings from the style. `rcParams`
     not defined in the style are kept.
 
     Examples
@@ -154,7 +156,7 @@ def color(color: str):
     color : str
         Available colors are purple ,blue, turquoise, green, light green,
         yellow, orange, and red. The colors can be specified by their full
-        name, e.g., 'red' or the first letter, e.g., 'r'.
+        name, e.g., ``red`` or the first letter, e.g., ``r``.
 
     Returns
     -------
@@ -180,56 +182,11 @@ def shortcuts(show=True):
     Note that shortcuts are only available if using an interactive backend in
     Matplotlib, e.g., by ``%matplotlib qt``.
 
-    Use these shortcuts to show different plots
-
-    - 1, T: pyfar.plot.time
-    - 2, F: pyfar.plot.freq
-    - 3, P: pyfar.plot.phase
-    - 4, G: pyfar.plot.group_delay
-    - 5, S: pyfar.plot.spectrogram
-    - 6, ctrl+T, ctrl+F: pyfar.plot.time_freq
-    - 7, ctrl+P: pyfar.plot.freq_phase
-    - 8, ctrl+G: pyfar.plot.freq_group_delay
-
-    Use these shortcuts to control the plot
-
-    - left: move x-axis view to the left
-    - right: move x-axis view to the right
-    - up: move y-axis view upwards
-    - down: y-axis view downwards
-    - +, ctrl+shift+up: move colormap range up
-    - -, ctrl+shift+down: move colormap range down
-    - shift+right: zoom in x-axis
-    - shift+left: zoom out x-axis
-    - shift+up: zoom out y-axis
-    - shift+down: zoom in y-axis
-    - \*, alt+shift+up: zoom colormap range in
-    - _, alt+shift+down: zoom colormap range out
-    - X: toggle between linear and logarithmic x-axis
-    - Y: toggle between linear and logarithmic y-axis
-    - C: toggle between linear and logarithmic color data
-    - A: toggle between plotting all channels and plotting single channels
-    - ., ]: show next channel
-    - ,, [: show previous channel
-
-    Notes on plot controls
-
-    - Moving and zooming the x and y axes is supported by all plots.
-    - Moving and zooming the colormap is only supported by plots that have a
-      colormap.
-    - Toggling the x-axis is supported by: plot.time, plot.freq, plot.phase,
-      plot.group_delay, plot.spectrogram, plot.time_freq, plot.freq_phase,
-      plot.freq_group_delay
-    - Toggling the y-axis is supported by: plot.time, plot.freq, plot.phase,
-      plot.group_delay, plot.spectrogram, plot.time_freq, plot.freq_phase,
-      plot.freq_group_delay
-    - Toggling the colormap is supported by: plot.spectrogram
-
     Parameters
     ----------
     show : bool, optional
         print the keyboard shortcuts to the default console. The default is
-        True.
+        ``True``.
 
     Returns
     -------

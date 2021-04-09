@@ -7,9 +7,9 @@ inspecting audio data and generating scientific plots.
 Keyboard shortcuts are available for to ease the inspection
 (See :py:func:`pyfar.plot.shortcuts`).
 
-pyfar.plot is based on `Matplotlib <https://matplotlib.org>`_ and all plot
-functions return Matplotlib axis objects for a flexible customization of plots.
-In addition most plot functions pass keyword arguments to Matplotlib.
+:py:mod:`pyfar.plot` is based on `Matplotlib <https://matplotlib.org>`_ and
+all plot functions return Matplotlib axis objects for a flexible customization
+of plots. In addition most plot functions pass keyword arguments to Matplotlib.
 
 This is an example for customizing the line color and axis limits:
 
