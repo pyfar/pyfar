@@ -184,8 +184,8 @@ Optional fields that are often used are
 
 Here are a few tips to make things run smoothly
 
-- Use the tags ``:py:func:``, ``:py:mod:``, and ``:py:class:`` to reference functions, modules, and classes (e.g. ``:py:func:`pyfar.plot.time``` or ``:py:func:`plot time data <pyfar.plot.time>```
-- Code snippets, modules, classes, functions and values are marked by double ticks \`\` to appear in mono spaced font, e.g., ``x=3`` or ``pyfar.Signal``.
+- Use the tags ``:py:func:``, ``:py:mod:``, and ``:py:class:`` to reference pyfar functions, modules, and classes (e.g. ``:py:func:`pyfar.plot.time``` or ``:py:func:`plot time data <pyfar.plot.time>```
+- Code snippets and values as well as external modules, classes, functions are marked by double ticks \`\` to appear in mono spaced font, e.g., ``x=3`` or ``pyfar.Signal``.
 - Parameters, returns, and attributes are marked by single ticks \` to appear as emphasized text, e.g., *unit*.
 - Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
 - Do not use footnotes in the short summary. Only use footnotes in the extended summary if there is a short summary. Otherwise, it messes with the auto-footnotes.
