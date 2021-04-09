@@ -927,8 +927,8 @@ class Coordinates():
         is returned refers to the reshaped coordinate points. To access the
         points for example use
 
-        >>> points_reshaped = self.get_sph().reshape((self.csize, 3))
-        >>> points_reshaped[index]
+        ``points_reshaped = points.get_sph().reshape((points.csize, 3))``
+        ``points_reshaped[index]``
 
         Examples
         --------
