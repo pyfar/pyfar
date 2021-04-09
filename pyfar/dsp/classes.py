@@ -105,7 +105,7 @@ class Filter(object):
             if coefficients is None:
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
-            state = atleast_3d_first_dim(state)
+            state = np.atleast_2d(state)
             self._initialized = True
         else:
             self._initialized = False
@@ -120,7 +120,7 @@ class Filter(object):
 
         self._comment = comment
 
-    def initialize(self):
+    def init_state(self, state='empty'):
         raise NotImplementedError("Abstract class method")
 
     @property
@@ -184,39 +184,39 @@ class Filter(object):
                 "The sampling rates of filter and signal do not match")
 
         if reset is True:
-            self.reset()
+            self.reset_state()
 
         if self.size > 1:
-            filtered_signal_data = np.broadcast_to(
+            filtered = np.broadcast_to(
                 signal.time,
                 (self.shape[0], *signal.time.shape))
-            filtered_signal_data = filtered_signal_data.copy()
+            filtered = filtered.copy()
         else:
-            filtered_signal_data = signal.time.copy()
+            filtered = signal.time.copy()
 
         if self.state is not None:
+            new_state = np.zeros_like(self._state)
             for idx, (coeff, state) in enumerate(
                     zip(self._coefficients, self._state)):
-                filtered_signal_data[idx, ...], new_state = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], state)
+                filtered[idx, ...], new_state[idx, ...] = self.filter_func(
+                    coeff, filtered[idx, ...], zi=state)
+            self._state = new_state
+
         else:
             for idx, coeff in enumerate(self._coefficients):
-                filtered_signal_data[idx, ...] = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], zi=None)
+                filtered[idx, ...] = self.filter_func(
+                    coeff, filtered[idx, ...], zi=None)
 
         filtered_signal = deepcopy(signal)
         if (signal.time.ndim == 2) and (signal.cshape[0] == 1):
-            filtered_signal_data = np.squeeze(filtered_signal_data)
-        filtered_signal.time = filtered_signal_data
+            filtered = np.squeeze(filtered)
+        filtered_signal.time = filtered
 
         return filtered_signal
 
-    def reset(self):
+    def reset_state(self):
         if self._state is not None:
             self._state = np.zeros_like(self._state)
-        else:
-            warnings.warn(
-                "No previous state was set. Initialize a filter state first.")
 
     @property
     def comment(self):
@@ -256,6 +256,7 @@ class FilterFIR(Filter):
             self,
             coefficients,
             sampling_rate,
+            state=None,
             filter_func=lfilter):
         """
         Initialize a general Filter object.
@@ -278,12 +279,22 @@ class FilterFIR(Filter):
         a[..., 0] = 1
         coeff = np.stack((b, a), axis=-2)
 
-        super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
+        super().__init__(
+            coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
         self._FILTER_FUNCS = {
             'default': lfilter,
             'zerophase': filtfilt}
         self._filter_func = filter_func
+
+    def init_state(self, state):
+        n_coeff = self._coefficients.shape[-1]
+        state = np.zeros(
+            (self._coefficients.shape[0], n_coeff-1))
+        if state == 'step':
+            for idx, coeff in enumerate(self._coefficients):
+                state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
+        return super().init_state(state=state)
 
     @property
     def filter_func(self):
@@ -305,6 +316,7 @@ class FilterIIR(Filter):
             self,
             coefficients,
             sampling_rate,
+            state=None,
             filter_func=lfilter):
         """IIR filter
         Initialize a general Filter object.
@@ -323,12 +335,22 @@ class FilterIIR(Filter):
             The state of the filter from a priory knowledge.
         """
         coeff = np.atleast_2d(coefficients)
-        super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
+        super().__init__(
+            coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
         self._FILTER_FUNCS = {
             'default': lfilter,
             'zerophase': filtfilt}
         self._filter_func = filter_func
+
+    def init_state(self, state):
+        n_coeff = self._coefficients.shape[-1]
+        state = np.zeros(
+            (self._coefficients.shape[0], n_coeff-1))
+        if state == 'step':
+            for idx, coeff in enumerate(self._coefficients):
+                state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
+        return super().init_state(state=state)
 
     @property
     def filter_func(self):
@@ -349,6 +371,7 @@ class FilterSOS(Filter):
             self,
             coefficients,
             sampling_rate,
+            state=None,
             filter_func=sosfilt):
         """
         Initialize a general Filter object.
@@ -372,8 +395,11 @@ class FilterSOS(Filter):
             raise ValueError(
                 "The coefficients are not in line with a second order",
                 "section filter structure.")
+
+        if state is not None:
+            state = atleast_3d_first_dim(state)
         super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate)
+            coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
         self._FILTER_FUNCS = {
             'default': sosfilt,
@@ -381,6 +407,18 @@ class FilterSOS(Filter):
         }
         self._filter_func = filter_func
 
+    def init_state(self, state='zeros'):
+        state = np.zeros(
+            (self._coefficients.shape[0], self.n_sections, 2))
+        if state == 'step':
+            for idx, coeff in enumerate(self._coefficients):
+                state[idx, ...] = spsignal.sosfilt_zi(coeff)
+        return super().init_state(state=state)
+
     @property
     def filter_func(self):
         return self._filter_func
+
+    @property
+    def n_sections(self):
+        return self._coefficients.shape[-2]
