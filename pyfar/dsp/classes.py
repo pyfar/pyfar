@@ -50,6 +50,19 @@ def extend_sos_coefficients(sos, order):
     """Extend a set of SOS filter coefficients to match a required filter order
     by adding sections with coefficients resulting in an ideal frequency
     response.
+
+    Parameters
+    ----------
+    sos : array-like
+        The second order section filter coefficients.
+    order : int
+        The order to which the coefficients are to be extended.
+
+    Returns
+    -------
+    sos_ext : array-like
+        The extended second order section coefficients.
+
     """
     sos_order = sos.shape[0]
     if sos_order == order:
@@ -93,8 +106,8 @@ class Filter(object):
 
         Returns
         -------
-        filter : Filter
-            The filter object
+        Filter
+            The filter object.
 
         """
         super().__init__()
@@ -265,6 +278,11 @@ class FilterFIR(Filter):
             in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
+
+        Returns
+        -------
+        FilterFIR
+            The FIR filter object.
         """
         b = np.atleast_2d(coefficients)
         a = np.zeros_like(b)
@@ -314,6 +332,11 @@ class FilterIIR(Filter):
             in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
+
+        Returns
+        -------
+        FilterIIR
+            The IIR filter object.
         """
         coeff = np.atleast_2d(coefficients)
         super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
@@ -359,6 +382,10 @@ class FilterSOS(Filter):
         state : array, optional
             The state of the filter from a priory knowledge.
 
+        Returns
+        -------
+        FilterSOS
+            The SOS filter object.
         """
         coeff = np.atleast_2d(coefficients)
         if coeff.shape[-1] != 6:
