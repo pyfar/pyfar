@@ -801,9 +801,9 @@ class Signal(FrequencyData, TimeData):
         return self.n_samples
 
     def __iter__(self):
-        """Iterator for audio objects.
+        """Iterator for Signal objects.
 
-        Iterate across the first dimension of an audio object. The actual
+        Iterate across the first dimension of a Signal object. The actual
         iteration is handled through numpy's array iteration.
 
         Examples
