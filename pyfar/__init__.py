@@ -27,7 +27,7 @@ __all__ = [
     'Orientations',
     'FilterFIR',
     'FilterIIR',
-    'FilterSOS'
+    'FilterSOS',
     'plot',
     'samplings',
     'io',
