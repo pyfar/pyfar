@@ -17,7 +17,8 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         Parameters
         ----------
         sampling : Coordinates
-            Spherical sampling as :py:class:`Coordinates <pyfar.coordinates.Coordinates>` object.
+            Spherical sampling as
+            :py:class:`Coordinates <pyfar.coordinates.Coordinates>` object.
         round_decimals : int
             Number of decimals to be rounded for checking for equal radius.
             The default is ``12``.
@@ -69,8 +70,8 @@ def calculate_sph_voronoi_weights(
     Calculate sampling weights for numeric integration.
 
     This is wrapper for ``scipy.spatial.SphericalVoronoi`` and uses the class
-    method ``calculate_areas`` to calculate the weights. It requires a spherical
-    sampling grid with a single radius.
+    method ``calculate_areas`` to calculate the weights. It requires a
+    spherical sampling grid with a single radius.
 
     Parameters
     ----------
