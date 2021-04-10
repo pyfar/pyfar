@@ -6,8 +6,8 @@ Modules
 
    pyfar.dsp
    pyfar.dsp.fft
+   pyfar.dsp.filter
    pyfar.io
    pyfar.plot
    pyfar.signals
-   pyfar.spatial
-   pyfar.spatial.samplings
+   pyfar.samplings

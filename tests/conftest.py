@@ -4,7 +4,7 @@ import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
-from pyfar.spatial import SphericalVoronoi
+from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
 from pyfar import Coordinates
 from pyfar import FrequencyData, TimeData

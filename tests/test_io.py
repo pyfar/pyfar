@@ -12,7 +12,7 @@ import scipy.io.wavfile as wavfile
 from pyfar import io
 from pyfar import Signal
 from pyfar import Coordinates
-from pyfar.spatial.spatial import SphericalVoronoi
+from pyfar.samplings import SphericalVoronoi
 import pyfar.dsp.classes as fo
 from pyfar import FrequencyData, TimeData
 

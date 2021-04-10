@@ -8,42 +8,57 @@ from . import _interaction as ia
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
          style='light', **kwargs):
-    """Plot the time data of a signal.
+    """Plot the time signal.
 
-    Plots `prefix * log10(signal.time / log_reference)` if dB is True
-    `signal.time` otherwise.
+    Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
+    ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
     signal : Signal, TimeData
-        pyfar Signal or TimeData object.
-    dB : boolean
-        Indicate if the data should be plotted in dB. The default is False.
+        :py:class:`Signal<pyfar.signal.Signal>` or
+        :py:class:`TimeData<pyfar.signal.TimeData>` object.
+    dB : bool
+        Indicate if the data should be plotted in dB in which case
+        ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
+        default is ``False``.
     log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is 20.
+        Prefix for calculating the logarithmic time data. The default is
+        ``20``.
     log_reference : integer
-        Reference for calculating the logarithmic time data. The default is 1.
+        Reference for calculating the logarithmic time data. The default is
+        ``1``.
     unit : str, None
-        Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
-        The default is None, which sets the unit to 's' (seconds), 'ms'
-        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. The default is None, which uses the current figure
-        ore creates a new one if no figure exists.
+        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
+        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
+    Examples
     --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+
+    >>> import pyfar
+    >>>
+    >>> sine = pyfar.signals.sine(100, 4410)
+    >>> pyfar.plot.time(sine)
+
+    .. plot::
+
+        import pyfar
+        sine = pyfar.signals.sine(100, 4410)
+        pyfar.plot.time(sine)
     """
 
     with context(style):
@@ -64,41 +79,56 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
 def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
          ax=None, style='light', **kwargs):
     """
-    Plot the logarithmic absolute spectrum on the positive frequency axis.
+    Plot the magnitude spectrum.
 
-    Plots `prefix * log10(signal.freq / log_reference)` if dB is True and
-    `signal.req` otherwise.
+    Plots ``abs(signal.freq)`` and passes keyword arguments (`kwargs`) to
+    ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
     signal : Signal, FrequencyData
-        pyfar Signal or FrequencyData object.
-    dB : boolean
-        Indicate if the data should be plotted in dB. The default is True.
+        :py:class:`Signal<pyfar.signal.Signal>` or
+        :py:class:`FrequencyData<pyfar.signal.FrequencyData>` object.
+    dB : bool
+        Indicate if the data should be plotted in dB in which case
+        ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
+        The default is ``True``.
     log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is 20.
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``20``.
     log_reference : integer, float
-        Reference for calculating the logarithmic time data. The default is 1.
+        Reference for calculating the logarithmic frequency data. The default
+        is ``1``.
     xscale : str
-        'linear' or 'log' to plot on a linear or logarithmic x-axis. The
-        default is 'log'.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. The default is None, which uses the current figure
-        ore creates a new one if no figure exists.
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
-    --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+    Example
+    -------
+
+    >>> import pyfar
+    >>>
+    >>> sine = pyfar.signals.sine(100, 4410)
+    >>> pyfar.plot.freq(sine)
+
+    .. plot::
+
+        import pyfar
+        sine = pyfar.signals.sine(100, 4410)
+        pyfar.plot.freq(sine)
     """
 
     with context(style):
@@ -118,36 +148,52 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
 def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
           style='light', **kwargs):
-    """Plot the phase of the spectrum on the positive frequency axis.
+    """Plot the phase of the spectrum.
+
+    Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
+    ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
     signal : Signal, FrequencyData
-        pyfar Signal or FrequencyData object.
-    deg : Boolean
-        Flag to plot the phase in degrees. The default is False.
-    unwrap : Boolean, str
+        :py:class:`Signal<pyfar.signal.Signal>` or
+        :py:class:`FrequencyData<pyfar.signal.FrequencyData>` object.
+    deg : bool
+        Plot the phase in degrees. The default is ``False``, which plots the
+        phase in radians.
+    unwrap : bool, str
         True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
-        default is False.
+        default is ``False``, which plots the wrapped phase.
     xscale : str
-        'linear' or 'log' to plot on a linear or logarithmic x-axis. The
-        default is 'log'.
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
     ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
-    --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+    Example
+    -------
+
+    >>> import pyfar
+    >>>
+    >>> impulse = pyfar.signals.impulse(100, 10)
+    >>> pyfar.plot.phase(impulse, unwrap=True)
+
+    .. plot::
+
+        import pyfar
+        impulse = pyfar.signals.impulse(100, 10)
+        pyfar.plot.phase(impulse, unwrap=True)
     """
 
     with context(style):
@@ -165,36 +211,48 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
 
 def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
                 **kwargs):
-    """Plot the group delay on the positive frequency axis.
+    """Plot the group delay.
+
+    Passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object.
+        :py:class:`Signal<pyfar.signal.Signal>` object.
     unit : str, None
-        Unit of the group delay. Can be 's', 'ms', 'mus', or 'samples'.
-        The default is None, which sets the unit to 's' (seconds), 'ms'
-        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
+        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
+        (milli seconds), or ``mus`` (micro seconds) depending on the data.
     xscale : str
-        'linear' or 'log' to plot on a linear or logarithmic x-axis. The
-        default is 'log'.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. The default is None, which uses the current figure
-        ore creates a new one if no figure exists.
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
+    Examples
     --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+
+    >>> import pyfar
+    >>>
+    >>> impulse = pyfar.signals.impulse(100, 10)
+    >>> pyfar.plot.group_delay(impulse, unit='samples')
+
+    .. plot::
+
+        import pyfar
+        impulse = pyfar.signals.impulse(100, 10)
+        pyfar.plot.group_delay(impulse, unit='samples')
     """
 
     with context(style):
@@ -214,45 +272,66 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
                 yscale='linear', unit=None, window='hann', window_length=1024,
                 window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
                 ax=None, style='light'):
-    """Plot the magnitude spectrum versus time.
+    """Plot blocks of the magnitude spectrum versus time.
 
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object.
-    dB : Boolean
-        Flag to plot the logarithmic magnitude specturm. The default is True.
+        :py:class:`Signal<pyfar.signal.Signal>` object.
+    dB : bool
+        Indicate if the data should be plotted in dB in which case
+        ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
+        The default is ``True``.
     log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is 20.
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``20``.
     log_reference : integer
-        Reference for calculating the logarithmic time data. The default is 1.
+        Reference for calculating the logarithmic frequency data. The default
+        is ``1``.
     yscale : str
-        'linear' or 'log' to plot on a linear or logarithmic y-axis. The
-        default is 'linear'.
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``linear``.
     unit : str, None
-        Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
-        The default is None, which sets the unit to 's' (seconds), 'ms'
-        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
+        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
+        (milli seconds), or ``mus`` (micro seconds) depending on the data.
     window : str
-        Specifies the window (See scipy.signal.get_window). The default is
-        'hann'.
+        Specifies the window that is applied to each block of the time data
+        before applying the Fourier transform. The default is ``hann``. See
+        ``scipy.signal.get_window`` for a list of possible windows.
     window_length : integer
-        Specifies the window length in samples. The default ist 1024.
+        Specifies the window/block length in samples. The default is ``1024``.
     window_overlap_fct : double
-        Ratio of points to overlap between fft segments [0...1]. The default is
-        0.5
+        Ratio of points to overlap between blocks [0...1]. The default is
+        ``0.5``, which would result in 512 samples overlap for a window length
+        of 1024 samples.
     cmap : matplotlib.colors.Colormap(name, N=256)
-        Colormap for spectrogram. Defaults to matplotlibs 'magma' colormap.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. If not given, the current figure will be used.
+        Colormap for spectrogram. Defaults to matplotlibs ``magma`` colormap.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
+
+    Example
+    -------
+
+    >>> import pyfar
+    >>>
+    >>> sweep = pyfar.signals.linear_sweep(2**14, [0, 22050])
+    >>> pyfar.plot.spectrogram(sweep)
+
+    .. plot::
+
+        import pyfar
+        sweep = pyfar.signals.linear_sweep(2**14, [0, 22050])
+        pyfar.plot.spectrogram(sweep)
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -282,45 +361,59 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
 
+
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object.
-    dB_time : Boolean
-        Flag to plot the logarithmic time signal. The default is False.
-    dB_freq : Boolean
-        Flag to plot the logarithmic magnitude specturm. The default is True.
+        :py:class:`Signal<pyfar.signal.Signal>` object.
+    dB_time : bool
+        Indicate if the data should be plotted in dB in which case
+        ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
+        default is ``False``.
+    dB_freq : bool
+        Indicate if the data should be plotted in dB in which case
+        ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
+        The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic time/frequency data.
-        The default is 20.
+        The default is ``20``.
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
-        The default is 1.
+        The default is ``1``.
     xscale : str
-        'linear' or 'log' to plot on a linear or logarithmic x-axis for the
-        frequency plot. The default is 'log'.
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
     unit : str
-        Unit of the time axis. Can be 's', 'ms', 'mus', or 'samples'.
-        The default is None, which sets the unit to 's' (seconds), 'ms'
-        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
-    ax : matplotlib.pyplot.axes object
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. The default is None, which uses the current figure
-        ore creates a new one if no figure exists.
+        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
+        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
+    Examples
     --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+
+    >>> import pyfar
+    >>>
+    >>> sine = pyfar.signals.sine(100, 4410)
+    >>> pyfar.plot.time_freq(sine)
+
+    .. plot::
+
+        import pyfar
+        sine = pyfar.signals.sine(100, 4410)
+        pyfar.plot.time_freq(sine)
     """
 
     with context(style):
@@ -346,33 +439,38 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     Parameters
     ----------
     signal : Signal, FrequencyData
-        pyfar Signal or FrequencyData object.
-    dB : Boolean
-        Flag to plot the logarithmic magnitude specturm. The default is True.
+        :py:class:`Signal<pyfar.signal.Signal>` or
+        :py:class:`FrequencyData<pyfar.signal.FrequencyData>` object.
+    dB : bool
+        Indicate if the data should be plotted in dB in which case
+        ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
+        The default is ``True``.
     log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is 20.
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``20``.
     log_reference : integer
-        Reference for calculating the logarithmic time data. The default is 1.
-    deg : Boolean
-        Flag to plot the phase in degrees. The default is False.
-    unwrap : Boolean, str
+        Reference for calculating the logarithmic frequency data. The default
+        is ``1``.
+    deg : bool
+        Flag to plot the phase in degrees. The default is ``False``.
+    unwrap : bool, str
         True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
-        default is False.
+        default is ``False``.
     xscale : str
-        'linear' or 'log' to plot on a linear or logarithmic x-axis. The
-        default is 'log'.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. The default is None, which uses the current figure
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current figure
         ore creates a new one if no figure exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are forwarded to matplotlib.pyplot.plot
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
     See Also
@@ -401,40 +499,56 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
                      **kwargs):
     """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
 
+    Passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
+
     Parameters
     ----------
     signal : Signal, FrequencyData
-        pyfar Signal or FrequencyData object.
-    dB : Boolean
-        Flag to plot the logarithmic magnitude specturm. The default is True.
+        :py:class:`Signal<pyfar.signal.Signal>` or
+        :py:class:`FrequencyData<pyfar.signal.FrequencyData>` object.
+    dB : bool
+        Flag to plot the logarithmic magnitude spectrum. The default is
+        ``True``.
     log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is 20.
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``20``.
     log_reference : integer
-        Reference for calculating the logarithmic time data. The default is 1.
+        Reference for calculating the logarithmic frequency data. The default
+        is ``1``.
     unit : str
-        Unit of the group delay. Can be 's', 'ms', 'mus', or 'samples'.
-        The default is None, which sets the unit to 's' (seconds), 'ms'
-        (milli seconds), or 'mus' (micro seconds) depending on the maximum.
+        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
+        (milli seconds), or ``mus`` (micro seconds) depending on the data.
     xscale : str
-        'linear' or 'log' to plot on a linear or logarithmic x-axis. The
-        default is 'log'.
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. The default is None, which uses the current figure
-        ore creates a new one if no figure exists.
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
+    Examples
     --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+
+    >>> import pyfar
+    >>>
+    >>> impulse = pyfar.signals.impulse(100, 10)
+    >>> pyfar.plot.freq_group_delay(impulse, unit='samples')
+
+    .. plot::
+
+        import pyfar
+        impulse = pyfar.signals.impulse(100, 10)
+        pyfar.plot.freq_group_delay(impulse, unit='samples')
     """
 
     with context(style):
@@ -455,41 +569,51 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
 
 def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     """
-    Generate subplot with a custom layout based on a list of plot function
-    handles. The subplot layout is taken from the shape of the plot function
-    handle list.
+    Plot multiple pyfar plots with a custom layout and default parameters.
+
+    The plots are passed as a list of :py:mod:`pyfar.plot` function handles.
+    The subplot layout is taken from the shape of that list
+    (see example below).
 
     Parameters
     ----------
     signal : Signal
-        A pyfar Signal object
+        :py:class:`Signal<pyfar.signal.Signal>` object.
     plots : list, nested list
-        list with function handles for plotting (e.g. pyfar.plot.line.time.
-        See example below)
-    ax : matplotlib.pyplot.axes object
-        Axes to plot on. The default is None, which uses the current figure
-        ore creates a new one if no figure exists.
+        Function handles for plotting.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on. The default is ``None``, which uses the current axis
+        or creates a new figure if none exists.
     style : str
-        'light' or 'dark' to use the pyfar plot styles or style from
-        matplotlib.pyplot.available. the default is 'light'
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
     **kwargs
-        Keyword arguments that are piped to matplotlib.pyplot.plot
+        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
     Returns
     -------
-    ax : axes
+    ax : matplotlib.pyplot.axes
         List of axes handles
 
     Examples
     --------
-    >>> from pyfar import Signal
-    >>> import pyfar.plot.line as ppl
+
+    Generate a two by two subplot layout
+
+    >>> import pyfar
     >>>
-    >>> # generate a signal
-    >>> s = Signal([0, 0, 1, 0, 0, 0, 0, 0, 0, 0], 1e3)
-    >>>
-    >>> # two by two plot of time and frequency signals
-    >>> ppl.multi(s, [[ppl.time, ppl.time_dB], [ppl.freq, ppl.group_delay]])
+    >>> impulse = pyfar.signals.impulse(100, 10)
+    >>> plots = [[pyfar.plot.time, pyfar.plot.phase],
+    ...          [pyfar.plot.freq, pyfar.plot.group_delay]]
+    >>> pyfar.plot.custom_subplots(impulse, plots)
+
+    .. plot::
+
+        import pyfar
+        impulse = pyfar.signals.impulse(100, 10)
+        plots = [[pyfar.plot.time, pyfar.plot.phase],
+                 [pyfar.plot.freq, pyfar.plot.group_delay]]
+        pyfar.plot.custom_subplots(impulse, plots)
 
     """
 
