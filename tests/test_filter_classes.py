@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import numpy.testing as npt
-import pyfar.dsp.classes as fo
+import pyfar.classes.filter as fo
 from scipy import signal as spsignal
 
 

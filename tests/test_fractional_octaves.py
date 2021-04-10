@@ -5,8 +5,7 @@ import pytest
 from numpy import testing as npt
 
 from pyfar.dsp import filter
-from pyfar.dsp.classes import FilterSOS
-from pyfar import Signal
+from pyfar import FilterSOS, Signal
 from pyfar.dsp import fft
 
 

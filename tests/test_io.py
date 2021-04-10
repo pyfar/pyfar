@@ -13,7 +13,7 @@ from pyfar import io
 from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.samplings import SphericalVoronoi
-import pyfar.dsp.classes as fo
+import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData
 
 

@@ -3,7 +3,7 @@ import numpy as np
 import numpy.testing as npt
 from pyfar import Signal
 import pyfar.dsp.filter as pfilt
-import pyfar.dsp.classes as pclass
+import pyfar.classes.filter as pclass
 
 
 def test_butter(impulse):
