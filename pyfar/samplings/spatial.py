@@ -78,7 +78,7 @@ def calculate_sph_voronoi_weights(
     Uses the class method ``calculate_areas`` from :py:class:`SphericalVoronoi`
     to calculate the weights. It requires a spherical sampling grid with a
     single radius and uses ``scipy.spatial.SphericalVoronoi`` in the
-    backgournd.
+    background.
 
     Parameters
     ----------
