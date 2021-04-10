@@ -10,7 +10,11 @@ script:
   - tox
 
 deploy:
+  provider: pypi
+  username: "__token__"
   password:
     secure: hwx5YpuH8H+bpjpOK8aYHgT94MzP5+59VNQfHTJdQl7lInmbygSsxkcSzaYWlbM8Ky3whBAgAP2M6FS7loR2x0E39NGA4Pa2Megq9tp+nwc+w8WS8Bw1sok14+cIXEb5tXXwtV0NZIeHhGZrB/wDTHUxcRgyPWfaMgFR6tjGjdQOQ8i68GqvkYxx7XYsSkAVVVfKyNfKWKPrJDlgtolAxf/dHrZ229cmehP1x0GmUaWskAbbiqE6FCuGmvy0xEENWGIuF0qMvHqZx3XDAM/t5CZ1S72At2bm28p5zI9VKoTl3Sv5IiXCRkoi7Yv2gmPQjJrFMjPuk738454/4Yae4yKgWA+d2EDP3ZvTu6scomXW08nfLqh8JJ0OWMuUcbLlEsXUzPb7JCOVo5b7j+S9H4gzfyWyADhG/VzvaiQ+8GM4kcrdIST/rd6xQgHSdItxOHnVL0qpolgBdCJtJTAdEL1bgYkIU1b6NXQX/AS6me8byvgbp5CnKw+GPFrbrNhViM5WLKquQMJLyC2hrzz3rk+mmWlDdmpgapfW9tzcXUV5hfLiNyE1jR1qA60hNE2d9HCLond0F+knI8d0bevhokHgiquLTT7wfqVM0v57U2NxunBTjg8hBB+0pZZRitA5IiGxnwkZpct5jTQ98Wr6BS1pAjcNOKVmTvEw/kYNhDY=
+  distributions: "sdist bdist_wheel"
+  skip_existing: true
   on:
     tags: true
