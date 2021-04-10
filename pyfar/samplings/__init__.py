@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
-"""Spatial sub-package for pyfar."""
+"""
+Collection of sampling schemes and related functionality.
+"""
 
 from .spatial import SphericalVoronoi, calculate_sph_voronoi_weights
 from .samplings import (
