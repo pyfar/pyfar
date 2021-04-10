@@ -7,7 +7,9 @@ from copy import deepcopy
 
 class SphericalVoronoi(spat.SphericalVoronoi):
     """
-    Voronoi diagrams on the surface of a sphere.
+    Voronoi diagrams on the surface of a sphere. Note that
+    :py:func:`calculate_sph_voronoi_weights` can be used directly, if only the
+    sampling weights are needed.
     """
     def __init__(self, sampling, round_decimals=12, center=0.0):
         """
@@ -30,6 +32,10 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         voronoi : SphericalVoronoi
             Spherical voronoi diagram as implemented in ``scipy.spatial``.
 
+        See also
+        --------
+        :py:func:`calculate_sph_voronoi_weights`
+
         """
         points = sampling.get_cart()
         radius = sampling.get_sph()[:, -1]
@@ -40,7 +46,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         super().__init__(points, radius_round, center)
 
     def copy(self):
-        """Return a deep copy of the Coordinates object."""
+        """Return a copy of the Voronoi object."""
         return deepcopy(self)
 
     def _encode(self):
@@ -69,9 +75,10 @@ def calculate_sph_voronoi_weights(
     """
     Calculate sampling weights for numeric integration.
 
-    This is wrapper for ``scipy.spatial.SphericalVoronoi`` and uses the class
-    method ``calculate_areas`` to calculate the weights. It requires a
-    spherical sampling grid with a single radius.
+    Uses the class method ``calculate_areas`` from :py:class:`SphericalVoronoi`
+    to calculate the weights. It requires a spherical sampling grid with a
+    single radius and uses ``scipy.spatial.SphericalVoronoi`` in the
+    backgournd.
 
     Parameters
     ----------
@@ -90,7 +97,7 @@ def calculate_sph_voronoi_weights(
     Returns
     -------
     weigths : ndarray, double
-        Sampling weights of size `csize`.
+        Sampling weights of size `samplings.csize`.
 
     """
     # get Voronoi diagram

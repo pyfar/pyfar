@@ -24,7 +24,7 @@ def cart_equidistant_cube(n_points):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions. Does not contain sampling weights.
 
     """
     if np.size(n_points) == 1:
@@ -68,7 +68,8 @@ def sph_dodecahedron(radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     """
 
@@ -122,7 +123,8 @@ def sph_icosahedron(radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     """
     gamma_R_r = np.arccos(np.cos(np.pi / 3) / np.sin(np.pi / 5))
@@ -156,8 +158,8 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     Parameters
     ----------
     n_points : int, tuple of two ints
-        Number of sampling points in azimuth and elevation. Either n_points or
-        sh_order must be provided. The default is None.
+        Number of sampling points in azimuth and elevation. Either `n_points`
+        or `sh_order` must be provided. The default is ``None``.
     sh_order : int
         Maximum applicable spherical harmonic order. If this is provided,
         'n_points' is set to ``2 * sh_order + 1``. Either `n_points` or
@@ -168,7 +170,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions including sampling weights.
 
     References
     ----------
@@ -231,7 +233,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     """
     Generate sampling of the sphere based on the Gaussian quadrature.
 
-    For detailed information, see [#]_.
+    For detailed information, see [#]_ (Section 3.3).
     This sampling does not contain points at the North and South Pole and is
     typically used for spherical harmonics processing. See
     :py:func:`sph_equal_angle` and :py:func:`sph_great_circle` for samplings
@@ -252,7 +254,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions including sampling weights.
 
     References
     ----------
@@ -329,7 +331,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions including sampling weights.
 
     Notes
     -----
@@ -438,7 +440,8 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     Notes
     -----
@@ -531,9 +534,10 @@ def sph_equal_angle(delta_angles, radius=1.):
     """
     Generate sampling of the sphere with equally spaced angles.
 
-    This sampling does contain points at the North and South Pole. See
-    :py:func:`sph_equiangular` and :py:func:`sph_gaussian` for samplings that
-    do not contain points at the poles.
+    This sampling contain points at the North and South Pole. See
+    :py:func:`sph_equiangular`, :py:func:`sph_gaussian`, and
+    :py:func:`sph_great_circle` for samplings that do not contain points at the
+    poles.
 
 
     Parameters
@@ -548,7 +552,8 @@ def sph_equal_angle(delta_angles, radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     """
 
@@ -605,7 +610,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
         ``np.linspace(-90, 90, 19)``.
     gcd : number, optional
         Desired great circle distance (GCD). Note that the actual GCD of the
-        sampling grid is equal or larger then the desired GCD and that the GCD
+        sampling grid is equal or smaller then the desired GCD and that the GCD
         may vary across elevations. The default is ``10``.
     radius : number, optional
         Radius of the sampling grid in meters. The default is ``1``.
@@ -614,19 +619,21 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
         ``1``.
     match : number, optional
         Forces azimuth entries to appear with a period of match degrees. E.g.,
-        if ``match=90``, the grid will have azimuth angles at 0, 90, 180, and
-        270 degrees (and possibly in between). The default is ``360``.
+        if ``match=90``, the grid includes the azimuth angles 0, 90, 180, and
+        270 degrees. The default is ``360``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     References
     ----------
     .. [#]  B. P. Bovbjerg, F. Christensen, P. Minnaar, and X. Chen, “Measuring
             the head-related transfer functions of an artificial head with a
-            high directional resolution,” Los Angeles, USA, Sep. 2000.
+            high directional resolution,” 109th AES Convention, Los Angeles,
+            USA, Sep. 2000.
 
     """
 
@@ -679,7 +686,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     Return Lebedev spherical sampling grid.
 
     For detailed information, see [#]_. For a list of available values
-    for `n_points`and `sh_order` call :py:func:`sph_lebedev`.
+    for `n_points` and `sh_order` call :py:func:`sph_lebedev`.
 
     Parameters
     ----------
@@ -697,11 +704,11 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions including sampling weights.
 
     Notes
     -----
-    This implementation is based on Matlab Code written by Rob Parrish [#]_.
+    This is a Python port of the Matlab Code written by Rob Parrish [#]_.
 
     References
     ----------
@@ -793,7 +800,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions including sampling weights.
 
     Notes
     -----
@@ -948,7 +955,8 @@ def sph_equal_area(n_points, radius=1.):
     Returns
     -------
     sampling : Coordinates
-        Sampling positions
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     References
     ----------
