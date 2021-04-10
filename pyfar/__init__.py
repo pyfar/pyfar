@@ -10,6 +10,7 @@ __version__ = '0.1.0'
 from .classes import Signal, TimeData, FrequencyData
 from .classes import Coordinates
 from .classes import Orientations
+from .classes import FilterFIR, FilterIIR, FilterSOS
 
 from . import plot
 from . import samplings
@@ -24,6 +25,9 @@ __all__ = [
     'FrequencyData',
     'Coordinates',
     'Orientations',
+    'FilterFIR',
+    'FilterIIR',
+    'FilterSOS'
     'plot',
     'samplings',
     'io',
