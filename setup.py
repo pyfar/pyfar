@@ -37,7 +37,7 @@ test_requirements = [
 
 setup(
     author="The pyfar developers",
-    author_email='',
+    author_email='info@pyfar.org',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Scientists',
@@ -61,4 +61,5 @@ setup(
     url='https://github.com/pyfar/pyfar',
     version='0.1.0',
     zip_safe=False,
+    python_requires='>=3.7,<3.9'
 )

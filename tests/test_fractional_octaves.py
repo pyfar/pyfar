@@ -7,7 +7,7 @@ from numpy import testing as npt
 from pyfar.dsp import filter
 from pyfar.dsp.classes import FilterSOS
 from pyfar.signal import Signal
-from pyfar import fft
+from pyfar.dsp import fft
 
 
 def test_center_frequencies_iec():
@@ -165,9 +165,6 @@ def impulse_mock():
     # time signal:
     time = np.zeros(n_samples, dtype='float64')
     time[0] = 1
-
-    # frequency signal
-    freq = np.ones(n_bins)
 
     # create a mock object of Signal class to test the plot independently
     signal = mock.Mock(spec_set=Signal(time, sampling_rate))

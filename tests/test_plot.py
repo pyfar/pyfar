@@ -368,7 +368,7 @@ def test_line_custom_subplots(sine, impulse_group_delay):
         compare_images(baseline, output, tol=10)
 
 
-def test_line_plots_time_data(time_data_three_points):
+def test_line_plots_time_data(time_data):
     """Test all line plots with default arguments and hold functionality."""
 
     function_list = [plot.line.time]
@@ -384,7 +384,7 @@ def test_line_plots_time_data(time_data_three_points):
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
-        function(time_data_three_points)
+        function(time_data)
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -400,7 +400,7 @@ def test_line_plots_time_data(time_data_three_points):
         plt.close()
 
 
-def test_line_plots_frequency_data(frequency_data_three_points):
+def test_line_plots_frequency_data(frequency_data):
     """Test all line plots with default arguments and hold functionality."""
 
     function_list = [plot.line.freq,
@@ -418,7 +418,7 @@ def test_line_plots_frequency_data(frequency_data_three_points):
         matplotlib.use('Agg')
         mpt.set_reproducibility_for_testing()
         plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
-        function(frequency_data_three_points)
+        function(frequency_data)
 
         # save baseline if it does not exist
         # make sure to visually check the baseline uppon creation
@@ -476,8 +476,8 @@ def test_prepare_plot():
 
 
 def test_lower_frequency_limit(
-        sine, sine_short, frequency_data_three_points,
-        frequency_data_one_point, time_data_three_points):
+        sine, sine_short, frequency_data,
+        frequency_data_one_point, time_data):
     """Test the private function plot._line._lower_frequency_limit"""
 
     # test Signal with frequencies below 20 Hz
@@ -491,7 +491,7 @@ def test_lower_frequency_limit(
     # test with FrequencyData
     # (We only need to test if FrequencyData works. The frequency dependent
     # cases are already tested above)
-    low = plot._line._lower_frequency_limit(frequency_data_three_points)
+    low = plot._line._lower_frequency_limit(frequency_data)
     assert low == 100
 
     # test only 0 Hz assertions
@@ -500,7 +500,7 @@ def test_lower_frequency_limit(
 
     # test TimeData assertions
     with raises(TypeError, match="Input data has to be of type"):
-        plot._line._lower_frequency_limit(time_data_three_points)
+        plot._line._lower_frequency_limit(time_data)
 
 
 def test_use():
