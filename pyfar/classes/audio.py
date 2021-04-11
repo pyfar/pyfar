@@ -12,16 +12,16 @@ are implemented in the methods ``add``, ``subtract``, ``multiply``, ``divide``,
 and ``power``. For example, two :py:func:`Signal`, :py:func:`TimeData`, or
 :py:func:`FrequencyData` instances can be added in the time domain by
 
-``result = pyfar.signal.add((signal_1, signal_2), 'time')``
+>>> result = pyfar.classes.audio.add((signal_1, signal_2), 'time')
 
 and in the frequency domain by
 
-``result = pyfar.signal.add((signal_1, signal_2), 'freq')``
+>>> result = pyfar.classes.audio.add((signal_1, signal_2), 'freq')
 
 This also works with more than two instances and supports array likes and
 scalar values, e.g.,
 
-``result = pyfar.signal.add((signal_1, 1), 'time')``
+>>> result = pyfar.classes.audio.add((signal_1, 1), 'time')
 
 In this case the scalar `1` is broadcasted, i.e., it is is added to every
 sample of `signal` (or every bin in case of a frequency domain operation).
@@ -31,24 +31,24 @@ convenience. Note, however, that their behavior depends on the Audio object.
 Frequency domain operations are applied for :py:func:`Signal` and
 :py:func:`FrequencyData` objects, i.e,
 
-``result = signal1 + signal2``
+>>> result = signal1 + signal2
 
 is equivalent to
 
-``result = pyfar.signal.add((signal1, signal2), 'freq')``
+>>> result = pyfar.classes.audio.add((signal1, signal2), 'freq')
 
 Time domain operations are applied for :py:func:`TimeData` objects, i.e.,
 
-``result = time_data_1 + time_data_2``
+>>> result = time_data_1 + time_data_2
 
 is equivalent to
 
-``result = pyfar.signal.add((time_data_1, time_data_2), 'time')``
+>>> result = pyfar.classes.audio.add((time_data_1, time_data_2), 'time')
 
 In addition to the arithmetic operations, the equality operator is overloaded
 to allow comparisons
 
-``signal_1 == signal_2``.
+>>> signal_1 == signal_2
 
 """
 
@@ -409,7 +409,7 @@ class FrequencyData(_Audio):
         fft_norm : str, optional
             The normalization of the Discrete Fourier Transform (DFT). Can be
             ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
-            or ``'psd'``. See :py:func:`pyfar.dsp.fft.normalization` and [#]_
+            or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
             for more information. The default is ``'none'``, which is typically
             used for energy signals, such as impulse responses.
         comment : str, optional
@@ -478,7 +478,7 @@ class FrequencyData(_Audio):
         """
         The normalization for the Discrete Fourier Transform (DFT).
 
-        See :py:func:`pyfar.dsp.fft.normalization` for more information.
+        See :py:func:`~pyfar.dsp.fft.normalization` for more information.
         """
         return self._fft_norm
 
@@ -585,7 +585,7 @@ class Signal(FrequencyData, TimeData):
         fft_norm : str, optional
             The normalization of the Discrete Fourier Transform (DFT). Can be
             ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
-            or ``'psd'``. See :py:func:`pyfar.dsp.fft.normalization` and [#]_
+            or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
             for more information. The default is ``'none'``, which is typically
             used for energy signals, such as impulse responses.
         comment : str
@@ -724,7 +724,7 @@ class Signal(FrequencyData, TimeData):
         """
         The normalization for the Discrete Fourier Transform (DFT).
 
-        See :py:func:`pyfar.dsp.fft.normalization` for more information.
+        See :py:func:`~pyfar.dsp.fft.normalization` for more information.
         """
         # check input
         if value not in self._VALID_FFT_NORMS:
@@ -899,7 +899,7 @@ def subtract(data: tuple, domain='freq'):
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
         normalization is removed before the operation (See
-        :py:func:`pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
 
     Returns
     -------
@@ -931,7 +931,7 @@ def multiply(data: tuple, domain='freq'):
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
         normalization is removed before the operation (See
-        :py:func:`pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
 
     Returns
     -------
@@ -962,7 +962,7 @@ def divide(data: tuple, domain='freq'):
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
         normalization is removed before the operation (See
-        :py:func:`pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
 
     Returns
     -------
@@ -993,7 +993,7 @@ def power(data: tuple, domain='freq'):
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
         normalization is removed before the operation (See
-        :py:func:`pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
 
     Returns
     -------
