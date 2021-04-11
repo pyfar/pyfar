@@ -39,7 +39,7 @@ setup(
     author="The pyfar developers",
     author_email='info@pyfar.org',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Scientists',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
