@@ -20,7 +20,8 @@ import io
 
 from pyfar import Signal
 from pyfar import Coordinates
-import pyfar._codec as codec
+
+from . import _codec as codec
 import pyfar.classes.filter as fo
 
 
