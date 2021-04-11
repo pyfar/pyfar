@@ -144,7 +144,7 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     sampling_rate : number
         sampling rate in Hz
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of pyfar.fft.normalization.
+        See documentation of :py:func:`~pyfar.dsp.fft.normalization`.
 
     Returns
     -------
@@ -186,7 +186,7 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     sampling_rate : number
         sampling rate in Hz
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of pyfar.fft.normalization.
+        See documentaion of :py:func:`~pyfar.dsp.fft.normalization`.
 
     Returns
     -------
