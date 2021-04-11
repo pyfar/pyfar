@@ -99,11 +99,9 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
     Returns
     -------
     signal : Signal
-        The filtered signal as :py:class:`<pyfar.Signal>`. Only returned if
-        ``sampling_rate = None``.
+        The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterSOS
-        The filter as :py:class:`<pyfar.FilterSOS>` object. Only returned if
-        ``signal = None``.
+        SOS Filter object. Only returned if ``signal = None``.
     """
 
     # check input
