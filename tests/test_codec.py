@@ -1,4 +1,4 @@
-import pyfar._codec as codec
+import pyfar.io._codec as codec
 
 
 def test__str_to_type():

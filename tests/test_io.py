@@ -119,8 +119,8 @@ def test_read_sofa_position_type_unit(generate_sofa_postype_error):
         io.read_sofa(generate_sofa_postype_error)
 
 
-@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
-@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+@patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_flat_data(tmpdir, flat_data):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
@@ -131,8 +131,8 @@ def test_write_read_flat_data(tmpdir, flat_data):
     assert actual['flat_data'] == flat_data
 
 
-@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
-@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+@patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_nested_data(nested_data, flat_data, tmpdir):
     filename = os.path.join(tmpdir, 'write_nested_flat_data.far')
     io.write(filename, nested_data=nested_data)
@@ -140,8 +140,8 @@ def test_write_read_nested_data(nested_data, flat_data, tmpdir):
     assert actual['nested_data'] == nested_data
 
 
-@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
-@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+@patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_multipleObjects(flat_data, nested_data, tmpdir):
     """ Check if file can be read back after writing without explicitply
     passing the .far-extension.
@@ -165,8 +165,8 @@ def test_write_anyObj_TypeError(any_obj, tmpdir):
         io.write(filename, any_obj=any_obj)
 
 
-@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
-@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+@patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_NoEncode_NotImplemented(no_encode_obj, tmpdir):
     """ Check if a TypeError is raised when writing an arbitrary
     object.
@@ -176,8 +176,8 @@ def test_write_NoEncode_NotImplemented(no_encode_obj, tmpdir):
         io.write(filename, no_encode_obj=no_encode_obj)
 
 
-@patch('pyfar._codec._str_to_type', new=stub_str_to_type())
-@patch('pyfar._codec._is_pyfar_type', new=stub_is_pyfar_type())
+@patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
     """ Check if a TypeError is raised when writing an arbitrary
     object.
