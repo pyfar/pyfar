@@ -32,10 +32,10 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
     Returns
     -------
     signal : Signal
-        The noise as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        signal is in the time domain and has the ``rms`` FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). The type of the spectrum
-        (``white``, ``pink``) and the RMS amplitude are written to `comment`.
+        The noise signal. The signal is in the time domain and has the ``rms``
+        FFT normalization (see :py:func:`~pyfar.dsp.fft.normalization`). The
+        type of the spectrum (``white``, ``pink``) and the RMS amplitude are
+        written to `comment`.
     """
 
     # generate the noise
@@ -108,10 +108,9 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
     Returns
     -------
     signal : Signal
-        The noise as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        Signal is in the time domain and has the ``rms`` FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`). `comment` contains
-        information about the selected parameters.
+        The noise signal. The Signal is in the time domain and has the ``rms``
+        FFT normalization (see :py:func:`~pyfar.dsp.fft.normalization`).
+        `comment` contains information about the selected parameters.
     """
 
     if n_pulse < 2 * n_fade:
