@@ -20,8 +20,9 @@ import io
 
 from pyfar import Signal
 from pyfar import Coordinates
+
 from . import _codec as codec
-import pyfar.dsp.classes as fo
+import pyfar.classes.filter as fo
 
 
 def read_wav(filename):

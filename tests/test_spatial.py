@@ -1,6 +1,6 @@
 import numpy as np
+from pyfar import Coordinates
 import pyfar.samplings as samplings
-from pyfar.coordinates import Coordinates
 import pytest
 
 

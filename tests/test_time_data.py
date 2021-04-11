@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pyfar.signal import TimeData as TimeData
+from pyfar import TimeData
 
 
 def test_data_time_init_with_defaults():

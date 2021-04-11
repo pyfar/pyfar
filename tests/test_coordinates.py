@@ -3,8 +3,8 @@ import numpy.testing as npt
 import pytest
 from pytest import raises
 
-from pyfar.coordinates import Coordinates
-import pyfar.coordinates as coordinates
+from pyfar import Coordinates
+import pyfar.classes.coordinates as coordinates
 
 
 # Test Coordinates() class ----------------------------------------------------

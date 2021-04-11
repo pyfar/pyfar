@@ -6,7 +6,7 @@ def test_copy(sphericalvoronoi, time_data, frequency_data):
     obj_list = [pyfar.Signal(1000, 44100),
                 pyfar.Orientations(),
                 pyfar.Coordinates(),
-                pyfar.dsp.Filter(),
+                pyfar.classes.filter.Filter(),
                 sphericalvoronoi,
                 time_data,
                 frequency_data]

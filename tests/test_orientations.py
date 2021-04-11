@@ -4,8 +4,8 @@ import numpy as np
 import numpy.testing as npt
 from scipy.spatial.transform import Rotation
 
-from pyfar.orientations import Orientations
-from pyfar.coordinates import Coordinates
+from pyfar import Orientations
+from pyfar import Coordinates
 
 
 def test_orientations_init():
