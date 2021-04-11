@@ -26,9 +26,8 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     Returns
     -------
     signal : Signal
-        The sine as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        Signal is in the time domain and has the ``rms`` FFT normalization (see
-        :py:func:`pyfar.dsp.fft.normalization`).
+        The sine signal. The Signal is in the time domain and has the ``rms``
+        FFT normalization (see :py:func:`~pyfar.dsp.fft.normalization`).
         The exact frequency, amplitude and phase are written to `comment`.
 
     Notes
@@ -100,9 +99,9 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     Returns
     -------
     signal : Signal
-        The impulse as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        Signal is in the time domain and has the ``none`` FFT normalization
-        (see :py:func:`pyfar.dsp.fft.normalization`). The delay and amplitude
+        The impulse signal. The Signal is in the time domain and has the
+        ``none`` FFT normalization (see
+        :py:func:`~pyfar.dsp.fft.normalization`). The delay and amplitude
         are written to `comment`.
 
     Notes
@@ -163,10 +162,10 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     Returns
     -------
     sweep : Signal
-        The sweep as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        Signal is in the time domain and has the ``none`` FFT normalization
-        (see :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
-        range, and length of the fade our are written to `comment`.
+        The sweep signal. The Signal is in the time domain and has the ``none``
+        FFT normalization (see :py:func:`~pyfar.dsp.fft.normalization`). The
+        sweep type, frequency range, and length of the fade our are written to
+        `comment`.
 
     References
     ----------
@@ -224,10 +223,10 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     Returns
     -------
     sweep : Signal
-        The sweep as a :py:class:`Signal <pyfar.signal.Signal>` object. The
-        Signal is in the time domain and has the ``none`` FFT normalization
-        (see :py:func:`pyfar.dsp.fft.normalization`). The sweep type, frequency
-        range, and length of the fade our are written to `comment`.
+        The sweep signal. The Signal is in the time domain and has the ``none``
+        FFT normalization (see :py:func:`~pyfar.dsp.fft.normalization`). The
+        sweep type, frequency range, and length of the fade our are written to
+        `comment`.
 
     References
     ----------
