@@ -13,10 +13,6 @@ from . import fft
 __all__ = [
     'fft',
     'filter',
-    'Filter',
-    'FilterFIR',
-    'FilterIIR',
-    'FilterSOS',
     'phase',
     'group_delay',
     'wrap_to_2pi',

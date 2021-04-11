@@ -20,7 +20,7 @@ and can be obtained by
 >>> coords.systems()        # list all systems
 
 A plethora of sampling schemes to generate coordinate objects is contained in
-:py:mod:`pyfar.spatial.samplings`.
+:py:mod:`~pyfar.samplings`.
 
 .. |coordinate_systems| image:: resources/coordinate_systems.png
    :width: 100%
@@ -788,13 +788,13 @@ class Coordinates():
         Get frontal point from a spherical coordinate system
 
         >>> import pyfar
-        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+        >>> coords = pyfar.samplings.sph_lebedev(sh_order=10)
         >>> result = coords.get_nearest_k(1, 0, 0, show=True)
 
         .. plot::
 
             import pyfar
-            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            coords = pyfar.samplings.sph_lebedev(sh_order=10)
             result = coords.get_nearest_k(1, 0, 0, show=True)
         """
 
@@ -862,13 +862,13 @@ class Coordinates():
         Get frontal points within a distance of 0.5 meters
 
         >>> import pyfar
-        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+        >>> coords = pyfar.samplings.sph_lebedev(sh_order=10)
         >>> result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
 
         .. plot::
 
             import pyfar
-            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            coords = pyfar.samplings.sph_lebedev(sh_order=10)
             result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
@@ -936,13 +936,13 @@ class Coordinates():
         Get top points within a distance of 45 degrees
 
         >>> import pyfar
-        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+        >>> coords = pyfar.samplings.sph_lebedev(sh_order=10)
         >>> result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
 
         .. plot::
 
             import pyfar
-            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            coords = pyfar.samplings.sph_lebedev(sh_order=10)
             result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
         """
 
@@ -1011,7 +1011,7 @@ class Coordinates():
         .. plot::
 
             import pyfar
-            coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
+            coords = pyfar.samplings.sph_lebedev(sh_order=10)
             result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
 
         """
