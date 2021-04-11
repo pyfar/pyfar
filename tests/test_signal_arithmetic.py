@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-import pyfar.classes.signal as signal
+import pyfar.classes.audio as signal
 from pyfar import Signal, TimeData, FrequencyData
 
 

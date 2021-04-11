@@ -1,10 +1,10 @@
-from . import signal
+from . import audio
 from . import coordinates
 from . import orientations
 from . import filter
 
 __all__ = [
-    'signal',
+    'audio',
     'coordinates',
     'orientations',
     'filter'

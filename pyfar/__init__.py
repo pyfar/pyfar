@@ -7,7 +7,7 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .classes.signal import Signal, TimeData, FrequencyData
+from .classes.audio import Signal, TimeData, FrequencyData
 from .classes.coordinates import Coordinates
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
