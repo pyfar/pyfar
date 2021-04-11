@@ -27,7 +27,7 @@ import pyfar.classes.filter as fo
 
 def read_wav(filename):
     """
-    Import a WAV file as :py:class:`Signal <pyfar.signal.Signal>` object.
+    Import a WAV file as :py:class:`~pyfar.classes.audio.Signal` object.
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def read_wav(filename):
     Returns
     -------
     signal : Signal
-        :py:class:`Signal <pyfar.signal.Signal>` object containing the audio
+        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
         data from the WAV file.
 
     Notes
@@ -52,7 +52,7 @@ def read_wav(filename):
 
 def write_wav(signal, filename, overwrite=True):
     """
-    Write a :py:class:`Signal <pyfar.signal.Signal>` object as a WAV file to
+    Write a :py:class:`~pyfar.classes.audio.Signal` object as a WAV file to
     disk.
 
     Parameters
@@ -96,7 +96,7 @@ def write_wav(signal, filename, overwrite=True):
 
 def read_sofa(filename):
     """
-    Import a SOFA file as :py:class:`Signal <pyfar.signal.Signal>` object.
+    Import a SOFA file as :py:class:`~pyfar.classes.audio.Signal` object.
 
     Parameters
     ----------
@@ -106,7 +106,7 @@ def read_sofa(filename):
     Returns
     -------
     signal : Signal
-        :py:class:`Signal <pyfar.signal.Signal>` object containing the data
+        :py:class:`~pyfar.classes.audio.Signal` object containing the data
         stored in `SOFA_Object.Data.IR`.
         `cshape` is equal to ``(number of measurements, number of receivers)``.
     source_coordinates : Coordinates
