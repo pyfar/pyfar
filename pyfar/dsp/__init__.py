@@ -1,10 +1,3 @@
-from .classes import (
-    Filter,
-    FilterFIR,
-    FilterIIR,
-    FilterSOS
-)
-
 from .dsp import (
     phase,
     group_delay,

@@ -8,7 +8,7 @@ from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
 from pyfar import Coordinates
 from pyfar import FrequencyData, TimeData
-import pyfar.dsp.classes as fo
+import pyfar.classes.filter as fo
 import pyfar.signals
 
 from pyfar.testing import stub_utils

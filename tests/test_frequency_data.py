@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pyfar.signal import FrequencyData as FrequencyData
+from pyfar import FrequencyData
 
 
 def test_data_frequency_init_with_defaults():

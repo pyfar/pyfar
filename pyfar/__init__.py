@@ -7,9 +7,10 @@ __email__ = ''
 __version__ = '0.1.0'
 
 
-from .signal import Signal, TimeData, FrequencyData
-from .coordinates import Coordinates
-from .orientations import Orientations
+from .classes.audio import Signal, TimeData, FrequencyData
+from .classes.coordinates import Coordinates
+from .classes.orientations import Orientations
+from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 
 from . import plot
 from . import samplings
@@ -24,6 +25,9 @@ __all__ = [
     'FrequencyData',
     'Coordinates',
     'Orientations',
+    'FilterFIR',
+    'FilterIIR',
+    'FilterSOS',
     'plot',
     'samplings',
     'io',

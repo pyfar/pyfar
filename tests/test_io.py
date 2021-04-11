@@ -1,4 +1,4 @@
-from pyfar.orientations import Orientations
+from pyfar import Orientations
 import numpy as np
 import numpy.testing as npt
 import pytest
@@ -13,8 +13,8 @@ from pyfar import io
 from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.samplings import SphericalVoronoi
-import pyfar.dsp.classes as fo
-from pyfar.signal import FrequencyData, TimeData
+import pyfar.classes.filter as fo
+from pyfar import FrequencyData, TimeData
 
 
 def test_read_wav(generate_wav_file, noise):
