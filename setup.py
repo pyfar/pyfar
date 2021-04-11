@@ -40,7 +40,7 @@ setup(
     author_email='info@pyfar.org',
     classifiers=[
         'Development Status :: 4 - Beta',
-        'Intended Audience :: Scientists',
+        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
