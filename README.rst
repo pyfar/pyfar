@@ -31,6 +31,6 @@ Refer to the `contribution guidelines`_ for more information.
 
 
 .. _contribution guidelines: https://github.com/pyfar/pyfar/blob/develop/CONTRIBUTING.rst
-.. _examples notebook: https://mybinder.org/v2/gh/pyfar/pyfar/develop?filepath=examples%2Fpyfar_demo.ipynb
+.. _examples notebook: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
 .. _pyfar.org: https://pyfar.org
 .. _read the docs: https://pyfar.readthedocs.io/en/latest
