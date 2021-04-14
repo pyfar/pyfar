@@ -180,12 +180,12 @@ class PlotParameter(object):
         Parameters
         ----------
         plot : str
-            Defines the plot by module.plot_function, e.g., 'line.freq'
+            Defines the plot by module.plot_function, e.g., 'freq'
 
         """
 
         # set the axis, color map, and cycle, parameter for each plot
-        if plot == 'line.time':
+        if plot == 'time':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -200,7 +200,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.freq':
+        elif plot == 'freq':
             # x-axis
             self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
@@ -217,7 +217,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.phase':
+        elif plot == 'phase':
             # x-axis
             self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
@@ -235,7 +235,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.group_delay':
+        elif plot == 'group_delay':
             # x-axis
             self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
@@ -252,7 +252,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.spectrogram':
+        elif plot == 'spectrogram':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -269,7 +269,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'signal'
 
-        elif plot == 'line.time_freq':
+        elif plot == 'time_freq':
             # same as time
             # (currently interaction uses only the axis of the top plot)
 
@@ -287,7 +287,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot in ['line.freq_phase', 'line.freq_group_delay']:
+        elif plot in ['freq_phase', 'freq_group_delay']:
             # same as freq
             # (currently interaction uses only the axis of the top plot)
 
@@ -511,31 +511,31 @@ class Interaction(object):
             self.figure.clear()
             self.ax = None
 
-            if event.key in plot['line.time']:
-                self.params.update_axis_type('line.time')
+            if event.key in plot['time']:
+                self.params.update_axis_type('time')
                 self.ax = _line._time(
                     self.signal, prm.dB_time, prm.log_prefix,
                     prm.log_reference, self.ax, **self.kwargs)
 
-            elif event.key in plot['line.freq']:
-                self.params.update_axis_type('line.freq')
+            elif event.key in plot['freq']:
+                self.params.update_axis_type('freq')
                 self.ax = _line._freq(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
 
-            elif event.key in plot['line.phase']:
-                self.params.update_axis_type('line.phase')
+            elif event.key in plot['phase']:
+                self.params.update_axis_type('phase')
                 self.ax = _line._phase(
                     self.signal, prm.deg, prm.unwrap, prm.xscale,
                     self.ax, **self.kwargs)
 
-            elif event.key in plot['line.group_delay']:
-                self.params.update_axis_type('line.group_delay')
+            elif event.key in plot['group_delay']:
+                self.params.update_axis_type('group_delay')
                 self.ax = _line._group_delay(
                     self.signal, prm.unit, prm.xscale, self.ax, **self.kwargs)
 
-            elif event.key in plot['line.spectrogram']:
-                self.params.update_axis_type('line.spectrogram')
+            elif event.key in plot['spectrogram']:
+                self.params.update_axis_type('spectrogram')
                 ax = _line._spectrogram_cb(
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
@@ -543,23 +543,23 @@ class Interaction(object):
                     prm.cmap, self.ax, **self.kwargs)
                 self.ax = ax[0]
 
-            elif event.key in plot['line.time_freq']:
-                self.params.update_axis_type('line.time')
+            elif event.key in plot['time_freq']:
+                self.params.update_axis_type('time')
                 ax = _line._time_freq(
                     self.signal, prm.dB_time, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
                 self.ax = ax[0]
 
-            elif event.key in plot['line.freq_phase']:
-                self.params.update_axis_type('line.freq')
+            elif event.key in plot['freq_phase']:
+                self.params.update_axis_type('freq')
                 ax = _line._freq_phase(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
 
-            elif event.key in plot['line.freq_group_delay']:
-                self.params.update_axis_type('line.freq')
+            elif event.key in plot['freq_group_delay']:
+                self.params.update_axis_type('freq')
                 ax = _line._freq_group_delay(
                     self.signal, prm.dB_freq, prm.log_prefix,
                     prm.log_reference, prm.unit, prm.xscale,
@@ -765,7 +765,7 @@ class Interaction(object):
 
         # re-plot
         self.all_visible = False
-        self.toggle_plot(EventEmu(self.plot['line.spectrogram']))
+        self.toggle_plot(EventEmu(self.plot['spectrogram']))
 
     def write_current_channel_text(self):
 

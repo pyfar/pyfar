@@ -67,7 +67,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.time', dB_time=dB, log_prefix=log_prefix,
+        'time', dB_time=dB, log_prefix=log_prefix,
         log_reference=log_reference)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -136,7 +136,7 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -199,7 +199,7 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.phase', deg=deg, unwrap=unwrap, xscale=xscale)
+        'phase', deg=deg, unwrap=unwrap, xscale=xscale)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
@@ -258,7 +258,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.group_delay', unit=unit, xscale=xscale)
+        'group_delay', unit=unit, xscale=xscale)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
@@ -342,7 +342,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.spectrogram', dB_freq=dB, log_prefix=log_prefix,
+        'spectrogram', dB_freq=dB, log_prefix=log_prefix,
         log_reference=log_reference, yscale=yscale, unit=unit, window=window,
         window_length=window_length, window_overlap_fct=window_overlap_fct,
         cmap=cmap)
@@ -420,7 +420,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.time', dB_time=dB_time, log_prefix=log_prefix,
+        'time', dB_time=dB_time, log_prefix=log_prefix,
         log_reference=log_reference)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
@@ -481,7 +481,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
@@ -553,7 +553,7 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'line.freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
