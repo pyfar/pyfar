@@ -45,11 +45,6 @@ def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
             points[..., 1],
             points[..., 2], **kwargs)
 
-    # labeling
-    ax.set_xlabel('x in m')
-    ax.set_ylabel('y in m')
-    ax.set_zlabel('z in m')
-
     return ax
 
 
@@ -84,10 +79,12 @@ def quiver(
 
     min_val = min(np.min(origins), np.min(endpoints))
     max_val = max(np.max(origins), np.max(endpoints))
-    ax = _setup_axes(
-        projection, ax, set_ax, bounds=(min_val, max_val), **kwargs)
 
-    ax.quiver(*origins.T, *endpoints.T, **kwargs)
+    with pf.plot.context():
+        ax = _setup_axes(
+            projection, ax, set_ax, bounds=(min_val, max_val), **kwargs)
+
+        ax.quiver(*origins.T, *endpoints.T, **kwargs)
 
     return ax
 
@@ -132,9 +129,9 @@ def _setup_axes(projection=Axes3D.name, ax=None,
     kwargs['c'] = kwargs.get('c', 'k')
 
     # labeling
-    ax.set_xlabel('X [m]')
-    ax.set_ylabel('Y [m]')
-    ax.set_zlabel('Z [m]')
+    ax.set_xlabel('x in m')
+    ax.set_ylabel('y in m')
+    ax.set_zlabel('z in m')
 
     # equal axis limits for distortion free  display
     if set_ax:
