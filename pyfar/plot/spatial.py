@@ -126,7 +126,6 @@ def _setup_axes(projection=Axes3D.name, ax=None,
 
     # add defaults to kwargs
     kwargs['marker'] = kwargs.get('marker', '.')
-    kwargs['c'] = kwargs.get('c', 'k')
 
     # labeling
     ax.set_xlabel('x in m')
