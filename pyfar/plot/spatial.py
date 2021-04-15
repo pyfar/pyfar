@@ -4,6 +4,7 @@ Plot for spatially distributed data.
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
+import pyfar as pf
 
 __all__ = [Axes3D]
 
@@ -34,19 +35,20 @@ def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
     """
     points = np.atleast_2d(points).astype(np.float64)
 
-    ax = _setup_axes(projection, ax, set_ax,
-                     bounds=(np.min(points), np.max(points)), **kwargs)
+    with pf.plot.context():
+        ax = _setup_axes(projection, ax, set_ax,
+                         bounds=(np.min(points), np.max(points)), **kwargs)
 
-    # plot
-    ax.scatter(
-        points[..., 0],
-        points[..., 1],
-        points[..., 2], **kwargs)
+        # plot
+        ax.scatter(
+            points[..., 0],
+            points[..., 1],
+            points[..., 2], **kwargs)
 
     # labeling
-    ax.set_xlabel('X [m]')
-    ax.set_ylabel('Y [m]')
-    ax.set_zlabel('Z [m]')
+    ax.set_xlabel('x in m')
+    ax.set_ylabel('y in m')
+    ax.set_zlabel('z in m')
 
     return ax
 
