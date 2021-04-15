@@ -33,7 +33,7 @@ import deepdiff
 import re
 from copy import deepcopy
 
-import pyfar
+import pyfar as pf
 
 
 class Coordinates():
@@ -723,14 +723,14 @@ class Coordinates():
 
         """
         if mask is None:
-            pyfar.plot.scatter(self)
+            pf.plot.scatter(self)
         else:
             mask = np.asarray(mask)
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
             colors = np.full(mask.shape, 'k')
             colors[mask] = 'r'
-            pyfar.plot.scatter(self, c=colors.flatten(), **kwargs)
+            pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
                       domain='cart', convention='right', unit='met',

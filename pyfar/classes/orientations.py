@@ -1,7 +1,7 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
 
-import pyfar
+import pyfar as pf
 
 
 class Orientations(Rotation):
@@ -155,13 +155,13 @@ class Orientations(Rotation):
 
         ax = None
         if show_views:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, views, color=(1, 0, 0), **kwargs)
         if show_ups:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, ups, ax=ax, color=(0, 1, 0), **kwargs)
         if show_rights:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
 
     def as_view_up_right(self):

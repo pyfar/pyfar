@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 import scipy.signal as spsignal
 
-import pyfar
+import pyfar as pf
 from copy import deepcopy
 
 
@@ -189,7 +189,7 @@ class Filter(object):
         filtered : Signal
             A filtered copy of the input signal.
         """
-        if not isinstance(signal, pyfar.Signal):
+        if not isinstance(signal, pf.Signal):
             raise ValueError("The input needs to be a haiopy.Signal object.")
 
         if self.sampling_rate != signal.sampling_rate:
