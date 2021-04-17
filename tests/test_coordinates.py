@@ -509,17 +509,18 @@ def test_get_nearest_k():
 
 
 def test_get_nearest_cart():
+    """Tests returns of get_nearest_cart."""
     # test only 1D case since most of the code from self.get_nearest_k is used
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
     i, m = coords.get_nearest_cart(2.5, 0, 0, 1.5)
-    assert (i == np.array([1, 2, 3, 4])).all()
-    assert (m == np.array([[0, 1, 1, 1, 1, 0]], dtype=bool)).all()
+    npt.assert_allclose(i, np.array([1, 2, 3, 4]))
+    npt.assert_allclose(m, np.array([0, 1, 1, 1, 1, 0]))
 
     # test search with empty results
     i, m = coords.get_nearest_cart(2.5, 0, 0, .1)
     assert len(i) == 0
-    assert (m == np.array([[0, 0, 0, 0, 0, 0]], dtype=bool)).all()
+    npt.assert_allclose(m, np.array([0, 0, 0, 0, 0, 0]))
 
     # test out of range parameters
     with raises(AssertionError):
@@ -527,17 +528,18 @@ def test_get_nearest_cart():
 
 
 def test_get_nearest_sph():
+    """Tests returns of get_nearest_sph."""
     # test only 1D case since most of the code from self.get_nearest_k is used
     az = np.linspace(0, 40, 5)
     coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
     i, m = coords.get_nearest_sph(25, 0, 1, 5, 'sph', 'top_elev', 'deg')
-    assert (i == np.array([2, 3])).all()
-    assert (m == np.array([[0, 0, 1, 1, 0]], dtype=bool)).all()
+    npt.assert_allclose(i, np.array([2, 3]))
+    npt.assert_allclose(m, np.array([0, 0, 1, 1, 0]))
 
     # test search with empty results
     i, m = coords.get_nearest_sph(25, 0, 1, 1, 'sph', 'top_elev', 'deg')
     assert len(i) == 0
-    assert (m == np.array([[0, 0, 0, 0, 0]], dtype=bool)).all()
+    npt.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
 
     # test out of range parameters
     with raises(AssertionError):
@@ -597,39 +599,35 @@ def test_get_slice():
     # not tested here.
 
 
-def test_rotation():
-    # test with quaternion
+@pytest.mark.parametrize("rot_type,rot", [
+    ('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)]),
+    ('matrix',  [[0, -1, 0], [1, 0, 0], [0, 0, 1]]),
+    ('rotvec', [0, 0, 90]),
+    ('z', 90)])
+def test_rotation(rot_type, rot):
+    """Test rotation with different formats."""
     c = Coordinates(1, 0, 0)
-    c.rotate('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)])
-    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
+    c.rotate(rot_type, rot)
+    npt.assert_allclose(c.get_cart(), np.atleast_2d([0, 1, 0]), atol=1e-15)
 
-    # test with matrix
+
+def test_rotation_assertion():
+    """Test rotation with unknown rotation type."""
     c = Coordinates(1, 0, 0)
-    c.rotate('matrix', [[0, -1, 0], [1, 0, 0], [0, 0, 1]])
-    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
-
-    # test with rotvec
-    c = Coordinates(1, 0, 0)
-    c.rotate('rotvec', [0, 0, 90])
-    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
-
-    # test with euler
-    c = Coordinates(1, 0, 0)
-    c.rotate('z', 90)
-    npt.assert_allclose(c.get_cart().flatten(), [0, 1, 0], atol=1e-15)
-
     # test with unknown type
     with raises(ValueError):
         c.rotate('urgh', 90)
 
-    # test if cshape is preserved and inverse rotation works
+
+def test_inverse_rotation():
+    """Test the inverse rotation."""
     xyz = np.concatenate((np.ones((2, 4, 1)),
                           np.zeros((2, 4, 1)),
                           np.zeros((2, 4, 1))), -1)
-    c = Coordinates(xyz[..., 0], xyz[..., 1], xyz[..., 2])
+    c = Coordinates(xyz[..., 0].copy(), xyz[..., 1].copy(), xyz[..., 2].copy())
     c.rotate('z', 90)
     c.rotate('z', 90, inverse=True)
-    npt.assert_allclose(c._points, xyz, atol=1e-15)
+    npt.assert_allclose(c.get_cart(), xyz, atol=1e-15)
 
 
 def test_converters():
@@ -651,8 +649,7 @@ def test_converters():
     ])
 def test___eq___differInPoints(
         points_1, points_2, points_3, actual, expected):
-    """ This function checks against 3 different pairings of Coordinates.
-    """
+    """This function checks against 3 different pairings of Coordinates."""
     coordinates = Coordinates(points_1, points_2, points_3)
     comparison = coordinates == actual
     assert comparison == expected
