@@ -7,14 +7,15 @@ from pyfar import Coordinates
 import pyfar.classes.coordinates as coordinates
 
 
-# Test Coordinates() class ----------------------------------------------------
 def test_coordinates_init():
-    # get class instance
+    """Test initialization of empty coordinates object."""
     coords = Coordinates()
     assert isinstance(coords, Coordinates)
 
 
 def test__systems():
+    """Test completeness of internal representation of coordinate systems."""
+
     # get all coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -55,7 +56,7 @@ def test__systems():
 
 
 def test_coordinate_names():
-    # check if units agree across coordinates that appear more than once
+    """Test if units agree across coordinates that appear more than once"""
 
     # get all coordinate systems
     c = Coordinates()
@@ -90,7 +91,7 @@ def test_coordinate_names():
         units_ref, idx = np.unique(units[0], True)
         units_ref = units_ref[idx]
         for cc in range(1, len(units)):
-            # get nex entry for comparison
+            # get next entry for comparison
             units_test, idx = np.unique(units[cc], True)
             units_test = units_test[idx]
             # compare
@@ -103,6 +104,7 @@ def test_coordinate_names():
 
 
 def test_exist_systems():
+    """Test internal function for checking if a coordinate system exists."""
     # get class instance
     coords = Coordinates()
 
@@ -128,6 +130,7 @@ def test_exist_systems():
 
 
 def test_systems():
+    """Test if all possible function calls of Coordinates.systems() pass."""
     # get class instance
     coords = Coordinates()
 
@@ -136,14 +139,20 @@ def test_systems():
     coords.systems(brief=True)
     coords.systems('all')
     coords.systems('all', brief=True)
+    coords.systems('current')
+    coords.systems('current', brief=True)
+
+    with raises(ValueError, match="show must be 'current' or 'all'."):
+        coords.systems('what')
 
 
 def test_coordinates_init_val():
+    """Test initializing Coordinates with values of different type and size."""
 
     # test input: scalar
     c1 = 1
     # test input: 2 element vectors
-    c2 = [1, 2]                         # list
+    c2 = [1, 2]                        # list
     c3 = np.asarray(c2)                # flat np.array
     c4 = np.atleast_2d(c2)             # row vector np.array
     c5 = np.transpose(c4)              # column vector np.array
@@ -181,6 +190,7 @@ def test_coordinates_init_val():
 
 
 def test_coordinates_init_val_and_system():
+    """Test initialization with all available coordinate systems."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -192,7 +202,8 @@ def test_coordinates_init_val_and_system():
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
 
 
-def test_coordinates_init_val_no_convention():
+def test_coordinates_init_default_convention():
+    """Test initialization with the default convention."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -204,7 +215,8 @@ def test_coordinates_init_val_no_convention():
             Coordinates(0, 0, 0, domain, unit=unit[0][0:3])
 
 
-def test_coordinates_init_val_no_convention_no_unit():
+def test_coordinates_init_default_convention_and_unit():
+    """Test initialization with the default convention and untit."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -214,10 +226,18 @@ def test_coordinates_init_val_no_convention_no_unit():
         Coordinates(0, 0, 0, domain)
 
 
+def test_coordinates_init_val_and_comment():
+    coords = Coordinates(1, 1, 1, comment='try this')
+    assert isinstance(coords, Coordinates)
+    assert coords.comment == 'try this'
+
+
 def test_coordinates_init_val_and_weights():
+    """Test initialization with weights."""
     # correct number of weights
     coords = Coordinates([1, 2], 0, 0, weights=[.5, .5])
     assert isinstance(coords, Coordinates)
+    npt.assert_allclose(coords.weights, [.5, .5])
 
     # incorrect number of weights
     with raises(AssertionError):
@@ -225,11 +245,14 @@ def test_coordinates_init_val_and_weights():
 
 
 def test_coordinates_init_sh_order():
+    """Test initialization with spherical harmonics order."""
     coords = Coordinates(sh_order=5)
     assert isinstance(coords, Coordinates)
+    assert coords.sh_order == 5
 
 
 def test_show():
+    """Test if possible calls of show() pass."""
     coords = Coordinates([-1, 0, 1], 0, 0)
     # show without mask
     coords.show()
@@ -242,7 +265,8 @@ def test_show():
         coords.show(np.array([1, 0], dtype=bool))
 
 
-def test_setter_and_getter_with():
+def test_setter_and_getter_with_conversion():
+    """Test conversion between coordinate systems using the default unit."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -290,6 +314,7 @@ def test_setter_and_getter_with():
 
 
 def test_multiple_getter_with_conversion():
+    """Test output of 500 random sequential conversions."""
     # test N successive coordinate conversions
     N = 500
 
@@ -324,40 +349,51 @@ def test_multiple_getter_with_conversion():
         print(f"Tolerance met in iteration {ii}")
 
 
-def test_getter_weights():
-    coords = Coordinates([1, 2], 0, 0, weights=[.5, .5])
-    assert (coords.weights == np.array([.5, .5])).all()
+def test_getter_with_degrees():
+    """Test if getter return correct values also in degrees"""
+    coords = Coordinates(0, 1, 0)
+
+    sph = coords.get_sph(unit="deg")
+    npt.assert_allclose(sph, np.atleast_2d([90, 90, 1]))
+
+    cyl = coords.get_cyl(unit="deg")
+    npt.assert_allclose(cyl, np.atleast_2d([90, 0, 1]))
+
+
+def test_assertion_for_getter():
+    """Test assertion for empty Coordinates objects"""
+    coords = Coordinates()
+    with raises(ValueError, match="Object is empty"):
+        coords.get_cart()
+    with raises(ValueError, match="Object is empty"):
+        coords.get_sph()
+    with raises(ValueError, match="Object is empty"):
+        coords.get_cyl()
 
 
 def test_setter_weights():
+    """Test setting weights."""
     coords = Coordinates([1, 2], 0, 0)
     coords.weights = [.5, .5]
     assert (coords.weights == np.array([.5, .5])).all()
 
 
-def test_getter_sh_order():
-    coords = Coordinates(sh_order=10)
-    assert coords.sh_order == 10
-
-
 def test_setter_sh_order():
+    """Test setting the SH order."""
     coords = Coordinates()
     coords.sh_order = 10
     assert coords.sh_order == 10
 
 
-def test_getter_comment():
-    coords = Coordinates(1, 1, 1, comment='try this')
-    assert coords.comment == 'try this'
-
-
 def test_setter_comment():
+    """Test setting the comment."""
     coords = Coordinates()
     coords.comment = 'now this'
     assert coords.comment == 'now this'
 
 
 def test_cshape():
+    """Test the cshape attribute."""
     # empty
     coords = Coordinates()
     assert coords.cshape == (0,)
@@ -370,6 +406,7 @@ def test_cshape():
 
 
 def test_cdim():
+    """Test the csim attribute."""
     # empty
     coords = Coordinates()
     assert coords.cdim == 0
@@ -382,6 +419,7 @@ def test_cdim():
 
 
 def test_csize():
+    """Test the csize attribute."""
     # 0 points
     coords = Coordinates()
     assert coords.csize == 0
@@ -394,6 +432,7 @@ def test_csize():
 
 
 def test_getitem():
+    """Test getitem with different parameters."""
     # test without weights
     coords = Coordinates([1, 2], 0, 0)
     new = coords[0]
@@ -505,6 +544,11 @@ def test_get_nearest_sph():
     with raises(AssertionError):
         coords.get_nearest_sph(1, 0, 0, 181)
 
+    # test assertion for multiple radii
+    coords = Coordinates([1, 2], 0, 0)
+    with raises(ValueError, match="get_nearest_sph only works if"):
+        coords.get_nearest_sph(0, 0, 1, 1)
+
 
 def test_get_slice():
     # test only for self.cdim = 1.
@@ -529,6 +573,8 @@ def test_get_slice():
     # cyclic querry
     assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0, 1, 1, 1, 0],
                                                             dtype=bool)).all()
+    assert (c.get_slice('azimuth', 'deg', 359, 2) == np.array([1, 1, 1, 1, 0],
+                                                            dtype=bool)).all()
     # non-cyclic querry
     assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0, 0, 1, 1, 1],
                                                             dtype=bool)).all()
@@ -538,6 +584,9 @@ def test_get_slice():
 
     # there is no unique processing for cylindrical coordinates - they are thus
     # not tested here.
+
+    # test with show
+    c.get_slice('azimuth', 'deg', 1, 1, show=True)
 
 
 def test_rotation():
@@ -576,8 +625,10 @@ def test_rotation():
 
 
 def test_converters():
-    # test if converterts can handle numbers
-    # (correctness of the rotation is tested in test_setter_and_getter)
+    """
+    Test if converterts can handle numbers (correctness of theconversion is
+    tested in test_setter_and_getter_with_conversion)
+    """
     coordinates.cart2sph(0, 0, 1)
     coordinates.sph2cart(0, 0, 1)
     coordinates.cart2cyl(0, 0, 1)

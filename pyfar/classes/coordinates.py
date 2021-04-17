@@ -544,7 +544,7 @@ class Coordinates():
                 f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
-        if self._system['unit'] == 'deg':
+        if new_system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi * 180
 
         # return points and convert internal state if desired
