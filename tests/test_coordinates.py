@@ -551,45 +551,49 @@ def test_get_nearest_sph():
 
 
 def test_get_slice():
+    """Test different queries for get slice."""
     # test only for self.cdim = 1.
     # self.get_slice uses KDTree, which is tested with N-dimensional arrays
     # in test_get_nearest_k()
 
     # cartesian grid
     d = np.linspace(-2, 2, 5)
+
     c = Coordinates(d, 0, 0)
-    assert (c.get_slice('x', 'met', 0, 1) == np.array([0, 1, 1, 1, 0],
-                                                      dtype=bool)).all()
+    npt.assert_allclose(
+        c.get_slice('x', 'met', 0, 1), np.array([0, 1, 1, 1, 0]))
+
     c = Coordinates(0, d, 0)
-    assert (c.get_slice('y', 'met', 0, 1) == np.array([0, 1, 1, 1, 0],
-                                                      dtype=bool)).all()
+    npt.assert_allclose(
+        c.get_slice('y', 'met', 0, 1), np.array([0, 1, 1, 1, 0]))
+
     c = Coordinates(0, 0, d)
-    assert (c.get_slice('z', 'met', 0, 1) == np.array([0, 1, 1, 1, 0],
-                                                      dtype=bool)).all()
+    npt.assert_allclose(
+        c.get_slice('z', 'met', 0, 1), np.array([0, 1, 1, 1, 0]))
 
     # spherical grid
     d = [358, 359, 0, 1, 2]
     c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
-    # cyclic query
-    assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0, 1, 1, 1, 0],
-                                                            dtype=bool)).all()
-    assert (c.get_slice('azimuth', 'deg', 359, 2) == np.array([1, 1, 1, 1, 0],
-                                                            dtype=bool)).all()
+    # cyclic query for lower bound
+    npt.assert_allclose(
+        c.get_slice('azimuth', 'deg', 0, 1), np.array([0, 1, 1, 1, 0]))
+    # cyclic query for upper bound
+    npt.assert_allclose(
+        c.get_slice('azimuth', 'deg', 359, 2), np.array([1, 1, 1, 1, 0]))
     # non-cyclic query
-    assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0, 0, 1, 1, 1],
-                                                            dtype=bool)).all()
+    npt.assert_allclose(
+        c.get_slice('azimuth', 'deg', 1, 1), np.array([0, 0, 1, 1, 1]))
     # out of range query
     with raises(AssertionError):
         c.get_slice('azimuth', 'deg', -1, 1)
     # non existing coordinate query
     with raises(ValueError, match="'elevation' in 'ged' does not exist"):
         c.get_slice('elevation', 'ged', 1, 1)
+    # test with show
+    c.get_slice('azimuth', 'deg', 1, 1, show=True)
 
     # there is no unique processing for cylindrical coordinates - they are thus
     # not tested here.
-
-    # test with show
-    c.get_slice('azimuth', 'deg', 1, 1, show=True)
 
 
 def test_rotation():
