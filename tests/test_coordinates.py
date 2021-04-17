@@ -570,17 +570,20 @@ def test_get_slice():
     # spherical grid
     d = [358, 359, 0, 1, 2]
     c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
-    # cyclic querry
+    # cyclic query
     assert (c.get_slice('azimuth', 'deg', 0, 1) == np.array([0, 1, 1, 1, 0],
                                                             dtype=bool)).all()
     assert (c.get_slice('azimuth', 'deg', 359, 2) == np.array([1, 1, 1, 1, 0],
                                                             dtype=bool)).all()
-    # non-cyclic querry
+    # non-cyclic query
     assert (c.get_slice('azimuth', 'deg', 1, 1) == np.array([0, 0, 1, 1, 1],
                                                             dtype=bool)).all()
-    # out of range querry
+    # out of range query
     with raises(AssertionError):
         c.get_slice('azimuth', 'deg', -1, 1)
+    # non existing coordinate query
+    with raises(ValueError, match="'elevation' in 'ged' does not exist"):
+        c.get_slice('elevation', 'ged', 1, 1)
 
     # there is no unique processing for cylindrical coordinates - they are thus
     # not tested here.
