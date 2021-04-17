@@ -437,14 +437,14 @@ def test_getitem():
     coords = Coordinates([1, 2], 0, 0)
     new = coords[0]
     assert isinstance(new, Coordinates)
-    assert (new.get_cart().flatten() == np.array([1, 0, 0])).all()
+    npt.assert_allclose(new.get_cart(), np.atleast_2d([1, 0, 0]))
 
     # test with weights
     coords = Coordinates([1, 2], 0, 0, weights=[.1, .9])
     new = coords[0]
     assert isinstance(new, Coordinates)
-    assert (new.get_cart().flatten() == np.array([1, 0, 0])).all()
-    assert new.weights.flatten() == np.array(.1)
+    npt.assert_allclose(new.get_cart(), np.atleast_2d([1, 0, 0]))
+    assert new.weights == np.array(.1)
 
     # test with 3D array
     coords = Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0)

@@ -1673,7 +1673,7 @@ class Coordinates():
 
         new = self.copy()
         # slice points
-        new._points = new._points[index]
+        new._points = np.atleast_2d(new._points[index])
         # slice weights
         if new._weights is not None:
             new._weights = new._weights[index]
