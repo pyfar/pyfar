@@ -461,38 +461,39 @@ def test_getitem():
 
 
 def test_get_nearest_k():
+    """Test returns of get_nearest_k"""
     # 1D cartesian, nearest point
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
     d, i, m = coords.get_nearest_k(1, 0, 0)
     assert d == 0.
     assert i == 1
-    assert (m == np.array([0, 1, 0, 0, 0, 0], dtype=bool)).all()
+    npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
 
     # 1D spherical, nearest point
     d, i, m = coords.get_nearest_k(0, 0, 1, 1, 'sph', 'top_elev', 'deg')
     assert d == 0.
     assert i == 1
-    assert (m == np.array([0, 1, 0, 0, 0, 0], dtype=bool)).all()
+    npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
 
     # 1D cartesian, two nearest points
     d, i, m = coords.get_nearest_k(1.2, 0, 0, 2)
     npt.assert_allclose(d, [.2, .8], atol=1e-15)
-    assert (i == np.array([1, 2])).all()
-    assert (m == np.array([0, 1, 1, 0, 0, 0], dtype=bool)).all()
+    npt.assert_allclose(i, np.array([1, 2]))
+    npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
 
-    # 1D cartesian querry two points
+    # 1D cartesian query two points
     d, i, m = coords.get_nearest_k([1, 2], 0, 0)
     npt.assert_allclose(d, [0, 0], atol=1e-15)
     npt.assert_allclose(i, [1, 2])
-    assert (m == np.array([0, 1, 1, 0, 0, 0], dtype=bool)).all()
+    npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
 
     # 2D cartesian, nearest point
     coords = Coordinates(x.reshape(2, 3), 0, 0)
     d, i, m = coords.get_nearest_k(1, 0, 0)
     assert d == 0.
     assert i == 1
-    assert (m == np.array([[0, 1, 0], [0, 0, 0]], dtype=bool)).all()
+    npt.assert_allclose(m, np.array([[0, 1, 0], [0, 0, 0]]))
 
     # test with plot
     coords = Coordinates(x, 0, 0)
