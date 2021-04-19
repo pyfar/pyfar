@@ -8,6 +8,7 @@ Note that it is not tested if the properties for
 pyfar.plot._interaction.PlotParameter are correctly set in pyfar.plot.function.
 If the parameters are incorrect, interaction will behave incorrect.
 """
+import numpy.testing as npt
 from inspect import getmembers, isfunction
 import numpy as np
 import matplotlib as mpl
@@ -16,7 +17,12 @@ import matplotlib.pyplot as plt
 import pyfar as pf
 import pyfar.plot._interaction as ia
 
+# use non showing backend for speed
 mpl.use("Agg")
+
+# get plot controls for universal testing
+sc_plot = pf.plot.shortcuts(show=False)["plots"]
+sc_ctr = pf.plot.shortcuts(show=False)["controls"]
 
 
 def test_event_emu():
@@ -37,8 +43,7 @@ def test_interaction_attached():
     an interaction. This is intended behavior.
     """
 
-    # dummy signal (needs to as longe as than the default spectrogram block
-    # size)
+    # dummy signal (needs to as longe as the default spectrogram block size)
     signal = pf.signals.impulse(1024)
 
     # loop functions
@@ -65,41 +70,42 @@ def test_toggle_plots():
 
     plots = {
         'time': {
-            'shortcut': '1',
+            'shortcut': sc_plot["time"]["key"][0],
             'xlabel': ['Time in ms'],
             'ylabel': ['Amplitude']},
         'freq': {
-            'shortcut': '2',
+            'shortcut': sc_plot["freq"]["key"][0],
             'xlabel': ['Frequency in Hz'],
             'ylabel': ['Magnitude in dB']},
         'phase': {
-            'shortcut': '3',
+            'shortcut': sc_plot["phase"]["key"][0],
             'xlabel': ['Frequency in Hz'],
             'ylabel': ['Phase in radians']},
         'group_delay': {
-            'shortcut': '4',
+            'shortcut': sc_plot["group_delay"]["key"][0],
             'xlabel': ['Frequency in Hz'],
             'ylabel': ['Group delay in s']},
         'spectrogram': {
-            'shortcut': '5',
+            'shortcut': sc_plot["spectrogram"]["key"][0],
             'xlabel': ['Time in s'],
             'ylabel': ['Frequency in Hz']},
         'time_freq': {
-            'shortcut': '6',
+            'shortcut': sc_plot["time_freq"]["key"][0],
             'xlabel': ['Time in ms', 'Frequency in Hz'],
             'ylabel': ['Amplitude', 'Magnitude in dB']},
         'freq_phase': {
-            'shortcut': '7',
+            'shortcut': sc_plot["freq_phase"]["key"][0],
             'xlabel':  ['', 'Frequency in Hz'],
             'ylabel': ['Magnitude in dB', 'Phase in radians']},
         'freq_group_delay': {
-            'shortcut': '8',
+            'shortcut': sc_plot["freq_group_delay"]["key"][0],
             'xlabel': ['', 'Frequency in Hz'],
             'ylabel': ['Magnitude in dB', 'Group delay in s']}
     }
 
+    # dummy signal (needs to as longe as the default spectrogram block size)
     signal = pf.signals.impulse(1024)
-
+    # initialze the plot
     ax = pf.plot.time(signal)
 
     for function in getmembers(pf.plot.line, isfunction):
@@ -124,3 +130,68 @@ def test_toggle_plots():
         for idx in range(len(xlabel)):
             assert ca[idx].get_xlabel() == xlabel[idx]
             assert ca[idx].get_ylabel() == ylabel[idx]
+
+    plt.close("all")
+
+
+def test_move_and_zoom_linear():
+    """Test moving and zooming linear x-axis, y-axis and colormap.
+
+    This is only done for one example plot. Other plots will work correctly
+    if the pyfar.plot._interaction.PlotParameter are set correctly in
+    pyfar.plot.function.
+    """
+
+    # initialize the plot
+    signal = pf.signals.impulse(1024)
+
+    for axes in ['x', 'y', 'cm']:
+        if axes == 'x':
+            ax = pf.plot.time(signal, unit="samples")
+            getter = ax.get_xlim
+
+            move = [sc_ctr["move_right"]["key"][0],
+                    sc_ctr["move_left"]["key"][0]]
+            zoom = [sc_ctr["zoom_x_in"]["key"][0],
+                    sc_ctr["zoom_x_out"]["key"][0]]
+        if axes == 'y':
+            ax = pf.plot.time(signal, unit="samples")
+            getter = ax.get_ylim
+
+            move = [sc_ctr["move_up"]["key"][0],
+                    sc_ctr["move_down"]["key"][0]]
+            zoom = [sc_ctr["zoom_y_in"]["key"][0],
+                    sc_ctr["zoom_y_out"]["key"][0]]
+        if axes == 'cm':
+            ax = pf.plot.spectrogram(signal, dB=False)
+            ax = ax[0]
+            for cm in ax.get_children():
+                if type(cm) == mpl.collections.QuadMesh:
+                    break
+            getter = cm.get_clim
+
+            move = [sc_ctr["move_cm_up"]["key"][0],
+                    sc_ctr["move_cm_down"]["key"][0]]
+            zoom = [sc_ctr["zoom_cm_in"]["key"][0],
+                    sc_ctr["zoom_cm_out"]["key"][0]]
+
+        # starting limits and range for changing them
+        lim = getter()
+        rng = (lim[1] - lim[0]) / 10
+
+        # move left and right
+        ax.interaction.select_action(ia.EventEmu(move[0]))
+        npt.assert_allclose(getter(), (lim[0] + rng, lim[1] + rng))
+        ax.interaction.select_action(ia.EventEmu(move[1]))
+        npt.assert_allclose(getter(), lim)
+
+        # zoom in and out
+        ax.interaction.select_action(ia.EventEmu(zoom[0]))
+        npt.assert_allclose(getter(), (lim[0] + rng, lim[1] - rng))
+        lim = getter()
+        rng = (lim[1] - lim[0]) / 10
+        ax.interaction.select_action(ia.EventEmu(zoom[1]))
+        npt.assert_allclose(
+            getter(), (lim[0] - rng, lim[1] + rng))
+
+        plt.close()
