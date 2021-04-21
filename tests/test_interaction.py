@@ -40,8 +40,8 @@ def test_event_emu():
 def test_interaction_attached():
     """Test if interaction object is attached to each plot function.
 
-    This test will fail if a new plot function is added that does not have
-    an interaction. This is intended behavior.
+    This test will fail if a new plot function is added to the pyfar.plot that
+    does not have an interaction. This is intended behavior.
     """
 
     # dummy signal (needs to as longe as the default spectrogram block size)
@@ -242,3 +242,60 @@ def test_move_and_zoom_linear():
             getter(), (lim[0] - shift, lim[1] + shift))
 
         plt.close()
+
+
+def test_toggle_x_axis():
+    """Test toggling the x-axis from logarithmic to linear and back.
+
+    This is only tested for one example. Other plots will work correctly
+    if the pyfar.plot._interaction.PlotParameter are set correctly in
+    pyfar.plot.function.
+    """
+
+    # init the plot
+    ax = pf.plot.freq(pf.Signal([1, 2, 3, 4, 5], 44100))
+    assert ax.get_xscale() == "log"
+    # toggle x-axis
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_x"]["key"][0]))
+    assert plt.gca().get_xscale() == "linear"
+    # toggle x-axis
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_x"]["key"][0]))
+    assert plt.gca().get_xscale() == "log"
+
+
+def test_toggle_y_axis():
+    """Test toggling the y-axis from dB to linear and back.
+
+    This is only tested for one example. Other plots will work correctly
+    if the pyfar.plot._interaction.PlotParameter are set correctly in
+    pyfar.plot.function.
+    """
+
+    # init the plot
+    ax = pf.plot.freq(pf.Signal([1, 2, 3, 4, 5], 44100))
+    assert ax.get_ylabel() == "Magnitude in dB"
+    # toggle x-axis
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_y"]["key"][0]))
+    assert plt.gca().get_ylabel() == "Magnitude"
+    # toggle x-axis
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_y"]["key"][0]))
+    assert plt.gca().get_ylabel() == "Magnitude in dB"
+
+
+def test_toggle_colormap():
+    """Test toggling the colormap from dB to linear and back.
+
+    This is only tested for one example. Other plots will work correctly
+    if the pyfar.plot._interaction.PlotParameter are set correctly in
+    pyfar.plot.function.
+    """
+
+    # init the plot
+    ax = pf.plot.spectrogram(pf.signals.impulse(1024))
+    assert ax[1].get_ylabel() == "Magnitude in dB"
+    # toggle x-axis
+    ax[0].interaction.select_action(ia.EventEmu(sc_ctr["toggle_cm"]["key"][0]))
+    assert plt.gcf().get_axes()[1].get_ylabel() == "Magnitude"
+    # toggle x-axis
+    ax[0].interaction.select_action(ia.EventEmu(sc_ctr["toggle_cm"]["key"][0]))
+    assert plt.gcf().get_axes()[1].get_ylabel() == "Magnitude in dB"
