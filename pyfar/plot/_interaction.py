@@ -507,6 +507,12 @@ class Interaction(object):
         plot = self.plot
         prm = self.params
 
+        # cases that are not allowed
+        if event.key in plot['spectrogram'] \
+                and self.signal.n_samples < prm.window_length:
+            return
+
+        # toogle the plot
         with plt.style.context(utils.plotstyle(self.style)):
             self.figure.clear()
             self.ax = None
@@ -779,7 +785,7 @@ def get_new_axis_limits(limits, axis_type, operation, direction, amount=.1):
     # distribute shift to the lower and upper bound of frequency axes
     if axis_type == 'freq':
         shift = np.array([limits[0] / limits[1] * shift,
-                            (1 - limits[0] / limits[1]) * shift]).flatten()
+                         (1 - limits[0] / limits[1]) * shift]).flatten()
     else:
         shift = np.tile(shift, 2)
 

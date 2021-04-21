@@ -106,7 +106,7 @@ def test_toggle_plots():
 
     # dummy signal (needs to as longe as the default spectrogram block size)
     signal = pf.signals.impulse(1024)
-    # initialze the plot
+    # initialize the plot
     ax = pf.plot.time(signal)
 
     for function in getmembers(pf.plot.line, isfunction):
@@ -120,7 +120,7 @@ def test_toggle_plots():
         xlabel = plots[function[0]]["xlabel"]
         ylabel = plots[function[0]]["ylabel"]
 
-        # toogle the interaction
+        # toggle the interaction
         ax.interaction.select_action(ia.EventEmu(shortcut))
 
         # current axis or array/list of axes
@@ -133,6 +133,23 @@ def test_toggle_plots():
             assert ca[idx].get_ylabel() == ylabel[idx]
 
     plt.close("all")
+
+@pytest.mark.parametrize("plot,signal,toggle", [
+    # togling spectrogram with short signal would raise Value error
+    # if not caught
+    (pf.plot.time, pf.Signal([1, 0, 0], 44100), "spectrogram")
+    ])
+def test_toggle_plot_not_allowed(plot, signal, toggle):
+    """Test if toggles that are not allowed are caught.
+
+    Can be extended if required in the future.
+    """
+
+    # toggling spectrogram, if signal is too short
+    ax = plot(signal)
+    shortcut = sc_plot[toggle]["key"][0]
+    # toggle the interaction
+    ax.interaction.select_action(ia.EventEmu(shortcut))
 
 
 @pytest.mark.parametrize(
@@ -152,7 +169,7 @@ def test_toggle_plots():
      ])
 def test_get_new_axis_limits(ax_type, operation, direction,
                              limits, new_limits):
-    """Test calucalation of new axis limits for all parameter combinations."""
+    """Test calculation of new axis limits for all parameter combinations."""
 
     test_limits = ia.get_new_axis_limits(
         limits, ax_type, operation, direction)
