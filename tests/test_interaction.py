@@ -135,6 +135,31 @@ def test_toggle_plots():
     plt.close("all")
 
 
+@pytest.mark.parametrize(
+    "ax_type,operation,direction,limits,new_limits",
+    [("freq", "move", "increase", [20, 20e3], [20 + 1.998, 20e3 + 1996.002]),
+     ("freq", "move", "decrease", [20, 20e3], [20 - 1.998, 20e3 - 1996.002]),
+     ("freq", "zoom", "increase", [20, 20e3], [20 + 1.998, 20e3 - 1996.002]),
+     ("freq", "zoom", "decrease", [20, 20e3], [20 - 1.998, 20e3 + 1996.002]),
+     ("dB", "move", "increase", [-20, 0], [-18, 2]),
+     ("dB", "move", "decrease", [-20, 0], [-22, -2]),
+     ("dB", "zoom", "increase", [-20, 0], [-16, 0]),
+     ("dB", "zoom", "decrease", [-20, 0], [-24, 0]),
+     ("other", "move", "increase", [0, 10], [1, 11]),
+     ("other", "move", "decrease", [0, 10], [-1, 9]),
+     ("other", "zoom", "increase", [0, 10], [1, 9]),
+     ("other", "zoom", "decrease", [0, 10], [-1, 11])
+     ])
+def test_get_new_axis_limits(ax_type, operation, direction,
+                             limits, new_limits):
+    """Test calucalation of new axis limits for all parameter combinations."""
+
+    test_limits = ia.get_new_axis_limits(
+        limits, ax_type, operation, direction)
+
+    npt.assert_allclose(test_limits, np.array(new_limits))
+
+
 def test_move_and_zoom_linear():
     """Test moving and zooming linear x-axis, y-axis and colormap.
 
@@ -199,8 +224,3 @@ def test_move_and_zoom_linear():
             getter(), (lim[0] - shift, lim[1] + shift))
 
         plt.close()
-
-# pytest.mark.parametrize("ax_type,operation,direction,limits,new_limits",
-#     [("freq", "move", "increase", [20, 20e3], [20 + 1.998, 20e3 + 1996.002]],)
-# def test_get_new_axis_limits():
-#     test_limits =
