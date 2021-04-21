@@ -749,6 +749,8 @@ def get_new_axis_limits(limits, axis_type, operation, direction, amount=.1):
 
     Parameters
     ----------
+    limits : array like
+        array like of length two with the current lower and upper axis limits.
     axis_type : 'freq', 'dB', 'other'
         String that sets constraints on how axis/colormaps are moved and
         zoomed
@@ -771,7 +773,7 @@ def get_new_axis_limits(limits, axis_type, operation, direction, amount=.1):
     """
 
     # get the amount to be shifted
-    dyn_range = np.diff(limits)
+    dyn_range = np.diff(np.array(limits))
     shift = amount * dyn_range
 
     # distribute shift to the lower and upper bound of frequency axes
