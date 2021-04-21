@@ -177,21 +177,21 @@ def test_move_and_zoom_linear():
 
         # starting limits and range for changing them
         lim = getter()
-        rng = (lim[1] - lim[0]) / 10
+        shift = (lim[1] - lim[0]) * .1
 
         # move left and right
         ax.interaction.select_action(ia.EventEmu(move[0]))
-        npt.assert_allclose(getter(), (lim[0] + rng, lim[1] + rng))
+        npt.assert_allclose(getter(), (lim[0] + shift, lim[1] + shift))
         ax.interaction.select_action(ia.EventEmu(move[1]))
         npt.assert_allclose(getter(), lim)
 
         # zoom in and out
         ax.interaction.select_action(ia.EventEmu(zoom[0]))
-        npt.assert_allclose(getter(), (lim[0] + rng, lim[1] - rng))
+        npt.assert_allclose(getter(), (lim[0] + shift, lim[1] - shift))
         lim = getter()
-        rng = (lim[1] - lim[0]) / 10
+        shift = (lim[1] - lim[0]) / 10
         ax.interaction.select_action(ia.EventEmu(zoom[1]))
         npt.assert_allclose(
-            getter(), (lim[0] - rng, lim[1] + rng))
+            getter(), (lim[0] - shift, lim[1] + shift))
 
         plt.close()
