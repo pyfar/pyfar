@@ -632,12 +632,10 @@ class Interaction(object):
             if self.params.cm_type is None:
                 return
 
-            for cm in self.ax.get_children():
-                if type(cm) == mpl.collections.QuadMesh:
-                    break
+            qm = _line._get_quad_mesh_from_axis(self.ax)
 
-            getter = cm.get_clim
-            setter = cm.set_clim
+            getter = qm.get_clim
+            setter = qm.set_clim
             axis_type = self.params.cm_type
             if event.key in ctr["move_cm_up"] + ctr["move_cm_down"]:
                 operation = "move"
