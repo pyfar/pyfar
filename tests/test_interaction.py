@@ -17,9 +17,11 @@ import matplotlib.pyplot as plt
 
 import pyfar as pf
 import pyfar.plot._interaction as ia
+from pyfar.plot._line import _get_quad_mesh_from_axis
 
 # use non showing backend for speed
 mpl.use("Agg")
+plt.close("all")
 
 # get plot controls for universal testing
 sc_plot = pf.plot.shortcuts(show=False)["plots"]
@@ -152,6 +154,8 @@ def test_toggle_plot_not_allowed(plot, signal, toggle):
     # toggle the interaction
     ax.interaction.select_action(ia.EventEmu(shortcut))
 
+    plt.close("all")
+
 
 @pytest.mark.parametrize(
     "ax_type,operation,direction,limits,new_limits",
@@ -262,6 +266,8 @@ def test_toggle_x_axis():
     ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_x"]["key"][0]))
     assert plt.gca().get_xscale() == "log"
 
+    plt.close("all")
+
 
 def test_toggle_y_axis():
     """Test toggling the y-axis from dB to linear and back.
@@ -281,6 +287,8 @@ def test_toggle_y_axis():
     ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_y"]["key"][0]))
     assert plt.gca().get_ylabel() == "Magnitude in dB"
 
+    plt.close("all")
+
 
 def test_toggle_colormap():
     """Test toggling the colormap from dB to linear and back.
@@ -299,3 +307,64 @@ def test_toggle_colormap():
     # toggle x-axis
     ax[0].interaction.select_action(ia.EventEmu(sc_ctr["toggle_cm"]["key"][0]))
     assert plt.gcf().get_axes()[1].get_ylabel() == "Magnitude in dB"
+
+    plt.close("all")
+
+
+def test_cycle_and_toggle_lines():
+    """Test toggling and cycling channels of a Signal."""
+
+    # init and check start conditions
+    signal = pf.Signal([[1, 0], [2, 0]], 44100)
+    ax = pf.plot.time(signal)
+    assert ax.lines[0].get_visible() is True
+    assert ax.lines[1].get_visible() is True
+    assert ax.interaction.txt is None
+    # toggle all
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_all"]["key"][0]))
+    assert ax.lines[0].get_visible() is True
+    assert ax.lines[1].get_visible() is False
+    assert ax.interaction.txt.get_text() == "Ch. 0"
+    # next
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["next"]["key"][0]))
+    assert ax.lines[0].get_visible() is False
+    assert ax.lines[1].get_visible() is True
+    assert ax.interaction.txt.get_text() == "Ch. 1"
+    # previous
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["prev"]["key"][0]))
+    assert ax.lines[0].get_visible() is True
+    assert ax.lines[1].get_visible() is False
+    assert ax.interaction.txt.get_text() == "Ch. 0"
+    # toggle all
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_all"]["key"][0]))
+    assert ax.lines[0].get_visible() is True
+    assert ax.lines[1].get_visible() is True
+    assert ax.interaction.txt is None
+
+    plt.close("all")
+
+
+def test_cycle_and_toggle_signals():
+    """Test toggling and cycling Signal slices."""
+
+    # init and check start conditions
+    signal = pf.signals.impulse(1024, amplitude=[1, 2])
+    ax = pf.plot.spectrogram(signal)
+
+    assert ax[0].interaction.txt is None
+    # use the clim because the image data is identical
+    clim = _get_quad_mesh_from_axis(ax[0]).get_clim()
+    npt.assert_allclose(clim, (-96, 4), atol=.5)
+
+    # next
+    ax[0].interaction.select_action(ia.EventEmu(sc_ctr["next"]["key"][0]))
+    assert ax[0].interaction.txt.get_text() == "Ch. 1"
+    clim = _get_quad_mesh_from_axis(plt.gcf().get_axes()[0]).get_clim()
+    npt.assert_allclose(clim, (-90, 10), atol=.5)
+
+    # previous
+    # next
+    ax[0].interaction.select_action(ia.EventEmu(sc_ctr["prev"]["key"][0]))
+    assert ax[0].interaction.txt.get_text() == "Ch. 0"
+    clim = _get_quad_mesh_from_axis(plt.gcf().get_axes()[0]).get_clim()
+    npt.assert_allclose(clim, (-96, 4), atol=.5)
