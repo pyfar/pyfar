@@ -642,22 +642,23 @@ class Interaction(object):
             else:
                 direction = "decrease"
 
-        # move or zoom
         if getter is not None:
-            self.apply_move_and_zoom(getter, setter, axis_type,
-                                     operation, direction)
+            # get the new axis limits
+            current_limits = np.asarray(getter())
+            new_limits = self.get_new_axis_limits(
+                current_limits, axis_type, operation, direction)
 
-    def apply_move_and_zoom(self, getter_function, setter_function,
-                            axis_type, operation, direction, amount=.1):
+            # apply the new axis limits
+            setter(new_limits[0], new_limits[1])
+            self.draw_canvas()
+
+    def get_new_axis_limits(
+            self, limits, axis_type, operation, direction, amount=.1):
         """
-        Move or zoom axes or colormap by a specified amount.
+        Get new limits for plot axis.
 
         Parameters
         ----------
-        getter_function : callable
-            Function handle, e.g., `ax.get_xlim`
-        setter_function : callable
-            Function handle, e.g., `ax.set_xlim`
         axis_type : 'freq', 'dB', 'other'
             String that sets constraints on how axis/colormaps are moved and
             zoomed
@@ -679,15 +680,14 @@ class Interaction(object):
 
         """
 
-        # shift 10 percent of the current axis range
-        lims = np.asarray(getter_function())
-        dyn_range = np.diff(lims)
+        # get the amount to be shifted
+        dyn_range = np.diff(limits)
         shift = amount * dyn_range
 
         # distribute shift to the lower and upper bound of frequency axes
         if axis_type == 'freq':
-            shift = np.array([lims[0] / lims[1] * shift,
-                             (1 - lims[0] / lims[1]) * shift]).flatten()
+            shift = np.array([limits[0] / limits[1] * shift,
+                             (1 - limits[0] / limits[1]) * shift]).flatten()
         else:
             shift = np.tile(shift, 2)
 
@@ -711,12 +711,9 @@ class Interaction(object):
                 f"operation must be 'move' or 'zoom' but is {operation}")
 
         # get new limits
-        lims_new = lims + shift
+        new_limits = limits + shift
 
-        # apply limits
-        setter_function(lims_new[0], lims_new[1])
-
-        self.draw_canvas()
+        return new_limits
 
     def toggle_all_lines(self):
         if self.all_visible:
