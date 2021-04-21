@@ -227,6 +227,7 @@ def test_coordinates_init_default_convention_and_unit():
 
 
 def test_coordinates_init_val_and_comment():
+    """Test initialization with comment."""
     coords = Coordinates(1, 1, 1, comment='try this')
     assert isinstance(coords, Coordinates)
     assert coords.comment == 'try this'
