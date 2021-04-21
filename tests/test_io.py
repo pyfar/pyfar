@@ -113,6 +113,18 @@ def test_read_sofa_sampling_rate_unit(generate_sofa_unit_error):
         io.read_sofa(generate_sofa_unit_error)
 
 
+def test_read_sofa_position_type_spherical(
+        generate_sofa_postype_spherical, sofa_reference_coordinates):
+    """Test to verify correct position type of sofa file"""
+    _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
+    npt.assert_allclose(
+        s_coords.get_sph(convention='top_elev', unit='deg'),
+        sofa_reference_coordinates[0])
+    npt.assert_allclose(
+        r_coords.get_sph(convention='top_elev', unit='deg'),
+        sofa_reference_coordinates[1])
+
+
 def test_read_sofa_position_type_unit(generate_sofa_postype_error):
     """Test to verify correct position type of sofa file"""
     with pytest.raises(ValueError):
