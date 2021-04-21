@@ -77,7 +77,8 @@ def test_write_wav_suffix(noise, tmpdir):
 def test_write_wav_nd(noise_two_by_three_channel, tmpdir):
     """Test for signals of higher dimension."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
-    io.write_wav(noise_two_by_three_channel, filename)
+    with pytest.warns(UserWarning, match='flattened'):
+        io.write_wav(noise_two_by_three_channel, filename)
     signal_reload = wavfile.read(filename)[-1].T
     npt.assert_allclose(
         signal_reload.reshape(noise_two_by_three_channel.time.shape),
