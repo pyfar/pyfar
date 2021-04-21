@@ -2,6 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from pytest import raises
+import matplotlib.pyplot as plt
 
 from pyfar import Coordinates
 import pyfar.classes.coordinates as coordinates
@@ -241,6 +242,8 @@ def test_show():
     with raises(AssertionError):
         coords.show(np.array([1, 0], dtype=bool))
 
+    plt.close("all")
+
 
 def test_setter_and_getter_with():
     # get list of available coordinate systems
@@ -466,6 +469,8 @@ def test_get_nearest_k():
     # test out of range parameters
     with raises(AssertionError):
         coords.get_nearest_k(1, 0, 0, -1)
+
+    plt.close("all")
 
 
 def test_get_nearest_cart():

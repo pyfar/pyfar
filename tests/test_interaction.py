@@ -368,3 +368,5 @@ def test_cycle_and_toggle_signals():
     assert ax[0].interaction.txt.get_text() == "Ch. 0"
     clim = _get_quad_mesh_from_axis(plt.gcf().get_axes()[0]).get_clim()
     npt.assert_allclose(clim, (-96, 4), atol=.5)
+
+    plt.close("all")
