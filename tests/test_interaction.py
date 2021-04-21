@@ -9,6 +9,7 @@ pyfar.plot._interaction.PlotParameter are correctly set in pyfar.plot.function.
 If the parameters are incorrect, interaction will behave incorrect.
 """
 import numpy.testing as npt
+import pytest
 from inspect import getmembers, isfunction
 import numpy as np
 import matplotlib as mpl
@@ -137,6 +138,9 @@ def test_toggle_plots():
 def test_move_and_zoom_linear():
     """Test moving and zooming linear x-axis, y-axis and colormap.
 
+    This round trip test is only done for linear axis to save time. If the new
+    axes limits are calculated correctly for all cases is tested separately.
+
     This is only done for one example plot. Other plots will work correctly
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
@@ -195,3 +199,8 @@ def test_move_and_zoom_linear():
             getter(), (lim[0] - shift, lim[1] + shift))
 
         plt.close()
+
+# pytest.mark.parametrize("ax_type,operation,direction,limits,new_limits",
+#     [("freq", "move", "increase", [20, 20e3], [20 + 1.998, 20e3 + 1996.002]],)
+# def test_get_new_axis_limits():
+#     test_limits =

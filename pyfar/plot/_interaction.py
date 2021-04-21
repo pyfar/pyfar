@@ -645,75 +645,12 @@ class Interaction(object):
         if getter is not None:
             # get the new axis limits
             current_limits = np.asarray(getter())
-            new_limits = self.get_new_axis_limits(
+            new_limits = get_new_axis_limits(
                 current_limits, axis_type, operation, direction)
 
             # apply the new axis limits
             setter(new_limits[0], new_limits[1])
             self.draw_canvas()
-
-    def get_new_axis_limits(
-            self, limits, axis_type, operation, direction, amount=.1):
-        """
-        Get new limits for plot axis.
-
-        Parameters
-        ----------
-        axis_type : 'freq', 'dB', 'other'
-            String that sets constraints on how axis/colormaps are moved and
-            zoomed
-            'freq' : zoom and move is applied according to the ratios of the
-                     lower to upper axis limit, i.e., the change is smaller
-                     on the lower limit.
-            'dB' : Only the lower axis limit is changed when zooming.
-            'other' : move and zoom without constraints
-        operation : 'move', 'zoom'
-            'move' to shift the section of the axis or colormap to the
-            left/right (if setter_function is an x-axis)or up/down (if setter
-            function is a y-axis or colorbar). 'zoom' to zoom in our out.
-        direction : 'increase', 'decrease'
-            'increase' to move up/right or zoom in. 'decrease' to move
-            down/left or zoom out.
-        amount : number
-            amount to move or zoom in percent. E.g., `amount=.1` will move/zoom
-            10 percent of the current axis/colormap range. The default is 0.1
-
-        """
-
-        # get the amount to be shifted
-        dyn_range = np.diff(limits)
-        shift = amount * dyn_range
-
-        # distribute shift to the lower and upper bound of frequency axes
-        if axis_type == 'freq':
-            shift = np.array([limits[0] / limits[1] * shift,
-                             (1 - limits[0] / limits[1]) * shift]).flatten()
-        else:
-            shift = np.tile(shift, 2)
-
-        if operation == 'move':
-            # reverse the sign
-            if direction == 'decrease':
-                shift *= -1
-
-        elif operation == 'zoom':
-            # reverse one sign for zooming in/out
-            if direction == 'decrease':
-                shift[0] *= -1
-            else:
-                shift[1] *= -1
-
-            # dB axes only zoom at the lower end
-            if axis_type == 'dB':
-                shift = np.array([2 * shift[0], 0])
-        else:
-            raise ValueError(
-                f"operation must be 'move' or 'zoom' but is {operation}")
-
-        # get new limits
-        new_limits = limits + shift
-
-        return new_limits
 
     def toggle_all_lines(self):
         if self.all_visible:
@@ -804,3 +741,66 @@ class Interaction(object):
     def disconnect(self):
         """Disconnect from Matplotlib figure."""
         self.figure.canvas.mpl_disconnect(self.mpl_id)
+
+
+def get_new_axis_limits(limits, axis_type, operation, direction, amount=.1):
+    """
+    Get new limits for plot axis.
+
+    Parameters
+    ----------
+    axis_type : 'freq', 'dB', 'other'
+        String that sets constraints on how axis/colormaps are moved and
+        zoomed
+        'freq' : zoom and move is applied according to the ratios of the
+                    lower to upper axis limit, i.e., the change is smaller
+                    on the lower limit.
+        'dB' : Only the lower axis limit is changed when zooming.
+        'other' : move and zoom without constraints
+    operation : 'move', 'zoom'
+        'move' to shift the section of the axis or colormap to the
+        left/right (if setter_function is an x-axis)or up/down (if setter
+        function is a y-axis or colorbar). 'zoom' to zoom in our out.
+    direction : 'increase', 'decrease'
+        'increase' to move up/right or zoom in. 'decrease' to move
+        down/left or zoom out.
+    amount : number
+        amount to move or zoom in percent. E.g., `amount=.1` will move/zoom
+        10 percent of the current axis/colormap range. The default is 0.1
+
+    """
+
+    # get the amount to be shifted
+    dyn_range = np.diff(limits)
+    shift = amount * dyn_range
+
+    # distribute shift to the lower and upper bound of frequency axes
+    if axis_type == 'freq':
+        shift = np.array([limits[0] / limits[1] * shift,
+                            (1 - limits[0] / limits[1]) * shift]).flatten()
+    else:
+        shift = np.tile(shift, 2)
+
+    if operation == 'move':
+        # reverse the sign
+        if direction == 'decrease':
+            shift *= -1
+
+    elif operation == 'zoom':
+        # reverse one sign for zooming in/out
+        if direction == 'decrease':
+            shift[0] *= -1
+        else:
+            shift[1] *= -1
+
+        # dB axes only zoom at the lower end
+        if axis_type == 'dB':
+            shift = np.array([2 * shift[0], 0])
+    else:
+        raise ValueError(
+            f"operation must be 'move' or 'zoom' but is {operation}")
+
+    # get new limits
+    new_limits = limits + shift
+
+    return new_limits
