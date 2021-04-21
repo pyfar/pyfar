@@ -134,6 +134,7 @@ def test_toggle_plots():
 
     plt.close("all")
 
+
 @pytest.mark.parametrize("plot,signal,toggle", [
     # togling spectrogram with short signal would raise Value error
     # if not caught
