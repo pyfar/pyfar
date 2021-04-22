@@ -1,6 +1,9 @@
 import numpy as np
 import numpy.testing as npt
+
 from pytest import raises
+import pytest
+from unittest.mock import patch
 
 from pyfar.dsp import fft
 
@@ -19,7 +22,10 @@ def test_n_bins_odd():
     assert n_bins == truth
 
 
-def test_fft_orthogonality_sine_even_np(sine_stub, fft_lib_np):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_orthogonality_sine_even(sine_stub, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         sine_stub.time, sine_stub.n_samples, sine_stub.sampling_rate,
         sine_stub.fft_norm)
@@ -31,19 +37,10 @@ def test_fft_orthogonality_sine_even_np(sine_stub, fft_lib_np):
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_sine_even_fftw(sine_stub, fft_lib_pyfftw):
-    signal_spec = fft.rfft(
-        sine_stub.time, sine_stub.n_samples, sine_stub.sampling_rate,
-        sine_stub.fft_norm)
-    transformed_signal_time = fft.irfft(
-        signal_spec, sine_stub.n_samples, sine_stub.sampling_rate,
-        sine_stub.fft_norm)
-    npt.assert_allclose(
-        transformed_signal_time, sine_stub.time,
-        rtol=1e-10, atol=10*np.finfo(float).eps)
-
-
-def test_fft_orthogonality_sine_odd_np(sine_stub_odd, fft_lib_np):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_orthogonality_sine_odd(sine_stub_odd, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         sine_stub_odd.time, sine_stub_odd.n_samples,
         sine_stub_odd.sampling_rate, sine_stub_odd.fft_norm)
@@ -55,19 +52,10 @@ def test_fft_orthogonality_sine_odd_np(sine_stub_odd, fft_lib_np):
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_sine_odd_fftw(sine_stub_odd, fft_lib_pyfftw):
-    signal_spec = fft.rfft(
-        sine_stub_odd.time, sine_stub_odd.n_samples,
-        sine_stub_odd.sampling_rate, sine_stub_odd.fft_norm)
-    transformed_signal_time = fft.irfft(
-        signal_spec, sine_stub_odd.n_samples, sine_stub_odd.sampling_rate,
-        sine_stub_odd.fft_norm)
-    npt.assert_allclose(
-        transformed_signal_time, sine_stub_odd.time,
-        rtol=1e-10, atol=10*np.finfo(float).eps)
-
-
-def test_fft_orthogonality_noise_even_np(noise_stub, fft_lib_np):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_orthogonality_noise_even(noise_stub, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
         noise_stub.fft_norm)
@@ -79,19 +67,10 @@ def test_fft_orthogonality_noise_even_np(noise_stub, fft_lib_np):
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_noise_even_fftw(noise_stub, fft_lib_pyfftw):
-    signal_spec = fft.rfft(
-        noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
-        noise_stub.fft_norm)
-    transformed_signal_time = fft.irfft(
-        signal_spec, noise_stub.n_samples, noise_stub.sampling_rate,
-        noise_stub.fft_norm)
-    npt.assert_allclose(
-        transformed_signal_time, noise_stub.time,
-        rtol=1e-10, atol=10*np.finfo(float).eps)
-
-
-def test_fft_orthogonality_noise_odd_np(noise_stub_odd, fft_lib_np):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_orthogonality_noise_odd(noise_stub_odd, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         noise_stub_odd.time, noise_stub_odd.n_samples,
         noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
@@ -103,19 +82,10 @@ def test_fft_orthogonality_noise_odd_np(noise_stub_odd, fft_lib_np):
         rtol=1e-10, atol=10*np.finfo(float).eps)
 
 
-def test_fft_orthogonality_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
-    signal_spec = fft.rfft(
-        noise_stub_odd.time, noise_stub_odd.n_samples,
-        noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
-    transformed_signal_time = fft.irfft(
-        signal_spec, noise_stub_odd.n_samples, noise_stub_odd.sampling_rate,
-        noise_stub_odd.fft_norm)
-    npt.assert_allclose(
-        transformed_signal_time, noise_stub_odd.time,
-        rtol=1e-10, atol=10*np.finfo(float).eps)
-
-
-def test_fft_parseval_theorem_sine_even_np(sine_stub, fft_lib_np):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_parseval_theorem_sine_even(sine_stub, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         sine_stub.time, sine_stub.n_samples,
         sine_stub.sampling_rate, sine_stub.fft_norm)
@@ -126,18 +96,10 @@ def test_fft_parseval_theorem_sine_even_np(sine_stub, fft_lib_np):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parseval_theorem_sine_even_fftw(sine_stub, fft_lib_pyfftw):
-    signal_spec = fft.rfft(
-        sine_stub.time, sine_stub.n_samples,
-        sine_stub.sampling_rate, sine_stub.fft_norm)
-
-    e_time = np.mean(np.abs(sine_stub.time)**2)
-    e_freq = np.sum(np.abs(signal_spec)**2)
-
-    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
-
-
-def test_fft_parseval_theorem_sine_odd_np(sine_stub_odd, fft_lib_np):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_parseval_theorem_sine_odd(sine_stub_odd, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         sine_stub_odd.time, sine_stub_odd.n_samples,
         sine_stub_odd.sampling_rate, sine_stub_odd.fft_norm)
@@ -148,18 +110,10 @@ def test_fft_parseval_theorem_sine_odd_np(sine_stub_odd, fft_lib_np):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parseval_theorem_sine_odd_fftw(sine_stub_odd, fft_lib_pyfftw):
-    signal_spec = fft.rfft(
-        sine_stub_odd.time, sine_stub_odd.n_samples,
-        sine_stub_odd.sampling_rate, sine_stub_odd.fft_norm)
-
-    e_time = np.mean(np.abs(sine_stub_odd.time)**2)
-    e_freq = np.sum(np.abs(signal_spec)**2)
-
-    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
-
-
-def test_fft_parseval_theorem_noise_even_np(noise_stub, fft_lib_np):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_parseval_theorem_noise_even(noise_stub, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
         noise_stub.fft_norm)
@@ -170,29 +124,10 @@ def test_fft_parseval_theorem_noise_even_np(noise_stub, fft_lib_np):
     npt.assert_allclose(e_freq, e_time, rtol=1e-10)
 
 
-def test_fft_parseval_theorem_noise_even_fftw(noise_stub, fft_lib_pyfftw):
-    signal_spec = fft.rfft(
-        noise_stub.time, noise_stub.n_samples, noise_stub.sampling_rate,
-        noise_stub.fft_norm)
-
-    e_time = np.mean(np.abs(noise_stub.time)**2)
-    e_freq = np.sum(np.abs(signal_spec)**2)
-
-    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
-
-
-def test_fft_parseval_theorem_noise_odd_np(noise_stub_odd, fft_lib_np):
-    signal_spec = fft.rfft(
-        noise_stub_odd.time, noise_stub_odd.n_samples,
-        noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
-
-    e_time = np.mean(np.abs(noise_stub_odd.time)**2)
-    e_freq = np.sum(np.abs(signal_spec)**2)
-
-    npt.assert_allclose(e_freq, e_time, rtol=1e-10)
-
-
-def test_fft_parseval_theorem_noise_odd_fftw(noise_stub_odd, fft_lib_pyfftw):
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_parseval_theorem_noise_odd(noise_stub_odd, fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
     signal_spec = fft.rfft(
         noise_stub_odd.time, noise_stub_odd.n_samples,
         noise_stub_odd.sampling_rate, noise_stub_odd.fft_norm)
@@ -452,9 +387,16 @@ def test_rfft_normalization_sine(sine_stub):
         rtol=1e-10, atol=1e-10)
 
 
+@pytest.mark.parametrize('fft_lib', ['fft_lib_np', 'fft_lib_pyfftw'])
+def test_fft_mock(fft_lib, request):
+    # getting the fixture value is required to apply the monkeypatch
+    request.getfixturevalue(fft_lib)
+    assert fft.fft_lib.__name__ == request.getfixturevalue(fft_lib)
+
+
 def test_fft_mock_numpy(fft_lib_np):
-    assert 'numpy.fft' in fft.fft_lib.__name__
+    assert 'numpy.fft' in fft_lib_np
 
 
 def test_fft_mock_pyfftw(fft_lib_pyfftw):
-    assert 'pyfftw' in fft.fft_lib.__name__
+    assert 'pyfftw' in fft_lib_pyfftw
