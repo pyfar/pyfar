@@ -604,6 +604,8 @@ def test_get_slice():
     # there is no unique processing for cylindrical coordinates - they are thus
     # not tested here.
 
+    plt.close("all")
+
 
 @pytest.mark.parametrize("rot_type,rot", [
     ('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)]),

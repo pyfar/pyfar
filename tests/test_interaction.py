@@ -7,6 +7,12 @@ and comparing of images.
 Note that it is not tested if the properties for
 pyfar.plot._interaction.PlotParameter are correctly set in pyfar.plot.function.
 If the parameters are incorrect, interaction will behave incorrect.
+
+*******************************************************************************
+NOTE: These tests might fail in case tests that are conducted before use
+      plotting without closing the created figures. Make sure that you always
+      use matplotlib.pyplot.close("all") after creating tests with plots.
+*******************************************************************************
 """
 import numpy.testing as npt
 import pytest
