@@ -2,6 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from pytest import raises
+import matplotlib.pyplot as plt
 
 from pyfar import Coordinates
 import pyfar.classes.coordinates as coordinates
@@ -265,6 +266,8 @@ def test_show():
     with raises(AssertionError):
         coords.show(np.array([1, 0], dtype=bool))
 
+    plt.close("all")
+
 
 def test_setter_and_getter_with_conversion():
     """Test conversion between coordinate systems using the default unit."""
@@ -508,6 +511,8 @@ def test_get_nearest_k():
     with raises(AssertionError):
         coords.get_nearest_k(1, 0, 0, -1)
 
+    plt.close("all")
+
 
 def test_get_nearest_cart():
     """Tests returns of get_nearest_cart."""
@@ -598,6 +603,8 @@ def test_get_slice():
 
     # there is no unique processing for cylindrical coordinates - they are thus
     # not tested here.
+
+    plt.close("all")
 
 
 @pytest.mark.parametrize("rot_type,rot", [
