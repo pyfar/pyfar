@@ -399,6 +399,7 @@ def fft_lib_np(monkeypatch):
     """
     import pyfar.dsp.fft
     monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', np.fft)
+    return np.fft.__name__
 
 
 @pytest.fixture
@@ -408,6 +409,7 @@ def fft_lib_pyfftw(monkeypatch):
     import pyfar.dsp.fft
     from pyfftw.interfaces import numpy_fft as npi_fft
     monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', npi_fft)
+    return npi_fft.__name__
 
 
 @pytest.fixture
