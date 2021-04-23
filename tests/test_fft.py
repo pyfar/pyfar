@@ -3,7 +3,6 @@ import numpy.testing as npt
 
 from pytest import raises
 import pytest
-from unittest.mock import patch
 
 from pyfar.dsp import fft
 
