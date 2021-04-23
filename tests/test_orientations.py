@@ -155,7 +155,7 @@ def test_as_view_up_right(views, ups, orientations):
     ups = np.atleast_2d(ups).astype(np.float64)
     ups /= np.linalg.norm(ups, axis=1)[:, np.newaxis]
 
-    views_, ups_, rights_ = orientations.as_view_up_right()
+    views_, ups_, _ = orientations.as_view_up_right()
 
     assert np.array_equal(views_, views), "views are not preserved"
     assert np.array_equal(ups_, ups), "ups are not preserved"
