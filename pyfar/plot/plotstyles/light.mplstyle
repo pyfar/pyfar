@@ -13,6 +13,10 @@ lines.linewidth   : 1.5     ## line width in points
 lines.linestyle   : -       ## solid line
 
 
+#### SCATTER
+scatter.marker: .
+
+
 #### FONT
 
 font.family         : sans-serif

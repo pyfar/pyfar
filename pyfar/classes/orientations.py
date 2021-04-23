@@ -156,13 +156,13 @@ class Orientations(Rotation):
         ax = None
         if show_views:
             ax = pf.plot.quiver(
-                positions, views, color=(1, 0, 0), **kwargs)
+                positions, views, color=pf.plot.color('r'), **kwargs)
         if show_ups:
             ax = pf.plot.quiver(
-                positions, ups, ax=ax, color=(0, 1, 0), **kwargs)
+                positions, ups, ax=ax, color=pf.plot.color('g'), **kwargs)
         if show_rights:
             ax = pf.plot.quiver(
-                positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
+                positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
 
     def as_view_up_right(self):
         """Get Orientations as a view, up, and right vector.
