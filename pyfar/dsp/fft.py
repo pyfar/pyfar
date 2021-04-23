@@ -212,9 +212,9 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     """
     Normalize spectrum.
 
-    Apply normalizations defined in [1]_ to DFT spectrum. Note that, the phase
-    is maintained in all cases, i.e., instead of taking the squared absolute
-    spectra in Eq. (5-6), the complex spectra are multiplied with their
+    Apply normalizations defined in [1]_ to the DFT spectrum. Note that, the
+    phase is maintained in all cases, i.e., instead of taking the squared
+    absolute values in Eq. (5-6), the complex spectra are multiplied with their
     absolute values.
 
     Parameters
@@ -222,7 +222,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     spec : numpy array
         N dimensional array which has the frequency bins in the last
         dimension. E.g., ``spec.shape == (10,2,129)`` holds 10 times 2 spectra
-        with 129 frequencies each.
+        with 129 frequency bins each.
     n_samples : int
         number of samples of the corresponding time signal
     sampling_rate : number
@@ -232,7 +232,8 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             Do not apply any normalization
         'unitary'
             Multiplied single sided spectra by factor two as in [1]_ Eq. (8)
-            (except for 0 Hz and half the sampling rate)
+            (except for 0 Hz and the Nyquist frequency at half the sampling
+            rate)
         'amplitude'
             scale `spec` by ``1/n_samples`` as in [1]_ Eq. (4)
         'rms'
