@@ -223,6 +223,11 @@ def read(filename):
                     obj = codec._decode_object_json_aided(name, hint, zip_file)
                 elif hint == '$ndarray':
                     obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
+                else:
+                    raise TypeError(
+                        '.far-file contains unknown types.'
+                        'This might occur when writing and reading files with'
+                        'different versions of Pyfar.')
                 collection[name] = obj
 
     return collection

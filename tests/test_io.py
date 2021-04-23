@@ -192,12 +192,32 @@ def test_write_NoEncode_NotImplemented(no_encode_obj, tmpdir):
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
-    """ Check if a TypeError is raised when writing an arbitrary
+    """ Check if a NotImplementedError is raised when writing an arbitrary
     object.
     """
     filename = os.path.join(tmpdir, 'no_decode_obj.far')
     io.write(filename, no_decode_obj=no_decode_obj)
     with pytest.raises(NotImplementedError):
+        io.read(filename)
+
+
+@patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar.io._codec._is_pyfar_type', side_effect=[True] + 42 * [False])
+def test_write_read_FlatDataNoPyfarType_TypeError(_, no_decode_obj, tmpdir):
+    """ Check if a TypeError is raised when reading a .far-file that has been
+    created with a different version of Pyfar in which types exist which are
+    not present in the current version.
+
+    Notes
+    -----
+    The `42` in `[True] + 42 * [False]` is arbitrary. What matters is, that
+    `_is_pyfar_type` returns True on the first call to enable writing the
+    .far-file which is not compatible with the current version in the first
+    place.
+    """
+    filename = os.path.join(tmpdir, 'no_decode_obj.far')
+    io.write(filename, no_decode_obj=no_decode_obj)
+    with pytest.raises(TypeError):
         io.read(filename)
 
 
