@@ -406,8 +406,12 @@ def time_shift(signal, shift, unit='samples'):
     return shifted.reshape(signal.cshape)
 
 
-def fractional_time_shift(signal, shift, unit='samples', method='phase'):
-    """Apply a linear phase shift to a signal.
+def fractional_time_shift(signal, shift, unit='samples'):
+    """Apply a fractional delay to a signal.
+    The implements the time shift by weighting the spectrum with a linear
+    phase term corresponding to the desired time delay. Note that this is
+    equivalent to sinc interpolation in the time domain and consequently
+    results in a long impulse response.
 
 
     Parameters
@@ -420,6 +424,11 @@ def fractional_time_shift(signal, shift, unit='samples', method='phase'):
         The unit of the shift variable, can be samples or seconds. By default
         'samples'. Note that even if 'samples' is chosen, sub-sample shifts are
         possible.
+
+    Returns
+    -------
+    Signal
+        The shifted signal.
     """
     shift = np.atleast_1d(shift)
     if shift.size == 1:
