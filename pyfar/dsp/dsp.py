@@ -355,3 +355,90 @@ def _cross_fade(first, second, indices):
     result = first * window_first + second * window_second
 
     return result
+
+
+def time_shift(signal, shift, unit='samples'):
+    """Apply a time-shift to a signal.
+    The shift is performed as a cyclic shift on the time axis, potentially
+    resulting in non-causal signals for negative shift values.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to be shifted
+    shift : int, float
+        The time-shift value. A positive value will result in right shift on
+        the time axis (delaying of the signal), whereas a negative value
+        yields a left shift on the time axis (non-causal shift to a earlier
+        time).
+    unit : str, optional
+        Unit of the shift variable, this can be either samples or seconds.
+        By default 'samples' is used. Note that in the case of specifying
+        the shift time in seconds, the value is rounded to the next integer
+        sample value to perform the shift.
+
+
+    Returns
+    -------
+    Signal
+        The time-shifted signal.
+    """
+    shift = np.atleast_1d(shift)
+    if shift.size == 1:
+        shift = np.ones(signal.cshape) * shift
+
+    if unit == 'seconds':
+        shift_samples = np.round(shift*signal.sampling_rate).astype(int)
+    elif unit == 'samples':
+        shift_samples = shift.astype(int)
+    else:
+        raise ValueError(
+            f"Unknown unit: {unit}, has to be 'samples' or 'seconds'.")
+
+    shifted = signal.flatten()
+    shift_samples = shift_samples.flatten()
+    for ch in range(shifted.cshape[0]):
+        shifted.time[ch] = np.roll(
+            shifted.time[ch],
+            shift_samples[ch],
+            axis=-1)
+
+    return shifted.reshape(signal.cshape)
+
+
+def fractional_time_shift(signal, shift, unit='samples', method='phase'):
+    """Apply a linear phase shift to a signal.
+
+
+    Parameters
+    ----------
+    signal : Signal
+        The input signal
+    shift : float, array
+        The constant for the linear phase shift.
+    unit : str, optional
+        The unit of the shift variable, can be samples or seconds. By default
+        'samples'. Note that even if 'samples' is chosen, sub-sample shifts are
+        possible.
+    """
+    shift = np.atleast_1d(shift)
+    if shift.size == 1:
+        shift = np.ones(signal.cshape) * shift
+
+    if unit == 'seconds':
+        shift_times = shift.astype(np.double)
+    elif unit == 'samples':
+        shift_times = (shift/signal.sampling_rate).astype(np.double)
+    else:
+        raise ValueError(
+            f"Unknown unit: {unit}, has to be 'samples' or 'seconds'.")
+
+    shifted = signal.flatten()
+    shift_times = shift_times.flatten()
+
+    omega = 2*np.pi*shifted.frequencies
+
+    for ch in range(shifted.cshape[0]):
+        shifted.freq[ch, :] *= np.exp(-1j*omega*shift_times[ch])
+
+    return shifted.reshape(signal.cshape)

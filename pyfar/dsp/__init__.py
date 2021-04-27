@@ -3,7 +3,9 @@ from .dsp import (
     group_delay,
     wrap_to_2pi,
     spectrogram,
-    regularized_spectrum_inversion
+    regularized_spectrum_inversion,
+    time_shift,
+    fractional_time_shift
 )
 
 from . import filter
@@ -17,5 +19,7 @@ __all__ = [
     'group_delay',
     'wrap_to_2pi',
     'spectrogram',
-    'regularized_spectrum_inversion'
+    'regularized_spectrum_inversion',
+    'time_shift',
+    'fractional_time_shift'
 ]
