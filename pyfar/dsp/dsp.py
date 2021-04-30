@@ -143,6 +143,41 @@ def wrap_to_2pi(x):
     return x
 
 
+def zero_phase(signal):
+    """Calculate zero phase signal.
+
+    The zero phase signal is obtained by taking the absolute values of the
+    spectrum
+
+    .. math:: H_z = |H| = \\sqrt{\\mathrm{real}(H)^2 + \\mathrm{imag}(H)^2},
+
+    where :math:`H` is the complex valued spectrum of the input data and
+    :math:`H_z` the real valued zero phase spectrum.
+
+    The time domain data of a zero phase signal is symmetric around the first
+    sample, e.g., ``signal.time[0, 1] == signal.time[0, -1]``.
+
+    Parameters
+    ----------
+    signal : Signal, FrequencyData
+        input data
+
+    Returns
+    -------
+    signal : Signal, FrequencyData
+        zero phase copy of the input data
+    """
+
+    if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData)):
+        raise TypeError(
+            'Input data has to be of type Signal or FrequencyData.')
+
+    signal_zero = signal.copy()
+    signal_zero.freq = np.atleast_2d(np.abs(signal_zero.freq))
+
+    return signal_zero
+
+
 def nextpow2(x):
     """Returns the exponent of next higher power of 2.
 
