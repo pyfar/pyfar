@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+from pyfar import Signal
 
 from pyfar import dsp
 
@@ -109,21 +110,22 @@ def test_normalization_time_max_max_value():
                            channel_handling='max')
     assert answer == truth
 
+
 def test_normalization_magnitude_mean_min_freqrange():
     """Test the function along magnitude, mean, min & value path."""
-    signal = Signal([[1, 4, 1], [1, 10, 1]], 44100, n_samples=6, domain='freq')
-    truth = Signal([[4, 16, 4], [4, 40, 4]], 44100, n_samples=6, domain='freq')
+    signal = Signal([[1, 4, 1], [1, 10, 1]], 44100, n_samples=4, domain='freq')
+    truth = Signal([[2.5, 10, 2.5], [2.5, 25, 2.5]], 44100, n_samples=4,
+                   domain='freq')
     answer = dsp.normalize(signal, normalize='magnitude', normalize_to='mean',
                            channel_handling='min', value=10)
     assert answer == truth
 
 
-def test_average_time_phase():
-    """Test the function in time domain and phase copy"""
-    signal = Signal([[1, 2+1j, 1], [1, 4, 1]], 44100, domain='time')
-    truth = Signal([[1, 3+1j, 1]], 44100, domain='time')
-    answer = dsp.average(signal, average_mode='time',
-                         phase_copy=np.array([1, 0]))
+def test_average_complex():
+    """Test the function in complex domain"""
+    signal = Signal([[1, 4, 1], [1, 10, 1]], 44100, n_samples=4, domain='freq')
+    truth = Signal([1, 7, 1], 44100, n_samples=4, domain='freq')
+    answer = dsp.average(signal, average_mode='complex')
     assert answer == truth
 
 
