@@ -4,6 +4,7 @@ import pytest
 from pyfar import Signal
 
 from pyfar import dsp
+from pyfar import Signal
 
 
 def test_phase_rad(sine_plus_impulse):
