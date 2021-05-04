@@ -228,14 +228,27 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-def windows(signal, times=None, unit='samples', window_shape='symmetric',
-            window_function='hann', truncate=True, **kwargs):
-    """Return a windowed pyfar signal with selected window_function.
+def window(signal, function='hann', shape='symmetric', length=None, unit='samples', 
+        truncate=True):
+    """Apply time window to signal.
 
     Parameters
     ----------
-    signal : Signal object
-        An audio signal object from the pyfar signal class
+    signal : Signal
+        Signal to be windowed
+    function: string
+        Possible window function:
+        'rect': rectangular window
+        'hann': hanning window
+        'hamming': hamming window
+        'blackman': blackman window
+        'bartlett': bartlett window (triangle)
+        'kaiser': kaiser window
+        'flattop': flattop window
+        'chebwin': chebyshev window
+    window_shape: string
+        'symmetric' (default), 'left', 'right'
+        see argument times for more explanation
 
     times: int, list of int, None
         times = a
@@ -255,29 +268,17 @@ def windows(signal, times=None, unit='samples', window_shape='symmetric',
     unit: string
         times can be set in seconds 's', miliseconds 'ms' or 'samples'(default)
 
-    window_shape: string
-        'symmetric' (default), 'left', 'right'
-        see argument times for more explanation
 
-    window_function: string
-        select window type from:
-        'rect':no window
-        'hann': hanning window
-        'hamming': hamming window
-        'blackman': blackman window
-        'bartlett': bartlett window (triangle)
-        'kaiser': kaiser window
-        'flattop': flattop window
-        'chebwin': chebyshev window
-        see window function definitions for **kwargs
+
+
 
     truncate: boolean
         select True to truncate pyfar singal to window length
 
     Returns
     -------
-    out : pyfar
-        window coefficients
+    signal_windowed : Signal
+        Windowed signal
     """
     # check input and default values
     if not isinstance(signal, Signal):
@@ -346,10 +347,10 @@ def windows(signal, times=None, unit='samples', window_shape='symmetric',
         'chebwin': sgn.windows.chebwin,
     }
     if times is None or np.size(times) == 1 or np.size(times) == 2:
-        if window_function in switcher_window:
+        if window_type in switcher_window:
             if window_shape == 'left':
                 window_length = (times_right-times_left)*2
-                win = switcher_window[window_function](window_length,
+                win = switcher_window[window_type](window_length,
                                                        **kwargs)
                 # get half of window
                 win = win[0:int(np.ceil(np.size(win)/2))]
@@ -357,7 +358,7 @@ def windows(signal, times=None, unit='samples', window_shape='symmetric',
                 times_right = signal.n_samples
             elif window_shape == 'right':
                 window_length = (times_right-times_left)*2
-                win = switcher_window[window_function](window_length,
+                win = switcher_window[window_type](window_length,
                                                        **kwargs)
                 # get half of window
                 win = win[int(np.floor(np.size(win)/2)):]
@@ -365,22 +366,22 @@ def windows(signal, times=None, unit='samples', window_shape='symmetric',
                 times_left = 0
             else:
                 window_length = times_right-times_left
-                win = switcher_window[window_function](window_length,
+                win = switcher_window[window_type](window_length,
                                                        **kwargs)
         else:
-            raise ValueError(f"window_function is {window_function} but has"
+            raise ValueError(f"window_type is {window_type} but has"
                              f" to be one of the following:"
                              f" {', '.join(list(switcher_window))}.")
     elif np.size(times) == 4:
-        if window_function in switcher_window:
+        if window_type in switcher_window:
             # fade in
             window_length_in = (times_right_in - times_left_in)*2
-            win_in = switcher_window[window_function](window_length_in,
+            win_in = switcher_window[window_type](window_length_in,
                                                       **kwargs)
             win_in = win_in[0:int(np.ceil(np.size(win_in)/2))]
             # fade out
             window_length_out = (times_right_out - times_left_out)*2
-            win_out = switcher_window[window_function](window_length_out,
+            win_out = switcher_window[window_type](window_length_out,
                                                        **kwargs)
             win_out = win_out[int(np.floor(np.size(win_out)/2)):]
             win = np.concatenate((win_in, np.ones(times_left_out -
@@ -388,7 +389,7 @@ def windows(signal, times=None, unit='samples', window_shape='symmetric',
             times_left = times_left_in
             times_right = times_right_out
         else:
-            raise ValueError(f"window_function is {window_function} but has"
+            raise ValueError(f"window_type is {window_type} but has"
                              f" to be one of the following:"
                              f" {', '.join(list(switcher_window))}.")
 
