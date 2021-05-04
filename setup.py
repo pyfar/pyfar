@@ -37,10 +37,10 @@ test_requirements = [
 
 setup(
     author="The pyfar developers",
-    author_email='',
+    author_email='info@pyfar.org',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Scientists',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
@@ -50,7 +50,7 @@ setup(
     description="Project for data formats in acoustics.",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='pyfar',
     name='pyfar',
@@ -61,4 +61,5 @@ setup(
     url='https://github.com/pyfar/pyfar',
     version='0.1.0',
     zip_safe=False,
+    python_requires='>=3.7,<3.9'
 )

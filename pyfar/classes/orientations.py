@@ -1,7 +1,7 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
 
-import pyfar
+import pyfar as pf
 
 
 class Orientations(Rotation):
@@ -14,14 +14,13 @@ class Orientations(Rotation):
     convenient plot function.
 
     An orientation can be visualized with the triple of view, up and right
-    vectors and it istied to the object's local coordinate system.
+    vectors and it is tied to the object's local coordinate system.
     Alternatively the object's orientation can be illustrated with help of the
     right hand: Thumb (view), forefinger (up) and middle finger (right).
 
     Examples
     --------
-    from pyfar.orientations import Orientations
-
+    >>> from pyfar import Orientations
     >>> views = [[1, 0, 0], [2, 0, 0]]
     >>> ups = [[0, 1, 0], [0, -2, 0]]
     >>> orientations = Orientations.from_view_up(views, ups)
@@ -156,13 +155,13 @@ class Orientations(Rotation):
 
         ax = None
         if show_views:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, views, color=(1, 0, 0), **kwargs)
         if show_ups:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, ups, ax=ax, color=(0, 1, 0), **kwargs)
         if show_rights:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
 
     def as_view_up_right(self):

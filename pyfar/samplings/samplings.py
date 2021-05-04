@@ -1,31 +1,30 @@
-"""
-Collection of sampling schemes.
-"""
-
 import numpy as np
 import urllib3
 import os
 import scipy.io as sio
-from pyfar.coordinates import Coordinates
+import pyfar
 
 from . import external
 
 
 def cart_equidistant_cube(n_points):
-    """Create a cuboid sampling with equidistant spacings in x, y, and z.
-    The cube will have dimensions 1 x 1 x 1
+    """
+    Create a cuboid sampling with equidistant spacings in x, y, and z.
+
+    The cube will have dimensions 1 x 1 x 1.
 
     Parameters
     ----------
     n_points : int, tuple
         Number of points in the sampling. If a single value is given, the
         number of sampling positions will be the same in every axis. If a
-        tuple is given, the number of points will be set as (n_x, n_y, n_z).
+        tuple is given, the number of points will be set as
+        ``(n_x, n_y, n_z)``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions. Does not contain sampling weights.
 
     """
     if np.size(n_points) == 1:
@@ -46,7 +45,7 @@ def cart_equidistant_cube(n_points):
 
     x_grid, y_grid, z_grid = np.meshgrid(x, y, z)
 
-    sampling = Coordinates(
+    sampling = pyfar.Coordinates(
         x_grid.flatten(),
         y_grid.flatten(),
         z_grid.flatten(),
@@ -57,18 +56,20 @@ def cart_equidistant_cube(n_points):
 
 
 def sph_dodecahedron(radius=1.):
-    """Generate a sampling based on the center points of the twelve
+    """
+    Generate a sampling based on the center points of the twelve
     dodecahedron faces.
 
     Parameters
     ----------
     radius : number, optional
-        Radius of the sampling grid. The default is 1.
+        Radius of the sampling grid. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     """
 
@@ -104,7 +105,7 @@ def sph_dodecahedron(radius=1.):
         phi3 + np.pi / 3]), 2)
     rad = radius * np.ones(np.size(theta))
 
-    sampling = Coordinates(
+    sampling = pyfar.Coordinates(
         phi, theta, rad, domain='sph', convention='top_colat',
         comment='dodecahedral sampling grid')
     return sampling
@@ -117,12 +118,13 @@ def sph_icosahedron(radius=1.):
     Parameters
     ----------
     radius : number, optional
-        Radius of the sampling grid. The default is 1.
+        Radius of the sampling grid. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     """
     gamma_R_r = np.arccos(np.cos(np.pi / 3) / np.sin(np.pi / 5))
@@ -137,39 +139,43 @@ def sph_icosahedron(radius=1.):
     phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi / 5, 2)))
 
     rad = radius * np.ones(20)
-    sampling = Coordinates(phi, theta, rad,
-                           domain='sph', convention='top_colat',
-                           comment='icosahedral spherical sampling grid')
+    sampling = pyfar.Coordinates(
+        phi, theta, rad,
+        domain='sph', convention='top_colat',
+        comment='icosahedral spherical sampling grid')
     return sampling
 
 
 def sph_equiangular(n_points=None, sh_order=None, radius=1.):
-    """Generate an equiangular sampling of the sphere [1]_, Chapter 3.2.
+    """
+    Generate an equiangular sampling of the sphere.
 
+    For detailed information, see [#]_, Chapter 3.2.
     This sampling does not contain points at the North and South Pole and is
-    typically used for spherical harmonics processing. See `sph_equal_angle()`
-    and `sph_great_circle()` for samplings containing points at the poles.
+    typically used for spherical harmonics processing. See
+    :py:func:`sph_equal_angle` and :py:func:`sph_great_circle` for samplings
+    containing points at the poles.
 
     Parameters
     ----------
     n_points : int, tuple of two ints
-        number of sampling points in azimuth and elevation. Either n_points or
-        sh_order must be provided. The default is None.
+        Number of sampling points in azimuth and elevation. Either `n_points`
+        or `sh_order` must be provided. The default is ``None``.
     sh_order : int
-        maximum applicable spherical harmonic order. If this is provided,
-        'n_points' is set to 2 * sh_order + 1. Either n_points or sh_order must
-        be provided. The default is None.
+        Maximum applicable spherical harmonic order. If this is provided,
+        'n_points' is set to ``2 * sh_order + 1``. Either `n_points` or
+        `sh_order` must be provided. The default is ``None``.
     radius : number, optional
-        radius of the sampling grid. The default is 1.
+        Radius of the sampling grid. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions including sampling weights.
 
     References
     ----------
-    .. [1] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
+    .. [#] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
@@ -178,7 +184,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
             "Either the n_points or sh_order needs to be specified.")
 
     # get number of points from required spherical harmonic order
-    # ([1], equation 3.4)
+    # ([#], equation 3.4)
     if sh_order is not None:
         n_points = 2 * (int(sh_order) + 1)
 
@@ -216,41 +222,45 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     w = w / np.sum(w)
 
     # make Coordinates object
-    sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
-                           domain='sph', convention='top_colat',
-                           comment='equiangular spherical sampling grid',
-                           weights=w, sh_order=n_max)
+    sampling = pyfar.Coordinates(
+        phi.reshape(-1), theta.reshape(-1), rad,
+        domain='sph', convention='top_colat',
+        comment='equiangular spherical sampling grid',
+        weights=w, sh_order=n_max)
 
     return sampling
 
 
 def sph_gaussian(n_points=None, sh_order=None, radius=1.):
-    """Generate sampling of the sphere based on the Gaussian quadrature [1]_.
+    """
+    Generate sampling of the sphere based on the Gaussian quadrature.
 
+    For detailed information, see [#]_ (Section 3.3).
     This sampling does not contain points at the North and South Pole and is
-    typically used for spherical harmonics processing. See `sph_equal_angle()`
-    and `sph_great_circle()` for samplings containing points at the poles.
+    typically used for spherical harmonics processing. See
+    :py:func:`sph_equal_angle` and :py:func:`sph_great_circle` for samplings
+    containing points at the poles.
 
     Parameters
     ----------
     n_points : int, tuple of two ints
-        number of sampling points in azimuth and elevation. Either n_points or
-        sh_order must be provided. The default is None.
+        Number of sampling points in azimuth and elevation. Either `n_points`
+        or `sh_order` must be provided. The default is ``None``.
     sh_order : int
-        maximum applicable spherical harmonic order. If this is provided,
-        'n_points' is set to 2 * (sh_order + 1), sh_order + 1. Either n_points
-        or sh_order must be provided. The default is None.
+        Maximum applicable spherical harmonic order. If this is provided,
+        `n_points` is set to ``(2 * (sh_order + 1), sh_order + 1)``. Either
+        `n_points` or `sh_order` must be provided. The default is ``None``.
     radius : number, optional
-        radius of the sampling grid in meters. The default is 1.
+        Radius of the sampling grid in meters. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions including sampling weights.
 
     References
     ----------
-    .. [1] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
+    .. [#] B. Rafaely, Fundamentals of spherical array processing, 1st ed.
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
@@ -292,49 +302,52 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     weights = weights / np.sum(weights)
 
     # make Coordinates object
-    sampling = Coordinates(phi.reshape(-1), theta.reshape(-1), rad,
-                           domain='sph', convention='top_colat',
-                           comment='gaussian spherical sampling grid',
-                           weights=weights, sh_order=n_max)
+    sampling = pyfar.Coordinates(
+        phi.reshape(-1), theta.reshape(-1), rad,
+        domain='sph', convention='top_colat',
+        comment='gaussian spherical sampling grid',
+        weights=weights, sh_order=n_max)
 
     return sampling
 
 
 def sph_extremal(n_points=None, sh_order=None, radius=1.):
-    """Gives the points of a Hyperinterpolation sampling grid
-    after Sloan and Womersley [1]_. The samplings are available for
-    `1 <= sh_order <= 200` (`n_points = (sh_order + 1)^2`).
+    """
+    Return a Hyperinterpolation sampling grid.
+
+    After Sloan and Womersley [#]_. The samplings are available for
+    1 <= `sh_order` <= 200 (``n_points = (sh_order + 1)^2``).
 
     Parameters
     ----------
     n_points : int
-        number of sampling points in the grid. Related to the spherical
-        harmonic order by n_points = (sh_order + 1)**2. Either n_points or
-        sh_order must be provided. The default is None.
+        Number of sampling points in the grid. Related to the spherical
+        harmonic order by ``n_points = (sh_order + 1)**2``. Either `n_points`
+        or `sh_order` must be provided. The default is ``None``.
     sh_order : int
-        maximum applicable spherical harmonic order. Related to the number of
-        points by sh_order = np.sqrt(n_points) - 1. Either n_points or sh_order
-        must be provided. The default is None.
+        Maximum applicable spherical harmonic order. Related to the number of
+        points by ``sh_order = np.sqrt(n_points) - 1``. Either `n_points` or
+        `sh_order` must be provided. The default is ``None``.
     radius : number, optional
-        radius of the sampling grid in meters. The default is 1.
+        Radius of the sampling grid in meters. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions including sampling weights.
 
     Notes
     -----
-    This implementation uses precalculated sets of points from [2]_. The data
-    up to `sh_order = 99` are loaded the first time this function is called.
+    This implementation uses precalculated sets of points from [#]_. The data
+    up to ``sh_order = 99`` are loaded the first time this function is called.
     The remaining data is loaded upon request.
 
     References
     ----------
-    .. [1]  I. H. Sloan and R. S. Womersley, “Extremal Systems of Points and
+    .. [#]  I. H. Sloan and R. S. Womersley, “Extremal Systems of Points and
             Numerical Integration on the Sphere,” Advances in Computational
             Mathematics, vol. 21, no. 1/2, pp. 107–125, 2004.
-    .. [2]  https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/
+    .. [#]  https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/
 
     """
 
@@ -381,72 +394,76 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     weights = file_data[:, 3] / 4 / np.pi
 
     # generate Coordinates object
-    sampling = Coordinates(file_data[:, 0] * radius,
-                           file_data[:, 1] * radius,
-                           file_data[:, 2] * radius,
-                           sh_order=sh_order, weights=weights,
-                           comment='extremal spherical sampling grid')
+    sampling = pyfar.Coordinates(
+        file_data[:, 0] * radius,
+        file_data[:, 1] * radius,
+        file_data[:, 2] * radius,
+        sh_order=sh_order, weights=weights,
+        comment='extremal spherical sampling grid')
 
     return sampling
 
 
 def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
                  radius=1.):
-    r"""Return spherical t-design sampling grid [1]_.
+    """
+    Return spherical t-design sampling grid.
 
+    For detailed information, see [#]_.
     For a spherical harmonic order :math:`n_{sh}`, a t-Design of degree
     :math:`t=2n_{sh}` for constant energy or :math:`t=2n_{sh}+1` additionally
-    ensuring a constant angular spread of energy is required [2]_. For a given
+    ensuring a constant angular spread of energy is required [#]_. For a given
     degree t
 
     .. math::
 
-        L = \lceil \frac{(t+1)^2}{2} \rceil+1,
+        L = \\lceil \\frac{(t+1)^2}{2} \\rceil+1,
 
     points will be generated, except for t = 3, 5, 7, 9, 11, 13, and 15.
     T-designs allow for an inverse spherical harmonic transform matrix
-    calculated as :math:`D = \frac{4\pi}{L} \mathbf{Y}^\mathrm{H}` with
-    :math:`\mathbf{Y}^\mathrm{H}` being the hermitian transpose of the
+    calculated as :math:`D = \\frac{4\\pi}{L} \\mathbf{Y}^\\mathrm{H}` with
+    :math:`\\mathbf{Y}^\\mathrm{H}` being the hermitian transpose of the
     spherical harmonics matrix.
 
     Parameters
     ----------
     degree : int
-        T-design degree between 1 and 180. Either degree or sh_order must be
-        provided. The default is None.
+        T-design degree between ``1`` and ``180``. Either `degree` or
+        `sh_order` must be provided. The default is ``None``.
     sh_order : int
-        maximum applicable spherical harmonic order. Related to the degree
-        by degree = 2 * sh_order ('const_energy') and degree = 2 * sh_order + 1
-        ('const_angular_spread'). Either degree or sh_order must be provided.
-        The default is None.
-    criterion : 'const_energy', 'const_angular_spread'
+        Maximum applicable spherical harmonic order. Related to the degree
+        by ``degree = 2 * sh_order`` (``const_energy``) and
+        ``degree = 2 * sh_order + 1`` (``const_angular_spread``). Either
+        `degree` or `sh_order` must be provided. The default is ``None``.
+    criterion : ``const_energy``, ``const_angular_spread``
         Design criterion ensuring only a constant energy or additionally
-        constant angular spread of energy. The default is 'const_energy'.
+        constant angular spread of energy. The default is ``const_energy``.
     radius : number, optional
-        radius of the sampling grid in meters. The default is 1.
+        Radius of the sampling grid in meters. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     Notes
     -----
-    This function downloads a pre-calculated set of points from [3]_ . The data
-    up to `degree = 99` are loaded the first time this function is called.
+    This function downloads a pre-calculated set of points from [#]_ . The data
+    up to ``degree = 99`` are loaded the first time this function is called.
     The remaining data is loaded upon request.
 
     References
     ----------
 
-    .. [1]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
+    .. [#]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
             Spherical Designs for Integration and Interpolation on the
             Two-Sphere,” SIAM Journal on Numerical Analysis, vol. 48, no. 6,
             pp. 2135–2157, Jan. 2010.
-    .. [2]  F. Zotter, M. Frank, and A. Sontacchi, “The Virtual T-Design
+    .. [#]  F. Zotter, M. Frank, and A. Sontacchi, “The Virtual T-Design
             Ambisonics-Rig Using VBAP,” in Proceedings on the Congress on
             Sound and Vibration, 2010.
-    .. [3]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
+    .. [#]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
 
     """
 
@@ -508,11 +525,12 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
         sep=' ').reshape((n_points, 3))
 
     # generate Coordinates object
-    sampling = Coordinates(points[..., 0] * radius,
-                           points[..., 1] * radius,
-                           points[..., 2] * radius,
-                           sh_order=sh_order,
-                           comment='spherical T-design sampling grid')
+    sampling = pyfar.Coordinates(
+        points[..., 0] * radius,
+        points[..., 1] * radius,
+        points[..., 2] * radius,
+        sh_order=sh_order,
+        comment='spherical T-design sampling grid')
 
     return sampling
 
@@ -521,24 +539,26 @@ def sph_equal_angle(delta_angles, radius=1.):
     """
     Generate sampling of the sphere with equally spaced angles.
 
-    This sampling does contain points at the North and South Pole. See
-    `sph_equiangular()` and `sph_gauss()` for samplings that do not contain
-    points at the poles.
+    This sampling contain points at the North and South Pole. See
+    :py:func:`sph_equiangular`, :py:func:`sph_gaussian`, and
+    :py:func:`sph_great_circle` for samplings that do not contain points at the
+    poles.
 
 
     Parameters
     ----------
     delta_angles : tuple, number
-        tuple that gives the angular spacing in azimuth and colatitude in
+        Tuple that gives the angular spacing in azimuth and colatitude in
         degrees. If a number is provided, the same spacing is applied in both
         dimensions.
     radius : number, optional
-        radius of the sampling grid. The default is 1.
+        Radius of the sampling grid. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     """
 
@@ -571,9 +591,10 @@ def sph_equal_angle(delta_angles, radius=1.):
     theta = np.concatenate(([0], theta, [180]))
 
     # make Coordinates object
-    sampling = Coordinates(phi, theta, radius,
-                           domain='sph', convention='top_colat', unit='deg',
-                           comment='equal angle spherical sampling grid')
+    sampling = pyfar.Coordinates(
+        phi, theta, radius,
+        domain='sph', convention='top_colat', unit='deg',
+        comment='equal angle spherical sampling grid')
 
     return sampling
 
@@ -584,7 +605,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     Spherical sampling grid according to the great circle distance criterion.
 
     Sampling grid where neighboring points of the same elevation have approx.
-    the same great circle distance across elevations [1]_.
+    the same great circle distance across elevations [#]_.
 
     Parameters
     ----------
@@ -592,30 +613,33 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
         Contains the elevation from wich the sampling grid is generated, with
         :math:`-90^\\circ\\leq elevation \\leq 90^\\circ` (:math:`90^\\circ`:
         North Pole, :math:`-90^\\circ`: South Pole). The default is
-        np.linspace(-90, 90, 19).
+        ``np.linspace(-90, 90, 19)``.
     gcd : number, optional
         Desired great circle distance (GCD). Note that the actual GCD of the
-        sampling grid is equal or larger then the desired GCD and that the GCD
-        may vary across elevatoins. The default is 10.
+        sampling grid is equal or smaller then the desired GCD and that the GCD
+        may vary across elevations. The default is ``10``.
     radius : number, optional
-        Radius of the sampling grid in meters. The default is 1.
+        Radius of the sampling grid in meters. The default is ``1``.
     azimuth_res : number, optional
-        Minimum resolution of the azimuth angle in degree. The default is 1.
+        Minimum resolution of the azimuth angle in degree. The default is
+        ``1``.
     match : number, optional
         Forces azimuth entries to appear with a period of match degrees. E.g.,
-        if match=90, the grid will have azimuth angles at 0, 90, 180, and 270
-        degrees (and possibly inbetween). The default is 360.
+        if ``match=90``, the grid includes the azimuth angles 0, 90, 180, and
+        270 degrees. The default is ``360``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     References
     ----------
-    .. [1]  B. P. Bovbjerg, F. Christensen, P. Minnaar, and X. Chen, “Measuring
+    .. [#]  B. P. Bovbjerg, F. Christensen, P. Minnaar, and X. Chen, “Measuring
             the head-related transfer functions of an artificial head with a
-            high directional resolution,” Los Angeles, USA, Sep. 2000.
+            high directional resolution,” 109th AES Convention, Los Angeles,
+            USA, Sep. 2000.
 
     """
 
@@ -657,46 +681,49 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     azim = np.round(azim/azimuth_res) * azimuth_res
 
     # make Coordinates object
-    sampling = Coordinates(azim, elev, radius, 'sph', 'top_elev', 'deg',
-                           comment='spherical great circle sampling grid')
+    sampling = pyfar.Coordinates(
+        azim, elev, radius, 'sph', 'top_elev', 'deg',
+        comment='spherical great circle sampling grid')
 
     return sampling
 
 
 def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     """
-    Return Lebedev spherical sampling grid [1]_. For a list of available values
-    for `n_points`and `sh_order` call `sph_lebedev()`.
+    Return Lebedev spherical sampling grid.
+
+    For detailed information, see [#]_. For a list of available values
+    for `n_points` and `sh_order` call :py:func:`sph_lebedev`.
 
     Parameters
     ----------
     n_points : int, optional
-        number of sampling points in the grid. Related to the spherical
-        harmonic order by n_points = (sh_order + 1)**2. Either n_points or
-        sh_order must be provided. The default is None.
+        Number of sampling points in the grid. Related to the spherical
+        harmonic order by ``n_points = (sh_order + 1)**2``. Either `n_points`
+        or `sh_order` must be provided. The default is ``None``.
     sh_order : int, optional
-        maximum applicable spherical harmonic order. Related to the number of
-        points by sh_order = np.sqrt(n_points) - 1. Either n_points or sh_order
-        must be provided. The default is None.
+        Maximum applicable spherical harmonic order. Related to the number of
+        points by ``sh_order = np.sqrt(n_points) - 1``. Either `n_points` or
+        `sh_order` must be provided. The default is ``None``.
     radius : number, optional
-        radius of the sampling grid in meters. The default is 1.
+        Radius of the sampling grid in meters. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions including sampling weights.
 
     Notes
     -----
-    This implementation is based on Matlab Code written by Rob Parrish [2]_.
+    This is a Python port of the Matlab Code written by Rob Parrish [#]_.
 
     References
     ----------
-    .. [1] V.I. Lebedev, and D.N. Laikov
+    .. [#] V.I. Lebedev, and D.N. Laikov
            "A quadrature formula for the sphere of the 131st
            algebraic order of accuracy"
            Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
-    .. [2] https://de.mathworks.com/matlabcentral/fileexchange/27097-\
+    .. [#] https://de.mathworks.com/matlabcentral/fileexchange/27097-\
         getlebedevsphere
 
     """
@@ -748,48 +775,46 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     weights = leb["w"] / (4 * np.pi)
 
     # generate Coordinates object
-    sampling = Coordinates(leb["x"] * radius,
-                           leb["y"] * radius,
-                           leb["z"] * radius,
-                           sh_order=sh_order, weights=weights,
-                           comment='spherical Lebedev sampling grid')
+    sampling = pyfar.Coordinates(
+        leb["x"] * radius,
+        leb["y"] * radius,
+        leb["z"] * radius,
+        sh_order=sh_order, weights=weights,
+        comment='spherical Lebedev sampling grid')
 
     return sampling
 
 
 def sph_fliege(n_points=None, sh_order=None, radius=1.):
     """
-    Return Fliege-Maier spherical sampling grid [1]_. See
-    :ref:`Input Values<values>` for a list of
-    possible values for `n_points`and `sh_order` or call `sph_fliege()`.
+    Return Fliege-Maier spherical sampling grid.
+
+    For detailed information, see [#]_. Call :py:func:`sph_fliege`
+    for a list of possible values for `n_points` and `sh_order`.
 
     Parameters
     ----------
     n_points : int, optional
-        number of sampling points in the grid. Related to the spherical
-        harmonic order by n_points = (sh_order + 1)**2. Either n_points or
-        sh_order must be provided. The default is None.
+        Number of sampling points in the grid. Related to the spherical
+        harmonic order by ``n_points = (sh_order + 1)**2``. Either `n_points`
+        or `sh_order` must be provided. The default is ``None``.
     sh_order : int, optional
-        maximum applicable spherical harmonic order. Related to the number of
-        points by sh_order = np.sqrt(n_points) - 1. Either n_points or sh_order
-        must be provided. The default is None.
+        Maximum applicable spherical harmonic order. Related to the number of
+        points by ``sh_order = np.sqrt(n_points) - 1``. Either `n_points` or
+        `sh_order` must be provided. The default is ``None``.
     radius : number, optional
-        radius of the sampling grid in meters. The default is 1.
+        Radius of the sampling grid in meters. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions including sampling weights.
 
     Notes
     -----
-    This implementation uses pre-calculated points from the SOFiA toolbox [2]_.
+    This implementation uses pre-calculated points from the SOFiA
+    toolbox [#]_. Possible combinations of `n_points` and `sh_order` are:
 
-
-    .. _values:
-
-    Input Values
-    ------------
     +------------+------------+
     | `n_points` | `sh_order` |
     +============+============+
@@ -854,10 +879,10 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
     References
     ----------
-    .. [1] J. Fliege and U. Maier, "The distribution of points on the sphere
+    .. [#] J. Fliege and U. Maier, "The distribution of points on the sphere
            and corresponding cubature formulae,” IMA J. Numerical Analysis,
            Vol. 19, pp. 317–334, Apr. 1999, doi: 10.1093/imanum/19.2.317.
-    .. [2] https://audiogroup.web.th-koeln.de/SOFiA_wiki/DOWNLOAD.html
+    .. [#] https://audiogroup.web.th-koeln.de/SOFiA_wiki/DOWNLOAD.html
 
     """
 
@@ -906,12 +931,13 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     fliege = fliege[f"Fliege_{int(n_points)}"]
 
     # generate Coordinates object
-    sampling = Coordinates(fliege[:, 0],
-                           fliege[:, 1],
-                           radius,
-                           domain='sph', convention='top_colat', unit='rad',
-                           sh_order=sh_order, weights=fliege[:, 2],
-                           comment='spherical Fliege sampling grid')
+    sampling = pyfar.Coordinates(
+        fliege[:, 0],
+        fliege[:, 1],
+        radius,
+        domain='sph', convention='top_colat', unit='rad',
+        sh_order=sh_order, weights=fliege[:, 2],
+        comment='spherical Fliege sampling grid')
 
     # switch and invert coordinates in Cartesian representation to be
     # consistent with [1]
@@ -922,7 +948,10 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
 
 def sph_equal_area(n_points, radius=1.):
-    """Sampling based on partitioning into faces with equal area [1]_.
+    """
+    Sampling based on partitioning into faces with equal area.
+
+    For detailed information, see [#]_.
 
     Parameters
     ----------
@@ -930,23 +959,24 @@ def sph_equal_area(n_points, radius=1.):
         Number of points corresponding to the number of partitions of the
         sphere.
     radius : number, optional
-        radius of the sampling grid in meters. The default is 1.
+        Radius of the sampling grid in meters. The default is ``1``.
 
     Returns
     -------
     sampling : Coordinates
-        Sampling positions as Coordinate object
+        Sampling positions. Sampling weights can be obtained from
+        :py:func:`calculate_sph_voronoi_weights`.
 
     References
     ----------
-    .. [1]  P. Leopardi, “A partition of the unit sphere into regions of equal
+    .. [#]  P. Leopardi, “A partition of the unit sphere into regions of equal
             area and small diameter,” Electronic Transactions on Numerical
             Analysis, vol. 25, no. 12, pp. 309–327, 2006.
 
     """
 
     point_set = external.eq_point_set(2, n_points)
-    sampling = Coordinates(
+    sampling = pyfar.Coordinates(
         point_set[0] * radius, point_set[1] * radius, point_set[2] * radius,
         domain='cart', convention='right',
         comment='Equal area partitioning of the sphere.')
