@@ -4,7 +4,7 @@ from .dsp import (
     wrap_to_2pi,
     spectrogram,
     regularized_spectrum_inversion,
-    window
+    windowing
 )
 
 from . import filter
@@ -19,5 +19,5 @@ __all__ = [
     'wrap_to_2pi',
     'spectrogram',
     'regularized_spectrum_inversion',
-    'window'
+    'windowing'
 ]

@@ -227,185 +227,158 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-def window(signal, function='hann', shape='symmetric', length=None, unit='samples', 
-        truncate=True):
+def windowing(signal, window='hann', length=None, shape='symmetric',
+              unit='samples', truncate=True):
     """Apply time window to signal.
+
+    This function uses the windows implemented in ``scipy.signal.windows``.
 
     Parameters
     ----------
     signal : Signal
-        Signal to be windowed
-    function: string
-        Possible window function:
-        'rect': rectangular window
-        'hann': hanning window
-        'hamming': hamming window
-        'blackman': blackman window
-        'bartlett': bartlett window (triangle)
-        'kaiser': kaiser window
-        'flattop': flattop window
-        'chebwin': chebyshev window
-    window_shape: string
-        'symmetric' (default), 'left', 'right'
-        see argument times for more explanation
-
-    times: int, list of int, None
-        times = a
-            symmetric window of length a with start at 0 samples
-        times = [a,b]
-            window_shape='symmetric'
-                symmetric window between a and b
-            window_shape='left'
-                fade-in between a and b
-            window_shape='right'
-                fade-out between a and b
-        times = [a,b,c,d]
-            fade_in between a and b
-            no change between b and c
-            fade-out between c and d
-
-    unit: string
-        times can be set in seconds 's', miliseconds 'ms' or 'samples'(default)
-
-
-
-
-
-    truncate: boolean
-        select True to truncate pyfar singal to window length
+        pyfar Signal object to be windowed
+    window: str
+        The type of window to create. See below for more details.
+        The default is ``hann``.
+    length: list of int, None
+        If length has two entries, these specify the beginning and the end of
+        the window or the fade-in / fade-out (see parameter `shape`).
+        If length has four entries, a symmetric window with fade-in between
+        the first two entries and a fade-out between the last two is created,
+        while it is constant in between.
+        If ``None``, a symmetric window is applied to the overall length of
+        the signal and `shape` is ignored.
+        The unit of `length` is specified by the parameter `unit`.
+    shape: str
+        ``symmetric``, ``left`` or ``right``.
+        Specifies, if the window is applied single sided or symmetrically.
+        If ``left`` or ``right``, the beginning and the end of the fade is
+        defined by the two values in `length`.
+        The default is ``symmetric``.
+    unit: str
+        Unit of the parameter `length`. Can be set to ``s`` (seconds), ``ms``
+        (milliseconds) or ``samples``. Time values are rounded to the nearest
+        sample. The default is ``samples``.
+    truncate: bool
+        If ``True``, the signal is truncated to the length of the window.
+        The default is ``False``.
 
     Returns
     -------
     signal_windowed : Signal
-        Windowed signal
+        Windowed signal object
+
+    Notes
+    -----
+    This function calls `~scipy.signal.windows.get_window` to create the
+    window.
+    Window types:
+    - ``scipy.signal.windows.boxcar``
+    - ``scipy.signal.windows.triang``
+    - ``scipy.signal.windows.blackman``
+    - ``scipy.signal.windows.hamming``
+    - ``scipy.signal.windows.hann``
+    - ``scipy.signal.windows.bartlett``
+    - ``scipy.signal.windows.flattop``
+    - ``scipy.signal.windows.parzen``
+    - ``scipy.signal.windows.bohman``
+    - ``scipy.signal.windows.blackmanharris``
+    - ``scipy.signal.windows.nuttall``
+    - ``scipy.signal.windows.barthann``
+    - ``scipy.signal.windows.kaiser`` (needs beta)
+    - ``scipy.signal.windows.gaussian`` (needs standard deviation)
+    - ``scipy.signal.windows.general_gaussian`` (needs power, width)
+    - ``scipy.signal.windows.dpss`` (needs normalized half-bandwidth)
+    - ``scipy.signal.windows.chebwin`` (needs attenuation)
+    - ``scipy.signal.windows.exponential`` (needs center, decay scale)
+    - ``scipy.signal.windows.tukey`` (needs taper fraction)
+    - ``scipy.signal.windows.taylor`` (needs number of constant sidelobes,
+      sidelobe level)
+    If the window requires no parameters, then `window` can be a string.
+    If the window requires parameters, then `window` must be a tuple
+    with the first argument the string name of the window, and the next
+    arguments the needed parameters.
+    If `window` is a floating point number, it is interpreted as the beta
+    parameter of the `~scipy.signal.windows.kaiser` window.
     """
-    # check input and default values
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+    # Check input
+    if not isinstance(signal, pyfar.Signal):
+        raise TypeError("The parameter signal has to be of type: Signal.")
+    if not isinstance(length, (list, type(None))):
+        raise TypeError(
+            "The parameter length has to be of type list or None.")
+    if shape not in ('symmetric', 'left', 'right'):
+        raise ValueError(
+            "The parameter length has to be 'symmetric', 'left' or 'right'.")
+    if not isinstance(truncate, bool):
+        raise TypeError("The parameter truncate has to be of type: bool.")
+    if length != sorted(length):
+        raise ValueError("Values in length need to be in ascending order.")
 
-    # convert times to samples
-    if unit == 'samples':
-        # do nothing
-        times
-    elif unit == 's':
-        for x in range(np.size(times)):
-            times[x] = round(times[x] * signal.sampling_rate)
+    # Convert length to samples
+    if unit == 's':
+        length = [round(li*signal.sampling_rate) for li in length]
     elif unit == 'ms':
-        for x in range(np.size(times)):
-            times[x] = round(times[x] * signal.sampling_rate / 1e3)
-    else:
+        length = [round(li*signal.sampling_rate/1e3) for li in length]
+    elif unit != 'samples':
         raise ValueError(f"unit is {unit} but has to be"
-                         f" one of the following:"
                          f" 'samples', 's' or 'ms'.")
+    # Check window size
+    if length[-1] > signal.n_samples:
+        raise ValueError(
+            "Values in length require window to be longer than signal.")
 
-    # copy signal object
-    signal_copy = signal.copy()
-
-    if not isinstance(times, (int, list, type(None))):
-        raise ValueError('times has to be of type int, list or None.')
-
-    # check different use cases of times
-    if times is None:
-        window_shape_list = ['symmetric']
-        # assign window limits
-        times_left = 0
-        times_right = signal_copy.n_samples
-    elif np.size(times) == 1:
-        window_shape_list = ['symmetric']
-        times_left = 0
-        times_right = times
-    elif np.size(times) == 2:
-        window_shape_list = ['symmetric', 'left', 'right']
-        # assign window limits
-        times_left = times[0]
-        times_right = times[1]
-    elif np.size(times) == 4:
-        window_shape_list = ['symmetric']
-        # assign window limits
-        times_left_in = times[0]
-        times_right_in = times[1]
-        times_left_out = times[2]
-        times_right_out = times[3]
-    else:
-        raise ValueError(f"times has size {np.size(times)} but has to be"
-                         f" of size: 1, 2 or 4")
-    if window_shape not in window_shape_list:
-        raise ValueError(f"window_shape is {window_shape} but has to be"
-                         f" one of the following:"
-                         f" {', '.join(list(window_shape_list))}.")
-
-    # create selected window
-    switcher_window = {
-        'rect': sgn.windows.boxcar,
-        'hann': sgn.windows.hann,
-        'hamming': sgn.windows.hamming,
-        'blackman': sgn.windows.blackman,
-        'bartlett': sgn.windows.bartlett,
-        'kaiser': sgn.windows.kaiser,
-        'flattop': sgn.windows.flattop,
-        'chebwin': sgn.windows.chebwin,
-    }
-    if times is None or np.size(times) == 1 or np.size(times) == 2:
-        if window_type in switcher_window:
-            if window_shape == 'left':
-                window_length = (times_right-times_left)*2
-                win = switcher_window[window_type](window_length,
-                                                       **kwargs)
-                # get half of window
-                win = win[0:int(np.ceil(np.size(win)/2))]
-                win = np.append(win, np.ones(signal.n_samples-times_right))
-                times_right = signal.n_samples
-            elif window_shape == 'right':
-                window_length = (times_right-times_left)*2
-                win = switcher_window[window_type](window_length,
-                                                       **kwargs)
-                # get half of window
-                win = win[int(np.floor(np.size(win)/2)):]
-                win = np.append(np.ones(times_left), win)
-                times_left = 0
-            else:
-                window_length = times_right-times_left
-                win = switcher_window[window_type](window_length,
-                                                       **kwargs)
+    # Create window
+    if length is None:
+        win_samples = signal.n_samples
+        win = sgn.windows.get_window(window, win_samples, fftbins=False)
+        win_start = 0
+        win_stop = signal.n_samples-1
+    elif len(length) == 2:
+        if shape == 'symmetric':
+            win_samples = length[1]-length[0]
+            win = sgn.windows.get_window(window, win_samples, fftbins=False)
+            win_start = length[0]
+            win_stop = length[1]
         else:
-            raise ValueError(f"window_type is {window_type} but has"
-                             f" to be one of the following:"
-                             f" {', '.join(list(switcher_window))}.")
-    elif np.size(times) == 4:
-        if window_type in switcher_window:
-            # fade in
-            window_length_in = (times_right_in - times_left_in)*2
-            win_in = switcher_window[window_type](window_length_in,
-                                                      **kwargs)
-            win_in = win_in[0:int(np.ceil(np.size(win_in)/2))]
-            # fade out
-            window_length_out = (times_right_out - times_left_out)*2
-            win_out = switcher_window[window_type](window_length_out,
-                                                       **kwargs)
-            win_out = win_out[int(np.floor(np.size(win_out)/2)):]
-            win = np.concatenate((win_in, np.ones(times_left_out -
-                                                  times_right_in), win_out))
-            times_left = times_left_in
-            times_right = times_right_out
-        else:
-            raise ValueError(f"window_type is {window_type} but has"
-                             f" to be one of the following:"
-                             f" {', '.join(list(switcher_window))}.")
+            fade_samples = int(2*(length[1]-length[0]))
+            fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
+            if shape == 'left':
+                win = np.ones(signal.n_samples-length[0])
+                win[length[0]:length[1]] = fade[:int(win_samples/2)]
+                win_start = length[0]
+                win_stop = signal.n_samples-1
+            if shape == 'right':
+                win = np.ones(signal.n_samples-length[1]+1)
+                win[length[0]:length[1]] = fade[int(win_samples/2):]
+                win_start = 0
+                win_stop = length[1]
+    elif len(length) == 4:
+        fade_in_samples = int(2*(length[1]-length[0]))
+        fade_in = sgn.windows.get_window(
+            window, fade_in_samples, fftbins=False)
+        fade_in = fade_in[:int(fade_in_samples/2)]
+        fade_out_samples = int(2*(length[3]-length[2]))
+        fade_out = sgn.windows.get_window(
+            window, fade_out_samples, fftbins=False)
+        fade_out = fade_out[:int(fade_out_samples/2)]
+        win = np.ones(length[-1]-length[0]+1)
+        win[length[0]:length[1]] = fade_in
+        win[length[2]:length[3]] = fade_out
+        win_start = length[0]
+        win_stop = length[-1]
 
-    # apply windowing to time domain copy of signal
-    if np.size(win) > signal.n_samples:
-        ValueError('>>>>>>> window is longer than signal!')
-
-    # apply window
+    # Apply window
+    signal_win = signal.copy()
     if truncate:
-        signal_copy.time = signal_copy[..., times_left:times_right].time*win
+        signal_win.time = signal_win[..., win_start:win_stop].time*win
     else:
         # create zeropadded window with shape of signal
         window_zeropadded = np.zeros(signal.n_samples)
-        window_zeropadded[times_left:times_right] = win
-        signal_copy.time = signal_copy.time*window_zeropadded
+        window_zeropadded[win_start:win_stop] = win
+        signal_win.time = signal_win.time*window_zeropadded
 
-    return signal_copy
+    return signal_win
 
 
 def regularized_spectrum_inversion(
