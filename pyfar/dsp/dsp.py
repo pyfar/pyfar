@@ -237,10 +237,10 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
     ----------
     signal : Signal
         pyfar Signal object to be windowed
-    window: str
+    window: string, float, or tuple
         The type of window to create. See below for more details.
         The default is ``hann``.
-    length: list of int, None
+    length: list of int or None
         If length has two entries, these specify the beginning and the end of
         the window or the fade-in / fade-out (see parameter `shape`).
         If length has four entries, a symmetric window with fade-in between
@@ -249,13 +249,14 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         If ``None``, a symmetric window is applied to the overall length of
         the signal and `shape` is ignored.
         The unit of `length` is specified by the parameter `unit`.
-    shape: str
+    shape: string
         ``symmetric``, ``left`` or ``right``.
         Specifies, if the window is applied single sided or symmetrically.
-        If ``left`` or ``right``, the beginning and the end of the fade is
-        defined by the two values in `length`.
+        If ``left`` or ``right``, the beginning (window=0 or window=1) and the
+        end of the fade (window=1 or window=0) is defined by the two values in
+        `length`.
         The default is ``symmetric``.
-    unit: str
+    unit: string
         Unit of the parameter `length`. Can be set to ``s`` (seconds), ``ms``
         (milliseconds) or ``samples``. Time values are rounded to the nearest
         sample. The default is ``samples``.
@@ -304,14 +305,14 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
     # Check input
     if not isinstance(signal, pyfar.Signal):
         raise TypeError("The parameter signal has to be of type: Signal.")
-    if not isinstance(length, (list, type(None))):
-        raise TypeError(
-            "The parameter length has to be of type list or None.")
     if shape not in ('symmetric', 'left', 'right'):
         raise ValueError(
             "The parameter length has to be 'symmetric', 'left' or 'right'.")
     if not isinstance(truncate, bool):
         raise TypeError("The parameter truncate has to be of type: bool.")
+    if not isinstance(length, (list, type(None))):
+        raise TypeError(
+            "The parameter length has to be of type list or None.")
     if length != sorted(length):
         raise ValueError("Values in length need to be in ascending order.")
 
@@ -341,11 +342,11 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
             win_start = length[0]
             win_stop = length[1]
         else:
-            fade_samples = int(2*(length[1]-length[0]))
+            fade_samples = int(2*(length[1]-length[0])+1)
             fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
             if shape == 'left':
                 win = np.ones(signal.n_samples-length[0])
-                win[length[0]:length[1]] = fade[:int(win_samples/2)]
+                win[length[0]:length[1]] = fade[:int(fade_samples/2)+1]
                 win_start = length[0]
                 win_stop = signal.n_samples-1
             if shape == 'right':
@@ -354,14 +355,14 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
                 win_start = 0
                 win_stop = length[1]
     elif len(length) == 4:
-        fade_in_samples = int(2*(length[1]-length[0]))
+        fade_in_samples = int(2*(length[1]-length[0])+1)
         fade_in = sgn.windows.get_window(
             window, fade_in_samples, fftbins=False)
-        fade_in = fade_in[:int(fade_in_samples/2)]
-        fade_out_samples = int(2*(length[3]-length[2]))
+        fade_in = fade_in[:int(fade_in_samples/2)+1]
+        fade_out_samples = int(2*(length[3]-length[2])+1)
         fade_out = sgn.windows.get_window(
             window, fade_out_samples, fftbins=False)
-        fade_out = fade_out[:int(fade_out_samples/2)]
+        fade_out = fade_out[int(fade_out_samples/2):]
         win = np.ones(length[-1]-length[0]+1)
         win[length[0]:length[1]] = fade_in
         win[length[2]:length[3]] = fade_out
