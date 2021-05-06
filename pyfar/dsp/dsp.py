@@ -247,19 +247,18 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         the first two entries and a fade-out between the last two is created,
         while it is constant in between.
         If ``None``, a symmetric window is applied to the overall length of
-        the signal and `shape` is ignored.
+        the signal and `shape` and `unit` are ignored.
         The unit of `length` is specified by the parameter `unit`.
     shape: string
         ``symmetric``, ``left`` or ``right``.
         Specifies, if the window is applied single sided or symmetrically.
-        If ``left`` or ``right``, the beginning (window=0 or window=1) and the
-        end of the fade (window=1 or window=0) is defined by the two values in
-        `length`.
-        The default is ``symmetric``.
+        If ``left`` or ``right``, the beginning and the end of the fade is
+        defined by the two values in `length`. The default is ``symmetric``.
     unit: string
         Unit of the parameter `length`. Can be set to ``s`` (seconds), ``ms``
-        (milliseconds) or ``samples``. Time values are rounded to the nearest
-        sample. The default is ``samples``.
+        (milliseconds) or ``samples``. If ``samples``, the values in length
+        denote the first and last sample being included. Time values are
+        rounded to the nearest sample. The default is ``samples``.
     truncate: bool
         If ``True``, the signal is truncated to the length of the window.
         The default is ``False``.
@@ -307,12 +306,16 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         raise TypeError("The parameter signal has to be of type: Signal.")
     if shape not in ('symmetric', 'left', 'right'):
         raise ValueError(
-            "The parameter length has to be 'symmetric', 'left' or 'right'.")
+            "The parameter shape has to be 'symmetric', 'left' or 'right'.")
     if not isinstance(truncate, bool):
         raise TypeError("The parameter truncate has to be of type: bool.")
     if not isinstance(length, (list, type(None))):
         raise TypeError(
             "The parameter length has to be of type list or None.")
+
+    if length is None:
+        length = [0, signal.n_samples]
+        unit = 'samples'
     if length != sorted(length):
         raise ValueError("Values in length need to be in ascending order.")
 
@@ -337,46 +340,46 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         win_stop = signal.n_samples-1
     elif len(length) == 2:
         if shape == 'symmetric':
-            win_samples = length[1]-length[0]
+            win_samples = length[1]-length[0]+1
             win = sgn.windows.get_window(window, win_samples, fftbins=False)
             win_start = length[0]
             win_stop = length[1]
         else:
-            fade_samples = int(2*(length[1]-length[0])+1)
+            fade_samples = int(2*(length[1]-length[0]))
             fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
             if shape == 'left':
                 win = np.ones(signal.n_samples-length[0])
-                win[length[0]:length[1]] = fade[:int(fade_samples/2)+1]
+                win[0:length[1]-length[0]] = fade[:int(fade_samples/2)]
                 win_start = length[0]
                 win_stop = signal.n_samples-1
             if shape == 'right':
-                win = np.ones(signal.n_samples-length[1]+1)
-                win[length[0]:length[1]] = fade[int(win_samples/2):]
+                win = np.ones(length[1]+1)
+                win[length[0]+1:] = fade[int(fade_samples/2):]
                 win_start = 0
                 win_stop = length[1]
     elif len(length) == 4:
-        fade_in_samples = int(2*(length[1]-length[0])+1)
+        fade_in_samples = int(2*(length[1]-length[0]))
         fade_in = sgn.windows.get_window(
             window, fade_in_samples, fftbins=False)
-        fade_in = fade_in[:int(fade_in_samples/2)+1]
-        fade_out_samples = int(2*(length[3]-length[2])+1)
+        fade_in = fade_in[:int(fade_in_samples/2)]
+        fade_out_samples = int(2*(length[3]-length[2]))
         fade_out = sgn.windows.get_window(
             window, fade_out_samples, fftbins=False)
         fade_out = fade_out[int(fade_out_samples/2):]
         win = np.ones(length[-1]-length[0]+1)
-        win[length[0]:length[1]] = fade_in
-        win[length[2]:length[3]] = fade_out
+        win[0:length[1]-length[0]] = fade_in
+        win[length[2]-length[0]+1:length[3]-length[0]+1] = fade_out
         win_start = length[0]
-        win_stop = length[-1]
+        win_stop = length[3]
 
     # Apply window
     signal_win = signal.copy()
     if truncate:
-        signal_win.time = signal_win[..., win_start:win_stop].time*win
+        signal_win.time = signal_win[..., win_start:win_stop+1].time*win
     else:
         # create zeropadded window with shape of signal
         window_zeropadded = np.zeros(signal.n_samples)
-        window_zeropadded[win_start:win_stop] = win
+        window_zeropadded[win_start:win_stop+1] = win
         signal_win.time = signal_win.time*window_zeropadded
 
     return signal_win
