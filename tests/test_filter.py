@@ -216,14 +216,15 @@ def test_crossover(impulse):
         x = pfilt.crossover(impulse, 3, 1000)
 
     # check if frequency response sums to unity for different filter orders
+    # and cross-over frequencies
     for order in [2, 4, 6, 8]:
-        x = pfilt.crossover(impulse, order, 4000)
-        x_sum = np.sum(x.freq, axis=-2).flatten()
-        x_ref = np.ones(x.n_bins)
-        npt.assert_allclose(x_ref, np.abs(x_sum))
+        for frequency in [4000, (1e2, 10e3)]:
+            x = pfilt.crossover(impulse, order, frequency)
+            x_sum = np.sum(x.freq, axis=-2).flatten()
+            x_ref = np.ones(x.n_bins)
+            npt.assert_allclose(x_ref, np.abs(x_sum), atol=.0005)
 
     # check network with multiple cross-over frequencies
     f_obj = pfilt.crossover(None, 2, [100, 10_000], 44100)
     assert f_obj.comment == ("Linkwitz-Riley cross over network of order 2 at "
                              "100, 10000 Hz.")
-    x = pfilt.crossover(impulse, 2, [100, 10_000])
