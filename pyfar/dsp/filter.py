@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import scipy.signal as spsignal
 
-import pyfar
+import pyfar as pf
 
 from . import _audiofilter as iir
 
@@ -55,7 +55,7 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     sos = spsignal.butter(N, frequency_norm, btype, analog=False, output='sos')
 
     # generate filter object
-    filt = pyfar.FilterSOS(sos, fs)
+    filt = pf.FilterSOS(sos, fs)
     filt.comment = (f"Butterworth {btype} of order {N}. "
                     f"Cut-off frequency {frequency} Hz.")
 
@@ -119,7 +119,7 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
                           output='sos')
 
     # generate filter object
-    filt = pyfar.FilterSOS(sos, fs)
+    filt = pf.FilterSOS(sos, fs)
     filt.comment = (f"Chebychev Type I {btype} of order {N}. "
                     f"Cut-off frequency {frequency} Hz. "
                     f"Pass band ripple {ripple} dB.")
@@ -185,7 +185,7 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
                           output='sos')
 
     # generate filter object
-    filt = pyfar.FilterSOS(sos, fs)
+    filt = pf.FilterSOS(sos, fs)
     filt.comment = (f"Chebychev Type II {btype} of order {N}. "
                     f"Cut-off frequency {frequency} Hz. "
                     f"Stop band attenuation {attenuation} dB.")
@@ -253,7 +253,7 @@ def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
                          analog=False, output='sos')
 
     # generate filter object
-    filt = pyfar.FilterSOS(sos, fs)
+    filt = pf.FilterSOS(sos, fs)
     filt.comment = (f"Elliptic (Cauer) {btype} of order {N}. "
                     f"Cut-off frequency {frequency} Hz. "
                     f"Pass band ripple {ripple} dB. "
@@ -339,7 +339,7 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
                           output='sos', norm=norm)
 
     # generate filter object
-    filt = pyfar.FilterSOS(sos, fs)
+    filt = pf.FilterSOS(sos, fs)
     filt.comment = (f"Bessel/Thomson {btype} of order {N} and '{norm}' "
                     f"normalization. Cut-off frequency {frequency} Hz.")
 
@@ -428,7 +428,7 @@ blob/master/filter_design/audiofilter.py
     ba[1] = a
 
     # generate filter object
-    filt = pyfar.FilterIIR(ba, fs)
+    filt = pf.FilterIIR(ba, fs)
     filt.comment = ("Second order parametric equalizer (PEQ) "
                     f"of type {peq_type} with {gain} dB gain at "
                     f"{center_frequency} Hz (Quality = {quality}).")
@@ -601,26 +601,27 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     # init neutral SOS matrix of shape (freq.size+1, SOS_dim_2, 6)
     n_sos = int(np.ceil(N / 2))  # number of lowpass sos
-    SOS_dim_2 = n_sos if freq.size == 1 else N
+    SOS_dim_2 = n_sos if freq.size == 1 else 2 * n_sos
+
     SOS = np.tile(np.array([1, 0, 0, 1, 0, 0], dtype='float64'),
                   (freq.size + 1, SOS_dim_2, 1))
 
     # get filter coefficients for lowpass
-    # (and bandpass if more than one frequency is provided)
-    for n in range(freq.size):
-        # get coefficients
-        kind = 'lowpass' if n == 0 else 'bandpass'
-        f = freq[n] if n == 0 else freq[n-1:n+1]
-        sos = spsignal.butter(N, f, kind, analog=False, output='sos')
-        # write to sos matrix
-        if n == 0:
-            SOS[n, 0:n_sos] = sos
-        else:
-            SOS[n] = sos
+    sos = spsignal.butter(N, freq[0], 'lowpass', analog=False, output='sos')
+    SOS[0, 0:n_sos] = sos
+
+    # get filter coefficients for the bandpass if more than one frequency is
+    # provided
+    for n in range(1, freq.size):
+        sos_high = spsignal.butter(
+            N, freq[n-1], 'highpass', analog=False, output='sos')
+        sos_low = spsignal.butter(
+            N, freq[n], 'lowpass', analog=False, output='sos')
+        SOS[n] = np.concatenate((sos_high, sos_low))
 
     # get filter coefficients for the highpass
-    sos = spsignal.butter(N, freq[-1], 'highpass', analog=False, output='sos')
-    # write to sos matrix
+    sos = spsignal.butter(
+        N, freq[-1], 'highpass', analog=False, output='sos')
     SOS[-1, 0:n_sos] = sos
 
     # Apply every Butterworth filter twice
@@ -632,7 +633,7 @@ def crossover(signal, N, frequency, sampling_rate=None):
         SOS[np.arange(1, freq.size + 1, 2), 0, 0:3] *= -1
 
     # generate filter object
-    filt = pyfar.FilterSOS(SOS, fs)
+    filt = pf.FilterSOS(SOS, fs)
     freq_list = [str(f) for f in np.array(frequency, ndmin=1)]
     filt.comment = (f"Linkwitz-Riley cross over network of order {N*2} at "
                     f"{', '.join(freq_list)} Hz.")
@@ -686,7 +687,7 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
     ba[1] = a
 
     # generate filter object
-    filt = pyfar.FilterIIR(ba, fs)
+    filt = pf.FilterIIR(ba, fs)
     kind = "High" if kind == "high" else "Low"
     filt.comment = (f"{kind}-shelve of order {order} and type "
                     f"{shelve_type} with {gain} dB gain at {frequency} Hz.")
@@ -896,7 +897,7 @@ def fractional_octave_bands(
         sampling_rate=fs, num_fractions=num_fractions,
         freq_range=freq_range, order=order)
 
-    filt = pyfar.FilterSOS(sos, fs)
+    filt = pf.FilterSOS(sos, fs)
     filt.comment = (
         "Second order section 1/{num_fractions} fractional octave band"
         "filter of order {order}")
@@ -968,7 +969,7 @@ def _coefficients_fractional_octave_bands(
             Wn = Wn[0]
             btype = 'highpass'
             sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
-            sos_coeff = pyfar.classes.filter.extend_sos_coefficients(
+            sos_coeff = pf.classes.filter.extend_sos_coefficients(
                 sos_hp, order)
         else:
             btype = 'bandpass'

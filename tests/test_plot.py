@@ -1,3 +1,10 @@
+"""
+*******************************************************************************
+NOTE: These tests might fail in case tests that are conducted before use
+      plotting without closing the created figures. Make sure that you always
+      use matplotlib.pyplot.close("all") after creating tests with plots.
+*******************************************************************************
+"""
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.testing as mpt

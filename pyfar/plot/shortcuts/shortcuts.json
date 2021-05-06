@@ -1,37 +1,37 @@
 {
 "plots": {
-    "line.time": {
+    "time": {
         "key": ["1", "T"],
         "key_verbose": ["1", "shift+t"],
-        "info": "line.time"},
-    "line.freq": {
+        "info": "time"},
+    "freq": {
         "key": ["2", "F"],
         "key_verbose": ["2", "shift+f"],
-        "info": "line.freq"},
-    "line.phase": {
+        "info": "freq"},
+    "phase": {
         "key": ["3", "P"],
         "key_verbose": ["3", "shift+p"],
-        "info": "line.phase"},
-    "line.group_delay": {
+        "info": "phase"},
+    "group_delay": {
         "key": ["4", "G"],
         "key_verbose": ["4", "shift+g"],
-        "info": "line.group_delay"},
-    "line.spectrogram": {
+        "info": "group_delay"},
+    "spectrogram": {
         "key": ["5", "S"],
         "key_verbose": ["5", "shift+s"],
-        "info": "line.spectrogram"},
-    "line.time_freq": {
+        "info": "spectrogram"},
+    "time_freq": {
         "key": ["6", "ctrl+T", "ctrl+F"],
         "key_verbose": ["6", "ctrl+shift+t", "ctrl+shift+f"],
-        "info": "line.time_freq"},
-    "line.freq_phase": {
+        "info": "time_freq"},
+    "freq_phase": {
         "key": ["7", "ctrl+P"],
         "key_verbose": ["7", "ctrl+shift+p"],
-        "info": "line.freq_phase"},
-    "line.freq_group_delay": {
+        "info": "freq_phase"},
+    "freq_group_delay": {
         "key": ["8", "ctrl+G"],
         "key_verbose": ["8", "ctrl+shift+g"],
-        "info": "line.freq_group_delay"}
+        "info": "freq_group_delay"}
     },
 "controls": {
     "move_left": {
