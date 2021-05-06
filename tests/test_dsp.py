@@ -1,8 +1,10 @@
+from pyfar.dsp.dsp import linear_phase
 import numpy as np
 import numpy.testing as npt
 import pytest
 
 from pyfar import dsp
+import pyfar as pf
 
 
 def test_phase_rad(sine_plus_impulse):
@@ -100,6 +102,29 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == (2,)
     npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+
+
+def test_linear_phase():
+    # test signal
+    N = 64
+    x = pf.signals.impulse(N)
+
+    # test default parameters
+    y = dsp.linear_phase(x)
+    # test output
+    assert isinstance(y, pf.Signal)
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+    # test if input did not change
+    npt.assert_allclose(x.time, pf.signals.impulse(N).time)
+
+    # test custom group delay
+    y = dsp.linear_phase(x, 10)
+    npt.assert_allclose(dsp.group_delay(y), 10 * np.ones(y.n_bins))
+    npt.assert_allclose(x.time, pf.signals.impulse(N).time)
+
+    # test assertion
+    with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
+        dsp.linear_phase(1)
 
 
 def test_xfade(impulse):
