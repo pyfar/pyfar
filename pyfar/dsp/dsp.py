@@ -143,6 +143,51 @@ def wrap_to_2pi(x):
     return x
 
 
+def linear_phase(signal, group_delay=None):
+    """
+    Calculate linear phase signal.
+
+    The linear phase signal is computed as
+
+    .. math:: H_{\\mathrm{lin}} = |H| \\mathrm{e}^{-j \\omega \\tau}\\,,
+
+    with :math:`H` the complex spectrum of the input data, :math:`|\\cdot|` the
+    absolute values, :math:`\\omega` the frequency in radians and :math:`\\tau`
+    the group delay in seconds.
+
+    Parameters
+    ----------
+    signal : Signal
+        input data
+    group_delay : float, optional
+        The desired group delay of the linear phase signal in samples. Can be
+        an integer or float number. If this is None, the group delay is set to
+        ``signal.n_samples / 2`` by default.
+
+    Returns
+    -------
+    signal: Signal
+        linear phase copy of the input data
+    """
+
+    if not isinstance(signal, pyfar.Signal):
+        raise TypeError("signal must be a pyfar Signal object.")
+
+    # group delay in seconds
+    tau = signal.n_samples / 2 / signal.sampling_rate \
+        if group_delay is None else group_delay / signal.sampling_rate
+
+    # linear phase
+    phase = 2 * np.pi * signal.frequencies * tau
+
+    # construct linear phase spectrum
+    signal_lin = signal.copy()
+    signal_lin.freq = \
+        np.abs(signal_lin.freq).astype(complex) * np.exp(-1j * phase)
+
+    return signal_lin
+
+
 def nextpow2(x):
     """Returns the exponent of next higher power of 2.
 
