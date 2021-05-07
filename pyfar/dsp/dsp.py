@@ -245,7 +245,7 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         the window or the fade-in / fade-out (see parameter `shape`).
         If length has four entries, a symmetric window with fade-in between
         the first two entries and a fade-out between the last two is created,
-        while it is constant in between.
+        while it is constant in between. See Notes for more details.
         If ``None``, a symmetric window is applied to the overall length of
         the signal and `shape` and `unit` are ignored.
         The unit of `length` is specified by the parameter `unit`.
@@ -270,6 +270,12 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
 
     Notes
     -----
+    For the left sight of a symmetric window and for ``shape='left'``,
+    the indexes of the samples given in `length` denote the first sample of
+    the windowing which is non-zero and the first being one. For the right
+    side of a symmetric window and for ``shape='right'``, the samples denote
+    the last sample being one and the last being non-zero.
+
     This function calls `~scipy.signal.windows.get_window` to create the
     window.
     Window types:
@@ -313,26 +319,25 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         raise TypeError(
             "The parameter length has to be of type list or None.")
 
-    if length is None:
-        length = [0, signal.n_samples]
-        unit = 'samples'
-    if length != sorted(length):
-        raise ValueError("Values in length need to be in ascending order.")
-
-    # Convert length to samples
-    if unit == 's':
-        length = [round(li*signal.sampling_rate) for li in length]
-    elif unit == 'ms':
-        length = [round(li*signal.sampling_rate/1e3) for li in length]
-    elif unit != 'samples':
-        raise ValueError(f"unit is {unit} but has to be"
-                         f" 'samples', 's' or 'ms'.")
-    # Check window size
-    if length[-1] > signal.n_samples:
-        raise ValueError(
-            "Values in length require window to be longer than signal.")
+    # Check length
+    if length is not None:
+        if length != sorted(length):
+            raise ValueError("Values in length need to be in ascending order.")
+        # Convert to samples
+        if unit == 's':
+            length = [round(li*signal.sampling_rate) for li in length]
+        elif unit == 'ms':
+            length = [round(li*signal.sampling_rate/1e3) for li in length]
+        elif unit != 'samples':
+            raise ValueError(f"unit is {unit} but has to be"
+                             f" 'samples', 's' or 'ms'.")
+        # Check window size
+        if length[-1] > signal.n_samples:
+            raise ValueError(
+                "Values in length require window to be longer than signal.")
 
     # Create window
+    # win_start and win_stop define the first and last sample of the window
     if length is None:
         win_samples = signal.n_samples
         win = sgn.windows.get_window(window, win_samples, fftbins=False)
