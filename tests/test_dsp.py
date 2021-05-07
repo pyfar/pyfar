@@ -1,4 +1,3 @@
-from pyfar.dsp.dsp import linear_phase
 import numpy as np
 import numpy.testing as npt
 import pytest
