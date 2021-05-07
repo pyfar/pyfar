@@ -985,7 +985,7 @@ def reconstructing_fractional_octave_bands(
     Perfectly reconstructing fractional octave filter bank.
 
     The filters have a linear phase with a delay of ``n_samples/2`` and are
-    windowed with a Hann window to supress side lobes of the finite filters.
+    windowed with a Hann window to suppress side lobes of the finite filters.
     The magnitude response of the filters is designed similar to [#]_ with
     two exceptions:
 
