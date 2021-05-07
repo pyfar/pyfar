@@ -980,17 +980,18 @@ def _coefficients_fractional_octave_bands(
 
 def reconstructing_fractional_octave_bands(
         signal, num_fractions=1, frequency_range=(63, 16000),
-        overlap=1, slope=0, n_samples=2**12, sampling_rate=None):
+        overlap=1, slope=0, n_samples=None, sampling_rate=None):
     """
     Perfectly reconstructing fractional octave filter bank.
 
-    The filters have a linear phase with a delay of ``n_samples/2``. The
-    magnitude response of the filter bank is designed following [#]_ with
+    The filters have a linear phase with a delay of ``n_samples/2`` and are
+    windowed with a Hann window to supress side lobes of the finite filters.
+    The magnitude response of the filters is designed similar to [#]_ with
     two exceptions:
 
     1. The magnitude response is designed using squared sine/cosine ramps to
-       obtain -6 dB at the cut-off frequencies
-    2. The overlap between the filters is calculated from the center and
+       obtain -6 dB at the cut-off frequencies.
+    2. The overlap between the filters is calculated between the center and
        upper cut-off frequencies and not between the center and lower cut-off
        frequencies. This enables smaller pass-bands with unity gain, which
        might be advantageous for applications that apply analysis and
@@ -1001,22 +1002,25 @@ def reconstructing_fractional_octave_bands(
     signal : Signal, None
         The Signal to be filtered. Pass None to create the filter without
         applying it.
-    num_fractions : int
+    num_fractions : int, optional
         Octave fraction, e.g., 3 for third-octave bands. The default is ``1``.
-    frequency_range : tuple
+    frequency_range : tuple, optional
         frequency range for fractional octave in Hz. The default is
         ``(63, 16000)``
     overlap : float
-        Band overlap of the filter slopes between 0 and 1. The default is
-        ``1``.
-    slope : int
-        Number > 0 that defines the width and steepnes of the filter slopes.
-        Larger number denote smaller band widths and steeper slopes. The
+        Band overlap of the filter slopes between 0 and 1. Smaller values yield
+        wider pass-bands and steeper filter slopes. The default is ``1``.
+    slope : int, optional
+        Number > 0 that defines the width and steepness of the filter slopes.
+        Larger values yield wider pass-bands and steeper filter slopes. The
         default is ``0``.
-    n_samples : int
-        Number of samples of the corresponding time signal.
+    n_samples : int, optional
+        Length of the filter in samples. Longer filters yield more exact
+        filters. If this is ``None`` four times the period of the lower
+        frequency range rounded up to the next power of two is used
+        (``2**pf.dsp.nextpow2(4 / frequency_range[0] * sampling_rate)``).
     sampling_rate : int
-        Sampling frequency in Hz. The default is ``44100``.
+        Sampling frequency in Hz. The default is ``None``.
 
     Returns
     -------
@@ -1048,6 +1052,12 @@ def reconstructing_fractional_octave_bands(
     # sampling frequency in Hz
     sampling_rate = \
         signal.sampling_rate if sampling_rate is None else sampling_rate
+
+    # set the length to at least for times the period of the lowest cut-off
+    # frequency
+    if n_samples is None:
+        n_samples = 2**pf.dsp.nextpow2(4 / frequency_range[0] * sampling_rate)
+        n_samples = int(n_samples)
 
     # number of frequency bins
     n_bins = int(n_samples // 2 + 1)
@@ -1110,6 +1120,9 @@ def reconstructing_fractional_octave_bands(
 
     # get impulse responses
     h = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
+
+    # window
+    h *= spsignal.windows.hann(h.shape[-1])
 
     # create filter object
     filt = pf.FilterFIR(h, sampling_rate)
