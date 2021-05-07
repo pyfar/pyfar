@@ -1,6 +1,8 @@
 import numpy as np
 import numpy.testing as npt
+import scipy.signal as sgn
 import pytest
+import pyfar
 
 from pyfar import dsp
 
@@ -138,3 +140,128 @@ def test_regu_inversion(impulse):
 
     npt.assert_allclose(res.freq[:, 0], [0.25])
     npt.assert_allclose(res.freq[:, -1], [0.25])
+
+
+def test_windowing_default():
+    """ Test windowing function with default values."""
+    sig = pyfar.Signal(np.ones(10), 2)
+    sig_win = dsp.windowing(sig)
+    time_win = np.atleast_2d(sgn.windows.hann(10, sym=True))
+    npt.assert_allclose(sig_win.time, time_win)
+
+
+def test_windowing_input():
+    """Test errors when calling with incorrect parameters."""
+    sig = pyfar.Signal(np.ones(5), 2)
+    with pytest.raises(TypeError, match='signal'):
+        dsp.windowing([1., 2.])
+    with pytest.raises(ValueError, match='shape'):
+        dsp.windowing(sig, shape='top')
+    with pytest.raises(TypeError, match='truncate'):
+        dsp.windowing(sig, truncate='t')
+    with pytest.raises(ValueError, match='unit'):
+        dsp.windowing(sig, length=[0, 1], unit='kg')
+    with pytest.raises(TypeError, match='length'):
+        dsp.windowing(sig, length=1)
+
+
+def test_windowing_length_order_error():
+    """ Test errors for incorrect order of values in length."""
+    sig = pyfar.Signal(np.ones(10), 2)
+    with pytest.raises(ValueError, match='ascending'):
+        dsp.windowing(sig, length=[2, 1])
+    with pytest.raises(ValueError, match='ascending'):
+        dsp.windowing(sig, length=[1, 2, 3, 0])
+
+
+def test_windowing_length_unit_error():
+    """ Test errors for incorrect boundaries in combinations with unit."""
+    sig = pyfar.Signal(np.ones(10), 2)
+    with pytest.raises(ValueError, match='than signal'):
+        dsp.windowing(sig, length=[0, 11], unit='samples')
+    with pytest.raises(ValueError, match='than signal'):
+        dsp.windowing(sig, length=[0, 6], unit='s')
+    with pytest.raises(ValueError, match='than signal'):
+        dsp.windowing(sig, length=[0, 6e3], unit='ms')
+
+
+def test_windowing_truncate():
+    """ Test truncation of windowed signal."""
+    sig = pyfar.Signal(np.ones(10), 2)
+    sig_win = dsp.windowing(sig, length=[1, 3], truncate=False)
+    assert sig_win.n_samples == 10
+    sig_win = dsp.windowing(
+        sig, length=[1, 3], shape='symmetric', unit='samples', truncate=True)
+    assert sig_win.n_samples == 3
+    sig_win = dsp.windowing(
+        sig, length=[0.5, 1.5], shape='symmetric', unit='s', truncate=True)
+    assert sig_win.n_samples == 3
+    sig_win = dsp.windowing(
+        sig, length=[500, 1500], shape='symmetric', unit='ms', truncate=True)
+    assert sig_win.n_samples == 3
+    sig_win = dsp.windowing(sig, length=[1, 3], shape='left', truncate=True)
+    assert sig_win.n_samples == 9
+    sig_win = dsp.windowing(sig, length=[1, 3], shape='right', truncate=True)
+    assert sig_win.n_samples == 4
+
+
+def test_windowing_symmetric():
+    """ Test window option symmetric."""
+    sig = pyfar.Signal(np.ones(10), 2)
+    sig_win = dsp.windowing(
+        sig, window='hann', length=[1, 5], shape='symmetric')
+    time_win = np.atleast_2d(sgn.windows.hann(5, sym=True))
+    npt.assert_allclose(sig_win.time, time_win)
+
+
+def test_windowing_single_sided():
+    """ Test window options left and right."""
+    sig = pyfar.Signal(np.ones(7), 1)
+    # Fade in, odd number of samples
+    sig_win = dsp.windowing(
+        sig, window='triang', length=[2, 4], shape='left', truncate=False)
+    time_win = np.array([[0, 0, 0.25, 0.75, 1, 1, 1]])
+    npt.assert_allclose(sig_win.time, time_win)
+    # Fade in, even number of samples
+    sig_win = dsp.windowing(
+        sig, window='triang', length=[2, 5], shape='left', truncate=False)
+    time_win = np.array([[0, 0, 1/6, 3/6, 5/6, 1, 1]])
+    npt.assert_allclose(sig_win.time, time_win)
+    # Fade out, odd number of samples
+    sig_win = dsp.windowing(
+        sig, window='triang', length=[2, 4], shape='right', truncate=False)
+    time_win = np.array([[1, 1, 1, 0.75, 0.25, 0, 0]])
+    npt.assert_allclose(sig_win.time, time_win)
+    # Fade out, even number of samples
+    sig_win = dsp.windowing(
+        sig, window='triang', length=[2, 5], shape='right', truncate=False)
+    time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6, 0]])
+    npt.assert_allclose(sig_win.time, time_win)
+
+
+def test_windowing_length_four_values():
+    """ Test windowing with four values given in length."""
+    sig = pyfar.Signal(np.ones(9), 1)
+    sig_win = dsp.windowing(
+        sig, window='triang', length=[1, 3, 6, 7], unit='samples',
+        truncate=False)
+    time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0]])
+    npt.assert_allclose(sig_win.time, time_win)
+    sig = pyfar.Signal(np.ones(10), 1)
+    sig_win = dsp.windowing(
+        sig, window='triang', length=[1, 3, 6, 7], unit='samples',
+        truncate=False)
+    time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0, 0]])
+    npt.assert_allclose(sig_win.time, time_win)
+
+
+def test_windowing_multichannel():
+    """ Test windowing of multichannel signal."""
+    time = np.array(
+        [[[1, 1, 1, 1], [2, 2, 2, 2]], [[3, 3, 3, 3], [4, 4, 4, 4]]])
+    sig = pyfar.Signal(time, 1)
+    sig_win = dsp.windowing(
+        sig, window='triang', length=[1, 2], shape='symmetric', truncate=True)
+    time_win = np.array(
+        [[[0.5, 0.5], [1, 1]], [[1.5, 1.5], [2, 2]]])
+    npt.assert_allclose(sig_win.time, time_win)
