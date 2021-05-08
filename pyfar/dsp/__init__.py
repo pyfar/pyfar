@@ -3,7 +3,6 @@ from .dsp import (
     group_delay,
     wrap_to_2pi,
     spectrogram,
-    nextpow2,
     regularized_spectrum_inversion
 )
 
@@ -17,7 +16,6 @@ __all__ = [
     'phase',
     'group_delay',
     'wrap_to_2pi',
-    'nextpow2'
     'spectrogram',
     'regularized_spectrum_inversion'
 ]
