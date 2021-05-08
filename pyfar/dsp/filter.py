@@ -1016,11 +1016,10 @@ def reconstructing_fractional_octave_bands(
         default is ``0``.
     n_samples : int, optional
         Length of the filter in samples. Longer filters yield more exact
-        filters. If this is ``None`` four times the period of the lower
-        frequency range rounded up to the next power of two is used
-        (``2**pf.dsp.nextpow2(4 / frequency_range[0] * sampling_rate)``).
+        filters. The default is ``2**12``.
     sampling_rate : int
-        Sampling frequency in Hz. The default is ``None``.
+        Sampling frequency in Hz. The default is ``None``. Only required if
+        ``signal=None``.
 
     Returns
     -------
@@ -1036,6 +1035,35 @@ def reconstructing_fractional_octave_bands(
     .. [#] Antoni, J. (2010). Orthogonal-like fractional-octave-band filters.
            J. Acous. Soc. Am., 127(2), 884–895, doi: 10.1121/1.3273888
 
+    Examples
+    --------
+
+    Filter and re-synthesize impulse signal
+
+    >>> import pyfar as pf
+    >>> import numpy as np
+    >>>
+    >>> x = pf.signals.impulse(2**12)
+    >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
+    >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
+    >>>
+    >>> # plot
+    >>> ax = pf.plot.time_freq(y_sum, color='k')
+    >>> pf.plot.freq(y, ax=ax[1])
+
+    .. plot::
+
+        import pyfar as pf
+        import numpy as np
+
+        # filter and re-synthesize impulse signal
+        x = pf.signals.impulse(2**12)
+        y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
+        y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
+
+        # plot
+        ax = pf.plot.time_freq(y_sum, color='k')
+        pf.plot.freq(y, ax=ax[1])
     """
 
     # check input
