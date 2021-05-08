@@ -980,7 +980,7 @@ def _coefficients_fractional_octave_bands(
 
 def reconstructing_fractional_octave_bands(
         signal, num_fractions=1, frequency_range=(63, 16000),
-        overlap=1, slope=0, n_samples=None, sampling_rate=None):
+        overlap=1, slope=0, n_samples=2**12, sampling_rate=None):
     """
     Perfectly reconstructing fractional octave filter bank.
 
@@ -1052,12 +1052,6 @@ def reconstructing_fractional_octave_bands(
     # sampling frequency in Hz
     sampling_rate = \
         signal.sampling_rate if sampling_rate is None else sampling_rate
-
-    # set the length to at least for times the period of the lowest cut-off
-    # frequency
-    if n_samples is None:
-        n_samples = 2**pf.dsp.nextpow2(4 / frequency_range[0] * sampling_rate)
-        n_samples = int(n_samples)
 
     # number of frequency bins
     n_bins = int(n_samples // 2 + 1)
