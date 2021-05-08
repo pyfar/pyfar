@@ -169,6 +169,29 @@ def _check_axis_scale(scale, axis='x'):
             f"{axis}scale is {scale} but must be 'linear', or 'log'.")
 
 
+def _get_quad_mesh_from_axis(ax):
+    """get the QuadMesh from an axis, if there is one.
+
+    Parameters
+    ----------
+    ax : Matplotlib axes object
+
+    Returns
+    -------
+    cm : Matplotlib QuadMesh object
+    """
+    quad_mesh_found = False
+    for qm in ax.get_children():
+        if type(qm) == mpl.collections.QuadMesh:
+            quad_mesh_found = True
+            break
+
+    if not quad_mesh_found:
+        raise ValueError("ax does not have a quad mesh.")
+
+    return qm
+
+
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
           ax=None, **kwargs):
     """Plot the time data of a signal."""
@@ -542,11 +565,9 @@ def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
         cmap, ax[0])
 
     # Colorbar:
-    for PCM in ax[0].get_children():
-        if type(PCM) == mpl.collections.QuadMesh:
-            break
+    qm = _get_quad_mesh_from_axis(ax[0])
 
-    cb = plt.colorbar(PCM, cax=ax[1])
+    cb = plt.colorbar(qm, cax=ax[1])
     cb_label = 'Magnitude in dB' if dB else 'Magnitude'
     cb.set_label(cb_label)
 

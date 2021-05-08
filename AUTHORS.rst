@@ -3,7 +3,7 @@ Credits
 =======
 
 The pyfar developers
-----------------
+--------------------
 
 - Marco Berzborn
 - Fabian Brinkmann

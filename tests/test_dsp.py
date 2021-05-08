@@ -129,10 +129,7 @@ def test_regu_inversion(impulse):
             ValueError, match='lower and upper limits'):
         dsp.regularized_spectrum_inversion(impulse, (2))
 
-    impulse.freq = impulse.freq*2
-    impulse.time = impulse.time*2
-
-    res = dsp.regularized_spectrum_inversion(impulse, [200, 10e3])
+    res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
 
     ind = impulse.find_nearest_frequency([200, 10e3])
     npt.assert_allclose(

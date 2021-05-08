@@ -390,10 +390,13 @@ def test_noise_func():
     n_samples = 2**18
     sigma = 1
     cshape = (1,)
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
 
     npt.assert_array_almost_equal(np.mean(time), 0, decimal=1)
     npt.assert_array_almost_equal(np.std(time, ddof=1), sigma, decimal=1)
+    e_time = np.mean(np.abs(time)**2)
+    e_freq = np.sum(np.abs(freq)**2)
+    npt.assert_array_almost_equal(e_time, e_freq, decimal=4)
 
 
 def test_noise_func_multi_channel():
@@ -402,10 +405,13 @@ def test_noise_func_multi_channel():
     n_samples = 2**10
     sigma = 1
     cshape = (2, 2)
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
 
     npt.assert_array_almost_equal(np.mean(time), 0, decimal=1)
     npt.assert_array_almost_equal(np.std(time, ddof=1), sigma, decimal=1)
+    e_time = np.mean(np.abs(time)**2, axis=-1)
+    e_freq = np.sum(np.abs(freq)**2, axis=-1)
+    npt.assert_array_almost_equal(e_time, e_freq, decimal=2)
 
 
 def test__eq___dict__flat_data(flat_data):

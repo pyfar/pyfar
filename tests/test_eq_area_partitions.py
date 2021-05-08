@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 
-import pyfar.spatial.external.eq_area_partitions as eq
+import pyfar.samplings.external.eq_area_partitions as eq
 
 
 def test_caps_dim_2():
