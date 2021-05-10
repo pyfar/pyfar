@@ -273,19 +273,25 @@ class Coordinates():
                 y, z, x = sph2cart(pts[..., 0], pts[..., 1], pts[..., 2])
 
             else:
+                # Can not be tested. Will only be raised if a coordinate system
+                # is not fully implemented.
                 raise ValueError(
-                    f"Conversion for {self._system['convention']} \
-                    is not implemented.")
+                    (f"Conversion for {self._system['convention']} "
+                     "is not implemented."))
 
         # ... from cylindrical coordinate systems
         elif self._system['domain'] == 'cyl':
             if self._system['convention'] == 'top':
                 x, y, z = cyl2cart(pts[..., 0], pts[..., 1], pts[..., 2])
             else:
+                # Can not be tested. Will only be raised if a coordinate system
+                # is not fully implemented.
                 raise ValueError(
-                    f"Conversion for {self._system['convention']} \
-                    is not implemented.")
+                    (f"Conversion for {self._system['convention']} "
+                     "is not implemented."))
         else:
+            # Can not be tested. Will only be raised if a coordinate system
+            # is not fully implemented.
             raise ValueError(
                 f"Conversion for {convention} is not implemented.")
 
@@ -425,6 +431,8 @@ class Coordinates():
                 pts[..., 1], pts[..., 2], pts[..., 0])
 
         else:
+            # Can not be tested. Will only be raised if a coordinate system
+            # is not fully implemented.
             raise ValueError(
                 f"Conversion for {convention} is not implemented.")
 
@@ -540,11 +548,13 @@ class Coordinates():
                 pts[..., 0], pts[..., 1], pts[..., 2])
 
         else:
+            # Can not be tested. Will only be raised if a coordinate system
+            # is not fully implemented.
             raise ValueError(
                 f"Conversion for {convention} is not implemented.")
 
         # convert to degrees
-        if self._system['unit'] == 'deg':
+        if new_system['unit'] == 'deg':
             pts_1 = pts_1 / np.pi * 180
 
         # return points and convert internal state if desired
@@ -1016,7 +1026,7 @@ class Coordinates():
 
         """
 
-        # check if the coordinate  and unit
+        # check if the coordinate and unit exist
         domain, convention, index = self._exist_coordinate(coordinate, unit)
 
         # get type and range of coordinate
@@ -1443,11 +1453,11 @@ class Coordinates():
                     # return or raise ValueError
                     if unit in units:
                         return domain, convention, index
-                    else:
-                        raise ValueError(
-                            f"'{coordinate}' in '{unit}' does not exist. See "
-                            "self.systems() for a list of possible "
-                            "coordinates and units")
+
+        raise ValueError(
+            (f"'{coordinate}' in '{unit}' does not exist. See "
+             "self.systems() for a list of possible "
+             "coordinates and units"))
 
     def _make_system(self, domain=None, convention=None, unit=None):
         """
@@ -1663,7 +1673,7 @@ class Coordinates():
 
         new = self.copy()
         # slice points
-        new._points = new._points[index]
+        new._points = np.atleast_2d(new._points[index])
         # slice weights
         if new._weights is not None:
             new._weights = new._weights[index]
