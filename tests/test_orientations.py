@@ -24,7 +24,7 @@ def test_orientations_from_view_up():
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 1, 0]]
     Orientations.from_view_up(views, ups)
-    # provided as ndarrays
+    # provided as numpy ndarrays
     views = np.atleast_2d(views).astype(np.float64)
     ups = np.atleast_2d(ups).astype(np.float64)
     Orientations.from_view_up(views, ups)
