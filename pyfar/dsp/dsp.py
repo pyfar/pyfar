@@ -237,10 +237,10 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
     ----------
     signal : Signal
         pyfar Signal object to be windowed
-    window: string, float, or tuple
+    window : string, float, or tuple
         The type of window to create. See below for more details.
-        The default is ``hann``.
-    length: list of int or None
+        The default is ``'hann'``.
+    length : list of int or None
         If length has two entries, these specify the beginning and the end of
         the window or the fade-in / fade-out (see parameter `shape`).
         If length has four entries, a symmetric window with fade-in between
@@ -249,17 +249,17 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         If ``None``, a symmetric window is applied to the overall length of
         the signal and `shape` and `unit` are ignored.
         The unit of `length` is specified by the parameter `unit`.
-    shape: string
+    shape : string
         ``symmetric``, ``left`` or ``right``.
         Specifies, if the window is applied single sided or symmetrically.
         If ``left`` or ``right``, the beginning and the end of the fade is
         defined by the two values in `length`. The default is ``symmetric``.
-    unit: string
+    unit : string
         Unit of the parameter `length`. Can be set to ``s`` (seconds), ``ms``
         (milliseconds) or ``samples``. If ``samples``, the values in length
         denote the first and last sample being included. Time values are
         rounded to the nearest sample. The default is ``samples``.
-    truncate: bool
+    truncate : bool
         If ``True``, the signal is truncated to the length of the window.
         The default is ``False``.
 
@@ -276,36 +276,34 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
     side of a symmetric window and for ``shape='right'``, the samples denote
     the last sample being one and the last being non-zero.
 
-    This function calls `~scipy.signal.windows.get_window` to create the
+    This function calls `scipy.signal.windows.get_window` to create the
     window.
     Window types:
-    - ``scipy.signal.windows.boxcar``
-    - ``scipy.signal.windows.triang``
-    - ``scipy.signal.windows.blackman``
-    - ``scipy.signal.windows.hamming``
-    - ``scipy.signal.windows.hann``
-    - ``scipy.signal.windows.bartlett``
-    - ``scipy.signal.windows.flattop``
-    - ``scipy.signal.windows.parzen``
-    - ``scipy.signal.windows.bohman``
-    - ``scipy.signal.windows.blackmanharris``
-    - ``scipy.signal.windows.nuttall``
-    - ``scipy.signal.windows.barthann``
-    - ``scipy.signal.windows.kaiser`` (needs beta)
-    - ``scipy.signal.windows.gaussian`` (needs standard deviation)
-    - ``scipy.signal.windows.general_gaussian`` (needs power, width)
-    - ``scipy.signal.windows.dpss`` (needs normalized half-bandwidth)
-    - ``scipy.signal.windows.chebwin`` (needs attenuation)
-    - ``scipy.signal.windows.exponential`` (needs center, decay scale)
-    - ``scipy.signal.windows.tukey`` (needs taper fraction)
-    - ``scipy.signal.windows.taylor`` (needs number of constant sidelobes,
+    - ``boxcar``
+    - ``triang``
+    - ``blackman``
+    - ``hamming``
+    - ``hann``
+    - ``bartlett``
+    - ``flattop``
+    - ``parzen``
+    - ``bohman``
+    - ``blackmanharris``
+    - ``nuttall``
+    - ``barthann``
+    - ``kaiser`` (needs beta, see :py:func:`~pyfar.dsp.kaiser_window_beta`)
+    - ``gaussian`` (needs standard deviation)
+    - ``general_gaussian`` (needs power, width)
+    - ``dpss`` (needs normalized half-bandwidth)
+    - ``chebwin`` (needs attenuation)
+    - ``exponential`` (needs center, decay scale)
+    - ``tukey`` (needs taper fraction)
+    - ``taylor`` (needs number of constant sidelobes,
       sidelobe level)
     If the window requires no parameters, then `window` can be a string.
     If the window requires parameters, then `window` must be a tuple
     with the first argument the string name of the window, and the next
     arguments the needed parameters.
-    If `window` is a floating point number, it is interpreted as the beta
-    parameter of the `~scipy.signal.windows.kaiser` window.
     """
     # Check input
     if not isinstance(signal, pyfar.Signal):
@@ -328,7 +326,9 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
             length = [round(li*signal.sampling_rate) for li in length]
         elif unit == 'ms':
             length = [round(li*signal.sampling_rate/1e3) for li in length]
-        elif unit != 'samples':
+        elif unit == 'samples':
+            length = [int(li) for li in length]
+        else:
             raise ValueError(f"unit is {unit} but has to be"
                              f" 'samples', 's' or 'ms'.")
         # Check window size
@@ -388,6 +388,39 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
         signal_win.time = signal_win.time*window_zeropadded
 
     return signal_win
+
+
+def kaiser_window_beta(A):
+    """ Return a shape parameter beta to create kaiser window based on desired
+    side lobe suppression in dB.
+
+    This function can be used to call :py:func:`~pyfar.dsp.windowing` with
+    ``window=('kaiser', beta)``.
+
+    Parameters
+    ----------
+    A : float
+        Side lobe suppression in dB
+
+    Returns
+    -------
+    beta : float
+        Shape parameter beta after [#]_, Eq. 7.75
+
+    References
+    ----------
+    .. [#]  A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
+            Third edition, Upper Saddle, Pearson, 2010.
+    """
+    A = np.abs(A)
+    if A > 50:
+        beta = 0.1102 * (A - 8.7)
+    elif A >= 21:
+        beta = 0.5842 * (A - 21)**0.4 + 0.07886 * (A - 21)
+    else:
+        beta = 0.0
+
+    return beta
 
 
 def regularized_spectrum_inversion(
