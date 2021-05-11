@@ -265,3 +265,19 @@ def test_windowing_multichannel():
     time_win = np.array(
         [[[0.5, 0.5], [1, 1]], [[1.5, 1.5], [2, 2]]])
     npt.assert_allclose(sig_win.time, time_win)
+
+
+def test_kaiser_window_beta():
+    """ Test function call."""
+    A = 51
+    beta = dsp.kaiser_window_beta(A)
+    beta_true = 0.1102*(A-8.7)
+    assert beta == beta_true
+    A = 30
+    beta = dsp.kaiser_window_beta(A)
+    beta_true = 0.5842*(A-21)**0.4+0.07886*(A-21)
+    assert beta == beta_true
+    A = 10
+    beta = dsp.kaiser_window_beta(A)
+    beta_true = 0.0
+    assert beta == beta_true
