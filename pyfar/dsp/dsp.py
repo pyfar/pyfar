@@ -355,3 +355,32 @@ def _cross_fade(first, second, indices):
     result = first * window_first + second * window_second
 
     return result
+
+
+def minimum_phase(signal, method='homomorpic', n_fft=None):
+    """Calculate the minumum phase equivalent of an impulse response or
+    FIR filter.
+
+    Parameters
+    ----------
+    signal : [type]
+        [description]
+    method : str, optional
+        [description], by default 'homomorpic'
+    n_fft : [type], optional
+        [description], by default None
+    """
+
+    signal_flat = signal.flatten()
+    signal_minphase = signal.flatten()
+    signal_minphase.time = np.zeros(
+        (signal_minphase.cshape[0], int(np.floor((signal.n_samples + 1)/2))),
+        dtype=signal.dtype)
+
+    for ch in range(signal_minphase.cshape[0]):
+        signal_minphase.time[ch] = sgn.minimum_phase(
+            signal_flat.time[ch],
+            method=method,
+            n_fft=n_fft)
+
+    return signal_minphase
