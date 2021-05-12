@@ -242,7 +242,8 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
         the window or the fade-in / fade-out (see parameter `shape`).
         If length has four entries, a symmetric window with fade-in between
         the first two entries and a fade-out between the last two is created,
-        while it is constant in between. See Notes for more details.
+        while it is constant in between and `shape` is ignored. See Notes for
+        more details.
         If ``None``, a symmetric window is applied to the overall length of
         the signal and `shape` and `unit` are ignored.
         The unit of `length` is specified by the parameter `unit`.
@@ -250,15 +251,17 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
         The type of window to create. See below for more details.
         The default is ``'hann'``.
     shape : string
-        ``symmetric``, ``left`` or ``right``.
-        Specifies, if the window is applied single sided or symmetrically.
-        If ``left`` or ``right``, the beginning and the end of the fade is
-        defined by the two values in `length`. The default is ``symmetric``.
+        ``'symmetric'``, ``'symmetric_zero'``, ``'left'`` or ``'right'``.
+        Specifies, if the window is applied single-sided or symmetrically.
+        If ``'symmetric_zero'``, ``'left'`` or ``'right'``, the beginning and
+        the end of the fade is defined by the two values in `length`.
+        See parameter `length`and Notes for more details.The default is
+        ``'symmetric_zero'``, which ignores `crop`.
     unit : string
-        Unit of the parameter `length`. Can be set to ``s`` (seconds), ``ms``
-        (milliseconds) or ``samples``. If ``samples``, the values in length
-        denote the first and last sample being included. Time values are
-        rounded to the nearest sample. The default is ``samples``.
+        Unit of the parameter `length`. Can be set to ``'s'`` (seconds),
+        ``'ms'`` (milliseconds) or ``'samples'``. If ``'samples'``, the values
+        in length denote the first and last sample being included. Time values
+        are rounded to the nearest sample. The default is ``'samples'``.
     crop : bool
         If ``True``, the signal is truncated to the length of the window.
         The default is ``False``.
@@ -308,9 +311,10 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
     # Check input
     if not isinstance(signal, pyfar.Signal):
         raise TypeError("The parameter signal has to be of type: Signal.")
-    if shape not in ('symmetric', 'left', 'right'):
+    if shape not in ('symmetric', 'symmetric_zero', 'left', 'right'):
         raise ValueError(
-            "The parameter shape has to be 'symmetric', 'left' or 'right'.")
+            "The parameter shape has to be 'symmetric', 'symmetric_zero' "
+            "'left' or 'right'.")
     if not isinstance(crop, bool):
         raise TypeError("The parameter crop has to be of type: bool.")
     if not isinstance(length, (list, tuple, type(None))):
@@ -354,12 +358,20 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
         else:
             fade_samples = int(2*(length[1]-length[0]))
             fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
-            if shape == 'left':
+            if shape == 'symmetric_zero':
+                win = np.zeros(signal.n_samples)
+                win[:length[0]+1] = 1
+                win[length[0]+1:length[1]+1] = fade[int(fade_samples/2):]
+                win[-length[0]:] = 1
+                win[-length[1]:-length[0]] = fade[:int(fade_samples/2)]
+                win_start = 0
+                win_stop = signal.n_samples
+            elif shape == 'left':
                 win = np.ones(signal.n_samples-length[0])
                 win[0:length[1]-length[0]] = fade[:int(fade_samples/2)]
                 win_start = length[0]
                 win_stop = signal.n_samples-1
-            if shape == 'right':
+            elif shape == 'right':
                 win = np.ones(length[1]+1)
                 win[length[0]+1:] = fade[int(fade_samples/2):]
                 win_start = 0

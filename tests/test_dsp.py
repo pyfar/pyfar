@@ -228,6 +228,15 @@ def test_time_window_symmetric():
     npt.assert_allclose(sig_win.time, time_win)
 
 
+def test_time_window_symmetric_zero():
+    """ Test window option symmetric_zero."""
+    sig = pyfar.Signal(np.ones(12), 2)
+    sig_win = dsp.time_window(
+        sig, window='triang', length=[2, 4], shape='symmetric_zero')
+    time_win = np.array([[1, 1, 1, 0.75, 0.25, 0, 0, 0, 0.25, 0.75, 1, 1]])
+    npt.assert_allclose(sig_win.time, time_win)
+
+
 def test_time_window_single_sided():
     """ Test window options left and right."""
     sig = pyfar.Signal(np.ones(7), 1)
