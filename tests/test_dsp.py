@@ -163,6 +163,20 @@ def test_time_window_input():
         dsp.time_window(sig, length=[0, 1], unit='kg')
     with pytest.raises(TypeError, match='length'):
         dsp.time_window(sig, length=1)
+    with pytest.raises(ValueError, match='contain'):
+        dsp.time_window(sig, length=[1, 2, 3])
+    with pytest.raises(ValueError, match='longer'):
+        dsp.time_window(sig, length=[1, 11])
+    with pytest.raises(ValueError):
+        dsp.time_window(sig, length=['a', 'b'])
+
+
+def test_time_window_length_types():
+    sig = pyfar.Signal(np.ones(10), 2)
+    dsp.time_window(sig, length=(1, 2))
+    dsp.time_window(sig, length=[1, 2])
+    dsp.time_window(sig, length=(1, 2, 3, 4))
+    dsp.time_window(sig, length=[1, 2, 3, 4])
 
 
 def test_time_window_length_order_error():

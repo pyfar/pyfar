@@ -228,7 +228,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def time_window(signal, length=None, window='hann', shape='symmetric',
-              unit='samples', crop=True):
+                unit='samples', crop=True):
     """Apply time window to signal.
 
     This function uses the windows implemented in ``scipy.signal.windows``.
@@ -313,12 +313,14 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
             "The parameter shape has to be 'symmetric', 'left' or 'right'.")
     if not isinstance(crop, bool):
         raise TypeError("The parameter crop has to be of type: bool.")
-    if not isinstance(length, (list, type(None))):
+    if not isinstance(length, (list, tuple, type(None))):
         raise TypeError(
-            "The parameter length has to be of type list or None.")
+            "The parameter length has to be of type list, tuple or None.")
 
     # Check length
     if length is not None:
+        if isinstance(length, tuple):
+            length = list(length)
         if length != sorted(length):
             raise ValueError("Values in length need to be in ascending order.")
         # Convert to samples
@@ -376,11 +378,14 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
         win[length[2]-length[0]+1:length[3]-length[0]+1] = fade_out
         win_start = length[0]
         win_stop = length[3]
+    else:
+        raise ValueError(
+            "Length needs to contain two or four values.")
 
     # Apply window
     signal_win = signal.copy()
     if crop:
-        signal_win.time = signal_win[..., win_start:win_stop+1].time*win
+        signal_win.time = signal_win.time[..., win_start:win_stop+1]*win
     else:
         # create zeropadded window with shape of signal
         window_zeropadded = np.zeros(signal.n_samples)
