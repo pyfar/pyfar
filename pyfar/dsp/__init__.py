@@ -4,7 +4,7 @@ from .dsp import (
     wrap_to_2pi,
     spectrogram,
     regularized_spectrum_inversion,
-    windowing,
+    time_window,
     kaiser_window_beta
 )
 
@@ -20,6 +20,6 @@ __all__ = [
     'wrap_to_2pi',
     'spectrogram',
     'regularized_spectrum_inversion',
-    'windowing',
+    'time_window',
     'kaiser_window_beta'
 ]

@@ -227,7 +227,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-def windowing(signal, window='hann', length=None, shape='symmetric',
+def time_window(signal, window='hann', length=None, shape='symmetric',
               unit='samples', truncate=True):
     """Apply time window to signal.
 
@@ -272,7 +272,7 @@ def windowing(signal, window='hann', length=None, shape='symmetric',
     -----
     For the left sight of a symmetric window and for ``shape='left'``,
     the indexes of the samples given in `length` denote the first sample of
-    the windowing which is non-zero and the first being one. For the right
+    the window which is non-zero and the first being one. For the right
     side of a symmetric window and for ``shape='right'``, the samples denote
     the last sample being one and the last being non-zero.
 
@@ -394,7 +394,7 @@ def kaiser_window_beta(A):
     """ Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
 
-    This function can be used to call :py:func:`~pyfar.dsp.windowing` with
+    This function can be used to call :py:func:`~pyfar.dsp.time_window` with
     ``window=('kaiser', beta)``.
 
     Parameters
