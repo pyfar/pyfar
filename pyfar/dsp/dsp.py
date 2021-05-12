@@ -227,8 +227,8 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-def time_window(signal, window='hann', length=None, shape='symmetric',
-              unit='samples', truncate=True):
+def time_window(signal, length=None, window='hann', shape='symmetric',
+              unit='samples', crop=True):
     """Apply time window to signal.
 
     This function uses the windows implemented in ``scipy.signal.windows``.
@@ -237,9 +237,6 @@ def time_window(signal, window='hann', length=None, shape='symmetric',
     ----------
     signal : Signal
         pyfar Signal object to be windowed
-    window : string, float, or tuple
-        The type of window to create. See below for more details.
-        The default is ``'hann'``.
     length : list of int or None
         If length has two entries, these specify the beginning and the end of
         the window or the fade-in / fade-out (see parameter `shape`).
@@ -249,6 +246,9 @@ def time_window(signal, window='hann', length=None, shape='symmetric',
         If ``None``, a symmetric window is applied to the overall length of
         the signal and `shape` and `unit` are ignored.
         The unit of `length` is specified by the parameter `unit`.
+    window : string, float, or tuple
+        The type of window to create. See below for more details.
+        The default is ``'hann'``.
     shape : string
         ``symmetric``, ``left`` or ``right``.
         Specifies, if the window is applied single sided or symmetrically.
@@ -259,7 +259,7 @@ def time_window(signal, window='hann', length=None, shape='symmetric',
         (milliseconds) or ``samples``. If ``samples``, the values in length
         denote the first and last sample being included. Time values are
         rounded to the nearest sample. The default is ``samples``.
-    truncate : bool
+    crop : bool
         If ``True``, the signal is truncated to the length of the window.
         The default is ``False``.
 
@@ -311,8 +311,8 @@ def time_window(signal, window='hann', length=None, shape='symmetric',
     if shape not in ('symmetric', 'left', 'right'):
         raise ValueError(
             "The parameter shape has to be 'symmetric', 'left' or 'right'.")
-    if not isinstance(truncate, bool):
-        raise TypeError("The parameter truncate has to be of type: bool.")
+    if not isinstance(crop, bool):
+        raise TypeError("The parameter crop has to be of type: bool.")
     if not isinstance(length, (list, type(None))):
         raise TypeError(
             "The parameter length has to be of type list or None.")
@@ -379,7 +379,7 @@ def time_window(signal, window='hann', length=None, shape='symmetric',
 
     # Apply window
     signal_win = signal.copy()
-    if truncate:
+    if crop:
         signal_win.time = signal_win[..., win_start:win_stop+1].time*win
     else:
         # create zeropadded window with shape of signal
