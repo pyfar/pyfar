@@ -4,8 +4,7 @@ from .dsp import (
     wrap_to_2pi,
     spectrogram,
     regularized_spectrum_inversion,
-    time_shift,
-    fractional_time_shift
+    time_shift
 )
 
 from . import filter
@@ -20,6 +19,5 @@ __all__ = [
     'wrap_to_2pi',
     'spectrogram',
     'regularized_spectrum_inversion',
-    'time_shift',
-    'fractional_time_shift'
+    'time_shift'
 ]
