@@ -23,8 +23,8 @@ def phase(signal, deg=False, unwrap=False):
         Phase.
     """
 
-    if not isinstance(signal, pyfar.Signal) and \
-            not isinstance(signal, pyfar.FrequencyData):
+    if not isinstance(signal, pf.Signal) and \
+            not isinstance(signal, pf.FrequencyData):
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')
 
@@ -198,7 +198,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     """
 
     # check input
-    if not isinstance(signal, pyfar.Signal):
+    if not isinstance(signal, pf.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     if window_length > signal.n_samples:
@@ -282,7 +282,7 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
-    if not isinstance(signal, pyfar.Signal):
+    if not isinstance(signal, pf.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 
     data = signal.freq
