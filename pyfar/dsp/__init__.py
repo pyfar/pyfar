@@ -1,15 +1,15 @@
 from .dsp import (
+    pad_zeros,
     phase,
     group_delay,
     wrap_to_2pi,
     spectrogram,
-    regularized_spectrum_inversion
+    regularized_spectrum_inversion,
+    pad_zeros
 )
 
 from . import filter
 from . import fft
-
-from .zeropadding import (zeropadding)
 
 
 __all__ = [
@@ -19,5 +19,6 @@ __all__ = [
     'group_delay',
     'wrap_to_2pi',
     'spectrogram',
-    'regularized_spectrum_inversion'
+    'regularized_spectrum_inversion',
+    'pad_zeros'
 ]

@@ -379,9 +379,9 @@ def pad_zeros(signal, pad_width, mode):
 
     padded_signal = signal.flatten()
 
-    if mode in ['end', 'center']:
+    if mode in ['after', 'center']:
         pad_array = ((0, 0), (0, pad_width))
-    elif mode == 'beginning':
+    elif mode == 'before':
         pad_array = ((0, 0), (pad_width, 0))
     else:
         raise ValueError("Unknown padding mode.")
