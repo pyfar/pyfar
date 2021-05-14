@@ -1,5 +1,4 @@
 from .dsp import (
-    pad_zeros,
     phase,
     group_delay,
     wrap_to_2pi,
