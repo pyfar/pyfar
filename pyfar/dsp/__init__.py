@@ -9,6 +9,8 @@ from .dsp import (
 from . import filter
 from . import fft
 
+from .zeropadding import (zeropadding)
+
 
 __all__ = [
     'fft',
