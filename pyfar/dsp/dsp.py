@@ -227,7 +227,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-def time_window(signal, length=None, window='hann', shape='symmetric',
+def time_window(signal, interval=None, window='hann', shape='symmetric',
                 unit='samples', crop=True):
     """Apply time window to signal.
 
@@ -237,16 +237,16 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
     ----------
     signal : Signal
         pyfar Signal object to be windowed
-    length : list of int or None
-        If length has two entries, these specify the beginning and the end of
+    interval : list of int or None
+        If `interval` has two entries, these specify the beginning and the end of
         the window or the fade-in / fade-out (see parameter `shape`).
-        If length has four entries, a symmetric window with fade-in between
+        If `interval` has four entries, a symmetric window with fade-in between
         the first two entries and a fade-out between the last two is created,
         while it is constant in between and `shape` is ignored. See Notes for
         more details.
         If ``None``, a symmetric window is applied to the overall length of
         the signal and `shape` and `unit` are ignored.
-        The unit of `length` is specified by the parameter `unit`.
+        The unit of `interval` is specified by the parameter `unit`.
     window : string, float, or tuple
         The type of window to create. See below for more details.
         The default is ``'hann'``.
@@ -254,13 +254,13 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
         ``'symmetric'``, ``'symmetric_zero'``, ``'left'`` or ``'right'``.
         Specifies, if the window is applied single-sided or symmetrically.
         If ``'symmetric_zero'``, ``'left'`` or ``'right'``, the beginning and
-        the end of the fade is defined by the two values in `length`.
-        See parameter `length`and Notes for more details.The default is
+        the end of the fade is defined by the two values in `interval`.
+        See parameter `interval`and Notes for more details.The default is
         ``'symmetric_zero'``, which ignores `crop`.
     unit : string
-        Unit of the parameter `length`. Can be set to ``'s'`` (seconds),
+        Unit of the parameter `interval`. Can be set to ``'s'`` (seconds),
         ``'ms'`` (milliseconds) or ``'samples'``. If ``'samples'``, the values
-        in length denote the first and last sample being included. Time values
+        in `interval` denote the first and last sample being included. Time values
         are rounded to the nearest sample. The default is ``'samples'``.
     crop : bool
         If ``True``, the signal is truncated to the length of the window.
@@ -274,7 +274,7 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
     Notes
     -----
     For the left sight of a symmetric window and for ``shape='left'``,
-    the indexes of the samples given in `length` denote the first sample of
+    the indexes of the samples given in `interval` denote the first sample of
     the window which is non-zero and the first being one. For the right
     side of a symmetric window and for ``shape='right'``, the samples denote
     the last sample being one and the last being non-zero.
@@ -317,82 +317,82 @@ def time_window(signal, length=None, window='hann', shape='symmetric',
             "'left' or 'right'.")
     if not isinstance(crop, bool):
         raise TypeError("The parameter crop has to be of type: bool.")
-    if not isinstance(length, (list, tuple, type(None))):
+    if not isinstance(interval, (list, tuple, type(None))):
         raise TypeError(
-            "The parameter length has to be of type list, tuple or None.")
+            "The parameter interval has to be of type list, tuple or None.")
 
-    # Check length
-    if length is not None:
-        if isinstance(length, tuple):
-            length = list(length)
-        if length != sorted(length):
-            raise ValueError("Values in length need to be in ascending order.")
+    # Check interval
+    if interval is not None:
+        if isinstance(interval, tuple):
+            interval = list(interval)
+        if interval != sorted(interval):
+            raise ValueError("Values in interval need to be in ascending order.")
         # Convert to samples
         if unit == 's':
-            length = [round(li*signal.sampling_rate) for li in length]
+            interval = [round(li*signal.sampling_rate) for li in interval]
         elif unit == 'ms':
-            length = [round(li*signal.sampling_rate/1e3) for li in length]
+            interval = [round(li*signal.sampling_rate/1e3) for li in interval]
         elif unit == 'samples':
-            length = [int(li) for li in length]
+            interval = [int(li) for li in interval]
         else:
             raise ValueError(f"unit is {unit} but has to be"
                              f" 'samples', 's' or 'ms'.")
         # Check window size
-        if length[-1] > signal.n_samples:
+        if interval[-1] > signal.n_samples:
             raise ValueError(
-                "Values in length require window to be longer than signal.")
+                "Values in interval require window to be longer than signal.")
 
     # Create window
     # win_start and win_stop define the first and last sample of the window
-    if length is None:
+    if interval is None:
         win_samples = signal.n_samples
         win = sgn.windows.get_window(window, win_samples, fftbins=False)
         win_start = 0
         win_stop = signal.n_samples-1
-    elif len(length) == 2:
+    elif len(interval) == 2:
         if shape == 'symmetric':
-            win_samples = length[1]-length[0]+1
+            win_samples = interval[1]-interval[0]+1
             win = sgn.windows.get_window(window, win_samples, fftbins=False)
-            win_start = length[0]
-            win_stop = length[1]
+            win_start = interval[0]
+            win_stop = interval[1]
         else:
-            fade_samples = int(2*(length[1]-length[0]))
+            fade_samples = int(2*(interval[1]-interval[0]))
             fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
             if shape == 'symmetric_zero':
                 win = np.zeros(signal.n_samples)
-                win[:length[0]+1] = 1
-                win[length[0]+1:length[1]+1] = fade[int(fade_samples/2):]
-                win[-length[0]:] = 1
-                win[-length[1]:-length[0]] = fade[:int(fade_samples/2)]
+                win[:interval[0]+1] = 1
+                win[interval[0]+1:interval[1]+1] = fade[int(fade_samples/2):]
+                win[-interval[0]:] = 1
+                win[-interval[1]:-interval[0]] = fade[:int(fade_samples/2)]
                 win_start = 0
                 win_stop = signal.n_samples
             elif shape == 'left':
-                win = np.ones(signal.n_samples-length[0])
-                win[0:length[1]-length[0]] = fade[:int(fade_samples/2)]
-                win_start = length[0]
+                win = np.ones(signal.n_samples-interval[0])
+                win[0:interval[1]-interval[0]] = fade[:int(fade_samples/2)]
+                win_start = interval[0]
                 win_stop = signal.n_samples-1
             elif shape == 'right':
-                win = np.ones(length[1]+1)
-                win[length[0]+1:] = fade[int(fade_samples/2):]
+                win = np.ones(interval[1]+1)
+                win[interval[0]+1:] = fade[int(fade_samples/2):]
                 win_start = 0
-                win_stop = length[1]
-    elif len(length) == 4:
-        fade_in_samples = int(2*(length[1]-length[0]))
+                win_stop = interval[1]
+    elif len(interval) == 4:
+        fade_in_samples = int(2*(interval[1]-interval[0]))
         fade_in = sgn.windows.get_window(
             window, fade_in_samples, fftbins=False)
         fade_in = fade_in[:int(fade_in_samples/2)]
-        fade_out_samples = int(2*(length[3]-length[2]))
+        fade_out_samples = int(2*(interval[3]-interval[2]))
         fade_out = sgn.windows.get_window(
             window, fade_out_samples, fftbins=False)
         fade_out = fade_out[int(fade_out_samples/2):]
-        win = np.ones(length[-1]-length[0]+1)
-        win[0:length[1]-length[0]] = fade_in
-        win[length[2]-length[0]+1:length[3]-length[0]+1] = fade_out
-        win_start = length[0]
-        win_stop = length[3]
+        win = np.ones(interval[-1]-interval[0]+1)
+        win[0:interval[1]-interval[0]] = fade_in
+        win[interval[2]-interval[0]+1:interval[3]-interval[0]+1] = fade_out
+        win_start = interval[0]
+        win_stop = interval[3]
     else:
         raise ValueError(
-            "Length needs to contain two or four values.")
+            "interval needs to contain two or four values.")
 
     # Apply window
     signal_win = signal.copy()

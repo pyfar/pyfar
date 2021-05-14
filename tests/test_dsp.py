@@ -160,62 +160,62 @@ def test_time_window_input():
     with pytest.raises(TypeError, match='crop'):
         dsp.time_window(sig, crop='t')
     with pytest.raises(ValueError, match='unit'):
-        dsp.time_window(sig, length=[0, 1], unit='kg')
-    with pytest.raises(TypeError, match='length'):
-        dsp.time_window(sig, length=1)
+        dsp.time_window(sig, interval=[0, 1], unit='kg')
+    with pytest.raises(TypeError, match='interval'):
+        dsp.time_window(sig, interval=1)
     with pytest.raises(ValueError, match='contain'):
-        dsp.time_window(sig, length=[1, 2, 3])
+        dsp.time_window(sig, interval=[1, 2, 3])
     with pytest.raises(ValueError, match='longer'):
-        dsp.time_window(sig, length=[1, 11])
+        dsp.time_window(sig, interval=[1, 11])
     with pytest.raises(ValueError):
-        dsp.time_window(sig, length=['a', 'b'])
+        dsp.time_window(sig, interval=['a', 'b'])
 
 
-def test_time_window_length_types():
+def test_time_window_interval_types():
     sig = pyfar.Signal(np.ones(10), 2)
-    dsp.time_window(sig, length=(1, 2))
-    dsp.time_window(sig, length=[1, 2])
-    dsp.time_window(sig, length=(1, 2, 3, 4))
-    dsp.time_window(sig, length=[1, 2, 3, 4])
+    dsp.time_window(sig, interval=(1, 2))
+    dsp.time_window(sig, interval=[1, 2])
+    dsp.time_window(sig, interval=(1, 2, 3, 4))
+    dsp.time_window(sig, interval=[1, 2, 3, 4])
 
 
-def test_time_window_length_order_error():
-    """ Test errors for incorrect order of values in length."""
+def test_time_window_interval_order_error():
+    """ Test errors for incorrect order of values in interval."""
     sig = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='ascending'):
-        dsp.time_window(sig, length=[2, 1])
+        dsp.time_window(sig, interval=[2, 1])
     with pytest.raises(ValueError, match='ascending'):
-        dsp.time_window(sig, length=[1, 2, 3, 0])
+        dsp.time_window(sig, interval=[1, 2, 3, 0])
 
 
-def test_time_window_length_unit_error():
+def test_time_window_interval_unit_error():
     """ Test errors for incorrect boundaries in combinations with unit."""
     sig = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='than signal'):
-        dsp.time_window(sig, length=[0, 11], unit='samples')
+        dsp.time_window(sig, interval=[0, 11], unit='samples')
     with pytest.raises(ValueError, match='than signal'):
-        dsp.time_window(sig, length=[0, 6], unit='s')
+        dsp.time_window(sig, interval=[0, 6], unit='s')
     with pytest.raises(ValueError, match='than signal'):
-        dsp.time_window(sig, length=[0, 6e3], unit='ms')
+        dsp.time_window(sig, interval=[0, 6e3], unit='ms')
 
 
 def test_time_window_crop():
     """ Test truncation of windowed signal."""
     sig = pyfar.Signal(np.ones(10), 2)
-    sig_win = dsp.time_window(sig, length=[1, 3], crop=False)
+    sig_win = dsp.time_window(sig, interval=[1, 3], crop=False)
     assert sig_win.n_samples == 10
     sig_win = dsp.time_window(
-        sig, length=[1, 3], shape='symmetric', unit='samples', crop=True)
+        sig, interval=[1, 3], shape='symmetric', unit='samples', crop=True)
     assert sig_win.n_samples == 3
     sig_win = dsp.time_window(
-        sig, length=[0.5, 1.5], shape='symmetric', unit='s', crop=True)
+        sig, interval=[0.5, 1.5], shape='symmetric', unit='s', crop=True)
     assert sig_win.n_samples == 3
     sig_win = dsp.time_window(
-        sig, length=[500, 1500], shape='symmetric', unit='ms', crop=True)
+        sig, interval=[500, 1500], shape='symmetric', unit='ms', crop=True)
     assert sig_win.n_samples == 3
-    sig_win = dsp.time_window(sig, length=[1, 3], shape='left', crop=True)
+    sig_win = dsp.time_window(sig, interval=[1, 3], shape='left', crop=True)
     assert sig_win.n_samples == 9
-    sig_win = dsp.time_window(sig, length=[1, 3], shape='right', crop=True)
+    sig_win = dsp.time_window(sig, interval=[1, 3], shape='right', crop=True)
     assert sig_win.n_samples == 4
 
 
@@ -223,7 +223,7 @@ def test_time_window_symmetric():
     """ Test window option symmetric."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
-        sig, window='hann', length=[1, 5], shape='symmetric')
+        sig, window='hann', interval=[1, 5], shape='symmetric')
     time_win = np.atleast_2d(sgn.windows.hann(5, sym=True))
     npt.assert_allclose(sig_win.time, time_win)
 
@@ -232,7 +232,7 @@ def test_time_window_symmetric_zero():
     """ Test window option symmetric_zero."""
     sig = pyfar.Signal(np.ones(12), 2)
     sig_win = dsp.time_window(
-        sig, window='triang', length=[2, 4], shape='symmetric_zero')
+        sig, window='triang', interval=[2, 4], shape='symmetric_zero')
     time_win = np.array([[1, 1, 1, 0.75, 0.25, 0, 0, 0, 0.25, 0.75, 1, 1]])
     npt.assert_allclose(sig_win.time, time_win)
 
@@ -242,37 +242,37 @@ def test_time_window_single_sided():
     sig = pyfar.Signal(np.ones(7), 1)
     # Fade in, odd number of samples
     sig_win = dsp.time_window(
-        sig, window='triang', length=[2, 4], shape='left', crop=False)
+        sig, window='triang', interval=[2, 4], shape='left', crop=False)
     time_win = np.array([[0, 0, 0.25, 0.75, 1, 1, 1]])
     npt.assert_allclose(sig_win.time, time_win)
     # Fade in, even number of samples
     sig_win = dsp.time_window(
-        sig, window='triang', length=[2, 5], shape='left', crop=False)
+        sig, window='triang', interval=[2, 5], shape='left', crop=False)
     time_win = np.array([[0, 0, 1/6, 3/6, 5/6, 1, 1]])
     npt.assert_allclose(sig_win.time, time_win)
     # Fade out, odd number of samples
     sig_win = dsp.time_window(
-        sig, window='triang', length=[2, 4], shape='right', crop=False)
+        sig, window='triang', interval=[2, 4], shape='right', crop=False)
     time_win = np.array([[1, 1, 1, 0.75, 0.25, 0, 0]])
     npt.assert_allclose(sig_win.time, time_win)
     # Fade out, even number of samples
     sig_win = dsp.time_window(
-        sig, window='triang', length=[2, 5], shape='right', crop=False)
+        sig, window='triang', interval=[2, 5], shape='right', crop=False)
     time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6, 0]])
     npt.assert_allclose(sig_win.time, time_win)
 
 
-def test_time_window_length_four_values():
-    """ Test time_window with four values given in length."""
+def test_time_window_interval_four_values():
+    """ Test time_window with four values given in interval."""
     sig = pyfar.Signal(np.ones(9), 1)
     sig_win = dsp.time_window(
-        sig, window='triang', length=[1, 3, 6, 7], unit='samples',
+        sig, window='triang', interval=[1, 3, 6, 7], unit='samples',
         crop=False)
     time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0]])
     npt.assert_allclose(sig_win.time, time_win)
     sig = pyfar.Signal(np.ones(10), 1)
     sig_win = dsp.time_window(
-        sig, window='triang', length=[1, 3, 6, 7], unit='samples',
+        sig, window='triang', interval=[1, 3, 6, 7], unit='samples',
         crop=False)
     time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0, 0]])
     npt.assert_allclose(sig_win.time, time_win)
@@ -284,7 +284,7 @@ def test_time_window_multichannel():
         [[[1, 1, 1, 1], [2, 2, 2, 2]], [[3, 3, 3, 3], [4, 4, 4, 4]]])
     sig = pyfar.Signal(time, 1)
     sig_win = dsp.time_window(
-        sig, window='triang', length=[1, 2], shape='symmetric', crop=True)
+        sig, window='triang', interval=[1, 2], shape='symmetric', crop=True)
     time_win = np.array(
         [[[0.5, 0.5], [1, 1]], [[1.5, 1.5], [2, 2]]])
     npt.assert_allclose(sig_win.time, time_win)
