@@ -357,8 +357,13 @@ def _cross_fade(first, second, indices):
     return result
 
 
-def pad_zeros(signal, pad_width, mode):
+def pad_zeros(signal, pad_width, mode='after'):
     """Pad a signal with zeros in the time domain.
+    The function supports multiple padding modes, either after the last sample,
+    before the first sample, or in the middle. Note that the mode 'before'
+    results in a linear phase shift corresponding to the number of added
+    samples. The mode 'center' can be used to pad signals with a symmetry with
+    respect to the time ``t=0``.
 
     Parameters
     ----------
@@ -372,6 +377,18 @@ def pad_zeros(signal, pad_width, mode):
         number of zeros before the starting time of the signal, or
         'center' to insert the number of zeros in the middle of the signal.
         The default is 'after'.
+
+    Returns
+    -------
+    Signal
+        The zero-padded signal.
+
+    Examples
+    --------
+    >>> import pyfar
+    >>> impulse = pyfar.signals.impulse(512, amplitude=1)
+    >>> impulse_shiftet = pyfar.dsp.pad_zeros(impulse, 128, mode='after')
+
     """
 
     if not isinstance(signal, pyfar.Signal):
