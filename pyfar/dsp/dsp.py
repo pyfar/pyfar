@@ -389,14 +389,14 @@ def pad_zeros(signal, pad_width, mode):
     if mode == 'center':
         shift_samples = int(np.round(signal.n_samples/2))
         padded_signal.time = np.roll(
-            padded_signal.time, -shift_samples, axis=-1)
+            padded_signal.time, shift_samples, axis=-1)
 
     padded_signal.time = np.pad(
         padded_signal.time, pad_array, mode='constant')
 
     if mode == 'center':
         padded_signal.time = np.roll(
-            padded_signal.time, shift_samples, axis=-1)
+            padded_signal.time, -shift_samples, axis=-1)
 
     padded_signal = padded_signal.reshape(signal.cshape)
 
