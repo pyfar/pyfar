@@ -228,7 +228,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def time_window(signal, interval, window='hann', shape='symmetric',
-                unit='samples', crop=True):
+                unit='samples', crop='none'):
     """Apply time window to signal.
 
     This function uses the windows implemented in ``scipy.signal.windows``.
@@ -262,9 +262,12 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         ``'ms'`` (milliseconds) or ``'samples'``. If ``'samples'``, the values
         in `interval` denote the first and last sample being included. Time
         values are rounded to the nearest sample. The default is ``'samples'``.
-    crop : bool
-        If ``True``, the signal is truncated to the length of the window.
-        The default is ``False``.
+    crop : string
+        ``'none'``, ``'window'`` or ``'end'``
+        If ``'none'``, the length of the signal stays the same.
+        If ``'window'``, the signal is truncated to the windowed part.
+        If ``'end'``, only the zeros at the end of the windowed signal are
+        cropped, so the original phase is preserved. The default is ``'none'``.
 
     Returns
     -------
@@ -315,8 +318,9 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         raise ValueError(
             "The parameter shape has to be 'symmetric', 'symmetric_zero' "
             "'left' or 'right'.")
-    if not isinstance(crop, bool):
-        raise TypeError("The parameter crop has to be of type: bool.")
+    if crop not in ('window', 'end', 'none'):
+        raise TypeError(
+            "The parameter crop has to be 'none', 'window' or 'end'.")
     if not isinstance(interval, (list, tuple)):
         raise TypeError(
             "The parameter interval has to be of type list, tuple or None.")
@@ -363,10 +367,15 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     # Apply window
     signal_win = signal.copy()
-    if crop:
+    if crop == 'window':
         signal_win.time = signal_win.time[..., win_start:win_stop+1]*win
-    else:
-        # create zeropadded window with shape of signal
+    if crop == 'end':
+        # Add zeros before window
+        window_zeropadded = np.zeros(win_stop+1)
+        window_zeropadded[win_start:win_stop+1] = win
+        signal_win.time = signal_win.time[..., :win_stop+1]*window_zeropadded
+    elif crop == 'none':
+        # Create zeropadded window
         window_zeropadded = np.zeros(signal.n_samples)
         window_zeropadded[win_start:win_stop+1] = win
         signal_win.time = signal_win.time*window_zeropadded
