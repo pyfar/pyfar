@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import signal as sgn
-import pyfar as pf
+import pyfar
 from pyfar.dsp import fft
 
 
@@ -23,8 +23,8 @@ def phase(signal, deg=False, unwrap=False):
         Phase.
     """
 
-    if not isinstance(signal, pf.Signal) and \
-            not isinstance(signal, pf.FrequencyData):
+    if not isinstance(signal, pyfar.Signal) and \
+            not isinstance(signal, pyfar.FrequencyData):
         raise TypeError(
             'Input data has to be of type: Signal or FrequencyData.')
 
@@ -72,7 +72,7 @@ def group_delay(signal, frequencies=None, method='fft'):
     """
 
     # check input and default values
-    if not isinstance(signal, pf.Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     if frequencies is not None and method == 'fft':
@@ -198,7 +198,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     """
 
     # check input
-    if not isinstance(signal, pf.Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     if window_length > signal.n_samples:
@@ -282,7 +282,7 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
-    if not isinstance(signal, pf.Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 
     data = signal.freq
@@ -374,7 +374,7 @@ def pad_zeros(signal, pad_width, mode):
         The default is 'after'.
     """
 
-    if not isinstance(signal, pf.Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     padded_signal = signal.flatten()
