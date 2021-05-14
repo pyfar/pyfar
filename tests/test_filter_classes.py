@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 import numpy.testing as npt
-import pyfar.dsp.classes as fo
+import pyfar.classes.filter as fo
+from scipy import signal as spsignal
 
 
 def test_filter_init_empty_coefficients():
@@ -82,13 +83,13 @@ def test_filter_iir_process(impulse):
     filt = fo.FilterIIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
 
-    npt.assert_allclose(res.time[:3], coeff[0])
+    npt.assert_allclose(res.time[0, :3], coeff[0])
 
     coeff = np.array([[1, 0, 0], [1, 1, 0]])
     filt = fo.FilterIIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
-    desired = np.ones(impulse.n_samples)
-    desired[1::2] *= -1
+    desired = np.ones((1, impulse.n_samples))
+    desired[:, 1::2] *= -1
 
     npt.assert_allclose(res.time, desired)
 
@@ -98,7 +99,7 @@ def test_filter_fir_process(impulse):
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
 
-    npt.assert_allclose(res.time[:3], coeff)
+    npt.assert_allclose(res.time[0, :3], coeff)
 
 
 def test_filter_fir_process_sampling_rate_mismatch(impulse):
@@ -118,6 +119,16 @@ def test_filter_iir_process_multi_dim_filt(impulse):
 
     npt.assert_allclose(res.time[:, :3], coeff[:, 0])
 
+    impulse.time = np.vstack((impulse.time, impulse.time))
+    filt = fo.FilterIIR(coeff, impulse.sampling_rate)
+    res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, 0, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 0, :3], coeff[1, 0, :], atol=1e-16)
+
+    npt.assert_allclose(res.time[0, 1, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 1, :3], coeff[1, 0, :], atol=1e-16)
+
 
 def test_filter_fir_process_multi_dim_filt(impulse):
     coeff = np.array([
@@ -128,18 +139,25 @@ def test_filter_fir_process_multi_dim_filt(impulse):
     res = filt.process(impulse)
     npt.assert_allclose(res.time[:, :3], coeff)
 
+    impulse.time = np.vstack((impulse.time, impulse.time))
+    filt = fo.FilterFIR(coeff, impulse.sampling_rate)
+    res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, 0, :3], coeff[0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 0, :3], coeff[1, :], atol=1e-16)
+
+    npt.assert_allclose(res.time[0, 1, :3], coeff[0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 1, :3], coeff[1, :], atol=1e-16)
+
 
 def test_filter_sos_process(impulse):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
-    # coeff = np.array([
-    #     [[1, 1/2, 0], [1, 0, 0]],
-    #     [[1, 1/4, 0], [1, 0, 0]]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
 
-    npt.assert_allclose(res.time[:3], coeff[0])
+    npt.assert_allclose(res.time[0, :3], coeff[0])
 
 
 def test_filter_sos_process_multi_dim_filt(impulse):
@@ -153,6 +171,16 @@ def test_filter_sos_process_multi_dim_filt(impulse):
     res = filt.process(impulse)
 
     npt.assert_allclose(res.time[:, :3], coeff[:, 0])
+
+    impulse.time = np.vstack((impulse.time, impulse.time))
+    filt = fo.FilterSOS(sos, impulse.sampling_rate)
+    res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, 0, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 0, :3], coeff[1, 0, :], atol=1e-16)
+
+    npt.assert_allclose(res.time[0, 1, :3], coeff[0, 0, :], atol=1e-16)
+    npt.assert_allclose(res.time[1, 1, :3], coeff[1, 0, :], atol=1e-16)
 
 
 def test_atleast_3d_first_dim():
@@ -171,3 +199,44 @@ def test_atleast_3d_first_dim():
     desired = arr.copy()
     arr_3d = fo.atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
+
+
+def test_extend_sos_coefficients():
+    sos = np.array([
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+    ])
+
+    actual = fo.extend_sos_coefficients(sos, 2)
+    npt.assert_allclose(actual, sos)
+
+    expected = np.array([
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0],
+    ])
+
+    actual = fo.extend_sos_coefficients(sos, 4)
+    npt.assert_allclose(actual, expected)
+
+    # test if the extended filter has an ideal impulse response.
+    imp = np.zeros(512)
+    imp[0] = 1
+    imp_filt = spsignal.sosfilt(actual, imp)
+    npt.assert_allclose(imp_filt, imp)
+
+
+def test___eq___equal(filter):
+    actual = filter.copy()
+    assert filter == actual
+
+
+def test___eq___notEqual(filter, coeffs, state):
+    actual = fo.Filter(coefficients=2 * coeffs, state=state)
+    assert not filter == actual
+    actual = fo.Filter(coefficients=coeffs, state=2 * state)
+    assert not filter == actual
+    actual = filter.copy()
+    actual.comment = f'{actual.comment} A completely different thing'
+    assert not filter == actual

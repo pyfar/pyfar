@@ -1,11 +1,11 @@
-import copy
+import deepdiff
 import warnings
 
 import numpy as np
 import scipy.signal as spsignal
 
-from pyfar import Signal
-from .. import utils
+import pyfar as pf
+from copy import deepcopy
 
 
 def atleast_3d_first_dim(arr):
@@ -46,6 +46,35 @@ def sosfiltfilt(sos, signal, **kwargs):
     return spsignal.sosfiltfilt(sos, signal, **kwargs)
 
 
+def extend_sos_coefficients(sos, order):
+    """Extend a set of SOS filter coefficients to match a required filter order
+    by adding sections with coefficients resulting in an ideal frequency
+    response.
+
+    Parameters
+    ----------
+    sos : array-like
+        The second order section filter coefficients.
+    order : int
+        The order to which the coefficients are to be extended.
+
+    Returns
+    -------
+    sos_ext : array-like
+        The extended second order section coefficients.
+
+    """
+    sos_order = sos.shape[0]
+    if sos_order == order:
+        return sos
+    pad_len = order-sos_order
+    sos_ext = np.zeros((pad_len, 6))
+    sos_ext[:, 3] = 1.
+    sos_ext[:, 0] = 1.
+
+    return np.vstack((sos, sos_ext))
+
+
 class Filter(object):
     """
     Container class for digital filters.
@@ -66,10 +95,10 @@ class Filter(object):
         ----------
         coefficients : array, double
             The filter coefficients as an array.
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
+        filter_func : ``'default'``, ``'zerophase'``
+            ``'default'`` applies a direct form II transposed time domain
+            filter based on the standard difference equation. ``'zerophase'``
+            uses the same filter twice, first forward, then backwards resulting
             in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
@@ -77,8 +106,8 @@ class Filter(object):
 
         Returns
         -------
-        filter : Filter
-            The filter object
+        Filter
+            The filter object.
 
         """
         super().__init__()
@@ -151,16 +180,16 @@ class Filter(object):
         ----------
         signal : Signal
             The data to be filtered as Signal object.
-        reset : bool, True
-            If set to true, the filter state will be reset to zero before the
-            filter is applied to the signal.
+        reset : bool, optional
+            If set to ``True``, the filter state will be reset to zero before
+            the filter is applied to the signal. The default is ``'True'``.
 
         Returns
         -------
         filtered : Signal
             A filtered copy of the input signal.
         """
-        if not isinstance(signal, Signal):
+        if not isinstance(signal, pf.Signal):
             raise ValueError("The input needs to be a haiopy.Signal object.")
 
         if self.sampling_rate != signal.sampling_rate:
@@ -170,13 +199,9 @@ class Filter(object):
         if reset is True:
             self.reset()
 
-        if self.size > 1:
-            filtered_signal_data = np.broadcast_to(
-                signal.time,
-                (self.shape[0], *signal.time.shape))
-            filtered_signal_data = filtered_signal_data.copy()
-        else:
-            filtered_signal_data = signal.time.copy()
+        filtered_signal_data = np.zeros(
+            (self.size, *signal.time.shape),
+            dtype=signal.time.dtype)
 
         if self.state is not None:
             for idx, (coeff, state) in enumerate(
@@ -186,21 +211,19 @@ class Filter(object):
         else:
             for idx, coeff in enumerate(self._coefficients):
                 filtered_signal_data[idx, ...] = self.filter_func(
-                    coeff, filtered_signal_data[idx, ...], zi=None)
+                    coeff, signal.time, zi=None)
 
-        filtered_signal = copy.deepcopy(signal)
-        if (signal.time.ndim == 2) and (signal.cshape[0] == 1):
-            filtered_signal_data = np.squeeze(filtered_signal_data)
-        filtered_signal.time = filtered_signal_data
+        filtered_signal = deepcopy(signal)
+        filtered_signal.time = np.squeeze(filtered_signal_data)
 
         return filtered_signal
 
     def reset(self):
+        """Reset the filter state by filling it with zeros."""
         if self._state is not None:
             self._state = np.zeros_like(self._state)
         else:
-            warnings.warn(
-                "No previous state was set. Initialize a filter state first.")
+            self._state = None
 
     @property
     def comment(self):
@@ -213,8 +236,23 @@ class Filter(object):
         self._comment = str(value)
 
     def copy(self):
-        """Return a deep copy of the Filter object."""
-        return utils.copy(self)
+        """Return a copy of the Filter object."""
+        return deepcopy(self)
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
 
 
 class FilterFIR(Filter):
@@ -227,20 +265,27 @@ class FilterFIR(Filter):
             sampling_rate,
             filter_func=lfilter):
         """
-        Initialize a general Filter object.
+        Initialize an finite impulse response (FIR) Filter object.
 
         Parameters
         ----------
         coefficients : array, double
             The filter coefficients as an array with dimensions
-            (n_channels_filter, num_coefficients)
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
+            (number of channels, number of filter coefficients)
+        sampling_rate : number
+            The sampling rate of the filter in Hz.
+        filter_func : ``'default'``, ``'zerophase'``
+            ``'default'`` applies a direct form II transposed time domain
+            filter based on the standard difference equation. ``'zerophase'``
+            uses the same filter twice, first forward, then backwards resulting
             in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
+
+        Returns
+        -------
+        FilterFIR
+            The FIR filter object.
         """
         b = np.atleast_2d(coefficients)
         a = np.zeros_like(b)
@@ -276,20 +321,28 @@ class FilterIIR(Filter):
             sampling_rate,
             filter_func=lfilter):
         """IIR filter
-        Initialize a general Filter object.
+        Initialize an infinite impulse response (IIR) Filter object.
 
         Parameters
         ----------
         coefficients : array, double
             The filter coefficients as an array, with shape
-            (n_filter_channels, n_coefficients_num, n_coefficients_denom)
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
+            (number of channels, number of coefficients in the nominator,
+            number of coefficients in the denominator)
+        sampling_rate : number
+            The sampling rate of the filter in Hz.
+        filter_func : ``'default'``, ``'zerophase'``
+            ``'default'`` applies a direct form II transposed time domain
+            filter based on the standard difference equation. ``'zerophase'``
+            uses the same filter twice, first forward, then backwards resulting
             in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
+
+        Returns
+        -------
+        FilterIIR
+            The IIR filter object.
         """
         coeff = np.atleast_2d(coefficients)
         super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
@@ -312,7 +365,7 @@ class FilterIIR(Filter):
 
 class FilterSOS(Filter):
     """
-    Filter object for IIR filters as second order sections.
+    Filter object for IIR filters as second order sections (SOS).
     """
     def __init__(
             self,
@@ -320,21 +373,27 @@ class FilterSOS(Filter):
             sampling_rate,
             filter_func=sosfilt):
         """
-        Initialize a general Filter object.
+        Initialize a second order sections (SOS) Filter object.
 
         Parameters
         ----------
         coefficients : array, double
             The filter coefficients as an array with dimensions
             (n_filter_chan, n_sections, 6)
-        filter_func : default, zerophase
-            Default applies a direct form II transposed time domain filter
-            based on the standard difference equation. Zerophase uses
-            the same filter twice, first forward, then backwards resulting
+        sampling_rate : number
+            The sampling rate of the filter in Hz.
+        filter_func : ``'default'``, ``'zerophase'``
+            ```'default'``` applies a direct form II transposed time domain
+            filter based on the standard difference equation. ``'zerophase'``
+            uses the same filter twice, first forward, then backwards resulting
             in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
 
+        Returns
+        -------
+        FilterSOS
+            The SOS filter object.
         """
         coeff = np.atleast_2d(coefficients)
         if coeff.shape[-1] != 6:

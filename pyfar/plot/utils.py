@@ -1,74 +1,175 @@
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+import matplotlib.style as mpl_style
 import os
 import json
+import contextlib
 import pyfar.plot._line as _line
 from pyfar.plot._interaction import PlotParameter
 
 
 def plotstyle(style='light'):
     """
-    Get name and fullpath of plotstyle.
+    Get the fullpath of the pyfar plotstyles ``light`` or ``dark``.
 
-    Can be used to plot the pyfar plotstyles 'light' and 'dark' saved as
-    mplstyle-file inside the pyfar package.
+    The plotstyles are defined by mplstyle files, which is Matplotlibs format
+    to define styles. By default, pyfar uses the ``light`` plotstyle.
 
     Parameters
     ----------
     style : str
-        'light', 'dark', or stlye from matplotlib.pyplot.available. Raises a
-        ValueError if style is not known.
+        ``light``, or ``dark``
 
     Returns
     -------
     style : str
-        Full path to the pyfar plotstyle or name of the matplotlib plotstyle
+        Full path to the pyfar plotstyle.
+
+    See also
+    --------
+    pyfar.plot.use
+    pyfar.plot.context
 
     """
 
-    if style is None:
-        # get the currently used plotstyle
-        style = mpl.matplotlib_fname()
-    elif style in ['light', 'dark']:
-        # use pyfar style
+    if style in ['light', 'dark']:
         style = os.path.join(
             os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
-    elif style not in plt.style.available:
-        # error if style not found
-        ValueError((f"plotstyle '{style}' not available. Valid styles are "
-                    "None, 'light', 'dark' and styles from "
-                    "matplotlib.pyplot.available"))
 
     return style
 
 
-def color(color: str) -> str:
+@contextlib.contextmanager
+def context(style='light', after_reset=False):
+    """Context manager for using plot styles temporarily.
+
+    This context manager supports the two pyfar styles ``light`` and ``dark``.
+    It is a wrapper for ``matplotlib.pyplot.style.context()``.
+
+    Parameters
+    ----------
+    style : str, dict, Path or list
+        A style specification. Valid options are:
+
+        +------+-------------------------------------------------------------+
+        | str  | The name of a style or a path/URL to a style file. For a    |
+        |      | list of available style names, see                          |
+        |      | ``matplotlib.style.available``.                             |
+        +------+-------------------------------------------------------------+
+        | dict | Dictionary with valid key/value pairs for                   |
+        |      | ``matplotlib.rcParams``.                                    |
+        +------+-------------------------------------------------------------+
+        | Path | A path-like object which is a path to a style file.         |
+        +------+-------------------------------------------------------------+
+        | list | A list of style specifiers (str, Path or dict) applied from |
+        |      | first to last in the list.                                  |
+        +------+-------------------------------------------------------------+
+
+    after_reset : bool
+        If ``True``, apply style after resetting settings to their defaults;
+        otherwise, apply style on top of the current settings.
+
+    See also
+    --------
+    pyfar.plot.plotstyle
+
+    Examples
+    --------
+
+    Generate customizable subplots with the default pyfar plot style
+
+    >>> import pyfar
+    >>> import matplotlib.pyplot as plt
+    >>>
+    >>> with pyfar.plot.context():
+    >>>     fig, ax = plt.subplots(2, 1)
+    >>>     pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
+    """
+
+    # get pyfar plotstyle if desired
+    style = plotstyle(style)
+
+    # apply plot style
+    with mpl_style.context(style):
+        yield
+
+
+def use(style="light"):
+    """
+    Use plot style settings from a style specification.
+
+    The style name of ``default`` is reserved for reverting back to
+    the default style settings. This is a wrapper for ``matplotlib.style.use``
+    that supports the pyfar plot styles ``light`` and ``dark``.
+
+    Parameters
+    ----------
+    style : str, dict, Path or list
+        A style specification. Valid options are:
+
+        +------+-------------------------------------------------------------+
+        | str  | The name of a style or a path/URL to a style file. For a    |
+        |      | list of available style names, see                          |
+        |      | ``matplotlib.style.available``.                             |
+        +------+-------------------------------------------------------------+
+        | dict | Dictionary with valid key/value pairs for                   |
+        |      | ``matplotlib.rcParams``.                                    |
+        +------+-------------------------------------------------------------+
+        | Path | A path-like object which is a path to a style file.         |
+        +------+-------------------------------------------------------------+
+        | list | A list of style specifiers (str, Path or dict) applied from |
+        |      | first to last in the list.                                  |
+        +------+-------------------------------------------------------------+
+
+    See also
+    --------
+    pyfar.plot.plotstyle
+
+    Notes
+    -----
+    This updates the `rcParams` with the settings from the style. `rcParams`
+    not defined in the style are kept.
+
+    Examples
+    --------
+
+    Permanently use the pyfar default plot style
+
+    >>> import pyfar
+    >>> import matplotlib.pyplot as plt
+    >>>
+    >>> pyfar.plot.utils.use()
+    >>> fig, ax = plt.subplots(2, 1)
+    >>> pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
+
+    """
+
+    # get pyfar plotstyle if desired
+    style = plotstyle(style)
+    # use plot style
+    mpl_style.use(style)
+
+
+def color(color: str):
     """Return pyfar default color as HEX string.
 
     Parameters
     ----------
     color : str
-        'p' - purple
-        'b' - blue
-        't' - turqois
-        'g' - green
-        'l' - light green
-        'y' - yellow
-        'o' - orange
-        'r' - red
+        Available colors are purple ,blue, turquoise, green, light green,
+        yellow, orange, and red. The colors can be specified by their full
+        name, e.g., ``red`` or the first letter, e.g., ``r``.
 
     Returns
     -------
     color : str
         pyfar default color as HEX string
-
     """
+
     colors = ['p', 'b', 't', 'g', 'l', 'y', 'o', 'r']
-    if color not in colors:
+    if color[0] not in colors:
         raise ValueError((f"color is '{color}' but must be one of the "
                           f"following {', '.join(colors)}"))
 
-    kwargs = {'c': color}
+    kwargs = {'c': color[0]}
     kwargs = _line._return_default_colors_rgb(**kwargs)
 
     color = kwargs['c']
@@ -79,70 +180,19 @@ def shortcuts(show=True):
     """Show and return keyboard shortcuts for interactive figures.
 
     Note that shortcuts are only available if using an interactive backend in
-    Matplotlib, e.g., by typing `%matplotlib qt`. Shortcuts can be customized
-    by edition 'shortcuts/shortcuts.json'. See below for the default shortcuts.
+    Matplotlib, e.g., by ``%matplotlib qt``.
 
     Parameters
     ----------
     show : bool, optional
         print the keyboard shortcuts to the default console. The default is
-        True.
+        ``True``.
 
     Returns
     -------
     short_cuts : dict
         dictionary that contains all the shortcuts
-
-    Use these shortcuts to show different plots
-    -------------------------------------------
-    1: line.time
-    2: line.freq
-    3: line.phase
-    4: line.group_delay
-    5: line.spectrogram
-    6: line.time_freq
-    7: line.freq_phase
-    8: line.freq_group_delay
-
-    Use these shortcuts to control the plot
-    ---------------------------------------
-    left: move x-axis view to the left
-    right: move x-axis view to the right
-    up: move y-axis view upwards
-    down: y-axis view downwards
-    +: move colormap range up
-    -: move colormap range down
-    shift+right: zoom in x-axis
-    shift+left: zoom out x-axis
-    shift+up: zoom out y-axis
-    shift+down: zoom in y-axis
-    *: zoom colormap range in
-    _: zoom colormap range out
-    x: toggle between linear and logarithmic x-axis
-    y: toggle between linear and logarithmic y-axis
-    c: toggle between linear and logarithmic color data
-    a: toggle between plotting all channels and plottinng single channels
-    .: show next channel
-    ,: show previous channel
-
-    Notes on plot controls
-    ----------------------
-    Moving and zooming the x and y axes is supported by all plots.
-
-    Moving and zooming the colormap is only supported by plots that have a
-    colormap.
-
-    Toggling the x-axis is supported by: line.time, line.freq, line.phase,
-    line.group_delay, line.spectrogram, line.time_freq, line.freq_phase,
-    line.freq_group_delay
-
-    Toggling the y-axis is supported by: line.time, line.freq, line.phase,
-    line.group_delay, line.spectrogram, line.time_freq, line.freq_phase,
-    line.freq_group_delay
-
-    Toggling the colormap is supported by: line.spectrogram
-
-    """
+    """  # noqa: W605 (to ignore \*)
     # Note: The end of the docstring can be generated by calling shortcuts()
 
     # load short cuts from json file
@@ -173,14 +223,25 @@ def shortcuts(show=True):
         print("-------------------------------------------")
         plt = short_cuts["plots"]
         for p in plt:
-            print(f'{", ".join(plt[p]["key"])}: {p}')
+            if "key_verbose" in plt[p]:
+                key = plt[p]["key_verbose"]
+            else:
+                key = plt[p]["key"]
+            print(f'{", ".join(key)}: {p}')
         print(" ")
+        print(("Note that not all plots are available for TimeData and "
+               "FrequencyData objects as detailed in the documentation of "
+               "plots.\n\n"))
 
         print("Use these shortcuts to control the plot")
         print("---------------------------------------")
         ctr = short_cuts["controls"]
         for action in ctr:
-            print(f'{", ".join(ctr[action]["key"])}: {ctr[action]["info"]}')
+            if "key_verbose" in ctr[action]:
+                key = ctr[action]["key_verbose"]
+            else:
+                key = ctr[action]["key"]
+            print(f'{", ".join(key)}: {ctr[action]["info"]}')
         print(" ")
 
         print("Notes on plot controls")

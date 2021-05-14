@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pyfar.signal import FrequencyData as FrequencyData
+from pyfar import FrequencyData
 
 
 def test_data_frequency_init_with_defaults():
@@ -93,7 +93,7 @@ def test_reshape_exceptions():
         data_out = data_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape signal of cshape'):
+    with pytest.raises(ValueError, match='Can not reshape audio object'):
         data_out = data_in.reshape((3, 4))
 
 
@@ -201,3 +201,22 @@ def test_separation_from_signal():
         freq.domain = 'freq'
     with pytest.raises(AttributeError):
         freq.fft_norm = 'amplitude'
+
+
+def test___eq___equal():
+    """Check if copied FrequencyData is equal."""
+    frequency_data = FrequencyData([1, 2, 3], [1, 2, 3])
+    actual = frequency_data.copy()
+    assert frequency_data == actual
+
+
+def test___eq___notEqual():
+    """Check if FrequencyData is equal."""
+    frequency_data = FrequencyData([1, 2, 3], [1, 2, 3])
+    actual = FrequencyData([2, 3, 4], [1, 2, 3])
+    assert not frequency_data == actual
+    actual = FrequencyData([1, 2, 3], [2, 3, 4])
+    assert not frequency_data == actual
+    comment = f'{frequency_data.comment} A completely different thing'
+    actual = FrequencyData([1, 2, 3], [1, 2, 3], comment=comment)
+    assert not frequency_data == actual

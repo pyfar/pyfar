@@ -1,7 +1,7 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
 
-import pyfar
+import pyfar as pf
 
 
 class Orientations(Rotation):
@@ -14,14 +14,13 @@ class Orientations(Rotation):
     convenient plot function.
 
     An orientation can be visualized with the triple of view, up and right
-    vectors and it istied to the object's local coordinate system.
+    vectors and it is tied to the object's local coordinate system.
     Alternatively the object's orientation can be illustrated with help of the
     right hand: Thumb (view), forefinger (up) and middle finger (right).
 
     Examples
     --------
-    from pyfar.orientations import Orientations
-
+    >>> from pyfar import Orientations
     >>> views = [[1, 0, 0], [2, 0, 0]]
     >>> ups = [[0, 1, 0], [0, -2, 0]]
     >>> orientations = Orientations.from_view_up(views, ups)
@@ -47,6 +46,7 @@ class Orientations(Rotation):
             Each row is a (possibly non-unit norm) quaternion in scalar-last
             (x, y, z, w) format. Each quaternion will be normalized to unit
             norm.
+
     """
 
     def __init__(self, quat=None, normalize=True, copy=True):
@@ -155,13 +155,13 @@ class Orientations(Rotation):
 
         ax = None
         if show_views:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, views, color=(1, 0, 0), **kwargs)
         if show_ups:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, ups, ax=ax, color=(0, 1, 0), **kwargs)
         if show_rights:
-            ax = pyfar.plot.quiver(
+            ax = pf.plot.quiver(
                 positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
 
     def as_view_up_right(self):
@@ -193,6 +193,17 @@ class Orientations(Rotation):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
 
+    def _encode(self):
+        """Return object in a proper encoding format."""
+        # Use public interface of the scipy super-class to prevent
+        # error in case of chaning super-class implementations
+        return {'quat': self.as_quat()}
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        return cls.from_quat(obj_dict['quat'])
+
     def __setitem__(self, idx, val):
         """
         Assign orientations(s) at given index(es) from object.
@@ -211,3 +222,7 @@ class Orientations(Rotation):
         quats = self.as_quat()
         quats[idx] = quat
         self = super().from_quat(quats)
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return np.array_equal(self.as_quat(), other.as_quat())

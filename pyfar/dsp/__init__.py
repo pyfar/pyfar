@@ -1,11 +1,23 @@
-from .classes import (Filter, FilterFIR, FilterIIR, FilterSOS)
 from .dsp import (
-    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram)
+    phase,
+    group_delay,
+    wrap_to_2pi,
+    spectrogram,
+    regularized_spectrum_inversion
+)
+
+from . import filter
+from . import fft
 
 from .zeropadding import (zeropadding)
 
 
 __all__ = [
-    Filter, FilterFIR, FilterIIR, FilterSOS,
-    phase, group_delay, wrap_to_2pi, nextpow2, spectrogram, zeropadding
+    'fft',
+    'filter',
+    'phase',
+    'group_delay',
+    'wrap_to_2pi',
+    'spectrogram',
+    'regularized_spectrum_inversion'
 ]
