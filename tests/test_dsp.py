@@ -145,7 +145,7 @@ def test_regu_inversion(impulse):
 def test_time_window_default():
     """ Test time_window function with default values."""
     sig = pyfar.Signal(np.ones(10), 2)
-    sig_win = dsp.time_window(sig)
+    sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
     time_win = np.atleast_2d(sgn.windows.hann(10, sym=True))
     npt.assert_allclose(sig_win.time, time_win)
 
@@ -154,11 +154,11 @@ def test_time_window_input():
     """Test errors when calling with incorrect parameters."""
     sig = pyfar.Signal(np.ones(5), 2)
     with pytest.raises(TypeError, match='signal'):
-        dsp.time_window([1., 2.])
+        dsp.time_window([1., 2.], interval=(0, 4))
     with pytest.raises(ValueError, match='shape'):
-        dsp.time_window(sig, shape='top')
+        dsp.time_window(sig, interval=(0, 4), shape='top')
     with pytest.raises(TypeError, match='crop'):
-        dsp.time_window(sig, crop='t')
+        dsp.time_window(sig, interval=(0, 4), crop='t')
     with pytest.raises(ValueError, match='unit'):
         dsp.time_window(sig, interval=[0, 1], unit='kg')
     with pytest.raises(TypeError, match='interval'):

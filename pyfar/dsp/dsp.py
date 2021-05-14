@@ -227,7 +227,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     return frequencies, times, spectrogram
 
 
-def time_window(signal, interval=None, window='hann', shape='symmetric',
+def time_window(signal, interval, window='hann', shape='symmetric',
                 unit='samples', crop=True):
     """Apply time window to signal.
 
@@ -238,30 +238,30 @@ def time_window(signal, interval=None, window='hann', shape='symmetric',
     signal : Signal
         pyfar Signal object to be windowed
     interval : list of int or None
-        If `interval` has two entries, these specify the beginning and the end of
-        the window or the fade-in / fade-out (see parameter `shape`).
+        If `interval` has two entries, these specify the beginning and the end
+        of the window or the fade-in / fade-out (see parameter `shape`).
         If `interval` has four entries, a symmetric window with fade-in between
         the first two entries and a fade-out between the last two is created,
-        while it is constant in between and `shape` is ignored. See Notes for
-        more details.
-        If ``None``, a symmetric window is applied to the overall length of
-        the signal and `shape` and `unit` are ignored.
-        The unit of `interval` is specified by the parameter `unit`.
+        while it is constant in between and `shape` is ignored.
+        See Notes for more details. The unit of `interval` is specified by the
+        parameter `unit`.
     window : string, float, or tuple
         The type of window to create. See below for more details.
         The default is ``'hann'``.
     shape : string
         ``'symmetric'``, ``'symmetric_zero'``, ``'left'`` or ``'right'``.
         Specifies, if the window is applied single-sided or symmetrically.
+        ``'symmetric_zero'`` denotes a symmetric window with respect to t=0,
+        `crop` is ignored. ``symmetric`` denotes a general symmetric window.
         If ``'symmetric_zero'``, ``'left'`` or ``'right'``, the beginning and
         the end of the fade is defined by the two values in `interval`.
-        See parameter `interval`and Notes for more details.The default is
-        ``'symmetric_zero'``, which ignores `crop`.
+        See parameter `interval`and Notes for more details. The default is
+        ``'symmetric'``.
     unit : string
         Unit of the parameter `interval`. Can be set to ``'s'`` (seconds),
         ``'ms'`` (milliseconds) or ``'samples'``. If ``'samples'``, the values
-        in `interval` denote the first and last sample being included. Time values
-        are rounded to the nearest sample. The default is ``'samples'``.
+        in `interval` denote the first and last sample being included. Time
+        values are rounded to the nearest sample. The default is ``'samples'``.
     crop : bool
         If ``True``, the signal is truncated to the length of the window.
         The default is ``False``.
@@ -317,79 +317,46 @@ def time_window(signal, interval=None, window='hann', shape='symmetric',
             "'left' or 'right'.")
     if not isinstance(crop, bool):
         raise TypeError("The parameter crop has to be of type: bool.")
-    if not isinstance(interval, (list, tuple, type(None))):
+    if not isinstance(interval, (list, tuple)):
         raise TypeError(
             "The parameter interval has to be of type list, tuple or None.")
 
-    # Check interval
-    if interval is not None:
-        if isinstance(interval, tuple):
-            interval = list(interval)
-        if interval != sorted(interval):
-            raise ValueError("Values in interval need to be in ascending order.")
-        # Convert to samples
-        if unit == 's':
-            interval = [round(li*signal.sampling_rate) for li in interval]
-        elif unit == 'ms':
-            interval = [round(li*signal.sampling_rate/1e3) for li in interval]
-        elif unit == 'samples':
-            interval = [int(li) for li in interval]
-        else:
-            raise ValueError(f"unit is {unit} but has to be"
-                             f" 'samples', 's' or 'ms'.")
-        # Check window size
-        if interval[-1] > signal.n_samples:
-            raise ValueError(
-                "Values in interval require window to be longer than signal.")
+    interval = np.array(interval)
+    if not np.array_equal(interval, np.sort(interval)):
+        raise ValueError("Values in interval need to be in ascending order.")
+    # Convert to samples
+    if unit == 's':
+        interval = np.round(interval*signal.sampling_rate).astype(int)
+    elif unit == 'ms':
+        interval = np.round(interval*signal.sampling_rate/1e3).astype(int)
+    elif unit == 'samples':
+        interval = interval.astype(int)
+    else:
+        raise ValueError(f"unit is {unit} but has to be"
+                         f" 'samples', 's' or 'ms'.")
+    # Check window size
+    if interval[-1] > signal.n_samples:
+        raise ValueError(
+            "Values in interval require window to be longer than signal.")
 
     # Create window
     # win_start and win_stop define the first and last sample of the window
-    if interval is None:
-        win_samples = signal.n_samples
-        win = sgn.windows.get_window(window, win_samples, fftbins=False)
-        win_start = 0
-        win_stop = signal.n_samples-1
-    elif len(interval) == 2:
+    if len(interval) == 2:
         if shape == 'symmetric':
-            win_samples = interval[1]-interval[0]+1
-            win = sgn.windows.get_window(window, win_samples, fftbins=False)
-            win_start = interval[0]
-            win_stop = interval[1]
-        else:
-            fade_samples = int(2*(interval[1]-interval[0]))
-            fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
-            if shape == 'symmetric_zero':
-                win = np.zeros(signal.n_samples)
-                win[:interval[0]+1] = 1
-                win[interval[0]+1:interval[1]+1] = fade[int(fade_samples/2):]
-                win[-interval[0]:] = 1
-                win[-interval[1]:-interval[0]] = fade[:int(fade_samples/2)]
-                win_start = 0
-                win_stop = signal.n_samples
-            elif shape == 'left':
-                win = np.ones(signal.n_samples-interval[0])
-                win[0:interval[1]-interval[0]] = fade[:int(fade_samples/2)]
-                win_start = interval[0]
-                win_stop = signal.n_samples-1
-            elif shape == 'right':
-                win = np.ones(interval[1]+1)
-                win[interval[0]+1:] = fade[int(fade_samples/2):]
-                win_start = 0
-                win_stop = interval[1]
+            win, win_start, win_stop = _time_window_symmetric_interval_two(
+                interval, window)
+        elif shape == 'symmetric_zero':
+            win, win_start, win_stop = _time_window_symmetric_zero(
+                signal.n_samples, interval, window)
+        elif shape == 'left':
+            win, win_start, win_stop = _time_window_left(
+                signal.n_samples, interval, window)
+        elif shape == 'right':
+            win, win_start, win_stop = _time_window_right(
+                interval, window)
     elif len(interval) == 4:
-        fade_in_samples = int(2*(interval[1]-interval[0]))
-        fade_in = sgn.windows.get_window(
-            window, fade_in_samples, fftbins=False)
-        fade_in = fade_in[:int(fade_in_samples/2)]
-        fade_out_samples = int(2*(interval[3]-interval[2]))
-        fade_out = sgn.windows.get_window(
-            window, fade_out_samples, fftbins=False)
-        fade_out = fade_out[int(fade_out_samples/2):]
-        win = np.ones(interval[-1]-interval[0]+1)
-        win[0:interval[1]-interval[0]] = fade_in
-        win[interval[2]-interval[0]+1:interval[3]-interval[0]+1] = fade_out
-        win_start = interval[0]
-        win_stop = interval[3]
+        win, win_start, win_stop = _time_window_symmetric_interval_four(
+            interval, window)
     else:
         raise ValueError(
             "interval needs to contain two or four values.")
@@ -438,6 +405,158 @@ def kaiser_window_beta(A):
         beta = 0.0
 
     return beta
+
+
+def _time_window_symmetric_interval_two(interval, window):
+    """ Symmetric time window between 2 values given in interval.
+
+    Parameters
+    ----------
+    interval : array_like
+        Boundaries of the window
+    window : string
+        Window type, see :py:func:`~pyfar.dsp.time_window`
+
+    Returns
+    -------
+    win : numpy array
+        Time window
+    win_start : int
+        Index of first sample of window
+    win_stop : int
+        Index of last sample of window
+    """
+    win_samples = interval[1]-interval[0]+1
+    win = sgn.windows.get_window(window, win_samples, fftbins=False)
+    win_start = interval[0]
+    win_stop = interval[1]
+    return win, win_start, win_stop
+
+
+def _time_window_left(n_samples, interval, window):
+    """ Left-sided time window. ""
+
+    Parameters
+    ----------
+    n_samples : int
+        Number of samples of signal to be windowed
+    interval : array_like
+        First and last sample of fade-in
+    window : string
+        Window type, see :py:func:`~pyfar.dsp.time_window`
+
+    Returns
+    -------
+    win : numpy array
+        Time window
+    win_start : int
+        Index of first sample of window
+    win_stop : int
+        Index of last sample of window
+    """
+    fade_samples = int(2*(interval[1]-interval[0]))
+    fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
+    win = np.ones(n_samples-interval[0])
+    win[0:interval[1]-interval[0]] = fade[:int(fade_samples/2)]
+    win_start = interval[0]
+    win_stop = n_samples-1
+    return win, win_start, win_stop
+
+
+def _time_window_right(interval, window):
+    """ Right-sided time window. ""
+
+    Parameters
+    ----------
+    interval : array_like
+        First and last sample of fade-out
+    window : string
+        Window type, see :py:func:`~pyfar.dsp.time_window`
+
+    Returns
+    -------
+    win : numpy array
+        Time window
+    win_start : int
+        Index of first sample of window
+    win_stop : int
+        Index of last sample of window
+    """
+    fade_samples = int(2*(interval[1]-interval[0]))
+    fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
+    win = np.ones(interval[1]+1)
+    win[interval[0]+1:] = fade[int(fade_samples/2):]
+    win_start = 0
+    win_stop = interval[1]
+    return win, win_start, win_stop
+
+
+def _time_window_symmetric_zero(n_samples, interval, window):
+    """ Symmetric time window with respect to t=0. ""
+
+    Parameters
+    ----------
+    n_samples : int
+        Number of samples of signal to be windowed
+    interval : array_like
+        First and last sample of fade-out.
+    window : string
+        Window type, see :py:func:`~pyfar.dsp.time_window`
+
+    Returns
+    -------
+    win : numpy array
+        Time window
+    win_start : int
+        Index of first sample of window
+    win_stop : int
+        Index of last sample of window
+    """
+    fade_samples = int(2*(interval[1]-interval[0]))
+    fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
+    win = np.zeros(n_samples)
+    win[:interval[0]+1] = 1
+    win[interval[0]+1:interval[1]+1] = fade[int(fade_samples/2):]
+    win[-interval[0]:] = 1
+    win[-interval[1]:-interval[0]] = fade[:int(fade_samples/2)]
+    win_start = 0
+    win_stop = n_samples
+    return win, win_start, win_stop
+
+
+def _time_window_symmetric_interval_four(interval, window):
+    """ Symmetric time window with two fades and constant range in between.
+
+    Parameters
+    ----------
+    interval : array_like
+        Indexes of fade-in and fade-out
+    window : string
+        Window type, see :py:func:`~pyfar.dsp.time_window`
+
+    Returns
+    -------
+    win : numpy array
+        Time window
+    win_start : int
+        Index of first sample of window
+    win_stop : int
+        Index of last sample of window
+    """
+    fade_in_samples = int(2*(interval[1]-interval[0]))
+    fade_in = sgn.windows.get_window(
+        window, fade_in_samples, fftbins=False)
+    fade_in = fade_in[:int(fade_in_samples/2)]
+    fade_out_samples = int(2*(interval[3]-interval[2]))
+    fade_out = sgn.windows.get_window(
+        window, fade_out_samples, fftbins=False)
+    fade_out = fade_out[int(fade_out_samples/2):]
+    win = np.ones(interval[-1]-interval[0]+1)
+    win[0:interval[1]-interval[0]] = fade_in
+    win[interval[2]-interval[0]+1:interval[3]-interval[0]+1] = fade_out
+    win_start = interval[0]
+    win_stop = interval[3]
+    return win, win_start, win_stop
 
 
 def regularized_spectrum_inversion(
