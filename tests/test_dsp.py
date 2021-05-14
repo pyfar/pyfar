@@ -125,6 +125,27 @@ def test_linear_phase():
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
         dsp.linear_phase(1)
 
+        
+def test_zero_phase():
+    """Test zero phase generation."""
+    # generate test signal and zero phase version
+    signal = pf.Signal([0, 0, 0, 2], 44100)
+    signal_zero = dsp.zero_phase(signal)
+    # assert type and id
+    assert isinstance(signal_zero, pf.Signal)
+    assert id(signal) != id(signal_zero)
+    # assert freq data
+    assert np.any(np.abs(np.imag(signal.freq)) > 1e-15)
+    assert np.all(np.abs(np.imag(signal_zero.freq)) == 0)
+    # assert time data
+    npt.assert_allclose(signal_zero.time, np.atleast_2d([2, 0, 0, 0]))
+
+
+def test_zero_phase_assertion():
+    """Test assertion when passing a TimeData object."""
+    with pytest.raises(TypeError, match="Input data has to be of type"):
+        dsp.zero_phase(pf.TimeData([1, 0, 0], [0, 1, 3]))
+
 
 def test_xfade(impulse):
     first = np.ones(5001)
