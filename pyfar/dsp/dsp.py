@@ -237,12 +237,12 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     ----------
     signal : Signal
         pyfar Signal object to be windowed
-    interval : list of int or None
+    interval : array_like
         If `interval` has two entries, these specify the beginning and the end
         of the window or the fade-in / fade-out (see parameter `shape`).
         If `interval` has four entries, a symmetric window with fade-in between
         the first two entries and a fade-out between the last two is created,
-        while it is constant in between and `shape` is ignored.
+        while it is constant in between, `shape` is ignored.
         See Notes for more details. The unit of `interval` is specified by the
         parameter `unit`.
     window : string, float, or tuple
