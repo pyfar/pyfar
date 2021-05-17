@@ -1025,8 +1025,8 @@ def reconstructing_fractional_octave_bands(
     -------
     signal : Signal
         The filtered signal. Only returned if ``sampling_rate = None``.
-    filter : FilterSOS
-        SOS Filter object. Only returned if ``signal = None``.
+    filter : FilterFIR
+        FIR Filter object. Only returned if ``signal = None``.
     frequencies : np.ndarray
         Center frequencies of the filters.
 
