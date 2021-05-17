@@ -1,10 +1,12 @@
 from .dsp import (
+    interpolate_spectrum,
     phase,
     group_delay,
     wrap_to_2pi,
     zero_phase,
     spectrogram,
-    regularized_spectrum_inversion
+    regularized_spectrum_inversion,
+    interpolate_spectrum
 )
 
 from . import filter
@@ -19,5 +21,6 @@ __all__ = [
     'wrap_to_2pi',
     'zero_phase',
     'spectrogram',
-    'regularized_spectrum_inversion'
+    'regularized_spectrum_inversion',
+    'interpolate_spectrum'
 ]

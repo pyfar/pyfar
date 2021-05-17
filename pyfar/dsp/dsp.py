@@ -351,6 +351,70 @@ def regularized_spectrum_inversion(
     return inverse
 
 
+def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
+                         kind, fscale='linear', clip=False):
+    """
+    Interpolate incomplete spectrum to complete single sided spectrum.
+
+    TODO: Add references to minimum and linear phase functions
+
+    Parameters
+    ----------
+    frequency_data : FrequencyData
+        Input data to be interpolated
+    n_samples : int
+        The lengths of the corresponding time signal in samples.
+    sampling_rate : int
+        The sampling rate in Hz
+    method : string
+        Specifies the input data for the interpolation
+
+        ``'complex'``
+            Separate interpolation of the real and imaginary part
+        ``'abs_unwrap'``
+            Separate interpolation if the absolute values and unwrapped phase
+        ``'abs_linear'``
+            Interpolation of the absolute values and generation of a linear
+            phase response with a group delay of ``n_samples / 2``
+        ``'abs_minumum'``
+            Interpolation of the absolute values and generation of a minimum
+            phase response
+        ''`abs'``
+            Interpolate the absolute values only. Results in a zero phase
+            signal, which is symmetric around the first sample
+
+    kind : tuple, string
+        Specifies the kind of interpolation as a string. The string has to be
+        ``'linear'``, ``'nearest'``, ``'nearest-up'``, ``'zero'``,
+        ``'slinear'``, ``'quadratic'``, ``'cubic'``, ``'previous'``, or
+        ``'next'`` (see ``scipy.interpolate.interp1d``).
+
+        ``('first', 'second', 'third')``
+            Three element tuple specifies the kind of inter/extrapolation below
+            the lowest frequency (first), between the lowest and highest
+            frequency (second), and above the highest frequency (third)
+        ``'first'``
+            String that specifies the kind of interpolation between the lowest
+            and highest frequency. Values outside the frequency range are
+            taken from the next/previous available value.
+
+    fscale : string, optional
+
+        ``'linear'``
+            Interpolate on a linear frequency axis
+        ``'log'``
+            Interpolate on a logarithmic frequency axis
+
+        The default is ``'linear'``.
+    clip : bool, tuple
+        The interpolated frequency data is clipped to the range specified by
+        this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
+        values smaller than 0 and larger than 1 occur in the interpolated
+        frequency data. The default is ``False`` which does not clip the data.
+    """
+    return frequency_data
+
+
 def _cross_fade(first, second, indices):
     """Cross-fade two numpy arrays by multiplication with a raised cosine
     window inside the range specified by the indices. Outside the range, the
