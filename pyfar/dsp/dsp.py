@@ -159,10 +159,12 @@ def linear_phase(signal, group_delay, unit="samples"):
     ----------
     signal : Signal
         input data
-    group_delay : float
+    group_delay : float, array like
         The desired group delay of the linear phase signal according to `unit`.
         A reasonable value for most cases is ``signal.n_samples / 2`` samples,
-        which results in a time signal that is symmetric around the center.
+        which results in a time signal that is symmetric around the center. If
+        group delay is a list or array it must broadcast with the channel
+        layout of the signal (``signal.cshape``).
     unit : string, optional
         Unit of the group delay. Can be ``'s'`` for seconds, ``'ms'`` for
         milliseconds, ``'mus'`` for microseconds, or ``'samples'``. The
@@ -179,18 +181,18 @@ def linear_phase(signal, group_delay, unit="samples"):
 
     # group delay in seconds
     if unit == "samples":
-        tau = group_delay / signal.sampling_rate
+        tau = np.asarray(group_delay) / signal.sampling_rate
     elif unit == "s":
-        tau = group_delay
+        tau = np.asarray(group_delay)
     elif unit == 'ms':
-        tau = group_delay / 1e3
+        tau = np.asarray(group_delay) / 1e3
     elif unit == 'mus':
-        tau = group_delay / 1e6
+        tau = np.asarray(group_delay) / 1e6
     else:
         raise ValueError("unit must be 'samples', 's', 'ms', or 'mus'.")
 
     # linear phase
-    phase = 2 * np.pi * signal.frequencies * tau
+    phase = 2 * np.pi * signal.frequencies * tau[..., np.newaxis]
 
     # construct linear phase spectrum
     signal_lin = signal.copy()

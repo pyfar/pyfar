@@ -134,6 +134,23 @@ def test_linear_phase():
         dsp.linear_phase(1, 0)
 
 
+def test_linear_phase_multichannel():
+    # test signal
+    N = 64
+    fs = 44100
+    x = pf.signals.impulse(N, [0, 0], sampling_rate=fs)
+
+    # test with scalar group delay
+    y = dsp.linear_phase(x, N/2)
+    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1]), N / 2 * np.ones(y.n_bins))
+
+    # test with array like group delay
+    y = dsp.linear_phase(x, [N/2, N/4])
+    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1]), N / 4 * np.ones(y.n_bins))
+
+
 def test_zero_phase():
     """Test zero phase generation."""
     # generate test signal and zero phase version
