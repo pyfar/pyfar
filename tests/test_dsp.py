@@ -109,23 +109,18 @@ def test_linear_phase():
     x = pf.signals.impulse(N)
 
     # test default parameters
-    y = dsp.linear_phase(x)
+    y = dsp.linear_phase(x, N/2)
     # test output
     assert isinstance(y, pf.Signal)
     npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
     # test if input did not change
     npt.assert_allclose(x.time, pf.signals.impulse(N).time)
 
-    # test custom group delay
-    y = dsp.linear_phase(x, 10)
-    npt.assert_allclose(dsp.group_delay(y), 10 * np.ones(y.n_bins))
-    npt.assert_allclose(x.time, pf.signals.impulse(N).time)
-
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
-        dsp.linear_phase(1)
+        dsp.linear_phase(1, 0)
 
-        
+
 def test_zero_phase():
     """Test zero phase generation."""
     # generate test signal and zero phase version
