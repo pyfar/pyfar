@@ -106,7 +106,8 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
 def test_linear_phase():
     # test signal
     N = 64
-    x = pf.signals.impulse(N)
+    fs = 44100
+    x = pf.signals.impulse(N, sampling_rate=fs)
 
     # test default parameters
     y = dsp.linear_phase(x, N/2)
@@ -115,6 +116,18 @@ def test_linear_phase():
     npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
     # test if input did not change
     npt.assert_allclose(x.time, pf.signals.impulse(N).time)
+
+    # test group delay in seconds
+    y = dsp.linear_phase(x, N / 2 / fs, unit="s")
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+
+    # test group delay in milliseconds
+    y = dsp.linear_phase(x, N / 2 / fs * 1e3, unit="ms")
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+
+    # test group delay in microseconds
+    y = dsp.linear_phase(x, N / 2 / fs * 1e6, unit="mus")
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
 
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):

@@ -143,7 +143,7 @@ def wrap_to_2pi(x):
     return x
 
 
-def linear_phase(signal, group_delay):
+def linear_phase(signal, group_delay, unit="samples"):
     """
     Set the phase to a linear phase with a specified group delay.
 
@@ -160,9 +160,13 @@ def linear_phase(signal, group_delay):
     signal : Signal
         input data
     group_delay : float
-        The desired group delay of the linear phase signal in samples. A
-        reasonable value for most cases is ``signal.n_samples / 2``, which
-        results in a time signal that is symmetric around the center.
+        The desired group delay of the linear phase signal according to `unit`.
+        A reasonable value for most cases is ``signal.n_samples / 2`` samples,
+        which results in a time signal that is symmetric around the center.
+    unit : string, optional
+        Unit of the group delay. Can be ``'s'`` for seconds, ``'ms'`` for
+        milliseconds, ``'mus'`` for microseconds, or ``'samples'``. The
+        default is ``'samples'``.
 
     Returns
     -------
@@ -174,7 +178,16 @@ def linear_phase(signal, group_delay):
         raise TypeError("signal must be a pyfar Signal object.")
 
     # group delay in seconds
-    tau = group_delay / signal.sampling_rate
+    if unit == "samples":
+        tau = group_delay / signal.sampling_rate
+    elif unit == "s":
+        tau = group_delay
+    elif unit == 'ms':
+        tau = group_delay / 1e3
+    elif unit == 'mus':
+        tau = group_delay / 1e6
+    else:
+        raise ValueError("unit must be 'samples', 's', 'ms', or 'mus'.")
 
     # linear phase
     phase = 2 * np.pi * signal.frequencies * tau
