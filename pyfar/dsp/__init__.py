@@ -1,5 +1,4 @@
 from .dsp import (
-    interpolate_spectrum,
     phase,
     group_delay,
     wrap_to_2pi,
