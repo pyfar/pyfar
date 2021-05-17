@@ -371,16 +371,16 @@ def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
 
         ``'complex'``
             Separate interpolation of the real and imaginary part
-        ``'abs_unwrap'``
-            Separate interpolation if the absolute values and unwrapped phase
-        ``'abs_linear'``
-            Interpolation of the absolute values and generation of a linear
+        ``'magnitude_unwrap'``
+            Separate interpolation if the magnitude and unwrapped phase values
+        ``'magnitude_linear'``
+            Interpolation of the magnitude values and generation of a linear
             phase response with a group delay of ``n_samples / 2``
-        ``'abs_minumum'``
-            Interpolation of the absolute values and generation of a minimum
+        ``'magnitude_minimum'``
+            Interpolation of the magnitude values and generation of a minimum
             phase response
-        ''`abs'``
-            Interpolate the absolute values only. Results in a zero phase
+        ''`magnitude'``
+            Interpolate the magnitude values only. Results in a zero phase
             signal, which is symmetric around the first sample
 
     kind : tuple, string
@@ -411,6 +411,11 @@ def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
         this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
         values smaller than 0 and larger than 1 occur in the interpolated
         frequency data. The default is ``False`` which does not clip the data.
+
+    Returns
+    -------
+    signal : Signal
+        The interpolated data as a pyfar Signal object.
     """
     return frequency_data
 
