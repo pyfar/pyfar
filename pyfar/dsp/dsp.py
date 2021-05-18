@@ -247,7 +247,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         The unit of `interval` is specified by the parameter `unit`.
         See below for more details.
     window : string, float, or tuple, optional
-        The type of window to create. See Notes for a list of implemented
+        The type of the window. See below for a list of implemented
         windows. The default is ``'hann'``.
     shape : string, optional
         ``'symmetric'``
