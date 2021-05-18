@@ -4,8 +4,8 @@ import pytest
 
 
 def test_pad_zeros():
-    num_zeros = 100
-    n_samples = 1024
+    num_zeros = 2
+    n_samples = 8
 
     test_signal = pyfar.signals.impulse(
         n_samples, delay=0, amplitude=np.ones((2, 3)), sampling_rate=44100)
@@ -50,9 +50,9 @@ def test_pad_zeros():
 
     desired = np.concatenate(
         (
-            np.ones((2, 3, int(1024/2))),
+            np.ones((2, 3, int(n_samples/2))),
             np.zeros((2, 3, num_zeros)),
-            np.ones((2, 3, int(1024/2)))),
+            np.ones((2, 3, int(n_samples/2)))),
         axis=-1)
 
     np.testing.assert_allclose(padded.time, desired)
