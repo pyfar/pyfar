@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 
-def test_zeropadding():
+def test_pad_zeros():
     num_zeros = 100
     n_samples = 1024
 

@@ -370,7 +370,7 @@ def pad_zeros(signal, pad_width, mode='after'):
     signal : Signal
         The signal which is to be extended
     pad_width : int
-        The number of samples to be padded in samples.
+        The number of samples to be padded.
     mode : str, optional
         The padding mode, can either be 'after', to append a number of
         zeros to the end of the signal, 'before' to pre-pend the
@@ -387,7 +387,7 @@ def pad_zeros(signal, pad_width, mode='after'):
     --------
     >>> import pyfar
     >>> impulse = pyfar.signals.impulse(512, amplitude=1)
-    >>> impulse_shiftet = pyfar.dsp.pad_zeros(impulse, 128, mode='after')
+    >>> impulse_padded = pyfar.dsp.pad_zeros(impulse, 128, mode='after')
 
     """
 
