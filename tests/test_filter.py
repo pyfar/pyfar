@@ -232,7 +232,7 @@ def test_crossover(impulse):
 
 
 def test_reconstructing_fractional_octave_bands():
-    """Test the recontructiong fractional octave filter bank."""
+    """Test the reconstructing fractional octave filter bank."""
 
     # test filter object
     f_obj, f = pfilt.reconstructing_fractional_octave_bands(
@@ -261,6 +261,9 @@ def test_reconstructing_fractional_octave_bands():
     y_sum.time = np.sum(y_sum.time, 0)
     npt.assert_allclose(y_sum.time, reference.time, atol=1e-6)
 
+
+def test_reconstructing_fractional_octave_bands_filter_slopes():
+    """Test the shape of the filter slopes for different parameters"""
     # test different filter slopes against reference
     x = pf.signals.impulse(2**10)
 
@@ -271,6 +274,14 @@ def test_reconstructing_fractional_octave_bands():
         reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             f"filter.reconstructing_octaves_{overlap}_{slope}.csv"))
-        # restricting rtol was not needed localy. It was added for tests to
+        # restricting rtol was not needed locally. It was added for tests to
         # pass on travis ci
-        npt.assert_allclose(y.time, np.atleast_2d(reference), rtol=.01)
+        npt.assert_allclose(
+            y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
+
+
+def test_reconstructing_fractional_octave_bands_warning():
+    """Test warning for octave frequency exceeding half the sampling rate."""
+    with pytest.warns(UserWarning):
+        x = pf.signals.impulse(2**12, sampling_rate=16e3)
+        y, f = pfilt.reconstructing_fractional_octave_bands(x)

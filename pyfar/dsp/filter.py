@@ -1091,6 +1091,8 @@ def reconstructing_fractional_octave_bands(
     # discard fractional octaves, if the center frequency exceeds
     # half the sampling rate
     f_id = f_m < sampling_rate / 2
+    if not np.all(f_id):
+        warnings.warn("Skipping bands above the Nyquist frequency")
 
     # DFT lines of the lower cut-off and center frequency as in
     # Antoni, Eq. (14)
