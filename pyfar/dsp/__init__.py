@@ -20,6 +20,6 @@ __all__ = [
     'wrap_to_2pi',
     'spectrogram',
     'regularized_spectrum_inversion',
-    'minimum_phase'
+    'minimum_phase',
     'pad_zeros'
 ]

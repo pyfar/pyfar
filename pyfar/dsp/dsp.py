@@ -357,20 +357,44 @@ def _cross_fade(first, second, indices):
     return result
 
 
-def minimum_phase(signal, method='homomorpic', n_fft=None):
-    """Calculate the minumum phase equivalent of an impulse response or
-    FIR filter.
+def minimum_phase(
+        signal, method='homomorphic', n_fft=None,
+        pad=False, return_magnitude_error=False):
+    """Calculate the minimum phase equivalent of a signal or filter
 
     Parameters
     ----------
-    signal : [type]
-        [description]
+    signal : Signal
+        The linear phase filter.
     method : str, optional
-        [description], by default 'homomorpic'
-    n_fft : [type], optional
-        [description], by default None
-    """
+        The method:
+            'homomorphic' (default)
+                This method works best with filters with an
+                odd number of taps, and the resulting minimum phase filter
+                will have a magnitude response that approximates the square
+                root of the the original filter's magnitude response.
+            'hilbert'
+                This method is designed to be used with equi-ripple
+                filters with unity or zero gain regions.
+    n_fft : int, optional
+        The FFT length used for calculating the cepstrum. Should be at least a
+        few times larger than the signal length. The default is ``None``,
+        resulting in an FFT length of:
 
+            n_fft = 2 ** int(np.ceil(np.log2(2 * (len(h) - 1) / 0.01)))
+
+    pad : bool, optional
+        If ``pad`` is ``True``, the resulting signal will be padded to the
+        same length as the input. The default is ``False``
+    return_magnitude_error : bool, optional
+        If ``True``, the absolute error between the input and the output is
+        returned, by default ``False``.
+
+    Returns
+    -------
+    Signal
+        The minimum phase version of the filter.
+    """
     signal_flat = signal.flatten()
     signal_minphase = signal.flatten()
     signal_minphase.time = np.zeros(
@@ -383,7 +407,22 @@ def minimum_phase(signal, method='homomorpic', n_fft=None):
             method=method,
             n_fft=n_fft)
 
-    return signal_minphase
+    if (pad is True) or (return_magnitude_error is True):
+        sig_minphase_pad = pad_zeros(
+            signal_minphase, signal.n_samples - signal_minphase.n_samples)
+
+        if return_magnitude_error is False:
+            return sig_minphase_pad
+
+        error_mag = (np.abs(signal.freq) - np.abs(sig_minphase_pad.freq))
+        error = pyfar.FrequencyData(error_mag, signal.frequencies)
+
+        if pad_zeros is False:
+            return signal_minphase, error
+        else:
+            return sig_minphase_pad, error
+    else:
+        return signal_minphase
 
 
 def pad_zeros(signal, pad_width, mode='after'):
