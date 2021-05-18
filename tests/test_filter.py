@@ -271,4 +271,4 @@ def test_reconstructing_fractional_octave_bands():
         reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             f"filter.reconstructing_octaves_{overlap}_{slope}.csv"))
-        npt.assert_allclose(y.time, np.atleast_2d(reference))
+        npt.assert_allclose(y.time, np.atleast_2d(reference), rtol=.01)
