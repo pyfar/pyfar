@@ -239,35 +239,46 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         pyfar Signal object to be windowed
     interval : array_like
         If `interval` has two entries, these specify the beginning and the end
-        of the window or the fade-in / fade-out (see parameter `shape`).
-        If `interval` has four entries, a symmetric window with fade-in between
+        of the symmetric window or the fade-in / fade-out (see parameter
+        `shape`).
+        If `interval` has four entries, a window with fade-in between
         the first two entries and a fade-out between the last two is created,
-        while it is constant in between, `shape` is ignored.
-        See Notes for more details. The unit of `interval` is specified by the
-        parameter `unit`.
-    window : string, float, or tuple
-        The type of window to create. See below for more details.
-        The default is ``'hann'``.
-    shape : string
-        ``'symmetric'``, ``'symmetric_zero'``, ``'left'`` or ``'right'``.
-        Specifies, if the window is applied single-sided or symmetrically.
-        ``'symmetric_zero'`` denotes a symmetric window with respect to t=0,
-        `crop` is ignored. ``symmetric`` denotes a general symmetric window.
-        If ``'symmetric_zero'``, ``'left'`` or ``'right'``, the beginning and
-        the end of the fade is defined by the two values in `interval`.
-        See parameter `interval`and Notes for more details. The default is
-        ``'symmetric'``.
-    unit : string
-        Unit of the parameter `interval`. Can be set to ``'s'`` (seconds),
-        ``'ms'`` (milliseconds) or ``'samples'``. If ``'samples'``, the values
-        in `interval` denote the first and last sample being included. Time
-        values are rounded to the nearest sample. The default is ``'samples'``.
-    crop : string
-        ``'none'``, ``'window'`` or ``'end'``
-        If ``'none'``, the length of the signal stays the same.
-        If ``'window'``, the signal is truncated to the windowed part.
-        If ``'end'``, only the zeros at the end of the windowed signal are
-        cropped, so the original phase is preserved. The default is ``'none'``.
+        while it is constant in between (ignores `shape`).
+        The unit of `interval` is specified by the parameter `unit`.
+        See below for more details.
+    window : string, float, or tuple, optional
+        The type of window to create. See Notes for a list of implemented
+        windows. The default is ``'hann'``.
+    shape : string, optional
+        ``'symmetric'``
+            General symmetric window, the two values in `interval` define the
+            first and last samples of the window.
+        ``'symmetric_zero'``
+            Symmetric window with respect to t=0, the two values in `interval`
+            define the first and last samples of fade-out. `crop` is ignored.
+        ``'left'``
+            Fade-in, the beginning and the end of the fade is defined by the
+            two values in `interval`. See Notes for more details.
+        ``'right'``
+            Fade-out, the beginning and the end of the fade is defined by the
+            two values in `interval`. See Notes for more details.
+
+        The default is ``'symmetric'``.
+    unit : string, optional
+        Unit of `interval`. Can be set to ``'s'`` (seconds), ``'ms'``
+        (milliseconds) or ``'samples'``.
+        Time values are rounded to the nearest sample.
+        The default is ``'samples'``.
+    crop : string, optional
+        ``'none'``
+            The length of the windowed signal stays the same.
+        ``'window'``
+            The signal is truncated to the windowed part
+        ``'end'``
+            Only the zeros at the end of the windowed signal are
+            cropped, so the original phase is preserved.
+
+        The default is ``'none'``.
 
     Returns
     -------
@@ -276,15 +287,15 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     Notes
     -----
-    For the left sight of a symmetric window and for ``shape='left'``,
-    the indexes of the samples given in `interval` denote the first sample of
-    the window which is non-zero and the first being one. For the right
-    side of a symmetric window and for ``shape='right'``, the samples denote
-    the last sample being one and the last being non-zero.
+    For a fade-in, the indexes of the samples given in `interval` denote the
+    first sample of the window which is non-zero and the first which is one.
+    For a fade-out, the samples given in `interval` denote the last sample
+    which is one and the last which is non-zero.
 
     This function calls `scipy.signal.windows.get_window` to create the
     window.
-    Window types:
+    Available window types:
+
     - ``boxcar``
     - ``triang``
     - ``blackman``
@@ -304,12 +315,61 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     - ``chebwin`` (needs attenuation)
     - ``exponential`` (needs center, decay scale)
     - ``tukey`` (needs taper fraction)
-    - ``taylor`` (needs number of constant sidelobes,
-      sidelobe level)
+    - ``taylor`` (needs number of constant sidelobes, sidelobe level)
+
     If the window requires no parameters, then `window` can be a string.
     If the window requires parameters, then `window` must be a tuple
     with the first argument the string name of the window, and the next
     arguments the needed parameters.
+
+    Examples
+    --------
+
+    Options for parameter `shape`.
+
+    >>> import pyfar
+    >>> import numpy as np
+    >>>
+    >>> signal = pyfar.Signal(np.ones(100), 44100)
+    >>> for shape in ['symmetric', 'symmetric_zero', 'left', 'right']:
+    >>>     signal_windowed = pyfar.dsp.time_window(
+    >>>         signal, interval=[25,45], shape=shape)
+    >>>     ax = pyfar.plot.time(signal_windowed, label=shape)
+    >>> ax.legend(loc='right')
+
+    .. plot::
+
+        import pyfar
+        import numpy as np
+
+        signal = pyfar.Signal(np.ones(100), 44100)
+        for shape in ['symmetric', 'symmetric_zero', 'left', 'right']:
+            signal_windowed = pyfar.dsp.time_window(
+                signal, interval=[25,45], shape=shape)
+            ax = pyfar.plot.time(signal_windowed, label=shape)
+        ax.legend(loc='right')
+
+    Window with fade-in and fade-out defined by four values in `interval`.
+
+    >>> import pyfar
+    >>> import numpy as np
+    >>>
+    >>> signal = pyfar.Signal(np.ones(100), 44100)
+    >>> signal_windowed = pyfar.dsp.time_window(
+    >>>         signal, interval=[25, 40, 60, 90], window='hann')
+    >>> pyfar.plot.time(signal_windowed)
+
+    .. plot::
+
+        import pyfar
+        import numpy as np
+
+        signal = pyfar.Signal(np.ones(100), 44100)
+        signal_windowed = pyfar.dsp.time_window(
+                signal, interval=[25, 40, 60, 90], window='hann')
+        pyfar.plot.time(signal_windowed)
+
+
     """
     # Check input
     if not isinstance(signal, pyfar.Signal):
