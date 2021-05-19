@@ -352,7 +352,8 @@ def regularized_spectrum_inversion(
 
 
 def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
-                         kind, fscale='linear', clip=False):
+                         kind, fscale='linear', clip=False, group_delay=None,
+                         unit='samples'):
     """
     Interpolate incomplete spectrum to complete single sided spectrum.
 
@@ -375,7 +376,8 @@ def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
             Separate interpolation if the magnitude and unwrapped phase values
         ``'magnitude_linear'``
             Interpolation of the magnitude values and generation of a linear
-            phase response with a group delay of ``n_samples / 2``
+            phase response with a specified group delay. (See parameters
+            `group_delay` and `unit` below).
         ``'magnitude_minimum'``
             Interpolation of the magnitude values and generation of a minimum
             phase response
@@ -412,6 +414,14 @@ def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
         this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
         values smaller than 0 and larger than 1 occur in the interpolated
         frequency data. The default is ``False`` which does not clip the data.
+    group_delay : float, optional
+        The group delay of the linear phase response. Must be specified if
+        `method` is ``'magnitude_linear'``. The unit of the group delay is
+        given by `unit` (see below).
+    unit : string, optional
+        Unit of the group delay. Can be ``'s'`` for seconds, ``'ms'`` for
+        milliseconds, ``'mus'`` for microseconds, or ``'samples'``. The
+        default is ``'samples'``.
 
     Returns
     -------
