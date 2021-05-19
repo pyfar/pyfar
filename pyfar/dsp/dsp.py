@@ -383,21 +383,22 @@ def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
             Interpolate the magnitude values only. Results in a zero phase
             signal, which is symmetric around the first sample
 
-    kind : tuple, string
-        Specifies the kind of interpolation as a string. The string has to be
-        ``'linear'``, ``'nearest'``, ``'nearest-up'``, ``'zero'``,
-        ``'slinear'``, ``'quadratic'``, ``'cubic'``, ``'previous'``, or
-        ``'next'`` (see ``scipy.interpolate.interp1d``).
+    kind : tuple
+        Three element tuple ``('first', 'second', 'third')`` that specifies the
+        kind of inter/extrapolation below the lowest frequency (first), between
+        the lowest and highest frequency (second), and above the highest
+        frequency (third).
 
-        ``('first', 'second', 'third')``
-            Three element tuple specifies the kind of inter/extrapolation below
-            the lowest frequency (first), between the lowest and highest
-            frequency (second), and above the highest frequency (third)
-        ``'first'``
-            String that specifies the kind of interpolation between the lowest
-            and highest frequency. Values outside the frequency range are
-            taken from the next/previous available value.
-
+        The string has to be ``'linear'``, ``'nearest'``, ``'nearest-up'``,
+        ``'zero'``, ``'slinear'``, ``'quadratic'``, ``'cubic'``,
+        ``'previous'``, or ``'next'``.  ``'zero'``, ``slinear``,
+        ``'quadratic'``, and ``'cubic'`` refer to a spline interpolation of
+        zeroth, first, second or third order; ``'previous'`` and ``'next'``
+        simply return the previous or next value of the point; ``'nearest-up'``
+        and ``'nearest'`` differ when interpolating half-integers
+        (e.g. 0.5, 1.5) in that ``'nearest-up'`` rounds up and ``'nearest'``
+        rounds down. The interpolation is done using
+        ``scipy.interpolate.interp1d``.
     fscale : string, optional
 
         ``'linear'``
