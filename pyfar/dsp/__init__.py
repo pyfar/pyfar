@@ -5,7 +5,9 @@ from .dsp import (
     linear_phase,
     zero_phase,
     spectrogram,
-    regularized_spectrum_inversion
+    regularized_spectrum_inversion,
+    time_window,
+    kaiser_window_beta
 )
 
 from . import filter
@@ -21,5 +23,7 @@ __all__ = [
     'linear_phase',
     'zero_phase',
     'spectrogram',
-    'regularized_spectrum_inversion'
+    'regularized_spectrum_inversion',
+    'time_window',
+    'kaiser_window_beta'
 ]
