@@ -143,6 +143,65 @@ def wrap_to_2pi(x):
     return x
 
 
+def linear_phase(signal, group_delay, unit="samples"):
+    """
+    Set the phase to a linear phase with a specified group delay.
+
+    The linear phase signal is computed as
+
+    .. math:: H_{\\mathrm{lin}} = |H| \\mathrm{e}^{-j \\omega \\tau}\\,,
+
+    with :math:`H` the complex spectrum of the input data, :math:`|\\cdot|` the
+    absolute values, :math:`\\omega` the frequency in radians and :math:`\\tau`
+    the group delay in seconds.
+
+    Parameters
+    ----------
+    signal : Signal
+        input data
+    group_delay : float, array like
+        The desired group delay of the linear phase signal according to `unit`.
+        A reasonable value for most cases is ``signal.n_samples / 2`` samples,
+        which results in a time signal that is symmetric around the center. If
+        group delay is a list or array it must broadcast with the channel
+        layout of the signal (``signal.cshape``).
+    unit : string, optional
+        Unit of the group delay. Can be ``'s'`` for seconds, ``'ms'`` for
+        milliseconds, ``'mus'`` for microseconds, or ``'samples'``. The
+        default is ``'samples'``.
+
+    Returns
+    -------
+    signal: Signal
+        linear phase copy of the input data
+    """
+
+    if not isinstance(signal, pyfar.Signal):
+        raise TypeError("signal must be a pyfar Signal object.")
+
+    # group delay in seconds
+    if unit == "samples":
+        tau = np.asarray(group_delay) / signal.sampling_rate
+    elif unit == "s":
+        tau = np.asarray(group_delay)
+    elif unit == 'ms':
+        tau = np.asarray(group_delay) / 1e3
+    elif unit == 'mus':
+        tau = np.asarray(group_delay) / 1e6
+    else:
+        raise ValueError("unit must be 'samples', 's', 'ms', or 'mus'.")
+
+    # linear phase
+    phase = 2 * np.pi * signal.frequencies * tau[..., np.newaxis]
+
+    # construct linear phase spectrum
+    signal_lin = signal.copy()
+    signal_lin.freq = \
+        np.abs(signal_lin.freq).astype(complex) * np.exp(-1j * phase)
+
+    return signal_lin
+
+
 def zero_phase(signal):
     """Calculate zero phase signal.
 

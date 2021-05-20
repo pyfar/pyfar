@@ -103,6 +103,54 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
 
 
+def test_linear_phase():
+    # test signal
+    N = 64
+    fs = 44100
+    x = pf.signals.impulse(N, sampling_rate=fs)
+
+    # test default parameters
+    y = dsp.linear_phase(x, N/2)
+    # test output
+    assert isinstance(y, pf.Signal)
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+    # test if input did not change
+    npt.assert_allclose(x.time, pf.signals.impulse(N).time)
+
+    # test group delay in seconds
+    y = dsp.linear_phase(x, N / 2 / fs, unit="s")
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+
+    # test group delay in milliseconds
+    y = dsp.linear_phase(x, N / 2 / fs * 1e3, unit="ms")
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+
+    # test group delay in microseconds
+    y = dsp.linear_phase(x, N / 2 / fs * 1e6, unit="mus")
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+
+    # test assertion
+    with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
+        dsp.linear_phase(1, 0)
+
+
+def test_linear_phase_multichannel():
+    # test signal
+    N = 64
+    fs = 44100
+    x = pf.signals.impulse(N, [0, 0], sampling_rate=fs)
+
+    # test with scalar group delay
+    y = dsp.linear_phase(x, N/2)
+    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1]), N / 2 * np.ones(y.n_bins))
+
+    # test with array like group delay
+    y = dsp.linear_phase(x, [N/2, N/4])
+    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1]), N / 4 * np.ones(y.n_bins))
+
+
 def test_zero_phase():
     """Test zero phase generation."""
     # generate test signal and zero phase version
