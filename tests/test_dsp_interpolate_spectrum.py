@@ -4,7 +4,7 @@ from pyfar.dsp import interpolate_spectrum
 
 
 def test_init():
-    """Test if init returns an interpolate_spectrum opbject"""
+    """Test if init returns an interpolate_spectrum object"""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
     si = interpolate_spectrum(fd, "complex", ("linear", "linear", "linear"))
@@ -15,9 +15,19 @@ def test_init_assertions():
     """Test if init raises assertions correctly"""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
-    # invalid frequency_data
-    with raises(TypeError, match="frequency_data must be"):
+    # data (invalid type)
+    with raises(TypeError, match="data must be"):
         interpolate_spectrum(1, "complex", ("linear", "linear", "linear"))
+    # data (invalid FFT normalization)
+    with raises(ValueError, match="data.fft_norm is 'rms'"):
+        fd_rms = pf.FrequencyData([1, .5], [100, 200], 'rms')
+        interpolate_spectrum(
+            fd_rms, "complex", ("linear", "linear", "linear"))
+    # data (not enough bins)
+    with raises(ValueError, match="data.n_bins must be at least 2"):
+        fd_short = pf.FrequencyData(1, 100)
+        interpolate_spectrum(
+            fd_short, "complex", ("linear", "linear", "linear"))
 
     # test invalid method
     with raises(ValueError, match="method is 'invalid'"):

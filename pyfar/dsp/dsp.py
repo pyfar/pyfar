@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.interpolate import interp1d
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
@@ -359,12 +360,8 @@ class interpolate_spectrum():
 
     Parameters
     ----------
-    frequency_data : FrequencyData
-        Input data to be interpolated
-    n_samples : int
-        The lengths of the corresponding time signal in samples.
-    sampling_rate : int
-        The sampling rate in Hz
+    data : FrequencyData
+        Input data to be interpolated. `data.fft_norm` must be `'none'`.
     method : string
         Specifies the input data for the interpolation
 
@@ -427,38 +424,40 @@ class interpolate_spectrum():
         The interpolated data as a pyfar Signal object.
     """
 
-    def __init__(self, frequency_data, method, kind, fscale='linear',
+    def __init__(self, data, method, kind, fscale='linear',
                  clip=False, group_delay=None, unit='samples'):
 
-        # check input
-        # ... frequency_data
-        if not isinstance(frequency_data, pyfar.FrequencyData):
-            raise TypeError('frequency_data must be a FrequencyData object.')
+        # check input ---------------------------------------------------------
+        # ... data
+        if not isinstance(data, pyfar.FrequencyData):
+            raise TypeError('data must be a FrequencyData object.')
+        if data.n_bins < 2:
+            raise ValueError("data.n_bins must be at least 2")
+        if data.fft_norm != 'none':
+            raise ValueError(
+                f"data.fft_norm is '{data.fft_norm}' but must be 'none'")
 
         # ... method
-        self._methods = ['complex', 'magnitude_unwrap', 'magnitude_linear',
-                         'magnitude_minimum', 'magnitude']
-        if method not in self._methods:
+        methods = ['complex', 'magnitude_unwrap', 'magnitude_linear',
+                   'magnitude_minimum', 'magnitude']
+        if method not in methods:
             raise ValueError((f"method is '{method}'' but must be on of the "
-                              f"following: {', '.join(self._methods)}"))
-        self._method = method
+                              f"following: {', '.join(methods)}"))
 
         # ... kind
         if not isinstance(kind, tuple) or len(kind) != 3:
             raise ValueError("kind must be a tuple of length 3")
-        self._kinds = ['linear', 'nearest', 'nearest-up', 'zero', 'slinear',
-                       'quadratic', 'cubic', 'previous', 'next']
+        kinds = ['linear', 'nearest', 'nearest-up', 'zero', 'slinear',
+                 'quadratic', 'cubic', 'previous', 'next']
         for k in kind:
-            if k not in self._kinds:
+            if k not in kinds:
                 raise ValueError((f"kind contains '{k}' but must only contain "
-                                  f"the following: {', '.join(self._kinds)}"))
-        self._kind = kind
+                                  f"the following: {', '.join(kinds)}"))
 
         # ... fscale
         if fscale not in ["linear", "log"]:
             raise ValueError(
                 f"fscale is '{fscale}'' but must be linear or log")
-        self._fscale = fscale
 
         # ... clip
         if clip:
@@ -469,6 +468,88 @@ class interpolate_spectrum():
         if group_delay is None and method == 'magnitude_linear':
             raise ValueError(("The group delay must be specified "
                               "if the method is magnitude_linear"))
+
+        # initialize the interpolators ----------------------------------------
+        # store required parameters
+        self._method = method
+        self._clip = clip
+        self._fscale = fscale
+        self._group_delay = group_delay
+
+        # flatten input data to work with scipy interpolators
+        self._cshape = data.cshape
+        data = data.flatten()
+
+        # get the required data for interpolation
+        if method == 'complex':
+            self._data = [np.real(data.freq), np.imag(data.freq)]
+        elif method == 'magnitude_unwrap':
+            self._data = [np.abs(data.freq),
+                          pyfar.dsp.phase(data, unwrap=True)]
+        else:
+            self._data = [np.abs(data.freq)]
+
+        # frequencies for interpolation
+        frequencies = data.frequencies if fscale == "linear" \
+            else np.log(data.frequencies)
+
+        # frequency range
+        self._freq_range = [frequencies[0], frequencies[-1]]
+
+        # get the interpolators
+        self._interpolators = []
+        for d in self._data:
+            interpolators = []
+            for idx, k in enumerate(kind):
+                if idx == 1:
+                    interpolators.append(interp1d(frequencies, d, k))
+                else:
+                    interpolators.append(interp1d(
+                        frequencies, d, k, fill_value="extrapolate"))
+            self._interpolators.append(interpolators)
+
+    def __call__(self, n_samples, sampling_rate):
+
+        # get the query frequencies
+        frequencies = pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate)
+        if self._fscale == "log":
+            frequencies = np.log(frequencies)
+
+        # get interpolation ranges
+        id_below = frequencies < self._freq_range[0]
+        id_within = np.logical_and(frequencies >= self._freq_range[0],
+                                   frequencies <= self._freq_range[1])
+        id_above = frequencies > self._freq_range[1]
+
+        # interpolate the data
+        interpolated = []
+        for data in self._interpolators:
+            data_interpolated = np.concatenate((
+                (data[0](frequencies[id_below])),
+                (data[1](frequencies[id_within])),
+                (data[2](frequencies[id_above]))),
+                axis=-1)
+            interpolated.append(data_interpolated)
+
+        # get half sided spectrum
+        if self._method == "complex":
+            freq = interpolated[0] + 1j * interpolated[1]
+        elif self._method == 'magnitude_unwrap':
+            freq = interpolated[0] * np.exp(-1j * interpolated[1])
+        else:
+            freq = interpolated[0]
+
+        # get initial signal
+        signal = pyfar.Signal(freq, sampling_rate, n_samples, "freq")
+
+        # generate linear or minimum phase
+        if self._method == "magnitude_minimum":
+            pass
+        elif self._method == "magnitude_linear":
+            pass
+
+        return signal
+
 
 
 def _cross_fade(first, second, indices):
