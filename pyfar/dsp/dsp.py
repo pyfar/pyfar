@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from scipy import signal as sgn
 import pyfar
@@ -394,6 +395,10 @@ def time_shift(signal, shift, unit='samples'):
     else:
         raise ValueError(
             f"Unknown unit: {unit}, has to be 'samples' or 'seconds'.")
+
+    if np.any(shift_samples > signal.n_samples):
+        warnings.warn(
+            "Shifting by more samples than the length of the signal")
 
     shifted = signal.flatten()
     shift_samples = shift_samples.flatten()
