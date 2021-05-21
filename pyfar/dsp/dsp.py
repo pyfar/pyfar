@@ -351,9 +351,7 @@ def regularized_spectrum_inversion(
     return inverse
 
 
-def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
-                         kind, fscale='linear', clip=False, group_delay=None,
-                         unit='samples'):
+class interpolate_spectrum():
     """
     Interpolate incomplete spectrum to complete single sided spectrum.
 
@@ -381,7 +379,7 @@ def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
         ``'magnitude_minimum'``
             Interpolation of the magnitude values and generation of a minimum
             phase response
-        ''`magnitude'``
+        ``'magnitude'``
             Interpolate the magnitude values only. Results in a zero phase
             signal, which is symmetric around the first sample
 
@@ -428,7 +426,49 @@ def interpolate_spectrum(frequency_data, n_samples, sampling_rate, method,
     signal : Signal
         The interpolated data as a pyfar Signal object.
     """
-    return frequency_data
+
+    def __init__(self, frequency_data, method, kind, fscale='linear',
+                 clip=False, group_delay=None, unit='samples'):
+
+        # check input
+        # ... frequency_data
+        if not isinstance(frequency_data, pyfar.FrequencyData):
+            raise TypeError('frequency_data must be a FrequencyData object.')
+
+        # ... method
+        self._methods = ['complex', 'magnitude_unwrap', 'magnitude_linear',
+                         'magnitude_minimum', 'magnitude']
+        if method not in self._methods:
+            raise ValueError((f"method is '{method}'' but must be on of the "
+                              f"following: {', '.join(self._methods)}"))
+        self._method = method
+
+        # ... kind
+        if not isinstance(kind, tuple) or len(kind) != 3:
+            raise ValueError("kind must be a tuple of length 3")
+        self._kinds = ['linear', 'nearest', 'nearest-up', 'zero', 'slinear',
+                       'quadratic', 'cubic', 'previous', 'next']
+        for k in kind:
+            if k not in self._kinds:
+                raise ValueError((f"kind contains '{k}' but must only contain "
+                                  f"the following: {', '.join(self._kinds)}"))
+        self._kind = kind
+
+        # ... fscale
+        if fscale not in ["linear", "log"]:
+            raise ValueError(
+                f"fscale is '{fscale}'' but must be linear or log")
+        self._fscale = fscale
+
+        # ... clip
+        if clip:
+            if not isinstance(clip, tuple) or len(clip) != 2:
+                raise ValueError("clip must be a tuple of length 2")
+
+        # ... group delay
+        if group_delay is None and method == 'magnitude_linear':
+            raise ValueError(("The group delay must be specified "
+                              "if the method is magnitude_linear"))
 
 
 def _cross_fade(first, second, indices):
