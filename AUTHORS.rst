@@ -9,3 +9,11 @@ The pyfar developers
 - Fabian Brinkmann
 - Kai Jurgeit
 - Simon Kersten
+
+
+Contributors
+------------
+
+- Chris Hold
+- Johannes Imort
+- Simon Klein
