@@ -935,6 +935,7 @@ class interpolate_spectrum():
         self._clip = clip
         self._fscale = fscale
         self._group_delay = group_delay
+        self._unit = unit
 
         # flatten input data to work with scipy interpolators
         self._cshape = data.cshape
@@ -1006,10 +1007,9 @@ class interpolate_spectrum():
         if self._method == "magnitude_minimum":
             pass
         elif self._method == "magnitude_linear":
-            pass
+            signal = linear_phase(signal, self._group_delay, self._unit)
 
         return signal
-
 
 
 def _cross_fade(first, second, indices):
