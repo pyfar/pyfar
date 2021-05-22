@@ -887,8 +887,8 @@ class interpolate_spectrum():
     -------
     interpolator : :py:class:`interpolate_spectrum`
         The interpolator can be called to interpolate the data (see examples
-        below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has the
-        following parameters
+        below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has
+        the following parameters
 
         `n_samples` : int
             Length of the interpolated time signal in samples
@@ -1048,7 +1048,7 @@ class interpolate_spectrum():
         if self._clip:
             signal.freq = \
                 np.clip(np.abs(signal.freq), self._clip[0], self._clip[1]) \
-                    * np.exp(1j * phase(signal))
+                * np.exp(1j * phase(signal))
 
         # generate linear or minimum phase
         if self._method == "magnitude_minimum":
