@@ -817,7 +817,7 @@ class interpolate_spectrum():
     """
     Interpolate incomplete spectrum to complete single sided spectrum.
 
-    TODO: Add references to minimum and linear phase functions
+    TODO: Add reference to minimum phase functions
 
     Parameters
     ----------
@@ -833,7 +833,8 @@ class interpolate_spectrum():
         ``'magnitude_linear'``
             Interpolation of the magnitude values and generation of a linear
             phase response with a specified group delay. (See parameters
-            `group_delay` and `unit` below).
+            `group_delay` and `unit` below and
+            :py:func:`~pyfar.dsp.linear_phase`).
         ``'magnitude_minimum'``
             Interpolation of the magnitude values and generation of a minimum
             phase response
