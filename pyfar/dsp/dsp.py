@@ -860,9 +860,12 @@ class interpolate_spectrum():
     fscale : string, optional
 
         ``'linear'``
-            Interpolate on a linear frequency axis
+            Interpolate on a linear frequency axis.
         ``'log'``
-            Interpolate on a logarithmic frequency axis
+            Interpolate on a logarithmic frequency axis. Note that 0 Hz can
+            not be interpolated on a logarithmic scale because the logarithm
+            of 0 does not exist. Frequencies of 0 Hz are thus replaced by the
+            next highest frequency before interpolation.
 
         The default is ``'linear'``.
     clip : bool, tuple
@@ -988,8 +991,7 @@ class interpolate_spectrum():
             self._data = [np.abs(data.freq)]
 
         # frequencies for interpolation
-        frequencies = data.frequencies if fscale == "linear" \
-            else np.log(data.frequencies)
+        frequencies = self._get_frequencies(data.frequencies.copy())
 
         # frequency range
         self._freq_range = [frequencies[0], frequencies[-1]]
@@ -1013,9 +1015,8 @@ class interpolate_spectrum():
         """
 
         # get the query frequencies
-        frequencies = pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate)
-        if self._fscale == "log":
-            frequencies = np.log(frequencies)
+        frequencies = self._get_frequencies(
+            pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate))
 
         # get interpolation ranges
         id_below = frequencies < self._freq_range[0]
@@ -1077,6 +1078,20 @@ class interpolate_spectrum():
                 ax[1][1].legend(loc='best')
 
         return signal
+
+    def _get_frequencies(self, frequencies):
+        """
+        Return frequencies for creating or quering interpolation objects.
+
+        In case logfrequencies are requested, 0 Hz entries are replaced by
+        the next highest frequency, because the logarithm of 0 does not exist.
+        """
+        if self._fscale == "log":
+            if frequencies[0] == 0:
+                frequencies[0] = frequencies[1]
+            frequencies = np.log(frequencies)
+
+        return frequencies
 
 
 def _cross_fade(first, second, indices):
