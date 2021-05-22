@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy import signal as sgn
+import matplotlib.pyplot as plt
 import pyfar
 from pyfar.dsp import fft
 
@@ -865,10 +866,14 @@ class interpolate_spectrum():
 
         The default is ``'linear'``.
     clip : bool, tuple
-        The interpolated frequency data is clipped to the range specified by
-        this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
+        The interpolated magnitude response is clipped to the range specified
+        by this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
         values smaller than 0 and larger than 1 occur in the interpolated
-        frequency data. The default is ``False`` which does not clip the data.
+        magnitude response. The clipping is applied after the interpolation
+        but before applying linear or minimum phase (in case `method` is
+        ``'magnitude_linear'`` or ``'magnitude_minimum'``. The default is
+        ``False`` which does not clip the
+        data.
     group_delay : float, optional
         The group delay of the linear phase response. Must be specified if
         `method` is ``'magnitude_linear'``. The unit of the group delay is
@@ -880,8 +885,39 @@ class interpolate_spectrum():
 
     Returns
     -------
-    signal : Signal
-        The interpolated data as a pyfar Signal object.
+    interpolator : :py:class:`interpolate_spectrum`
+        The interpolator can be called to interpolate the data (see examples
+        below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has the
+        following parameters
+
+        `n_samples` : int
+            Length of the interpolated time signal in samples
+        `sampling_rate`: int
+            Sampling rate of the output signal in Hz
+        `show` : bool, optional
+            Show a plot of the input and output data. The default is ``False``.
+
+    Examples
+    --------
+    Interpolate magnitude only and add artificial linear.
+
+    >>> import pyfar as pf
+    >>>
+    >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
+    >>> interpolator = pf.dsp.interpolate_spectrum(
+    >>>     data, 'magnitude', ('nearest', 'linear', 'nearest'),
+    >>>     group_delay=32)
+    >>> signal = interpolator(64, 44100, show=True)
+
+    .. :plot:
+
+        import pyfar as pf
+        data = pf.FrequencyData([1, 0], [5e3, 20e3])
+        interpolator = pf.dsp.interpolate_spectrum(
+            data, 'magnitude', ('nearest', 'linear', 'nearest'),
+            group_delay=32)
+        signal = interpolator(64, 44100, show=True)
+
     """
 
     def __init__(self, data, method, kind, fscale='linear',
@@ -940,6 +976,7 @@ class interpolate_spectrum():
         # flatten input data to work with scipy interpolators
         self._cshape = data.cshape
         data = data.flatten()
+        self._input = data
 
         # get the required data for interpolation
         if method == 'complex':
@@ -969,7 +1006,11 @@ class interpolate_spectrum():
                         frequencies, d, k, fill_value="extrapolate"))
             self._interpolators.append(interpolators)
 
-    def __call__(self, n_samples, sampling_rate):
+    def __call__(self, n_samples, sampling_rate, show=False):
+        """
+        Interpolate a Signal with n_samples length.
+        (see class docstring) for more information.
+        """
 
         # get the query frequencies
         frequencies = pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate)
@@ -1003,11 +1044,37 @@ class interpolate_spectrum():
         # get initial signal
         signal = pyfar.Signal(freq, sampling_rate, n_samples, "freq")
 
+        # clip the magnitude
+        if self._clip:
+            signal.freq = \
+                np.clip(np.abs(signal.freq), self._clip[0], self._clip[1]) \
+                    * np.exp(1j * phase(signal))
+
         # generate linear or minimum phase
         if self._method == "magnitude_minimum":
             pass
         elif self._method == "magnitude_linear":
             signal = linear_phase(signal, self._group_delay, self._unit)
+
+        if show:
+            # plot input and output data
+            with pyfar.plot.context():
+                _, ax = plt.subplots(2, 2)
+                # time signal (linear amplitude)
+                pyfar.plot.time(signal, ax=ax[0][0])
+                # time signal (log amplitude)
+                pyfar.plot.time(signal, ax=ax[1][0], dB=True)
+                # frequency plot (linear x-axis)
+                pyfar.plot.freq(signal, dB=False, xscale="linear", ax=ax[0][1])
+                pyfar.plot.freq(self._input, dB=False, xscale="linear",
+                                ax=ax[0][1], c='r', ls='', marker='.')
+                ax[0][1].set_xlim(signal.frequencies[0], sampling_rate/2)
+                # frequency plot (log x-axis)
+                pyfar.plot.freq(signal, dB=False, ax=ax[1][1], label='intput')
+                pyfar.plot.freq(self._input, dB=False, ax=ax[1][1],
+                                c='r', ls='', marker='.', label='output')
+                ax[1][1].set_xlim(signal.frequencies[1], sampling_rate/2)
+                ax[1][1].legend(loc='best')
 
         return signal
 
