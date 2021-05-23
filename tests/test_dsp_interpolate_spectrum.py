@@ -1,4 +1,3 @@
-from numpy.testing._private.utils import assert_allclose
 import pytest
 from pytest import raises
 import numpy as np
@@ -168,8 +167,9 @@ def test_fscale():
     n_samples = 10
     sampling_rate = 40
     f_query_lin = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
-    f_query_log = np.log(f_query_lin)
+    f_query_log = f_query_lin.copy()
     f_query_log[0] = f_query_log[1]
+    f_query_log = np.log(f_query_log)
     data = pf.FrequencyData([1, 1, 1], f_in_lin)
 
     # generate interpolator with linear frequency
@@ -187,3 +187,16 @@ def test_fscale():
 
     npt.assert_allclose(interpolator_log._f_in, f_in_log)
     npt.assert_allclose(interpolator_log._f_query, f_query_log)
+
+
+def test_show():
+    """Test plotting the results.
+
+    This only tests if the code finishes without errors. Because the plot is
+    an informal plot for inspection, we don't test specifics of the figure and
+    axes for speed up the testing."""
+
+    data = pf.FrequencyData([1, 2], [1, 2])
+    interpolator = interpolate_spectrum(
+        data, "magnitude", ("linear", "linear", "linear"))
+    _ = interpolator(10, 10, show=True)
