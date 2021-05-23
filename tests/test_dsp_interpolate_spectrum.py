@@ -106,7 +106,7 @@ def test_init_assertions():
 def test_interpolation(
         method, freq_in, frequencies, freq_out, n_samples, sampling_rate):
     """
-    Test the if the interpolated spectrum matches the reference.
+    Test the if the interpolated spectrum matches the reference across methods.
     """
 
     # create test data
@@ -129,10 +129,29 @@ def test_interpolation(
         # test magnitude and minimum phase response
         npt.assert_allclose(np.abs(signal.freq), np.atleast_2d(freq_out))
         # generate reference minimum phase signal
-        signal_min = pf.Signal(freq_out, sampling_rate, n_samples, "freq")
+        # signal_min = pf.Signal(freq_out, sampling_rate, n_samples, "freq")
         # signal_min = pf.dsp.minimum_phase(signal_min)
         # npt.assert_allclose(signal.freq, signal_min.freq)
 
     else:
         # test complex spectrum
         npt.assert_allclose(signal.freq, np.atleast_2d(freq_out))
+
+
+def test_clip():
+    """Test if clipping the magnitude data works."""
+
+    data = pf.FrequencyData([1, 2], [1, 2])
+    # interpolate with and without clipping
+    interpolator = interpolate_spectrum(
+        data, "magnitude", ("linear", "linear", "linear"))
+    signal_no_clip = interpolator(6, 6)
+
+    interpolator = interpolate_spectrum(
+        data, "magnitude", ("linear", "linear", "linear"), clip=(1, 2))
+    signal_clip = interpolator(6, 6)
+
+    assert np.any(np.abs(signal_no_clip.freq) < 1) and \
+           np.any(np.abs(signal_no_clip.freq) > 2)
+    assert np.all(np.abs(signal_clip.freq) >= 1) and \
+           np.all(np.abs(signal_clip.freq) <= 2)

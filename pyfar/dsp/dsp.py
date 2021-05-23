@@ -1050,7 +1050,7 @@ class interpolate_spectrum():
         if self._clip:
             signal.freq = \
                 np.clip(np.abs(signal.freq), self._clip[0], self._clip[1]) \
-                * np.exp(1j * phase(signal))
+                * np.exp(-1j * phase(signal))
 
         # generate linear or minimum phase
         if self._method == "magnitude_minimum":
