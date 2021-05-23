@@ -991,11 +991,11 @@ class interpolate_spectrum():
         else:
             self._data = [np.abs(data.freq)]
 
-        # frequencies for interpolation
-        frequencies = self._get_frequencies(data.frequencies.copy())
+        # frequencies for interpolation (store for testing)
+        self._f_in = self._get_frequencies(data.frequencies.copy())
 
         # frequency range
-        self._freq_range = [frequencies[0], frequencies[-1]]
+        self._freq_range = [self._f_in[0], self._f_in[-1]]
 
         # get the interpolators
         self._interpolators = []
@@ -1003,10 +1003,10 @@ class interpolate_spectrum():
             interpolators = []
             for idx, k in enumerate(kind):
                 if idx == 1:
-                    interpolators.append(interp1d(frequencies, d, k))
+                    interpolators.append(interp1d(self._f_in, d, k))
                 else:
                     interpolators.append(interp1d(
-                        frequencies, d, k, fill_value="extrapolate"))
+                        self._f_in, d, k, fill_value="extrapolate"))
             self._interpolators.append(interpolators)
 
     def __call__(self, n_samples, sampling_rate, show=False):
@@ -1015,23 +1015,23 @@ class interpolate_spectrum():
         (see class docstring) for more information.
         """
 
-        # get the query frequencies
-        frequencies = self._get_frequencies(
+        # get the query frequencies (store for testing)
+        self._f_query = self._get_frequencies(
             pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate))
 
         # get interpolation ranges
-        id_below = frequencies < self._freq_range[0]
-        id_within = np.logical_and(frequencies >= self._freq_range[0],
-                                   frequencies <= self._freq_range[1])
-        id_above = frequencies > self._freq_range[1]
+        id_below = self._f_query < self._freq_range[0]
+        id_within = np.logical_and(self._f_query >= self._freq_range[0],
+                                   self._f_query <= self._freq_range[1])
+        id_above = self._f_query > self._freq_range[1]
 
         # interpolate the data
         interpolated = []
         for data in self._interpolators:
             data_interpolated = np.concatenate((
-                (data[0](frequencies[id_below])),
-                (data[1](frequencies[id_within])),
-                (data[2](frequencies[id_above]))),
+                (data[0](self._f_query[id_below])),
+                (data[1](self._f_query[id_within])),
+                (data[2](self._f_query[id_above]))),
                 axis=-1)
             interpolated.append(data_interpolated)
 

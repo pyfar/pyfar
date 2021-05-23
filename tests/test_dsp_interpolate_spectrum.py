@@ -155,3 +155,35 @@ def test_clip():
            np.any(np.abs(signal_no_clip.freq) > 2)
     assert np.all(np.abs(signal_clip.freq) >= 1) and \
            np.all(np.abs(signal_clip.freq) <= 2)
+
+
+def test_fscale():
+    """
+    Test frequency vectors for linear and logarithmic frequency interpolation.
+    """
+
+    # test parametres and data
+    f_in_lin = [0, 10, 20]
+    f_in_log = np.log([10, 10, 20])
+    n_samples = 10
+    sampling_rate = 40
+    f_query_lin = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
+    f_query_log = np.log(f_query_lin)
+    f_query_log[0] = f_query_log[1]
+    data = pf.FrequencyData([1, 1, 1], f_in_lin)
+
+    # generate interpolator with linear frequency
+    interpolator_lin = interpolate_spectrum(
+        data, "magnitude", ("linear", "linear", "linear"), fscale="linear")
+    _ = interpolator_lin(n_samples, sampling_rate)
+    # generate interpolator with logarithmic frequency
+    interpolator_log = interpolate_spectrum(
+        data, "magnitude", ("linear", "linear", "linear"), fscale="log")
+    _ = interpolator_log(n_samples, sampling_rate)
+
+    # test frequency vectors
+    npt.assert_allclose(interpolator_lin._f_in, f_in_lin)
+    npt.assert_allclose(interpolator_lin._f_query, f_query_lin)
+
+    npt.assert_allclose(interpolator_log._f_in, f_in_log)
+    npt.assert_allclose(interpolator_log._f_query, f_query_log)
