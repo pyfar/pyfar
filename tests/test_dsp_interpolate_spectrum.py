@@ -1,14 +1,21 @@
+import pytest
 from pytest import raises
 import pyfar as pf
 from pyfar.dsp import interpolate_spectrum
 
 
 def test_init():
-    """Test if init returns an interpolate_spectrum object"""
+    """Test return objects"""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
-    si = interpolate_spectrum(fd, "complex", ("linear", "linear", "linear"))
-    assert isinstance(si, interpolate_spectrum)
+    # interpolation object
+    interpolator = interpolate_spectrum(
+        fd, "complex", ("linear", "linear", "linear"))
+    assert isinstance(interpolator, interpolate_spectrum)
+
+    # interpolation result
+    signal = interpolator(8, 44100)
+    assert isinstance(signal, pf.Signal)
 
 
 def test_init_assertions():
