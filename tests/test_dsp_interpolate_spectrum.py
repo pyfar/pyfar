@@ -2,6 +2,7 @@ import pytest
 from pytest import raises
 import numpy as np
 import numpy.testing as npt
+import matplotlib.pyplot as plt
 import pyfar as pf
 from pyfar.dsp import interpolate_spectrum
 
@@ -200,3 +201,5 @@ def test_show():
     interpolator = interpolate_spectrum(
         data, "magnitude", ("linear", "linear", "linear"))
     _ = interpolator(10, 10, show=True)
+
+    plt.close()
