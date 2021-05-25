@@ -17,3 +17,4 @@ Contributors
 - Chris Hold
 - Johannes Imort
 - Simon Klein
+- Udo Waldek
