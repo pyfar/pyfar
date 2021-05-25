@@ -242,6 +242,13 @@ def test_time_shift():
 
     npt.assert_allclose(shifted.time, ref.time)
 
+    # don't shift at all
+    shift_samples = 0
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
     # shift in seconds
     # shift to the right
     shift_samples = 2

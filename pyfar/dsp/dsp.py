@@ -855,6 +855,7 @@ def _cross_fade(first, second, indices):
 
 def time_shift(signal, shift, unit='samples'):
     """Apply a time-shift to a signal.
+
     The shift is performed as a cyclic shift on the time axis, potentially
     resulting in non-causal signals for negative shift values.
 
@@ -889,7 +890,7 @@ def time_shift(signal, shift, unit='samples'):
         shift_samples = shift.astype(int)
     else:
         raise ValueError(
-            f"Unknown unit: {unit}, has to be 'samples' or 'seconds'.")
+            f"Unit is: {unit}, but has to be 'samples' or 'seconds'.")
 
     if np.any(shift_samples > signal.n_samples):
         warnings.warn(
