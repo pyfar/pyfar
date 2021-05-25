@@ -2,9 +2,13 @@ from .dsp import (
     phase,
     group_delay,
     wrap_to_2pi,
+    linear_phase,
+    zero_phase,
     spectrogram,
     regularized_spectrum_inversion,
-    pad_zeros
+    pad_zeros,
+    time_window,
+    kaiser_window_beta
 )
 
 from . import filter
@@ -17,7 +21,11 @@ __all__ = [
     'phase',
     'group_delay',
     'wrap_to_2pi',
+    'linear_phase',
+    'zero_phase',
     'spectrogram',
     'regularized_spectrum_inversion',
-    'pad_zeros'
+    'pad_zeros',
+    'time_window',
+    'kaiser_window_beta'
 ]
