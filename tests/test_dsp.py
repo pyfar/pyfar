@@ -434,3 +434,58 @@ def test_kaiser_window_beta():
     beta = dsp.kaiser_window_beta(A)
     beta_true = 0.0
     assert beta == beta_true
+
+
+def test_minimum_phase():
+    # tests are separated since their reliability depends on the type of
+    # filters. The homomorphic method works best for filters with odd numbers
+    # of taps
+
+    # method = 'hilbert'
+    n_samples = 9
+    filter_linphase = pyfar.Signal([0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 44100)
+
+    imp_minphase = pyfar.dsp.minimum_phase(
+        filter_linphase, pad=False, method='hilbert', n_fft=2**18)
+
+    ref = np.array([1, 1, 0, 0, 0], dtype=float)
+    npt.assert_allclose(
+        np.squeeze(imp_minphase.time), ref, rtol=1e-4, atol=1e-4)
+
+    # method = 'homomorphic'
+    n_samples = 8
+    imp_linphase = pyfar.signals.impulse(
+        n_samples+1, delay=int(n_samples/2))
+
+    ref = pyfar.signals.impulse(int(n_samples/2)+1)
+
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=False)
+    npt.assert_allclose(imp_minphase.time, ref.time)
+
+    # test pad length
+    ref = pyfar.signals.impulse(n_samples+1)
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=True)
+
+    assert imp_minphase.n_samples == imp_linphase.n_samples
+    npt.assert_allclose(imp_minphase.time, ref.time)
+
+    # test error
+    ref = pyfar.signals.impulse(n_samples+1)
+    imp_minphase, mag_error = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', return_magnitude_ratio=True)
+
+    npt.assert_allclose(
+        np.squeeze(mag_error.freq),
+        np.ones(int(n_samples/2+1), dtype=complex))
+
+    # test multidim
+    ref = pyfar.signals.impulse(n_samples+1, amplitude=np.ones((2, 3)))
+    imp_linphase = pyfar.signals.impulse(
+        n_samples+1, delay=int(n_samples/2), amplitude=np.ones((2, 3)))
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=True)
+
+    assert imp_minphase.n_samples == imp_linphase.n_samples
+    npt.assert_allclose(imp_minphase.time, ref.time)

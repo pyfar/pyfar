@@ -854,7 +854,7 @@ def _cross_fade(first, second, indices):
 
 def minimum_phase(
         signal, method='homomorphic', n_fft=None,
-        pad=False, return_magnitude_error=False):
+        pad=False, return_magnitude_ratio=False):
     """Calculate the minimum phase equivalent of a signal or filter
 
     Parameters
@@ -865,13 +865,13 @@ def minimum_phase(
         The method:
 
         'homomorphic' (default)
-            This method works best with filters with an
-            odd number of taps, and the resulting minimum phase filter
-            will have a magnitude response that approximates the square
-            root of the the original filter's magnitude response.
+            This method works best with filters with an odd number of taps,
+            and the resulting minimum phase filter will have a magnitude
+            response that approximates the square root of the the original
+            filter's magnitude response.
         'hilbert'
-            This method is designed to be used with equi-ripple
-            filters with unity or zero gain regions.
+            This method is designed to be used with equi-ripple filters with
+            unity or zero gain regions.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
         few times larger than the signal length. The default is ``None``,
@@ -881,17 +881,24 @@ def minimum_phase(
 
     pad : bool, optional
         If ``pad`` is ``True``, the resulting signal will be padded to the
-        same length as the input. The default is ``False``
-    return_magnitude_error : bool, optional
-        If ``True``, the absolute error between the input and the output is
-        returned, by default ``False``.
+        same length as the input. If ``pad`` is ``False`` the resulting minimum
+        phase representation is of length ``signal.n_samples/2+1``.
+        The default is ``False``
+    return_magnitude_ratio : bool, optional
+        If ``True``, the ratio between the linear phase (input) and the
+        minimum phase (output) filters is returned. See the examples for
+        further information. The default is ``False``.
 
     Returns
     -------
-    Signal
+    signal_minphase : Signal
         The minimum phase version of the filter.
+    magnitude_ratio : FrequencyData
+        The ratio between the magnitude of the linear phase version and the
+        minimum phase versions of the filter.
     """
     signal_flat = signal.flatten()
+    original_cshape = signal.cshape
     signal_minphase = signal.flatten()
     signal_minphase.time = np.zeros(
         (signal_minphase.cshape[0], int(np.floor((signal.n_samples + 1)/2))),
@@ -903,11 +910,13 @@ def minimum_phase(
             method=method,
             n_fft=n_fft)
 
-    if (pad is True) or (return_magnitude_error is True):
+    signal_minphase = signal_minphase.reshape(original_cshape)
+
+    if (pad is True) or (return_magnitude_ratio is True):
         sig_minphase_pad = pad_zeros(
             signal_minphase, signal.n_samples - signal_minphase.n_samples)
 
-        if return_magnitude_error is False:
+        if return_magnitude_ratio is False:
             return sig_minphase_pad
 
         error_mag = np.abs(sig_minphase_pad.freq) / np.abs(signal.freq)
