@@ -896,6 +896,123 @@ def minimum_phase(
     magnitude_ratio : FrequencyData
         The ratio between the magnitude of the linear phase version and the
         minimum phase versions of the filter.
+
+
+    Examples
+    --------
+
+    Minmum-phase version of an ideal impulse with a group delay of 64 samples
+
+    >>> import pyfar
+    >>> import matplotlib.pyplot as plt
+    >>> impulse_linear_phase = pyfar.signals.impulse(129, delay=64)
+    >>> impulse_minmum_phase = pyfar.dsp.minimum_phase(
+    ...     impulse_linear_phase, method='homomorphic')
+    >>> plt.figure(figsize=(8, 2))
+    >>> pyfar.plot.group_delay(impulse_linear_phase, label='Linear phase')
+    >>> pyfar.plot.group_delay(impulse_minmum_phase, label='Minmum phase')
+    >>> plt.legend()
+
+    .. plot::
+
+        import pyfar
+        import matplotlib.pyplot as plt
+        impulse_linear_phase = pyfar.signals.impulse(129, delay=64)
+        impulse_minmum_phase = pyfar.dsp.minimum_phase(
+            impulse_linear_phase, method='homomorphic')
+        plt.figure(figsize=(8, 2))
+        pyfar.plot.group_delay(impulse_linear_phase, label='Linear phase')
+        pyfar.plot.group_delay(impulse_minmum_phase, label='Minmum phase')
+        plt.legend()
+
+    Create a minimum phase equivalent of a linear phase FIR low-pass filter
+
+    >>> import pyfar
+    >>> import numpy as np
+    >>> from scipy.signal import remez
+    >>> import matplotlib.pyplot as plt
+    >>> freq = [0, 0.2, 0.3, 1.0]
+    >>> desired = [1, 0]
+    >>> h_linear = pyfar.Signal(remez(151, freq, desired, Hz=2.), 44100)
+    >>> h_min_hom = pyfar.dsp.minimum_phase(h_linear, method='homomorphic')
+    >>> h_min_hil = pyfar.dsp.minimum_phase(h_linear, method='hilbert')
+    >>> fig, axs = plt.subplots(3, figsize=(8, 6))
+    >>> for h, style in zip(
+    ...         (h_linear, h_min_hom, h_min_hil),
+    ...         ('-', '-.', '--')):
+    ...     pyfar.plot.time(h, linestyle=style, ax=axs[0])
+    ...     axs[0].grid(True)
+    ...     pyfar.plot.freq(h, linestyle=style, ax=axs[1])
+    ...     pyfar.plot.group_delay(h, linestyle=style, ax=axs[2])
+    >>> axs[1].legend(['Linear', 'Homomorphic', 'Hilbert'])
+
+    .. plot::
+
+        import pyfar
+        import numpy as np
+        from scipy.signal import remez
+        import matplotlib.pyplot as plt
+        freq = [0, 0.2, 0.3, 1.0]
+        desired = [1, 0]
+        h_linear = pyfar.Signal(remez(151, freq, desired, Hz=2.), 44100)
+        h_min_hom = pyfar.dsp.minimum_phase(h_linear, method='homomorphic')
+        h_min_hil = pyfar.dsp.minimum_phase(h_linear, method='hilbert')
+        fig, axs = plt.subplots(3, figsize=(8, 6))
+        for h, style in zip(
+                (h_linear, h_min_hom, h_min_hil),
+                ('-', '-.', '--')):
+            pyfar.plot.time(h, linestyle=style, ax=axs[0])
+            axs[0].grid(True)
+            pyfar.plot.freq(h, linestyle=style, ax=axs[1])
+            pyfar.plot.group_delay(h, linestyle=style, ax=axs[2])
+        axs[1].legend(['Linear', 'Homomorphic', 'Hilbert'])
+
+    Return the magnitude ratios between the mimimum and linear phase filters
+    and indicate frequencies where the linear phase filter exhibits small
+    amplitudes.
+
+    >>> h_minimum, ratio = pyfar.dsp.minimum_phase(h_linear,
+    ...     method='homomorphic', return_magnitude_ratio=True)
+    >>> fig, axs = plt.subplots(2, figsize=(8, 4))
+    >>> pyfar.plot.freq(h_linear, linestyle='-', ax=axs[0])
+    >>> pyfar.plot.freq(h_minimum, linestyle='--', ax=axs[0])
+    >>> pyfar.plot.freq(ratio, linestyle='-', ax=axs[1])
+    >>> mask = np.abs(h_linear.freq) < 10**(-60/20)
+    >>> ratio_masked = pyfar.FrequencyData(
+    ...     ratio.freq[mask], ratio.frequencies[mask[0]])
+    >>> pyfar.plot.freq(ratio_masked, color='k', linestyle='--', ax=axs[1])
+    >>> axs[1].set_ylabel('Log error in dB')
+    >>> axs[0].legend(['Linear phase', 'Minimum phase'])
+    >>> axs[1].legend(['Broadband', 'Linear-phase < -60 dB'])
+    >>> axs[1].set_ylim((-5, 105))
+
+    .. plot::
+
+        import pyfar
+        import numpy as np
+        from scipy.signal import remez
+        import matplotlib.pyplot as plt
+        freq = [0, 0.2, 0.3, 1.0]
+        desired = [1, 0]
+        h_linear = pyfar.Signal(remez(151, freq, desired, Hz=2.), 44100)
+        h_minimum, ratio = pyfar.dsp.minimum_phase(h_linear,
+            method='homomorphic', return_magnitude_ratio=True)
+
+        fig, axs = plt.subplots(2, figsize=(8, 4))
+        pyfar.plot.freq(h_linear, linestyle='-', ax=axs[0])
+        pyfar.plot.freq(h_minimum, linestyle='--', ax=axs[0])
+        pyfar.plot.freq(ratio, linestyle='-', ax=axs[1])
+        mask = np.abs(h_linear.freq) < 10**(-60/20)
+        ratio_masked = pyfar.FrequencyData(
+            ratio.freq[mask], ratio.frequencies[mask[0]])
+        pyfar.plot.freq(ratio_masked, color='k', linestyle='--', ax=axs[1])
+
+        axs[1].set_ylabel('Log error in dB')
+        axs[0].legend(['Linear phase', 'Minimum phase'])
+        axs[1].legend(['Broadband', 'Linear-phase < -60 dB'])
+        axs[1].set_ylim((-5, 105))
+
+
     """
     signal_flat = signal.flatten()
     original_cshape = signal.cshape
