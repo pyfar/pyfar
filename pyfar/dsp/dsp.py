@@ -903,24 +903,72 @@ class interpolate_spectrum():
 
     Examples
     --------
-    Interpolate magnitude only and add artificial linear.
+    Interpolate magnitude only and add artificial linear phase.
 
     >>> import pyfar as pf
     >>>
     >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
     >>> interpolator = pf.dsp.interpolate_spectrum(
-    >>>     data, 'magnitude', ('nearest', 'linear', 'nearest'),
+    >>>     data, 'magnitude_linear', ('nearest', 'linear', 'nearest'),
     >>>     group_delay=32)
-    >>> signal = interpolator(64, 44100, show=True)
+    >>> signal = interpolator(64, 44100)
 
-    .. :plot:
+    Inspect the data. Note that this plot can be also created by the
+    interpolator object by ``signal = interpolator(64, 44100, show=True)``
+
+    >>> with pf.plot.context():
+    >>>     _, ax = plt.subplots(2, 2)
+    >>>
+    >>>     # time signal (linear amplitude)
+    >>>     pf.plot.time(signal, ax=ax[0][0])
+    >>>
+    >>>     # time signal (log amplitude)
+    >>>     pf.plot.time(signal, ax=ax[1][0], dB=True)
+    >>>
+    >>>     # frequency plot (linear x-axis)
+    >>>     pf.plot.freq(signal, dB=False, xscale="linear", ax=ax[0][1])
+    >>>     pf.plot.freq(data, dB=False, xscale="linear",
+    >>>                  ax=ax[0][1], c='r', ls='', marker='.')
+    >>>     ax[0][1].set_xlim(0, signal.sampling_rate/2)
+    >>>
+    >>>     # frequency plot (log x-axis)
+    >>>     pf.plot.freq(signal, dB=False, ax=ax[1][1], label='intput')
+    >>>     pf.plot.freq(data, dB=False, ax=ax[1][1],
+    >>>                  c='r', ls='', marker='.', label='output')
+    >>>     min_freq = np.min([signal.sampling_rate / signal.n_samples,
+                               data.frequencies[0]])
+    >>>     ax[1][1].set_xlim(min_freq, signal.sampling_rate/2)
+    >>>     ax[1][1].legend(loc='best')
+
+    .. plot::
 
         import pyfar as pf
         data = pf.FrequencyData([1, 0], [5e3, 20e3])
         interpolator = pf.dsp.interpolate_spectrum(
-            data, 'magnitude', ('nearest', 'linear', 'nearest'),
+            data, 'magnitude_linear', ('nearest', 'linear', 'nearest'),
             group_delay=32)
-        signal = interpolator(64, 44100, show=True)
+        signal = interpolator(64, 44100)
+
+        # plot input and output data
+        with pf.plot.context():
+            _, ax = plt.subplots(2, 2)
+            # time signal (linear amplitude)
+            pf.plot.time(signal, ax=ax[0][0])
+            # time signal (log amplitude)
+            pf.plot.time(signal, ax=ax[1][0], dB=True)
+            # frequency plot (linear x-axis)
+            pf.plot.freq(signal, dB=False, xscale="linear", ax=ax[0][1])
+            pf.plot.freq(data, dB=False, xscale="linear",
+                         ax=ax[0][1], c='r', ls='', marker='.')
+            ax[0][1].set_xlim(0, signal.sampling_rate/2)
+            # frequency plot (log x-axis)
+            pf.plot.freq(signal, dB=False, ax=ax[1][1], label='intput')
+            pf.plot.freq(data, dB=False, ax=ax[1][1],
+                         c='r', ls='', marker='.', label='output')
+            min_freq = np.min([signal.sampling_rate / signal.n_samples,
+                               data.frequencies[0]])
+            ax[1][1].set_xlim(min_freq, signal.sampling_rate/2)
+            ax[1][1].legend(loc='best')
 
     """
 
