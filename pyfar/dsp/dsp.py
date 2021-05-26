@@ -910,7 +910,7 @@ def minimum_phase(
         if return_magnitude_error is False:
             return sig_minphase_pad
 
-        error_mag = (np.abs(signal.freq) - np.abs(sig_minphase_pad.freq))
+        error_mag = np.abs(sig_minphase_pad.freq) / np.abs(signal.freq)
         error = pyfar.FrequencyData(error_mag, signal.frequencies)
 
         if pad_zeros is False:
