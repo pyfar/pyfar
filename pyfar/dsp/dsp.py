@@ -368,20 +368,21 @@ def minimum_phase(
         The linear phase filter.
     method : str, optional
         The method:
-            'homomorphic' (default)
-                This method works best with filters with an
-                odd number of taps, and the resulting minimum phase filter
-                will have a magnitude response that approximates the square
-                root of the the original filter's magnitude response.
-            'hilbert'
-                This method is designed to be used with equi-ripple
-                filters with unity or zero gain regions.
+
+        'homomorphic' (default)
+            This method works best with filters with an
+            odd number of taps, and the resulting minimum phase filter
+            will have a magnitude response that approximates the square
+            root of the the original filter's magnitude response.
+        'hilbert'
+            This method is designed to be used with equi-ripple
+            filters with unity or zero gain regions.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
         few times larger than the signal length. The default is ``None``,
         resulting in an FFT length of:
 
-            n_fft = 2 ** int(np.ceil(np.log2(2 * (len(h) - 1) / 0.01)))
+            n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
 
     pad : bool, optional
         If ``pad`` is ``True``, the resulting signal will be padded to the
