@@ -27,25 +27,6 @@ def pop_state_from_kwargs(**kwargs):
     return kwargs
 
 
-def lfilter(coefficients, signal, zi):
-    return spsignal.lfilter(coefficients[0], coefficients[1], signal, zi=zi)
-
-
-def filtfilt(coefficients, signal, **kwargs):
-    kwargs = pop_state_from_kwargs(kwargs)
-    return spsignal.filtfilt(
-        coefficients[0], coefficients[1], signal, **kwargs)
-
-
-def sosfilt(sos, signal, zi):
-    return spsignal.sosfilt(sos, signal, zi=zi)
-
-
-def sosfiltfilt(sos, signal, **kwargs):
-    kwargs = pop_state_from_kwargs(kwargs)
-    return spsignal.sosfiltfilt(sos, signal, **kwargs)
-
-
 def extend_sos_coefficients(sos, order):
     """Extend a set of SOS filter coefficients to match a required filter order
     by adding sections with coefficients resulting in an ideal frequency
@@ -276,7 +257,7 @@ class FilterFIR(Filter):
 
     @staticmethod
     def _process(coefficients, data, zi=None):
-        return lfilter(coefficients, data, zi=zi)
+        return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
 
 class FilterIIR(Filter):
@@ -312,7 +293,7 @@ class FilterIIR(Filter):
 
     @staticmethod
     def _process(coefficients, data, zi=None):
-        return lfilter(coefficients, data, zi=zi)
+        return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
 
 class FilterSOS(Filter):
@@ -351,4 +332,4 @@ class FilterSOS(Filter):
 
     @staticmethod
     def _process(sos, data, zi=None):
-        return sosfilt(sos, data, zi=zi)
+        return spsignal.sosfilt(sos, data, zi=zi)
