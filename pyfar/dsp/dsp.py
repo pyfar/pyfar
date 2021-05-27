@@ -815,9 +815,11 @@ def regularized_spectrum_inversion(
 
 class interpolate_spectrum():
     """
-    Interpolate incomplete spectrum to complete single sided spectrum.
+    Interpolate an incomplete spectrum to a complete single sided spectrum.
 
-    TODO: Add reference to minimum phase functions
+    This is intended to interpolate transfer functions, for example sparse
+    spectra that are defined only at octave frequencies or incomplete spectra
+    from numerical simulations.
 
     Parameters
     ----------
@@ -828,7 +830,7 @@ class interpolate_spectrum():
 
         ``'complex'``
             Separate interpolation of the real and imaginary part
-        ``'magnitude_unwrap'``
+        ``'magnitude_phase'``
             Separate interpolation if the magnitude and unwrapped phase values
         ``'magnitude_linear'``
             Interpolation of the magnitude values and generation of a linear
@@ -913,16 +915,14 @@ class interpolate_spectrum():
     >>>     group_delay=32)
     >>> signal = interpolator(64, 44100)
 
-    Inspect the data. Note that this plot can be also created by the
-    interpolator object by ``signal = interpolator(64, 44100, show=True)``
+    Inspect the data in the time and frequency domain. Note that this plot can
+    be also created by the interpolator object by
+    ``signal = interpolator(64, 44100, show=True)``
 
     >>> with pf.plot.context():
     >>>     _, ax = plt.subplots(2, 2)
     >>>
-    >>>     # time signal (linear amplitude)
     >>>     pf.plot.time(signal, ax=ax[0][0])
-    >>>
-    >>>     # time signal (log amplitude)
     >>>     pf.plot.time(signal, ax=ax[1][0], dB=True)
     >>>
     >>>     # frequency plot (linear x-axis)
@@ -986,7 +986,7 @@ class interpolate_spectrum():
                 f"data.fft_norm is '{data.fft_norm}' but must be 'none'")
 
         # ... method
-        methods = ['complex', 'magnitude_unwrap', 'magnitude_linear',
+        methods = ['complex', 'magnitude_phase', 'magnitude_linear',
                    'magnitude_minimum', 'magnitude']
         if method not in methods:
             raise ValueError((f"method is '{method}'' but must be on of the "
@@ -1033,7 +1033,7 @@ class interpolate_spectrum():
         # get the required data for interpolation
         if method == 'complex':
             self._data = [np.real(data.freq), np.imag(data.freq)]
-        elif method == 'magnitude_unwrap':
+        elif method == 'magnitude_phase':
             self._data = [np.abs(data.freq),
                           pyfar.dsp.phase(data, unwrap=True)]
         else:
@@ -1086,7 +1086,7 @@ class interpolate_spectrum():
         # get half sided spectrum
         if self._method == "complex":
             freq = interpolated[0] + 1j * interpolated[1]
-        elif self._method == 'magnitude_unwrap':
+        elif self._method == 'magnitude_phase':
             freq = interpolated[0] * np.exp(-1j * interpolated[1])
         else:
             freq = interpolated[0]
@@ -1096,9 +1096,10 @@ class interpolate_spectrum():
 
         # clip the magnitude
         if self._clip:
-            signal.freq = \
-                np.clip(np.abs(signal.freq), self._clip[0], self._clip[1]) \
-                * np.exp(-1j * phase(signal))
+            signal.freq = np.clip(
+                np.abs(signal.freq),
+                self._clip[0],
+                self._clip[1]) * np.exp(-1j * phase(signal))
 
         # generate linear or minimum phase
         if self._method == "magnitude_minimum":

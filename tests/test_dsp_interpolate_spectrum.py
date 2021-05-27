@@ -85,7 +85,7 @@ def test_init_assertions():
      ("complex", [1+2j, 2+1j], [1, 2], 12, 6,
       [0+3j, 0.5+2.5j, 1+2j, 1.5+1.5j, 2+1j, 2.5+0.5j, 3+0j]),
 
-     ("magnitude_unwrap",
+     ("magnitude_phase",
       # magnitude increases with 1 per Hz, phase with pi per Hz
       [np.linspace(1, 2, 3) * np.exp(-1j * np.linspace(np.pi, np.pi*2, 3))],
       [1, 1.5, 2], 24, 6,
@@ -116,7 +116,7 @@ def test_interpolation(
     signal = interpolator(n_samples, sampling_rate)
 
     # check output depending on method
-    if method == "magnitude_unwrap":
+    if method == "magnitude_phase":
         # test magnitude and unwrapped phase response
         npt.assert_allclose(np.abs(signal.freq), np.atleast_2d(freq_out[0]))
         npt.assert_allclose(pf.dsp.phase(signal, unwrap=True),
