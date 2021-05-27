@@ -885,6 +885,33 @@ def fractional_octave_bands(
     -----
     This function uses second order sections of Butterworth filters for
     increased numeric accuracy and stability.
+
+    Examples
+    --------
+    Filter an impulse into octave bands. The summed energy of all bands equals
+    the energy of the input signal.
+
+    >>> import pyfar as pf
+    >>> import numpy as np
+    >>> x = pf.signals.impulse(2**17)
+    >>> y = pf.dsp.filter.fractional_octave_bands(x, 1, freq_range=(20, 8e3))
+    >>> y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0), y.frequencies)
+    >>> pf.plot.freq(y)
+    >>> ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
+    >>> ax.set_title("Filter bands and the sum of their squared magnitudes")
+
+    .. plot::
+
+        import pyfar as pf
+        import numpy as np
+        x = pf.signals.impulse(2**17)
+        y = pf.dsp.filter.fractional_octave_bands(x, 1, freq_range=(20, 8e3))
+        y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0), y.frequencies)
+        pf.plot.freq(y)
+        ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
+        ax.set_title("Filter bands and the sum of their squared magnitudes")
+        plt.tight_layout()
+
     """
     # check input
     if (signal is None and sampling_rate is None) \
