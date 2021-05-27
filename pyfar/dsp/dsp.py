@@ -832,17 +832,15 @@ class interpolate_spectrum():
             Separate interpolation of the real and imaginary part
         ``'magnitude_phase'``
             Separate interpolation if the magnitude and unwrapped phase values
-        ``'magnitude_linear'``
-            Interpolation of the magnitude values and generation of a linear
-            phase response with a specified group delay. (See parameters
-            `group_delay` and `unit` below and
-            :py:func:`~pyfar.dsp.linear_phase`).
-        ``'magnitude_minimum'``
             Interpolation of the magnitude values and generation of a minimum
             phase response
         ``'magnitude'``
             Interpolate the magnitude values only. Results in a zero phase
-            signal, which is symmetric around the first sample
+            signal, which is symmetric around the first sample. This phase
+            response might not be ideal for many applications. Minimum and
+            linear phase responses can be generated with
+            :py:func:`~pyfar.dsp.minimum_phase` and
+            :py:func:`~pyfar.dsp.linear_phase`.
 
     kind : tuple
         Three element tuple ``('first', 'second', 'third')`` that specifies the
@@ -880,14 +878,6 @@ class interpolate_spectrum():
         ``'magnitude_linear'`` or ``'magnitude_minimum'``. The default is
         ``False`` which does not clip the
         data.
-    group_delay : float, optional
-        The group delay of the linear phase response. Must be specified if
-        `method` is ``'magnitude_linear'``. The unit of the group delay is
-        given by `unit` (see below).
-    unit : string, optional
-        Unit of the group delay. Can be ``'s'`` for seconds, ``'ms'`` for
-        milliseconds, ``'mus'`` for microseconds, or ``'samples'``. The
-        default is ``'samples'``.
 
     Returns
     -------
@@ -911,9 +901,9 @@ class interpolate_spectrum():
     >>>
     >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
     >>> interpolator = pf.dsp.interpolate_spectrum(
-    >>>     data, 'magnitude_linear', ('nearest', 'linear', 'nearest'),
-    >>>     group_delay=32)
+    >>>     data, 'magnitude', ('nearest', 'linear', 'nearest'))
     >>> signal = interpolator(64, 44100)
+    >>> signal = pf.dsp.linear_phase(signal, 32)
 
     Inspect the data in the time and frequency domain. Note that this plot can
     be also created by the interpolator object by
@@ -945,9 +935,9 @@ class interpolate_spectrum():
         import pyfar as pf
         data = pf.FrequencyData([1, 0], [5e3, 20e3])
         interpolator = pf.dsp.interpolate_spectrum(
-            data, 'magnitude_linear', ('nearest', 'linear', 'nearest'),
-            group_delay=32)
+            data, 'magnitude', ('nearest', 'linear', 'nearest'))
         signal = interpolator(64, 44100)
+        signal = pf.dsp.linear_phase(signal, 32)
 
         # plot input and output data
         with pf.plot.context():
@@ -986,8 +976,7 @@ class interpolate_spectrum():
                 f"data.fft_norm is '{data.fft_norm}' but must be 'none'")
 
         # ... method
-        methods = ['complex', 'magnitude_phase', 'magnitude_linear',
-                   'magnitude_minimum', 'magnitude']
+        methods = ['complex', 'magnitude_phase', 'magnitude']
         if method not in methods:
             raise ValueError((f"method is '{method}'' but must be on of the "
                               f"following: {', '.join(methods)}"))
@@ -1012,18 +1001,11 @@ class interpolate_spectrum():
             if not isinstance(clip, tuple) or len(clip) != 2:
                 raise ValueError("clip must be a tuple of length 2")
 
-        # ... group delay
-        if group_delay is None and method == 'magnitude_linear':
-            raise ValueError(("The group delay must be specified "
-                              "if the method is magnitude_linear"))
-
         # initialize the interpolators ----------------------------------------
         # store required parameters
         self._method = method
         self._clip = clip
         self._fscale = fscale
-        self._group_delay = group_delay
-        self._unit = unit
 
         # flatten input data to work with scipy interpolators
         self._cshape = data.cshape
@@ -1100,12 +1082,6 @@ class interpolate_spectrum():
                 np.abs(signal.freq),
                 self._clip[0],
                 self._clip[1]) * np.exp(-1j * phase(signal))
-
-        # generate linear or minimum phase
-        if self._method == "magnitude_minimum":
-            pass
-        elif self._method == "magnitude_linear":
-            signal = linear_phase(signal, self._group_delay, self._unit)
 
         if show:
             # plot input and output data
