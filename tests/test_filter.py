@@ -239,7 +239,7 @@ def test_reconstructing_fractional_octave_bands():
         None, sampling_rate=44100)
     assert isinstance(f_obj, pclass.FilterFIR)
     assert f_obj.comment == \
-        ("Perfect reconstructing linear phase fractional octave filter bank."
+        ("Reconstructing linear phase fractional octave filter bank."
          "(num_fractions=1, frequency_range=(63, 16000), overlap=1, slope=0)")
     assert f_obj.sampling_rate == 44100
 

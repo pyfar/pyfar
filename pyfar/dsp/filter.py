@@ -854,7 +854,17 @@ def fractional_octave_bands(
         sampling_rate=None,
         freq_range=(20.0, 20e3),
         order=14):
-    """Create and/or apply a fractional octave filter bank.
+    """Create and/or apply an energy preserving fractional octave filter bank.
+
+    .. note::
+        This filter bank has -3 dB cut-off frequencies. For sufficiently large
+        values of ``'order'``, the summed energy of the filter bank equals the
+        energy of input signal, i.e., the filter bank is energy preserving
+        (reconstructing). This is usefull for analysis energetic properties of
+        the input signal such as the room acoustic propertie reverberation
+        time. For an amplitude preserving filter bank with -6 dB cut-off
+        frequencies see
+        :py:func:`~pyfar.dsp.filter.reconstructing_fractional_octave_bands`.
 
     Parameters
     ----------
@@ -982,7 +992,16 @@ def reconstructing_fractional_octave_bands(
         signal, num_fractions=1, frequency_range=(63, 16000),
         overlap=1, slope=0, n_samples=2**12, sampling_rate=None):
     """
-    Perfectly reconstructing fractional octave filter bank.
+    Create and/or apply an amplitude preserving fractional octave filter bank.
+
+    .. note::
+        This filter bank has -6 dB cut-off frequencies. For sufficient lengths
+        of ``'n_samples'``, the summed output of the filter bank equals the
+        input signal, i.e., the filter bank is amplitude preserving
+        (reconstructing). This is usefull for analysis and synthesis
+        applications such as room acoustical simulations. For an energy
+        preserving filter bank with -3 dB cut-off frequencies see
+        :py:func:`~pyfar.dsp.filter.fractional_octave_bands`.
 
     The filters have a linear phase with a delay of ``n_samples/2`` and are
     windowed with a Hann window to suppress side lobes of the finite filters.
@@ -1042,28 +1061,43 @@ def reconstructing_fractional_octave_bands(
 
     >>> import pyfar as pf
     >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
     >>>
     >>> x = pf.signals.impulse(2**12)
     >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
     >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
     >>>
-    >>> # plot
     >>> ax = pf.plot.time_freq(y_sum, color='k')
+    >>> pf.plot.time(x, ax=ax[0])
+    >>> ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
+    >>> ax[0].set_title("Original (blue) and reconstructed pulse (black)")
+    >>>
+    >>> pf.plot.freq(y_sum, color='k', ax=ax[1])
     >>> pf.plot.freq(y, ax=ax[1])
+    >>> ax[1].set_title("Reconstructed (black) and filtered impulse (colored)")
+    >>>
+    >>> plt.tight_layout(h_pad=.6)
 
     .. plot::
 
         import pyfar as pf
         import numpy as np
+        import matplotlib.pyplot as plt
 
-        # filter and re-synthesize impulse signal
         x = pf.signals.impulse(2**12)
         y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
         y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
 
-        # plot
         ax = pf.plot.time_freq(y_sum, color='k')
+        pf.plot.time(x, ax=ax[0])
+        ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
+        ax[0].set_title("Original (blue) and reconstructed pulse (black)")
+
+        pf.plot.freq(y_sum, color='k', ax=ax[1])
         pf.plot.freq(y, ax=ax[1])
+        ax[1].set_title("Reconstructed (black) and filtered impulse (colored)")
+
+        plt.tight_layout(h_pad=.6)
     """
 
     # check input
@@ -1138,20 +1172,20 @@ def reconstructing_fractional_octave_bands(
     g = g**2
 
     # generate linear phase
-    f = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
-    tau = n_samples / 2 / sampling_rate
-    g = g.astype(complex) * np.exp(-1j * 2 * np.pi * f * tau)
+    frequencies = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
+    group_delay = n_samples / 2 / sampling_rate
+    g = g.astype(complex) * np.exp(-1j * 2 * np.pi * frequencies * group_delay)
 
     # get impulse responses
-    h = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
+    time = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
 
     # window
-    h *= spsignal.windows.hann(h.shape[-1])
+    time *= spsignal.windows.hann(time.shape[-1])
 
     # create filter object
-    filt = pf.FilterFIR(h, sampling_rate)
+    filt = pf.FilterFIR(time, sampling_rate)
     filt.comment = (
-        "Perfect reconstructing linear phase fractional octave filter bank."
+        "Reconstructing linear phase fractional octave filter bank."
         f"(num_fractions={num_fractions}, frequency_range={frequency_range}, "
         f"overlap={overlap}, slope={slope})")
 
