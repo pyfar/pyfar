@@ -1,6 +1,7 @@
 import warnings
 
 import numpy as np
+from numpy.lib.twodim_base import triu_indices_from
 import scipy.signal as spsignal
 
 import pyfar as pf
@@ -853,7 +854,7 @@ def fractional_octave_bands(
         num_fractions,
         sampling_rate=None,
         freq_range=(20.0, 20e3),
-        order=14):
+        order=14, cascaded=False):
     """Create and/or apply a fractional octave filter bank.
 
     Parameters
@@ -892,9 +893,14 @@ def fractional_octave_bands(
 
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
-    sos = _coefficients_fractional_octave_bands(
-        sampling_rate=fs, num_fractions=num_fractions,
-        freq_range=freq_range, order=order)
+    if cascaded is False:
+        sos = _coefficients_fractional_octave_bands(
+            sampling_rate=fs, num_fractions=num_fractions,
+            freq_range=freq_range, order=order)
+    else:
+        sos = _coefficients_fractional_octave_bands_cascaded(
+            sampling_rate=fs, num_fractions=num_fractions,
+            freq_range=freq_range, order=order)
 
     filt = pf.FilterSOS(sos, fs)
     filt.comment = (
@@ -975,4 +981,67 @@ def _coefficients_fractional_octave_bands(
             sos_coeff = spsignal.butter(
                 order, Wn, btype=btype, output='sos')
         sos[idx, :, :] = sos_coeff
+    return sos
+
+
+def _coefficients_fractional_octave_bands_cascaded(
+        sampling_rate, num_fractions,
+        freq_range=(20.0, 20e3), order=14):
+    """Calculate the second order section filter coefficients of a fractional
+    octave band filter bank.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., 1 refers to octave
+        bands and 3 to third octave bands. The default is 1.
+    sampling_rate : None, int
+        The sampling rate in Hz. Only required if signal is None. The default
+        is None.
+    frequency_range : array, tuple, optional
+        The lower and upper frequency limits. The default is (20, 20e3)
+    order : integer, optional
+        Order of the Butterworth filter. The default is 14.
+
+
+    Returns
+    -------
+    sos : array, float
+        Second order section filter coefficients with shape (.., 6)
+
+    Notes
+    -----
+    This function uses second order sections of butterworth filters for
+    increased numeric accuracy and stability.
+    """
+
+    f_crit = fractional_octave_frequencies(
+        num_fractions, freq_range, return_cutoff=True)[2]
+
+    freqs_upper = f_crit[1]
+    freqs_lower = f_crit[0]
+
+    # normalize interval such that the Nyquist frequency is 1
+    Wns = np.vstack((freqs_lower, freqs_upper)).T / sampling_rate * 2
+
+    mask_skip = Wns[:, 0] >= 1
+    if np.any(mask_skip):
+        Wns = Wns[~mask_skip]
+        warnings.warn("Skipping bands above the Nyquist frequency")
+
+    num_bands = np.sum(~mask_skip)
+    sos = np.zeros((num_bands, order, 6), np.double)
+
+    for idx, Wn in enumerate(Wns):
+        if Wn[1] <= 1:
+            sos_lp = spsignal.butter(
+                order, Wn[1], btype='lowpass', output='sos')
+        else:
+            sos_lp = np.repeat([[1, 0, 0, 1, 0, 0]], sos_lp.shape[0], axis=0)
+
+        sos_hp = spsignal.butter(
+            order, Wn[0], btype='highpass', output='sos', )
+
+        sos[idx, :, :] = np.concatenate((sos_lp, sos_hp), axis=0)
+
     return sos
