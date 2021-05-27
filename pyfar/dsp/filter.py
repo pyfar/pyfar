@@ -1,7 +1,6 @@
 import warnings
 
 import numpy as np
-from numpy.lib.twodim_base import triu_indices_from
 import scipy.signal as spsignal
 
 import pyfar as pf
