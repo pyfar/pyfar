@@ -19,10 +19,9 @@ def test_import_classes():
     from pyfar import Coordinates
     from pyfar import Orientations
 
-    from pyfar.dsp import Filter
-    from pyfar.dsp import FilterSOS
-    from pyfar.dsp import FilterFIR
-    from pyfar.dsp import FilterIIR
+    from pyfar import FilterSOS
+    from pyfar import FilterFIR
+    from pyfar import FilterIIR
 
     __all__ = [
         Signal,
@@ -30,7 +29,6 @@ def test_import_classes():
         FrequencyData,
         Coordinates,
         Orientations,
-        Filter,
         FilterSOS,
         FilterFIR,
         FilterIIR
@@ -44,6 +42,6 @@ def test_import_submodules():
     assert pyfar.dsp.fft
     assert pyfar.dsp.filter
     assert pyfar.io
-    assert pyfar.spatial
+    assert pyfar.samplings
     assert pyfar.plot
     assert pyfar.signals

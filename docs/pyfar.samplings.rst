@@ -1,7 +1,7 @@
-pyfar.spatial
-=============
+pyfar.samplings
+===============
 
-.. automodule:: pyfar.spatial
+.. automodule:: pyfar.samplings
    :members:
    :undoc-members:
    :show-inheritance:

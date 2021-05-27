@@ -1,7 +1,7 @@
 Orientations
 ------------
 
-.. automodule:: pyfar.orientations
+.. automodule:: pyfar.classes.orientations
    :members:
    :undoc-members:
    :special-members: __init__

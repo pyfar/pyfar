@@ -2,8 +2,8 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-import pyfar.signal as signal
-from pyfar.signal import Signal, TimeData, FrequencyData
+import pyfar.classes.audio as signal
+from pyfar import Signal, TimeData, FrequencyData
 
 
 # test adding two Signals
