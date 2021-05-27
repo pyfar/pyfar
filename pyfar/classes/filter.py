@@ -165,13 +165,9 @@ class Filter(object):
         """
         return self._state
 
-    @property
-    def filter_func(self):
-        raise NotImplementedError("Abstract class method")
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        raise NotImplementedError("Abstract class method")
+    @staticmethod
+    def _process(coefficients, data, zi=None):
+        raise NotImplementedError("Abstract class method.")
 
     def process(self, signal, reset=True):
         """Apply the filter to a signal.
@@ -206,11 +202,11 @@ class Filter(object):
         if self.state is not None:
             for idx, (coeff, state) in enumerate(
                     zip(self._coefficients, self._state)):
-                filtered_signal_data[idx, ...], new_state = self.filter_func(
+                filtered_signal_data[idx, ...], new_state = self._process(
                     coeff, filtered_signal_data[idx, ...], state)
         else:
             for idx, coeff in enumerate(self._coefficients):
-                filtered_signal_data[idx, ...] = self.filter_func(
+                filtered_signal_data[idx, ...] = self._process(
                     coeff, signal.time, zi=None)
 
         filtered_signal = deepcopy(signal)
@@ -262,8 +258,7 @@ class FilterFIR(Filter):
     def __init__(
             self,
             coefficients,
-            sampling_rate,
-            filter_func=lfilter):
+            sampling_rate):
         """
         Initialize an finite impulse response (FIR) Filter object.
 
@@ -297,17 +292,10 @@ class FilterFIR(Filter):
         self._FILTER_FUNCS = {
             'default': lfilter,
             'zerophase': filtfilt}
-        self._filter_func = filter_func
 
-    @property
-    def filter_func(self):
-        return self._filter_func
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        if type('filter_func') == str:
-            filter_func = self._FILTER_FUNCS[filter_func]
-        self._filter_func = filter_func
+    @staticmethod
+    def _process(coefficients, data, zi=None):
+        return lfilter(coefficients, data, zi=zi)
 
 
 class FilterIIR(Filter):
@@ -318,8 +306,7 @@ class FilterIIR(Filter):
     def __init__(
             self,
             coefficients,
-            sampling_rate,
-            filter_func=lfilter):
+            sampling_rate):
         """IIR filter
         Initialize an infinite impulse response (IIR) Filter object.
 
@@ -350,17 +337,10 @@ class FilterIIR(Filter):
         self._FILTER_FUNCS = {
             'default': lfilter,
             'zerophase': filtfilt}
-        self._filter_func = filter_func
 
-    @property
-    def filter_func(self):
-        return self._filter_func
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        if type('filter_func') == str:
-            filter_func = self._FILTER_FUNCS[filter_func]
-        self._filter_func = filter_func
+    @staticmethod
+    def _process(coefficients, data, zi=None):
+        return lfilter(coefficients, data, zi=zi)
 
 
 class FilterSOS(Filter):
@@ -370,8 +350,7 @@ class FilterSOS(Filter):
     def __init__(
             self,
             coefficients,
-            sampling_rate,
-            filter_func=sosfilt):
+            sampling_rate):
         """
         Initialize a second order sections (SOS) Filter object.
 
@@ -407,8 +386,7 @@ class FilterSOS(Filter):
             'default': sosfilt,
             'zerophase': sosfiltfilt
         }
-        self._filter_func = filter_func
 
-    @property
-    def filter_func(self):
-        return self._filter_func
+    @staticmethod
+    def _process(sos, data, zi=None):
+        return sosfilt(sos, data, zi=zi)
