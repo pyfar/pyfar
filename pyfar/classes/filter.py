@@ -84,7 +84,6 @@ class Filter(object):
     def __init__(
             self,
             coefficients=None,
-            filter_func=None,
             sampling_rate=None,
             state=None,
             comment=None):
@@ -95,14 +94,10 @@ class Filter(object):
         ----------
         coefficients : array, double
             The filter coefficients as an array.
-        filter_func : ``'default'``, ``'zerophase'``
-            ``'default'`` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
+        sampling_rate : number
+            The sampling rate of the filter in Hz.
         state : array, optional
             The state of the filter from a priory knowledge.
-
 
         Returns
         -------
@@ -123,11 +118,6 @@ class Filter(object):
         else:
             self._initialized = False
         self._state = state
-        self._filter_func = None
-
-        self._FILTER_FUNCS = {
-            'default': None,
-            'zerophase': None}
 
         self._sampling_rate = sampling_rate
 
@@ -269,11 +259,6 @@ class FilterFIR(Filter):
             (number of channels, number of filter coefficients)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        filter_func : ``'default'``, ``'zerophase'``
-            ``'default'`` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
 
@@ -288,10 +273,6 @@ class FilterFIR(Filter):
         coeff = np.stack((b, a), axis=-2)
 
         super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
-
-        self._FILTER_FUNCS = {
-            'default': lfilter,
-            'zerophase': filtfilt}
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -318,11 +299,6 @@ class FilterIIR(Filter):
             number of coefficients in the denominator)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        filter_func : ``'default'``, ``'zerophase'``
-            ``'default'`` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
 
@@ -333,10 +309,6 @@ class FilterIIR(Filter):
         """
         coeff = np.atleast_2d(coefficients)
         super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
-
-        self._FILTER_FUNCS = {
-            'default': lfilter,
-            'zerophase': filtfilt}
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -361,11 +333,6 @@ class FilterSOS(Filter):
             (n_filter_chan, n_sections, 6)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        filter_func : ``'default'``, ``'zerophase'``
-            ```'default'``` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
 
@@ -381,11 +348,6 @@ class FilterSOS(Filter):
                 "section filter structure.")
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate)
-
-        self._FILTER_FUNCS = {
-            'default': sosfilt,
-            'zerophase': sosfiltfilt
-        }
 
     @staticmethod
     def _process(sos, data, zi=None):
