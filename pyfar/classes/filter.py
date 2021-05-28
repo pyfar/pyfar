@@ -213,7 +213,7 @@ class Filter(object):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective object dictionary."""
-        obj = cls()
+        obj = cls(np.zeros((1, 6)), None)
         obj.__dict__.update(obj_dict)
         return obj
 
