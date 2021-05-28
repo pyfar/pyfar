@@ -1299,9 +1299,9 @@ def pad_zeros(signal, pad_width, mode='after'):
 
     Examples
     --------
-    >>> import pyfar
-    >>> impulse = pyfar.signals.impulse(512, amplitude=1)
-    >>> impulse_padded = pyfar.dsp.pad_zeros(impulse, 128, mode='after')
+    >>> import pyfar as pf
+    >>> impulse = pf.signals.impulse(512, amplitude=1)
+    >>> impulse_padded = pf.dsp.pad_zeros(impulse, 128, mode='after')
 
     """
 

@@ -81,7 +81,7 @@ def context(style='light', after_reset=False):
     >>>
     >>> with pf.plot.context():
     >>>     fig, ax = plt.subplots(2, 1)
-    >>>     pf.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
+    >>>     pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
     """
 
     # get pyfar plotstyle if desired
