@@ -6,6 +6,7 @@ from .dsp import (
     zero_phase,
     spectrogram,
     regularized_spectrum_inversion,
+    pad_zeros,
     time_shift,
     time_window,
     kaiser_window_beta
@@ -25,6 +26,7 @@ __all__ = [
     'zero_phase',
     'spectrogram',
     'regularized_spectrum_inversion',
+    'pad_zeros',
     'time_shift',
     'time_window',
     'kaiser_window_beta'

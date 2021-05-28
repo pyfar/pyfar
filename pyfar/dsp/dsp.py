@@ -853,6 +853,65 @@ def _cross_fade(first, second, indices):
     return result
 
 
+def pad_zeros(signal, pad_width, mode='after'):
+    """Pad a signal with zeros in the time domain.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal which is to be extended
+    pad_width : int
+        The number of samples to be padded.
+    mode : str, optional
+        The padding mode, can either be 'after', to append a number of
+        zeros to the end of the signal, 'before' to pre-pend the
+        number of zeros before the starting time of the signal, or
+        'center' to insert the number of zeros in the middle of the signal.
+        The mode 'center' can be used to pad signals with a symmetry with
+        respect to the time ``t=0``. The default is 'after'.
+
+    Returns
+    -------
+    Signal
+        The zero-padded signal.
+
+    Examples
+    --------
+    >>> import pyfar
+    >>> impulse = pyfar.signals.impulse(512, amplitude=1)
+    >>> impulse_padded = pyfar.dsp.pad_zeros(impulse, 128, mode='after')
+
+    """
+
+    if not isinstance(signal, pyfar.Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    padded_signal = signal.flatten()
+
+    if mode in ['after', 'center']:
+        pad_array = ((0, 0), (0, pad_width))
+    elif mode == 'before':
+        pad_array = ((0, 0), (pad_width, 0))
+    else:
+        raise ValueError("Unknown padding mode.")
+
+    if mode == 'center':
+        shift_samples = int(np.round(signal.n_samples/2))
+        padded_signal.time = np.roll(
+            padded_signal.time, shift_samples, axis=-1)
+
+    padded_signal.time = np.pad(
+        padded_signal.time, pad_array, mode='constant')
+
+    if mode == 'center':
+        padded_signal.time = np.roll(
+            padded_signal.time, -shift_samples, axis=-1)
+
+    padded_signal = padded_signal.reshape(signal.cshape)
+
+    return padded_signal
+
+
 def time_shift(signal, shift, unit='samples'):
     """Apply a time-shift to a signal.
 
