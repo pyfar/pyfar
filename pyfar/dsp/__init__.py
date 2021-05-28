@@ -1,4 +1,5 @@
 from .dsp import (
+    minimum_phase,
     phase,
     group_delay,
     wrap_to_2pi,
@@ -26,6 +27,7 @@ __all__ = [
     'zero_phase',
     'spectrogram',
     'regularized_spectrum_inversion',
+    'minimum_phase',
     'pad_zeros',
     'time_shift',
     'time_window',
