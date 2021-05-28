@@ -426,27 +426,27 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     .. plot::
 
-        import pyfar
+        import pyfar as pf
         import numpy as np
 
-        signal = pyfar.Signal(np.ones(100), 44100)
+        signal = pf.Signal(np.ones(100), 44100)
         for shape in ['symmetric', 'symmetric_zero', 'left', 'right']:
-            signal_windowed = pyfar.dsp.time_window(
+            signal_windowed = pf.dsp.time_window(
                 signal, interval=[25,45], shape=shape)
-            ax = pyfar.plot.time(signal_windowed, label=shape)
+            ax = pf.plot.time(signal_windowed, label=shape)
         ax.legend(loc='right')
 
     Window with fade-in and fade-out defined by four values in `interval`.
 
     .. plot::
 
-        import pyfar
+        import pyfar as pf
         import numpy as np
 
-        signal = pyfar.Signal(np.ones(100), 44100)
-        signal_windowed = pyfar.dsp.time_window(
+        signal = pf.Signal(np.ones(100), 44100)
+        signal_windowed = pf.dsp.time_window(
                 signal, interval=[25, 40, 60, 90], window='hann')
-        pyfar.plot.time(signal_windowed)
+        pf.plot.time(signal_windowed)
 
 
     """
