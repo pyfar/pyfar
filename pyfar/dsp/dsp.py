@@ -923,7 +923,7 @@ class InterpolateSpectrum():
     ...                  ax=ax[0, 1], c='r', ls='', marker='.')
     >>>     ax[0, 1].set_xlim(0, signal.sampling_rate/2)
     >>>     # frequency plot (log x-axis)
-    >>>     pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='intput')
+    >>>     pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
     >>>     pf.plot.freq(data, dB=False, ax=ax[1, 1],
     ...                  c='r', ls='', marker='.', label='output')
     >>>     min_freq = np.min([signal.sampling_rate / signal.n_samples,
@@ -955,7 +955,7 @@ class InterpolateSpectrum():
                          ax=ax[0, 1], c='r', ls='', marker='.')
             ax[0, 1].set_xlim(0, signal.sampling_rate/2)
             # frequency plot (log x-axis)
-            pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='intput')
+            pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
             pf.plot.freq(data, dB=False, ax=ax[1, 1],
                          c='r', ls='', marker='.', label='output')
             min_freq = np.min([signal.sampling_rate / signal.n_samples,
@@ -1100,7 +1100,7 @@ class InterpolateSpectrum():
                                 ax=ax[0, 1], c='r', ls='', marker='.')
                 ax[0, 1].set_xlim(0, sampling_rate/2)
                 # frequency plot (log x-axis)
-                pyfar.plot.freq(signal, dB=False, ax=ax[1, 1], label='intput')
+                pyfar.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
                 pyfar.plot.freq(self._input, dB=False, ax=ax[1, 1],
                                 c='r', ls='', marker='.', label='output')
                 min_freq = np.min([sampling_rate / n_samples,
