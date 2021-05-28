@@ -1099,8 +1099,8 @@ class Coordinates():
 
         Get a coordinates object
 
-        >>> import pyfar
-        >>> coordinates = pyfar.spatial.samplings.sph_gaussian(sh_order=3)
+        >>> import pyfar as pf
+        >>> coordinates = pf.samplings.sph_gaussian(sh_order=3)
 
         Rotate 45 degrees about the y-axis using
 
