@@ -933,6 +933,8 @@ class InterpolateSpectrum():
     .. plot::
 
         import pyfar as pf
+        import matplotlib.pyplot as plt
+        import numpy as np
         data = pf.FrequencyData([1, 0], [5e3, 20e3])
         interpolator = pf.dsp.InterpolateSpectrum(
             data, 'magnitude', ('nearest', 'linear', 'nearest'))
