@@ -870,7 +870,7 @@ def time_shift(signal, shift, unit='samples'):
         time).
     unit : str, optional
         Unit of the shift variable, this can be either samples or seconds.
-        By default 'samples' is used. Note that in the case of specifying
+        By default ``'samples'`` is used. Note that in the case of specifying
         the shift time in seconds, the value is rounded to the next integer
         sample value to perform the shift.
 
