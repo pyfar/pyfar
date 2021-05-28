@@ -897,7 +897,7 @@ class InterpolateSpectrum():
     --------
     Interpolate magnitude only and add artificial linear phase.
 
-    >>> import pyfar as pf
+
     >>>
     >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
     >>> interpolator = pf.dsp.InterpolateSpectrum(
@@ -909,6 +909,9 @@ class InterpolateSpectrum():
     be also created by the interpolator object by
     ``signal = interpolator(64, 44100, show=True)``
 
+    >>> import pyfar as pf
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
     >>> with pf.plot.context():
     >>>     _, ax = plt.subplots(2, 2)
     >>>
