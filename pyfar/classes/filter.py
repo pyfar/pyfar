@@ -94,14 +94,13 @@ class Filter(object):
             if coefficients is None:
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
-            state = np.atleast_2d(state)
+            state = atleast_3d_first_dim(state)
             self._initialized = True
         else:
             self._initialized = False
+
         self._state = state
-
         self._sampling_rate = sampling_rate
-
         self._comment = comment
 
     def init_state(self, state='empty'):
@@ -164,7 +163,7 @@ class Filter(object):
                 "The sampling rates of filter and signal do not match")
 
         if reset is True:
-            self.reset_state()
+            self.reset()
 
         filtered_signal_data = np.zeros(
             (self.size, *signal.time.shape),
@@ -174,8 +173,8 @@ class Filter(object):
             new_state = np.zeros_like(self._state)
             for idx, (coeff, state) in enumerate(
                     zip(self._coefficients, self._state)):
-                filtered_signal_data[idx, ...], new_state = self._process(
-                    coeff, filtered_signal_data[idx, ...], state)
+                filtered_signal_data[idx, ...], new_state[idx, ...] = \
+                    self._process(coeff, signal.time, state)
                 self._state = new_state
         else:
             for idx, coeff in enumerate(self._coefficients):
@@ -259,10 +258,10 @@ class FilterFIR(Filter):
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
-    def init_state(self, state):
+    def init_state(self, cshape, state='zeros'):
         n_coeff = self._coefficients.shape[-1]
         state = np.zeros(
-            (self._coefficients.shape[0], n_coeff-1))
+            (self._coefficients.shape[0], *cshape, n_coeff-1))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
@@ -354,7 +353,7 @@ class FilterSOS(Filter):
                 "section filter structure.")
 
         if state is not None:
-            state = atleast_3d_first_dim(state)
+            state = atleast_3d_first_dim(state)[np.newaxis]
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
