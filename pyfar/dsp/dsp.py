@@ -967,7 +967,7 @@ def minimum_phase(
             pf.plot.group_delay(h, linestyle=style, ax=axs[2])
         axs[1].legend(['Linear', 'Homomorphic', 'Hilbert'])
 
-    Return the magnitude ratios between the mimimum and linear phase filters
+    Return the magnitude ratios between the minimum and linear phase filters
     and indicate frequencies where the linear phase filter exhibits small
     amplitudes.
 
