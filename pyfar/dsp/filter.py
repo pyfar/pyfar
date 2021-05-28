@@ -856,6 +856,12 @@ def fractional_octave_bands(
         freq_range=(20.0, 20e3),
         order=14):
     """Create and/or apply an energy preserving fractional octave filter bank.
+    The filters are designed using second order sections of Butterworth
+    band-pass filters. Note that if the upper cut-off frequency of a band lies
+    above the Nyquist frequency, a high-pass filter is applied instead. Due to
+    differences in the design of band-pass and high-pass filters, their slopes
+    differ, potentially introducing an error in the summed energy in the stop-
+    band region of the respective filters.
 
     .. note::
         This filter bank has -3 dB cut-off frequencies. For sufficiently large
@@ -891,11 +897,6 @@ def fractional_octave_bands(
     filter : FilterSOS
         Filter object. Only returned if ``signal = None``.
 
-    Notes
-    -----
-    This function uses second order sections of Butterworth filters for
-    increased numeric accuracy and stability.
-
     Examples
     --------
     Filter an impulse into octave bands. The summed energy of all bands equals
@@ -930,14 +931,9 @@ def fractional_octave_bands(
 
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
-    if cascaded is False:
-        sos = _coefficients_fractional_octave_bands(
-            sampling_rate=fs, num_fractions=num_fractions,
-            freq_range=freq_range, order=order)
-    else:
-        sos = _coefficients_fractional_octave_bands_cascaded(
-            sampling_rate=fs, num_fractions=num_fractions,
-            freq_range=freq_range, order=order)
+    sos = _coefficients_fractional_octave_bands(
+        sampling_rate=fs, num_fractions=num_fractions,
+        freq_range=freq_range, order=order)
 
     filt = pf.FilterSOS(sos, fs)
     filt.comment = (
