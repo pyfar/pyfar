@@ -15,10 +15,10 @@ This is an example for customizing the line color and axis limits:
 
 .. plot::
 
-    import pyfar
+    import pyfar as pf
 
-    noise = pyfar.signals.noise(2**14)
-    ax = pyfar.plot.freq(noise, color=(.3, .3, .3))
+    noise = pf.signals.noise(2**14)
+    ax = pf.plot.freq(noise, color=(.3, .3, .3))
     ax.set_ylim(-60, -20)
 """
 

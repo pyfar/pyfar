@@ -48,16 +48,11 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     Examples
     --------
 
-    >>> import pyfar
-    >>>
-    >>> sine = pyfar.signals.sine(100, 4410)
-    >>> pyfar.plot.time(sine)
-
     .. plot::
 
-        import pyfar
-        sine = pyfar.signals.sine(100, 4410)
-        pyfar.plot.time(sine)
+        import pyfar as pf
+        sine = pf.signals.sine(100, 4410)
+        pf.plot.time(sine)
     """
 
     with context(style):
@@ -117,16 +112,11 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     Example
     -------
 
-    >>> import pyfar
-    >>>
-    >>> sine = pyfar.signals.sine(100, 4410)
-    >>> pyfar.plot.freq(sine)
-
     .. plot::
 
-        import pyfar
-        sine = pyfar.signals.sine(100, 4410)
-        pyfar.plot.freq(sine)
+        import pyfar as pf
+        sine = pf.signals.sine(100, 4410)
+        pf.plot.freq(sine)
     """
 
     with context(style):
@@ -181,16 +171,11 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     Example
     -------
 
-    >>> import pyfar
-    >>>
-    >>> impulse = pyfar.signals.impulse(100, 10)
-    >>> pyfar.plot.phase(impulse, unwrap=True)
-
     .. plot::
 
-        import pyfar
-        impulse = pyfar.signals.impulse(100, 10)
-        pyfar.plot.phase(impulse, unwrap=True)
+        import pyfar as pf
+        impulse = pf.signals.impulse(100, 10)
+        pf.plot.phase(impulse, unwrap=True)
     """
 
     with context(style):
@@ -240,16 +225,11 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     Examples
     --------
 
-    >>> import pyfar
-    >>>
-    >>> impulse = pyfar.signals.impulse(100, 10)
-    >>> pyfar.plot.group_delay(impulse, unit='samples')
-
     .. plot::
 
-        import pyfar
-        impulse = pyfar.signals.impulse(100, 10)
-        pyfar.plot.group_delay(impulse, unit='samples')
+        import pyfar as pf
+        impulse = pf.signals.impulse(100, 10)
+        pf.plot.group_delay(impulse, unit='samples')
     """
 
     with context(style):
@@ -319,16 +299,11 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     Example
     -------
 
-    >>> import pyfar
-    >>>
-    >>> sweep = pyfar.signals.linear_sweep(2**14, [0, 22050])
-    >>> pyfar.plot.spectrogram(sweep)
-
     .. plot::
 
-        import pyfar
-        sweep = pyfar.signals.linear_sweep(2**14, [0, 22050])
-        pyfar.plot.spectrogram(sweep)
+        import pyfar as pf
+        sweep = pf.signals.linear_sweep(2**14, [0, 22050])
+        pf.plot.spectrogram(sweep)
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -401,16 +376,11 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     Examples
     --------
 
-    >>> import pyfar
-    >>>
-    >>> sine = pyfar.signals.sine(100, 4410)
-    >>> pyfar.plot.time_freq(sine)
-
     .. plot::
 
-        import pyfar
-        sine = pyfar.signals.sine(100, 4410)
-        pyfar.plot.time_freq(sine)
+        import pyfar as pf
+        sine = pf.signals.sine(100, 4410)
+        pf.plot.time_freq(sine)
     """
 
     with context(style):
@@ -534,16 +504,11 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     Examples
     --------
 
-    >>> import pyfar
-    >>>
-    >>> impulse = pyfar.signals.impulse(100, 10)
-    >>> pyfar.plot.freq_group_delay(impulse, unit='samples')
-
     .. plot::
 
-        import pyfar
-        impulse = pyfar.signals.impulse(100, 10)
-        pyfar.plot.freq_group_delay(impulse, unit='samples')
+        import pyfar as pf
+        impulse = pf.signals.impulse(100, 10)
+        pf.plot.freq_group_delay(impulse, unit='samples')
     """
 
     with context(style):
@@ -595,20 +560,13 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
 
     Generate a two by two subplot layout
 
-    >>> import pyfar
-    >>>
-    >>> impulse = pyfar.signals.impulse(100, 10)
-    >>> plots = [[pyfar.plot.time, pyfar.plot.phase],
-    ...          [pyfar.plot.freq, pyfar.plot.group_delay]]
-    >>> pyfar.plot.custom_subplots(impulse, plots)
-
     .. plot::
 
-        import pyfar
-        impulse = pyfar.signals.impulse(100, 10)
-        plots = [[pyfar.plot.time, pyfar.plot.phase],
-                 [pyfar.plot.freq, pyfar.plot.group_delay]]
-        pyfar.plot.custom_subplots(impulse, plots)
+        import pyfar as pf
+        impulse = pf.signals.impulse(100, 10)
+        plots = [[pf.plot.time, pf.plot.phase],
+                 [pf.plot.freq, pf.plot.group_delay]]
+        pf.plot.custom_subplots(impulse, plots)
 
     """
 
