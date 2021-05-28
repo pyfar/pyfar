@@ -4,6 +4,7 @@ import scipy.signal as sgn
 import pytest
 import pyfar
 
+from pyfar.signals import impulse
 from pyfar import dsp
 import pyfar as pf
 
@@ -210,6 +211,70 @@ def test_regu_inversion(impulse):
 
     npt.assert_allclose(res.freq[:, 0], [0.25])
     npt.assert_allclose(res.freq[:, -1], [0.25])
+
+
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+def test_time_shift_samples(shift_samples):
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+    # shift around one time
+    shift_samples = n_samples
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+def test_time_shift_full_length():
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shifted = dsp.time_shift(test_signal, n_samples, unit='samples')
+    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+def test_time_shift_seconds(shift_samples):
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shift_time = shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift_time, unit='s')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+def test_time_shift_multi_dim():
+    delay = 2
+    n_samples = 10
+
+    # multi-dim signal with individual shifts
+    n_channels = np.array([2, 3])
+    test_signal = impulse(
+        n_samples, delay=delay, amplitude=np.ones(n_channels))
+    shift_samples = np.reshape(np.arange(np.prod(n_channels)) + 1, n_channels)
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, amplitude=np.ones(n_channels))
+
+    npt.assert_allclose(shifted.time, ref.time, atol=1e-16)
 
 
 def test_time_window_default():
