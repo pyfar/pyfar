@@ -371,6 +371,9 @@ def test_write_read_numpy_ndarrays(tmpdir):
 
 def test_write_read_multiplePyfarObjects(
         filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
         coordinates,
         orientations,
         sphericalvoronoi,
@@ -386,6 +389,9 @@ def test_write_read_multiplePyfarObjects(
     io.write(
         filename,
         filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
         sphericalvoronoi=sphericalvoronoi,
@@ -396,6 +402,12 @@ def test_write_read_multiplePyfarObjects(
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
     assert isinstance(actual['coordinates'], Coordinates)
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
@@ -414,6 +426,9 @@ def test_write_read_multiplePyfarObjects(
 
 def test_write_read_multiplePyfarObjectsWithCompression(
         filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
         coordinates,
         orientations,
         sphericalvoronoi,
@@ -430,6 +445,9 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filename,
         compress=True,
         filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
         sphericalvoronoi=sphericalvoronoi,
@@ -440,6 +458,12 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
     assert isinstance(actual['coordinates'], Coordinates)
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
