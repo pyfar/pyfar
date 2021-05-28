@@ -34,13 +34,13 @@ Debugging is a bit tricky because you do not see errors in the terminal. It can
 be done this way
 
 >>> # %% plot something
->>> import pyfar
+>>> import pyfar as pf
 >>> import numpy as np
 >>> from pyfar.plot._interaction import EventEmu as EventEmu
 >>> %matplotlib qt
 >>>
->>> sig = pyfar.Signal(np.random.normal(0, 1, 2**16), 48e3)
->>> ax = pyfar.plot.time(sig)
+>>> sig = pf.Signal(np.random.normal(0, 1, 2**16), 48e3)
+>>> ax = pf.plot.time(sig)
 >>>
 >>> # %% debug this cell
 >>> # EventEmu can be used to simulate pressing a key
