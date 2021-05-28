@@ -856,6 +856,7 @@ def fractional_octave_bands(
         freq_range=(20.0, 20e3),
         order=14):
     """Create and/or apply an energy preserving fractional octave filter bank.
+
     The filters are designed using second order sections of Butterworth
     band-pass filters. Note that if the upper cut-off frequency of a band lies
     above the Nyquist frequency, a high-pass filter is applied instead. Due to
