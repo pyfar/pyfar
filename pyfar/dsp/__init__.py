@@ -10,7 +10,8 @@ from .dsp import (
     pad_zeros,
     time_shift,
     time_window,
-    kaiser_window_beta
+    kaiser_window_beta,
+    InterpolateSpectrum,
 )
 
 from . import filter
@@ -31,5 +32,6 @@ __all__ = [
     'pad_zeros',
     'time_shift',
     'time_window',
-    'kaiser_window_beta'
+    'kaiser_window_beta',
+    'InterpolateSpectrum',
 ]
