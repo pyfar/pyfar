@@ -10,7 +10,7 @@ from .dsp import (
     pad_zeros,
     time_shift,
     time_window,
-    kaiser_window_beta,
+    kaiser_window_beta
 )
 
 from . import filter

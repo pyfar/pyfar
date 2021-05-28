@@ -1050,24 +1050,20 @@ def minimum_phase(
 
 def pad_zeros(signal, pad_width, mode='after'):
     """Pad a signal with zeros in the time domain.
-    The function supports multiple padding modes, either after the last sample,
-    before the first sample, or in the middle. Note that the mode 'before'
-    results in a linear phase shift corresponding to the number of added
-    samples. The mode 'center' can be used to pad signals with a symmetry with
-    respect to the time ``t=0``.
 
     Parameters
     ----------
     signal : Signal
         The signal which is to be extended
     pad_width : int
-        The number of samples to be padded in samples.
+        The number of samples to be padded.
     mode : str, optional
         The padding mode, can either be 'after', to append a number of
         zeros to the end of the signal, 'before' to pre-pend the
         number of zeros before the starting time of the signal, or
         'center' to insert the number of zeros in the middle of the signal.
-        The default is 'after'.
+        The mode 'center' can be used to pad signals with a symmetry with
+        respect to the time ``t=0``. The default is 'after'.
 
     Returns
     -------
@@ -1078,7 +1074,7 @@ def pad_zeros(signal, pad_width, mode='after'):
     --------
     >>> import pyfar
     >>> impulse = pyfar.signals.impulse(512, amplitude=1)
-    >>> impulse_shiftet = pyfar.dsp.pad_zeros(impulse, 128, mode='after')
+    >>> impulse_padded = pyfar.dsp.pad_zeros(impulse, 128, mode='after')
 
     """
 
