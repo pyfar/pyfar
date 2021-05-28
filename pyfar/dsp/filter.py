@@ -857,6 +857,13 @@ def fractional_octave_bands(
         order=14):
     """Create and/or apply an energy preserving fractional octave filter bank.
 
+    The filters are designed using second order sections of Butterworth
+    band-pass filters. Note that if the upper cut-off frequency of a band lies
+    above the Nyquist frequency, a high-pass filter is applied instead. Due to
+    differences in the design of band-pass and high-pass filters, their slopes
+    differ, potentially introducing an error in the summed energy in the stop-
+    band region of the respective filters.
+
     .. note::
         This filter bank has -3 dB cut-off frequencies. For sufficiently large
         values of ``'order'``, the summed energy of the filter bank equals the
@@ -891,10 +898,32 @@ def fractional_octave_bands(
     filter : FilterSOS
         Filter object. Only returned if ``signal = None``.
 
-    Notes
-    -----
-    This function uses second order sections of Butterworth filters for
-    increased numeric accuracy and stability.
+    Examples
+    --------
+    Filter an impulse into octave bands. The summed energy of all bands equals
+    the energy of the input signal.
+
+    >>> import pyfar as pf
+    >>> import numpy as np
+    >>> x = pf.signals.impulse(2**17)
+    >>> y = pf.dsp.filter.fractional_octave_bands(x, 1, freq_range=(20, 8e3))
+    >>> y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0), y.frequencies)
+    >>> pf.plot.freq(y)
+    >>> ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
+    >>> ax.set_title("Filter bands and the sum of their squared magnitudes")
+
+    .. plot::
+
+        import pyfar as pf
+        import numpy as np
+        x = pf.signals.impulse(2**17)
+        y = pf.dsp.filter.fractional_octave_bands(x, 1, freq_range=(20, 8e3))
+        y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0), y.frequencies)
+        pf.plot.freq(y)
+        ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
+        ax.set_title("Filter bands and the sum of their squared magnitudes")
+        plt.tight_layout()
+
     """
     # check input
     if (signal is None and sampling_rate is None) \
