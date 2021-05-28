@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from scipy import signal as sgn
 import pyfar
@@ -909,3 +910,96 @@ def pad_zeros(signal, pad_width, mode='after'):
     padded_signal = padded_signal.reshape(signal.cshape)
 
     return padded_signal
+
+
+def time_shift(signal, shift, unit='samples'):
+    """Apply a time-shift to a signal.
+
+    The shift is performed as a cyclic shift on the time axis, potentially
+    resulting in non-causal signals for negative shift values.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to be shifted
+    shift : int, float
+        The time-shift value. A positive value will result in right shift on
+        the time axis (delaying of the signal), whereas a negative value
+        yields a left shift on the time axis (non-causal shift to a earlier
+        time). If a single value is given, the same time shift will be applied
+        to each channel of the signal. Individual time shifts for each channel
+        can be performed by passing an array matching the signals channel
+        dimensions.
+    unit : str, optional
+        Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
+        for seconds. By default ``'samples'`` is used. Note that in the case
+        of specifying the shift time in seconds, the value is rounded to the
+        next integer sample value to perform the shift.
+
+    Returns
+    -------
+    Signal
+        The time-shifted signal.
+
+    Examples
+    --------
+    Individually shift a set of ideal impulses stored in three different
+    channels
+
+    >>> import pyfar as pf
+    >>> import matplotlib.pyplot as plt
+    >>> impulse = pf.signals.impulse(
+    ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+    >>> shifted = pf.dsp.time_shift(impulse, [-2, 0, 2])
+
+    Plot the resulting signals
+
+    >>> pf.plot.use('light')
+    >>> _, axs = plt.subplots(2, 1)
+    >>> pf.plot.time(impulse, ax=axs[0])
+    >>> pf.plot.time(shifted, ax=axs[1])
+    >>> axs[0].set_title('Original signals')
+    >>> axs[1].set_title('Shifted signals')
+    >>> plt.tight_layout()
+
+    .. plot::
+
+        import pyfar as pf
+        import matplotlib.pyplot as plt
+        impulse = pf.signals.impulse(
+            32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+        shifted = pf.dsp.time_shift(impulse, [-2, 0, 2])
+        pf.plot.use('light')
+        _, axs = plt.subplots(2, 1)
+        pf.plot.time(impulse, ax=axs[0])
+        pf.plot.time(shifted, ax=axs[1])
+        axs[0].set_title('Original signals')
+        axs[1].set_title('Shifted signals')
+        plt.tight_layout()
+
+    """
+    shift = np.atleast_1d(shift)
+    if shift.size == 1:
+        shift = np.ones(signal.cshape) * shift
+
+    if unit == 's':
+        shift_samples = np.round(shift*signal.sampling_rate).astype(int)
+    elif unit == 'samples':
+        shift_samples = shift.astype(int)
+    else:
+        raise ValueError(
+            f"Unit is: {unit}, but has to be 'samples' or 's'.")
+
+    if np.any(shift_samples > signal.n_samples):
+        warnings.warn(
+            "Shifting by more samples than the length of the signal")
+
+    shifted = signal.flatten()
+    shift_samples = shift_samples.flatten()
+    for ch in range(shifted.cshape[0]):
+        shifted.time[ch] = np.roll(
+            shifted.time[ch],
+            shift_samples[ch],
+            axis=-1)
+
+    return shifted.reshape(signal.cshape)

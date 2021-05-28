@@ -225,8 +225,9 @@ def read(filename):
                     obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
                 else:
                     raise TypeError(
-                        f'Objects of type {type(obj)}'
-                        'cannot be read from disk.')
+                        '.far-file contains unknown types.'
+                        'This might occur when writing and reading files with'
+                        'different versions of Pyfar.')
                 collection[name] = obj
 
     return collection
