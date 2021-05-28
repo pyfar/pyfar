@@ -799,8 +799,8 @@ class Coordinates():
 
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
+            import pyfar as pf
+            coords = pf.samplings.sph_lebedev(sh_order=10)
             result = coords.get_nearest_k(1, 0, 0, show=True)
         """
 
@@ -869,8 +869,8 @@ class Coordinates():
 
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
+            import pyfar as pf
+            coords = pf.samplings.sph_lebedev(sh_order=10)
             result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
@@ -939,8 +939,8 @@ class Coordinates():
 
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
+            import pyfar as pf
+            coords = pf.samplings.sph_lebedev(sh_order=10)
             result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
         """
 
@@ -1004,8 +1004,8 @@ class Coordinates():
 
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
+            import pyfar as pf
+            coords = pf.samplings.sph_lebedev(sh_order=10)
             result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
 
         """
