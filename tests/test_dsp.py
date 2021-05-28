@@ -4,6 +4,7 @@ import scipy.signal as sgn
 import pytest
 import pyfar
 
+from pyfar.signals import impulse
 from pyfar import dsp
 import pyfar as pf
 
@@ -210,6 +211,70 @@ def test_regu_inversion(impulse):
 
     npt.assert_allclose(res.freq[:, 0], [0.25])
     npt.assert_allclose(res.freq[:, -1], [0.25])
+
+
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+def test_time_shift_samples(shift_samples):
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+    # shift around one time
+    shift_samples = n_samples
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+def test_time_shift_full_length():
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shifted = dsp.time_shift(test_signal, n_samples, unit='samples')
+    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+def test_time_shift_seconds(shift_samples):
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shift_time = shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift_time, unit='s')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+def test_time_shift_multi_dim():
+    delay = 2
+    n_samples = 10
+
+    # multi-dim signal with individual shifts
+    n_channels = np.array([2, 3])
+    test_signal = impulse(
+        n_samples, delay=delay, amplitude=np.ones(n_channels))
+    shift_samples = np.reshape(np.arange(np.prod(n_channels)) + 1, n_channels)
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, amplitude=np.ones(n_channels))
+
+    npt.assert_allclose(shifted.time, ref.time, atol=1e-16)
 
 
 def test_time_window_default():
@@ -434,3 +499,58 @@ def test_kaiser_window_beta():
     beta = dsp.kaiser_window_beta(A)
     beta_true = 0.0
     assert beta == beta_true
+
+
+def test_minimum_phase():
+    # tests are separated since their reliability depends on the type of
+    # filters. The homomorphic method works best for filters with odd numbers
+    # of taps
+
+    # method = 'hilbert'
+    n_samples = 9
+    filter_linphase = pyfar.Signal([0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 44100)
+
+    imp_minphase = pyfar.dsp.minimum_phase(
+        filter_linphase, pad=False, method='hilbert', n_fft=2**18)
+
+    ref = np.array([1, 1, 0, 0, 0], dtype=float)
+    npt.assert_allclose(
+        np.squeeze(imp_minphase.time), ref, rtol=1e-4, atol=1e-4)
+
+    # method = 'homomorphic'
+    n_samples = 8
+    imp_linphase = pyfar.signals.impulse(
+        n_samples+1, delay=int(n_samples/2))
+
+    ref = pyfar.signals.impulse(int(n_samples/2)+1)
+
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=False)
+    npt.assert_allclose(imp_minphase.time, ref.time)
+
+    # test pad length
+    ref = pyfar.signals.impulse(n_samples+1)
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=True)
+
+    assert imp_minphase.n_samples == imp_linphase.n_samples
+    npt.assert_allclose(imp_minphase.time, ref.time)
+
+    # test error
+    ref = pyfar.signals.impulse(n_samples+1)
+    imp_minphase, mag_error = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', return_magnitude_ratio=True)
+
+    npt.assert_allclose(
+        np.squeeze(mag_error.freq),
+        np.ones(int(n_samples/2+1), dtype=complex))
+
+    # test multidim
+    ref = pyfar.signals.impulse(n_samples+1, amplitude=np.ones((2, 3)))
+    imp_linphase = pyfar.signals.impulse(
+        n_samples+1, delay=int(n_samples/2), amplitude=np.ones((2, 3)))
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=True)
+
+    assert imp_minphase.n_samples == imp_linphase.n_samples
+    npt.assert_allclose(imp_minphase.time, ref.time)
