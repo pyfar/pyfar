@@ -78,7 +78,6 @@ def context(style='light', after_reset=False):
 
     >>> import pyfar as pf
     >>> import matplotlib.pyplot as plt
-    >>>
     >>> with pf.plot.context():
     >>>     fig, ax = plt.subplots(2, 1)
     >>>     pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
@@ -135,7 +134,6 @@ def use(style="light"):
 
     >>> import pyfar as pf
     >>> import matplotlib.pyplot as plt
-    >>>
     >>> pf.plot.utils.use()
     >>> fig, ax = plt.subplots(2, 1)
     >>> pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])

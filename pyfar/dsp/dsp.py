@@ -426,27 +426,25 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     .. plot::
 
-        import pyfar as pf
-        import numpy as np
-
-        signal = pf.Signal(np.ones(100), 44100)
-        for shape in ['symmetric', 'symmetric_zero', 'left', 'right']:
-            signal_windowed = pf.dsp.time_window(
-                signal, interval=[25,45], shape=shape)
-            ax = pf.plot.time(signal_windowed, label=shape)
-        ax.legend(loc='right')
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> signal = pf.Signal(np.ones(100), 44100)
+        >>> for shape in ['symmetric', 'symmetric_zero', 'left', 'right']:
+        >>>     signal_windowed = pf.dsp.time_window(
+        ...         signal, interval=[25,45], shape=shape)
+        >>>     ax = pf.plot.time(signal_windowed, label=shape)
+        >>> ax.legend(loc='right')
 
     Window with fade-in and fade-out defined by four values in `interval`.
 
     .. plot::
 
-        import pyfar as pf
-        import numpy as np
-
-        signal = pf.Signal(np.ones(100), 44100)
-        signal_windowed = pf.dsp.time_window(
-                signal, interval=[25, 40, 60, 90], window='hann')
-        pf.plot.time(signal_windowed)
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> signal = pf.Signal(np.ones(100), 44100)
+        >>> signal_windowed = pf.dsp.time_window(
+        ...         signal, interval=[25, 40, 60, 90], window='hann')
+        >>> pf.plot.time(signal_windowed)
 
 
     """
@@ -884,37 +882,34 @@ class InterpolateSpectrum():
 
     .. plot::
 
-        import pyfar as pf
-        import matplotlib.pyplot as plt
-        import numpy as np
-
-        # generate data
-        data = pf.FrequencyData([1, 0], [5e3, 20e3])
-        interpolator = pf.dsp.InterpolateSpectrum(
-            data, 'magnitude', ('nearest', 'linear', 'nearest'))
-        signal = interpolator(64, 44100)
-        signal = pf.dsp.linear_phase(signal, 32)
-
-        # plot input and output data
-        with pf.plot.context():
-            _, ax = plt.subplots(2, 2)
-            # time signal (linear amplitude)
-            pf.plot.time(signal, ax=ax[0, 0])
-            # time signal (log amplitude)
-            pf.plot.time(signal, ax=ax[1, 0], dB=True)
-            # frequency plot (linear x-axis)
-            pf.plot.freq(signal, dB=False, xscale="linear", ax=ax[0, 1])
-            pf.plot.freq(data, dB=False, xscale="linear",
-                         ax=ax[0, 1], c='r', ls='', marker='.')
-            ax[0, 1].set_xlim(0, signal.sampling_rate/2)
-            # frequency plot (log x-axis)
-            pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
-            pf.plot.freq(data, dB=False, ax=ax[1, 1],
-                         c='r', ls='', marker='.', label='output')
-            min_freq = np.min([signal.sampling_rate / signal.n_samples,
-                               data.frequencies[0]])
-            ax[1, 1].set_xlim(min_freq, signal.sampling_rate/2)
-            ax[1, 1].legend(loc='best')
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> # generate data
+        >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
+        >>> interpolator = pf.dsp.InterpolateSpectrum(
+        ...     data, 'magnitude', ('nearest', 'linear', 'nearest'))
+        >>> signal = interpolator(64, 44100)
+        >>> signal = pf.dsp.linear_phase(signal, 32)
+        >>> # plot input and output data
+        >>> with pf.plot.context():
+        >>>     _, ax = plt.subplots(2, 2)
+        >>>     # time signal (linear and logarithmic amplitude)
+        >>>     pf.plot.time(signal, ax=ax[0, 0])
+        >>>     pf.plot.time(signal, ax=ax[1, 0], dB=True)
+        >>>     # frequency plot (linear x-axis)
+        >>>     pf.plot.freq(signal, dB=False, xscale="linear", ax=ax[0, 1])
+        >>>     pf.plot.freq(data, dB=False, xscale="linear",
+        ...                  ax=ax[0, 1], c='r', ls='', marker='.')
+        >>>     ax[0, 1].set_xlim(0, signal.sampling_rate/2)
+        >>>     # frequency plot (log x-axis)
+        >>>     pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
+        >>>     pf.plot.freq(data, dB=False, ax=ax[1, 1],
+        ...                  c='r', ls='', marker='.', label='output')
+        >>>     min_freq = np.min([signal.sampling_rate / signal.n_samples,
+        ...                        data.frequencies[0]])
+        >>>     ax[1, 1].set_xlim(min_freq, signal.sampling_rate/2)
+        >>>     ax[1, 1].legend(loc='best')
 
     """
 
@@ -1172,42 +1167,42 @@ def minimum_phase(
 
     .. plot::
 
-        import pyfar as pf
-        import matplotlib.pyplot as plt
-
-        impulse_linear_phase = pf.signals.impulse(129, delay=64)
-        impulse_minmum_phase = pf.dsp.minimum_phase(
-            impulse_linear_phase, method='homomorphic')
-
-        plt.figure(figsize=(8, 2))
-        pf.plot.group_delay(impulse_linear_phase, label='Linear phase')
-        pf.plot.group_delay(impulse_minmum_phase, label='Minmum phase')
-        plt.legend()
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> # create linear and minimum phase signal
+        >>> impulse_linear_phase = pf.signals.impulse(129, delay=64)
+        >>> impulse_minmum_phase = pf.dsp.minimum_phase(
+        ...     impulse_linear_phase, method='homomorphic')
+        >>> # plot the group delay
+        >>> plt.figure(figsize=(8, 2))
+        >>> pf.plot.group_delay(impulse_linear_phase, label='Linear phase')
+        >>> pf.plot.group_delay(impulse_minmum_phase, label='Minmum phase')
+        >>> plt.legend()
 
     Create a minimum phase equivalent of a linear phase FIR low-pass filter
 
     .. plot::
 
-        import pyfar as pf
-        import numpy as np
-        from scipy.signal import remez
-        import matplotlib.pyplot as plt
-
-        freq = [0, 0.2, 0.3, 1.0]
-        desired = [1, 0]
-        h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
-        h_min_hom = pf.dsp.minimum_phase(h_linear, method='homomorphic')
-        h_min_hil = pf.dsp.minimum_phase(h_linear, method='hilbert')
-
-        fig, axs = plt.subplots(3, figsize=(8, 6))
-        for h, style in zip(
-                (h_linear, h_min_hom, h_min_hil),
-                ('-', '-.', '--')):
-            pf.plot.time(h, linestyle=style, ax=axs[0])
-            axs[0].grid(True)
-            pf.plot.freq(h, linestyle=style, ax=axs[1])
-            pf.plot.group_delay(h, linestyle=style, ax=axs[2])
-        axs[1].legend(['Linear', 'Homomorphic', 'Hilbert'])
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> from scipy.signal import remez
+        >>> import matplotlib.pyplot as plt
+        >>> # create minimum phase signals with different methods
+        >>> freq = [0, 0.2, 0.3, 1.0]
+        >>> desired = [1, 0]
+        >>> h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
+        >>> h_min_hom = pf.dsp.minimum_phase(h_linear, method='homomorphic')
+        >>> h_min_hil = pf.dsp.minimum_phase(h_linear, method='hilbert')
+        >>> # plot the results
+        >>> fig, axs = plt.subplots(3, figsize=(8, 6))
+        >>> for h, style in zip(
+        ...         (h_linear, h_min_hom, h_min_hil),
+        ...         ('-', '-.', '--')):
+        >>>     pf.plot.time(h, linestyle=style, ax=axs[0])
+        >>>     axs[0].grid(True)
+        >>>     pf.plot.freq(h, linestyle=style, ax=axs[1])
+        >>>     pf.plot.group_delay(h, linestyle=style, ax=axs[2])
+        >>> axs[1].legend(['Linear', 'Homomorphic', 'Hilbert'])
 
     Return the magnitude ratios between the minimum and linear phase filters
     and indicate frequencies where the linear phase filter exhibits small
@@ -1215,30 +1210,29 @@ def minimum_phase(
 
     .. plot::
 
-        import pyfar as pf
-        import numpy as np
-        from scipy.signal import remez
-        import matplotlib.pyplot as plt
-
-        freq = [0, 0.2, 0.3, 1.0]
-        desired = [1, 0]
-        h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
-        h_minimum, ratio = pf.dsp.minimum_phase(h_linear,
-            method='homomorphic', return_magnitude_ratio=True)
-
-        fig, axs = plt.subplots(2, figsize=(8, 4))
-        pf.plot.freq(h_linear, linestyle='-', ax=axs[0])
-        pf.plot.freq(h_minimum, linestyle='--', ax=axs[0])
-        pf.plot.freq(ratio, linestyle='-', ax=axs[1])
-        mask = np.abs(h_linear.freq) < 10**(-60/20)
-        ratio_masked = pf.FrequencyData(
-            ratio.freq[mask], ratio.frequencies[mask[0]])
-        pf.plot.freq(ratio_masked, color='k', linestyle='--', ax=axs[1])
-
-        axs[1].set_ylabel('Magnitude error in dB')
-        axs[0].legend(['Linear phase', 'Minimum phase'])
-        axs[1].legend(['Broadband', 'Linear-phase < -60 dB'])
-        axs[1].set_ylim((-5, 105))
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> from scipy.signal import remez
+        >>> import matplotlib.pyplot as plt
+        >>> # generate linear and minimum phase signal
+        >>> freq = [0, 0.2, 0.3, 1.0]
+        >>> desired = [1, 0]
+        >>> h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
+        >>> h_minimum, ratio = pf.dsp.minimum_phase(h_linear,
+        ...     method='homomorphic', return_magnitude_ratio=True)
+        >>> # plot signals and difference between them
+        >>> fig, axs = plt.subplots(2, figsize=(8, 4))
+        >>> pf.plot.freq(h_linear, linestyle='-', ax=axs[0])
+        >>> pf.plot.freq(h_minimum, linestyle='--', ax=axs[0])
+        >>> pf.plot.freq(ratio, linestyle='-', ax=axs[1])
+        >>> mask = np.abs(h_linear.freq) < 10**(-60/20)
+        >>> ratio_masked = pf.FrequencyData(
+        ...     ratio.freq[mask], ratio.frequencies[mask[0]])
+        >>> pf.plot.freq(ratio_masked, color='k', linestyle='--', ax=axs[1])
+        >>> axs[1].set_ylabel('Magnitude error in dB')
+        >>> axs[0].legend(['Linear phase', 'Minimum phase'])
+        >>> axs[1].legend(['Broadband', 'Linear-phase < -60 dB'])
+        >>> axs[1].set_ylim((-5, 105))
 
 
     """
@@ -1370,20 +1364,20 @@ def time_shift(signal, shift, unit='samples'):
 
     .. plot::
 
-        import pyfar as pf
-        import matplotlib.pyplot as plt
-
-        impulse = pf.signals.impulse(
-            32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
-        shifted = pf.dsp.time_shift(impulse, [-2, 0, 2])
-
-        pf.plot.use('light')
-        _, axs = plt.subplots(2, 1)
-        pf.plot.time(impulse, ax=axs[0])
-        pf.plot.time(shifted, ax=axs[1])
-        axs[0].set_title('Original signals')
-        axs[1].set_title('Shifted signals')
-        plt.tight_layout()
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> # generate and shift the impulses
+        >>> impulse = pf.signals.impulse(
+        ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+        >>> shifted = pf.dsp.time_shift(impulse, [-2, 0, 2])
+        >>> # time domain plot
+        >>> pf.plot.use('light')
+        >>> _, axs = plt.subplots(2, 1)
+        >>> pf.plot.time(impulse, ax=axs[0])
+        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> axs[0].set_title('Original signals')
+        >>> axs[1].set_title('Shifted signals')
+        >>> plt.tight_layout()
 
     """
     shift = np.atleast_1d(shift)

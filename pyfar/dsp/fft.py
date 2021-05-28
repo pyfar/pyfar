@@ -47,30 +47,29 @@ spectrum, e.g., according to the RMS value.
 
 .. plot::
 
-    import numpy as np
-    from pyfar.dsp import fft
-    import matplotlib.pyplot as plt
-
-    fft_normalization = "rms"
-
-    n_samples = 1024
-    sampling_rate = 48e3
-    frequency = 100
-    times = np.linspace(0, 10, n_samples)
-    freqs = fft.rfftfreq(n_samples, 48e3)
-
-    sine = np.sin(times * 2*np.pi * frequency)
-    spec = fft.rfft(sine, n_samples, sampling_rate, fft_normalization)
-
-    plt.subplot(1, 2, 1)
-    plt.plot(times, sine)
-    ax = plt.gca()
-    ax.set_xlabel('Time in s')
-    plt.subplot(1, 2, 2)
-    plt.plot(freqs, np.abs(spec))
-    ax = plt.gca()
-    ax.set_xlabel('Frequency in Hz')
-    plt.show()
+    >>> import numpy as np
+    >>> from pyfar.dsp import fft
+    >>> import matplotlib.pyplot as plt
+    >>> # properties
+    >>> fft_normalization = "rms"
+    >>> n_samples = 1024
+    >>> sampling_rate = 48e3
+    >>> frequency = 100
+    >>> times = np.linspace(0, 10, n_samples)
+    >>> freqs = fft.rfftfreq(n_samples, 48e3)
+    >>> # generate data
+    >>> sine = np.sin(times * 2*np.pi * frequency)
+    >>> spec = fft.rfft(sine, n_samples, sampling_rate, fft_normalization)
+    >>> # plot time and frequency data
+    >>> plt.subplot(1, 2, 1)
+    >>> plt.plot(times, sine)
+    >>> ax = plt.gca()
+    >>> ax.set_xlabel('Time in s')
+    >>> plt.subplot(1, 2, 2)
+    >>> plt.plot(freqs, np.abs(spec))
+    >>> ax = plt.gca()
+    >>> ax.set_xlabel('Frequency in Hz')
+    >>> plt.show()
 
 
 References
