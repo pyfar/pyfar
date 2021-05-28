@@ -601,26 +601,27 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     # init neutral SOS matrix of shape (freq.size+1, SOS_dim_2, 6)
     n_sos = int(np.ceil(N / 2))  # number of lowpass sos
-    SOS_dim_2 = n_sos if freq.size == 1 else N
+    SOS_dim_2 = n_sos if freq.size == 1 else 2 * n_sos
+
     SOS = np.tile(np.array([1, 0, 0, 1, 0, 0], dtype='float64'),
                   (freq.size + 1, SOS_dim_2, 1))
 
     # get filter coefficients for lowpass
-    # (and bandpass if more than one frequency is provided)
-    for n in range(freq.size):
-        # get coefficients
-        kind = 'lowpass' if n == 0 else 'bandpass'
-        f = freq[n] if n == 0 else freq[n-1:n+1]
-        sos = spsignal.butter(N, f, kind, analog=False, output='sos')
-        # write to sos matrix
-        if n == 0:
-            SOS[n, 0:n_sos] = sos
-        else:
-            SOS[n] = sos
+    sos = spsignal.butter(N, freq[0], 'lowpass', analog=False, output='sos')
+    SOS[0, 0:n_sos] = sos
+
+    # get filter coefficients for the bandpass if more than one frequency is
+    # provided
+    for n in range(1, freq.size):
+        sos_high = spsignal.butter(
+            N, freq[n-1], 'highpass', analog=False, output='sos')
+        sos_low = spsignal.butter(
+            N, freq[n], 'lowpass', analog=False, output='sos')
+        SOS[n] = np.concatenate((sos_high, sos_low))
 
     # get filter coefficients for the highpass
-    sos = spsignal.butter(N, freq[-1], 'highpass', analog=False, output='sos')
-    # write to sos matrix
+    sos = spsignal.butter(
+        N, freq[-1], 'highpass', analog=False, output='sos')
     SOS[-1, 0:n_sos] = sos
 
     # Apply every Butterworth filter twice
