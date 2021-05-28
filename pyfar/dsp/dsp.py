@@ -867,18 +867,57 @@ def time_shift(signal, shift, unit='samples'):
         The time-shift value. A positive value will result in right shift on
         the time axis (delaying of the signal), whereas a negative value
         yields a left shift on the time axis (non-causal shift to a earlier
-        time).
+        time). If a single value is given, the same time shift will be applied
+        to each channel of the signal. Individual time shifts for each channel
+        can be performed by passing an array matching the signals channel
+        dimensions.
     unit : str, optional
         Unit of the shift variable, this can be either samples or seconds.
         By default ``'samples'`` is used. Note that in the case of specifying
         the shift time in seconds, the value is rounded to the next integer
         sample value to perform the shift.
 
-
     Returns
     -------
     Signal
         The time-shifted signal.
+
+    Examples
+    --------
+    Individually shift a set of ideal impulses stored in three different
+    channels
+
+    >>> import pyfar as pf
+    >>> import matplotlib.pyplot as plt
+    >>> impulse = pf.signals.impulse(
+    ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+    >>> shifted = pf.dsp.time_shift(impulse, [-2, 0, 2])
+
+    Plot the resulting signals
+
+    >>> pf.plot.use('light')
+    >>> _, axs = plt.subplots(2, 1)
+    >>> pf.plot.time(impulse, ax=axs[0])
+    >>> pf.plot.time(shifted, ax=axs[1])
+    >>> axs[0].set_title('Original signals')
+    >>> axs[1].set_title('Shifted signals')
+    >>> plt.tight_layout()
+
+    .. plot::
+
+        import pyfar as pf
+        import matplotlib.pyplot as plt
+        impulse = pf.signals.impulse(
+            32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+        shifted = pf.dsp.time_shift(impulse, [-2, 0, 2])
+        pf.plot.use('light')
+        _, axs = plt.subplots(2, 1)
+        pf.plot.time(impulse, ax=axs[0])
+        pf.plot.time(shifted, ax=axs[1])
+        axs[0].set_title('Original signals')
+        axs[1].set_title('Shifted signals')
+        plt.tight_layout()
+
     """
     shift = np.atleast_1d(shift)
     if shift.size == 1:
