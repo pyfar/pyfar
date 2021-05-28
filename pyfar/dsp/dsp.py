@@ -167,9 +167,8 @@ def linear_phase(signal, group_delay, unit="samples"):
         group delay is a list or array it must broadcast with the channel
         layout of the signal (``signal.cshape``).
     unit : string, optional
-        Unit of the group delay. Can be ``'s'`` for seconds, ``'ms'`` for
-        milliseconds, ``'mus'`` for microseconds, or ``'samples'``. The
-        default is ``'samples'``.
+        Unit of the group delay. Can be ``'samples'`` or ``'s'`` for seconds.
+        The default is ``'samples'``.
 
     Returns
     -------
@@ -185,12 +184,8 @@ def linear_phase(signal, group_delay, unit="samples"):
         tau = np.asarray(group_delay) / signal.sampling_rate
     elif unit == "s":
         tau = np.asarray(group_delay)
-    elif unit == 'ms':
-        tau = np.asarray(group_delay) / 1e3
-    elif unit == 'mus':
-        tau = np.asarray(group_delay) / 1e6
     else:
-        raise ValueError("unit must be 'samples', 's', 'ms', or 'mus'.")
+        raise ValueError(f"unit is {unit} but must be 'samples' or 's'.")
 
     # linear phase
     phase = 2 * np.pi * signal.frequencies * tau[..., np.newaxis]

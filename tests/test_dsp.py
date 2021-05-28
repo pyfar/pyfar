@@ -124,17 +124,11 @@ def test_linear_phase():
     y = dsp.linear_phase(x, N / 2 / fs, unit="s")
     npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
 
-    # test group delay in milliseconds
-    y = dsp.linear_phase(x, N / 2 / fs * 1e3, unit="ms")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
-
-    # test group delay in microseconds
-    y = dsp.linear_phase(x, N / 2 / fs * 1e6, unit="mus")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
-
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
         dsp.linear_phase(1, 0)
+    with pytest.raises(ValueError, match="unit is km"):
+        dsp.linear_phase(x, N / 2 / fs, unit="km")
 
 
 def test_linear_phase_multichannel():
