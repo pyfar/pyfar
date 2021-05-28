@@ -813,7 +813,7 @@ def regularized_spectrum_inversion(
     return inverse
 
 
-class interpolate_spectrum():
+class InterpolateSpectrum():
     """
     Interpolate an incomplete spectrum to a complete single sided spectrum.
 
@@ -881,7 +881,7 @@ class interpolate_spectrum():
 
     Returns
     -------
-    interpolator : :py:class:`interpolate_spectrum`
+    interpolator : :py:class:`InterpolateSpectrum`
         The interpolator can be called to interpolate the data (see examples
         below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has
         the following parameters
@@ -900,7 +900,7 @@ class interpolate_spectrum():
     >>> import pyfar as pf
     >>>
     >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
-    >>> interpolator = pf.dsp.interpolate_spectrum(
+    >>> interpolator = pf.dsp.InterpolateSpectrum(
     >>>     data, 'magnitude', ('nearest', 'linear', 'nearest'))
     >>> signal = interpolator(64, 44100)
     >>> signal = pf.dsp.linear_phase(signal, 32)
@@ -934,7 +934,7 @@ class interpolate_spectrum():
 
         import pyfar as pf
         data = pf.FrequencyData([1, 0], [5e3, 20e3])
-        interpolator = pf.dsp.interpolate_spectrum(
+        interpolator = pf.dsp.InterpolateSpectrum(
             data, 'magnitude', ('nearest', 'linear', 'nearest'))
         signal = interpolator(64, 44100)
         signal = pf.dsp.linear_phase(signal, 32)

@@ -4,7 +4,7 @@ import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 import pyfar as pf
-from pyfar.dsp import interpolate_spectrum
+from pyfar.dsp import InterpolateSpectrum
 
 # TODO: Finish `test_interpolation()` for 'magnitude_minimum'
 
@@ -14,9 +14,9 @@ def test_init():
     fd = pf.FrequencyData([1, .5], [100, 200])
 
     # interpolation object
-    interpolator = interpolate_spectrum(
+    interpolator = InterpolateSpectrum(
         fd, "complex", ("linear", "linear", "linear"))
-    assert isinstance(interpolator, interpolate_spectrum)
+    assert isinstance(interpolator, InterpolateSpectrum)
 
     # interpolation result
     signal = interpolator(8, 44100)
@@ -29,48 +29,48 @@ def test_init_assertions():
 
     # data (invalid type)
     with raises(TypeError, match="data must be"):
-        interpolate_spectrum(1, "complex", ("linear", "linear", "linear"))
+        InterpolateSpectrum(1, "complex", ("linear", "linear", "linear"))
     # data (invalid FFT normalization)
     with raises(ValueError, match="data.fft_norm is 'rms'"):
         fd_rms = pf.FrequencyData([1, .5], [100, 200], 'rms')
-        interpolate_spectrum(
+        InterpolateSpectrum(
             fd_rms, "complex", ("linear", "linear", "linear"))
     # data (not enough bins)
     with raises(ValueError, match="data.n_bins must be at least 2"):
         fd_short = pf.FrequencyData(1, 100)
-        interpolate_spectrum(
+        InterpolateSpectrum(
             fd_short, "complex", ("linear", "linear", "linear"))
 
     # test invalid method
     with raises(ValueError, match="method is 'invalid'"):
-        interpolate_spectrum(fd, "invalid", ("linear", "linear", "linear"))
+        InterpolateSpectrum(fd, "invalid", ("linear", "linear", "linear"))
 
     # test kind (invald type)
     with raises(ValueError, match="kind must be a tuple of length 3"):
-        interpolate_spectrum(fd, "complex", "linear")
+        InterpolateSpectrum(fd, "complex", "linear")
     # test kind (invalid length)
     with raises(ValueError, match="kind must be a tuple of length 3"):
-        interpolate_spectrum(fd, "complex", ("linear", "linear"))
+        InterpolateSpectrum(fd, "complex", ("linear", "linear"))
     # test kind (wrong entry)
     with raises(ValueError, match="kind contains 'wrong'"):
-        interpolate_spectrum(fd, "complex", ("linear", "linear", "wrong"))
+        InterpolateSpectrum(fd, "complex", ("linear", "linear", "wrong"))
 
     # test fscale
     with raises(ValueError, match="fscale is 'nice'"):
-        interpolate_spectrum(
+        InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), fscale="nice")
 
     # test clip (wrong value of bool)
     with raises(ValueError, match="clip must be a tuple of length 2"):
-        interpolate_spectrum(
+        InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), clip=True)
     # test clip (invalid type)
     with raises(ValueError, match="clip must be a tuple of length 2"):
-        interpolate_spectrum(
+        InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), clip=1)
     # test clip (invalid length)
     with raises(ValueError, match="clip must be a tuple of length 2"):
-        interpolate_spectrum(
+        InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), clip=(1, 2, 3))
 
 
@@ -98,7 +98,7 @@ def test_interpolation(
 
     # create test data
     data = pf.FrequencyData(freq_in, frequencies)
-    interpolator = interpolate_spectrum(
+    interpolator = InterpolateSpectrum(
         data, method, ("linear", "linear", "linear"))
     signal = interpolator(n_samples, sampling_rate)
 
@@ -118,11 +118,11 @@ def test_clip():
 
     data = pf.FrequencyData([1, 2], [1, 2])
     # interpolate with and without clipping
-    interpolator = interpolate_spectrum(
+    interpolator = InterpolateSpectrum(
         data, "magnitude", ("linear", "linear", "linear"))
     signal_no_clip = interpolator(6, 6)
 
-    interpolator = interpolate_spectrum(
+    interpolator = InterpolateSpectrum(
         data, "magnitude", ("linear", "linear", "linear"), clip=(1, 2))
     signal_clip = interpolator(6, 6)
 
@@ -149,11 +149,11 @@ def test_fscale():
     data = pf.FrequencyData([1, 1, 1], f_in_lin)
 
     # generate interpolator with linear frequency
-    interpolator_lin = interpolate_spectrum(
+    interpolator_lin = InterpolateSpectrum(
         data, "magnitude", ("linear", "linear", "linear"), fscale="linear")
     _ = interpolator_lin(n_samples, sampling_rate)
     # generate interpolator with logarithmic frequency
-    interpolator_log = interpolate_spectrum(
+    interpolator_log = InterpolateSpectrum(
         data, "magnitude", ("linear", "linear", "linear"), fscale="log")
     _ = interpolator_log(n_samples, sampling_rate)
 
@@ -173,7 +173,7 @@ def test_show():
     axes for speed up the testing."""
 
     data = pf.FrequencyData([1, 2], [1, 2])
-    interpolator = interpolate_spectrum(
+    interpolator = InterpolateSpectrum(
         data, "magnitude", ("linear", "linear", "linear"))
     _ = interpolator(10, 10, show=True)
 
