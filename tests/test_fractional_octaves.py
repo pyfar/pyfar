@@ -71,21 +71,23 @@ def test_fractional_coeff_oct_filter_iec():
     assert actual.shape == (1, order, 6)
 
 
-def test_fract_oct_filter_iec(impulse_mock):
+def test_fract_oct_filter_iec():
     # Test only Filter object related stuff here, testing of coefficients is
     # done in separate test.
     sr = 48e3
     order = 2
+    n_samples = 2**10
+    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
     f_obj = filter.fractional_octave_bands(
         None, 3, sampling_rate=sr, order=order)
     assert isinstance(f_obj, FilterSOS)
 
-    sig = filter.fractional_octave_bands(impulse_mock, 3, order=order)
+    sig = filter.fractional_octave_bands(impulse, 3, order=order)
     assert isinstance(sig, Signal)
 
     ir_actual = filter.fractional_octave_bands(
-        impulse_mock, 1, freq_range=(1e3, 4e3), order=order)
+        impulse, 1, freq_range=(1e3, 4e3), order=order)
 
     assert ir_actual.time.shape[0] == 3
 
