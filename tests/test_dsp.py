@@ -254,7 +254,7 @@ def test_time_shift_seconds(shift_samples):
     test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
 
     shift_time = shift_samples/sampling_rate
-    shifted = dsp.time_shift(test_signal, shift_time, unit='seconds')
+    shifted = dsp.time_shift(test_signal, shift_time, unit='s')
     ref = impulse(
         n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
 

@@ -872,10 +872,10 @@ def time_shift(signal, shift, unit='samples'):
         can be performed by passing an array matching the signals channel
         dimensions.
     unit : str, optional
-        Unit of the shift variable, this can be either samples or seconds.
-        By default ``'samples'`` is used. Note that in the case of specifying
-        the shift time in seconds, the value is rounded to the next integer
-        sample value to perform the shift.
+        Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
+        for seconds. By default ``'samples'`` is used. Note that in the case
+        of specifying the shift time in seconds, the value is rounded to the
+        next integer sample value to perform the shift.
 
     Returns
     -------
@@ -923,13 +923,13 @@ def time_shift(signal, shift, unit='samples'):
     if shift.size == 1:
         shift = np.ones(signal.cshape) * shift
 
-    if unit == 'seconds':
+    if unit == 's':
         shift_samples = np.round(shift*signal.sampling_rate).astype(int)
     elif unit == 'samples':
         shift_samples = shift.astype(int)
     else:
         raise ValueError(
-            f"Unit is: {unit}, but has to be 'samples' or 'seconds'.")
+            f"Unit is: {unit}, but has to be 'samples' or 's'.")
 
     if np.any(shift_samples > signal.n_samples):
         warnings.warn(
