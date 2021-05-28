@@ -355,10 +355,9 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
         The default is ``'symmetric'``.
     unit : string, optional
-        Unit of `interval`. Can be set to ``'s'`` (seconds), ``'ms'``
-        (milliseconds) or ``'samples'``.
-        Time values are rounded to the nearest sample.
-        The default is ``'samples'``.
+        Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
+        Time values are rounded to the nearest sample. The default is
+        ``'samples'``.
     crop : string, optional
         ``'none'``
             The length of the windowed signal stays the same.
@@ -481,13 +480,10 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     # Convert to samples
     if unit == 's':
         interval = np.round(interval*signal.sampling_rate).astype(int)
-    elif unit == 'ms':
-        interval = np.round(interval*signal.sampling_rate/1e3).astype(int)
     elif unit == 'samples':
         interval = interval.astype(int)
     else:
-        raise ValueError(f"unit is {unit} but has to be"
-                         f" 'samples', 's' or 'ms'.")
+        raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
     # Check window size
     if interval[-1] > signal.n_samples:
         raise ValueError(
