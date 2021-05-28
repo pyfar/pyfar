@@ -903,26 +903,18 @@ def fractional_octave_bands(
     Filter an impulse into octave bands. The summed energy of all bands equals
     the energy of the input signal.
 
-    >>> import pyfar as pf
-    >>> import numpy as np
-    >>> x = pf.signals.impulse(2**17)
-    >>> y = pf.dsp.filter.fractional_octave_bands(x, 1, freq_range=(20, 8e3))
-    >>> y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0), y.frequencies)
-    >>> pf.plot.freq(y)
-    >>> ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
-    >>> ax.set_title("Filter bands and the sum of their squared magnitudes")
-
     .. plot::
 
         import pyfar as pf
         import numpy as np
+
         x = pf.signals.impulse(2**17)
         y = pf.dsp.filter.fractional_octave_bands(x, 1, freq_range=(20, 8e3))
         y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0), y.frequencies)
+
         pf.plot.freq(y)
         ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
         ax.set_title("Filter bands and the sum of their squared magnitudes")
-        plt.tight_layout()
 
     """
     # check input
@@ -1088,25 +1080,6 @@ def reconstructing_fractional_octave_bands(
     --------
 
     Filter and re-synthesize impulse signal
-
-    >>> import pyfar as pf
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>>
-    >>> x = pf.signals.impulse(2**12)
-    >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
-    >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
-    >>>
-    >>> ax = pf.plot.time_freq(y_sum, color='k')
-    >>> pf.plot.time(x, ax=ax[0])
-    >>> ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
-    >>> ax[0].set_title("Original (blue) and reconstructed pulse (black)")
-    >>>
-    >>> pf.plot.freq(y_sum, color='k', ax=ax[1])
-    >>> pf.plot.freq(y, ax=ax[1])
-    >>> ax[1].set_title("Reconstructed (black) and filtered impulse (colored)")
-    >>>
-    >>> plt.tight_layout(h_pad=.6)
 
     .. plot::
 
