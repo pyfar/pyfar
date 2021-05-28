@@ -298,34 +298,6 @@ def test_write_read_filter(filter, tmpdir):
     assert actual == filter
 
 
-# def test_write_filterIIR_TypeError(filterIIR, tmpdir):
-#     """ FilterIIR
-#     Can't be written to disk because objects store user-defined function.
-#     """
-#     filename = os.path.join(tmpdir, 'filterIIR.far')
-#     with pytest.raises(TypeError):
-#         io.write(filename, filterIIR=filterIIR)
-
-def test_write_filterIIR(filterIIR, tmpdir):
-    """ FilterIIR
-    Make sure `read` understands the bits written by `write`
-    """
-    filename = os.path.join(tmpdir, 'filterIIR.far')
-    io.write(filename, filterIIR=filterIIR)
-    actual = io.read(filename)['filterIIR']
-    assert isinstance(actual, fo.Filter)
-    assert actual == filterIIR
-
-
-# def test_write_filterFIR_TypeError(filterFIR, tmpdir):
-#     """ FilterFIR
-#     Can't be written to disk because objects store user-defined function.
-#     """
-#     filename = os.path.join(tmpdir, 'filterIIR.far')
-#     with pytest.raises(TypeError):
-#         io.write(filename, filterFIR=filterFIR)
-
-
 def test_write_filterFIR(filterFIR, tmpdir):
     """ filterFIR
     Make sure `read` understands the bits written by `write`
@@ -337,13 +309,15 @@ def test_write_filterFIR(filterFIR, tmpdir):
     assert actual == filterFIR
 
 
-# def test_write_filterSOS_TypeError(filterSOS, tmpdir):
-#     """ FilterIIR
-#     Can't be written to disk because objects store user-defined function.
-#     """
-#     filename = os.path.join(tmpdir, 'filterSOS.far')
-#     with pytest.raises(TypeError):
-#         io.write(filename, filterSOS=filterSOS)
+def test_write_filterIIR(filterIIR, tmpdir):
+    """ FilterIIR
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'filterIIR.far')
+    io.write(filename, filterIIR=filterIIR)
+    actual = io.read(filename)['filterIIR']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filterIIR
 
 
 def test_write_filterSOS(filterSOS, tmpdir):

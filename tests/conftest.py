@@ -647,14 +647,6 @@ def filter(coeffs, state):
 
 
 @pytest.fixture
-def filterIIR():
-    """ FilterIIR object.
-    """
-    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
-    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
-
-
-@pytest.fixture
 def filterFIR():
     """ FilterFIR objectr.
     """
@@ -662,6 +654,14 @@ def filterFIR():
         [1, 1 / 2, 0],
         [1, 1 / 4, 1 / 8]])
     return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture

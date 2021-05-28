@@ -28,7 +28,8 @@ def pop_state_from_kwargs(**kwargs):
 
 
 def extend_sos_coefficients(sos, order):
-    """Extend a set of SOS filter coefficients to match a required filter order
+    """
+    Extend a set of SOS filter coefficients to match a required filter order
     by adding sections with coefficients resulting in an ideal frequency
     response.
 
@@ -48,7 +49,7 @@ def extend_sos_coefficients(sos, order):
     sos_order = sos.shape[0]
     if sos_order == order:
         return sos
-    pad_len = order-sos_order
+    pad_len = order - sos_order
     sos_ext = np.zeros((pad_len, 6))
     sos_ext[:, 3] = 1.
     sos_ext[:, 0] = 1.
@@ -213,6 +214,7 @@ class Filter(object):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective object dictionary."""
+        # initializing this way satisfies FIR, IIR and SOS initialization
         obj = cls(np.zeros((1, 6)), None)
         obj.__dict__.update(obj_dict)
         return obj
