@@ -24,7 +24,7 @@ def test_orientations_from_view_up():
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 1, 0]]
     Orientations.from_view_up(views, ups)
-    # provided as ndarrays
+    # provided as numpy ndarrays
     views = np.atleast_2d(views).astype(np.float64)
     ups = np.atleast_2d(ups).astype(np.float64)
     Orientations.from_view_up(views, ups)
@@ -32,10 +32,19 @@ def test_orientations_from_view_up():
     views = Coordinates(views[:, 0], views[:, 1], views[:, 2])
     ups = Coordinates(ups[:, 0], ups[:, 1], ups[:, 2])
     Orientations.from_view_up(views, ups)
-    # view and up counts not matching
+    # number of views to ups N:1
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0]]
     Orientations.from_view_up(views, ups)
+    # number of views to ups 1:N
+    views = [[1, 0, 0]]
+    ups = [[0, 1, 0], [0, 1, 0]]
+    Orientations.from_view_up(views, ups)
+    # number of views to ups M:N
+    with raises(ValueError):
+        views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
+        ups = [[0, 1, 0], [0, 1, 0]]
+        Orientations.from_view_up(views, ups)
 
 
 def test_orientations_from_view_up_invalid():
@@ -146,7 +155,7 @@ def test_as_view_up_right(views, ups, orientations):
     ups = np.atleast_2d(ups).astype(np.float64)
     ups /= np.linalg.norm(ups, axis=1)[:, np.newaxis]
 
-    views_, ups_, rights_ = orientations.as_view_up_right()
+    views_, ups_, _ = orientations.as_view_up_right()
 
     assert np.array_equal(views_, views), "views are not preserved"
     assert np.array_equal(ups_, ups), "ups are not preserved"
