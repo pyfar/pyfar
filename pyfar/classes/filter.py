@@ -20,6 +20,18 @@ def atleast_3d_first_dim(arr):
         return arr
 
 
+def atleast_4d_first_dim(arr):
+    arr = np.asarray(arr)
+    ndim = np.ndim(arr)
+
+    if ndim < 3:
+        arr = atleast_3d_first_dim(arr)
+    if ndim < 4:
+        return arr[np.newaxis]
+    else:
+        return arr
+
+
 def pop_state_from_kwargs(**kwargs):
     kwargs.pop('zi', None)
     warnings.warn(
@@ -175,7 +187,7 @@ class Filter(object):
                     zip(self._coefficients, self._state)):
                 filtered_signal_data[idx, ...], new_state[idx, ...] = \
                     self._process(coeff, signal.time, state)
-                self._state = new_state
+            self._state = new_state
         else:
             for idx, coeff in enumerate(self._coefficients):
                 filtered_signal_data[idx, ...] = self._process(
@@ -305,10 +317,10 @@ class FilterIIR(Filter):
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
-    def init_state(self, state):
+    def init_state(self, cshape, state):
         n_coeff = self._coefficients.shape[-1]
         state = np.zeros(
-            (self._coefficients.shape[0], n_coeff-1))
+            (self._coefficients.shape[0], *cshape, n_coeff-1))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
@@ -353,13 +365,13 @@ class FilterSOS(Filter):
                 "section filter structure.")
 
         if state is not None:
-            state = atleast_3d_first_dim(state)[np.newaxis]
+            state = atleast_4d_first_dim(state)
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
-    def init_state(self, state='zeros'):
+    def init_state(self, cshape, state='zeros'):
         state = np.zeros(
-            (self._coefficients.shape[0], self.n_sections, 2))
+            (self._coefficients.shape[0], *cshape, self.n_sections, 2))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 state[idx, ...] = spsignal.sosfilt_zi(coeff)
@@ -367,4 +379,11 @@ class FilterSOS(Filter):
 
     @staticmethod
     def _process(sos, data, zi=None):
-        return spsignal.sosfilt(sos, data, zi=zi)
+        if zi is not None:
+            zi = zi.transpose(1, 0, 2)
+        res = spsignal.sosfilt(sos, data, zi=zi, axis=-1)
+        if zi is not None:
+            zi = res[1].transpose(1, 0, 2)
+            return res[0], zi
+        else:
+            return res
