@@ -354,6 +354,9 @@ def _is_pyfar_type(obj):
         'Coordinates',
         'Signal',
         'Filter',
+        'FilterFIR',
+        'FilterIIR',
+        'FilterSOS',
         'SphericalVoronoi',
         'TimeData',
         'FrequencyData']

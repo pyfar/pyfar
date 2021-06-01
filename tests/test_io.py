@@ -298,31 +298,37 @@ def test_write_read_filter(filter, tmpdir):
     assert actual == filter
 
 
-def test_write_filterIIR_TypeError(filterIIR, tmpdir):
-    """ FilterIIR
-    Can't be written to disk because objects store user-defined function.
+def test_write_filterFIR(filterFIR, tmpdir):
+    """ filterFIR
+    Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filterIIR.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterIIR=filterIIR)
+    io.write(filename, filterFIR=filterFIR)
+    actual = io.read(filename)['filterFIR']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filterFIR
 
 
-def test_write_filterFIR_TypeError(filterFIR, tmpdir):
-    """ FilterFIR
-    Can't be written to disk because objects store user-defined function.
+def test_write_filterIIR(filterIIR, tmpdir):
+    """ FilterIIR
+    Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filterIIR.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterFIR=filterFIR)
+    io.write(filename, filterIIR=filterIIR)
+    actual = io.read(filename)['filterIIR']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filterIIR
 
 
-def test_write_filterSOS_TypeError(filterSOS, tmpdir):
-    """ FilterIIR
-    Can't be written to disk because objects store user-defined function.
+def test_write_filterSOS(filterSOS, tmpdir):
+    """ filterSOS
+    Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filterSOS.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterSOS=filterSOS)
+    io.write(filename, filterSOS=filterSOS)
+    actual = io.read(filename)['filterSOS']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filterSOS
 
 
 def test_write_read_numpy_ndarrays(tmpdir):
@@ -365,6 +371,9 @@ def test_write_read_numpy_ndarrays(tmpdir):
 
 def test_write_read_multiplePyfarObjects(
         filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
         coordinates,
         orientations,
         sphericalvoronoi,
@@ -380,6 +389,9 @@ def test_write_read_multiplePyfarObjects(
     io.write(
         filename,
         filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
         sphericalvoronoi=sphericalvoronoi,
@@ -390,6 +402,12 @@ def test_write_read_multiplePyfarObjects(
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
     assert isinstance(actual['coordinates'], Coordinates)
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
@@ -408,6 +426,9 @@ def test_write_read_multiplePyfarObjects(
 
 def test_write_read_multiplePyfarObjectsWithCompression(
         filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
         coordinates,
         orientations,
         sphericalvoronoi,
@@ -424,6 +445,9 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filename,
         compress=True,
         filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
         sphericalvoronoi=sphericalvoronoi,
@@ -434,6 +458,12 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
     assert isinstance(actual['coordinates'], Coordinates)
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
