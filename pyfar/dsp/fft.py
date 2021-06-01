@@ -45,36 +45,31 @@ of the spectrum (cf. [1]_, Eq. 8). The coresponding normalization is
 ``'unitary'``. Additional normalizations can be applied to further scale the
 spectrum, e.g., according to the RMS value.
 
->>> import numpy as np
->>> from pyfar.dsp import fft
->>> import matplotlib.pyplot as plt
->>> frequency = 100
->>> sampling_rate = 1000
->>> n_samples = 1024
->>> sampling_rate = 48e3
->>> sine = np.sin(np.linspace(0, 2*np.pi*frequency/sampling_rate, n_samples))
->>> spectrum = fft.rfft(sine, n_samples, sampling_rate, 'rms')
-
 .. plot::
 
-    import numpy as np
-    from pyfar.dsp import fft
-    import matplotlib.pyplot as plt
-    n_samples = 1024
-    sampling_rate = 48e3
-    times = np.linspace(0, 10, n_samples)
-    sine = np.sin(times * 2*np.pi * 100)
-    spec = fft.rfft(sine, n_samples, sampling_rate, 'rms')
-    freqs = fft.rfftfreq(n_samples, 48e3)
-    plt.subplot(1, 2, 1)
-    plt.plot(times, sine)
-    ax = plt.gca()
-    ax.set_xlabel('Time in s')
-    plt.subplot(1, 2, 2)
-    plt.plot(freqs, np.abs(spec))
-    ax = plt.gca()
-    ax.set_xlabel('Frequency in Hz')
-    plt.show()
+    >>> import numpy as np
+    >>> from pyfar.dsp import fft
+    >>> import matplotlib.pyplot as plt
+    >>> # properties
+    >>> fft_normalization = "rms"
+    >>> n_samples = 1024
+    >>> sampling_rate = 48e3
+    >>> frequency = 100
+    >>> times = np.linspace(0, 10, n_samples)
+    >>> freqs = fft.rfftfreq(n_samples, 48e3)
+    >>> # generate data
+    >>> sine = np.sin(times * 2*np.pi * frequency)
+    >>> spec = fft.rfft(sine, n_samples, sampling_rate, fft_normalization)
+    >>> # plot time and frequency data
+    >>> plt.subplot(1, 2, 1)
+    >>> plt.plot(times, sine)
+    >>> ax = plt.gca()
+    >>> ax.set_xlabel('Time in s')
+    >>> plt.subplot(1, 2, 2)
+    >>> plt.plot(freqs, np.abs(spec))
+    >>> ax = plt.gca()
+    >>> ax.set_xlabel('Frequency in Hz')
+    >>> plt.show()
 
 
 References

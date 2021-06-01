@@ -45,6 +45,10 @@ extensions = [
 # package
 autodoc_default_options = {'autosummary': True}
 
+# show the code of plots that follows the command .. plot:: based on the
+# package matplotlib.sphinxext.plot_directive
+plot_include_source = True
+
 imgmath_latex_preamble = r'\usepackage{array}'
 
 # Add any paths that contain templates here, relative to this directory.

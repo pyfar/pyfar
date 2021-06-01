@@ -797,15 +797,11 @@ class Coordinates():
 
         Get frontal point from a spherical coordinate system
 
-        >>> import pyfar
-        >>> coords = pyfar.samplings.sph_lebedev(sh_order=10)
-        >>> result = coords.get_nearest_k(1, 0, 0, show=True)
-
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
-            result = coords.get_nearest_k(1, 0, 0, show=True)
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.get_nearest_k(1, 0, 0, show=True)
         """
 
         # check the input
@@ -871,15 +867,11 @@ class Coordinates():
 
         Get frontal points within a distance of 0.5 meters
 
-        >>> import pyfar
-        >>> coords = pyfar.samplings.sph_lebedev(sh_order=10)
-        >>> result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
-
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
-            result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
 
@@ -945,15 +937,11 @@ class Coordinates():
 
         Get top points within a distance of 45 degrees
 
-        >>> import pyfar
-        >>> coords = pyfar.samplings.sph_lebedev(sh_order=10)
-        >>> result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
-
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
-            result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
         """
 
         # check the input
@@ -1014,15 +1002,11 @@ class Coordinates():
         Get horizontal slice of spherical coordinate system within a ring of
         +/- 10 degrees
 
-        >>> import pyfar
-        >>> coords = pyfar.spatial.samplings.sph_lebedev(sh_order=10)
-        >>> result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
-
         .. plot::
 
-            import pyfar
-            coords = pyfar.samplings.sph_lebedev(sh_order=10)
-            result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
 
         """
 
@@ -1115,8 +1099,8 @@ class Coordinates():
 
         Get a coordinates object
 
-        >>> import pyfar
-        >>> coordinates = pyfar.spatial.samplings.sph_gaussian(sh_order=3)
+        >>> import pyfar as pf
+        >>> coordinates = pf.samplings.sph_gaussian(sh_order=3)
 
         Rotate 45 degrees about the y-axis using
 
