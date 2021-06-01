@@ -89,8 +89,8 @@ class Filter(object):
             The filter coefficients as an array.
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        state : array, optional
-            The state of the filter from a priory knowledge.
+        state : array, double, optional
+            The state of the buffer elements.
 
         Returns
         -------
@@ -115,7 +115,7 @@ class Filter(object):
         self._sampling_rate = sampling_rate
         self._comment = comment
 
-    def init_state(self, state='empty'):
+    def init_state(self, state='zeros'):
         self._state = state
         self._initialized = True
 
@@ -152,7 +152,7 @@ class Filter(object):
     def _process(coefficients, data, zi=None):
         raise NotImplementedError("Abstract class method.")
 
-    def process(self, signal, reset=True):
+    def process(self, signal, reset=False):
         """Apply the filter to a signal.
 
         Parameters
@@ -160,8 +160,11 @@ class Filter(object):
         signal : Signal
             The data to be filtered as Signal object.
         reset : bool, optional
-            If set to ``True``, the filter state will be reset to zero before
-            the filter is applied to the signal. The default is ``'True'``.
+            If set to ``True``, the filter state will be reset to zeros before
+            the filter is applied to the signal. Note that if the filter state
+            is ``None``, this option will have no effect. Use ``init_state``
+            to initialize a filter with no previously set state. The default
+            is ``'False'``.
 
         Returns
         -------
@@ -169,7 +172,7 @@ class Filter(object):
             A filtered copy of the input signal.
         """
         if not isinstance(signal, pf.Signal):
-            raise ValueError("The input needs to be a haiopy.Signal object.")
+            raise ValueError("The input needs to be a Signal object.")
 
         if self.sampling_rate != signal.sampling_rate:
             raise ValueError(
@@ -255,8 +258,8 @@ class FilterFIR(Filter):
             (number of channels, number of filter coefficients)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        state : array, optional
-            The state of the filter from a priory knowledge.
+        state : array, double, optional
+            The state of the buffer elements.
 
         Returns
         -------
@@ -271,10 +274,26 @@ class FilterFIR(Filter):
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
+    @property
+    def order(self):
+        """The order of te filter."""
+        return self._coefficients.shape[-1] - 1
+
     def init_state(self, cshape, state='zeros'):
-        n_coeff = self._coefficients.shape[-1]
+        """Initialize the buffer elements to pre-defined initial conditions.
+
+        Parameters
+        ----------
+        cshape : tuple, int
+            The channel shape of the ``~py:class:Signal`` which is to be
+            filtered.
+        state : str, optional
+            The desired state. This can either be ``'zeros'`` which initializes
+            an empty filter, or ``'step'`` which constructs the initial
+            conditions for step response steady-state. The default is 'zeros'.
+        """
         new_state = np.zeros(
-            (self._coefficients.shape[0], *cshape, n_coeff-1))
+            (self._coefficients.shape[0], *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
@@ -282,6 +301,10 @@ class FilterFIR(Filter):
 
     @staticmethod
     def _process(coefficients, data, zi=None):
+        """Process a single filter channel.
+        This is a hidden static method required for a shared processing
+        function in the parent class.
+        """
         return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
 
@@ -306,8 +329,10 @@ class FilterIIR(Filter):
             number of coefficients in the denominator)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        state : array, optional
-            The state of the filter from a priory knowledge.
+        state : array, double, optional
+            The state of the filter from prior information with dimensions
+            ``(n_filter_chan, *cshape, order-1)``, where ``cshape`` is
+            the channel shape of the ``~py:class:Signal`` to be filtered.
 
         Returns
         -------
@@ -318,10 +343,26 @@ class FilterIIR(Filter):
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
+    @property
+    def order(self):
+        """The order of te filter."""
+        return self._coefficients.shape[-1] - 1
+
     def init_state(self, cshape, state):
-        n_coeff = self._coefficients.shape[-1]
+        """Initialize the buffer elements to pre-defined initial conditions.
+
+        Parameters
+        ----------
+        cshape : tuple, int
+            The channel shape of the ``~py:class:Signal`` which is to be
+            filtered.
+        state : str, optional
+            The desired state. This can either be ``'zeros'`` which initializes
+            an empty filter, or ``'step'`` which constructs the initial
+            conditions for step response steady-state. The default is 'zeros'.
+        """
         new_state = np.zeros(
-            (self._coefficients.shape[0], *cshape, n_coeff-1))
+            (self._coefficients.shape[0], *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
@@ -329,6 +370,10 @@ class FilterIIR(Filter):
 
     @staticmethod
     def _process(coefficients, data, zi=None):
+        """Process a single filter channel.
+        This is a hidden static method required for a shared processing
+        function in the parent class.
+        """
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
 
@@ -348,11 +393,13 @@ class FilterSOS(Filter):
         ----------
         coefficients : array, double
             The filter coefficients as an array with dimensions
-            (n_filter_chan, n_sections, 6)
+            ``(n_filter_chan, n_sections, 6)``
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        state : array, optional
-            The state of the filter from a priory knowledge.
+        state : array, double, optional
+            The state of the filter from prior information with dimensions
+            ``(n_filter_chan, *cshape, n_sections, 6)``, where ``cshape`` is
+            the channel shape of the ``~py:class:Signal`` to be filtered.
 
         Returns
         -------
@@ -375,6 +422,18 @@ class FilterSOS(Filter):
         return self._coefficients.shape[-2]
 
     def init_state(self, cshape, state='zeros'):
+        """Initialize the buffer elements to pre-defined initial conditions.
+
+        Parameters
+        ----------
+        cshape : tuple, int
+            The channel shape of the ``~py:class:Signal`` which is to be
+            filtered.
+        state : str, optional
+            The desired state. This can either be ``'zeros'`` which initializes
+            an empty filter, or ``'step'`` which constructs the initial
+            conditions for step response steady-state. The default is 'zeros'.
+        """
         new_state = np.zeros(
             (self._coefficients.shape[0], *cshape, self.n_sections, 2))
         if state == 'step':
@@ -384,6 +443,10 @@ class FilterSOS(Filter):
 
     @staticmethod
     def _process(sos, data, zi=None):
+        """Process a single filter channel.
+        This is a hidden static method required for a shared processing
+        function in the parent class.
+        """
         if zi is not None:
             zi = zi.transpose(1, 0, 2)
         res = spsignal.sosfilt(sos, data, zi=zi, axis=-1)
