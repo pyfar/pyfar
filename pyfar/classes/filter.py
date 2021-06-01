@@ -1,4 +1,3 @@
-from os import stat
 import deepdiff
 import warnings
 
