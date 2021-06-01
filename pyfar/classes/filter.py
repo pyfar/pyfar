@@ -1,3 +1,4 @@
+from os import stat
 import deepdiff
 import warnings
 
@@ -116,7 +117,8 @@ class Filter(object):
         self._comment = comment
 
     def init_state(self, state='empty'):
-        raise NotImplementedError("Abstract class method")
+        self._state = state
+        self._initialized = True
 
     @property
     def sampling_rate(self):
@@ -272,12 +274,12 @@ class FilterFIR(Filter):
 
     def init_state(self, cshape, state='zeros'):
         n_coeff = self._coefficients.shape[-1]
-        state = np.zeros(
+        new_state = np.zeros(
             (self._coefficients.shape[0], *cshape, n_coeff-1))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
-                state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
-        return super().init_state(state=state)
+                new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
+        super().init_state(state=new_state)
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -319,12 +321,12 @@ class FilterIIR(Filter):
 
     def init_state(self, cshape, state):
         n_coeff = self._coefficients.shape[-1]
-        state = np.zeros(
+        new_state = np.zeros(
             (self._coefficients.shape[0], *cshape, n_coeff-1))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
-                state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
-        return super().init_state(state=state)
+                new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
+        return super().init_state(state=new_state)
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -369,13 +371,17 @@ class FilterSOS(Filter):
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
+    @property
+    def n_sections(self):
+        return self._coefficients.shape[-2]
+
     def init_state(self, cshape, state='zeros'):
-        state = np.zeros(
+        new_state = np.zeros(
             (self._coefficients.shape[0], *cshape, self.n_sections, 2))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
-                state[idx, ...] = spsignal.sosfilt_zi(coeff)
-        return super().init_state(state=state)
+                new_state[idx, ...] = spsignal.sosfilt_zi(coeff)
+        return super().init_state(state=new_state)
 
     @staticmethod
     def _process(sos, data, zi=None):
