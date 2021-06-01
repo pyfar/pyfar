@@ -816,7 +816,6 @@ class Signal(FrequencyData, TimeData):
         Iterate channels of a :py:func:`Signal`
 
         >>> import pyfar as pf
-        >>>
         >>> signal = pf.signals.impulse(2, amplitude=[1, 1, 1])
         >>> for idx, channel in enumerate(signal):
         >>>     channel.time *= idx
