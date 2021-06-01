@@ -124,17 +124,11 @@ def test_linear_phase():
     y = dsp.linear_phase(x, N / 2 / fs, unit="s")
     npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
 
-    # test group delay in milliseconds
-    y = dsp.linear_phase(x, N / 2 / fs * 1e3, unit="ms")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
-
-    # test group delay in microseconds
-    y = dsp.linear_phase(x, N / 2 / fs * 1e6, unit="mus")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
-
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
         dsp.linear_phase(1, 0)
+    with pytest.raises(ValueError, match="unit is km"):
+        dsp.linear_phase(x, N / 2 / fs, unit="km")
 
 
 def test_linear_phase_multichannel():
@@ -330,8 +324,6 @@ def test_time_window_interval_unit_error():
         dsp.time_window(sig, interval=[0, 11], unit='samples')
     with pytest.raises(ValueError, match='than signal'):
         dsp.time_window(sig, interval=[0, 6], unit='s')
-    with pytest.raises(ValueError, match='than signal'):
-        dsp.time_window(sig, interval=[0, 6e3], unit='ms')
 
 
 def test_time_window_crop_none():
@@ -353,10 +345,6 @@ def test_time_window_crop_interval():
         crop='window')
     assert sig_win.n_samples == 3
     sig_win = dsp.time_window(
-        sig, interval=[500, 1500], shape='symmetric', unit='ms',
-        crop='window')
-    assert sig_win.n_samples == 3
-    sig_win = dsp.time_window(
         sig, interval=[1, 3], shape='left', crop='window')
     assert sig_win.n_samples == 9
     sig_win = dsp.time_window(
@@ -373,10 +361,6 @@ def test_time_window_crop_end():
     assert sig_win.n_samples == 4
     sig_win = dsp.time_window(
         sig, interval=[0.5, 1.5], shape='symmetric', unit='s',
-        crop='end')
-    assert sig_win.n_samples == 4
-    sig_win = dsp.time_window(
-        sig, interval=[500, 1500], shape='symmetric', unit='ms',
         crop='end')
     assert sig_win.n_samples == 4
     sig_win = dsp.time_window(
@@ -460,14 +444,12 @@ def test_time_window_interval_four_values():
     """ Test time_window with four values given in interval."""
     sig = pyfar.Signal(np.ones(9), 1)
     sig_win = dsp.time_window(
-        sig, window='triang', interval=[1, 3, 6, 7], unit='samples',
-        crop='none')
+        sig, window='triang', interval=[1, 3, 6, 7], crop='none')
     time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0]])
     npt.assert_allclose(sig_win.time, time_win)
     sig = pyfar.Signal(np.ones(10), 1)
     sig_win = dsp.time_window(
-        sig, window='triang', interval=[1, 3, 6, 7], unit='samples',
-        crop='none')
+        sig, window='triang', interval=[1, 3, 6, 7], crop='none')
     time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0, 0]])
     npt.assert_allclose(sig_win.time, time_win)
 
