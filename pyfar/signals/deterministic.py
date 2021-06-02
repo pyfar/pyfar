@@ -259,8 +259,8 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
 
 def general_sweep_synthesis(
-    n_samples, spectrum, start_margin=None, stop_margin=None,
-    requency_range=None, double=True, sampling_rate=44100):
+        n_samples, spectrum, start_margin=None, stop_margin=None,
+        requency_range=None, double=True, sampling_rate=44100):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
 
