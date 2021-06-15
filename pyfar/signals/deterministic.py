@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 import pyfar
 
 
@@ -129,6 +130,20 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     return signal
 
 
+def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
+                 sampling_rate=44100):
+    """
+    This function will be deprecated in pyfar 0.5.0. See
+    :py:func:`linear_sweep_time`.
+    """
+
+    warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
+                   "of pyfar.signals.linear_sweep_time."))
+
+    linear_sweep_time(n_samples, frequency_range, n_fade_out, amplitude,
+                      sampling_rate)
+
+
 def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
                       sampling_rate=44100):
     """Generate single channel sine sweep with linearly increasing frequency.
@@ -179,6 +194,20 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
         sampling_rate, "linear")
 
     return signal
+
+
+def exponential_sweep(n_samples, frequency_range, n_fade_out=90,
+                      amplitude=1, sweep_rate=None, sampling_rate=44100):
+    """
+    This function will be deprecated in pyfar 0.5.0. See
+    :py:func:`exponential_sweep_time`.
+    """
+
+    warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
+                   "of pyfar.signals.exponential_sweep_time."))
+
+    exponential_sweep_time(n_samples, frequency_range, n_fade_out,
+                           amplitude, sweep_rate, sampling_rate)
 
 
 def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
