@@ -129,8 +129,8 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     return signal
 
 
-def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
-                 sampling_rate=44100):
+def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
+                      sampling_rate=44100):
     """Generate single channel sine sweep with linearly increasing frequency.
 
     Time domain sweep generation according to [#]_:
@@ -181,8 +181,8 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     return signal
 
 
-def exponential_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
-                      sweep_rate=None, sampling_rate=44100):
+def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
+                           amplitude=1, sweep_rate=None, sampling_rate=44100):
     """
     Generate single channel sine sweep with exponentially increasing frequency.
 

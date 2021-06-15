@@ -253,9 +253,10 @@ def test_pulsed_noise_assertions():
 
 def test_linear_sweep_against_reference():
     """Test linear sweep against manually verified reference."""
-    sweep = pfs.linear_sweep(2**10, [1e3, 20e3])
+    sweep = pfs.linear_sweep_time(2**10, [1e3, 20e3])
     reference = np.loadtxt(os.path.join(
-        os.path.dirname(__file__), "references", "signals.linear_sweep.csv"))
+        os.path.dirname(__file__), "references",
+        "signals.linear_sweep_time.csv"))
 
     npt.assert_allclose(sweep.time, np.atleast_2d(reference))
     assert sweep.cshape == (1, )
@@ -268,7 +269,7 @@ def test_linear_sweep_against_reference():
 
 def test_linear_sweep_amplitude_sampling_rate():
     """Test linear sweep with custom amplitude and sampling rate."""
-    sweep = pfs.linear_sweep(
+    sweep = pfs.linear_sweep_time(
         2**10, [1e3, 20e3], amplitude=2, sampling_rate=48000)
 
     assert sweep.sampling_rate == 48000
@@ -278,25 +279,25 @@ def test_linear_sweep_amplitude_sampling_rate():
 
 def test_linear_sweep_float():
     """Test linear sweep with float number of samples."""
-    sweep = pfs.linear_sweep(100.6, [1e3, 20e3])
+    sweep = pfs.linear_sweep_time(100.6, [1e3, 20e3])
     assert sweep.n_samples == 100
 
 
 def test_linear_sweep_assertions():
     """Test assertions for linear sweep."""
     with pytest.raises(ValueError, match="The sweep must be longer"):
-        pfs.linear_sweep(50, [1, 2])
+        pfs.linear_sweep_time(50, [1, 2])
     with pytest.raises(ValueError, match="frequency_range must be an array"):
-        pfs.linear_sweep(100, 1)
+        pfs.linear_sweep_time(100, 1)
     with pytest.raises(ValueError, match="Upper frequency limit"):
-        pfs.linear_sweep(100, [1, 40e3])
+        pfs.linear_sweep_time(100, [1, 40e3])
 
 
 def test_exponential_sweep_against_reference():
     """Test exponential sweep against manually verified reference."""
-    sweep = pfs.exponential_sweep(2**10, [1e3, 20e3])
+    sweep = pfs.exponential_sweep_time(2**10, [1e3, 20e3])
     reference = np.loadtxt(os.path.join(os.path.dirname(__file__),
-                           "references", "signals.exponential_sweep.csv"))
+                           "references", "signals.exponential_sweep_time.csv"))
 
     npt.assert_allclose(sweep.time, np.atleast_2d(reference))
     assert sweep.cshape == (1, )
@@ -309,7 +310,7 @@ def test_exponential_sweep_against_reference():
 
 def test_exponential_sweep_amplitude_sampling_rate():
     """Test exponential sweep with custom amplitude and sampling rate."""
-    sweep = pfs.exponential_sweep(
+    sweep = pfs.exponential_sweep_time(
         2**10, [1e3, 20e3], amplitude=2, sampling_rate=48000)
 
     assert sweep.sampling_rate == 48000
@@ -319,7 +320,7 @@ def test_exponential_sweep_amplitude_sampling_rate():
 
 def test_exponential_sweep_rate():
     """Test exponential sweep with sweep rate."""
-    sweep = pfs.exponential_sweep(None, [1e3, 2e3], sweep_rate=10)
+    sweep = pfs.exponential_sweep_time(None, [1e3, 2e3], sweep_rate=10)
 
     # duration in seconds
     T = 1 / 10 / np.log(2) * np.log(2e3 / 1e3)
@@ -331,7 +332,7 @@ def test_exponential_sweep_rate():
 
 def test_exponential_sweep_assertion():
     with pytest.raises(ValueError, match="The exponential sweep can not"):
-        pfs.exponential_sweep(2**10, [0, 20e3])
+        pfs.exponential_sweep_time(2**10, [0, 20e3])
 
 
 def test_get_common_shape():
