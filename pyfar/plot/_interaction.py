@@ -58,17 +58,21 @@ class Cycle(object):
     """ Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions.
     """
-    def __init__(self, n_channels, index=0):
+    def __init__(self, cshape, index=0):
         """
         Parameters
         ----------
-        n_channels : int
-            number of channels in the signal
+        chsape : tupel
+            cshape of the signal
         index : int, optional
             index of the current channel. The default is 0
         """
-        self._n_channels = n_channels
+        self._n_channels = np.prod(cshape)
         self._index = index
+
+        self._channels = []
+        for index in np.ndindex(cshape):
+            self._channels.append(index)
 
     def increase_index(self):
         self._index = (self.index + 1) % self.n_channels
@@ -81,11 +85,18 @@ class Cycle(object):
 
     @property
     def index(self):
-        return self._index
+        return int(self._index)
 
     @property
     def n_channels(self):
         return self._n_channels
+
+    @property
+    def current_channel(self):
+        channel = self._channels[self.index]
+        if len(channel) == 1:
+            channel = channel[0]
+        return channel
 
 
 class EventEmu(object):
@@ -397,7 +408,8 @@ class Interaction(object):
         """
 
         # save input arguments
-        self.signal = signal
+        self.cshape = signal.cshape
+        self.signal = signal.flatten()
         self.ax = axes
         self.figure = axes.figure
         self.style = style
@@ -408,7 +420,7 @@ class Interaction(object):
         self.event = None
 
         # initialize cycler
-        self.cycler = Cycle(self.signal.cshape[0])
+        self.cycler = Cycle(self.cshape)
 
         # initialize visibility
         self.all_visible = True
@@ -538,7 +550,8 @@ class Interaction(object):
             elif event.key in plot['group_delay']:
                 self.params.update_axis_type('group_delay')
                 self.ax = _line._group_delay(
-                    self.signal, prm.unit, prm.xscale, self.ax, **self.kwargs)
+                    self.signal, prm.unit, prm.xscale, self.ax,
+                    **self.kwargs)
 
             elif event.key in plot['spectrogram']:
                 self.params.update_axis_type('spectrogram')
@@ -720,7 +733,7 @@ class Interaction(object):
                         ec=mpl.rcParams["axes.facecolor"], alpha=.5)
 
             self.txt = self.ax.text(
-                x_pos, y_pos, f'Ch. {self.cycler.index}',
+                x_pos, y_pos, f'Ch. {self.cycler.current_channel}',
                 horizontalalignment='right', verticalalignment='baseline',
                 bbox=bbox, transform=self.ax.transAxes)
 
