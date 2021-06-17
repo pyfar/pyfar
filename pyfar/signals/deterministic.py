@@ -204,6 +204,17 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     return signal
 
 
+def linear_sweep_freq(
+        n_samples, start_margin=None, stop_margin=None, frequency_range=None,
+        butterworth_order=8, double=True, sampling_rate=44100):
+
+    signal, group_delay = _sweep_synthesis_freq(
+        n_samples, "linear", start_margin, stop_margin,
+        frequency_range, butterworth_order, double, sampling_rate)
+
+    return signal, group_delay
+
+
 def exponential_sweep(n_samples, frequency_range, n_fade_out=90,
                       amplitude=1, sweep_rate=None, sampling_rate=44100):
     """
@@ -287,9 +298,41 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
     return signal
 
 
-def general_sweep_synthesis(
-        n_samples, spectrum, start_margin=None, stop_margin=None,
-        requency_range=None, double=True, sampling_rate=44100):
+def exponential_sweep_freq(
+        n_samples, start_margin=None, stop_margin=None, frequency_range=None,
+        butterworth_order=8, double=True, sampling_rate=44100):
+
+    signal, group_delay = _sweep_synthesis_freq(
+        n_samples, "exponential", start_margin, stop_margin,
+        frequency_range, butterworth_order, double, sampling_rate)
+
+    return signal, group_delay
+
+
+def magnitude_weighted_sweep(
+        n_samples, magnitude, start_margin=None, stop_margin=None,
+        double=True, sampling_rate=44100):
+
+    signal, group_delay = _sweep_synthesis_freq(
+        n_samples, magnitude, start_margin, stop_margin,
+        None, None, double, sampling_rate)
+
+    return signal, group_delay
+
+
+def perfect_sweep(
+        n_samples, sampling_rate=44100):
+
+    signal, group_delay = _sweep_synthesis_freq(
+        n_samples, "perfect", None, None, None, None, False, sampling_rate)
+
+    return signal, group_delay
+
+
+def _sweep_synthesis_freq(
+        n_samples, magnitude, start_margin=None, stop_margin=None,
+        frequency_range=None, buterworth_order=8, double=True,
+        sampling_rate=44100):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
 
@@ -313,7 +356,7 @@ def general_sweep_synthesis(
     ----------
     n_samples : int
         The length of the sweep in samples.
-    spectrum : Signal, string
+    magnitude : Signal, string
         Specify the magnitude response of the sweep.
 
         signal
@@ -346,8 +389,11 @@ def general_sweep_synthesis(
     frequency_range : array like, optional
         Frequency range of the sweep given by the lower and upper cut-off
         frequency in Hz. The restriction of the frequency range is realized
-        by appling 8th order Butterworth filters at the specified frequencies.
+        by appling a Butterworth band-pass with the specified frequencies.
         Not required if `spectrum` is ``'perfect'`` or `signal`.
+    butterworth_order : int, optional
+        The order of the Butterworth filters that are applied to limit the
+        frequency range. The default is ``8``.
     double : bool, optional
         Double `n_samples` during the sweep calculation (recommended). The
         default is  ``True``. Not required if `spectrum` is ``'perfect'``.
