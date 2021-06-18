@@ -16,7 +16,9 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     Parameters
     ----------
     signal : Signal, TimeData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -57,7 +59,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     """
 
     with context(style):
-        ax = _line._time(signal, dB, log_prefix, log_reference, unit,
+        ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
     plt.tight_layout()
 
@@ -82,7 +84,9 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -121,8 +125,8 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     """
 
     with context(style):
-        ax = _line._freq(signal, dB, log_prefix, log_reference, xscale, ax,
-                         **kwargs)
+        ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
+                         xscale, ax, **kwargs)
     plt.tight_layout()
 
     # manage interaction
@@ -145,7 +149,9 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     deg : bool
         Plot the phase in degrees. The default is ``False``, which plots the
         phase in radians.
@@ -180,7 +186,7 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     """
 
     with context(style):
-        ax = _line._phase(signal, deg, unwrap, xscale, ax, **kwargs)
+        ax = _line._phase(signal.flatten(), deg, unwrap, xscale, ax, **kwargs)
     plt.tight_layout()
 
     # manage interaction
@@ -201,7 +207,9 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     unit : str, None
         Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
@@ -234,7 +242,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     """
 
     with context(style):
-        ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
+        ax = _line._group_delay(signal.flatten(), unit, xscale, ax, **kwargs)
     plt.tight_layout()
 
     # manage interaction
@@ -255,7 +263,9 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -311,7 +321,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     with context(style):
         ax = _line._spectrogram_cb(
-            signal, dB, log_prefix, log_reference, yscale, unit,
+            signal.flatten(), dB, log_prefix, log_reference, yscale, unit,
             window, window_length, window_overlap_fct,
             cmap, ax)
     plt.tight_layout()
@@ -338,7 +348,9 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB_time : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -385,7 +397,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     """
 
     with context(style):
-        ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
+        ax = _line._time_freq(signal.flatten(), dB_time, dB_freq, log_prefix,
                               log_reference, xscale, unit, ax, **kwargs)
     plt.tight_layout()
 
@@ -407,7 +419,9 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -446,8 +460,8 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     """
 
     with context(style):
-        ax = _line._freq_phase(signal, dB, log_prefix, log_reference, xscale,
-                               deg, unwrap, ax, **kwargs)
+        ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
+                               xscale, deg, unwrap, ax, **kwargs)
     plt.tight_layout()
 
     # manage interaction
@@ -471,7 +485,9 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Flag to plot the logarithmic magnitude spectrum. The default is
         ``True``.
@@ -513,8 +529,9 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     """
 
     with context(style):
-        ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
-                                     unit, xscale, ax, **kwargs)
+        ax = _line._freq_group_delay(
+            signal.flatten(), dB, log_prefix, log_reference,
+            unit, xscale, ax, **kwargs)
     plt.tight_layout()
 
     # manage interaction
@@ -539,7 +556,9 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     plots : list, nested list
         Function handles for plotting.
     ax : matplotlib.pyplot.axes
@@ -572,7 +591,7 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     """
 
     with context(style):
-        ax = _line._custom_subplots(signal, plots, ax, **kwargs)
+        ax = _line._custom_subplots(signal.flatten(), plots, ax, **kwargs)
     plt.tight_layout()
 
     return ax

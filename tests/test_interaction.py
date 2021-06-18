@@ -317,8 +317,8 @@ def test_toggle_colormap():
     plt.close("all")
 
 
-def test_cycle_and_toggle_lines():
-    """Test toggling and cycling channels of a Signal."""
+def test_cycle_and_toggle_lines_1d_signal():
+    """Test toggling and cycling channels of a one-dimensional Signal."""
 
     # init and check start conditions
     signal = pf.Signal([[1, 0], [2, 0]], 44100)
@@ -345,6 +345,42 @@ def test_cycle_and_toggle_lines():
     ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_all"]["key"][0]))
     assert ax.lines[0].get_visible() is True
     assert ax.lines[1].get_visible() is True
+    assert ax.interaction.txt is None
+
+    plt.close("all")
+
+
+def test_cycle_and_toggle_lines_2d_signal():
+    """Test toggling and cycling channels of a two-dimensional Signal."""
+
+    # init and check start conditions
+    signal = pf.signals.impulse(10, [[1, 2], [3, 4]])
+    ax = pf.plot.time(signal)
+    for line in [0, 1, 2, 3]:
+        assert ax.lines[line].get_visible() is True
+    assert ax.interaction.txt is None
+    # toggle all
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_all"]["key"][0]))
+    assert ax.lines[0].get_visible() is True
+    for line in [1, 2, 3]:
+        assert ax.lines[line].get_visible() is False
+    assert ax.interaction.txt.get_text() == "Ch. (0, 0)"
+    # next
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["next"]["key"][0]))
+    for line in [0, 2, 3]:
+        assert ax.lines[line].get_visible() is False
+    assert ax.lines[1].get_visible() is True
+    assert ax.interaction.txt.get_text() == "Ch. (0, 1)"
+    # previous
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["prev"]["key"][0]))
+    assert ax.lines[0].get_visible() is True
+    for line in [1, 2, 3]:
+        assert ax.lines[line].get_visible() is False
+    assert ax.interaction.txt.get_text() == "Ch. (0, 0)"
+    # toggle all
+    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_all"]["key"][0]))
+    for line in [0, 1, 2, 3]:
+        assert ax.lines[line].get_visible() is True
     assert ax.interaction.txt is None
 
     plt.close("all")
