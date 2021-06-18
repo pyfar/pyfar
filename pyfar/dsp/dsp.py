@@ -1433,9 +1433,10 @@ def find_impulse_response_start(
             time of rooms with reference to other acoustical parameters. pp. 22
 
     """
-    ir_squared = np.abs(impulse_response)**2
+    ir_squared = np.abs(impulse_response.time)**2
 
     mask_start = np.int(0.9*ir_squared.shape[-1])
+
     if noise_energy == 'auto':
         mask = np.arange(mask_start, ir_squared.shape[-1])
         noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
@@ -1447,8 +1448,9 @@ def find_impulse_response_start(
 
     if np.any(max_value < 10**(threshold/10) * noise) or \
             np.any(max_sample > mask_start):
-        raise ValueError("The SNR is lower than the defined threshold. Check \
-                if this is a valid impulse response with sufficient SNR.")
+        raise ValueError(
+            "The SNR is lower than the defined threshold. Check "
+            "if this is a valid impulse response with sufficient SNR.")
 
     start_sample_shape = max_sample.shape
     n_samples = ir_squared.shape[-1]
