@@ -313,7 +313,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     .. plot::
 
         >>> import pyfar as pf
-        >>> sweep = pf.signals.linear_sweep(2**14, [0, 22050])
+        >>> sweep = pf.signals.linear_sweep_time(2**14, [0, 22050])
         >>> pf.plot.spectrogram(sweep)
     """
     if not isinstance(signal, Signal):
