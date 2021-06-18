@@ -62,7 +62,7 @@ class Cycle(object):
         """
         Parameters
         ----------
-        chsape : tupel, array like, int
+        cshape : tupel, array like, int
             cshape of the signal
         index : int, optional
             index of the current channel. The default is 0
