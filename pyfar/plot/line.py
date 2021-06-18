@@ -17,7 +17,8 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     ----------
     signal : Signal, TimeData
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -84,7 +85,8 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -148,7 +150,8 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     deg : bool
         Plot the phase in degrees. The default is ``False``, which plots the
         phase in radians.
@@ -205,7 +208,8 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     ----------
     signal : Signal
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     unit : str, None
         Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
@@ -260,7 +264,8 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ----------
     signal : Signal
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -344,7 +349,8 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     ----------
     signal : Signal
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB_time : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -414,7 +420,8 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -479,7 +486,8 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Flag to plot the logarithmic magnitude spectrum. The default is
         ``True``.
@@ -549,7 +557,8 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     ----------
     signal : Signal
         The input data to be plotted. Multidimensional data are flattened for
-        plotting.
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     plots : list, nested list
         Function handles for plotting.
     ax : matplotlib.pyplot.axes

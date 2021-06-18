@@ -317,7 +317,7 @@ def test_toggle_colormap():
     plt.close("all")
 
 
-def test_cycle_and_toggle_lines_1D_signal():
+def test_cycle_and_toggle_lines_1d_signal():
     """Test toggling and cycling channels of a one-dimensional Signal."""
 
     # init and check start conditions
@@ -350,7 +350,7 @@ def test_cycle_and_toggle_lines_1D_signal():
     plt.close("all")
 
 
-def test_cycle_and_toggle_lines_2D_signal():
+def test_cycle_and_toggle_lines_2d_signal():
     """Test toggling and cycling channels of a two-dimensional Signal."""
 
     # init and check start conditions
