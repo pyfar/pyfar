@@ -296,7 +296,8 @@ def test_linear_sweep_time_assertions():
 
 
 def test_linear_sweep_deprecation():
-    with pytest.warns(UserWarning, match="This function will be deprecated"):
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
         pfs.linear_sweep(2**10, [1e3, 20e3])
 
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
@@ -348,7 +349,8 @@ def test_exponential_sweep_time_assertion():
 
 
 def test_exponential_sweep_deprecation():
-    with pytest.warns(UserWarning, match="This function will be deprecated"):
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
         pfs.exponential_sweep(2**10, [1e3, 20e3])
 
     if version.parse(pf.__version__) >= version.parse('0.5.0'):

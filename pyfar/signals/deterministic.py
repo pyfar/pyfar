@@ -138,7 +138,8 @@ def linear_sweep(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     """
 
     warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
-                   "of pyfar.signals.linear_sweep_time."))
+                   "of pyfar.signals.linear_sweep_time."),
+                  PendingDeprecationWarning)
 
     linear_sweep_time(n_samples, frequency_range, n_fade_out, amplitude,
                       sampling_rate)
@@ -204,7 +205,8 @@ def exponential_sweep(n_samples, frequency_range, n_fade_out=90,
     """
 
     warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
-                   "of pyfar.signals.exponential_sweep_time."))
+                   "of pyfar.signals.exponential_sweep_time."),
+                  PendingDeprecationWarning)
 
     exponential_sweep_time(n_samples, frequency_range, n_fade_out,
                            amplitude, sweep_rate, sampling_rate)
