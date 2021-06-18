@@ -309,7 +309,7 @@ def exponential_sweep_freq(
     return signal, group_delay
 
 
-def magnitude_weighted_sweep(
+def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude, start_margin=None, stop_margin=None,
         double=True, sampling_rate=44100):
 
