@@ -322,7 +322,7 @@ def magnitude_spectrum_weighted_sweep(
     return signal, group_delay
 
 
-def perfect_sweep(
+def perfect_linear_sweep(
         n_samples, sampling_rate=44100):
 
     signal, group_delay = _sweep_synthesis_freq(
