@@ -1408,19 +1408,26 @@ def find_impulse_response_start(
     The start sample is identified as the first sample that varies
     significantly from the noise floor but still has a level of at least 20 dB
     below the maximum of the impulse response. The function further tries to
-    consider oscillations before the time below the threshold value.
+    consider oscillations before the time below the threshold value. If the
+    function fails to identify a clear starting sample, zero values will be
+    returned by default.
 
     Parameters
     ----------
     impulse_response : Signal
         The impulse response
     threshold : double, optional
-        Threshold in dB according to ISO 3382
+        Threshold in dB according to ISO 3382. The default is 20 dB.
+    noise_energy: optional, float, str
+        The additive noise energy found in the signal. The default value 'auto'
+        will result in an automatic estimation of the noise energy from a time
+        interval corresponding to the last ten percent of the impulse response.
 
     Returns
     -------
-    start_sample : int
-        Sample at which the impulse response starts
+    start_sample : array_like, int
+        Sample at which the impulse response starts. If the input is a
+        multi-channel object, the output will match the signals ``cshape``.
 
     Note
     ----
