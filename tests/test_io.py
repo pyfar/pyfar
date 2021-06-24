@@ -375,15 +375,23 @@ def test_write_read_builtins(tmpdir):
 
     Make sure `read` understands the bits written by `write`
     """
+    any_int = 49
+    any_bool = True
     builtin_types = {'int': 42}
     filename = os.path.join(tmpdir, 'builtins.far')
 
     io.write(
         filename,
+        any_int=any_int,
+        any_bool=any_bool,
         **builtin_types
     )
 
     actual = io.read(filename)
+    assert isinstance(any_int, int)
+    assert actual['any_int'] == any_int
+    assert isinstance(any_bool, bool)
+    assert actual['any_bool'] == any_bool
     assert isinstance(actual['int'], int)
     assert actual['int'] == builtin_types['int']
 
