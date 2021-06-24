@@ -33,7 +33,7 @@ three basic encoding/decoding types:
             [str, str] e.g. ['$ndarray', '/my_obj/_signal']
 
 Numpy-types can be stored directly in the zipfile. In this case type hints,
-such as `$ndarray`, become the name of the file in the archive.
+such as `$ndarray`, become the name of the node in the zipfile.
 
 
 Class-Level
@@ -103,6 +103,7 @@ import io
 import sys
 import json
 import numpy as np
+from copy import deepcopy
 
 
 def _decode(obj, zipfile):
@@ -359,7 +360,8 @@ def _is_pyfar_type(obj):
         'FilterSOS',
         'SphericalVoronoi',
         'TimeData',
-        'FrequencyData']
+        'FrequencyData',
+        'BuiltinsWrapper']
 
 
 def _is_numpy_type(obj):
@@ -421,3 +423,16 @@ def _str_to_type(type_as_string, module='pyfar'):
             type_as_string, module=f'{module}.{submodule}')
         if PyfarType:
             return PyfarType
+
+
+class BuiltinsWrapper(dict):
+
+    def copy(self):
+        return deepcopy(self)
+
+    def _encode(self):
+        return self.copy()
+
+    @staticmethod
+    def _decode(obj_dict):
+        return obj_dict

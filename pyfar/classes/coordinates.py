@@ -1164,7 +1164,7 @@ class Coordinates():
 
     def _encode(self):
         """Return dictionary for the encoding."""
-        return self.copy().__dict__
+        return self.copy()
 
     @classmethod
     def _decode(cls, obj_dict):

@@ -230,6 +230,11 @@ def read(filename):
                         'different versions of Pyfar.')
                 collection[name] = obj
 
+        if 'builtin_wrapper' in collection:
+            for key, value in collection['builtin_wrapper'].items():
+                collection[key] = value
+            collection.pop('builtin_wrapper')
+
     return collection
 
 
@@ -265,18 +270,25 @@ def write(filename, compress=False, **objs):
     filename = pathlib.Path(filename).with_suffix('.far')
     compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
     zip_buffer = io.BytesIO()
+    builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
             if codec._is_pyfar_type(obj):
                 codec._encode_object_json_aided(obj, name, zip_file)
             elif codec._is_numpy_type(obj):
                 codec._encode({f'${type(obj).__name__}': obj}, name, zip_file)
+            elif isinstance(obj, int):
+                builtin_wrapper[name] = obj
             else:
                 error = (
                     f'Objects of type {type(obj)} cannot be written to disk.')
                 if isinstance(obj, fo.Filter):
                     error = f'{error}. Consider casting to {fo.Filter}'
                 raise TypeError(error)
+
+        if len(builtin_wrapper) > 0:
+            codec._encode_object_json_aided(
+                builtin_wrapper, 'builtin_wrapper', zip_file)
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())

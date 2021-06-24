@@ -369,6 +369,25 @@ def test_write_read_numpy_ndarrays(tmpdir):
     assert np.allclose(actual['matrix_3d_complex'], matrix_3d_complex)
 
 
+def test_write_read_builtins(tmpdir):
+    """ All python builtin types except for exceptions and the types:
+    filter, map, object, super, and staticmethod.
+
+    Make sure `read` understands the bits written by `write`
+    """
+    builtin_types = {'int': 42}
+    filename = os.path.join(tmpdir, 'builtins.far')
+
+    io.write(
+        filename,
+        **builtin_types
+    )
+
+    actual = io.read(filename)
+    assert isinstance(actual['int'], int)
+    assert actual['int'] == builtin_types['int']
+
+
 def test_write_read_multiplePyfarObjects(
         filter,
         filterFIR,
