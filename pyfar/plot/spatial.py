@@ -120,7 +120,7 @@ def _setup_axes(projection=Axes3D.name, ax=None,
         # (workaround for ax.set_aspect('equal', 'box'), which is currently not
         #  working for 3D axes.)
         plt.figure(figsize=plt.figaspect(1.))
-        ax = plt.gca(projection=projection)
+        ax = plt.subplot(111, projection=projection)
 
     if 'Axes3D' not in ax.__str__():
         raise ValueError("Only three-dimensional axes supported.")
