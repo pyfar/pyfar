@@ -422,7 +422,7 @@ def _sweep_synthesis_freq(
     -----
     The envelope of the sweep time signal should be constant, appart from
     slight overshoots at the beginning and end. If this is not the case, try to
-    provide a smoother spectrum (if `spectrum` is `signal`) or increase
+    provide a smoother spectrum (if `magnitude` is `signal`) or increase
     `n_samples`.
 
     References
