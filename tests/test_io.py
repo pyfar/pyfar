@@ -369,7 +369,7 @@ def test_write_read_numpy_ndarrays(tmpdir):
     assert np.allclose(actual['matrix_3d_complex'], matrix_3d_complex)
 
 
-def test_write_read_builtins(tmpdir):
+def test_write_read_builtins(dict_of_builtins, tmpdir):
     """ All python builtin types except for exceptions and the types:
     filter, map, object, super, and staticmethod.
 
@@ -377,14 +377,13 @@ def test_write_read_builtins(tmpdir):
     """
     any_int = 49
     any_bool = True
-    builtin_types = {'int': 42}
     filename = os.path.join(tmpdir, 'builtins.far')
 
     io.write(
         filename,
         any_int=any_int,
         any_bool=any_bool,
-        **builtin_types
+        **dict_of_builtins
     )
 
     actual = io.read(filename)
@@ -392,8 +391,8 @@ def test_write_read_builtins(tmpdir):
     assert actual['any_int'] == any_int
     assert isinstance(any_bool, bool)
     assert actual['any_bool'] == any_bool
-    assert isinstance(actual['int'], int)
-    assert actual['int'] == builtin_types['int']
+    # checks if `dict_of_builtins` is a subset of `actual`
+    assert dict_of_builtins.items() <= actual.items()
 
 
 def test_write_read_multiplePyfarObjects(
@@ -407,6 +406,7 @@ def test_write_read_multiplePyfarObjects(
         time_data,
         frequency_data,
         sine,
+        dict_of_builtins,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back.
@@ -425,7 +425,8 @@ def test_write_read_multiplePyfarObjects(
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
-        matrix_2d_int=matrix_2d_int)
+        matrix_2d_int=matrix_2d_int,
+        **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -449,6 +450,7 @@ def test_write_read_multiplePyfarObjects(
     assert actual['signal'] == sine
     assert isinstance(actual['matrix_2d_int'], np.ndarray)
     assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
+    assert dict_of_builtins.items() <= actual.items()
 
 
 def test_write_read_multiplePyfarObjectsWithCompression(
@@ -462,6 +464,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         time_data,
         frequency_data,
         sine,
+        dict_of_builtins,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back with zip compression.
@@ -481,7 +484,8 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
-        matrix_2d_int=matrix_2d_int)
+        matrix_2d_int=matrix_2d_int,
+        **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -505,3 +509,4 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     assert actual['signal'] == sine
     assert isinstance(actual['matrix_2d_int'], np.ndarray)
     assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
+    assert dict_of_builtins.items() <= actual.items()

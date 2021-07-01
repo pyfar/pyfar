@@ -240,7 +240,8 @@ def read(filename):
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible pyfar object or numpy array as .far file to disk.
+    Write any compatible pyfar object or numpy array and often used builtin
+    types as .far file to disk.
 
     Parameters
     ----------
@@ -265,6 +266,10 @@ def write(filename, compress=False, **objs):
     >>> a = np.array([1,2,3])
     >>> pyfar.io.write('my_objs.far', signal=s, orientations=o, array=a)
 
+    Notes
+    -----
+    * Supported builtin types are:
+      bool, bytes, complex, float, frozenset, int, list, set, str and tuple
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
@@ -277,7 +282,7 @@ def write(filename, compress=False, **objs):
                 codec._encode_object_json_aided(obj, name, zip_file)
             elif codec._is_numpy_type(obj):
                 codec._encode({f'${type(obj).__name__}': obj}, name, zip_file)
-            elif isinstance(obj, int):
+            elif type(obj) in codec._supported_builtin_types():
                 builtin_wrapper[name] = obj
             else:
                 error = (
