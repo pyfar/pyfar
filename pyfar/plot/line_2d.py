@@ -6,7 +6,7 @@ from . import _line_2d
 
 
 def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
-           points=None, sort_points="ascending", orientation="vertical",
+           points=None, orientation="vertical",
            cmap=mpl.cm.get_cmap(name='magma'), ax=None, style='light',
            **kwargs):
     """
@@ -37,21 +37,11 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milli seconds), or ``mus`` (micro seconds) depending on the data.
     points: array like, optional
-        Points at which the channels of `signal` were sampled. `points` must
-        have as many entries as `signal` has channels. Examples for points
-        might be azimuth angles, if `signal` holds data on the horizontal plane
-        or x-values, if `signal` was sampled along a line in Cartesian
-        coordinates. `points` is used to for labeling the axis. The default is
-        ``'None'`` which labels the channels in `signal` from 0 to N.
-    sort_points: string, optional
-        ``'ascending'``
-            sort the channels in `signal` so that `points` are ascending.
-        ``'descending'``
-            sort the channels in `signal` so that `points` are descending.
-        ``'none'``
-            do not sort the channels in `signal`
-
-        The default is ``'ascending'``
+        Points at which the channels of `signal` were sampled (e.g. azimuth
+        angles or x values). `points` must be monotonously increasing/
+        decreasing and have as many entries as `signal` has channels. The
+        default is ``'None'`` which labels the channels in `signal` from
+        0 to N.
     orientation: string, optional
         ``'vertical'``
             The channels of `signal` will be plotted as as vertical lines.
@@ -92,8 +82,7 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     with context(style):
         ax = _line_2d._time2d(
             signal.flatten(), dB, log_prefix, log_reference, unit,
-            points, sort_points, orientation,
-            cmap, ax, **kwargs)
+            points, orientation, cmap, ax, **kwargs)
     plt.tight_layout()
 
     # plot_parameter = ia.PlotParameter(

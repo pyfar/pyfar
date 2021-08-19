@@ -7,7 +7,7 @@ from pyfar.plot._line import (
     _deal_time_units, _prepare_plot, _set_axlim, _get_quad_mesh_from_axis)
 
 
-def _time2d(signal, dB, log_prefix, log_reference, unit, points, sort_points,
+def _time2d(signal, dB, log_prefix, log_reference, unit, points,
             orientation, cmap, ax, **kwargs):
 
     # check input
@@ -77,7 +77,5 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points, sort_points,
     cb = plt.colorbar(qm, cax=ax[1])
     cb_label = "Amplitude in dB" if dB else "Amplitude"
     cb.set_label(cb_label)
-
-    plt.tight_layout()
 
     return ax
