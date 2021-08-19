@@ -32,6 +32,9 @@ from .line import (
     freq_group_delay,
     custom_subplots
 )
+from .line_2d import (
+    time2d
+)
 from .spatial import (
     scatter,
     quiver
@@ -48,6 +51,7 @@ from .utils import (
 __all__ = [
     'freq',
     'time',
+    'time2d',
     'phase',
     'group_delay',
     'spectrogram',

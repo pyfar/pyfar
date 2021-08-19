@@ -208,9 +208,8 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
         # avoid any zero-values because they result in -inf in dB data
         eps = np.finfo(float).eps
         data = log_prefix * np.log10(np.abs(data) / log_reference + eps)
-        ymax = np.nanmax(data)
-        ymin = ymax - 90
-        ymax = ymax + 10
+        ymax = np.nanmax(data) + 10
+        ymin = ymax - 100
 
     # auto detect the time unit
     if unit is None:
