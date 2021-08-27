@@ -1396,3 +1396,100 @@ def time_shift(signal, shift, unit='samples'):
             axis=-1)
 
     return shifted.reshape(signal.cshape)
+
+
+def deconvolve(measurement, excitation, **kwargs):
+    """Calculate transfer functions by spectral deconvolution of two signals.
+
+    The transfer function :math:`H(\\omega)` is calculated by spectral
+    deconvolution (spectral division).
+
+    .. math::
+    \\H( \\omega ) = \\frac{Y(\\omega)}{X(\\omega)},
+
+    where :math:`X(\\omega)` is the excitation signal and :math:`Y(\\omega)`
+    the measured signal. Regulated inversion is used to avoid numerical issues
+    in calculating :math:`\\hat{X(\\omega)} = 1/X(\\omega)` for small values of
+    :math:`X(\\omega)` (see :py:func:`pyfar.dsp.regulated_spectrum_inversion`).
+    The transfer function is thus calculated as
+
+    .. math::
+    \\H(\\omega) = Y(\\omega)\\hat{X(\\omega)}.
+
+    For more information, refer to [1]_
+
+    Parameters
+    ----------
+    measurement : pyfar.Signal
+        The measurement signal, recorded after passing the device under test.
+        The measurement signal is zero padded, if it is shorter than the
+        excitation signal.
+    excitation : pyfar.Signal
+        The excitation signal, used to perform the measurement.
+        The excitation signal is zero padded, if it is shorter than the
+        measurement signal.
+    kwargs : Parameters for regu_inversion, can include:
+        freq_range, regu_outside, regu_inside, regu_final
+        refer to function regularized_spectrum_inversion for deatiled
+        documentation.
+
+    Returns
+    -------
+    signal : Signal
+        The resulting signal after deconvolution.
+        The fft_norm of this resulting signal is set to 'none'.
+
+    References
+    -----------
+    .. [1] S. Mueller and P. Masserani "Transfer function measurement with
+           sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
+           (2001, June).
+    """
+
+    # Check if both inputs are type Signal
+    if not isinstance(measurement, pyfar.Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+    if not isinstance(excitation, pyfar.Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    # Check if both signals have the same sampling rate
+    if not measurement.sampling_rate == excitation.sampling_rate:
+        raise ValueError("The two signals have different sampling rates!")
+    # Check if both signals have the same fft norm, if not: warn
+    if not measurement.fft_norm == excitation.fft_norm:
+        warnings.warn("The two signals have different fft_norms.")
+
+    # Check if both signals have the same length,
+    # if not: bring them to the same length
+    if measurement.n_samples > excitation.n_samples:
+        # Add Zeros to excitation
+        excitation.time = np.concatenate((excitation.time,
+                                          np.zeros(excitation.cshape +
+                                                   (measurement.n_samples -
+                                                    excitation.n_samples, ))
+                                          ), axis=1)
+
+    if measurement.n_samples < excitation.n_samples:
+        # Add Zeros to measurement
+        measurement.time = np.concatenate((measurement.time,
+                                           np.zeros(measurement.cshape +
+                                                    (excitation.n_samples -
+                                                     measurement.n_samples, ))
+                                           ), axis=1)
+
+    # multiply measurement signal with regularized inversed excitation signal
+    # to get the transfer function
+    result = measurement * regularized_spectrum_inversion(excitation, **kwargs)
+
+    # Check if the signals have any comments,
+    # if yes: concatenate the comments for the result
+    result.comment = "Calculated with pyfar.dsp.deconv."
+    if measurement.comment != 'none':
+        result.comment += f" Measured signal: {measurement.comment}."
+    if excitation.comment != 'none':
+        result.comment += f" Excitation signal: {excitation.comment}."
+
+    # return the impulse resonse
+    result.fft_norm = 'none'
+
+    return result
