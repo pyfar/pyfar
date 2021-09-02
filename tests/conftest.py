@@ -399,6 +399,7 @@ def fft_lib_np(monkeypatch):
     """
     import pyfar.dsp.fft
     monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', np.fft)
+    return np.fft.__name__
 
 
 @pytest.fixture
@@ -408,6 +409,7 @@ def fft_lib_pyfftw(monkeypatch):
     import pyfar.dsp.fft
     from pyfftw.interfaces import numpy_fft as npi_fft
     monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', npi_fft)
+    return npi_fft.__name__
 
 
 @pytest.fixture
@@ -485,6 +487,41 @@ def generate_sofa_GeneralTF(
     sofafile.Data.initialize()
     sofafile.Data.Real.set_values(np.real(noise_two_by_three_channel.freq))
     sofafile.Data.Imag.set_values(np.imag(noise_two_by_three_channel.freq))
+
+    sofafile.close()
+    return filename
+
+
+@pytest.fixture
+def generate_sofa_postype_spherical(
+        tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
+    """ Generate the reference sofa files of type GeneralFIR,
+    spherical position type.
+    """
+    sofatype = 'GeneralFIR'
+    n_measurements = noise_two_by_three_channel.cshape[0]
+    n_receivers = noise_two_by_three_channel.cshape[1]
+    n_samples = noise_two_by_three_channel.n_samples
+    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
+
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
+
+    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Source.initialize(
+        variances=["Position"], fixed=["View", "Up"])
+    sofafile.Source.Position.set_system('spherical')
+    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
+    sofafile.Receiver.initialize(
+        variances=["Position"], fixed=["View", "Up"])
+    sofafile.Receiver.Position.set_system('spherical')
+    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
+    sofafile.Receiver.Position.set_values(r_coords)
+    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
+    sofafile.Data.Type = 'FIR'
+    sofafile.Data.initialize()
+    sofafile.Data.IR = noise_two_by_three_channel.time
+    sofafile.Data.SamplingRate = noise_two_by_three_channel.sampling_rate
 
     sofafile.close()
     return filename
@@ -610,14 +647,6 @@ def filter(coeffs, state):
 
 
 @pytest.fixture
-def filterIIR():
-    """ FilterIIR object.
-    """
-    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
-    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
-
-
-@pytest.fixture
 def filterFIR():
     """ FilterFIR objectr.
     """
@@ -625,6 +654,14 @@ def filterFIR():
         [1, 1 / 2, 0],
         [1, 1 / 4, 1 / 8]])
     return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture

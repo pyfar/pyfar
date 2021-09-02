@@ -214,8 +214,8 @@ class _Audio():
         --------
         Get the first channel of a multi channel audio object
 
-        >>> import pyfar
-        >>> signal = pyfar.signals.noise(10, rms=[1, 1])
+        >>> import pyfar as pf
+        >>> signal = pf.signals.noise(10, rms=[1, 1])
         >>> first_channel = signal[0]
 
 
@@ -239,9 +239,9 @@ class _Audio():
         --------
         Set the first channel of a multi channel audio object
 
-        >>> import pyfar
-        >>> signal = pyfar.signals.noise(10, rms=[1, 1])
-        >>> signal[0] = pyfar.signals.noise(10, rms=2)
+        >>> import pyfar as pf
+        >>> signal = pf.signals.noise(10, rms=[1, 1])
+        >>> signal[0] = pf.signals.noise(10, rms=2)
         """
         self._assert_matching_meta_data(value)
         if isinstance(key, (int, slice)):
@@ -815,9 +815,8 @@ class Signal(FrequencyData, TimeData):
         --------
         Iterate channels of a :py:func:`Signal`
 
-        >>> import pyfar
-        >>>
-        >>> signal = pyfar.signals.impulse(2, amplitude=[1, 1, 1])
+        >>> import pyfar as pf
+        >>> signal = pf.signals.impulse(2, amplitude=[1, 1, 1])
         >>> for idx, channel in enumerate(signal):
         >>>     channel.time *= idx
         >>>     signal[idx] = channel

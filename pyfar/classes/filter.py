@@ -27,27 +27,9 @@ def pop_state_from_kwargs(**kwargs):
     return kwargs
 
 
-def lfilter(coefficients, signal, zi):
-    return spsignal.lfilter(coefficients[0], coefficients[1], signal, zi=zi)
-
-
-def filtfilt(coefficients, signal, **kwargs):
-    kwargs = pop_state_from_kwargs(kwargs)
-    return spsignal.filtfilt(
-        coefficients[0], coefficients[1], signal, **kwargs)
-
-
-def sosfilt(sos, signal, zi):
-    return spsignal.sosfilt(sos, signal, zi=zi)
-
-
-def sosfiltfilt(sos, signal, **kwargs):
-    kwargs = pop_state_from_kwargs(kwargs)
-    return spsignal.sosfiltfilt(sos, signal, **kwargs)
-
-
 def extend_sos_coefficients(sos, order):
-    """Extend a set of SOS filter coefficients to match a required filter order
+    """
+    Extend a set of SOS filter coefficients to match a required filter order
     by adding sections with coefficients resulting in an ideal frequency
     response.
 
@@ -67,7 +49,7 @@ def extend_sos_coefficients(sos, order):
     sos_order = sos.shape[0]
     if sos_order == order:
         return sos
-    pad_len = order-sos_order
+    pad_len = order - sos_order
     sos_ext = np.zeros((pad_len, 6))
     sos_ext[:, 3] = 1.
     sos_ext[:, 0] = 1.
@@ -84,7 +66,6 @@ class Filter(object):
     def __init__(
             self,
             coefficients=None,
-            filter_func=None,
             sampling_rate=None,
             state=None,
             comment=None):
@@ -95,14 +76,10 @@ class Filter(object):
         ----------
         coefficients : array, double
             The filter coefficients as an array.
-        filter_func : ``'default'``, ``'zerophase'``
-            ``'default'`` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
+        sampling_rate : number
+            The sampling rate of the filter in Hz.
         state : array, optional
             The state of the filter from a priory knowledge.
-
 
         Returns
         -------
@@ -123,11 +100,6 @@ class Filter(object):
         else:
             self._initialized = False
         self._state = state
-        self._filter_func = None
-
-        self._FILTER_FUNCS = {
-            'default': None,
-            'zerophase': None}
 
         self._sampling_rate = sampling_rate
 
@@ -165,13 +137,9 @@ class Filter(object):
         """
         return self._state
 
-    @property
-    def filter_func(self):
-        raise NotImplementedError("Abstract class method")
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        raise NotImplementedError("Abstract class method")
+    @staticmethod
+    def _process(coefficients, data, zi=None):
+        raise NotImplementedError("Abstract class method.")
 
     def process(self, signal, reset=True):
         """Apply the filter to a signal.
@@ -206,11 +174,11 @@ class Filter(object):
         if self.state is not None:
             for idx, (coeff, state) in enumerate(
                     zip(self._coefficients, self._state)):
-                filtered_signal_data[idx, ...], new_state = self.filter_func(
+                filtered_signal_data[idx, ...], new_state = self._process(
                     coeff, filtered_signal_data[idx, ...], state)
         else:
             for idx, coeff in enumerate(self._coefficients):
-                filtered_signal_data[idx, ...] = self.filter_func(
+                filtered_signal_data[idx, ...] = self._process(
                     coeff, signal.time, zi=None)
 
         filtered_signal = deepcopy(signal)
@@ -246,7 +214,8 @@ class Filter(object):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective object dictionary."""
-        obj = cls()
+        # initializing this way satisfies FIR, IIR and SOS initialization
+        obj = cls(np.zeros((1, 6)), None)
         obj.__dict__.update(obj_dict)
         return obj
 
@@ -262,8 +231,7 @@ class FilterFIR(Filter):
     def __init__(
             self,
             coefficients,
-            sampling_rate,
-            filter_func=lfilter):
+            sampling_rate):
         """
         Initialize an finite impulse response (FIR) Filter object.
 
@@ -274,11 +242,6 @@ class FilterFIR(Filter):
             (number of channels, number of filter coefficients)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        filter_func : ``'default'``, ``'zerophase'``
-            ``'default'`` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
 
@@ -294,20 +257,9 @@ class FilterFIR(Filter):
 
         super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
 
-        self._FILTER_FUNCS = {
-            'default': lfilter,
-            'zerophase': filtfilt}
-        self._filter_func = filter_func
-
-    @property
-    def filter_func(self):
-        return self._filter_func
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        if type('filter_func') == str:
-            filter_func = self._FILTER_FUNCS[filter_func]
-        self._filter_func = filter_func
+    @staticmethod
+    def _process(coefficients, data, zi=None):
+        return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
 
 class FilterIIR(Filter):
@@ -318,8 +270,7 @@ class FilterIIR(Filter):
     def __init__(
             self,
             coefficients,
-            sampling_rate,
-            filter_func=lfilter):
+            sampling_rate):
         """IIR filter
         Initialize an infinite impulse response (IIR) Filter object.
 
@@ -331,11 +282,6 @@ class FilterIIR(Filter):
             number of coefficients in the denominator)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        filter_func : ``'default'``, ``'zerophase'``
-            ``'default'`` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
 
@@ -347,20 +293,9 @@ class FilterIIR(Filter):
         coeff = np.atleast_2d(coefficients)
         super().__init__(coefficients=coeff, sampling_rate=sampling_rate)
 
-        self._FILTER_FUNCS = {
-            'default': lfilter,
-            'zerophase': filtfilt}
-        self._filter_func = filter_func
-
-    @property
-    def filter_func(self):
-        return self._filter_func
-
-    @filter_func.setter
-    def filter_func(self, filter_func):
-        if type('filter_func') == str:
-            filter_func = self._FILTER_FUNCS[filter_func]
-        self._filter_func = filter_func
+    @staticmethod
+    def _process(coefficients, data, zi=None):
+        return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
 
 class FilterSOS(Filter):
@@ -370,8 +305,7 @@ class FilterSOS(Filter):
     def __init__(
             self,
             coefficients,
-            sampling_rate,
-            filter_func=sosfilt):
+            sampling_rate):
         """
         Initialize a second order sections (SOS) Filter object.
 
@@ -382,11 +316,6 @@ class FilterSOS(Filter):
             (n_filter_chan, n_sections, 6)
         sampling_rate : number
             The sampling rate of the filter in Hz.
-        filter_func : ``'default'``, ``'zerophase'``
-            ```'default'``` applies a direct form II transposed time domain
-            filter based on the standard difference equation. ``'zerophase'``
-            uses the same filter twice, first forward, then backwards resulting
-            in zero phase.
         state : array, optional
             The state of the filter from a priory knowledge.
 
@@ -403,12 +332,6 @@ class FilterSOS(Filter):
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate)
 
-        self._FILTER_FUNCS = {
-            'default': sosfilt,
-            'zerophase': sosfiltfilt
-        }
-        self._filter_func = filter_func
-
-    @property
-    def filter_func(self):
-        return self._filter_func
+    @staticmethod
+    def _process(sos, data, zi=None):
+        return spsignal.sosfilt(sos, data, zi=zi)

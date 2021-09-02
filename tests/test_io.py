@@ -77,7 +77,8 @@ def test_write_wav_suffix(noise, tmpdir):
 def test_write_wav_nd(noise_two_by_three_channel, tmpdir):
     """Test for signals of higher dimension."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
-    io.write_wav(noise_two_by_three_channel, filename)
+    with pytest.warns(UserWarning, match='flattened'):
+        io.write_wav(noise_two_by_three_channel, filename)
     signal_reload = wavfile.read(filename)[-1].T
     npt.assert_allclose(
         signal_reload.reshape(noise_two_by_three_channel.time.shape),
@@ -111,6 +112,18 @@ def test_read_sofa_sampling_rate_unit(generate_sofa_unit_error):
     """Test to verify correct sampling rate unit of sofa file"""
     with pytest.raises(ValueError):
         io.read_sofa(generate_sofa_unit_error)
+
+
+def test_read_sofa_position_type_spherical(
+        generate_sofa_postype_spherical, sofa_reference_coordinates):
+    """Test to verify correct position type of sofa file"""
+    _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
+    npt.assert_allclose(
+        s_coords.get_sph(convention='top_elev', unit='deg'),
+        sofa_reference_coordinates[0])
+    npt.assert_allclose(
+        r_coords.get_sph(convention='top_elev', unit='deg'),
+        sofa_reference_coordinates[1])
 
 
 def test_read_sofa_position_type_unit(generate_sofa_postype_error):
@@ -179,12 +192,32 @@ def test_write_NoEncode_NotImplemented(no_encode_obj, tmpdir):
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_FlatDataNoDecode_NotImplemented(no_decode_obj, tmpdir):
-    """ Check if a TypeError is raised when writing an arbitrary
+    """ Check if a NotImplementedError is raised when writing an arbitrary
     object.
     """
     filename = os.path.join(tmpdir, 'no_decode_obj.far')
     io.write(filename, no_decode_obj=no_decode_obj)
     with pytest.raises(NotImplementedError):
+        io.read(filename)
+
+
+@patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
+@patch('pyfar.io._codec._is_pyfar_type', side_effect=[True] + 42 * [False])
+def test_write_read_FlatDataNoPyfarType_TypeError(_, no_decode_obj, tmpdir):
+    """ Check if a TypeError is raised when reading a .far-file that has been
+    created with a different version of Pyfar in which types exist which are
+    not present in the current version.
+
+    Notes
+    -----
+    The `42` in `[True] + 42 * [False]` is arbitrary. What matters is, that
+    `_is_pyfar_type` returns True on the first call to enable writing the
+    .far-file which is not compatible with the current version in the first
+    place.
+    """
+    filename = os.path.join(tmpdir, 'no_decode_obj.far')
+    io.write(filename, no_decode_obj=no_decode_obj)
+    with pytest.raises(TypeError):
         io.read(filename)
 
 
@@ -265,31 +298,37 @@ def test_write_read_filter(filter, tmpdir):
     assert actual == filter
 
 
-def test_write_filterIIR_TypeError(filterIIR, tmpdir):
-    """ FilterIIR
-    Can't be written to disk because objects store user-defined function.
+def test_write_filterFIR(filterFIR, tmpdir):
+    """ filterFIR
+    Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filterIIR.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterIIR=filterIIR)
+    io.write(filename, filterFIR=filterFIR)
+    actual = io.read(filename)['filterFIR']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filterFIR
 
 
-def test_write_filterFIR_TypeError(filterFIR, tmpdir):
-    """ FilterFIR
-    Can't be written to disk because objects store user-defined function.
+def test_write_filterIIR(filterIIR, tmpdir):
+    """ FilterIIR
+    Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filterIIR.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterFIR=filterFIR)
+    io.write(filename, filterIIR=filterIIR)
+    actual = io.read(filename)['filterIIR']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filterIIR
 
 
-def test_write_filterSOS_TypeError(filterSOS, tmpdir):
-    """ FilterIIR
-    Can't be written to disk because objects store user-defined function.
+def test_write_filterSOS(filterSOS, tmpdir):
+    """ filterSOS
+    Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filterSOS.far')
-    with pytest.raises(TypeError):
-        io.write(filename, filterSOS=filterSOS)
+    io.write(filename, filterSOS=filterSOS)
+    actual = io.read(filename)['filterSOS']
+    assert isinstance(actual, fo.Filter)
+    assert actual == filterSOS
 
 
 def test_write_read_numpy_ndarrays(tmpdir):
@@ -332,6 +371,9 @@ def test_write_read_numpy_ndarrays(tmpdir):
 
 def test_write_read_multiplePyfarObjects(
         filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
         coordinates,
         orientations,
         sphericalvoronoi,
@@ -347,6 +389,9 @@ def test_write_read_multiplePyfarObjects(
     io.write(
         filename,
         filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
         sphericalvoronoi=sphericalvoronoi,
@@ -357,6 +402,12 @@ def test_write_read_multiplePyfarObjects(
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
     assert isinstance(actual['coordinates'], Coordinates)
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
@@ -375,6 +426,9 @@ def test_write_read_multiplePyfarObjects(
 
 def test_write_read_multiplePyfarObjectsWithCompression(
         filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
         coordinates,
         orientations,
         sphericalvoronoi,
@@ -391,6 +445,9 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filename,
         compress=True,
         filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
         sphericalvoronoi=sphericalvoronoi,
@@ -401,6 +458,12 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
     assert isinstance(actual['coordinates'], Coordinates)
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
