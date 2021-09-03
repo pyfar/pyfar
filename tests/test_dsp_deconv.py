@@ -7,7 +7,7 @@ import pyfar as pf
 from pyfar.signals import impulse
 import pyfar.signals as pfs
 
-from pyfar.dsp import deconvolve
+from pyfar.dsp.dsp import deconvolve
 
 
 def test_input_type_error():
