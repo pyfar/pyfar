@@ -464,106 +464,106 @@ def test_getitem():
     npt.assert_allclose(coords.get_cart()[0], np.array([0, 0, 0]))
 
 
-def test_get_nearest_k():
-    """Test returns of get_nearest_k"""
+def test_find_nearest_k():
+    """Test returns of find_nearest_k"""
     # 1D cartesian, nearest point
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
-    d, i, m = coords.get_nearest_k(1, 0, 0)
+    i, m, d = coords.find_nearest_k(1, 0, 0)
     assert d == 0.
     assert i == 1
     npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
 
     # 1D spherical, nearest point
-    d, i, m = coords.get_nearest_k(0, 0, 1, 1, 'sph', 'top_elev', 'deg')
+    i, m, d = coords.find_nearest_k(0, 0, 1, 1, 'sph', 'top_elev', 'deg')
     assert d == 0.
     assert i == 1
     npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
 
     # 1D cartesian, two nearest points
-    d, i, m = coords.get_nearest_k(1.2, 0, 0, 2)
+    i, m, d = coords.find_nearest_k(1.2, 0, 0, 2)
     npt.assert_allclose(d, [.2, .8], atol=1e-15)
     npt.assert_allclose(i, np.array([1, 2]))
     npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
 
     # 1D cartesian query two points
-    d, i, m = coords.get_nearest_k([1, 2], 0, 0)
+    i, m, d = coords.find_nearest_k([1, 2], 0, 0)
     npt.assert_allclose(d, [0, 0], atol=1e-15)
     npt.assert_allclose(i, [1, 2])
     npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
 
     # 2D cartesian, nearest point
     coords = Coordinates(x.reshape(2, 3), 0, 0)
-    d, i, m = coords.get_nearest_k(1, 0, 0)
+    i, m, d = coords.find_nearest_k(1, 0, 0)
     assert d == 0.
     assert i == 1
     npt.assert_allclose(m, np.array([[0, 1, 0], [0, 0, 0]]))
 
     # test with plot
     coords = Coordinates(x, 0, 0)
-    coords.get_nearest_k(1, 0, 0, show=True)
+    coords.find_nearest_k(1, 0, 0, show=True)
 
     # test object with a single point
     coords = Coordinates(1, 0, 0)
-    coords.get_nearest_k(1, 0, 0, show=True)
+    coords.find_nearest_k(1, 0, 0, show=True)
 
     # test out of range parameters
     with raises(AssertionError):
-        coords.get_nearest_k(1, 0, 0, -1)
+        coords.find_nearest_k(1, 0, 0, -1)
 
     plt.close("all")
 
 
-def test_get_nearest_cart():
-    """Tests returns of get_nearest_cart."""
-    # test only 1D case since most of the code from self.get_nearest_k is used
+def test_find_nearest_cart():
+    """Tests returns of find_nearest_cart."""
+    # test only 1D case since most of the code from self.find_nearest_k is used
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
-    i, m = coords.get_nearest_cart(2.5, 0, 0, 1.5)
+    i, m = coords.find_nearest_cart(2.5, 0, 0, 1.5)
     npt.assert_allclose(i, np.array([1, 2, 3, 4]))
     npt.assert_allclose(m, np.array([0, 1, 1, 1, 1, 0]))
 
     # test search with empty results
-    i, m = coords.get_nearest_cart(2.5, 0, 0, .1)
+    i, m = coords.find_nearest_cart(2.5, 0, 0, .1)
     assert len(i) == 0
     npt.assert_allclose(m, np.array([0, 0, 0, 0, 0, 0]))
 
     # test out of range parameters
     with raises(AssertionError):
-        coords.get_nearest_cart(1, 0, 0, -1)
+        coords.find_nearest_cart(1, 0, 0, -1)
 
 
-def test_get_nearest_sph():
-    """Tests returns of get_nearest_sph."""
-    # test only 1D case since most of the code from self.get_nearest_k is used
+def test_find_nearest_sph():
+    """Tests returns of find_nearest_sph."""
+    # test only 1D case since most of the code from self.find_nearest_k is used
     az = np.linspace(0, 40, 5)
     coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
-    i, m = coords.get_nearest_sph(25, 0, 1, 5, 'sph', 'top_elev', 'deg')
+    i, m = coords.find_nearest_sph(25, 0, 1, 5, 'sph', 'top_elev', 'deg')
     npt.assert_allclose(i, np.array([2, 3]))
     npt.assert_allclose(m, np.array([0, 0, 1, 1, 0]))
 
     # test search with empty results
-    i, m = coords.get_nearest_sph(25, 0, 1, 1, 'sph', 'top_elev', 'deg')
+    i, m = coords.find_nearest_sph(25, 0, 1, 1, 'sph', 'top_elev', 'deg')
     assert len(i) == 0
     npt.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
 
     # test out of range parameters
     with raises(AssertionError):
-        coords.get_nearest_sph(1, 0, 0, -1)
+        coords.find_nearest_sph(1, 0, 0, -1)
     with raises(AssertionError):
-        coords.get_nearest_sph(1, 0, 0, 181)
+        coords.find_nearest_sph(1, 0, 0, 181)
 
     # test assertion for multiple radii
     coords = Coordinates([1, 2], 0, 0)
-    with raises(ValueError, match="get_nearest_sph only works if"):
-        coords.get_nearest_sph(0, 0, 1, 1)
+    with raises(ValueError, match="find_nearest_sph only works if"):
+        coords.find_nearest_sph(0, 0, 1, 1)
 
 
 def test_get_slice():
     """Test different queries for get slice."""
     # test only for self.cdim = 1.
     # self.get_slice uses KDTree, which is tested with N-dimensional arrays
-    # in test_get_nearest_k()
+    # in test_find_nearest_k()
 
     # cartesian grid
     d = np.linspace(-2, 2, 5)
