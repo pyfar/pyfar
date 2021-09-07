@@ -555,7 +555,7 @@ class Interaction(object):
 
             elif event.key in plot['spectrogram']:
                 self.params.update_axis_type('spectrogram')
-                ax = _line._spectrogram_cb(
+                ax = _line._spectrogram(
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
                     prm.window, prm.window_length, prm.window_overlap_fct,

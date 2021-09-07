@@ -247,10 +247,7 @@ def test_line_xscale_assertion(sine):
         plot.line.group_delay(sine, xscale="warped")
 
     with raises(ValueError):
-        plot._line._spectrogram(sine, yscale="warped")
-
-    with raises(ValueError):
-        plot._line._spectrogram_cb(sine, yscale="warped")
+        plot.line.spectrogram(sine, yscale="warped")
 
     plt.close("all")
 
@@ -299,10 +296,7 @@ def test_time_unit_assertion(sine):
         plot.line.group_delay(sine, unit="pascal")
 
     with raises(ValueError):
-        plot._line._spectrogram(sine, unit="pascal")
-
-    with raises(ValueError):
-        plot.line._line._spectrogram_cb(sine, unit="pascal")
+        plot.line.spectrogram(sine, unit="pascal")
 
     plt.close("all")
 

@@ -320,7 +320,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         raise TypeError('Input data has to be of type: Signal.')
 
     with context(style):
-        ax = _line._spectrogram_cb(
+        ax, qm, cb = _line._spectrogram(
             signal.flatten(), dB, log_prefix, log_reference, yscale, unit,
             window, window_length, window_overlap_fct,
             cmap, ax)
@@ -332,10 +332,10 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         log_reference=log_reference, yscale=yscale, unit=unit, window=window,
         window_length=window_length, window_overlap_fct=window_overlap_fct,
         cmap=cmap)
-    interaction = ia.Interaction(signal, ax[0], style, plot_parameter)
-    ax[0].interaction = interaction
+    interaction = ia.Interaction(signal, ax, style, plot_parameter)
+    ax.interaction = interaction
 
-    return ax
+    return [ax, cb.ax]
 
 
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,

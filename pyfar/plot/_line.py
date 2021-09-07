@@ -31,14 +31,9 @@ def _prepare_plot(ax=None, subplots=None):
         Axes or array/list of axes.
     """
     if ax is None:
-        # get current figure or create new one
+        # get current figure and axes or create new ones
         fig = plt.gcf()
-        # get current axes or create new one
-        ax = fig.get_axes()
-        if not len(ax):
-            ax = plt.gca()
-        elif len(ax) == 1:
-            ax = ax[0]
+        ax = fig.gca()
     else:
         # obtain figure from axis
         # (ax objects can be inside an array or list)
@@ -505,9 +500,11 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         times = times * factor
 
     # plot the data
-    _, ax = _prepare_plot(ax)
+    fig, ax = _prepare_plot(ax)
     ax.pcolormesh(times, frequencies, spectrogram, cmap=cmap,
                   shading='gouraud')
+
+    qm = _get_quad_mesh_from_axis(ax)
 
     # Adjust axes:
     ax.set_ylabel('Frequency in Hz')
@@ -517,63 +514,24 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # color limits
     if dB:
-        for PCM in ax.get_children():
-            if type(PCM) == mpl.collections.QuadMesh:
-                break
-
         ymax = np.nanmax(spectrogram)
         ymin = ymax - 90
         ymax = ymax + 10
-        PCM.set_clim(ymin, ymax)
+        qm.set_clim(ymin, ymax)
 
     if yscale == 'log':
         ax.set_yscale('symlog')
         ax.yaxis.set_major_locator(LogLocatorITAToolbox())
     ax.yaxis.set_major_formatter(LogFormatterITAToolbox())
     ax.grid(ls='dotted', color='white')
-    plt.tight_layout()
 
-    return ax, spectrogram
-
-
-def _spectrogram_cb(signal, dB=True, log_prefix=20, log_reference=1,
-                    yscale='linear', unit=None,
-                    window='hann', window_length=1024, window_overlap_fct=0.5,
-                    cmap=mpl.cm.get_cmap(name='magma'), ax=None):
-    """Plot the magnitude spectrum versus time.
-
-    See pyfar.line.spectogram for more information.
-    """
-
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-    _check_time_unit(unit)
-    _check_axis_scale(yscale, 'y')
-
-    # Define figure and axes for plot:
-    fig, ax = _prepare_plot(ax)
-    # clear figure and axis - spectogram does not work with hold
-    fig.clf()
-    ax = plt.gca()
-    # plot the data
-    ax = ax.figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 0.05]})
-    fig.axes[0].remove()
-
-    ax[0], _ = _spectrogram(
-        signal, dB, log_prefix, log_reference, yscale, unit,
-        window, window_length, window_overlap_fct,
-        cmap, ax[0])
-
-    # Colorbar:
-    qm = _get_quad_mesh_from_axis(ax[0])
-
-    cb = plt.colorbar(qm, cax=ax[1])
-    cb_label = 'Magnitude in dB' if dB else 'Magnitude'
-    cb.set_label(cb_label)
+    # colorbar
+    cb = fig.colorbar(qm, ax=ax)
+    cb.set_label('Magnitude in dB' if dB else 'Magnitude')
 
     plt.tight_layout()
 
-    return ax
+    return ax, qm, cb
 
 
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
