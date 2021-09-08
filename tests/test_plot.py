@@ -29,6 +29,10 @@ if not os.path.isdir(baseline_path):
 if not os.path.isdir(output_path):
     os.mkdir(output_path)
 
+# remove old output files
+for file in os.listdir(output_path):
+    os.remove(os.path.join(output_path, file))
+
 # figure parameters
 f_width = 4.8
 f_height = 4.8
@@ -42,7 +46,6 @@ def test_line_plots(sine, impulse_group_delay):
                      plot.line.freq,
                      plot.line.phase,
                      plot.line.group_delay,
-                     plot.line.spectrogram,
                      plot.line.time_freq,
                      plot.line.freq_phase,
                      plot.line.freq_group_delay]
@@ -435,7 +438,82 @@ def test_line_plots_frequency_data(frequency_data):
         plt.close()
 
 
-def test_colorbar_assertion(sine):
+def test_2d_plots(sine):
+    """Test all 2D plots with default parameters"""
+    function_list = [
+        plot.spectrogram]
+
+    for function in function_list:
+
+        print(f"Testing: {function.__name__}")
+        # file names
+        filename = '2d_' + function.__name__ + '.png'
+        baseline = os.path.join(baseline_path, filename)
+        output = os.path.join(output_path, filename)
+
+        # plotting
+        matplotlib.use('Agg')
+        mpt.set_reproducibility_for_testing()
+        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        function(sine)
+
+        # save baseline if it does not exist
+        # make sure to visually check the baseline uppon creation
+        if create_baseline:
+            plt.savefig(baseline)
+        # safe test image
+        plt.savefig(output)
+
+        # close current figure
+        plt.close()
+
+        # testing
+        compare_images(baseline, output, tol=10)
+
+
+def test_2d_plots_colorbar_options(sine):
+    """Test all 2D plots with default parameters"""
+    function_list = [
+        plot.spectrogram]
+
+    for function in function_list:
+        for cb_option in ["off", "axes"]:
+
+            print(f"Testing: {function.__name__}")
+            # file names
+            filename = '2d_' + cb_option + "_" + function.__name__ + '.png'
+            baseline = os.path.join(baseline_path, filename)
+            output = os.path.join(output_path, filename)
+
+            # plotting
+            matplotlib.use('Agg')
+            mpt.set_reproducibility_for_testing()
+            # force size/dpi for testing
+            fig = plt.figure(1, (f_width, f_height), f_dpi)
+            if cb_option == "off":
+                # test not plotting a colobar
+                function(sine, colorbar=False)
+            elif cb_option == "axes":
+                # test plotting colorbar to specified axis
+                fig.clear()
+                _, ax = plt.subplots(1, 2, num=fig.number)
+                function(sine, ax=ax)
+
+            # save baseline if it does not exist
+            # make sure to visually check the baseline uppon creation
+            if create_baseline:
+                plt.savefig(baseline)
+            # safe test image
+            plt.savefig(output)
+
+            # close current figure
+            plt.close()
+
+            # testing
+            compare_images(baseline, output, tol=10)
+
+
+def test_2d_plots_colorbar_assertion(sine):
     function_list = [
         plot.spectrogram]
 

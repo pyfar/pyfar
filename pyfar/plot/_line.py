@@ -28,12 +28,17 @@ def _prepare_plot(ax=None, subplots=None):
     Returns
     -------
     ax : matplotlib.pyplot.axes object
-        Axes or array/list of axes.
+        The current axes if `subplots` is ``None`` all axes from the
+        current figure as a single axis or array/list of axes otherwise.
     """
     if ax is None:
-        # get current figure and axes or create new ones
+        # get current figure or create new one
         fig = plt.gcf()
-        ax = fig.gca()
+        # get the current axis of all axes
+        if subplots is None:
+            ax = fig.gca()
+        else:
+            ax = fig.get_axes()
     else:
         # obtain figure from axis
         # (ax objects can be inside an array or list)
@@ -506,20 +511,24 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         factor, unit = _deal_time_units(unit)
         times = times * factor
 
-    # plot the data
+    # prepare the figure and axis for plotting the data and colorbar
     fig, ax = _prepare_plot(ax)
-    ax.pcolormesh(times, frequencies, spectrogram, cmap=cmap,
-                  shading='gouraud')
+    if not isinstance(ax, (np.ndarray, list)):
+        ax = [ax, None]
 
-    qm = _get_quad_mesh_from_axis(ax)
+    # plot the data
+    ax[0].pcolormesh(times, frequencies, spectrogram, cmap=cmap,
+                     shading='gouraud')
 
     # Adjust axes:
-    ax.set_ylabel('Frequency in Hz')
-    ax.set_xlabel(f'Time in {unit}')
-    ax.set_xlim((times[0], times[-1]))
-    ax.set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
+    ax[0].set_ylabel('Frequency in Hz')
+    ax[0].set_xlabel(f'Time in {unit}')
+    ax[0].set_xlim((times[0], times[-1]))
+    ax[0].set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
 
     # color limits
+    qm = _get_quad_mesh_from_axis(ax[0])
+
     if dB:
         ymax = np.nanmax(spectrogram)
         ymin = ymax - 90
@@ -530,19 +539,22 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     if yscale == 'log':
         ax.set_yscale('symlog')
         ax.yaxis.set_major_locator(LogLocatorITAToolbox())
-    ax.yaxis.set_major_formatter(LogFormatterITAToolbox())
-    ax.grid(ls='dotted', color='white')
+    ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
+    ax[0].grid(ls='dotted', color='white')
 
     # colorbar
     if colorbar:
-        cb = fig.colorbar(qm, ax=ax)
+        if ax[1] is None:
+            cb = fig.colorbar(qm, ax=ax[0])
+        else:
+            cb = fig.colorbar(qm, cax=ax[1])
         cb.set_label('Magnitude in dB' if dB else 'Magnitude')
     else:
         cb = None
 
     plt.tight_layout()
 
-    return ax, qm, cb
+    return ax[0], qm, cb
 
 
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
