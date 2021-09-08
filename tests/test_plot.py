@@ -435,6 +435,17 @@ def test_line_plots_frequency_data(frequency_data):
         plt.close()
 
 
+def test_colorbar_assertion(sine):
+    function_list = [
+        plot.spectrogram]
+
+    # test assertion when passing an array of axes but not having a colobar
+    for function in function_list:
+        with raises(ValueError, match="A list of axes"):
+            function(sine, colorbar=False, ax=[plt.gca(), plt.gca()])
+        plt.close()
+
+
 def test_prepare_plot():
     # test without arguments
     plot._line._prepare_plot()

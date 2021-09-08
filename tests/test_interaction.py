@@ -62,7 +62,9 @@ def test_interaction_attached():
             continue
 
         ax = function[1](signal)
-        # get axis of first subplot, if we have subplots
+        # axis is first return parameter if function returns multiple
+        ax = ax[0] if isinstance(ax, (tuple)) else ax
+        # interaction axis is first axis if functions returns multiple
         ax = ax[0] if isinstance(ax, (np.ndarray, list)) else ax
         # assert and close figure
         assert isinstance(ax.interaction, ia.Interaction)
@@ -220,7 +222,7 @@ def test_move_and_zoom_linear():
             zoom = [sc_ctr["zoom_y_in"]["key"][0],
                     sc_ctr["zoom_y_out"]["key"][0]]
         if axes == 'cm':
-            ax = pf.plot.spectrogram(signal, dB=False)
+            ax, *_ = pf.plot.spectrogram(signal, dB=False)
             ax = ax[0]
             for cm in ax.get_children():
                 if type(cm) == mpl.collections.QuadMesh:
@@ -305,7 +307,7 @@ def test_toggle_colormap():
     """
 
     # init the plot
-    ax = pf.plot.spectrogram(pf.signals.impulse(1024))
+    ax, *_ = pf.plot.spectrogram(pf.signals.impulse(1024))
     assert ax[1].get_ylabel() == "Magnitude in dB"
     # toggle x-axis
     ax[0].interaction.select_action(ia.EventEmu(sc_ctr["toggle_cm"]["key"][0]))
@@ -391,7 +393,7 @@ def test_cycle_and_toggle_signals():
 
     # init and check start conditions
     signal = pf.signals.impulse(1024, amplitude=[1, 2])
-    ax = pf.plot.spectrogram(signal)
+    ax, *_ = pf.plot.spectrogram(signal)
 
     assert ax[0].interaction.txt is None
     # use the clim because the image data is identical

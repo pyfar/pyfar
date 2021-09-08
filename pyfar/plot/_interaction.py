@@ -136,7 +136,8 @@ class PlotParameter(object):
                  unit=None,                                # time unit
                  window='hann', window_length=1014,        # spectrogram
                  window_overlap_fct=.5,
-                 cmap=mpl.cm.get_cmap(name='magma')):      # colormap
+                 cmap=mpl.cm.get_cmap(name='magma'),       # colormap and bar
+                 colorbar=True):
 
         # store input
         self.dB_time = dB_time
@@ -152,6 +153,7 @@ class PlotParameter(object):
         self.window_length = window_length
         self.window_overlap_fct = window_overlap_fct
         self.cmap = cmap
+        self.colorbar = colorbar
 
         # set axis types based on `plot`
         self.update_axis_type(plot)
@@ -555,12 +557,12 @@ class Interaction(object):
 
             elif event.key in plot['spectrogram']:
                 self.params.update_axis_type('spectrogram')
-                ax = _line._spectrogram(
+                ax, *_ = _line._spectrogram(
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
                     prm.window, prm.window_length, prm.window_overlap_fct,
-                    prm.cmap, self.ax, **self.kwargs)
-                self.ax = ax[0]
+                    prm.cmap, prm.colorbar, self.ax, **self.kwargs)
+                self.ax = ax
 
             elif event.key in plot['time_freq']:
                 self.params.update_axis_type('time')

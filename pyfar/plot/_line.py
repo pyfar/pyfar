@@ -457,15 +457,22 @@ def _deal_time_units(unit='s'):
 def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
                  yscale='linear', unit=None,
                  window='hann', window_length=1024, window_overlap_fct=0.5,
-                 cmap=mpl.cm.get_cmap(name='magma'), ax=None):
+                 cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None):
     """Plot the magnitude spectrum versus time.
 
     See pyfar.line.spectogram for more information.
+
+    Note: this function always returns only the axis of the actual plot and
+    never an array of axes containing also the axis of the colorbar. This makes
+    handling interactions easier. The axis of the colorbar is added in
+    pyfar.line.spectrogram.
     """
 
     # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+    if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
+        raise ValueError('A list of axes can not be used if colorbar is False')
     _check_time_unit(unit)
     _check_axis_scale(yscale, 'y')
 
@@ -519,6 +526,7 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         ymax = ymax + 10
         qm.set_clim(ymin, ymax)
 
+    # scales and ticks
     if yscale == 'log':
         ax.set_yscale('symlog')
         ax.yaxis.set_major_locator(LogLocatorITAToolbox())
@@ -526,8 +534,11 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ax.grid(ls='dotted', color='white')
 
     # colorbar
-    cb = fig.colorbar(qm, ax=ax)
-    cb.set_label('Magnitude in dB' if dB else 'Magnitude')
+    if colorbar:
+        cb = fig.colorbar(qm, ax=ax)
+        cb.set_label('Magnitude in dB' if dB else 'Magnitude')
+    else:
+        cb = None
 
     plt.tight_layout()
 
