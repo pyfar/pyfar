@@ -1410,7 +1410,8 @@ def deconvolve(measurement, excitation, **kwargs):
     where :math:`X(\\omega)` is the excitation signal and :math:`Y(\\omega)`
     the measured signal. Regulated inversion is used to avoid numerical issues
     in calculating :math:`\\hat{X(\\omega)} = 1/X(\\omega)` for small values of
-    :math:`X(\\omega)` (see :py:func:`~pyfar.dsp.regulated_spectrum_inversion`).
+    :math:`X(\\omega)`
+    (see :py:func:`~pyfar.dsp.regulated_spectrum_inversion`).
     The transfer function is thus calculated as
 
     .. math::
@@ -1429,7 +1430,8 @@ def deconvolve(measurement, excitation, **kwargs):
         The excitation signal is zero padded, if it is shorter than the
         measurement signal.
     kwargs : key value arguments
-        Key value arguments to control the inversion of :math:`H(\\omega)` are passed to to :py:func:`~pyfar.dsp.regulated_spectrum_inversion`.
+        Key value arguments to control the inversion of :math:`H(\\omega)` are
+        passed to to :py:func:`~pyfar.dsp.regulated_spectrum_inversion`.
 
 
     Returns
