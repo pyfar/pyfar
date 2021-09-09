@@ -1447,9 +1447,9 @@ def deconvolve(measurement, excitation, **kwargs):
 
     # Check if both inputs are type Signal
     if not isinstance(measurement, pyfar.Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+        raise TypeError('measurement has to be of type pyfar.Signal')
     if not isinstance(excitation, pyfar.Signal):
-        raise TypeError('Input data has to be of type: Signal.')
+        raise TypeError('excitation has to be of type pyfar.Signal')
 
     # Check if both signals have the same sampling rate
     if not measurement.sampling_rate == excitation.sampling_rate:
