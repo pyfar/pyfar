@@ -1428,10 +1428,9 @@ def deconvolve(measurement, excitation, **kwargs):
         The excitation signal, used to perform the measurement.
         The excitation signal is zero padded, if it is shorter than the
         measurement signal.
-    kwargs : Parameters for regu_inversion, can include:
-        freq_range, regu_outside, regu_inside, regu_final
-        refer to function regularized_spectrum_inversion for deatiled
-        documentation.
+    kwargs : key value arguments
+        Key value arguments to control the inversion of :math:`H(\\omega)` are passed to to :py:func:`~pyfar.dsp.regulated_spectrum_inversion`.
+
 
     Returns
     -------
