@@ -12,15 +12,18 @@ from pyfar.dsp.dsp import deconvolve
 
 def test_input_type_error():
     """Test assertions by passing non Signal-Type"""
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError,
+                       match='measurement has to be of type pyfar.Signal'):
         deconvolve('error', impulse(3))
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError,
+                       match='excitation has to be of type pyfar.Signal'):
         deconvolve(impulse(3), 'error')
 
 
 def test_input_sampling_freq_error():
     """Test assertions by passing signals with different sampling frequency"""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError,
+                       match='The two signals have different sampling rates!'):
         deconvolve(impulse(3, sampling_rate=44100),
                    impulse(3, sampling_rate=48000))
 
