@@ -1424,7 +1424,7 @@ def deconvolve(measurement, excitation, **kwargs):
         The measurement signal, recorded after passing the device under test.
         The measurement signal is zero padded, if it is shorter than the
         excitation signal.
-    excitation : pyfar.Signal
+    excitation : Signal
         The excitation signal, used to perform the measurement.
         The excitation signal is zero padded, if it is shorter than the
         measurement signal.
