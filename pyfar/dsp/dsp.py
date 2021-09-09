@@ -1416,7 +1416,7 @@ def deconvolve(measurement, excitation, **kwargs):
     .. math::
     \\H(\\omega) = Y(\\omega)\\hat{X(\\omega)}.
 
-    For more information, refer to [1]_
+    For more information, refer to [#]_
 
     Parameters
     ----------
