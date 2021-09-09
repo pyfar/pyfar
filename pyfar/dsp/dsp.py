@@ -1459,22 +1459,16 @@ def deconvolve(measurement, excitation, **kwargs):
         warnings.warn("The two signals have different fft_norms.")
 
     # Check if both signals have the same length,
-    # if not: bring them to the same length
+    # if not: bring them to the same length by padding with zeros
     if measurement.n_samples > excitation.n_samples:
         # Add Zeros to excitation
-        excitation.time = np.concatenate((excitation.time,
-                                          np.zeros(excitation.cshape +
-                                                   (measurement.n_samples -
-                                                    excitation.n_samples, ))
-                                          ), axis=1)
+        excitation = pyfar.dsp.pad_zeros(excitation, (measurement.n_samples -
+                                                      excitation.n_samples))
 
     if measurement.n_samples < excitation.n_samples:
         # Add Zeros to measurement
-        measurement.time = np.concatenate((measurement.time,
-                                           np.zeros(measurement.cshape +
-                                                    (excitation.n_samples -
-                                                     measurement.n_samples, ))
-                                           ), axis=1)
+        measurement = pyfar.dsp.pad_zeros(measurement, (excitation.n_samples -
+                                                        measurement.n_samples))
 
     # multiply measurement signal with regularized inversed excitation signal
     # to get the transfer function
