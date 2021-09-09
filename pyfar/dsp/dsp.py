@@ -1441,7 +1441,7 @@ def deconvolve(measurement, excitation, **kwargs):
 
     References
     -----------
-    .. [1] S. Mueller and P. Masserani "Transfer function measurement with
+    .. [#] S. Mueller and P. Masserani "Transfer function measurement with
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
     """
