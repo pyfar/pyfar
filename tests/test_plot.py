@@ -138,7 +138,8 @@ def test_line_dB_option(sine):
             filename = 'line_' + function.__name__ + '_dB_' + str(dB)
             create_figure()
             function(sine, dB=dB)
-            save_and_compare(create_baseline, filename, file_type, compare_output)
+            save_and_compare(
+                create_baseline, filename, file_type, compare_output)
 
     # test if log_prefix and log_reference are working
     for function in function_list:
@@ -165,7 +166,8 @@ def test_line_xscale_option(sine):
             filename = 'line_' + function.__name__ + '_xscale_' + xscale
             create_figure()
             function(sine, xscale=xscale)
-            save_and_compare(create_baseline, filename, file_type, compare_output)
+            save_and_compare(
+                create_baseline, filename, file_type, compare_output)
 
 
 def test_line_xscale_assertion(sine):
@@ -201,7 +203,8 @@ def test_time_unit(impulse_group_delay):
             filename = f'line_{function.__name__}_unit_{str(unit)}'
             create_figure()
             plot.line.group_delay(impulse_group_delay[0], unit=unit)
-            save_and_compare(create_baseline, filename, file_type, compare_output)
+            save_and_compare(
+                create_baseline, filename, file_type, compare_output)
 
 
 def test_time_unit_assertion(sine):
@@ -321,7 +324,8 @@ def test_2d_colorbar_options(sine):
                 fig.clear()
                 _, ax = plt.subplots(1, 2, num=fig.number)
                 function(sine, ax=ax)
-            save_and_compare(create_baseline, filename, file_type, compare_output)
+            save_and_compare(
+                create_baseline, filename, file_type, compare_output)
 
 
 def test_2d_plots_colorbar_assertion(sine):
