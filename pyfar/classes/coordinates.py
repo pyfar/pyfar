@@ -803,6 +803,25 @@ class Coordinates():
 
         return index, mask
 
+    def get_slice(self, coordinate: str, unit: str, value, tol=0,
+                  show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_slice`.
+
+        .. note::
+            This functions returns only the `mask` which is different in
+            `find_slice()`
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_slice."),
+                  PendingDeprecationWarning)
+
+        _, mask = self.find_slice(coordinate, unit, value, tol, show, atol)
+        return mask
+
     def find_nearest_k(self, points_1, points_2, points_3, k=1,
                        domain='cart', convention='right', unit='met',
                        show=False):
@@ -1025,10 +1044,10 @@ class Coordinates():
 
         return index, mask
 
-    def get_slice(self, coordinate: str, unit: str, value, tol=0,
-                  show=False, atol=1e-15):
+    def find_slice(self, coordinate: str, unit: str, value, tol=0,
+                   show=False, atol=1e-15):
         """
-        Get a slice of the coordinates points.
+        Find a slice of the coordinates points.
 
         Parameters
         ----------
@@ -1048,6 +1067,8 @@ class Coordinates():
 
         Returns
         -------
+        index : numpy array of ints
+            The indices of the selected points.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -1060,14 +1081,14 @@ class Coordinates():
         Examples
         --------
 
-        Get horizontal slice of spherical coordinate system within a ring of
+        Find horizontal slice of spherical coordinate system within a ring of
         +/- 10 degrees
 
         .. plot::
 
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
+            >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
 
         """
 
@@ -1112,7 +1133,9 @@ class Coordinates():
         if show:
             self.show(mask)
 
-        return mask
+        index = np.asarray(mask).nonzero()[0]
+
+        return index, mask
 
     def rotate(self, rotation: str, value=None, degrees=True, inverse=False):
         """

@@ -561,6 +561,60 @@ def test_find_nearest_sph():
         coords.find_nearest_sph(0, 0, 1, 1)
 
 
+def test_find_slice():
+    """Test different queries for find slice."""
+    # test only for self.cdim = 1.
+    # self.find_slice uses KDTree, which is tested with N-dimensional arrays
+    # in test_find_nearest_k()
+
+    # cartesian grid
+    d = np.linspace(-2, 2, 5)
+
+    c = Coordinates(d, 0, 0)
+    index, mask = c.find_slice('x', 'met', 0, 1)
+    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+
+    c = Coordinates(0, d, 0)
+    index, mask = c.find_slice('y', 'met', 0, 1)
+    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+
+    c = Coordinates(0, 0, d)
+    index, mask = c.find_slice('z', 'met', 0, 1)
+    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+
+    # spherical grid
+    d = [358, 359, 0, 1, 2]
+    c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
+    # cyclic query for lower bound
+    index, mask = c.find_slice('azimuth', 'deg', 0, 1)
+    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+    # cyclic query for upper bound
+    index, mask = c.find_slice('azimuth', 'deg', 359, 2)
+    npt.assert_allclose(index, np.array([0, 1, 2, 3]))
+    npt.assert_allclose(mask, np.array([1, 1, 1, 1, 0]))
+    # non-cyclic query
+    index, mask = c.find_slice('azimuth', 'deg', 1, 1)
+    npt.assert_allclose(index, np.array([2, 3, 4]))
+    npt.assert_allclose(mask, np.array([0, 0, 1, 1, 1]))
+    # out of range query
+    with raises(AssertionError):
+        c.find_slice('azimuth', 'deg', -1, 1)
+    # non existing coordinate query
+    with raises(ValueError, match="'elevation' in 'ged' does not exist"):
+        c.find_slice('elevation', 'ged', 1, 1)
+    # test with show
+    c.find_slice('azimuth', 'deg', 1, 1, show=True)
+
+    # there is no unique processing for cylindrical coordinates - they are thus
+    # not tested here.
+
+    plt.close("all")
+
+
 def test_get_nearest_deprecations():
     coords = Coordinates(np.arange(6), 0, 0)
 
@@ -595,53 +649,15 @@ def test_get_nearest_deprecations():
             # remove get_nearest_k() from pyfar 0.5.0!
             coords.get_nearest_sph(0, 0, 1, 1)
 
+    # slice
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.get_slice('x', 'met', 0, 1)
 
-def test_get_slice():
-    """Test different queries for get slice."""
-    # test only for self.cdim = 1.
-    # self.get_slice uses KDTree, which is tested with N-dimensional arrays
-    # in test_find_nearest_k()
-
-    # cartesian grid
-    d = np.linspace(-2, 2, 5)
-
-    c = Coordinates(d, 0, 0)
-    npt.assert_allclose(
-        c.get_slice('x', 'met', 0, 1), np.array([0, 1, 1, 1, 0]))
-
-    c = Coordinates(0, d, 0)
-    npt.assert_allclose(
-        c.get_slice('y', 'met', 0, 1), np.array([0, 1, 1, 1, 0]))
-
-    c = Coordinates(0, 0, d)
-    npt.assert_allclose(
-        c.get_slice('z', 'met', 0, 1), np.array([0, 1, 1, 1, 0]))
-
-    # spherical grid
-    d = [358, 359, 0, 1, 2]
-    c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
-    # cyclic query for lower bound
-    npt.assert_allclose(
-        c.get_slice('azimuth', 'deg', 0, 1), np.array([0, 1, 1, 1, 0]))
-    # cyclic query for upper bound
-    npt.assert_allclose(
-        c.get_slice('azimuth', 'deg', 359, 2), np.array([1, 1, 1, 1, 0]))
-    # non-cyclic query
-    npt.assert_allclose(
-        c.get_slice('azimuth', 'deg', 1, 1), np.array([0, 0, 1, 1, 1]))
-    # out of range query
-    with raises(AssertionError):
-        c.get_slice('azimuth', 'deg', -1, 1)
-    # non existing coordinate query
-    with raises(ValueError, match="'elevation' in 'ged' does not exist"):
-        c.get_slice('elevation', 'ged', 1, 1)
-    # test with show
-    c.get_slice('azimuth', 'deg', 1, 1, show=True)
-
-    # there is no unique processing for cylindrical coordinates - they are thus
-    # not tested here.
-
-    plt.close("all")
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove get_slice() from pyfar 0.5.0!
+            coords.get_slice('x', 'met', 0, 1)
 
 
 @pytest.mark.parametrize("rot_type,rot", [
