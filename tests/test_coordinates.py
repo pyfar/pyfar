@@ -572,17 +572,17 @@ def test_find_slice():
 
     c = Coordinates(d, 0, 0)
     index, mask = c.find_slice('x', 'met', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
 
     c = Coordinates(0, d, 0)
     index, mask = c.find_slice('y', 'met', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
 
     c = Coordinates(0, 0, d)
     index, mask = c.find_slice('z', 'met', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
 
     # spherical grid
@@ -590,15 +590,15 @@ def test_find_slice():
     c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
     # cyclic query for lower bound
     index, mask = c.find_slice('azimuth', 'deg', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
     # cyclic query for upper bound
     index, mask = c.find_slice('azimuth', 'deg', 359, 2)
-    npt.assert_allclose(index, np.array([0, 1, 2, 3]))
+    npt.assert_allclose(index[0], np.array([0, 1, 2, 3]))
     npt.assert_allclose(mask, np.array([1, 1, 1, 1, 0]))
     # non-cyclic query
     index, mask = c.find_slice('azimuth', 'deg', 1, 1)
-    npt.assert_allclose(index, np.array([2, 3, 4]))
+    npt.assert_allclose(index[0], np.array([2, 3, 4]))
     npt.assert_allclose(mask, np.array([0, 0, 1, 1, 1]))
     # out of range query
     with raises(AssertionError):

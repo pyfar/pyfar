@@ -848,7 +848,7 @@ class Coordinates():
         -------
         index : numpy array of ints
             The locations of the neighbors in the getter methods (e.g.,
-            ``self.get_cart``). Dimension according to distance (see above).
+            ``self.get_cart``). Dimension according to `distance` (see below).
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
@@ -924,7 +924,7 @@ class Coordinates():
         -------
         index : numpy array of ints
             The locations of the neighbors in the getter methods (e.g.,
-            ``get_cart``). Dimension according to distance (see above).
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
@@ -994,7 +994,7 @@ class Coordinates():
         -------
         index : numpy array of ints
             The locations of the neighbors in the getter methods (e.g.,
-            ``get_cart``). Dimension according to distance (see above).
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
@@ -1068,7 +1068,9 @@ class Coordinates():
         Returns
         -------
         index : numpy array of ints
-            The indices of the selected points.
+            The indices of the selected points as a tuple of arrays. The length
+            of the tuple matches :py:func:`~cdim`. The length of each array
+            matches the number of selected points.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -1133,7 +1135,7 @@ class Coordinates():
         if show:
             self.show(mask)
 
-        index = np.asarray(mask).nonzero()[0]
+        index = np.asarray(mask).nonzero()
 
         return index, mask
 
