@@ -1,11 +1,8 @@
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.testing as mpt
-from matplotlib.testing.compare import compare_images
 import os
 from pytest import raises
-
+import matplotlib.pyplot as plt
 import pyfar.plot as plot
+from pyfar.testing.plot_utils import create_figure, save_and_compare
 
 # global parameters -----------------------------------------------------------
 # flag for creating new baseline plots
@@ -19,7 +16,7 @@ file_type = "png"
 # if true, the plots will be compared to the baseline and an error is raised
 # if there are any differences. In any case, differences are writted to
 # output_path as images
-compare_output = True
+compare_output = False
 
 # path handling
 base_path = os.path.join('tests', 'test_plot_data')
@@ -36,42 +33,6 @@ if not os.path.isdir(output_path):
 # remove old output files
 for file in os.listdir(output_path):
     os.remove(os.path.join(output_path, file))
-
-
-# helper functions ------------------------------------------------------------
-# Intended to reduce code redundancy and assure reproducibility on different
-# operating systems
-def create_figure(width=4.8, height=4.8, dpi=100):
-    """
-    Create figure with defined parameters for reproducible testing.
-    Returns: fig
-    """
-
-    plt.close('all')
-    matplotlib.use('Agg')
-    mpt.set_reproducibility_for_testing()
-    # force size/dpi for testing
-    return plt.figure(1, (width, height), dpi)
-
-
-def save_and_compare(create_baseline, filename, file_type, compare_output):
-    """
-    1. Save baseline and test files.
-    2. Compare files
-    """
-    # file names for saving
-    baseline = os.path.join(baseline_path, filename + "." + file_type)
-    output = os.path.join(output_path, filename + "." + file_type)
-
-    # safe baseline and test image
-    if create_baseline:
-        plt.savefig(baseline)
-    plt.savefig(output)
-
-    # compare images
-    comparison = compare_images(baseline, output, tol=10)
-    if compare_output:
-        assert comparison is None
 
 
 # testing ---------------------------------------------------------------------
@@ -93,12 +54,14 @@ def test_line_plots(sine, impulse_group_delay):
         filename = 'line_' + function.__name__
         create_figure()
         function(sine)
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
         # test hold functionality
         filename = 'line_' + function.__name__ + '_hold'
         function(impulse_group_delay[0])
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_line_phase_options(sine):
@@ -114,7 +77,8 @@ def test_line_phase_options(sine):
         filename = param[0]
         create_figure()
         plot.line.phase(sine, deg=param[1], unwrap=param[2])
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_line_phase_unwrap_assertion(sine):
@@ -138,8 +102,8 @@ def test_line_dB_option(sine):
             filename = 'line_' + function.__name__ + '_dB_' + str(dB)
             create_figure()
             function(sine, dB=dB)
-            save_and_compare(
-                create_baseline, filename, file_type, compare_output)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
 
     # test if log_prefix and log_reference are working
     for function in function_list:
@@ -148,7 +112,8 @@ def test_line_dB_option(sine):
         filename = 'line_' + function.__name__ + '_logParams'
         create_figure()
         function(sine, log_prefix=10, log_reference=.5, dB=True)
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_line_xscale_option(sine):
@@ -166,8 +131,8 @@ def test_line_xscale_option(sine):
             filename = 'line_' + function.__name__ + '_xscale_' + xscale
             create_figure()
             function(sine, xscale=xscale)
-            save_and_compare(
-                create_baseline, filename, file_type, compare_output)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
 
 
 def test_line_xscale_assertion(sine):
@@ -203,8 +168,8 @@ def test_time_unit(impulse_group_delay):
             filename = f'line_{function.__name__}_unit_{str(unit)}'
             create_figure()
             plot.line.group_delay(impulse_group_delay[0], unit=unit)
-            save_and_compare(
-                create_baseline, filename, file_type, compare_output)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
 
 
 def test_time_unit_assertion(sine):
@@ -251,12 +216,14 @@ def test_line_custom_subplots(sine, impulse_group_delay):
         filename = 'line_custom_subplots_' + p
         create_figure()
         plot.line.custom_subplots(sine, plots[p])
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
         # test hold functionality
         filename = 'line_custom_subplots_' + p + '_hold'
         plot.line.custom_subplots(impulse_group_delay[0], plots[p])
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_line_time_data(time_data):
@@ -270,7 +237,8 @@ def test_line_time_data(time_data):
         filename = 'line_time_data_' + function.__name__
         create_figure()
         function(time_data)
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_line_frequency_data(frequency_data):
@@ -286,7 +254,8 @@ def test_line_frequency_data(frequency_data):
         filename = 'line_frequency_data_' + function.__name__
         create_figure()
         function(frequency_data)
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_2d_plots(sine):
@@ -301,7 +270,8 @@ def test_2d_plots(sine):
         filename = '2d_' + function.__name__
         create_figure()
         function(sine)
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_2d_colorbar_options(sine):
@@ -324,8 +294,8 @@ def test_2d_colorbar_options(sine):
                 fig.clear()
                 _, ax = plt.subplots(1, 2, num=fig.number)
                 function(sine, ax=ax)
-            save_and_compare(
-                create_baseline, filename, file_type, compare_output)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
 
 
 def test_2d_plots_colorbar_assertion(sine):
@@ -416,4 +386,5 @@ def test_use():
         plot.utils.use(style)
         create_figure()
         plt.plot([1, 2, 3], [1, 2, 3])
-        save_and_compare(create_baseline, filename, file_type, compare_output)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
