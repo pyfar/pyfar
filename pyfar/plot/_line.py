@@ -159,6 +159,7 @@ def _default_color_dict():
 
     return colors
 
+
 def _check_time_unit(unit):
     """Check if a valid time unit is passed."""
     units = ['s', 'ms', 'mus', 'samples']

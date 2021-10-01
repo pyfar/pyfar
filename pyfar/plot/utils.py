@@ -146,32 +146,37 @@ def use(style="light"):
     mpl_style.use(style)
 
 
-def color(color: str):
+def color(color):
     """Return pyfar default color as HEX string.
 
     Parameters
     ----------
-    color : str
-        Available colors are purple ,blue, turquoise, green, light green,
-        yellow, orange, and red. The colors can be specified by their full
-        name, e.g., ``red`` or the first letter, e.g., ``r``.
+    color : int, str
+        Available colors are blue, red, yellow, purple, green, turquois,
+        orange and light green. The colors can be specified by their index in
+        the color cycler, their full name, e.g., ``red`` or the first letter,
+        e.g., ``r``.
 
     Returns
     -------
-    color : str
+    color_hex : str
         pyfar default color as HEX string
     """
 
-    colors = ['p', 'b', 't', 'g', 'l', 'y', 'o', 'r']
-    if color[0] not in colors:
-        raise ValueError((f"color is '{color}' but must be one of the "
-                          f"following {', '.join(colors)}"))
-
-    kwargs = {'c': color[0]}
-    kwargs = _line._return_default_colors_rgb(**kwargs)
-
-    color = kwargs['c']
-    return color
+    color_dict = _line._default_color_dict()
+    colors = list(color_dict.keys())
+    if isinstance(color, str):
+        if color[0] not in colors:
+            raise ValueError((f"color is '{color}' but must be one of the "
+                              f"following {', '.join(colors)}"))
+        else:
+            # all colors differ by their first letter
+            color_hex = color_dict[color[0]]
+    elif isinstance(color, int):
+        color_hex = list(color_dict.values())[color % len(colors)]
+    else:
+        raise ValueError("color is has to be of type str or int.")
+    return color_hex
 
 
 def shortcuts(show=True):
