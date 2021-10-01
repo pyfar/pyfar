@@ -135,14 +135,14 @@ def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with pyfar default color if possible."""
 
     # pyfar default colors
-    colors = {'p': '#5F4690',  # purple
-              'b': '#1471B9',  # blue
-              't': '#4EBEBE',  # turqois
-              'g': '#078554',  # green
-              'l': '#72AF47',  # light green
+    colors = {'b': '#1471B9',  # blue
+              'r': '#D83C27',  # red
               'y': '#ECAD20',  # yellow
+              'p': '#5F4690',  # purple
+              'g': '#078554',  # green
+              't': '#4EBEBE',  # turqois
               'o': '#E07D26',  # orange
-              'r': '#D83C27'}  # red
+              'l': '#72AF47'}  # light green
 
     if 'c' in kwargs and isinstance(kwargs['c'], str):
         kwargs['c'] = colors[kwargs['c']] \
