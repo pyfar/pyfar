@@ -854,12 +854,6 @@ class Coordinates():
         mask : boolean numpy array
             mask that contains ``True`` at the positions of the selected points
             and ``False`` otherwise. Mask is of shape ``cshape``.
-        distance : numpy array of floats
-            The euclidian distances to the nearest neighbors.
-            If the `points` have the shape `tuple`, then the `distance`
-            has the shape ``tuple+(k,)``. When ``k == 1``, the last dimension
-            is squeezed. Missing neighbors are indicated with infinite
-            distances.
 
         Notes
         -----
@@ -886,14 +880,14 @@ class Coordinates():
 
         # check the input
         assert isinstance(k, int) and k > 0 and k <= self.csize,\
-            "k must be an integeger > 0 and <= self.csize."
+            "k must be an integer > 0 and <= self.csize."
 
         # get the points
-        distance, index, mask = self._find_nearest(
+        _, index, mask = self._find_nearest(
             points_1, points_2, points_3,
             domain, convention, unit, show, k, 'k')
 
-        return index, mask, distance
+        return index, mask
 
     def find_nearest_cart(self, points_1, points_2, points_3, distance,
                           domain='cart', convention='right', unit='met',
