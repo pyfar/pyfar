@@ -719,8 +719,8 @@ class Coordinates():
         Parameters
         ----------
         mask : boolean numpy array, None, optional
-            Plot points in red if ``mask==True`` and black elsewhere. The
-            default is ``None``, which the same color for all points.
+            Plot points in red if ``mask==True``. The default is ``None``,
+            which the same color for all points.
         kwargs : optional
             keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
             If a mask is provided and the key `c` is contained in kwargs, it
@@ -733,13 +733,13 @@ class Coordinates():
 
         """
         if mask is None:
-            pf.plot.scatter(self)
+            pf.plot.scatter(self, **kwargs)
         else:
             mask = np.asarray(mask)
             assert mask.shape == self.cshape,\
                 "'mask.shape' must be self.cshape"
-            colors = np.full(mask.shape, 'k')
-            colors[mask] = 'r'
+            colors = np.full(mask.shape, pf.plot.color('b'))
+            colors[mask] = pf.plot.color('r')
             pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def get_nearest_k(self, points_1, points_2, points_3, k=1,
