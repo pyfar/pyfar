@@ -28,6 +28,17 @@ def test_input_sampling_freq_error():
                    impulse(3, sampling_rate=48000))
 
 
+def test_input_fft_norm_error():
+    """Test assertion by passing signals with different fft_norm"""
+    measurement = impulse(3, sampling_rate=44100)
+    measurement.fft_norm = 'rms'
+    excitation = impulse(3, sampling_rate=44100)
+    excitation.fft_norm = 'power'
+    with pytest.raises(ValueError,
+                       match='The two signals have different fft_norm.'):
+        deconvolve(measurement, excitation)
+
+
 def test_output_type():
     """Test Type of returned Signal and basic deconvolution with impulses"""
     res = deconvolve(impulse(3), impulse(3), freq_range=(1, 22050))

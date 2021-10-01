@@ -1456,9 +1456,9 @@ def deconvolve(measurement, excitation, **kwargs):
     # Check if both signals have the same sampling rate
     if not measurement.sampling_rate == excitation.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
-    # Check if both signals have the same fft norm, if not: warn
+    # Check if both signals have the same fft norm
     if not measurement.fft_norm == excitation.fft_norm:
-        warnings.warn("The two signals have different fft_norms.")
+        raise ValueError("The two signals have different fft_norm.")
 
     # Check if both signals have the same length,
     # if not: bring them to the same length by padding with zeros
