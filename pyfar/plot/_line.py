@@ -537,8 +537,8 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # scales and ticks
     if yscale == 'log':
-        ax.set_yscale('symlog')
-        ax.yaxis.set_major_locator(LogLocatorITAToolbox())
+        ax[0].set_yscale('symlog')
+        ax[0].yaxis.set_major_locator(LogLocatorITAToolbox())
     ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
     ax[0].grid(ls='dotted', color='white')
 

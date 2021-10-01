@@ -295,9 +295,25 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         of 1024 samples.
     cmap : matplotlib.colors.Colormap(name, N=256)
         Colormap for spectrogram. Defaults to matplotlibs ``magma`` colormap.
+    colorbar : bool, optional
+        Control the colorbar. The default is ``True``, which adds a colorbar
+        to the plot. ``False`` omits the colorbar.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
+        Axes to plot on.
+
+        ``None``
+            Use the current axis, or create a new axis (and figure) if there is
+            none.
+        ``ax``
+            If a single axis is passed, this is used for plotting. If
+            `colorbar` is ``True`` the space for the colorbar is taken from
+            this axis.
+        ``[ax, ax]``
+            If a list or array of two axes is passed, the first is used to plot
+            the data and the second to plot the colorbar. In this case
+            `colorbar` must be ``True``
+
+        The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
@@ -307,7 +323,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ax : matplotlib.pyplot.axes
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
-        coloarbar. If `colorbar` is ``False``, only the axis on which the data
+        colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
