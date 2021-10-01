@@ -133,16 +133,7 @@ def _lower_frequency_limit(signal):
 
 def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with pyfar default color if possible."""
-
-    # pyfar default colors
-    colors = {'b': '#1471B9',  # blue
-              'r': '#D83C27',  # red
-              'y': '#ECAD20',  # yellow
-              'p': '#5F4690',  # purple
-              'g': '#078554',  # green
-              't': '#4EBEBE',  # turqois
-              'o': '#E07D26',  # orange
-              'l': '#72AF47'}  # light green
+    colors = _default_color_dict()
 
     if 'c' in kwargs and isinstance(kwargs['c'], str):
         kwargs['c'] = colors[kwargs['c']] \
@@ -153,6 +144,20 @@ def _return_default_colors_rgb(**kwargs):
 
     return kwargs
 
+
+def _default_color_dict():
+    """pyfar default colors in the order matching the plotstyles"""
+
+    colors = {'b': '#1471B9',  # blue
+              'r': '#D83C27',  # red
+              'y': '#ECAD20',  # yellow
+              'p': '#5F4690',  # purple
+              'g': '#078554',  # green
+              't': '#4EBEBE',  # turqois
+              'o': '#E07D26',  # orange
+              'l': '#72AF47'}  # light green
+
+    return colors
 
 def _check_time_unit(unit):
     """Check if a valid time unit is passed."""
