@@ -358,6 +358,14 @@ class TimeData(_Audio):
             data, times=self.times, comment=self.comment, dtype=self.dtype)
         return item
 
+    def __repr__(self):
+        """String representation of TimeData class."""
+        repr_string = (
+            f"TimeData:\n"
+            f"{self.cshape} channels with {self.n_samples} samples")
+
+        return repr_string
+
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
@@ -519,6 +527,15 @@ class FrequencyData(_Audio):
             data, frequencies=self.frequencies, fft_norm=self.fft_norm,
             comment=self.comment, dtype=self.dtype)
         return item
+
+    def __repr__(self):
+        """String representation of FrequencyData class."""
+        repr_string = (
+            f"FrequencyData:\n"
+            f"{self.cshape} channels with {self.n_bins} frequencies "
+            f"and {self.fft_norm} FFT normalization\n")
+
+        return repr_string
 
     @classmethod
     def _decode(cls, obj_dict):
@@ -790,8 +807,7 @@ class Signal(FrequencyData, TimeData):
         return stype
 
     def __repr__(self):
-        """String representation of signal class.
-        """
+        """String representation of Signal class."""
         repr_string = (
             f"{self.domain} domain {self.signal_type} Signal:\n"
             f"{self.cshape} channels with {self.n_samples} samples @ "

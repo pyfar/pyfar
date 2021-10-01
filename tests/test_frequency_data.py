@@ -220,3 +220,12 @@ def test___eq___notEqual():
     comment = f'{frequency_data.comment} A completely different thing'
     actual = FrequencyData([1, 2, 3], [1, 2, 3], comment=comment)
     assert not frequency_data == actual
+
+
+def test__repr__(capfd):
+    """Test string representation"""
+    print(FrequencyData([1, 2, 3], [1, 2, 3]))
+    out, _ = capfd.readouterr()
+    assert ("FrequencyData:\n"
+            "(1,) channels with 3 frequencies "
+            "and none FFT normalization") in out
