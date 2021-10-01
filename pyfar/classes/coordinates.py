@@ -760,8 +760,10 @@ class Coordinates():
             "of Coordinates.find_nearest_k."),
                   PendingDeprecationWarning)
 
-        index, mask, distance = self.find_nearest_k(
-            points_1, points_2, points_3, k, domain, convention, unit, show)
+        # get the points
+        distance, index, mask = self._find_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, k, 'k')
 
         return distance, index, mask
 
@@ -1698,11 +1700,11 @@ class Coordinates():
             # nearest points
             distance, index = kdtree.query(points, k=value)
         elif measure == 'cart':
-            # points within eucledian distance
+            # points within euclidean distance
             index = kdtree.query_ball_point(points, value + atol)
             distance = None
         elif measure == 'sph':
-            # convert great circle to eucedian distance
+            # convert great circle to euclidean distance
             x, y, z = sph2cart([0, value / 180 * np.pi],
                                [np.pi / 2, np.pi / 2],
                                [radius, radius])
