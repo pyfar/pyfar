@@ -235,7 +235,6 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
 
     # plot data
     ax.plot(times, data, **kwargs)
-    plt.tight_layout()
 
     return ax
 
@@ -285,8 +284,6 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     if xscale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
-
-    plt.tight_layout()
 
     return ax
 
@@ -344,7 +341,6 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
         ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
     else:
         ax.plot(signal.frequencies, phase_data.T, **kwargs)
-    plt.tight_layout()
 
     # set and format ticks
     if xscale == 'log':
@@ -390,7 +386,6 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
         ax.semilogx(signal.frequencies, data.T, **kwargs)
     else:
         ax.plot(signal.frequencies, data.T, **kwargs)
-    plt.tight_layout()
 
     # set and format ticks
     if xscale == 'log':
@@ -552,8 +547,6 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     else:
         cb = None
 
-    plt.tight_layout()
-
     return ax[0], qm, cb
 
 
@@ -569,7 +562,6 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     _time(signal, dB_time, log_prefix, log_reference, unit, ax[0], **kwargs)
     _freq(signal, dB_freq, log_prefix, log_reference, xscale, ax[1], **kwargs)
     fig.align_ylabels()
-    plt.tight_layout()
 
     return ax
 
@@ -585,7 +577,6 @@ def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     _phase(signal, deg, unwrap, xscale, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
-    plt.tight_layout()
 
     return ax
 
@@ -603,7 +594,6 @@ def _freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     _group_delay(signal, unit, xscale, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
-    plt.tight_layout()
 
     return ax
 
