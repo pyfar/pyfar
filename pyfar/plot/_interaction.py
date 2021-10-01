@@ -52,6 +52,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar.plot import utils
 from pyfar.plot import _line
+from pyfar.plot import _utils
 
 
 class Cycle(object):
@@ -647,7 +648,7 @@ class Interaction(object):
             if self.params.cm_type is None:
                 return
 
-            qm = _line._get_quad_mesh_from_axis(self.ax)
+            qm = _utils._get_quad_mesh_from_axis(self.ax)
 
             getter = qm.get_clim
             setter = qm.set_clim

@@ -2,7 +2,7 @@ import matplotlib.style as mpl_style
 import os
 import json
 import contextlib
-import pyfar.plot._line as _line
+from . import _utils
 from pyfar.plot._interaction import PlotParameter
 
 
@@ -168,7 +168,7 @@ def color(color: str):
                           f"following {', '.join(colors)}"))
 
     kwargs = {'c': color[0]}
-    kwargs = _line._return_default_colors_rgb(**kwargs)
+    kwargs = _utils._return_default_colors_rgb(**kwargs)
 
     color = kwargs['c']
     return color
