@@ -13,10 +13,10 @@ from pyfar.dsp.dsp import deconvolve
 def test_input_type_error():
     """Test assertions by passing non Signal-Type"""
     with pytest.raises(TypeError,
-                       match='measurement has to be of type pyfar.Signal'):
+                       match='system_output has to be of type pyfar.Signal'):
         deconvolve('error', impulse(3))
     with pytest.raises(TypeError,
-                       match='excitation has to be of type pyfar.Signal'):
+                       match='system_input has to be of type pyfar.Signal'):
         deconvolve(impulse(3), 'error')
 
 
