@@ -1032,6 +1032,8 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     elif audio_type == TimeData:
         result = TimeData(result, times)
     elif audio_type == FrequencyData:
+        result = fft.normalization(result, n_samples, sampling_rate,
+                                   fft_norm)
         result = FrequencyData(result, frequencies, fft_norm)
 
     return result
@@ -1180,7 +1182,7 @@ def _get_arithmetic_data(data, n_samples, domain):
         elif domain == "freq":
             data_out = data.freq.copy()
 
-            if isinstance(data, Signal):
+            if isinstance(data, (Signal, FrequencyData)):
                 if data.fft_norm != 'none':
                     # remove current fft normalization
                     data_out = fft.normalization(
