@@ -39,6 +39,23 @@ def test_input_fft_norm_error():
         deconvolve(measurement, excitation)
 
 
+def test_fft_length_error():
+    """Test assertion by passing fft_length shorter than n_samples of
+    given Signals"""
+    with pytest.raises(ValueError,
+                       match="The fft_length can not be shorter than" +
+                             "system_output.n_samples."):
+        deconvolve(impulse(6, sampling_rate=44100),
+                   impulse(5, sampling_rate=44100),
+                   fft_length=5)
+    with pytest.raises(ValueError,
+                       match="The fft_length can not be shorter than" +
+                             "system_input.n_samples."):
+        deconvolve(impulse(5, sampling_rate=44100),
+                   impulse(6, sampling_rate=44100),
+                   fft_length=5)
+
+
 def test_output_type():
     """Test Type of returned Signal and basic deconvolution with impulses"""
     res = deconvolve(impulse(3), impulse(3), freq_range=(1, 22050))
@@ -54,6 +71,9 @@ def test_output_length():
     assert res.n_samples == 5
     res = deconvolve(impulse(3), impulse(5), freq_range=(1, 22050))
     assert res.n_samples == 5
+    res = deconvolve(impulse(3), impulse(5), fft_length=7,
+                     freq_range=(1, 22050))
+    assert res.n_samples == 7
 
 
 def test_output_sweep():
