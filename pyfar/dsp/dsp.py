@@ -1398,7 +1398,7 @@ def time_shift(signal, shift, unit='samples'):
     return shifted.reshape(signal.cshape)
 
 
-def deconvolve(system_output, system_input, **kwargs):
+def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     """Calculate transfer functions by spectral deconvolution of two signals.
 
     The transfer function :math:`H(\\omega)` is calculated by spectral
@@ -1429,6 +1429,11 @@ def deconvolve(system_output, system_input, **kwargs):
         The system input signal, used to perform the measurement.
         The system input signal is zero padded, if it is shorter than the
         system output signal.
+    fft_length: int or None
+        The length the signals system_output and system_input are zero padded
+        to before deconvolving. The default is None. In this case only the
+        shorter signal is padded to the length of the longer signal, no padding
+        is applied when both signals have the same length.
     kwargs : key value arguments
         Key value arguments to control the inversion of :math:`H(\\omega)` are
         passed to to :py:func:`~pyfar.dsp.regulated_spectrum_inversion`.
@@ -1461,19 +1466,31 @@ def deconvolve(system_output, system_input, **kwargs):
     if not system_output.fft_norm == system_input.fft_norm:
         raise ValueError("The two signals have different fft_norm.")
 
-    # Check if both signals have the same length,
-    # if not: bring them to the same length by padding with zeros
-    if system_output.n_samples > system_input.n_samples:
-        # Add Zeros to system_input
-        system_input = pyfar.dsp.pad_zeros(system_input,
-                                           (system_output.n_samples -
-                                            system_input.n_samples))
+    # Set fft_length to the max n_samples of both signals,
+    # if it is not explicitly set to a value
+    if fft_length is None:
+        fft_length = np.max([system_output.n_samples, system_input.n_samples])
+    # Check if both signals length are shorter or the same as fft_length
+    if fft_length < system_output.n_samples:
+        raise ValueError("The fft_length can not be shorter than" +
+                         "system_output.n_samples.")
+    if fft_length < system_input.n_samples:
+        raise ValueError("The fft_length can not be shorter than" +
+                         "system_input.n_samples.")
 
-    if system_output.n_samples < system_input.n_samples:
-        # Add Zeros to system_output
+    # Check if both signals have the same length as ftt_length,
+    # if not: bring them to the same length by padding with zeros
+    if system_output.n_samples < fft_length:
+        # Add Zeros to system_input
         system_output = pyfar.dsp.pad_zeros(system_output,
-                                            (system_input.n_samples -
+                                            (fft_length -
                                              system_output.n_samples))
+
+    if system_input.n_samples < fft_length:
+        # Add Zeros to system_output
+        system_input = pyfar.dsp.pad_zeros(system_input,
+                                           (fft_length -
+                                            system_input.n_samples))
 
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
