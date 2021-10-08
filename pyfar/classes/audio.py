@@ -389,7 +389,7 @@ class FrequencyData(_Audio):
     incomplete spectra.
 
     """
-    def __init__(self, data, frequencies, fft_norm=None, comment=None,
+    def __init__(self, data, frequencies, fft_norm='none', comment=None,
                  dtype=complex):
         """Create FrequencyData with data, and frequencies.
 
@@ -444,8 +444,6 @@ class FrequencyData(_Audio):
                 len(self._frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
 
-        if fft_norm is None:
-            fft_norm = 'none'
         if fft_norm in self._VALID_FFT_NORMS:
             self._fft_norm = fft_norm
         else:
@@ -565,7 +563,7 @@ class Signal(FrequencyData, TimeData):
             sampling_rate,
             n_samples=None,
             domain='time',
-            fft_norm=None,
+            fft_norm='none',
             comment=None,
             dtype=np.double):
         """Create Signal with data, and sampling rate.
@@ -620,8 +618,6 @@ class Signal(FrequencyData, TimeData):
             self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
             self._n_samples = self._data.shape[-1]
 
-            if fft_norm is None:
-                fft_norm = 'none'
             if fft_norm in self._VALID_FFT_NORMS:
                 self._fft_norm = fft_norm
             else:

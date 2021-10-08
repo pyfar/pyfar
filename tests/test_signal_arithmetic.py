@@ -330,8 +330,8 @@ def test_get_arithmetic_data_with_array():
 
 def test_get_arithmetic_data_with_signal():
     # all possible combinations of `domain`, `signal_type`, and `fft_norm`
-    meta = [['time', None],
-            ['freq', None],
+    meta = [['time', 'none'],
+            ['freq', 'none'],
             ['time', 'unitary'],
             ['freq', 'unitary'],
             ['time', 'amplitude'],
