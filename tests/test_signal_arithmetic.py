@@ -173,14 +173,6 @@ def test_add_frequency_data_and_number_wrong_frequencies():
         signal.add((x, y), 'freq')
 
 
-def test_add_frequency_data_and_number_wrong_fft_norm():
-    # generate and add signals
-    x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = FrequencyData([1, 0, 0], [0, .1, .5], fft_norm='rms')
-    with raises(ValueError):
-        signal.add((x, y), 'freq')
-
-
 def test_subtraction():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)

@@ -43,7 +43,7 @@ def test_data_frequency_with_wrong_fft_norm():
     freqs = [0, .1, .2]
 
     with pytest.raises(ValueError):
-        FrequencyData(data, freqs, fft_norm='bull shit')
+        FrequencyData(data, freqs, fft_norm='rms')
 
 
 def test_data_frequency_setter_freq():
@@ -61,8 +61,8 @@ def test_getter_fft_norm():
     data = [1, 0, -1]
     freqs = [0, .1, .3]
 
-    freq = FrequencyData(data, freqs, fft_norm='psd')
-    assert freq.fft_norm == 'psd'
+    freq = FrequencyData(data, freqs, fft_norm='none')
+    assert freq.fft_norm == 'none'
 
 
 def test_reshape():
@@ -148,17 +148,6 @@ def test_magic_setitem():
     freq_a[0] = freq_b
 
     npt.assert_allclose(freq_a.freq, np.asarray([[2, 0, -2], [1, 0, -1]]))
-
-
-def test_magic_setitem_wrong_fft_norm():
-    """Test the setitem for FrequencyData with wrong FFT norm."""
-    freqs = [0, .1, .3]
-
-    freq_a = FrequencyData([1, 0, -1], freqs)
-    freq_b = FrequencyData([2, 0, -2], freqs, fft_norm='psd')
-
-    with pytest.raises(ValueError):
-        freq_a[0] = freq_b
 
 
 def test_magic_setitem_wrong_n_bins():
