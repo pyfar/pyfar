@@ -424,8 +424,7 @@ class FrequencyData(_Audio):
 
         _Audio.__init__(self, 'freq', comment, dtype)
 
-        self._VALID_FFT_NORMS = [
-            "none", "unitary", "amplitude", "rms", "power", "psd"]
+        self._VALID_FFT_NORMS = ["none"]
 
         self._init_frequency_domain_data(data, frequencies, fft_norm)
 
@@ -647,8 +646,7 @@ class Signal(FrequencyData, TimeData):
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
 
-            FrequencyData.__init__(self, data, self.frequencies, fft_norm,
-                                   comment, dtype)
+            self._init_frequency_domain_data(data, self.frequencies, fft_norm)
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
