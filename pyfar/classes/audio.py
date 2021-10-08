@@ -71,11 +71,7 @@ class _Audio():
     def __init__(self, domain, comment=None, dtype=np.double):
 
         # initialize valid parameter spaces
-        # NOTE: Some are note needed by TimeData but would have to be defined
-        #       in FrequencyData and Signal otherwise.
         self._VALID_DOMAINS = ["time", "freq"]
-        self._VALID_FFT_NORMS = [
-            "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # initialize global parameters
         self.comment = comment
@@ -428,6 +424,17 @@ class FrequencyData(_Audio):
 
         _Audio.__init__(self, 'freq', comment, dtype)
 
+        self._VALID_FFT_NORMS = [
+            "none", "unitary", "amplitude", "rms", "power", "psd"]
+
+        self._init_frequency_domain_data(data, frequencies, fft_norm)
+
+    def _init_frequency_domain_data(self, data, frequencies, fft_norm):
+        """
+        This abstraction of the initialization is needed to make it possible
+        to overwrite self._VALID_FFT_NORMS in the Signal class
+        """
+
         # init data
         self._data = np.atleast_2d(np.asarray(data, dtype=complex))
 
@@ -604,6 +611,9 @@ class Signal(FrequencyData, TimeData):
 
         # initialize global parameter and valid parameter spaces
         _Audio.__init__(self, domain, comment, dtype)
+
+        self._VALID_FFT_NORMS = [
+            "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
