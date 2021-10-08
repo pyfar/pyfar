@@ -403,11 +403,9 @@ class FrequencyData(_Audio):
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
         fft_norm : str, optional
-            The normalization of the Discrete Fourier Transform (DFT). Can be
-            ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
-            or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
-            for more information. The default is ``'none'``, which is typically
-            used for energy signals, such as impulse responses.
+            The normalization of the Discrete Fourier Transform (DFT). Can only
+            ``'none'``. All other normalizations would require knowledge of
+            the sampling rate.
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
         dtype : string, optional
