@@ -152,10 +152,17 @@ def color(color):
     Parameters
     ----------
     color : int, str
-        Available colors are blue, red, yellow, purple, green, turquois,
-        orange and light green. The colors can be specified by their index in
-        the color cycler, their full name, e.g., ``red`` or the first letter,
-        e.g., ``r``.
+        The colors can be specified by their index, their full name,
+         or the first letter. Available colors are:
+        
+        1, ``'b'``: blue  
+        2, ``'r'``: red  
+        3, ``'y'``: yellow  
+        4, ``'p'``: purple  
+        5, ``'g'``: green  
+        6, ``'t'``: turquois  
+        7, ``'o'``: orange  
+        8, ``'l'``: light green. 
 
     Returns
     -------
