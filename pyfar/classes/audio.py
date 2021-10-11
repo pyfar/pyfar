@@ -372,17 +372,32 @@ class TimeData(_Audio):
     def __add__(self, data):
         return add((self, data), 'time')
 
+    def __radd__(self, data):
+        return add((data, self), 'time')
+
     def __sub__(self, data):
         return subtract((self, data), 'time')
+
+    def __rsub__(self, data):
+        return subtract((data, self), 'time')
 
     def __mul__(self, data):
         return multiply((self, data), 'time')
 
+    def __rmul__(self, data):
+        return multiply((data, self), 'time')
+
     def __truediv__(self, data):
         return divide((self, data), 'time')
 
+    def __rtruediv__(self, data):
+        return divide((data, self), 'time')
+
     def __pow__(self, data):
         return power((self, data), 'time')
+
+    def __rpow__(self, data):
+        return power((data, self), 'time')
 
 
 class FrequencyData(_Audio):
@@ -535,17 +550,32 @@ class FrequencyData(_Audio):
     def __add__(self, data):
         return add((self, data), 'freq')
 
+    def __radd__(self, data):
+        return add((data, self), 'freq')
+
     def __sub__(self, data):
         return subtract((self, data), 'freq')
+
+    def __rsub__(self, data):
+        return subtract((data, self), 'freq')
 
     def __mul__(self, data):
         return multiply((self, data), 'freq')
 
+    def __rmul__(self, data):
+        return multiply((data, self), 'freq')
+
     def __truediv__(self, data):
         return divide((self, data), 'freq')
 
+    def __rtruediv__(self, data):
+        return divide((data, self), 'freq')
+
     def __pow__(self, data):
         return power((self, data), 'freq')
+
+    def __rpow__(self, data):
+        return power((data, self), 'freq')
 
 
 class Signal(FrequencyData, TimeData):
