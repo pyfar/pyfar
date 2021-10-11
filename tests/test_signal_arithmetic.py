@@ -222,66 +222,102 @@ def test_power():
 
 
 def test_overloaded_operators_signal():
-    x = Signal([2, 1, 0], 44100, n_samples=5, domain='freq')
-    y = Signal([2, 2, 2], 44100, n_samples=5, domain='freq')
+    x = Signal([3, 2, 1], 44100, n_samples=5, domain='freq')
+    y_s = Signal([2, 2, 2], 44100, n_samples=5, domain='freq')
 
-    # addition
-    z = x + y
-    npt.assert_allclose(z.freq, np.array([4, 3, 2], ndmin=2), atol=1e-15)
-    # subtraction
-    z = x - y
-    npt.assert_allclose(z.freq, np.array([0, -1, -2], ndmin=2), atol=1e-15)
-    # multiplication
-    z = x * y
-    npt.assert_allclose(z.freq, np.array([4, 2, 0], ndmin=2), atol=1e-15)
-    # division
-    z = x / y
-    npt.assert_allclose(z.freq, np.array([1, .5, 0], ndmin=2), atol=1e-15)
-    # power
-    z = x**y
-    npt.assert_allclose(z.freq, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+    for y in [y_s, 2]:
+        # addition
+        z = x + y
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        z = y + x
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        # subtraction
+        z = x - y
+        npt.assert_allclose(z.freq, np.array([1, 0, -1], ndmin=2), atol=1e-15)
+        z = y - x
+        npt.assert_allclose(z.freq, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
+        # multiplication
+        z = x * y
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        z = y * x
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        # division
+        z = x / y
+        npt.assert_allclose(
+            z.freq, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
+        z = y / x
+        npt.assert_allclose(z.freq, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
+        # power
+        z = x**y
+        npt.assert_allclose(z.freq, np.array([9, 4, 1], ndmin=2), atol=1e-15)
+        z = y**x
+        npt.assert_allclose(z.freq, np.array([8, 4, 2], ndmin=2), atol=1e-15)
 
 
 def test_overloaded_operators_time_data():
-    x = TimeData([2, 1, 0], [0, 1, 2])
-    y = TimeData([2, 2, 2], [0, 1, 2])
+    x = TimeData([3, 2, 1], [0, 1, 2])
+    y_s = TimeData([2, 2, 2], [0, 1, 2])
 
-    # addition
-    z = x + y
-    npt.assert_allclose(z.time, np.array([4, 3, 2], ndmin=2), atol=1e-15)
-    # subtraction
-    z = x - y
-    npt.assert_allclose(z.time, np.array([0, -1, -2], ndmin=2), atol=1e-15)
-    # multiplication
-    z = x * y
-    npt.assert_allclose(z.time, np.array([4, 2, 0], ndmin=2), atol=1e-15)
-    # division
-    z = x / y
-    npt.assert_allclose(z.time, np.array([1, .5, 0], ndmin=2), atol=1e-15)
-    # power
-    z = x**y
-    npt.assert_allclose(z.time, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+    for y in [y_s, 2]:
+        # addition
+        z = x + y
+        npt.assert_allclose(z.time, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        z = y + x
+        npt.assert_allclose(z.time, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        # subtraction
+        z = x - y
+        npt.assert_allclose(z.time, np.array([1, 0, -1], ndmin=2), atol=1e-15)
+        z = y - x
+        npt.assert_allclose(z.time, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
+        # multiplication
+        z = x * y
+        npt.assert_allclose(z.time, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        z = y * x
+        npt.assert_allclose(z.time, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        # division
+        z = x / y
+        npt.assert_allclose(
+            z.time, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
+        z = y / x
+        npt.assert_allclose(z.time, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
+        # power
+        z = x**y
+        npt.assert_allclose(z.time, np.array([9, 4, 1], ndmin=2), atol=1e-15)
+        z = y**x
+        npt.assert_allclose(z.time, np.array([8, 4, 2], ndmin=2), atol=1e-15)
 
 
 def test_overloaded_operators_frequency_data():
-    x = FrequencyData([2, 1, 0], [0, 1, 2])
-    y = FrequencyData([2, 2, 2], [0, 1, 2])
+    x = FrequencyData([3, 2, 1], [0, 1, 2])
+    y_s = FrequencyData([2, 2, 2], [0, 1, 2])
 
-    # addition
-    z = x + y
-    npt.assert_allclose(z.freq, np.array([4, 3, 2], ndmin=2), atol=1e-15)
-    # subtraction
-    z = x - y
-    npt.assert_allclose(z.freq, np.array([0, -1, -2], ndmin=2), atol=1e-15)
-    # multiplication
-    z = x * y
-    npt.assert_allclose(z.freq, np.array([4, 2, 0], ndmin=2), atol=1e-15)
-    # division
-    z = x / y
-    npt.assert_allclose(z.freq, np.array([1, .5, 0], ndmin=2), atol=1e-15)
-    # power
-    z = x**y
-    npt.assert_allclose(z.freq, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+    for y in [y_s, 2]:
+        # addition
+        z = x + y
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        z = y + x
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        # subtraction
+        z = x - y
+        npt.assert_allclose(z.freq, np.array([1, 0, -1], ndmin=2), atol=1e-15)
+        z = y - x
+        npt.assert_allclose(z.freq, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
+        # multiplication
+        z = x * y
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        z = y * x
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        # division
+        z = x / y
+        npt.assert_allclose(
+            z.freq, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
+        z = y / x
+        npt.assert_allclose(z.freq, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
+        # power
+        z = x**y
+        npt.assert_allclose(z.freq, np.array([9, 4, 1], ndmin=2), atol=1e-15)
+        z = y**x
+        npt.assert_allclose(z.freq, np.array([8, 4, 2], ndmin=2), atol=1e-15)
 
 
 def test_assert_match_for_arithmetic():
