@@ -2,6 +2,10 @@
 History
 =======
 
+0.2.1 (2021-10-12)
+------------------
+* Bugfix for left and right hand side arithmetic operators
+
 0.2.0 (2021-06-01)
 ------------------
 * Add DSP functions: `zero_phase`, `time_window`, `linear_phase`, `pad_zeros`, `time_shift`, `minimum_phase`,
