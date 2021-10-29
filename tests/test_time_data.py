@@ -189,3 +189,11 @@ def test___eq___notEqual():
     comment = f'{time_data.comment} A completely different thing'
     actual = TimeData([1, 2, 3], [0.1, 0.2, 0.3], comment=comment)
     assert not time_data == actual
+
+
+def test__repr__(capfd):
+    """Test string representation"""
+    print(TimeData([1, 2, 3], [1, 2, 3]))
+    out, _ = capfd.readouterr()
+    assert ("TimeData:\n"
+            "(1,) channels with 3 samples") in out
