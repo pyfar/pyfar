@@ -32,6 +32,7 @@ from scipy.spatial.transform import Rotation as sp_rot
 import deepdiff
 import re
 from copy import deepcopy
+import warnings
 
 import pyfar as pf
 
@@ -746,6 +747,87 @@ class Coordinates():
                       domain='cart', convention='right', unit='met',
                       show=False):
         """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_k`.
+
+        .. note::
+            This functions returns the parameters in the order `distance`,
+            `index`, `mask`, which is different in `find_nearest_k()`
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_k."),
+                  PendingDeprecationWarning)
+
+        # get the points
+        distance, index, mask = self._find_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, k, 'k')
+
+        return distance, index, mask
+
+    def get_nearest_cart(self, points_1, points_2, points_3, distance,
+                         domain='cart', convention='right', unit='met',
+                         show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_cart`.
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_cart."),
+                  PendingDeprecationWarning)
+
+        index, mask = self.find_nearest_cart(
+            points_1, points_2, points_3, distance, domain, convention, unit,
+            show, atol)
+
+        return index, mask
+
+    def get_nearest_sph(self, points_1, points_2, points_3, distance,
+                        domain='sph', convention='top_colat', unit='rad',
+                        show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_sph`.
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_sph."),
+                  PendingDeprecationWarning)
+
+        index, mask = self.find_nearest_sph(
+            points_1, points_2, points_3, distance, domain, convention,
+            unit, show, atol)
+
+        return index, mask
+
+    def get_slice(self, coordinate: str, unit: str, value, tol=0,
+                  show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_slice`.
+
+        .. note::
+            This functions returns only the `mask` which is different in
+            `find_slice()`
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_slice."),
+                  PendingDeprecationWarning)
+
+        _, mask = self.find_slice(coordinate, unit, value, tol, show, atol)
+        return mask
+
+    def find_nearest_k(self, points_1, points_2, points_3, k=1,
+                       domain='cart', convention='right', unit='met',
+                       show=False):
+        """
         Find the k nearest coordinates points.
 
         Parameters
@@ -766,15 +848,9 @@ class Coordinates():
 
         Returns
         -------
-        distance : numpy array of floats
-            The euclidian distances to the nearest neighbors.
-            If the `points` have the shape `tuple`, then the `distance`
-            has the shape ``tuple+(k,)``. When ``k == 1``, the last dimension
-            is squeezed. Missing neighbors are indicated with infinite
-            distances.
         index : numpy array of ints
             The locations of the neighbors in the getter methods (e.g.,
-            ``self.get_cart``). Dimension according to distance (see above).
+            ``self.get_cart``). Dimension according to `distance` (see below).
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
@@ -795,29 +871,29 @@ class Coordinates():
         Examples
         --------
 
-        Get frontal point from a spherical coordinate system
+        Find frontal point from a spherical coordinate system
 
         .. plot::
 
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.get_nearest_k(1, 0, 0, show=True)
+            >>> result = coords.find_nearest_k(1, 0, 0, show=True)
         """
 
         # check the input
         assert isinstance(k, int) and k > 0 and k <= self.csize,\
-            "k must be an integeger > 0 and <= self.csize."
+            "k must be an integer > 0 and <= self.csize."
 
         # get the points
-        distance, index, mask = self._get_nearest(
+        _, index, mask = self._find_nearest(
             points_1, points_2, points_3,
             domain, convention, unit, show, k, 'k')
 
-        return distance, index, mask
+        return index, mask
 
-    def get_nearest_cart(self, points_1, points_2, points_3, distance,
-                         domain='cart', convention='right', unit='met',
-                         show=False, atol=1e-15):
+    def find_nearest_cart(self, points_1, points_2, points_3, distance,
+                          domain='cart', convention='right', unit='met',
+                          show=False, atol=1e-15):
         """
         Find coordinates within a certain distance in meters to query points.
 
@@ -844,7 +920,7 @@ class Coordinates():
         -------
         index : numpy array of ints
             The locations of the neighbors in the getter methods (e.g.,
-            ``get_cart``). Dimension according to distance (see above).
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
@@ -865,13 +941,13 @@ class Coordinates():
         Examples
         --------
 
-        Get frontal points within a distance of 0.5 meters
+        Find frontal points within a distance of 0.5 meters
 
         .. plot::
 
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.get_nearest_cart(1, 0, 0, 0.5, show=True)
+            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
 
@@ -879,15 +955,15 @@ class Coordinates():
         assert distance >= 0, "distance must be >= 0"
 
         # get the points
-        distance, index, mask = self._get_nearest(
+        distance, index, mask = self._find_nearest(
             points_1, points_2, points_3,
             domain, convention, unit, show, distance, 'cart', atol)
 
         return index, mask
 
-    def get_nearest_sph(self, points_1, points_2, points_3, distance,
-                        domain='sph', convention='top_colat', unit='rad',
-                        show=False, atol=1e-15):
+    def find_nearest_sph(self, points_1, points_2, points_3, distance,
+                         domain='sph', convention='top_colat', unit='rad',
+                         show=False, atol=1e-15):
         """
         Find coordinates within certain angular distance to the query points.
 
@@ -914,7 +990,7 @@ class Coordinates():
         -------
         index : numpy array of ints
             The locations of the neighbors in the getter methods (e.g.,
-            ``get_cart``). Dimension according to distance (see above).
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
@@ -935,13 +1011,13 @@ class Coordinates():
         Examples
         --------
 
-        Get top points within a distance of 45 degrees
+        Find top points within a distance of 45 degrees
 
         .. plot::
 
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.get_nearest_sph(0, 0, 1, 45, show=True)
+            >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
         """
 
         # check the input
@@ -953,21 +1029,21 @@ class Coordinates():
         delta_radius = np.max(radius) - np.min(radius)
         if delta_radius > 1e-15:
             raise ValueError(
-                "get_nearest_sph only works if all points have the same \
+                "find_nearest_sph only works if all points have the same \
                 radius. Differences are larger than 1e-15")
 
         # get the points
-        distance, index, mask = self._get_nearest(
+        distance, index, mask = self._find_nearest(
             points_1, points_2, points_3,
             domain, convention, unit, show, distance, 'sph', atol,
             np.max(radius))
 
         return index, mask
 
-    def get_slice(self, coordinate: str, unit: str, value, tol=0,
-                  show=False, atol=1e-15):
+    def find_slice(self, coordinate: str, unit: str, value, tol=0,
+                   show=False, atol=1e-15):
         """
-        Get a slice of the coordinates points.
+        Find a slice of the coordinates points.
 
         Parameters
         ----------
@@ -987,6 +1063,10 @@ class Coordinates():
 
         Returns
         -------
+        index : numpy array of ints
+            The indices of the selected points as a tuple of arrays. The length
+            of the tuple matches :py:func:`~cdim`. The length of each array
+            matches the number of selected points.
         mask : boolean numpy array
             mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
@@ -999,14 +1079,14 @@ class Coordinates():
         Examples
         --------
 
-        Get horizontal slice of spherical coordinate system within a ring of
+        Find horizontal slice of spherical coordinate system within a ring of
         +/- 10 degrees
 
         .. plot::
 
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.get_slice('elevation', 'deg', 0, 10, show=True)
+            >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
 
         """
 
@@ -1051,7 +1131,9 @@ class Coordinates():
         if show:
             self.show(mask)
 
-        return mask
+        index = np.asarray(mask).nonzero()
+
+        return index, mask
 
     def rotate(self, rotation: str, value=None, degrees=True, inverse=False):
         """
@@ -1598,9 +1680,9 @@ class Coordinates():
         # set class variable
         self._weights = weights
 
-    def _get_nearest(self, points_1, points_2, points_3,
-                     domain, convention, unit, show,
-                     value, measure, atol=1e-15, radius=None):
+    def _find_nearest(self, points_1, points_2, points_3,
+                      domain, convention, unit, show,
+                      value, measure, atol=1e-15, radius=None):
 
         # get KDTree
         kdtree = self._make_kdtree()
@@ -1618,11 +1700,11 @@ class Coordinates():
             # nearest points
             distance, index = kdtree.query(points, k=value)
         elif measure == 'cart':
-            # points within eucledian distance
+            # points within euclidean distance
             index = kdtree.query_ball_point(points, value + atol)
             distance = None
         elif measure == 'sph':
-            # convert great circle to eucedian distance
+            # convert great circle to euclidean distance
             x, y, z = sph2cart([0, value / 180 * np.pi],
                                [np.pi / 2, np.pi / 2],
                                [radius, radius])
