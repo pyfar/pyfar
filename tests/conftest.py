@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 import os.path
-import scipy.fft
 import sofa
 import scipy.io.wavfile as wavfile
 

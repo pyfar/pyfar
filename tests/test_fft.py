@@ -2,7 +2,6 @@ import numpy as np
 import numpy.testing as npt
 
 from pytest import raises
-import pytest
 
 from pyfar.dsp import fft
 
