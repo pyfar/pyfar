@@ -2,7 +2,7 @@ import matplotlib.style as mpl_style
 import os
 import json
 import contextlib
-import pyfar.plot._line as _line
+from . import _utils
 from pyfar.plot._interaction import PlotParameter
 
 
@@ -170,7 +170,7 @@ def color(color):
         pyfar default color as HEX string
     """
 
-    color_dict = _line._default_color_dict()
+    color_dict = _utils._default_color_dict()
     colors = list(color_dict.keys())
     if isinstance(color, str):
         if color[0] not in colors:
