@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import os.path
+import scipy.fft
 import sofa
 import scipy.io.wavfile as wavfile
 
@@ -391,25 +392,6 @@ def frequency_data_one_point():
     """
     frequency_data = FrequencyData([2], [0])
     return frequency_data
-
-
-@pytest.fixture
-def fft_lib_np(monkeypatch):
-    """Set numpy.fft as fft library.
-    """
-    import pyfar.dsp.fft
-    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', np.fft)
-    return np.fft.__name__
-
-
-@pytest.fixture
-def fft_lib_pyfftw(monkeypatch):
-    """Set pyfftw as fft library.
-    """
-    import pyfar.dsp.fft
-    from pyfftw.interfaces import numpy_fft as npi_fft
-    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', npi_fft)
-    return npi_fft.__name__
 
 
 @pytest.fixture
