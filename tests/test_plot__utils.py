@@ -78,3 +78,16 @@ def test_time_auto_unit():
     assert plot._utils._time_auto_unit(1e-4) == 'mus'
     assert plot._utils._time_auto_unit(2e-2) == 'ms'
     assert plot._utils._time_auto_unit(2) == 's'
+
+
+def test_default_colors():
+    """Test default colors in plotstyles to match
+    function used for displaying these
+    """
+    color_dict = plot._utils._default_color_dict()
+    colors = list(color_dict.values())
+    for style in ['light', 'dark']:
+        with plot.utils.context(style):
+            prop_cycle = plt.rcParams['axes.prop_cycle']
+            colors_style = prop_cycle.by_key()['color']
+            assert colors == colors_style
