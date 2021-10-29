@@ -154,15 +154,15 @@ def color(color):
     color : int, str
         The colors can be specified by their index, their full name,
          or the first letter. Available colors are:
-        
-        1, ``'b'``: blue  
-        2, ``'r'``: red  
-        3, ``'y'``: yellow  
-        4, ``'p'``: purple  
-        5, ``'g'``: green  
-        6, ``'t'``: turquois  
-        7, ``'o'``: orange  
-        8, ``'l'``: light green. 
+
+        1, ``'b'``: blue
+        2, ``'r'``: red
+        3, ``'y'``: yellow
+        4, ``'p'``: purple
+        5, ``'g'``: green
+        6, ``'t'``: turquois
+        7, ``'o'``: orange
+        8, ``'l'``: light green.
 
     Returns
     -------
