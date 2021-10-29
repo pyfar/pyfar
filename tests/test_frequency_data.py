@@ -38,14 +38,6 @@ def test_data_frequency_with_non_monotonously_increasing_frequencies():
         FrequencyData(data, freqs)
 
 
-def test_data_frequency_with_wrong_fft_norm():
-    data = [1, 0, -1]
-    freqs = [0, .1, .2]
-
-    with pytest.raises(ValueError):
-        FrequencyData(data, freqs, fft_norm='rms')
-
-
 def test_data_frequency_setter_freq():
     """Test the setter for the frequency data."""
     data_a = [1, 0, -1]
@@ -61,7 +53,7 @@ def test_getter_fft_norm():
     data = [1, 0, -1]
     freqs = [0, .1, .3]
 
-    freq = FrequencyData(data, freqs, fft_norm='none')
+    freq = FrequencyData(data, freqs)
     assert freq.fft_norm == 'none'
 
 

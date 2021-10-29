@@ -354,6 +354,14 @@ class TimeData(_Audio):
             data, times=self.times, comment=self.comment, dtype=self.dtype)
         return item
 
+    def __repr__(self):
+        """String representation of TimeData class."""
+        repr_string = (
+            f"TimeData:\n"
+            f"{self.cshape} channels with {self.n_samples} samples")
+
+        return repr_string
+
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
@@ -389,8 +397,7 @@ class FrequencyData(_Audio):
     incomplete spectra.
 
     """
-    def __init__(self, data, frequencies, fft_norm='none', comment=None,
-                 dtype=complex):
+    def __init__(self, data, frequencies, comment=None, dtype=complex):
         """Create FrequencyData with data, and frequencies.
 
         Parameters
@@ -402,14 +409,18 @@ class FrequencyData(_Audio):
         frequencies : array, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
-        fft_norm : str, optional
-            The normalization of the Discrete Fourier Transform (DFT). Can only
-            ``'none'``. All other normalizations would require knowledge of
-            the sampling rate.
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
         dtype : string, optional
             Raw data type of the audio object. The default is `float64`.
+
+        Notes
+        -----
+        The normalization of the Discrete Fourier Transform (DFT) is set to
+        ``'none'`` for FrequencyData objects. All other normaliaztions require
+        the sampling rate or the number of samples of the corresponding time
+        signal. Both informations are not known.
+        (see :py:func:`~pyfar.dsp.fft.normalization` and [#]_)
 
         References
         ----------
@@ -421,16 +432,6 @@ class FrequencyData(_Audio):
         """
 
         _Audio.__init__(self, 'freq', comment, dtype)
-
-        self._VALID_FFT_NORMS = ["none"]
-
-        self._init_frequency_domain_data(data, frequencies, fft_norm)
-
-    def _init_frequency_domain_data(self, data, frequencies, fft_norm):
-        """
-        This abstraction of the initialization is needed to make it possible
-        to overwrite self._VALID_FFT_NORMS in the Signal class
-        """
 
         # init data
         self._data = np.atleast_2d(np.asarray(data, dtype=complex))
@@ -444,12 +445,8 @@ class FrequencyData(_Audio):
                 len(self._frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
 
-        if fft_norm in self._VALID_FFT_NORMS:
-            self._fft_norm = fft_norm
-        else:
-            raise ValueError(("Invalid FFT normalization. Has to be "
-                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
-                              f"'{fft_norm}'"))
+        # init fft norm 'none'
+        self._fft_norm = 'none'
 
     @property
     def freq(self):
@@ -518,9 +515,18 @@ class FrequencyData(_Audio):
     def _return_item(self, data):
         """Return new FrequencyData object with data."""
         item = FrequencyData(
-            data, frequencies=self.frequencies, fft_norm=self.fft_norm,
+            data, frequencies=self.frequencies,
             comment=self.comment, dtype=self.dtype)
         return item
+
+    def __repr__(self):
+        """String representation of FrequencyData class."""
+        repr_string = (
+            f"FrequencyData:\n"
+            f"{self.cshape} channels with {self.n_bins} frequencies "
+            f"and {self.fft_norm} FFT normalization\n")
+
+        return repr_string
 
     @classmethod
     def _decode(cls, obj_dict):
@@ -528,7 +534,6 @@ class FrequencyData(_Audio):
         obj = cls(
             obj_dict['_data'],
             obj_dict['_frequencies'],
-            obj_dict['_fft_norm'],
             obj_dict['_comment'],
             obj_dict['_dtype'])
         obj.__dict__.update(obj_dict)
@@ -607,17 +612,18 @@ class Signal(FrequencyData, TimeData):
         # initialize global parameter and valid parameter spaces
         _Audio.__init__(self, domain, comment, dtype)
 
-        self._VALID_FFT_NORMS = [
-            "none", "unitary", "amplitude", "rms", "power", "psd"]
-
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
+        self._VALID_FFT_NORMS = [
+            "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # initialize domain specific parameters
         if domain == 'time':
             self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
             self._n_samples = self._data.shape[-1]
 
+            if fft_norm is None:
+                fft_norm = 'none'
             if fft_norm in self._VALID_FFT_NORMS:
                 self._fft_norm = fft_norm
             else:
@@ -640,7 +646,17 @@ class Signal(FrequencyData, TimeData):
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
 
-            self._init_frequency_domain_data(data, self.frequencies, fft_norm)
+            FrequencyData.__init__(self, data, self.frequencies,
+                                   comment, dtype)
+
+            if fft_norm is None:
+                fft_norm = 'none'
+            if fft_norm in self._VALID_FFT_NORMS:
+                self._fft_norm = fft_norm
+            else:
+                raise ValueError(("Invalid FFT normalization. Has to be "
+                                  f"{', '.join(self._VALID_FFT_NORMS)}, but "
+                                  f"found '{fft_norm}'"))
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
@@ -792,8 +808,7 @@ class Signal(FrequencyData, TimeData):
         return stype
 
     def __repr__(self):
-        """String representation of signal class.
-        """
+        """String representation of Signal class."""
         repr_string = (
             f"{self.domain} domain {self.signal_type} Signal:\n"
             f"{self.cshape} channels with {self.n_samples} samples @ "
@@ -1034,7 +1049,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     elif audio_type == TimeData:
         result = TimeData(result, times)
     elif audio_type == FrequencyData:
-        result = FrequencyData(result, frequencies, fft_norm)
+        result = FrequencyData(result, frequencies)
 
     return result
 
@@ -1182,12 +1197,11 @@ def _get_arithmetic_data(data, n_samples, domain):
         elif domain == "freq":
             data_out = data.freq.copy()
 
-            if isinstance(data, Signal):
-                if data.fft_norm != 'none':
-                    # remove current fft normalization
-                    data_out = fft.normalization(
-                        data_out, n_samples, data.sampling_rate,
-                        data.fft_norm, inverse=True)
+            if isinstance(data, Signal) and data.fft_norm != 'none':
+                # remove current fft normalization
+                data_out = fft.normalization(
+                    data_out, n_samples, data.sampling_rate,
+                    data.fft_norm, inverse=True)
 
         else:
             raise ValueError(
