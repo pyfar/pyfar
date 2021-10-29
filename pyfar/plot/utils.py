@@ -169,7 +169,6 @@ def color(color):
     color_hex : str
         pyfar default color as HEX string
     """
-
     color_dict = _utils._default_color_dict()
     colors = list(color_dict.keys())
     if isinstance(color, str):
