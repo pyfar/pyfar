@@ -1,8 +1,7 @@
-import matplotlib.pyplot as plt
 import matplotlib as mpl
 from pyfar.plot.utils import context
 from .. import Signal
-from . import _line
+from . import (_line, _utils)
 from . import _interaction as ia
 
 
@@ -61,7 +60,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     with context(style):
         ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -127,7 +126,7 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     with context(style):
         ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
                          xscale, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -187,7 +186,7 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
 
     with context(style):
         ax = _line._phase(signal.flatten(), deg, unwrap, xscale, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -243,7 +242,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
 
     with context(style):
         ax = _line._group_delay(signal.flatten(), unit, xscale, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -352,7 +351,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
             signal.flatten(), dB, log_prefix, log_reference, yscale, unit,
             window, window_length, window_overlap_fct,
             cmap, colorbar, ax)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -430,7 +429,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     with context(style):
         ax = _line._time_freq(signal.flatten(), dB_time, dB_freq, log_prefix,
                               log_reference, xscale, unit, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -493,7 +492,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     with context(style):
         ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
                                xscale, deg, unwrap, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -563,7 +562,7 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
         ax = _line._freq_group_delay(
             signal.flatten(), dB, log_prefix, log_reference,
             unit, xscale, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -623,6 +622,6 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
 
     with context(style):
         ax = _line._custom_subplots(signal.flatten(), plots, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     return ax

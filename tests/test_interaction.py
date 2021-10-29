@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 import pyfar as pf
 import pyfar.plot._interaction as ia
-from pyfar.plot._line import _get_quad_mesh_from_axis
+from pyfar.plot._utils import _get_quad_mesh_from_axis
 
 # use non showing backend for speed
 mpl.use("Agg")
