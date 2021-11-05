@@ -51,27 +51,6 @@ def test_data_frequency_setter_freq():
     npt.assert_allclose(freq.freq, np.atleast_2d(np.asarray(data_b)))
 
 
-def test_setter_getter_fft_norm():
-    data = [1, 0, -1]
-    freqs = [0, .1, .3]
-
-    freq = FrequencyData(data, freqs)
-
-    if version.parse(pf.__version__) < version.parse('0.5.0'):
-
-        # test if the errors are raised
-        with pytest.raises(ValueError, match="deprecated in pyfar 0.3.0"):
-            freq.fft_norm
-        with pytest.raises(ValueError, match="deprecated in pyfar 0.3.0"):
-            freq.fft_norm = 3
-    else:
-
-        # remove property from pyfar 0.5.0!
-        if version.parse(pf.__version__) >= version.parse('0.5.0'):
-            with pytest.raises(AttributeError):
-                freq.fft_norm
-
-
 def test_reshape():
 
     # test reshape with tuple

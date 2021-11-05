@@ -467,32 +467,6 @@ class FrequencyData(_Audio):
         """Number of frequency bins."""
         return self._data.shape[-1]
 
-    @property
-    def fft_norm(self):
-        """
-        Frequency data does not support an FFT norm, because this requires
-        knowledge about the sampling rate or the number of samples of the time
-        signal.
-
-        This parameter was deprecated in pyfar 0.3.0 and will be completely
-        removed in pyfar 0.5.0.
-        """
-
-        raise ValueError("The fft_norm was deprecated in pyfar 0.3.0")
-
-    @fft_norm.setter
-    def fft_norm(self, value):
-        """
-        Frequency data does not support an FFT norm, because this requires
-        knowledge about the sampling rate or the number of samples of the time
-        signal.
-
-        This parameter was deprecated in pyfar 0.3.0 and will be completely
-        removed in pyfar 0.5.0.
-        """
-
-        raise ValueError("The fft_norm was deprecated in pyfar 0.3.0")
-
     def find_nearest_frequency(self, value):
         """Return the index that is closest to the query frequency.
 
