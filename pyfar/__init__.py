@@ -4,7 +4,7 @@
 
 __author__ = """The pyfar developers"""
 __email__ = ''
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 
 from .classes.audio import Signal, TimeData, FrequencyData

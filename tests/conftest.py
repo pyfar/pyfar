@@ -394,25 +394,6 @@ def frequency_data_one_point():
 
 
 @pytest.fixture
-def fft_lib_np(monkeypatch):
-    """Set numpy.fft as fft library.
-    """
-    import pyfar.dsp.fft
-    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', np.fft)
-    return np.fft.__name__
-
-
-@pytest.fixture
-def fft_lib_pyfftw(monkeypatch):
-    """Set pyfftw as fft library.
-    """
-    import pyfar.dsp.fft
-    from pyfftw.interfaces import numpy_fft as npi_fft
-    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', npi_fft)
-    return npi_fft.__name__
-
-
-@pytest.fixture
 def generate_wav_file(tmpdir, noise):
     """Create wav file in temporary folder.
     """
