@@ -59,7 +59,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/pyfar/pyfar',
-    version='0.2.1',
+    version='0.2.2',
     zip_safe=False,
     python_requires='>=3.7,<3.9'
 )
