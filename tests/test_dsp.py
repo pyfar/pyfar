@@ -50,16 +50,19 @@ def test_group_delay_single_channel(impulse_group_delay):
 
     grp = dsp.group_delay(signal, method='scipy')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(signal, method='fft')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(
         signal, method='fft')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
 
 def test_group_delay_two_channel(impulse_group_delay_two_channel):
@@ -95,7 +98,8 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency_idx = np.abs(signal.frequencies-frequency).argmin()
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == ()
-    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+    npt.assert_allclose(
+        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
     # Multiple frequencies
     frequency = np.array([1000, 2000])
@@ -103,7 +107,8 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
         signal.frequencies-frequency[..., np.newaxis]).argmin(axis=-1)
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == (2,)
-    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+    npt.assert_allclose(
+        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
 
 def test_linear_phase():
