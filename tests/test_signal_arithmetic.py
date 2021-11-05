@@ -174,14 +174,6 @@ def test_add_frequency_data_and_number_wrong_frequencies():
         pf.add((x, y), 'freq')
 
 
-def test_add_frequency_data_and_number_wrong_fft_norm():
-    # generate and add signals
-    x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = FrequencyData([1, 0, 0], [0, .1, .5], fft_norm='rms')
-    with raises(ValueError):
-        pf.add((x, y), 'freq')
-
-
 def test_subtraction():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
@@ -339,8 +331,8 @@ def test_get_arithmetic_data_with_array():
 
 def test_get_arithmetic_data_with_signal():
     # all possible combinations of `domain`, `signal_type`, and `fft_norm`
-    meta = [['time', None],
-            ['freq', None],
+    meta = [['time', 'none'],
+            ['freq', 'none'],
             ['time', 'unitary'],
             ['freq', 'unitary'],
             ['time', 'amplitude'],
