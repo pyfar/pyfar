@@ -200,5 +200,4 @@ def test__repr__(capfd):
     print(FrequencyData([1, 2, 3], [1, 2, 3]))
     out, _ = capfd.readouterr()
     assert ("FrequencyData:\n"
-            "(1,) channels with 3 frequencies "
-            "and none FFT normalization") in out
+            "(1,) channels with 3 frequencies") in out
