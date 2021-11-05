@@ -26,15 +26,16 @@ from .line import (
     time,
     phase,
     group_delay,
-    spectrogram,
     time_freq,
     freq_phase,
     freq_group_delay,
     custom_subplots
 )
-from .line_2d import (
-    time2d
+
+from .two_d import (
+    spectrogram
 )
+
 from .spatial import (
     scatter,
     quiver

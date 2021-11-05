@@ -11,6 +11,7 @@ from copy import deepcopy
 from unittest import mock
 
 from pyfar import Signal, TimeData, FrequencyData
+from pyfar.io import _codec
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):
@@ -326,6 +327,20 @@ def _normalization(freq, n_samples, fft_norm):
 
 def any_ndarray():
     return np.arange(0, 24).reshape((2, 3, 4))
+
+
+def dict_of_builtins():
+    """
+    Return a dictionary that contains all builtin types that can
+    be written to and read from disk.
+    """
+    typename_instance = {}
+    for type_ in _codec._supported_builtin_types():
+        try:
+            typename_instance[type_.__name__] = type_(42)
+        except TypeError:
+            typename_instance[type_.__name__] = type_([42])
+    return typename_instance
 
 
 class AnyClass:
