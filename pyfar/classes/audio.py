@@ -416,11 +416,9 @@ class FrequencyData(_Audio):
 
         Notes
         -----
-        The normalization of the Discrete Fourier Transform (DFT) is set to
-        ``'none'`` for FrequencyData objects. All other normaliaztions require
-        the sampling rate or the number of samples of the corresponding time
-        signal. Both informations are not known.
-        (see :py:func:`~pyfar.dsp.fft.normalization` and [#]_)
+        FrequencyData objects do not support an FFT norm, because this requires
+        knowledge about the sampling rate or the number of samples of the time
+        signal [#]_.
 
         References
         ----------
