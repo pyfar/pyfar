@@ -445,9 +445,6 @@ class FrequencyData(_Audio):
                 len(self._frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
 
-        # init fft norm 'none'
-        self._fft_norm = 'none'
-
     @property
     def freq(self):
         """Return the data in the frequency domain."""
@@ -475,11 +472,28 @@ class FrequencyData(_Audio):
     @property
     def fft_norm(self):
         """
-        The normalization for the Discrete Fourier Transform (DFT).
+        Frequency data does not support an FFT norm, because this requires
+        knowledge about the sampling rate or the number of samples of the time
+        signal.
 
-        See :py:func:`~pyfar.dsp.fft.normalization` for more information.
+        This parameter was deprecated in pyfar 0.3.0 and will be completely
+        removed in pyfar 0.5.0.
         """
-        return self._fft_norm
+
+        raise ValueError("The fft_norm was deprecated in pyfar 0.3.0")
+
+    @fft_norm.setter
+    def fft_norm(self, value):
+        """
+        Frequency data does not support an FFT norm, because this requires
+        knowledge about the sampling rate or the number of samples of the time
+        signal.
+
+        This parameter was deprecated in pyfar 0.3.0 and will be completely
+        removed in pyfar 0.5.0.
+        """
+
+        raise ValueError("The fft_norm was deprecated in pyfar 0.3.0")
 
     def find_nearest_frequency(self, value):
         """Return the index that is closest to the query frequency.
@@ -509,8 +523,6 @@ class FrequencyData(_Audio):
         if self.n_bins != other.n_bins:
             raise ValueError(
                 "The number of frequency bins does not match.")
-        if self.fft_norm != other.fft_norm:
-            raise ValueError("The FFT norms do not match.")
 
     def _return_item(self, data):
         """Return new FrequencyData object with data."""
@@ -523,8 +535,7 @@ class FrequencyData(_Audio):
         """String representation of FrequencyData class."""
         repr_string = (
             f"FrequencyData:\n"
-            f"{self.cshape} channels with {self.n_bins} frequencies "
-            f"and {self.fft_norm} FFT normalization\n")
+            f"{self.cshape} channels with {self.n_bins} frequencies\n")
 
         return repr_string
 
@@ -737,7 +748,16 @@ class Signal(FrequencyData, TimeData):
         """Number of frequency bins."""
         return fft._n_bins(self.n_samples)
 
-    @FrequencyData.fft_norm.setter
+    @property
+    def fft_norm(self):
+        """
+        The normalization for the Discrete Fourier Transform (DFT).
+
+        See :py:func:`~pyfar.dsp.fft.normalization` for more information.
+        """
+        return self._fft_norm
+
+    @fft_norm.setter
     def fft_norm(self, value):
         """
         The normalization for the Discrete Fourier Transform (DFT).
@@ -1121,7 +1141,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                     if domain != "freq":
                         raise ValueError("The domain must be 'freq'.")
                     frequencies = d.frequencies
-                    fft_norm = d.fft_norm
 
                 found_audio_data = True
                 audio_type = type(d)
@@ -1149,9 +1168,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                             frequencies, d.frequencies, atol=1e-15):
                         raise ValueError(
                             "The frequencies do not match.")
-                    if fft_norm != d.fft_norm:
-                        raise ValueError(
-                            "The FFT norm does not match.")
 
         # check type of non signal input
         else:

@@ -1,6 +1,8 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+from packaging import version
+import pyfar as pf
 from pyfar import FrequencyData
 
 
@@ -49,12 +51,25 @@ def test_data_frequency_setter_freq():
     npt.assert_allclose(freq.freq, np.atleast_2d(np.asarray(data_b)))
 
 
-def test_getter_fft_norm():
+def test_setter_getter_fft_norm():
     data = [1, 0, -1]
     freqs = [0, .1, .3]
 
     freq = FrequencyData(data, freqs)
-    assert freq.fft_norm == 'none'
+
+    if version.parse(pf.__version__) < version.parse('0.5.0'):
+
+        # test if the errors are raised
+        with pytest.raises(ValueError, match="deprecated in pyfar 0.3.0"):
+            freq.fft_norm
+        with pytest.raises(ValueError, match="deprecated in pyfar 0.3.0"):
+            freq.fft_norm = 3
+    else:
+
+        # remove property from pyfar 0.5.0!
+        if version.parse(pf.__version__) >= version.parse('0.5.0'):
+            with pytest.raises(AttributeError):
+                freq.fft_norm
 
 
 def test_reshape():
@@ -180,8 +195,6 @@ def test_separation_from_signal():
         freq.sampling_rate
     with pytest.raises(AttributeError):
         freq.domain = 'freq'
-    with pytest.raises(AttributeError):
-        freq.fft_norm = 'amplitude'
 
 
 def test___eq___equal():
