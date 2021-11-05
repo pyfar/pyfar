@@ -52,23 +52,28 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar.plot import utils
 from pyfar.plot import _line
+from pyfar.plot import _utils
 
 
 class Cycle(object):
     """ Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions.
     """
-    def __init__(self, n_channels, index=0):
+    def __init__(self, cshape, index=0):
         """
         Parameters
         ----------
-        n_channels : int
-            number of channels in the signal
+        cshape : tupel, array like, int
+            cshape of the signal
         index : int, optional
             index of the current channel. The default is 0
         """
-        self._n_channels = n_channels
+        self._n_channels = np.prod(cshape)
         self._index = index
+
+        self._channels = []
+        for index in np.ndindex(cshape):
+            self._channels.append(index)
 
     def increase_index(self):
         self._index = (self.index + 1) % self.n_channels
@@ -81,11 +86,18 @@ class Cycle(object):
 
     @property
     def index(self):
-        return self._index
+        return int(self._index)
 
     @property
     def n_channels(self):
         return self._n_channels
+
+    @property
+    def current_channel(self):
+        channel = self._channels[self.index]
+        if len(channel) == 1:
+            channel = channel[0]
+        return channel
 
 
 class EventEmu(object):
@@ -125,7 +137,8 @@ class PlotParameter(object):
                  unit=None,                                # time unit
                  window='hann', window_length=1014,        # spectrogram
                  window_overlap_fct=.5,
-                 cmap=mpl.cm.get_cmap(name='magma')):      # colormap
+                 cmap=mpl.cm.get_cmap(name='magma'),       # colormap and bar
+                 colorbar=True):
 
         # store input
         self.dB_time = dB_time
@@ -141,6 +154,7 @@ class PlotParameter(object):
         self.window_length = window_length
         self.window_overlap_fct = window_overlap_fct
         self.cmap = cmap
+        self.colorbar = colorbar
 
         # set axis types based on `plot`
         self.update_axis_type(plot)
@@ -397,7 +411,8 @@ class Interaction(object):
         """
 
         # save input arguments
-        self.signal = signal
+        self.cshape = signal.cshape
+        self.signal = signal.flatten()
         self.ax = axes
         self.figure = axes.figure
         self.style = style
@@ -408,7 +423,7 @@ class Interaction(object):
         self.event = None
 
         # initialize cycler
-        self.cycler = Cycle(self.signal.cshape[0])
+        self.cycler = Cycle(self.cshape)
 
         # initialize visibility
         self.all_visible = True
@@ -538,16 +553,17 @@ class Interaction(object):
             elif event.key in plot['group_delay']:
                 self.params.update_axis_type('group_delay')
                 self.ax = _line._group_delay(
-                    self.signal, prm.unit, prm.xscale, self.ax, **self.kwargs)
+                    self.signal, prm.unit, prm.xscale, self.ax,
+                    **self.kwargs)
 
             elif event.key in plot['spectrogram']:
                 self.params.update_axis_type('spectrogram')
-                ax = _line._spectrogram_cb(
+                ax, *_ = _line._spectrogram(
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
                     prm.window, prm.window_length, prm.window_overlap_fct,
-                    prm.cmap, self.ax, **self.kwargs)
-                self.ax = ax[0]
+                    prm.cmap, prm.colorbar, self.ax, **self.kwargs)
+                self.ax = ax
 
             elif event.key in plot['time_freq']:
                 self.params.update_axis_type('time')
@@ -632,7 +648,7 @@ class Interaction(object):
             if self.params.cm_type is None:
                 return
 
-            qm = _line._get_quad_mesh_from_axis(self.ax)
+            qm = _utils._get_quad_mesh_from_axis(self.ax)
 
             getter = qm.get_clim
             setter = qm.set_clim
@@ -720,7 +736,7 @@ class Interaction(object):
                         ec=mpl.rcParams["axes.facecolor"], alpha=.5)
 
             self.txt = self.ax.text(
-                x_pos, y_pos, f'Ch. {self.cycler.index}',
+                x_pos, y_pos, f'Ch. {self.cycler.current_channel}',
                 horizontalalignment='right', verticalalignment='baseline',
                 bbox=bbox, transform=self.ax.transAxes)
 

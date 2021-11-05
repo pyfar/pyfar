@@ -378,3 +378,12 @@ def test___eq___notEqual():
     comment = f'{signal.comment} A completely different thing'
     actual = Signal(time, 44100, domain='time', comment=comment)
     assert not signal == actual
+
+
+def test__repr__(capfd):
+    """Test string representation"""
+    print(Signal([0, 1, 0], 44100))
+    out, _ = capfd.readouterr()
+    assert ("time domain energy Signal:\n"
+            "(1,) channels with 3 samples @ 44100 Hz sampling rate "
+            "and none FFT normalization") in out
