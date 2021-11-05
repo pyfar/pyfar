@@ -33,6 +33,7 @@ from .line import (
 )
 
 from .two_d import (
+    time2d,
     spectrogram
 )
 
