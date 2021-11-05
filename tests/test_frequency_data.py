@@ -1,8 +1,6 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from packaging import version
-import pyfar as pf
 from pyfar import FrequencyData
 
 
