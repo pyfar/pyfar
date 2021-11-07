@@ -1286,9 +1286,9 @@ def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
 
     # check if fft_norms are type string
     if isinstance(fft_norm_1, str) is False:
-        raise ValueError("Parameter fft_norm_1 must be type str.")
+        raise TypeError("Parameter fft_norm_1 must be type str.")
     if isinstance(fft_norm_2, str) is False:
-        raise ValueError("Parameter fft_norm_2 must be type str.")
+        raise TypeError("Parameter fft_norm_2 must be type str.")
 
     # check if fft_norms are valid
     valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
@@ -1303,7 +1303,7 @@ def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
 
     # check if parameter division is type bool
     if isinstance(division, bool) is False:
-        raise ValueError("Parameter division must be type bool.")
+        raise TypeError("Parameter division must be type bool.")
 
     if division is False:
 
