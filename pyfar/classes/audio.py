@@ -1262,6 +1262,9 @@ def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     Or: both have the same fft_norm. Other combinations raise an error.
 
     For division:
+    Either: the denominator (fft_norm_2) is ``'none'``, the result gets the
+    fft_norm of the numerator (fft_norm_1).
+    Or:
     ###  more discussion needed  ###
 
     Parameters
@@ -1323,7 +1326,15 @@ def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
 
     elif division is True:
 
-        # more discussion needed
-        pass
+        if fft_norm_2 == 'none':
+            fft_norm_result = fft_norm_1
+
+        elif fft_norm_1 == fft_norm_2:
+            # more discussion needed
+            pass
+
+        else:
+            # more discussion needed
+            pass
 
     return fft_norm_result
