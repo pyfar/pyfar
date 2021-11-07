@@ -54,7 +54,7 @@ def test_result_no_division():
 
 def test_assertion_no_division():
     """Test assertion by passing invalid combinations of fft_norms"""
-    #           fft_norm_1, fft_norm_2, result
+    #           fft_norm_1, fft_norm_2
     fft_norms = [['unitary', 'amplitude'],
                  ['unitary', 'rms'],
                  ['unitary', 'power'],
