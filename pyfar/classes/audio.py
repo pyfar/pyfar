@@ -1249,3 +1249,81 @@ def _divide(a, b):
 
 def _power(a, b):
     return a**b
+
+
+def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
+    """
+    Helper function to determine the fft_norm resulting from an
+    arithmetic operation of two signals.
+
+    For addition, subtraction and multiplication:
+    Either: one signal has fft_norm ``'none'`` , the results gets the other
+    norm.
+    Or: both have the same fft_norm. Other combinations raise an error.
+
+    For division:
+    ###  more discussion needed  ###
+
+    Parameters
+    ----------
+    fft_norm_1 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
+    ``'power'`` or ``'psd'``
+        First fft_norm for matching.
+    fft_norm_2 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
+    ``'power'`` or ``'psd'``
+        Second fft_norm for matching.
+    division : bool
+        ``True`` if arithmetic operation is addition, subtraction or
+        multiplication;
+        ``False`` if arithmetic operation is division.
+
+    Returns
+    -------
+    fft_norm_result : str, ``'none'``, ``'unitary'``, ``'amplitude'``,
+    ``'rms'``, ``'power'`` or ``'psd'``
+        The fft_norm resulting from arithmetic operation.
+    """
+
+    # check if fft_norms are type string
+    if isinstance(fft_norm_1, str) is False:
+        raise ValueError("Parameter fft_norm_1 must be type str.")
+    if isinstance(fft_norm_2, str) is False:
+        raise ValueError("Parameter fft_norm_2 must be type str.")
+
+    # check if fft_norms are valid
+    valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
+    if fft_norm_1 not in valid_fft_norms:
+        raise ValueError("Parameter fft_norm_1 is not a valid fft_norm.\n" +
+                         f"valid fft_norms: {valid_fft_norms}\n" +
+                         f"found: {fft_norm_1}")
+    if fft_norm_2 not in valid_fft_norms:
+        raise ValueError("Parameter fft_norm_2 is not a valid fft_norm.\n" +
+                         f"valid fft_norms: {valid_fft_norms}\n" +
+                         f"found: {fft_norm_2}")
+
+    # check if parameter division is type bool
+    if isinstance(division, bool) is False:
+        raise ValueError("Parameter division must be type bool.")
+
+    if division is False:
+
+        if fft_norm_1 == fft_norm_2:
+            fft_norm_result = fft_norm_1
+
+        elif fft_norm_1 == 'none':
+            fft_norm_result = fft_norm_2
+
+        elif fft_norm_2 == 'none':
+            fft_norm_result = fft_norm_1
+
+        else:
+            raise ValueError("Either one fft_norm has to be 'none' or both ",
+                             "fft_norms must be the same,\nbut they are ",
+                             f"{fft_norm_1} and {fft_norm_2}.")
+
+    elif division is True:
+
+        # more discussion needed
+        pass
+
+    return fft_norm_result
