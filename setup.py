@@ -17,7 +17,8 @@ requirements = [
     'matplotlib',
     'python-sofa>=0.2.0',
     'urllib3',
-    'deepdiff'
+    'deepdiff',
+    'soundfile'
 ]
 
 setup_requirements = ['pytest-runner', ]
