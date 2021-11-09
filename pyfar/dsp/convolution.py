@@ -1,17 +1,6 @@
 
 from pyfar import Signal
-import multiprocessing
-import warnings
-import scipy.signal
-
-try:
-    import pyfftw
-    pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-    scipy.fftpack = pyfftw.interfaces.scipy_fftpack
-except ImportError:
-    warnings.warn(
-        "Using numpy FFT implementation.\
-        Install pyfftw for improved performance.")
+from scipy import signal as sps
 
 
 def convolve_overlap_add(signal1, signal2, mode='full'):
@@ -43,7 +32,7 @@ def convolve_overlap_add(signal1, signal2, mode='full'):
     if not signal1.fft_norm == signal2.fft_norm:
         raise ValueError("FFT norms do not match.")
 
-    res = scipy.signal.oaconvolve(
+    res = sps.oaconvolve(
         signal1.time, signal2.time, mode=mode, axes=-1)
 
     return Signal(
