@@ -1276,9 +1276,9 @@ def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     ``'power'`` or ``'psd'``
         Second fft_norm for matching.
     division : bool
-        ``True`` if arithmetic operation is addition, subtraction or
+        ``False`` if arithmetic operation is addition, subtraction or
         multiplication;
-        ``False`` if arithmetic operation is division.
+        ``True`` if arithmetic operation is division.
 
     Returns
     -------
