@@ -8,7 +8,6 @@ imported and exported as WAV files using :py:func:`read_wav` and
 :py:func:`write_wav`. :py:func:`read_sofa` provides functionality to read the
 data stored in a SOFA file.
 """
-import scipy.io.wavfile as wavfile
 import os.path
 import pathlib
 import warnings
@@ -16,6 +15,7 @@ import numpy as np
 import sofa
 import zipfile
 import io
+import soundfile as sf
 
 
 from pyfar import Signal
@@ -23,75 +23,6 @@ from pyfar import Coordinates
 
 from . import _codec as codec
 import pyfar.classes.filter as fo
-
-
-def read_wav(filename):
-    """
-    Import a WAV file as :py:class:`~pyfar.classes.audio.Signal` object.
-
-    Parameters
-    ----------
-    filename : string, Path
-        Input file.
-
-    Returns
-    -------
-    signal : Signal
-        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
-        data from the WAV file.
-
-    Notes
-    -----
-    * This function is based on ``scipy.io.wavfile.read``.
-    * 24-bit data cannot be read.
-    """
-    sampling_rate, data = wavfile.read(filename)
-    signal = Signal(data.T, sampling_rate, domain='time')
-    return signal
-
-
-def write_wav(signal, filename, overwrite=True):
-    """
-    Write a :py:class:`~pyfar.classes.audio.Signal` object as a WAV file to
-    disk.
-
-    Parameters
-    ----------
-    signal : Signal
-        Object to be written.
-    filename : string, Path
-        Output file.
-    overwrite : bool
-        Select wether to overwrite the WAV file, if it already exists.
-        The default is ``True``.
-
-    Notes
-    -----
-    * Signals are flattened before writing to disk (e.g. a signal with
-      ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
-    * This function is based on ``scipy.io.wavfile.write``.
-    * The bits-per-sample and PCM/float is determined by the data-type, see
-      documentation for ``scipy.io.wavfile.write``.
-
-    """
-    sampling_rate = signal.sampling_rate
-    data = signal.time
-
-    # Reshape to 2D
-    data = data.reshape(-1, data.shape[-1])
-    if len(signal.cshape) != 1:
-        warnings.warn(f"Signal flattened to {data.shape[0]} channels.")
-
-    # .wav file extension
-    filename = pathlib.Path(filename).with_suffix('.wav')
-
-    # Check if file exists and for overwrite
-    if overwrite is False and os.path.isfile(filename):
-        raise FileExistsError(
-            "File already exists,"
-            "use overwrite option to disable error.")
-    else:
-        wavfile.write(filename, sampling_rate, data.T)
 
 
 def read_sofa(filename):
@@ -297,3 +228,210 @@ def write(filename, compress=False, **objs):
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())
+
+
+def read_audio(filename, dtype='float64', **kwargs):
+    """
+    Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
+
+    Parameters
+    ----------
+    filename : string, Path
+        Input file.
+    dtype : {'float64', 'float32', 'int32', 'int16'}, optional
+        Data type of the returned signal, by default ``'float64'``.
+        Floating point audio data is typically in the range from
+        ``-1.0`` to ``1.0``.  Integer data is in the range from
+        ``-2**15`` to ``2**15-1`` for ``'int16'`` and from ``-2**31`` to
+        ``2**31-1`` for ``'int32'``.
+    **kwargs
+        Other keyword arguments to be passed to ``soundfile.read``. This is
+        needed, e.g, to read RAW audio files.
+
+
+    Returns
+    -------
+    signal : Signal
+        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
+        data.
+
+    Notes
+    -----
+    * This function is based on ``soundfile.read``.
+    * Reading int values from a float file will *not* scale the data to
+      [-1.0, 1.0). If the file contains ``np.array([42.6], dtype='float32')``,
+      you will read ``np.array([43], dtype='int32')`` for ``dtype='int32'``.
+    """
+    data, sampling_rate = sf.read(
+        file=filename, dtype=dtype, always_2d=True, **kwargs)
+    signal = Signal(data.T, sampling_rate, domain='time', dtype=dtype)
+    return signal
+
+
+def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
+    """
+    Write a :py:class:`~pyfar.classes.audio.Signal` object as a audio file to
+    disk.
+
+    Parameters
+    ----------
+    signal : Signal
+        Object to be written.
+    filename : string, Path
+        Output file. The format is determined from the file extension.
+        See :py:func:`available_formats` for all possible formats.
+    subtype : str, optional
+        The subtype of the sound file, the default value depends on the
+        selected `format` (see :py:func:`default_subtype`).
+        See :py:func:`available_subtypes` for all possible subtypes for
+        a given ``format``.
+    overwrite : bool
+        Select wether to overwrite the audio file, if it already exists.
+        The default is ``True``.
+    **kwargs
+        Other keyword arguments to be passed to ``soundfile.write``.
+
+    Notes
+    -----
+    * Signals are flattened before writing to disk (e.g. a signal with
+      ``cshape = (3, 2)`` will be written to disk as a six channel audio file).
+    * This function is based on ``soundfile.write``.
+    * Amplitudes larger than +/- 1 are clipped.
+
+    """
+    sampling_rate = signal.sampling_rate
+    data = signal.time
+
+    # Reshape to 2D
+    data = data.reshape(-1, data.shape[-1])
+    if len(signal.cshape) != 1:
+        warnings.warn(f"Signal flattened to {data.shape[0]} channels.")
+
+    # Check if file exists and for overwrite
+    if overwrite is False and os.path.isfile(filename):
+        raise FileExistsError(
+            "File already exists,"
+            "use overwrite option to disable error.")
+    else:
+        sf.write(
+            file=filename, data=data.T, samplerate=sampling_rate,
+            subtype=subtype, **kwargs)
+
+
+def read_wav(filename):
+    """
+    Import a WAV file as :py:class:`~pyfar.classes.audio.Signal` object.
+
+    Parameters
+    ----------
+    filename : string, Path
+        Input file.
+
+    Returns
+    -------
+    signal : Signal
+        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
+        data from the WAV file.
+
+    Notes
+    -----
+    * This function is based on :py:func:`read_audio`.
+    """
+    signal = read_audio(filename)
+    return signal
+
+
+def write_wav(signal, filename, subtype=None, overwrite=True):
+    """
+    Write a :py:class:`~pyfar.classes.audio.Signal` object as a WAV file to
+    disk.
+
+    Parameters
+    ----------
+    signal : Signal
+        Object to be written.
+    filename : string, Path
+        Output file.
+    overwrite : bool
+        Select wether to overwrite the WAV file, if it already exists.
+        The default is ``True``.
+
+    Notes
+    -----
+    * Signals are flattened before writing to disk (e.g. a signal with
+      ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
+    * This function is based on :py:func:`write_audio`.
+    * Amplitudes larger than +/- 1 are clipped.
+
+    """
+    # .wav file extension
+    filename = pathlib.Path(filename).with_suffix('.wav')
+
+    write_audio(signal, filename, subtype=subtype, overwrite=overwrite)
+
+
+def available_formats():
+    """Return a dictionary of available audio formats.
+
+    Notes
+    -----
+    This function is a wrapper of ``soundfile.available_formats()``.
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> pf.available_formats()
+    {'FLAC': 'FLAC (FLAC Lossless Audio Codec)',
+     'OGG': 'OGG (OGG Container format)',
+     'WAV': 'WAV (Microsoft)',
+     'AIFF': 'AIFF (Apple/SGI)',
+     ...
+     'WAVEX': 'WAVEX (Microsoft)',
+     'RAW': 'RAW (header-less)',
+     'MAT5': 'MAT5 (GNU Octave 2.1 / Matlab 5.0)'}
+
+    """
+    return sf.available_formats()
+
+
+def available_subtypes(format=None):
+    """Return a dictionary of available audio subtypes.
+
+    Parameters
+    ----------
+    format : str
+        If given, only compatible subtypes are returned.
+
+    Notes
+    -----
+    This function is a wrapper of ``soundfile.available_subtypes()``.
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> pf.available_subtypes('FLAC')
+    {'PCM_24': 'Signed 24 bit PCM',
+     'PCM_16': 'Signed 16 bit PCM',
+     'PCM_S8': 'Signed 8 bit PCM'}
+
+    """
+    return sf.available_subtypes(format=format)
+
+
+def default_subtype(format):
+    """Return the default subtype for a given format.
+
+    Notes
+    -----
+    This function is a wrapper of ``soundfile.default_subtype()``.
+
+    Examples
+    --------
+    >>> import soundfile as sf
+    >>> sf.default_subtype('WAV')
+    'PCM_16'
+    >>> sf.default_subtype('MAT5')
+    'DOUBLE'
+
+    """
+    return sf.default_subtype(format)
