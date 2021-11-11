@@ -1251,7 +1251,7 @@ def _power(a, b):
     return a**b
 
 
-def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
+def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     """
     Helper function to determine the fft_norm resulting from an
     arithmetic operation of two signals.
@@ -1287,22 +1287,14 @@ def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
         The fft_norm resulting from arithmetic operation.
     """
 
-    # check if fft_norms are type string
-    if isinstance(fft_norm_1, str) is False:
-        raise TypeError("Parameter fft_norm_1 must be type str.")
-    if isinstance(fft_norm_2, str) is False:
-        raise TypeError("Parameter fft_norm_2 must be type str.")
-
     # check if fft_norms are valid
     valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
     if fft_norm_1 not in valid_fft_norms:
-        raise ValueError("Parameter fft_norm_1 is not a valid fft_norm.\n" +
-                         f"valid fft_norms: {valid_fft_norms}\n" +
-                         f"found: {fft_norm_1}")
+        raise ValueError(f"fft_norm_1 is {fft_norm_1} but must be in ",
+                         f"{', '.join(valid_fft_norms)}")
     if fft_norm_2 not in valid_fft_norms:
-        raise ValueError("Parameter fft_norm_2 is not a valid fft_norm.\n" +
-                         f"valid fft_norms: {valid_fft_norms}\n" +
-                         f"found: {fft_norm_2}")
+        raise ValueError(f"fft_norm_2 is {fft_norm_2} but must be in ",
+                         f"{', '.join(valid_fft_norms)}")
 
     # check if parameter division is type bool
     if isinstance(division, bool) is False:
@@ -1321,7 +1313,7 @@ def match_fft_norm(fft_norm_1, fft_norm_2, division=False):
 
         else:
             raise ValueError("Either one fft_norm has to be 'none' or both ",
-                             "fft_norms must be the same,\nbut they are ",
+                             "fft_norms must be the same, but they are ",
                              f"{fft_norm_1} and {fft_norm_2}.")
 
     elif division is True:
