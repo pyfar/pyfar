@@ -2,16 +2,6 @@ import pytest
 from pyfar.classes.audio import match_fft_norm
 
 
-def test_input_fft_norm_type():
-    """Test assertion by passig non str type"""
-    with pytest.raises(TypeError,
-                       match='Parameter fft_norm_1 must be type str.'):
-        match_fft_norm(0, 'none')
-    with pytest.raises(TypeError,
-                       match='Parameter fft_norm_2 must be type str.'):
-        match_fft_norm('none', 0)
-
-
 def test_input_fft_norm_valid():
     """Test assertion by passing invalid fft_norm"""
     with pytest.raises(ValueError,
