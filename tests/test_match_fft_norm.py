@@ -5,10 +5,10 @@ from pyfar.classes.audio import _match_fft_norm
 def test_input_fft_norm_valid():
     """Test assertion by passing invalid fft_norm"""
     with pytest.raises(ValueError,
-                       match='Parameter fft_norm_1 is not a valid fft_norm.'):
+                       match='fft_norm_1 is invalid but must be in '):
         _match_fft_norm('invalid', 'none')
     with pytest.raises(ValueError,
-                       match='Parameter fft_norm_2 is not a valid fft_norm.'):
+                       match='fft_norm_2 is invalid but must be in '):
         _match_fft_norm('none', 'invalid')
 
 
