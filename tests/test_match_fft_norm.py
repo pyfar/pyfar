@@ -1,22 +1,22 @@
 import pytest
-from pyfar.classes.audio import match_fft_norm
+from pyfar.classes.audio import _match_fft_norm
 
 
 def test_input_fft_norm_valid():
     """Test assertion by passing invalid fft_norm"""
     with pytest.raises(ValueError,
                        match='Parameter fft_norm_1 is not a valid fft_norm.'):
-        match_fft_norm('invalid', 'none')
+        _match_fft_norm('invalid', 'none')
     with pytest.raises(ValueError,
                        match='Parameter fft_norm_2 is not a valid fft_norm.'):
-        match_fft_norm('none', 'invalid')
+        _match_fft_norm('none', 'invalid')
 
 
 def test_input_division_type():
     """Test assertion by passing invalid division parameter"""
     with pytest.raises(TypeError,
                        match='Parameter division must be type bool.'):
-        match_fft_norm('none', 'none', 'invalid')
+        _match_fft_norm('none', 'none', 'invalid')
 
 
 def test_result_no_division():
@@ -39,7 +39,7 @@ def test_result_no_division():
                  ['power', 'power', 'power'],
                  ['psd', 'psd', 'psd']]
     for fft_norm in fft_norms:
-        assert match_fft_norm(fft_norm[0], fft_norm[1]) == fft_norm[2]
+        assert _match_fft_norm(fft_norm[0], fft_norm[1]) == fft_norm[2]
 
 
 def test_assertion_no_division():
@@ -68,7 +68,7 @@ def test_assertion_no_division():
     for fft_norm in fft_norms:
         with pytest.raises(ValueError,
                            match="Either one fft_norm has to be "):
-            match_fft_norm(fft_norm[0], fft_norm[1])
+            _match_fft_norm(fft_norm[0], fft_norm[1])
 
 
 def test_result_division():
