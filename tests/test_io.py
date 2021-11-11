@@ -514,7 +514,7 @@ def test_write_audio_overwrite(noise, tmpdir):
 def test_write_audio_kwargs(sf_write_mock, noise):
     pyfar.io.write_audio(
         signal=noise, filename='test.wav', kwarg1='kwarg1', kwarg2='kwarg2')
-    actual_args = sf_write_mock.call_args.kwargs
+    actual_args = sf_write_mock.call_args[1]
     assert actual_args['kwarg1'] == 'kwarg1'
     assert actual_args['kwarg2'] == 'kwarg2'
 
