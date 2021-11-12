@@ -2,6 +2,11 @@
 History
 =======
 
+0.2.3 (2021-11-12)
+------------------
+* Fix broken install on Python 3.9
+* Remove fft normalizations from FrequencyData
+
 0.2.2 (2021-11-05)
 ------------------
 * Removed dependency on pyfftw in favor of scipy.fft to support Python 3.9 and above
