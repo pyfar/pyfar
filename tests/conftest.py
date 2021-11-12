@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 import os.path
 import sofa
-import soundfile
 
 from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
@@ -396,15 +395,6 @@ def frequency_data_one_point():
     """
     frequency_data = FrequencyData([2], [0])
     return frequency_data
-
-
-@pytest.fixture
-def generate_wav_file(tmpdir, noise):
-    """Create wav file in temporary folder.
-    """
-    filename = os.path.join(tmpdir, 'test_wav.wav')
-    soundfile.write(filename, noise.time.T, noise.sampling_rate)
-    return filename
 
 
 @pytest.fixture

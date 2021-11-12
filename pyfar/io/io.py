@@ -16,10 +16,12 @@ import sofa
 import zipfile
 import io
 import soundfile as sf
+import tempfile
 
 
 from pyfar import Signal
 from pyfar import Coordinates
+import pyfar
 
 from . import _codec as codec
 import pyfar.classes.filter as fo
@@ -234,6 +236,9 @@ def read_audio(filename, dtype='float64', **kwargs):
     """
     Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
 
+    Reads 'wav', 'aiff', 'ogg', and 'flac' files among others. For a complete
+    list see :py:func:`audio_formats`.
+
     Parameters
     ----------
     filename : string, Path
@@ -241,12 +246,13 @@ def read_audio(filename, dtype='float64', **kwargs):
     dtype : {'float64', 'float32', 'int32', 'int16'}, optional
         Data type of the returned signal, by default ``'float64'``.
         Floating point audio data is typically in the range from
-        ``-1.0`` to ``1.0``.  Integer data is in the range from
-        ``-2**15`` to ``2**15-1`` for ``'int16'`` and from ``-2**31`` to
-        ``2**31-1`` for ``'int32'``.
+        ``-1.0`` to ``1.0``.  Note that ``'int16'`` and ``'int32'`` should only
+        be used if the data was written in the same format. Integer data is in
+        the range from ``-2**15`` to ``2**15-1`` for ``'int16'`` and from
+        ``-2**31`` to ``2**31-1`` for ``'int32'``.
     **kwargs
-        Other keyword arguments to be passed to ``soundfile.read``. This is
-        needed, e.g, to read RAW audio files.
+        Other keyword arguments to be passed to :py:func:`soundfile.read`. This
+        is needed, e.g, to read RAW audio files.
 
 
     Returns
@@ -257,7 +263,7 @@ def read_audio(filename, dtype='float64', **kwargs):
 
     Notes
     -----
-    * This function is based on ``soundfile.read``.
+    * This function is based on :py:func:`soundfile.read`.
     * Reading int values from a float file will *not* scale the data to
       [-1.0, 1.0). If the file contains ``np.array([42.6], dtype='float32')``,
       you will read ``np.array([43], dtype='int32')`` for ``dtype='int32'``.
@@ -273,30 +279,34 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     Write a :py:class:`~pyfar.classes.audio.Signal` object as a audio file to
     disk.
 
+    Writes 'wav', 'aiff', 'ogg', and 'flac' files among others. For a complete
+    list see :py:func:`audio_formats`.
+
     Parameters
     ----------
     signal : Signal
         Object to be written.
     filename : string, Path
         Output file. The format is determined from the file extension.
-        See :py:func:`available_formats` for all possible formats.
+        See :py:func:`audio_formats` for all possible formats.
     subtype : str, optional
         The subtype of the sound file, the default value depends on the
-        selected `format` (see :py:func:`default_subtype`).
-        See :py:func:`available_subtypes` for all possible subtypes for
+        selected `format` (see :py:func:`default_audio_subtype`).
+        See :py:func:`audio_subtypes` for all possible subtypes for
         a given ``format``.
     overwrite : bool
         Select wether to overwrite the audio file, if it already exists.
         The default is ``True``.
     **kwargs
-        Other keyword arguments to be passed to ``soundfile.write``.
+        Other keyword arguments to be passed to :py:func:`soundfile.write`.
 
     Notes
     -----
     * Signals are flattened before writing to disk (e.g. a signal with
       ``cshape = (3, 2)`` will be written to disk as a six channel audio file).
-    * This function is based on ``soundfile.write``.
-    * Amplitudes larger than +/- 1 are clipped.
+    * This function is based on :py:func:`soundfile.write`.
+    * For some formats and subtypes, amplitudes larger than +/- 1 are clipped.
+      See :py:func:`clipped_audio_subtypes` for details.
 
     """
     sampling_rate = signal.sampling_rate
@@ -337,6 +347,9 @@ def read_wav(filename):
     -----
     * This function is based on :py:func:`read_audio`.
     """
+    warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
+                   "of pyfar.io.read_audio."),
+                  PendingDeprecationWarning)
     signal = read_audio(filename)
     return signal
 
@@ -361,26 +374,30 @@ def write_wav(signal, filename, subtype=None, overwrite=True):
     * Signals are flattened before writing to disk (e.g. a signal with
       ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
     * This function is based on :py:func:`write_audio`.
-    * Amplitudes larger than +/- 1 are clipped.
+    * For some subtypes, amplitudes larger than +/- 1 are clipped.
+      See :py:func:`clipped_audio_subtypes` for details.
 
     """
+    warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
+                   "of pyfar.io.read_audio."),
+                  PendingDeprecationWarning)
     # .wav file extension
     filename = pathlib.Path(filename).with_suffix('.wav')
 
     write_audio(signal, filename, subtype=subtype, overwrite=overwrite)
 
 
-def available_formats():
+def audio_formats():
     """Return a dictionary of available audio formats.
 
     Notes
     -----
-    This function is a wrapper of ``soundfile.available_formats()``.
+    This function is a wrapper of :py:func:`soundfile.audio_formats()`.
 
     Examples
     --------
     >>> import pyfar as pf
-    >>> pf.available_formats()
+    >>> pf.io.audio_formats()
     {'FLAC': 'FLAC (FLAC Lossless Audio Codec)',
      'OGG': 'OGG (OGG Container format)',
      'WAV': 'WAV (Microsoft)',
@@ -391,10 +408,10 @@ def available_formats():
      'MAT5': 'MAT5 (GNU Octave 2.1 / Matlab 5.0)'}
 
     """
-    return sf.available_formats()
+    return sf.audio_formats()
 
 
-def available_subtypes(format=None):
+def audio_subtypes(format=None):
     """Return a dictionary of available audio subtypes.
 
     Parameters
@@ -404,34 +421,147 @@ def available_subtypes(format=None):
 
     Notes
     -----
-    This function is a wrapper of ``soundfile.available_subtypes()``.
+    This function is a wrapper of :py:func:`soundfile.audio_subtypes()`.
 
     Examples
     --------
     >>> import pyfar as pf
-    >>> pf.available_subtypes('FLAC')
+    >>> pf.io.audio_subtypes('FLAC')
     {'PCM_24': 'Signed 24 bit PCM',
      'PCM_16': 'Signed 16 bit PCM',
      'PCM_S8': 'Signed 8 bit PCM'}
 
     """
-    return sf.available_subtypes(format=format)
+    return sf.audio_subtypes(format=format)
 
 
-def default_subtype(format):
+def default_audio_subtype(format):
     """Return the default subtype for a given format.
 
     Notes
     -----
-    This function is a wrapper of ``soundfile.default_subtype()``.
+    This function is a wrapper of :py:func:`soundfile.default_audio_subtype()`.
 
     Examples
     --------
-    >>> import soundfile as sf
-    >>> sf.default_subtype('WAV')
+    >>> import pyfar as pf
+    >>> pf.io.default_audio_subtype('WAV')
     'PCM_16'
-    >>> sf.default_subtype('MAT5')
+    >>> pf.io.default_audio_subtype('MAT5')
     'DOUBLE'
 
     """
-    return sf.default_subtype(format)
+    return sf.default_audio_subtype(format)
+
+
+def clipped_audio_subtypes(format):
+    """Return a list of subtypes which are clipped to amplitudes smaller than 1.
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> pf.io.clipped_audio_subtypes('WAV')
+    ['PCM_16',
+     'PCM_24',
+     'PCM_32',
+     'PCM_U8',
+     'ULAW']
+    """
+    if format not in audio_formats().keys():
+        raise ValueError(f'Invalid format {format}.')
+    else:
+        clipped_dict = _clipped_audio_subtypes_dict()[format]
+    return clipped_dict
+
+
+def _clipped_audio_subtypes_dict():
+    """Returns a dictionary of format/subtype combinations which are clipped
+    by :py:func:´write_audio`.
+
+    The dict was created by calling
+    pyfar.io.io._write_audio_clippe_scaled_dict_creation and copied manually.
+    """
+    clipped_dict = {
+        'AIFF': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
+        'AU': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'ULAW'],
+        'AVR': ['PCM_S8', 'PCM_16', 'PCM_U8'],
+        'CAF': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'ULAW', 'ALAC_16',
+                'ALAC_20', 'ALAC_24', 'ALAC_32'],
+        'FLAC': ['PCM_S8', 'PCM_16', 'PCM_24'],
+        'HTK': ['PCM_16'],
+        'SVX': ['PCM_S8', 'PCM_16'],
+        'MAT4': ['PCM_16', 'PCM_32'],
+        'MAT5': ['PCM_16', 'PCM_32', 'PCM_U8'],
+        'MPC2K': ['PCM_16'],
+        'OGG': [],
+        'PAF': ['PCM_S8', 'PCM_16', 'PCM_24'],
+        'PVF': ['PCM_S8', 'PCM_16', 'PCM_32'],
+        'RAW': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
+        'RF64': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
+        'SD2': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32'],
+        'SDS': ['PCM_S8', 'PCM_16', 'PCM_24'],
+        'IRCAM': ['PCM_16', 'PCM_32', 'ULAW'],
+        'VOC': ['PCM_16', 'PCM_U8'],
+        'W64': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
+        'WAV': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
+        'NIST': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'ULAW'],
+        'WAVEX': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
+        'WVE': [],
+        'XI': []}
+    return clipped_dict
+
+
+def _clipped_audio_subtypes_dict_creation():
+    """Creates a dictionary of format/subtype combinations which are clipped by
+    :py:func:´write_audio`.
+
+    This function is not called directly due to the need of writing all files
+    to disk. Instead, the dict is manually copied.
+    """
+    collection = {}
+    signal = pyfar.Signal(np.array([10., 5., -10.]*500), 44100)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        formats = pyfar.io.audio_formats()
+        for format in formats:
+            filename = os.path.join(tmpdir, 'test_file.'+format)
+            collection[format] = []
+            for subtype in pyfar.io.audio_subtypes(format):
+                write_valid = not _soundfile_write_errors(format, subtype)
+                read_valid = not _soundfile_read_errors(format, subtype)
+                format_valid = sf.check_format(format, subtype)
+                if write_valid and read_valid and format_valid:
+                    if format == 'RAW':
+                        write_audio(signal, filename, subtype=subtype)
+                        signal_read = read_audio(
+                            filename, samplerate=44100, channels=1,
+                            subtype=subtype)
+                    else:
+                        write_audio(signal, filename, subtype=subtype)
+                        signal_read = read_audio(filename)
+                    if len(np.unique(signal_read.time)) < 3:
+                        collection[format] = collection[format] + [subtype]
+    return collection
+
+
+def _soundfile_write_errors(format, subtype):
+    """Checks if a write error due to soundfile/libsnfile can be expected.
+
+    Written according to test_write_audio_read_audio.
+    """
+    if format == 'AIFF' and subtype == 'DWVW_12':
+        error_expected = True
+    else:
+        error_expected = False
+    return error_expected
+
+
+def _soundfile_read_errors(format, subtype):
+    """Checks if a read error due to soundfile/libsnfile can be expected.
+
+    Written according to test_write_audio_read_audio.
+    """
+    if 'DWVW' in subtype and (format == 'AIFF' or format == 'RAW'):
+        error_expected = True
+    else:
+        error_expected = False
+    return error_expected

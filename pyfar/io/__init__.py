@@ -1,6 +1,7 @@
 from .io import (read_wav, write_wav, read, write, read_sofa,
                  read_audio, write_audio,
-                 available_subtypes, available_formats, default_subtype)
+                 audio_subtypes, audio_formats, default_audio_subtype,
+                 clipped_audio_subtypes)
 
 
 __all__ = [
@@ -11,6 +12,7 @@ __all__ = [
     'read_sofa',
     'read_audio',
     'write_audio',
-    'available_subtypes',
-    'available_formats',
-    'default_subtype']
+    'audio_subtypes',
+    'audio_formats',
+    'default_audio_subtype',
+    'clipped_audio_subtypes']

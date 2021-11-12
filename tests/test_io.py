@@ -3,12 +3,12 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from unittest.mock import patch
+from packaging import version
 import pyfar
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
 import pathlib
-import scipy.io.wavfile as wavfile
 import soundfile as sf
 
 from pyfar import io
@@ -486,11 +486,12 @@ def test_read_audio_stereo(read_mock):
     assert signal.sampling_rate == 1000
 
 
-@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
-def test_write_audio(audio_format, tmpdir, noise):
+@pytest.mark.parametrize("audio_format", sf.audio_formats().keys())
+@pytest.mark.parametrize("subtype", sf.audio_subtypes().keys())
+def test_write_audio(audio_format, subtype, tmpdir, noise):
     """Test all available audio formats and subtypes."""
-    filename = os.path.join(tmpdir, 'test_file.'+audio_format)
-    for subtype in sf.available_subtypes(audio_format):
+    if sf.check_format(audio_format, subtype):
+        filename = os.path.join(tmpdir, 'test_file.'+audio_format)
         if audio_format == 'AIFF' and subtype == 'DWVW_12':
             # This seems to be an error in soundfile/libsndfile?
             with pytest.raises(RuntimeError):
@@ -531,11 +532,12 @@ def test_write_audio_nd(noise_two_by_three_channel, tmpdir):
         atol=1e-4)
 
 
-@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
-def test_write_audio_read_audio(audio_format, tmpdir, noise):
+@pytest.mark.parametrize("audio_format", sf.audio_formats().keys())
+@pytest.mark.parametrize("subtype", sf.audio_subtypes().keys())
+def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
     """Test all reading and writing of available audio formats and subtypes."""
-    filename = os.path.join(tmpdir, 'test_file.'+audio_format)
-    for subtype in sf.available_subtypes(audio_format):
+    if sf.check_format(audio_format, subtype):
+        filename = os.path.join(tmpdir, 'test_file.'+audio_format)
         # Write Audio file
         # For exceptions see tests below
         if audio_format == 'AIFF' and subtype == 'DWVW_12':
@@ -565,7 +567,7 @@ def test_write_audio_read_audio(audio_format, tmpdir, noise):
             io.read_audio(filename)
 
 
-@pytest.mark.parametrize("subtype", sf.available_subtypes('AIFF').keys())
+@pytest.mark.parametrize("subtype", sf.audio_subtypes('AIFF').keys())
 def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
     """Test for errors in soundfile/libsndfile for AIFF format"""
     filename = os.path.join(tmpdir, 'test_file.aiff')
@@ -581,7 +583,7 @@ def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
         io.read_audio(filename)
 
 
-@pytest.mark.parametrize("subtype", sf.available_subtypes('RAW').keys())
+@pytest.mark.parametrize("subtype", sf.audio_subtypes('RAW').keys())
 def test_write_audio_read_audio_raw(subtype, tmpdir, noise):
     """Test for errors in soundfile/libsndfile for RAW format"""
     filename = os.path.join(tmpdir, 'test_file.raw')
@@ -644,7 +646,7 @@ def test_write_wav_suffix(noise, tmpdir):
     io.write_wav(noise, filename)
     # Without suffix
     with pytest.raises(FileNotFoundError):
-        wavfile.read(filename)
+        sf.read(filename)
     # With suffix added
     filename = filename.with_suffix('.wav')
     signal_reload = sf.read(filename)[0].T
@@ -654,24 +656,69 @@ def test_write_wav_suffix(noise, tmpdir):
         atol=1e-4)
 
 
-@patch('soundfile.available_formats')
-def test_available_formats(available_formats_mock):
+@patch('soundfile.read', return_value=(np.array([1., 2., 3.]), 1000))
+def test_read_wav_deprecation(tmpdir):
+    filename = 'test.wav'
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        io.read_wav(filename)
+
+    if version.parse(pyfar.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove read_wav from pyfar 0.5.0!
+            io.read_wav(filename)
+
+
+@patch('soundfile.write')
+def test_write_wav_deprecation(write_mock, noise, tmpdir):
+    filename = pathlib.Path(tmpdir, 'test_wav')
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        io.write_wav(noise, filename)
+
+    if version.parse(pyfar.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove write_wav from pyfar 0.5.0!
+            io.write_wav(noise, filename)
+
+
+@patch('soundfile.audio_formats')
+def test_audio_formats(audio_formats_mock):
     """Test correct call of the wrapped soundfile function."""
-    pyfar.io.available_formats()
-    available_formats_mock.assert_called()
+    pyfar.io.audio_formats()
+    audio_formats_mock.assert_called()
 
 
-@patch('soundfile.available_subtypes')
-def test_available_subtypes(available_subtypes_mock):
+@patch('soundfile.audio_subtypes')
+def test_audio_subtypes(audio_subtypes_mock):
     """Test correct call of the wrapped soundfile function."""
-    pyfar.io.available_subtypes()
-    available_subtypes_mock.assert_called()
+    pyfar.io.audio_subtypes()
+    audio_subtypes_mock.assert_called()
 
 
-@patch('soundfile.default_subtype', return_value='bla')
-def test_default_subtype(default_subtype_mock):
+@patch('soundfile.default_audio_subtype', return_value='bla')
+def test_default_audio_subtype(default_audio_subtype_mock):
     """Test correct call of the wrapped soundfile function."""
     audio_format = 'wav'
-    subtype_return = pyfar.io.default_subtype(format=audio_format)
+    subtype_return = pyfar.io.default_audio_subtype(format=audio_format)
     assert subtype_return == 'bla'
-    default_subtype_mock.assert_called_with(audio_format)
+    default_audio_subtype_mock.assert_called_with(audio_format)
+
+
+def test_clipped_audio_subtypes():
+    actual = io.clipped_audio_subtypes('WAV')
+    expected = ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW']
+    assert actual == expected
+
+
+@pytest.mark.parametrize("audio_format", sf.audio_formats().keys())
+def test_clipped_audio_subtypes_formats(audio_format):
+    """Test if all format are available"""
+    io.clipped_audio_subtypes(audio_format)
+
+
+def test__clipped_audio_subtypes_dict():
+    """Test correct clipping dict."""
+    actual = pyfar.io.io._clipped_audio_subtypes_dict()
+    expected = pyfar.io.io._clipped_audio_subtypes_dict_creation()
+    assert actual == expected
