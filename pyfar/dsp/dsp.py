@@ -913,6 +913,9 @@ class InterpolateSpectrum():
             raise TypeError('data must be a FrequencyData object.')
         if data.n_bins < 2:
             raise ValueError("data.n_bins must be at least 2")
+        if data.fft_norm != 'none':
+            raise ValueError(
+                f"data.fft_norm is '{data.fft_norm}' but must be 'none'")
 
         # ... method
         methods = ['complex', 'magnitude_phase', 'magnitude']

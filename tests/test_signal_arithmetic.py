@@ -2,7 +2,6 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
-import pyfar as pf
 import pyfar.classes.audio as signal
 from pyfar import Signal, TimeData, FrequencyData
 
@@ -13,7 +12,7 @@ def test_add_two_signals_time():
     x = Signal([1, 0, 0], 44100)
 
     # time domain
-    y = pf.add((x, x), 'time')
+    y = signal.add((x, x), 'time')
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
     # check result
@@ -28,7 +27,7 @@ def test_add_two_signals_freq():
     x = Signal([1, 0, 0], 44100)
 
     # frequency domain
-    y = pf.add((x, x), 'freq')
+    y = signal.add((x, x), 'freq')
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
     # check result
@@ -41,7 +40,7 @@ def test_add_two_signals_freq():
 def test_add_three_signals():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = pf.add((x, x, x), 'time')
+    y = signal.add((x, x, x), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -56,7 +55,7 @@ def test_add_three_signals():
 def test_add_signal_and_number():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = pf.add((x, 1), 'time')
+    y = signal.add((x, 1), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -71,7 +70,7 @@ def test_add_signal_and_number():
 def test_add_number_and_signal():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = pf.add((1, x), 'time')
+    y = signal.add((1, x), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -85,7 +84,7 @@ def test_add_number_and_signal():
 def test_add_time_data_and_number():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, 1), 'time')
+    y = signal.add((x, 1), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -100,7 +99,7 @@ def test_add_time_data_and_number():
 def test_add_time_data_and_time_data():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, x), 'time')
+    y = signal.add((x, x), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -116,7 +115,7 @@ def test_add_time_data_and_number_wrong_domain():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
     with raises(ValueError):
-        pf.add((x, 1), 'freq')
+        signal.add((x, 1), 'freq')
 
 
 def test_add_time_data_and_number_wrong_times():
@@ -124,15 +123,15 @@ def test_add_time_data_and_number_wrong_times():
     x = TimeData([1, 0, 0], [0, .1, .5])
     y = TimeData([1, 0, 0], [0, .1, .4])
     with raises(ValueError):
-        pf.add((x, y), 'time')
+        signal.add((x, y), 'time')
 
 
 def test_add_frequency_data_and_number():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, 1), 'freq')
+    y = signal.add((x, 1), 'freq')
     with raises(ValueError):
-        pf.add((x, 1), 'time')
+        signal.add((x, 1), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -147,7 +146,7 @@ def test_add_frequency_data_and_number():
 def test_add_frequency_data_and_frequency_data():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, x), 'freq')
+    y = signal.add((x, x), 'freq')
 
     # check if old signal did not change
     npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -163,7 +162,7 @@ def test_add_frequency_data_and_number_wrong_domain():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     with raises(ValueError):
-        pf.add((x, 1), 'time')
+        signal.add((x, 1), 'time')
 
 
 def test_add_frequency_data_and_number_wrong_frequencies():
@@ -171,14 +170,22 @@ def test_add_frequency_data_and_number_wrong_frequencies():
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = FrequencyData([1, 0, 0], [0, .1, .4])
     with raises(ValueError):
-        pf.add((x, y), 'freq')
+        signal.add((x, y), 'freq')
+
+
+def test_add_frequency_data_and_number_wrong_fft_norm():
+    # generate and add signals
+    x = FrequencyData([1, 0, 0], [0, .1, .5])
+    y = FrequencyData([1, 0, 0], [0, .1, .5], fft_norm='rms')
+    with raises(ValueError):
+        signal.add((x, y), 'freq')
 
 
 def test_subtraction():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100)
-    z = pf.subtract((x, y), 'time')
+    z = signal.subtract((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([1, -1, 0]), atol=1e-15)
@@ -188,7 +195,7 @@ def test_multiplication():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100)
-    z = pf.multiply((x, y), 'time')
+    z = signal.multiply((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0, 0, 0]), atol=1e-15)
@@ -198,7 +205,7 @@ def test_division():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([2, 2, 2], 44100)
-    z = pf.divide((x, y), 'time')
+    z = signal.divide((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0.5, 0, 0]), atol=1e-15)
@@ -208,7 +215,7 @@ def test_power():
     # only test one case - everything else is tested below
     x = Signal([2, 1, 0], 44100)
     y = Signal([2, 2, 2], 44100)
-    z = pf.power((x, y), 'time')
+    z = signal.power((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([4, 1, 0]), atol=1e-15)
@@ -367,8 +374,8 @@ def test_get_arithmetic_data_with_array():
 
 def test_get_arithmetic_data_with_signal():
     # all possible combinations of `domain`, `signal_type`, and `fft_norm`
-    meta = [['time', 'none'],
-            ['freq', 'none'],
+    meta = [['time', None],
+            ['freq', None],
             ['time', 'unitary'],
             ['freq', 'unitary'],
             ['time', 'amplitude'],
