@@ -4,11 +4,10 @@
 
 __author__ = """The pyfar developers"""
 __email__ = ''
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 
 from .classes.audio import Signal, TimeData, FrequencyData
-from .classes.audio import add, subtract, multiply, divide, power
 from .classes.coordinates import Coordinates
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
@@ -24,11 +23,6 @@ __all__ = [
     'Signal',
     'TimeData',
     'FrequencyData',
-    'add',
-    'subtract',
-    'multiply',
-    'divide',
-    'power',
     'Coordinates',
     'Orientations',
     'FilterFIR',

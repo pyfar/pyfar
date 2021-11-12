@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 import pyfar as pf
 import pyfar.plot._interaction as ia
-from pyfar.plot._utils import _get_quad_mesh_from_axis
+from pyfar.plot._line import _get_quad_mesh_from_axis
 
 # use non showing backend for speed
 mpl.use("Agg")
@@ -62,9 +62,7 @@ def test_interaction_attached():
             continue
 
         ax = function[1](signal)
-        # axis is first return parameter if function returns multiple
-        ax = ax[0] if isinstance(ax, (tuple)) else ax
-        # interaction axis is first axis if functions returns multiple
+        # get axis of first subplot, if we have subplots
         ax = ax[0] if isinstance(ax, (np.ndarray, list)) else ax
         # assert and close figure
         assert isinstance(ax.interaction, ia.Interaction)
@@ -222,7 +220,7 @@ def test_move_and_zoom_linear():
             zoom = [sc_ctr["zoom_y_in"]["key"][0],
                     sc_ctr["zoom_y_out"]["key"][0]]
         if axes == 'cm':
-            ax, *_ = pf.plot.spectrogram(signal, dB=False)
+            ax = pf.plot.spectrogram(signal, dB=False)
             ax = ax[0]
             for cm in ax.get_children():
                 if type(cm) == mpl.collections.QuadMesh:
@@ -307,7 +305,7 @@ def test_toggle_colormap():
     """
 
     # init the plot
-    ax, *_ = pf.plot.spectrogram(pf.signals.impulse(1024))
+    ax = pf.plot.spectrogram(pf.signals.impulse(1024))
     assert ax[1].get_ylabel() == "Magnitude in dB"
     # toggle x-axis
     ax[0].interaction.select_action(ia.EventEmu(sc_ctr["toggle_cm"]["key"][0]))
@@ -319,8 +317,8 @@ def test_toggle_colormap():
     plt.close("all")
 
 
-def test_cycle_and_toggle_lines_1d_signal():
-    """Test toggling and cycling channels of a one-dimensional Signal."""
+def test_cycle_and_toggle_lines():
+    """Test toggling and cycling channels of a Signal."""
 
     # init and check start conditions
     signal = pf.Signal([[1, 0], [2, 0]], 44100)
@@ -352,48 +350,12 @@ def test_cycle_and_toggle_lines_1d_signal():
     plt.close("all")
 
 
-def test_cycle_and_toggle_lines_2d_signal():
-    """Test toggling and cycling channels of a two-dimensional Signal."""
-
-    # init and check start conditions
-    signal = pf.signals.impulse(10, [[1, 2], [3, 4]])
-    ax = pf.plot.time(signal)
-    for line in [0, 1, 2, 3]:
-        assert ax.lines[line].get_visible() is True
-    assert ax.interaction.txt is None
-    # toggle all
-    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_all"]["key"][0]))
-    assert ax.lines[0].get_visible() is True
-    for line in [1, 2, 3]:
-        assert ax.lines[line].get_visible() is False
-    assert ax.interaction.txt.get_text() == "Ch. (0, 0)"
-    # next
-    ax.interaction.select_action(ia.EventEmu(sc_ctr["next"]["key"][0]))
-    for line in [0, 2, 3]:
-        assert ax.lines[line].get_visible() is False
-    assert ax.lines[1].get_visible() is True
-    assert ax.interaction.txt.get_text() == "Ch. (0, 1)"
-    # previous
-    ax.interaction.select_action(ia.EventEmu(sc_ctr["prev"]["key"][0]))
-    assert ax.lines[0].get_visible() is True
-    for line in [1, 2, 3]:
-        assert ax.lines[line].get_visible() is False
-    assert ax.interaction.txt.get_text() == "Ch. (0, 0)"
-    # toggle all
-    ax.interaction.select_action(ia.EventEmu(sc_ctr["toggle_all"]["key"][0]))
-    for line in [0, 1, 2, 3]:
-        assert ax.lines[line].get_visible() is True
-    assert ax.interaction.txt is None
-
-    plt.close("all")
-
-
 def test_cycle_and_toggle_signals():
     """Test toggling and cycling Signal slices."""
 
     # init and check start conditions
     signal = pf.signals.impulse(1024, amplitude=[1, 2])
-    ax, *_ = pf.plot.spectrogram(signal)
+    ax = pf.plot.spectrogram(signal)
 
     assert ax[0].interaction.txt is None
     # use the clim because the image data is identical

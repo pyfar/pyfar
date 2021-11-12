@@ -4,7 +4,6 @@ Plot for spatially distributed data.
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
-import pyfar as pf
 
 __all__ = [Axes3D]
 
@@ -35,15 +34,19 @@ def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
     """
     points = np.atleast_2d(points).astype(np.float64)
 
-    # default marker size
-    kwargs['s'] = kwargs.get('s', np.clip(8e3 / points.shape[0], 4, 100))
+    ax = _setup_axes(projection, ax, set_ax,
+                     bounds=(np.min(points), np.max(points)), **kwargs)
 
-    # plot with plotstyle
-    with pf.plot.context():
-        ax = _setup_axes(projection, ax, set_ax,
-                         bounds=(np.min(points), np.max(points)), **kwargs)
+    # plot
+    ax.scatter(
+        points[..., 0],
+        points[..., 1],
+        points[..., 2], **kwargs)
 
-        ax.scatter(points[..., 0], points[..., 1], points[..., 2], **kwargs)
+    # labeling
+    ax.set_xlabel('X [m]')
+    ax.set_ylabel('Y [m]')
+    ax.set_zlabel('Z [m]')
 
     return ax
 
@@ -79,13 +82,10 @@ def quiver(
 
     min_val = min(np.min(origins), np.min(endpoints))
     max_val = max(np.max(origins), np.max(endpoints))
+    ax = _setup_axes(
+        projection, ax, set_ax, bounds=(min_val, max_val), **kwargs)
 
-    # plot with plotstyle
-    with pf.plot.context():
-        ax = _setup_axes(
-            projection, ax, set_ax, bounds=(min_val, max_val), **kwargs)
-
-        ax.quiver(*origins.T, *endpoints.T, **kwargs)
+    ax.quiver(*origins.T, *endpoints.T, **kwargs)
 
     return ax
 
@@ -120,18 +120,19 @@ def _setup_axes(projection=Axes3D.name, ax=None,
         # (workaround for ax.set_aspect('equal', 'box'), which is currently not
         #  working for 3D axes.)
         plt.figure(figsize=plt.figaspect(1.))
-        ax = plt.subplot(111, projection=projection)
+        ax = plt.axes(projection=projection)
 
     if 'Axes3D' not in ax.__str__():
         raise ValueError("Only three-dimensional axes supported.")
 
     # add defaults to kwargs
     kwargs['marker'] = kwargs.get('marker', '.')
+    kwargs['c'] = kwargs.get('c', 'k')
 
     # labeling
-    ax.set_xlabel('x in m')
-    ax.set_ylabel('y in m')
-    ax.set_zlabel('z in m')
+    ax.set_xlabel('X [m]')
+    ax.set_ylabel('Y [m]')
+    ax.set_zlabel('Z [m]')
 
     # equal axis limits for distortion free  display
     if set_ax:
