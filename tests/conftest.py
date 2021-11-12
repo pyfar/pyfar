@@ -697,3 +697,10 @@ def nested_data():
     `io.write` and `io.read`.
     """
     return stub_utils.NestedData.create()
+
+
+@pytest.fixture
+def dict_of_builtins():
+    """ Dictionary that contains builtins with support for writing and reading.
+    """
+    return stub_utils.dict_of_builtins()
