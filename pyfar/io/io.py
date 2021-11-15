@@ -392,7 +392,7 @@ def audio_formats():
 
     Notes
     -----
-    This function is a wrapper of :py:func:`soundfile.audio_formats()`.
+    This function is a wrapper of :py:func:`soundfile.available_formats()`.
 
     Examples
     --------
@@ -408,7 +408,7 @@ def audio_formats():
      'MAT5': 'MAT5 (GNU Octave 2.1 / Matlab 5.0)'}
 
     """
-    return sf.audio_formats()
+    return sf.available_formats()
 
 
 def audio_subtypes(format=None):
@@ -421,7 +421,7 @@ def audio_subtypes(format=None):
 
     Notes
     -----
-    This function is a wrapper of :py:func:`soundfile.audio_subtypes()`.
+    This function is a wrapper of :py:func:`soundfile.available_subtypes()`.
 
     Examples
     --------
@@ -432,7 +432,7 @@ def audio_subtypes(format=None):
      'PCM_S8': 'Signed 8 bit PCM'}
 
     """
-    return sf.audio_subtypes(format=format)
+    return sf.available_subtypes(format=format)
 
 
 def default_audio_subtype(format):
@@ -451,7 +451,7 @@ def default_audio_subtype(format):
     'DOUBLE'
 
     """
-    return sf.default_audio_subtype(format)
+    return sf.default_subtype(format)
 
 
 def clipped_audio_subtypes(format):

@@ -486,8 +486,8 @@ def test_read_audio_stereo(read_mock):
     assert signal.sampling_rate == 1000
 
 
-@pytest.mark.parametrize("audio_format", sf.audio_formats().keys())
-@pytest.mark.parametrize("subtype", sf.audio_subtypes().keys())
+@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
+@pytest.mark.parametrize("subtype", sf.available_subtypes().keys())
 def test_write_audio(audio_format, subtype, tmpdir, noise):
     """Test all available audio formats and subtypes."""
     if sf.check_format(audio_format, subtype):
@@ -532,8 +532,8 @@ def test_write_audio_nd(noise_two_by_three_channel, tmpdir):
         atol=1e-4)
 
 
-@pytest.mark.parametrize("audio_format", sf.audio_formats().keys())
-@pytest.mark.parametrize("subtype", sf.audio_subtypes().keys())
+@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
+@pytest.mark.parametrize("subtype", sf.available_subtypes().keys())
 def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
     """Test all reading and writing of available audio formats and subtypes."""
     if sf.check_format(audio_format, subtype):
@@ -567,7 +567,7 @@ def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
             io.read_audio(filename)
 
 
-@pytest.mark.parametrize("subtype", sf.audio_subtypes('AIFF').keys())
+@pytest.mark.parametrize("subtype", sf.available_subtypes('AIFF').keys())
 def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
     """Test for errors in soundfile/libsndfile for AIFF format"""
     filename = os.path.join(tmpdir, 'test_file.aiff')
@@ -583,7 +583,7 @@ def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
         io.read_audio(filename)
 
 
-@pytest.mark.parametrize("subtype", sf.audio_subtypes('RAW').keys())
+@pytest.mark.parametrize("subtype", sf.available_subtypes('RAW').keys())
 def test_write_audio_read_audio_raw(subtype, tmpdir, noise):
     """Test for errors in soundfile/libsndfile for RAW format"""
     filename = os.path.join(tmpdir, 'test_file.raw')
@@ -645,7 +645,7 @@ def test_write_wav_suffix(noise, tmpdir):
     filename = pathlib.Path(tmpdir, 'test_wav')
     io.write_wav(noise, filename)
     # Without suffix
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(RuntimeError):
         sf.read(filename)
     # With suffix added
     filename = filename.with_suffix('.wav')
@@ -682,21 +682,21 @@ def test_write_wav_deprecation(write_mock, noise, tmpdir):
             io.write_wav(noise, filename)
 
 
-@patch('soundfile.audio_formats')
+@patch('soundfile.available_formats')
 def test_audio_formats(audio_formats_mock):
     """Test correct call of the wrapped soundfile function."""
     pyfar.io.audio_formats()
     audio_formats_mock.assert_called()
 
 
-@patch('soundfile.audio_subtypes')
+@patch('soundfile.available_subtypes')
 def test_audio_subtypes(audio_subtypes_mock):
     """Test correct call of the wrapped soundfile function."""
     pyfar.io.audio_subtypes()
     audio_subtypes_mock.assert_called()
 
 
-@patch('soundfile.default_audio_subtype', return_value='bla')
+@patch('soundfile.default_subtype', return_value='bla')
 def test_default_audio_subtype(default_audio_subtype_mock):
     """Test correct call of the wrapped soundfile function."""
     audio_format = 'wav'
@@ -711,7 +711,7 @@ def test_clipped_audio_subtypes():
     assert actual == expected
 
 
-@pytest.mark.parametrize("audio_format", sf.audio_formats().keys())
+@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
 def test_clipped_audio_subtypes_formats(audio_format):
     """Test if all format are available"""
     io.clipped_audio_subtypes(audio_format)
