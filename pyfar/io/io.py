@@ -14,6 +14,7 @@ import pathlib
 import warnings
 import numpy as np
 import sofa
+import sofar as sf
 import zipfile
 import io
 
@@ -94,18 +95,32 @@ def write_wav(signal, filename, overwrite=True):
         wavfile.write(filename, sampling_rate, data.T)
 
 
-def read_sofa(filename):
+def read_sofa(filename, verify=True):
     """
-    Import a SOFA file as :py:class:`~pyfar.classes.audio.Signal` object.
+    Import a SOFA file as pyfar object.
 
     Parameters
     ----------
     filename : string, Path
         Input SOFA file (cf. [#]_, [#]_).
+    verify : bool, optional
+        Verify if the data contained in the SOFA file agrees with the AES69
+        standard (see references). If the verification fails, the SOFA file
+        can be loaded by setting ``verify=False``. The default is ``True``
 
     Returns
     -------
-    signal : Signal
+    audio : pyfar audio object
+        The audio object that is returned depends on the DataType of the SOFA
+        object:
+
+        - :py:class:`~pyfar.classes.audio.Signal`
+            A Signal object is returned is the DataType is ``'FIR'``,
+            ``'FIR-E'``, or ``'FIRE'``
+        - :py:class:`~pyfar.classes.audio.FrequencyData`
+            A FrequencyData object is returned is the DataType is ``'TF'``,
+            ``'TF-E'``, or ``'TFE'``
+
         :py:class:`~pyfar.classes.audio.Signal` object containing the data
         stored in `SOFA_Object.Data.IR`.
         `cshape` is equal to ``(number of measurements, number of receivers)``.
@@ -126,29 +141,24 @@ def read_sofa(filename):
     References
     ----------
     .. [#] https://www.sofaconventions.org
-    .. [#] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
-        File Format.”, 2015.
+    .. [#] “AES69-2020: AES Standard for File Exchange-Spatial Acoustic Data
+        File Format.”, 2020.
     .. [#] https://github.com/spatialaudio/python-sofa
 
     """
-    sofafile = sofa.Database.open(filename)
+    sofafile = sf.read_sofa(filename, verify)
     # Check for DataType
-    if sofafile.Data.Type == 'FIR':
-        domain = 'time'
-        data = np.asarray(sofafile.Data.IR)
-        sampling_rate = sofafile.Data.SamplingRate.get_values()
-        # Check for units
-        if sofafile.Data.SamplingRate.Units != 'hertz':
-            raise ValueError(
-                "SamplingRate:Units"
-                "{sofafile.Data.SamplingRate.Units} is not supported.")
+    if sofafile.GLOBAL_DataType in ['FIR', 'FIR-E', 'FIRE']:
+        # make a Signal
+        signal = Signal(sofafile.Data_IR, sofafile.Data_SamplingRate,
+                        domain='time')
     else:
-        raise ValueError("DataType {sofafile.Data.Type} is not supported.")
-    signal = Signal(data, sampling_rate, domain=domain)
+        raise ValueError(
+            "DataType {sofafile.GLOBAL_DataType} is not supported.")
 
     # Source
-    s_values = sofafile.Source.Position.get_values()
-    s_domain, s_convention, s_unit = _sofa_pos(sofafile.Source.Position.Type)
+    s_values = sofafile.SourcePosition
+    s_domain, s_convention, s_unit = _sofa_pos(sofafile.SourcePosition_Type)
     source_coordinates = Coordinates(
         s_values[:, 0],
         s_values[:, 1],
@@ -157,8 +167,8 @@ def read_sofa(filename):
         convention=s_convention,
         unit=s_unit)
     # Receiver
-    r_values = sofafile.Receiver.Position.get_values()
-    r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
+    r_values = sofafile.ReceiverPosition
+    r_domain, r_convention, r_unit = _sofa_pos(sofafile.ReceiverPosition_Type)
     receiver_coordinates = Coordinates(
         r_values[:, 0],
         r_values[:, 1],
