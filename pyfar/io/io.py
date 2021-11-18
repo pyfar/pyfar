@@ -111,14 +111,14 @@ def read_sofa(filename, verify=True):
 
         - :py:class:`~pyfar.classes.audio.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
-            ``'FIR-E'``, or ``'FIRE'``
+            ``'FIR-E'``, or ``'FIRE'``.
         - :py:class:`~pyfar.classes.audio.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
-            ``'TF-E'``, or ``'TFE'``
+            ``'TF-E'``, or ``'TFE'``.
 
-        :py:class:`~pyfar.classes.audio.Signal` object containing the data
-        stored in `SOFA_Object.Data.IR`.
-        `cshape` is equal to ``(number of measurements, number of receivers)``.
+        The `cshape` of the object is is ``(M, R)`` with `M` being the number
+        of measurements and `R` being the number of receivers from the SOFA
+        file.
     source_coordinates : Coordinates
         Coordinates object containing the data stored in
         `SOFA_object.SourcePosition`. The domain, convention and unit are
@@ -130,15 +130,14 @@ def read_sofa(filename, verify=True):
 
     Notes
     -----
-    * This function is based on the python-sofa [#]_.
-    * Currently, only SOFA files of `DataType` ``FIR`` are supported.
+    * This function uses the sofar package to read SOFA files [#]_.
 
     References
     ----------
     .. [#] https://www.sofaconventions.org
     .. [#] “AES69-2020: AES Standard for File Exchange-Spatial Acoustic Data
         File Format.”, 2020.
-    .. [#] https://github.com/spatialaudio/python-sofa
+    .. [#] https://pyfar.org
 
     """
     sofafile = sf.read_sofa(filename, verify)
