@@ -12,8 +12,6 @@ import scipy.io.wavfile as wavfile
 import os.path
 import pathlib
 import warnings
-import numpy as np
-import sofa
 import sofar as sf
 import zipfile
 import io
