@@ -509,38 +509,6 @@ def generate_sofa_postype_spherical(
 
 
 @pytest.fixture
-def generate_sofa_unit_error(
-        tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR
-    with incorrect sampling rate unit.
-    """
-    sofatype = 'GeneralFIR'
-    n_measurements = noise_two_by_three_channel.cshape[0]
-    n_receivers = noise_two_by_three_channel.cshape[1]
-    n_samples = noise_two_by_three_channel.n_samples
-    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
-
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
-
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(variances=["Position"], fixed=["View", "Up"])
-    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
-    sofafile.Receiver.initialize(variances=["Position"], fixed=["View", "Up"])
-    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
-    sofafile.Receiver.Position.set_values(r_coords)
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-    sofafile.Data.Type = 'FIR'
-    sofafile.Data.initialize()
-    sofafile.Data.IR = noise_two_by_three_channel.time
-    sofafile.Data.SamplingRate = noise_two_by_three_channel.sampling_rate
-    sofafile.Data.SamplingRate.Units = 'not_hertz'
-
-    sofafile.close()
-    return filename
-
-
-@pytest.fixture
 def generate_sofa_postype_error(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
     """ Generate the reference sofa files of type GeneralFIR

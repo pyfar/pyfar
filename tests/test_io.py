@@ -108,12 +108,6 @@ def test_read_sofa_coordinates(
         r_coords.get_cart(), sofa_reference_coordinates[1])
 
 
-def test_read_sofa_sampling_rate_unit(generate_sofa_unit_error):
-    """Test to verify correct sampling rate unit of sofa file"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_unit_error)
-
-
 def test_read_sofa_position_type_spherical(
         generate_sofa_postype_spherical, sofa_reference_coordinates):
     """Test to verify correct position type of sofa file"""
