@@ -120,12 +120,6 @@ def test_read_sofa_position_type_spherical(
         sofa_reference_coordinates[1])
 
 
-def test_read_sofa_position_type_unit(generate_sofa_postype_error):
-    """Test to verify correct position type of sofa file"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_postype_error)
-
-
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_flat_data(tmpdir, flat_data):
