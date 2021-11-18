@@ -92,10 +92,11 @@ def test_read_sofa_GeneralFIR(
     npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
 
 
-def test_read_sofa_GeneralTF(generate_sofa_GeneralTF):
+def test_read_sofa_GeneralTF(
+        generate_sofa_GeneralTF, noise_two_by_three_channel):
     """Test for sofa datatype GeneralTF"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_GeneralTF)
+    signal = io.read_sofa(generate_sofa_GeneralTF)[0]
+    npt.assert_allclose(signal.freq, noise_two_by_three_channel.freq)
 
 
 def test_read_sofa_coordinates(

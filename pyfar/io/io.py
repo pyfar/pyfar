@@ -16,10 +16,7 @@ import sofar as sf
 import zipfile
 import io
 
-
-from pyfar import Signal
-from pyfar import Coordinates
-
+from pyfar import Signal, FrequencyData, Coordinates
 from . import _codec as codec
 import pyfar.classes.filter as fo
 
@@ -148,8 +145,12 @@ def read_sofa(filename, verify=True):
     # Check for DataType
     if sofafile.GLOBAL_DataType in ['FIR', 'FIR-E', 'FIRE']:
         # make a Signal
-        signal = Signal(sofafile.Data_IR, sofafile.Data_SamplingRate,
-                        domain='time')
+        signal = Signal(sofafile.Data_IR, sofafile.Data_SamplingRate)
+
+    elif sofafile.GLOBAL_DataType in ['TF', 'TF-E', 'TFE']:
+        # make FrequencyData
+        signal = FrequencyData(
+            sofafile.Data_Real + 1j * sofafile.Data_Imag, sofafile.N)
     else:
         raise ValueError(
             "DataType {sofafile.GLOBAL_DataType} is not supported.")
