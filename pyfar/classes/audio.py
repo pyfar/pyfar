@@ -1301,7 +1301,7 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     if not isinstance(division, bool):
         raise TypeError("Parameter division must be type bool.")
 
-    if division is False:
+    if not division:
 
         if fft_norm_1 == fft_norm_2:
             fft_norm_result = fft_norm_1
