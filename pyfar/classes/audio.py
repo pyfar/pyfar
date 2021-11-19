@@ -1298,7 +1298,7 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
                          f"{', '.join(valid_fft_norms)}")
 
     # check if parameter division is type bool
-    if isinstance(division, bool) is False:
+    if not isinstance(division, bool):
         raise TypeError("Parameter division must be type bool.")
 
     if division is False:
