@@ -14,7 +14,6 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'numpy>=1.14.0',
     'scipy>=1.5.0',
-    'pyfftw',
     'matplotlib',
     'python-sofa>=0.2.0',
     'urllib3',
@@ -37,20 +36,21 @@ test_requirements = [
 
 setup(
     author="The pyfar developers",
-    author_email='',
+    author_email='info@pyfar.org',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Scientists',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
     description="Project for data formats in acoustics.",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='pyfar',
     name='pyfar',
@@ -59,6 +59,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/pyfar/pyfar',
-    version='0.1.0',
+    version='0.2.3',
     zip_safe=False,
+    python_requires='>=3.7'
 )

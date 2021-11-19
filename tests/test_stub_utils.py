@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 
-from pyfar import Signal
+from pyfar import Signal, TimeData, FrequencyData
 from pyfar.testing import stub_utils
 
 
@@ -64,6 +64,85 @@ def test_signal_stub_frequencies_odd():
     signal_stub = stub_utils.signal_stub(time, freq, sampling_rate, fft_norm)
 
     npt.assert_allclose(signal_stub.frequencies, frequencies, rtol=1e-10)
+
+
+def test_time_data_stub_properties():
+    """ Test comparing properties of TimeData stub
+    with actual TimeData implementation.
+    """
+    time = [1, 0, -1]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+    stub_dir = dir(time_data_stub)
+    time_data_dir = dir(TimeData(time, times))
+
+    assert stub_dir.sort() == time_data_dir.sort()
+
+
+def test_time_data_stub_data():
+    """Test the data contained in the TimeData stub."""
+
+    time = [1, 0, -1]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+
+    npt.assert_allclose(time_data_stub.time, np.atleast_2d(time))
+    npt.assert_allclose(time_data_stub.times, np.atleast_1d(times))
+
+
+def test_time_data_stub_slice():
+    """Test slicing the TimeData stub."""
+
+    time = [[1, 0, -1], [2, 0, -2]]
+    times = [0, .1, .4]
+
+    time_data_stub = stub_utils.time_data_stub(time, times)
+    stub_slice = time_data_stub[0]
+
+    npt.assert_allclose(stub_slice.time, np.atleast_2d(time[0]))
+    npt.assert_allclose(stub_slice.times, np.atleast_1d(times))
+
+
+def test_frequency_data_stub_properties():
+    """ Test comparing properties of FrequencyData stub
+    with actual FrequencyData implementation.
+    """
+    freq = [1, 0, -1]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+    stub_dir = dir(frequency_data_stub)
+    frequency_data_dir = dir(FrequencyData(freq, frequencies))
+
+    assert stub_dir.sort() == frequency_data_dir.sort()
+
+
+def test_frequency_data_stub_data():
+    """Test the data contained in the FrequencyData stub."""
+
+    freq = [1, 0, -1]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+
+    npt.assert_allclose(frequency_data_stub.freq, np.atleast_2d(freq))
+    npt.assert_allclose(
+        frequency_data_stub.frequencies, np.atleast_1d(frequencies))
+
+
+def test_frequency_data_stub_slice():
+    """Test slicing the FrequencyData stub."""
+
+    freq = [[1, 0, -1], [2, 0, -2]]
+    frequencies = [0, .1, .4]
+
+    frequency_data_stub = stub_utils.frequency_data_stub(freq, frequencies)
+    stub_slice = frequency_data_stub[0]
+
+    npt.assert_allclose(stub_slice.freq, np.atleast_2d(freq[0]))
+    npt.assert_allclose(stub_slice.frequencies, np.atleast_1d(frequencies))
 
 
 def test_impulse_func_single_channel():
@@ -136,7 +215,7 @@ def test_impulse_func_multi_channel():
 def test_normalization_none():
     """ Test unitary FFT normalization implemented in stubs_utils.py"""
     n_samples = 4
-    freq = np.array([1, 1, 1], dtype=np.complex)
+    freq = np.array([1, 1, 1], dtype=complex)
     freq_norm = stub_utils._normalization(freq, n_samples, 'none')
     npt.assert_allclose(freq, freq_norm, rtol=1e-10)
 
@@ -145,8 +224,8 @@ def test_normalization_rms_even():
     """ Test RMS FFT normalization implemented in stubs_utils.py,
     even number of samples."""
     n_samples = 4
-    freq = np.array([1, 1, 1], dtype=np.complex)
-    freq_norm_truth = np.array([1, np.sqrt(2), 1], dtype=np.complex)
+    freq = np.array([1, 1, 1], dtype=complex)
+    freq_norm_truth = np.array([1, np.sqrt(2), 1], dtype=complex)
     freq_norm_truth /= n_samples
     freq_norm = stub_utils._normalization(freq, n_samples, 'rms')
     npt.assert_allclose(freq_norm, freq_norm_truth, rtol=1e-10)
@@ -156,8 +235,8 @@ def test_normalization_rms_odd():
     """ Test RMS FFT normalization implemented in stubs_utils.py,
     odd number of samples."""
     n_samples = 5
-    freq = np.array([1, 1, 1], dtype=np.complex)
-    freq_norm_truth = np.array([1, np.sqrt(2), np.sqrt(2)], dtype=np.complex)
+    freq = np.array([1, 1, 1], dtype=complex)
+    freq_norm_truth = np.array([1, np.sqrt(2), np.sqrt(2)], dtype=complex)
     freq_norm_truth /= n_samples
     freq_norm = stub_utils._normalization(freq, n_samples, 'rms')
     npt.assert_allclose(freq_norm, freq_norm_truth, rtol=1e-10)
@@ -311,10 +390,13 @@ def test_noise_func():
     n_samples = 2**18
     sigma = 1
     cshape = (1,)
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
 
     npt.assert_array_almost_equal(np.mean(time), 0, decimal=1)
     npt.assert_array_almost_equal(np.std(time, ddof=1), sigma, decimal=1)
+    e_time = np.mean(np.abs(time)**2)
+    e_freq = np.sum(np.abs(freq)**2)
+    npt.assert_array_almost_equal(e_time, e_freq, decimal=4)
 
 
 def test_noise_func_multi_channel():
@@ -323,10 +405,13 @@ def test_noise_func_multi_channel():
     n_samples = 2**10
     sigma = 1
     cshape = (2, 2)
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
 
     npt.assert_array_almost_equal(np.mean(time), 0, decimal=1)
     npt.assert_array_almost_equal(np.std(time, ddof=1), sigma, decimal=1)
+    e_time = np.mean(np.abs(time)**2, axis=-1)
+    e_freq = np.sum(np.abs(freq)**2, axis=-1)
+    npt.assert_array_almost_equal(e_time, e_freq, decimal=2)
 
 
 def test__eq___dict__flat_data(flat_data):

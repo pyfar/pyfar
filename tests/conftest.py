@@ -4,42 +4,22 @@ import os.path
 import sofa
 import scipy.io.wavfile as wavfile
 
-from pyfar.spatial.spatial import SphericalVoronoi
-from pyfar.orientations import Orientations
-from pyfar.coordinates import Coordinates
-from pyfar.signal import Signal
-import pyfar.dsp.classes as fo
+from pyfar.samplings import SphericalVoronoi
+from pyfar import Orientations
+from pyfar import Coordinates
+from pyfar import FrequencyData, TimeData
+import pyfar.classes.filter as fo
+import pyfar.signals
 
 from pyfar.testing import stub_utils
 
 
 @pytest.fixture
-def sine():
+def sine_stub():
     """Sine signal stub.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of sine signal
-    """
-    frequency = 441
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'none'
-    cshape = (1,)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def sine_rms():
-    """Sine signal stub,
-    RMS FFT-normalization.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -61,34 +41,11 @@ def sine_rms():
 
 
 @pytest.fixture
-def sine_odd():
-    """Sine signal stub,
-    odd number of samples.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of sine signal
-    """
-    frequency = 441
-    sampling_rate = 44100
-    n_samples = 9999
-    fft_norm = 'none'
-    cshape = (1,)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def sine_odd_rms():
-    """Sine signal stub,
-    odd number of samples,
-    RMS FFT-normalization
+def sine_stub_odd():
+    """Sine signal stub, odd number of samples
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -110,31 +67,11 @@ def sine_odd_rms():
 
 
 @pytest.fixture
-def sine_two_by_two_channel():
-    """2-by-2 channel sine signal stub.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of sine signal
-    """
-    frequency = np.array([[1, 2], [3, 4]]) * 441
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'none'
-    cshape = (2, 2)
-
-    time, freq, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def impulse():
+def impulse_stub():
     """Delta impulse signal stub.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -156,137 +93,11 @@ def impulse():
 
 
 @pytest.fixture
-def impulse_rms():
-    """Delta impulse signal stub,
-    RMS FFT-normalization.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of impulse signal
-    """
-    delay = 0
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'rms'
-    cshape = (1,)
-
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def impulse_group_delay():
-    """Delayed delta impulse signal stub with static properties.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of impulse signal
-    group_delay : ndarray
-        Group delay of impulse signal
-    """
-    delay = 1000
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'none'
-    cshape = (1,)
-
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-    group_delay = delay * np.ones_like(freq, dtype=float)
-
-    return signal, group_delay
-
-
-@pytest.fixture
-def impulse_group_delay_two_channel():
-    """Delayed 2 channel delta impulse signal stub with static properties.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of impulse signal
-    group_delay : ndarray
-        Group delay of impulse signal
-    """
-    delay = np.atleast_1d([1000, 2000])
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'none'
-    cshape = (2,)
-
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-    group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
-
-    return signal, group_delay
-
-
-@pytest.fixture
-def impulse_group_delay_two_by_two_channel():
-    """Delayed 2-by-2 channel delta impulse signal stub with static properties.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of impulse signal
-    group_delay : ndarray
-        Group delay of impulse signal
-    """
-    delay = np.array([[1000, 2000], [3000, 4000]])
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'none'
-    cshape = (2, 2)
-
-    time, freq = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
-    group_delay = delay[..., np.newaxis] * np.ones_like(freq, dtype=float)
-
-    return signal, group_delay
-
-
-@pytest.fixture
-def sine_plus_impulse():
-    """Combined sine and delta impulse signal stub.
-
-    Returns
-    -------
-    signal : Signal
-        Stub of sine signal
-    """
-    frequency = 441
-    delay = 100
-    sampling_rate = 44100
-    n_samples = 10000
-    fft_norm = 'none'
-    cshape = (1,)
-
-    time_sine, freq_sine, frequency = stub_utils.sine_func(
-        frequency, sampling_rate, n_samples, fft_norm, cshape)
-    time_imp, freq_imp = stub_utils.impulse_func(
-        delay, n_samples, fft_norm, cshape)
-    signal = stub_utils.signal_stub(
-        time_sine + time_imp, freq_sine + freq_imp, sampling_rate, fft_norm)
-
-    return signal
-
-
-@pytest.fixture
-def noise():
+def noise_stub():
     """Gaussian white noise signal stub.
-    The frequency spectrum is set to dummy value None.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -298,9 +109,8 @@ def noise():
     cshape = (1,)
     sampling_rate = 44100
     fft_norm = 'rms'
-    freq = None
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
     signal = stub_utils.signal_stub(
         time, freq, sampling_rate, fft_norm)
 
@@ -308,10 +118,11 @@ def noise():
 
 
 @pytest.fixture
-def noise_odd():
-    """Gaussian white noise signal stub,
-    odd number of samples.
-    The frequency spectrum is set to dummy value None.
+def noise_stub_odd():
+    """Gaussian white noise signal stub, odd number of samples.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
 
     Returns
     -------
@@ -323,9 +134,8 @@ def noise_odd():
     cshape = (1,)
     sampling_rate = 44100
     fft_norm = 'rms'
-    freq = None
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
+    time, freq = stub_utils.noise_func(sigma, n_samples, cshape)
     signal = stub_utils.signal_stub(
         time, freq, sampling_rate, fft_norm)
 
@@ -333,68 +143,254 @@ def noise_odd():
 
 
 @pytest.fixture
-def noise_two_by_two_channel():
-    """ 2-by-2 channel gaussian white noise signal stub.
-    The frequency spectrum is set to dummy value None.
+def sine():
+    """Sine signal.
 
     Returns
     -------
     signal : Signal
-        Stub of noise signal
+        Sine signal
     """
-    sigma = 1
-    n_samples = int(1e5)
-    cshape = (2, 2)
+    frequency = 441
+    n_samples = 10000
     sampling_rate = 44100
-    fft_norm = 'rms'
-    freq = None
+    amplitude = 1
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+
+    return signal
+
+
+@pytest.fixture
+def sine_short():
+    """Short sine signal where the first frequency is > 20 Hz.
+
+    This is used for testing plot._line._lower_frequency_limit.
+
+    Returns
+    -------
+    signal : Signal
+        Sine signal
+    """
+    frequency = 441
+    n_samples = 100
+    sampling_rate = 44100
+    amplitude = 1
+
+    signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+
+    return signal
+
+
+@pytest.fixture
+def impulse():
+    """Delta impulse signal.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    """
+    n_samples = 10000
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+
+    return signal
+
+
+@pytest.fixture
+def impulse_group_delay():
+    """Delayed delta impulse signal with analytical group delay.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    group_delay : ndarray
+        Group delay of impulse signal
+    """
+    n_samples = 10000
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    group_delay = delay * np.ones_like(signal.freq, dtype=float)
+
+    return signal, group_delay
+
+
+@pytest.fixture
+def impulse_group_delay_two_channel():
+    """Delayed 2 channel delta impulse signal with analytical group delay.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    group_delay : ndarray
+        Group delay of impulse signal
+    """
+    n_samples = 10000
+    delay = np.atleast_1d([1000, 2000])
+    amplitude = np.atleast_1d([1, 1])
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    group_delay = delay[..., np.newaxis] * np.ones_like(
+        signal.freq, dtype=float)
+
+    return signal, group_delay
+
+
+@pytest.fixture
+def impulse_group_delay_two_by_two_channel():
+    """Delayed 2-by-2 channel delta impulse signal with analytical group delay.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    group_delay : ndarray
+        Group delay of impulse signal
+    """
+    n_samples = 10000
+    delay = np.array([[1000, 2000], [3000, 4000]])
+    amplitude = np.atleast_1d([[1, 1], [1, 1]])
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    group_delay = delay[..., np.newaxis] * np.ones_like(
+        signal.freq, dtype=float)
+
+    return signal, group_delay
+
+
+@pytest.fixture
+def sine_plus_impulse():
+    """Added sine and delta impulse signals.
+
+    Returns
+    -------
+    signal : Signal
+        Combined signal
+    """
+    frequency = 441
+    delay = 100
+    n_samples = 10000
+    sampling_rate = 44100
+    amplitude = 1
+
+    sine_signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    sine_signal.fft_norm = 'none'
+
+    impulse_signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    signal = sine_signal + impulse_signal
+
+    return signal
+
+
+@pytest.fixture
+def noise():
+    """Gaussian white noise signal.
+
+    Returns
+    -------
+    signal : Signal
+        Noise signal
+    """
+    n_samples = 10000
+    rms = 1
+    sampling_rate = 44100
+    seed = 1234
+
+    signal = pyfar.signals.noise(
+        n_samples, spectrum="white", rms=rms, sampling_rate=sampling_rate,
+        seed=seed)
 
     return signal
 
 
 @pytest.fixture
 def noise_two_by_three_channel():
-    """ 2-by-3 channel gaussian white noise signal stub.
-    The frequency spectrum is created with np.fft.rfft.
+    """ 2-by-3 channel gaussian white noise signal.
 
     Returns
     -------
     signal : Signal
-        Stub of noise signal
+        Noise signal
     """
-    sigma = 1
-    n_samples = int(1e5)
-    cshape = (2, 3)
+    n_samples = 10000
+    rms = np.ones((2, 3))
     sampling_rate = 44100
-    fft_norm = 'none'
+    seed = 1234
 
-    time = stub_utils.noise_func(sigma, n_samples, cshape)
-    freq = np.fft.rfft(time)
-    signal = stub_utils.signal_stub(
-        time, freq, sampling_rate, fft_norm)
+    signal = pyfar.signals.noise(
+        n_samples, spectrum="white", rms=rms, sampling_rate=sampling_rate,
+        seed=seed)
 
     return signal
 
 
 @pytest.fixture
-def fft_lib_np(monkeypatch):
-    """Set numpy.fft as fft library.
+def time_data():
     """
-    import pyfar.fft
-    monkeypatch.setattr(pyfar.fft, 'fft_lib', np.fft)
+    TimeData object with three data points.
+
+    Returns
+    -------
+    time_data TimeData
+        Data
+    """
+    time_data = TimeData([1, 0, -1], [0, .1, .4])
+    return time_data
 
 
 @pytest.fixture
-def fft_lib_pyfftw(monkeypatch):
-    """Set pyfftw as fft library.
+def frequency_data():
     """
-    import pyfar.fft
-    from pyfftw.interfaces import numpy_fft as npi_fft
-    monkeypatch.setattr(pyfar.fft, 'fft_lib', npi_fft)
+    FrequencyData object with three data points.
+
+    Returns
+    -------
+    frequency_data FrequencyData
+        Data
+    """
+    frequency_data = FrequencyData([2, .25, .5], [100, 1000, 20000])
+    return frequency_data
+
+
+@pytest.fixture
+def frequency_data_one_point():
+    """
+    FrequencyData object with one data point.
+
+    Returns
+    -------
+    frequency_data FrequencyData
+        Data
+    """
+    frequency_data = FrequencyData([2], [0])
+    return frequency_data
 
 
 @pytest.fixture
@@ -472,6 +468,41 @@ def generate_sofa_GeneralTF(
     sofafile.Data.initialize()
     sofafile.Data.Real.set_values(np.real(noise_two_by_three_channel.freq))
     sofafile.Data.Imag.set_values(np.imag(noise_two_by_three_channel.freq))
+
+    sofafile.close()
+    return filename
+
+
+@pytest.fixture
+def generate_sofa_postype_spherical(
+        tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
+    """ Generate the reference sofa files of type GeneralFIR,
+    spherical position type.
+    """
+    sofatype = 'GeneralFIR'
+    n_measurements = noise_two_by_three_channel.cshape[0]
+    n_receivers = noise_two_by_three_channel.cshape[1]
+    n_samples = noise_two_by_three_channel.n_samples
+    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
+
+    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
+    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
+
+    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
+    sofafile.Source.initialize(
+        variances=["Position"], fixed=["View", "Up"])
+    sofafile.Source.Position.set_system('spherical')
+    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
+    sofafile.Receiver.initialize(
+        variances=["Position"], fixed=["View", "Up"])
+    sofafile.Receiver.Position.set_system('spherical')
+    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
+    sofafile.Receiver.Position.set_values(r_coords)
+    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
+    sofafile.Data.Type = 'FIR'
+    sofafile.Data.initialize()
+    sofafile.Data.IR = noise_two_by_three_channel.time
+    sofafile.Data.SamplingRate = noise_two_by_three_channel.sampling_rate
 
     sofafile.close()
     return filename
@@ -580,13 +611,6 @@ def coordinates():
 
 
 @pytest.fixture
-def sine_signal(sine):
-    """ Signal object without Mock or MagicMock wrapper.
-    """
-    return Signal(sine.time, sine.sampling_rate, domain='time')
-
-
-@pytest.fixture
 def coeffs():
     return np.array([[[1, 0, 0], [1, 0, 0]]])
 
@@ -604,14 +628,6 @@ def filter(coeffs, state):
 
 
 @pytest.fixture
-def filterIIR():
-    """ FilterIIR object.
-    """
-    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
-    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
-
-
-@pytest.fixture
 def filterFIR():
     """ FilterFIR objectr.
     """
@@ -619,6 +635,14 @@ def filterFIR():
         [1, 1 / 2, 0],
         [1, 1 / 4, 1 / 8]])
     return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
@@ -673,3 +697,10 @@ def nested_data():
     `io.write` and `io.read`.
     """
     return stub_utils.NestedData.create()
+
+
+@pytest.fixture
+def dict_of_builtins():
+    """ Dictionary that contains builtins with support for writing and reading.
+    """
+    return stub_utils.dict_of_builtins()

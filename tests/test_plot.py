@@ -1,13 +1,22 @@
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.testing as mpt
-from matplotlib.testing.compare import compare_images
 import os
-
+from pytest import raises
+import matplotlib.pyplot as plt
 import pyfar.plot as plot
+from pyfar.testing.plot_utils import create_figure, save_and_compare
 
-# flag for creating new baseline plots (required if the plot look changed)
+# global parameters -----------------------------------------------------------
+# flag for creating new baseline plots
+# - required if the plot look changed
+# - make sure to manually check the new baseline plots located at baseline_path
 create_baseline = False
+
+# file type used for saving the plots
+file_type = "png"
+
+# if true, the plots will be compared to the baseline and an error is raised
+# if there are any differences. In any case, differences are writted to
+# output_path as images
+compare_output = False
 
 # path handling
 base_path = os.path.join('tests', 'test_plot_data')
@@ -21,12 +30,12 @@ if not os.path.isdir(baseline_path):
 if not os.path.isdir(output_path):
     os.mkdir(output_path)
 
-# figure parameters
-f_width = 4.8
-f_height = 4.8
-f_dpi = 100
+# remove old output files
+for file in os.listdir(output_path):
+    os.remove(os.path.join(output_path, file))
 
 
+# testing ---------------------------------------------------------------------
 def test_line_plots(sine, impulse_group_delay):
     """Test all line plots with default arguments and hold functionality."""
 
@@ -34,87 +43,48 @@ def test_line_plots(sine, impulse_group_delay):
                      plot.line.freq,
                      plot.line.phase,
                      plot.line.group_delay,
-                     plot.line.spectrogram,
                      plot.line.time_freq,
                      plot.line.freq_phase,
                      plot.line.freq_group_delay]
 
     for function in function_list:
         print(f"Testing: {function.__name__}")
-        # file names
-        filename = 'line_' + function.__name__ + '.png'
-        baseline = os.path.join(baseline_path, filename)
-        output = os.path.join(output_path, filename)
 
-        # plotting
-        matplotlib.use('Agg')
-        mpt.set_reproducibility_for_testing()
-        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        # initial plot
+        filename = 'line_' + function.__name__
+        create_figure()
         function(sine)
-
-        # save baseline if it does not exist
-        # make sure to visually check the baseline uppon creation
-        if create_baseline:
-            plt.savefig(baseline)
-        # safe test image
-        plt.savefig(output)
-
-        # testing
-        compare_images(baseline, output, tol=10)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
         # test hold functionality
-        # file names
-        filename = 'line_' + function.__name__ + '_hold.png'
-        baseline = os.path.join(baseline_path, filename)
-        output = os.path.join(output_path, filename)
-
-        # plotting
+        filename = 'line_' + function.__name__ + '_hold'
         function(impulse_group_delay[0])
-
-        # save baseline if it does not exist
-        # make sure to visually check the baseline uppon creation
-        if create_baseline:
-            plt.savefig(baseline)
-        # safe test image
-        plt.savefig(output)
-
-        # close current figure
-        plt.close()
-
-        # testing
-        compare_images(baseline, output, tol=10)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_line_phase_options(sine):
     """Test parameters that are unique to the phase plot."""
 
-    parameter_list = [['line_phase_deg.png', True, False],
-                      ['line_phase_unwrap.png', False, True],
-                      ['line_phase_deg_unwrap.png', True, True]]
+    parameter_list = [['line_phase_deg', True, False],
+                      ['line_phase_unwrap', False, True],
+                      ['line_phase_deg_unwrap', True, True]]
 
     for param in parameter_list:
         print(f"Testing: {param[0]}")
-        # file names
+
         filename = param[0]
-        baseline = os.path.join(baseline_path, filename)
-        output = os.path.join(output_path, filename)
-        # plotting
-        matplotlib.use('Agg')
-        mpt.set_reproducibility_for_testing()
-        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        create_figure()
         plot.line.phase(sine, deg=param[1], unwrap=param[2])
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
-        # save baseline if it does not exist
-        # make sure to visually check the baseline uppon creation
-        if create_baseline:
-            plt.savefig(baseline)
-        # safe test image
-        plt.savefig(output)
-        # close current figure
-        plt.close()
 
-        # testing
-        compare_images(baseline, output, tol=10)
+def test_line_phase_unwrap_assertion(sine):
+    """Test assertion for unwrap parameter."""
+    with raises(ValueError):
+        plot.line.phase(sine, unwrap='infinity')
 
 
 def test_line_dB_option(sine):
@@ -128,56 +98,22 @@ def test_line_dB_option(sine):
     for function in function_list:
         for dB in [True, False]:
             print(f"Testing: {function.__name__} (dB={dB})")
-            # file names
-            filename = 'line_' + function.__name__ + '_dB_' + str(dB) + '.png'
-            baseline = os.path.join(baseline_path, filename)
-            output = os.path.join(output_path, filename)
 
-            # plotting
-            matplotlib.use('Agg')
-            mpt.set_reproducibility_for_testing()
-            plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+            filename = 'line_' + function.__name__ + '_dB_' + str(dB)
+            create_figure()
             function(sine, dB=dB)
-
-            # save baseline if it does not exist
-            # make sure to visually check the baseline uppon creation
-            if create_baseline:
-                plt.savefig(baseline)
-            # safe test image
-            plt.savefig(output)
-
-            # close current figure
-            plt.close()
-
-            # testing
-            compare_images(baseline, output, tol=10)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
 
     # test if log_prefix and log_reference are working
     for function in function_list:
         print(f"Testing: {function.__name__} (log parameters)")
-        # file names
-        filename = 'line_' + function.__name__ + '_logParams.png'
-        baseline = os.path.join(baseline_path, filename)
-        output = os.path.join(output_path, filename)
 
-        # plotting
-        matplotlib.use('Agg')
-        mpt.set_reproducibility_for_testing()
-        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+        filename = 'line_' + function.__name__ + '_logParams'
+        create_figure()
         function(sine, log_prefix=10, log_reference=.5, dB=True)
-
-        # save baseline if it does not exist
-        # make sure to visually check the baseline uppon creation
-        if create_baseline:
-            plt.savefig(baseline)
-        # safe test image
-        plt.savefig(output)
-
-        # close current figure
-        plt.close()
-
-        # testing
-        compare_images(baseline, output, tol=10)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
 def test_line_xscale_option(sine):
@@ -191,30 +127,32 @@ def test_line_xscale_option(sine):
     for function in function_list:
         for xscale in ['log', 'linear']:
             print(f"Testing: {function.__name__} (xscale={xscale})")
-            # file names
-            filename = 'line_' + function.__name__ + '_xscale_' + xscale + \
-                       '.png'
-            baseline = os.path.join(baseline_path, filename)
-            output = os.path.join(output_path, filename)
 
-            # plotting
-            matplotlib.use('Agg')
-            mpt.set_reproducibility_for_testing()
-            plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+            filename = 'line_' + function.__name__ + '_xscale_' + xscale
+            create_figure()
             function(sine, xscale=xscale)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
 
-            # save baseline if it does not exist
-            # make sure to visually check the baseline uppon creation
-            if create_baseline:
-                plt.savefig(baseline)
-            # safe test image
-            plt.savefig(output)
 
-            # close current figure
-            plt.close()
+def test_line_xscale_assertion(sine):
+    """
+    Test if all line plots raise an assertion for a wrong scale parameter.
+    """
 
-            # testing
-            compare_images(baseline, output, tol=10)
+    with raises(ValueError):
+        plot.line.freq(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.phase(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, xscale="warped")
+
+    with raises(ValueError):
+        plot.line.spectrogram(sine, yscale="warped")
+
+    plt.close("all")
 
 
 def test_time_unit(impulse_group_delay):
@@ -226,37 +164,27 @@ def test_time_unit(impulse_group_delay):
     for function in function_list:
         for unit in [None, 's', 'ms', 'mus', 'samples']:
             print(f"Testing: {function.__name__} (unit={unit})")
-            # file names
-            filename = f'line_{function.__name__}_unit_{str(unit)}.png'
-            baseline = os.path.join(baseline_path, filename)
-            output = os.path.join(output_path, filename)
 
-            # plotting
-            matplotlib.use('Agg')
-            mpt.set_reproducibility_for_testing()
-            plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi
+            filename = f'line_{function.__name__}_unit_{str(unit)}'
+            create_figure()
             plot.line.group_delay(impulse_group_delay[0], unit=unit)
-
-            # save baseline if it does not exist
-            # make sure to visually check the baseline uppon creation
-            if create_baseline:
-                plt.savefig(baseline)
-            # safe test image
-            plt.savefig(output)
-
-            # close current figure
-            plt.close()
-
-            # testing
-            compare_images(baseline, output, tol=10)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
 
 
-def test_line_time_auto_unit():
-    """Test automatically assigning the unit in group delay plots."""
-    assert plot._line._time_auto_unit(0) == 's'
-    assert plot._line._time_auto_unit(1e-4) == 'mus'
-    assert plot._line._time_auto_unit(2e-2) == 'ms'
-    assert plot._line._time_auto_unit(2) == 's'
+def test_time_unit_assertion(sine):
+    """Test if all line plots raise an assertion for a wrong unit parameter."""
+
+    with raises(ValueError):
+        plot.line.time(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line.group_delay(sine, unit="pascal")
+
+    with raises(ValueError):
+        plot.line.spectrogram(sine, unit="pascal")
+
+    plt.close("all")
 
 
 def test_line_custom_subplots(sine, impulse_group_delay):
@@ -275,86 +203,111 @@ def test_line_custom_subplots(sine, impulse_group_delay):
 
     for p in plots:
         print(f"Testing: {p}")
-        # file names
-        filename = 'line_custom_subplots_' + p + '.png'
-        baseline = os.path.join(baseline_path, filename)
-        output = os.path.join(output_path, filename)
 
-        # plotting
-        matplotlib.use('Agg')
-        mpt.set_reproducibility_for_testing()
-        plt.figure(1, (f_width, f_height), f_dpi)  # force size/dpi for testing
+        # test initial plot
+        filename = 'line_custom_subplots_' + p
+        create_figure()
         plot.line.custom_subplots(sine, plots[p])
-
-        # save baseline if it does not exist
-        # make sure to visually check the baseline uppon creation
-        if create_baseline:
-            plt.savefig(baseline)
-        # safe test image
-        plt.savefig(output)
-
-        # testing
-        compare_images(baseline, output, tol=10)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
         # test hold functionality
-        # file names
-        filename = 'line_custom_subplots_' + p + '_hold.png'
-        baseline = os.path.join(baseline_path, filename)
-        output = os.path.join(output_path, filename)
-
-        # plotting
+        filename = 'line_custom_subplots_' + p + '_hold'
         plot.line.custom_subplots(impulse_group_delay[0], plots[p])
-
-        # save baseline if it does not exist
-        # make sure to visually check the baseline uppon creation
-        if create_baseline:
-            plt.savefig(baseline)
-        # safe test image
-        plt.savefig(output)
-
-        # close current figure
-        plt.close()
-
-        # testing
-        compare_images(baseline, output, tol=10)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
 
-def test_prepare_plot():
-    # test without arguments
-    plot._line._prepare_plot()
+def test_line_time_data(time_data):
+    """Test all line plots with default arguments and hold functionality."""
 
-    # test with single axes object
-    fig = plt.gcf()
-    ax = plt.gca()
-    plot._line._prepare_plot(ax)
-    plt.close()
+    function_list = [plot.line.time]
 
-    # test with list of axes
-    fig = plt.gcf()
-    fig.subplots(2, 2)
-    ax = fig.get_axes()
-    plot._line._prepare_plot(ax)
-    plt.close()
+    for function in function_list:
+        print(f"Testing: {function.__name__}")
 
-    # test with numpy array of axes
-    fig = plt.gcf()
-    ax = fig.subplots(2, 2)
-    plot._line._prepare_plot(ax)
-    plt.close()
+        filename = 'line_time_data_' + function.__name__
+        create_figure()
+        function(time_data)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
 
-    # test with list of axes and desired subplot layout
-    fig = plt.gcf()
-    fig.subplots(2, 2)
-    ax = fig.get_axes()
-    plot._line._prepare_plot(ax, (2, 2))
-    plt.close()
 
-    # test with numpy array of axes and desired subplot layout
-    fig = plt.gcf()
-    ax = fig.subplots(2, 2)
-    plot._line._prepare_plot(ax, (2, 2))
-    plt.close()
+def test_line_frequency_data(frequency_data):
+    """Test all line plots with default arguments and hold functionality."""
 
-    # test without axes and with desired subplot layout
-    plot._line._prepare_plot(None, (2, 2))
-    plt.close()
+    function_list = [plot.line.freq,
+                     plot.line.phase,
+                     plot.line.freq_phase]
+
+    for function in function_list:
+        print(f"Testing: {function.__name__}")
+
+        filename = 'line_frequency_data_' + function.__name__
+        create_figure()
+        function(frequency_data)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
+
+
+def test_2d_plots(sine):
+    """Test all 2D plots with default parameters"""
+    function_list = [
+        plot.spectrogram]
+
+    for function in function_list:
+
+        print(f"Testing: {function.__name__}")
+
+        filename = '2d_' + function.__name__
+        create_figure()
+        function(sine)
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)
+
+
+def test_2d_colorbar_options(sine):
+    """Test all 2D plots with default parameters"""
+    function_list = [
+        plot.spectrogram]
+
+    for function in function_list:
+        for cb_option in ["off", "axes"]:
+
+            print(f"Testing: {function.__name__}")
+
+            filename = '2d_' + cb_option + "_" + function.__name__
+            fig = create_figure()
+            if cb_option == "off":
+                # test not plotting a colobar
+                function(sine, colorbar=False)
+            elif cb_option == "axes":
+                # test plotting colorbar to specified axis
+                fig.clear()
+                _, ax = plt.subplots(1, 2, num=fig.number)
+                function(sine, ax=ax)
+            save_and_compare(create_baseline, baseline_path, output_path,
+                             filename, file_type, compare_output)
+
+
+def test_2d_plots_colorbar_assertion(sine):
+    function_list = [
+        plot.spectrogram]
+
+    # test assertion when passing an array of axes but not having a colobar
+    for function in function_list:
+        with raises(ValueError, match="A list of axes"):
+            function(sine, colorbar=False, ax=[plt.gca(), plt.gca()])
+
+
+def test_use():
+    """Test if use changes the plot style."""
+
+    for style in ["dark", "default"]:
+
+        filename = 'use_' + style
+        plot.utils.use(style)
+        create_figure()
+        plt.plot([1, 2, 3], [1, 2, 3])
+        save_and_compare(create_baseline, baseline_path, output_path, filename,
+                         file_type, compare_output)

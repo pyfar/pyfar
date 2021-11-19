@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pyfar.signal import FrequencyData as FrequencyData
+from pyfar import FrequencyData
 
 
 def test_data_frequency_init_with_defaults():
@@ -38,14 +38,6 @@ def test_data_frequency_with_non_monotonously_increasing_frequencies():
         FrequencyData(data, freqs)
 
 
-def test_data_frequency_with_wrong_fft_norm():
-    data = [1, 0, -1]
-    freqs = [0, .1, .2]
-
-    with pytest.raises(ValueError):
-        FrequencyData(data, freqs, fft_norm='bull shit')
-
-
 def test_data_frequency_setter_freq():
     """Test the setter for the frequency data."""
     data_a = [1, 0, -1]
@@ -55,14 +47,6 @@ def test_data_frequency_setter_freq():
     freq = FrequencyData(data_a, freqs)
     freq.freq = data_b
     npt.assert_allclose(freq.freq, np.atleast_2d(np.asarray(data_b)))
-
-
-def test_getter_fft_norm():
-    data = [1, 0, -1]
-    freqs = [0, .1, .3]
-
-    freq = FrequencyData(data, freqs, fft_norm='psd')
-    assert freq.fft_norm == 'psd'
 
 
 def test_reshape():
@@ -93,7 +77,7 @@ def test_reshape_exceptions():
         data_out = data_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape signal of cshape'):
+    with pytest.raises(ValueError, match='Can not reshape audio object'):
         data_out = data_in.reshape((3, 4))
 
 
@@ -150,17 +134,6 @@ def test_magic_setitem():
     npt.assert_allclose(freq_a.freq, np.asarray([[2, 0, -2], [1, 0, -1]]))
 
 
-def test_magic_setitem_wrong_fft_norm():
-    """Test the setitem for FrequencyData with wrong FFT norm."""
-    freqs = [0, .1, .3]
-
-    freq_a = FrequencyData([1, 0, -1], freqs)
-    freq_b = FrequencyData([2, 0, -2], freqs, fft_norm='psd')
-
-    with pytest.raises(ValueError):
-        freq_a[0] = freq_b
-
-
 def test_magic_setitem_wrong_n_bins():
     """Test the setitem for FrequencyData with wrong number of bins."""
 
@@ -199,5 +172,30 @@ def test_separation_from_signal():
         freq.sampling_rate
     with pytest.raises(AttributeError):
         freq.domain = 'freq'
-    with pytest.raises(AttributeError):
-        freq.fft_norm = 'amplitude'
+
+
+def test___eq___equal():
+    """Check if copied FrequencyData is equal."""
+    frequency_data = FrequencyData([1, 2, 3], [1, 2, 3])
+    actual = frequency_data.copy()
+    assert frequency_data == actual
+
+
+def test___eq___notEqual():
+    """Check if FrequencyData is equal."""
+    frequency_data = FrequencyData([1, 2, 3], [1, 2, 3])
+    actual = FrequencyData([2, 3, 4], [1, 2, 3])
+    assert not frequency_data == actual
+    actual = FrequencyData([1, 2, 3], [2, 3, 4])
+    assert not frequency_data == actual
+    comment = f'{frequency_data.comment} A completely different thing'
+    actual = FrequencyData([1, 2, 3], [1, 2, 3], comment=comment)
+    assert not frequency_data == actual
+
+
+def test__repr__(capfd):
+    """Test string representation"""
+    print(FrequencyData([1, 2, 3], [1, 2, 3]))
+    out, _ = capfd.readouterr()
+    assert ("FrequencyData:\n"
+            "(1,) channels with 3 frequencies") in out
