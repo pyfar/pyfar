@@ -45,36 +45,31 @@ of the spectrum (cf. [1]_, Eq. 8). The coresponding normalization is
 ``'unitary'``. Additional normalizations can be applied to further scale the
 spectrum, e.g., according to the RMS value.
 
->>> import numpy as np
->>> from pyfar.dsp import fft
->>> import matplotlib.pyplot as plt
->>> frequency = 100
->>> sampling_rate = 1000
->>> n_samples = 1024
->>> sampling_rate = 48e3
->>> sine = np.sin(np.linspace(0, 2*np.pi*frequency/sampling_rate, n_samples))
->>> spectrum = fft.rfft(sine, n_samples, sampling_rate, 'rms')
-
 .. plot::
 
-    import numpy as np
-    from pyfar.dsp import fft
-    import matplotlib.pyplot as plt
-    n_samples = 1024
-    sampling_rate = 48e3
-    times = np.linspace(0, 10, n_samples)
-    sine = np.sin(times * 2*np.pi * 100)
-    spec = fft.rfft(sine, n_samples, sampling_rate, 'rms')
-    freqs = fft.rfftfreq(n_samples, 48e3)
-    plt.subplot(1, 2, 1)
-    plt.plot(times, sine)
-    ax = plt.gca()
-    ax.set_xlabel('Time in s')
-    plt.subplot(1, 2, 2)
-    plt.plot(freqs, np.abs(spec))
-    ax = plt.gca()
-    ax.set_xlabel('Frequency in Hz')
-    plt.show()
+    >>> import numpy as np
+    >>> from pyfar.dsp import fft
+    >>> import matplotlib.pyplot as plt
+    >>> # properties
+    >>> fft_normalization = "rms"
+    >>> n_samples = 1024
+    >>> sampling_rate = 48e3
+    >>> frequency = 100
+    >>> times = np.linspace(0, 10, n_samples)
+    >>> freqs = fft.rfftfreq(n_samples, 48e3)
+    >>> # generate data
+    >>> sine = np.sin(times * 2*np.pi * frequency)
+    >>> spec = fft.rfft(sine, n_samples, sampling_rate, fft_normalization)
+    >>> # plot time and frequency data
+    >>> plt.subplot(1, 2, 1)
+    >>> plt.plot(times, sine)
+    >>> ax = plt.gca()
+    >>> ax.set_xlabel('Time in s')
+    >>> plt.subplot(1, 2, 2)
+    >>> plt.plot(freqs, np.abs(spec))
+    >>> ax = plt.gca()
+    >>> ax.set_xlabel('Frequency in Hz')
+    >>> plt.show()
 
 
 References
@@ -87,19 +82,9 @@ References
 
 """
 import multiprocessing
-import warnings
 
 import numpy as np
-
-try:
-    import pyfftw
-    pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-    from pyfftw.interfaces import numpy_fft as fft_lib
-except ImportError:
-    warnings.warn(
-        "Using numpy FFT implementation.\
-        Install pyfftw for improved performance.")
-    from numpy import fft as fft_lib
+from scipy import fft
 
 
 def rfftfreq(n_samples, sampling_rate):
@@ -123,7 +108,7 @@ def rfftfreq(n_samples, sampling_rate):
         The positive discrete frequencies in Hz for which the FFT is
         calculated.
     """  # noqa: W605 (ignore \_ which is valid only in LaTex)
-    return fft_lib.rfftfreq(n_samples, d=1/sampling_rate)
+    return fft.rfftfreq(n_samples, d=1/sampling_rate)
 
 
 def rfft(data, n_samples, sampling_rate, fft_norm):
@@ -158,7 +143,8 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     """
 
     # DFT
-    spec = fft_lib.rfft(data, n=n_samples, axis=-1)
+    spec = fft.rfft(
+        data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
     # Normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=False, single_sided=True)
@@ -202,7 +188,8 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True)
     # Inverse DFT
-    data = fft_lib.irfft(spec, n=n_samples, axis=-1)
+    data = fft.irfft(
+        spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
 
     return data
 

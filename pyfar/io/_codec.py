@@ -33,7 +33,7 @@ three basic encoding/decoding types:
             [str, str] e.g. ['$ndarray', '/my_obj/_signal']
 
 Numpy-types can be stored directly in the zipfile. In this case type hints,
-such as `$ndarray`, become the name of the file in the archive.
+such as `$ndarray`, become the name of the node in the zipfile.
 
 
 Class-Level
@@ -103,6 +103,7 @@ import io
 import sys
 import json
 import numpy as np
+from copy import deepcopy
 
 
 def _decode(obj, zipfile):
@@ -165,6 +166,8 @@ def _inner_decode(obj, key, zipfile):
         obj[key] = set(tuple(obj[key][1]))
     elif obj[key][0][1:] == 'frozenset':
         obj[key] = frozenset(tuple(obj[key][1]))
+    elif obj[key][0][1:] == 'bytes':
+        obj[key] = bytes.fromhex(obj[key][1])
     else:
         _decode_numpy_scalar(obj, key)
 
@@ -292,6 +295,8 @@ def _inner_encode(obj, key, zip_path, zipfile):
         obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
     elif isinstance(obj[key], (tuple, set, frozenset)):
         obj[key] = [f'${type(obj[key]).__name__ }', list(obj[key])]
+    elif isinstance(obj[key], bytes):
+        obj[key] = [f'${type(obj[key]).__name__ }', obj[key].hex()]
     else:
         _encode(obj[key], zip_path, zipfile)
 
@@ -354,9 +359,32 @@ def _is_pyfar_type(obj):
         'Coordinates',
         'Signal',
         'Filter',
+        'FilterFIR',
+        'FilterIIR',
+        'FilterSOS',
         'SphericalVoronoi',
         'TimeData',
-        'FrequencyData']
+        'FrequencyData',
+        'BuiltinsWrapper']
+
+
+def _supported_builtin_types():
+    """
+    The following python builtin types can be written and read
+    from and to disk.
+    """
+    builtin_types = [
+        bool,
+        bytes,
+        complex,
+        float,
+        frozenset,
+        int,
+        list,
+        set,
+        str,
+        tuple]
+    return builtin_types
 
 
 def _is_numpy_type(obj):
@@ -418,3 +446,20 @@ def _str_to_type(type_as_string, module='pyfar'):
             type_as_string, module=f'{module}.{submodule}')
         if PyfarType:
             return PyfarType
+
+
+class BuiltinsWrapper(dict):
+    """
+    Wrapper for builtins that enables json-aided encoding and contains
+    `_encode` and `_decode` methods, which are called polymorphically
+    in `io.write` and `io.read`.
+    """
+    def copy(self):
+        return deepcopy(self)
+
+    def _encode(self):
+        return self.copy()
+
+    @staticmethod
+    def _decode(obj_dict):
+        return obj_dict

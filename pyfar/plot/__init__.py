@@ -13,19 +13,12 @@ of plots. In addition most plot functions pass keyword arguments to Matplotlib.
 
 This is an example for customizing the line color and axis limits:
 
->>> import pyfar
->>>
->>> noise = pyfar.signals.noise(2**14)
->>> ax = pyfar.plot.freq(noise, color=(.3, .3, .3))
->>> ax.set_ylim(-60, -20)
-
 .. plot::
 
-    import pyfar
-
-    noise = pyfar.signals.noise(2**14)
-    ax = pyfar.plot.freq(noise, color=(.3, .3, .3))
-    ax.set_ylim(-60, -20)
+    >>> import pyfar as pf
+    >>> noise = pf.signals.noise(2**14)
+    >>> ax = pf.plot.freq(noise, color=(.3, .3, .3))
+    >>> ax.set_ylim(-60, -20)
 """
 
 from .line import (
@@ -33,12 +26,16 @@ from .line import (
     time,
     phase,
     group_delay,
-    spectrogram,
     time_freq,
     freq_phase,
     freq_group_delay,
     custom_subplots
 )
+
+from .two_d import (
+    spectrogram
+)
+
 from .spatial import (
     scatter,
     quiver

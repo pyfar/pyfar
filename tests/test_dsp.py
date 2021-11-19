@@ -4,6 +4,7 @@ import scipy.signal as sgn
 import pytest
 import pyfar
 
+from pyfar.signals import impulse
 from pyfar import dsp
 import pyfar as pf
 
@@ -49,16 +50,19 @@ def test_group_delay_single_channel(impulse_group_delay):
 
     grp = dsp.group_delay(signal, method='scipy')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(signal, method='fft')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(
         signal, method='fft')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
 
 def test_group_delay_two_channel(impulse_group_delay_two_channel):
@@ -94,7 +98,8 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency_idx = np.abs(signal.frequencies-frequency).argmin()
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == ()
-    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+    npt.assert_allclose(
+        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
     # Multiple frequencies
     frequency = np.array([1000, 2000])
@@ -102,7 +107,8 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
         signal.frequencies-frequency[..., np.newaxis]).argmin(axis=-1)
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == (2,)
-    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+    npt.assert_allclose(
+        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
 
 def test_linear_phase():
@@ -123,17 +129,11 @@ def test_linear_phase():
     y = dsp.linear_phase(x, N / 2 / fs, unit="s")
     npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
 
-    # test group delay in milliseconds
-    y = dsp.linear_phase(x, N / 2 / fs * 1e3, unit="ms")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
-
-    # test group delay in microseconds
-    y = dsp.linear_phase(x, N / 2 / fs * 1e6, unit="mus")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
-
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
         dsp.linear_phase(1, 0)
+    with pytest.raises(ValueError, match="unit is km"):
+        dsp.linear_phase(x, N / 2 / fs, unit="km")
 
 
 def test_linear_phase_multichannel():
@@ -212,6 +212,70 @@ def test_regu_inversion(impulse):
     npt.assert_allclose(res.freq[:, -1], [0.25])
 
 
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+def test_time_shift_samples(shift_samples):
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+    # shift around one time
+    shift_samples = n_samples
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+def test_time_shift_full_length():
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shifted = dsp.time_shift(test_signal, n_samples, unit='samples')
+    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+def test_time_shift_seconds(shift_samples):
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    shift_time = shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift_time, unit='s')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
+def test_time_shift_multi_dim():
+    delay = 2
+    n_samples = 10
+
+    # multi-dim signal with individual shifts
+    n_channels = np.array([2, 3])
+    test_signal = impulse(
+        n_samples, delay=delay, amplitude=np.ones(n_channels))
+    shift_samples = np.reshape(np.arange(np.prod(n_channels)) + 1, n_channels)
+    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, amplitude=np.ones(n_channels))
+
+    npt.assert_allclose(shifted.time, ref.time, atol=1e-16)
+
+
 def test_time_window_default():
     """ Test time_window function with default values."""
     sig = pyfar.Signal(np.ones(10), 2)
@@ -265,8 +329,6 @@ def test_time_window_interval_unit_error():
         dsp.time_window(sig, interval=[0, 11], unit='samples')
     with pytest.raises(ValueError, match='than signal'):
         dsp.time_window(sig, interval=[0, 6], unit='s')
-    with pytest.raises(ValueError, match='than signal'):
-        dsp.time_window(sig, interval=[0, 6e3], unit='ms')
 
 
 def test_time_window_crop_none():
@@ -288,10 +350,6 @@ def test_time_window_crop_interval():
         crop='window')
     assert sig_win.n_samples == 3
     sig_win = dsp.time_window(
-        sig, interval=[500, 1500], shape='symmetric', unit='ms',
-        crop='window')
-    assert sig_win.n_samples == 3
-    sig_win = dsp.time_window(
         sig, interval=[1, 3], shape='left', crop='window')
     assert sig_win.n_samples == 9
     sig_win = dsp.time_window(
@@ -308,10 +366,6 @@ def test_time_window_crop_end():
     assert sig_win.n_samples == 4
     sig_win = dsp.time_window(
         sig, interval=[0.5, 1.5], shape='symmetric', unit='s',
-        crop='end')
-    assert sig_win.n_samples == 4
-    sig_win = dsp.time_window(
-        sig, interval=[500, 1500], shape='symmetric', unit='ms',
         crop='end')
     assert sig_win.n_samples == 4
     sig_win = dsp.time_window(
@@ -395,14 +449,12 @@ def test_time_window_interval_four_values():
     """ Test time_window with four values given in interval."""
     sig = pyfar.Signal(np.ones(9), 1)
     sig_win = dsp.time_window(
-        sig, window='triang', interval=[1, 3, 6, 7], unit='samples',
-        crop='none')
+        sig, window='triang', interval=[1, 3, 6, 7], crop='none')
     time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0]])
     npt.assert_allclose(sig_win.time, time_win)
     sig = pyfar.Signal(np.ones(10), 1)
     sig_win = dsp.time_window(
-        sig, window='triang', interval=[1, 3, 6, 7], unit='samples',
-        crop='none')
+        sig, window='triang', interval=[1, 3, 6, 7], crop='none')
     time_win = np.array([[0, 0.25, 0.75, 1, 1, 1, 1, 0.5, 0, 0]])
     npt.assert_allclose(sig_win.time, time_win)
 
@@ -434,3 +486,58 @@ def test_kaiser_window_beta():
     beta = dsp.kaiser_window_beta(A)
     beta_true = 0.0
     assert beta == beta_true
+
+
+def test_minimum_phase():
+    # tests are separated since their reliability depends on the type of
+    # filters. The homomorphic method works best for filters with odd numbers
+    # of taps
+
+    # method = 'hilbert'
+    n_samples = 9
+    filter_linphase = pyfar.Signal([0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 44100)
+
+    imp_minphase = pyfar.dsp.minimum_phase(
+        filter_linphase, pad=False, method='hilbert', n_fft=2**18)
+
+    ref = np.array([1, 1, 0, 0, 0], dtype=float)
+    npt.assert_allclose(
+        np.squeeze(imp_minphase.time), ref, rtol=1e-4, atol=1e-4)
+
+    # method = 'homomorphic'
+    n_samples = 8
+    imp_linphase = pyfar.signals.impulse(
+        n_samples+1, delay=int(n_samples/2))
+
+    ref = pyfar.signals.impulse(int(n_samples/2)+1)
+
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=False)
+    npt.assert_allclose(imp_minphase.time, ref.time)
+
+    # test pad length
+    ref = pyfar.signals.impulse(n_samples+1)
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=True)
+
+    assert imp_minphase.n_samples == imp_linphase.n_samples
+    npt.assert_allclose(imp_minphase.time, ref.time)
+
+    # test error
+    ref = pyfar.signals.impulse(n_samples+1)
+    imp_minphase, mag_error = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', return_magnitude_ratio=True)
+
+    npt.assert_allclose(
+        np.squeeze(mag_error.freq),
+        np.ones(int(n_samples/2+1), dtype=complex))
+
+    # test multidim
+    ref = pyfar.signals.impulse(n_samples+1, amplitude=np.ones((2, 3)))
+    imp_linphase = pyfar.signals.impulse(
+        n_samples+1, delay=int(n_samples/2), amplitude=np.ones((2, 3)))
+    imp_minphase = pyfar.dsp.minimum_phase(
+        imp_linphase, method='homomorphic', pad=True)
+
+    assert imp_minphase.n_samples == imp_linphase.n_samples
+    npt.assert_allclose(imp_minphase.time, ref.time)

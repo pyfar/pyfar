@@ -2,6 +2,7 @@ import numpy as np
 import numpy.testing as npt
 from pytest import raises
 
+import pyfar as pf
 import pyfar.classes.audio as signal
 from pyfar import Signal, TimeData, FrequencyData
 
@@ -12,7 +13,7 @@ def test_add_two_signals_time():
     x = Signal([1, 0, 0], 44100)
 
     # time domain
-    y = signal.add((x, x), 'time')
+    y = pf.add((x, x), 'time')
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
     # check result
@@ -27,7 +28,7 @@ def test_add_two_signals_freq():
     x = Signal([1, 0, 0], 44100)
 
     # frequency domain
-    y = signal.add((x, x), 'freq')
+    y = pf.add((x, x), 'freq')
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
     # check result
@@ -40,7 +41,7 @@ def test_add_two_signals_freq():
 def test_add_three_signals():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = signal.add((x, x, x), 'time')
+    y = pf.add((x, x, x), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -55,7 +56,7 @@ def test_add_three_signals():
 def test_add_signal_and_number():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = signal.add((x, 1), 'time')
+    y = pf.add((x, 1), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -70,7 +71,7 @@ def test_add_signal_and_number():
 def test_add_number_and_signal():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = signal.add((1, x), 'time')
+    y = pf.add((1, x), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -84,7 +85,7 @@ def test_add_number_and_signal():
 def test_add_time_data_and_number():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    y = signal.add((x, 1), 'time')
+    y = pf.add((x, 1), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -99,7 +100,7 @@ def test_add_time_data_and_number():
 def test_add_time_data_and_time_data():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    y = signal.add((x, x), 'time')
+    y = pf.add((x, x), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -115,7 +116,7 @@ def test_add_time_data_and_number_wrong_domain():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
     with raises(ValueError):
-        signal.add((x, 1), 'freq')
+        pf.add((x, 1), 'freq')
 
 
 def test_add_time_data_and_number_wrong_times():
@@ -123,15 +124,15 @@ def test_add_time_data_and_number_wrong_times():
     x = TimeData([1, 0, 0], [0, .1, .5])
     y = TimeData([1, 0, 0], [0, .1, .4])
     with raises(ValueError):
-        signal.add((x, y), 'time')
+        pf.add((x, y), 'time')
 
 
 def test_add_frequency_data_and_number():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = signal.add((x, 1), 'freq')
+    y = pf.add((x, 1), 'freq')
     with raises(ValueError):
-        signal.add((x, 1), 'time')
+        pf.add((x, 1), 'time')
 
     # check if old signal did not change
     npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -146,7 +147,7 @@ def test_add_frequency_data_and_number():
 def test_add_frequency_data_and_frequency_data():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = signal.add((x, x), 'freq')
+    y = pf.add((x, x), 'freq')
 
     # check if old signal did not change
     npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -162,7 +163,7 @@ def test_add_frequency_data_and_number_wrong_domain():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     with raises(ValueError):
-        signal.add((x, 1), 'time')
+        pf.add((x, 1), 'time')
 
 
 def test_add_frequency_data_and_number_wrong_frequencies():
@@ -170,22 +171,14 @@ def test_add_frequency_data_and_number_wrong_frequencies():
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = FrequencyData([1, 0, 0], [0, .1, .4])
     with raises(ValueError):
-        signal.add((x, y), 'freq')
-
-
-def test_add_frequency_data_and_number_wrong_fft_norm():
-    # generate and add signals
-    x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = FrequencyData([1, 0, 0], [0, .1, .5], fft_norm='rms')
-    with raises(ValueError):
-        signal.add((x, y), 'freq')
+        pf.add((x, y), 'freq')
 
 
 def test_subtraction():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100)
-    z = signal.subtract((x, y), 'time')
+    z = pf.subtract((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([1, -1, 0]), atol=1e-15)
@@ -195,7 +188,7 @@ def test_multiplication():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100)
-    z = signal.multiply((x, y), 'time')
+    z = pf.multiply((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0, 0, 0]), atol=1e-15)
@@ -205,7 +198,7 @@ def test_division():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([2, 2, 2], 44100)
-    z = signal.divide((x, y), 'time')
+    z = pf.divide((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0.5, 0, 0]), atol=1e-15)
@@ -215,73 +208,109 @@ def test_power():
     # only test one case - everything else is tested below
     x = Signal([2, 1, 0], 44100)
     y = Signal([2, 2, 2], 44100)
-    z = signal.power((x, y), 'time')
+    z = pf.power((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([4, 1, 0]), atol=1e-15)
 
 
 def test_overloaded_operators_signal():
-    x = Signal([2, 1, 0], 44100, n_samples=5, domain='freq')
-    y = Signal([2, 2, 2], 44100, n_samples=5, domain='freq')
+    x = Signal([3, 2, 1], 44100, n_samples=5, domain='freq')
+    y_s = Signal([2, 2, 2], 44100, n_samples=5, domain='freq')
 
-    # addition
-    z = x + y
-    npt.assert_allclose(z.freq, np.array([4, 3, 2], ndmin=2), atol=1e-15)
-    # subtraction
-    z = x - y
-    npt.assert_allclose(z.freq, np.array([0, -1, -2], ndmin=2), atol=1e-15)
-    # multiplication
-    z = x * y
-    npt.assert_allclose(z.freq, np.array([4, 2, 0], ndmin=2), atol=1e-15)
-    # division
-    z = x / y
-    npt.assert_allclose(z.freq, np.array([1, .5, 0], ndmin=2), atol=1e-15)
-    # power
-    z = x**y
-    npt.assert_allclose(z.freq, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+    for y in [y_s, 2]:
+        # addition
+        z = x + y
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        z = y + x
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        # subtraction
+        z = x - y
+        npt.assert_allclose(z.freq, np.array([1, 0, -1], ndmin=2), atol=1e-15)
+        z = y - x
+        npt.assert_allclose(z.freq, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
+        # multiplication
+        z = x * y
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        z = y * x
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        # division
+        z = x / y
+        npt.assert_allclose(
+            z.freq, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
+        z = y / x
+        npt.assert_allclose(z.freq, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
+        # power
+        z = x**y
+        npt.assert_allclose(z.freq, np.array([9, 4, 1], ndmin=2), atol=1e-15)
+        z = y**x
+        npt.assert_allclose(z.freq, np.array([8, 4, 2], ndmin=2), atol=1e-15)
 
 
 def test_overloaded_operators_time_data():
-    x = TimeData([2, 1, 0], [0, 1, 2])
-    y = TimeData([2, 2, 2], [0, 1, 2])
+    x = TimeData([3, 2, 1], [0, 1, 2])
+    y_s = TimeData([2, 2, 2], [0, 1, 2])
 
-    # addition
-    z = x + y
-    npt.assert_allclose(z.time, np.array([4, 3, 2], ndmin=2), atol=1e-15)
-    # subtraction
-    z = x - y
-    npt.assert_allclose(z.time, np.array([0, -1, -2], ndmin=2), atol=1e-15)
-    # multiplication
-    z = x * y
-    npt.assert_allclose(z.time, np.array([4, 2, 0], ndmin=2), atol=1e-15)
-    # division
-    z = x / y
-    npt.assert_allclose(z.time, np.array([1, .5, 0], ndmin=2), atol=1e-15)
-    # power
-    z = x**y
-    npt.assert_allclose(z.time, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+    for y in [y_s, 2]:
+        # addition
+        z = x + y
+        npt.assert_allclose(z.time, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        z = y + x
+        npt.assert_allclose(z.time, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        # subtraction
+        z = x - y
+        npt.assert_allclose(z.time, np.array([1, 0, -1], ndmin=2), atol=1e-15)
+        z = y - x
+        npt.assert_allclose(z.time, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
+        # multiplication
+        z = x * y
+        npt.assert_allclose(z.time, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        z = y * x
+        npt.assert_allclose(z.time, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        # division
+        z = x / y
+        npt.assert_allclose(
+            z.time, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
+        z = y / x
+        npt.assert_allclose(z.time, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
+        # power
+        z = x**y
+        npt.assert_allclose(z.time, np.array([9, 4, 1], ndmin=2), atol=1e-15)
+        z = y**x
+        npt.assert_allclose(z.time, np.array([8, 4, 2], ndmin=2), atol=1e-15)
 
 
 def test_overloaded_operators_frequency_data():
-    x = FrequencyData([2, 1, 0], [0, 1, 2])
-    y = FrequencyData([2, 2, 2], [0, 1, 2])
+    x = FrequencyData([3, 2, 1], [0, 1, 2])
+    y_s = FrequencyData([2, 2, 2], [0, 1, 2])
 
-    # addition
-    z = x + y
-    npt.assert_allclose(z.freq, np.array([4, 3, 2], ndmin=2), atol=1e-15)
-    # subtraction
-    z = x - y
-    npt.assert_allclose(z.freq, np.array([0, -1, -2], ndmin=2), atol=1e-15)
-    # multiplication
-    z = x * y
-    npt.assert_allclose(z.freq, np.array([4, 2, 0], ndmin=2), atol=1e-15)
-    # division
-    z = x / y
-    npt.assert_allclose(z.freq, np.array([1, .5, 0], ndmin=2), atol=1e-15)
-    # power
-    z = x**y
-    npt.assert_allclose(z.freq, np.array([4, 1, 0], ndmin=2), atol=1e-15)
+    for y in [y_s, 2]:
+        # addition
+        z = x + y
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        z = y + x
+        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
+        # subtraction
+        z = x - y
+        npt.assert_allclose(z.freq, np.array([1, 0, -1], ndmin=2), atol=1e-15)
+        z = y - x
+        npt.assert_allclose(z.freq, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
+        # multiplication
+        z = x * y
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        z = y * x
+        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
+        # division
+        z = x / y
+        npt.assert_allclose(
+            z.freq, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
+        z = y / x
+        npt.assert_allclose(z.freq, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
+        # power
+        z = x**y
+        npt.assert_allclose(z.freq, np.array([9, 4, 1], ndmin=2), atol=1e-15)
+        z = y**x
+        npt.assert_allclose(z.freq, np.array([8, 4, 2], ndmin=2), atol=1e-15)
 
 
 def test_assert_match_for_arithmetic():
@@ -338,8 +367,8 @@ def test_get_arithmetic_data_with_array():
 
 def test_get_arithmetic_data_with_signal():
     # all possible combinations of `domain`, `signal_type`, and `fft_norm`
-    meta = [['time', None],
-            ['freq', None],
+    meta = [['time', 'none'],
+            ['freq', 'none'],
             ['time', 'unitary'],
             ['freq', 'unitary'],
             ['time', 'amplitude'],

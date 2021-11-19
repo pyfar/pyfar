@@ -2,7 +2,7 @@ import matplotlib.style as mpl_style
 import os
 import json
 import contextlib
-import pyfar.plot._line as _line
+from . import _utils
 from pyfar.plot._interaction import PlotParameter
 
 
@@ -76,12 +76,11 @@ def context(style='light', after_reset=False):
 
     Generate customizable subplots with the default pyfar plot style
 
-    >>> import pyfar
+    >>> import pyfar as pf
     >>> import matplotlib.pyplot as plt
-    >>>
-    >>> with pyfar.plot.context():
+    >>> with pf.plot.context():
     >>>     fig, ax = plt.subplots(2, 1)
-    >>>     pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
+    >>>     pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
     """
 
     # get pyfar plotstyle if desired
@@ -133,12 +132,11 @@ def use(style="light"):
 
     Permanently use the pyfar default plot style
 
-    >>> import pyfar
+    >>> import pyfar as pf
     >>> import matplotlib.pyplot as plt
-    >>>
-    >>> pyfar.plot.utils.use()
+    >>> pf.plot.utils.use()
     >>> fig, ax = plt.subplots(2, 1)
-    >>> pyfar.plot.time(pyfar.Signal([0, 1, 0, -1], 44100), ax=ax[0])
+    >>> pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
 
     """
 
@@ -148,32 +146,43 @@ def use(style="light"):
     mpl_style.use(style)
 
 
-def color(color: str):
+def color(color):
     """Return pyfar default color as HEX string.
 
     Parameters
     ----------
-    color : str
-        Available colors are purple ,blue, turquoise, green, light green,
-        yellow, orange, and red. The colors can be specified by their full
-        name, e.g., ``red`` or the first letter, e.g., ``r``.
+    color : int, str
+        The colors can be specified by their index, their full name,
+         or the first letter. Available colors are:
+
+        1, ``'b'``: blue
+        2, ``'r'``: red
+        3, ``'y'``: yellow
+        4, ``'p'``: purple
+        5, ``'g'``: green
+        6, ``'t'``: turquois
+        7, ``'o'``: orange
+        8, ``'l'``: light green.
 
     Returns
     -------
-    color : str
+    color_hex : str
         pyfar default color as HEX string
     """
-
-    colors = ['p', 'b', 't', 'g', 'l', 'y', 'o', 'r']
-    if color[0] not in colors:
-        raise ValueError((f"color is '{color}' but must be one of the "
-                          f"following {', '.join(colors)}"))
-
-    kwargs = {'c': color[0]}
-    kwargs = _line._return_default_colors_rgb(**kwargs)
-
-    color = kwargs['c']
-    return color
+    color_dict = _utils._default_color_dict()
+    colors = list(color_dict.keys())
+    if isinstance(color, str):
+        if color[0] not in colors:
+            raise ValueError((f"color is '{color}' but must be one of the "
+                              f"following {', '.join(colors)}"))
+        else:
+            # all colors differ by their first letter
+            color_hex = color_dict[color[0]]
+    elif isinstance(color, int):
+        color_hex = list(color_dict.values())[color % len(colors)]
+    else:
+        raise ValueError("color is has to be of type str or int.")
+    return color_hex
 
 
 def shortcuts(show=True):

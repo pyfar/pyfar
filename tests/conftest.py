@@ -394,25 +394,6 @@ def frequency_data_one_point():
 
 
 @pytest.fixture
-def fft_lib_np(monkeypatch):
-    """Set numpy.fft as fft library.
-    """
-    import pyfar.dsp.fft
-    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', np.fft)
-    return np.fft.__name__
-
-
-@pytest.fixture
-def fft_lib_pyfftw(monkeypatch):
-    """Set pyfftw as fft library.
-    """
-    import pyfar.dsp.fft
-    from pyfftw.interfaces import numpy_fft as npi_fft
-    monkeypatch.setattr(pyfar.dsp.fft, 'fft_lib', npi_fft)
-    return npi_fft.__name__
-
-
-@pytest.fixture
 def generate_wav_file(tmpdir, noise):
     """Create wav file in temporary folder.
     """
@@ -647,14 +628,6 @@ def filter(coeffs, state):
 
 
 @pytest.fixture
-def filterIIR():
-    """ FilterIIR object.
-    """
-    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
-    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
-
-
-@pytest.fixture
 def filterFIR():
     """ FilterFIR objectr.
     """
@@ -662,6 +635,14 @@ def filterFIR():
         [1, 1 / 2, 0],
         [1, 1 / 4, 1 / 8]])
     return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+
+
+@pytest.fixture
+def filterIIR():
+    """ FilterIIR object.
+    """
+    coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
+    return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
@@ -716,3 +697,10 @@ def nested_data():
     `io.write` and `io.read`.
     """
     return stub_utils.NestedData.create()
+
+
+@pytest.fixture
+def dict_of_builtins():
+    """ Dictionary that contains builtins with support for writing and reading.
+    """
+    return stub_utils.dict_of_builtins()

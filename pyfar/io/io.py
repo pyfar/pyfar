@@ -230,12 +230,18 @@ def read(filename):
                         'different versions of Pyfar.')
                 collection[name] = obj
 
+        if 'builtin_wrapper' in collection:
+            for key, value in collection['builtin_wrapper'].items():
+                collection[key] = value
+            collection.pop('builtin_wrapper')
+
     return collection
 
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible pyfar object or numpy array as .far file to disk.
+    Write any compatible pyfar object or numpy array and often used builtin
+    types as .far file to disk.
 
     Parameters
     ----------
@@ -260,23 +266,34 @@ def write(filename, compress=False, **objs):
     >>> a = np.array([1,2,3])
     >>> pyfar.io.write('my_objs.far', signal=s, orientations=o, array=a)
 
+    Notes
+    -----
+    * Supported builtin types are:
+      bool, bytes, complex, float, frozenset, int, list, set, str and tuple
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
     compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
     zip_buffer = io.BytesIO()
+    builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
             if codec._is_pyfar_type(obj):
                 codec._encode_object_json_aided(obj, name, zip_file)
             elif codec._is_numpy_type(obj):
                 codec._encode({f'${type(obj).__name__}': obj}, name, zip_file)
+            elif type(obj) in codec._supported_builtin_types():
+                builtin_wrapper[name] = obj
             else:
                 error = (
                     f'Objects of type {type(obj)} cannot be written to disk.')
                 if isinstance(obj, fo.Filter):
                     error = f'{error}. Consider casting to {fo.Filter}'
                 raise TypeError(error)
+
+        if len(builtin_wrapper) > 0:
+            codec._encode_object_json_aided(
+                builtin_wrapper, 'builtin_wrapper', zip_file)
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())
