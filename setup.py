@@ -17,7 +17,8 @@ requirements = [
     'matplotlib',
     'sofar>=0.1.2',
     'urllib3',
-    'deepdiff'
+    'deepdiff',
+    'requests'
 ]
 
 setup_requirements = ['pytest-runner', ]
