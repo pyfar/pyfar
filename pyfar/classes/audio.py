@@ -1254,7 +1254,7 @@ def _power(a, b):
 def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     """
     Helper function to determine the fft_norm resulting from an
-    arithmetic operation of two signals.
+    arithmetic operation of two audio objects.
 
     For addition, subtraction and multiplication:
     Either: one signal has fft_norm ``'none'`` , the results gets the other
