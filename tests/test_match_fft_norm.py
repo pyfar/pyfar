@@ -74,10 +74,53 @@ def test_assertion_no_division():
 def test_result_division():
     """Test the returned fft_norm for arithmetic operation by passing
     valid combinations of fft_norms, with division=True"""
-    pass
+    #           fft_norm_1, fft_norm_2, result
+    fft_norms = [['none', 'none', 'none'],
+                 ['unitary', 'none', 'unitary'],
+                 ['amplitude', 'none', 'amplitude'],
+                 ['rms', 'none', 'rms'],
+                 ['power', 'none', 'power'],
+                 ['psd', 'none', 'psd'],
+                 ['unitary', 'unitary', 'none'],
+                 ['amplitude', 'amplitude', 'none'],
+                 ['rms', 'rms', 'none'],
+                 ['power', 'power', 'none'],
+                 ['psd', 'psd', 'none']]
+    for fft_norm in fft_norms:
+        assert _match_fft_norm(fft_norm[0],
+                               fft_norm[1],
+                               division=True) == fft_norm[2]
 
 
 def test_assertion_division():
     """Test assertion by passing invalid combinations of fft_norms,
     with division=True"""
-    pass
+    #           fft_norm_1, fft_norm_2
+    fft_norms = [['none', 'unitary'],
+                 ['none', 'amplitude'],
+                 ['none', 'power'],
+                 ['none', 'psd'],
+                 ['unitary', 'amplitude'],
+                 ['unitary', 'rms'],
+                 ['unitary', 'power'],
+                 ['unitary', 'psd'],
+                 ['amplitude', 'unitary'],
+                 ['amplitude', 'rms'],
+                 ['amplitude', 'power'],
+                 ['amplitude', 'psd'],
+                 ['rms', 'unitary'],
+                 ['rms', 'amplitude'],
+                 ['rms', 'power'],
+                 ['rms', 'psd'],
+                 ['power', 'unitary'],
+                 ['power', 'amplitude'],
+                 ['power', 'rms'],
+                 ['power', 'psd'],
+                 ['psd', 'unitary'],
+                 ['psd', 'amplitude'],
+                 ['psd', 'rms'],
+                 ['psd', 'power']]
+    for fft_norm in fft_norms:
+        with pytest.raises(ValueError,
+                           match="Either fft_norm_2 "):
+            _match_fft_norm(fft_norm[0], fft_norm[1], division=True)
