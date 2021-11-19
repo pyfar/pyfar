@@ -1259,13 +1259,14 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     For addition, subtraction and multiplication:
     Either: one signal has fft_norm ``'none'`` , the results gets the other
     norm.
-    Or: both have the same fft_norm. Other combinations raise an error.
+    Or: both have the same fft_norm, the results gets the same norm.
+    Other combinations raise an error.
 
     For division:
     Either: the denominator (fft_norm_2) is ``'none'``, the result gets the
     fft_norm of the numerator (fft_norm_1).
-    Or:
-    ###  more discussion needed  ###
+    Or: both have the same fft_norm, the results gets the fft_norm ``'none'``.
+    Other combinations raise an error.
 
     Parameters
     ----------
@@ -1322,11 +1323,11 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
             fft_norm_result = fft_norm_1
 
         elif fft_norm_1 == fft_norm_2:
-            # more discussion needed
-            pass
+            fft_norm_result = 'none'
 
         else:
-            # more discussion needed
-            pass
+            raise ValueError("Either fft_norm_2 (denominator) has to be ",
+                             "'none' or both fft_norms must be the same, but ",
+                             f"they are {fft_norm_1} and {fft_norm_2}.")
 
     return fft_norm_result
