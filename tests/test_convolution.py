@@ -1,5 +1,5 @@
 import numpy as np
-from pyfar.signal import Signal
+from pyfar import Signal
 from pyfar.dsp import convolution
 
 
