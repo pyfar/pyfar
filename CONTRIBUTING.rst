@@ -60,15 +60,18 @@ Get Started!
 Ready to contribute? Here's how to set up `pyfar` for local development.
 
 1. Fork the `pyfar` repo on GitHub.
-2. Clone your fork locally::
+2. Clone your fork locally and cd into the pyfar directory::
 
     $ git clone https://github.com/pyfar/pyfar.git
+    $ de pyfar
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Install your local copy into a virtualenv. Assuming you have Anaconda or Miniconda installed, this is how you set up your fork for local development::
 
-    $ mkvirtualenv pyfar
-    $ cd pyfar/
-    $ python setup.py develop
+    $ conda create --name pyfar python
+    $ conda activate pyfar
+    $ conda install pip
+    $ pip install -e .
+    $ pip install -r requirements_dev.txt
 
 4. Create a branch for local development. Indicate the intention of your branch in its respective name (i.e. `feature/branch-name` or `bugfix/branch-name`)::
 
@@ -77,13 +80,12 @@ Ready to contribute? Here's how to set up `pyfar` for local development.
    Now you can make your changes locally.
 
 5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox::
+   tests::
 
     $ flake8 pyfar tests
     $ pytest
-    $ tox
 
-   To get flake8 and tox, pip install them into your virtualenv. The flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust the your flake8 and linting configuration in your IDE accordingly.
+   flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust the your flake8 and linting configuration in your IDE accordingly.
 
 6. Commit your changes and push your branch to GitHub::
 
