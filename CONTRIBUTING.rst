@@ -63,7 +63,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development.
 2. Clone your fork locally and cd into the pyfar directory::
 
     $ git clone https://github.com/pyfar/pyfar.git
-    $ de pyfar
+    $ cd pyfar
 
 3. Install your local copy into a virtualenv. Assuming you have Anaconda or Miniconda installed, this is how you set up your fork for local development::
 
