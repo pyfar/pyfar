@@ -133,18 +133,9 @@ class Filter(object):
         return self._sampling_rate
 
     @property
-    def shape(self):
-        """
-        The shape of the filter.
-        """
-        return self._coefficients.shape[:-2]
-
-    @property
-    def size(self):
-        """
-        The size of the filter, that is all elements in the filter object.
-        """
-        return np.prod(self.shape)
+    def n_channels(self):
+        """The number of channels of the filter"""
+        return self._coefficients.shape[0]
 
     @property
     def state(self):
@@ -188,7 +179,7 @@ class Filter(object):
             self.reset()
 
         filtered_signal_data = np.zeros(
-            (self.size, *signal.time.shape),
+            (self.n_channels, *signal.time.shape),
             dtype=signal.time.dtype)
 
         if self.state is not None:
@@ -400,7 +391,11 @@ class FilterSOS(Filter):
         ----------
         coefficients : array, double
             The filter coefficients as an array with dimensions
-            ``(n_filter_chan, n_sections, 6)``
+            ``(n_filter_chan, n_sections, 6)`` The first three values of
+            a section provide the numerator coefficients, the last three values
+            the denominator coefficients, e.g,
+            ``[[[ b[0], b[1], b[2], a[0], a[1], a[2] ]]]`` for a single channel
+            SOS filter with one section.
         sampling_rate : number
             The sampling rate of the filter in Hz.
         state : array, double, optional
