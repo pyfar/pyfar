@@ -348,7 +348,7 @@ def test_blockwise_processing(Filter):
 
     # filter in two blocks with correct handling of the state
     Filter.init_state(signal.cshape, 'zeros')
-    block_a = Filter.process(signal[0, :3], reset=True)
+    block_a = Filter.process(signal[0, :3], reset=False)
     block_b = Filter.process(signal[0, 3:], reset=False)
     # outputs have to be identical in this case
     npt.assert_array_equal(complete[0, :3].time, block_a.time)
