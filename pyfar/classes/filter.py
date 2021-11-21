@@ -178,6 +178,8 @@ class Filter(object):
         if reset is True:
             self.reset()
 
+        # shape of the output signal. if n_channels is 1, it will be squeezed
+        # below
         filtered_signal_data = np.zeros(
             (self.n_channels, *signal.time.shape),
             dtype=signal.time.dtype)
@@ -194,6 +196,7 @@ class Filter(object):
                 filtered_signal_data[idx, ...] = self._process(
                     coeff, signal.time, zi=None)
 
+        # prepare output signal
         filtered_signal = deepcopy(signal)
         filtered_signal.time = np.squeeze(filtered_signal_data)
 
