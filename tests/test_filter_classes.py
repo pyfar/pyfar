@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 import pyfar.classes.filter as fo
+import pyfar as pf
 from scipy import signal as spsignal
 
 
@@ -22,7 +23,7 @@ def test_filter_init():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
     filt = fo.Filter(coefficients=coeff, sampling_rate=None)
     npt.assert_array_equal(filt._coefficients, coeff)
-    assert filt._state is None
+    assert filt.state is None
 
 
 def test_filter_init_with_state():
@@ -30,7 +31,7 @@ def test_filter_init_with_state():
     state = np.array([[[1, 0]]])
     filt = fo.Filter(coefficients=coeff, state=state)
     npt.assert_array_equal(filt._coefficients, coeff)
-    npt.assert_array_equal(filt._state, state)
+    npt.assert_array_equal(filt.state, state)
 
 
 def test_filter_comment():
@@ -93,7 +94,7 @@ def test_filter_iir_process_state(impulse):
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterIIR(coeff, impulse.sampling_rate, state=[0, 0])
     res = filt.process(impulse, reset=False)
-    state = filt._state
+    state = filt.state
 
     npt.assert_allclose([[[0, 0]]], state)
     npt.assert_allclose(res.time[0, :3], coeff[0])
@@ -105,7 +106,7 @@ def test_filter_iir_process_state(impulse):
     desired[1::2] *= -1
 
     npt.assert_allclose(res.time, np.atleast_2d(desired))
-    npt.assert_allclose(filt._state, [[[1, 0]]])
+    npt.assert_allclose(filt.state, [[[1, 0]]])
 
 
 def test_filter_iir_init_state(impulse):
@@ -115,23 +116,23 @@ def test_filter_iir_init_state(impulse):
     # init empty filter
     filt.init_state(impulse.cshape, state='zeros')
     desired = np.array([[[0, 0]]])
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
     desired = np.array([[[-0.5, 0, ]]])
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
     filt.init_state((2, 3), state='zeros')
     desired = np.zeros((1, 2, 3, 2), dtype=float)
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
     filt.init_state((2, 3), state='step')
     desired = np.zeros((1, 2, 3, 2), dtype=float)
     desired[..., 0] = -0.5
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
 
 def test_filter_fir_process(impulse):
@@ -146,7 +147,7 @@ def test_filter_fir_process_state(impulse):
     coeff = np.array([1, 1/2, 0, 0, 0, 0])
     filt = fo.FilterFIR(coeff, impulse.sampling_rate, state=[0, 0, 0, 0, 0])
     res = filt.process(impulse, reset=False)
-    state = filt._state
+    state = filt.state
 
     npt.assert_allclose([[[0, 0, 0, 0, 0]]], state)
     npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff))
@@ -159,23 +160,23 @@ def test_filter_fir_init_state(impulse):
     # init empty filter
     filt.init_state(impulse.cshape, state='zeros')
     desired = np.array([[[0, 0, 0, 0, 0]]])
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
     desired = np.array([[[0.5, 0, 0, 0, 0]]])
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
     filt.init_state((2, 3), state='zeros')
     desired = np.zeros((1, 2, 3, 5), dtype=float)
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
     filt.init_state((2, 3), state='step')
     desired = np.zeros((1, 2, 3, 5), dtype=float)
     desired[..., 0] = 0.5
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
 
 def test_filter_fir_process_sampling_rate_mismatch(impulse):
@@ -249,7 +250,7 @@ def test_filter_sos_process_state(impulse):
     desired = np.array([[1, 1/2, 0]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate, state=[0, 0])
     res = filt.process(impulse, reset=False)
-    state = filt._state
+    state = filt.state
 
     npt.assert_allclose([[[[0, 0]]]], state)
     npt.assert_allclose(res.time[:, :3], desired)
@@ -260,24 +261,24 @@ def test_filter_sos_process_state(impulse):
     desired = np.ones(impulse.n_samples)
     desired[1::2] *= -1
 
-    state = filt._state
+    state = filt.state
     npt.assert_allclose(res.time, np.atleast_2d(desired))
-    npt.assert_allclose(filt._state, [[[[1, 0]]]])
+    npt.assert_allclose(filt.state, [[[[1, 0]]]])
 
     sos = np.array([[1, 0, 0, 1, 1, 0]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate,  state=[1, 0])
     res = filt.process(impulse)
-    desired = np.ones(impulse.n_samples)
+    desired = 2 * np.ones(impulse.n_samples)
     desired[1::2] *= -1
-    state = filt._state
+    state = filt.state
     npt.assert_allclose(res.time, np.atleast_2d(desired))
-    npt.assert_allclose(filt._state, [[[[1, 0]]]])
+    npt.assert_allclose(filt.state, [[[[2, 0]]]])
 
     sos = np.array([[[1, 0, 0, 1, 1, 0], [1, 0, 0, 1, 0, 0]]])
     filt = fo.FilterSOS(
         sos, impulse.sampling_rate,  state=[[[[0, 0], [0, 0]]]])
     res = filt.process(impulse)
-    state = filt._state
+    state = filt.state
     desired = np.array([[[[1, 0], [0, 0]]]])
     npt.assert_allclose(state, desired)
 
@@ -289,25 +290,25 @@ def test_filter_sos_init_state(impulse):
     # init empty filter
     filt.init_state(impulse.cshape, state='zeros')
     desired = np.array([[[[0, 0]]]])
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
     desired = np.array([[[[-0.5, 0, ]]]])
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
     # sos states are saved as (*fshape, *cshape, n_sections, 2)
     n_sections = 1
     filt.init_state((2, 3), state='zeros')
     desired = np.zeros((1, 2, 3, n_sections, 2), dtype=float)
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
     filt.init_state((2, 3), state='step')
     desired = np.zeros((1, 2, 3, n_sections, 2), dtype=float)
     desired[..., 0] = -0.5
-    npt.assert_allclose(filt._state, desired)
+    npt.assert_allclose(filt.state, desired)
 
 
 def test_filter_sos_process_multi_dim_filt(impulse):
