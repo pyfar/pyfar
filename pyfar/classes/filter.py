@@ -1,4 +1,8 @@
-"""Link to :py:mod:`Filter concepts <pyfar.classes.filter_concepts>`"""
+"""
+The following documents the pyfar filter classes. More details and
+background is given in the
+:py:mod:`Filter concepts <pyfar.classes.filter_concepts>`
+"""
 import deepdiff
 import warnings
 
