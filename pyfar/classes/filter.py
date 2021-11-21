@@ -1,3 +1,4 @@
+"""Link to :py:mod:`Filter concepts <pyfar.classes.filter_concepts>`"""
 import deepdiff
 import warnings
 
