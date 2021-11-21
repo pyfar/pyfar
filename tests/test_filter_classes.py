@@ -396,3 +396,22 @@ def test___eq___notEqual(filter, coeffs, state):
     actual = filter.copy()
     actual.comment = f'{actual.comment} A completely different thing'
     assert not filter == actual
+
+
+def test_repr(capfd):
+    """Test the repr string of the filter classes"""
+
+    print(fo.FilterFIR([[1, 0, 1]], 44100))
+    out, _ = capfd.readouterr()
+    assert "2nd order FIR filter with 1 channel @ 44100 Hz sampling rate\n" \
+        == out
+
+    print(fo.FilterIIR([[1, 0, 1], [1, 0, 0]], 44100))
+    out, _ = capfd.readouterr()
+    assert "2nd order IIR filter with 1 channel @ 44100 Hz sampling rate\n" \
+        == out
+
+    print(fo.FilterSOS([[[1, 0, 0, 1, 0, 0]]], 44100))
+    out, _ = capfd.readouterr()
+    assert "SOS filter with 1 section and 1 channel @ 44100 Hz sampling rate\n" \
+        == out

@@ -69,6 +69,31 @@ def _extend_sos_coefficients(sos, order):
     return np.vstack((sos, sos_ext))
 
 
+def _repr_string(filter_type, order, n_channels, sampling_rate):
+    """Generate repr string for filter objects"""
+
+    ch_str = 'channel' if n_channels == 1 else 'channels'
+
+    if filter_type == "SOS":
+        sec_str = 'section' if order == 1 else 'sections'
+        repr = (f"SOS filter with {order} {sec_str} and {n_channels} {ch_str} "
+                f"@ {sampling_rate} Hz sampling rate")
+    else:
+        if order % 10 == 1:
+            order_string = 'st'
+        elif order % 10 == 2:
+            order_string = 'nd'
+        elif order % 10 == 3:
+            order_string = 'rd'
+        else:
+            order_string = 'th'
+
+        repr = (f"{order}{order_string} order {filter_type} filter with "
+                f"{n_channels} {ch_str} @ {sampling_rate} Hz sampling rate")
+
+    return repr
+
+
 class Filter(object):
     """
     Container class for digital filters.
@@ -307,6 +332,10 @@ class FilterFIR(Filter):
         """
         return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
+    def __repr__(self):
+        return _repr_string(
+            "FIR", self.order, self.n_channels, self.sampling_rate)
+
 
 class FilterIIR(Filter):
     """
@@ -374,6 +403,10 @@ class FilterIIR(Filter):
         function in the parent class.
         """
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
+
+    def __repr__(self):
+        return _repr_string(
+            "IIR", self.order, self.n_channels, self.sampling_rate)
 
 
 class FilterSOS(Filter):
@@ -460,3 +493,7 @@ class FilterSOS(Filter):
             return res[0], zi
         else:
             return res
+
+    def __repr__(self):
+        return _repr_string(
+            "SOS", self.n_sections, self.n_channels, self.sampling_rate)
