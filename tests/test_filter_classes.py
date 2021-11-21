@@ -14,19 +14,13 @@ def test_filter_init_empty_coefficients():
 
 
 def test_filter_init_empty_coefficients_with_state():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Cannot set a state without"):
         fo.Filter(coefficients=None, state=[1, 0], sampling_rate=None)
 
 
 def test_filter_init():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
     filt = fo.Filter(coefficients=coeff, sampling_rate=None)
-    npt.assert_array_equal(filt._coefficients, coeff)
-
-
-def test_filter_init_empty_state():
-    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
-    filt = fo.Filter(coefficients=coeff, state=None)
     npt.assert_array_equal(filt._coefficients, coeff)
     assert filt._state is None
 
@@ -403,15 +397,15 @@ def test_repr(capfd):
 
     print(fo.FilterFIR([[1, 0, 1]], 44100))
     out, _ = capfd.readouterr()
-    assert "2nd order FIR filter with 1 channel @ 44100 Hz sampling rate\n" \
-        == out
+    assert out == \
+        "2nd order FIR filter with 1 channel @ 44100 Hz sampling rate\n"
 
     print(fo.FilterIIR([[1, 0, 1], [1, 0, 0]], 44100))
     out, _ = capfd.readouterr()
-    assert "2nd order IIR filter with 1 channel @ 44100 Hz sampling rate\n" \
-        == out
+    assert out == \
+        "2nd order IIR filter with 1 channel @ 44100 Hz sampling rate\n"
 
     print(fo.FilterSOS([[[1, 0, 0, 1, 0, 0]]], 44100))
     out, _ = capfd.readouterr()
-    assert "SOS filter with 1 section and 1 channel @ 44100 Hz sampling rate\n" \
-        == out
+    assert out == \
+        "SOS filter with 1 section and 1 channel @ 44100 Hz sampling rate\n"
