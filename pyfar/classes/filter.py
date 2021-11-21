@@ -121,6 +121,11 @@ class Filter(object):
         self._initialized = True
 
     @property
+    def coefficients(self):
+        """Coefficients of the filter"""
+        self._coefficients
+
+    @property
     def sampling_rate(self):
         """Sampling rate of the filter in Hz. The sampling rate is set upon
         initialization and cannot be changed after the object has been created.

@@ -7,8 +7,9 @@ from scipy import signal as spsignal
 
 def test_filter_init_empty_coefficients():
     filt = fo.Filter(coefficients=None, state=None, sampling_rate=None)
-    assert filt._coefficients is None
-    assert filt._state is None
+    assert filt.coefficients is None
+    assert filt.sampling_rate is None
+    assert filt.state is None
     assert filt.comment is None
 
 
