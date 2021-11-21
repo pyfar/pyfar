@@ -243,30 +243,30 @@ class Filter(object):
 class FilterFIR(Filter):
     """
     Filter object for FIR filters.
+
+     Parameters
+    ----------
+    coefficients : array, double
+        The filter coefficients as an array with dimensions
+        (number of channels, number of filter coefficients)
+    sampling_rate : number
+        The sampling rate of the filter in Hz.
+    state : array, double, optional
+        The state of the filter from prior information with dimensions
+        ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
+        the channel shape of the ``~py:class:Signal`` to be filtered.
+
+    Returns
+    -------
+    FilterFIR
+        The FIR filter object.
     """
     def __init__(
             self,
             coefficients,
             sampling_rate,
             state=None):
-        """
-        Initialize an finite impulse response (FIR) Filter object.
 
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array with dimensions
-            (number of channels, number of filter coefficients)
-        sampling_rate : number
-            The sampling rate of the filter in Hz.
-        state : array, double, optional
-            The state of the buffer elements.
-
-        Returns
-        -------
-        FilterFIR
-            The FIR filter object.
-        """
         b = np.atleast_2d(coefficients)
         a = np.zeros_like(b)
         a[..., 0] = 1
@@ -310,35 +310,35 @@ class FilterFIR(Filter):
 
 class FilterIIR(Filter):
     """
-    Filter object for IIR filters. For IIR filters with high orders, second
-    order section IIR filters using FilterSOS should be considered.
+    Filter object for IIR filters.
+
+    For IIR filters with high orders, second order section IIR filters using
+    FilterSOS should be considered.
+
+    Parameters
+    ----------
+    coefficients : array, double
+        The filter coefficients as an array, with shape
+        (number of channels, number of coefficients in the nominator,
+        number of coefficients in the denominator)
+    sampling_rate : number
+        The sampling rate of the filter in Hz.
+    state : array, double, optional
+        The state of the filter from prior information with dimensions
+        ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
+        the channel shape of the ``~py:class:Signal`` to be filtered.
+
+    Returns
+    -------
+    FilterIIR
+        The IIR filter object.
     """
     def __init__(
             self,
             coefficients,
             sampling_rate,
             state=None):
-        """IIR filter
-        Initialize an infinite impulse response (IIR) Filter object.
 
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array, with shape
-            (number of channels, number of coefficients in the nominator,
-            number of coefficients in the denominator)
-        sampling_rate : number
-            The sampling rate of the filter in Hz.
-        state : array, double, optional
-            The state of the filter from prior information with dimensions
-            ``(n_filter_chan, *cshape, order-1)``, where ``cshape`` is
-            the channel shape of the ``~py:class:Signal`` to be filtered.
-
-        Returns
-        -------
-        FilterIIR
-            The IIR filter object.
-        """
         coeff = np.atleast_2d(coefficients)
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
@@ -379,36 +379,34 @@ class FilterIIR(Filter):
 class FilterSOS(Filter):
     """
     Filter object for IIR filters as second order sections (SOS).
+
+    Parameters
+    ----------
+    coefficients : array, double
+        The filter coefficients as an array with dimensions
+        ``(n_filter_chan, n_sections, 6)`` The first three values of
+        a section provide the numerator coefficients, the last three values
+        the denominator coefficients, e.g,
+        ``[[[ b[0], b[1], b[2], a[0], a[1], a[2] ]]]`` for a single channel
+        SOS filter with one section.
+    sampling_rate : number
+        The sampling rate of the filter in Hz.
+    state : array, double, optional
+        The state of the filter from prior information with dimensions
+        ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
+        the channel shape of the ``~py:class:Signal`` to be filtered.
+
+    Returns
+    -------
+    FilterSOS
+        The SOS filter object.
     """
     def __init__(
             self,
             coefficients,
             sampling_rate,
             state=None):
-        """
-        Initialize a second order sections (SOS) Filter object.
 
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array with dimensions
-            ``(n_filter_chan, n_sections, 6)`` The first three values of
-            a section provide the numerator coefficients, the last three values
-            the denominator coefficients, e.g,
-            ``[[[ b[0], b[1], b[2], a[0], a[1], a[2] ]]]`` for a single channel
-            SOS filter with one section.
-        sampling_rate : number
-            The sampling rate of the filter in Hz.
-        state : array, double, optional
-            The state of the filter from prior information with dimensions
-            ``(n_filter_chan, *cshape, n_sections, 6)``, where ``cshape`` is
-            the channel shape of the ``~py:class:Signal`` to be filtered.
-
-        Returns
-        -------
-        FilterSOS
-            The SOS filter object.
-        """
         coeff = np.atleast_2d(coefficients)
         if coeff.shape[-1] != 6:
             raise ValueError(
