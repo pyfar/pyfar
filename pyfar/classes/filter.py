@@ -269,7 +269,7 @@ class FilterFIR(Filter):
     """
     Filter object for FIR filters.
 
-     Parameters
+    Parameters
     ----------
     coefficients : array, double
         The filter coefficients as an array with dimensions
