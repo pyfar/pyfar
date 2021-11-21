@@ -277,7 +277,7 @@ class FilterFIR(Filter):
 
     @property
     def order(self):
-        """The order of te filter."""
+        """The order of the filter."""
         return self._coefficients.shape[-1] - 1
 
     def init_state(self, cshape, state='zeros'):
@@ -346,8 +346,8 @@ class FilterIIR(Filter):
 
     @property
     def order(self):
-        """The order of te filter."""
-        return self._coefficients.shape[-1] - 1
+        """The order of the filter."""
+        return np.max(self._coefficients.shape[-2:]) - 1
 
     def init_state(self, cshape, state):
         """Initialize the buffer elements to pre-defined initial conditions.
@@ -422,8 +422,13 @@ class FilterSOS(Filter):
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
+    def order(self):
+        """The order of the filter. This is always 2 for SOS filter."""
+        return 2
+
     @property
     def n_sections(self):
+        """The number of sections"""
         return self._coefficients.shape[-2]
 
     def init_state(self, cshape, state='zeros'):
