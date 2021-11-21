@@ -334,6 +334,27 @@ def test_filter_sos_process_multi_dim_filt(impulse):
     npt.assert_allclose(res.time[1, 1, :3], coeff[1, 0, :], atol=1e-16)
 
 
+@pytest.mark.parametrize('Filter', [
+    (fo.FilterFIR([[1, -1]], 44100)),
+    (fo.FilterIIR([[1, -1], [1, 0]], 44100)),
+    (fo.FilterSOS([[[1, -1, 0, 1, 0, 0]]], 44100))])
+def test_blockwise_processing(Filter):
+
+    # test signal
+    signal = pf.Signal([1, 2, 3, 4, 5, 6], 44100)
+
+    # filter entire signal
+    complete = Filter.process(signal, reset=True)
+
+    # filter in two blocks with correct handling of the state
+    Filter.init_state(signal.cshape, 'zeros')
+    block_a = Filter.process(signal[0, :3], reset=True)
+    block_b = Filter.process(signal[0, 3:], reset=False)
+    # outputs have to be identical in this case
+    npt.assert_array_equal(complete[0, :3].time, block_a.time)
+    npt.assert_array_equal(complete[0, 3:].time, block_b.time)
+
+
 def test_atleast_3d_first_dim():
     arr = np.array([1, 0, 0])
     desired = np.array([[[1, 0, 0]]])
