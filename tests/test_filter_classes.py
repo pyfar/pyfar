@@ -343,17 +343,17 @@ def test_atleast_3d_first_dim():
     arr = np.array([1, 0, 0])
     desired = np.array([[[1, 0, 0]]])
 
-    arr_3d = fo.atleast_3d_first_dim(arr)
+    arr_3d = fo._atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
     arr = np.array([[1, 0, 0], [2, 2, 2]])
 
     desired = np.array([[[1, 0, 0], [2, 2, 2]]])
-    arr_3d = fo.atleast_3d_first_dim(arr)
+    arr_3d = fo._atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
 
     arr = np.ones((2, 3, 5))
     desired = arr.copy()
-    arr_3d = fo.atleast_3d_first_dim(arr)
+    arr_3d = fo._atleast_3d_first_dim(arr)
     npt.assert_array_equal(arr_3d, desired)
 
 
@@ -363,7 +363,7 @@ def test_extend_sos_coefficients():
         [1, 0, 0, 1, 0, 0],
     ])
 
-    actual = fo.extend_sos_coefficients(sos, 2)
+    actual = fo._extend_sos_coefficients(sos, 2)
     npt.assert_allclose(actual, sos)
 
     expected = np.array([
@@ -373,7 +373,7 @@ def test_extend_sos_coefficients():
         [1, 0, 0, 1, 0, 0],
     ])
 
-    actual = fo.extend_sos_coefficients(sos, 4)
+    actual = fo._extend_sos_coefficients(sos, 4)
     npt.assert_allclose(actual, expected)
 
     # test if the extended filter has an ideal impulse response.

@@ -8,7 +8,7 @@ import pyfar as pf
 from copy import deepcopy
 
 
-def atleast_3d_first_dim(arr):
+def _atleast_3d_first_dim(arr):
     arr = np.asarray(arr)
     ndim = np.ndim(arr)
 
@@ -20,26 +20,26 @@ def atleast_3d_first_dim(arr):
         return arr
 
 
-def atleast_4d_first_dim(arr):
+def _atleast_4d_first_dim(arr):
     arr = np.asarray(arr)
     ndim = np.ndim(arr)
 
     if ndim < 3:
-        arr = atleast_3d_first_dim(arr)
+        arr = _atleast_3d_first_dim(arr)
     if ndim < 4:
         return arr[np.newaxis]
     else:
         return arr
 
 
-def pop_state_from_kwargs(**kwargs):
+def _pop_state_from_kwargs(**kwargs):
     kwargs.pop('zi', None)
     warnings.warn(
         "This filter function does not support saving the filter state")
     return kwargs
 
 
-def extend_sos_coefficients(sos, order):
+def _extend_sos_coefficients(sos, order):
     """
     Extend a set of SOS filter coefficients to match a required filter order
     by adding sections with coefficients resulting in an ideal frequency
@@ -101,13 +101,13 @@ class Filter(object):
         """
         super().__init__()
         if coefficients is not None:
-            coefficients = atleast_3d_first_dim(coefficients)
+            coefficients = _atleast_3d_first_dim(coefficients)
         self._coefficients = coefficients
         if state is not None:
             if coefficients is None:
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
-            state = atleast_3d_first_dim(state)
+            state = _atleast_3d_first_dim(state)
             self._initialized = True
         else:
             self._initialized = False
@@ -414,7 +414,7 @@ class FilterSOS(Filter):
                 "section filter structure.")
 
         if state is not None:
-            state = atleast_4d_first_dim(state)
+            state = _atleast_4d_first_dim(state)
         super().__init__(
             coefficients=coeff, sampling_rate=sampling_rate, state=state)
 
