@@ -1317,7 +1317,7 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
                              "fft_norms must be the same, but they are ",
                              f"{fft_norm_1} and {fft_norm_2}.")
 
-    elif division is True:
+    else:
 
         if fft_norm_2 == 'none':
             fft_norm_result = fft_norm_1
