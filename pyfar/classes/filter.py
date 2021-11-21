@@ -293,8 +293,7 @@ class FilterFIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
-        new_state = np.zeros(
-            (self._coefficients.shape[0], *cshape, self.order))
+        new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
@@ -362,8 +361,7 @@ class FilterIIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
-        new_state = np.zeros(
-            (self._coefficients.shape[0], *cshape, self.order))
+        new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
@@ -444,8 +442,7 @@ class FilterSOS(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
-        new_state = np.zeros(
-            (self._coefficients.shape[0], *cshape, self.n_sections, 2))
+        new_state = np.zeros((self.n_channels, *cshape, self.n_sections, 2))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.sosfilt_zi(coeff)
