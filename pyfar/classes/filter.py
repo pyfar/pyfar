@@ -178,9 +178,9 @@ class Filter(object):
         if reset is True:
             self.reset()
 
-        filtered_signal_data = np.zeros(
-            (self.n_channels, *signal.time.shape),
-            dtype=signal.time.dtype)
+        signal_shape = signal.time.shape if self.n_channels == 1 \
+            else (self.n_channels, *signal.time.shape)
+        filtered_signal_data = np.zeros(signal_shape, dtype=signal.time.dtype)
 
         if self.state is not None:
             new_state = np.zeros_like(self._state)
