@@ -532,6 +532,15 @@ def test_write_audio_nd(noise_two_by_three_channel, tmpdir):
         atol=1e-4)
 
 
+@patch('soundfile.write')
+def test_write_audio_clip(sf_write_mock):
+    """Test for clipping warning."""
+    signal = pyfar.Signal([1., 2., 3.], 44100)
+    with pytest.warns(Warning, match='clipped'):
+        pyfar.io.write_audio(
+            signal=signal, filename='test.wav', subtype='PCM_16')
+
+
 @pytest.mark.parametrize("audio_format", sf.available_formats().keys())
 @pytest.mark.parametrize("subtype", sf.available_subtypes().keys())
 def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
@@ -703,22 +712,3 @@ def test_default_audio_subtype(default_audio_subtype_mock):
     subtype_return = pyfar.io.default_audio_subtype(format=audio_format)
     assert subtype_return == 'bla'
     default_audio_subtype_mock.assert_called_with(audio_format)
-
-
-def test_clipped_audio_subtypes():
-    actual = io.clipped_audio_subtypes('WAV')
-    expected = ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW']
-    assert actual == expected
-
-
-@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
-def test_clipped_audio_subtypes_formats(audio_format):
-    """Test if all format are available"""
-    io.clipped_audio_subtypes(audio_format)
-
-
-def test__clipped_audio_subtypes_dict():
-    """Test correct clipping dict."""
-    actual = pyfar.io.io._clipped_audio_subtypes_dict()
-    expected = pyfar.io.io._clipped_audio_subtypes_dict_creation()
-    assert actual == expected

@@ -1,5 +1,5 @@
 """
-Read and write objects to disk, read and write WAV files, read SOFA files.
+Read and write objects to disk, read and write audio files, read SOFA files.
 
 The functions :py:func:`read` and :py:func:`write` allow to save or load
 several pyfar objects and other variables. So, e.g., workspaces in notebooks
@@ -254,7 +254,6 @@ def read_audio(filename, dtype='float64', **kwargs):
         Other keyword arguments to be passed to :py:func:`soundfile.read`. This
         is needed, e.g, to read RAW audio files.
 
-
     Returns
     -------
     signal : Signal
@@ -305,8 +304,8 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     * Signals are flattened before writing to disk (e.g. a signal with
       ``cshape = (3, 2)`` will be written to disk as a six channel audio file).
     * This function is based on :py:func:`soundfile.write`.
-    * For some formats and subtypes, amplitudes larger than +/- 1 are clipped.
-      See :py:func:`clipped_audio_subtypes` for details.
+    * Except for the subtypes ``'FLOAT'``, ``'DOUBLE'`` and ``'VORBIS'`` ´
+      amplitudes larger than +/- 1 are clipped.
 
     """
     sampling_rate = signal.sampling_rate
@@ -323,6 +322,15 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
             "File already exists,"
             "use overwrite option to disable error.")
     else:
+        # Only the subtypes FLOAT, DOUBLE, VORBIS are not clipped,
+        # see _clipped_audio_subtypes()
+        format = pathlib.Path(filename).suffix[1:]
+        if subtype is None:
+            subtype = default_audio_subtype(format)
+        if (np.any(data > 1.) and
+                subtype.upper() not in ['FLOAT', 'DOUBLE', 'VORBIS']):
+            warnings.warn(
+                f'{format}-files of subtype {subtype} are clipped to +/- 1.')
         sf.write(
             file=filename, data=data.T, samplerate=sampling_rate,
             subtype=subtype, **kwargs)
@@ -374,8 +382,9 @@ def write_wav(signal, filename, subtype=None, overwrite=True):
     * Signals are flattened before writing to disk (e.g. a signal with
       ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
     * This function is based on :py:func:`write_audio`.
-    * For some subtypes, amplitudes larger than +/- 1 are clipped.
-      See :py:func:`clipped_audio_subtypes` for details.
+    * Except for the subtypes ``'FLOAT'`` and ``'DOUBLE'``,
+      amplitudes larger than +/- 1 are clipped.
+
 
     """
     warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
@@ -454,77 +463,20 @@ def default_audio_subtype(format):
     return sf.default_subtype(format)
 
 
-def clipped_audio_subtypes(format):
-    """Return a list of subtypes which are clipped to amplitudes smaller than 1.
-
-    Examples
-    --------
-    >>> import pyfar as pf
-    >>> pf.io.clipped_audio_subtypes('WAV')
-    ['PCM_16',
-     'PCM_24',
-     'PCM_32',
-     'PCM_U8',
-     'ULAW']
-    """
-    if format not in audio_formats().keys():
-        raise ValueError(f'Invalid format {format}.')
-    else:
-        clipped_dict = _clipped_audio_subtypes_dict()[format]
-    return clipped_dict
-
-
-def _clipped_audio_subtypes_dict():
-    """Returns a dictionary of format/subtype combinations which are clipped
-    by :py:func:´write_audio`.
-
-    The dict was created by calling
-    pyfar.io.io._write_audio_clippe_scaled_dict_creation and copied manually.
-    """
-    clipped_dict = {
-        'AIFF': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
-        'AU': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'ULAW'],
-        'AVR': ['PCM_S8', 'PCM_16', 'PCM_U8'],
-        'CAF': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'ULAW', 'ALAC_16',
-                'ALAC_20', 'ALAC_24', 'ALAC_32'],
-        'FLAC': ['PCM_S8', 'PCM_16', 'PCM_24'],
-        'HTK': ['PCM_16'],
-        'SVX': ['PCM_S8', 'PCM_16'],
-        'MAT4': ['PCM_16', 'PCM_32'],
-        'MAT5': ['PCM_16', 'PCM_32', 'PCM_U8'],
-        'MPC2K': ['PCM_16'],
-        'OGG': [],
-        'PAF': ['PCM_S8', 'PCM_16', 'PCM_24'],
-        'PVF': ['PCM_S8', 'PCM_16', 'PCM_32'],
-        'RAW': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
-        'RF64': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
-        'SD2': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32'],
-        'SDS': ['PCM_S8', 'PCM_16', 'PCM_24'],
-        'IRCAM': ['PCM_16', 'PCM_32', 'ULAW'],
-        'VOC': ['PCM_16', 'PCM_U8'],
-        'W64': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
-        'WAV': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
-        'NIST': ['PCM_S8', 'PCM_16', 'PCM_24', 'PCM_32', 'ULAW'],
-        'WAVEX': ['PCM_16', 'PCM_24', 'PCM_32', 'PCM_U8', 'ULAW'],
-        'WVE': [],
-        'XI': []}
-    return clipped_dict
-
-
-def _clipped_audio_subtypes_dict_creation():
+def _clipped_audio_subtypes():
     """Creates a dictionary of format/subtype combinations which are clipped by
     :py:func:´write_audio`.
 
     This function is not called directly due to the need of writing all files
-    to disk. Instead, the dict is manually copied.
+    to disk. It needs to be called manually:
+    pyfar.io.io._clipped_audio_subtypes().
     """
     collection = {}
-    signal = pyfar.Signal(np.array([10., 5., -10.]*500), 44100)
+    signal = pyfar.Signal([-1.5, -1, -.5, 0, .5, 1, 1.5]*100, 44100)
     with tempfile.TemporaryDirectory() as tmpdir:
         formats = pyfar.io.audio_formats()
         for format in formats:
             filename = os.path.join(tmpdir, 'test_file.'+format)
-            collection[format] = []
             for subtype in pyfar.io.audio_subtypes(format):
                 write_valid = not _soundfile_write_errors(format, subtype)
                 read_valid = not _soundfile_read_errors(format, subtype)
@@ -538,8 +490,20 @@ def _clipped_audio_subtypes_dict_creation():
                     else:
                         write_audio(signal, filename, subtype=subtype)
                         signal_read = read_audio(filename)
-                    if len(np.unique(signal_read.time)) < 3:
-                        collection[format] = collection[format] + [subtype]
+                    if (np.any(signal_read.time > 1.1) and
+                            np.any(signal_read.time < -1.1)):
+                        behavior = 'not clipping (' + format + ')'
+                    elif (np.any(signal_read.time > .1) and
+                            np.any(signal_read.time < -.1)):
+                        behavior = 'clipping to +/- 1 (' + format + ')'
+                    else:
+                        raise ValueError(f"{format}/{subtype}")
+
+                    if subtype not in collection:
+                        collection[subtype] = [behavior]
+                    else:
+                        collection[subtype] = collection[subtype] + [behavior]
+
     return collection
 
 
