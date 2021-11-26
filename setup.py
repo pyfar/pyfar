@@ -15,7 +15,7 @@ requirements = [
     'numpy>=1.14.0',
     'scipy>=1.5.0',
     'matplotlib',
-    'python-sofa>=0.2.0',
+    'sofar>=0.1.2',
     'urllib3',
     'deepdiff',
     'soundfile'
@@ -60,7 +60,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/pyfar/pyfar',
-    version='0.2.2',
+    version='0.2.3',
     zip_safe=False,
     python_requires='>=3.7'
 )

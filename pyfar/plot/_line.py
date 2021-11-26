@@ -391,3 +391,5 @@ def _custom_subplots(signal, plots, ax, **kwargs):
                 ca = ax[row * cols + col]
             # plot
             plots[row][col](signal, ax=ca, **kwargs)
+
+    return ax

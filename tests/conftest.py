@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 import os.path
-import sofa
+import sofar as sf
+import scipy.io.wavfile as wavfile
 
 from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
@@ -404,67 +405,45 @@ def sofa_reference_coordinates(noise_two_by_three_channel):
     n_measurements = noise_two_by_three_channel.cshape[0]
     n_receivers = noise_two_by_three_channel.cshape[1]
     source_coordinates = np.random.rand(n_measurements, 3)
-    receiver_coordinates = np.random.rand(n_receivers, n_measurements, 3)
+    receiver_coordinates = np.random.rand(n_receivers, 3)
     return source_coordinates, receiver_coordinates
 
 
 @pytest.fixture
 def generate_sofa_GeneralFIR(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR.
-    """
-    sofatype = 'GeneralFIR'
-    n_measurements = noise_two_by_three_channel.cshape[0]
-    n_receivers = noise_two_by_three_channel.cshape[1]
-    n_samples = noise_two_by_three_channel.n_samples
-    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
+    """ Generate the reference sofa files of type GeneralFIR."""
+    filename = os.path.join(tmpdir, ('GeneralFIR' + '.sofa'))
 
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
+    sofafile = sf.Sofa('GeneralFIR', True)
+    sofafile.Data_IR = noise_two_by_three_channel.time
+    sofafile.Data_Delay = np.zeros((1, noise_two_by_three_channel.cshape[1]))
+    sofafile.Data_SamplingRate = noise_two_by_three_channel.sampling_rate
+    sofafile.SourcePosition = sofa_reference_coordinates[0]
+    sofafile.SourcePosition_Type = "cartesian"
+    sofafile.SourcePosition_Units = "meter"
+    sofafile.ReceiverPosition = sofa_reference_coordinates[1]
 
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(variances=["Position"], fixed=["View", "Up"])
-    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
-    sofafile.Receiver.initialize(variances=["Position"], fixed=["View", "Up"])
-    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
-    sofafile.Receiver.Position.set_values(r_coords)
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-    sofafile.Data.Type = 'FIR'
-    sofafile.Data.initialize()
-    sofafile.Data.IR = noise_two_by_three_channel.time
-    sofafile.Data.SamplingRate = noise_two_by_three_channel.sampling_rate
+    sf.write_sofa(filename, sofafile)
 
-    sofafile.close()
     return filename
 
 
 @pytest.fixture
 def generate_sofa_GeneralTF(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralTF.
-    """
-    sofatype = 'GeneralTF'
-    n_measurements = noise_two_by_three_channel.cshape[0]
-    n_receivers = noise_two_by_three_channel.cshape[1]
-    n_bins = noise_two_by_three_channel.n_bins
-    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_bins}
+    """ Generate the reference sofa files of type GeneralTF."""
+    filename = os.path.join(tmpdir, ('GeneralTF' + '.sofa'))
 
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
+    sofafile = sf.Sofa('GeneralTF', True)
+    sofafile.Data_Real = np.real(noise_two_by_three_channel.freq)
+    sofafile.Data_Imag = np.imag(noise_two_by_three_channel.freq)
+    sofafile.N = noise_two_by_three_channel.frequencies
+    sofafile.SourcePosition = sofa_reference_coordinates[0]
+    sofafile.ReceiverPosition = sofa_reference_coordinates[1]
 
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(variances=["Position"], fixed=["View", "Up"])
-    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
-    sofafile.Receiver.initialize(variances=["Position"], fixed=["View", "Up"])
-    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
-    sofafile.Receiver.Position.set_values(r_coords)
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-    sofafile.Data.Type = 'TF'
-    sofafile.Data.initialize()
-    sofafile.Data.Real.set_values(np.real(noise_two_by_three_channel.freq))
-    sofafile.Data.Imag.set_values(np.imag(noise_two_by_three_channel.freq))
+    sf.write_sofa(filename, sofafile)
 
-    sofafile.close()
     return filename
 
 
@@ -474,96 +453,20 @@ def generate_sofa_postype_spherical(
     """ Generate the reference sofa files of type GeneralFIR,
     spherical position type.
     """
-    sofatype = 'GeneralFIR'
-    n_measurements = noise_two_by_three_channel.cshape[0]
-    n_receivers = noise_two_by_three_channel.cshape[1]
-    n_samples = noise_two_by_three_channel.n_samples
-    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
 
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
+    filename = os.path.join(tmpdir, ('GeneralFIR' + '.sofa'))
 
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(
-        variances=["Position"], fixed=["View", "Up"])
-    sofafile.Source.Position.set_system('spherical')
-    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
-    sofafile.Receiver.initialize(
-        variances=["Position"], fixed=["View", "Up"])
-    sofafile.Receiver.Position.set_system('spherical')
-    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
-    sofafile.Receiver.Position.set_values(r_coords)
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-    sofafile.Data.Type = 'FIR'
-    sofafile.Data.initialize()
-    sofafile.Data.IR = noise_two_by_three_channel.time
-    sofafile.Data.SamplingRate = noise_two_by_three_channel.sampling_rate
+    sofafile = sf.Sofa('GeneralFIR', True)
+    sofafile.Data_IR = noise_two_by_three_channel.time
+    sofafile.Data_Delay = np.zeros((1, noise_two_by_three_channel.cshape[1]))
+    sofafile.Data_SamplingRate = noise_two_by_three_channel.sampling_rate
+    sofafile.SourcePosition = sofa_reference_coordinates[0]
+    sofafile.ReceiverPosition = sofa_reference_coordinates[1]
+    sofafile.ReceiverPosition_Type = "spherical"
+    sofafile.ReceiverPosition_Units = "degree, degree, meter"
 
-    sofafile.close()
-    return filename
+    sf.write_sofa(filename, sofafile)
 
-
-@pytest.fixture
-def generate_sofa_unit_error(
-        tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR
-    with incorrect sampling rate unit.
-    """
-    sofatype = 'GeneralFIR'
-    n_measurements = noise_two_by_three_channel.cshape[0]
-    n_receivers = noise_two_by_three_channel.cshape[1]
-    n_samples = noise_two_by_three_channel.n_samples
-    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
-
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
-
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(variances=["Position"], fixed=["View", "Up"])
-    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
-    sofafile.Receiver.initialize(variances=["Position"], fixed=["View", "Up"])
-    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
-    sofafile.Receiver.Position.set_values(r_coords)
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-    sofafile.Data.Type = 'FIR'
-    sofafile.Data.initialize()
-    sofafile.Data.IR = noise_two_by_three_channel.time
-    sofafile.Data.SamplingRate = noise_two_by_three_channel.sampling_rate
-    sofafile.Data.SamplingRate.Units = 'not_hertz'
-
-    sofafile.close()
-    return filename
-
-
-@pytest.fixture
-def generate_sofa_postype_error(
-        tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR
-    with incorrect position type.
-    """
-    sofatype = 'GeneralFIR'
-    n_measurements = noise_two_by_three_channel.cshape[0]
-    n_receivers = noise_two_by_three_channel.cshape[1]
-    n_samples = noise_two_by_three_channel.n_samples
-    dimensions = {"M": n_measurements, "R": n_receivers, "N": n_samples}
-
-    filename = os.path.join(tmpdir, (sofatype + '.sofa'))
-    sofafile = sofa.Database.create(filename, sofatype, dimensions=dimensions)
-
-    sofafile.Listener.initialize(fixed=["Position", "View", "Up"])
-    sofafile.Source.initialize(variances=["Position"], fixed=["View", "Up"])
-    sofafile.Source.Position.set_values(sofa_reference_coordinates[0])
-    sofafile.Receiver.initialize(variances=["Position"], fixed=["View", "Up"])
-    r_coords = np.transpose(sofa_reference_coordinates[1], (0, 2, 1))
-    sofafile.Receiver.Position.set_values(r_coords)
-    sofafile.Emitter.initialize(fixed=["Position", "View", "Up"], count=1)
-    sofafile.Data.Type = 'FIR'
-    sofafile.Data.initialize()
-    sofafile.Data.IR = noise_two_by_three_channel.time
-    sofafile.Data.SamplingRate = noise_two_by_three_channel.sampling_rate
-    sofafile.Source.Position.Type = 'wrong_type'
-
-    sofafile.close()
     return filename
 
 
