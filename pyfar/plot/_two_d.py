@@ -11,11 +11,13 @@ from .ticker import (
 
 
 def _time2d(signal, dB, log_prefix, log_reference, unit, points,
-            orientation, cmap, ax, **kwargs):
+            orientation, cmap, colorbar, ax, **kwargs):
 
     # check input
     if not isinstance(signal, (Signal, TimeData)):
         raise TypeError('Input data has to be of type: Signal or TimeData.')
+    if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
+        raise ValueError('A list of axes can not be used if colorbar is False')
     _utils._check_time_unit(unit)
 
     # prepare input
@@ -38,15 +40,12 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
         factor, unit = _utils._deal_time_units(unit)
         times = signal.times * factor
 
-    # prepare figure
+    # prepare the figure and axis for plotting the data and colorbar
     fig, ax = _utils._prepare_plot(ax)
-    # clear figure and axis - spectogram does not work with hold
-    fig.clf()
-    ax = plt.gca()
-    # plot the data
-    ax = ax.figure.subplots(1, 2, gridspec_kw={"width_ratios": [1, 0.05]})
-    fig.axes[0].remove()
+    if not isinstance(ax, (np.ndarray, list)):
+        ax = [ax, None]
 
+    # setup axis label and data
     if orientation == "vertical":
         ax[0].set_xlabel("Points")
         ax[0].set_ylabel(f"Time in {unit}")
@@ -68,20 +67,22 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
                      shading='gouraud')
 
     # color limits
-    if dB:
-        for PCM in ax[0].get_children():
-            if type(PCM) == mpl.collections.QuadMesh:
-                break
-        PCM.set_clim(ymin, ymax)
-
-    # Colorbar:
     qm = _utils._get_quad_mesh_from_axis(ax[0])
 
-    cb = plt.colorbar(qm, cax=ax[1])
-    cb_label = "Amplitude in dB" if dB else "Amplitude"
-    cb.set_label(cb_label)
+    if dB:
+        qm.set_clim(ymin, ymax)
 
-    return ax
+    # Colorbar:
+    if colorbar:
+        if ax[1] is None:
+            cb = fig.colorbar(qm, ax=ax[0])
+        else:
+            cb = fig.colorbar(qm, cax=ax[1])
+        cb.set_label("Amplitude in dB" if dB else "Amplitude")
+    else:
+        cb = None
+
+    return ax[0], qm, cb
 
 
 def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,

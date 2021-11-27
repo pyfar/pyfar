@@ -7,8 +7,8 @@ from . import _interaction as ia
 
 def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
            points=None, orientation="vertical",
-           cmap=mpl.cm.get_cmap(name='magma'), ax=None, style='light',
-           **kwargs):
+           cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
+           style='light', **kwargs):
     """
     Surface plot of the time signal.
 
@@ -80,9 +80,9 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     """
 
     with context(style):
-        ax = _two_d._time2d(
+        ax, qm, cb = _two_d._time2d(
             signal.flatten(), dB, log_prefix, log_reference, unit,
-            points, orientation, cmap, ax, **kwargs)
+            points, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # plot_parameter = ia.PlotParameter(
@@ -90,6 +90,11 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     #     log_reference=log_reference)
     # interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     # ax.interaction = interaction
+
+    if colorbar:
+        ax = [ax, cb.ax]
+
+    return ax, qm, cb
 
 
 def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
