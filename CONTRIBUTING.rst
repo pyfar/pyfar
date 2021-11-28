@@ -7,33 +7,19 @@ Contributing
 Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given.
 
-You can contribute in many ways:
-
 Types of Contributions
 ----------------------
 
-Report Bugs
-~~~~~~~~~~~
+Report Bugs or Suggest Features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Report bugs at https://github.com/pyfar/pyfar/issues.
+The best place for this is https://github.com/pyfar/pyfar/issues.
 
-If you are reporting a bug, please include:
+Fix Bugs or Implement Features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Your operating system name and version.
-* Any details about your local setup that might be helpful in troubleshooting.
-* Detailed steps to reproduce the bug.
-
-Fix Bugs
-~~~~~~~~
-
-Look through the GitHub issues for bugs. Anything tagged with "bug" and "help
-wanted" is open to whoever wants to implement it.
-
-Implement Features
-~~~~~~~~~~~~~~~~~~
-
-Look through the GitHub issues for features. Anything tagged with "enhancement"
-and "help wanted" is open to whoever wants to implement it.
+Look through https://github.com/pyfar/pyfar/issues for bugs or feature request
+and contact us or comment if you are interested in implementing.
 
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
@@ -41,18 +27,6 @@ Write Documentation
 pyfar could always use more documentation, whether as part of the
 official pyfar docs, in docstrings, or even on the web in blog posts,
 articles, and such.
-
-Submit Feedback
-~~~~~~~~~~~~~~~
-
-The best way to send feedback is to file an issue at https://github.com/pyfar/pyfar/issues.
-
-If you are proposing a feature:
-
-* Explain in detail how it would work.
-* Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that contributions
-  are welcome :)
 
 Get Started!
 ------------
@@ -103,8 +77,7 @@ Before you submit a pull request, check that it meets these guidelines:
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
-3. The pull request should work for Python 3.7 and 3.8. Check
-   https://travis-ci.com/pyfar/pyfar/pull_requests
+3. Check https://travis-ci.com/pyfar/pyfar/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
 
@@ -118,6 +91,16 @@ In the following, you'll find a guideline. Note: these instructions are not gene
 - Make sure that all important parts of pyfar are covered by the tests. This can be checked using *coverage* (see below).
 - In case of pyfar, mainly **state verification** is applied in the tests. This means that the outcome of a function is compared to a desired value (``assert ...``). For more information, it is refered to `Martin Fowler's article <https://martinfowler.com/articles/mocksArentStubs.html.>`_.
 
+Tips
+~~~~~~~~~~~
+Pytest provides several, sophisticated functionalities which could reduce the effort of implementing tests.
+
+- Similar tests executing the same code with different variables can be `parametrized <https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
+- Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
+
+You can create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ by calling
+
+    $ pytest --cov=. --cov-report=html
 
 Fixtures
 ~~~~~~~~
@@ -151,17 +134,6 @@ Mocks are similar to stubs but used for **behavioral verification**. For example
 - A typical use case of mocks in the pyfar context is hardware communication, for example reading and writing of large files or audio in- and output. These use cases are rare compared to tests performing state verification.
 - In contrast to some other guidelines on mocks, external dependencies do **not** need to be mocked in general. Failing tests due to changes in external packages are meaningful hints to modify the code.
 - Examples of internal mocking can be found in *test_io.py*, indicated by the pytest ``@patch`` calls.
-
-Tips
-~~~~~~~~~~~
-Pytest provides several, sophisticated functionalities which could reduce the effort of implementing tests.
-
-- Similar tests executing the same code with different variables can be `parametrized <https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
-- Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
-
-You can create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ by calling
-
-    $ pytest --cov=. --cov-report=html
 
 
 Writing the Documentation
