@@ -98,7 +98,15 @@ Pytest provides several, sophisticated functionalities which could reduce the ef
 - Similar tests executing the same code with different variables can be `parametrized <https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
 - Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
 
-You can create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ by calling
+Run a single test with
+
+    $ pytest tests/test_plot.py::test_line_plots
+
+Exclude tests (for example the time consuming test of plot) with
+
+    $ pytest -k 'not plot'
+
+Create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ with
 
     $ pytest --cov=. --cov-report=html
 
