@@ -1,4 +1,5 @@
 import os
+import pytest
 from pytest import raises
 import matplotlib.pyplot as plt
 import pyfar.plot as plot
@@ -8,7 +9,7 @@ from pyfar.testing.plot_utils import create_figure, save_and_compare
 # flag for creating new baseline plots
 # - required if the plot look changed
 # - make sure to manually check the new baseline plots located at baseline_path
-create_baseline = False
+create_baseline = True
 
 # file type used for saving the plots
 file_type = "png"
@@ -250,20 +251,37 @@ def test_line_frequency_data(frequency_data):
                          file_type, compare_output)
 
 
-def test_2d_plots(sine):
-    """Test all 2D plots with default parameters"""
-    function_list = [
-        plot.spectrogram]
+def test_spectrogram(sine):
+    """Test spectrogram with default parameters"""
+    function = plot.spectrogram
 
-    for function in function_list:
+    print(f"Testing: {function.__name__}")
 
-        print(f"Testing: {function.__name__}")
+    filename = '2d_' + function.__name__
+    create_figure()
+    function(sine)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
 
-        filename = '2d_' + function.__name__
-        create_figure()
-        function(sine)
-        save_and_compare(create_baseline, baseline_path, output_path, filename,
-                         file_type, compare_output)
+
+@pytest.mark.parametrize('function', [
+    (plot.time2d)])
+@pytest.mark.parametrize('points', [('default'), ('custom')])
+@pytest.mark.parametrize('orientation', [('vertical'), ('horizontal')])
+def test_2d_points_orientation(function, orientation, points, impulse_45_channels):
+    """Test 2D plots with varing `points` and `orientation` parameters"""
+
+    print(f"Testing: {function.__name__}")
+
+    points_label = 'points-default' if points == 'default' else 'points-custom'
+    signal = impulse_45_channels[0]
+    points = impulse_45_channels[1] if points == 'custom' else None
+
+    filename = f'2d_{function.__name__}_{orientation}_{points_label}'
+    create_figure()
+    function(signal, points=points, orientation=orientation)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
 
 
 def test_2d_colorbar_options(sine):

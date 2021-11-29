@@ -74,6 +74,7 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     # Colorbar:
     if colorbar:
         if ax[1] is None:
+            # mpl.pyplot.grid(False)
             cb = fig.colorbar(qm, ax=ax[0])
         else:
             cb = fig.colorbar(qm, cax=ax[1])
