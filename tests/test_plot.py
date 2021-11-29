@@ -2,6 +2,7 @@ import os
 import pytest
 from pytest import raises
 import matplotlib.pyplot as plt
+import pyfar as pf
 import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
 
@@ -9,7 +10,7 @@ from pyfar.testing.plot_utils import create_figure, save_and_compare
 # flag for creating new baseline plots
 # - required if the plot look changed
 # - make sure to manually check the new baseline plots located at baseline_path
-create_baseline = True
+create_baseline = False
 
 # file type used for saving the plots
 file_type = "png"
@@ -268,7 +269,8 @@ def test_spectrogram(sine):
     (plot.time2d)])
 @pytest.mark.parametrize('points', [('default'), ('custom')])
 @pytest.mark.parametrize('orientation', [('vertical'), ('horizontal')])
-def test_2d_points_orientation(function, orientation, points, impulse_45_channels):
+def test_2d_points_orientation(
+        function, orientation, points, impulse_45_channels):
     """Test 2D plots with varing `points` and `orientation` parameters"""
 
     print(f"Testing: {function.__name__}")
@@ -284,38 +286,44 @@ def test_2d_points_orientation(function, orientation, points, impulse_45_channel
                      file_type, compare_output)
 
 
-def test_2d_colorbar_options(sine):
+@pytest.mark.parametrize('function', [
+    (plot.time2d), (plot.spectrogram)])
+@pytest.mark.parametrize('colorbar', [('off'), ('axes')])
+def test_2d_colorbar_options(function, colorbar, impulse_45_channels):
     """Test all 2D plots with default parameters"""
-    function_list = [
-        plot.spectrogram]
 
-    for function in function_list:
-        for cb_option in ["off", "axes"]:
+    print(f"Testing: {function.__name__} with colorbar {colorbar}")
+    filename = f'2d_{function.__name__}_colorbar-{colorbar}'
 
-            print(f"Testing: {function.__name__}")
+    # pad zeros to get minimum signal length for spectrogram
+    signal = impulse_45_channels[0]
+    if function == plot.spectrogram:
+        signal = pf.dsp.pad_zeros(signal, 2048 - signal.n_samples)
 
-            filename = '2d_' + cb_option + "_" + function.__name__
-            fig = create_figure()
-            if cb_option == "off":
-                # test not plotting a colobar
-                function(sine, colorbar=False)
-            elif cb_option == "axes":
-                # test plotting colorbar to specified axis
-                fig.clear()
-                _, ax = plt.subplots(1, 2, num=fig.number)
-                function(sine, ax=ax)
-            save_and_compare(create_baseline, baseline_path, output_path,
-                             filename, file_type, compare_output)
+    fig = create_figure()
+    if colorbar == "off":
+        # test not plotting a colobar
+        function(signal, colorbar=False)
+    elif colorbar == "axes":
+        # test plotting colorbar to specified axis
+        fig.clear()
+        _, ax = plt.subplots(1, 2, num=fig.number)
+        function(signal, ax=ax)
+
+    save_and_compare(create_baseline, baseline_path, output_path,
+                     filename, file_type, compare_output)
 
 
-def test_2d_plots_colorbar_assertion(sine):
-    function_list = [
-        plot.spectrogram]
+@pytest.mark.parametrize('function', [
+    (plot.time2d), (plot.spectrogram)])
+def test_2d_colorbar_assertion(function, impulse_45_channels):
+    """
+    Test assertion when passing an array of axes but not having a colobar.
+    """
 
-    # test assertion when passing an array of axes but not having a colobar
-    for function in function_list:
-        with raises(ValueError, match="A list of axes"):
-            function(sine, colorbar=False, ax=[plt.gca(), plt.gca()])
+    with raises(ValueError, match="A list of axes"):
+        function(impulse_45_channels[0], colorbar=False,
+                 ax=[plt.gca(), plt.gca()])
 
 
 def test_use():
