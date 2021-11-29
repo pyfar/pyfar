@@ -352,6 +352,27 @@ def noise_two_by_three_channel():
 
 
 @pytest.fixture
+def impulse_45_channels():
+    """
+    45 channel signal with delayed and scaled impulses for testing 2D plots-
+
+    Returns
+    -------
+    signal : Signal
+        Multi channel impulse signal
+    points : numpy array
+        Angles for passing to the plot functions as `points` argument
+    """
+
+    delays = np.array(np.sin(np.linspace(0, 2*np.pi, 45))*50 + 55, dtype=int)
+    amplitudes = 1 - .5 * np.sin(np.linspace(0, 2*np.pi, 45))
+    signal = pyfar.signals.impulse(256, delays, amplitudes)
+    points = np.linspace(0, 360, 45)
+
+    return signal, points
+
+
+@pytest.fixture
 def time_data():
     """
     TimeData object with three data points.
