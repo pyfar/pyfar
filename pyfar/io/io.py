@@ -14,8 +14,9 @@ import warnings
 import sofar as sf
 import zipfile
 import io
-import soundfile as sf
+import soundfile
 import tempfile
+import numpy as np
 
 import pyfar
 from pyfar import Signal, FrequencyData, Coordinates
@@ -275,7 +276,7 @@ def read_audio(filename, dtype='float64', **kwargs):
       [-1.0, 1.0). If the file contains ``np.array([42.6], dtype='float32')``,
       you will read ``np.array([43], dtype='int32')`` for ``dtype='int32'``.
     """
-    data, sampling_rate = sf.read(
+    data, sampling_rate = soundfile.read(
         file=filename, dtype=dtype, always_2d=True, **kwargs)
     signal = Signal(data.T, sampling_rate, domain='time', dtype=dtype)
     return signal
@@ -339,7 +340,7 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
                 subtype.upper() not in ['FLOAT', 'DOUBLE', 'VORBIS']):
             warnings.warn(
                 f'{format}-files of subtype {subtype} are clipped to +/- 1.')
-        sf.write(
+        soundfile.write(
             file=filename, data=data.T, samplerate=sampling_rate,
             subtype=subtype, **kwargs)
 
@@ -425,7 +426,7 @@ def audio_formats():
      'MAT5': 'MAT5 (GNU Octave 2.1 / Matlab 5.0)'}
 
     """
-    return sf.available_formats()
+    return soundfile.available_formats()
 
 
 def audio_subtypes(format=None):
@@ -449,7 +450,7 @@ def audio_subtypes(format=None):
      'PCM_S8': 'Signed 8 bit PCM'}
 
     """
-    return sf.available_subtypes(format=format)
+    return soundfile.available_subtypes(format=format)
 
 
 def default_audio_subtype(format):
@@ -468,7 +469,7 @@ def default_audio_subtype(format):
     'DOUBLE'
 
     """
-    return sf.default_subtype(format)
+    return soundfile.default_subtype(format)
 
 
 def _clipped_audio_subtypes():
@@ -488,7 +489,7 @@ def _clipped_audio_subtypes():
             for subtype in pyfar.io.audio_subtypes(format):
                 write_valid = not _soundfile_write_errors(format, subtype)
                 read_valid = not _soundfile_read_errors(format, subtype)
-                format_valid = sf.check_format(format, subtype)
+                format_valid = soundfile.check_format(format, subtype)
                 if write_valid and read_valid and format_valid:
                     if format == 'RAW':
                         write_audio(signal, filename, subtype=subtype)

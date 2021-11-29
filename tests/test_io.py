@@ -9,7 +9,7 @@ from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
 import pathlib
-import soundfile as sf
+import soundfile
 
 from pyfar import io
 from pyfar import Signal
@@ -475,11 +475,11 @@ def test_read_audio_stereo(read_mock):
     assert signal.sampling_rate == 1000
 
 
-@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
-@pytest.mark.parametrize("subtype", sf.available_subtypes().keys())
+@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
+@pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())
 def test_write_audio(audio_format, subtype, tmpdir, noise):
     """Test all available audio formats and subtypes."""
-    if sf.check_format(audio_format, subtype):
+    if soundfile.check_format(audio_format, subtype):
         filename = os.path.join(tmpdir, 'test_file.'+audio_format)
         if audio_format == 'AIFF' and subtype == 'DWVW_12':
             # This seems to be an error in soundfile/libsndfile?
@@ -514,7 +514,7 @@ def test_write_audio_nd(noise_two_by_three_channel, tmpdir):
     filename = os.path.join(tmpdir, 'test_wav.wav')
     with pytest.warns(UserWarning, match='flattened'):
         io.write_audio(noise_two_by_three_channel, filename)
-    signal_reload = sf.read(filename)[0].T
+    signal_reload = soundfile.read(filename)[0].T
     npt.assert_allclose(
         signal_reload.reshape(noise_two_by_three_channel.time.shape),
         noise_two_by_three_channel.time,
@@ -530,11 +530,11 @@ def test_write_audio_clip(sf_write_mock):
             signal=signal, filename='test.wav', subtype='PCM_16')
 
 
-@pytest.mark.parametrize("audio_format", sf.available_formats().keys())
-@pytest.mark.parametrize("subtype", sf.available_subtypes().keys())
+@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
+@pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())
 def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
     """Test all reading and writing of available audio formats and subtypes."""
-    if sf.check_format(audio_format, subtype):
+    if soundfile.check_format(audio_format, subtype):
         filename = os.path.join(tmpdir, 'test_file.'+audio_format)
         # Write Audio file
         # For exceptions see tests below
@@ -565,7 +565,8 @@ def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
             io.read_audio(filename)
 
 
-@pytest.mark.parametrize("subtype", sf.available_subtypes('AIFF').keys())
+@pytest.mark.parametrize(
+    "subtype", soundfile.available_subtypes('AIFF').keys())
 def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
     """Test for errors in soundfile/libsndfile for AIFF format"""
     filename = os.path.join(tmpdir, 'test_file.aiff')
@@ -581,7 +582,7 @@ def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
         io.read_audio(filename)
 
 
-@pytest.mark.parametrize("subtype", sf.available_subtypes('RAW').keys())
+@pytest.mark.parametrize("subtype", soundfile.available_subtypes('RAW').keys())
 def test_write_audio_read_audio_raw(subtype, tmpdir, noise):
     """Test for errors in soundfile/libsndfile for RAW format"""
     filename = os.path.join(tmpdir, 'test_file.raw')
@@ -609,7 +610,7 @@ def test_write_wav(tmpdir, noise):
     """Test default without optional parameters."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
     io.write_wav(noise, filename)
-    signal_reload = sf.read(filename)[0].T
+    signal_reload = soundfile.read(filename)[0].T
     npt.assert_allclose(
         noise.time,
         np.atleast_2d(signal_reload),
@@ -620,7 +621,7 @@ def test_write_wav_subtype(tmpdir, noise):
     """Test default optional subtype parameter."""
     filename = os.path.join(tmpdir, 'test_wav.wav')
     io.write_wav(noise, filename, subtype='DOUBLE')
-    signal_reload = sf.read(filename)[0].T
+    signal_reload = soundfile.read(filename)[0].T
     npt.assert_allclose(
         noise.time,
         np.atleast_2d(signal_reload),
@@ -631,7 +632,7 @@ def test_write_wav_pathlib(noise, tmpdir):
     """Test write functionality with filename as pathlib Path object."""
     filename = pathlib.Path(tmpdir, 'test_wav.wav')
     io.write_wav(noise, filename)
-    signal_reload = sf.read(filename)[0].T
+    signal_reload = soundfile.read(filename)[0].T
     npt.assert_allclose(
         noise.time,
         np.atleast_2d(signal_reload),
@@ -644,10 +645,10 @@ def test_write_wav_suffix(noise, tmpdir):
     io.write_wav(noise, filename)
     # Without suffix
     with pytest.raises(RuntimeError):
-        sf.read(filename)
+        soundfile.read(filename)
     # With suffix added
     filename = filename.with_suffix('.wav')
-    signal_reload = sf.read(filename)[0].T
+    signal_reload = soundfile.read(filename)[0].T
     npt.assert_allclose(
         noise.time,
         np.atleast_2d(signal_reload),

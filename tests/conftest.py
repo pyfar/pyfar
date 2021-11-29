@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 import os.path
 import sofar as sf
-import scipy.io.wavfile as wavfile
 
 from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
