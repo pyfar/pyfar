@@ -19,108 +19,100 @@ def test_input_division_type():
         _match_fft_norm('none', 'none', 'invalid')
 
 
-def test_result_no_division():
+@pytest.mark.parametrize("fft_norm_1, fft_norm_2, result",
+                         [['none',       'none',         'none'],
+                          ['none',       'unitary',      'unitary'],
+                          ['none',       'amplitude',    'amplitude'],
+                          ['none',       'power',        'power'],
+                          ['none',       'psd',          'psd'],
+                          ['unitary',    'none',         'unitary'],
+                          ['amplitude',  'none',         'amplitude'],
+                          ['rms',        'none',         'rms'],
+                          ['power',      'none',         'power'],
+                          ['psd',        'none',         'psd'],
+                          ['unitary',    'unitary',      'unitary'],
+                          ['amplitude',  'amplitude',    'amplitude'],
+                          ['rms',        'rms',          'rms'],
+                          ['power',      'power',        'power'],
+                          ['psd',        'psd',          'psd']])
+def test_result_no_division(fft_norm_1, fft_norm_2, result):
     """Test the returned fft_norm for arithmetic operation by passing
     valid combinations of fft_norms"""
-    #             fft_norm_1,   fft_norm_2,     result
-    fft_norms = [['none',       'none',         'none'],
-                 ['none',       'unitary',      'unitary'],
-                 ['none',       'amplitude',    'amplitude'],
-                 ['none',       'power',        'power'],
-                 ['none',       'psd',          'psd'],
-                 ['unitary',    'none',         'unitary'],
-                 ['amplitude',  'none',         'amplitude'],
-                 ['rms',        'none',         'rms'],
-                 ['power',      'none',         'power'],
-                 ['psd',        'none',         'psd'],
-                 ['unitary',    'unitary',      'unitary'],
-                 ['amplitude',  'amplitude',    'amplitude'],
-                 ['rms',        'rms',          'rms'],
-                 ['power',      'power',        'power'],
-                 ['psd',        'psd',          'psd']]
-    for fft_norm in fft_norms:
-        assert _match_fft_norm(fft_norm[0], fft_norm[1]) == fft_norm[2]
+    assert _match_fft_norm(fft_norm_1, fft_norm_2) == result
 
 
-def test_assertion_no_division():
+@pytest.mark.parametrize("fft_norm_1, fft_norm_2",
+                         [['unitary',    'amplitude'],
+                          ['unitary',    'rms'],
+                          ['unitary',    'power'],
+                          ['unitary',    'psd'],
+                          ['amplitude',  'unitary'],
+                          ['amplitude',  'rms'],
+                          ['amplitude',  'power'],
+                          ['amplitude',  'psd'],
+                          ['rms',        'unitary'],
+                          ['rms',        'amplitude'],
+                          ['rms',        'power'],
+                          ['rms',        'psd'],
+                          ['power',      'unitary'],
+                          ['power',      'amplitude'],
+                          ['power',      'rms'],
+                          ['power',      'psd'],
+                          ['psd',        'unitary'],
+                          ['psd',        'amplitude'],
+                          ['psd',        'rms'],
+                          ['psd',        'power']])
+def test_assertion_no_division(fft_norm_1, fft_norm_2):
     """Test assertion by passing invalid combinations of fft_norms"""
-    #           fft_norm_1,     fft_norm_2
-    fft_norms = [['unitary',    'amplitude'],
-                 ['unitary',    'rms'],
-                 ['unitary',    'power'],
-                 ['unitary',    'psd'],
-                 ['amplitude',  'unitary'],
-                 ['amplitude',  'rms'],
-                 ['amplitude',  'power'],
-                 ['amplitude',  'psd'],
-                 ['rms',        'unitary'],
-                 ['rms',        'amplitude'],
-                 ['rms',        'power'],
-                 ['rms',        'psd'],
-                 ['power',      'unitary'],
-                 ['power',      'amplitude'],
-                 ['power',      'rms'],
-                 ['power',      'psd'],
-                 ['psd',        'unitary'],
-                 ['psd',        'amplitude'],
-                 ['psd',        'rms'],
-                 ['psd',        'power']]
-    for fft_norm in fft_norms:
-        with pytest.raises(ValueError,
-                           match="Either one fft_norm has to be "):
-            _match_fft_norm(fft_norm[0], fft_norm[1])
+    with pytest.raises(ValueError, match="Either one fft_norm has to be "):
+        _match_fft_norm(fft_norm_1, fft_norm_2)
 
 
-def test_result_division():
+@pytest.mark.parametrize("fft_norm_1, fft_norm_2, result",
+                         [['none',       'none',         'none'],
+                          ['unitary',    'none',         'unitary'],
+                          ['amplitude',  'none',         'amplitude'],
+                          ['rms',        'none',         'rms'],
+                          ['power',      'none',         'power'],
+                          ['psd',        'none',         'psd'],
+                          ['unitary',    'unitary',      'none'],
+                          ['amplitude',  'amplitude',    'none'],
+                          ['rms',        'rms',          'none'],
+                          ['power',      'power',        'none'],
+                          ['psd',        'psd',          'none']])
+def test_result_division(fft_norm_1, fft_norm_2, result):
     """Test the returned fft_norm for arithmetic operation by passing
     valid combinations of fft_norms, with division=True"""
-    #             fft_norm_1,   fft_norm_2,     result
-    fft_norms = [['none',       'none',         'none'],
-                 ['unitary',    'none',         'unitary'],
-                 ['amplitude',  'none',         'amplitude'],
-                 ['rms',        'none',         'rms'],
-                 ['power',      'none',         'power'],
-                 ['psd',        'none',         'psd'],
-                 ['unitary',    'unitary',      'none'],
-                 ['amplitude',  'amplitude',    'none'],
-                 ['rms',        'rms',          'none'],
-                 ['power',      'power',        'none'],
-                 ['psd',        'psd',          'none']]
-    for fft_norm in fft_norms:
-        assert _match_fft_norm(fft_norm[0],
-                               fft_norm[1],
-                               division=True) == fft_norm[2]
+    assert _match_fft_norm(fft_norm_1, fft_norm_2, division=True) == result
 
 
-def test_assertion_division():
+@pytest.mark.parametrize("fft_norm_1, fft_norm_2",
+                         [['none',       'unitary'],
+                          ['none',       'amplitude'],
+                          ['none',       'power'],
+                          ['none',       'psd'],
+                          ['unitary',    'amplitude'],
+                          ['unitary',    'rms'],
+                          ['unitary',    'power'],
+                          ['unitary',    'psd'],
+                          ['amplitude',  'unitary'],
+                          ['amplitude',  'rms'],
+                          ['amplitude',  'power'],
+                          ['amplitude',  'psd'],
+                          ['rms',        'unitary'],
+                          ['rms',        'amplitude'],
+                          ['rms',        'power'],
+                          ['rms',        'psd'],
+                          ['power',      'unitary'],
+                          ['power',      'amplitude'],
+                          ['power',      'rms'],
+                          ['power',      'psd'],
+                          ['psd',        'unitary'],
+                          ['psd',        'amplitude'],
+                          ['psd',        'rms'],
+                          ['psd',        'power']])
+def test_assertion_division(fft_norm_1, fft_norm_2):
     """Test assertion by passing invalid combinations of fft_norms,
     with division=True"""
-    #             fft_norm_1,   fft_norm_2
-    fft_norms = [['none',       'unitary'],
-                 ['none',       'amplitude'],
-                 ['none',       'power'],
-                 ['none',       'psd'],
-                 ['unitary',    'amplitude'],
-                 ['unitary',    'rms'],
-                 ['unitary',    'power'],
-                 ['unitary',    'psd'],
-                 ['amplitude',  'unitary'],
-                 ['amplitude',  'rms'],
-                 ['amplitude',  'power'],
-                 ['amplitude',  'psd'],
-                 ['rms',        'unitary'],
-                 ['rms',        'amplitude'],
-                 ['rms',        'power'],
-                 ['rms',        'psd'],
-                 ['power',      'unitary'],
-                 ['power',      'amplitude'],
-                 ['power',      'rms'],
-                 ['power',      'psd'],
-                 ['psd',        'unitary'],
-                 ['psd',        'amplitude'],
-                 ['psd',        'rms'],
-                 ['psd',        'power']]
-    for fft_norm in fft_norms:
-        with pytest.raises(ValueError,
-                           match="Either fft_norm_2 "):
-            _match_fft_norm(fft_norm[0], fft_norm[1], division=True)
+    with pytest.raises(ValueError, match="Either fft_norm_2 "):
+        _match_fft_norm(fft_norm_1, fft_norm_2, division=True)
