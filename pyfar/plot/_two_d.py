@@ -15,6 +15,9 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     # check input
     if not isinstance(signal, (Signal, TimeData)):
         raise TypeError('Input data has to be of type: Signal or TimeData.')
+    if len(signal.cshape) > 1:
+        raise ValueError(
+            f'signal.cshape must be (m, ) with m > 0 but is {signal.cshape}')
     if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
         raise ValueError('A list of axes can not be used if colorbar is False')
     _utils._check_time_unit(unit)

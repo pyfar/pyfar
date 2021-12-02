@@ -21,7 +21,8 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     Parameters
     ----------
     signal : Signal, TimeData
-        The input data to be plotted.
+        The input data to be plotted. `signal.cshape` must be `(m, )` with
+        $m>0$.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -81,7 +82,7 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
 
     with context(style):
         ax, qm, cb = _two_d._time2d(
-            signal.flatten(), dB, log_prefix, log_reference, unit,
+            signal, dB, log_prefix, log_reference, unit,
             points, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
