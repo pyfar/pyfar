@@ -31,12 +31,12 @@ articles, and such.
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `pyfar` for local development using the command-line interface. Note that several alternative user interfaces exist, e.g., the Git GUI, `GitHub Desktop <https://desktop.github.com/>`_, extensions in `Visual Studio Code <https://code.visualstudio.com/>`_...
+Ready to contribute? Here's how to set up `pyfar` for local development using the command-line interface. Note that several alternative user interfaces exist, e.g., the Git GUI, `GitHub Desktop <https://desktop.github.com/>`_, extensions in `Visual Studio Code <https://code.visualstudio.com/>`_ ...
 
-1. Fork the `pyfar` repo on GitHub.
+1. `Fork <https://docs.github.com/en/get-started/quickstart/fork-a-repo/>`_ the `pyfar` repo on GitHub.
 2. Clone your fork locally and cd into the pyfar directory::
 
-    $ git clone https://github.com/pyfar/pyfar.git
+    $ git clone https://github.com/YOUR_USERNAME/pyfar.git
     $ cd pyfar
 
 3. Install your local copy into a virtualenv. Assuming you have Anaconda or Miniconda installed, this is how you set up your fork for local development::
@@ -67,7 +67,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+7. Submit a pull request on the develop branch through the GitHub website.
 
 Pull Request Guidelines
 -----------------------
