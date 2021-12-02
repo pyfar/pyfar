@@ -332,7 +332,7 @@ def test_2d_cshape_assertion(function):
     Test assertion when passing an array of axes but not having a colobar.
     """
 
-    error_str = r"signal.cshape must be \(m, \) with m \> 0 but is \(2, 2\)"
+    error_str = r"signal.cshape must be \(m, \) with m\>0 but is \(2, 2\)"
 
     with raises(ValueError, match=error_str):
         function(pf.signals.impulse(10, [[0, 0], [0, 0]]))
