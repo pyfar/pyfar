@@ -31,7 +31,7 @@ articles, and such.
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `pyfar` for local development.
+Ready to contribute? Here's how to set up `pyfar` for local development using the command-line interface. Note that several alternative user interfaces exist, e.g., the Git GUI, `GitHub Desktop <https://desktop.github.com/>`_, extensions in `Visual Studio Code <https://code.visualstudio.com/>`_...
 
 1. Fork the `pyfar` repo on GitHub.
 2. Clone your fork locally and cd into the pyfar directory::
@@ -75,10 +75,8 @@ Pull Request Guidelines
 Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring.
-3. Check https://travis-ci.com/pyfar/pyfar/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+2. If the pull request adds functionality, the docs should be updated. Put your new functionality into a function with a docstring.
+3. If checks to not pass, have a look at https://travis-ci.com/pyfar/pyfar/pull_requests for more information.
 
 
 Testing Guidelines
@@ -96,19 +94,20 @@ Tips
 Pytest provides several, sophisticated functionalities which could reduce the effort of implementing tests.
 
 - Similar tests executing the same code with different variables can be `parametrized <https://docs.pytest.org/en/stable/example/parametrize.html>`_. An example is ``test___eq___differInPoints`` in *test_coordinates.py*.
-- Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
 
-Run a single test with
+- Run a single test with
 
     $ pytest tests/test_plot.py::test_line_plots
 
-Exclude tests (for example the time consuming test of plot) with
+- Exclude tests (for example the time consuming test of plot) with
 
     $ pytest -k 'not plot'
 
-Create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ with
+- Create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ with
 
     $ pytest --cov=. --cov-report=html
+
+- Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
 
 Fixtures
 ~~~~~~~~
