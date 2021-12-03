@@ -1,4 +1,4 @@
 Fast Fourier Transform (FFT)
 -----------------------------------------------
 
-.. automodule:: pyfar.dsp.fft_concepts
+.. automodule:: pyfar._concepts.fft_concepts

@@ -1,4 +1,4 @@
 Coordinates
 -----------------------------------------------
 
-.. automodule:: pyfar.classes.coordinates_concepts
+.. automodule:: pyfar._concepts.coordinates_concepts

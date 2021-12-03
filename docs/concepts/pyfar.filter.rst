@@ -1,4 +1,4 @@
 Filter
 -----------------------------------------------
 
-.. automodule:: pyfar.classes.filter_concepts
+.. automodule:: pyfar._concepts.filter_concepts
