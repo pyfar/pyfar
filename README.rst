@@ -22,7 +22,7 @@ Use pip to install pyfar
 
     $ pip install pyfar
 
-(Requires Python 3.7 or 3.8)
+(Requires Python 3.7, 3.8 or 3.9)
 
 Contributing
 ============

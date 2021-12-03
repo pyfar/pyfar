@@ -92,10 +92,11 @@ def test_read_sofa_GeneralFIR(
     npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
 
 
-def test_read_sofa_GeneralTF(generate_sofa_GeneralTF):
+def test_read_sofa_GeneralTF(
+        generate_sofa_GeneralTF, noise_two_by_three_channel):
     """Test for sofa datatype GeneralTF"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_GeneralTF)
+    signal = io.read_sofa(generate_sofa_GeneralTF)[0]
+    npt.assert_allclose(signal.freq, noise_two_by_three_channel.freq)
 
 
 def test_read_sofa_coordinates(
@@ -108,12 +109,6 @@ def test_read_sofa_coordinates(
         r_coords.get_cart(), sofa_reference_coordinates[1])
 
 
-def test_read_sofa_sampling_rate_unit(generate_sofa_unit_error):
-    """Test to verify correct sampling rate unit of sofa file"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_unit_error)
-
-
 def test_read_sofa_position_type_spherical(
         generate_sofa_postype_spherical, sofa_reference_coordinates):
     """Test to verify correct position type of sofa file"""
@@ -124,12 +119,6 @@ def test_read_sofa_position_type_spherical(
     npt.assert_allclose(
         r_coords.get_sph(convention='top_elev', unit='deg'),
         sofa_reference_coordinates[1])
-
-
-def test_read_sofa_position_type_unit(generate_sofa_postype_error):
-    """Test to verify correct position type of sofa file"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_postype_error)
 
 
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
@@ -369,6 +358,32 @@ def test_write_read_numpy_ndarrays(tmpdir):
     assert np.allclose(actual['matrix_3d_complex'], matrix_3d_complex)
 
 
+def test_write_read_builtins(dict_of_builtins, tmpdir):
+    """ All python builtin types except for exceptions and the types:
+    filter, map, object, super, and staticmethod.
+
+    Make sure `read` understands the bits written by `write`
+    """
+    any_int = 49
+    any_bool = True
+    filename = os.path.join(tmpdir, 'builtins.far')
+
+    io.write(
+        filename,
+        any_int=any_int,
+        any_bool=any_bool,
+        **dict_of_builtins
+    )
+
+    actual = io.read(filename)
+    assert isinstance(any_int, int)
+    assert actual['any_int'] == any_int
+    assert isinstance(any_bool, bool)
+    assert actual['any_bool'] == any_bool
+    # checks if `dict_of_builtins` is a subset of `actual`
+    assert dict_of_builtins.items() <= actual.items()
+
+
 def test_write_read_multiplePyfarObjects(
         filter,
         filterFIR,
@@ -380,6 +395,7 @@ def test_write_read_multiplePyfarObjects(
         time_data,
         frequency_data,
         sine,
+        dict_of_builtins,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back.
@@ -398,7 +414,8 @@ def test_write_read_multiplePyfarObjects(
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
-        matrix_2d_int=matrix_2d_int)
+        matrix_2d_int=matrix_2d_int,
+        **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -422,6 +439,7 @@ def test_write_read_multiplePyfarObjects(
     assert actual['signal'] == sine
     assert isinstance(actual['matrix_2d_int'], np.ndarray)
     assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
+    assert dict_of_builtins.items() <= actual.items()
 
 
 def test_write_read_multiplePyfarObjectsWithCompression(
@@ -435,6 +453,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         time_data,
         frequency_data,
         sine,
+        dict_of_builtins,
         tmpdir):
     """ Check if multiple different PyFar-objects can be written to disk
     and read back with zip compression.
@@ -454,7 +473,8 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
-        matrix_2d_int=matrix_2d_int)
+        matrix_2d_int=matrix_2d_int,
+        **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filter
@@ -478,3 +498,4 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     assert actual['signal'] == sine
     assert isinstance(actual['matrix_2d_int'], np.ndarray)
     assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
+    assert dict_of_builtins.items() <= actual.items()

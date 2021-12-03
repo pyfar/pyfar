@@ -12,15 +12,11 @@ import scipy.io.wavfile as wavfile
 import os.path
 import pathlib
 import warnings
-import numpy as np
-import sofa
+import sofar as sf
 import zipfile
 import io
 
-
-from pyfar import Signal
-from pyfar import Coordinates
-
+from pyfar import Signal, FrequencyData, Coordinates
 from . import _codec as codec
 import pyfar.classes.filter as fo
 
@@ -94,21 +90,35 @@ def write_wav(signal, filename, overwrite=True):
         wavfile.write(filename, sampling_rate, data.T)
 
 
-def read_sofa(filename):
+def read_sofa(filename, verify=True):
     """
-    Import a SOFA file as :py:class:`~pyfar.classes.audio.Signal` object.
+    Import a SOFA file as pyfar object.
 
     Parameters
     ----------
     filename : string, Path
         Input SOFA file (cf. [#]_, [#]_).
+    verify : bool, optional
+        Verify if the data contained in the SOFA file agrees with the AES69
+        standard (see references). If the verification fails, the SOFA file
+        can be loaded by setting ``verify=False``. The default is ``True``
 
     Returns
     -------
-    signal : Signal
-        :py:class:`~pyfar.classes.audio.Signal` object containing the data
-        stored in `SOFA_Object.Data.IR`.
-        `cshape` is equal to ``(number of measurements, number of receivers)``.
+    audio : pyfar audio object
+        The audio object that is returned depends on the DataType of the SOFA
+        object:
+
+        - :py:class:`~pyfar.classes.audio.Signal`
+            A Signal object is returned is the DataType is ``'FIR'``,
+            ``'FIR-E'``, or ``'FIRE'``.
+        - :py:class:`~pyfar.classes.audio.FrequencyData`
+            A FrequencyData object is returned is the DataType is ``'TF'``,
+            ``'TF-E'``, or ``'TFE'``.
+
+        The `cshape` of the object is is ``(M, R)`` with `M` being the number
+        of measurements and `R` being the number of receivers from the SOFA
+        file.
     source_coordinates : Coordinates
         Coordinates object containing the data stored in
         `SOFA_object.SourcePosition`. The domain, convention and unit are
@@ -120,35 +130,33 @@ def read_sofa(filename):
 
     Notes
     -----
-    * This function is based on the python-sofa [#]_.
-    * Currently, only SOFA files of `DataType` ``FIR`` are supported.
+    * This function uses the sofar package to read SOFA files [#]_.
 
     References
     ----------
     .. [#] https://www.sofaconventions.org
-    .. [#] “AES69-2015: AES Standard for File Exchange-Spatial Acoustic Data
-        File Format.”, 2015.
-    .. [#] https://github.com/spatialaudio/python-sofa
+    .. [#] “AES69-2020: AES Standard for File Exchange-Spatial Acoustic Data
+        File Format.”, 2020.
+    .. [#] https://pyfar.org
 
     """
-    sofafile = sofa.Database.open(filename)
+    sofafile = sf.read_sofa(filename, verify)
     # Check for DataType
-    if sofafile.Data.Type == 'FIR':
-        domain = 'time'
-        data = np.asarray(sofafile.Data.IR)
-        sampling_rate = sofafile.Data.SamplingRate.get_values()
-        # Check for units
-        if sofafile.Data.SamplingRate.Units != 'hertz':
-            raise ValueError(
-                "SamplingRate:Units"
-                "{sofafile.Data.SamplingRate.Units} is not supported.")
+    if sofafile.GLOBAL_DataType in ['FIR', 'FIR-E', 'FIRE']:
+        # make a Signal
+        signal = Signal(sofafile.Data_IR, sofafile.Data_SamplingRate)
+
+    elif sofafile.GLOBAL_DataType in ['TF', 'TF-E', 'TFE']:
+        # make FrequencyData
+        signal = FrequencyData(
+            sofafile.Data_Real + 1j * sofafile.Data_Imag, sofafile.N)
     else:
-        raise ValueError("DataType {sofafile.Data.Type} is not supported.")
-    signal = Signal(data, sampling_rate, domain=domain)
+        raise ValueError(
+            "DataType {sofafile.GLOBAL_DataType} is not supported.")
 
     # Source
-    s_values = sofafile.Source.Position.get_values()
-    s_domain, s_convention, s_unit = _sofa_pos(sofafile.Source.Position.Type)
+    s_values = sofafile.SourcePosition
+    s_domain, s_convention, s_unit = _sofa_pos(sofafile.SourcePosition_Type)
     source_coordinates = Coordinates(
         s_values[:, 0],
         s_values[:, 1],
@@ -157,8 +165,8 @@ def read_sofa(filename):
         convention=s_convention,
         unit=s_unit)
     # Receiver
-    r_values = sofafile.Receiver.Position.get_values()
-    r_domain, r_convention, r_unit = _sofa_pos(sofafile.Receiver.Position.Type)
+    r_values = sofafile.ReceiverPosition
+    r_domain, r_convention, r_unit = _sofa_pos(sofafile.ReceiverPosition_Type)
     receiver_coordinates = Coordinates(
         r_values[:, 0],
         r_values[:, 1],
@@ -230,12 +238,18 @@ def read(filename):
                         'different versions of Pyfar.')
                 collection[name] = obj
 
+        if 'builtin_wrapper' in collection:
+            for key, value in collection['builtin_wrapper'].items():
+                collection[key] = value
+            collection.pop('builtin_wrapper')
+
     return collection
 
 
 def write(filename, compress=False, **objs):
     """
-    Write any compatible pyfar object or numpy array as .far file to disk.
+    Write any compatible pyfar object or numpy array and often used builtin
+    types as .far file to disk.
 
     Parameters
     ----------
@@ -260,23 +274,34 @@ def write(filename, compress=False, **objs):
     >>> a = np.array([1,2,3])
     >>> pyfar.io.write('my_objs.far', signal=s, orientations=o, array=a)
 
+    Notes
+    -----
+    * Supported builtin types are:
+      bool, bytes, complex, float, frozenset, int, list, set, str and tuple
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
     compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
     zip_buffer = io.BytesIO()
+    builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
         for name, obj in objs.items():
             if codec._is_pyfar_type(obj):
                 codec._encode_object_json_aided(obj, name, zip_file)
             elif codec._is_numpy_type(obj):
                 codec._encode({f'${type(obj).__name__}': obj}, name, zip_file)
+            elif type(obj) in codec._supported_builtin_types():
+                builtin_wrapper[name] = obj
             else:
                 error = (
                     f'Objects of type {type(obj)} cannot be written to disk.')
                 if isinstance(obj, fo.Filter):
                     error = f'{error}. Consider casting to {fo.Filter}'
                 raise TypeError(error)
+
+        if len(builtin_wrapper) > 0:
+            codec._encode_object_json_aided(
+                builtin_wrapper, 'builtin_wrapper', zip_file)
 
     with open(filename, 'wb') as f:
         f.write(zip_buffer.getvalue())

@@ -82,19 +82,9 @@ References
 
 """
 import multiprocessing
-import warnings
 
 import numpy as np
-
-try:
-    import pyfftw
-    pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-    from pyfftw.interfaces import numpy_fft as fft_lib
-except ImportError:
-    warnings.warn(
-        "Using numpy FFT implementation.\
-        Install pyfftw for improved performance.")
-    from numpy import fft as fft_lib
+from scipy import fft
 
 
 def rfftfreq(n_samples, sampling_rate):
@@ -118,7 +108,7 @@ def rfftfreq(n_samples, sampling_rate):
         The positive discrete frequencies in Hz for which the FFT is
         calculated.
     """  # noqa: W605 (ignore \_ which is valid only in LaTex)
-    return fft_lib.rfftfreq(n_samples, d=1/sampling_rate)
+    return fft.rfftfreq(n_samples, d=1/sampling_rate)
 
 
 def rfft(data, n_samples, sampling_rate, fft_norm):
@@ -153,7 +143,8 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     """
 
     # DFT
-    spec = fft_lib.rfft(data, n=n_samples, axis=-1)
+    spec = fft.rfft(
+        data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
     # Normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=False, single_sided=True)
@@ -197,7 +188,8 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True)
     # Inverse DFT
-    data = fft_lib.irfft(spec, n=n_samples, axis=-1)
+    data = fft.irfft(
+        spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
 
     return data
 
