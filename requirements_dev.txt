@@ -18,3 +18,4 @@ deepdiff
 insipid-sphinx-theme
 tox-wheel
 autodocsumm
+soundfile
