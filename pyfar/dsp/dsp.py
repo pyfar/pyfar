@@ -1407,17 +1407,21 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     mode : str {'full', 'cut', 'cyclic'}, optional
         A string indicating the size of the output:
             - ``'full'``:
-                The output is the full discrete linear convolution of
-                the input signals. (Default)
+                Compute the the full discrete linear convolution of
+                the input signals. The output has the length
+                ``'signal1.n_samples + signal2.n_samples - 1'`` (Default).
 
             - ``'cut'`` :
-                The output is the same as for ``full``, but cut to the length
-                of the longer signal.
+                Compute the complete convolution with ``full`` and truncate the
+                result to the length of the longer signal.
 
             - ``'cyclic'`` :
                 The output is the cyclic convolution of the signals, where the
                 shorter signal is zero-padded to fit the length of the longer
-                one.
+                one. This is done by computing the complete convolution with
+                ``'full'``, adding the tail (i.e., the part that is truncated
+                for ``mode='cut'`` to the beginning of the result) and
+                truncating the result to the length of the longer signal.
 
     method : str {'overlap_add', 'fft'}, optional
         A string indicating which method to use to calculate the convolution:

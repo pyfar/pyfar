@@ -569,32 +569,14 @@ def test_convolve_fft_norm_error():
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-def test_convolve_mode_full(method):
+@pytest.mark.parametrize("mode, desired", [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]])),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]])),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]]))])
+def test_convolve_mode_and_method(method, mode, desired):
     x = pf.Signal([1, 0.5, 0.5, 0.1], 44100)
     y = pf.Signal([1, -1, 0.1], 44100)
-
-    res = dsp.convolve(x, y, mode='full', method=method)
-    desired = np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]])
-    np.testing.assert_allclose(res.time, desired, atol=1e-10)
-
-
-@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-def test_convolve_mode_cut(method):
-    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100)
-    y = pf.Signal([1, -1, 0.1], 44100)
-
-    res = dsp.convolve(x, y, mode='cut', method=method)
-    desired = np.array([[1, -0.5, 0.1, -0.35]])
-    np.testing.assert_allclose(res.time, desired, atol=1e-10)
-
-
-@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-def test_convolve_mode_cyclic(method):
-    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100)
-    y = pf.Signal([1, -1, 0.1], 44100)
-
-    res = dsp.convolve(x, y, mode='cyclic', method=method)
-    desired = np.array([[0.95, -0.49, 0.1, -0.35]])
+    res = dsp.convolve(x, y, mode=mode, method=method)
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
 
 
