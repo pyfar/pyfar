@@ -1402,7 +1402,8 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     deconvolution (spectral division).
 
     .. math::
-    \\H( \\omega ) = \\frac{Y(\\omega)}{X(\\omega)},
+
+        \\H( \\omega ) = \\frac{Y(\\omega)}{X(\\omega)},
 
     where :math:`X(\\omega)` is the system input signal and :math:`Y(\\omega)`
     the system output. Regulated inversion is used to avoid numerical issues
@@ -1412,7 +1413,8 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     The system response (transfer function) is thus calculated as
 
     .. math::
-    \\H(\\omega) = Y(\\omega)\\hat{X(\\omega)}.
+
+        \\H(\\omega) = Y(\\omega)\\hat{X(\\omega)}.
 
     For more information, refer to [#]_
 
