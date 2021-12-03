@@ -4,10 +4,10 @@ Modules
 .. toctree::
    :maxdepth: 1
 
-   pyfar.dsp
-   pyfar.dsp.fft
-   pyfar.dsp.filter
-   pyfar.io
-   pyfar.plot
-   pyfar.signals
-   pyfar.samplings
+   modules/pyfar.dsp
+   modules/pyfar.dsp.fft
+   modules/pyfar.dsp.filter
+   modules/pyfar.io
+   modules/pyfar.plot
+   modules/pyfar.signals
+   modules/pyfar.samplings

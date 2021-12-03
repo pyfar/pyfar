@@ -4,4 +4,6 @@ Concepts
 .. toctree::
    :maxdepth: 1
 
-   pyfar.concepts_filter
+   concepts/pyfar.audio.rst
+   concepts/pyfar.filter.rst
+   concepts/pyfar.coordinates.rst
