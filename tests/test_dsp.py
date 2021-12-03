@@ -541,3 +541,56 @@ def test_minimum_phase():
 
     assert imp_minphase.n_samples == imp_linphase.n_samples
     npt.assert_allclose(imp_minphase.time, ref.time)
+
+
+def test_convolve_default():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, -1, 0], 44100)
+
+    res = dsp.convolve(x, y)
+    desired = np.array([[1, -0.5, -0.25, -0.25, 0, 0]])
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+def test_convolve_sampling_rate_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, 0.5, 0.25, 0], 48000)
+
+    with pytest.raises(ValueError, match="sampling rates"):
+        dsp.convolve(x, y)
+
+
+def test_convolve_fft_norm_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='unitary')
+    y = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='amplitude')
+
+    with pytest.raises(ValueError, match="fft_norm"):
+        dsp.convolve(x, y)
+
+
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize("mode, desired", [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]])),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]])),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]]))])
+def test_convolve_mode_and_method(method, mode, desired):
+    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100)
+    y = pf.Signal([1, -1, 0.1], 44100)
+    res = dsp.convolve(x, y, mode=mode, method=method)
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+def test_convolve_mode_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, -1, 0], 44100)
+
+    with pytest.raises(ValueError, match='Invalid mode'):
+        dsp.convolve(x, y, mode='invalid')
+
+
+def test_convolve_method_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, -1, 0], 44100)
+
+    with pytest.raises(ValueError, match='Invalid method'):
+        dsp.convolve(x, y, method='invalid')
