@@ -1459,9 +1459,6 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     # Check if both signals have the same sampling rate
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
-    # Check if both signals have the same fft norm
-    if not system_output.fft_norm == system_input.fft_norm:
-        raise ValueError("The two signals have different fft_norm.")
 
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value
@@ -1503,6 +1500,7 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
         system_response.comment += f" system output: {system_input.comment}."
 
     # return the impulse resonse
-    system_response.fft_norm = 'none'
+    system_response.fft_norm = pyfar.classes.audio._match_fft_norm(
+        system_output.fft_norm, system_input.fft_norm)
 
     return system_response
