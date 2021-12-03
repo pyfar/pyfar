@@ -92,10 +92,11 @@ def test_read_sofa_GeneralFIR(
     npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
 
 
-def test_read_sofa_GeneralTF(generate_sofa_GeneralTF):
+def test_read_sofa_GeneralTF(
+        generate_sofa_GeneralTF, noise_two_by_three_channel):
     """Test for sofa datatype GeneralTF"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_GeneralTF)
+    signal = io.read_sofa(generate_sofa_GeneralTF)[0]
+    npt.assert_allclose(signal.freq, noise_two_by_three_channel.freq)
 
 
 def test_read_sofa_coordinates(
@@ -108,12 +109,6 @@ def test_read_sofa_coordinates(
         r_coords.get_cart(), sofa_reference_coordinates[1])
 
 
-def test_read_sofa_sampling_rate_unit(generate_sofa_unit_error):
-    """Test to verify correct sampling rate unit of sofa file"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_unit_error)
-
-
 def test_read_sofa_position_type_spherical(
         generate_sofa_postype_spherical, sofa_reference_coordinates):
     """Test to verify correct position type of sofa file"""
@@ -124,12 +119,6 @@ def test_read_sofa_position_type_spherical(
     npt.assert_allclose(
         r_coords.get_sph(convention='top_elev', unit='deg'),
         sofa_reference_coordinates[1])
-
-
-def test_read_sofa_position_type_unit(generate_sofa_postype_error):
-    """Test to verify correct position type of sofa file"""
-    with pytest.raises(ValueError):
-        io.read_sofa(generate_sofa_postype_error)
 
 
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
