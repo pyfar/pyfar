@@ -28,17 +28,6 @@ def test_input_sampling_freq_error():
                    impulse(3, sampling_rate=48000))
 
 
-def test_input_fft_norm_error():
-    """Test assertion by passing signals with different fft_norm"""
-    measurement = impulse(3, sampling_rate=44100)
-    measurement.fft_norm = 'rms'
-    excitation = impulse(3, sampling_rate=44100)
-    excitation.fft_norm = 'power'
-    with pytest.raises(ValueError,
-                       match='The two signals have different fft_norm.'):
-        deconvolve(measurement, excitation)
-
-
 def test_fft_length_error():
     """Test assertion by passing fft_length shorter than n_samples of
     given Signals"""
