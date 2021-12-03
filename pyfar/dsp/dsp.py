@@ -1453,7 +1453,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     .. plot::
 
         >>> import pyfar as pf
-        >>> s1 = pf.Signal([1, 0.5, 0.5], .1)
+        >>> s1 = pf.Signal([1, 0.5, 0.5], 1000)
         >>> s2 = pf.Signal([1,-1], .1)
         >>> full = pf.dsp.convolve(s1, s2, mode='full')
         >>> cut = pf.dsp.convolve(s1, s2, mode='cut')
@@ -1477,9 +1477,8 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     """
     if not signal1.sampling_rate == signal2.sampling_rate:
         raise ValueError("The sampling rates do not match")
-    # TO DO: _match_fft_norm
-    if not signal1.fft_norm == signal2.fft_norm:
-        raise ValueError("FFT norms do not match.")
+    fft_norm = pyfar.classes.audio._match_fft_norm(
+        signal1.fft_norm, signal2.fft_norm)
     if mode not in ['full', 'cut', 'cyclic']:
         raise ValueError(
             f"Invalid mode {mode}, needs to be "
@@ -1502,4 +1501,4 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         res = res[..., :n_max]
 
     return pyfar.Signal(
-        res, signal1.sampling_rate, domain='time', fft_norm=signal1.fft_norm)
+        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)

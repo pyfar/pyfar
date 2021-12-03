@@ -564,7 +564,7 @@ def test_convolve_fft_norm_error():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='unitary')
     y = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='amplitude')
 
-    with pytest.raises(ValueError, match="FFT norms"):
+    with pytest.raises(ValueError, match="fft_norm"):
         dsp.convolve(x, y)
 
 
