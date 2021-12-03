@@ -26,4 +26,6 @@ A plethora of sampling schemes to generate coordinate objects is contained in
 .. |coordinate_systems| image:: resources/coordinate_systems.png
    :width: 100%
    :alt: Alternative text
+
+See :py:class:`~pyfar.classes.coordinates` for a complete documentation.
 """

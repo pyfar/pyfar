@@ -15,7 +15,7 @@ There are three types of Filter objects:
   IIR filters of the same order.
 
 
-Initializing a filter object
+Initializing a Filter Object
 ----------------------------
 
 A filter object is initialized at least with the coefficients and a sampling
@@ -27,7 +27,7 @@ rate
     filter = pf.FilterFIR([[2, -2]], 44100, state=None)
 
 
-Applying a Filter object
+Applying a Filter Object
 ------------------------
 
 To filter an audio signal, pass it to the filters process function
@@ -42,7 +42,7 @@ as the input.
 
 The output will be the same no matter how often ``process`` is called. This
 default behavior is often desired. In some cases, a different functionality can
-be usefull. For blockwise processing of input signals, the Filter object can
+be useful. For blockwise processing of input signals, the Filter object can
 track the `state` of the filter. The initial state can be passed during
 initialization or typical states can be set using
 
@@ -84,4 +84,6 @@ or simply do not initialize the state at all as done by
 
     filter = pf.FilterFIR([[2, -2]], 44100, state=None)
 
+
+See :py:class:`~pyfar.classes.filter` for a complete documentation.
 """
