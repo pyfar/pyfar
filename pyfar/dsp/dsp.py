@@ -1396,25 +1396,25 @@ def time_shift(signal, shift, unit='samples'):
 
 
 def deconvolve(system_output, system_input, fft_length=None, **kwargs):
-    """Calculate transfer functions by spectral deconvolution of two signals.
+    r"""Calculate transfer functions by spectral deconvolution of two signals.
 
-    The transfer function :math:`H(\\omega)` is calculated by spectral
+    The transfer function :math:`H(\omega)` is calculated by spectral
     deconvolution (spectral division).
 
     .. math::
 
-        \\H( \\omega ) = \\frac{Y(\\omega)}{X(\\omega)},
+        H(\omega) = \frac{Y(\omega)}{X(\omega)},
 
-    where :math:`X(\\omega)` is the system input signal and :math:`Y(\\omega)`
+    where :math:`X(\omega)` is the system input signal and :math:`Y(\omega)`
     the system output. Regulated inversion is used to avoid numerical issues
-    in calculating :math:`\\hat{X(\\omega)} = 1/X(\\omega)` for small values of
-    :math:`X(\\omega)`
+    in calculating :math:`X(\omega)^{-1} = 1/X(\omega)` for small values of
+    :math:`X(\omega)`
     (see :py:func:`~pyfar.dsp.regulated_spectrum_inversion`).
     The system response (transfer function) is thus calculated as
 
     .. math::
 
-        \\H(\\omega) = Y(\\omega)\\hat{X(\\omega)}.
+        H(\omega) = Y(\omega)X(\omega)^{-1}.
 
     For more information, refer to [#]_
 
@@ -1434,7 +1434,7 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
         shorter signal is padded to the length of the longer signal, no padding
         is applied when both signals have the same length.
     kwargs : key value arguments
-        Key value arguments to control the inversion of :math:`H(\\omega)` are
+        Key value arguments to control the inversion of :math:`H(\omega)` are
         passed to to :py:func:`~pyfar.dsp.regulated_spectrum_inversion`.
 
 
