@@ -17,9 +17,6 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
 
     Parameters
     ----------
-
-    Parameters
-    ----------
     signal : Signal, TimeData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
         $m>0$.
@@ -70,6 +67,7 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     samples
 
     .. plot::
+
         >>> import pyfar as pf
         >>> import numpy as np
         >>> # generate the signal
