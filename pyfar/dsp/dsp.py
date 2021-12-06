@@ -1476,17 +1476,10 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
 
     # Check if both signals have the same length as ftt_length,
     # if not: bring them to the same length by padding with zeros
-    if system_output.n_samples < fft_length:
-        # Add Zeros to system_input
-        system_output = pyfar.dsp.pad_zeros(system_output,
-                                            (fft_length -
-                                             system_output.n_samples))
-
-    if system_input.n_samples < fft_length:
-        # Add Zeros to system_output
-        system_input = pyfar.dsp.pad_zeros(system_input,
-                                           (fft_length -
-                                            system_input.n_samples))
+    system_output = pyfar.dsp.pad_zeros(system_output,
+                                        (fft_length - system_output.n_samples))
+    system_input = pyfar.dsp.pad_zeros(system_input,
+                                       (fft_length - system_input.n_samples))
 
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
