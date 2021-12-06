@@ -8,6 +8,9 @@ python:
   - 3.9
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+before_install:
+  - sudo apt-get install libsndfile1
+
 install:
   - pip install -U pip
   - pip install -U tox-travis
