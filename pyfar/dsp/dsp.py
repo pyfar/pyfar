@@ -1503,7 +1503,7 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
 
     # return the impulse resonse
     system_response.fft_norm = pyfar.classes.audio._match_fft_norm(
-        system_output.fft_norm, system_input.fft_norm)
+        system_output.fft_norm, system_input.fft_norm, division=True)
 
     return system_response
 
