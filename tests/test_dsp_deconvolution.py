@@ -83,3 +83,15 @@ def test_output_sweep():
                                 sweep,
                                 freq_range=(1, 44100)).freq[0, 1000:-12500]
     npt.assert_allclose(np.ones_like(res), res, atol=1e-9)
+
+
+def test_fft_norm():
+    """Test the correct call of _match_fft_norm with parameter division=True
+    for two example inputs."""
+    sig1 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
+    res = pf.dsp.dsp.deconvolve(sig1, sig1, freq_range=(1, 44100))
+    assert res.fft_norm == 'none'
+    sig2 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='none')
+    sig3 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
+    with pytest.raises(ValueError, match="Either fft_norm_2 "):
+        deconvolve(sig2, sig3, freq_range=(1, 44100))
