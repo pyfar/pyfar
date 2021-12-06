@@ -45,6 +45,16 @@ def test_fft_length_error():
                    fft_length=5)
 
 
+def test_default():
+    """Test the default parameters of deconvolution function."""
+    res = deconvolve(impulse(6, sampling_rate=44100),
+                     impulse(5, sampling_rate=44100),
+                     freq_range=(1, 22050))
+    assert res.n_samples == 6
+    assert res.fft_norm == 'none'
+    assert res.sampling_rate == 44100
+
+
 def test_output_type():
     """Test Type of returned Signal and basic deconvolution with impulses"""
     res = deconvolve(impulse(3), impulse(3), freq_range=(1, 22050))
