@@ -1454,7 +1454,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
         >>> import pyfar as pf
         >>> s1 = pf.Signal([1, 0.5, 0.5], 1000)
-        >>> s2 = pf.Signal([1,-1], .1)
+        >>> s2 = pf.Signal([1,-1], 1000)
         >>> full = pf.dsp.convolve(s1, s2, mode='full')
         >>> cut = pf.dsp.convolve(s1, s2, mode='cut')
         >>> cyc = pf.dsp.convolve(s1, s2, mode='cyclic')
