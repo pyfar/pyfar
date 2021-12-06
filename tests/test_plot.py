@@ -329,7 +329,7 @@ def test_2d_colorbar_assertion(function, impulse_45_channels):
 @pytest.mark.parametrize('function', [(plot.time2d)])
 def test_2d_cshape_assertion(function):
     """
-    Test assertion when passing an array of axes but not having a colobar.
+    Test assertion when passing a signal with wring cshape.
     """
 
     error_str = r"signal.cshape must be \(m, \) with m\>0 but is \(2, 2\)"
