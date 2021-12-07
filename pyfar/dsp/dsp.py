@@ -320,7 +320,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def time_window(signal, interval, window='hann', shape='symmetric',
-                unit='samples', crop='none'):
+                unit='samples', crop='none', return_window=False):
     """Apply time window to signal.
 
     This function uses the windows implemented in ``scipy.signal.windows``.
@@ -370,11 +370,16 @@ def time_window(signal, interval, window='hann', shape='symmetric',
             cropped, so the original phase is preserved.
 
         The default is ``'none'``.
+    return_window: bool, optional
+        If ``True``, both the windowed signal and the time window are returned.
 
     Returns
     -------
     signal_windowed : Signal
         Windowed signal object
+    window : Signal
+        Time window used to create the windowed signal, only returned if
+        ``return_window=True``.
 
     Notes
     -----
@@ -455,6 +460,9 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     if not isinstance(interval, (list, tuple)):
         raise TypeError(
             "The parameter interval has to be of type list, tuple or None.")
+    if not isinstance(return_window, bool):
+        raise TypeError(
+            "The parameter return_window needs to be boolean.")
 
     interval = np.array(interval)
     if not np.array_equal(interval, np.sort(interval)):
@@ -497,18 +505,33 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     signal_win = signal.copy()
     if crop == 'window':
         signal_win.time = signal_win.time[..., win_start:win_stop+1]*win
+        if return_window:
+            window_fin = pyfar.Signal(win, signal_win.sampling_rate)
     if crop == 'end':
         # Add zeros before window
         window_zeropadded = np.zeros(win_stop+1)
         window_zeropadded[win_start:win_stop+1] = win
         signal_win.time = signal_win.time[..., :win_stop+1]*window_zeropadded
+        if return_window:
+            window_fin = pyfar.Signal(
+                window_zeropadded, signal_win.sampling_rate)
     elif crop == 'none':
         # Create zeropadded window
         window_zeropadded = np.zeros(signal.n_samples)
         window_zeropadded[win_start:win_stop+1] = win
         signal_win.time = signal_win.time*window_zeropadded
+        if return_window:
+            window_fin = pyfar.Signal(
+                window_zeropadded, signal_win.sampling_rate)
 
-    return signal_win
+    if return_window:
+        window_fin.comment = (
+            f"Time window with parameters interval={tuple(interval)},"
+            f"window='{window}', shape='{shape}', unit='{unit}', "
+            f"crop='{crop}'")
+        return signal_win, window_fin
+    else:
+        return signal_win
 
 
 def kaiser_window_beta(A):
