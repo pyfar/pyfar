@@ -10,7 +10,7 @@ from . import _audiofilter as iir
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     """
-    This function will be deprecated in favor of `:py:func:~butterworth`
+    This function will be deprecated in favor of :py:func:`~butterworth`
     in pyfar 0.5.0
     """
 
@@ -22,7 +22,7 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
 
 def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
     """
-    This function will be deprecated in favor of `:py:func:~chebyshev1`
+    This function will be deprecated in favor of :py:func:`~chebyshev1`
     in pyfar 0.5.0
     """
 
@@ -35,7 +35,7 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
 def cheby2(signal, N, attenuation, frequency, btype='lowpass',
            sampling_rate=None):
     """
-    This function will be deprecated in favor of `:py:func:~chebyshev2`
+    This function will be deprecated in favor of :py:func:`~chebyshev2`
     in pyfar 0.5.0
     """
 
@@ -48,7 +48,7 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
 def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
           sampling_rate=None):
     """
-    This function will be deprecated in favor of `:py:func:~elliptic`
+    This function will be deprecated in favor of :py:func:`~elliptic`
     in pyfar 0.5.0
     """
 
@@ -62,7 +62,7 @@ def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
 def peq(signal, center_frequency, gain, quality, peq_type='II',
         quality_warp='cos', sampling_rate=None):
     """
-    This function will be deprecated in favor of `:py:func:~bell`
+    This function will be deprecated in favor of :py:func:`~bell`
     in pyfar 0.5.0
     """
 
