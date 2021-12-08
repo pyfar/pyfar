@@ -218,9 +218,10 @@ def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
     attenuation : number
         The minimum stop band attenuation in dB.
     frequency : number, array like
-        The cut off-frequency in Hz if `btype` is ``'lowpass'`` or
-        ``'highpass'``. An array like containing the lower and upper cut-off
-        frequencies in Hz if `btype` is ``'bandpass'`` or ``'bandstop'``.
+        The frequency in Hz where the `attenuatoin` is first reached if `btype`
+        is ``'lowpass'`` or ``'highpass'``. An array like containing the lower
+        and upper frequencies in Hz if `btype` is ``'bandpass'`` or
+        ``'bandstop'``.
     btype : str
         One of the following ``'lowpass'``, ``'highpass'``, ``'bandpass'``,
         ``'bandstop'``. The default is ``'lowpass'``.
@@ -272,7 +273,7 @@ def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
     Create and apply digital Elliptic (Cauer) IIR filter.
 
     This is a wrapper for ``scipy.signal.ellip``. Which creates digital
-    Chebyshev Type II filter coefficients in second-order sections (SOS).
+    Elliptic (Cauer) filter coefficients in second-order sections (SOS).
 
     Parameters
     ----------
