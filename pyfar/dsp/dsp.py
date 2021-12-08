@@ -372,6 +372,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         The default is ``'none'``.
     return_window: bool, optional
         If ``True``, both the windowed signal and the time window are returned.
+        The default is ``False``.
 
     Returns
     -------
