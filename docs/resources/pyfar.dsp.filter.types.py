@@ -60,7 +60,7 @@ ax[0, 1].set_ylim(-70, 20)
 ax[0, 1].legend(loc=4, ncol=3)
 
 # DIN Filterbank
-y = pf.dsp.filter.fractional_octave_bands(impulse, 1, freq_range=(20, 16e3))
+y = pf.dsp.filter.fractional_octave_bands(impulse, 1, freq_range=(60, 12e3))
 pf.plot.freq(y, ax=ax[1, 0])
 ax[1, 0].set_title('Fractional octave bands (room acoustics)')
 ax[1, 0].set_xlim(20, 20e3)
