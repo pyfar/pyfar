@@ -10,6 +10,71 @@ from . import _audiofilter as iir
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     """
+    This function will be deprecated in favor of `:py:func:~butterworth`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use butterworth instead'), PendingDeprecationWarning)
+
+    return butterworth(signal, N, frequency, btype, sampling_rate)
+
+
+def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
+    """
+    This function will be deprecated in favor of `:py:func:~chebyshev1`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use chebyshev1 instead'), PendingDeprecationWarning)
+
+    return chebyshev1(signal, N, ripple, frequency, btype, sampling_rate)
+
+
+def cheby2(signal, N, attenuation, frequency, btype='lowpass',
+           sampling_rate=None):
+    """
+    This function will be deprecated in favor of `:py:func:~chebyshev2`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use chebyshev2 instead'), PendingDeprecationWarning)
+
+    return chebyshev2(signal, N, attenuation, frequency, btype, sampling_rate)
+
+
+def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
+          sampling_rate=None):
+    """
+    This function will be deprecated in favor of `:py:func:~elliptic`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use elliptic instead'), PendingDeprecationWarning)
+
+    return elliptic(signal, N, ripple, attenuation, frequency, btype,
+                    sampling_rate)
+
+
+def peq(signal, center_frequency, gain, quality, peq_type='II',
+        quality_warp='cos', sampling_rate=None):
+    """
+    This function will be deprecated in favor of `:py:func:~bell`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use bell instead'), PendingDeprecationWarning)
+
+    return bell(signal, center_frequency, gain, quality, peq_type,
+                quality_warp, sampling_rate)
+
+
+def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
+    """
     Create and apply a digital Butterworth IIR filter.
 
     This is a wrapper for ``scipy.signal.butter``. Which creates digital
@@ -69,7 +134,8 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
         return signal_filt
 
 
-def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
+def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
+               sampling_rate=None):
     """
     Create and apply digital Chebyshev Type I IIR filter.
 
@@ -134,8 +200,8 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
         return signal_filt
 
 
-def cheby2(signal, N, attenuation, frequency, btype='lowpass',
-           sampling_rate=None):
+def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
+               sampling_rate=None):
     """
     Create and apply digital Chebyshev Type II IIR filter.
 
@@ -200,8 +266,8 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
         return signal_filt
 
 
-def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
-          sampling_rate=None):
+def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
+             sampling_rate=None):
     """
     Create and apply digital Elliptic (Cauer) IIR filter.
 
@@ -275,7 +341,7 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
     Create and apply digital Bessel/Thomson IIR filter.
 
     This is a wrapper for ``scipy.signal.bessel``. Which creates digital
-    Butterworth filter coefficients in second-order sections (SOS).
+    Bessel filter coefficients in second-order sections (SOS).
 
     Parameters
     ----------
@@ -353,10 +419,10 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
         return signal_filt
 
 
-def peq(signal, center_frequency, gain, quality, peq_type='II',
-        quality_warp='cos', sampling_rate=None):
+def bell(signal, center_frequency, gain, quality, bell_type='II',
+         quality_warp='cos', sampling_rate=None):
     """
-    Create and apply second order parametric equalizer filter.
+    Create and apply second order bell (parametric equalizer) filter.
 
     Uses the implementation of [#]_.
 
@@ -372,7 +438,7 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     quality : number
         Quality of the parametric equalizer, i.e., the inverse of the
         bandwidth
-    peq_type : str
+    bell_type : str
         Defines the bandwidth/quality. The default is ``'II'``
 
         ``'I'``
@@ -409,9 +475,9 @@ blob/master/filter_design/audiofilter.py
             or (signal is not None and sampling_rate is not None):
         raise ValueError('Either signal or sampling_rate must be none.')
 
-    if peq_type not in ['I', 'II', 'III']:
-        raise ValueError(("peq_type must be 'I', 'II' or "
-                          f"'III' but is '{peq_type}'.'"))
+    if bell_type not in ['I', 'II', 'III']:
+        raise ValueError(("bell_type must be 'I', 'II' or "
+                          f"'III' but is '{bell_type}'.'"))
 
     if quality_warp not in ['cos', 'sin', 'tan']:
         raise ValueError(("quality_warp must be 'cos', 'sin' or "
@@ -423,14 +489,14 @@ blob/master/filter_design/audiofilter.py
     # get filter coefficients
     ba = np.zeros((2, 3))
     _, _, b, a = iir.biquad_peq2nd(
-        center_frequency, gain, quality, fs, peq_type, quality_warp)
+        center_frequency, gain, quality, fs, bell_type, quality_warp)
     ba[0] = b
     ba[1] = a
 
     # generate filter object
     filt = pf.FilterIIR(ba, fs)
-    filt.comment = ("Second order parametric equalizer (PEQ) "
-                    f"of type {peq_type} with {gain} dB gain at "
+    filt.comment = ("Second order bell (parametric equalizer) "
+                    f"of type {bell_type} with {gain} dB gain at "
                     f"{center_frequency} Hz (Quality = {quality}).")
 
     # return the filter object
