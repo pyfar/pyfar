@@ -472,6 +472,28 @@ def test_time_window_multichannel():
     npt.assert_allclose(sig_win.time, time_win)
 
 
+@pytest.mark.parametrize("crop", ['none', 'window', 'end'])
+def test_time_window_return_window(crop):
+    """ Test return window parameter."""
+    sig = pyfar.Signal(np.ones(10), 44100)
+    sig_win, win = dsp.time_window(
+        sig, interval=(4, 8), crop=crop, return_window=True)
+    assert isinstance(win, pyfar.Signal)
+    assert sig_win.sampling_rate == win.sampling_rate
+    npt.assert_allclose(sig_win.time, win.time)
+    desired_comment = (
+        f"Time window with parameters interval=(4, 8),"
+        f"window='hann', shape='symmetric', unit='samples', crop='{crop}'")
+    assert win.comment == desired_comment
+
+
+def test_time_window_return_window_error():
+    """ Test return window with non bool parameter."""
+    sig = pyfar.Signal(np.ones(10), 44100)
+    with pytest.raises(TypeError, match="boolean"):
+        dsp.time_window(sig, interval=(4, 8), return_window='a')
+
+
 def test_kaiser_window_beta():
     """ Test function call."""
     A = 51
