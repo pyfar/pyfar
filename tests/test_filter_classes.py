@@ -46,14 +46,16 @@ def test_filter_comment():
 def test_filter_iir_init():
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterIIR(coeff, sampling_rate=2*np.pi)
-    npt.assert_array_equal(filt._coefficients, coeff[np.newaxis])
+    npt.assert_array_equal(filt.coefficients, coeff[np.newaxis])
 
 
 def test_filter_fir_init():
     coeff = np.array([1, 1/2, 0])
     desired = np.array([[[1, 1/2, 0], [1, 0, 0]]])
     filt = fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+    # seprately test internal coefficients and property because they differ
     npt.assert_array_equal(filt._coefficients, desired)
+    npt.assert_array_equal(filt.coefficients, np.atleast_2d(coeff))
 
 
 def test_filter_fir_init_multi_dim():
@@ -65,13 +67,15 @@ def test_filter_fir_init_multi_dim():
         [[1, 1/4, 1/8], [1, 0, 0]]
         ])
     filt = fo.FilterFIR(coeff, sampling_rate=2*np.pi)
+    # seprately test internal coefficients and property because they differ
     npt.assert_array_equal(filt._coefficients, desired)
+    npt.assert_array_equal(filt.coefficients, coeff)
 
 
 def test_filter_sos_init():
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
     filt = fo.FilterSOS(sos, sampling_rate=2*np.pi)
-    npt.assert_array_equal(filt._coefficients, sos[np.newaxis])
+    npt.assert_array_equal(filt.coefficients, sos[np.newaxis])
 
 
 def test_filter_iir_process(impulse):

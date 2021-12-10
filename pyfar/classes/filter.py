@@ -361,8 +361,8 @@ class FilterIIR(Filter):
     ----------
     coefficients : array, double
         The filter coefficients as an array, with shape
-        (number of channels, number of coefficients in the nominator,
-        number of coefficients in the denominator)
+        (number of channels, 2, max(number of coefficients in the nominator,
+        number of coefficients in the denominator))
     sampling_rate : number
         The sampling rate of the filter in Hz.
     state : array, double, optional
