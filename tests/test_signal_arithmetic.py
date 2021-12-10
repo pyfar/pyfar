@@ -318,44 +318,39 @@ def test_assert_match_for_arithmetic():
     s1 = Signal([1, 2, 3, 4], 48000)
     s2 = Signal([1, 2, 3], 44100)
     s4 = Signal([1, 2, 3, 4], 44100, fft_norm="rms")
-    s5 = Signal([1, 2, 3, 4], 44100, fft_norm='amplitude')
 
     # check with two signals
-    signal._assert_match_for_arithmetic((s, s), 'time')
+    signal._assert_match_for_arithmetic((s, s), 'time', division=False)
     # check with one signal and one array like
-    signal._assert_match_for_arithmetic((s, [1, 2]), 'time')
+    signal._assert_match_for_arithmetic((s, [1, 2]), 'time', division=False)
     # check with more than two inputs
-    signal._assert_match_for_arithmetic((s, s, s), 'time')
+    signal._assert_match_for_arithmetic((s, s, s), 'time', division=False)
 
     # check output
-    out = signal._assert_match_for_arithmetic((s, s), 'time')
+    out = signal._assert_match_for_arithmetic((s, s), 'time', division=False)
     assert out[0] == 44100
     assert out[1] == 4
     assert out[2] == 'none'
-    out = signal._assert_match_for_arithmetic((s, s4), 'time')
+    out = signal._assert_match_for_arithmetic((s, s4), 'time', division=False)
     assert out[2] == 'rms'
-    out = signal._assert_match_for_arithmetic((s5, s4), 'time')
-    assert out[2] == 'amplitude'
 
-    # check with only one argument
-    with raises(TypeError):
-        signal._assert_match_for_arithmetic((s, s))
-    # check with single input
+    # check with non-tuple input for first argument
     with raises(ValueError):
-        signal._assert_match_for_arithmetic(s, 'time')
-    # check with invalid data type
-    with raises(ValueError):
-        signal._assert_match_for_arithmetic((s, ['str', 'ing']), 'time')
-    # check with complex data and time domain signal
+        signal._assert_match_for_arithmetic(s, 'time', division=False)
+    # check with invalid data type in first argument
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (s, np.array([1 + 1j])), 'time')
+            (s, ['str', 'ing']), 'time', division=False)
+    # check with complex data and time domain operation
+    with raises(ValueError):
+        signal._assert_match_for_arithmetic(
+            (s, np.array([1 + 1j])), 'time', division=False)
     # test signals with different sampling rates
     with raises(ValueError):
-        signal._assert_match_for_arithmetic((s, s1), 'time')
+        signal._assert_match_for_arithmetic((s, s1), 'time', division=False)
     # test signals with different n_samples
     with raises(ValueError):
-        signal._assert_match_for_arithmetic((s, s2), 'time')
+        signal._assert_match_for_arithmetic((s, s2), 'time', division=False)
 
 
 def test_get_arithmetic_data_with_array():
@@ -403,12 +398,12 @@ def test_get_arithmetic_data_with_signal():
 def test_assert_match_for_arithmetic_data_different_audio_classes():
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (Signal(1, 1), TimeData(1, 1)), 'time')
+            (Signal(1, 1), TimeData(1, 1)), 'time', division=False)
 
 
 def test_assert_match_for_arithmetic_data_wrong_domain():
     with raises(ValueError):
-        signal._assert_match_for_arithmetic((1, 1), 'space')
+        signal._assert_match_for_arithmetic((1, 1), 'space', division=False)
 
 
 def test_get_arithmetic_data_wrong_domain():

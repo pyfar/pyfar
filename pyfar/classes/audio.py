@@ -1049,8 +1049,9 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     """Apply arithmetic operations."""
 
     # check input and obtain meta data of new signal
+    division = True if operation == _divide else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type = \
-        _assert_match_for_arithmetic(data, domain)
+        _assert_match_for_arithmetic(data, domain, division)
 
     # apply arithmetic operation
     result = _get_arithmetic_data(data[0], n_samples, domain)
@@ -1076,7 +1077,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     return result
 
 
-def _assert_match_for_arithmetic(data: tuple, domain: str):
+def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
     """Check if type and meta data of input is fine for arithmetic operations.
 
     Check if sampling rate and number of samples agree if multiple signals are
@@ -1089,6 +1090,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     domain : str
         Domain in which the arithmetic operation should be performed. 'time' or
         'freq'.
+    division : bool
+        ``True`` if a division is performed, ``False`` otherwise
 
     Returns
     -------
@@ -1157,10 +1160,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                     if n_samples != d.n_samples:
                         raise ValueError(
                             "The number of samples does not match.")
-                    # if there is a power signal, the returned signal will be
-                    # a power signal
-                    if d.fft_norm != 'none' and fft_norm == 'none':
-                        fft_norm = d.fft_norm
+                    fft_norm = _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if not np.allclose(times, d.times, atol=1e-15):
                         raise ValueError(
