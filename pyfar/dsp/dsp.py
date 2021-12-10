@@ -1395,6 +1395,112 @@ def time_shift(signal, shift, unit='samples'):
     return shifted.reshape(signal.cshape)
 
 
+def deconvolve(system_output, system_input, fft_length=None, **kwargs):
+    r"""Calculate transfer functions by spectral deconvolution of two signals.
+
+    The transfer function :math:`H(\omega)` is calculated by spectral
+    deconvolution (spectral division).
+
+    .. math::
+
+        H(\omega) = \frac{Y(\omega)}{X(\omega)},
+
+    where :math:`X(\omega)` is the system input signal and :math:`Y(\omega)`
+    the system output. Regulated inversion is used to avoid numerical issues
+    in calculating :math:`X(\omega)^{-1} = 1/X(\omega)` for small values of
+    :math:`X(\omega)`
+    (see :py:func:`~pyfar.dsp.regulated_spectrum_inversion`).
+    The system response (transfer function) is thus calculated as
+
+    .. math::
+
+        H(\omega) = Y(\omega)X(\omega)^{-1}.
+
+    For more information, refer to [#]_
+
+    Parameters
+    ----------
+    system_output : Signal
+        The system output signal, recorded after passing the device under test.
+        The system output signal is zero padded, if it is shorter than the
+        system input signal.
+    system_input : Signal
+        The system input signal, used to perform the measurement.
+        The system input signal is zero padded, if it is shorter than the
+        system output signal.
+    fft_length: int or None
+        The length the signals system_output and system_input are zero padded
+        to before deconvolving. The default is None. In this case only the
+        shorter signal is padded to the length of the longer signal, no padding
+        is applied when both signals have the same length.
+    kwargs : key value arguments
+        Key value arguments to control the inversion of :math:`H(\omega)` are
+        passed to to :py:func:`~pyfar.dsp.regulated_spectrum_inversion`.
+
+
+    Returns
+    -------
+    system_response : Signal
+        The resulting signal after deconvolution, representing the system
+        response.
+        The fft_norm of this resulting signal is set to 'none'.
+
+    References
+    -----------
+    .. [#] S. Mueller and P. Masserani "Transfer function measurement with
+           sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
+           (2001, June).
+    """
+
+    # Check if system_output and system_input are both type Signal
+    if not isinstance(system_output, pyfar.Signal):
+        raise TypeError('system_output has to be of type pyfar.Signal')
+    if not isinstance(system_input, pyfar.Signal):
+        raise TypeError('system_input has to be of type pyfar.Signal')
+
+    # Check if both signals have the same sampling rate
+    if not system_output.sampling_rate == system_input.sampling_rate:
+        raise ValueError("The two signals have different sampling rates!")
+
+    # Set fft_length to the max n_samples of both signals,
+    # if it is not explicitly set to a value
+    if fft_length is None:
+        fft_length = np.max([system_output.n_samples, system_input.n_samples])
+    # Check if both signals length are shorter or the same as fft_length
+    if fft_length < system_output.n_samples:
+        raise ValueError("The fft_length can not be shorter than" +
+                         "system_output.n_samples.")
+    if fft_length < system_input.n_samples:
+        raise ValueError("The fft_length can not be shorter than" +
+                         "system_input.n_samples.")
+
+    # Check if both signals have the same length as ftt_length,
+    # if not: bring them to the same length by padding with zeros
+    system_output = pyfar.dsp.pad_zeros(system_output,
+                                        (fft_length - system_output.n_samples))
+    system_input = pyfar.dsp.pad_zeros(system_input,
+                                       (fft_length - system_input.n_samples))
+
+    # multiply system_output signal with regularized inversed system_input
+    # signal to get the system response
+    system_response = (system_output *
+                       regularized_spectrum_inversion(system_input, **kwargs))
+
+    # Check if the signals have any comments,
+    # if yes: concatenate the comments for the system_response
+    system_response.comment = "Calculated with pyfar.dsp.deconvolve."
+    if system_output.comment != 'none':
+        system_response.comment += f" system input: {system_output.comment}."
+    if system_input.comment != 'none':
+        system_response.comment += f" system output: {system_input.comment}."
+
+    # return the impulse resonse
+    system_response.fft_norm = pyfar.classes.audio._match_fft_norm(
+        system_output.fft_norm, system_input.fft_norm, division=True)
+
+    return system_response
+
+
 def convolve(signal1, signal2, mode='full', method='overlap_add'):
     """Convolve two signals.
 
