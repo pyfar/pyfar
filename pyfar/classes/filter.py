@@ -153,7 +153,7 @@ class Filter(object):
     @property
     def coefficients(self):
         """Coefficients of the filter"""
-        self._coefficients
+        return self._coefficients
 
     @property
     def sampling_rate(self):
@@ -309,6 +309,14 @@ class FilterFIR(Filter):
     def order(self):
         """The order of the filter."""
         return self._coefficients.shape[-1] - 1
+
+    @property
+    def coefficients(self):
+        """Coefficients of the filter"""
+        # property from Filter is overwritten, because FilterFIR internally
+        # also stores a-coefficients easier handling of coefficients across
+        # filter classes. The user should only see the b-coefficients, however.
+        return self._coefficients[:, 0]
 
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
