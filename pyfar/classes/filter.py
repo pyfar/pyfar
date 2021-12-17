@@ -129,10 +129,12 @@ class Filter(object):
             The filter object.
 
         """
-        super().__init__()
+
         if coefficients is not None:
-            coefficients = _atleast_3d_first_dim(coefficients)
-        self._coefficients = coefficients
+            self.coefficients = coefficients
+        else:
+            self._coefficients = None
+
         if state is not None:
             if coefficients is None:
                 raise ValueError(
@@ -154,6 +156,11 @@ class Filter(object):
     def coefficients(self):
         """Coefficients of the filter"""
         return self._coefficients
+
+    @coefficients.setter
+    def coefficients(self, value):
+        """Coefficients of the filter"""
+        self._coefficients = _atleast_3d_first_dim(value)
 
     @property
     def sampling_rate(self):
@@ -297,13 +304,7 @@ class FilterFIR(Filter):
             sampling_rate,
             state=None):
 
-        b = np.atleast_2d(coefficients)
-        a = np.zeros_like(b)
-        a[..., 0] = 1
-        coeff = np.stack((b, a), axis=-2)
-
-        super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate, state=state)
+        super().__init__(coefficients, sampling_rate, state)
 
     @property
     def order(self):
@@ -317,6 +318,18 @@ class FilterFIR(Filter):
         # also stores a-coefficients easier handling of coefficients across
         # filter classes. The user should only see the b-coefficients, however.
         return self._coefficients[:, 0]
+
+    @coefficients.setter
+    def coefficients(self, value):
+        """Coefficients of the filter"""
+
+        b = np.atleast_2d(value)
+        # add a-coefficients for easier handling across filter classes
+        a = np.zeros_like(b)
+        a[..., 0] = 1
+
+        coeff = np.stack((b, a), axis=-2)
+        self._coefficients = _atleast_3d_first_dim(coeff)
 
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
@@ -381,9 +394,8 @@ class FilterIIR(Filter):
             sampling_rate,
             state=None):
 
-        coeff = np.atleast_2d(coefficients)
-        super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate, state=state)
+        super().__init__(coefficients=coefficients,
+                         sampling_rate=sampling_rate, state=state)
 
     @property
     def order(self):
@@ -453,16 +465,22 @@ class FilterSOS(Filter):
             sampling_rate,
             state=None):
 
-        coeff = np.atleast_2d(coefficients)
+        if state is not None:
+            state = _atleast_4d_first_dim(state)
+        super().__init__(coefficients=coefficients,
+                         sampling_rate=sampling_rate, state=state)
+
+    @Filter.coefficients.setter
+    def coefficients(self, value):
+        """Coefficients of the filter"""
+
+        coeff = _atleast_3d_first_dim(value)
         if coeff.shape[-1] != 6:
             raise ValueError(
                 "The coefficients are not in line with a second order",
                 "section filter structure.")
 
-        if state is not None:
-            state = _atleast_4d_first_dim(state)
-        super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate, state=state)
+        self._coefficients = coeff
 
     def order(self):
         """The order of the filter. This is always 2 for SOS filter."""
