@@ -1,6 +1,9 @@
 """
-Filter Types
-------------
+The following introduces the concept of the pyfar filter classes. See
+:py:class:`filter classes <pyfar.classes.filter>` for a complete documentation.
+
+Types
+--------------
 
 There are three types of Filter objects:
 
@@ -83,7 +86,4 @@ or simply do not initialize the state at all as done by
 .. code-block:: python
 
     filter = pf.FilterFIR([[2, -2]], 44100, state=None)
-
-
-See :py:class:`~pyfar.classes.filter` for a complete documentation.
 """

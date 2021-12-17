@@ -11,6 +11,7 @@ through these concepts.
 
    concepts/pyfar.audio_classes.rst
    concepts/pyfar.arithmetic_operations.rst
-   concepts/pyfar.filter.rst
+   concepts/pyfar.filter_classes.rst
+   concepts/pyfar.filter_types.rst
    concepts/pyfar.coordinates.rst
    concepts/pyfar.fft.rst
