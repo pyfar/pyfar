@@ -13,6 +13,13 @@ Getting Started
 
    readme
 
+Concepts
+========
+
+.. toctree::
+   :maxdepth: 2
+
+   concepts
 
 Documentation
 =============
