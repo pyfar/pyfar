@@ -5,9 +5,9 @@ the spectrum of a energy signal is equivalent to the right-hand spectrum
 of a real-valued time signal defined above. The corresponding normalization is
 ``'none'``.
 
-For **power signals** however, which possess a finite power but infinite energy,
-a normalization for the time interval in which the signal is sampled, is
-chosen. In order for Parseval's theorem to remain valid, the single sided
+For **power signals** however, which possess a finite power but infinite
+energy, a normalization for the time interval in which the signal is sampled,
+is chosen. In order for Parseval's theorem to remain valid, the single sided
 needs to be multiplied by a factor of 2, compensating for the discarded part
 of the spectrum (cf. [1]_, Eq. 8). The coresponding normalization is
 ``'unitary'``. Additional normalizations can be applied to further scale the
