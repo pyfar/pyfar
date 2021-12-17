@@ -1001,8 +1001,9 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     """Apply arithmetic operations."""
 
     # check input and obtain meta data of new signal
+    division = True if operation == _divide else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type = \
-        _assert_match_for_arithmetic(data, domain)
+        _assert_match_for_arithmetic(data, domain, division)
 
     # apply arithmetic operation
     result = _get_arithmetic_data(data[0], n_samples, domain)
@@ -1028,7 +1029,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     return result
 
 
-def _assert_match_for_arithmetic(data: tuple, domain: str):
+def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
     """Check if type and meta data of input is fine for arithmetic operations.
 
     Check if sampling rate and number of samples agree if multiple signals are
@@ -1041,6 +1042,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     domain : str
         Domain in which the arithmetic operation should be performed. 'time' or
         'freq'.
+    division : bool
+        ``True`` if a division is performed, ``False`` otherwise
 
     Returns
     -------
@@ -1109,10 +1112,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                     if n_samples != d.n_samples:
                         raise ValueError(
                             "The number of samples does not match.")
-                    # if there is a power signal, the returned signal will be
-                    # a power signal
-                    if d.fft_norm != 'none' and fft_norm == 'none':
-                        fft_norm = d.fft_norm
+                    fft_norm = _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if not np.allclose(times, d.times, atol=1e-15):
                         raise ValueError(
@@ -1201,3 +1201,85 @@ def _divide(a, b):
 
 def _power(a, b):
     return a**b
+
+
+def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
+    """
+    Helper function to determine the fft_norm resulting from an
+    arithmetic operation of two audio objects.
+
+    For addition, subtraction and multiplication:
+    Either: one signal has fft_norm ``'none'`` , the results gets the other
+    norm.
+    Or: both have the same fft_norm, the results gets the same norm.
+    Other combinations raise an error.
+
+    For division:
+    Either: the denominator (fft_norm_2) is ``'none'``, the result gets the
+    fft_norm of the numerator (fft_norm_1).
+    Or: both have the same fft_norm, the results gets the fft_norm ``'none'``.
+    Other combinations raise an error.
+
+    Parameters
+    ----------
+    fft_norm_1 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
+    ``'power'`` or ``'psd'``
+        First fft_norm for matching.
+    fft_norm_2 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
+    ``'power'`` or ``'psd'``
+        Second fft_norm for matching.
+    division : bool
+        ``False`` if arithmetic operation is addition, subtraction or
+        multiplication;
+        ``True`` if arithmetic operation is division.
+
+    Returns
+    -------
+    fft_norm_result : str, ``'none'``, ``'unitary'``, ``'amplitude'``,
+    ``'rms'``, ``'power'`` or ``'psd'``
+        The fft_norm resulting from arithmetic operation.
+    """
+
+    # check if fft_norms are valid
+    valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
+    if fft_norm_1 not in valid_fft_norms:
+        raise ValueError(f"fft_norm_1 is {fft_norm_1} but must be in ",
+                         f"{', '.join(valid_fft_norms)}")
+    if fft_norm_2 not in valid_fft_norms:
+        raise ValueError(f"fft_norm_2 is {fft_norm_2} but must be in ",
+                         f"{', '.join(valid_fft_norms)}")
+
+    # check if parameter division is type bool
+    if not isinstance(division, bool):
+        raise TypeError("Parameter division must be type bool.")
+
+    if not division:
+
+        if fft_norm_1 == fft_norm_2:
+            fft_norm_result = fft_norm_1
+
+        elif fft_norm_1 == 'none':
+            fft_norm_result = fft_norm_2
+
+        elif fft_norm_2 == 'none':
+            fft_norm_result = fft_norm_1
+
+        else:
+            raise ValueError("Either one fft_norm has to be 'none' or both ",
+                             "fft_norms must be the same, but they are ",
+                             f"{fft_norm_1} and {fft_norm_2}.")
+
+    else:
+
+        if fft_norm_2 == 'none':
+            fft_norm_result = fft_norm_1
+
+        elif fft_norm_1 == fft_norm_2:
+            fft_norm_result = 'none'
+
+        else:
+            raise ValueError("Either fft_norm_2 (denominator) has to be ",
+                             "'none' or both fft_norms must be the same, but ",
+                             f"they are {fft_norm_1} and {fft_norm_2}.")
+
+    return fft_norm_result

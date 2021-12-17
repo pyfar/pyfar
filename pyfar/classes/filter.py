@@ -153,7 +153,7 @@ class Filter(object):
     @property
     def coefficients(self):
         """Coefficients of the filter"""
-        self._coefficients
+        return self._coefficients
 
     @property
     def sampling_rate(self):
@@ -310,6 +310,14 @@ class FilterFIR(Filter):
         """The order of the filter."""
         return self._coefficients.shape[-1] - 1
 
+    @property
+    def coefficients(self):
+        """Coefficients of the filter"""
+        # property from Filter is overwritten, because FilterFIR internally
+        # also stores a-coefficients easier handling of coefficients across
+        # filter classes. The user should only see the b-coefficients, however.
+        return self._coefficients[:, 0]
+
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
 
@@ -353,8 +361,8 @@ class FilterIIR(Filter):
     ----------
     coefficients : array, double
         The filter coefficients as an array, with shape
-        (number of channels, number of coefficients in the nominator,
-        number of coefficients in the denominator)
+        (number of channels, 2, max(number of coefficients in the nominator,
+        number of coefficients in the denominator))
     sampling_rate : number
         The sampling rate of the filter in Hz.
     state : array, double, optional

@@ -5,10 +5,10 @@ Filter Types
 There are three types of Filter objects:
 
 - **FIR Filter:** Finite Impulse Response (FIR) filters are non-recursive
-  filters. FIR filters very flexible and can have arbitrary magnitude and
+  filters. FIR filters are very flexible and can have arbitrary magnitude and
   phase responses.
 - **IIR Filter:** Infinite Impulse Response (IIR) filters are recursive
-  filters. The can achieve steeper filter slopes than FIR filters of the same
+  filters. They can achieve steeper filter slopes than FIR filters of the same
   order but are less flexible with respect to the phase response.
 - **SOS Filter:** Second Order Section (SOS) filters are cascaded 2nd order
   recursive filters. They are often more robust against numerical errors than
@@ -58,7 +58,7 @@ blocks of the input
     block_one = filter.process(in[0, 0:2])
     block_two = filter.process(in[0, 2:4])
 
-the the blockwise output yields the same as the complete output ``out`` seen
+the blockwise output yields the same as the complete output ``out`` seen
 above, i.e., ``[block_one, block_two] = [[2, 2, 2, 2]]``. This is the case
 because initializing the state also makes the filter object track the state
 across multiple calls of the ``process`` functions.
