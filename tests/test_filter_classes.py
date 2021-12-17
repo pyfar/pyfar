@@ -11,7 +11,7 @@ def test_filter_init_empty_coefficients():
     assert filt.coefficients is None
     assert filt.sampling_rate is None
     assert filt.state is None
-    assert filt.comment is None
+    assert filt.comment == 'None'
 
 
 def test_filter_init_empty_coefficients_with_state():

@@ -122,6 +122,8 @@ class Filter(object):
             The sampling rate of the filter in Hz.
         state : array, double, optional
             The state of the buffer elements.
+        comment : str, optional
+            A comment. The default is ``'None'``.
 
         Returns
         -------
@@ -146,7 +148,7 @@ class Filter(object):
 
         self._state = state
         self._sampling_rate = sampling_rate
-        self._comment = comment
+        self.comment = comment
 
     def init_state(self, state='zeros'):
         self._state = state
@@ -292,19 +294,17 @@ class FilterFIR(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
+    comment : str, optional
+            A comment. The default is ``'None'``.
 
     Returns
     -------
     FilterFIR
         The FIR filter object.
     """
-    def __init__(
-            self,
-            coefficients,
-            sampling_rate,
-            state=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
 
-        super().__init__(coefficients, sampling_rate, state)
+        super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
     def order(self):
@@ -382,20 +382,17 @@ class FilterIIR(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
+    comment : str, optional
+            A comment. The default is ``'None'``.
 
     Returns
     -------
     FilterIIR
         The IIR filter object.
     """
-    def __init__(
-            self,
-            coefficients,
-            sampling_rate,
-            state=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
 
-        super().__init__(coefficients=coefficients,
-                         sampling_rate=sampling_rate, state=state)
+        super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
     def order(self):
@@ -453,22 +450,20 @@ class FilterSOS(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
+    comment : str, optional
+            A comment. The default is ``'None'``.
 
     Returns
     -------
     FilterSOS
         The SOS filter object.
     """
-    def __init__(
-            self,
-            coefficients,
-            sampling_rate,
-            state=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
 
         if state is not None:
             state = _atleast_4d_first_dim(state)
-        super().__init__(coefficients=coefficients,
-                         sampling_rate=sampling_rate, state=state)
+
+        super().__init__(coefficients, sampling_rate, state, comment)
 
     @Filter.coefficients.setter
     def coefficients(self, value):
