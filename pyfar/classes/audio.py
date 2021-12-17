@@ -1075,21 +1075,25 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
     # properties that must match
     sampling_rate = None
     n_samples = None
-    fft_norm = None
+    fft_norm = 'none'
     times = None
     frequencies = None
     audio_type = type(None)
 
     # check input types and meta data
     found_audio_data = False
-    for d in data:
+    for n, d in enumerate(data):
         if isinstance(d, (Signal, TimeData, FrequencyData)):
             # store meta data upon first appearance
             if not found_audio_data:
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
                     n_samples = d.n_samples
-                    fft_norm = d.fft_norm
+                    # if a signal comes first (n==0) its fft_norm is taken
+                    # directly. If a signal does not come first, (n>0, e.g.
+                    # 1/signal, the fft norm is matched)
+                    fft_norm = d.fft_norm if n == 0 else \
+                        _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
