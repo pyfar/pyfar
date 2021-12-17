@@ -2,22 +2,76 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 import os
+from packaging import version
 import pyfar as pf
 from pyfar import Signal
 import pyfar.dsp.filter as pfilt
 import pyfar.classes.filter as pclass
 
 
-def test_butter(impulse):
+def test_filter_deprecations():
+
+    # butter
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.butter(None, 2, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove butter() from pyfar 0.5.0!
+            pfilt.butter(None, 2, 1000, 'lowpass', 44100)
+
+    # cheby1
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.cheby1(None, 2, 1, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove cheby1() from pyfar 0.5.0!
+            pfilt.cheby1(None, 2, 1, 1000, 'lowpass', 44100)
+
+    # cheby2
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.cheby2(None, 2, 40, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove cheby2() from pyfar 0.5.0!
+            pfilt.cheby2(None, 2, 40, 1000, 'lowpass', 44100)
+
+    # elipp
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove ellip() from pyfar 0.5.0!
+            pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass', 44100)
+
+    # bell
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.peq(None, 1000, 10, 2, sampling_rate=44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove peq() from pyfar 0.5.0!
+            pfilt.peq(None, 1000, 10, 2, sampling_rate=44100)
+
+
+def test_butterworth(impulse):
     # Uses scipy function. We thus only test the functionality not the results
     # Filter object
-    f_obj = pfilt.butter(None, 2, 1000, 'lowpass', 44100)
+    f_obj = pfilt.butterworth(None, 2, 1000, 'lowpass', 44100)
     assert isinstance(f_obj, pclass.FilterSOS)
     assert f_obj.comment == ("Butterworth lowpass of order 2. "
                              "Cut-off frequency 1000 Hz.")
 
     # Filter
-    x = pfilt.butter(impulse, 2, 1000, 'lowpass')
+    x = pfilt.butterworth(impulse, 2, 1000, 'lowpass')
     y = f_obj.process(impulse)
     assert isinstance(x, Signal)
     npt.assert_allclose(x.time, y.time)
@@ -25,23 +79,23 @@ def test_butter(impulse):
     # ValueError
     with pytest.raises(ValueError):
         # pass signal and sampling rate
-        x = pfilt.butter(impulse, 2, 1000, 'lowpass', 44100)
+        x = pfilt.butterworth(impulse, 2, 1000, 'lowpass', 44100)
     with pytest.raises(ValueError):
         # pass no signal and no sampling rate
-        x = pfilt.butter(None, 2, 1000, 'lowpass')
+        x = pfilt.butterworth(None, 2, 1000, 'lowpass')
 
 
-def test_cheby1(impulse):
+def test_chebyshev1(impulse):
     # Uses scipy function. We thus only test the functionality not the results
     # Filter object
-    f_obj = pfilt.cheby1(None, 2, 1, 1000, 'lowpass', 44100)
+    f_obj = pfilt.chebyshev1(None, 2, 1, 1000, 'lowpass', 44100)
     assert isinstance(f_obj, pclass.FilterSOS)
     assert f_obj.comment == ("Chebychev Type I lowpass of order 2. "
                              "Cut-off frequency 1000 Hz. "
                              "Pass band ripple 1 dB.")
 
     # Filter
-    x = pfilt.cheby1(impulse, 2, 1, 1000, 'lowpass')
+    x = pfilt.chebyshev1(impulse, 2, 1, 1000, 'lowpass')
     y = f_obj.process(impulse)
     assert isinstance(x, Signal)
     npt.assert_allclose(x.time, y.time)
@@ -49,23 +103,23 @@ def test_cheby1(impulse):
     # ValueError
     with pytest.raises(ValueError):
         # pass signal and sampling rate
-        x = pfilt.cheby1(impulse, 2, 1, 1000, 'lowpass', 44100)
+        x = pfilt.chebyshev1(impulse, 2, 1, 1000, 'lowpass', 44100)
     with pytest.raises(ValueError):
         # pass no signal and no sampling rate
-        x = pfilt.cheby1(None, 2, 1, 1000, 'lowpass')
+        x = pfilt.chebyshev1(None, 2, 1, 1000, 'lowpass')
 
 
-def test_cheby2(impulse):
+def test_chebyshev2(impulse):
     # Uses scipy function. We thus only test the functionality not the results
     # Filter object
-    f_obj = pfilt.cheby2(None, 2, 40, 1000, 'lowpass', 44100)
+    f_obj = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass', 44100)
     assert isinstance(f_obj, pclass.FilterSOS)
     assert f_obj.comment == ("Chebychev Type II lowpass of order 2. "
                              "Cut-off frequency 1000 Hz. "
                              "Stop band attenuation 40 dB.")
 
     # Filter
-    x = pfilt.cheby2(impulse, 2, 40, 1000, 'lowpass')
+    x = pfilt.chebyshev2(impulse, 2, 40, 1000, 'lowpass')
     y = f_obj.process(impulse)
     assert isinstance(x, Signal)
     npt.assert_allclose(x.time, y.time)
@@ -73,16 +127,16 @@ def test_cheby2(impulse):
     # ValueError
     with pytest.raises(ValueError):
         # pass signal and sampling rate
-        x = pfilt.cheby2(impulse, 2, 40, 1000, 'lowpass', 44100)
+        x = pfilt.chebyshev2(impulse, 2, 40, 1000, 'lowpass', 44100)
     with pytest.raises(ValueError):
         # pass no signal and no sampling rate
-        x = pfilt.cheby2(None, 2, 40, 1000, 'lowpass')
+        x = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass')
 
 
-def test_ellip(impulse):
+def test_elliptic(impulse):
     # Uses scipy function. We thus only test the functionality not the results
     # Filter object
-    f_obj = pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass', 44100)
+    f_obj = pfilt.elliptic(None, 2, 1, 40, 1000, 'lowpass', 44100)
     assert isinstance(f_obj, pclass.FilterSOS)
     assert f_obj.comment == ("Elliptic (Cauer) lowpass of order 2. "
                              "Cut-off frequency 1000 Hz. "
@@ -90,7 +144,7 @@ def test_ellip(impulse):
                              "Stop band attenuation 40 dB.")
 
     # Filter
-    x = pfilt.ellip(impulse, 2, 1, 40, 1000, 'lowpass')
+    x = pfilt.elliptic(impulse, 2, 1, 40, 1000, 'lowpass')
     y = f_obj.process(impulse)
     assert isinstance(x, Signal)
     npt.assert_allclose(x.time, y.time)
@@ -98,10 +152,10 @@ def test_ellip(impulse):
     # ValueError
     with pytest.raises(ValueError):
         # pass signal and sampling rate
-        x = pfilt.ellip(impulse, 2, 1, 40, 1000, 'lowpass', 44100)
+        x = pfilt.elliptic(impulse, 2, 1, 40, 1000, 'lowpass', 44100)
     with pytest.raises(ValueError):
         # pass no signal and no sampling rate
-        x = pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass')
+        x = pfilt.elliptic(None, 2, 1, 40, 1000, 'lowpass')
 
 
 def test_bessel(impulse):
@@ -127,17 +181,18 @@ def test_bessel(impulse):
         x = pfilt.bessel(None, 2, 1000, 'lowpass', 'phase')
 
 
-def test_peq(impulse):
+def test_bell(impulse):
     # Uses third party code.
     # We thus only test the functionality not the results
     # Filter object
-    f_obj = pfilt.peq(None, 1000, 10, 2, sampling_rate=44100)
+    f_obj = pfilt.bell(None, 1000, 10, 2, sampling_rate=44100)
     assert isinstance(f_obj, pclass.FilterIIR)
-    assert f_obj.comment == ("Second order parametric equalizer (PEQ) of type "
-                             "II with 10 dB gain at 1000 Hz (Quality = 2).")
+    assert f_obj.comment == (
+        "Second order bell (parametric equalizer) of "
+        "type II with 10 dB gain at 1000 Hz (Quality = 2).")
 
     # Filter
-    x = pfilt.peq(impulse, 1000, 10, 2)
+    x = pfilt.bell(impulse, 1000, 10, 2)
     y = f_obj.process(impulse)
     assert isinstance(x, Signal)
     npt.assert_allclose(x.time, y.time)
@@ -145,15 +200,15 @@ def test_peq(impulse):
     # test ValueError
     with pytest.raises(ValueError):
         # pass signal and sampling rate
-        x = pfilt.peq(impulse, 1000, 10, 2, sampling_rate=44100)
+        x = pfilt.bell(impulse, 1000, 10, 2, sampling_rate=44100)
     with pytest.raises(ValueError):
         # pass no signal and no sampling rate
-        x = pfilt.peq(None, 1000, 10, 2)
+        x = pfilt.bell(None, 1000, 10, 2)
     # check wrong input arguments
     with pytest.raises(ValueError):
-        x = pfilt.peq(impulse, 1000, 10, 2, peq_type='nope')
+        x = pfilt.bell(impulse, 1000, 10, 2, bell_type='nope')
     with pytest.raises(ValueError):
-        x = pfilt.peq(impulse, 1000, 10, 2, quality_warp='nope')
+        x = pfilt.bell(impulse, 1000, 10, 2, quality_warp='nope')
 
 
 def test_shelve(impulse):
