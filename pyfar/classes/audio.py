@@ -1091,7 +1091,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
                     n_samples = d.n_samples
                     # if a signal comes first (n==0) its fft_norm is taken
                     # directly. If a signal does not come first, (n>0, e.g.
-                    # 1/signal, the fft norm is matched)
+                    # 1/signal), the fft norm is matched
                     fft_norm = d.fft_norm if n == 0 else \
                         _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
