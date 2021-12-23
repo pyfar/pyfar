@@ -20,4 +20,3 @@ tox-wheel
 autodocsumm
 soundfile
 sofar>=0.1.2
-soundfile
