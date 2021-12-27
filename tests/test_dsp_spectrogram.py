@@ -1,5 +1,6 @@
 import pyfar as pf
 from pyfar.dsp import spectrogram
+import pytest
 from pytest import raises
 import numpy as np
 import numpy.testing as npt
@@ -43,3 +44,17 @@ def test_dB_False():
     npt.assert_allclose(spectro[:256, 1], 0, atol=1e-13)
     npt.assert_allclose(spectro[256, 1], 1, atol=1e-13)
     npt.assert_allclose(spectro[257:, 1], 0, atol=1e-13)
+
+
+@pytest.mark.parametrize('window,value', [
+    ('rect', [0, 1, 0]),            # rect window does not spread energy
+    ('hann', [.5, 1, .5])])      # hann window spreads energy
+def test_window(window, value):
+    """Test return values of the spectrogram with default parameters"""
+    # test signal and spectrogram
+    signal = pf.signals.sine(256, 2*1024, sampling_rate=1024)
+    signal.fft_norm = 'amplitude'
+    _, _, spectro = pf.dsp.spectrogram(signal,  dB=False, window=window)
+
+    # check middle slice
+    npt.assert_allclose(spectro[255:258, 1], value, atol=1e-13)
