@@ -1,7 +1,7 @@
 """
 The following documents the pyfar filter classes. More details and
 background is given in the
-:py:mod:`filter concepts <pyfar.classes.filter_concepts>`.
+:py:mod:`filter concepts <pyfar._concepts.filter_concepts>`.
 """
 import deepdiff
 import warnings
@@ -156,7 +156,13 @@ class Filter(object):
 
     @property
     def coefficients(self):
-        """Coefficients of the filter"""
+        """
+        Get and set the coefficients of the filter.
+
+        Refer to the
+        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        cases.
+        """
         return self._coefficients
 
     @coefficients.setter
@@ -313,7 +319,13 @@ class FilterFIR(Filter):
 
     @property
     def coefficients(self):
-        """Coefficients of the filter"""
+        """
+        Get and set the coefficients of the filter.
+
+        Refer to the
+        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        cases.
+        """
         # property from Filter is overwritten, because FilterFIR internally
         # also stores a-coefficients easier handling of coefficients across
         # filter classes. The user should only see the b-coefficients, however.
