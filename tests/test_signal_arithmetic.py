@@ -174,6 +174,21 @@ def test_add_frequency_data_and_number_wrong_frequencies():
         pf.add((x, y), 'freq')
 
 
+def test_signal_inversion():
+    """Test signal inversion with different FFT norms"""
+
+    # 'none' norm
+    signal = pf.Signal([2, 0, 0], 44100, fft_norm='none')
+    signal_inv = 1 / signal
+    npt.assert_allclose(signal.time.flatten(), [2, 0, 0])
+    npt.assert_allclose(signal_inv.time.flatten(), [.5, 0, 0])
+
+    # 'rms' norm
+    signal.fft_norm = 'rms'
+    with raises(ValueError, match="Either fft_norm_2"):
+        1 / signal
+
+
 def test_subtraction():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)

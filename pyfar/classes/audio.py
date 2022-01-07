@@ -1247,11 +1247,11 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     # check if fft_norms are valid
     valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
     if fft_norm_1 not in valid_fft_norms:
-        raise ValueError(f"fft_norm_1 is {fft_norm_1} but must be in ",
-                         f"{', '.join(valid_fft_norms)}")
+        raise ValueError((f"fft_norm_1 is {fft_norm_1} but must be in "
+                          f"{', '.join(valid_fft_norms)}"))
     if fft_norm_2 not in valid_fft_norms:
-        raise ValueError(f"fft_norm_2 is {fft_norm_2} but must be in ",
-                         f"{', '.join(valid_fft_norms)}")
+        raise ValueError((f"fft_norm_2 is {fft_norm_2} but must be in "
+                          f"{', '.join(valid_fft_norms)}"))
 
     # check if parameter division is type bool
     if not isinstance(division, bool):
@@ -1269,9 +1269,9 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
             fft_norm_result = fft_norm_1
 
         else:
-            raise ValueError("Either one fft_norm has to be 'none' or both ",
-                             "fft_norms must be the same, but they are ",
-                             f"{fft_norm_1} and {fft_norm_2}.")
+            raise ValueError(("Either one fft_norm has to be 'none' or both "
+                              "fft_norms must be the same, but they are ",
+                              f"{fft_norm_1} and {fft_norm_2}."))
 
     else:
 
@@ -1282,8 +1282,8 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
             fft_norm_result = 'none'
 
         else:
-            raise ValueError("Either fft_norm_2 (denominator) has to be ",
-                             "'none' or both fft_norms must be the same, but ",
-                             f"they are {fft_norm_1} and {fft_norm_2}.")
+            raise ValueError(("Either fft_norm_2 (denominator) has to be "
+                              "'none' or both fft_norms must be the same, but "
+                              f"they are {fft_norm_1} and {fft_norm_2}."))
 
     return fft_norm_result
