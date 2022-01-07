@@ -1,7 +1,7 @@
 """
 The following documents the pyfar filter classes. More details and
 background is given in the
-:py:mod:`filter concepts <pyfar.classes.filter_concepts>`.
+:py:mod:`filter concepts <pyfar._concepts.filter_concepts>`.
 """
 import deepdiff
 import warnings
@@ -122,6 +122,8 @@ class Filter(object):
             The sampling rate of the filter in Hz.
         state : array, double, optional
             The state of the buffer elements.
+        comment : str, optional
+            A comment. The default is ``'None'``.
 
         Returns
         -------
@@ -129,10 +131,12 @@ class Filter(object):
             The filter object.
 
         """
-        super().__init__()
+
         if coefficients is not None:
-            coefficients = _atleast_3d_first_dim(coefficients)
-        self._coefficients = coefficients
+            self.coefficients = coefficients
+        else:
+            self._coefficients = None
+
         if state is not None:
             if coefficients is None:
                 raise ValueError(
@@ -144,7 +148,7 @@ class Filter(object):
 
         self._state = state
         self._sampling_rate = sampling_rate
-        self._comment = comment
+        self.comment = comment
 
     def init_state(self, state='zeros'):
         self._state = state
@@ -152,8 +156,19 @@ class Filter(object):
 
     @property
     def coefficients(self):
-        """Coefficients of the filter"""
+        """
+        Get and set the coefficients of the filter.
+
+        Refer to the
+        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        cases.
+        """
         return self._coefficients
+
+    @coefficients.setter
+    def coefficients(self, value):
+        """Coefficients of the filter"""
+        self._coefficients = _atleast_3d_first_dim(value)
 
     @property
     def sampling_rate(self):
@@ -285,25 +300,17 @@ class FilterFIR(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
+    comment : str, optional
+            A comment. The default is ``'None'``.
 
     Returns
     -------
     FilterFIR
         The FIR filter object.
     """
-    def __init__(
-            self,
-            coefficients,
-            sampling_rate,
-            state=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
 
-        b = np.atleast_2d(coefficients)
-        a = np.zeros_like(b)
-        a[..., 0] = 1
-        coeff = np.stack((b, a), axis=-2)
-
-        super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate, state=state)
+        super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
     def order(self):
@@ -312,11 +319,29 @@ class FilterFIR(Filter):
 
     @property
     def coefficients(self):
-        """Coefficients of the filter"""
+        """
+        Get and set the coefficients of the filter.
+
+        Refer to the
+        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        cases.
+        """
         # property from Filter is overwritten, because FilterFIR internally
         # also stores a-coefficients easier handling of coefficients across
         # filter classes. The user should only see the b-coefficients, however.
         return self._coefficients[:, 0]
+
+    @coefficients.setter
+    def coefficients(self, value):
+        """Coefficients of the filter"""
+
+        b = np.atleast_2d(value)
+        # add a-coefficients for easier handling across filter classes
+        a = np.zeros_like(b)
+        a[..., 0] = 1
+
+        coeff = np.stack((b, a), axis=-2)
+        self._coefficients = _atleast_3d_first_dim(coeff)
 
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
@@ -369,21 +394,17 @@ class FilterIIR(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
+    comment : str, optional
+            A comment. The default is ``'None'``.
 
     Returns
     -------
     FilterIIR
         The IIR filter object.
     """
-    def __init__(
-            self,
-            coefficients,
-            sampling_rate,
-            state=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
 
-        coeff = np.atleast_2d(coefficients)
-        super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate, state=state)
+        super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
     def order(self):
@@ -441,28 +462,32 @@ class FilterSOS(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
+    comment : str, optional
+            A comment. The default is ``'None'``.
 
     Returns
     -------
     FilterSOS
         The SOS filter object.
     """
-    def __init__(
-            self,
-            coefficients,
-            sampling_rate,
-            state=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
 
-        coeff = np.atleast_2d(coefficients)
+        if state is not None:
+            state = _atleast_4d_first_dim(state)
+
+        super().__init__(coefficients, sampling_rate, state, comment)
+
+    @Filter.coefficients.setter
+    def coefficients(self, value):
+        """Coefficients of the filter"""
+
+        coeff = _atleast_3d_first_dim(value)
         if coeff.shape[-1] != 6:
             raise ValueError(
                 "The coefficients are not in line with a second order",
                 "section filter structure.")
 
-        if state is not None:
-            state = _atleast_4d_first_dim(state)
-        super().__init__(
-            coefficients=coeff, sampling_rate=sampling_rate, state=state)
+        self._coefficients = coeff
 
     def order(self):
         """The order of the filter. This is always 2 for SOS filter."""
