@@ -5,28 +5,54 @@ import numpy as np
 
 pf.plot.use()
 # %%
-n_samples = 44100
-impulse = pf.signals.impulse(n_samples)
-ir = pf.dsp.filter.fractional_octave_bands(impulse, num_fractions=1, freq_range=(500, 700))
-sine = pf.signals.sine(1e3, n_samples)
-sine.fft_norm = 'amplitude'
-noise = pf.signals.noise(n_samples, rms=1/np.sqrt(2))
-noise.fft_norm = 'amplitude'
-# %% Example Signals
-fig, ax = plt.subplots()
-pf.plot.freq(ir, label='Impulse Response in dB re V/Hz', ax=ax)
-pf.plot.freq(sine, label='Sine in dB re V', ax=ax)
-pf.plot.freq(noise, label='Noise in dB re V/Hz', ax=ax)
-ax.legend()
+n_samples = 1e3
+sampling_rate = 1e4
+order = 3
+impulse = pf.signals.impulse(n_samples, sampling_rate=sampling_rate)
+filter = pf.dsp.filter.fractional_octave_bands(impulse, num_fractions=1, freq_range=(500, 700))
+ir = pf.dsp.filter.fractional_octave_bands(impulse, num_fractions=1, freq_range=(200, 400), order=3)*n_samples/2
+sine = pf.signals.sine(1e3, n_samples, sampling_rate=sampling_rate)
+noise = pf.signals.noise(n_samples, rms=1/np.sqrt(2), sampling_rate=sampling_rate)
 
+# %% Non squared norms
+plt.close('all')
+fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
+ylim = [(-23, 63), (-23, 63), (-83, 3), (-83, 3), (-83, 3), (-83, 3)]
+units = ['V/Hz', 'V/Hz', 'V', 'V', 'V/\\sqrt{\\mathrm{Hz}}', 'V/\\sqrt{\\mathrm{Hz}}']
+log_prefixs = [20, 20, 20, 20, 10, 10]
 
+fig, axes = plt.subplots(int(len(fft_norms)/2), 2, figsize=(30/2.54, 30/2.54), sharex=True)
+for idx, (fft_norm, unit, log_prefix, ylim) in enumerate(zip(fft_norms, units, log_prefixs, ylim)):
+    ax = plt.subplot(int(len(fft_norms)/2), 2, idx+1)
+    filter.fft_norm = fft_norm
+    ir.fft_norm = fft_norm
+    sine.fft_norm = fft_norm
+    noise.fft_norm = fft_norm
+    pf.plot.freq(ir, label='IR Signal', log_prefix=log_prefix, ax=ax)
+    pf.plot.freq(sine, label='Sine', log_prefix=log_prefix, ax=ax)
+    pf.plot.freq(noise, label='Noise', log_prefix=log_prefix, ax=ax)
+    pf.plot.freq(filter, label='FIR Filter in dB re $'+unit.replace('V', '1')+'$', log_prefix=log_prefix, ls='--', ax=ax)
+    ax.set_ylim(ylim)
+    ax.set_xlabel('')
+    ax.legend(loc='lower left')
+    if idx % 2 == 0:
+        ax.set_ylabel(f'Magnitude in dB re $1 {unit}$')
+    else:
+        ax.set_ylabel('')
+        ax.yaxis.set_ticklabels([])
+    ax.set_title('\''+fft_norm+'\'')
+fig.tight_layout()
+plt.savefig('fft_norms_not_squared.png', dpi=150)
 
 # %% All norms
 plt.close('all')
-fft_norms = ir._VALID_FFT_NORMS
+fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
+ylim = [(-23, 63), (-23, 63), (-83, 3), (-83, 3), (-153, 3), (-153, 3)]
+units = ['V/Hz', 'V/Hz', 'V', 'V', 'V', 'V/sqrt(Hz)']
+ylim = [(-23, 63), (-23, 63), (-83, 3), (-83, 3), (-153, 3), (-153, 3)]
 
-fig, ax = plt.subplots(3, 2, sharex=True)
-for idx, fft_norm in enumerate(fft_norms):
+fig, axes = plt.subplots(3, 2, figsize=(30/2.54, 30/2.54), sharex=True)
+for idx, (fft_norm, unit, ylim) in enumerate(zip(fft_norms, units, ylim)):
     ax = plt.subplot(3, 2, idx+1)
     ir.fft_norm = fft_norm
     sine.fft_norm = fft_norm
@@ -34,7 +60,11 @@ for idx, fft_norm in enumerate(fft_norms):
     pf.plot.freq(ir, label='Impulse Response', ax=ax)
     pf.plot.freq(sine, label='Sine', ax=ax)
     pf.plot.freq(noise, label='Noise', ax=ax)
-    ax.set_xlim(200, 2000)
+    ax.set_ylim(ylim)
+    ax.set_xlabel('')
+    ax.set_ylabel('Magnitude in ')
+    ax.set_title('\''+fft_norm+'\'')
+
 fig.tight_layout()
 
 # %% standard filters ---------------------------------------------------------
