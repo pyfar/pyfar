@@ -1,10 +1,11 @@
 r"""
 Pyfar implements five normalizations [1]_ that can be applied to spectra. The
-normalizations are implictly used by the :py:class:`~pyfar.Signal` class and
-are available from :py:func:`~pyfar.dsp.fft.normalization`. This means that,
-for a Signal object ``signal``, ``signal.freq`` is calculated depending on the
-normalization given by ``signal.fft_norm``. **The time signals do not change
-regardless of the normalization.**
+normalizations are implicitly used by the
+:py:class:`~pyfar.classes.audio.Signal`
+class and are available from :py:func:`~pyfar.dsp.fft.normalization`. This
+means that, for a Signal object ``signal``, ``signal.freq`` is calculated
+depending on the normalization given by ``signal.fft_norm``. **The time signals
+do not change regardless of the normalization.**
 
 In order to illustrate the meaning of the normalizations, [1]_ is summarized
 and the consequences are discussed with respect to (arithmetic) operations.
