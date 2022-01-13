@@ -1,5 +1,6 @@
 r"""
-Pyfar implements five normalizations [1]_ that can be applied to spectra. The
+Pyfar implements five normalizations [1]_ that can be applied to spectra after
+the :py:mod:`Fourier Transform <pyfar._concepts.fft_concepts.definition>`. The
 normalizations are implicitly used by the
 :py:class:`~pyfar.classes.audio.Signal`
 class and are available from :py:func:`~pyfar.dsp.fft.normalization`. This
@@ -20,7 +21,7 @@ Definitions
    * - Norm
      - Equation
    * - ``'none'``
-     - :math:`X(k) = \sum_{n=0}^{N-1} x(n) e^{-i 2 \pi \frac{k n}{N}}``
+     - --
    * - ``'unitary'``
      - :math:`X_{\text{SS}}(k) = \left\{\begin{array}{ll} X(k) & \forall k=0,
        k=\frac{N}{2}\\ 2 X(k) & \forall 0<k< \frac{N}{2} \end{array}\right.`
@@ -40,7 +41,8 @@ Definitions
        \lvert \overline{X}_{\text{RMS}}(k) \lvert ^2`
 
 
-Note that all pyfar signals are real-valued, leading to single-sided spectra.
+Note that all pyfar signals are real-valued, leading to single-sided spectra
+:math:`X_{\text{SS}}(k)`.
 So there are small differences in the definitions compared to the formulas
 written in [1]_.
 
@@ -48,27 +50,25 @@ Explanations
 ------------
 
 * ``'none'``:
-        The definition of the discrete Fourier transform as used in
-        pyfar. It represents the signal's energy, i.e., zeropadding does not
-        change spectrum. Accordingly, this norm is to be used for energy
-        signals such as impulse responses. For power signals, the magnitudes
-        depend on the number of samples ("longer recording = more energy"),
-        therefore a different normalization is appropriate.
+        Use the spectrum as it is. This norm is to be used for energy
+        signals such as impulse responses. In this case the spectrum is
+        independent from the signal length. For power signals, the spectrum
+        depends on the number of samples ("longer signal = more energy").
+        In this case different normalizations are appropriate.
 * ``'unitary'``:
-        In pyfar, all spectra are single-sided. For power signals,
-        this conversion requires to multiply the outcome of the discrete
-        Fourier transform with a factor of 2 in order to represent power
+        Multiply the spectrum with a factor of 2 in order to represent power
         related measures correctly (e.g., the amplitude or RMS-value, see
-        below).
+        below). **All following normalizations make use of this.**
 * ``'amplitude'``:
-        This normalization considers the dependence of the spectral
-        magnitudes on the number of samples, which is appropriate for discrete
-        tones as the resulting magnitudes in the spectrum can be interpreted as
-        amplitudes.
+        Normalize the spectrum to show the amplitude of the pure tone
+        components contained in a signal. If the signal is a sine with an
+        amplitude of 1, the spectrum will have an absolute value of 1 (0 dB) at
+        the frequency of the sine.
 * ``'rms'``:
-        The crest factor of sine waves of :math:`\sqrt{2}` is considered
-        to represent RMS-values (a power quantity) resulting in a difference of
-        -3 dB compared to ``'amplitude'``.
+        Normalize the spectrum to show the RMS value of the pure tone
+        components contained in a signal. If the signal is a sine with an
+        amplitude of 1, the spectrum will have an absolute value of
+        :math:`1/\sqrt{2}` (-3 dB) at the frequency of the sine.
 * ``'power'``:
         In a dB representation, it equals the ``'rms'`` normalization
         describing a power quantity. For stochastic broadband signals, this
@@ -77,10 +77,14 @@ Explanations
 * ``'psd'``:
         Using this normalization, signals are represented as
         *power densities* (e.g. in V²/Hz), leading to a meaningful
-        representation for broadband stochastic signals but not for discrete
-        tones or impulse responses.
+        representation for broadband stochastic signals independent of the
+        sampling rate.
 
-.. list-table:: **Overview on appropriate normalizations**
+
+Appropriate FFT Normalizations
+------------------------------
+
+.. list-table::
    :widths: 20 35 45
    :header-rows: 1
 
@@ -101,24 +105,22 @@ Explanations
 Examples
 --------
 
-Three signals are used for illustration purposes, all with sampling rate of
-1000 samples and a sampling rate of 10 kHz:
+Four signals with a length of 1000 samples and a sampling rate of 10 kHz are
+used for illustration:
 
-#. An impulse signal (one at :math:`t=0` and zero otherwise) with a constant
-   spectrum. It is an energy signal, so the appropriate normalization is
-   ``'none'``.
-#. A FIR filter. This energy preserving octave filter represents a
-   general impulse response / transfer function with finite energy (e.g., a
-   measured loudspeaker transfer function, a room impulse response, HRTF ...) It
-   is an energy signal, so the appropriate normalization is ``'none'``.
-#. A sine signal with an amplitude of :math:`1 \text{V}`. It represents a discrete tone
-   of which a snippet was recorded. Accordingly, it possess a finite power but
-   infinite energy, so it is a power signal with appriate normalizations
-   ``'amplitude'``, ``'rms'`` or ``'power'``.
+#. An impulse (:math:`x(0)=1` and zero otherwise) with a constant spectrum.
+   This is an energy signal, so the appropriate normalization is ``'none'``.
+#. A fractional octave FIR filter presenting a system with finite energy
+   (e.g., a loudspeaker transfer function, a room impulse response, an HRTF
+   ...) It is an energy signal, so the appropriate normalization is ``'none'``.
+#. A sine signal with an amplitude of :math:`1 \text{V}`. It represents a
+   discrete tone of which a snippet was recorded. Accordingly, it possess a
+   finite power but infinite energy and is a power signal with appropriate
+   normalizations ``'amplitude'``, ``'rms'``, or ``'power'``.
 #. A white noise signal with an RMS
    value of :math:`1/\sqrt{2} \text{V}`. It represents a broadband stochastic
-   signal of which a snippet was recorded of. Accordingly, the appropriate
-   normalization is ``'psd'``.
+   signal of which a snippet was recorded of. Accordingly, it is a power signal
+   with the appropriate normalization ``'psd'``.
 
 Note that the implied units differ and a prefix of 10 is used for the dB
 calculations of the normalizations ``'power'`` and ``'psd'``.
@@ -126,10 +128,10 @@ calculations of the normalizations ``'power'`` and ``'psd'``.
 |examples|
 
 
-* The ``'none'`` normalization gives expected results for the impulse and FIR
-  Filter, but leads to a magnitude of number of samples/2 for the sine signal
-  (1000/2, 60-6 dB). As illustrated, other normalizations than ``'none'`` are
-  not meaningful for the IRs.
+* The ``'none'`` normalization gives the expected results for the impulse and
+  FIR filter, but leads to a magnitude of number of samples/2 for the sine
+  signal (1000/2, 60-6 dB). As illustrated, other normalizations than
+  ``'none'`` are not meaningful for the IRs.
 * For the sine signal, ``'unitary'`` normalization considers the factor 2 due
   to the single-side spectrum (+6 dB compared to ``'none'``). The
   ``'amplitude'`` normalization considers the number of samples, so the
