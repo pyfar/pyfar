@@ -1,7 +1,38 @@
 r"""
+The foloowing gives background information that is helpful to
+understand how the Fast Fourier Transform (FFT) and the corresponding
+normalizations are defined in pyfar and how these are related to the
+concepts of energy and power signals as well as their handling in
+arithmetic operations.
+
+FFT Definition
+--------------
+
+The discrete Fourier spectrum of an arbitrary, but band-limited signal
+:math:`x(n)` is defined as
+
+.. math::
+        X(\mu) = \sum_{n=0}^{N-1} x(n) e^{-i 2 \pi \frac{\mu n}{N}}
+
+using a negative sign convention in the transform kernel
+:math:`\kappa(\mu, n) = e^{-i 2 \pi \mu \frac{n}{N}}`.
+Analogously, the discrete inverse Fourier transform is implemented as
+
+.. math::
+        x(n) = \frac{1}{N} \sum_{\mu=0}^{N-1} X(\mu) e^{i2\pi\frac{\mu n}{N}}
+
+Pyfar uses a DFT implementation for purely real-valued time signals resulting
+in Fourier spectra with complex conjugate symmetry for negative and
+positive frequencies :math:`X(\mu) = X(-\mu)^*`. As a result,
+the left-hand side of the spectrum is discarded, yielding
+:math:`X_R(\mu) = X(\mu) \mbox{ }\forall 0 \le \mu \le N/2`. Complex valued
+time signals can be implemented, if required.
+
+FFT Normalizations
+------------------
+
 Pyfar implements five normalizations [1]_ that can be applied to spectra after
-the :py:mod:`Fourier Transform <pyfar._concepts.fft_concepts.definition>`. The
-normalizations are implicitly used by the
+the DFT. The normalizations are implicitly used by the
 :py:class:`~pyfar.classes.audio.Signal`
 class and are available from :py:func:`~pyfar.dsp.fft.normalization`. This
 means that, for a Signal object ``signal``, ``signal.freq`` is calculated
@@ -11,8 +42,7 @@ do not change regardless of the normalization.**
 In order to illustrate the meaning of the normalizations, [1]_ is summarized
 and the consequences are discussed with respect to (arithmetic) operations.
 
-Definitions
------------
+**Definitions**
 
 .. list-table::
    :widths: 25 75
@@ -46,8 +76,7 @@ Note that all pyfar signals are real-valued, leading to single-sided spectra
 So there are small differences in the definitions compared to the formulas
 written in [1]_.
 
-Explanations
-------------
+**Explanations**
 
 * ``'none'``:
         Use the spectrum as it is. This norm is to be used for energy
@@ -81,8 +110,7 @@ Explanations
         sampling rate.
 
 
-Appropriate FFT Normalizations
-------------------------------
+**Appropriate FFT Normalizations**
 
 .. list-table::
    :widths: 20 35 45
@@ -102,8 +130,7 @@ Appropriate FFT Normalizations
      - ``'psd'``
 
 
-Examples
---------
+**Examples**
 
 Four signals with a length of 1000 samples and a sampling rate of 10 kHz are
 used for illustration:
