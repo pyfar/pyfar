@@ -44,13 +44,8 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # get spectrogram
     frequencies, times, spectrogram = dsp.spectrogram(
-        signal[first_channel], window, window_length, window_overlap_fct)
-
-    # get magnitude data in dB
-    if dB:
-        eps = np.finfo(float).eps
-        spectrogram = log_prefix*np.log10(
-            np.abs(spectrogram) / log_reference + eps)
+        signal[first_channel], dB, log_prefix, log_reference,
+        window, window_length, window_overlap_fct)
 
     # auto detect the time unit
     if unit is None:

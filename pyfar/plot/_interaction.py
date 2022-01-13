@@ -52,6 +52,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar.plot import utils
 from pyfar.plot import _line
+from pyfar.plot import _two_d
 from pyfar.plot import _utils
 
 
@@ -558,7 +559,7 @@ class Interaction(object):
 
             elif event.key in plot['spectrogram']:
                 self.params.update_axis_type('spectrogram')
-                ax, *_ = _line._spectrogram(
+                ax, *_ = _two_d._spectrogram(
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
                     prm.window, prm.window_length, prm.window_overlap_fct,

@@ -11,7 +11,7 @@ def test_filter_init_empty_coefficients():
     assert filt.coefficients is None
     assert filt.sampling_rate is None
     assert filt.state is None
-    assert filt.comment is None
+    assert filt.comment == 'None'
 
 
 def test_filter_init_empty_coefficients_with_state():
@@ -357,6 +357,36 @@ def test_blockwise_processing(Filter):
     # outputs have to be identical in this case
     npt.assert_array_equal(complete[0, :3].time, block_a.time)
     npt.assert_array_equal(complete[0, 3:].time, block_b.time)
+
+
+def test_blockwise_processing_with_coefficients_exchange():
+    # input signal
+    input = pf.Signal([1, 2, 3, 4, 0], 44100)
+
+    coefficients_1 = [2, -2]
+    coefficients_2 = [2, -1.9]
+
+    # time variant filtering using Filter object
+    # initialize filter and state
+    filter = pf.FilterFIR([coefficients_1], 44100)
+    filter.init_state(input.cshape, state='zeros')
+    # process first block
+    filter_1 = filter.process(input[..., :2])
+    # update filter coefficients
+    filter.coefficients = [coefficients_2]
+    # process second block
+    filter_2 = filter.process(input[..., 2:])
+
+    # overlap and add time variant filtering
+    # first block
+    ola_1 = np.convolve([1, 2], coefficients_1)
+    # second block
+    ola_2 = np.convolve([3, 4], coefficients_2)
+    ola_2[0] += ola_1[-1]
+
+    # check equality
+    npt.assert_allclose(filter_1.time.flatten(), ola_1[:2])
+    npt.assert_allclose(filter_2.time.flatten(), ola_2)
 
 
 def test_atleast_3d_first_dim():

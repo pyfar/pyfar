@@ -1075,21 +1075,25 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
     # properties that must match
     sampling_rate = None
     n_samples = None
-    fft_norm = None
+    fft_norm = 'none'
     times = None
     frequencies = None
     audio_type = type(None)
 
     # check input types and meta data
     found_audio_data = False
-    for d in data:
+    for n, d in enumerate(data):
         if isinstance(d, (Signal, TimeData, FrequencyData)):
             # store meta data upon first appearance
             if not found_audio_data:
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
                     n_samples = d.n_samples
-                    fft_norm = d.fft_norm
+                    # if a signal comes first (n==0) its fft_norm is taken
+                    # directly. If a signal does not come first, (n>0, e.g.
+                    # 1/signal), the fft norm is matched
+                    fft_norm = d.fft_norm if n == 0 else \
+                        _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
@@ -1243,11 +1247,11 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     # check if fft_norms are valid
     valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
     if fft_norm_1 not in valid_fft_norms:
-        raise ValueError(f"fft_norm_1 is {fft_norm_1} but must be in ",
-                         f"{', '.join(valid_fft_norms)}")
+        raise ValueError((f"fft_norm_1 is {fft_norm_1} but must be in "
+                          f"{', '.join(valid_fft_norms)}"))
     if fft_norm_2 not in valid_fft_norms:
-        raise ValueError(f"fft_norm_2 is {fft_norm_2} but must be in ",
-                         f"{', '.join(valid_fft_norms)}")
+        raise ValueError((f"fft_norm_2 is {fft_norm_2} but must be in "
+                          f"{', '.join(valid_fft_norms)}"))
 
     # check if parameter division is type bool
     if not isinstance(division, bool):
@@ -1265,9 +1269,9 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
             fft_norm_result = fft_norm_1
 
         else:
-            raise ValueError("Either one fft_norm has to be 'none' or both ",
-                             "fft_norms must be the same, but they are ",
-                             f"{fft_norm_1} and {fft_norm_2}.")
+            raise ValueError(("Either one fft_norm has to be 'none' or both "
+                              "fft_norms must be the same, but they are ",
+                              f"{fft_norm_1} and {fft_norm_2}."))
 
     else:
 
@@ -1278,8 +1282,8 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
             fft_norm_result = 'none'
 
         else:
-            raise ValueError("Either fft_norm_2 (denominator) has to be ",
-                             "'none' or both fft_norms must be the same, but ",
-                             f"they are {fft_norm_1} and {fft_norm_2}.")
+            raise ValueError(("Either fft_norm_2 (denominator) has to be "
+                              "'none' or both fft_norms must be the same, but "
+                              f"they are {fft_norm_1} and {fft_norm_2}."))
 
     return fft_norm_result
