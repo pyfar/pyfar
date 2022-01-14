@@ -70,7 +70,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     return ax
 
 
-def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
+def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
          ax=None, style='light', **kwargs):
     """
     Plot the magnitude spectrum.
@@ -90,7 +90,7 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, which chooses the prefix depending on ``signal.fft_norm``.
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.

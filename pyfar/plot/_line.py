@@ -56,7 +56,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
     return ax
 
 
-def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
+def _freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
           ax=None, **kwargs):
     """
     Plot the logarithmic absolute spectrum on the positive frequency axis.
@@ -71,6 +71,8 @@ def _freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     if dB:
+        if log_prefix is None:
+            log_prefix = _utils._log_prefix(signal.fft_norm)
         eps = np.finfo(float).eps
         data = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
         ymax = np.nanmax(data)
