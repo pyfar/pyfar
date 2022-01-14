@@ -1,7 +1,8 @@
 """
-The following documents the container classes and arithmethic operations for
-audio data. More details and background is given in the
-:py:mod:`audio concepts <pyfar.classes.audio_concepts>`.
+The following documents the audio classes and arithmethic operations for
+audio data. More details and background is given in the concepts (
+:py:mod:`audio classes <pyfar._concepts.audio_classes>`,
+:py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`).
 """
 
 from copy import deepcopy

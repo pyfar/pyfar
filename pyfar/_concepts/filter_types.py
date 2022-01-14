@@ -1,7 +1,7 @@
 """
 :py:mod:`pyfar.dsp.filter` contains different filter types that are briefly
 introduced in the following. The filters can be used to directly
-filter a :py:class:`~pyfar.signal` or can return a
+filter a :py:class:`~pyfar.classes.audio.Signal` or can return a
 :py:mod:`Filter object <pyfar.classes.filter>` described in
 :py:mod:`Filter classes <pyfar._concepts.filter_classes>`.
 

@@ -15,3 +15,4 @@ through these concepts.
    concepts/pyfar.filter_classes.rst
    concepts/pyfar.filter_types.rst
    concepts/pyfar.coordinates.rst
+   concepts/pyfar.plot.rst
