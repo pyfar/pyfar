@@ -47,4 +47,23 @@ to allow comparisons
 >>> signal_1 == signal_2
 
 See :py:class:`~pyfar.classes.audio` for a complete documentation.
+
+
+FFT Normalizations
+------------------
+The arithmetic operations are implemented in a way that only physically meaningful arithmetic operations are allowed with respect to the FFT normalizations of the signals. These rules are motivated by the fact that the normalizations correspond to specific types of signals (e.g., energy signals, discrete tone signals, stochastic broadband signals). While addition and subtraction are independent of being operated in time or frequency domain, this is not necessarily the case for multiplication and division. Nevertheless, **the same rules apply for both time and frequency domain operations** for convenience:
+
+Addition, subtraction and multiplication
+****************************************
+
+* Either: one signal has ``fft_norm`` ``'none'`` , the results gets the other normalization.
+* Or: both have the same ``fft_norm``, the results gets the same normalization.
+* Other combinations raise an error.
+
+Division
+********
+
+* Either: the denominator has the ``fft_norm`` ``'none'``, the result gets the ``fft_norm`` of the numerator.
+* Or: both have the same fft_norm, the results gets the fft_norm ``'none'``.
+* Other combinations raise an error.
 """
