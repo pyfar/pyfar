@@ -183,4 +183,6 @@ References
 .. |examples| image:: resources/fft_norms_examples.png
    :width: 100%
    :alt: FFT Normalization Examples
+
+See :py:mod:`~pyfar.dsp.fft` for a complete documentation.
 """
