@@ -230,8 +230,8 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     return ax
 
 
-def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
-                deg=False, unwrap=False, ax=None, **kwargs):
+def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
+                xscale='log', deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
@@ -245,7 +245,7 @@ def _freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     return ax
 
 
-def _freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
+def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                       unit=None, xscale='log', ax=None, **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.

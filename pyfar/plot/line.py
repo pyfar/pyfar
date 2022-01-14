@@ -90,7 +90,8 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``None``, which chooses the prefix depending on ``signal.fft_norm``.
+        ``None``, so either ``20`` or ``10`` is chosen depending on
+        ``signal.fft_norm``.
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -325,7 +326,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     return ax
 
 
-def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
+def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
                deg=False, unwrap=False, ax=None, style='light', **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout.
 
@@ -341,7 +342,8 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so either ``20`` or ``10`` is chosen depending on
+        ``signal.fft_norm``.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -388,7 +390,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     return ax
 
 
-def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
+def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      unit=None, xscale='log', ax=None, style='light',
                      **kwargs):
     """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
@@ -406,7 +408,8 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
         ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so either ``20`` or ``10`` is chosen depending on
+        ``signal.fft_norm``.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
