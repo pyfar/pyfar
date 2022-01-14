@@ -90,8 +90,8 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``None``, so either ``20`` or ``10`` is chosen depending on
-        ``signal.fft_norm``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -278,8 +278,8 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         The default is ``20``.
     log_prefix_freq : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``None``, so either ``20`` or ``10`` is chosen depending on
-        ``signal.fft_norm``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
         The default is ``1``.
@@ -347,8 +347,8 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``None``, so either ``20`` or ``10`` is chosen depending on
-        ``signal.fft_norm``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise..
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -413,8 +413,8 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``None``, so either ``20`` or ``10`` is chosen depending on
-        ``signal.fft_norm``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
