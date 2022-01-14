@@ -214,8 +214,9 @@ def _group_delay(signal, unit=None, xscale='log', ax=None, **kwargs):
     return ax
 
 
-def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
-               log_reference=1, xscale='log', unit=None, ax=None, **kwargs):
+def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
+               log_prefix_freq=None, log_reference=1, xscale='log', unit=None,
+               ax=None, **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
@@ -223,8 +224,10 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
-    _time(signal, dB_time, log_prefix, log_reference, unit, ax[0], **kwargs)
-    _freq(signal, dB_freq, log_prefix, log_reference, xscale, ax[1], **kwargs)
+    _time(signal, dB_time, log_prefix_time, log_reference, unit, ax[0],
+          **kwargs)
+    _freq(signal, dB_freq, log_prefix_freq, log_reference, xscale, ax[1],
+          **kwargs)
     fig.align_ylabels()
 
     return ax

@@ -252,8 +252,8 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     return ax
 
 
-def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
-              log_reference=1, xscale='log', unit=None,
+def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
+              log_prefix_freq=None, log_reference=1, xscale='log', unit=None,
               ax=None, style='light', **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
@@ -273,9 +273,13 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic time/frequency data.
+    log_prefix_time : integer, float
+        Prefix for calculating the logarithmic time data.
         The default is ``20``.
+    log_prefix_freq : integer, float
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``None``, so either ``20`` or ``10`` is chosen depending on
+        ``signal.fft_norm``.
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
         The default is ``1``.
@@ -311,13 +315,14 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     """
 
     with context(style):
-        ax = _line._time_freq(signal.flatten(), dB_time, dB_freq, log_prefix,
+        ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
+                              log_prefix_time, log_prefix_freq,
                               log_reference, xscale, unit, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB_time, log_prefix=log_prefix,
+        'time', dB_time=dB_time, log_prefix=log_prefix_time,
         log_reference=log_reference)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
