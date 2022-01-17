@@ -3,6 +3,8 @@ from pytest import raises
 import matplotlib.pyplot as plt
 import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
+import numpy as np
+import numpy.testing as npt
 
 # global parameters -----------------------------------------------------------
 # flag for creating new baseline plots
@@ -311,3 +313,37 @@ def test_use():
         plt.plot([1, 2, 3], [1, 2, 3])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
+
+
+def test_freq_fft_norm_dB(noise):
+    """Test correct log_prefix in plot.freq depending on fft_norm."""
+    create_figure()
+    noise.fft_norm = 'power'
+    ax = plot.freq(noise)
+    y_actual = ax.lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+
+    create_figure()
+    noise.fft_norm = 'psd'
+    ax = plot.freq(noise)
+    y_actual = ax.lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+
+
+def test_time_freq_fft_norm_dB(noise):
+    """Test correct log_prefix in plot.time_freq depending on fft_norm."""
+    create_figure()
+    noise.fft_norm = 'power'
+    ax = plot.time_freq(noise)
+    y_actual = ax[1].lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+
+    create_figure()
+    noise.fft_norm = 'psd'
+    ax = plot.time_freq(noise)
+    y_actual = ax[1].lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
