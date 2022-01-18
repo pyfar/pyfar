@@ -9,7 +9,7 @@ from .ticker import (
     LogLocatorITAToolbox)
 
 
-def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
+def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                  yscale='linear', unit=None,
                  window='hann', window_length=1024, window_overlap_fct=0.5,
                  cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None):
@@ -48,6 +48,8 @@ def _spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # get magnitude data in dB
     if dB:
+        if log_prefix is None:
+            log_prefix = _utils._log_prefix(signal)
         eps = np.finfo(float).eps
         spectrogram = log_prefix*np.log10(
             np.abs(spectrogram) / log_reference + eps)

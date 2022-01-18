@@ -5,7 +5,7 @@ from . import (_two_d, _utils)
 from . import _interaction as ia
 
 
-def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
+def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 yscale='linear', unit=None, window='hann', window_length=1024,
                 window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
                 colorbar=True, ax=None, style='light'):
