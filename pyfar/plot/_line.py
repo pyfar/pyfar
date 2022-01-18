@@ -72,10 +72,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     if dB:
         if log_prefix is None:
-            if isinstance(signal, Signal):
-                log_prefix = _utils._log_prefix(signal.fft_norm)
-            else:
-                log_prefix = 20
+            log_prefix = _utils._log_prefix(signal)
         eps = np.finfo(float).eps
         data = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
         ymax = np.nanmax(data)

@@ -279,7 +279,7 @@ def _deal_time_units(unit='s'):
     return factor, string
 
 
-def _log_prefix(fft_norm):
+def _log_prefix(signal):
     """Return prefix for dB calculation in frequency domain depending on
     fft_norm.
 
@@ -291,7 +291,7 @@ def _log_prefix(fft_norm):
     fft_norm : str
         FFT normalization
     """
-    if fft_norm in ('power', 'psd'):
+    if isinstance(signal, Signal) and signal.fft_norm in ('power', 'psd'):
         log_prefix = 10
     else:
         log_prefix = 20
