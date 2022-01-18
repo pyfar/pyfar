@@ -251,8 +251,8 @@ def nextpow2(x):
     return np.ceil(np.log2(x))
 
 
-def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                window='hann', window_length=1024, window_overlap_fct=0.5):
+def spectrogram(signal, window='hann', window_length=1024,
+                window_overlap_fct=0.5):
     """Compute the magnitude spectrum versus time.
 
     This is a wrapper for scipy.signal.spectogram with two differences. First,
@@ -265,12 +265,6 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     ----------
     signal : Signal
         pyfar Signal object.
-    db : Boolean
-        False to plot the logarithmic magnitude spectrum. The default is True.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is 20.
-    log_reference : integer
-        Reference for calculating the logarithmic time data. The default is 1.
     window : str
         Specifies the window (See scipy.signal.get_window). The default is
         'hann'.
@@ -311,12 +305,6 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
     spectrogram = fft.normalization(
         spectrogram, window_length, signal.sampling_rate,
         signal.fft_norm, window=window)
-
-    # get magnitude data in dB
-    if dB:
-        eps = np.finfo(float).eps
-        spectrogram = log_prefix*np.log10(
-            np.abs(spectrogram) / log_reference + eps)
 
     # scipy.signal takes the center of the DFT blocks as time stamp we take the
     # beginning (looks nicer in plots, both conventions are used)
