@@ -6,7 +6,7 @@ time and frequency domain for inspecting data and generating scientific plots.
 
 The plots are based on `Matplotlib <https://matplotlib.org>`_ and
 all plot functions return Matplotlib axis objects for a flexible customization
-of plots. In addition most plot functions pass keyword arguments (\*kwargs) to
+of plots. In addition most plot functions pass keyword arguments (kwargs) to
 Matplotlib.
 
 This is an example for customizing the line color using a keyword argument and
