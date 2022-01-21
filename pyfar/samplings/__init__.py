@@ -1,5 +1,7 @@
 """
-Collection of sampling schemes and related functionality.
+Collection of sampling schemes and related functionality. For information on
+the used coordinate systems refer to the
+:py:mod:`concepts <pyfar._concepts.coordinates>`.
 """
 
 from .spatial import SphericalVoronoi, calculate_sph_voronoi_weights
