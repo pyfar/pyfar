@@ -160,7 +160,7 @@ Optional fields that are often used are
 
 Here are a few tips to make things run smoothly
 
-- Use the tags ``:py:func:``, ``:py:mod:``, and ``:py:class:`` to reference pyfar functions, modules, and classes: For example ``:py:func:`~pyfar.plot.time``` for a link that displays only the function name.
+- Use the tags ``:py:func:``, ``:py:mod:``, and ``:py:class:`` to reference pyfar functions, modules, and classes: For example ``:py:func:`~pyfar.plot.time``` for a link that displays only the function name. For links with custom text use ``:py:mod:`plot functions <pyfar.plot>```.
 - Code snippets and values as well as external modules, classes, functions are marked by double ticks \`\` to appear in mono spaced font, e.g., ``x=3`` or ``pyfar.Signal``.
 - Parameters, returns, and attributes are marked by single ticks \` to appear as emphasized text, e.g., *unit*.
 - Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
@@ -200,7 +200,10 @@ Deploying
 ~~~~~~~~~
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
+- Commit all changes to develop
+- Update HISTORY.rst in develop
+- Merge develop into main
+
 Then run::
 
 $ bumpversion patch # possible: major / minor / patch
