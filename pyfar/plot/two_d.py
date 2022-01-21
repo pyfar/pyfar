@@ -5,7 +5,7 @@ from . import (_two_d, _utils)
 from . import _interaction as ia
 
 
-def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
+def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 yscale='linear', unit=None, window='hann', window_length=1024,
                 window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
                 colorbar=True, ax=None, style='light'):
@@ -23,7 +23,8 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -107,7 +108,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'spectrogram', dB_freq=dB, log_prefix=log_prefix,
+        'spectrogram', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, yscale=yscale, unit=unit, window=window,
         window_length=window_length, window_overlap_fct=window_overlap_fct,
         cmap=cmap)

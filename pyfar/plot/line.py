@@ -62,7 +62,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB, log_prefix=log_prefix,
+        'time', dB_time=dB, log_prefix_time=log_prefix,
         log_reference=log_reference)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -70,7 +70,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     return ax
 
 
-def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
+def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
          ax=None, style='light', **kwargs):
     """
     Plot the magnitude spectrum.
@@ -90,7 +90,8 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -128,7 +129,7 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -251,8 +252,8 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     return ax
 
 
-def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
-              log_reference=1, xscale='log', unit=None,
+def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
+              log_prefix_freq=None, log_reference=1, xscale='log', unit=None,
               ax=None, style='light', **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
@@ -272,9 +273,13 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic time/frequency data.
+    log_prefix_time : integer, float
+        Prefix for calculating the logarithmic time data.
         The default is ``20``.
+    log_prefix_freq : integer, float
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
         The default is ``1``.
@@ -310,14 +315,15 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     """
 
     with context(style):
-        ax = _line._time_freq(signal.flatten(), dB_time, dB_freq, log_prefix,
+        ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
+                              log_prefix_time, log_prefix_freq,
                               log_reference, xscale, unit, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB_time, log_prefix=log_prefix,
-        log_reference=log_reference)
+        'time', dB_time=dB_time, log_prefix_time=log_prefix_time,
+        log_prefix_freq=log_prefix_freq, log_reference=log_reference)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -325,7 +331,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     return ax
 
 
-def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
+def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
                deg=False, unwrap=False, ax=None, style='light', **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout.
 
@@ -341,7 +347,8 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise..
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -379,7 +386,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
@@ -388,7 +395,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     return ax
 
 
-def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
+def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      unit=None, xscale='log', ax=None, style='light',
                      **kwargs):
     """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
@@ -406,7 +413,8 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
         ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -449,7 +457,7 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
