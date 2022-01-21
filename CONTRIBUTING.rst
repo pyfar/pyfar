@@ -205,7 +205,7 @@ A reminder for the maintainers on how to deploy.
 - Update HISTORY.rst in develop
 - Merge develop into main
 
-Then run::
+Switch to main and run::
 
 $ bumpversion patch # possible: major / minor / patch
 $ git push
