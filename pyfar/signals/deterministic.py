@@ -446,7 +446,118 @@ def _sweep_synthesis_freq(
 
     TODO Examples with spectrum="perfect"
     """
-    pass
+
+    # calculte min and max frequency range limits for default frequency_range
+    delta_f = sampling_rate / n_samples
+    nyq = int(n_samples / 2) + 1
+    t_end = n_samples / sampling_rate
+    if frequency_range is None:
+        f_max = sampling_rate / 2 - delta_f
+        frequency_range = [delta_f, f_max]
+
+    # check input
+    if not isinstance(magnitude, (pyfar.Signal, str)):
+        raise TypeError("magnitude must be type Signal or str.")
+    if isinstance(magnitude, str) and magnitude not in ['linear',
+                                                        'exponential',
+                                                        'perfect']:
+        raise ValueError("magnitude must be 'linear', 'exponential' or",
+                         "'perfect', when its type is str.")
+    if np.atleast_1d(frequency_range).size != 2:
+        raise ValueError(
+            "frequency_range must be an array like with to elements.")
+    if frequency_range[1] > sampling_rate/2:
+        raise ValueError(
+            "Upper frequency limit is larger than half the sampling rate.")
+    if frequency_range[0] == 0 and magnitude == "exponential":
+        raise ValueError("The exponential sweep can not start at 0 Hz.")
+
+    # define start_margin and stop_margin if not given
+    if start_margin is None:
+        start_margin = 0
+    if stop_margin is None:
+        stop_margin = 0
+
+    # double n_samples
+    if double and magnitude != 'perfect':
+        n_samples *= 2
+
+    # zero pad magnitude Signal, if needed
+    if isinstance(magnitude, pyfar.Signal):
+        if n_samples > magnitude.n_samples:
+            magnitude = pyfar.dsp.pad_zeros(magnitude,
+                                            n_samples - magnitude.n_samples)
+
+    if magnitude == 'linear':
+        h_sweep = np.ones(int(n_samples))
+    elif magnitude == 'exponential':
+        h_sweep = np.zeros(int(n_samples))
+        h_sweep[1:int(n_samples/2)] = 1 / np.sqrt(2 * np.pi * np.linspace(frequency_range[0], frequency_range[1], len(h_sweep[1:int(n_samples/2)])))
+    elif magnitude == 'perfect':
+        pass
+
+    # mirror halfvector up to fs-df and get absolute values
+    sweep_abs = np.abs(h_sweep)
+    sweep_abs = np.concatenate((sweep_abs,
+                                np.zeros(1),
+                                sweep_abs[1:][::-1]), axis=None)
+
+    # initialize group delay
+    sweep_tg = np.zeros(nyq + 1)
+
+    # groupdelay at nyquist frequency
+    if double:
+        sweep_tg[nyq] = t_end / 2 - stop_margin / sampling_rate
+    else:
+        sweep_tg[nyq] = t_end - stop_margin / sampling_rate
+
+    # groupdelay at DC
+    sweep_tg[0] = 0
+    # groupdelay for first frequency bin
+    sweep_tg[1] = start_margin / sampling_rate
+
+    # FORMULA (11, p.40 )
+    sweep_power = np.sum(np.abs(sweep_abs[2:nyq] ** 2))
+    C = (sweep_tg[0] - sweep_tg[1]) / sweep_power
+
+    # FORMULA (10, p.40 )
+    for k in range(2, nyq):
+        sweep_tg[k] = sweep_tg[k+1] + C * np.abs(sweep_abs[k]) ** 2
+
+    # calculate phase from group delay
+    sweep_phase = -1 * np.cumsum(sweep_tg) * 2 * np.pi * delta_f
+
+    # mirror phase up to sampling_rate - delta_f
+    sweep_phase = np.concatenate((sweep_phase[:nyq],
+                                  (-1 * sweep_phase[1:nyq][::-1])), axis=None)
+    sweep_phase[0] = np.pi
+
+    # calculate the complex spectrum
+    sweep_freq = sweep_abs * np.exp(1j * sweep_phase)
+    sweep_freq[0] = np.abs(sweep_freq[0])
+
+    sweep = pyfar.Signal(sweep_freq, sampling_rate, domain='freq')
+
+    # transform into time domain
+    sweep.domain = 'time'
+
+    # put group delay into FrequencyData
+    group_delay_sweep = pyfar.FrequencyData(sweep_tg[:nyq],
+                                            np.arange(0, sampling_rate/2,
+                                                      step=delta_f))
+
+    # normalize to avoid clipping when written to wav with 16bit
+    # (worst case; LSB = 2^-15)
+    sweep = sweep / np.max(np.abs(sweep.time)) * (1 - 2**(-15))
+
+    # cut the second half of sweep, if n_samples was doubled while synthesis
+    if double:
+        sweep = pyfar.Signal(sweep.time[:int(sweep.n_samples/2)],
+                             sampling_rate)
+
+    # add comment
+
+    return sweep, group_delay_sweep
 
 
 def _time_domain_sweep(n_samples, frequency_range, n_fade_out, amplitude,
