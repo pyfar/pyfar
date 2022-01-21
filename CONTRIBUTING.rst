@@ -200,6 +200,7 @@ Deploying
 ~~~~~~~~~
 
 A reminder for the maintainers on how to deploy.
+
 - Commit all changes to develop
 - Update HISTORY.rst in develop
 - Merge develop into main
