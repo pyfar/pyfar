@@ -1,4 +1,4 @@
 Audio Classes
 -----------------------------------------------
 
-.. automodule:: pyfar._concepts.audio_concepts
+.. automodule:: pyfar._concepts.audio_classes

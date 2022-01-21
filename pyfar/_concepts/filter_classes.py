@@ -1,6 +1,9 @@
 """
-Filter Types
-------------
+The following introduces the concept of the pyfar filter classes. See
+:py:class:`filter classes <pyfar.classes.filter>` for a complete documentation.
+
+Types
+--------------
 
 There are three types of Filter objects:
 

@@ -1,7 +1,8 @@
 """
-The following documents the pyfar coordinates class. More details and
-background is given in the
-:py:mod:`coordinates concepts <pyfar.classes.coordinates_concepts>`.
+The following documents the pyfar coordinates class. More background
+information is given in
+:py:mod:`coordinates concepts <pyfar._concepts.coordinates_concepts>`.
+Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
 """
 import numpy as np
 from scipy.spatial import cKDTree
