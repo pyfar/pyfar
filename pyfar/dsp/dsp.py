@@ -18,7 +18,7 @@ def phase(signal, deg=False, unwrap=False):
         Specifies, whether the phase is returned in degrees or radians.
     unwrap : Boolean
         Specifies, whether the phase is unwrapped or not.
-        If set to ``'360'``, the phase is wrapped to :math:`2\pi`.
+        If set to ``'360'``, the phase is wrapped to 2 pi.
 
     Returns
     -------
@@ -127,17 +127,17 @@ def group_delay(signal, frequencies=None, method='fft'):
 
 
 def wrap_to_2pi(x):
-    """Wraps phase to :math:`2\pi`.
+    """Wraps phase to 2 pi.
 
     Parameters
     ----------
     x : double
-        Input phase to be wrapped to :math:`2\pi`.
+        Input phase to be wrapped to 2 pi.
 
     Returns
     -------
     x : double
-        Phase wrapped to :math:`2\pi`.
+        Phase wrapped to 2 pi`.
     """
     positive_input = (x > 0)
     zero_check = np.logical_and(positive_input, (x == 0))
@@ -1446,7 +1446,8 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     Parameters
     ----------
     system_output : Signal
-        The system output signal (e.g., recorded after passing a device under test).
+        The system output signal (e.g., recorded after passing a device under
+        test).
         The system output signal is zero padded, if it is shorter than the
         system input signal.
     system_input : Signal
