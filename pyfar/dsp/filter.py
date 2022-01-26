@@ -622,9 +622,9 @@ blob/master/filter_design/audiofilter.py
 
 def crossover(signal, N, frequency, sampling_rate=None):
     """
-    Create and apply Linkwitz-Riley crossover network  [#]_, [#]_.
+    Create and apply Linkwitz-Riley crossover network.
 
-    Linkwitz-Riley crossover filters are designed by cascading Butterworth
+    Linkwitz-Riley crossover filters ([#]_, [#]_) are designed by cascading Butterworth
     filters of order `N/2`. where `N` must be even.
 
     Parameters
