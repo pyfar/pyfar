@@ -90,7 +90,7 @@ def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
         The order of the Butterworth filter
@@ -152,10 +152,10 @@ def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Chebychev filter
+        The order of the Chebychev filter.
     ripple : number
         The passband ripple in dB.
     frequency : number, array like
@@ -218,10 +218,10 @@ def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Chebychev filter
+        The order of the Chebychev filter.
     attenuation : number
         The minimum stop band attenuation in dB.
     frequency : number, array like
@@ -285,10 +285,10 @@ def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Elliptic filter
+        The order of the Elliptic filter.
     ripple : number
         The passband ripple in dB.
     attenuation : number
@@ -354,10 +354,10 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Bessel/Thomson filter
+        The order of the Bessel/Thomson filter.
     frequency : number, array like
         The cut off-frequency in Hz if `btype` is ``'lowpass'`` or
         ``'highpass'``. An array
@@ -447,14 +447,14 @@ def bell(signal, center_frequency, gain, quality, bell_type='II',
         Quality of the parametric equalizer, i.e., the inverse of the
         bandwidth
     bell_type : str
-        Defines the bandwidth/quality. The default is ``'II'``
+        Defines the bandwidth/quality. The default is ``'II'``.
 
         ``'I'``
-            not recommended. Also known as 'constant Q'
+            not recommended. Also known as 'constant Q'.
         ``'II'``
             defines the bandwidth by the points 3 dB below the maximum if the
             gain is positive and 3 dB above the minimum if the gain is
-            negative. Also known as 'symmetric'
+            negative. Also known as 'symmetric'.
         ``'III'``
             defines the bandwidth by the points at gain/2. Also known as
             'half pad loss'.
@@ -531,9 +531,9 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
         The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     frequency : number
-        Characteristic frequency of the shelve in Hz
+        Characteristic frequency of the shelve in Hz.
     gain : number
-        Gain of the shelve in dB
+        Gain of the shelve in dB.
     order : number
         The shelve order. Must be ``1`` or ``2``.
     shelve_type : str
@@ -578,12 +578,12 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     frequency : number
-        Characteristic frequency of the shelve in Hz
+        Characteristic frequency of the shelve in Hz.
     gain : number
-        Gain of the shelve in dB
+        Gain of the shelve in dB.
     order : number
         The shelve order. Must be ``1`` or ``2``.
     shelve_type : str
@@ -591,12 +591,12 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 
         ``'I'``
             defines the characteristic frequency 3 dB below the gain value if
-            the gain is positive and 3 dB above the gain value otherwise
+            the gain is positive and 3 dB above the gain value otherwise.
         ``'II'``
             defines the characteristic frequency at 3 dB if the gain is
             positive and at -3 dB if the gain is negative.
         ``'III'``
-            defines the characteristic frequency at gain/2 dB
+            defines the characteristic frequency at gain/2 dB.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -622,7 +622,7 @@ blob/master/filter_design/audiofilter.py
 
 def crossover(signal, N, frequency, sampling_rate=None):
     """
-    Create and apply Linkwitz-Riley crossover network  [1]_, [2]_.
+    Create and apply Linkwitz-Riley crossover network  [#]_, [#]_.
 
     Linkwitz-Riley crossover filters are designed by cascading Butterworth
     filters of order `N/2`. where `N` must be even.
@@ -652,9 +652,9 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     References
     ----------
-    .. [1]  S. H. Linkwitz, 'Active crossover networks for noncoincident
+    .. [#]  S. H. Linkwitz, 'Active crossover networks for noncoincident
             drivers,' J. Audio Eng. Soc., vol. 24, no. 1, pp. 2–8, Jan. 1976.
-    .. [2]  D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
+    .. [#]  D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
             2005.
     """
 
@@ -779,7 +779,9 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
 def fractional_octave_frequencies(
         num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
     """Return the octave center frequencies according to the IEC 61260:1:2014
-    standard. For numbers of fractions other than ``1`` and ``3``, only the
+    standard.
+
+    For numbers of fractions other than ``1`` and ``3``, only the
     exact center frequencies are returned, since nominal frequencies are not
     specified by corresponding standards.
 
@@ -797,13 +799,13 @@ def fractional_octave_frequencies(
     nominal : array, float
         The nominal center frequencies in Hz specified in the standard.
         Nominal frequencies are only returned for octave bands and third octave
-        bands
+        bands.
     exact : array, float
         The exact center frequencies in Hz, resulting in a uniform distribution
         of frequency bands over the frequency range.
     cutoff_freq : tuple, array, float
         The lower and upper critical frequencies in Hz of the bandpass filters
-        for each band as a tuple corresponding to ``(f_lower, f_upper)``
+        for each band as a tuple corresponding to ``(f_lower, f_upper)``.
     """
     nominal = None
 
@@ -942,8 +944,8 @@ def fractional_octave_bands(
         This filter bank has -3 dB cut-off frequencies. For sufficiently large
         values of ``'order'``, the summed energy of the filter bank equals the
         energy of input signal, i.e., the filter bank is energy preserving
-        (reconstructing). This is usefull for analysis energetic properties of
-        the input signal such as the room acoustic propertie reverberation
+        (reconstructing). This is useful for analysis energetic properties of
+        the input signal such as the room acoustic property reverberation
         time. For an amplitude preserving filter bank with -6 dB cut-off
         frequencies see
         :py:func:`~pyfar.dsp.filter.reconstructing_fractional_octave_bands`.
@@ -961,7 +963,7 @@ def fractional_octave_bands(
         default is ``None``.
     frequency_range : array, tuple, optional
         The lower and upper frequency limits. The default is
-         ``frequency_range=(20, 20e3)``
+        ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
 
@@ -1099,15 +1101,15 @@ def reconstructing_fractional_octave_bands(
         This filter bank has -6 dB cut-off frequencies. For sufficient lengths
         of ``'n_samples'``, the summed output of the filter bank equals the
         input signal, i.e., the filter bank is amplitude preserving
-        (reconstructing). This is usefull for analysis and synthesis
+        (reconstructing). This is useful for analysis and synthesis
         applications such as room acoustical simulations. For an energy
         preserving filter bank with -3 dB cut-off frequencies see
         :py:func:`~pyfar.dsp.filter.fractional_octave_bands`.
 
     The filters have a linear phase with a delay of ``n_samples/2`` and are
-    windowed with a Hann window to suppress side lobes of the finite filters.
-    The magnitude response of the filters is designed similar to [#]_ with
-    two exceptions:
+    windowed with a Hanning window to suppress side lobes of the finite
+    filters. The magnitude response of the filters is designed similar to [#]_
+    with two exceptions:
 
     1. The magnitude response is designed using squared sine/cosine ramps to
        obtain -6 dB at the cut-off frequencies.
@@ -1120,12 +1122,13 @@ def reconstructing_fractional_octave_bands(
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     num_fractions : int, optional
-        Octave fraction, e.g., 3 for third-octave bands. The default is ``1``.
+        Octave fraction, e.g., ``3`` for third-octave bands. The default is
+        ``1``.
     frequency_range : tuple, optional
-        frequency range for fractional octave in Hz. The default is
+        Frequency range for fractional octave in Hz. The default is
         ``(63, 16000)``
     overlap : float
         Band overlap of the filter slopes between 0 and 1. Smaller values yield
@@ -1158,7 +1161,7 @@ def reconstructing_fractional_octave_bands(
     Examples
     --------
 
-    Filter and re-synthesize impulse signal
+    Filter and re-synthesize an impulse signal.
 
     .. plot::
 
