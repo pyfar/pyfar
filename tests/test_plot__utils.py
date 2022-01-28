@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pytest
 from pytest import raises
 import pyfar.plot as plot
+import pyfar as pf
 
 
 def test_prepare_plot():
@@ -105,3 +106,9 @@ def test__log_prefix_norms(sine, fft_norm, expected):
 
 def test__log_prefix_frequency_data(frequency_data):
     assert plot._utils._log_prefix(frequency_data) == 20
+
+
+def test__deal_time_units_mus():
+    """Test previous bugfix for unit micro seconds in labels."""
+    s = pf.signals.impulse(10, sampling_rate=44100)
+    pf.plot.time(s)
