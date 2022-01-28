@@ -7,6 +7,7 @@ The pyfar developers
 
 - Marco Berzborn
 - Fabian Brinkmann
+- Alexander Deutsch
 - Kai Jurgeit
 - Simon Kersten
 

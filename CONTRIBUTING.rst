@@ -203,6 +203,7 @@ A reminder for the maintainers on how to deploy.
 
 - Commit all changes to develop
 - Update HISTORY.rst in develop
+- Check if new contributors should be added to AUTHORS.rst
 - Merge develop into main
 
 Switch to main and run::
