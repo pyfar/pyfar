@@ -1,8 +1,5 @@
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 from pyfar.plot.utils import context
-from .. import Signal
-from . import _line
+from . import (_line, _utils)
 from . import _interaction as ia
 
 
@@ -16,7 +13,9 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     Parameters
     ----------
     signal : Signal, TimeData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -57,13 +56,13 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     """
 
     with context(style):
-        ax = _line._time(signal, dB, log_prefix, log_reference, unit,
+        ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB, log_prefix=log_prefix,
+        'time', dB_time=dB, log_prefix_time=log_prefix,
         log_reference=log_reference)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -71,7 +70,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     return ax
 
 
-def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
+def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
          ax=None, style='light', **kwargs):
     """
     Plot the magnitude spectrum.
@@ -82,14 +81,17 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -121,13 +123,13 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     """
 
     with context(style):
-        ax = _line._freq(signal, dB, log_prefix, log_reference, xscale, ax,
-                         **kwargs)
-    plt.tight_layout()
+        ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
+                         xscale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -145,7 +147,9 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     deg : bool
         Plot the phase in degrees. The default is ``False``, which plots the
         phase in radians.
@@ -180,8 +184,8 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     """
 
     with context(style):
-        ax = _line._phase(signal, deg, unwrap, xscale, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._phase(signal.flatten(), deg, unwrap, xscale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -201,7 +205,9 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     unit : str, None
         Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
@@ -234,8 +240,8 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     """
 
     with context(style):
-        ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._group_delay(signal.flatten(), unit, xscale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -246,90 +252,8 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     return ax
 
 
-def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                yscale='linear', unit=None, window='hann', window_length=1024,
-                window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
-                ax=None, style='light'):
-    """Plot blocks of the magnitude spectrum versus time.
-
-    Parameters
-    ----------
-    signal : Signal
-        The input data to be plotted.
-    dB : bool
-        Indicate if the data should be plotted in dB in which case
-        ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
-        The default is ``True``.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
-    log_reference : integer
-        Reference for calculating the logarithmic frequency data. The default
-        is ``1``.
-    yscale : str
-        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
-        axis. The default is ``linear``.
-    unit : str, None
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
-        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
-    window : str
-        Specifies the window that is applied to each block of the time data
-        before applying the Fourier transform. The default is ``hann``. See
-        ``scipy.signal.get_window`` for a list of possible windows.
-    window_length : integer
-        Specifies the window/block length in samples. The default is ``1024``.
-    window_overlap_fct : double
-        Ratio of points to overlap between blocks [0...1]. The default is
-        ``0.5``, which would result in 512 samples overlap for a window length
-        of 1024 samples.
-    cmap : matplotlib.colors.Colormap(name, N=256)
-        Colormap for spectrogram. Defaults to matplotlibs ``magma`` colormap.
-    ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
-    style : str
-        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes
-        Axes or array of axes containing the plot.
-
-    Example
-    -------
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> sweep = pf.signals.linear_sweep(2**14, [0, 22050])
-        >>> pf.plot.spectrogram(sweep)
-    """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
-    with context(style):
-        ax = _line._spectrogram_cb(
-            signal, dB, log_prefix, log_reference, yscale, unit,
-            window, window_length, window_overlap_fct,
-            cmap, ax)
-    plt.tight_layout()
-
-    # manage interaction
-    plot_parameter = ia.PlotParameter(
-        'spectrogram', dB_freq=dB, log_prefix=log_prefix,
-        log_reference=log_reference, yscale=yscale, unit=unit, window=window,
-        window_length=window_length, window_overlap_fct=window_overlap_fct,
-        cmap=cmap)
-    interaction = ia.Interaction(signal, ax[0], style, plot_parameter)
-    ax[0].interaction = interaction
-
-    return ax
-
-
-def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
-              log_reference=1, xscale='log', unit=None,
+def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
+              log_prefix_freq=None, log_reference=1, xscale='log', unit=None,
               ax=None, style='light', **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
@@ -338,7 +262,9 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB_time : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -347,9 +273,13 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic time/frequency data.
+    log_prefix_time : integer, float
+        Prefix for calculating the logarithmic time data.
         The default is ``20``.
+    log_prefix_freq : integer, float
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
         The default is ``1``.
@@ -385,14 +315,15 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     """
 
     with context(style):
-        ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
+        ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
+                              log_prefix_time, log_prefix_freq,
                               log_reference, xscale, unit, ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB_time, log_prefix=log_prefix,
-        log_reference=log_reference)
+        'time', dB_time=dB_time, log_prefix_time=log_prefix_time,
+        log_prefix_freq=log_prefix_freq, log_reference=log_reference)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -400,21 +331,24 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
     return ax
 
 
-def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
+def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
                deg=False, unwrap=False, ax=None, style='light', **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout.
 
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise..
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -446,13 +380,13 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     """
 
     with context(style):
-        ax = _line._freq_phase(signal, dB, log_prefix, log_reference, xscale,
-                               deg, unwrap, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
+                               xscale, deg, unwrap, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
@@ -461,7 +395,7 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     return ax
 
 
-def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
+def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      unit=None, xscale='log', ax=None, style='light',
                      **kwargs):
     """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
@@ -471,13 +405,16 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Flag to plot the logarithmic magnitude spectrum. The default is
         ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
@@ -513,13 +450,14 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
     """
 
     with context(style):
-        ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
-                                     unit, xscale, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._freq_group_delay(
+            signal.flatten(), dB, log_prefix, log_reference,
+            unit, xscale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
+        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
@@ -539,7 +477,9 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     plots : list, nested list
         Function handles for plotting.
     ax : matplotlib.pyplot.axes
@@ -572,7 +512,7 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     """
 
     with context(style):
-        ax = _line._custom_subplots(signal, plots, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._custom_subplots(signal.flatten(), plots, ax, **kwargs)
+    _utils._tight_layout()
 
     return ax

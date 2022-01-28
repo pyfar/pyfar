@@ -5,9 +5,8 @@ import pyfar as pf
 
 
 class Orientations(Rotation):
-    """Orientations in 3d is a subclass of scipy.spatial.transform.Rotation.
-
-    This container class for Orientations in the three-dimensional space,
+    """
+    This class for Orientations in the three-dimensional space,
     is a subclass of scipy.spatial.transform.Rotation and equally based on
     quaternions of shape (N, 4). It inherits all methods of the Rotation class
     and adds the creation from perpendicular view and up vectors and a
@@ -156,13 +155,13 @@ class Orientations(Rotation):
         ax = None
         if show_views:
             ax = pf.plot.quiver(
-                positions, views, color=(1, 0, 0), **kwargs)
+                positions, views, color=pf.plot.color('r'), **kwargs)
         if show_ups:
             ax = pf.plot.quiver(
-                positions, ups, ax=ax, color=(0, 1, 0), **kwargs)
+                positions, ups, ax=ax, color=pf.plot.color('g'), **kwargs)
         if show_rights:
             ax = pf.plot.quiver(
-                positions, rights, ax=ax, color=(0, 0, 1), **kwargs)
+                positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
 
     def as_view_up_right(self):
         """Get Orientations as a view, up, and right vector.

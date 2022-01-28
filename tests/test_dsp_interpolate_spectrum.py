@@ -30,11 +30,6 @@ def test_init_assertions():
     # data (invalid type)
     with raises(TypeError, match="data must be"):
         InterpolateSpectrum(1, "complex", ("linear", "linear", "linear"))
-    # data (invalid FFT normalization)
-    with raises(ValueError, match="data.fft_norm is 'rms'"):
-        fd_rms = pf.FrequencyData([1, .5], [100, 200], 'rms')
-        InterpolateSpectrum(
-            fd_rms, "complex", ("linear", "linear", "linear"))
     # data (not enough bins)
     with raises(ValueError, match="data.n_bins must be at least 2"):
         fd_short = pf.FrequencyData(1, 100)

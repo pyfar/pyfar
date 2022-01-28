@@ -18,12 +18,12 @@ def phase(signal, deg=False, unwrap=False):
         Specifies, whether the phase is returned in degrees or radians.
     unwrap : Boolean
         Specifies, whether the phase is unwrapped or not.
-        If set to "360", the phase is wrapped to 2 pi.
+        If set to ``'360'``, the phase is wrapped to 2 pi.
 
     Returns
     -------
-    phase : np.array()
-        Phase.
+    phase : numpy array
+        The phase of the signal.
     """
 
     if not isinstance(signal, pyfar.Signal) and \
@@ -51,17 +51,17 @@ def group_delay(signal, frequencies=None, method='fft'):
 
     Parameters
     ----------
-    signal : Signal object
+    signal : Signal
         An audio signal object from the pyfar signal class
-    frequencies : number array like
+    frequencies : array-like
         Frequency or frequencies in Hz at which the group delay is calculated.
-        The default is None, in which case signal.frequencies is used.
+        The default is ``None``, in which case signal.frequencies is used.
     method : 'scipy', 'fft', optional
         Method to calculate the group delay of a Signal. Both methods calculate
         the group delay using the method presented in [#]_ avoiding issues
         due to discontinuities in the unwrapped phase. Note that the scipy
         version additionally allows to specify frequencies for which the
-        group delay is evaluated. The default is 'fft', which is faster.
+        group delay is evaluated. The default is ``'fft'``, which is faster.
 
     Returns
     -------
@@ -137,7 +137,7 @@ def wrap_to_2pi(x):
     Returns
     -------
     x : double
-        Phase wrapped to 2 pi.
+        Phase wrapped to 2 pi`.
     """
     positive_input = (x > 0)
     zero_check = np.logical_and(positive_input, (x == 0))
@@ -251,34 +251,27 @@ def nextpow2(x):
     return np.ceil(np.log2(x))
 
 
-def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                window='hann', window_length=1024, window_overlap_fct=0.5):
+def spectrogram(signal, window='hann', window_length=1024,
+                window_overlap_fct=0.5):
     """Compute the magnitude spectrum versus time.
 
-    This is a wrapper for scipy.signal.spectogram with two differences. First,
-    the returned times refer to the start of the FFT blocks, i.e., the first
-    time is always 0 whereas it is window_length/2 in scipy. Second, the
-    returned spectrogram is normalized accroding to `signal.signal_type` and
-    `signal.fft_norm`.
+    This is a wrapper for ``scipy.signal.spectogram`` with two differences.
+    First, the returned times refer to the start of the FFT blocks, i.e., the
+    first time is always 0 whereas it is window_length/2 in scipy. Second, the
+    returned spectrogram is normalized according to ``signal.fft_norm``.
 
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object.
-    db : Boolean
-        False to plot the logarithmic magnitude spectrum. The default is True.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is 20.
-    log_reference : integer
-        Reference for calculating the logarithmic time data. The default is 1.
+        Signal to compute spectrogram of.
     window : str
-        Specifies the window (See scipy.signal.get_window). The default is
-        'hann'.
+        Specifies the window (see ``scipy.signal.windows``). The default is
+        ``'hann'``.
     window_length : integer
-        Specifies the window length in samples. The default ist 1024.
+        Window length in samples, the default ist 1024.
     window_overlap_fct : double
-        Ratio of points to overlap between fft segments [0...1]. The default is
-        0.5
+        Ratio of points to overlap between FFT segments [0...1]. The default is
+        ``0.5``.
 
     Returns
     -------
@@ -320,7 +313,7 @@ def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
 
 
 def time_window(signal, interval, window='hann', shape='symmetric',
-                unit='samples', crop='none'):
+                unit='samples', crop='none', return_window=False):
     """Apply time window to signal.
 
     This function uses the windows implemented in ``scipy.signal.windows``.
@@ -328,7 +321,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object to be windowed
+        Signal object to be windowed.
     interval : array_like
         If `interval` has two entries, these specify the beginning and the end
         of the symmetric window or the fade-in / fade-out (see parameter
@@ -364,17 +357,23 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         ``'none'``
             The length of the windowed signal stays the same.
         ``'window'``
-            The signal is truncated to the windowed part
+            The signal is truncated to the windowed part.
         ``'end'``
             Only the zeros at the end of the windowed signal are
             cropped, so the original phase is preserved.
 
         The default is ``'none'``.
+    return_window: bool, optional
+        If ``True``, both the windowed signal and the time window are returned.
+        The default is ``False``.
 
     Returns
     -------
     signal_windowed : Signal
         Windowed signal object
+    window : Signal
+        Time window used to create the windowed signal, only returned if
+        ``return_window=True``.
 
     Notes
     -----
@@ -455,6 +454,9 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     if not isinstance(interval, (list, tuple)):
         raise TypeError(
             "The parameter interval has to be of type list, tuple or None.")
+    if not isinstance(return_window, bool):
+        raise TypeError(
+            "The parameter return_window needs to be boolean.")
 
     interval = np.array(interval)
     if not np.array_equal(interval, np.sort(interval)):
@@ -497,18 +499,33 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     signal_win = signal.copy()
     if crop == 'window':
         signal_win.time = signal_win.time[..., win_start:win_stop+1]*win
+        if return_window:
+            window_fin = pyfar.Signal(win, signal_win.sampling_rate)
     if crop == 'end':
         # Add zeros before window
         window_zeropadded = np.zeros(win_stop+1)
         window_zeropadded[win_start:win_stop+1] = win
         signal_win.time = signal_win.time[..., :win_stop+1]*window_zeropadded
+        if return_window:
+            window_fin = pyfar.Signal(
+                window_zeropadded, signal_win.sampling_rate)
     elif crop == 'none':
         # Create zeropadded window
         window_zeropadded = np.zeros(signal.n_samples)
         window_zeropadded[win_start:win_stop+1] = win
         signal_win.time = signal_win.time*window_zeropadded
+        if return_window:
+            window_fin = pyfar.Signal(
+                window_zeropadded, signal_win.sampling_rate)
 
-    return signal_win
+    if return_window:
+        window_fin.comment = (
+            f"Time window with parameters interval={tuple(interval)},"
+            f"window='{window}', shape='{shape}', unit='{unit}', "
+            f"crop='{crop}'")
+        return signal_win, window_fin
+    else:
+        return signal_win
 
 
 def kaiser_window_beta(A):
@@ -700,18 +717,21 @@ def regularized_spectrum_inversion(
         signal, freq_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None):
     r"""Invert the spectrum of a signal applying frequency dependent
-    regularization. Regularization can either be specified within a given
+    regularization.
+
+    Regularization can either be specified within a given
     frequency range using two different regularization factors, or for each
     frequency individually using the parameter `regu_final`. In the first case
     the regularization factors for the frequency regions are cross-faded using
-    a raised cosine window function with a width of `math:f*\sqrt(2)` above and
+    a raised cosine window function with a width of :math:`\sqrt{2}f` above and
     below the given frequency range. Note that the resulting regularization
     function is adjusted to the quadratic maximum of the given signal.
     In case the `regu_final` parameter is used, all remaining options are
     ignored and an array matching the number of frequency bins of the signal
     needs to be given. In this case, no normalization of the regularization
-    function is applied. Finally, the inverse spectrum is calculated as
-    [#]_, [#]_,
+    function is applied.
+
+    Finally, the inverse spectrum is calculated as [#]_, [#]_,
 
     .. math::
 
@@ -720,30 +740,30 @@ def regularized_spectrum_inversion(
 
     Parameters
     ----------
-    signal : pyfar.Signal
+    signal : Signal
         The signals which spectra are to be inverted.
     freq_range : tuple, array_like, double
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied.
     regu_outside : float, optional
         The normalized regularization factor outside the frequency range.
-        The default is 1.
+        The default is ``1``.
     regu_inside : float, optional
         The normalized regularization factor inside the frequency range.
-        The default is 10**(-200/20).
+        The default is ``10**(-200/20)`` (-200 dB).
     regu_final : float, array_like, optional
-        The final regularization factor for each frequency, by default None.
+        The final regularization factor for each frequency, default ``None``.
         If this parameter is set, the remaining regularization factors are
         ignored.
 
     Returns
     -------
-    pyfar.Signal
+    Signal
         The resulting signal after inversion.
 
     References
     ----------
-    .. [#]  O. Kirkeby and P. A. Nelson, “Digital Filter Designfor Inversion
+    .. [#]  O. Kirkeby and P. A. Nelson, “Digital Filter Design for Inversion
             Problems in Sound Reproduction,” J. Audio Eng. Soc., vol. 47,
             no. 7, p. 13, 1999.
 
@@ -804,8 +824,6 @@ class InterpolateSpectrum():
             Separate interpolation of the real and imaginary part
         ``'magnitude_phase'``
             Separate interpolation if the magnitude and unwrapped phase values
-            Interpolation of the magnitude values and generation of a minimum
-            phase response
         ``'magnitude'``
             Interpolate the magnitude values only. Results in a zero phase
             signal, which is symmetric around the first sample. This phase
@@ -820,16 +838,17 @@ class InterpolateSpectrum():
         the lowest and highest frequency (second), and above the highest
         frequency (third).
 
-        The string has to be ``'linear'``, ``'nearest'``, ``'nearest-up'``,
-        ``'zero'``, ``'slinear'``, ``'quadratic'``, ``'cubic'``,
-        ``'previous'``, or ``'next'``.  ``'zero'``, ``slinear``,
-        ``'quadratic'``, and ``'cubic'`` refer to a spline interpolation of
-        zeroth, first, second or third order; ``'previous'`` and ``'next'``
-        simply return the previous or next value of the point; ``'nearest-up'``
-        and ``'nearest'`` differ when interpolating half-integers
-        (e.g. 0.5, 1.5) in that ``'nearest-up'`` rounds up and ``'nearest'``
-        rounds down. The interpolation is done using
-        ``scipy.interpolate.interp1d``.
+        The individual strings have to be
+
+        ``'zero'``, ``slinear``, ``'quadratic'``, ``'cubic'``
+            Spline interpolation of zeroth, first, second or third order
+        ``'previous'``, ``'next'``
+            Simply return the previous or next value of the point
+        ``'nearest-up'``, ``'nearest'``
+            Differ when interpolating half-integers (e.g. 0.5, 1.5) in that
+            ``'nearest-up'`` rounds up and ``'nearest'`` rounds down.
+
+        The interpolation is done using ``scipy.interpolate.interp1d``.
     fscale : string, optional
 
         ``'linear'``
@@ -845,11 +864,8 @@ class InterpolateSpectrum():
         The interpolated magnitude response is clipped to the range specified
         by this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
         values smaller than 0 and larger than 1 occur in the interpolated
-        magnitude response. The clipping is applied after the interpolation
-        but before applying linear or minimum phase (in case `method` is
-        ``'magnitude_linear'`` or ``'magnitude_minimum'``. The default is
-        ``False`` which does not clip the
-        data.
+        magnitude response. The clipping is applied after the interpolation.
+        The default is ``False`` which does not clip the data.
 
     Returns
     -------
@@ -867,8 +883,9 @@ class InterpolateSpectrum():
 
     Examples
     --------
-    Interpolate magnitude add artificial linear phase and inspect the results.
-    Note that a similar plot can also be created by the interpolator object by
+    Interpolate a magnitude spectrum, add an artificial linear phase and
+    inspect the results.
+    Note that a similar plot can be created by the interpolator object by
     ``signal = interpolator(64, 44100, show=True)``
 
     .. plot::
@@ -880,7 +897,9 @@ class InterpolateSpectrum():
         >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
         >>> interpolator = pf.dsp.InterpolateSpectrum(
         ...     data, 'magnitude', ('nearest', 'linear', 'nearest'))
+        >>> # interpolate 64 samples at a sampling rate of 44100
         >>> signal = interpolator(64, 44100)
+        >>> # add linear phase
         >>> signal = pf.dsp.linear_phase(signal, 32)
         >>> # plot input and output data
         >>> with pf.plot.context():
@@ -913,9 +932,6 @@ class InterpolateSpectrum():
             raise TypeError('data must be a FrequencyData object.')
         if data.n_bins < 2:
             raise ValueError("data.n_bins must be at least 2")
-        if data.fft_norm != 'none':
-            raise ValueError(
-                f"data.fft_norm is '{data.fft_norm}' but must be 'none'")
 
         # ... method
         methods = ['complex', 'magnitude_phase', 'magnitude']
@@ -1266,16 +1282,22 @@ def pad_zeros(signal, pad_width, mode='after'):
     Parameters
     ----------
     signal : Signal
-        The signal which is to be extended
+        The signal which is to be extended.
     pad_width : int
         The number of samples to be padded.
     mode : str, optional
-        The padding mode, can either be 'after', to append a number of
-        zeros to the end of the signal, 'before' to pre-pend the
-        number of zeros before the starting time of the signal, or
-        'center' to insert the number of zeros in the middle of the signal.
-        The mode 'center' can be used to pad signals with a symmetry with
-        respect to the time ``t=0``. The default is 'after'.
+        The padding mode:
+
+        ``'after'``
+            Append zeros to the end of the signal
+        ``'before'``
+            Pre-pend zeros before the starting time of the signal
+        ``'center'``
+            Insert the number of zeros in the middle of the signal.
+            This mode can be used to pad signals with a symmetry with respect
+            to the time ``t=0``.
+
+        The default is ``'after'``.
 
     Returns
     -------
@@ -1336,7 +1358,7 @@ def time_shift(signal, shift, unit='samples'):
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
-        dimensions.
+        dimensions ``cshape``.
     unit : str, optional
         Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
         for seconds. By default ``'samples'`` is used. Note that in the case
@@ -1396,3 +1418,218 @@ def time_shift(signal, shift, unit='samples'):
             axis=-1)
 
     return shifted.reshape(signal.cshape)
+
+
+def deconvolve(system_output, system_input, fft_length=None, **kwargs):
+    r"""Calculate transfer functions by spectral deconvolution of two signals.
+
+    The transfer function :math:`H(\omega)` is calculated by spectral
+    deconvolution (spectral division).
+
+    .. math::
+
+        H(\omega) = \frac{Y(\omega)}{X(\omega)},
+
+    where :math:`X(\omega)` is the system input signal and :math:`Y(\omega)`
+    the system output. Regularized inversion is used to avoid numerical issues
+    in calculating :math:`X(\omega)^{-1} = 1/X(\omega)` for small values of
+    :math:`X(\omega)`
+    (see :py:func:`~pyfar.dsp.regularized_spectrum_inversion`).
+    The system response (transfer function) is thus calculated as
+
+    .. math::
+
+        H(\omega) = Y(\omega)X(\omega)^{-1}.
+
+    For more information, refer to [#]_.
+
+    Parameters
+    ----------
+    system_output : Signal
+        The system output signal (e.g., recorded after passing a device under
+        test).
+        The system output signal is zero padded, if it is shorter than the
+        system input signal.
+    system_input : Signal
+        The system input signal (e.g., used to perform a measurement).
+        The system input signal is zero padded, if it is shorter than the
+        system output signal.
+    fft_length: int or None
+        The length the signals system_output and system_input are zero padded
+        to before deconvolving. The default is None. In this case only the
+        shorter signal is padded to the length of the longer signal, no padding
+        is applied when both signals have the same length.
+    kwargs : key value arguments
+        Key value arguments to control the inversion of :math:`H(\omega)` are
+        passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+
+
+    Returns
+    -------
+    system_response : Signal
+        The resulting signal after deconvolution, representing the system
+        response (the transfer function).
+        The ``fft_norm`` of is set to ``'none'``.
+
+    References
+    -----------
+    .. [#] S. Mueller and P. Masserani "Transfer function measurement with
+           sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
+           (2001, June).
+    """
+
+    # Check if system_output and system_input are both type Signal
+    if not isinstance(system_output, pyfar.Signal):
+        raise TypeError('system_output has to be of type pyfar.Signal')
+    if not isinstance(system_input, pyfar.Signal):
+        raise TypeError('system_input has to be of type pyfar.Signal')
+
+    # Check if both signals have the same sampling rate
+    if not system_output.sampling_rate == system_input.sampling_rate:
+        raise ValueError("The two signals have different sampling rates!")
+
+    # Set fft_length to the max n_samples of both signals,
+    # if it is not explicitly set to a value
+    if fft_length is None:
+        fft_length = np.max([system_output.n_samples, system_input.n_samples])
+    # Check if both signals length are shorter or the same as fft_length
+    if fft_length < system_output.n_samples:
+        raise ValueError("The fft_length can not be shorter than" +
+                         "system_output.n_samples.")
+    if fft_length < system_input.n_samples:
+        raise ValueError("The fft_length can not be shorter than" +
+                         "system_input.n_samples.")
+
+    # Check if both signals have the same length as ftt_length,
+    # if not: bring them to the same length by padding with zeros
+    system_output = pyfar.dsp.pad_zeros(system_output,
+                                        (fft_length - system_output.n_samples))
+    system_input = pyfar.dsp.pad_zeros(system_input,
+                                       (fft_length - system_input.n_samples))
+
+    # multiply system_output signal with regularized inversed system_input
+    # signal to get the system response
+    system_response = (system_output *
+                       regularized_spectrum_inversion(system_input, **kwargs))
+
+    # Check if the signals have any comments,
+    # if yes: concatenate the comments for the system_response
+    system_response.comment = "Calculated with pyfar.dsp.deconvolve."
+    if system_output.comment != 'none':
+        system_response.comment += f" system input: {system_output.comment}."
+    if system_input.comment != 'none':
+        system_response.comment += f" system output: {system_input.comment}."
+
+    # return the impulse resonse
+    system_response.fft_norm = pyfar.classes.audio._match_fft_norm(
+        system_output.fft_norm, system_input.fft_norm, division=True)
+
+    return system_response
+
+
+def convolve(signal1, signal2, mode='full', method='overlap_add'):
+    """Convolve two signals.
+
+    Parameters
+    ----------
+    signal1 : Signal
+        The first signal
+    signal2 : Signal
+        The second signal
+    mode : string, optional
+        A string indicating the size of the output:
+
+        ``'full'``
+            Compute the full discrete linear convolution of
+            the input signals. The output has the length
+            ``'signal1.n_samples + signal2.n_samples - 1'`` (Default).
+        ``'cut'``
+            Compute the complete convolution with ``full`` and truncate the
+            result to the length of the longer signal.
+        ``'cyclic'``
+            The output is the cyclic convolution of the signals, where the
+            shorter signal is zero-padded to fit the length of the longer
+            one. This is done by computing the complete convolution with
+            ``'full'``, adding the tail (i.e., the part that is truncated
+            for ``mode='cut'`` to the beginning of the result) and
+            truncating the result to the length of the longer signal.
+
+    method : str {'overlap_add', 'fft'}, optional
+        A string indicating which method to use to calculate the convolution:
+
+        ``'overlap_add'``
+            Convolve using  the overlap-add algorithm based
+            on ``scipy.signal.oaconvolve``. (Default)
+        ``'fft'``
+            Convolve using FFT based on ``scipy.signal.fftconvolve``.
+
+        See Notes for more details.
+
+    Returns
+    -------
+    Signal
+        The convolution result as a Signal object.
+
+    Notes
+    -----
+    The overlap-add method is generally much faster than fft convolution when
+    one signal is much larger than the other, but can be slower when only a few
+    output values are needed or when the signals have a very similar length.
+    For ``method='overlap_add'``, integer data will be cast to float.
+
+    Examples
+    --------
+    Illustrate the different modes.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> s1 = pf.Signal([1, 0.5, 0.5], 1000)
+        >>> s2 = pf.Signal([1,-1], 1000)
+        >>> full = pf.dsp.convolve(s1, s2, mode='full')
+        >>> cut = pf.dsp.convolve(s1, s2, mode='cut')
+        >>> cyc = pf.dsp.convolve(s1, s2, mode='cyclic')
+        >>> # Plot input and output
+        >>> with pf.plot.context():
+        >>>     fig, ax = plt.subplots(2, 1, sharex=True)
+        >>>     pf.plot.time(s1, ax=ax[0], label='Signal 1', marker='o')
+        >>>     pf.plot.time(s2, ax=ax[0], label='Signal 2', marker='o')
+        >>>     ax[0].set_title('Input Signals')
+        >>>     ax[0].legend()
+        >>>     pf.plot.time(full, ax=ax[1], label='full', marker='o')
+        >>>     pf.plot.time(cut, ax=ax[1], label='cut', ls='--',  marker='o')
+        >>>     pf.plot.time(cyc, ax=ax[1], label='cyclic', ls=':', marker='o')
+        >>>     ax[1].set_title('Convolution Result')
+        >>>     ax[1].set_ylim(-1.1, 1.1)
+        >>>     ax[1].legend()
+        >>>     fig.tight_layout()
+
+
+    """
+    if not signal1.sampling_rate == signal2.sampling_rate:
+        raise ValueError("The sampling rates do not match")
+    fft_norm = pyfar.classes.audio._match_fft_norm(
+        signal1.fft_norm, signal2.fft_norm)
+    if mode not in ['full', 'cut', 'cyclic']:
+        raise ValueError(
+            f"Invalid mode {mode}, needs to be "
+            "'full', 'cut' or 'cyclic'.")
+
+    if method == 'overlap_add':
+        res = sgn.oaconvolve(signal1.time, signal2.time, mode='full', axes=-1)
+    elif method == 'fft':
+        res = sgn.fftconvolve(signal1.time, signal2.time, mode='full', axes=-1)
+    else:
+        raise ValueError(
+            f"Invalid method {method}, needs to be 'overlap_add' or 'fft'.")
+
+    if mode == 'cut':
+        res = res[..., :np.max((signal1.n_samples, signal2.n_samples))]
+    elif mode == 'cyclic':
+        n_min = np.min((signal1.n_samples, signal2.n_samples))
+        n_max = np.max((signal1.n_samples, signal2.n_samples))
+        res[..., :n_min-1] += res[..., -n_min+1:]
+        res = res[..., :n_max]
+
+    return pyfar.Signal(
+        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)

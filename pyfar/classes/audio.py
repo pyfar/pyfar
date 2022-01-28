@@ -1,55 +1,9 @@
 """
-Container classes and arithmethic operations for audio data.
-
-The classes :py:func:`TimeData` and :py:func:`FrequencyData` are intended to
-store incomplete or non-equidistant audio data in the time and frequency
-domain. The class :py:func:`Signal` can be used to store equidistant and
-complete audio data that can be converted between the time and frequency
-domain by means of the Fourier transform.
-
-Arithmetic operations can be applied in the time and frequency domain and
-are implemented in the methods ``add``, ``subtract``, ``multiply``, ``divide``,
-and ``power``. For example, two :py:func:`Signal`, :py:func:`TimeData`, or
-:py:func:`FrequencyData` instances can be added in the time domain by
-
->>> result = pyfar.classes.audio.add((signal_1, signal_2), 'time')
-
-and in the frequency domain by
-
->>> result = pyfar.classes.audio.add((signal_1, signal_2), 'freq')
-
-This also works with more than two instances and supports array likes and
-scalar values, e.g.,
-
->>> result = pyfar.classes.audio.add((signal_1, 1), 'time')
-
-In this case the scalar `1` is broadcasted, i.e., it is is added to every
-sample of `signal` (or every bin in case of a frequency domain operation).
-
-The operators ``+``, ``-``, ``*``, ``/``, and ``**`` are overloaded for
-convenience. Note, however, that their behavior depends on the Audio object.
-Frequency domain operations are applied for :py:func:`Signal` and
-:py:func:`FrequencyData` objects, i.e,
-
->>> result = signal1 + signal2
-
-is equivalent to
-
->>> result = pyfar.classes.audio.add((signal1, signal2), 'freq')
-
-Time domain operations are applied for :py:func:`TimeData` objects, i.e.,
-
->>> result = time_data_1 + time_data_2
-
-is equivalent to
-
->>> result = pyfar.classes.audio.add((time_data_1, time_data_2), 'time')
-
-In addition to the arithmetic operations, the equality operator is overloaded
-to allow comparisons
-
->>> signal_1 == signal_2
-
+The following documents the audio classes and arithmethic operations for
+audio data. More details and background is given in the concepts (
+:py:mod:`audio classes <pyfar._concepts.audio_classes>`,
+:py:mod:`Fourier transform <pyfar._concepts.fft>`,
+:py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`).
 """
 
 from copy import deepcopy
@@ -71,11 +25,7 @@ class _Audio():
     def __init__(self, domain, comment=None, dtype=np.double):
 
         # initialize valid parameter spaces
-        # NOTE: Some are note needed by TimeData but would have to be defined
-        #       in FrequencyData and Signal otherwise.
         self._VALID_DOMAINS = ["time", "freq"]
-        self._VALID_FFT_NORMS = [
-            "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # initialize global parameters
         self.comment = comment
@@ -358,6 +308,14 @@ class TimeData(_Audio):
             data, times=self.times, comment=self.comment, dtype=self.dtype)
         return item
 
+    def __repr__(self):
+        """String representation of TimeData class."""
+        repr_string = (
+            f"TimeData:\n"
+            f"{self.cshape} channels with {self.n_samples} samples")
+
+        return repr_string
+
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
@@ -408,8 +366,7 @@ class FrequencyData(_Audio):
     incomplete spectra.
 
     """
-    def __init__(self, data, frequencies, fft_norm=None, comment=None,
-                 dtype=complex):
+    def __init__(self, data, frequencies, comment=None, dtype=complex):
         """Create FrequencyData with data, and frequencies.
 
         Parameters
@@ -421,16 +378,16 @@ class FrequencyData(_Audio):
         frequencies : array, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
-        fft_norm : str, optional
-            The normalization of the Discrete Fourier Transform (DFT). Can be
-            ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
-            or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
-            for more information. The default is ``'none'``, which is typically
-            used for energy signals, such as impulse responses.
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
         dtype : string, optional
             Raw data type of the audio object. The default is `float64`.
+
+        Notes
+        -----
+        FrequencyData objects do not support an FFT norm, because this requires
+        knowledge about the sampling rate or the number of samples of the time
+        signal [#]_.
 
         References
         ----------
@@ -455,15 +412,6 @@ class FrequencyData(_Audio):
                 len(self._frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
 
-        if fft_norm is None:
-            fft_norm = 'none'
-        if fft_norm in self._VALID_FFT_NORMS:
-            self._fft_norm = fft_norm
-        else:
-            raise ValueError(("Invalid FFT normalization. Has to be "
-                              f"{', '.join(self._VALID_FFT_NORMS)}, but found "
-                              f"'{fft_norm}'"))
-
     @property
     def freq(self):
         """Return the data in the frequency domain."""
@@ -487,15 +435,6 @@ class FrequencyData(_Audio):
     def n_bins(self):
         """Number of frequency bins."""
         return self._data.shape[-1]
-
-    @property
-    def fft_norm(self):
-        """
-        The normalization for the Discrete Fourier Transform (DFT).
-
-        See :py:func:`~pyfar.dsp.fft.normalization` for more information.
-        """
-        return self._fft_norm
 
     def find_nearest_frequency(self, value):
         """Return the index that is closest to the query frequency.
@@ -525,15 +464,21 @@ class FrequencyData(_Audio):
         if self.n_bins != other.n_bins:
             raise ValueError(
                 "The number of frequency bins does not match.")
-        if self.fft_norm != other.fft_norm:
-            raise ValueError("The FFT norms do not match.")
 
     def _return_item(self, data):
         """Return new FrequencyData object with data."""
         item = FrequencyData(
-            data, frequencies=self.frequencies, fft_norm=self.fft_norm,
+            data, frequencies=self.frequencies,
             comment=self.comment, dtype=self.dtype)
         return item
+
+    def __repr__(self):
+        """String representation of FrequencyData class."""
+        repr_string = (
+            f"FrequencyData:\n"
+            f"{self.cshape} channels with {self.n_bins} frequencies\n")
+
+        return repr_string
 
     @classmethod
     def _decode(cls, obj_dict):
@@ -541,7 +486,6 @@ class FrequencyData(_Audio):
         obj = cls(
             obj_dict['_data'],
             obj_dict['_frequencies'],
-            obj_dict['_fft_norm'],
             obj_dict['_comment'],
             obj_dict['_dtype'])
         obj.__dict__.update(obj_dict)
@@ -591,7 +535,7 @@ class Signal(FrequencyData, TimeData):
             sampling_rate,
             n_samples=None,
             domain='time',
-            fft_norm=None,
+            fft_norm='none',
             comment=None,
             dtype=np.double):
         """Create Signal with data, and sampling rate.
@@ -637,6 +581,8 @@ class Signal(FrequencyData, TimeData):
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
+        self._VALID_FFT_NORMS = [
+            "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # initialize domain specific parameters
         if domain == 'time':
@@ -667,8 +613,17 @@ class Signal(FrequencyData, TimeData):
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
 
-            FrequencyData.__init__(self, data, self.frequencies, fft_norm,
+            FrequencyData.__init__(self, data, self.frequencies,
                                    comment, dtype)
+
+            if fft_norm is None:
+                fft_norm = 'none'
+            if fft_norm in self._VALID_FFT_NORMS:
+                self._fft_norm = fft_norm
+            else:
+                raise ValueError(("Invalid FFT normalization. Has to be "
+                                  f"{', '.join(self._VALID_FFT_NORMS)}, but "
+                                  f"found '{fft_norm}'"))
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
@@ -749,7 +704,17 @@ class Signal(FrequencyData, TimeData):
         """Number of frequency bins."""
         return fft._n_bins(self.n_samples)
 
-    @FrequencyData.fft_norm.setter
+    @property
+    def fft_norm(self):
+        """
+        The normalization for the Discrete Fourier Transform (DFT).
+
+        See :py:func:`~pyfar.dsp.fft.normalization` and
+        :py:mod:`FFT concepts <pyfar._concepts.fft>` for more information.
+        """
+        return self._fft_norm
+
+    @fft_norm.setter
     def fft_norm(self, value):
         """
         The normalization for the Discrete Fourier Transform (DFT).
@@ -820,8 +785,7 @@ class Signal(FrequencyData, TimeData):
         return stype
 
     def __repr__(self):
-        """String representation of signal class.
-        """
+        """String representation of Signal class."""
         repr_string = (
             f"{self.domain} domain {self.signal_type} Signal:\n"
             f"{self.cshape} channels with {self.n_samples} samples @ "
@@ -890,7 +854,10 @@ def add(data: tuple, domain='freq'):
         Data to be added. Can contain pyfar audio objects, array likes, and
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
+    for
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -923,7 +890,9 @@ def subtract(data: tuple, domain='freq'):
         Data to be subtracted. Can contain pyfar audio objects, array likes,
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -955,7 +924,9 @@ def multiply(data: tuple, domain='freq'):
         Data to be multiplied. Can contain pyfar audio objects, array likes,
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -986,7 +957,9 @@ def divide(data: tuple, domain='freq'):
         Data to be divided. Can contain pyfar audio objects, array likes, and
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -1017,7 +990,9 @@ def power(data: tuple, domain='freq'):
         The base for which the power is calculated. Can contain pyfar audio
         objects, array likes, and scalars. Pyfar audio objects can not be
         mixed, e.g., :py:func:`TimeData` and :py:func:`FrequencyData` objects
-        do not work together.
+        do not work together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -1040,8 +1015,9 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     """Apply arithmetic operations."""
 
     # check input and obtain meta data of new signal
+    division = True if operation == _divide else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type = \
-        _assert_match_for_arithmetic(data, domain)
+        _assert_match_for_arithmetic(data, domain, division)
 
     # apply arithmetic operation
     result = _get_arithmetic_data(data[0], n_samples, domain)
@@ -1062,12 +1038,12 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
     elif audio_type == TimeData:
         result = TimeData(result, times)
     elif audio_type == FrequencyData:
-        result = FrequencyData(result, frequencies, fft_norm)
+        result = FrequencyData(result, frequencies)
 
     return result
 
 
-def _assert_match_for_arithmetic(data: tuple, domain: str):
+def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
     """Check if type and meta data of input is fine for arithmetic operations.
 
     Check if sampling rate and number of samples agree if multiple signals are
@@ -1080,6 +1056,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     domain : str
         Domain in which the arithmetic operation should be performed. 'time' or
         'freq'.
+    division : bool
+        ``True`` if a division is performed, ``False`` otherwise
 
     Returns
     -------
@@ -1111,21 +1089,25 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
     # properties that must match
     sampling_rate = None
     n_samples = None
-    fft_norm = None
+    fft_norm = 'none'
     times = None
     frequencies = None
     audio_type = type(None)
 
     # check input types and meta data
     found_audio_data = False
-    for d in data:
+    for n, d in enumerate(data):
         if isinstance(d, (Signal, TimeData, FrequencyData)):
             # store meta data upon first appearance
             if not found_audio_data:
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
                     n_samples = d.n_samples
-                    fft_norm = d.fft_norm
+                    # if a signal comes first (n==0) its fft_norm is taken
+                    # directly. If a signal does not come first, (n>0, e.g.
+                    # 1/signal), the fft norm is matched
+                    fft_norm = d.fft_norm if n == 0 else \
+                        _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
@@ -1134,7 +1116,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                     if domain != "freq":
                         raise ValueError("The domain must be 'freq'.")
                     frequencies = d.frequencies
-                    fft_norm = d.fft_norm
 
                 found_audio_data = True
                 audio_type = type(d)
@@ -1149,10 +1130,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                     if n_samples != d.n_samples:
                         raise ValueError(
                             "The number of samples does not match.")
-                    # if there is a power signal, the returned signal will be
-                    # a power signal
-                    if d.fft_norm != 'none' and fft_norm == 'none':
-                        fft_norm = d.fft_norm
+                    fft_norm = _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if not np.allclose(times, d.times, atol=1e-15):
                         raise ValueError(
@@ -1162,9 +1140,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str):
                             frequencies, d.frequencies, atol=1e-15):
                         raise ValueError(
                             "The frequencies do not match.")
-                    if fft_norm != d.fft_norm:
-                        raise ValueError(
-                            "The FFT norm does not match.")
 
         # check type of non signal input
         else:
@@ -1210,12 +1185,11 @@ def _get_arithmetic_data(data, n_samples, domain):
         elif domain == "freq":
             data_out = data.freq.copy()
 
-            if isinstance(data, Signal):
-                if data.fft_norm != 'none':
-                    # remove current fft normalization
-                    data_out = fft.normalization(
-                        data_out, n_samples, data.sampling_rate,
-                        data.fft_norm, inverse=True)
+            if isinstance(data, Signal) and data.fft_norm != 'none':
+                # remove current fft normalization
+                data_out = fft.normalization(
+                    data_out, n_samples, data.sampling_rate,
+                    data.fft_norm, inverse=True)
 
         else:
             raise ValueError(
@@ -1245,3 +1219,85 @@ def _divide(a, b):
 
 def _power(a, b):
     return a**b
+
+
+def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
+    """
+    Helper function to determine the fft_norm resulting from an
+    arithmetic operation of two audio objects.
+
+    For addition, subtraction and multiplication:
+    Either: one signal has fft_norm ``'none'`` , the results gets the other
+    norm.
+    Or: both have the same fft_norm, the results gets the same norm.
+    Other combinations raise an error.
+
+    For division:
+    Either: the denominator (fft_norm_2) is ``'none'``, the result gets the
+    fft_norm of the numerator (fft_norm_1).
+    Or: both have the same fft_norm, the results gets the fft_norm ``'none'``.
+    Other combinations raise an error.
+
+    Parameters
+    ----------
+    fft_norm_1 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
+    ``'power'`` or ``'psd'``
+        First fft_norm for matching.
+    fft_norm_2 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
+    ``'power'`` or ``'psd'``
+        Second fft_norm for matching.
+    division : bool
+        ``False`` if arithmetic operation is addition, subtraction or
+        multiplication;
+        ``True`` if arithmetic operation is division.
+
+    Returns
+    -------
+    fft_norm_result : str, ``'none'``, ``'unitary'``, ``'amplitude'``,
+    ``'rms'``, ``'power'`` or ``'psd'``
+        The fft_norm resulting from arithmetic operation.
+    """
+
+    # check if fft_norms are valid
+    valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
+    if fft_norm_1 not in valid_fft_norms:
+        raise ValueError((f"fft_norm_1 is {fft_norm_1} but must be in "
+                          f"{', '.join(valid_fft_norms)}"))
+    if fft_norm_2 not in valid_fft_norms:
+        raise ValueError((f"fft_norm_2 is {fft_norm_2} but must be in "
+                          f"{', '.join(valid_fft_norms)}"))
+
+    # check if parameter division is type bool
+    if not isinstance(division, bool):
+        raise TypeError("Parameter division must be type bool.")
+
+    if not division:
+
+        if fft_norm_1 == fft_norm_2:
+            fft_norm_result = fft_norm_1
+
+        elif fft_norm_1 == 'none':
+            fft_norm_result = fft_norm_2
+
+        elif fft_norm_2 == 'none':
+            fft_norm_result = fft_norm_1
+
+        else:
+            raise ValueError(("Either one fft_norm has to be 'none' or both "
+                              "fft_norms must be the same, but they are ",
+                              f"{fft_norm_1} and {fft_norm_2}."))
+
+    else:
+
+        if fft_norm_2 == 'none':
+            fft_norm_result = fft_norm_1
+
+        elif fft_norm_1 == fft_norm_2:
+            fft_norm_result = 'none'
+
+        else:
+            raise ValueError(("Either fft_norm_2 (denominator) has to be "
+                              "'none' or both fft_norms must be the same, but "
+                              f"they are {fft_norm_1} and {fft_norm_2}."))
+
+    return fft_norm_result
