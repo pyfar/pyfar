@@ -68,10 +68,10 @@ History
 ------------------
 * `pyfar.dsp`
 
-  * added `linear_phase`
+  * added `linear_phase` (PR #176)
   * added `minimum_phase` (PR #185)
-  * added `zero_phase`
-  * added `time_window`
+  * added `zero_phase` (PR #175)
+  * added `time_window` (PR #178)
   * added `pad_zeros` (PR #184)
   * added `time_shift` (PR #186)
   * added `InterpolateSpectrum` (PR #187)
