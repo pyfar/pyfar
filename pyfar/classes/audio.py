@@ -854,7 +854,10 @@ def add(data: tuple, domain='freq'):
         Data to be added. Can contain pyfar audio objects, array likes, and
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
+    for
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -887,7 +890,9 @@ def subtract(data: tuple, domain='freq'):
         Data to be subtracted. Can contain pyfar audio objects, array likes,
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -919,7 +924,9 @@ def multiply(data: tuple, domain='freq'):
         Data to be multiplied. Can contain pyfar audio objects, array likes,
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -950,7 +957,9 @@ def divide(data: tuple, domain='freq'):
         Data to be divided. Can contain pyfar audio objects, array likes, and
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together.
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -981,7 +990,9 @@ def power(data: tuple, domain='freq'):
         The base for which the power is calculated. Can contain pyfar audio
         objects, array likes, and scalars. Pyfar audio objects can not be
         mixed, e.g., :py:func:`TimeData` and :py:func:`FrequencyData` objects
-        do not work together.
+        do not work together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
