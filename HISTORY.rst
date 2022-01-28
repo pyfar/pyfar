@@ -4,8 +4,8 @@ History
 
 0.3.0 (2022-01-28)
 ------------------
-* More reasonable handling of FFT normalizations in arithmetic operations (`<pyfar.readthedocs.io/en/latest/concepts/pyfar.arithmetic_operations.html>`_). This is a major change and might break backwards compatibility in some cases (although this is unlikely to happen, PR #253, #245, #235).
-* The documentation now contains concepts behind pyfar in a separate section. This makes the concepts easier to find and understand and the documentation of the classes and functions cleaner (PR #251, #243).
+* More reasonable handling of FFT normalizations in `arithmetic operations <https://pyfar.readthedocs.io/en/latest/concepts/pyfar.arithmetic_operations.html>`_. This is a major change and might break backwards compatibility in some cases (although this is unlikely to happen, PR #253, #245, #235).
+* The documentation now contains `concepts <https://pyfar.readthedocs.io/en/latest/concepts.html>`_ behind pyfar in a separate section. This makes the concepts easier to find and understand and the documentation of the classes and functions cleaner (PR #251, #243).
 
 * `pyfar.dsp`
 
@@ -18,7 +18,7 @@ History
 * `pyfar.io`
 
   * added `read_audio` and `write_audio` to support more types of audio files (based on the `soundfile` package). The old functions `read_wav` and `write_wav` will be deprecated in pyfar 0.5.0 (PR #234)
-  * `read_sofa` can now also load SOFA files of DataType 'TransferFunction' (e.g. GeneralTF) and uses the sofar package (`<sofar.readthedocs.io>`_, PR #254, #240).
+  * `read_sofa` can now also load SOFA files of DataType 'TransferFunction' (e.g. GeneralTF) and uses the `sofar <https://sofar.readthedocs.io>`_ package (PR #254, #240).
 
 * `pyfar.plot`
 
