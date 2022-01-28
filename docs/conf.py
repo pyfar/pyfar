@@ -65,7 +65,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pyfar'
-copyright = u"2020, The pyfar developers"
+copyright = u"2020-2022, The pyfar developers"
 author = u"The pyfar developers"
 
 # The version info for the project you're documenting, acts as replacement
