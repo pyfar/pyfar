@@ -27,7 +27,7 @@ rate
 .. code-block:: python
 
     import pyfar as pf
-    filter = pf.FilterFIR([[2, -2]], 44100, state=None)
+    filter = pf.FilterFIR([[3, -1]], 44100)
 
 
 Applying a time-invariant Filter
@@ -40,12 +40,12 @@ To filter an audio signal, pass it to the filters process function
     input = pf.Signal([1, 2, 3, 4], 44100)
     output = filter.process(input)
 
-The output is ``output.time = [[2, 2, 2, 2]]`` and has the same number of
+The output is ``output.time = [[3, 5, 7, 9]]`` and has the same number of
 samples as the input.
 
 The output will be the same no matter how often ``process`` is called. This
 default behavior is often desired. In some cases, a different functionality can
-be useful. For blockwise processing of input signals, the Filter object can
+be useful. For blockwise processing of input signals, the filter object can
 track the `state` of the filter. The initial state can be passed during
 initialization or typical states can be set using
 
@@ -62,9 +62,9 @@ blocks of the input
     block_two = filter.process(input[0, 2:4])
 
 the blockwise output yields the same as the complete output ``output`` seen
-above, i.e., ``[block_one, block_two] = [[2, 2, 2, 2]]``. This is the case
-because initializing the state also makes the filter object track the state
-across multiple calls of the ``process`` functions.
+above, i.e., ``block_one.time = [[3, 5]]``, ``block_two.time = [[7, 9]]``.
+This is the case because initializing the state also makes the filter object
+track the state across multiple calls of the ``process`` functions.
 
 Another option for initialization is
 
@@ -85,7 +85,9 @@ or simply do not initialize the state at all as done by
 
 .. code-block:: python
 
-    filter = pf.FilterFIR([[2, -2]], 44100, state=None)
+    filter = pf.FilterFIR([[3, -1]], 44100, state=None)
+
+which is the default.
 
 
 Applying a time-variant Filter
@@ -114,7 +116,4 @@ by exchanging the filter coefficients
 
 Note that this only works for filters of the same length and after initializing
 the state. Otherwise, discontinuities will appear between the output blocks.
-
-
-See :py:class:`~pyfar.classes.filter` for the complete documentation.
 """

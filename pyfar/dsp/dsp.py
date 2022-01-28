@@ -18,12 +18,12 @@ def phase(signal, deg=False, unwrap=False):
         Specifies, whether the phase is returned in degrees or radians.
     unwrap : Boolean
         Specifies, whether the phase is unwrapped or not.
-        If set to "360", the phase is wrapped to 2 pi.
+        If set to ``'360'``, the phase is wrapped to 2 pi.
 
     Returns
     -------
-    phase : np.array()
-        Phase.
+    phase : numpy array
+        The phase of the signal.
     """
 
     if not isinstance(signal, pyfar.Signal) and \
@@ -53,15 +53,15 @@ def group_delay(signal, frequencies=None, method='fft'):
     ----------
     signal : Signal
         An audio signal object from the pyfar signal class
-    frequencies : number array like
+    frequencies : array-like
         Frequency or frequencies in Hz at which the group delay is calculated.
-        The default is None, in which case signal.frequencies is used.
+        The default is ``None``, in which case signal.frequencies is used.
     method : 'scipy', 'fft', optional
         Method to calculate the group delay of a Signal. Both methods calculate
         the group delay using the method presented in [#]_ avoiding issues
         due to discontinuities in the unwrapped phase. Note that the scipy
         version additionally allows to specify frequencies for which the
-        group delay is evaluated. The default is 'fft', which is faster.
+        group delay is evaluated. The default is ``'fft'``, which is faster.
 
     Returns
     -------
@@ -137,7 +137,7 @@ def wrap_to_2pi(x):
     Returns
     -------
     x : double
-        Phase wrapped to 2 pi.
+        Phase wrapped to 2 pi`.
     """
     positive_input = (x > 0)
     zero_check = np.logical_and(positive_input, (x == 0))
@@ -255,24 +255,23 @@ def spectrogram(signal, window='hann', window_length=1024,
                 window_overlap_fct=0.5):
     """Compute the magnitude spectrum versus time.
 
-    This is a wrapper for scipy.signal.spectogram with two differences. First,
-    the returned times refer to the start of the FFT blocks, i.e., the first
-    time is always 0 whereas it is window_length/2 in scipy. Second, the
-    returned spectrogram is normalized accroding to `signal.signal_type` and
-    `signal.fft_norm`.
+    This is a wrapper for ``scipy.signal.spectogram`` with two differences.
+    First, the returned times refer to the start of the FFT blocks, i.e., the
+    first time is always 0 whereas it is window_length/2 in scipy. Second, the
+    returned spectrogram is normalized according to ``signal.fft_norm``.
 
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object.
+        Signal to compute spectrogram of.
     window : str
-        Specifies the window (See scipy.signal.get_window). The default is
-        'hann'.
+        Specifies the window (see ``scipy.signal.windows``). The default is
+        ``'hann'``.
     window_length : integer
-        Specifies the window length in samples. The default ist 1024.
+        Window length in samples, the default ist 1024.
     window_overlap_fct : double
-        Ratio of points to overlap between fft segments [0...1]. The default is
-        0.5
+        Ratio of points to overlap between FFT segments [0...1]. The default is
+        ``0.5``.
 
     Returns
     -------
@@ -322,7 +321,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     Parameters
     ----------
     signal : Signal
-        pyfar Signal object to be windowed
+        Signal object to be windowed.
     interval : array_like
         If `interval` has two entries, these specify the beginning and the end
         of the symmetric window or the fade-in / fade-out (see parameter
@@ -358,7 +357,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         ``'none'``
             The length of the windowed signal stays the same.
         ``'window'``
-            The signal is truncated to the windowed part
+            The signal is truncated to the windowed part.
         ``'end'``
             Only the zeros at the end of the windowed signal are
             cropped, so the original phase is preserved.
@@ -718,18 +717,21 @@ def regularized_spectrum_inversion(
         signal, freq_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None):
     r"""Invert the spectrum of a signal applying frequency dependent
-    regularization. Regularization can either be specified within a given
+    regularization.
+
+    Regularization can either be specified within a given
     frequency range using two different regularization factors, or for each
     frequency individually using the parameter `regu_final`. In the first case
     the regularization factors for the frequency regions are cross-faded using
-    a raised cosine window function with a width of `math:f*\sqrt(2)` above and
+    a raised cosine window function with a width of :math:`\sqrt{2}f` above and
     below the given frequency range. Note that the resulting regularization
     function is adjusted to the quadratic maximum of the given signal.
     In case the `regu_final` parameter is used, all remaining options are
     ignored and an array matching the number of frequency bins of the signal
     needs to be given. In this case, no normalization of the regularization
-    function is applied. Finally, the inverse spectrum is calculated as
-    [#]_, [#]_,
+    function is applied.
+
+    Finally, the inverse spectrum is calculated as [#]_, [#]_,
 
     .. math::
 
@@ -745,12 +747,12 @@ def regularized_spectrum_inversion(
         regularization factor is to be applied.
     regu_outside : float, optional
         The normalized regularization factor outside the frequency range.
-        The default is 1.
+        The default is ``1``.
     regu_inside : float, optional
         The normalized regularization factor inside the frequency range.
-        The default is 10**(-200/20).
+        The default is ``10**(-200/20)`` (-200 dB).
     regu_final : float, array_like, optional
-        The final regularization factor for each frequency, by default None.
+        The final regularization factor for each frequency, default ``None``.
         If this parameter is set, the remaining regularization factors are
         ignored.
 
@@ -761,7 +763,7 @@ def regularized_spectrum_inversion(
 
     References
     ----------
-    .. [#]  O. Kirkeby and P. A. Nelson, “Digital Filter Designfor Inversion
+    .. [#]  O. Kirkeby and P. A. Nelson, “Digital Filter Design for Inversion
             Problems in Sound Reproduction,” J. Audio Eng. Soc., vol. 47,
             no. 7, p. 13, 1999.
 
@@ -822,8 +824,6 @@ class InterpolateSpectrum():
             Separate interpolation of the real and imaginary part
         ``'magnitude_phase'``
             Separate interpolation if the magnitude and unwrapped phase values
-            Interpolation of the magnitude values and generation of a minimum
-            phase response
         ``'magnitude'``
             Interpolate the magnitude values only. Results in a zero phase
             signal, which is symmetric around the first sample. This phase
@@ -838,16 +838,17 @@ class InterpolateSpectrum():
         the lowest and highest frequency (second), and above the highest
         frequency (third).
 
-        The string has to be ``'linear'``, ``'nearest'``, ``'nearest-up'``,
-        ``'zero'``, ``'slinear'``, ``'quadratic'``, ``'cubic'``,
-        ``'previous'``, or ``'next'``.  ``'zero'``, ``slinear``,
-        ``'quadratic'``, and ``'cubic'`` refer to a spline interpolation of
-        zeroth, first, second or third order; ``'previous'`` and ``'next'``
-        simply return the previous or next value of the point; ``'nearest-up'``
-        and ``'nearest'`` differ when interpolating half-integers
-        (e.g. 0.5, 1.5) in that ``'nearest-up'`` rounds up and ``'nearest'``
-        rounds down. The interpolation is done using
-        ``scipy.interpolate.interp1d``.
+        The individual strings have to be
+
+        ``'zero'``, ``slinear``, ``'quadratic'``, ``'cubic'``
+            Spline interpolation of zeroth, first, second or third order
+        ``'previous'``, ``'next'``
+            Simply return the previous or next value of the point
+        ``'nearest-up'``, ``'nearest'``
+            Differ when interpolating half-integers (e.g. 0.5, 1.5) in that
+            ``'nearest-up'`` rounds up and ``'nearest'`` rounds down.
+
+        The interpolation is done using ``scipy.interpolate.interp1d``.
     fscale : string, optional
 
         ``'linear'``
@@ -863,11 +864,8 @@ class InterpolateSpectrum():
         The interpolated magnitude response is clipped to the range specified
         by this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
         values smaller than 0 and larger than 1 occur in the interpolated
-        magnitude response. The clipping is applied after the interpolation
-        but before applying linear or minimum phase (in case `method` is
-        ``'magnitude_linear'`` or ``'magnitude_minimum'``. The default is
-        ``False`` which does not clip the
-        data.
+        magnitude response. The clipping is applied after the interpolation.
+        The default is ``False`` which does not clip the data.
 
     Returns
     -------
@@ -885,8 +883,9 @@ class InterpolateSpectrum():
 
     Examples
     --------
-    Interpolate magnitude add artificial linear phase and inspect the results.
-    Note that a similar plot can also be created by the interpolator object by
+    Interpolate a magnitude spectrum, add an artificial linear phase and
+    inspect the results.
+    Note that a similar plot can be created by the interpolator object by
     ``signal = interpolator(64, 44100, show=True)``
 
     .. plot::
@@ -898,7 +897,9 @@ class InterpolateSpectrum():
         >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
         >>> interpolator = pf.dsp.InterpolateSpectrum(
         ...     data, 'magnitude', ('nearest', 'linear', 'nearest'))
+        >>> # interpolate 64 samples at a sampling rate of 44100
         >>> signal = interpolator(64, 44100)
+        >>> # add linear phase
         >>> signal = pf.dsp.linear_phase(signal, 32)
         >>> # plot input and output data
         >>> with pf.plot.context():
@@ -1281,16 +1282,22 @@ def pad_zeros(signal, pad_width, mode='after'):
     Parameters
     ----------
     signal : Signal
-        The signal which is to be extended
+        The signal which is to be extended.
     pad_width : int
         The number of samples to be padded.
     mode : str, optional
-        The padding mode, can either be 'after', to append a number of
-        zeros to the end of the signal, 'before' to pre-pend the
-        number of zeros before the starting time of the signal, or
-        'center' to insert the number of zeros in the middle of the signal.
-        The mode 'center' can be used to pad signals with a symmetry with
-        respect to the time ``t=0``. The default is 'after'.
+        The padding mode:
+
+        ``'after'``
+            Append zeros to the end of the signal
+        ``'before'``
+            Pre-pend zeros before the starting time of the signal
+        ``'center'``
+            Insert the number of zeros in the middle of the signal.
+            This mode can be used to pad signals with a symmetry with respect
+            to the time ``t=0``.
+
+        The default is ``'after'``.
 
     Returns
     -------
@@ -1351,7 +1358,7 @@ def time_shift(signal, shift, unit='samples'):
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
-        dimensions.
+        dimensions ``cshape``.
     unit : str, optional
         Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
         for seconds. By default ``'samples'`` is used. Note that in the case
@@ -1424,26 +1431,27 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
         H(\omega) = \frac{Y(\omega)}{X(\omega)},
 
     where :math:`X(\omega)` is the system input signal and :math:`Y(\omega)`
-    the system output. Regulated inversion is used to avoid numerical issues
+    the system output. Regularized inversion is used to avoid numerical issues
     in calculating :math:`X(\omega)^{-1} = 1/X(\omega)` for small values of
     :math:`X(\omega)`
-    (see :py:func:`~pyfar.dsp.regulated_spectrum_inversion`).
+    (see :py:func:`~pyfar.dsp.regularized_spectrum_inversion`).
     The system response (transfer function) is thus calculated as
 
     .. math::
 
         H(\omega) = Y(\omega)X(\omega)^{-1}.
 
-    For more information, refer to [#]_
+    For more information, refer to [#]_.
 
     Parameters
     ----------
     system_output : Signal
-        The system output signal, recorded after passing the device under test.
+        The system output signal (e.g., recorded after passing a device under
+        test).
         The system output signal is zero padded, if it is shorter than the
         system input signal.
     system_input : Signal
-        The system input signal, used to perform the measurement.
+        The system input signal (e.g., used to perform a measurement).
         The system input signal is zero padded, if it is shorter than the
         system output signal.
     fft_length: int or None
@@ -1453,15 +1461,15 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
         is applied when both signals have the same length.
     kwargs : key value arguments
         Key value arguments to control the inversion of :math:`H(\omega)` are
-        passed to to :py:func:`~pyfar.dsp.regulated_spectrum_inversion`.
+        passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
 
 
     Returns
     -------
     system_response : Signal
         The resulting signal after deconvolution, representing the system
-        response.
-        The fft_norm of this resulting signal is set to 'none'.
+        response (the transfer function).
+        The ``fft_norm`` of is set to ``'none'``.
 
     References
     -----------
@@ -1528,47 +1536,46 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         The first signal
     signal2 : Signal
         The second signal
-    mode : str {'full', 'cut', 'cyclic'}, optional
+    mode : string, optional
         A string indicating the size of the output:
-            - ``'full'``:
-                Compute the the full discrete linear convolution of
-                the input signals. The output has the length
-                ``'signal1.n_samples + signal2.n_samples - 1'`` (Default).
 
-            - ``'cut'`` :
-                Compute the complete convolution with ``full`` and truncate the
-                result to the length of the longer signal.
-
-            - ``'cyclic'`` :
-                The output is the cyclic convolution of the signals, where the
-                shorter signal is zero-padded to fit the length of the longer
-                one. This is done by computing the complete convolution with
-                ``'full'``, adding the tail (i.e., the part that is truncated
-                for ``mode='cut'`` to the beginning of the result) and
-                truncating the result to the length of the longer signal.
+        ``'full'``
+            Compute the full discrete linear convolution of
+            the input signals. The output has the length
+            ``'signal1.n_samples + signal2.n_samples - 1'`` (Default).
+        ``'cut'``
+            Compute the complete convolution with ``full`` and truncate the
+            result to the length of the longer signal.
+        ``'cyclic'``
+            The output is the cyclic convolution of the signals, where the
+            shorter signal is zero-padded to fit the length of the longer
+            one. This is done by computing the complete convolution with
+            ``'full'``, adding the tail (i.e., the part that is truncated
+            for ``mode='cut'`` to the beginning of the result) and
+            truncating the result to the length of the longer signal.
 
     method : str {'overlap_add', 'fft'}, optional
         A string indicating which method to use to calculate the convolution:
-            - ``'overlap_add'`` :
-                Convolve using  the overlap-add algorithm based
-                on ``scipy.signal.oaconvolve``. (Default)
 
-            - ``'fft'`` :
-                Convolve using FFT based on ``scipy.signal.fftconvolve``.
+        ``'overlap_add'``
+            Convolve using  the overlap-add algorithm based
+            on ``scipy.signal.oaconvolve``. (Default)
+        ``'fft'``
+            Convolve using FFT based on ``scipy.signal.fftconvolve``.
 
         See Notes for more details.
 
     Returns
     -------
     Signal
-        The result as a signal object.
+        The convolution result as a Signal object.
 
     Notes
     -----
     The overlap-add method is generally much faster than fft convolution when
     one signal is much larger than the other, but can be slower when only a few
     output values are needed or when the signals have a very similar length.
-    For ``method='overlap_add'``, int data will be cast to float.
+    For ``method='overlap_add'``, integer data will be cast to float.
 
     Examples
     --------

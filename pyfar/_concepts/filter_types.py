@@ -10,17 +10,17 @@ High-pass, low-pass, band-pass, and band-stop filters
 -----------------------------------------------------
 
 These are the classic filters that are wrapped from ``scipy.signal`` and
-available from :py:func:`~pyfar.dsp.filter.butterworth`,
+available from the functions :py:func:`~pyfar.dsp.filter.butterworth`,
 :py:func:`~pyfar.dsp.filter.bessel`, :py:func:`~pyfar.dsp.filter.chebyshev1`,
 :py:func:`~pyfar.dsp.filter.chebyshev2`, and
-:py:func:`~pyfar.dsp.filter.elliptic`
+:py:func:`~pyfar.dsp.filter.elliptic`.
 
 |standard_filter|
 
 
 Linkwitz-Riley cross-over
 -----------------------------------------------------
-The functions :py:func:`~pyfar.dsp.filter.crossover`, realized Linkwitz-Riley
+The function :py:func:`~pyfar.dsp.filter.crossover` returns Linkwitz-Riley
 cross-over filters that are often used in loudspeaker design.
 
 |crossover|
@@ -29,7 +29,7 @@ cross-over filters that are often used in loudspeaker design.
 Filter banks
 -----------------------------------------------------
 
-Filter banks are commonly used in audio and acoustics signal processing and
+Filter banks are commonly used in audio and acoustics signal processing,
 pyfar contains two types of filter banks:
 
 - The :py:func:`~pyfar.dsp.filter.fractional_octave_bands` are often used for
@@ -40,6 +40,8 @@ pyfar contains two types of filter banks:
 
 |filter_banks|
 
+The corresponding center frequencies are accessible via
+:py:func:`~pyfar.dsp.filter.fractional_octave_frequencies`.
 
 Parametric equalizer
 -----------------------------------------------------

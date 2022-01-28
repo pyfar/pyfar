@@ -5,9 +5,8 @@ import pyfar as pf
 
 
 class Orientations(Rotation):
-    """Orientations in 3d is a subclass of scipy.spatial.transform.Rotation.
-
-    This container class for Orientations in the three-dimensional space,
+    """
+    This class for Orientations in the three-dimensional space,
     is a subclass of scipy.spatial.transform.Rotation and equally based on
     quaternions of shape (N, 4). It inherits all methods of the Rotation class
     and adds the creation from perpendicular view and up vectors and a

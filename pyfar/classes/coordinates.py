@@ -1,7 +1,7 @@
 """
-The following documents the pyfar coordinates class. More background
-information is given in
-:py:mod:`coordinates concepts <pyfar._concepts.coordinates_concepts>`.
+The following documents the pyfar coordinates class and functions for
+coordinate conversion. More background information is given in
+:py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
 Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
 """
 import numpy as np
@@ -55,7 +55,8 @@ class Coordinates():
         Create :py:func:`Coordinates` object with or without coordinate points.
 
         The points that enter the Coordinates object are defined by the
-        `domain`, `convention`, and `unit`:
+        `domain`, `convention`, and `unit` as illustrated in the
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
 
         +--------------------+----------+------------+----------+----------+
         | domain, convention | points_1 | points_2   | points_3 | unit     |
