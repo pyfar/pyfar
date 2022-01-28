@@ -269,7 +269,7 @@ def _deal_time_units(unit='s'):
         string = 'ms'
     elif unit == 'mus':
         factor = 1 / 1e-6
-        string = r'$\mathrm{\mu s}$'
+        string = r'$\mathrm{\mu}$s'
     elif unit == 'samples':
         factor = 1
         string = 'samples'
