@@ -26,6 +26,8 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     data = signal.time.T if orientation == "vertical" else signal.time
     if dB:
+        if log_prefix is None:
+            log_prefix = _utils._log_prefix(signal)
         # avoid any zero-values because they result in -inf in dB data
         eps = np.finfo(float).eps
         data = log_prefix * np.log10(np.abs(data) / log_reference + eps)

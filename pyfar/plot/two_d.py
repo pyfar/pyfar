@@ -5,7 +5,7 @@ from . import (_two_d, _utils)
 from . import _interaction as ia
 
 
-def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
+def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
            points=None, orientation="vertical",
            cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
            style='light', **kwargs):
@@ -25,8 +25,9 @@ def time2d(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
         default is ``False``.
     log_prefix : integer, float
-        Prefix for calculating the logarithmic time data. The default is
-        ``20``.
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic time data. The default is
         ``1``.
