@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+import pytest
 from pytest import raises
 import pyfar.plot as plot
+import pyfar as pf
 
 
 def test_prepare_plot():
@@ -91,3 +93,22 @@ def test_default_colors():
             prop_cycle = plt.rcParams['axes.prop_cycle']
             colors_style = prop_cycle.by_key()['color']
             assert colors == colors_style
+
+
+@pytest.mark.parametrize(
+    "fft_norm, expected",
+    [('none', 20), ('unitary', 20), ('amplitude', 20),
+     ('rms', 20), ('power', 10), ('psd', 10)])
+def test__log_prefix_norms(sine, fft_norm, expected):
+    sine.fft_norm = fft_norm
+    assert plot._utils._log_prefix(sine) == expected
+
+
+def test__log_prefix_frequency_data(frequency_data):
+    assert plot._utils._log_prefix(frequency_data) == 20
+
+
+def test__deal_time_units_mus():
+    """Test previous bugfix for unit micro seconds in labels."""
+    s = pf.signals.impulse(10, sampling_rate=44100)
+    pf.plot.time(s)

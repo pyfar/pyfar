@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 import os.path
 import sofar as sf
-import scipy.io.wavfile as wavfile
 
 from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
@@ -326,6 +325,8 @@ def noise():
     signal = pyfar.signals.noise(
         n_samples, spectrum="white", rms=rms, sampling_rate=sampling_rate,
         seed=seed)
+    # Amplitude Normalization
+    signal.time = signal.time / np.abs(signal.time.max())
 
     return signal
 
@@ -347,6 +348,9 @@ def noise_two_by_three_channel():
     signal = pyfar.signals.noise(
         n_samples, spectrum="white", rms=rms, sampling_rate=sampling_rate,
         seed=seed)
+
+    # Amplitude Normalization
+    signal.time = signal.time / np.abs(signal.time.max())
 
     return signal
 
@@ -412,15 +416,6 @@ def frequency_data_one_point():
     """
     frequency_data = FrequencyData([2], [0])
     return frequency_data
-
-
-@pytest.fixture
-def generate_wav_file(tmpdir, noise):
-    """Create wav file in temporary folder.
-    """
-    filename = os.path.join(tmpdir, 'test_wav.wav')
-    wavfile.write(filename, noise.sampling_rate, noise.time.T)
-    return filename
 
 
 @pytest.fixture

@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import pyfar as pf
 import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
+import numpy as np
+import numpy.testing as npt
 
 # global parameters -----------------------------------------------------------
 # flag for creating new baseline plots
@@ -41,13 +43,13 @@ for file in os.listdir(output_path):
 def test_line_plots(sine, impulse_group_delay):
     """Test all line plots with default arguments and hold functionality."""
 
-    function_list = [plot.line.time,
-                     plot.line.freq,
-                     plot.line.phase,
-                     plot.line.group_delay,
-                     plot.line.time_freq,
-                     plot.line.freq_phase,
-                     plot.line.freq_group_delay]
+    function_list = [plot.time,
+                     plot.freq,
+                     plot.phase,
+                     plot.group_delay,
+                     plot.time_freq,
+                     plot.freq_phase,
+                     plot.freq_group_delay]
 
     for function in function_list:
         print(f"Testing: {function.__name__}")
@@ -78,7 +80,7 @@ def test_line_phase_options(sine):
 
         filename = param[0]
         create_figure()
-        plot.line.phase(sine, deg=param[1], unwrap=param[2])
+        plot.phase(sine, deg=param[1], unwrap=param[2])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
 
@@ -86,15 +88,15 @@ def test_line_phase_options(sine):
 def test_line_phase_unwrap_assertion(sine):
     """Test assertion for unwrap parameter."""
     with raises(ValueError):
-        plot.line.phase(sine, unwrap='infinity')
+        plot.phase(sine, unwrap='infinity')
 
 
 def test_line_dB_option(sine):
     """Test all line plots that have a dB option."""
 
-    function_list = [plot.line.time,
-                     plot.line.freq,
-                     plot.line.spectrogram]
+    function_list = [plot.time,
+                     plot.freq,
+                     plot.spectrogram]
 
     # test if dB option is working
     for function in function_list:
@@ -121,9 +123,9 @@ def test_line_dB_option(sine):
 def test_line_xscale_option(sine):
     """Test all line plots that have an xscale option."""
 
-    function_list = [plot.line.freq,
-                     plot.line.phase,
-                     plot.line.group_delay]
+    function_list = [plot.freq,
+                     plot.phase,
+                     plot.group_delay]
 
     # test if dB option is working
     for function in function_list:
@@ -143,25 +145,25 @@ def test_line_xscale_assertion(sine):
     """
 
     with raises(ValueError):
-        plot.line.freq(sine, xscale="warped")
+        plot.freq(sine, xscale="warped")
 
     with raises(ValueError):
-        plot.line.phase(sine, xscale="warped")
+        plot.phase(sine, xscale="warped")
 
     with raises(ValueError):
-        plot.line.group_delay(sine, xscale="warped")
+        plot.group_delay(sine, xscale="warped")
 
     with raises(ValueError):
-        plot.line.spectrogram(sine, yscale="warped")
+        plot.spectrogram(sine, yscale="warped")
 
     plt.close("all")
 
 
 def test_time_unit(impulse_group_delay):
     """Test plottin with different units."""
-    function_list = [plot.line.time,
-                     plot.line.group_delay,
-                     plot.line.spectrogram]
+    function_list = [plot.time,
+                     plot.group_delay,
+                     plot.spectrogram]
 
     for function in function_list:
         for unit in [None, 's', 'ms', 'mus', 'samples']:
@@ -169,7 +171,7 @@ def test_time_unit(impulse_group_delay):
 
             filename = f'line_{function.__name__}_unit_{str(unit)}'
             create_figure()
-            plot.line.group_delay(impulse_group_delay[0], unit=unit)
+            function(impulse_group_delay[0], unit=unit)
             save_and_compare(create_baseline, baseline_path, output_path,
                              filename, file_type, compare_output)
 
@@ -178,13 +180,13 @@ def test_time_unit_assertion(sine):
     """Test if all line plots raise an assertion for a wrong unit parameter."""
 
     with raises(ValueError):
-        plot.line.time(sine, unit="pascal")
+        plot.time(sine, unit="pascal")
 
     with raises(ValueError):
-        plot.line.group_delay(sine, unit="pascal")
+        plot.group_delay(sine, unit="pascal")
 
     with raises(ValueError):
-        plot.line.spectrogram(sine, unit="pascal")
+        plot.spectrogram(sine, unit="pascal")
 
     plt.close("all")
 
@@ -197,10 +199,10 @@ def test_line_custom_subplots(sine, impulse_group_delay):
 
     # plot layouts to be tested
     plots = {
-        'row': [plot.line.time, plot.line.freq],
-        'col': [[plot.line.time], [plot.line.freq]],
-        'mix': [[plot.line.time, plot.line.freq],
-                [plot.line.phase, plot.line.group_delay]]
+        'row': [plot.time, plot.freq],
+        'col': [[plot.time], [plot.freq]],
+        'mix': [[plot.time, plot.freq],
+                [plot.phase, plot.group_delay]]
     }
 
     for p in plots:
@@ -209,13 +211,13 @@ def test_line_custom_subplots(sine, impulse_group_delay):
         # test initial plot
         filename = 'line_custom_subplots_' + p
         create_figure()
-        plot.line.custom_subplots(sine, plots[p])
+        plot.custom_subplots(sine, plots[p])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
 
         # test hold functionality
         filename = 'line_custom_subplots_' + p + '_hold'
-        plot.line.custom_subplots(impulse_group_delay[0], plots[p])
+        plot.custom_subplots(impulse_group_delay[0], plots[p])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
 
@@ -223,7 +225,7 @@ def test_line_custom_subplots(sine, impulse_group_delay):
 def test_line_time_data(time_data):
     """Test all line plots with default arguments and hold functionality."""
 
-    function_list = [plot.line.time]
+    function_list = [plot.time]
 
     for function in function_list:
         print(f"Testing: {function.__name__}")
@@ -238,9 +240,9 @@ def test_line_time_data(time_data):
 def test_line_frequency_data(frequency_data):
     """Test all line plots with default arguments and hold functionality."""
 
-    function_list = [plot.line.freq,
-                     plot.line.phase,
-                     plot.line.freq_phase]
+    function_list = [plot.freq,
+                     plot.phase,
+                     plot.freq_phase]
 
     for function in function_list:
         print(f"Testing: {function.__name__}")
@@ -349,3 +351,37 @@ def test_use():
         plt.plot([1, 2, 3], [1, 2, 3])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
+
+
+def test_freq_fft_norm_dB(noise):
+    """Test correct log_prefix in plot.freq depending on fft_norm."""
+    create_figure()
+    noise.fft_norm = 'power'
+    ax = plot.freq(noise)
+    y_actual = ax.lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+
+    create_figure()
+    noise.fft_norm = 'psd'
+    ax = plot.freq(noise)
+    y_actual = ax.lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+
+
+def test_time_freq_fft_norm_dB(noise):
+    """Test correct log_prefix in plot.time_freq depending on fft_norm."""
+    create_figure()
+    noise.fft_norm = 'power'
+    ax = plot.time_freq(noise)
+    y_actual = ax[1].lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+
+    create_figure()
+    noise.fft_norm = 'psd'
+    ax = plot.time_freq(noise)
+    y_actual = ax[1].lines[0].get_ydata().flatten()
+    y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
+    npt.assert_allclose(y_actual, y_desired, atol=1e-6)

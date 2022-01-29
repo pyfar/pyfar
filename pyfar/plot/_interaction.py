@@ -52,6 +52,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar.plot import utils
 from pyfar.plot import _line
+from pyfar.plot import _two_d
 from pyfar.plot import _utils
 
 
@@ -131,7 +132,8 @@ class PlotParameter(object):
     """
     def __init__(self, plot,
                  dB_time=False, dB_freq=True,              # dB properties
-                 log_prefix=20, log_reference=10,          # same for time/freq
+                 log_prefix_time=20, log_prefix_freq=20,
+                 log_reference=1,                          # same for time/freq
                  xscale='log', yscale='linear',            # axis scaling
                  deg=False, unwrap=False,                  # phase properties
                  unit=None,                                # time unit
@@ -143,7 +145,8 @@ class PlotParameter(object):
         # store input
         self.dB_time = dB_time
         self.dB_freq = dB_freq
-        self.log_prefix = log_prefix
+        self.log_prefix_time = log_prefix_time
+        self.log_prefix_freq = log_prefix_freq
         self.log_reference = log_reference
         self.xscale = xscale
         self.yscale = yscale
@@ -535,13 +538,13 @@ class Interaction(object):
             if event.key in plot['time']:
                 self.params.update_axis_type('time')
                 self.ax = _line._time(
-                    self.signal, prm.dB_time, prm.log_prefix,
+                    self.signal, prm.dB_time, prm.log_prefix_time,
                     prm.log_reference, self.ax, **self.kwargs)
 
             elif event.key in plot['freq']:
                 self.params.update_axis_type('freq')
                 self.ax = _line._freq(
-                    self.signal, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
 
             elif event.key in plot['phase']:
@@ -558,24 +561,26 @@ class Interaction(object):
 
             elif event.key in plot['spectrogram']:
                 self.params.update_axis_type('spectrogram')
-                ax, *_ = _line._spectrogram(
+                ax, *_ = _two_d._spectrogram(
                     self.signal[self.cycler.index], prm.dB_freq,
-                    prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
-                    prm.window, prm.window_length, prm.window_overlap_fct,
-                    prm.cmap, prm.colorbar, self.ax, **self.kwargs)
+                    prm.log_prefix_freq, prm.log_reference, prm.yscale,
+                    prm.unit, prm.window, prm.window_length,
+                    prm.window_overlap_fct, prm.cmap, prm.colorbar, self.ax,
+                    **self.kwargs)
                 self.ax = ax
 
             elif event.key in plot['time_freq']:
                 self.params.update_axis_type('time')
                 ax = _line._time_freq(
-                    self.signal, prm.dB_time, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_time, prm.dB_freq,
+                    prm.log_prefix_time, prm.log_prefix_freq,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
                 self.ax = ax[0]
 
             elif event.key in plot['freq_phase']:
                 self.params.update_axis_type('freq')
                 ax = _line._freq_phase(
-                    self.signal, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
@@ -583,7 +588,7 @@ class Interaction(object):
             elif event.key in plot['freq_group_delay']:
                 self.params.update_axis_type('freq')
                 ax = _line._freq_group_delay(
-                    self.signal, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.unit, prm.xscale,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]

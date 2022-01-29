@@ -1,30 +1,8 @@
 """
-Generate, store, and manipulate points in 3D coordinate systems.
-
-The core of this module is the :py:func:`Coordinates` class. It can convert
-between coordinate conventions and rotate, query and plot coordinates points.
-Functions for converting coordinates not stored in a :py:func:`Coordinates`
-object are available for convenience. However, it is strongly recommended to
-use the:py:func:`Coordinates` class for all conversions.
-
-Coordinate systems are defined by their `domain` (e.g. ``'spherical'``),
-`convention` (e.g. ``'top_elev'``), and `unit` (e.g. ``'deg'``). A complete
-list and description of supported coordinate systems is given in the image
-below
-
-|coordinate_systems|
-
-and can be obtained by
-
->>> coords = Coordinates()  # get an empty instance of the class
->>> coords.systems()        # list all systems
-
-A plethora of sampling schemes to generate coordinate objects is contained in
-:py:mod:`~pyfar.samplings`.
-
-.. |coordinate_systems| image:: resources/coordinate_systems.png
-   :width: 100%
-   :alt: Alternative text
+The following documents the pyfar coordinates class and functions for
+coordinate conversion. More background information is given in
+:py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
+Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
 """
 import numpy as np
 from scipy.spatial import cKDTree
@@ -77,7 +55,8 @@ class Coordinates():
         Create :py:func:`Coordinates` object with or without coordinate points.
 
         The points that enter the Coordinates object are defined by the
-        `domain`, `convention`, and `unit`:
+        `domain`, `convention`, and `unit` as illustrated in the
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
 
         +--------------------+----------+------------+----------+----------+
         | domain, convention | points_1 | points_2   | points_3 | unit     |
