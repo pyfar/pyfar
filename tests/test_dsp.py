@@ -2,10 +2,13 @@ import numpy as np
 import numpy.testing as npt
 import scipy.signal as sgn
 import pytest
+from pyfar import Signal
 import pyfar
+
 
 from pyfar.signals import impulse
 from pyfar import dsp
+from pyfar import Signal
 import pyfar as pf
 
 
@@ -172,6 +175,33 @@ def test_zero_phase_assertion():
     """Test assertion when passing a TimeData object."""
     with pytest.raises(TypeError, match="Input data has to be of type"):
         dsp.zero_phase(pf.TimeData([1, 0, 0], [0, 1, 3]))
+
+
+def test_normalization_time_max_max_value():
+    """Test the function along time, max, max & value path."""
+    signal = Signal([[1, 2, 1], [1, 4, 1]], 44100)
+    truth = Signal([[0.25, 0.5, 0.25], [0.25, 1., 0.25]], 44100)
+    answer = dsp.normalize(signal, normalize='time', normalize_to='max',
+                           channel_handling='max')
+    assert answer == truth
+
+
+def test_normalization_magnitude_mean_min_freqrange():
+    """Test the function along magnitude, mean, min & value path."""
+    signal = Signal([[1, 4, 1], [1, 10, 1]], 44100, n_samples=4, domain='freq')
+    truth = Signal([[2.5, 10, 2.5], [2.5, 25, 2.5]], 44100, n_samples=4,
+                   domain='freq')
+    answer = dsp.normalize(signal, normalize='magnitude', normalize_to='mean',
+                           channel_handling='min', value=10)
+    assert answer == truth
+
+
+def test_average_complex():
+    """Test the function in complex domain"""
+    signal = Signal([[1, 4, 1], [1, 10, 1]], 44100, n_samples=4, domain='freq')
+    truth = Signal([1, 7, 1], 44100, n_samples=4, domain='freq')
+    answer = dsp.average(signal, average_mode='complex')
+    assert answer == truth
 
 
 def test_xfade(impulse):

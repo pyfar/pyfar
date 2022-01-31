@@ -312,6 +312,223 @@ def spectrogram(signal, window='hann', window_length=1024,
     return frequencies, times, spectrogram
 
 
+def normalize(signal, normalize='time', normalize_to='max',
+              channel_handling='max', value=None, freq_range=None,
+              return_values=False):
+    """
+    Normalize signal in the time or frequency domain.
+
+    Parameters
+    ----------
+    signal: Signal
+        Input signal of the signal class
+    normalize: string
+        'time' - Normalize the time signal to 'value'
+        'magnitude' - Normalize the magnitude spectrum to 'value'
+        'log_magnitude' - Normalize the log magnitude spectrum to 'value'
+        The default is 'time'
+    normalize_to: string
+        'max' - Normalize to the absolute maximum of the signal data
+        'mean' - Normalize to the mean of the signal data
+        'rms' - Normalize to the rms of the signal data
+        The default is 'max'
+    channel_handling: string
+        'each' - Normalize each channel separately
+        'max' - Normalize to the max of 'normalize_to' across all channels
+        'min' - Normalize to min of 'normalize_to' across all channels
+        'mean' - Normalize to mean of 'normalize_to' across all channels
+       The default is 'max'
+    value: scalar, array
+        Normalizes to `value` which can be a scalar or an array with
+        shape equal to signal cshape. The unit of `value`
+        is defined by `norm_type`, i.e., it is either dB or linear.
+        The default is 0 for normalize='log_magnitude' and 1 otherwise
+    freq_range: tuple
+        Two element vector specifying upper and lower frequency bounds
+        for normalization or scalar specifying the centre frequency for
+        normalization
+    Returns
+    --------
+    normalized_signal: Signal
+        The normalized signal
+    values: numpy array
+        If return_values=True returns values, the values of all channels
+        before normalization.
+    """
+
+    # check input
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal.')
+
+    # set default values
+    if value is None:
+        value = 0 if normalize == 'log_magnitude' else 1
+    if freq_range is None:
+        freq_range = (0, signal.frequencies[-1])
+
+    # copy and transform data to the desired domain
+    if normalize == 'time':
+        input_data = np.abs(signal.time.copy())
+    elif normalize == 'magnitude':
+        input_data = np.abs(signal.freq.copy())
+    elif normalize == 'log_magnitude':
+        input_data = 20 * np.log10(signal.freq.copy())
+    else:
+        raise ValueError(
+                    "normalize must be 'time', 'magnitude' or 'log_magnitude'")
+
+    # get bounds for normalization
+    if normalize == 'time':
+        lim = (0, signal.n_samples)
+
+    else:
+        lim = signal.find_nearest_frequency(freq_range)
+        if signal.n_samples % 2:
+            lim[0] = np.max([lim[0], 1])
+        else:
+            lim = np.clip(lim, 1, signal.n_bins-1)
+
+    # get values for normalization
+    if normalize_to == 'max':
+        values = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
+                        keepdims=True)
+    elif normalize_to == 'mean':
+        values = np.mean(input_data[..., lim[0]:lim[1]], axis=-1,
+                         keepdims=True)
+    elif normalize_to == 'rms':
+        values = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
+                         axis=-1, keepdims=True))
+    else:
+        raise ValueError("normalize_to must be 'max', 'mean' or 'rms'")
+
+    # manipulate values
+    if channel_handling == 'each':
+        pass
+    elif channel_handling == 'max':
+        values = np.max(values)
+    elif channel_handling == 'min':
+        values = np.min(values)
+    elif channel_handling == 'mean':
+        values = np.mean(values)
+    else:
+        raise ValueError(
+                    "channel_handling must be 'each', 'max', 'min' or 'mean'")
+
+    # de-logarthimize value
+    if normalize == 'log_magnitude':
+        value = 10**(value/20)
+
+    # replace input with normalized_input
+    normalized_signal = signal.copy()
+    if normalize == 'time':
+        normalized_signal.time = signal.time.copy() / values * value
+    else:
+        normalized_signal.freq = signal.freq.copy() / values * value
+
+    if return_values:
+        return normalized_signal, values
+    else:
+        return normalized_signal
+
+
+def average(signal, average_mode='time', phase_copy=None,
+            weights=None):
+    """
+    Used to average multichannel Signals in different ways. You may want to
+    align your data first.
+
+    Parameters
+    ----------
+    signal: Signal
+        Input signal of the Signal class
+    average_mode: string
+        'time' - averages in time domain
+        'complex' - averages the complex spectra
+        'magnitude' - averages the magnitude spectra
+        'power' - averages the power spectra
+        'log_magnitude' - averages the log magnitude spectra
+        The default is 'time'
+    phase_copy: vector
+        indicates signal channel from which phase is to be copied to the
+        averaged signal
+        None - ignores the phase. Resulting in zero phase
+        The default is None
+    weights: numpy array
+        array that gives channel weighting for averaging the data. Must
+        have same shape as channel shape of signal.
+        The default is None
+    Returns
+    --------
+    averaged_signal: Signal
+        averaged input Signal
+    """
+
+    # check input
+    if not isinstance(signal, Signal):
+        raise TypeError('Input data has to be of type: Signal')
+
+    # set weights default
+    if weights is None:
+        weights = 1/(np.prod(signal.cshape))
+    else:
+        weights = weights/np.sum(weights)
+
+    # convert data to desired domain
+    if average_mode == 'time':
+        data = signal.time.copy()
+    elif average_mode == 'complex':
+        data = signal.freq.copy()
+    elif average_mode == 'magnitude':
+        data = np.abs(signal.freq.copy())
+    elif average_mode == 'power':
+        data = np.abs(signal.freq.copy())**2
+    elif average_mode == 'log_magnitude':
+        data = 20 * np.log10(signal.freq.copy())
+
+    # apply weights
+    # NOT SURE IF THIS WORKS WITH MORE THAN FOR SIGNALS GREATER THAN 3D
+    data = data * np.transpose(np.array([weights, ]*len(data[-1])))
+
+    # average the data
+    if (average_mode == 'time' or
+            average_mode == 'complex' or average_mode == 'magnitude'):
+        data = np.sum(data, axis=-2, keepdims=True)
+    elif average_mode == 'power':
+        data = np.sum(data, axis=-2, keepdims=True)
+        data = np.sqrt(data)
+    elif average_mode == 'log_magnitude':
+        data = np.sum(data, axis=-2, keepdims=True)
+        data = 10**(data/20)
+    else:
+        raise ValueError(
+            """average_mode must be 'time', 'complex', 'magnitude', 'power' or
+            'log_magnitude'"""
+            )
+
+    # phase handling
+    if phase_copy is None:
+        pass
+    else:
+        if average_mode == 'time':
+            data_ang = signal.time.copy()
+            # NOT SURE IF THIS COPPIES PHASE_COPY INDEX IN CORRECTLY
+            data_ang = np.angle(data_ang[phase_copy, ...])
+        else:
+            data_ang = signal.freq.copy()
+            data_ang = np.angle(data_ang[phase_copy, ...])
+
+        data = data * np.exp(1j * data_ang)
+
+    # input data into averaged_signal
+    averaged_signal = signal.copy()
+    if average_mode == 'time':
+        averaged_signal.time = data
+    else:
+        averaged_signal.freq = data
+
+    return averaged_signal
+
+  
 def time_window(signal, interval, window='hann', shape='symmetric',
                 unit='samples', crop='none', return_window=False):
     """Apply time window to signal.
