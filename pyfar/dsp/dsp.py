@@ -357,7 +357,7 @@ def normalize(signal, normalize='time', normalize_to='max',
     """
 
     # check input
-    if not isinstance(signal, Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
     # set default values
@@ -464,7 +464,7 @@ def average(signal, average_mode='time', phase_copy=None,
     """
 
     # check input
-    if not isinstance(signal, Signal):
+    if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal')
 
     # set weights default
@@ -528,7 +528,7 @@ def average(signal, average_mode='time', phase_copy=None,
 
     return averaged_signal
 
-  
+
 def time_window(signal, interval, window='hann', shape='symmetric',
                 unit='samples', crop='none', return_window=False):
     """Apply time window to signal.

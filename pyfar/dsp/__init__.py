@@ -14,6 +14,8 @@ from .dsp import (
     deconvolve,
     convolve,
     InterpolateSpectrum,
+    normalize,
+    average
 )
 
 from . import filter
@@ -38,4 +40,6 @@ __all__ = [
     'deconvolve',
     'convolve',
     'InterpolateSpectrum',
+    'normalize',
+    'average'
 ]
