@@ -113,8 +113,8 @@ venv.bak/
 .DS_Store
 
 # external data that os loaded from the web
-pyfar/spatial/external/samplings_extremal*
-pyfar/spatial/external/samplings_t_design*
+pyfar/samplings/external/samplings_extremal*
+pyfar/samplings/external/samplings_t_design*
 
 # saved plots from testing
 tests/test_plot_data/output/*.png
@@ -122,3 +122,4 @@ tests/test_plot_data/output/*.png
 # workaround for failing test discovery in vscode
 tests/__init__.py
 tests/*/__init__.py
+tests/private/

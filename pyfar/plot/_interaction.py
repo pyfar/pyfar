@@ -34,13 +34,13 @@ Debugging is a bit tricky because you do not see errors in the terminal. It can
 be done this way
 
 >>> # %% plot something
->>> import pyfar
+>>> import pyfar as pf
 >>> import numpy as np
 >>> from pyfar.plot._interaction import EventEmu as EventEmu
 >>> %matplotlib qt
 >>>
->>> sig = pyfar.Signal(np.random.normal(0, 1, 2**16), 48e3)
->>> ax = pyfar.plot.time(sig)
+>>> sig = pf.Signal(np.random.normal(0, 1, 2**16), 48e3)
+>>> ax = pf.plot.time(sig)
 >>>
 >>> # %% debug this cell
 >>> # EventEmu can be used to simulate pressing a key
@@ -52,23 +52,29 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar.plot import utils
 from pyfar.plot import _line
+from pyfar.plot import _two_d
+from pyfar.plot import _utils
 
 
 class Cycle(object):
     """ Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions.
     """
-    def __init__(self, n_channels, index=0):
+    def __init__(self, cshape, index=0):
         """
         Parameters
         ----------
-        n_channels : int
-            number of channels in the signal
+        cshape : tupel, array like, int
+            cshape of the signal
         index : int, optional
             index of the current channel. The default is 0
         """
-        self._n_channels = n_channels
+        self._n_channels = np.prod(cshape)
         self._index = index
+
+        self._channels = []
+        for index in np.ndindex(cshape):
+            self._channels.append(index)
 
     def increase_index(self):
         self._index = (self.index + 1) % self.n_channels
@@ -81,11 +87,18 @@ class Cycle(object):
 
     @property
     def index(self):
-        return self._index
+        return int(self._index)
 
     @property
     def n_channels(self):
         return self._n_channels
+
+    @property
+    def current_channel(self):
+        channel = self._channels[self.index]
+        if len(channel) == 1:
+            channel = channel[0]
+        return channel
 
 
 class EventEmu(object):
@@ -119,18 +132,21 @@ class PlotParameter(object):
     """
     def __init__(self, plot,
                  dB_time=False, dB_freq=True,              # dB properties
-                 log_prefix=20, log_reference=10,          # same for time/freq
+                 log_prefix_time=20, log_prefix_freq=20,
+                 log_reference=1,                          # same for time/freq
                  xscale='log', yscale='linear',            # axis scaling
                  deg=False, unwrap=False,                  # phase properties
                  unit=None,                                # time unit
                  window='hann', window_length=1014,        # spectrogram
                  window_overlap_fct=.5,
-                 cmap=mpl.cm.get_cmap(name='magma')):      # colormap
+                 cmap=mpl.cm.get_cmap(name='magma'),       # colormap and bar
+                 colorbar=True):
 
         # store input
         self.dB_time = dB_time
         self.dB_freq = dB_freq
-        self.log_prefix = log_prefix
+        self.log_prefix_time = log_prefix_time
+        self.log_prefix_freq = log_prefix_freq
         self.log_reference = log_reference
         self.xscale = xscale
         self.yscale = yscale
@@ -141,6 +157,7 @@ class PlotParameter(object):
         self.window_length = window_length
         self.window_overlap_fct = window_overlap_fct
         self.cmap = cmap
+        self.colorbar = colorbar
 
         # set axis types based on `plot`
         self.update_axis_type(plot)
@@ -180,12 +197,12 @@ class PlotParameter(object):
         Parameters
         ----------
         plot : str
-            Defines the plot by module.plot_function, e.g., 'line.freq'
+            Defines the plot by module.plot_function, e.g., 'freq'
 
         """
 
         # set the axis, color map, and cycle, parameter for each plot
-        if plot == 'line.time':
+        if plot == 'time':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -200,7 +217,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.freq':
+        elif plot == 'freq':
             # x-axis
             self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
@@ -217,7 +234,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.phase':
+        elif plot == 'phase':
             # x-axis
             self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
@@ -235,7 +252,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.group_delay':
+        elif plot == 'group_delay':
             # x-axis
             self._x_type = ['freq', 'other']
             self._x_param = 'xscale'
@@ -252,7 +269,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'line.spectrogram':
+        elif plot == 'spectrogram':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -269,7 +286,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'signal'
 
-        elif plot == 'line.time_freq':
+        elif plot == 'time_freq':
             # same as time
             # (currently interaction uses only the axis of the top plot)
 
@@ -287,7 +304,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot in ['line.freq_phase', 'line.freq_group_delay']:
+        elif plot in ['freq_phase', 'freq_group_delay']:
             # same as freq
             # (currently interaction uses only the axis of the top plot)
 
@@ -397,7 +414,8 @@ class Interaction(object):
         """
 
         # save input arguments
-        self.signal = signal
+        self.cshape = signal.cshape
+        self.signal = signal.flatten()
         self.ax = axes
         self.figure = axes.figure
         self.style = style
@@ -408,7 +426,7 @@ class Interaction(object):
         self.event = None
 
         # initialize cycler
-        self.cycler = Cycle(self.signal.cshape[0])
+        self.cycler = Cycle(self.cshape)
 
         # initialize visibility
         self.all_visible = True
@@ -507,61 +525,70 @@ class Interaction(object):
         plot = self.plot
         prm = self.params
 
+        # cases that are not allowed
+        if event.key in plot['spectrogram'] \
+                and self.signal.n_samples < prm.window_length:
+            return
+
+        # toogle the plot
         with plt.style.context(utils.plotstyle(self.style)):
             self.figure.clear()
             self.ax = None
 
-            if event.key in plot['line.time']:
-                self.params.update_axis_type('line.time')
+            if event.key in plot['time']:
+                self.params.update_axis_type('time')
                 self.ax = _line._time(
-                    self.signal, prm.dB_time, prm.log_prefix,
+                    self.signal, prm.dB_time, prm.log_prefix_time,
                     prm.log_reference, self.ax, **self.kwargs)
 
-            elif event.key in plot['line.freq']:
-                self.params.update_axis_type('line.freq')
+            elif event.key in plot['freq']:
+                self.params.update_axis_type('freq')
                 self.ax = _line._freq(
-                    self.signal, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
 
-            elif event.key in plot['line.phase']:
-                self.params.update_axis_type('line.phase')
+            elif event.key in plot['phase']:
+                self.params.update_axis_type('phase')
                 self.ax = _line._phase(
                     self.signal, prm.deg, prm.unwrap, prm.xscale,
                     self.ax, **self.kwargs)
 
-            elif event.key in plot['line.group_delay']:
-                self.params.update_axis_type('line.group_delay')
+            elif event.key in plot['group_delay']:
+                self.params.update_axis_type('group_delay')
                 self.ax = _line._group_delay(
-                    self.signal, prm.unit, prm.xscale, self.ax, **self.kwargs)
+                    self.signal, prm.unit, prm.xscale, self.ax,
+                    **self.kwargs)
 
-            elif event.key in plot['line.spectrogram']:
-                self.params.update_axis_type('line.spectrogram')
-                ax = _line._spectrogram_cb(
+            elif event.key in plot['spectrogram']:
+                self.params.update_axis_type('spectrogram')
+                ax, *_ = _two_d._spectrogram(
                     self.signal[self.cycler.index], prm.dB_freq,
-                    prm.log_prefix, prm.log_reference, prm.yscale, prm.unit,
-                    prm.window, prm.window_length, prm.window_overlap_fct,
-                    prm.cmap, self.ax, **self.kwargs)
-                self.ax = ax[0]
+                    prm.log_prefix_freq, prm.log_reference, prm.yscale,
+                    prm.unit, prm.window, prm.window_length,
+                    prm.window_overlap_fct, prm.cmap, prm.colorbar, self.ax,
+                    **self.kwargs)
+                self.ax = ax
 
-            elif event.key in plot['line.time_freq']:
-                self.params.update_axis_type('line.time')
+            elif event.key in plot['time_freq']:
+                self.params.update_axis_type('time')
                 ax = _line._time_freq(
-                    self.signal, prm.dB_time, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_time, prm.dB_freq,
+                    prm.log_prefix_time, prm.log_prefix_freq,
                     prm.log_reference, prm.xscale, self.ax, **self.kwargs)
                 self.ax = ax[0]
 
-            elif event.key in plot['line.freq_phase']:
-                self.params.update_axis_type('line.freq')
+            elif event.key in plot['freq_phase']:
+                self.params.update_axis_type('freq')
                 ax = _line._freq_phase(
-                    self.signal, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
 
-            elif event.key in plot['line.freq_group_delay']:
-                self.params.update_axis_type('line.freq')
+            elif event.key in plot['freq_group_delay']:
+                self.params.update_axis_type('freq')
                 ax = _line._freq_group_delay(
-                    self.signal, prm.dB_freq, prm.log_prefix,
+                    self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.unit, prm.xscale,
                     self.ax, **self.kwargs)
                 self.ax = ax[0]
@@ -626,12 +653,10 @@ class Interaction(object):
             if self.params.cm_type is None:
                 return
 
-            for cm in self.ax.get_children():
-                if type(cm) == mpl.collections.QuadMesh:
-                    break
+            qm = _utils._get_quad_mesh_from_axis(self.ax)
 
-            getter = cm.get_clim
-            setter = cm.set_clim
+            getter = qm.get_clim
+            setter = qm.set_clim
             axis_type = self.params.cm_type
             if event.key in ctr["move_cm_up"] + ctr["move_cm_down"]:
                 operation = "move"
@@ -642,81 +667,15 @@ class Interaction(object):
             else:
                 direction = "decrease"
 
-        # move or zoom
         if getter is not None:
-            self.apply_move_and_zoom(getter, setter, axis_type,
-                                     operation, direction)
+            # get the new axis limits
+            current_limits = np.asarray(getter())
+            new_limits = get_new_axis_limits(
+                current_limits, axis_type, operation, direction)
 
-    def apply_move_and_zoom(self, getter_function, setter_function,
-                            axis_type, operation, direction, amount=.1):
-        """
-        Move or zoom axes or colormap by a specified amount.
-
-        Parameters
-        ----------
-        getter_function : callable
-            Function handle, e.g., `ax.get_xlim`
-        setter_function : callable
-            Function handle, e.g., `ax.set_xlim`
-        axis_type : 'freq', 'dB', 'other'
-            String that sets constraints on how axis/colormaps are moved and
-            zoomed
-            'freq' : zoom and move is applied according to the ratios of the
-                     lower to upper axis limit, i.e., the change is smaller
-                     on the lower limit.
-            'dB' : Only the lower axis limit is changed when zooming.
-            'other' : move and zoom without constraints
-        operation : 'move', 'zoom'
-            'move' to shift the section of the axis or colormap to the
-            left/right (if setter_function is an x-axis)or up/down (if setter
-            function is a y-axis or colorbar). 'zoom' to zoom in our out.
-        direction : 'increase', 'decrease'
-            'increase' to move up/right or zoom in. 'decrease' to move
-            down/left or zoom out.
-        amount : number
-            amount to move or zoom in percent. E.g., `amount=.1` will move/zoom
-            10 percent of the current axis/colormap range. The default is 0.1
-
-        """
-
-        # shift 10 percent of the current axis range
-        lims = np.asarray(getter_function())
-        dyn_range = np.diff(lims)
-        shift = amount * dyn_range
-
-        # distribute shift to the lower and upper bound of frequency axes
-        if axis_type == 'freq':
-            shift = np.array([lims[0] / lims[1] * shift,
-                             (1 - lims[0] / lims[1]) * shift]).flatten()
-        else:
-            shift = np.tile(shift, 2)
-
-        if operation == 'move':
-            # reverse the sign
-            if direction == 'decrease':
-                shift *= -1
-
-        elif operation == 'zoom':
-            # reverse one sign for zooming in/out
-            if direction == 'decrease':
-                shift[0] *= -1
-            else:
-                shift[1] *= -1
-
-            # dB axes only zoom at the lower end
-            if axis_type == 'dB':
-                shift = np.array([2 * shift[0], 0])
-        else:
-            raise ValueError(
-                f"operation must be 'move' or 'zoom' but is {operation}")
-
-        # get new limits
-        lims_new = lims + shift
-
-        # apply limits
-        setter_function(lims_new[0], lims_new[1])
-
-        self.draw_canvas()
+            # apply the new axis limits
+            setter(new_limits[0], new_limits[1])
+            self.draw_canvas()
 
     def toggle_all_lines(self):
         if self.all_visible:
@@ -765,7 +724,7 @@ class Interaction(object):
 
         # re-plot
         self.all_visible = False
-        self.toggle_plot(EventEmu(self.plot['line.spectrogram']))
+        self.toggle_plot(EventEmu(self.plot['spectrogram']))
 
     def write_current_channel_text(self):
 
@@ -782,7 +741,7 @@ class Interaction(object):
                         ec=mpl.rcParams["axes.facecolor"], alpha=.5)
 
             self.txt = self.ax.text(
-                x_pos, y_pos, f'Ch. {self.cycler.index}',
+                x_pos, y_pos, f'Ch. {self.cycler.current_channel}',
                 horizontalalignment='right', verticalalignment='baseline',
                 bbox=bbox, transform=self.ax.transAxes)
 
@@ -807,3 +766,68 @@ class Interaction(object):
     def disconnect(self):
         """Disconnect from Matplotlib figure."""
         self.figure.canvas.mpl_disconnect(self.mpl_id)
+
+
+def get_new_axis_limits(limits, axis_type, operation, direction, amount=.1):
+    """
+    Get new limits for plot axis.
+
+    Parameters
+    ----------
+    limits : array like
+        array like of length two with the current lower and upper axis limits.
+    axis_type : 'freq', 'dB', 'other'
+        String that sets constraints on how axis/colormaps are moved and
+        zoomed
+        'freq' : zoom and move is applied according to the ratios of the
+                    lower to upper axis limit, i.e., the change is smaller
+                    on the lower limit.
+        'dB' : Only the lower axis limit is changed when zooming.
+        'other' : move and zoom without constraints
+    operation : 'move', 'zoom'
+        'move' to shift the section of the axis or colormap to the
+        left/right (if setter_function is an x-axis)or up/down (if setter
+        function is a y-axis or colorbar). 'zoom' to zoom in our out.
+    direction : 'increase', 'decrease'
+        'increase' to move up/right or zoom in. 'decrease' to move
+        down/left or zoom out.
+    amount : number
+        amount to move or zoom in percent. E.g., `amount=.1` will move/zoom
+        10 percent of the current axis/colormap range. The default is 0.1
+
+    """
+
+    # get the amount to be shifted
+    dyn_range = np.diff(np.array(limits))
+    shift = amount * dyn_range
+
+    # distribute shift to the lower and upper bound of frequency axes
+    if axis_type == 'freq':
+        shift = np.array([limits[0] / limits[1] * shift,
+                         (1 - limits[0] / limits[1]) * shift]).flatten()
+    else:
+        shift = np.tile(shift, 2)
+
+    if operation == 'move':
+        # reverse the sign
+        if direction == 'decrease':
+            shift *= -1
+
+    elif operation == 'zoom':
+        # reverse one sign for zooming in/out
+        if direction == 'decrease':
+            shift[0] *= -1
+        else:
+            shift[1] *= -1
+
+        # dB axes only zoom at the lower end
+        if axis_type == 'dB':
+            shift = np.array([2 * shift[0], 0])
+    else:
+        raise ValueError(
+            f"operation must be 'move' or 'zoom' but is {operation}")
+
+    # get new limits
+    new_limits = limits + shift
+
+    return new_limits

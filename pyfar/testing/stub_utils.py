@@ -11,6 +11,7 @@ from copy import deepcopy
 from unittest import mock
 
 from pyfar import Signal, TimeData, FrequencyData
+from pyfar.io import _codec
 
 
 def signal_stub(time, freq, sampling_rate, fft_norm):
@@ -253,7 +254,8 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
 
 
 def noise_func(sigma, n_samples, cshape):
-    """ Generate time data of zero-mean, gaussian white noise.
+    """ Generate time and frequency data of zero-mean, gaussian white noise,
+    RMS FFT normalization.
 
     Parameters
     ----------
@@ -275,8 +277,11 @@ def noise_func(sigma, n_samples, cshape):
     np.random.seed(1000)
     # Time vector
     time = np.random.normal(0, sigma, (cshape + (n_samples,)))
+    freq = np.fft.rfft(time)
+    norm = 1 / n_samples / np.sqrt(2) * 2
+    freq *= norm
 
-    return time
+    return time, freq
 
 
 def _normalization(freq, n_samples, fft_norm):
@@ -322,6 +327,20 @@ def _normalization(freq, n_samples, fft_norm):
 
 def any_ndarray():
     return np.arange(0, 24).reshape((2, 3, 4))
+
+
+def dict_of_builtins():
+    """
+    Return a dictionary that contains all builtin types that can
+    be written to and read from disk.
+    """
+    typename_instance = {}
+    for type_ in _codec._supported_builtin_types():
+        try:
+            typename_instance[type_.__name__] = type_(42)
+        except TypeError:
+            typename_instance[type_.__name__] = type_([42])
+    return typename_instance
 
 
 class AnyClass:

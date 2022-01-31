@@ -2,6 +2,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import os
+from packaging import version
+import pyfar as pf
 from pyfar import Signal
 import pyfar.dsp.filter as pff
 import pyfar.signals as pfs
@@ -15,7 +17,8 @@ def test_sine_with_defaults():
     sin = np.sin(np.arange(441) / 44100 * 2 * np.pi * 99)
 
     assert isinstance(signal, Signal)
-    assert signal.comment == "Sine signal (f = [99] Hz, amplitude = [1])"
+    assert signal.comment == ("Sine signal (f = [99] Hz, amplitude = [1], "
+                              "phase = [0] rad)")
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
     assert signal.time.shape == (1, 441)
@@ -34,7 +37,8 @@ def test_sine_full_period():
     signal = pfs.sine(99, 441, full_period=True)
     sin = np.sin(np.arange(441) / 44100 * 2 * np.pi * 100)
 
-    assert signal.comment == "Sine signal (f = [100] Hz, amplitude = [1])"
+    assert signal.comment == ("Sine signal (f = [100] Hz, amplitude = [1], "
+                              "phase = [0] rad)")
     npt.assert_allclose(signal.time, np.atleast_2d(sin))
 
 
@@ -45,7 +49,9 @@ def test_sine_multi_channel():
         (np.atleast_2d(np.sin(np.arange(441) / 44100 * 2 * np.pi * 99)),
          np.atleast_2d(np.sin(np.arange(441) / 44100 * 2 * np.pi * 50))), 0)
 
-    assert signal.comment == "Sine signal (f = [99 50] Hz, amplitude = [1 1])"
+    assert signal.comment == ("Sine signal (f = [99 50] Hz, "
+                              "amplitude = [1 1], "
+                              "phase = [0 0] rad)")
     npt.assert_allclose(signal.time, sin)
 
 
@@ -247,24 +253,25 @@ def test_pulsed_noise_assertions():
         pfs.pulsed_noise(200, 100, spectrum="brown")
 
 
-def test_linear_sweep_against_reference():
+def test_linear_sweep_time_against_reference():
     """Test linear sweep against manually verified reference."""
-    sweep = pfs.linear_sweep(2**10, [1e3, 20e3])
+    sweep = pfs.linear_sweep_time(2**10, [1e3, 20e3])
     reference = np.loadtxt(os.path.join(
-        os.path.dirname(__file__), "references", "signals.linear_sweep.csv"))
+        os.path.dirname(__file__), "references",
+        "signals.linear_sweep_time.csv"))
 
     npt.assert_allclose(sweep.time, np.atleast_2d(reference))
     assert sweep.cshape == (1, )
     assert sweep.n_samples == 2**10
     assert sweep.sampling_rate == 44100
-    assert sweep.fft_norm == "rms"
+    assert sweep.fft_norm == "none"
     assert sweep.comment == ("linear sweep between 1000.0 and 20000.0 Hz with "
                              "90 samples squared cosine fade-out.")
 
 
-def test_linear_sweep_amplitude_sampling_rate():
+def test_linear_sweep_time_amplitude_sampling_rate():
     """Test linear sweep with custom amplitude and sampling rate."""
-    sweep = pfs.linear_sweep(
+    sweep = pfs.linear_sweep_time(
         2**10, [1e3, 20e3], amplitude=2, sampling_rate=48000)
 
     assert sweep.sampling_rate == 48000
@@ -272,40 +279,51 @@ def test_linear_sweep_amplitude_sampling_rate():
         np.max(np.abs(sweep.time)), np.array(2), rtol=1e-6, atol=1e-6)
 
 
-def test_linear_sweep_float():
+def test_linear_sweep_time_float():
     """Test linear sweep with float number of samples."""
-    sweep = pfs.linear_sweep(100.6, [1e3, 20e3])
+    sweep = pfs.linear_sweep_time(100.6, [1e3, 20e3])
     assert sweep.n_samples == 100
 
 
-def test_linear_sweep_assertions():
+def test_linear_sweep_time_assertions():
     """Test assertions for linear sweep."""
     with pytest.raises(ValueError, match="The sweep must be longer"):
-        pfs.linear_sweep(50, [1, 2])
+        pfs.linear_sweep_time(50, [1, 2])
     with pytest.raises(ValueError, match="frequency_range must be an array"):
-        pfs.linear_sweep(100, 1)
+        pfs.linear_sweep_time(100, 1)
     with pytest.raises(ValueError, match="Upper frequency limit"):
-        pfs.linear_sweep(100, [1, 40e3])
+        pfs.linear_sweep_time(100, [1, 40e3])
 
 
-def test_exponential_sweep_against_reference():
+def test_linear_sweep_deprecation():
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfs.linear_sweep(2**10, [1e3, 20e3])
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove linear_sweep() from pyfar 0.5.0!
+            pfs.linear_sweep(2**10, [1e3, 20e3])
+
+
+def test_exponential_sweep_time_against_reference():
     """Test exponential sweep against manually verified reference."""
-    sweep = pfs.exponential_sweep(2**10, [1e3, 20e3])
+    sweep = pfs.exponential_sweep_time(2**10, [1e3, 20e3])
     reference = np.loadtxt(os.path.join(os.path.dirname(__file__),
-                           "references", "signals.exponential_sweep.csv"))
+                           "references", "signals.exponential_sweep_time.csv"))
 
     npt.assert_allclose(sweep.time, np.atleast_2d(reference))
     assert sweep.cshape == (1, )
     assert sweep.n_samples == 2**10
     assert sweep.sampling_rate == 44100
-    assert sweep.fft_norm == "rms"
+    assert sweep.fft_norm == "none"
     assert sweep.comment == ("exponential sweep between 1000.0 and 20000.0 Hz "
                              "with 90 samples squared cosine fade-out.")
 
 
-def test_exponential_sweep_amplitude_sampling_rate():
+def test_exponential_sweep_time_amplitude_sampling_rate():
     """Test exponential sweep with custom amplitude and sampling rate."""
-    sweep = pfs.exponential_sweep(
+    sweep = pfs.exponential_sweep_time(
         2**10, [1e3, 20e3], amplitude=2, sampling_rate=48000)
 
     assert sweep.sampling_rate == 48000
@@ -313,9 +331,9 @@ def test_exponential_sweep_amplitude_sampling_rate():
         np.max(np.abs(sweep.time)), np.array(2), rtol=1e-6, atol=1e-6)
 
 
-def test_exponential_sweep_rate():
+def test_exponential_sweep_time_rate():
     """Test exponential sweep with sweep rate."""
-    sweep = pfs.exponential_sweep(None, [1e3, 2e3], sweep_rate=10)
+    sweep = pfs.exponential_sweep_time(None, [1e3, 2e3], sweep_rate=10)
 
     # duration in seconds
     T = 1 / 10 / np.log(2) * np.log(2e3 / 1e3)
@@ -325,9 +343,20 @@ def test_exponential_sweep_rate():
     assert sweep.n_samples == n_samples
 
 
-def test_exponential_sweep_assertion():
-    with pytest.raises(ValueError, match="The exponential sweep can not start"):
-        pfs.exponential_sweep(2**10, [0, 20e3])
+def test_exponential_sweep_time_assertion():
+    with pytest.raises(ValueError, match="The exponential sweep can not"):
+        pfs.exponential_sweep_time(2**10, [0, 20e3])
+
+
+def test_exponential_sweep_deprecation():
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfs.exponential_sweep(2**10, [1e3, 20e3])
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove exponential_sweep() from pyfar 0.5.0!
+            pfs.exponential_sweep(2**10, [1e3, 20e3])
 
 
 def test_get_common_shape():

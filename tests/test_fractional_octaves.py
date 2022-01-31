@@ -1,13 +1,10 @@
-from unittest import mock
-
 import numpy as np
 import pytest
 from numpy import testing as npt
+import pyfar
 
 from pyfar.dsp import filter
-from pyfar.dsp.classes import FilterSOS
-from pyfar.signal import Signal
-from pyfar import fft
+from pyfar import FilterSOS, Signal
 
 
 def test_center_frequencies_iec():
@@ -74,21 +71,23 @@ def test_fractional_coeff_oct_filter_iec():
     assert actual.shape == (1, order, 6)
 
 
-def test_fract_oct_filter_iec(impulse_mock):
+def test_fract_oct_filter_iec():
     # Test only Filter object related stuff here, testing of coefficients is
     # done in separate test.
     sr = 48e3
     order = 2
+    n_samples = 2**10
+    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
     f_obj = filter.fractional_octave_bands(
         None, 3, sampling_rate=sr, order=order)
     assert isinstance(f_obj, FilterSOS)
 
-    sig = filter.fractional_octave_bands(impulse_mock, 3, order=order)
+    sig = filter.fractional_octave_bands(impulse, 3, order=order)
     assert isinstance(sig, Signal)
 
     ir_actual = filter.fractional_octave_bands(
-        impulse_mock, 1, freq_range=(1e3, 4e3), order=order)
+        impulse, 1, freq_range=(1e3, 4e3), order=order)
 
     assert ir_actual.time.shape[0] == 3
 
@@ -115,71 +114,24 @@ def test_fract_oct_bands_non_iec():
         f_crit[1], exact*octave_ratio**(1/2/frac))
 
 
-def test_sum_bands_din(impulse_mock):
+def test_sum_bands_din():
     """Check if the error in the sum of the quared magnitude of all bands is
     less than 1 dB. DIN 61260 requires this criterion to be fulfilled between
     two bands.
     """
-    ideal = np.squeeze(np.abs(fft.rfft(
-        impulse_mock.time,
-        impulse_mock.n_samples,
-        impulse_mock.sampling_rate,
-        impulse_mock.fft_norm))**2)
+    n_samples = 2**17
+    sampling_rate = 48e3
+    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate)
+
+    ideal = np.squeeze(np.abs(impulse.freq)**2)
 
     bp_imp = filter.fractional_octave_bands(
-        impulse_mock, num_fractions=3, order=14)
+        impulse, num_fractions=3, order=14)
 
-    tf = fft.rfft(
-        bp_imp.time,
-        bp_imp.n_samples,
-        bp_imp.sampling_rate,
-        bp_imp.fft_norm)
-
-    sum_bands = np.sum(np.abs(tf)**2, axis=0)
+    sum_bands = np.sum(np.abs(bp_imp.freq)**2, axis=0)
     diff = ideal / sum_bands
 
-    mask = (impulse_mock.frequencies > 30) & (impulse_mock.frequencies < 20e3)
+    mask = (impulse.frequencies > 30) & (impulse.frequencies < 20e3)
 
     assert not np.any(diff[mask] > 10**(1/10))
     assert not np.any(diff[mask] < 10**(-1/10))
-
-
-@pytest.fixture
-def impulse_mock():
-    """ Generate impulse signals, in order to test independently of the Signal
-    object.
-
-    Returns
-    -------
-    signal : Signal
-        single channel dirac signal, delay 0 samples, length 1024 samples,
-        sampling rate 44.1 kHz
-
-    """
-    n_samples = 2**16
-    n_bins = int(n_samples / 2 + 1)
-    sampling_rate = 48e3
-    times = np.arange(0, n_samples) / sampling_rate
-    frequencies = np.fft.rfftfreq(n_samples, 1/sampling_rate)
-
-    # time signal:
-    time = np.zeros(n_samples, dtype='float64')
-    time[0] = 1
-
-    # frequency signal
-    freq = np.ones(n_bins)
-
-    # create a mock object of Signal class to test the plot independently
-    signal = mock.Mock(spec_set=Signal(time, sampling_rate))
-    signal.sampling_rate = sampling_rate
-    signal.time = time[np.newaxis, :]
-    signal.times = times
-    signal.n_samples = n_samples
-    # signal.freq = freq[np.newaxis, :]
-    signal.frequencies = frequencies
-    signal.n_bins = n_bins
-    signal.cshape = (1, )
-    signal.signal_type = 'energy'
-    signal.fft_norm = 'unitary'
-
-    return signal
