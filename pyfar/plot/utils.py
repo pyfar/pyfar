@@ -211,7 +211,7 @@ def shortcuts(show=True):
 
     # print list of short cuts
     if show:
-        # get list of plots that allow toogling axes and colormaps
+        # get list of plots that allow toggling axes and colormaps
         x_toggle = []
         y_toggle = []
         cm_toggle = []
@@ -265,6 +265,9 @@ def shortcuts(show=True):
         print(f"Toggling the y-axis is supported by: {', '.join(y_toggle)}")
         print(" ")
         print(f"Toggling the colormap is supported by: {', '.join(cm_toggle)}")
+        print(" ")
+        print(("Toggling between line and 2D plots is not supported by:"
+               " spectrogram"))
         print(" ")
 
     return short_cuts

@@ -85,11 +85,12 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
             points, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
-    # plot_parameter = ia.PlotParameter(
-    #     'time', dB_time=dB, log_prefix=log_prefix,
-    #     log_reference=log_reference)
-    # interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
-    # ax.interaction = interaction
+    plot_parameter = ia.PlotParameter(
+        'time2d', dB_time=dB, log_prefix_time=log_prefix,
+        log_reference=log_reference, unit=unit, points=points,
+        orientation=orientation, cmap=cmap, colorbar=colorbar)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
 
     if colorbar:
         ax = [ax, cb.ax]
