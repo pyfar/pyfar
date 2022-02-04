@@ -323,30 +323,49 @@ def normalize(signal, normalize='time', normalize_to='max',
     signal: Signal
         Input signal of the signal class
     normalize: string
-        'time' - Normalize the time signal to 'value'
-        'magnitude' - Normalize the magnitude spectrum to 'value'
-        'log_magnitude' - Normalize the log magnitude spectrum to 'value'
-        The default is 'time'
+
+        ``'time'``
+            normalize the time signals
+        ``'magnitude'``
+            normalize the magnitude spectra
+        ``'log_magnitude'``
+            normalize the log. magnitude spectra $20 \\log_{10}(X)$
+
+        The default is ``'time'``
     normalize_to: string
-        'max' - Normalize to the absolute maximum of the signal data
-        'mean' - Normalize to the mean of the signal data
-        'rms' - Normalize to the rms of the signal data
-        The default is 'max'
+
+        ``'max'``
+            compute the absolute maximum value of each channel for
+            normalization
+        ``'mean'``
+            compute the mean value of each channel for normalization
+        ``'rms'``
+            compute the route mean square value of channel for normalization
+
+        The default is ``'max'``
     channel_handling: string
-        'each' - Normalize each channel separately
-        'max' - Normalize to the max of 'normalize_to' across all channels
-        'min' - Normalize to min of 'normalize_to' across all channels
-        'mean' - Normalize to mean of 'normalize_to' across all channels
-       The default is 'max'
+        Define how multi-channel signals are normalized. This parameter does
+        not affect single-channel signals.
+
+        ``'each'``
+            normalize each channel separately
+        ``'max'``
+            Normalize to the maximum across channels
+        ``'min'``
+            normalize to the minimum across channels
+        ``'mean'``
+            normalize to the mean across channels
+
+       The default is ``'max'``
     value: scalar, array
-        Normalizes to `value` which can be a scalar or an array with
-        shape equal to signal cshape. The unit of `value`
-        is defined by `norm_type`, i.e., it is either dB or linear.
-        The default is 0 for normalize='log_magnitude' and 1 otherwise
+        The value to which the signal is normalized in the unit according to
+        `normalize`.Can be a scalar or an array with shape equal to
+        ``signal.cshape``. The default is 0 dB if ``normalize='log_magnitude'``
+        and 1 otherwise.
     freq_range: tuple
         Two element vector specifying upper and lower frequency bounds
-        for normalization or scalar specifying the centre frequency for
-        normalization
+        for normalization.
+
     Returns
     --------
     normalized_signal: Signal
@@ -434,33 +453,54 @@ def normalize(signal, normalize='time', normalize_to='max',
 def average(signal, average_mode='time', phase_copy=None,
             weights=None):
     """
-    Used to average multichannel Signals in different ways. You may want to
-    align your data first.
+    Average multichannel Signals.
 
     Parameters
     ----------
     signal: Signal
         Input signal of the Signal class
     average_mode: string
-        'time' - averages in time domain
-        'complex' - averages the complex spectra
-        'magnitude' - averages the magnitude spectra
-        'power' - averages the power spectra
-        'log_magnitude' - averages the log magnitude spectra
-        The default is 'time'
-    phase_copy: vector
-        indicates signal channel from which phase is to be copied to the
-        averaged signal
-        None - ignores the phase. Resulting in zero phase
-        The default is None
-    weights: numpy array
-        array that gives channel weighting for averaging the data. Must
-        have same shape as channel shape of signal.
-        The default is None
+
+        ``'time'``
+            average in time domain. Note that this might cause artifacts if
+            the data is not aligned across channels.
+        ``'complex'``
+            average the complex spectra. Note that this might cause artifacts
+            if the data is not aligned across channels.
+        ``'magnitude'``
+            average the magnitude spectra and discard the phase
+            (see `phase_copy`)
+        ``'power'``
+            average the power spectra $|X|^2$ and discard the phase. The
+            squaring of the spectra is reversed before returning the averaged
+            signal.
+        ``'log_magnitude'``
+            average the log. magnitude spectra $20 \\log_{10}(X)$ and discard
+            the phase. The logarithm is reversed before returning the averaged
+            signal.
+
+        The default is ``'time'``
+    phase_copy: tuple
+        Some averaging modes discard the phase in which case the phase from
+        a channel before averaging can be copied to the averaged signal. Pass
+        the channel index as a tuple with as many elements as
+        ``signal.cshape``. The default ``None`` returns a zero-phase signal.
+    weights: array like
+        array that gives channel weights for averaging the data. Must be of
+        shape ``signal.cshape``. The default is ``None``, which applies equal
+        weights to all channels.
+
     Returns
     --------
     averaged_signal: Signal
         averaged input Signal
+
+    Notes
+    -----
+    The functions :py:func:`~pyfar.dsp.linear_phase` and
+    :py:func:`~pyfar.dsp.minimum_phase` can be used to obtain non-zero phase
+    responses. This can be usefull if the average mode discards the phase and
+    the paramter `phase_copy` can not be used.
     """
 
     # check input
