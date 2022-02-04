@@ -400,17 +400,12 @@ class FrequencyData(_Audio):
 
         _Audio.__init__(self, 'freq', comment, dtype)
 
-        # init data
-        self._data = np.atleast_2d(np.asarray(data, dtype=complex))
-
         # init frequencies
-        self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
-        if self._frequencies.size != self.n_bins:
-            raise ValueError(
-                "The number of frequencies must be data.shape[-1]")
-        if np.any(np.diff(self._frequencies) <= 0) and \
-                len(self._frequencies) > 1:
+        if np.any(np.diff(frequencies) <= 0) and len(frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
+        self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
+        # init data
+        self.freq = data
 
     @property
     def freq(self):
@@ -420,11 +415,13 @@ class FrequencyData(_Audio):
     @freq.setter
     def freq(self, value):
         """Set the frequency data."""
-        self._data = np.atleast_2d(np.atleast_2d(value))
-        # setting the domain is only required for Signal. Setting it here
-        # avoids the need for overloading the setter and does not harm
-        # FrequencyData
-        self._domain = 'freq'
+        data = np.atleast_2d(np.asarray(value, dtype=complex))
+        # match shape of frequencies
+        if self.frequencies.size != data.shape[-1]:
+            raise ValueError(
+                "Number of frequency values does not match the number of"
+                "frequencies.")
+        self._data = data
 
     @property
     def frequencies(self):
@@ -637,17 +634,17 @@ class Signal(FrequencyData, TimeData):
 
     @FrequencyData.freq.getter
     def freq(self):
-        """Return the (normalized) data in the frequency domain."""
-        # converts the data from 'time' to 'freq'
-        self.domain = 'freq'
-
-        return self.freq_norm
+        """Return the (normalized) frequency domain data."""
+        data = fft.normalization(
+                self.freq_raw, self.n_samples, self.sampling_rate,
+                self.fft_norm, inverse=False)
+        return data
 
     @freq.setter
     def freq(self, value):
-        """Set the (normalized) data in the frequency domain."""
-        data = np.atleast_2d(np.atleast_2d(value))
-        # set n_samples in case of a Signal object
+        """Set the (normalized) frequency domain data."""
+        data = np.atleast_2d(np.asarray(value))
+        # Check n_samples
         if data.shape[-1] == self.n_bins:
             n_samples = self.n_samples
         else:
@@ -656,8 +653,10 @@ class Signal(FrequencyData, TimeData):
                 "number of samples from the number of frequency bins.")))
             n_samples = (data.shape[-1] - 1)*2
         self._n_samples = n_samples
+        self.domain = 'freq'
 
-        # Denormalize, adjust values
+        # The freq attribute inherited from FrequencyData is internally saved
+        # without normalization (= freq_raw)
         data_denorm = fft.normalization(
                 data, self._n_samples, self._sampling_rate,
                 self._fft_norm, inverse=True)
@@ -740,30 +739,6 @@ class Signal(FrequencyData, TimeData):
         """Return the frequency domain data (without normalization)."""
         self.domain = 'freq'
         return self._data
-
-    @freq_raw.setter
-    def freq_raw(self, value):
-        """Set the frequency domain data (without normalization)."""
-        # The intuitive version does not work: super().freq = value
-        super(Signal, type(self)).freq.fset(self, value)
-
-        # set n_samples in case of a Signal object
-        if self._data.shape[-1] == self.n_bins:
-            n_samples = self.n_samples
-        else:
-            warnings.warn(UserWarning((
-                "Number of frequency bins changed, assuming an even "
-                "number of samples from the number of frequency bins.")))
-            n_samples = (self._data.shape[-1] - 1)*2
-        self._n_samples = n_samples
-
-    @property
-    def freq_norm(self):
-        """Return the normalized frequency domain data."""
-        data = fft.normalization(
-                self.freq_raw, self._n_samples, self._sampling_rate,
-                self._fft_norm, inverse=False)
-        return data
 
     def _assert_matching_meta_data(self, other):
         """Check if the meta data matches across two Signal objects."""
