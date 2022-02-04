@@ -581,46 +581,31 @@ class Signal(FrequencyData, TimeData):
         self._VALID_FFT_NORMS = [
             "none", "unitary", "amplitude", "rms", "power", "psd"]
 
+        # check fft norm
+        if fft_norm is None:
+            fft_norm = 'none'
+        if fft_norm in self._VALID_FFT_NORMS:
+            self._fft_norm = fft_norm
+        else:
+            raise ValueError(("Invalid FFT normalization. Has to be "
+                              f"{', '.join(self._VALID_FFT_NORMS)}, but "
+                              f"found '{fft_norm}'"))
+
         # initialize domain specific parameters
         if domain == 'time':
             self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
             self._n_samples = self._data.shape[-1]
-
-            if fft_norm is None:
-                fft_norm = 'none'
-            if fft_norm in self._VALID_FFT_NORMS:
-                self._fft_norm = fft_norm
-            else:
-                raise ValueError(("Invalid FFT normalization. Has to be "
-                                  f"{', '.join(self._VALID_FFT_NORMS)}, but "
-                                  f"found '{fft_norm}'"))
-
             TimeData.__init__(self, data, self.times, comment, dtype)
         elif domain == 'freq':
-            self._data = np.atleast_2d(np.asarray(data, dtype=complex))
-
-            n_bins = self._data.shape[-1]
-            if n_samples is None:
-                warnings.warn(
-                    "Number of time samples not given, assuming an even "
-                    "number of samples from the number of frequency bins.")
-                n_samples = (n_bins - 1)*2
-            elif n_samples > 2 * n_bins - 1:
+            freq = np.atleast_2d(np.asarray(data, dtype=complex))
+            self._n_bins = freq.shape[-1]
+            if n_samples > 2 * freq.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
-
-            FrequencyData.__init__(self, data, self.frequencies,
+            self.freq = freq
+            FrequencyData.__init__(self, self.freq_raw, self.frequencies,
                                    comment, dtype)
-
-            if fft_norm is None:
-                fft_norm = 'none'
-            if fft_norm in self._VALID_FFT_NORMS:
-                self._fft_norm = fft_norm
-            else:
-                raise ValueError(("Invalid FFT normalization. Has to be "
-                                  f"{', '.join(self._VALID_FFT_NORMS)}, but "
-                                  f"found '{fft_norm}'"))
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
@@ -645,15 +630,12 @@ class Signal(FrequencyData, TimeData):
         """Set the (normalized) frequency domain data."""
         data = np.atleast_2d(np.asarray(value))
         # Check n_samples
-        if data.shape[-1] == self.n_bins:
-            n_samples = self.n_samples
-        else:
+        if data.shape[-1] != self.n_bins:
             warnings.warn(UserWarning((
                 "Number of frequency bins changed, assuming an even "
                 "number of samples from the number of frequency bins.")))
-            n_samples = (data.shape[-1] - 1)*2
-        self._n_samples = n_samples
-        self.domain = 'freq'
+            self._n_samples = (data.shape[-1] - 1)*2
+        self._domain = 'freq'
 
         # The freq attribute inherited from FrequencyData is internally saved
         # without normalization (= freq_raw)
