@@ -204,12 +204,15 @@ A reminder for the maintainers on how to deploy.
 - Commit all changes to develop
 - Update HISTORY.rst in develop
 - Check if new contributors should be added to AUTHORS.rst
+- Check if examples/pyfar_demo.ipynb needs to be updated
 - Merge develop into main
 
 Switch to main and run::
 
 $ bumpversion patch # possible: major / minor / patch
-$ git push
 $ git push --tags
+$ git push
 
 Travis will then deploy to PyPI if tests pass.
+
+- merge main back into develop
