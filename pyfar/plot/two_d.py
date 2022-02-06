@@ -10,7 +10,7 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
            cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
            style='light', **kwargs):
     """
-    Surface plot of the time signal.
+    2D plot of multi-channel time signals with color coded amplitude.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
     ``matplotlib.pyplot.pcolormesh()``.
@@ -84,9 +84,10 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         >>> import pyfar as pf
         >>> import numpy as np
         >>> # generate the signal
-        >>> angles = np.arange(0, 180)
-        >>> delays = np.round(100 * np.sin(angles / 180 * np.pi)).astype(int)
-        >>> signal = pf.signals.impulse(128, delays)
+        >>> angles = np.arange(0, 180) / 180 * np.pi
+        >>> delays = np.round(100 * np.sin(angles)).astype(int)
+        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
+        >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
         >>> pf.plot.time2d(signal, points=angles)
     """
