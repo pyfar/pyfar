@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.tight_layout import get_subplotspec_list
-from pyfar import (Signal, FrequencyData, TimeData)
+from pyfar import (Signal, FrequencyData)
 
 
 def _tight_layout(fig=plt.gcf()):

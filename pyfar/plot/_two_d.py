@@ -59,11 +59,10 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap,
                           shading='gouraud')
 
-    # color limits
+    # color limits and colorbar
     if dB:
         qm.set_clim(ymin, ymax)
 
-    # Colorbar:
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
                               "Amplitude in dB" if dB else "Amplitude")
 
@@ -86,10 +85,8 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     """
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-    if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
-        raise ValueError('A list of axes can not be used if colorbar is False')
+    # check input and prepare the figure and axis
+    fig, ax = _utils._prepare_2d_plot(signal, (Signal), colorbar, ax)
     _utils._check_time_unit(unit)
     _utils._check_axis_scale(yscale, 'y')
 
@@ -125,11 +122,6 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         factor, unit = _utils._deal_time_units(unit)
         times = times * factor
 
-    # prepare the figure and axis for plotting the data and colorbar
-    fig, ax = _utils._prepare_plot(ax)
-    if not isinstance(ax, (np.ndarray, list)):
-        ax = [ax, None]
-
     # plot the data
     qm = ax[0].pcolormesh(times, frequencies, spectrogram, cmap=cmap,
                           shading='gouraud')
@@ -155,13 +147,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     ax[0].grid(ls='dotted', color='white')
 
     # colorbar
-    if colorbar:
-        if ax[1] is None:
-            cb = fig.colorbar(qm, ax=ax[0])
-        else:
-            cb = fig.colorbar(qm, cax=ax[1])
-        cb.set_label('Magnitude in dB' if dB else 'Magnitude')
-    else:
-        cb = None
+    cb = _utils._add_colorbar(colorbar, fig, ax, qm,
+                              'Magnitude in dB' if dB else 'Magnitude')
 
     return ax[0], qm, cb
