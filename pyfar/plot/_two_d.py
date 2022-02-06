@@ -12,14 +12,8 @@ from .ticker import (
 def _time2d(signal, dB, log_prefix, log_reference, unit, points,
             orientation, cmap, colorbar, ax, **kwargs):
 
-    # check input
-    if not isinstance(signal, (Signal, TimeData)):
-        raise TypeError('Input data has to be of type: Signal or TimeData.')
-    if len(signal.cshape) > 1:
-        raise ValueError(
-            f'signal.cshape must be (m, ) with m>0 but is {signal.cshape}')
-    if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
-        raise ValueError('A list of axes can not be used if colorbar is False')
+    # check input and prepare the figure and axis
+    fig, ax = _utils._prepare_2d_plot(signal, (Signal, TimeData), colorbar, ax)
     _utils._check_time_unit(unit)
 
     # prepare input
@@ -43,11 +37,6 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     else:
         factor, unit = _utils._deal_time_units(unit)
         times = signal.times * factor
-
-    # prepare the figure and axis for plotting the data and colorbar
-    fig, ax = _utils._prepare_plot(ax)
-    if not isinstance(ax, (np.ndarray, list)):
-        ax = [ax, None]
 
     # setup axis label and data
     if orientation == "vertical":
@@ -75,15 +64,8 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
         qm.set_clim(ymin, ymax)
 
     # Colorbar:
-    if colorbar:
-        if ax[1] is None:
-            # mpl.pyplot.grid(False)
-            cb = fig.colorbar(qm, ax=ax[0])
-        else:
-            cb = fig.colorbar(qm, cax=ax[1])
-        cb.set_label("Amplitude in dB" if dB else "Amplitude")
-    else:
-        cb = None
+    cb = _utils._add_colorbar(colorbar, fig, ax, qm,
+                              "Amplitude in dB" if dB else "Amplitude")
 
     return ax[0], qm, cb
 
