@@ -366,6 +366,32 @@ def test_toggle_colormap():
     plt.close("all")
 
 
+def test_toggle_orientation():
+    """
+    Test if the orientation is toggled by comparing the axis labels before
+    and after toggling.
+    """
+
+    signal = pf.signals.impulse(20, np.arange(0, 10).astype(int))
+    key = sc_ctr["toggle_orientation"]["key"][0]
+
+    for function in getmembers(pf.plot.two_d, isfunction):
+        # exclude functions that do not support interaction
+        if function[0] in ["context", "spectrogram"]:
+            continue
+
+        # plot
+        ax, *_ = function[1](signal)
+        # get current axis labels
+        labels = [ax[0].get_xlabel(), ax[0].get_ylabel()]
+        # toggle orientation
+        ax[0].interaction.select_action(ia.EventEmu(key))
+        # assert that axis lables are flipped
+        assert plt.gca().get_xlabel() == labels[1]
+        assert plt.gca().get_ylabel() == labels[0]
+        plt.close()
+
+
 def test_cycle_and_toggle_lines_1d_signal():
     """Test toggling and cycling channels of a one-dimensional Signal."""
 
@@ -461,3 +487,11 @@ def test_cycle_and_toggle_signals():
     npt.assert_allclose(clim, (-96, 4), atol=.5)
 
     plt.close("all")
+
+
+def test_cycle_plot_styles():
+    """Test cycle the plot styles between line and 2d plots."""
+    # TODO: Implement when all 2D plots are available
+    pass
+
+    # signal = pf.signals.impulse(20, np.arange(0, 10).astype(int))
