@@ -59,7 +59,19 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     Returns
     -------
     ax : matplotlib.pyplot.axes
-        Axes or array of axes containing the plot.
+        If `colorbar` is ``True`` an array of two axes is returned. The first
+        is the axis on which the data is plotted, the second is the axis of the
+        colorbar. If `colorbar` is ``False``, only the axis on which the data
+        is plotted is returned
+    quad_mesh : QuadMesh
+        The Matplotlib quad mesh collection. This can be used to manipulate the
+        way the data is displayed, e.g., by limiting the range of the colormap
+        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
+        by ``cb = fig.colorbar(qm, ...)``.
+    colorbar : Colorbar
+        The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
+        otherwise. This can be used to control the appearance of the colorbar,
+        e.g., the label can be set by ``colorbar.set_label()``.
 
     Examples
     --------

@@ -67,12 +67,10 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     # plot data
     points_x = points if orientation == "vertical" else times
     points_y = times if orientation == "vertical" else points
-    ax[0].pcolormesh(points_x, points_y, data, cmap=cmap,
-                     shading='gouraud')
+    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap,
+                          shading='gouraud')
 
     # color limits
-    qm = _utils._get_quad_mesh_from_axis(ax[0])
-
     if dB:
         qm.set_clim(ymin, ymax)
 
@@ -151,8 +149,8 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ax = [ax, None]
 
     # plot the data
-    ax[0].pcolormesh(times, frequencies, spectrogram, cmap=cmap,
-                     shading='gouraud')
+    qm = ax[0].pcolormesh(times, frequencies, spectrogram, cmap=cmap,
+                          shading='gouraud')
 
     # Adjust axes:
     ax[0].set_ylabel('Frequency in Hz')
@@ -161,8 +159,6 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     ax[0].set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
 
     # color limits
-    qm = _utils._get_quad_mesh_from_axis(ax[0])
-
     if dB:
         ymax = np.nanmax(spectrogram)
         ymin = ymax - 90
