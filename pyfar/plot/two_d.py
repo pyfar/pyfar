@@ -48,9 +48,25 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    colorbar : bool, optional
+        Control the colorbar. The default is ``True``, which adds a colorbar
+        to the plot. ``False`` omits the colorbar.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
+        Axes to plot on.
+
+        ``None``
+            Use the current axis, or create a new axis (and figure) if there is
+            none.
+        ``ax``
+            If a single axis is passed, this is used for plotting. If
+            `colorbar` is ``True`` the space for the colorbar is taken from
+            this axis.
+        ``[ax, ax]``
+            If a list or array of two axes is passed, the first is used to plot
+            the data and the second to plot the colorbar. In this case
+            `colorbar` must be ``True``
+
+        The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
