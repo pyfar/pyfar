@@ -641,9 +641,6 @@ class Signal(FrequencyData, TimeData):
                 "number of samples from the number of frequency bins.")))
             self._n_samples = (data.shape[-1] - 1)*2
         self._domain = 'freq'
-
-        # The freq attribute inherited from FrequencyData is internally saved
-        # without normalization (= freq_raw)
         data_denorm = fft.normalization(
                 data, self._n_samples, self._sampling_rate,
                 self._fft_norm, inverse=True)

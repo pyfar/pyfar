@@ -322,14 +322,14 @@ def test_freq_fft_norm_dB(noise):
     ax = plot.freq(noise)
     y_actual = ax.lines[0].get_ydata().flatten()
     y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
-    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+    npt.assert_allclose(y_actual, y_desired, rtol=1e-6)
 
     create_figure()
     noise.fft_norm = 'psd'
     ax = plot.freq(noise)
     y_actual = ax.lines[0].get_ydata().flatten()
     y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
-    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+    npt.assert_allclose(y_actual, y_desired, rtol=1e-6)
 
 
 def test_time_freq_fft_norm_dB(noise):
@@ -339,11 +339,11 @@ def test_time_freq_fft_norm_dB(noise):
     ax = plot.time_freq(noise)
     y_actual = ax[1].lines[0].get_ydata().flatten()
     y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
-    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+    npt.assert_allclose(y_actual, y_desired, rtol=1e-6)
 
     create_figure()
     noise.fft_norm = 'psd'
     ax = plot.time_freq(noise)
     y_actual = ax[1].lines[0].get_ydata().flatten()
     y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
-    npt.assert_allclose(y_actual, y_desired, atol=1e-6)
+    npt.assert_allclose(y_actual, y_desired, rtol=1e-6)

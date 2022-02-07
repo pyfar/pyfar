@@ -395,3 +395,12 @@ def test__repr__(capfd):
     assert ("time domain energy Signal:\n"
             "(1,) channels with 3 samples @ 44100 Hz sampling rate "
             "and none FFT normalization") in out
+
+
+def test_freq_raw():
+    """Test for unnormalized spectrum."""
+    signal = Signal([1, 0, 0, 0], 44100, domain='time')
+    npt.assert_allclose(signal.freq_raw, np.array([[1., 1., 1.]]))
+    signal.fft_norm = 'amplitude'
+    npt.assert_allclose(signal.freq, np.array([[1., 2., 1.]])/4)
+    npt.assert_allclose(signal.freq_raw, np.array([[1., 1., 1.]]))
