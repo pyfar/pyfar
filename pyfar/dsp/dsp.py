@@ -106,14 +106,10 @@ def group_delay(signal, frequencies=None, method='fft'):
                           signal.n_samples, signal.sampling_rate,
                           fft_norm='none')
 
-        freq = fft.normalization(
-            signal.freq, signal.n_samples, signal.sampling_rate,
-            signal.fft_norm, inverse=True)
-
-        group_delay = np.real(freq_k / freq)
+        group_delay = np.real(freq_k / signal.freq_raw)
 
         # catch zeros in the denominator
-        group_delay[np.abs(freq) < 1e-15] = 0
+        group_delay[np.abs(signal.freq_raw) < 1e-15] = 0
 
     else:
         raise ValueError(
