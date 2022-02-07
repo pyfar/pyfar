@@ -401,9 +401,10 @@ class FrequencyData(_Audio):
         _Audio.__init__(self, 'freq', comment, dtype)
 
         # init frequencies
-        if np.any(np.diff(frequencies) <= 0) and len(frequencies) > 1:
+        freqs = np.atleast_1d(np.asarray(frequencies).flatten())
+        if np.any(np.diff(freqs) <= 0) and len(frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
-        self._frequencies = np.atleast_1d(np.asarray(frequencies).flatten())
+        self._frequencies = freqs
         # init data
         self.freq = data
 
@@ -599,13 +600,17 @@ class Signal(FrequencyData, TimeData):
         elif domain == 'freq':
             freq = np.atleast_2d(np.asarray(data, dtype=complex))
             self._n_bins = freq.shape[-1]
-            if n_samples > 2 * freq.shape[-1] - 1:
+            if n_samples is None:
+                warnings.warn(
+                    "Number of time samples not given, assuming an even "
+                    "number of samples from the number of frequency bins.")
+                n_samples = (self._n_bins - 1)*2
+            elif n_samples > 2 * freq.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
+            # Set spectrum incl. checks and denormalization
             self.freq = freq
-            FrequencyData.__init__(self, self.freq_raw, self.frequencies,
-                                   comment, dtype)
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
@@ -642,9 +647,7 @@ class Signal(FrequencyData, TimeData):
         data_denorm = fft.normalization(
                 data, self._n_samples, self._sampling_rate,
                 self._fft_norm, inverse=True)
-
-        # The intuitive version does not work: super().freq = value
-        super(Signal, type(self)).freq.fset(self, data_denorm)
+        self._data = data_denorm
 
     @_Audio.domain.setter
     def domain(self, new_domain):
@@ -658,15 +661,16 @@ class Signal(FrequencyData, TimeData):
                 # If the new domain should be time, we had a saved spectrum
                 # (without normalization)
                 # and need to do an inverse Fourier Transform
-                self.time = fft.irfft(
+                self._data = fft.irfft(
                     self._data, self.n_samples, self._sampling_rate,
                     fft_norm='none')
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform (without normalization)
-                self.freq = fft.rfft(
+                self._data = fft.rfft(
                     self._data, self.n_samples, self._sampling_rate,
                     fft_norm='none')
+            self._domain = new_domain
 
     @property
     def sampling_rate(self):
