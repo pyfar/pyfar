@@ -1161,19 +1161,14 @@ def _get_arithmetic_data(data, n_samples, domain):
         Signal. `np.asarray(data)` otherwise.
     """
     if isinstance(data, (Signal, TimeData, FrequencyData)):
-
         # get signal in correct domain
         if domain == "time":
             data_out = data.time.copy()
         elif domain == "freq":
-            data_out = data.freq.copy()
-
-            if isinstance(data, Signal) and data.fft_norm != 'none':
-                # remove current fft normalization
-                data_out = fft.normalization(
-                    data_out, n_samples, data.sampling_rate,
-                    data.fft_norm, inverse=True)
-
+            if isinstance(data, Signal):
+                data_out = data.freq_raw.copy()
+            else:
+                data_out = data.freq.copy()
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")
