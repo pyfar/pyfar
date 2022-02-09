@@ -357,6 +357,12 @@ class TimeData(_Audio):
     def __rpow__(self, data):
         return power((data, self), 'time')
 
+    def __matmul__(self, data):
+        return matrix_multiplication((self, data), 'time')
+
+    def __rmatmul__(self, data):
+        return matrix_multiplication((data, self), 'time')
+
 
 class FrequencyData(_Audio):
     """Class for frequency data.
@@ -520,6 +526,12 @@ class FrequencyData(_Audio):
 
     def __rpow__(self, data):
         return power((data, self), 'freq')
+
+    def __matmul__(self, data):
+        return matrix_multiplication((self, data), 'freq')
+
+    def __rmatmul__(self, data):
+        return matrix_multiplication(tuple(data, self), 'freq')
 
 
 class Signal(FrequencyData, TimeData):
@@ -1011,6 +1023,41 @@ def power(data: tuple, domain='freq'):
     return _arithmetic(data, domain, _power)
 
 
+def matrix_multiplication(data: tuple, domain='freq'):
+    """Matrix multiplication along first two axes of pyfar audio objects
+    and array likes.
+
+    Pyfar audio objects are: :py:func:`Signal`, :py:func:`TimeData`, and
+    :py:func:`FrequencyData`.
+
+
+    Parameters
+    ----------
+    data : tuple of the form (data_1, data_2, ..., data_N)
+        Data to be multiplied. Can contain pyfar audio objects, array likes,
+        and scalars. Pyfar audio objects can not be mixed, e.g.,
+        :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
+        together. See
+        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        for possible combinations of Signal FFT normalizations.
+    domain : ``'time'``, ``'freq'``, optional
+        Flag to indicate if the operation should be performed in the time or
+        frequency domain. If working in the frequency domain, the FFT
+        normalization is removed before the operation (See
+        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+
+    Returns
+    -------
+    results : Signal, TimeData, FrequencyData, numpy array
+        Result of the operation as numpy array, if `data` contains only array
+        likes and numbers. Result as pyfar audio object if `data` contains an
+        audio object. The `fft_norm` is ``'none'`` if all FFT norms are
+        ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
+        used.
+    """
+    return _arithmetic(data, domain, _matrix_multiplication)
+
+
 def _arithmetic(data: tuple, domain: str, operation: Callable):
     """Apply arithmetic operations."""
 
@@ -1219,6 +1266,14 @@ def _divide(a, b):
 
 def _power(a, b):
     return a**b
+
+
+def _matrix_multiplication(a, b):
+    if a.shape[1:] != (b.shape[:1] + b.shape[2:]):
+        raise ValueError(
+                f"The data shapes {a.shape} and {b.shape} do not match for"
+                "matrix multiplication along the first two dimensions")
+    return np.matmul(a, b, axes=[(0, 1), (0, 1), (0, 1)])
 
 
 def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
