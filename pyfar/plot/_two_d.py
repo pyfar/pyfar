@@ -110,8 +110,7 @@ def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
     # plot data
     points_x = points if orientation == "vertical" else signal.frequencies
     points_y = signal.frequencies if orientation == "vertical" else points
-    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap,
-                          shading='gouraud')
+    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap)
 
     if orientation == "vertical":
         if xscale == "log":
