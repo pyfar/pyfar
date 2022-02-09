@@ -299,7 +299,12 @@ def _log_prefix(signal):
 
 
 def _prepare_2d_plot(data, instances, colorbar, ax, **kwargs):
-    """Check and prepare input for 2D plots
+    """
+    Check and prepare input for 2D plots
+
+    1. Check for correct instance and cshape of data
+    2. Prepare the plot
+    3. Set default shading parameter if not contained in kwargs
 
     Parameters
     ----------
