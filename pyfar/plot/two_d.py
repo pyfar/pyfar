@@ -356,7 +356,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         log_reference=log_reference, yscale=yscale, unit=unit, window=window,
         window_length=window_length, window_overlap_fct=window_overlap_fct,
         cmap=cmap)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     if colorbar:

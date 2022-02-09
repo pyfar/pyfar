@@ -155,6 +155,10 @@ def test_toggle_2d_plots():
             'shortcut': sc_plot["time"]["key"][0],
             'xlabel': ['Points'],
             'ylabel': ['Time in ms']},
+        'freq2d': {
+            'shortcut': sc_plot["freq"]["key"][0],
+            'xlabel': ['Points'],
+            'ylabel': ['Frequency in Hz']},
         'spectrogram': {
             'shortcut': sc_plot["spectrogram"]["key"][0],
             'xlabel': ['Time in s'],
