@@ -212,7 +212,8 @@ class PlotParameter(object):
         """
 
         # strip "2d" from plot name
-        self._plot = plot if not plot.endswith("2d") else plot[:-2]
+        self._plot = plot[:-2] if plot.endswith("2d") else plot
+        self.plot = plot
 
         # set the axis, color map, and cycle, parameter for each plot
         if plot == 'time':
@@ -234,6 +235,8 @@ class PlotParameter(object):
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
+            self._x_param = None
+            self._x_values = None
             # y-axis
             self._y_type = ['other']
             self._y_id = 0
@@ -261,6 +264,25 @@ class PlotParameter(object):
             self._cm_id = None
             # cycler type
             self._cycler_type = 'line'
+
+        elif plot == 'freq2d':
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            self._x_param = None
+            self._x_values = None
+            # y-axis
+            self._y_type = ['freq', 'other']
+            self._y_param = 'xscale'
+            self._y_values = ['log', 'linear']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = ['other', 'dB']
+            self._cm_param = 'dB_freq'
+            self._cm_values = [False, True]
+            self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # cycler type
+            self._cycler_type = None
 
         elif plot == 'phase':
             # x-axis
@@ -355,7 +377,13 @@ class PlotParameter(object):
         else:
             raise ValueError(f"{plot} not known.")
 
-        self.plot = plot
+        # toggle plot parameter (switch x and y axis)
+        if self.orientation == "horizontal":
+            for attr in ["type", "id", "param", "values"]:
+                tmp = getattr(self, f"_x_{attr}")
+                setattr(self, f"_x_{attr}", getattr(self, f"_y_{attr}"))
+                setattr(self, f"_y_{attr}", tmp)
+
 
     def toggle_x(self):
         """Toggle the x-axis type.
@@ -556,19 +584,19 @@ class Interaction(object):
         elif event.key in ctr["toggle_x"]:
             changed = self.params.toggle_x()
             if changed:
-                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
         # y-axis toggle
         elif event.key in ctr["toggle_y"]:
             changed = self.params.toggle_y()
             if changed:
-                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
         # color map toggle
         elif event.key in ctr["toggle_cm"]:
             changed = self.params.toggle_colormap()
             if changed:
-                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
         # toggle line visibility
         elif event.key in ctr["toggle_all"]:
@@ -618,10 +646,18 @@ class Interaction(object):
                         **self.kwargs)[0]
 
             elif event.key in plot['freq']:
-                self.params.update('freq')
-                self.ax = _line._freq(
-                    self.signal, prm.dB_freq, prm.log_prefix_freq,
-                    prm.log_reference, prm.xscale, self.ax, **self.kwargs)
+                if self.params.plot_type == "line":
+                    self.params.update('freq')
+                    self.ax = _line._freq(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, self.ax, **self.kwargs)
+                elif self.params.plot_type == "2d":
+                    self.params.update('freq2d')
+                    self.ax = _two_d._freq2d(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.points,
+                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
+                        **self.kwargs)
 
             elif event.key in plot['phase']:
                 self.params.update('phase')

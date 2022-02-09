@@ -121,7 +121,7 @@ def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
     else:
         if xscale == "log":
             ax[0].xaxis.set_major_locator(LogLocatorITAToolbox())
-        ax[0].set_yscale(xscale)
+        ax[0].set_xscale(xscale)
         ax[0].xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     # color limits and colorbar

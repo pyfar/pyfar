@@ -233,11 +233,12 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     _utils._tight_layout()
 
     # manage interaction
-    # plot_parameter = ia.PlotParameter(
-    #     'freq', dB_freq=dB, log_prefix_freq=log_prefix,
-    #     log_reference=log_reference, xscale=xscale)
-    # interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
-    # ax.interaction = interaction
+    plot_parameter = ia.PlotParameter(
+        'freq2d', dB_freq=dB, log_prefix_freq=log_prefix,
+        log_reference=log_reference, xscale=xscale, points=points,
+        orientation=orientation, cmap=cmap, colorbar=colorbar)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
 
     if colorbar:
         ax = [ax, cb.ax]
