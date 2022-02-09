@@ -350,7 +350,7 @@ def _prepare_2d_plot(data, instances, colorbar, ax, **kwargs):
 
     # check the kwargs
     if "shading" not in kwargs:
-        kwargs["shading"] = "gouraud"
+        kwargs["shading"] = "nearest"
 
     return fig, ax, kwargs
 
