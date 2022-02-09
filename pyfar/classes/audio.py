@@ -624,7 +624,14 @@ class Signal(FrequencyData, TimeData):
 
     @FrequencyData.freq.getter
     def freq(self):
-        """Return the (normalized) frequency domain data."""
+        """Return the normalized frequency domain data.
+
+        The normalized data is usually used for inspecting the data, e.g.,
+        using plots or when extracting information such as the amplitude of
+        harmonic components. Most processing operations, e.g., frequency
+        domain convolution, require the non-normalized data stored as
+        ``freq_raw``.
+        """
         data = fft.normalization(
                 self.freq_raw, self.n_samples, self.sampling_rate,
                 self.fft_norm, inverse=False)
@@ -632,7 +639,7 @@ class Signal(FrequencyData, TimeData):
 
     @freq.setter
     def freq(self, value):
-        """Set the (normalized) frequency domain data."""
+        """Set the normalized frequency domain data."""
         data = np.atleast_2d(np.asarray(value))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
@@ -646,13 +653,39 @@ class Signal(FrequencyData, TimeData):
                 self._fft_norm, inverse=True)
         self._data = data_denorm
 
+    @property
+    def freq_raw(self):
+        """Return the frequency domain data without normalization.
+
+        Most processing operations, e.g., frequency
+        domain convolution, require the non-normalized data.
+        The normalized data stored as ``freq`` is usually used for inspecting
+        the data, e.g., using plots or when extracting information such as the
+        amplitude of harmonic components.
+        """
+        self.domain = 'freq'
+        return self._data
+
+    @freq_raw.setter
+    def freq_raw(self, value):
+        """Set the frequency domain data without normalization."""
+        data = np.atleast_2d(np.asarray(value))
+        # Check n_samples
+        if data.shape[-1] != self.n_bins:
+            warnings.warn(UserWarning((
+                "Number of frequency bins changed, assuming an even "
+                "number of samples from the number of frequency bins.")))
+            self._n_samples = (data.shape[-1] - 1)*2
+        self._domain = 'freq'
+        self._data = data
+
     @_Audio.domain.setter
     def domain(self, new_domain):
         """Set the domain of the signal."""
         if new_domain not in self._VALID_DOMAINS:
             raise ValueError("Incorrect domain, needs to be time/freq.")
 
-        if not (self._domain == new_domain):
+        if self._domain != new_domain:
             # Only process if we change domain
             if new_domain == 'time':
                 # If the new domain should be time, we had a saved spectrum
@@ -716,12 +749,6 @@ class Signal(FrequencyData, TimeData):
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
         self._fft_norm = value
-
-    @property
-    def freq_raw(self):
-        """Return the frequency domain data (without normalization)."""
-        self.domain = 'freq'
-        return self._data
 
     def _assert_matching_meta_data(self, other):
         """Check if the meta data matches across two Signal objects."""
@@ -1011,13 +1038,11 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
 
     # check if to return an audio object
     if audio_type == Signal:
-        # apply desired fft normalization
-        if domain == 'freq':
-            result = fft.normalization(result, n_samples, sampling_rate,
-                                       fft_norm)
-
+        # Set unnormalized spectrum
         result = Signal(
-            result, sampling_rate, n_samples, domain, fft_norm=fft_norm)
+            result, sampling_rate, n_samples, domain, fft_norm='none')
+        # Set fft norm
+        result.fft_norm = fft_norm
     elif audio_type == TimeData:
         result = TimeData(result, times)
     elif audio_type == FrequencyData:

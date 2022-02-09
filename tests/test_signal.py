@@ -398,9 +398,24 @@ def test__repr__(capfd):
 
 
 def test_freq_raw():
-    """Test for unnormalized spectrum."""
+    """Test to access unnormalized spectrum."""
     signal = Signal([1, 0, 0, 0], 44100, domain='time')
     npt.assert_allclose(signal.freq_raw, np.array([[1., 1., 1.]]))
     signal.fft_norm = 'amplitude'
     npt.assert_allclose(signal.freq, np.array([[1., 2., 1.]])/4)
     npt.assert_allclose(signal.freq_raw, np.array([[1., 1., 1.]]))
+
+
+def test_setter_freq_raw():
+    """Test if attribute freq_raw is set correctly."""
+    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
+    signal.freq_raw = np.array([[1., 2., 3.]])
+    assert signal.domain == 'freq'
+    npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
+
+
+def test_setter_freq_raw_warning():
+    """Test the warning for estimating the number of samples from n_bins."""
+    signal = Signal([1, 2, 3], 44100, domain='freq', n_samples=4)
+    with pytest.warns(UserWarning, match="Number of frequency bins changed"):
+        signal.freq_raw = [1, 2, 3, 4]
