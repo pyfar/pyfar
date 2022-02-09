@@ -18,6 +18,7 @@ from .line import (
 
 from .two_d import (
     time2d,
+    freq2d,
     spectrogram
 )
 
@@ -36,6 +37,7 @@ from .utils import (
 
 __all__ = [
     'freq',
+    'freq2d',
     'time',
     'time2d',
     'phase',

@@ -298,7 +298,7 @@ def _log_prefix(signal):
     return log_prefix
 
 
-def _prepare_2d_plot(data, instances, colorbar, ax):
+def _prepare_2d_plot(data, instances, colorbar, ax, **kwargs):
     """Check and prepare input for 2D plots
 
     Parameters
@@ -328,6 +328,8 @@ def _prepare_2d_plot(data, instances, colorbar, ax):
     -------
     fig, ax : matplotlib objects
         The prepared figure and axis objects for plotting
+    kwargs : keyword arguments
+        With added default value for shading if it was not contained
     """
 
     # check input
@@ -346,7 +348,11 @@ def _prepare_2d_plot(data, instances, colorbar, ax):
     if not isinstance(ax, (np.ndarray, list)):
         ax = [ax, None]
 
-    return fig, ax
+    # check the kwargs
+    if "shading" not in kwargs:
+        kwargs["shading"] = "gouraud"
+
+    return fig, ax, kwargs
 
 
 def _add_colorbar(colorbar, fig, ax, qm, label):
