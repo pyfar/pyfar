@@ -298,7 +298,7 @@ def _log_prefix(signal):
     return log_prefix
 
 
-def _prepare_2d_plot(data, instances, colorbar, ax, **kwargs):
+def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
     """
     Check and prepare input for 2D plots
 
@@ -348,6 +348,11 @@ def _prepare_2d_plot(data, instances, colorbar, ax, **kwargs):
     if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
         raise ValueError('A list of axes can not be used if colorbar is False')
 
+    if points is None:
+        points = np.arange(data.cshape[0])
+    elif len(points) != data.cshape[0]:
+        raise ValueError('length of points must match signal.cshape[0]')
+
     # prepare the figure and axis for plotting the data and colorbar
     fig, ax = _prepare_plot(ax)
     if not isinstance(ax, (np.ndarray, list)):
@@ -357,7 +362,7 @@ def _prepare_2d_plot(data, instances, colorbar, ax, **kwargs):
     if "shading" not in kwargs:
         kwargs["shading"] = "nearest"
 
-    return fig, ax, kwargs
+    return fig, ax, points, kwargs
 
 
 def _add_colorbar(colorbar, fig, ax, qm, label):

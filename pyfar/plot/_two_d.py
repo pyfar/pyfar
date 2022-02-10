@@ -15,8 +15,8 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
             orientation, cmap, colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
-    fig, ax, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, TimeData), colorbar, ax, **kwargs)
+    fig, ax, points, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, TimeData), points, ax, colorbar, **kwargs)
     _utils._check_time_unit(unit)
 
     # prepare input
@@ -52,9 +52,6 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     axis[0].set_label_text(f"Time in {unit}")
     ax_lim[0](times[0], times[-1])
 
-    if points is None:
-        points = np.arange(signal.time.shape[0])
-
     # plot data
     points_x = points if orientation == "vertical" else times
     points_y = times if orientation == "vertical" else points
@@ -74,8 +71,8 @@ def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
             cmap, colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
-    fig, ax, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, FrequencyData), colorbar, ax, **kwargs)
+    fig, ax, points, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, FrequencyData), points, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -105,9 +102,6 @@ def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
-    if points is None:
-        points = np.arange(signal.time.shape[0])
-
     if xscale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
     ax_scale[0](xscale)
@@ -132,8 +126,8 @@ def _phase2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
              ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
-    fig, ax, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, FrequencyData), colorbar, ax, **kwargs)
+    fig, ax, points, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, FrequencyData), points, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -152,9 +146,6 @@ def _phase2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
     axis[1].set_label_text("Points")
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
-
-    if points is None:
-        points = np.arange(signal.time.shape[0])
 
     # plot data
     points_x = points if orientation == "vertical" else signal.frequencies
