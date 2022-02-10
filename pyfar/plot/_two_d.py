@@ -186,6 +186,7 @@ def _group_delay2d(signal, unit, xscale, points, orientation, cmap, colorbar,
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     data = dsp.group_delay(signal)
+    data = np.reshape(data, signal.freq.shape)
     data = data.T if orientation == "vertical" else data
     # auto detect the unit
     if unit is None:
