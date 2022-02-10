@@ -469,8 +469,13 @@ def test_matrix_multiplication_higher_shape():
 
 def test_matrix_multiplication_shape_mismatch():
     """Test default behavior for signals"""
+    # Signals
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = pf.signals.impulse(10, amplitude=np.array([[1, 2], [3, 4]]))
+    with raises(ValueError, match="The data shapes"):
+        pf.matrix_multiplication((x, y))
+    # Signal and array
+    y = np.ones((2, 2, 6)) * np.array([[1, 2], [3, 4]])[..., None]
     with raises(ValueError, match="The data shapes"):
         pf.matrix_multiplication((x, y))
 
@@ -517,4 +522,34 @@ def test_matrix_multiplication_signal_times_array():
     z = y @ x
     desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
         * np.ones((3, 3, 6))
+    npt.assert_allclose(z.freq, desired, atol=1e-15)
+
+
+def test_matrix_multiplication_TimeData_times_array():
+    """Test multiplication of TimeData with array"""
+    times = np.arange(10)
+    xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
+    x = pf.TimeData(xdata, times)
+    y = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
+    z = x @ y
+    desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
+    npt.assert_allclose(z.time, desired, atol=1e-15)
+    z = y @ x
+    desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
+        * np.ones((3, 3, 10))
+    npt.assert_allclose(z.time, desired, atol=1e-15)
+
+
+def test_matrix_multiplication_FrequencyData_times_array():
+    """Test multiplication of FrequencyData with array"""
+    times = np.arange(10)
+    xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
+    x = pf.FrequencyData(xdata, times)
+    y = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
+    z = x @ y
+    desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
+    npt.assert_allclose(z.freq, desired, atol=1e-15)
+    z = y @ x
+    desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
+        * np.ones((3, 3, 10))
     npt.assert_allclose(z.freq, desired, atol=1e-15)

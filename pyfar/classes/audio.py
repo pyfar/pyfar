@@ -21,6 +21,8 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
+    # indicate use of _Audio arithmetic operations (e.g. __rmatmul__)
+    __array_priority__ = 1.0
 
     def __init__(self, domain, comment=None, dtype=np.double):
 
@@ -531,7 +533,7 @@ class FrequencyData(_Audio):
         return matrix_multiplication((self, data), 'freq')
 
     def __rmatmul__(self, data):
-        return matrix_multiplication(tuple(data, self), 'freq')
+        return matrix_multiplication((data, self), 'freq')
 
 
 class Signal(FrequencyData, TimeData):
