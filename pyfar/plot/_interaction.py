@@ -717,7 +717,7 @@ class Interaction(object):
                 self.ax = ax
 
             elif event.key in plot['time_freq']:
-                self.params.update('time')
+                self.params.update('time_freq')
                 ax = _line._time_freq(
                     self.signal, prm.dB_time, prm.dB_freq,
                     prm.log_prefix_time, prm.log_prefix_freq,
@@ -725,7 +725,7 @@ class Interaction(object):
                 self.ax = ax[0]
 
             elif event.key in plot['freq_phase']:
-                self.params.update('freq')
+                self.params.update('freq_phase')
                 ax = _line._freq_phase(
                     self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
@@ -733,7 +733,7 @@ class Interaction(object):
                 self.ax = ax[0]
 
             elif event.key in plot['freq_group_delay']:
-                self.params.update('freq')
+                self.params.update('freq_group_delay')
                 ax = _line._freq_group_delay(
                     self.signal, prm.dB_freq, prm.log_prefix_freq,
                     prm.log_reference, prm.unit, prm.xscale,

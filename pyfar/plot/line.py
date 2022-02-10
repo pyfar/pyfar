@@ -322,7 +322,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB_time, log_prefix_time=log_prefix_time,
+        'time_freq', dB_time=dB_time, log_prefix_time=log_prefix_time,
         log_prefix_freq=log_prefix_freq, log_reference=log_reference)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
@@ -386,7 +386,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
+        'freq_phase', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
@@ -457,7 +457,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
+        'freq_group_delay', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax[0], style, plot_parameter, **kwargs)
