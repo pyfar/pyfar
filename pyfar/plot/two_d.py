@@ -19,7 +19,7 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     ----------
     signal : Signal, TimeData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        $m>0$.
+        :math:`m>0`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -39,8 +39,8 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         Points at which the channels of `signal` were sampled (e.g. azimuth
         angles or x values). `points` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
-        default is ``'None'`` which labels the channels in `signal` from
-        0 to N.
+        default is ``'None'`` which labels the N channels in `signal` from
+        0 to N-1.
     orientation: string, optional
         ``'vertical'``
             The channels of `signal` will be plotted as as vertical lines.
@@ -108,7 +108,7 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.time2d(signal, points=angles)
+        >>> pf.plot.time2d(signal)
     """
 
     with context(style):
@@ -143,9 +143,8 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted. Multidimensional data are flattened for
-        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
-        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
+        The input data to be plotted. `signal.cshape` must be `(m, )` with
+        :math:`m>0`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -164,8 +163,8 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         Points at which the channels of `signal` were sampled (e.g. azimuth
         angles or x values). `points` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
-        default is ``'None'`` which labels the channels in `signal` from
-        0 to N.
+        default is ``'None'`` which labels the N channels in `signal` from
+        0 to N-1.
     orientation: string, optional
         ``'vertical'``
             The channels of `signal` will be plotted as as vertical lines.
@@ -222,8 +221,14 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     .. plot::
 
         >>> import pyfar as pf
-        >>> sine = pf.signals.sine(100, 4410)
-        >>> pf.plot.freq(sine)
+        >>> import numpy as np
+        >>> # generate the signal
+        >>> angles = np.arange(0, 180) / 180 * np.pi
+        >>> delays = np.round(100 * np.sin(angles)).astype(int)
+        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
+        >>> signal = pf.signals.impulse(128, delays, amplitudes)
+        >>> # plot the signal
+        >>> pf.plot.freq2d(signal, dB=False)
     """
 
     with context(style):
