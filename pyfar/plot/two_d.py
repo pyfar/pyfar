@@ -352,11 +352,11 @@ def phase2d(signal, deg=False, unwrap=False, xscale='log', points=None,
     _utils._tight_layout()
 
     # manage interaction
-    # plot_parameter = ia.PlotParameter(
-    #     'phase2d', deg=deg, unwrap=unwrap, xscale=xscale, points=points,
-    #     orientation=orientation, cmap=cmap, colorbar=colorbar)
-    # interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
-    # ax.interaction = interaction
+    plot_parameter = ia.PlotParameter(
+        'phase2d', deg=deg, unwrap=unwrap, xscale=xscale, points=points,
+        orientation=orientation, cmap=cmap, colorbar=colorbar)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
 
     if colorbar:
         ax = [ax, cb.ax]

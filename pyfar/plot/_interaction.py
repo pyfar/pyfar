@@ -304,6 +304,26 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
+        elif plot == 'phase2d':
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            self._x_param = None
+            self._x_values = None
+            # y-axis
+            self._y_type = ['freq', 'other']
+            self._y_param = 'xscale'
+            self._y_values = ['log', 'linear']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = ['other', 'other', 'other']
+            self._cm_id = 0
+            self._cm_param = 'unwrap'
+            self._cm_values = [True, False, "360"]
+            self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # cycler type
+            self._cycler_type = None
+
         elif plot == 'group_delay':
             # x-axis
             self._x_type = ['freq', 'other']
@@ -668,10 +688,17 @@ class Interaction(object):
                         **self.kwargs_2d)[0]
 
             elif event.key in plot['phase']:
-                self.params.update('phase')
-                self.ax = _line._phase(
-                    self.signal, prm.deg, prm.unwrap, prm.xscale,
-                    self.ax, **self.kwargs_line)
+                if self.params.plot_type == "line":
+                    self.params.update('phase')
+                    self.ax = _line._phase(
+                        self.signal, prm.deg, prm.unwrap, prm.xscale,
+                        self.ax, **self.kwargs_line)
+                if self.params.plot_type == "2d":
+                    self.params.update('phase2d')
+                    self.ax = _two_d._phase2d(
+                        self.signal, prm.deg, prm.unwrap, prm.xscale,
+                        prm.points, prm.orientation, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_line)[0]
 
             elif event.key in plot['group_delay']:
                 self.params.update('group_delay')

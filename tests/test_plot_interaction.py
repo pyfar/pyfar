@@ -159,6 +159,10 @@ def test_toggle_2d_plots():
             'shortcut': sc_plot["freq"]["key"][0],
             'xlabel': ['Points'],
             'ylabel': ['Frequency in Hz']},
+        'phase2d': {
+            'shortcut': sc_plot["freq"]["key"][0],
+            'xlabel': ['Points'],
+            'ylabel': ['Frequency in Hz']},
         'spectrogram': {
             'shortcut': sc_plot["spectrogram"]["key"][0],
             'xlabel': ['Time in s'],

@@ -312,8 +312,8 @@ def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
         The input data for the plot function
     instance : tuple of pyfar audio classes
         Tuple of classes that can be used for the plot function that calls this
-    colorbar : bool
-        Flag indicating if a colobar should be added to the plot
+    points : None, array like
+        parameter from 2d plots against which the channels are plotted
     ax : matplotlib.pyplot.axes
         Axes to plot on.
 
@@ -328,11 +328,15 @@ def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
             If a list or array of two axes is passed, the first is used to plot
             the data and the second to plot the colorbar. In this case
             `colorbar` must be ``True``
+    colorbar : bool
+        Flag indicating if a colobar should be added to the plot
 
     Returns
     -------
     fig, ax : matplotlib objects
         The prepared figure and axis objects for plotting
+    points : array like
+        parameter from 2d plots against which the channels are plotted
     kwargs : keyword arguments
         With added default value for shading if it was not contained
     """
@@ -403,14 +407,14 @@ def _phase_label(unwrap, deg):
     phase_label = 'Phase '
 
     if deg:
-        phase_label += 'in degree '
+        phase_label += 'in degree'
     else:
-        phase_label += 'in radians '
+        phase_label += 'in radians'
 
     if unwrap == '360':
-        phase_label += '(wrapped to 360)'
+        phase_label += ' (wrapped to 360)'
     elif unwrap is True:
-        phase_label += '(unwrapped)'
+        phase_label += ' (unwrapped)'
     elif not isinstance(unwrap, bool):
         raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 

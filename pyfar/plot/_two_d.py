@@ -193,8 +193,8 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 
     # check input
     # check input and prepare the figure and axis
-    fig, ax, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal), colorbar, ax, **kwargs)
+    fig, ax, _, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal), None, ax, colorbar, **kwargs)
     _utils._check_time_unit(unit)
     _utils._check_axis_scale(yscale, 'y')
 
