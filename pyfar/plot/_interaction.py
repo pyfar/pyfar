@@ -380,40 +380,14 @@ class PlotParameter(object):
         elif plot == 'time_freq':
             # same as time
             # (currently interaction uses only the axis of the top plot)
-
-            # x-axis
-            self._x_type = ['other']
-            self._x_id = 0
-            # y-axis
-            self._y_type = ['other', 'dB']
-            self._y_param = 'dB_time'
-            self._y_values = [False, True]
-            self._y_id = self._y_values.index(getattr(self, self._y_param))
-            # color map
-            self._cm_type = None
-            self._cm_id = None
-            # cycler type
-            self._cycler_type = 'line'
+            self.update("time")
+            return
 
         elif plot in ['freq_phase', 'freq_group_delay']:
             # same as freq
             # (currently interaction uses only the axis of the top plot)
-
-            # x-axis
-            self._x_type = ['freq', 'other']
-            self._x_param = 'xscale'
-            self._x_values = ['log', 'linear']
-            self._x_id = self._x_values.index(getattr(self, self._x_param))
-            # y-axis
-            self._y_type = ['dB', 'other']
-            self._y_param = 'dB_freq'
-            self._y_values = [True, False]
-            self._y_id = self._y_values.index(getattr(self, self._y_param))
-            # color map
-            self._cm_type = None
-            self._cm_id = None
-            # cycler type
-            self._cycler_type = 'line'
+            self.update("freq")
+            return
 
         else:
             raise ValueError(f"{plot} not known.")
