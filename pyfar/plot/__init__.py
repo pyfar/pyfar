@@ -21,6 +21,9 @@ from .two_d import (
     freq2d,
     phase2d,
     group_delay2d,
+    time_freq2d,
+    freq_phase2d,
+    freq_group_delay2d,
     spectrogram
 )
 
@@ -48,8 +51,11 @@ __all__ = [
     'group_delay2d',
     'spectrogram',
     'time_freq',
+    'time_freq2d',
     'freq_phase',
+    'freq_phase2d',
     'freq_group_delay',
+    'freq_group_delay2d',
     'custom_subplots',
     'scatter',
     'quiver',

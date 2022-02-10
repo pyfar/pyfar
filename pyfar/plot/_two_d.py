@@ -180,7 +180,7 @@ def _group_delay2d(signal, unit, xscale, points, orientation, cmap, colorbar,
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, points, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, FrequencyData), points, ax, colorbar, **kwargs)
+        signal, (Signal), points, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -226,6 +226,62 @@ def _group_delay2d(signal, unit, xscale, points, orientation, cmap, colorbar,
     cb = _utils._add_colorbar(colorbar, fig, ax, qm, f"Group delay in {unit}")
 
     return ax[0], qm, cb
+
+
+def _time_freq2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
+                 log_reference, xscale, unit, points, orientation, cmap,
+                 colorbar, ax, **kwargs):
+    """
+    Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
+    """
+
+    fig, ax = _utils._prepare_plot(ax, (2, 1))
+
+    _, qm_0, cb_0 = _time2d(
+        signal, dB_time, log_prefix_time, log_reference, unit, points,
+        orientation, cmap, colorbar, ax[0], **kwargs)
+    _, qm_1, cb_1 = _freq2d(
+        signal, dB_freq, log_prefix_freq, log_reference, xscale, points,
+        orientation, cmap, colorbar, ax[1], **kwargs)
+    fig.align_ylabels()
+
+    return ax, [qm_0, qm_1], [cb_0, cb_1]
+
+
+def _freq_phase2d(signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
+                  points, orientation, cmap, colorbar, ax, **kwargs):
+    """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
+
+    fig, ax = _utils._prepare_plot(ax, (2, 1))
+
+    _, qm_0, cb_0 = _freq2d(signal, dB, log_prefix, log_reference, xscale,
+                            points, orientation, cmap, colorbar, ax[0],
+                            **kwargs)
+    _, qm_1, cb_1 =  _phase2d(signal, deg, unwrap, xscale, points, orientation,
+                              cmap, colorbar, ax[1], **kwargs)
+    ax[0].set_xlabel(None)
+    fig.align_ylabels()
+
+    return ax, [qm_0, qm_1], [cb_0, cb_1]
+
+
+def _freq_group_delay2d(signal, dB, log_prefix, log_reference, unit, xscale,
+                        points, orientation, cmap, colorbar, ax, **kwargs):
+    """
+    Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
+    """
+
+    fig, ax = _utils._prepare_plot(ax, (2, 1))
+
+    _, qm_0, cb_0 = _freq2d(signal, dB, log_prefix, log_reference, xscale,
+                            points, orientation, cmap, colorbar, ax[0],
+                            **kwargs)
+    _, qm_1, cb_1 =  _group_delay2d(signal, unit, xscale, points, orientation,
+                                    cmap, colorbar, ax[1], **kwargs)
+    ax[0].set_xlabel(None)
+    fig.align_ylabels()
+
+    return ax, [qm_0, qm_1], [cb_0, cb_1]
 
 
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,

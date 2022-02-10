@@ -381,12 +381,42 @@ class PlotParameter(object):
             # same as time
             # (currently interaction uses only the axis of the top plot)
             self.update("time")
+            self._plot = "time_freq"
             return
 
-        elif plot in ['freq_phase', 'freq_group_delay']:
+        elif plot == 'time_freq2d':
+            # same as time2d
+            # (currently interaction uses only the axis of the top plot)
+            self.update("time2d")
+            self._plot = "time_freq"
+            return
+
+        elif plot == 'freq_phase':
             # same as freq
             # (currently interaction uses only the axis of the top plot)
             self.update("freq")
+            self._plot = "freq_phase"
+            return
+
+        elif plot == 'freq_phase2d':
+            # same as freq
+            # (currently interaction uses only the axis of the top plot)
+            self.update("freq2d")
+            self._plot = "freq_phase"
+            return
+
+        elif plot == 'freq_group_delay':
+            # same as freq
+            # (currently interaction uses only the axis of the top plot)
+            self.update("freq")
+            self._plot = "freq_group_delay"
+            return
+
+        elif plot == 'freq_group_delay2d':
+            # same as freq
+            # (currently interaction uses only the axis of the top plot)
+            self.update("freq2d")
+            self._plot = "freq_group_delay"
             return
 
         else:
@@ -691,7 +721,7 @@ class Interaction(object):
                     self.ax = _two_d._phase2d(
                         self.signal, prm.deg, prm.unwrap, prm.xscale,
                         prm.points, prm.orientation, prm.cmap, prm.colorbar,
-                        self.ax, **self.kwargs_line)[0]
+                        self.ax, **self.kwargs_2d)[0]
 
             elif event.key in plot['group_delay']:
                 if self.params.plot_type == "line":
@@ -704,7 +734,7 @@ class Interaction(object):
                     self.ax = _two_d._group_delay2d(
                         self.signal, prm.unit, prm.xscale, prm.points,
                         prm.orientation, prm.cmap, prm.colorbar, self.ax,
-                        **self.kwargs_line)[0]
+                        **self.kwargs_2d)[0]
 
             elif event.key in plot['spectrogram']:
                 self.params.update('spectrogram')
@@ -717,28 +747,57 @@ class Interaction(object):
                 self.ax = ax
 
             elif event.key in plot['time_freq']:
-                self.params.update('time_freq')
-                ax = _line._time_freq(
-                    self.signal, prm.dB_time, prm.dB_freq,
-                    prm.log_prefix_time, prm.log_prefix_freq,
-                    prm.log_reference, prm.xscale, self.ax, **self.kwargs_line)
-                self.ax = ax[0]
+                if self.params.plot_type == "line":
+                    self.params.update('time_freq')
+                    ax = _line._time_freq(
+                        self.signal, prm.dB_time, prm.dB_freq,
+                        prm.log_prefix_time, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.unit, self.ax,
+                        **self.kwargs_line)
+                    self.ax = ax[0]
+                elif self.params.plot_type == "2d":
+                    self.params.update('time_freq2d')
+                    ax = _two_d._time_freq2d(
+                        self.signal, prm.dB_time, prm.dB_freq,
+                        prm.log_prefix_time, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.unit, prm.points,
+                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
+                        **self.kwargs_2d)[0]
+                    self.ax = ax[0]
 
             elif event.key in plot['freq_phase']:
-                self.params.update('freq_phase')
-                ax = _line._freq_phase(
-                    self.signal, prm.dB_freq, prm.log_prefix_freq,
-                    prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
-                    self.ax, **self.kwargs_line)
-                self.ax = ax[0]
+                if self.params.plot_type == "line":
+                    self.params.update('freq_phase')
+                    ax = _line._freq_phase(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
+                        self.ax, **self.kwargs_line)
+                    self.ax = ax[0]
+                elif self.params.plot_type == "2d":
+                    self.params.update('freq_phase2d')
+                    ax = _two_d._freq_phase2d(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
+                        prm.points, prm.orientation, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_2d)[0]
+                    self.ax = ax[0]
 
             elif event.key in plot['freq_group_delay']:
-                self.params.update('freq_group_delay')
-                ax = _line._freq_group_delay(
-                    self.signal, prm.dB_freq, prm.log_prefix_freq,
-                    prm.log_reference, prm.unit, prm.xscale,
-                    self.ax, **self.kwargs_line)
-                self.ax = ax[0]
+                if self.params.plot_type == "line":
+                    self.params.update('freq_group_delay')
+                    ax = _line._freq_group_delay(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.unit, prm.xscale,
+                        self.ax, **self.kwargs_line)
+                    self.ax = ax[0]
+                if self.params.plot_type == "2d":
+                    self.params.update('freq_group_delay2d')
+                    ax = _two_d._freq_group_delay2d(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.unit, prm.xscale, prm.points,
+                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
+                        **self.kwargs_2d)[0]
+                    self.ax = ax[0]
 
             # update figure
             if self.params._cycler_type == 'line':
