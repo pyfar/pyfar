@@ -6,13 +6,15 @@ from . import _utils
 import warnings
 from .ticker import (
     LogFormatterITAToolbox,
-    LogLocatorITAToolbox)
+    LogLocatorITAToolbox,
+    MultipleFractionLocator,
+    MultipleFractionFormatter)
 
 
 def _time2d(signal, dB, log_prefix, log_reference, unit, points,
             orientation, cmap, colorbar, ax, **kwargs):
 
-    # check input and prepare the figure and axis
+    # check input and prepare the figure, axis, and common parameters
     fig, ax, kwargs = _utils._prepare_2d_plot(
         signal, (Signal, TimeData), colorbar, ax, **kwargs)
     _utils._check_time_unit(unit)
@@ -40,16 +42,15 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
         times = signal.times * factor
 
     # setup axis label and data
-    if orientation == "vertical":
-        ax[0].set_xlabel("Points")
-        ax[0].set_ylabel(f"Time in {unit}")
-        _utils._set_axlim(ax[0], ax[0].set_ylim, times[0], times[-1],
-                          ax[0].get_ylim())
-    else:
-        ax[0].set_ylabel("Points")
-        ax[0].set_xlabel(f"Time in {unit}")
-        _utils._set_axlim(ax[0], ax[0].set_xlim, times[0], times[-1],
-                          ax[0].get_xlim())
+    axis = [ax[0].yaxis, ax[0].xaxis]
+    ax_lim = [ax[0].set_ylim, ax[0].set_xlim]
+    if orientation == "horizontal":
+        axis = np.roll(axis, 1)
+        ax_lim = np.roll(ax_lim, 1)
+
+    axis[1].set_label_text("Points")
+    axis[0].set_label_text(f"Time in {unit}")
+    ax_lim[0](times[0], times[-1])
 
     if points is None:
         points = np.arange(signal.time.shape[0])
@@ -72,7 +73,7 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
 def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
             cmap, colorbar, ax, **kwargs):
 
-    # check input and prepare the figure and axis
+    # check input and prepare the figure, axis, and common parameters
     fig, ax, kwargs = _utils._prepare_2d_plot(
         signal, (Signal, FrequencyData), colorbar, ax, **kwargs)
     _utils._check_axis_scale(xscale)
@@ -92,17 +93,65 @@ def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
         data = np.abs(data)
 
     # setup axis label and data
-    labels = np.array(["Points", "Frequency in Hz"])
+    axis = [ax[0].yaxis, ax[0].xaxis]
+    ax_lim = [ax[0].set_ylim, ax[0].set_xlim]
+    ax_scale = [ax[0].set_yscale, ax[0].set_xscale]
     if orientation == "horizontal":
-        labels = np.roll(labels, 1)
-    axlims = (ax[0].set_ylim, ax[0].get_ylim()) if orientation == "vertical" \
-        else (ax[0].set_xlim, ax[0].get_xlim())
+        axis = np.roll(axis, 1)
+        ax_lim = np.roll(ax_lim, 1)
+        ax_scale = np.roll(ax_scale, 1)
 
-    ax[0].set_xlabel(labels[0])
-    ax[0].set_ylabel(labels[1])
-    _utils._set_axlim(
-        ax[0], axlims[0], _utils._lower_frequency_limit(signal),
-        signal.frequencies[-1], axlims[1])
+    axis[1].set_label_text("Points")
+    axis[0].set_label_text("Frequency in Hz")
+    ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
+
+    if points is None:
+        points = np.arange(signal.time.shape[0])
+
+    if xscale == "log":
+        axis[0].set_major_locator(LogLocatorITAToolbox())
+    ax_scale[0](xscale)
+    axis[0].set_major_formatter(LogFormatterITAToolbox())
+
+    # plot data
+    points_x = points if orientation == "vertical" else signal.frequencies
+    points_y = signal.frequencies if orientation == "vertical" else points
+    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap)
+
+    # color limits and colorbar
+    if dB:
+        qm.set_clim(ymin, ymax)
+
+    cb = _utils._add_colorbar(colorbar, fig, ax, qm,
+                              "Magnitude in dB" if dB else "Magnitude")
+
+    return ax[0], qm, cb
+
+
+def _phase2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
+             ax, **kwargs):
+
+    # check input and prepare the figure, axis, and common parameters
+    fig, ax, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, FrequencyData), colorbar, ax, **kwargs)
+    _utils._check_axis_scale(xscale)
+
+    # prepare input
+    data = dsp.phase(signal, deg=deg, unwrap=unwrap)
+    data = data.T if orientation == "vertical" else data
+
+    # setup axis label and data
+    axis = [ax[0].yaxis, ax[0].xaxis]
+    ax_lim = [ax[0].set_ylim, ax[0].set_xlim]
+    ax_scale = [ax[0].set_yscale, ax[0].set_xscale]
+    if orientation == "horizontal":
+        axis = np.roll(axis, 1)
+        ax_lim = np.roll(ax_lim, 1)
+        ax_scale = np.roll(ax_scale, 1)
+
+    axis[1].set_label_text("Points")
+    axis[0].set_label_text("Frequency in Hz")
+    ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
     if points is None:
         points = np.arange(signal.time.shape[0])
@@ -112,23 +161,25 @@ def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
     points_y = signal.frequencies if orientation == "vertical" else points
     qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap)
 
-    if orientation == "vertical":
-        if xscale == "log":
-            ax[0].yaxis.set_major_locator(LogLocatorITAToolbox())
-        ax[0].set_yscale(xscale)
-        ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
-    else:
-        if xscale == "log":
-            ax[0].xaxis.set_major_locator(LogLocatorITAToolbox())
-        ax[0].set_xscale(xscale)
-        ax[0].xaxis.set_major_formatter(LogFormatterITAToolbox())
+    if xscale == "log":
+        axis[0].set_major_locator(LogLocatorITAToolbox())
+    ax_scale[0](xscale)
+    axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # color limits and colorbar
-    if dB:
-        qm.set_clim(ymin, ymax)
+    phase_margin = 5 if deg else np.radians(5)
+    qm.set_clim(np.nanmin(data) - phase_margin, np.nanmax(data) + phase_margin)
 
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
-                              "Magnitude in dB" if dB else "Magnitude")
+                              _utils._phase_label(unwrap, deg))
+
+    if not deg and (not unwrap or unwrap == "360"):
+        # nice tick formatting is not done for unwrap=True. In this case
+        # it can create 1000 or more ticks.
+        cb.locator = MultipleFractionLocator(np.pi, 2)
+        cb.formatter = MultipleFractionFormatter(
+            nominator=1, denominator=2, base=np.pi, base_str=r'\pi')
+        cb.update_ticks()
 
     return ax[0], qm, cb
 

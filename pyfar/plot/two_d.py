@@ -135,10 +135,10 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
            cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
            style='light', **kwargs):
     """
-    Plot the magnitude spectrum.
+    2D plot of multi-channel magnitude spectrum with color coded magnitude.
 
     Plots ``abs(signal.freq)`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.plot()``.
+    ``matplotlib.pyplot.pcolormesh()``.
 
     Parameters
     ----------
@@ -244,6 +244,119 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
     ax.interaction = interaction
+
+    if colorbar:
+        ax = [ax, cb.ax]
+
+    return ax, qm, cb
+
+
+def phase2d(signal, deg=False, unwrap=False, xscale='log', points=None,
+            orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+            colorbar=True, ax=None, style='light', **kwargs):
+    """
+    2D plot of multi-channel phase spectrum with color coded phase.
+
+    Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
+    ``matplotlib.pyplot.pcolormesh()``.
+
+    Parameters
+    ----------
+    signal : Signal, FrequencyData
+        The input data to be plotted. `signal.cshape` must be `(m, )` with
+        :math:`m>0`.
+    deg : bool
+        Plot the phase in degrees. The default is ``False``, which plots the
+        phase in radians.
+    unwrap : bool, str
+        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        default is ``False``, which plots the wrapped phase.
+    xscale : str
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
+    points: array like, optional
+        Points at which the channels of `signal` were sampled (e.g. azimuth
+        angles or x values). `points` must be monotonously increasing/
+        decreasing and have as many entries as `signal` has channels. The
+        default is ``'None'`` which labels the N channels in `signal` from
+        0 to N-1.
+    orientation: string, optional
+        ``'vertical'``
+            The channels of `signal` will be plotted as as vertical lines.
+        ``'horizontal'``
+            The channels of `signal` will be plotted as horizontal lines.
+
+        The default is ``'vertical'``
+    colorbar : bool, optional
+        Control the colorbar. The default is ``True``, which adds a colorbar
+        to the plot. ``False`` omits the colorbar.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on.
+
+        ``None``
+            Use the current axis, or create a new axis (and figure) if there is
+            none.
+        ``ax``
+            If a single axis is passed, this is used for plotting. If
+            `colorbar` is ``True`` the space for the colorbar is taken from
+            this axis.
+        ``[ax, ax]``
+            If a list or array of two axes is passed, the first is used to plot
+            the data and the second to plot the colorbar. In this case
+            `colorbar` must be ``True``
+
+        The default is ``None``.
+    style : str
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
+    **kwargs
+        Keyword arguments that are passed to
+        ``matplotlib.pyplot.pcolormesh()``.
+
+    Returns
+    -------
+    ax : matplotlib.pyplot.axes
+        If `colorbar` is ``True`` an array of two axes is returned. The first
+        is the axis on which the data is plotted, the second is the axis of the
+        colorbar. If `colorbar` is ``False``, only the axis on which the data
+        is plotted is returned
+    quad_mesh : QuadMesh
+        The Matplotlib quad mesh collection. This can be used to manipulate the
+        way the data is displayed, e.g., by limiting the range of the colormap
+        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
+        by ``cb = fig.colorbar(qm, ...)``.
+    colorbar : Colorbar
+        The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
+        otherwise. This can be used to control the appearance of the colorbar,
+        e.g., the label can be set by ``colorbar.set_label()``.
+
+    Example
+    -------
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> # generate the signal
+        >>> angles = np.arange(0, 180) / 180 * np.pi
+        >>> delays = np.round(100 * np.sin(angles)).astype(int)
+        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
+        >>> signal = pf.signals.impulse(128, delays, amplitudes)
+        >>> # plot the signal
+        >>> pf.plot.phase2d(signal, unwrap=True)
+    """
+
+    with context(style):
+        ax, qm, cb = _two_d._phase2d(signal, deg, unwrap, xscale, points,
+                                     orientation, cmap, colorbar, ax, **kwargs)
+    _utils._tight_layout()
+
+    # manage interaction
+    # plot_parameter = ia.PlotParameter(
+    #     'phase2d', deg=deg, unwrap=unwrap, xscale=xscale, points=points,
+    #     orientation=orientation, cmap=cmap, colorbar=colorbar)
+    # interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    # ax.interaction = interaction
 
     if colorbar:
         ax = [ax, cb.ax]

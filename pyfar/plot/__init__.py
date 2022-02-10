@@ -19,6 +19,7 @@ from .line import (
 from .two_d import (
     time2d,
     freq2d,
+    phase2d,
     spectrogram
 )
 
@@ -41,6 +42,7 @@ __all__ = [
     'time',
     'time2d',
     'phase',
+    'phase2d',
     'group_delay',
     'spectrogram',
     'time_freq',

@@ -390,3 +390,23 @@ def _add_colorbar(colorbar, fig, ax, qm, label):
         cb = None
 
     return cb
+
+
+def _phase_label(unwrap, deg):
+    """Generate label for plotting the phase."""
+
+    phase_label = 'Phase '
+
+    if deg:
+        phase_label += 'in degree '
+    else:
+        phase_label += 'in radians '
+
+    if unwrap == '360':
+        phase_label += '(wrapped to 360)'
+    elif unwrap is True:
+        phase_label += '(unwrapped)'
+    elif not isinstance(unwrap, bool):
+        raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
+
+    return phase_label
