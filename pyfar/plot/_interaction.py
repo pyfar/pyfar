@@ -341,6 +341,25 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
+        elif plot == 'group_delay2d':
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            self._x_param = None
+            self._x_values = None
+            # y-axis
+            self._y_type = ['freq', 'other']
+            self._y_param = 'xscale'
+            self._y_values = ['log', 'linear']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = ['other', 'other', 'other', 'other', 'other']
+            self._cm_param = 'unit'
+            self._cm_values = [None, 's', 'ms', 'mus', 'samples']
+            self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # cycler type
+            self._cycler_type = None
+
         elif plot == 'spectrogram':
             # x-axis
             self._x_type = ['other']
@@ -701,10 +720,17 @@ class Interaction(object):
                         self.ax, **self.kwargs_line)[0]
 
             elif event.key in plot['group_delay']:
-                self.params.update('group_delay')
-                self.ax = _line._group_delay(
-                    self.signal, prm.unit, prm.xscale, self.ax,
-                    **self.kwargs_line)
+                if self.params.plot_type == "line":
+                    self.params.update('group_delay')
+                    self.ax = _line._group_delay(
+                        self.signal, prm.unit, prm.xscale, self.ax,
+                        **self.kwargs_line)
+                if self.params.plot_type == "2d":
+                    self.params.update('group_delay2d')
+                    self.ax = _two_d._group_delay2d(
+                        self.signal, prm.unit, prm.xscale, prm.points,
+                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
+                        **self.kwargs_line)[0]
 
             elif event.key in plot['spectrogram']:
                 self.params.update('spectrogram')

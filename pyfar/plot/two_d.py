@@ -364,6 +364,118 @@ def phase2d(signal, deg=False, unwrap=False, xscale='log', points=None,
     return ax, qm, cb
 
 
+def group_delay2d(signal, unit=None, xscale='log', points=None,
+                  orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+                  colorbar=True, ax=None, style='light', **kwargs):
+    """
+    2D color coded plot of multi-channel group delays.
+
+    Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
+    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
+
+    Parameters
+    ----------
+    signal : Signal, FrequencyData
+        The input data to be plotted. `signal.cshape` must be `(m, )` with
+        :math:`m>0`.
+    unit : str, None
+        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
+        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+    xscale : str
+        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
+        axis. The default is ``log``.
+    points: array like, optional
+        Points at which the channels of `signal` were sampled (e.g. azimuth
+        angles or x values). `points` must be monotonously increasing/
+        decreasing and have as many entries as `signal` has channels. The
+        default is ``'None'`` which labels the N channels in `signal` from
+        0 to N-1.
+    orientation: string, optional
+        ``'vertical'``
+            The channels of `signal` will be plotted as as vertical lines.
+        ``'horizontal'``
+            The channels of `signal` will be plotted as horizontal lines.
+
+        The default is ``'vertical'``
+    colorbar : bool, optional
+        Control the colorbar. The default is ``True``, which adds a colorbar
+        to the plot. ``False`` omits the colorbar.
+    ax : matplotlib.pyplot.axes
+        Axes to plot on.
+
+        ``None``
+            Use the current axis, or create a new axis (and figure) if there is
+            none.
+        ``ax``
+            If a single axis is passed, this is used for plotting. If
+            `colorbar` is ``True`` the space for the colorbar is taken from
+            this axis.
+        ``[ax, ax]``
+            If a list or array of two axes is passed, the first is used to plot
+            the data and the second to plot the colorbar. In this case
+            `colorbar` must be ``True``
+
+        The default is ``None``.
+    style : str
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. The default is ``light``.
+    **kwargs
+        Keyword arguments that are passed to
+        ``matplotlib.pyplot.pcolormesh()``.
+
+    Returns
+    -------
+    ax : matplotlib.pyplot.axes
+        If `colorbar` is ``True`` an array of two axes is returned. The first
+        is the axis on which the data is plotted, the second is the axis of the
+        colorbar. If `colorbar` is ``False``, only the axis on which the data
+        is plotted is returned
+    quad_mesh : QuadMesh
+        The Matplotlib quad mesh collection. This can be used to manipulate the
+        way the data is displayed, e.g., by limiting the range of the colormap
+        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
+        by ``cb = fig.colorbar(qm, ...)``.
+    colorbar : Colorbar
+        The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
+        otherwise. This can be used to control the appearance of the colorbar,
+        e.g., the label can be set by ``colorbar.set_label()``.
+
+    Example
+    -------
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> # generate the signal
+        >>> angles = np.arange(0, 180) / 180 * np.pi
+        >>> delays = np.round(100 * np.sin(angles)).astype(int)
+        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
+        >>> signal = pf.signals.impulse(128, delays, amplitudes)
+        >>> # plot the signal
+        >>> pf.plot.group_delay2d(signal)
+    """
+
+    with context(style):
+        ax, qm, cb = _two_d._group_delay2d(
+            signal, unit, xscale, points, orientation, cmap,
+            colorbar, ax, **kwargs)
+    _utils._tight_layout()
+
+    # manage interaction
+    plot_parameter = ia.PlotParameter(
+        'group_delay2d', unit=unit, xscale=xscale, points=points,
+        orientation=orientation, cmap=cmap, colorbar=colorbar)
+    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    ax.interaction = interaction
+
+    if colorbar:
+        ax = [ax, cb.ax]
+
+    return ax, qm, cb
+
+
 def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 yscale='linear', unit=None, window='hann', window_length=1024,
                 window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),

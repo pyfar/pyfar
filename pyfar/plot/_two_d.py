@@ -110,7 +110,7 @@ def _freq2d(signal, dB, log_prefix, log_reference, xscale, points, orientation,
     # plot data
     points_x = points if orientation == "vertical" else signal.frequencies
     points_y = signal.frequencies if orientation == "vertical" else points
-    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap)
+    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap, **kwargs)
 
     # color limits and colorbar
     if dB:
@@ -150,7 +150,7 @@ def _phase2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
     # plot data
     points_x = points if orientation == "vertical" else signal.frequencies
     points_y = signal.frequencies if orientation == "vertical" else points
-    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap)
+    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap, **kwargs)
 
     if xscale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
@@ -171,6 +171,58 @@ def _phase2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
         cb.formatter = MultipleFractionFormatter(
             nominator=1, denominator=2, base=np.pi, base_str=r'\pi')
         cb.update_ticks()
+
+    return ax[0], qm, cb
+
+
+def _group_delay2d(signal, unit, xscale, points, orientation, cmap, colorbar,
+                   ax, **kwargs):
+
+    # check input and prepare the figure, axis, and common parameters
+    fig, ax, points, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, FrequencyData), points, ax, colorbar, **kwargs)
+    _utils._check_axis_scale(xscale)
+
+    # prepare input
+    kwargs = _utils._return_default_colors_rgb(**kwargs)
+    data = dsp.group_delay(signal)
+    data = data.T if orientation == "vertical" else data
+    # auto detect the unit
+    if unit is None:
+        unit = _utils._time_auto_unit(
+            np.nanmax(np.abs(data) / signal.sampling_rate))
+    # set the unit
+    if unit != "samples":
+        factor, unit = _utils._deal_time_units(unit)
+        data = data / signal.sampling_rate * factor
+
+    # setup axis label and data
+    axis = [ax[0].yaxis, ax[0].xaxis]
+    ax_lim = [ax[0].set_ylim, ax[0].set_xlim]
+    ax_scale = [ax[0].set_yscale, ax[0].set_xscale]
+    if orientation == "horizontal":
+        axis = np.roll(axis, 1)
+        ax_lim = np.roll(ax_lim, 1)
+        ax_scale = np.roll(ax_scale, 1)
+
+    axis[1].set_label_text("Points")
+    axis[0].set_label_text("Frequency in Hz")
+    ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
+
+    if xscale == "log":
+        axis[0].set_major_locator(LogLocatorITAToolbox())
+    ax_scale[0](xscale)
+    axis[0].set_major_formatter(LogFormatterITAToolbox())
+
+    # plot data
+    points_x = points if orientation == "vertical" else signal.frequencies
+    points_y = signal.frequencies if orientation == "vertical" else points
+    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap, **kwargs)
+
+    # color limits and colorbar
+    qm.set_clim(.5 * np.nanmin(data), 1.5 * np.nanmax(data))
+
+    cb = _utils._add_colorbar(colorbar, fig, ax, qm, f"Group delay in {unit}")
 
     return ax[0], qm, cb
 

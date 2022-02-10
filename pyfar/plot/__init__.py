@@ -20,6 +20,7 @@ from .two_d import (
     time2d,
     freq2d,
     phase2d,
+    group_delay2d,
     spectrogram
 )
 
@@ -44,6 +45,7 @@ __all__ = [
     'phase',
     'phase2d',
     'group_delay',
+    'group_delay2d',
     'spectrogram',
     'time_freq',
     'freq_phase',
