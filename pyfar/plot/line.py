@@ -291,8 +291,8 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milli seconds), or ``mus`` (micro seconds) depending on the data.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
+        Array or list with two axes to plot on. The default is ``None``, which
+        uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
@@ -361,8 +361,8 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current figure
-        ore creates a new one if no figure exists.
+        Array or list with two axes to plot on. The default is ``None``, which
+        uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or style from
         ``matplotlib.style.available``. The default is ``light``.
@@ -404,7 +404,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
 
     Parameters
     ----------
-    signal : Signal, FrequencyData
+    signal : Signal
         The input data to be plotted. Multidimensional data are flattened for
         plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
         in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
@@ -426,8 +426,8 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
+        Array or list with two axes to plot on. The default is ``None``, which
+        uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
