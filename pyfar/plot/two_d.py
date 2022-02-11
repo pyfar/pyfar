@@ -6,10 +6,10 @@ from . import (_two_d, _utils)
 from . import _interaction as ia
 
 
-def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
-           points=None, orientation="vertical",
-           cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-           style='light', **kwargs):
+def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
+            points=None, orientation="vertical",
+            cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
+            style='light', **kwargs):
     """
     2D plot of multi-channel time signals with color coded amplitude.
 
@@ -109,17 +109,17 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.time2d(signal)
+        >>> pf.plot.time_2d(signal)
     """
 
     with context(style):
-        ax, qm, cb = _two_d._time2d(
+        ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
             points, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     plot_parameter = ia.PlotParameter(
-        'time2d', dB_time=dB, log_prefix_time=log_prefix,
+        'time_2d', dB_time=dB, log_prefix_time=log_prefix,
         log_reference=log_reference, unit=unit, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
@@ -132,10 +132,10 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     return ax, qm, cb
 
 
-def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
-           points=None, orientation="vertical",
-           cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-           style='light', **kwargs):
+def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
+            points=None, orientation="vertical",
+            cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
+            style='light', **kwargs):
     """
     2D plot of multi-channel magnitude spectrum with color coded magnitude.
 
@@ -230,18 +230,18 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.freq2d(signal, dB=False)
+        >>> pf.plot.freq_2d(signal, dB=False)
     """
 
     with context(style):
-        ax, qm, cb = _two_d._freq2d(
+        ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, xscale, points,
             orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq2d', dB_freq=dB, log_prefix_freq=log_prefix,
+        'freq_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
@@ -254,9 +254,9 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     return ax, qm, cb
 
 
-def phase2d(signal, deg=False, unwrap=False, xscale='log', points=None,
-            orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
-            colorbar=True, ax=None, style='light', **kwargs):
+def phase_2d(signal, deg=False, unwrap=False, xscale='log', points=None,
+             orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+             colorbar=True, ax=None, style='light', **kwargs):
     """
     2D plot of multi-channel phase spectrum with color coded phase.
 
@@ -346,17 +346,18 @@ def phase2d(signal, deg=False, unwrap=False, xscale='log', points=None,
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.phase2d(signal, unwrap=True)
+        >>> pf.plot.phase_2d(signal, unwrap=True)
     """
 
     with context(style):
-        ax, qm, cb = _two_d._phase2d(signal, deg, unwrap, xscale, points,
-                                     orientation, cmap, colorbar, ax, **kwargs)
+        ax, qm, cb = _two_d._phase_2d(
+            signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
+            ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'phase2d', deg=deg, unwrap=unwrap, xscale=xscale, points=points,
+        'phase_2d', deg=deg, unwrap=unwrap, xscale=xscale, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -368,9 +369,9 @@ def phase2d(signal, deg=False, unwrap=False, xscale='log', points=None,
     return ax, qm, cb
 
 
-def group_delay2d(signal, unit=None, xscale='log', points=None,
-                  orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
-                  colorbar=True, ax=None, style='light', **kwargs):
+def group_delay_2d(signal, unit=None, xscale='log', points=None,
+                   orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+                   colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of multi-channel group delays.
 
@@ -458,18 +459,18 @@ def group_delay2d(signal, unit=None, xscale='log', points=None,
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.group_delay2d(signal)
+        >>> pf.plot.group_delay_2d(signal)
     """
 
     with context(style):
-        ax, qm, cb = _two_d._group_delay2d(
+        ax, qm, cb = _two_d._group_delay_2d(
             signal, unit, xscale, points, orientation, cmap,
             colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'group_delay2d', unit=unit, xscale=xscale, points=points,
+        'group_delay_2d', unit=unit, xscale=xscale, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -481,11 +482,11 @@ def group_delay2d(signal, unit=None, xscale='log', points=None,
     return ax, qm, cb
 
 
-def time_freq2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
-                log_prefix_freq=None, log_reference=1, xscale='log', unit=None,
-                points=None, orientation="vertical",
-                cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-                style='light', **kwargs):
+def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
+                 log_prefix_freq=None, log_reference=1, xscale='log',
+                 unit=None, points=None, orientation="vertical",
+                 cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
+                 style='light', **kwargs):
     """
     2D plot of multi-channel time signals and magnitude spectrum with color
     coded amplitude.
@@ -588,11 +589,11 @@ def time_freq2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.time2d(signal)
+        >>> pf.plot.time_2d(signal)
     """
 
     with context(style):
-        ax, qm, cb = _two_d._time_freq2d(
+        ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
             log_reference, xscale, unit, points, orientation, cmap, colorbar,
             ax, **kwargs)
@@ -600,7 +601,7 @@ def time_freq2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time_freq2d', dB_time=dB_time, log_prefix_time=log_prefix_time,
+        'time_freq_2d', dB_time=dB_time, log_prefix_time=log_prefix_time,
         log_prefix_freq=log_prefix_freq, log_reference=log_reference)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -612,10 +613,10 @@ def time_freq2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     return ax, qm, cb
 
 
-def freq_phase2d(signal, dB=True, log_prefix=None, log_reference=1,
-                 xscale='log', deg=False, unwrap=False, points=None,
-                 orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
-                 colorbar=True, ax=None, style='light', **kwargs):
+def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
+                  xscale='log', deg=False, unwrap=False, points=None,
+                  orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+                  colorbar=True, ax=None, style='light', **kwargs):
     """
     2D plot of multi-channel magnitude and phase spectrum with color coded
     values.
@@ -712,18 +713,18 @@ def freq_phase2d(signal, dB=True, log_prefix=None, log_reference=1,
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.time2d(signal)
+        >>> pf.plot.time_2d(signal)
     """
 
     with context(style):
-        ax, qm, cb = _two_d._freq_phase2d(
+        ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
             points, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq_phase2d', dB_freq=dB, log_prefix_freq=log_prefix,
+        'freq_phase_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale, deg=deg, unwrap=unwrap,
         points=points, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
@@ -736,11 +737,11 @@ def freq_phase2d(signal, dB=True, log_prefix=None, log_reference=1,
     return ax, qm, cb
 
 
-def freq_group_delay2d(signal, dB=True, log_prefix=None, log_reference=1,
-                       unit=None, xscale='log', points=None,
-                       orientation="vertical",
-                       cmap=mpl.cm.get_cmap(name='magma'), colorbar=True,
-                       ax=None, style='light', **kwargs):
+def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
+                        unit=None, xscale='log', points=None,
+                        orientation="vertical",
+                        cmap=mpl.cm.get_cmap(name='magma'), colorbar=True,
+                        ax=None, style='light', **kwargs):
     """
     2D plot of multi-channel magnitude spectrum and group delay with color
     coded values.
@@ -835,18 +836,18 @@ def freq_group_delay2d(signal, dB=True, log_prefix=None, log_reference=1,
         >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
         >>> signal = pf.signals.impulse(128, delays, amplitudes)
         >>> # plot the signal
-        >>> pf.plot.time2d(signal)
+        >>> pf.plot.time_2d(signal)
     """
 
     with context(style):
-        ax, qm, cb = _two_d._freq_group_delay2d(
+        ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, xscale, points,
             orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq_group_delay2d', dB_freq=dB, log_prefix_freq=log_prefix,
+        'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale, unit=unit, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(

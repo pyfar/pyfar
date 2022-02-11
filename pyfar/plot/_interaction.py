@@ -145,7 +145,7 @@ class PlotParameter(object):
 
         # set plot type
         self._plot_type = ['line', '2d']
-        if plot == "spectrogram" or plot.endswith("2d"):
+        if plot == "spectrogram" or plot.endswith("_2d"):
             self._plot_type = np.roll(self._plot_type, -1)
 
         # store input
@@ -212,7 +212,7 @@ class PlotParameter(object):
         """
 
         # strip "2d" from plot name
-        self._plot = plot[:-2] if plot.endswith("2d") else plot
+        self._plot = plot[:-3] if plot.endswith("_2d") else plot
         self.plot = plot
 
         # set the axis, color map, and cycle, parameter for each plot
@@ -231,7 +231,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'time2d':
+        elif plot == 'time_2d':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -267,7 +267,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'freq2d':
+        elif plot == 'freq_2d':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -304,7 +304,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'phase2d':
+        elif plot == 'phase_2d':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -341,7 +341,7 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'group_delay2d':
+        elif plot == 'group_delay_2d':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
@@ -384,10 +384,10 @@ class PlotParameter(object):
             self._plot = "time_freq"
             return
 
-        elif plot == 'time_freq2d':
-            # same as time2d
+        elif plot == 'time_freq_2d':
+            # same as time_2d
             # (currently interaction uses only the axis of the top plot)
-            self.update("time2d")
+            self.update("time_2d")
             self._plot = "time_freq"
             return
 
@@ -398,10 +398,10 @@ class PlotParameter(object):
             self._plot = "freq_phase"
             return
 
-        elif plot == 'freq_phase2d':
-            # same as freq
+        elif plot == 'freq_phase_2d':
+            # same as freq_2d
             # (currently interaction uses only the axis of the top plot)
-            self.update("freq2d")
+            self.update("freq_2d")
             self._plot = "freq_phase"
             return
 
@@ -412,10 +412,10 @@ class PlotParameter(object):
             self._plot = "freq_group_delay"
             return
 
-        elif plot == 'freq_group_delay2d':
-            # same as freq
+        elif plot == 'freq_group_delay_2d':
+            # same as freq_2d
             # (currently interaction uses only the axis of the top plot)
-            self.update("freq2d")
+            self.update("freq_2d")
             self._plot = "freq_group_delay"
             return
 
@@ -703,8 +703,8 @@ class Interaction(object):
                         prm.log_reference, prm.unit, self.ax,
                         **self.kwargs_line)
                 elif self.params.plot_type == "2d":
-                    self.params.update('time2d')
-                    self.all_axes, _, self.all_bars = _two_d._time2d(
+                    self.params.update('time_2d')
+                    self.all_axes, _, self.all_bars = _two_d._time_2d(
                         self.signal, prm.dB_time, prm.log_prefix_time,
                         prm.log_reference, prm.unit, prm.points,
                         prm.orientation, prm.cmap, prm.colorbar, self.ax,
@@ -719,8 +719,8 @@ class Interaction(object):
                         prm.log_reference, prm.xscale, self.ax,
                         **self.kwargs_line)
                 elif self.params.plot_type == "2d":
-                    self.params.update('freq2d')
-                    self.all_axes, _, self.all_bars = _two_d._freq2d(
+                    self.params.update('freq_2d')
+                    self.all_axes, _, self.all_bars = _two_d._freq_2d(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.points,
                         prm.orientation, prm.cmap, prm.colorbar, self.ax,
@@ -734,8 +734,8 @@ class Interaction(object):
                         self.signal, prm.deg, prm.unwrap, prm.xscale,
                         self.ax, **self.kwargs_line)
                 if self.params.plot_type == "2d":
-                    self.params.update('phase2d')
-                    self.all_axes, _, self.all_bars = _two_d._phase2d(
+                    self.params.update('phase_2d')
+                    self.all_axes, _, self.all_bars = _two_d._phase_2d(
                         self.signal, prm.deg, prm.unwrap, prm.xscale,
                         prm.points, prm.orientation, prm.cmap, prm.colorbar,
                         self.ax, **self.kwargs_2d)
@@ -748,8 +748,8 @@ class Interaction(object):
                         self.signal, prm.unit, prm.xscale, self.ax,
                         **self.kwargs_line)
                 if self.params.plot_type == "2d":
-                    self.params.update('group_delay2d')
-                    self.all_axes, _, self.all_bars = _two_d._group_delay2d(
+                    self.params.update('group_delay_2d')
+                    self.all_axes, _, self.all_bars = _two_d._group_delay_2d(
                         self.signal, prm.unit, prm.xscale, prm.points,
                         prm.orientation, prm.cmap, prm.colorbar, self.ax,
                         **self.kwargs_2d)
@@ -775,8 +775,8 @@ class Interaction(object):
                         **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 elif self.params.plot_type == "2d":
-                    self.params.update('time_freq2d')
-                    self.all_axes, _, self.all_bars = _two_d._time_freq2d(
+                    self.params.update('time_freq_2d')
+                    self.all_axes, _, self.all_bars = _two_d._time_freq_2d(
                         self.signal, prm.dB_time, prm.dB_freq,
                         prm.log_prefix_time, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.unit, prm.points,
@@ -793,8 +793,8 @@ class Interaction(object):
                         self.ax, **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 elif self.params.plot_type == "2d":
-                    self.params.update('freq_phase2d')
-                    self.all_axes, _, self.all_bars = _two_d._freq_phase2d(
+                    self.params.update('freq_phase_2d')
+                    self.all_axes, _, self.all_bars = _two_d._freq_phase_2d(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
                         prm.points, prm.orientation, prm.cmap, prm.colorbar,
@@ -810,9 +810,9 @@ class Interaction(object):
                         self.ax, **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 if self.params.plot_type == "2d":
-                    self.params.update('freq_group_delay2d')
+                    self.params.update('freq_group_delay_2d')
                     self.all_axes, _, self.all_bars = \
-                        _two_d._freq_group_delay2d(
+                        _two_d._freq_group_delay_2d(
                             self.signal, prm.dB_freq, prm.log_prefix_freq,
                             prm.log_reference, prm.unit, prm.xscale,
                             prm.points, prm.orientation, prm.cmap,

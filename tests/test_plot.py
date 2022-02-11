@@ -268,7 +268,7 @@ def test_spectrogram(sine):
 
 
 @pytest.mark.parametrize('function', [
-    (plot.time2d)])
+    (plot.time_2d)])
 @pytest.mark.parametrize('points', [('default'), ('custom')])
 @pytest.mark.parametrize('orientation', [('vertical'), ('horizontal')])
 def test_2d_points_orientation(
@@ -289,7 +289,7 @@ def test_2d_points_orientation(
 
 
 @pytest.mark.parametrize('function', [
-    (plot.time2d), (plot.spectrogram)])
+    (plot.time_2d), (plot.spectrogram)])
 @pytest.mark.parametrize('colorbar', [('off'), ('axes')])
 def test_2d_colorbar_options(function, colorbar, impulse_45_channels):
     """Test all 2D plots with default parameters"""
@@ -317,7 +317,7 @@ def test_2d_colorbar_options(function, colorbar, impulse_45_channels):
 
 
 @pytest.mark.parametrize('function', [
-    (plot.time2d), (plot.spectrogram)])
+    (plot.time_2d), (plot.spectrogram)])
 def test_2d_colorbar_assertion(function, impulse_45_channels):
     """
     Test assertion when passing an array of axes but not having a colobar.
@@ -328,7 +328,7 @@ def test_2d_colorbar_assertion(function, impulse_45_channels):
                  ax=[plt.gca(), plt.gca()])
 
 
-@pytest.mark.parametrize('function', [(plot.time2d)])
+@pytest.mark.parametrize('function', [(plot.time_2d)])
 def test_2d_cshape_assertion(function):
     """
     Test assertion when passing a signal with wring cshape.

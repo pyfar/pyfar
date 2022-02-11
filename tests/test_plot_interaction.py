@@ -151,19 +151,19 @@ def test_toggle_2d_plots():
     """
 
     plots = {
-        'time2d': {
+        'time_2d': {
             'shortcut': sc_plot["time"]["key"][0],
             'xlabel': ['Points'],
             'ylabel': ['Time in ms']},
-        'freq2d': {
+        'freq_2d': {
             'shortcut': sc_plot["freq"]["key"][0],
             'xlabel': ['Points'],
             'ylabel': ['Frequency in Hz']},
-        'phase2d': {
+        'phase_2d': {
             'shortcut': sc_plot["freq"]["key"][0],
             'xlabel': ['Points'],
             'ylabel': ['Frequency in Hz']},
-        'group_delay2d': {
+        'group_delay_2d': {
             'shortcut': sc_plot["group_delay"]["key"][0],
             'xlabel': ['Points'],
             'ylabel': ['Frequency in Hz']},
@@ -176,7 +176,7 @@ def test_toggle_2d_plots():
     # dummy signal (needs to as longe as the default spectrogram block size)
     signal = pf.signals.impulse(1024)
     # initialize the plot
-    ax, *_ = pf.plot.time2d(signal)
+    ax, *_ = pf.plot.time_2d(signal)
 
     for function in getmembers(pf.plot.two_d, isfunction):
 
