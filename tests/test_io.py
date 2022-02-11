@@ -487,6 +487,9 @@ def test_write_audio(audio_format, subtype, tmpdir, noise):
                 io.write_audio(noise, filename, subtype=subtype)
         else:
             io.write_audio(noise, filename, subtype=subtype)
+        # In some cases a file 'C._t' is created
+        if os.path.exists('C._t'):
+            os.remove('C._t')
 
 
 def test_write_audio_overwrite(noise, tmpdir):
@@ -563,6 +566,9 @@ def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
             # A comparison between written and read signals is not implemented
             # due to the difference caused by the coding
             io.read_audio(filename)
+    # In some cases a file 'C._t' is created
+    if os.path.exists('C._t'):
+        os.remove('C._t')
 
 
 @pytest.mark.parametrize(
