@@ -429,10 +429,10 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
     Returns
     -------
     ax : matplotlib.pyplot.axes
-        If `colorbar` is ``True`` an array of two axes is returned. The first
-        is the axis on which the data is plotted, the second is the axis of the
-        colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        If `colorbar` is ``True`` an array of four axes is returned. The first
+        two are the axis on which the data is plotted, the last two are the
+        axis of the colorbar. If `colorbar` is ``False``, only the axes on
+        which the data is plotted is returned
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
@@ -556,10 +556,10 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     Returns
     -------
     ax : matplotlib.pyplot.axes
-        If `colorbar` is ``True`` an array of two axes is returned. The first
-        is the axis on which the data is plotted, the second is the axis of the
-        colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        If `colorbar` is ``True`` an array of four axes is returned. The first
+        two are the axis on which the data is plotted, the last two are the
+        axis of the colorbar. If `colorbar` is ``False``, only the axes on
+        which the data is plotted is returned
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
@@ -677,10 +677,10 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     Returns
     -------
     ax : matplotlib.pyplot.axes
-        If `colorbar` is ``True`` an array of two axes is returned. The first
-        is the axis on which the data is plotted, the second is the axis of the
-        colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        If `colorbar` is ``True`` an array of four axes is returned. The first
+        two are the axis on which the data is plotted, the last two are the
+        axis of the colorbar. If `colorbar` is ``False``, only the axes on
+        which the data is plotted is returned
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
@@ -797,10 +797,10 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     Returns
     -------
     ax : matplotlib.pyplot.axes
-        If `colorbar` is ``True`` an array of two axes is returned. The first
-        is the axis on which the data is plotted, the second is the axis of the
-        colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        If `colorbar` is ``True`` an array of four axes is returned. The first
+        two are the axis on which the data is plotted, the last two are the
+        axis of the colorbar. If `colorbar` is ``False``, only the axes on
+        which the data is plotted is returned
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
