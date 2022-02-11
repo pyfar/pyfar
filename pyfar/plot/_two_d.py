@@ -257,8 +257,8 @@ def _freq_phase2d(signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
     _, qm_0, cb_0 = _freq2d(signal, dB, log_prefix, log_reference, xscale,
                             points, orientation, cmap, colorbar, ax[0],
                             **kwargs)
-    _, qm_1, cb_1 =  _phase2d(signal, deg, unwrap, xscale, points, orientation,
-                              cmap, colorbar, ax[1], **kwargs)
+    _, qm_1, cb_1 = _phase2d(signal, deg, unwrap, xscale, points, orientation,
+                             cmap, colorbar, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
 
