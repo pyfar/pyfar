@@ -509,7 +509,8 @@ class Interaction(object):
     Toggle between plots; move or zoom axis or color map; toggle axis types;
     cycle channels.
     """
-    def __init__(self, signal, axes, style, plot_parameter, **kwargs):
+    def __init__(self, signal, axes, colorbars, style, plot_parameter,
+                 **kwargs):
         """
         Change the plot and plot parameters based on keyboard shortcuts.
 
@@ -517,8 +518,10 @@ class Interaction(object):
         ----------
         signal : Signal
             audio data
-        axes : Matplotlib axes
-            axes handle
+        axes : Matplotlib axes, array like
+            axes objects of all axes in the plot holding data
+        colorbars : Matplotlib colorbar, array like
+            all colorbar objects in the plot
         style : plot style
             E.g. 'light'
         plot_parameter : PlotParameter
@@ -530,8 +533,10 @@ class Interaction(object):
         # save input arguments
         self.cshape = signal.cshape
         self.signal = signal.flatten()
-        self.ax = axes
-        self.figure = axes.figure
+        self.ax = axes[0] if isinstance(axes, (list, np.ndarray)) else axes
+        self.all_axes = axes
+        self.all_bars = colorbars
+        self.figure = self.ax.figure
         self.style = style
         self.params = plot_parameter
         if self.params.plot_type == "line":

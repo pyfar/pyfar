@@ -122,7 +122,8 @@ def time2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         'time2d', dB_time=dB, log_prefix_time=log_prefix,
         log_reference=log_reference, unit=unit, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    interaction = ia.Interaction(
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     if colorbar:
@@ -243,7 +244,8 @@ def freq2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         'freq2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    interaction = ia.Interaction(
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     if colorbar:
@@ -356,7 +358,8 @@ def phase2d(signal, deg=False, unwrap=False, xscale='log', points=None,
     plot_parameter = ia.PlotParameter(
         'phase2d', deg=deg, unwrap=unwrap, xscale=xscale, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    interaction = ia.Interaction(
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     if colorbar:
@@ -468,7 +471,8 @@ def group_delay2d(signal, unit=None, xscale='log', points=None,
     plot_parameter = ia.PlotParameter(
         'group_delay2d', unit=unit, xscale=xscale, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    interaction = ia.Interaction(
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     if colorbar:
@@ -599,7 +603,7 @@ def time_freq2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         'time_freq2d', dB_time=dB_time, log_prefix_time=log_prefix_time,
         log_prefix_freq=log_prefix_freq, log_reference=log_reference)
     interaction = ia.Interaction(
-        signal, ax[0], style, plot_parameter, **kwargs)
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
 
     if colorbar:
@@ -723,7 +727,7 @@ def freq_phase2d(signal, dB=True, log_prefix=None, log_reference=1,
         log_reference=log_reference, xscale=xscale, deg=deg, unwrap=unwrap,
         points=points, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
-        signal, ax[0], style, plot_parameter, **kwargs)
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
 
     if colorbar:
@@ -846,7 +850,7 @@ def freq_group_delay2d(signal, dB=True, log_prefix=None, log_reference=1,
         log_reference=log_reference, xscale=xscale, unit=unit, points=points,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
-        signal, ax[0], style, plot_parameter, **kwargs)
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
 
     if colorbar:
@@ -965,7 +969,8 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         log_reference=log_reference, yscale=yscale, unit=unit, window=window,
         window_length=window_length, window_overlap_fct=window_overlap_fct,
         cmap=cmap)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+    interaction = ia.Interaction(
+        signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     if colorbar:
