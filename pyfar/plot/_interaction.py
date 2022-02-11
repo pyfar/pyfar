@@ -704,7 +704,7 @@ class Interaction(object):
                         prm.log_reference, prm.unit, prm.points,
                         prm.orientation, prm.cmap, prm.colorbar, self.ax,
                         **self.kwargs_2d)
-                    self.ax = self.all_axes[0]
+                    self.ax = self.all_axes
 
             elif event.key in plot['freq']:
                 if self.params.plot_type == "line":
