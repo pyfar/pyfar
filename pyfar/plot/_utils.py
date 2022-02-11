@@ -296,3 +296,86 @@ def _log_prefix(signal):
     else:
         log_prefix = 20
     return log_prefix
+
+
+def _prepare_2d_plot(data, instances, colorbar, ax):
+    """Check and prepare input for 2D plots
+
+    Parameters
+    ----------
+    data : Signal, FrequencyData, TimeData
+        The input data for the plot function
+    instance : tuple of pyfar audio classes
+        Tuple of classes that can be used for the plot function that calls this
+    colorbar : bool
+        Flag indicating if a colobar should be added to the plot
+    ax : matplotlib.pyplot.axes
+        Axes to plot on.
+
+        ``None``
+            Use the current axis, or create a new axis (and figure) if there is
+            none.
+        ``ax``
+            If a single axis is passed, this is used for plotting. If
+            `colorbar` is ``True`` the space for the colorbar is taken from
+            this axis.
+        ``[ax, ax]``
+            If a list or array of two axes is passed, the first is used to plot
+            the data and the second to plot the colorbar. In this case
+            `colorbar` must be ``True``
+
+    Returns
+    -------
+    fig, ax : matplotlib objects
+        The prepared figure and axis objects for plotting
+    """
+
+    # check input
+    if not isinstance(data, instances):
+        instances = [str(ii).split('.')[-1][:-2] for ii in instances]
+        raise TypeError(
+            f'Input data has to be of type: {", ".join(instances)}.')
+    if len(data.cshape) > 1:
+        raise ValueError(
+            f'signal.cshape must be (m, ) with m>0 but is {data.cshape}')
+    if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
+        raise ValueError('A list of axes can not be used if colorbar is False')
+
+    # prepare the figure and axis for plotting the data and colorbar
+    fig, ax = _prepare_plot(ax)
+    if not isinstance(ax, (np.ndarray, list)):
+        ax = [ax, None]
+
+    return fig, ax
+
+
+def _add_colorbar(colorbar, fig, ax, qm, label):
+    """
+    Add colorbar to 2D plot
+
+    Parameters
+    ----------
+    colorbar : bool
+        Flag indicating if a colobar should be added to the plot
+    fig : matplotlib figure object
+    ax : list
+        either a list of to axes objects or a list with one axis and None
+        object
+    qm : matplotlib quadmesh object
+    label : string
+        colorbar label
+
+    Returns
+    -------
+    cb : matplotlib colorbar object
+    """
+    if colorbar:
+        if ax[1] is None:
+            cb = fig.colorbar(qm, ax=ax[0])
+        else:
+            cb = fig.colorbar(qm, cax=ax[1])
+        cb.set_label(label)
+    else:
+        cb = None
+
+    return cb

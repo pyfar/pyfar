@@ -56,7 +56,8 @@ def test_interaction_attached():
     signal = pf.signals.impulse(1024)
 
     # loop functions
-    for function in getmembers(pf.plot.line, isfunction):
+    for function in getmembers(pf.plot.line, isfunction) + \
+            getmembers(pf.plot.two_d, isfunction):
         # exclude functions that do not support interaction
         if function[0] in ["context", "custom_subplots"]:
             continue
@@ -71,7 +72,7 @@ def test_interaction_attached():
         plt.close()
 
 
-def test_toggle_plots():
+def test_toggle_line_plots():
     """Test toggling plots by checking x- and y-label after toggling.
 
     This test will fail if a new plot function is added that does not have
@@ -96,10 +97,6 @@ def test_toggle_plots():
             'shortcut': sc_plot["group_delay"]["key"][0],
             'xlabel': ['Frequency in Hz'],
             'ylabel': ['Group delay in s']},
-        'spectrogram': {
-            'shortcut': sc_plot["spectrogram"]["key"][0],
-            'xlabel': ['Time in s'],
-            'ylabel': ['Frequency in Hz']},
         'time_freq': {
             'shortcut': sc_plot["time_freq"]["key"][0],
             'xlabel': ['Time in ms', 'Frequency in Hz'],
@@ -132,6 +129,56 @@ def test_toggle_plots():
 
         # toggle the interaction
         ax.interaction.select_action(ia.EventEmu(shortcut))
+
+        # current axis or array/list of axes
+        ca = plt.gcf().get_axes()
+        print(f"testing: {function[0]} with axes {ca}")
+
+        # test x- and y-label
+        for idx in range(len(xlabel)):
+            assert ca[idx].get_xlabel() == xlabel[idx]
+            assert ca[idx].get_ylabel() == ylabel[idx]
+
+    plt.close("all")
+
+
+def test_toggle_2d_plots():
+    """Test toggling plots by checking x- and y-label after toggling.
+
+    This test will fail if a new plot function is added that does not have
+    an interaction or if the new plot function is not added to the plots
+    dictionary. This is intended behavior.
+    """
+
+    plots = {
+        'time2d': {
+            'shortcut': sc_plot["time"]["key"][0],
+            'xlabel': ['Points'],
+            'ylabel': ['Time in ms']},
+        'spectrogram': {
+            'shortcut': sc_plot["spectrogram"]["key"][0],
+            'xlabel': ['Time in s'],
+            'ylabel': ['Frequency in Hz']},
+    }
+
+    # dummy signal (needs to as longe as the default spectrogram block size)
+    signal = pf.signals.impulse(1024)
+    # initialize the plot
+    ax, *_ = pf.plot.time2d(signal)
+
+    for function in getmembers(pf.plot.two_d, isfunction):
+
+        # exclude functions that do not support interaction
+        if function[0] in ["context"]:
+            continue
+
+        # get current short cut and target values
+        shortcut = plots[function[0]]["shortcut"]
+        xlabel = plots[function[0]]["xlabel"]
+        ylabel = plots[function[0]]["ylabel"]
+
+        # toggle the interaction
+        ax[0].interaction.select_action(ia.EventEmu(shortcut))
 
         # current axis or array/list of axes
         ca = plt.gcf().get_axes()
@@ -319,6 +366,32 @@ def test_toggle_colormap():
     plt.close("all")
 
 
+def test_toggle_orientation():
+    """
+    Test if the orientation is toggled by comparing the axis labels before
+    and after toggling.
+    """
+
+    signal = pf.signals.impulse(20, np.arange(0, 10).astype(int))
+    key = sc_ctr["toggle_orientation"]["key"][0]
+
+    for function in getmembers(pf.plot.two_d, isfunction):
+        # exclude functions that do not support interaction
+        if function[0] in ["context", "spectrogram"]:
+            continue
+
+        # plot
+        ax, *_ = function[1](signal)
+        # get current axis labels
+        labels = [ax[0].get_xlabel(), ax[0].get_ylabel()]
+        # toggle orientation
+        ax[0].interaction.select_action(ia.EventEmu(key))
+        # assert that axis lables are flipped
+        assert plt.gca().get_xlabel() == labels[1]
+        assert plt.gca().get_ylabel() == labels[0]
+        plt.close()
+
+
 def test_cycle_and_toggle_lines_1d_signal():
     """Test toggling and cycling channels of a one-dimensional Signal."""
 
@@ -414,3 +487,11 @@ def test_cycle_and_toggle_signals():
     npt.assert_allclose(clim, (-96, 4), atol=.5)
 
     plt.close("all")
+
+
+def test_cycle_plot_styles():
+    """Test cycle the plot styles between line and 2d plots."""
+    # TODO: Implement when all 2D plots are available
+    pass
+
+    # signal = pf.signals.impulse(20, np.arange(0, 10).astype(int))

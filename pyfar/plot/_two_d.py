@@ -12,14 +12,8 @@ from .ticker import (
 def _time2d(signal, dB, log_prefix, log_reference, unit, points,
             orientation, cmap, colorbar, ax, **kwargs):
 
-    # check input
-    if not isinstance(signal, (Signal, TimeData)):
-        raise TypeError('Input data has to be of type: Signal or TimeData.')
-    if len(signal.cshape) > 1:
-        raise ValueError(
-            f'signal.cshape must be (m, ) with m>0 but is {signal.cshape}')
-    if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
-        raise ValueError('A list of axes can not be used if colorbar is False')
+    # check input and prepare the figure and axis
+    fig, ax = _utils._prepare_2d_plot(signal, (Signal, TimeData), colorbar, ax)
     _utils._check_time_unit(unit)
 
     # prepare input
@@ -44,11 +38,6 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
         factor, unit = _utils._deal_time_units(unit)
         times = signal.times * factor
 
-    # prepare the figure and axis for plotting the data and colorbar
-    fig, ax = _utils._prepare_plot(ax)
-    if not isinstance(ax, (np.ndarray, list)):
-        ax = [ax, None]
-
     # setup axis label and data
     if orientation == "vertical":
         ax[0].set_xlabel("Points")
@@ -67,25 +56,15 @@ def _time2d(signal, dB, log_prefix, log_reference, unit, points,
     # plot data
     points_x = points if orientation == "vertical" else times
     points_y = times if orientation == "vertical" else points
-    ax[0].pcolormesh(points_x, points_y, data, cmap=cmap,
-                     shading='gouraud')
+    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap,
+                          shading='gouraud')
 
-    # color limits
-    qm = _utils._get_quad_mesh_from_axis(ax[0])
-
+    # color limits and colorbar
     if dB:
         qm.set_clim(ymin, ymax)
 
-    # Colorbar:
-    if colorbar:
-        if ax[1] is None:
-            # mpl.pyplot.grid(False)
-            cb = fig.colorbar(qm, ax=ax[0])
-        else:
-            cb = fig.colorbar(qm, cax=ax[1])
-        cb.set_label("Amplitude in dB" if dB else "Amplitude")
-    else:
-        cb = None
+    cb = _utils._add_colorbar(colorbar, fig, ax, qm,
+                              "Amplitude in dB" if dB else "Amplitude")
 
     return ax[0], qm, cb
 
@@ -106,10 +85,8 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     """
 
     # check input
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-    if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
-        raise ValueError('A list of axes can not be used if colorbar is False')
+    # check input and prepare the figure and axis
+    fig, ax = _utils._prepare_2d_plot(signal, (Signal), colorbar, ax)
     _utils._check_time_unit(unit)
     _utils._check_axis_scale(yscale, 'y')
 
@@ -145,14 +122,9 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         factor, unit = _utils._deal_time_units(unit)
         times = times * factor
 
-    # prepare the figure and axis for plotting the data and colorbar
-    fig, ax = _utils._prepare_plot(ax)
-    if not isinstance(ax, (np.ndarray, list)):
-        ax = [ax, None]
-
     # plot the data
-    ax[0].pcolormesh(times, frequencies, spectrogram, cmap=cmap,
-                     shading='gouraud')
+    qm = ax[0].pcolormesh(times, frequencies, spectrogram, cmap=cmap,
+                          shading='gouraud')
 
     # Adjust axes:
     ax[0].set_ylabel('Frequency in Hz')
@@ -161,8 +133,6 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     ax[0].set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
 
     # color limits
-    qm = _utils._get_quad_mesh_from_axis(ax[0])
-
     if dB:
         ymax = np.nanmax(spectrogram)
         ymin = ymax - 90
@@ -177,13 +147,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     ax[0].grid(ls='dotted', color='white')
 
     # colorbar
-    if colorbar:
-        if ax[1] is None:
-            cb = fig.colorbar(qm, ax=ax[0])
-        else:
-            cb = fig.colorbar(qm, cax=ax[1])
-        cb.set_label('Magnitude in dB' if dB else 'Magnitude')
-    else:
-        cb = None
+    cb = _utils._add_colorbar(colorbar, fig, ax, qm,
+                              'Magnitude in dB' if dB else 'Magnitude')
 
     return ax[0], qm, cb
