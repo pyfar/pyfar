@@ -7,7 +7,7 @@ from . import _interaction as ia
 
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
-            points=None, orientation="vertical",
+            indices=None, orientation="vertical",
             cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
             style='light', **kwargs):
     """
@@ -36,9 +36,9 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milli seconds), or ``mus`` (micro seconds) depending on the data.
-    points: array like, optional
+    indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
-        angles or x values). `points` must be monotonously increasing/
+        angles or x values). `indices` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
         default is ``'None'`` which labels the N channels in `signal` from
         0 to N-1.
@@ -96,9 +96,6 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     Examples
     --------
 
-    Plot a multichannel signal with information about the points where it was
-    samples
-
     .. plot::
 
         >>> import pyfar as pf
@@ -115,12 +112,12 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     with context(style):
         ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
-            points, orientation, cmap, colorbar, ax, **kwargs)
+            indices, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
-        log_reference=log_reference, unit=unit, points=points,
+        log_reference=log_reference, unit=unit, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -133,7 +130,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
 
 
 def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
-            points=None, orientation="vertical",
+            indices=None, orientation="vertical",
             cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
             style='light', **kwargs):
     """
@@ -161,9 +158,9 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    points: array like, optional
+    indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
-        angles or x values). `points` must be monotonously increasing/
+        angles or x values). `indices` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
         default is ``'None'`` which labels the N channels in `signal` from
         0 to N-1.
@@ -235,14 +232,14 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
 
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
-            signal, dB, log_prefix, log_reference, xscale, points,
+            signal, dB, log_prefix, log_reference, xscale, indices,
             orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_2d', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale, points=points,
+        log_reference=log_reference, xscale=xscale, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -254,7 +251,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     return ax, qm, cb
 
 
-def phase_2d(signal, deg=False, unwrap=False, xscale='log', points=None,
+def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
              orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
              colorbar=True, ax=None, style='light', **kwargs):
     """
@@ -277,9 +274,9 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', points=None,
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    points: array like, optional
+    indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
-        angles or x values). `points` must be monotonously increasing/
+        angles or x values). `indices` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
         default is ``'None'`` which labels the N channels in `signal` from
         0 to N-1.
@@ -351,13 +348,13 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', points=None,
 
     with context(style):
         ax, qm, cb = _two_d._phase_2d(
-            signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
+            signal, deg, unwrap, xscale, indices, orientation, cmap, colorbar,
             ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'phase_2d', deg=deg, unwrap=unwrap, xscale=xscale, points=points,
+        'phase_2d', deg=deg, unwrap=unwrap, xscale=xscale, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -369,7 +366,7 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', points=None,
     return ax, qm, cb
 
 
-def group_delay_2d(signal, unit=None, xscale='log', points=None,
+def group_delay_2d(signal, unit=None, xscale='log', indices=None,
                    orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
                    colorbar=True, ax=None, style='light', **kwargs):
     """
@@ -390,9 +387,9 @@ def group_delay_2d(signal, unit=None, xscale='log', points=None,
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    points: array like, optional
+    indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
-        angles or x values). `points` must be monotonously increasing/
+        angles or x values). `indices` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
         default is ``'None'`` which labels the N channels in `signal` from
         0 to N-1.
@@ -464,13 +461,13 @@ def group_delay_2d(signal, unit=None, xscale='log', points=None,
 
     with context(style):
         ax, qm, cb = _two_d._group_delay_2d(
-            signal, unit, xscale, points, orientation, cmap,
+            signal, unit, xscale, indices, orientation, cmap,
             colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'group_delay_2d', unit=unit, xscale=xscale, points=points,
+        'group_delay_2d', unit=unit, xscale=xscale, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -484,7 +481,7 @@ def group_delay_2d(signal, unit=None, xscale='log', points=None,
 
 def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                  log_prefix_freq=None, log_reference=1, xscale='log',
-                 unit=None, points=None, orientation="vertical",
+                 unit=None, indices=None, orientation="vertical",
                  cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
                  style='light', **kwargs):
     """
@@ -521,9 +518,9 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milli seconds), or ``mus`` (micro seconds) depending on the data.
-    points: array like, optional
+    indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
-        angles or x values). `points` must be monotonously increasing/
+        angles or x values). `indices` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
         default is ``'None'`` which labels the N channels in `signal` from
         0 to N-1.
@@ -576,9 +573,6 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     Examples
     --------
 
-    Plot a multichannel signal with information about the points where it was
-    samples
-
     .. plot::
 
         >>> import pyfar as pf
@@ -595,7 +589,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     with context(style):
         ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
-            log_reference, xscale, unit, points, orientation, cmap, colorbar,
+            log_reference, xscale, unit, indices, orientation, cmap, colorbar,
             ax, **kwargs)
     _utils._tight_layout()
 
@@ -614,7 +608,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 
 def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
-                  xscale='log', deg=False, unwrap=False, points=None,
+                  xscale='log', deg=False, unwrap=False, indices=None,
                   orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
                   colorbar=True, ax=None, style='light', **kwargs):
     """
@@ -645,9 +639,9 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    points: array like, optional
+    indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
-        angles or x values). `points` must be monotonously increasing/
+        angles or x values). `indices` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
         default is ``'None'`` which labels the N channels in `signal` from
         0 to N-1.
@@ -700,9 +694,6 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     Examples
     --------
 
-    Plot a multichannel signal with information about the points where it was
-    samples
-
     .. plot::
 
         >>> import pyfar as pf
@@ -719,14 +710,14 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
-            points, orientation, cmap, colorbar, ax, **kwargs)
+            indices, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_phase_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=xscale, deg=deg, unwrap=unwrap,
-        points=points, orientation=orientation, cmap=cmap, colorbar=colorbar)
+        indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -738,7 +729,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
 
 def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
-                        unit=None, xscale='log', points=None,
+                        unit=None, xscale='log', indices=None,
                         orientation="vertical",
                         cmap=mpl.cm.get_cmap(name='magma'), colorbar=True,
                         ax=None, style='light', **kwargs):
@@ -768,9 +759,9 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    points: array like, optional
+    indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
-        angles or x values). `points` must be monotonously increasing/
+        angles or x values). `indices` must be monotonously increasing/
         decreasing and have as many entries as `signal` has channels. The
         default is ``'None'`` which labels the N channels in `signal` from
         0 to N-1.
@@ -823,9 +814,6 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     Examples
     --------
 
-    Plot a multichannel signal with information about the points where it was
-    samples
-
     .. plot::
 
         >>> import pyfar as pf
@@ -841,14 +829,14 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
-            signal, dB, log_prefix, log_reference, unit, xscale, points,
+            signal, dB, log_prefix, log_reference, unit, xscale, indices,
             orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale, unit=unit, points=points,
+        log_reference=log_reference, xscale=xscale, unit=unit, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -897,7 +885,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     window_length : integer
         Specifies the window/block length in samples. The default is ``1024``.
     window_overlap_fct : double
-        Ratio of points to overlap between blocks [0...1]. The default is
+        Ratio of indices to overlap between blocks [0...1]. The default is
         ``0.5``, which would result in 512 samples overlap for a window length
         of 1024 samples.
     cmap : matplotlib.colors.Colormap(name, N=256)

@@ -283,7 +283,7 @@ def test_2d_points_orientation(
 
     filename = f'2d_{function.__name__}_{orientation}_{points_label}'
     create_figure()
-    function(signal, points=points, orientation=orientation)
+    function(signal, indices=points, orientation=orientation)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 

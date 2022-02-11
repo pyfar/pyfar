@@ -33,6 +33,59 @@ plt.close("all")
 sc_plot = pf.plot.shortcuts(show=False)["plots"]
 sc_ctr = pf.plot.shortcuts(show=False)["controls"]
 
+plots = {
+    # line plots
+    'time': {
+        'shortcut': sc_plot["time"]["key"][0],
+        'xlabel': ['Time in ms'],
+        'ylabel': ['Amplitude']},
+    'freq': {
+        'shortcut': sc_plot["freq"]["key"][0],
+        'xlabel': ['Frequency in Hz'],
+        'ylabel': ['Magnitude in dB']},
+    'phase': {
+        'shortcut': sc_plot["phase"]["key"][0],
+        'xlabel': ['Frequency in Hz'],
+        'ylabel': ['Phase in radians']},
+    'group_delay': {
+        'shortcut': sc_plot["group_delay"]["key"][0],
+        'xlabel': ['Frequency in Hz'],
+        'ylabel': ['Group delay in s']},
+    'time_freq': {
+        'shortcut': sc_plot["time_freq"]["key"][0],
+        'xlabel': ['Time in ms', 'Frequency in Hz'],
+        'ylabel': ['Amplitude', 'Magnitude in dB']},
+    'freq_phase': {
+        'shortcut': sc_plot["freq_phase"]["key"][0],
+        'xlabel':  ['', 'Frequency in Hz'],
+        'ylabel': ['Magnitude in dB', 'Phase in radians']},
+    'freq_group_delay': {
+        'shortcut': sc_plot["freq_group_delay"]["key"][0],
+        'xlabel': ['', 'Frequency in Hz'],
+        'ylabel': ['Magnitude in dB', 'Group delay in s']},
+    # 2D plots
+    'time_2d': {
+        'shortcut': sc_plot["time"]["key"][0],
+        'xlabel': ['Indices'],
+        'ylabel': ['Time in ms']},
+    'freq_2d': {
+        'shortcut': sc_plot["freq"]["key"][0],
+        'xlabel': ['Indices'],
+        'ylabel': ['Frequency in Hz']},
+    'phase_2d': {
+        'shortcut': sc_plot["freq"]["key"][0],
+        'xlabel': ['Indices'],
+        'ylabel': ['Frequency in Hz']},
+    'group_delay_2d': {
+        'shortcut': sc_plot["group_delay"]["key"][0],
+        'xlabel': ['Indices'],
+        'ylabel': ['Frequency in Hz']},
+    'spectrogram': {
+        'shortcut': sc_plot["spectrogram"]["key"][0],
+        'xlabel': ['Time in s'],
+        'ylabel': ['Frequency in Hz']},
+    }
+
 
 def test_event_emu():
     """Test the EventEmu Class."""
@@ -80,37 +133,6 @@ def test_toggle_line_plots():
     dictionary. This is intended behavior.
     """
 
-    plots = {
-        'time': {
-            'shortcut': sc_plot["time"]["key"][0],
-            'xlabel': ['Time in ms'],
-            'ylabel': ['Amplitude']},
-        'freq': {
-            'shortcut': sc_plot["freq"]["key"][0],
-            'xlabel': ['Frequency in Hz'],
-            'ylabel': ['Magnitude in dB']},
-        'phase': {
-            'shortcut': sc_plot["phase"]["key"][0],
-            'xlabel': ['Frequency in Hz'],
-            'ylabel': ['Phase in radians']},
-        'group_delay': {
-            'shortcut': sc_plot["group_delay"]["key"][0],
-            'xlabel': ['Frequency in Hz'],
-            'ylabel': ['Group delay in s']},
-        'time_freq': {
-            'shortcut': sc_plot["time_freq"]["key"][0],
-            'xlabel': ['Time in ms', 'Frequency in Hz'],
-            'ylabel': ['Amplitude', 'Magnitude in dB']},
-        'freq_phase': {
-            'shortcut': sc_plot["freq_phase"]["key"][0],
-            'xlabel':  ['', 'Frequency in Hz'],
-            'ylabel': ['Magnitude in dB', 'Phase in radians']},
-        'freq_group_delay': {
-            'shortcut': sc_plot["freq_group_delay"]["key"][0],
-            'xlabel': ['', 'Frequency in Hz'],
-            'ylabel': ['Magnitude in dB', 'Group delay in s']}
-    }
-
     # dummy signal (needs to as longe as the default spectrogram block size)
     signal = pf.signals.impulse(1024)
     # initialize the plot
@@ -149,29 +171,6 @@ def test_toggle_2d_plots():
     an interaction or if the new plot function is not added to the plots
     dictionary. This is intended behavior.
     """
-
-    plots = {
-        'time_2d': {
-            'shortcut': sc_plot["time"]["key"][0],
-            'xlabel': ['Points'],
-            'ylabel': ['Time in ms']},
-        'freq_2d': {
-            'shortcut': sc_plot["freq"]["key"][0],
-            'xlabel': ['Points'],
-            'ylabel': ['Frequency in Hz']},
-        'phase_2d': {
-            'shortcut': sc_plot["freq"]["key"][0],
-            'xlabel': ['Points'],
-            'ylabel': ['Frequency in Hz']},
-        'group_delay_2d': {
-            'shortcut': sc_plot["group_delay"]["key"][0],
-            'xlabel': ['Points'],
-            'ylabel': ['Frequency in Hz']},
-        'spectrogram': {
-            'shortcut': sc_plot["spectrogram"]["key"][0],
-            'xlabel': ['Time in s'],
-            'ylabel': ['Frequency in Hz']},
-    }
 
     # dummy signal (needs to as longe as the default spectrogram block size)
     signal = pf.signals.impulse(1024)

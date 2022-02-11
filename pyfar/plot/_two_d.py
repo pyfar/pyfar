@@ -11,12 +11,12 @@ from .ticker import (
     MultipleFractionFormatter)
 
 
-def _time_2d(signal, dB, log_prefix, log_reference, unit, points,
+def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
              orientation, cmap, colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
-    fig, ax, points, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, TimeData), points, ax, colorbar, **kwargs)
+    fig, ax, indices, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, TimeData), indices, ax, colorbar, **kwargs)
     _utils._check_time_unit(unit)
 
     # prepare input
@@ -48,14 +48,14 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, points,
         axis = np.roll(axis, 1)
         ax_lim = np.roll(ax_lim, 1)
 
-    axis[1].set_label_text("Points")
+    axis[1].set_label_text("Indices")
     axis[0].set_label_text(f"Time in {unit}")
     ax_lim[0](times[0], times[-1])
 
     # plot data
-    points_x = points if orientation == "vertical" else times
-    points_y = times if orientation == "vertical" else points
-    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap, **kwargs)
+    indices_x = indices if orientation == "vertical" else times
+    indices_y = times if orientation == "vertical" else indices
+    qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
     # color limits and colorbar
     if dB:
@@ -67,12 +67,12 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, points,
     return ax[0], qm, cb
 
 
-def _freq_2d(signal, dB, log_prefix, log_reference, xscale, points,
+def _freq_2d(signal, dB, log_prefix, log_reference, xscale, indices,
              orientation, cmap, colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
-    fig, ax, points, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, FrequencyData), points, ax, colorbar, **kwargs)
+    fig, ax, indices, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, FrequencyData), indices, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -98,7 +98,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, xscale, points,
         ax_lim = np.roll(ax_lim, 1)
         ax_scale = np.roll(ax_scale, 1)
 
-    axis[1].set_label_text("Points")
+    axis[1].set_label_text("Indices")
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
@@ -108,9 +108,9 @@ def _freq_2d(signal, dB, log_prefix, log_reference, xscale, points,
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # plot data
-    points_x = points if orientation == "vertical" else signal.frequencies
-    points_y = signal.frequencies if orientation == "vertical" else points
-    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap, **kwargs)
+    indices_x = indices if orientation == "vertical" else signal.frequencies
+    indices_y = signal.frequencies if orientation == "vertical" else indices
+    qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
     # color limits and colorbar
     if dB:
@@ -122,12 +122,12 @@ def _freq_2d(signal, dB, log_prefix, log_reference, xscale, points,
     return ax[0], qm, cb
 
 
-def _phase_2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
-              ax, **kwargs):
+def _phase_2d(signal, deg, unwrap, xscale, indices, orientation, cmap,
+              colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
-    fig, ax, points, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, FrequencyData), points, ax, colorbar, **kwargs)
+    fig, ax, indices, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal, FrequencyData), indices, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -143,14 +143,14 @@ def _phase_2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
         ax_lim = np.roll(ax_lim, 1)
         ax_scale = np.roll(ax_scale, 1)
 
-    axis[1].set_label_text("Points")
+    axis[1].set_label_text("Indices")
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
     # plot data
-    points_x = points if orientation == "vertical" else signal.frequencies
-    points_y = signal.frequencies if orientation == "vertical" else points
-    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap, **kwargs)
+    indices_x = indices if orientation == "vertical" else signal.frequencies
+    indices_y = signal.frequencies if orientation == "vertical" else indices
+    qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
     if xscale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
@@ -175,12 +175,12 @@ def _phase_2d(signal, deg, unwrap, xscale, points, orientation, cmap, colorbar,
     return ax[0], qm, cb
 
 
-def _group_delay_2d(signal, unit, xscale, points, orientation, cmap, colorbar,
+def _group_delay_2d(signal, unit, xscale, indices, orientation, cmap, colorbar,
                     ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
-    fig, ax, points, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal), points, ax, colorbar, **kwargs)
+    fig, ax, indices, kwargs = _utils._prepare_2d_plot(
+        signal, (Signal), indices, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -206,7 +206,7 @@ def _group_delay_2d(signal, unit, xscale, points, orientation, cmap, colorbar,
         ax_lim = np.roll(ax_lim, 1)
         ax_scale = np.roll(ax_scale, 1)
 
-    axis[1].set_label_text("Points")
+    axis[1].set_label_text("Indices")
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
@@ -216,9 +216,9 @@ def _group_delay_2d(signal, unit, xscale, points, orientation, cmap, colorbar,
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # plot data
-    points_x = points if orientation == "vertical" else signal.frequencies
-    points_y = signal.frequencies if orientation == "vertical" else points
-    qm = ax[0].pcolormesh(points_x, points_y, data, cmap=cmap, **kwargs)
+    indices_x = indices if orientation == "vertical" else signal.frequencies
+    indices_y = signal.frequencies if orientation == "vertical" else indices
+    qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
     # color limits and colorbar
     qm.set_clim(.5 * np.nanmin(data), 1.5 * np.nanmax(data))
@@ -229,7 +229,7 @@ def _group_delay_2d(signal, unit, xscale, points, orientation, cmap, colorbar,
 
 
 def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
-                  log_reference, xscale, unit, points, orientation, cmap,
+                  log_reference, xscale, unit, indices, orientation, cmap,
                   colorbar, ax, **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
@@ -238,10 +238,10 @@ def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _time_2d(
-        signal, dB_time, log_prefix_time, log_reference, unit, points,
+        signal, dB_time, log_prefix_time, log_reference, unit, indices,
         orientation, cmap, colorbar, ax[0], **kwargs)
     _, qm_1, cb_1 = _freq_2d(
-        signal, dB_freq, log_prefix_freq, log_reference, xscale, points,
+        signal, dB_freq, log_prefix_freq, log_reference, xscale, indices,
         orientation, cmap, colorbar, ax[1], **kwargs)
     fig.align_ylabels()
 
@@ -249,16 +249,16 @@ def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
 
 
 def _freq_phase_2d(signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
-                   points, orientation, cmap, colorbar, ax, **kwargs):
+                   indices, orientation, cmap, colorbar, ax, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, xscale,
-                             points, orientation, cmap, colorbar, ax[0],
+                             indices, orientation, cmap, colorbar, ax[0],
                              **kwargs)
-    _, qm_1, cb_1 = _phase_2d(signal, deg, unwrap, xscale, points, orientation,
-                              cmap, colorbar, ax[1], **kwargs)
+    _, qm_1, cb_1 = _phase_2d(signal, deg, unwrap, xscale, indices,
+                              orientation, cmap, colorbar, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
 
@@ -266,7 +266,7 @@ def _freq_phase_2d(signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
 
 
 def _freq_group_delay_2d(signal, dB, log_prefix, log_reference, unit, xscale,
-                         points, orientation, cmap, colorbar, ax, **kwargs):
+                         indices, orientation, cmap, colorbar, ax, **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
@@ -274,9 +274,9 @@ def _freq_group_delay_2d(signal, dB, log_prefix, log_reference, unit, xscale,
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, xscale,
-                             points, orientation, cmap, colorbar, ax[0],
+                             indices, orientation, cmap, colorbar, ax[0],
                              **kwargs)
-    _, qm_1, cb_1 = _group_delay_2d(signal, unit, xscale, points, orientation,
+    _, qm_1, cb_1 = _group_delay_2d(signal, unit, xscale, indices, orientation,
                                     cmap, colorbar, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()

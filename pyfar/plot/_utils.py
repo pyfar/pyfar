@@ -298,7 +298,7 @@ def _log_prefix(signal):
     return log_prefix
 
 
-def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
+def _prepare_2d_plot(data, instances, indices, ax, colorbar, **kwargs):
     """
     Check and prepare input for 2D plots
 
@@ -312,7 +312,7 @@ def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
         The input data for the plot function
     instance : tuple of pyfar audio classes
         Tuple of classes that can be used for the plot function that calls this
-    points : None, array like
+    indices : None, array like
         parameter from 2d plots against which the channels are plotted
     ax : matplotlib.pyplot.axes
         Axes to plot on.
@@ -335,7 +335,7 @@ def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
     -------
     fig, ax : matplotlib objects
         The prepared figure and axis objects for plotting
-    points : array like
+    indices : array like
         parameter from 2d plots against which the channels are plotted
     kwargs : keyword arguments
         With added default value for shading if it was not contained
@@ -352,10 +352,10 @@ def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
     if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
         raise ValueError('A list of axes can not be used if colorbar is False')
 
-    if points is None:
-        points = np.arange(data.cshape[0])
-    elif len(points) != data.cshape[0]:
-        raise ValueError('length of points must match signal.cshape[0]')
+    if indices is None:
+        indices = np.arange(data.cshape[0])
+    elif len(indices) != data.cshape[0]:
+        raise ValueError('length of indices must match signal.cshape[0]')
 
     # prepare the figure and axis for plotting the data and colorbar
     fig, ax = _prepare_plot(ax)
@@ -366,7 +366,7 @@ def _prepare_2d_plot(data, instances, points, ax, colorbar, **kwargs):
     if "shading" not in kwargs:
         kwargs["shading"] = "nearest"
 
-    return fig, ax, points, kwargs
+    return fig, ax, indices, kwargs
 
 
 def _add_colorbar(colorbar, fig, ax, qm, label):
