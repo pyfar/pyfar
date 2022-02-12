@@ -102,9 +102,9 @@ def _freq_2d(signal, dB, log_prefix, log_reference, xscale, indices,
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
+    ax_scale[0](xscale)
     if xscale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
-    ax_scale[0](xscale)
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # plot data
@@ -152,9 +152,9 @@ def _phase_2d(signal, deg, unwrap, xscale, indices, orientation, cmap,
     indices_y = signal.frequencies if orientation == "vertical" else indices
     qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
+    ax_scale[0](xscale)
     if xscale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
-    ax_scale[0](xscale)
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # color limits and colorbar
@@ -210,9 +210,9 @@ def _group_delay_2d(signal, unit, xscale, indices, orientation, cmap, colorbar,
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
+    ax_scale[0](xscale)
     if xscale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
-    ax_scale[0](xscale)
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # plot data
