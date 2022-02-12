@@ -11,7 +11,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
             cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
             style='light', **kwargs):
     """
-    2D plot of multi-channel time signals with color coded amplitude.
+    2D color coded plot of time signals.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
     ``matplotlib.pyplot.pcolormesh()``.
@@ -96,17 +96,15 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     Examples
     --------
 
+    Plot a 25-channel impulse signal with different delays and amplitudes.
+
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> # generate the signal
-        >>> angles = np.arange(0, 180) / 180 * np.pi
-        >>> delays = np.round(100 * np.sin(angles)).astype(int)
-        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
-        >>> signal = pf.signals.impulse(128, delays, amplitudes)
-        >>> # plot the signal
-        >>> pf.plot.time_2d(signal)
+        >>> impulses = pf.signals.impulse(
+        ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
+        >>> pf.plot.time_2d(impulses)
     """
 
     with context(style):
@@ -134,7 +132,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
             cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
             style='light', **kwargs):
     """
-    2D plot of multi-channel magnitude spectrum with color coded magnitude.
+    2D color coded plot of magnitude spectra.
 
     Plots ``abs(signal.freq)`` and passes keyword arguments (`kwargs`) to
     ``matplotlib.pyplot.pcolormesh()``.
@@ -217,17 +215,15 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     Example
     -------
 
+    Plot a 25-channel impulse signal with different delays and amplitudes.
+
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> # generate the signal
-        >>> angles = np.arange(0, 180) / 180 * np.pi
-        >>> delays = np.round(100 * np.sin(angles)).astype(int)
-        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
-        >>> signal = pf.signals.impulse(128, delays, amplitudes)
-        >>> # plot the signal
-        >>> pf.plot.freq_2d(signal, dB=False)
+        >>> impulses = pf.signals.impulse(
+        ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
+        >>> pf.plot.freq_2d(impulses, dB=False)
     """
 
     with context(style):
@@ -255,7 +251,7 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
              orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
              colorbar=True, ax=None, style='light', **kwargs):
     """
-    2D plot of multi-channel phase spectrum with color coded phase.
+    2D color coded plot of phase spectra.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
     ``matplotlib.pyplot.pcolormesh()``.
@@ -333,17 +329,15 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
     Example
     -------
 
+    Plot a 25-channel impulse signal with different delays and amplitudes.
+
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> # generate the signal
-        >>> angles = np.arange(0, 180) / 180 * np.pi
-        >>> delays = np.round(100 * np.sin(angles)).astype(int)
-        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
-        >>> signal = pf.signals.impulse(128, delays, amplitudes)
-        >>> # plot the signal
-        >>> pf.plot.phase_2d(signal, unwrap=True)
+        >>> impulses = pf.signals.impulse(
+        ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
+        >>> pf.plot.phase_2d(impulses, unwrap=True, xscale="linear")
     """
 
     with context(style):
@@ -370,7 +364,7 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
                    orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
                    colorbar=True, ax=None, style='light', **kwargs):
     """
-    2D color coded plot of multi-channel group delays.
+    2D color coded plot of the group delay.
 
     Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
     (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
@@ -446,17 +440,15 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
     Example
     -------
 
+    Plot a 25-channel impulse signal with different delays and amplitudes.
+
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> # generate the signal
-        >>> angles = np.arange(0, 180) / 180 * np.pi
-        >>> delays = np.round(100 * np.sin(angles)).astype(int)
-        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
-        >>> signal = pf.signals.impulse(128, delays, amplitudes)
-        >>> # plot the signal
-        >>> pf.plot.group_delay_2d(signal)
+        >>> impulses = pf.signals.impulse(
+        ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
+        >>> pf.plot.group_delay_2d(impulses, unit="samples")
     """
 
     with context(style):
@@ -485,8 +477,10 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                  cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
                  style='light', **kwargs):
     """
-    2D plot of multi-channel time signals and magnitude spectrum with color
-    coded amplitude.
+    2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
+
+    Plots ``signal.time`` and ``abs(signal.freq)`` passes keyword arguments
+    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
 
     Parameters
     ----------
@@ -573,17 +567,15 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     Examples
     --------
 
+    Plot a 25-channel impulse signal with different delays and amplitudes.
+
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> # generate the signal
-        >>> angles = np.arange(0, 180) / 180 * np.pi
-        >>> delays = np.round(100 * np.sin(angles)).astype(int)
-        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
-        >>> signal = pf.signals.impulse(128, delays, amplitudes)
-        >>> # plot the signal
-        >>> pf.plot.time_2d(signal)
+        >>> impulses = pf.signals.impulse(
+        ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
+        >>> pf.plot.time_freq_2d(impulses, dB_freq=False)
     """
 
     with context(style):
@@ -595,8 +587,10 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time_freq_2d', dB_time=dB_time, log_prefix_time=log_prefix_time,
-        log_prefix_freq=log_prefix_freq, log_reference=log_reference)
+        'time_freq_2d', dB_time=dB_time, dB_freq=dB_freq,
+        log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
+        log_reference=log_reference, xscale=xscale, unit=unit, indices=indices,
+        orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -612,8 +606,10 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
                   orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
                   colorbar=True, ax=None, style='light', **kwargs):
     """
-    2D plot of multi-channel magnitude and phase spectrum with color coded
-    values.
+    2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
+
+    Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
+    arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
 
     Parameters
     ----------
@@ -694,17 +690,16 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     Examples
     --------
 
+    Plot a 25-channel impulse signal with different delays and amplitudes.
+
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> # generate the signal
-        >>> angles = np.arange(0, 180) / 180 * np.pi
-        >>> delays = np.round(100 * np.sin(angles)).astype(int)
-        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
-        >>> signal = pf.signals.impulse(128, delays, amplitudes)
-        >>> # plot the signal
-        >>> pf.plot.time_2d(signal)
+        >>> impulses = pf.signals.impulse(
+        ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
+        >>> pf.plot.freq_phase_2d(impulses, dB=False, unwrap=True,
+        ...                       xscale="linear")
     """
 
     with context(style):
@@ -734,8 +729,10 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
                         cmap=mpl.cm.get_cmap(name='magma'), colorbar=True,
                         ax=None, style='light', **kwargs):
     """
-    2D plot of multi-channel magnitude spectrum and group delay with color
-    coded values.
+    2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
+
+    Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
+    passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
 
     Parameters
     ----------
@@ -814,17 +811,15 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     Examples
     --------
 
+    Plot a 25-channel impulse signal with different delays and amplitudes.
+
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> # generate the signal
-        >>> angles = np.arange(0, 180) / 180 * np.pi
-        >>> delays = np.round(100 * np.sin(angles)).astype(int)
-        >>> amplitudes = .5 + .5 * np.abs(np.cos(angles))
-        >>> signal = pf.signals.impulse(128, delays, amplitudes)
-        >>> # plot the signal
-        >>> pf.plot.time_2d(signal)
+        >>> impulses = pf.signals.impulse(
+        ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
+        >>> pf.plot.freq_group_delay_2d(impulses, dB=False, unit="samples")
     """
 
     with context(style):
@@ -935,6 +930,8 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 
     Example
     -------
+
+    Plot the spectrogram of a linear sweep
 
     .. plot::
 

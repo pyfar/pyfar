@@ -63,7 +63,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'time', dB_time=dB, log_prefix_time=log_prefix,
-        log_reference=log_reference)
+        log_reference=log_reference, unit=unit)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -203,7 +203,8 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
                 **kwargs):
     """Plot the group delay.
 
-    Passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
+    (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
@@ -260,8 +261,10 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
               log_prefix_freq=None, log_reference=1, xscale='log', unit=None,
               ax=None, style='light', **kwargs):
     """
-    Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
+    Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
+    Plots ``signal.time`` and ``abs(signal.freq)`` passes keyword arguments
+    (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
@@ -326,8 +329,9 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time_freq', dB_time=dB_time, log_prefix_time=log_prefix_time,
-        log_prefix_freq=log_prefix_freq, log_reference=log_reference)
+        'time_freq', dB_time=dB_time, dB_freq=dB_freq,
+        log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
+        log_reference=log_reference, xscale=xscale, unit=unit)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -337,7 +341,10 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
                deg=False, unwrap=False, ax=None, style='light', **kwargs):
-    """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout.
+    """Plot the magnitude and phase spectrum (2 by 1 subplot).
+
+    Plots ``abs(signal.freq)``and ``angle(signal.freq)`` and passes keyword
+    arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
@@ -378,9 +385,14 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
+    Examples
     --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> impulse = pf.signals.impulse(100, 10)
+        >>> pf.plot.freq_phase(impulse, unwrap=True)
     """
 
     with context(style):
@@ -391,7 +403,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_phase', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale)
+        log_reference=log_reference, xscale=xscale, deg=deg, unwrap=unwrap)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -402,9 +414,10 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
 def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      unit=None, xscale='log', ax=None, style='light',
                      **kwargs):
-    """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
+    """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
-    Passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    Plots ``abs(signal.freq)``and ``pyfar.dsp.group_delay(signal.freq)`` and
+    passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
@@ -462,7 +475,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale)
+        log_reference=log_reference, unit=unit, xscale=xscale)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
