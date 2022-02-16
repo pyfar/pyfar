@@ -20,7 +20,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     ----------
     signal : Signal, TimeData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>0`.
+        :math:`m>1`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -141,7 +141,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>0`.
+        :math:`m>1`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -260,7 +260,7 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>0`.
+        :math:`m>1`.
     deg : bool
         Plot the phase in degrees. The default is ``False``, which plots the
         phase in radians.
@@ -373,7 +373,7 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
     ----------
     signal : Signal
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>0`.
+        :math:`m>1`.
     unit : str, None
         Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
@@ -486,7 +486,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     ----------
     signal : Signal
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>0`.
+        :math:`m>1`.
     dB_time : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -615,7 +615,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>0`.
+        :math:`m>1`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -738,7 +738,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     ----------
     signal : Signal
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>0`.
+        :math:`m>1`.
     dB : bool
         Flag to plot the logarithmic magnitude spectrum. The default is
         ``True``.

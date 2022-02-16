@@ -604,6 +604,10 @@ class Interaction(object):
             # no toggling for spectrogram
             if self.params._plot == "spectrogram":
                 return
+            # no toggling if signal has less than 2 channels
+            if np.prod(self.signal.cshape) < 2 \
+                    and self.params.plot_type == "line":
+                return
 
             # cycle the plot type
             self.params.cycle_plot_types()
@@ -678,6 +682,7 @@ class Interaction(object):
         prm = self.params
 
         # cases that are not allowed
+        # spectogram plot if signal has less samples than the window length
         if event.key in plot['spectrogram'] \
                 and self.signal.n_samples < prm.window_length:
             return

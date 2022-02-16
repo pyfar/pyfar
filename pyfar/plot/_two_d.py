@@ -16,7 +16,7 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, TimeData), indices, ax, colorbar, **kwargs)
+        signal, (Signal, TimeData), 2, indices, ax, colorbar, **kwargs)
     _utils._check_time_unit(unit)
 
     # prepare input
@@ -72,7 +72,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, xscale, indices,
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, FrequencyData), indices, ax, colorbar, **kwargs)
+        signal, (Signal, FrequencyData), 2, indices, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -127,7 +127,7 @@ def _phase_2d(signal, deg, unwrap, xscale, indices, orientation, cmap,
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal, FrequencyData), indices, ax, colorbar, **kwargs)
+        signal, (Signal, FrequencyData), 2, indices, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -180,7 +180,7 @@ def _group_delay_2d(signal, unit, xscale, indices, orientation, cmap, colorbar,
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal), indices, ax, colorbar, **kwargs)
+        signal, (Signal), 2, indices, ax, colorbar, **kwargs)
     _utils._check_axis_scale(xscale)
 
     # prepare input
@@ -303,7 +303,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     # check input
     # check input and prepare the figure and axis
     fig, ax, _, kwargs = _utils._prepare_2d_plot(
-        signal, (Signal), None, ax, colorbar, **kwargs)
+        signal, (Signal), 1, None, ax, colorbar, **kwargs)
     _utils._check_time_unit(unit)
     _utils._check_axis_scale(yscale, 'y')
 

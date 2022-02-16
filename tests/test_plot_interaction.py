@@ -139,8 +139,9 @@ def test_interaction_attached():
     does not have an interaction. This is intended behavior.
     """
 
-    # dummy signal (needs to as longe as the default spectrogram block size)
-    signal = pf.signals.impulse(1024)
+    # dummy signal (needs to as longe as the default spectrogram block size
+    # with at least two channels)
+    signal = pf.signals.impulse(1024, [0, 0])
 
     # loop functions
     for function in getmembers(pf.plot.line, isfunction) + \
@@ -166,7 +167,8 @@ def test_interaction_attached():
 def test_toggle_plots(plot_type, initial_function, function_list):
     """Test toggling plots by checking labels after toggling."""
 
-    # dummy signal (needs to as longe as the default spectrogram block size)
+    # dummy signal (needs to as longe as the default spectrogram block size
+    # with at least two channels)
     signal = pf.signals.impulse(1024, [0, 1000])
 
     # initital plot
@@ -214,23 +216,24 @@ def test_toggle_plots(plot_type, initial_function, function_list):
     plt.close("all")
 
 
-@pytest.mark.parametrize("plot,signal,toggle", [
-    # togling spectrogram with short signal would raise Value error
-    # if not caught
-    (pf.plot.time, pf.Signal([1, 0, 0], 44100), "spectrogram")
+@pytest.mark.parametrize("plot,signal,shortcut", [
+    # togling spectrogram with short signal raises Value error if not caught
+    (pf.plot.time, pf.Signal([1, 0, 0], 44100),
+     sc_plot["spectrogram"]["key"][0]),
+    # cycling plot style with 1 channel signal raises Value error if not caught
+    (pf.plot.time, pf.Signal([1, 0, 0], 44100),
+     sc_ctr["cycle_plot_types"]["key"][0]),
     ])
-def test_toggle_plot_not_allowed(plot, signal, toggle):
-    """Test if toggles that are not allowed are caught.
-
+def test_interaction_not_allowed(plot, signal, shortcut):
+    """
+    Test interactions that are not allowed are caught.
     Can be extended if required in the future.
     """
 
-    # toggling spectrogram, if signal is too short
+    # plot signal
     ax = plot(signal)
-    shortcut = sc_plot[toggle]["key"][0]
-    # toggle the interaction
+    # toggle the interaction would raise a ValueError if not caught
     ax.interaction.select_action(ia.EventEmu(shortcut))
-
     plt.close("all")
 
 
@@ -541,7 +544,8 @@ def test_cycle_and_toggle_signals():
 def test_cycle_plot_styles():
     """Test cycle the plot styles between line and 2d plots."""
 
-    # dummy signal (needs to as longe as the default spectrogram block size)
+    # dummy signal (needs to as longe as the default spectrogram block size
+    # with at least two channels)
     signal = pf.signals.impulse(1024, [0, 1000])
     # shortcut for toggling the orientation
     key = sc_ctr["cycle_plot_types"]["key"][0]

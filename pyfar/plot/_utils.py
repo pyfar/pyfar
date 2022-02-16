@@ -298,7 +298,8 @@ def _log_prefix(signal):
     return log_prefix
 
 
-def _prepare_2d_plot(data, instances, indices, ax, colorbar, **kwargs):
+def _prepare_2d_plot(data, instances, min_n_channels, indices, ax, colorbar,
+                     **kwargs):
     """
     Check and prepare input for 2D plots
 
@@ -312,6 +313,9 @@ def _prepare_2d_plot(data, instances, indices, ax, colorbar, **kwargs):
         The input data for the plot function
     instance : tuple of pyfar audio classes
         Tuple of classes that can be used for the plot function that calls this
+    min_n_channels : int
+        Minimum numbers channels required by the plot (1 for spectrogram, 2
+        otherwise)
     indices : None, array like
         parameter from 2d plots against which the channels are plotted
     ax : matplotlib.pyplot.axes
@@ -346,9 +350,10 @@ def _prepare_2d_plot(data, instances, indices, ax, colorbar, **kwargs):
         instances = [str(ii).split('.')[-1][:-2] for ii in instances]
         raise TypeError(
             f'Input data has to be of type: {", ".join(instances)}.')
-    if len(data.cshape) > 1:
-        raise ValueError(
-            f'signal.cshape must be (m, ) with m>0 but is {data.cshape}')
+    if len(data.cshape) > 1 or np.prod(data.cshape) < min_n_channels:
+        raise ValueError((
+            f'signal.cshape must be (m, ) with m>={min_n_channels} '
+            f'but is {data.cshape}'))
     if not colorbar and isinstance(ax, (tuple, list, np.ndarray)):
         raise ValueError('A list of axes can not be used if colorbar is False')
 
