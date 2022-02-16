@@ -115,7 +115,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
 
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
-        log_reference=log_reference, unit=unit, indices=indices,
+        log_reference=log_reference, unit_time=unit, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -459,7 +459,7 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'group_delay_2d', unit=unit, xscale=xscale, indices=indices,
+        'group_delay_2d', unit_gd=unit, xscale=xscale, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -589,8 +589,8 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     plot_parameter = ia.PlotParameter(
         'time_freq_2d', dB_time=dB_time, dB_freq=dB_freq,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
-        log_reference=log_reference, xscale=xscale, unit=unit, indices=indices,
-        orientation=orientation, cmap=cmap, colorbar=colorbar)
+        log_reference=log_reference, xscale=xscale, unit_time=unit,
+        indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -831,8 +831,8 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale, unit=unit, indices=indices,
-        orientation=orientation, cmap=cmap, colorbar=colorbar)
+        log_reference=log_reference, xscale=xscale, unit_gd=unit,
+        indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -952,9 +952,9 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'spectrogram', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, yscale=yscale, unit=unit, window=window,
-        window_length=window_length, window_overlap_fct=window_overlap_fct,
-        cmap=cmap)
+        log_reference=log_reference, yscale=yscale, unit_time=unit,
+        window=window, window_length=window_length,
+        window_overlap_fct=window_overlap_fct, cmap=cmap)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
