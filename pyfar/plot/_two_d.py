@@ -164,7 +164,7 @@ def _phase_2d(signal, deg, unwrap, xscale, indices, orientation, cmap,
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
                               _utils._phase_label(unwrap, deg))
 
-    if not deg and (not unwrap or unwrap == "360"):
+    if colorbar and not deg and (not unwrap or unwrap == "360"):
         # nice tick formatting is not done for unwrap=True. In this case
         # it can create 1000 or more ticks.
         cb.locator = MultipleFractionLocator(np.pi, 2)

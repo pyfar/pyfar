@@ -18,7 +18,7 @@ create_baseline = False
 file_type = "png"
 
 # if true, the plots will be compared to the baseline and an error is raised
-# if there are any differences. In any case, differences are writted to
+# if there are any differences. In any case, differences are written to
 # output_path as images
 compare_output = False
 
@@ -141,21 +141,19 @@ def test_line_xscale_assertion(sine):
     plt.close("all")
 
 
-def test_time_unit(impulse_group_delay):
+@pytest.mark.parametrize('function', [
+    (plot.time), (plot.group_delay), (plot.spectrogram)])
+@pytest.mark.parametrize('unit', [
+    (None), ('s'), ('ms'), ('mus'), ('samples')])
+def test_time_unit(function, unit, impulse_group_delay):
     """Test plottin with different units."""
-    function_list = [plot.time,
-                     plot.group_delay,
-                     plot.spectrogram]
+    print(f"Testing: {function.__name__} (unit={unit})")
 
-    for function in function_list:
-        for unit in [None, 's', 'ms', 'mus', 'samples']:
-            print(f"Testing: {function.__name__} (unit={unit})")
-
-            filename = f'line_{function.__name__}_unit_{str(unit)}'
-            create_figure()
-            function(impulse_group_delay[0], unit=unit)
-            save_and_compare(create_baseline, baseline_path, output_path,
-                             filename, file_type, compare_output)
+    filename = f'line_{function.__name__}_unit_{str(unit)}'
+    create_figure()
+    function(impulse_group_delay[0], unit=unit)
+    save_and_compare(create_baseline, baseline_path, output_path,
+                     filename, file_type, compare_output)
 
 
 def test_time_unit_assertion(sine):
@@ -205,35 +203,28 @@ def test_line_custom_subplots(sine, impulse_group_delay):
 
 
 def test_line_time_data(time_data):
-    """Test all line plots with default arguments and hold functionality."""
+    """Test time data plot with default arguments."""
+    function = plot.time
+    print(f"Testing: {function.__name__}")
 
-    function_list = [plot.time]
-
-    for function in function_list:
-        print(f"Testing: {function.__name__}")
-
-        filename = 'line_time_data_' + function.__name__
-        create_figure()
-        function(time_data)
-        save_and_compare(create_baseline, baseline_path, output_path, filename,
-                         file_type, compare_output)
+    filename = 'line_time_data_' + function.__name__
+    create_figure()
+    function(time_data)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
 
 
-def test_line_frequency_data(frequency_data):
-    """Test all line plots with default arguments and hold functionality."""
+@pytest.mark.parametrize('function', [
+    (plot.freq), (plot.phase), (plot.freq_phase)])
+def test_line_frequency_data(function, frequency_data):
+    """Test frequency data plot with default arguments."""
+    print(f"Testing: {function.__name__}")
 
-    function_list = [plot.freq,
-                     plot.phase,
-                     plot.freq_phase]
-
-    for function in function_list:
-        print(f"Testing: {function.__name__}")
-
-        filename = 'line_frequency_data_' + function.__name__
-        create_figure()
-        function(frequency_data)
-        save_and_compare(create_baseline, baseline_path, output_path, filename,
-                         file_type, compare_output)
+    filename = 'line_frequency_data_' + function.__name__
+    create_figure()
+    function(frequency_data)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
 
 
 def test_spectrogram(sine):
@@ -286,7 +277,7 @@ def test_2d_points_orientation(
     (plot.group_delay_2d)])
 @pytest.mark.parametrize('colorbar', [('off'), ('axes')])
 def test_2d_colorbar_options(function, colorbar, impulse_45_channels):
-    """Test all 2D plots with default parameters"""
+    """Test 2D color bar options"""
     print(f"Testing: {function.__name__} with colorbar {colorbar}")
     filename = f'2d_{function.__name__}_colorbar-{colorbar}'
     # pad zeros to get minimum signal length for spectrogram
@@ -409,6 +400,65 @@ def test_2d_xscale_assertion(impulse_45_channels):
         plot.spectrogram(impulse_45_channels[0], yscale="warped")
 
     plt.close("all")
+
+
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.group_delay_2d)])
+@pytest.mark.parametrize('unit', [
+    (None), ('s'), ('ms'), ('mus'), ('samples')])
+def test_2d_time_unit(function, unit, impulse_45_channels):
+    """Test plottin with different units."""
+    print(f"Testing: {function.__name__} (unit={unit})")
+
+    filename = f'2d_{function.__name__}_unit_{str(unit)}'
+    create_figure()
+    function(impulse_45_channels[0], unit=unit)
+    save_and_compare(create_baseline, baseline_path, output_path,
+                     filename, file_type, compare_output)
+
+
+def test_2d_time_unit_assertion(impulse_45_channels):
+    """Test if all 2d plots raise an assertion for a wrong unit parameter."""
+
+    with raises(ValueError):
+        plot.time_2d(impulse_45_channels[0], unit="pascal")
+
+    with raises(ValueError):
+        plot.group_delay_2d(impulse_45_channels[0], unit="pascal")
+
+    plt.close("all")
+
+
+def test_2d_time_data(impulse_45_channels):
+    """Test 2d time data plot with default arguments."""
+    function = plot.time
+    time_data = pf.TimeData(
+        impulse_45_channels[0].time, impulse_45_channels[0].times)
+    print(f"Testing: {function.__name__}")
+
+    filename = '2d_time_data_' + function.__name__
+    create_figure()
+    function(time_data)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.freq), (plot.phase), (plot.freq_phase)])
+def test_2d_frequency_data(function):
+    """Test 2d frequency data plot with default arguments."""
+    frequency = np.sin(np.linspace(0, 2*np.pi, 45))*500 + 1000
+    amplitude = 1 - .5 * np.sin(np.linspace(0, 2*np.pi, 45))
+    phase = 2 * np.pi * np.sin(np.linspace(0, 2*np.pi, 45))
+    signal = pf.signals.sine(frequency, 4410, amplitude=amplitude, phase=phase)
+    frequency_data = pf.FrequencyData(signal.freq, signal.frequencies)
+    print(f"Testing: {function.__name__}")
+
+    filename = '2d_frequency_data_' + function.__name__
+    create_figure()
+    function(frequency_data)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
 
 
 def test_use():
