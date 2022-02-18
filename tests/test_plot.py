@@ -157,13 +157,13 @@ def test_line_xscale_assertion(sine):
     (plot.time), (plot.group_delay), (plot.spectrogram)])
 @pytest.mark.parametrize('unit', [
     (None), ('s'), ('ms'), ('mus'), ('samples')])
-def test_time_unit(function, unit, impulse_group_delay):
+def test_time_unit(function, unit, handsome_signal):
     """Test plottin with different units."""
     print(f"Testing: {function.__name__} (unit={unit})")
 
     filename = f'{function.__name__}_unit_{str(unit)}'
     create_figure()
-    function(impulse_group_delay[0], unit=unit)
+    function(handsome_signal, unit=unit)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
@@ -220,7 +220,7 @@ def test_line_time_data(handsome_signal):
     time_data = pf.TimeData(handsome_signal.time, handsome_signal.times)
     print(f"Testing: {function.__name__}")
 
-    filename = function.__name__ + 'time_data'
+    filename = function.__name__ + '_time_data'
     create_figure()
     function(time_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
