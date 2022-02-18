@@ -43,35 +43,35 @@ for file in os.listdir(output_path):
 @pytest.mark.parametrize('function', [
     (plot.time), (plot.freq), (plot.phase), (plot.group_delay),
     (plot.time_freq), (plot.freq_phase), (plot.freq_group_delay)])
-def test_line_plots(function, sine, impulse_group_delay):
+def test_line_plots(function, handsome_signal, handsome_signal_v2):
     """Test all line plots with default arguments and hold functionality."""
     print(f"Testing: {function.__name__}")
 
     # initial plot
-    filename = 'line_' + function.__name__
+    filename = function.__name__ + '_default'
     create_figure()
-    function(sine)
+    function(handsome_signal)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
     # test hold functionality
-    filename = 'line_' + function.__name__ + '_hold'
-    function(impulse_group_delay[0])
+    filename = function.__name__ + '_hold'
+    function(handsome_signal_v2)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
 
 @pytest.mark.parametrize('param', [
-    ['line_phase_deg', True, False],
-    ['line_phase_unwrap', False, True],
-    ['line_phase_deg_unwrap', True, True]])
-def test_line_phase_options(param, sine):
+    ['phase_deg', True, False],
+    ['phase_unwrap', False, True],
+    ['phase_deg_unwrap', True, True]])
+def test_line_phase_options(param, handsome_signal):
     """Test parameters that are unique to the phase plot."""
     print(f"Testing: {param[0]}")
 
     filename = param[0]
     create_figure()
-    plot.phase(sine, deg=param[1], unwrap=param[2])
+    plot.phase(handsome_signal, deg=param[1], unwrap=param[2])
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -84,24 +84,24 @@ def test_line_phase_unwrap_assertion(sine):
 
 @pytest.mark.parametrize('function', [
     (plot.time), (plot.freq), (plot.spectrogram)])
-def test_line_dB_option(function, sine):
+def test_line_dB_option(function, handsome_signal):
     """Test all line plots that have a dB option."""
     # test if dB option is working
     for dB in [True, False]:
         print(f"Testing: {function.__name__} (dB={dB})")
 
-        filename = 'line_' + function.__name__ + '_dB_' + str(dB)
+        filename = function.__name__ + '_dB_' + str(dB)
         create_figure()
-        function(sine, dB=dB)
+        function(handsome_signal, dB=dB)
         save_and_compare(create_baseline, baseline_path, output_path,
                          filename, file_type, compare_output)
 
     # test if log_prefix and log_reference are working
     print(f"Testing: {function.__name__} (log parameters)")
 
-    filename = 'line_' + function.__name__ + '_logParams'
+    filename = function.__name__ + '_logParams'
     create_figure()
-    function(sine, log_prefix=10, log_reference=.5, dB=True)
+    function(handsome_signal, log_prefix=10, log_reference=.5, dB=True)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -109,14 +109,14 @@ def test_line_dB_option(function, sine):
 @pytest.mark.parametrize('function', [
     (plot.freq), (plot.phase), (plot.group_delay)])
 @pytest.mark.parametrize('xscale', [('log'), ('linear')])
-def test_line_xscale_option(function, xscale, sine):
+def test_line_xscale_option(function, xscale, handsome_signal):
     """Test all line plots that have an xscale option."""
     # test if xscale option is working
     print(f"Testing: {function.__name__} (xscale={xscale})")
 
-    filename = 'line_' + function.__name__ + '_xscale_' + xscale
+    filename = function.__name__ + '_xscale_' + xscale
     create_figure()
-    function(sine, xscale=xscale)
+    function(handsome_signal, xscale=xscale)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
@@ -149,7 +149,7 @@ def test_time_unit(function, unit, impulse_group_delay):
     """Test plottin with different units."""
     print(f"Testing: {function.__name__} (unit={unit})")
 
-    filename = f'line_{function.__name__}_unit_{str(unit)}'
+    filename = f'{function.__name__}_unit_{str(unit)}'
     create_figure()
     function(impulse_group_delay[0], unit=unit)
     save_and_compare(create_baseline, baseline_path, output_path,
@@ -171,7 +171,7 @@ def test_time_unit_assertion(sine):
     plt.close("all")
 
 
-def test_line_custom_subplots(sine, impulse_group_delay):
+def test_line_custom_subplots(handsome_signal, handsome_signal_v2):
     """
     Test custom subplots in row, column, and mixed layout including hold
     functionality.
@@ -189,25 +189,26 @@ def test_line_custom_subplots(sine, impulse_group_delay):
         print(f"Testing: {p}")
 
         # test initial plot
-        filename = 'line_custom_subplots_' + p
+        filename = 'custom_subplots_' + p
         create_figure()
-        plot.custom_subplots(sine, plots[p])
+        plot.custom_subplots(handsome_signal, plots[p])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
 
         # test hold functionality
-        filename = 'line_custom_subplots_' + p + '_hold'
-        plot.custom_subplots(impulse_group_delay[0], plots[p])
+        filename = 'custom_subplots_' + p + '_hold'
+        plot.custom_subplots(handsome_signal_v2, plots[p])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
 
 
-def test_line_time_data(time_data):
+def test_line_time_data(handsome_signal):
     """Test time data plot with default arguments."""
     function = plot.time
+    time_data = pf.TimeData(handsome_signal.time, handsome_signal.times)
     print(f"Testing: {function.__name__}")
 
-    filename = 'line_time_data_' + function.__name__
+    filename = function.__name__ + 'time_data'
     create_figure()
     function(time_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
@@ -216,26 +217,27 @@ def test_line_time_data(time_data):
 
 @pytest.mark.parametrize('function', [
     (plot.freq), (plot.phase), (plot.freq_phase)])
-def test_line_frequency_data(function, frequency_data):
+def test_line_frequency_data(function, handsome_signal):
     """Test frequency data plot with default arguments."""
     print(f"Testing: {function.__name__}")
-
-    filename = 'line_frequency_data_' + function.__name__
+    frequency_data = pf.FrequencyData(
+        handsome_signal.freq, handsome_signal.frequencies)
+    filename = function.__name__ + 'frequency_data'
     create_figure()
     function(frequency_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
 
-def test_spectrogram(sine):
+def test_spectrogram():
     """Test spectrogram with default parameters"""
     function = plot.spectrogram
 
     print(f"Testing: {function.__name__}")
 
-    filename = '2d_' + function.__name__
+    filename = function.__name__ + '_default'
     create_figure()
-    function(sine)
+    function(pf.signals.exponential_sweep_time(2**16, [100, 10e3]))
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -243,11 +245,11 @@ def test_spectrogram(sine):
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
     (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
-def test_2d_plots(function, impulse_45_channels):
+def test_2d_plots(function, handsome_signal_2d):
     """Test all 2d plots with default arguments."""
-    filename = '2d_' + function.__name__
+    filename = function.__name__
     create_figure()
-    function(impulse_45_channels[0])
+    function(handsome_signal_2d)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -259,13 +261,16 @@ def test_2d_plots(function, impulse_45_channels):
 @pytest.mark.parametrize('points', [('default'), ('custom')])
 @pytest.mark.parametrize('orientation', [('vertical'), ('horizontal')])
 def test_2d_points_orientation(
-        function, orientation, points, impulse_45_channels):
+        function, orientation, points, handsome_signal_2d):
     """Test 2D plots with varing `points` and `orientation` parameters"""
     print(f"Testing: {function.__name__}")
     points_label = 'points-default' if points == 'default' else 'points-custom'
-    signal = impulse_45_channels[0]
-    points = impulse_45_channels[1] if points == 'custom' else None
-    filename = f'2d_{function.__name__}_{orientation}_{points_label}'
+    signal = handsome_signal_2d
+    if points == 'custom':
+        points = np.linspace(0, 360, np.prod(handsome_signal_2d.cshape))
+    else:
+        points = None
+    filename = f'{function.__name__}_{orientation}_{points_label}'
     create_figure()
     function(signal, indices=points, orientation=orientation)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
@@ -276,12 +281,12 @@ def test_2d_points_orientation(
     (plot.spectrogram), (plot.time_2d), (plot.freq_2d), (plot.phase_2d),
     (plot.group_delay_2d)])
 @pytest.mark.parametrize('colorbar', [('off'), ('axes')])
-def test_2d_colorbar_options(function, colorbar, impulse_45_channels):
+def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
     """Test 2D color bar options"""
     print(f"Testing: {function.__name__} with colorbar {colorbar}")
-    filename = f'2d_{function.__name__}_colorbar-{colorbar}'
+    filename = f'{function.__name__}_colorbar-{colorbar}'
     # pad zeros to get minimum signal length for spectrogram
-    signal = impulse_45_channels[0]
+    signal = handsome_signal_2d
     if function == plot.spectrogram:
         signal = pf.dsp.pad_zeros(signal, 2048 - signal.n_samples)
     fig = create_figure()
@@ -300,12 +305,12 @@ def test_2d_colorbar_options(function, colorbar, impulse_45_channels):
 @pytest.mark.parametrize('function', [
     (plot.spectrogram), (plot.time_2d), (plot.freq_2d), (plot.phase_2d),
     (plot.group_delay_2d)])
-def test_2d_colorbar_assertion(function, impulse_45_channels):
+def test_2d_colorbar_assertion(function, handsome_signal_2d):
     """
     Test assertion when passing an array of axes but not having a colorbar.
     """
     with raises(ValueError, match="A list of axes"):
-        function(impulse_45_channels[0], colorbar=False,
+        function(handsome_signal_2d, colorbar=False,
                  ax=[plt.gca(), plt.gca()])
 
 
@@ -323,46 +328,46 @@ def test_2d_cshape_assertion(function):
 
 
 @pytest.mark.parametrize('param', [
-    (['2d_phase_deg', True, False]),
-    (['2d_phase_unwrap', False, True]),
-    (['2d_phase_deg_unwrap', True, True])])
-def test_2d_phase_options(param, impulse_45_channels):
+    (['phase_2d_deg', True, False]),
+    (['phase_2d_unwrap', False, True]),
+    (['phase_2d_deg_unwrap', True, True])])
+def test_2d_phase_options(param, handsome_signal_2d):
     """Test parameters that are unique to the phase plot."""
     print(f"Testing: {param[0]}")
 
     filename = param[0]
     create_figure()
-    plot.phase_2d(impulse_45_channels[0], deg=param[1], unwrap=param[2])
+    plot.phase_2d(handsome_signal_2d, deg=param[1], unwrap=param[2])
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
 
-def test_phase_2d_unwrap_assertion(impulse_45_channels):
+def test_phase_2d_unwrap_assertion(handsome_signal_2d):
     """Test assertion for unwrap parameter."""
     with raises(ValueError):
-        plot.phase_2d(impulse_45_channels[0], unwrap='infinity')
+        plot.phase_2d(handsome_signal_2d, unwrap='infinity')
 
 
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.freq_2d)])
-def test_2d_dB_option(function, impulse_45_channels):
+def test_2d_dB_option(function, handsome_signal_2d):
     """Test all 2d plots that have a dB option."""
     # test if dB option is working
     for dB in [True, False]:
         print(f"Testing: {function.__name__} (dB={dB})")
 
-        filename = '2d_' + function.__name__ + '_dB_' + str(dB)
+        filename = function.__name__ + '_dB_' + str(dB)
         create_figure()
-        function(impulse_45_channels[0], dB=dB)
+        function(handsome_signal_2d, dB=dB)
         save_and_compare(create_baseline, baseline_path, output_path,
                          filename, file_type, compare_output)
 
     # test if log_prefix and log_reference are working
     print(f"Testing: {function.__name__} (log parameters)")
 
-    filename = '2d_' + function.__name__ + '_logParams'
+    filename = function.__name__ + '_logParams'
     create_figure()
-    function(impulse_45_channels[0], log_prefix=10, log_reference=.5, dB=True)
+    function(handsome_signal_2d, log_prefix=10, log_reference=.5, dB=True)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -370,34 +375,34 @@ def test_2d_dB_option(function, impulse_45_channels):
 @pytest.mark.parametrize('function', [
     (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)])
 @pytest.mark.parametrize('xscale', [('log'), ('linear')])
-def test_2d_xscale_option(function, xscale, impulse_45_channels):
+def test_2d_xscale_option(function, xscale, handsome_signal_2d):
     """Test all 2d plots that have an xscale option."""
     # test if xscale option is working
     print(f"Testing: {function.__name__} (xscale={xscale})")
 
-    filename = '2d_' + function.__name__ + '_xscale_' + xscale
+    filename = function.__name__ + '_xscale_' + xscale
     create_figure()
-    function(impulse_45_channels[0], xscale=xscale)
+    function(handsome_signal_2d, xscale=xscale)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
 
-def test_2d_xscale_assertion(impulse_45_channels):
+def test_2d_xscale_assertion(handsome_signal_2d):
     """
     Test if all 2d plots raise an assertion for a wrong scale parameter.
     """
 
     with raises(ValueError):
-        plot.freq(impulse_45_channels[0], xscale="warped")
+        plot.freq(handsome_signal_2d, xscale="warped")
 
     with raises(ValueError):
-        plot.phase(impulse_45_channels[0], xscale="warped")
+        plot.phase(handsome_signal_2d, xscale="warped")
 
     with raises(ValueError):
-        plot.group_delay(impulse_45_channels[0], xscale="warped")
+        plot.group_delay(handsome_signal_2d, xscale="warped")
 
     with raises(ValueError):
-        plot.spectrogram(impulse_45_channels[0], yscale="warped")
+        plot.spectrogram(handsome_signal_2d, yscale="warped")
 
     plt.close("all")
 
@@ -406,37 +411,37 @@ def test_2d_xscale_assertion(impulse_45_channels):
     (plot.time_2d), (plot.group_delay_2d)])
 @pytest.mark.parametrize('unit', [
     (None), ('s'), ('ms'), ('mus'), ('samples')])
-def test_2d_time_unit(function, unit, impulse_45_channels):
+def test_2d_time_unit(function, unit, handsome_signal_2d):
     """Test plottin with different units."""
     print(f"Testing: {function.__name__} (unit={unit})")
 
-    filename = f'2d_{function.__name__}_unit_{str(unit)}'
+    filename = f'{function.__name__}_unit_{str(unit)}'
     create_figure()
-    function(impulse_45_channels[0], unit=unit)
+    function(handsome_signal_2d, unit=unit)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
 
-def test_2d_time_unit_assertion(impulse_45_channels):
+def test_2d_time_unit_assertion(handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
 
     with raises(ValueError):
-        plot.time_2d(impulse_45_channels[0], unit="pascal")
+        plot.time_2d(handsome_signal_2d, unit="pascal")
 
     with raises(ValueError):
-        plot.group_delay_2d(impulse_45_channels[0], unit="pascal")
+        plot.group_delay_2d(handsome_signal_2d, unit="pascal")
 
     plt.close("all")
 
 
-def test_2d_time_data(impulse_45_channels):
+def test_2d_time_data(handsome_signal_2d):
     """Test 2d time data plot with default arguments."""
     function = plot.time
     time_data = pf.TimeData(
-        impulse_45_channels[0].time, impulse_45_channels[0].times)
+        handsome_signal_2d.time, handsome_signal_2d.times)
     print(f"Testing: {function.__name__}")
 
-    filename = '2d_time_data_' + function.__name__
+    filename = function.__name__ + 'time_data'
     create_figure()
     function(time_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
@@ -445,16 +450,13 @@ def test_2d_time_data(impulse_45_channels):
 
 @pytest.mark.parametrize('function', [
     (plot.freq), (plot.phase), (plot.freq_phase)])
-def test_2d_frequency_data(function):
+def test_2d_frequency_data(handsome_signal, function):
     """Test 2d frequency data plot with default arguments."""
-    frequency = np.sin(np.linspace(0, 2*np.pi, 45))*500 + 1000
-    amplitude = 1 - .5 * np.sin(np.linspace(0, 2*np.pi, 45))
-    phase = 2 * np.pi * np.sin(np.linspace(0, 2*np.pi, 45))
-    signal = pf.signals.sine(frequency, 4410, amplitude=amplitude, phase=phase)
-    frequency_data = pf.FrequencyData(signal.freq, signal.frequencies)
+    frequency_data = pf.FrequencyData(
+        handsome_signal.freq, handsome_signal.frequencies)
     print(f"Testing: {function.__name__}")
 
-    filename = '2d_frequency_data_' + function.__name__
+    filename = function.__name__ + 'frequency_data'
     create_figure()
     function(frequency_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
