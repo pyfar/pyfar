@@ -234,7 +234,7 @@ def test_line_frequency_data(function, handsome_signal):
     print(f"Testing: {function.__name__}")
     frequency_data = pf.FrequencyData(
         handsome_signal.freq, handsome_signal.frequencies)
-    filename = function.__name__ + 'frequency_data'
+    filename = function.__name__ + '_frequency_data'
     create_figure()
     function(frequency_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
@@ -448,12 +448,12 @@ def test_2d_time_unit_assertion(handsome_signal_2d):
 
 def test_2d_time_data(handsome_signal_2d):
     """Test 2d time data plot with default arguments."""
-    function = plot.time
+    function = plot.time_2d
     time_data = pf.TimeData(
         handsome_signal_2d.time, handsome_signal_2d.times)
     print(f"Testing: {function.__name__}")
 
-    filename = function.__name__ + 'time_data'
+    filename = function.__name__ + '_time_data'
     create_figure()
     function(time_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
@@ -461,14 +461,14 @@ def test_2d_time_data(handsome_signal_2d):
 
 
 @pytest.mark.parametrize('function', [
-    (plot.freq), (plot.phase), (plot.freq_phase)])
-def test_2d_frequency_data(handsome_signal, function):
+    (plot.freq_2d), (plot.phase_2d), (plot.freq_phase_2d)])
+def test_2d_frequency_data(handsome_signal_2d, function):
     """Test 2d frequency data plot with default arguments."""
     frequency_data = pf.FrequencyData(
-        handsome_signal.freq, handsome_signal.frequencies)
+        handsome_signal_2d.freq, handsome_signal_2d.frequencies)
     print(f"Testing: {function.__name__}")
 
-    filename = function.__name__ + 'frequency_data'
+    filename = function.__name__ + '_frequency_data'
     create_figure()
     function(frequency_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
