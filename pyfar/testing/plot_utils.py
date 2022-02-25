@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.testing.compare import compare_images
 
 
-def create_figure(width=4.8, height=4.8, dpi=100):
+def create_figure(width=6, height=4.8, dpi=100):
     """
     Create figure with defined parameters for reproducible testing.
 
@@ -20,7 +20,7 @@ def create_figure(width=4.8, height=4.8, dpi=100):
     ----------
 
     width : float
-        The width in inch. The default is 4.8
+        The width in inch. The default is 6
     height : float
         The height in inch. The default is 4.8
     dpi : int

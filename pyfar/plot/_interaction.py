@@ -136,16 +136,17 @@ class PlotParameter(object):
                  log_reference=1,                          # same for time/freq
                  xscale='log', yscale='linear',            # axis scaling
                  deg=False, unwrap=False,                  # phase properties
-                 unit=None,                                # time unit
+                 unit_time=None,                           # time axis unit
+                 unit_gd=None,                             # group delay unit
                  window='hann', window_length=1014,        # spectrogram
                  window_overlap_fct=.5,
                  cmap=mpl.cm.get_cmap(name='magma'),       # colormap and bar
                  colorbar=True,
-                 orientation='vertical', points=None):     # 2D plots
+                 orientation='vertical', indices=None):    # 2D plots
 
         # set plot type
         self._plot_type = ['line', '2d']
-        if plot == "spectrogram" or plot.endswith("2d"):
+        if plot == "spectrogram" or plot.endswith("_2d"):
             self._plot_type = np.roll(self._plot_type, -1)
 
         # store input
@@ -158,14 +159,15 @@ class PlotParameter(object):
         self.yscale = yscale
         self.deg = deg
         self.unwrap = unwrap
-        self.unit = unit
+        self.unit_time = unit_time
+        self.unit_gd = unit_gd
         self.window = window
         self.window_length = window_length
         self.window_overlap_fct = window_overlap_fct
         self.cmap = cmap
         self.colorbar = colorbar
         self.orientation = orientation
-        self.points = points
+        self.indices = indices
 
         # set axis types based on `plot`
         self.update(plot)
@@ -212,7 +214,8 @@ class PlotParameter(object):
         """
 
         # strip "2d" from plot name
-        self._plot = plot if not plot.endswith("2d") else plot[:-2]
+        self._plot = plot[:-3] if plot.endswith("_2d") else plot
+        self.plot = plot
 
         # set the axis, color map, and cycle, parameter for each plot
         if plot == 'time':
@@ -230,13 +233,17 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
-        elif plot == 'time2d':
+        elif plot == 'time_2d':
             # x-axis
             self._x_type = ['other']
             self._x_id = 0
+            self._x_param = None
+            self._x_values = None
             # y-axis
             self._y_type = ['other']
             self._y_id = 0
+            self._y_param = None
+            self._y_values = None
             # color map
             self._cm_type = ['other', 'dB']
             self._cm_param = 'dB_time'
@@ -262,6 +269,25 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
+        elif plot == 'freq_2d':
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            self._x_param = None
+            self._x_values = None
+            # y-axis
+            self._y_type = ['freq', 'other']
+            self._y_param = 'xscale'
+            self._y_values = ['log', 'linear']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = ['other', 'dB']
+            self._cm_param = 'dB_freq'
+            self._cm_values = [False, True]
+            self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # cycler type
+            self._cycler_type = None
+
         elif plot == 'phase':
             # x-axis
             self._x_type = ['freq', 'other']
@@ -280,6 +306,26 @@ class PlotParameter(object):
             # cycler type
             self._cycler_type = 'line'
 
+        elif plot == 'phase_2d':
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            self._x_param = None
+            self._x_values = None
+            # y-axis
+            self._y_type = ['freq', 'other']
+            self._y_param = 'xscale'
+            self._y_values = ['log', 'linear']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = ['other', 'other', 'other']
+            self._cm_id = 0
+            self._cm_param = 'unwrap'
+            self._cm_values = [True, False, "360"]
+            self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # cycler type
+            self._cycler_type = None
+
         elif plot == 'group_delay':
             # x-axis
             self._x_type = ['freq', 'other']
@@ -288,7 +334,7 @@ class PlotParameter(object):
             self._x_id = self._x_values.index(getattr(self, self._x_param))
             # y-axis
             self._y_type = ['other', 'other', 'other', 'other', 'other']
-            self._y_param = 'unit'
+            self._y_param = 'unit_gd'
             self._y_values = [None, 's', 'ms', 'mus', 'samples']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
@@ -296,6 +342,25 @@ class PlotParameter(object):
             self._cm_id = None
             # cycler type
             self._cycler_type = 'line'
+
+        elif plot == 'group_delay_2d':
+            # x-axis
+            self._x_type = ['other']
+            self._x_id = 0
+            self._x_param = None
+            self._x_values = None
+            # y-axis
+            self._y_type = ['freq', 'other']
+            self._y_param = 'xscale'
+            self._y_values = ['log', 'linear']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
+            # color map
+            self._cm_type = ['other', 'other', 'other', 'other', 'other']
+            self._cm_param = 'unit_gd'
+            self._cm_values = [None, 's', 'ms', 'mus', 'samples']
+            self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # cycler type
+            self._cycler_type = None
 
         elif plot == 'spectrogram':
             # x-axis
@@ -317,45 +382,54 @@ class PlotParameter(object):
         elif plot == 'time_freq':
             # same as time
             # (currently interaction uses only the axis of the top plot)
+            self.update("time")
+            self._plot = "time_freq"
+            return
 
-            # x-axis
-            self._x_type = ['other']
-            self._x_id = 0
-            # y-axis
-            self._y_type = ['other', 'dB']
-            self._y_param = 'dB_time'
-            self._y_values = [False, True]
-            self._y_id = self._y_values.index(getattr(self, self._y_param))
-            # color map
-            self._cm_type = None
-            self._cm_id = None
-            # cycler type
-            self._cycler_type = 'line'
+        elif plot == 'time_freq_2d':
+            # same as time_2d
+            # (currently interaction uses only the axis of the top plot)
+            self.update("time_2d")
+            self._plot = "time_freq"
+            return
 
-        elif plot in ['freq_phase', 'freq_group_delay']:
+        elif plot == 'freq_phase':
             # same as freq
             # (currently interaction uses only the axis of the top plot)
+            self.update("freq")
+            self._plot = "freq_phase"
+            return
 
-            # x-axis
-            self._x_type = ['freq', 'other']
-            self._x_param = 'xscale'
-            self._x_values = ['log', 'linear']
-            self._x_id = self._x_values.index(getattr(self, self._x_param))
-            # y-axis
-            self._y_type = ['dB', 'other']
-            self._y_param = 'dB_freq'
-            self._y_values = [True, False]
-            self._y_id = self._y_values.index(getattr(self, self._y_param))
-            # color map
-            self._cm_type = None
-            self._cm_id = None
-            # cycler type
-            self._cycler_type = 'line'
+        elif plot == 'freq_phase_2d':
+            # same as freq_2d
+            # (currently interaction uses only the axis of the top plot)
+            self.update("freq_2d")
+            self._plot = "freq_phase"
+            return
+
+        elif plot == 'freq_group_delay':
+            # same as freq
+            # (currently interaction uses only the axis of the top plot)
+            self.update("freq")
+            self._plot = "freq_group_delay"
+            return
+
+        elif plot == 'freq_group_delay_2d':
+            # same as freq_2d
+            # (currently interaction uses only the axis of the top plot)
+            self.update("freq_2d")
+            self._plot = "freq_group_delay"
+            return
 
         else:
             raise ValueError(f"{plot} not known.")
 
-        self.plot = plot
+        # toggle plot parameter (switch x and y axis)
+        if self.orientation == "horizontal" and self.plot_type == "2d":
+            for attr in ["type", "id", "param", "values"]:
+                tmp = getattr(self, f"_x_{attr}")
+                setattr(self, f"_x_{attr}", getattr(self, f"_y_{attr}"))
+                setattr(self, f"_y_{attr}", tmp)
 
     def toggle_x(self):
         """Toggle the x-axis type.
@@ -437,7 +511,8 @@ class Interaction(object):
     Toggle between plots; move or zoom axis or color map; toggle axis types;
     cycle channels.
     """
-    def __init__(self, signal, axes, style, plot_parameter, **kwargs):
+    def __init__(self, signal, axes, colorbars, style, plot_parameter,
+                 **kwargs):
         """
         Change the plot and plot parameters based on keyboard shortcuts.
 
@@ -445,8 +520,10 @@ class Interaction(object):
         ----------
         signal : Signal
             audio data
-        axes : Matplotlib axes
-            axes handle
+        axes : Matplotlib axes, array like
+            axes objects of all axes in the plot holding data
+        colorbars : Matplotlib colorbar, array like
+            all colorbar objects in the plot
         style : plot style
             E.g. 'light'
         plot_parameter : PlotParameter
@@ -458,11 +535,18 @@ class Interaction(object):
         # save input arguments
         self.cshape = signal.cshape
         self.signal = signal.flatten()
-        self.ax = axes
-        self.figure = axes.figure
+        self.ax = axes[0] if isinstance(axes, (list, np.ndarray)) else axes
+        self.all_axes = axes
+        self.all_bars = colorbars
+        self.figure = self.ax.figure
         self.style = style
         self.params = plot_parameter
-        self.kwargs = kwargs
+        if self.params.plot_type == "line":
+            self.kwargs_line = kwargs
+            self.kwargs_2d = {}
+        if self.params.plot_type == "2d":
+            self.kwargs_line = {}
+            self.kwargs_2d = kwargs
 
         # store last key event (done in self.select_action)
         self.event = None
@@ -520,6 +604,10 @@ class Interaction(object):
             # no toggling for spectrogram
             if self.params._plot == "spectrogram":
                 return
+            # no toggling if signal has less than 2 channels
+            if np.prod(self.signal.cshape) < 2 \
+                    and self.params.plot_type == "line":
+                return
 
             # cycle the plot type
             self.params.cycle_plot_types()
@@ -556,19 +644,19 @@ class Interaction(object):
         elif event.key in ctr["toggle_x"]:
             changed = self.params.toggle_x()
             if changed:
-                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
         # y-axis toggle
         elif event.key in ctr["toggle_y"]:
             changed = self.params.toggle_y()
             if changed:
-                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
         # color map toggle
         elif event.key in ctr["toggle_cm"]:
             changed = self.params.toggle_colormap()
             if changed:
-                self.toggle_plot(EventEmu(self.plot[self.params.plot]))
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
         # toggle line visibility
         elif event.key in ctr["toggle_all"]:
@@ -594,80 +682,149 @@ class Interaction(object):
         prm = self.params
 
         # cases that are not allowed
+        # spectogram plot if signal has less samples than the window length
         if event.key in plot['spectrogram'] \
                 and self.signal.n_samples < prm.window_length:
             return
 
-        # toggle the plot
+        # prepare for toggling
         with plt.style.context(utils.plotstyle(self.style)):
             self.figure.clear()
+            # This saves the axis used for interaction
             self.ax = None
+            # This saves all axes and colorbars
+            self.all_axes = None
+            self.all_bars = None
 
+            # Toggle:
+            # 1. select plot
+            # 2. select plot_type
+            # 3. update self.params (PlotParameter instance)
+            # 4. plot and update all current axes and colorbars (None by
+            #    default) and self.ax (axes used for interaction)
             if event.key in plot['time']:
                 if self.params.plot_type == "line":
                     self.params.update('time')
-                    self.ax = _line._time(
+                    self.all_axes = self.ax = _line._time(
                         self.signal, prm.dB_time, prm.log_prefix_time,
-                        prm.log_reference, prm.unit, self.ax, **self.kwargs)
+                        prm.log_reference, prm.unit_time, self.ax,
+                        **self.kwargs_line)
                 elif self.params.plot_type == "2d":
-                    self.params.update('time2d')
-                    self.ax = _two_d._time2d(
+                    self.params.update('time_2d')
+                    self.all_axes, _, self.all_bars = _two_d._time_2d(
                         self.signal, prm.dB_time, prm.log_prefix_time,
-                        prm.log_reference, prm.unit, prm.points,
+                        prm.log_reference, prm.unit_time, prm.indices,
                         prm.orientation, prm.cmap, prm.colorbar, self.ax,
-                        **self.kwargs)[0]
+                        **self.kwargs_2d)
+                    self.ax = self.all_axes
 
             elif event.key in plot['freq']:
-                self.params.update('freq')
-                self.ax = _line._freq(
-                    self.signal, prm.dB_freq, prm.log_prefix_freq,
-                    prm.log_reference, prm.xscale, self.ax, **self.kwargs)
+                if self.params.plot_type == "line":
+                    self.params.update('freq')
+                    self.all_axes = self.ax = _line._freq(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, self.ax,
+                        **self.kwargs_line)
+                elif self.params.plot_type == "2d":
+                    self.params.update('freq_2d')
+                    self.all_axes, _, self.all_bars = _two_d._freq_2d(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.indices,
+                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
+                        **self.kwargs_2d)
+                    self.ax = self.all_axes
 
             elif event.key in plot['phase']:
-                self.params.update('phase')
-                self.ax = _line._phase(
-                    self.signal, prm.deg, prm.unwrap, prm.xscale,
-                    self.ax, **self.kwargs)
+                if self.params.plot_type == "line":
+                    self.params.update('phase')
+                    self.all_axes = self.ax = _line._phase(
+                        self.signal, prm.deg, prm.unwrap, prm.xscale,
+                        self.ax, **self.kwargs_line)
+                if self.params.plot_type == "2d":
+                    self.params.update('phase_2d')
+                    self.all_axes, _, self.all_bars = _two_d._phase_2d(
+                        self.signal, prm.deg, prm.unwrap, prm.xscale,
+                        prm.indices, prm.orientation, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_2d)
+                    self.ax = self.all_axes
 
             elif event.key in plot['group_delay']:
-                self.params.update('group_delay')
-                self.ax = _line._group_delay(
-                    self.signal, prm.unit, prm.xscale, self.ax,
-                    **self.kwargs)
+                if self.params.plot_type == "line":
+                    self.params.update('group_delay')
+                    self.all_axes = self.ax = _line._group_delay(
+                        self.signal, prm.unit_gd, prm.xscale, self.ax,
+                        **self.kwargs_line)
+                if self.params.plot_type == "2d":
+                    self.params.update('group_delay_2d')
+                    self.all_axes, _, self.all_bars = _two_d._group_delay_2d(
+                        self.signal, prm.unit_gd, prm.xscale, prm.indices,
+                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
+                        **self.kwargs_2d)
+                    self.ax = self.all_axes
 
             elif event.key in plot['spectrogram']:
                 self.params.update('spectrogram')
-                ax, *_ = _two_d._spectrogram(
+                self.all_axes, _, self.all_bars = _two_d._spectrogram(
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix_freq, prm.log_reference, prm.yscale,
-                    prm.unit, prm.window, prm.window_length,
+                    prm.unit_time, prm.window, prm.window_length,
                     prm.window_overlap_fct, prm.cmap, prm.colorbar, self.ax,
-                    **self.kwargs)
-                self.ax = ax
+                    **self.kwargs_2d)
+                self.ax = self.all_axes
 
             elif event.key in plot['time_freq']:
-                self.params.update('time')
-                ax = _line._time_freq(
-                    self.signal, prm.dB_time, prm.dB_freq,
-                    prm.log_prefix_time, prm.log_prefix_freq,
-                    prm.log_reference, prm.xscale, self.ax, **self.kwargs)
-                self.ax = ax[0]
+                if self.params.plot_type == "line":
+                    self.params.update('time_freq')
+                    self.all_axes = _line._time_freq(
+                        self.signal, prm.dB_time, prm.dB_freq,
+                        prm.log_prefix_time, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.unit_time, self.ax,
+                        **self.kwargs_line)
+                    self.ax = self.all_axes[0]
+                elif self.params.plot_type == "2d":
+                    self.params.update('time_freq_2d')
+                    self.all_axes, _, self.all_bars = _two_d._time_freq_2d(
+                        self.signal, prm.dB_time, prm.dB_freq,
+                        prm.log_prefix_time, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.unit_time,
+                        prm.indices, prm.orientation, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_2d)
+                    self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_phase']:
-                self.params.update('freq')
-                ax = _line._freq_phase(
-                    self.signal, prm.dB_freq, prm.log_prefix_freq,
-                    prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
-                    self.ax, **self.kwargs)
-                self.ax = ax[0]
+                if self.params.plot_type == "line":
+                    self.params.update('freq_phase')
+                    self.all_axes = _line._freq_phase(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
+                        self.ax, **self.kwargs_line)
+                    self.ax = self.all_axes[0]
+                elif self.params.plot_type == "2d":
+                    self.params.update('freq_phase_2d')
+                    self.all_axes, _, self.all_bars = _two_d._freq_phase_2d(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
+                        prm.indices, prm.orientation, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_2d)
+                    self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_group_delay']:
-                self.params.update('freq')
-                ax = _line._freq_group_delay(
-                    self.signal, prm.dB_freq, prm.log_prefix_freq,
-                    prm.log_reference, prm.unit, prm.xscale,
-                    self.ax, **self.kwargs)
-                self.ax = ax[0]
+                if self.params.plot_type == "line":
+                    self.params.update('freq_group_delay')
+                    self.all_axes = _line._freq_group_delay(
+                        self.signal, prm.dB_freq, prm.log_prefix_freq,
+                        prm.log_reference, prm.unit_gd, prm.xscale,
+                        self.ax, **self.kwargs_line)
+                    self.ax = self.all_axes[0]
+                if self.params.plot_type == "2d":
+                    self.params.update('freq_group_delay_2d')
+                    self.all_axes, _, self.all_bars = \
+                        _two_d._freq_group_delay_2d(
+                            self.signal, prm.dB_freq, prm.log_prefix_freq,
+                            prm.log_reference, prm.unit_gd, prm.xscale,
+                            prm.indices, prm.orientation, prm.cmap,
+                            prm.colorbar, self.ax, **self.kwargs_2d)
+                    self.ax = self.all_axes[0]
 
             # update figure
             if self.params._cycler_type == 'line':
