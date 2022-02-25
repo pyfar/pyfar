@@ -128,8 +128,8 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     return ax, qm, cb
 
 
-def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
-            indices=None, orientation="vertical",
+def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
+            freq_scale='log', indices=None, orientation="vertical",
             cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
             style='light', **kwargs):
     """
@@ -154,7 +154,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     indices: array like, optional
@@ -229,14 +229,14 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
 
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
-            signal, dB, log_prefix, log_reference, xscale, indices,
+            signal, dB, log_prefix, log_reference, freq_scale, indices,
             orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_2d', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale, indices=indices,
+        log_reference=log_reference, xscale=freq_scale, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -248,7 +248,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     return ax, qm, cb
 
 
-def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
+def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
              orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
              colorbar=True, ax=None, style='light', **kwargs):
     """
@@ -268,7 +268,7 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
     unwrap : bool, str
         True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``, which plots the wrapped phase.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     indices: array like, optional
@@ -343,13 +343,13 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
 
     with context(style):
         ax, qm, cb = _two_d._phase_2d(
-            signal, deg, unwrap, xscale, indices, orientation, cmap, colorbar,
-            ax, **kwargs)
+            signal, deg, unwrap, freq_scale, indices, orientation, cmap,
+            colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'phase_2d', deg=deg, unwrap=unwrap, xscale=xscale, indices=indices,
+        'phase_2d', deg=deg, unwrap=unwrap, xscale=freq_scale, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -361,7 +361,7 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
     return ax, qm, cb
 
 
-def group_delay_2d(signal, unit=None, xscale='log', indices=None,
+def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
                    orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
                    colorbar=True, ax=None, style='light', **kwargs):
     """
@@ -380,7 +380,7 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
         ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milliseconds), or ``mus`` (microseconds) depending on the data.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     indices: array like, optional
@@ -455,13 +455,13 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
 
     with context(style):
         ax, qm, cb = _two_d._group_delay_2d(
-            signal, unit, xscale, indices, orientation, cmap,
+            signal, unit, freq_scale, indices, orientation, cmap,
             colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'group_delay_2d', unit_gd=unit, xscale=xscale, indices=indices,
+        'group_delay_2d', unit_gd=unit, xscale=freq_scale, indices=indices,
         orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -474,7 +474,7 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
 
 
 def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
-                 log_prefix_freq=None, log_reference=1, xscale='log',
+                 log_prefix_freq=None, log_reference=1, freq_scale='log',
                  unit=None, indices=None, orientation="vertical",
                  cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
                  style='light', **kwargs):
@@ -507,7 +507,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
         The default is ``1``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     unit : str
@@ -584,15 +584,15 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     with context(style):
         ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
-            log_reference, xscale, unit, indices, orientation, cmap, colorbar,
-            ax, **kwargs)
+            log_reference, freq_scale, unit, indices, orientation, cmap,
+            colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'time_freq_2d', dB_time=dB_time, dB_freq=dB_freq,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
-        log_reference=log_reference, xscale=xscale, unit_time=unit,
+        log_reference=log_reference, xscale=freq_scale, unit_time=unit,
         indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -605,7 +605,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 
 def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
-                  xscale='log', deg=False, unwrap=False, indices=None,
+                  freq_scale='log', deg=False, unwrap=False, indices=None,
                   orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
                   colorbar=True, ax=None, style='light', **kwargs):
     """
@@ -635,7 +635,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     unwrap : bool, str
         True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     indices: array like, optional
@@ -702,19 +702,19 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.freq_phase_2d(impulses, dB=False, unwrap=True,
-        ...                       xscale="linear")
+        ...                       freq_scale="linear")
     """
 
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
-            signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
+            signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
             indices, orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_phase_2d', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale, deg=deg, unwrap=unwrap,
+        log_reference=log_reference, xscale=freq_scale, deg=deg, unwrap=unwrap,
         indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -727,7 +727,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
 
 def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
-                        unit=None, xscale='log', indices=None,
+                        unit=None, freq_scale='log', indices=None,
                         orientation="vertical",
                         cmap=mpl.cm.get_cmap(name='magma'), colorbar=True,
                         ax=None, style='light', **kwargs):
@@ -757,7 +757,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milliseconds), or ``mus`` (microseconds) depending on the data.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     indices: array like, optional
@@ -828,14 +828,14 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
-            signal, dB, log_prefix, log_reference, unit, xscale, indices,
+            signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
             orientation, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale, unit_gd=unit,
+        log_reference=log_reference, xscale=freq_scale, unit_gd=unit,
         indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
