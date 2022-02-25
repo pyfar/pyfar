@@ -190,8 +190,8 @@ def linear_phase(signal, group_delay, unit="samples"):
 
     # construct linear phase spectrum
     signal_lin = signal.copy()
-    signal_lin.freq = \
-        np.abs(signal_lin.freq).astype(complex) * np.exp(-1j * phase)
+    signal_lin.freq_raw = \
+        np.abs(signal_lin.freq_raw).astype(complex) * np.exp(-1j * phase)
 
     return signal_lin
 
@@ -226,7 +226,7 @@ def zero_phase(signal):
             'Input data has to be of type Signal or FrequencyData.')
 
     signal_zero = signal.copy()
-    signal_zero.freq = np.atleast_2d(np.abs(signal_zero.freq))
+    signal_zero.freq_raw = np.atleast_2d(np.abs(signal_zero.freq_raw))
 
     return signal_zero
 
@@ -248,13 +248,14 @@ def nextpow2(x):
 
 
 def spectrogram(signal, window='hann', window_length=1024,
-                window_overlap_fct=0.5):
+                window_overlap_fct=0.5, normalize=True):
     """Compute the magnitude spectrum versus time.
 
     This is a wrapper for ``scipy.signal.spectogram`` with two differences.
     First, the returned times refer to the start of the FFT blocks, i.e., the
     first time is always 0 whereas it is window_length/2 in scipy. Second, the
-    returned spectrogram is normalized according to ``signal.fft_norm``.
+    returned spectrogram is normalized according to ``signal.fft_norm`` if the
+    ``normalize`` parameter is set to ``True``.
 
     Parameters
     ----------
@@ -268,6 +269,9 @@ def spectrogram(signal, window='hann', window_length=1024,
     window_overlap_fct : double
         Ratio of points to overlap between FFT segments [0...1]. The default is
         ``0.5``.
+    normalize : bool
+        Flag to indicate if the FFT normalization should be applied to the
+        spectrogram according to `signal.fft_norm`. The default is ``True``.
 
     Returns
     -------
@@ -285,6 +289,9 @@ def spectrogram(signal, window='hann', window_length=1024,
     if window_length > signal.n_samples:
         raise ValueError("window_length exceeds signal length")
 
+    if not isinstance(normalize, bool):
+        raise TypeError("The normalize parameter needs to be boolean")
+
     # get spectrogram from scipy.signal
     window_overlap = int(window_length * window_overlap_fct)
     window = sgn.get_window(window, window_length)
@@ -297,9 +304,10 @@ def spectrogram(signal, window='hann', window_length=1024,
     spectrogram /= np.sqrt(1 / window.sum()**2)
 
     # apply normalization from signal
-    spectrogram = fft.normalization(
-        spectrogram, window_length, signal.sampling_rate,
-        signal.fft_norm, window=window)
+    if normalize:
+        spectrogram = fft.normalization(
+            spectrogram, window_length, signal.sampling_rate,
+            signal.fft_norm, window=window)
 
     # scipy.signal takes the center of the DFT blocks as time stamp we take the
     # beginning (looks nicer in plots, both conventions are used)
@@ -711,7 +719,8 @@ def _time_window_symmetric_interval_four(interval, window):
 
 def regularized_spectrum_inversion(
         signal, freq_range,
-        regu_outside=1., regu_inside=10**(-200/20), regu_final=None):
+        regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
+        normalized=True):
     r"""Invert the spectrum of a signal applying frequency dependent
     regularization.
 
@@ -751,6 +760,10 @@ def regularized_spectrum_inversion(
         The final regularization factor for each frequency, default ``None``.
         If this parameter is set, the remaining regularization factors are
         ignored.
+    normalized : bool
+        Flag to indicate if the normalized spectrum (according to
+        `signal.fft_norm`) should be inverted. The default is ``True``.
+
 
     Returns
     -------
@@ -770,7 +783,14 @@ def regularized_spectrum_inversion(
     if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 
-    data = signal.freq
+    if not isinstance(normalized, bool):
+        raise TypeError("The normalized parameter needs to be boolean")
+
+    if normalized:
+        data = signal.freq
+    else:
+        data = signal.freq_raw
+
     freq_range = np.asarray(freq_range)
 
     if freq_range.size < 2:
@@ -1159,8 +1179,8 @@ def minimum_phase(
     signal_minphase : Signal
         The minimum phase version of the filter.
     magnitude_ratio : FrequencyData
-        The ratio between the magnitude of the linear phase version and the
-        minimum phase versions of the filter.
+        The ratio between the (normalized) magnitude spectra of the linear
+        phase and the minimum phase versions of the filter.
 
 
     Examples
