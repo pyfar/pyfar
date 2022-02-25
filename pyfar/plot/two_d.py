@@ -4,6 +4,7 @@ from pyfar.plot.utils import context
 from .. import Signal
 from . import (_two_d, _utils)
 from . import _interaction as ia
+import warnings
 
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
@@ -851,7 +852,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 freq_scale='linear', unit=None, window='hann',
                 window_length=1024, window_overlap_fct=0.5,
                 cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-                style='light', **kwargs):
+                style='light', yscale=None, **kwargs):
     """Plot blocks of the magnitude spectrum versus time.
 
     Parameters
@@ -913,6 +914,16 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
+    yscale : str
+
+        .. deprecated:: 0.4.0
+
+        This parameter was replaced by the more explicit ``freq_scale``,
+        which has the same functionality.
+        If not ``None``, it overwrites ``freq_scale``.
+        It is kept for backwards compatibility until pyfar version 0.7.0.
+
+        The default is ``None``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()``.
@@ -947,6 +958,13 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
+
+    # xscale deprecation
+    if yscale is not None:
+        warnings.warn(('The yscale parameter will be deprecated in'
+                       'pyfar 0.7.0. in favor of freq_scale'),
+                      PendingDeprecationWarning)
+        freq_scale = yscale
 
     with context(style):
         ax, qm, cb = _two_d._spectrogram(
