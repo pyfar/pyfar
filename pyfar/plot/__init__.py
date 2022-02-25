@@ -17,6 +17,13 @@ from .line import (
 )
 
 from .two_d import (
+    time_2d,
+    freq_2d,
+    phase_2d,
+    group_delay_2d,
+    time_freq_2d,
+    freq_phase_2d,
+    freq_group_delay_2d,
     spectrogram
 )
 
@@ -35,13 +42,20 @@ from .utils import (
 
 __all__ = [
     'freq',
+    'freq_2d',
     'time',
+    'time_2d',
     'phase',
+    'phase_2d',
     'group_delay',
+    'group_delay_2d',
     'spectrogram',
     'time_freq',
+    'time_freq_2d',
     'freq_phase',
+    'freq_phase_2d',
     'freq_group_delay',
+    'freq_group_delay_2d',
     'custom_subplots',
     'scatter',
     'quiver',

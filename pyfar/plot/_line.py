@@ -25,9 +25,8 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
         # avoid any zero-values because they result in -inf in dB data
         eps = np.finfo(float).eps
         data = log_prefix * np.log10(np.abs(data) / log_reference + eps)
-        ymax = np.nanmax(data)
-        ymin = ymax - 90
-        ymax = ymax + 10
+        ymax = np.nanmax(data) + 10
+        ymin = ymax - 100
 
     # auto detect the time unit
     if unit is None:
@@ -122,28 +121,20 @@ def _phase(signal, deg=False, unwrap=False, xscale='log', ax=None, **kwargs):
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     phase_data = dsp.phase(signal, deg=deg, unwrap=unwrap)
-    # Construct the correct label string:
-    ylabel_string = 'Phase '
-    if unwrap == '360':
-        ylabel_string += '(wrapped to 360) '
-    elif unwrap is True:
-        ylabel_string += '(unwrapped) '
-    elif not isinstance(unwrap, bool):
-        raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
-    if deg:
-        ylabel_string += 'in degree'
-        y_margin = 5
-    else:
-        ylabel_string += 'in radians'
+    # Construct the correct label string
+    ylabel_string = _utils._phase_label(unwrap, deg)
+
+    # y-axis formatting
+    y_margin = 5 if deg else np.radians(5)
+    if not deg and (not unwrap or unwrap == "360"):
         # nice tick formatting is not done for unwrap=True. In this case
         # it can create 1000 or more ticks.
-        if not unwrap or unwrap == "360":
-            ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
-            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
-            ax.yaxis.set_major_formatter(MultipleFractionFormatter(
-                nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
-        y_margin = np.radians(5)
+        ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
+        ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
+        ax.yaxis.set_major_formatter(MultipleFractionFormatter(
+            nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
+
     ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
     ymax = np.nanmax(phase_data) + y_margin
 
