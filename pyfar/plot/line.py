@@ -27,9 +27,10 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
         Reference for calculating the logarithmic time data. The default is
         ``1``.
     unit : str, None
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the time axis. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     ax : matplotlib.pyplot.axes
         Axes to plot on. The default is ``None``, which uses the current axis
         or creates a new figure if none exists.
@@ -156,7 +157,7 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
         Plot the phase in degrees. The default is ``False``, which plots the
         phase in radians.
     unwrap : bool, str
-        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``, which plots the wrapped phase.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
@@ -213,9 +214,10 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
         plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
         in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     unit : str, None
-        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the group delay. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
@@ -294,9 +296,10 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     unit : str
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the time axis. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     ax : matplotlib.pyplot.axes
         Array or list with two axes to plot on. The default is ``None``, which
         uses the current axis or creates a new figure if none exists.
@@ -343,7 +346,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
                deg=False, unwrap=False, ax=None, style='light', **kwargs):
     """Plot the magnitude and phase spectrum (2 by 1 subplot).
 
-    Plots ``abs(signal.freq)``and ``angle(signal.freq)`` and passes keyword
+    Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
     arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
@@ -359,14 +362,14 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
         ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
-        ``'psd'`` and ``20`` otherwise..
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
     deg : bool
         Flag to plot the phase in degrees. The default is ``False``.
     unwrap : bool, str
-        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
@@ -416,7 +419,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      **kwargs):
     """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
-    Plots ``abs(signal.freq)``and ``pyfar.dsp.group_delay(signal.freq)`` and
+    Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
     passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
@@ -436,9 +439,10 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
     unit : str
-        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the group delay. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.

@@ -20,7 +20,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     ----------
     signal : Signal, TimeData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>1`.
+        `m>1`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -33,9 +33,10 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         Reference for calculating the logarithmic time data. The default is
         ``1``.
     unit : str, None
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the time axis. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
         angles or x values). `indices` must be monotonously increasing/
@@ -65,7 +66,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         ``[ax, ax]``
             If a list or array of two axes is passed, the first is used to plot
             the data and the second to plot the colorbar. In this case
-            `colorbar` must be ``True``
+            `colorbar` must be ``True``.
 
         The default is ``None``.
     style : str
@@ -82,12 +83,12 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -141,7 +142,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>1`.
+        `m>1`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -185,7 +186,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         ``[ax, ax]``
             If a list or array of two axes is passed, the first is used to plot
             the data and the second to plot the colorbar. In this case
-            `colorbar` must be ``True``
+            `colorbar` must be ``True``.
 
         The default is ``None``.
     style : str
@@ -201,12 +202,12 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -260,12 +261,12 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>1`.
+        `m>1`.
     deg : bool
         Plot the phase in degrees. The default is ``False``, which plots the
         phase in radians.
     unwrap : bool, str
-        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``, which plots the wrapped phase.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
@@ -299,7 +300,7 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
         ``[ax, ax]``
             If a list or array of two axes is passed, the first is used to plot
             the data and the second to plot the colorbar. In this case
-            `colorbar` must be ``True``
+            `colorbar` must be ``True``.
 
         The default is ``None``.
     style : str
@@ -315,12 +316,12 @@ def phase_2d(signal, deg=False, unwrap=False, xscale='log', indices=None,
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -373,11 +374,12 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
     ----------
     signal : Signal
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>1`.
+        `m>1`.
     unit : str, None
-        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the group delay. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
@@ -410,7 +412,7 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
         ``[ax, ax]``
             If a list or array of two axes is passed, the first is used to plot
             the data and the second to plot the colorbar. In this case
-            `colorbar` must be ``True``
+            `colorbar` must be ``True``.
 
         The default is ``None``.
     style : str
@@ -426,12 +428,12 @@ def group_delay_2d(signal, unit=None, xscale='log', indices=None,
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
-        which the data is plotted is returned
+        which the data is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -486,7 +488,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     ----------
     signal : Signal
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>1`.
+        `m>1`.
     dB_time : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -509,9 +511,10 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     unit : str
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the time axis. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     indices: array like, optional
         Points at which the channels of `signal` were sampled (e.g. azimuth
         angles or x values). `indices` must be monotonously increasing/
@@ -536,7 +539,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
             none.
         ``[ax, ax]``
             Two axes to plot on. Space for the colorbar of each plot is taken
-            from the provided axes
+            from the provided axes.
 
         The default is ``None``.
     style : str
@@ -553,12 +556,12 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
-        which the data is plotted is returned
+        which the data is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -615,7 +618,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     ----------
     signal : Signal, FrequencyData
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>1`.
+        `m>1`.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
@@ -623,14 +626,14 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
         ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
-        ``'psd'`` and ``20`` otherwise..
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
     deg : bool
         Flag to plot the phase in degrees. The default is ``False``.
     unwrap : bool, str
-        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
@@ -659,7 +662,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
             none.
         ``[ax, ax]``
             Two axes to plot on. Space for the colorbar of each plot is taken
-            from the provided axes
+            from the provided axes.
 
         The default is ``None``.
     style : str
@@ -676,12 +679,12 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
-        which the data is plotted is returned
+        which the data is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -738,7 +741,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     ----------
     signal : Signal
         The input data to be plotted. `signal.cshape` must be `(m, )` with
-        :math:`m>1`.
+        `m>1`.
     dB : bool
         Flag to plot the logarithmic magnitude spectrum. The default is
         ``True``.
@@ -750,9 +753,10 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
     unit : str
-        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the group delay. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     xscale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
@@ -780,7 +784,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
             none.
         ``[ax, ax]``
             Two axes to plot on. Space for the colorbar of each plot is taken
-            from the provided axes
+            from the provided axes.
 
         The default is ``None``.
     style : str
@@ -797,12 +801,12 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
-        which the data is plotted is returned
+        which the data is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -870,9 +874,10 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``linear``.
     unit : str, None
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the time axis. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     window : str
         Specifies the window that is applied to each block of the time data
         before applying the Fourier transform. The default is ``hann``. See
@@ -901,7 +906,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ``[ax, ax]``
             If a list or array of two axes is passed, the first is used to plot
             the data and the second to plot the colorbar. In this case
-            `colorbar` must be ``True``
+            `colorbar` must be ``True``.
 
         The default is ``None``.
     style : str
@@ -917,12 +922,12 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
-        is plotted is returned
+        is plotted is returned.
     quad_mesh : QuadMesh
         The Matplotlib quad mesh collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(qm, ...)``.
+        by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
