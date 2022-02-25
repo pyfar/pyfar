@@ -989,8 +989,8 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
         raise ValueError('Either signal or sampling_rate must be none.')
-    if not isinstance(signal, pf.Signal):
-        raise ValueError("signal must be a pyfar Signal object")
+    if not isinstance(signal, (pf.Signal, type(None))):
+        raise ValueError("signal must be a pyfar Signal object or None")
 
     # check and set filter slope parameters according to Eq. (4)
     gain, slope, bandwidth = _shelving_cascade_slope_parameters(
@@ -1013,7 +1013,15 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
         raise ValueError((f"frequency_type is '{frequency_type}' but must be "
                           "'lower' or 'upper'"))
 
-    # check upper cut-off-frequency
+    # check characteristic frequencies
+    if frequency[0] == 0:
+        raise ValueError("The lower characteristic frequency must not be 0 Hz")
+    if frequency[0] > sampling_rate/2:
+        raise ValueError(("The lower characteristic frequency must be smaller "
+                          "than half the sampling rate"))
+    if frequency[1] > sampling_rate/2 and shelve_type == "low":
+        raise ValueError(("The upper characteristic frequency must be smaller "
+                          "than half the sampling rate"))
     if frequency[1] > sampling_rate/2:
         frequency[1] = sampling_rate/2
         gain *= np.log2(frequency[1]/frequency[0]) / bandwidth
@@ -1026,7 +1034,7 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
 
     # determine number of shelve filters per octave ---------------------------
     # minimum shelve filters per octave according to Eq. (11.2)
-    N_min = 1 if slope < 12.04 else slope / 12.04
+    N_min = 1 if abs(slope) < 12.04 else abs(slope) / 12.04
 
     # determine optimal N_octave
     if N is None:
@@ -1045,7 +1053,7 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
         N_octave = N / bandwidth
         if N_octave < N_min:
             warnings.warn((
-                "N is {N} but should be at least "
+                f"N is {N} but should be at least "
                 f"{np.ceil(N_min*bandwidth).astype(int)} to obtain an good "
                 "approximation of the desired frequency response"))
 
@@ -1075,9 +1083,15 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
     magnitudes = np.array([10**(gain/20), 10**(gain/20), 1, 1])
     if shelve_type == "high":
         magnitudes = np.flip(magnitudes)
+    frequencies = [0, frequency[0], frequency[1], sampling_rate/2]
+
+    # remove duplicate entries (happens if the slope ends at Nyquist)
+    if frequencies[-2] == frequencies[-1]:
+        magnitudes = magnitudes[:-1]
+        frequencies = frequencies[:-1]
 
     ideal_response = pf.FrequencyData(
-        magnitudes, [0, frequency[0], frequency[1], sampling_rate/2],
+        magnitudes, frequencies,
         "ideal magnitude response of cascaded shelve filter")
 
     # return parameter --------------------------------------------------------
@@ -1101,28 +1115,25 @@ def _shelving_cascade_slope_parameters(gain, slope, bandwidth, shelve_type):
 
     """
     if slope == 0:
-        raise ValueError("slope must be nonzero.")
+        raise ValueError("slope must be non-zero.")
 
-    if slope and bandwidth is not None:
+    if gain is None and slope is not None and bandwidth is not None:
         bandwidth = abs(bandwidth)
         gain = -bandwidth * slope if shelve_type == "low" \
             else bandwidth * slope
-    elif bandwidth and gain is not None:
+    elif slope is None and gain is not None and bandwidth is not None:
         bandwidth = abs(bandwidth)
         slope = -gain / bandwidth if shelve_type == "low" \
             else gain / bandwidth
-    elif gain and slope is not None:
-        if shelve_type == "low":
-            if np.sign(gain * slope) == 1:
-                raise ValueError("gain and slope must have different signs")
-            bandwidth = -gain / slope
-        else:
-            if np.sign(gain * slope) == -1:
-                raise ValueError("gain and slope must have the same signs")
-            bandwidth = -gain / slope
+    elif bandwidth is None and gain is not None and slope is not None:
+        if shelve_type == "low" and np.sign(gain * slope) == 1:
+            raise ValueError("gain and slope must have different signs")
+        if shelve_type == "high" and np.sign(gain * slope) == -1:
+            raise ValueError("gain and slope must have the same signs")
+        bandwidth = abs(gain / slope)
     else:
-        print(("Exactly two out of the parameters gain, slope, and bandwidth "
-               "must be given."))
+        raise ValueError(("Exactly two out of the parameters gain, slope, and "
+                          "bandwidth must be given."))
 
     return gain, slope, bandwidth
 
