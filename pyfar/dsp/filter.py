@@ -702,13 +702,15 @@ def high_shelve_cascade(
     .. plot::
 
         >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
         >>>
         >>> impulse = pf.signals.impulse(40e3, sampling_rate=40000)
         >>> impulse, N, ideal = pf.dsp.filter.high_shelve_cascade(
         >>>     impulse, 250, "lower", -60, None, 4)
         >>>
-        >>> pf.plot.freq(ideal, c='k', ls='--')
-        >>> pf.plot.freq(impulse)
+        >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
+        >>> pf.plot.freq(impulse, label="actual")
+        >>> plt.legend()
     """  # noqa E501
     signal, N, ideal_response = _shelve_cascade(
         signal, frequency, frequency_type, gain, slope, bandwidth, N,
@@ -799,13 +801,15 @@ def low_shelve_cascade(
     .. plot::
 
         >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
         >>>
         >>> impulse = pf.signals.impulse(40e3, sampling_rate=40000)
         >>> impulse, N, ideal = pf.dsp.filter.low_shelve_cascade(
         >>>     impulse, 4000, "upper", -60, None, 4)
         >>>
-        >>> pf.plot.freq(ideal, c='k', ls='--')
-        >>> pf.plot.freq(impulse)
+        >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
+        >>> pf.plot.freq(impulse, label="actual")
+        >>> plt.legend()
     """  # noqa E501
     signal, N, ideal_response = _shelve_cascade(
         signal, frequency, frequency_type, gain, slope, bandwidth, N,
