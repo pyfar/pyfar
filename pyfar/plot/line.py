@@ -72,7 +72,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     return ax
 
 
-def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
+def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
          ax=None, style='light', **kwargs):
     """
     Plot the magnitude spectrum.
@@ -97,7 +97,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
@@ -126,13 +126,13 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
 
     with context(style):
         ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
-                         xscale, ax, **kwargs)
+                         freq_scale, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale)
+        log_reference=log_reference, xscale=freq_scale)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -140,7 +140,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     return ax
 
 
-def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
+def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
           style='light', **kwargs):
     """Plot the phase of the spectrum.
 
@@ -159,7 +159,7 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     unwrap : bool, str
         True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``, which plots the wrapped phase.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes object
@@ -187,12 +187,13 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     """
 
     with context(style):
-        ax = _line._phase(signal.flatten(), deg, unwrap, xscale, ax, **kwargs)
+        ax = _line._phase(
+            signal.flatten(), deg, unwrap, freq_scale, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'phase', deg=deg, unwrap=unwrap, xscale=xscale)
+        'phase', deg=deg, unwrap=unwrap, xscale=freq_scale)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -200,7 +201,7 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     return ax
 
 
-def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
+def group_delay(signal, unit=None, freq_scale='log', ax=None, style='light',
                 **kwargs):
     """Plot the group delay.
 
@@ -218,7 +219,7 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
         ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milliseconds), or ``mus`` (microseconds) depending on the data.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
@@ -246,12 +247,13 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     """
 
     with context(style):
-        ax = _line._group_delay(signal.flatten(), unit, xscale, ax, **kwargs)
+        ax = _line._group_delay(
+            signal.flatten(), unit, freq_scale, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'group_delay', unit_gd=unit, xscale=xscale)
+        'group_delay', unit_gd=unit, xscale=freq_scale)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -260,8 +262,8 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
 
 
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
-              log_prefix_freq=None, log_reference=1, xscale='log', unit=None,
-              ax=None, style='light', **kwargs):
+              log_prefix_freq=None, log_reference=1, freq_scale='log',
+              unit=None, ax=None, style='light', **kwargs):
     """
     Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
@@ -292,7 +294,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
         The default is ``1``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     unit : str
@@ -327,14 +329,14 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     with context(style):
         ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
                               log_prefix_time, log_prefix_freq,
-                              log_reference, xscale, unit, ax, **kwargs)
+                              log_reference, freq_scale, unit, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'time_freq', dB_time=dB_time, dB_freq=dB_freq,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
-        log_reference=log_reference, xscale=xscale, unit_time=unit)
+        log_reference=log_reference, xscale=freq_scale, unit_time=unit)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -342,8 +344,9 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     return ax
 
 
-def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
-               deg=False, unwrap=False, ax=None, style='light', **kwargs):
+def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
+               freq_scale='log', deg=False, unwrap=False, ax=None,
+               style='light', **kwargs):
     """Plot the magnitude and phase spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
@@ -371,7 +374,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
     unwrap : bool, str
         True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
@@ -400,13 +403,14 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
 
     with context(style):
         ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
-                               xscale, deg, unwrap, ax, **kwargs)
+                               freq_scale, deg, unwrap, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_phase', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=xscale, deg=deg, unwrap=unwrap)
+        log_reference=log_reference, xscale=freq_scale, deg=deg,
+        unwrap=unwrap)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -415,7 +419,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1, xscale='log',
 
 
 def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
-                     unit=None, xscale='log', ax=None, style='light',
+                     unit=None, freq_scale='log', ax=None, style='light',
                      **kwargs):
     """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
@@ -443,7 +447,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
         (milliseconds), or ``mus`` (microseconds) depending on the data.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
@@ -473,13 +477,13 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax = _line._freq_group_delay(
             signal.flatten(), dB, log_prefix, log_reference,
-            unit, xscale, ax, **kwargs)
+            unit, freq_scale, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, unit_gd=unit, xscale=xscale)
+        log_reference=log_reference, unit_gd=unit, xscale=freq_scale)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction

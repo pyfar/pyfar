@@ -338,7 +338,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         >>> import numpy as np
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
-        >>> pf.plot.phase_2d(impulses, unwrap=True, xscale="linear")
+        >>> pf.plot.phase_2d(impulses, unwrap=True, freq_scale="linear")
     """
 
     with context(style):
@@ -848,9 +848,10 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
 
 def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
-                yscale='linear', unit=None, window='hann', window_length=1024,
-                window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
-                colorbar=True, ax=None, style='light', **kwargs):
+                freq_scale='linear', unit=None, window='hann',
+                window_length=1024, window_overlap_fct=0.5,
+                cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
+                style='light', **kwargs):
     """Plot blocks of the magnitude spectrum versus time.
 
     Parameters
@@ -870,7 +871,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
-    yscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``linear``.
     unit : str, None
@@ -949,7 +950,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 
     with context(style):
         ax, qm, cb = _two_d._spectrogram(
-            signal.flatten(), dB, log_prefix, log_reference, yscale, unit,
+            signal.flatten(), dB, log_prefix, log_reference, freq_scale, unit,
             window, window_length, window_overlap_fct,
             cmap, colorbar, ax)
     _utils._tight_layout()
@@ -957,7 +958,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'spectrogram', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, yscale=yscale, unit_time=unit,
+        log_reference=log_reference, yscale=freq_scale, unit_time=unit,
         window=window, window_length=window_length,
         window_overlap_fct=window_overlap_fct, cmap=cmap)
     interaction = ia.Interaction(

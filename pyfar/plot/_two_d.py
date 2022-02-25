@@ -67,13 +67,13 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
     return ax[0], qm, cb
 
 
-def _freq_2d(signal, dB, log_prefix, log_reference, xscale, indices,
+def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
              orientation, cmap, colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
         signal, (Signal, FrequencyData), 2, indices, ax, colorbar, **kwargs)
-    _utils._check_axis_scale(xscale)
+    _utils._check_axis_scale(freq_scale)
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
@@ -102,8 +102,8 @@ def _freq_2d(signal, dB, log_prefix, log_reference, xscale, indices,
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
-    ax_scale[0](xscale)
-    if xscale == "log":
+    ax_scale[0](freq_scale)
+    if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
@@ -122,13 +122,13 @@ def _freq_2d(signal, dB, log_prefix, log_reference, xscale, indices,
     return ax[0], qm, cb
 
 
-def _phase_2d(signal, deg, unwrap, xscale, indices, orientation, cmap,
+def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, cmap,
               colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
         signal, (Signal, FrequencyData), 2, indices, ax, colorbar, **kwargs)
-    _utils._check_axis_scale(xscale)
+    _utils._check_axis_scale(freq_scale)
 
     # prepare input
     data = dsp.phase(signal, deg=deg, unwrap=unwrap)
@@ -152,8 +152,8 @@ def _phase_2d(signal, deg, unwrap, xscale, indices, orientation, cmap,
     indices_y = signal.frequencies if orientation == "vertical" else indices
     qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
-    ax_scale[0](xscale)
-    if xscale == "log":
+    ax_scale[0](freq_scale)
+    if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
@@ -175,13 +175,13 @@ def _phase_2d(signal, deg, unwrap, xscale, indices, orientation, cmap,
     return ax[0], qm, cb
 
 
-def _group_delay_2d(signal, unit, xscale, indices, orientation, cmap, colorbar,
-                    ax, **kwargs):
+def _group_delay_2d(signal, unit, freq_scale, indices, orientation, cmap,
+                    colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
         signal, (Signal), 2, indices, ax, colorbar, **kwargs)
-    _utils._check_axis_scale(xscale)
+    _utils._check_axis_scale(freq_scale)
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
@@ -210,8 +210,8 @@ def _group_delay_2d(signal, unit, xscale, indices, orientation, cmap, colorbar,
     axis[0].set_label_text("Frequency in Hz")
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
-    ax_scale[0](xscale)
-    if xscale == "log":
+    ax_scale[0](freq_scale)
+    if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
@@ -229,7 +229,7 @@ def _group_delay_2d(signal, unit, xscale, indices, orientation, cmap, colorbar,
 
 
 def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
-                  log_reference, xscale, unit, indices, orientation, cmap,
+                  log_reference, freq_scale, unit, indices, orientation, cmap,
                   colorbar, ax, **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
@@ -241,23 +241,23 @@ def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
         signal, dB_time, log_prefix_time, log_reference, unit, indices,
         orientation, cmap, colorbar, ax[0], **kwargs)
     _, qm_1, cb_1 = _freq_2d(
-        signal, dB_freq, log_prefix_freq, log_reference, xscale, indices,
+        signal, dB_freq, log_prefix_freq, log_reference, freq_scale, indices,
         orientation, cmap, colorbar, ax[1], **kwargs)
     fig.align_ylabels()
 
     return ax, [qm_0, qm_1], [cb_0, cb_1]
 
 
-def _freq_phase_2d(signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
-                   indices, orientation, cmap, colorbar, ax, **kwargs):
+def _freq_phase_2d(signal, dB, log_prefix, log_reference, freq_scale, deg,
+                   unwrap, indices, orientation, cmap, colorbar, ax, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
-    _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, xscale,
+    _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
                              indices, orientation, cmap, colorbar, ax[0],
                              **kwargs)
-    _, qm_1, cb_1 = _phase_2d(signal, deg, unwrap, xscale, indices,
+    _, qm_1, cb_1 = _phase_2d(signal, deg, unwrap, freq_scale, indices,
                               orientation, cmap, colorbar, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
@@ -265,19 +265,21 @@ def _freq_phase_2d(signal, dB, log_prefix, log_reference, xscale, deg, unwrap,
     return ax, [qm_0, qm_1], [cb_0, cb_1]
 
 
-def _freq_group_delay_2d(signal, dB, log_prefix, log_reference, unit, xscale,
-                         indices, orientation, cmap, colorbar, ax, **kwargs):
+def _freq_group_delay_2d(
+        signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
+        orientation, cmap, colorbar, ax, **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
-    _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, xscale,
+    _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
                              indices, orientation, cmap, colorbar, ax[0],
                              **kwargs)
-    _, qm_1, cb_1 = _group_delay_2d(signal, unit, xscale, indices, orientation,
-                                    cmap, colorbar, ax[1], **kwargs)
+    _, qm_1, cb_1 = _group_delay_2d(
+        signal, unit, freq_scale, indices, orientation, cmap, colorbar, ax[1],
+        **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
 
@@ -285,7 +287,7 @@ def _freq_group_delay_2d(signal, dB, log_prefix, log_reference, unit, xscale,
 
 
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
-                 yscale='linear', unit=None,
+                 freq_scale='linear', unit=None,
                  window='hann', window_length=1024, window_overlap_fct=0.5,
                  cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
                  **kwargs):
@@ -305,7 +307,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     fig, ax, _, kwargs = _utils._prepare_2d_plot(
         signal, (Signal), 1, None, ax, colorbar, **kwargs)
     _utils._check_time_unit(unit)
-    _utils._check_axis_scale(yscale, 'y')
+    _utils._check_axis_scale(freq_scale, 'y')
 
     if window_length > signal.n_samples:
         raise ValueError("window_length exceeds signal length")
@@ -356,7 +358,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         qm.set_clim(ymin, ymax)
 
     # scales and ticks
-    if yscale == 'log':
+    if freq_scale == 'log':
         ax[0].set_yscale('symlog')
         ax[0].yaxis.set_major_locator(LogLocatorITAToolbox())
     ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
