@@ -386,35 +386,32 @@ def test_2d_dB_option(function, handsome_signal_2d):
 
 @pytest.mark.parametrize('function', [
     (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)])
-@pytest.mark.parametrize('xscale', [('log'), ('linear')])
-def test_2d_xscale_option(function, xscale, handsome_signal_2d):
+@pytest.mark.parametrize('freq_scale', [('log'), ('linear')])
+def test_2d_freq_scale_option(function, freq_scale, handsome_signal_2d):
     """Test all 2d plots that have an xscale option."""
     # test if xscale option is working
-    print(f"Testing: {function.__name__} (xscale={xscale})")
+    print(f"Testing: {function.__name__} (freq_scale={freq_scale})")
 
-    filename = function.__name__ + '_xscale_' + xscale
+    filename = function.__name__ + '_freq_scale_' + freq_scale
     create_figure()
-    function(handsome_signal_2d, xscale=xscale)
+    function(handsome_signal_2d, freq_scale=freq_scale)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
 
-def test_2d_xscale_assertion(handsome_signal_2d):
+def test_2d_freq_scale_assertion(handsome_signal_2d):
     """
     Test if all 2d plots raise an assertion for a wrong scale parameter.
     """
 
     with raises(ValueError):
-        plot.freq(handsome_signal_2d, xscale="warped")
+        plot.freq_2d(handsome_signal_2d, freq_scale="warped")
 
     with raises(ValueError):
-        plot.phase(handsome_signal_2d, xscale="warped")
+        plot.phase_2d(handsome_signal_2d, freq_scale="warped")
 
     with raises(ValueError):
-        plot.group_delay(handsome_signal_2d, xscale="warped")
-
-    with raises(ValueError):
-        plot.spectrogram(handsome_signal_2d, yscale="warped")
+        plot.group_delay_2d(handsome_signal_2d, freq_scale="warped")
 
     plt.close("all")
 
