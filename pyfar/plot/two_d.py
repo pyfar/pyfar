@@ -961,7 +961,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 
     # xscale deprecation
     if yscale is not None:
-        warnings.warn(('The yscale parameter will be deprecated in'
+        warnings.warn(('The yscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = yscale
