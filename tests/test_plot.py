@@ -240,7 +240,7 @@ def test_line_frequency_data(function, handsome_signal):
     (plot.time_freq), (plot.freq_phase), (plot.freq_group_delay)])
 def test_xscale_deprecation(function, handsome_signal):
     with pytest.warns(PendingDeprecationWarning,
-                      match="The xscale parameter will be deprecated"):
+                      match="The xscale parameter will be removed"):
         function(handsome_signal, xscale='linear')
 
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
@@ -264,7 +264,7 @@ def test_spectrogram():
 
 def test_spectrogram_yscale_deprecation(sine):
     with pytest.warns(PendingDeprecationWarning,
-                      match="The yscale parameter will be deprecated"):
+                      match="The yscale parameter will be removed"):
         plot.spectrogram(sine, yscale='linear')
 
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
