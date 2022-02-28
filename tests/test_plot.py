@@ -243,9 +243,9 @@ def test_xscale_deprecation(function, handsome_signal):
                       match="The xscale parameter will be deprecated"):
         function(handsome_signal, xscale='linear')
 
-    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+    if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.7.0!
+            # remove xscale from pyfar 0.6.0!
             function(handsome_signal)
 
 
@@ -267,9 +267,9 @@ def test_spectrogram_yscale_deprecation(sine):
                       match="The yscale parameter will be deprecated"):
         plot.spectrogram(sine, yscale='linear')
 
-    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+    if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.7.0!
+            # remove xscale from pyfar 0.6.0!
             plot.spectrogram(sine)
 
 

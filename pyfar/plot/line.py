@@ -114,7 +114,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         This parameter was replaced by the more explicit ``freq_scale``,
         which has the same functionality.
         If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.7.0.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
 
         The default is ``None``.
     **kwargs
@@ -138,7 +138,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     # xscale deprecation
     if xscale is not None:
         warnings.warn(('The xscale parameter will be deprecated in'
-                       'pyfar 0.7.0. in favor of freq_scale'),
+                       'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = xscale
 
@@ -193,7 +193,7 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         This parameter was replaced by the more explicit ``freq_scale``,
         which has the same functionality.
         If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.7.0.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
 
         The default is ``None``.
     **kwargs
@@ -217,7 +217,7 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     # xscale deprecation
     if xscale is not None:
         warnings.warn(('The xscale parameter will be deprecated in'
-                       'pyfar 0.7.0. in favor of freq_scale'),
+                       'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = xscale
 
@@ -270,7 +270,7 @@ def group_delay(signal, unit=None, freq_scale='log', ax=None, style='light',
         This parameter was replaced by the more explicit ``freq_scale``,
         which has the same functionality.
         If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.7.0.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
 
         The default is ``None``.
     **kwargs
@@ -294,7 +294,7 @@ def group_delay(signal, unit=None, freq_scale='log', ax=None, style='light',
     # xscale deprecation
     if xscale is not None:
         warnings.warn(('The xscale parameter will be deprecated in'
-                       'pyfar 0.7.0. in favor of freq_scale'),
+                       'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = xscale
 
@@ -367,7 +367,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         This parameter was replaced by the more explicit ``freq_scale``,
         which has the same functionality.
         If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.7.0.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
 
         The default is ``None``.
     **kwargs
@@ -391,7 +391,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     # xscale deprecation
     if xscale is not None:
         warnings.warn(('The xscale parameter will be deprecated in'
-                       'pyfar 0.7.0. in favor of freq_scale'),
+                       'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = xscale
 
@@ -459,7 +459,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         This parameter was replaced by the more explicit ``freq_scale``,
         which has the same functionality.
         If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.7.0.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
 
         The default is ``None``.
     **kwargs
@@ -483,7 +483,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
     # xscale deprecation
     if xscale is not None:
         warnings.warn(('The xscale parameter will be deprecated in'
-                       'pyfar 0.7.0. in favor of freq_scale'),
+                       'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = xscale
 
@@ -549,7 +549,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         This parameter was replaced by the more explicit ``freq_scale``,
         which has the same functionality.
         If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.7.0.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
 
         The default is ``None``.
     **kwargs
@@ -573,7 +573,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     # xscale deprecation
     if xscale is not None:
         warnings.warn(('The xscale parameter will be deprecated in'
-                       'pyfar 0.7.0. in favor of freq_scale'),
+                       'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = xscale
 

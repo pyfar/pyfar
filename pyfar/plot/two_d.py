@@ -921,7 +921,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         This parameter was replaced by the more explicit ``freq_scale``,
         which has the same functionality.
         If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.7.0.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
 
         The default is ``None``.
     **kwargs
@@ -962,7 +962,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     # xscale deprecation
     if yscale is not None:
         warnings.warn(('The yscale parameter will be deprecated in'
-                       'pyfar 0.7.0. in favor of freq_scale'),
+                       'pyfar 0.6.0. in favor of freq_scale'),
                       PendingDeprecationWarning)
         freq_scale = yscale
 
