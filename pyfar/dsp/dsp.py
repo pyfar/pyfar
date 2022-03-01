@@ -908,8 +908,9 @@ class InterpolateSpectrum():
         >>>     pf.plot.time(signal, ax=ax[0, 0])
         >>>     pf.plot.time(signal, ax=ax[1, 0], dB=True)
         >>>     # frequency plot (linear x-axis)
-        >>>     pf.plot.freq(signal, dB=False, xscale="linear", ax=ax[0, 1])
-        >>>     pf.plot.freq(data, dB=False, xscale="linear",
+        >>>     pf.plot.freq(signal, dB=False, freq_scale="linear",
+        ...                  ax=ax[0, 1])
+        >>>     pf.plot.freq(data, dB=False, freq_scale="linear",
         ...                  ax=ax[0, 1], c='r', ls='', marker='.')
         >>>     ax[0, 1].set_xlim(0, signal.sampling_rate/2)
         >>>     # frequency plot (log x-axis)
@@ -1050,8 +1051,9 @@ class InterpolateSpectrum():
                 # time signal (log amplitude)
                 pyfar.plot.time(signal, ax=ax[1, 0], dB=True)
                 # frequency plot (linear x-axis)
-                pyfar.plot.freq(signal, dB=False, xscale="linear", ax=ax[0, 1])
-                pyfar.plot.freq(self._input, dB=False, xscale="linear",
+                pyfar.plot.freq(signal, dB=False, freq_scale="linear",
+                                ax=ax[0, 1])
+                pyfar.plot.freq(self._input, dB=False, freq_scale="linear",
                                 ax=ax[0, 1], c='r', ls='', marker='.')
                 ax[0, 1].set_xlim(0, sampling_rate/2)
                 # frequency plot (log x-axis)

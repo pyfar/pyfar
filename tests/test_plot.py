@@ -7,6 +7,7 @@ import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
 import numpy as np
 import numpy.testing as npt
+from packaging import version
 
 """
 Testing plots is difficult, as matplotlib does not create the exact same
@@ -120,35 +121,28 @@ def test_line_dB_option(function, handsome_signal):
 
 @pytest.mark.parametrize('function', [
     (plot.freq), (plot.phase), (plot.group_delay)])
-@pytest.mark.parametrize('xscale', [('log'), ('linear')])
-def test_line_xscale_option(function, xscale, handsome_signal):
-    """Test all line plots that have an xscale option."""
-    # test if xscale option is working
-    print(f"Testing: {function.__name__} (xscale={xscale})")
+@pytest.mark.parametrize('freq_scale', [('log'), ('linear')])
+def test_line_freq_scale_option(function, freq_scale, handsome_signal):
+    """Test all line plots that have a freq_scale option."""
+    # test if freq_scale option is working
+    print(f"Testing: {function.__name__} (freq_scale={freq_scale})")
 
-    filename = function.__name__ + '_xscale_' + xscale
+    filename = function.__name__ + '_freqscale_' + freq_scale
     create_figure()
-    function(handsome_signal, xscale=xscale)
+    function(handsome_signal, freq_scale=freq_scale)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
 
-def test_line_xscale_assertion(sine):
+@pytest.mark.parametrize('function', [
+    (plot.freq), (plot.phase), (plot.group_delay), (plot.spectrogram)])
+def test_line_freq_scale_assertion(function, sine):
     """
     Test if all line plots raise an assertion for a wrong scale parameter.
     """
 
     with raises(ValueError):
-        plot.freq(sine, xscale="warped")
-
-    with raises(ValueError):
-        plot.phase(sine, xscale="warped")
-
-    with raises(ValueError):
-        plot.group_delay(sine, xscale="warped")
-
-    with raises(ValueError):
-        plot.spectrogram(sine, yscale="warped")
+        function(sine, freq_scale="warped")
 
     plt.close("all")
 
@@ -241,6 +235,20 @@ def test_line_frequency_data(function, handsome_signal):
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('function', [
+    (plot.freq), (plot.phase), (plot.group_delay),
+    (plot.time_freq), (plot.freq_phase), (plot.freq_group_delay)])
+def test_xscale_deprecation(function, handsome_signal):
+    with pytest.warns(PendingDeprecationWarning,
+                      match="The xscale parameter will be removed"):
+        function(handsome_signal, xscale='linear')
+
+    if version.parse(pf.__version__) >= version.parse('0.6.0'):
+        with pytest.raises(AttributeError):
+            # remove xscale from pyfar 0.6.0!
+            function(handsome_signal)
+
+
 def test_spectrogram():
     """Test spectrogram with default parameters"""
     function = plot.spectrogram
@@ -252,6 +260,17 @@ def test_spectrogram():
     function(pf.signals.exponential_sweep_time(2**16, [100, 10e3]))
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
+
+
+def test_spectrogram_yscale_deprecation(sine):
+    with pytest.warns(PendingDeprecationWarning,
+                      match="The yscale parameter will be removed"):
+        plot.spectrogram(sine, yscale='linear')
+
+    if version.parse(pf.__version__) >= version.parse('0.6.0'):
+        with pytest.raises(AttributeError):
+            # remove xscale from pyfar 0.6.0!
+            plot.spectrogram(sine)
 
 
 @pytest.mark.parametrize('function', [
@@ -388,11 +407,11 @@ def test_2d_dB_option(function, handsome_signal_2d):
     (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)])
 @pytest.mark.parametrize('freq_scale', [('log'), ('linear')])
 def test_2d_freq_scale_option(function, freq_scale, handsome_signal_2d):
-    """Test all 2d plots that have an xscale option."""
-    # test if xscale option is working
+    """Test all 2d plots that have an freq_scale option."""
+    # test if freq_scale option is working
     print(f"Testing: {function.__name__} (freq_scale={freq_scale})")
 
-    filename = function.__name__ + '_freq_scale_' + freq_scale
+    filename = function.__name__ + '_freqscale_' + freq_scale
     create_figure()
     function(handsome_signal_2d, freq_scale=freq_scale)
     save_and_compare(create_baseline, baseline_path, output_path,
