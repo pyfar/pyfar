@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import os.path
 import sofar as sf
+import pyfar as pf
 
 from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
@@ -351,6 +352,61 @@ def noise_two_by_three_channel():
 
     # Amplitude Normalization
     signal.time = signal.time / np.abs(signal.time.max())
+
+    return signal
+
+
+@pytest.fixture
+def handsome_signal():
+    """
+    Windows 200 Hz sine signal for testing plots
+
+    Returns
+    -------
+    signal : Signal
+        Windowed sine
+    """
+
+    signal = pf.signals.sine(200, 4410)
+    signal = pf.dsp.time_window(signal, (1500, 2000, 3000, 3500))
+    signal.fft_norm = 'none'
+    return signal
+
+
+@pytest.fixture
+def handsome_signal_v2():
+    """
+    Windowed 1kHz sine signal for testing plots
+
+    Returns
+    -------
+    signal : Signal
+        Windowed sine
+    """
+
+    signal = pf.signals.sine(2000, 4410)
+    signal = pf.dsp.time_window(signal, (500, 1000, 2000, 2500))
+    signal.fft_norm = 'none'
+    return signal
+
+
+@pytest.fixture
+def handsome_signal_2d():
+    """
+    45 channel signal with delayed, scaled and bell-filtered impulses
+    for testing 2D plots
+
+    Returns
+    -------
+    signal : Signal
+        Multi channel signal
+    """
+
+    delays = np.array(np.sin(np.linspace(0, 2*np.pi, 45))*50 + 55, dtype=int)
+    amplitudes = 10**(-10*(1-np.cos(np.linspace(0, 2*np.pi, 45)))/20)
+    signal = pyfar.signals.impulse(2**9, delays, amplitudes)
+    for idx, s in enumerate(signal):
+        signal[idx] = pf.dsp.filter.bell(s, (idx+1)*200, -20, 5)
 
     return signal
 

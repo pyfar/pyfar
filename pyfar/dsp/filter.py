@@ -545,6 +545,8 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
         ``'II'``
             defines the characteristic frequency at 3 dB if the gain is
             positive and at -3 dB if the gain is negative.
+        ``'III'``
+            defines the characteristic frequency at gain/2 dB.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
