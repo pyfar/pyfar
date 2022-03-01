@@ -6,7 +6,7 @@ from matplotlib.tight_layout import get_subplotspec_list
 from pyfar import (Signal, FrequencyData)
 
 
-def _tight_layout(fig=plt.gcf()):
+def _tight_layout(fig=None):
     """
     Apply Matplotlibs tight_layout only when it is likely to work.
 
@@ -17,8 +17,12 @@ def _tight_layout(fig=plt.gcf()):
 
     Parameters
     ----------
-    fig : Matplotlib Figure
+    fig : Matplotlib Figure, optional
+        The default is ``None`` which uses ``plt.gcf()``
     """
+    if fig is None:
+        fig = plt.gcf()
+
     subplotspec_list = get_subplotspec_list(fig.get_axes())
     if None not in subplotspec_list:
         plt.tight_layout()
