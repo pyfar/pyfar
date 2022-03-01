@@ -624,7 +624,7 @@ def high_shelve_cascade(
         signal, frequency, frequency_type="lower", gain=None, slope=None,
         bandwidth=None, N=None, sampling_rate=None):
     """
-    Create and apply constant slope filter from cascaded 2nd order low shelves.
+    Create and apply constant slope filter from cascaded 2nd order high shelves.
 
     The filters are designed according to Schultz et al. 2020 [#]_ and are
     defined by their characteristic frequency, gain, slope, and bandwidth. Two
