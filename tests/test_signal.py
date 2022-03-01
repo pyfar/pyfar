@@ -76,7 +76,7 @@ def test_domain_setter_time_when_time():
 
 
 def test_domain_setter_time_when_freq():
-    signal = Signal([1, 2, 3, 4], 44100, domain='time', fft_norm='rms')
+    signal = Signal([1, 2, 3, 4], 44100, domain='freq', fft_norm='rms')
     domain = 'time'
     signal.domain = domain
     assert signal.domain == domain
