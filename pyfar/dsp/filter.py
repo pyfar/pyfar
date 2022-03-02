@@ -1037,29 +1037,22 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
                        f"maintain the intended slope of {slope} dB/octave."))
 
     # determine number of shelve filters per octave ---------------------------
-    # minimum shelve filters per octave according to Eq. (11.2)
-    N_min = 1 if abs(slope) < 12.04 else abs(slope) / 12.04
 
-    # determine optimal N_octave
-    if N is None:
-        # minimum shelve filters per octave to force bandwith * N_octave to be
-        # an integer (bandwidth * 1 / bandwidth = 1) according to Eq. (11.1)
-        N_octave = 1 / bandwidth
-        # make sure Eq. (11.2) is satisfied
-        if N_octave < N_min:
-            N_octave *= np.ceil(N_min / N_octave)
-        # total number of shelve filters
-        N = np.round(N_octave * bandwidth).astype(int)
+    # recommended minimum shelve filters per octave according to Eq. (11.2)
+    N_octave_min = 1 if abs(slope) < 12.04 else abs(slope) / 12.04
+    # minimum total shelve filters according to Eq. (9)
+    N_min = np.ceil(N_octave_min*bandwidth).astype(int)
 
-    # determine and check actual N_octave
-    else:
-        N = int(N)
-        N_octave = N / bandwidth
-        if N_octave < N_min:
-            warnings.warn((
-                f"N is {N} but should be at least "
-                f"{np.ceil(N_min*bandwidth).astype(int)} to obtain an good "
-                "approximation of the desired frequency response"))
+    # actual total shelve filters either from user input or recommended minimum
+    N = int(N) if N else N_min
+
+    if N < N_min:
+        warnings.warn((
+            f"N is {N} but should be at least {N_min} to obtain an good "
+            "approximation of the desired frequency response"))
+
+    # used shelve filters per octave
+    N_octave = N / bandwidth
 
     # get the filter ----------------------------------------------------------
 
