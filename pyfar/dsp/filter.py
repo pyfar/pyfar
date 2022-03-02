@@ -626,10 +626,10 @@ def high_shelve_cascade(
     """
     Create and apply constant slope filter from cascaded 2nd order high shelves.
 
-    The filters are designed according to Schultz et al. 2020 [#]_ and are
-    defined by their characteristic frequency, gain, slope, and bandwidth. Two
-    out of the three parameter `gain`, `slope`, and `bandwidth` must be
-    specified, while the third parameter is calculated as
+    The filters - also known as High-Schultz filters (cf. [#]_) - are defined
+    by their characteristic frequency, gain, slope, and bandwidth. Two out of
+    the three parameter `gain`, `slope`, and `bandwidth` must be specified,
+    while the third parameter is calculated as
 
     ``gain = bandwidth * slope``
 
@@ -725,10 +725,10 @@ def low_shelve_cascade(
     """
     Create and apply constant slope filter from cascaded 2nd order low shelves.
 
-    The filters are designed according to Schultz et al. 2020 [#]_ and are
-    defined by their characteristic frequency, gain, slope, and bandwidth. Two
-    out of the three parameter `gain`, `slope`, and `bandwidth` must be
-    specified, while the third parameter is calculated as
+    The filters - also known as Low-Schultz filters (cf. [#]_) - are defined
+    by their characteristic frequency, gain, slope, and bandwidth. Two out of
+    the three parameter `gain`, `slope`, and `bandwidth` must be specified,
+    while the third parameter is calculated as
 
     ``gain = -bandwidth * slope``
 
