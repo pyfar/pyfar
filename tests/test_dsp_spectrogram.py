@@ -6,7 +6,7 @@ import numpy as np
 import numpy.testing as npt
 
 
-def test_assertions():
+def test_assertions(sine):
     """Test assertions due to wrong input data"""
 
     with raises(TypeError, match="Input data has to be of type: Signal."):
@@ -14,6 +14,9 @@ def test_assertions():
 
     with raises(ValueError, match="window_length exceeds signal length"):
         spectrogram(pf.Signal(1, 44100))
+
+    with raises(TypeError, match="The normalize parameter"):
+        spectrogram(sine, normalize=1)
 
 
 def test_return_values():
@@ -45,3 +48,10 @@ def test_window(window, value):
 
     # check middle slice
     npt.assert_allclose(spectro[255:258, 1], value, atol=1e-13)
+
+
+def test_normalize(sine):
+    """Test normalize parameter"""
+    sine.fft_norm = 'amplitude'
+    assert pf.dsp.spectrogram(sine)[-1].max() < 1
+    assert pf.dsp.spectrogram(sine, normalize=False)[-1].max() > 1

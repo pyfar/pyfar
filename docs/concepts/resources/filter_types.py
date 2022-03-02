@@ -155,10 +155,11 @@ plt.tight_layout()
 plt.savefig('filter_types_crossover.png', dpi=150)
 
 # %% audio filter -------------------------------------------------------------
-_, ax = plt.subplots(1, 1, figsize=(15/2.54, 12/2.54))
+_, ax = plt.subplots(1, 2, figsize=(30/2.54, 12/2.54), sharey=True)
 
+# bell and shelve
 frequency = 1e3
-axis = ax
+axis = ax[0]
 y = pf.dsp.filter.bell(impulse, frequency, 10, 2)
 pf.plot.freq(y, ax=axis, label='Bell')
 
@@ -182,6 +183,36 @@ axis.set_xlabel('')
 axis.set_xlim(20, 20e3)
 axis.set_ylim(-70, 20)
 axis.legend(loc=4, ncol=3)
+
+# shelve cascades
+axis = ax[1]
+gain = 10
+y, _, ideal = pf.dsp.filter.high_shelve_cascade(
+    impulse, 125, 'lower', gain, None, 5)
+pf.plot.freq(ideal, c=[0, 0, 0, .5], ax=axis, ls="--", label="Ideal response")
+pf.plot.freq(y, ax=axis, label="High-shelve cascade")
+
+y, _, ideal = pf.dsp.filter.high_shelve_cascade(
+    impulse, 125, 'lower', -gain, None, 5)
+pf.plot.freq(ideal, c=[0, 0, 0, .5], ax=axis, ls="--")
+pf.plot.freq(y, ax=axis, label="High-shelve cascade")
+
+y, _, ideal = pf.dsp.filter.low_shelve_cascade(
+    impulse, 125, 'lower', gain, None, 5)
+pf.plot.freq(ideal*.01, c=[0, 0, 0, .5], ax=axis, ls="--")
+pf.plot.freq(y*.01, ax=axis, label="Low-shelve cascade")
+
+y, _, ideal = pf.dsp.filter.low_shelve_cascade(
+    impulse, 125, 'lower', -gain, None, 5)
+pf.plot.freq(ideal*.01, c=[0, 0, 0, .5], ax=axis, ls="--")
+pf.plot.freq(y*.01, ax=axis, label="Low-shelve cascade")
+
+axis.set_title('')
+axis.set_xlabel('')
+axis.set_xlim(20, 20e3)
+axis.set_ylim(-70, 20)
+axis.legend(loc=4, ncol=2)
+
 
 plt.tight_layout()
 plt.savefig('filter_types_parametric-eq.png', dpi=150)
