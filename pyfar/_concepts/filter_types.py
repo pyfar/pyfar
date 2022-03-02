@@ -45,10 +45,17 @@ The corresponding center frequencies are accessible via
 
 Parametric equalizer
 -----------------------------------------------------
-The functions :py:func:`~pyfar.dsp.filter.high_shelve`,
+The :py:func:`~pyfar.dsp.filter.high_shelve`,
 :py:func:`~pyfar.dsp.filter.low_shelve`, and :py:func:`~pyfar.dsp.filter.bell`
-are more specific filter for digital audio signal processing and often used
-in audio effects and loudspeaker or room compensation.
+filters shown on the left are specific filters for digital audio signal
+processing and are often used for audio effects and loudspeaker or room
+compensation. Bell filters manipulate the magnitude response around a
+center-frequency. Low- and high-shelve filters manipulate the magnitude
+response below and above a characteristic frequency. The cascaded shelving
+filters :py:func:`~pyfar.dsp.filter.low_shelve_cascade` and
+:py:func:`~pyfar.dsp.filter.high_shelve_cascade` shown on the right can be used
+to generate filters with a user definable slope given in dB per octaves within
+a certain frequency region.
 
 |eqs|
 
@@ -66,6 +73,6 @@ in audio effects and loudspeaker or room compensation.
    :alt: Cross-over contained in pyfar
 
 .. |eqs| image:: resources/filter_types_parametric-eq.png
-   :width: 50%
+   :width: 100%
    :alt: Parametric equalizer contained in pyfar
 """
