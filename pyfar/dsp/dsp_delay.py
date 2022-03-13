@@ -19,16 +19,16 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     # separate integer and fractional delay -----------------------------------
     delay_int = np.atleast_1d(delay).astype(int)
     delay_frac = np.atleast_1d(delay - delay_int)
-    # force delay_frac >= 0
+    # force delay_frac >= 0 as required by Laakso et al. 1996 Eq. (2)
     mask = delay_frac < 0
     delay_int[mask] -= 1
     delay_frac[mask] += 1
 
     # get discrete time vector for sinc functions and Kaiser windows ----------
     # Laakso et al. 1996 Eq. (21) applied to the fractional part of the delay
-    # (Note that int(delay_frac) and round(delay_frac) are always 0 because
-    # np.abs(delay_frac) <= 0.5. We keep them nevertheless for readability and
-    # to make sure M_opt gets the correct dimension)
+    # NOTE: This is the delay that is added when applying the fractional part
+    #       of the delay and has thus to be accounted for when realizing
+    #       delay_int
     if order % 2:
         M_opt = delay_frac.astype("int") - (order-1)/2
     else:
@@ -59,7 +59,9 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     # Kaiser window according to Oppenheim (2010) Eq. (10.12)
     alpha = order / 2
     L = np.arange(order + 1).astype("float") - delay_frac_matrix
-    # required to counter operations on M_opt
+    # required to counter operations on M_opt and make sure that the maxima
+    # of the underlying continuous sinc function and Kaiser window appear at
+    # the same time
     if order % 2:
         L += .5
     else:
@@ -72,4 +74,4 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     signal = pf.dsp.convolve(
         signal, pf.Signal(sinc * kaiser, signal.sampling_rate))
 
-    return signal, sinc, kaiser
+    return signal, sinc, kaiser, M_opt
