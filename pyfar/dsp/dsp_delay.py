@@ -24,7 +24,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     delay_int[mask] -= 1
     delay_frac[mask] += 1
 
-    # get discrete time vector for sinc functions and Kaiser windows ----------
+    # compute the sinc functions (fractional delay filters) -------------------
     # Laakso et al. 1996 Eq. (21) applied to the fractional part of the delay
     # NOTE: This is the delay that is added when applying the fractional part
     #       of the delay and has thus to be accounted for when realizing
@@ -45,7 +45,6 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     # discrete time vector
     n = np.arange(order + 1) + M_opt_matrix - delay_frac_matrix
 
-    # get the sinc functions (fractional delay filters) -----------------------
     sinc = np.sinc(n)
 
     # get the Kaiser windows --------------------------------------------------
