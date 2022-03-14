@@ -16,7 +16,7 @@ from .dsp import (
     InterpolateSpectrum,
 )
 
-from .dsp_delay import fractional_delay_sinc
+from .dsp_interpolation import fractional_delay_sinc
 
 from . import filter
 from . import fft
