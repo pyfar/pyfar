@@ -184,7 +184,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     # calculate full concolution, and cut later
     convolve_mode = mode if mode == "cyclic" else "full"
     # apply filter
-    delayed = pf.dsp.convolve(
+    signal = pf.dsp.convolve(
         signal, pf.Signal(frac_delay_filter, signal.sampling_rate),
         mode=convolve_mode)
 
@@ -192,12 +192,12 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     # account for delay from applying the fractional filter
     delay_int += M_opt.astype("int")
     # broadcast to required shape for easier looping
-    delay_int = np.broadcast_to(delay_int, delayed.cshape)
+    delay_int = np.broadcast_to(delay_int, signal.cshape)
 
-    for idx in np.ndindex(delayed.cshape):
+    for idx in np.ndindex(signal.cshape):
         if mode == "cyclic":
-            delayed.time[idx] = np.roll(delayed.time[idx], delay_int[idx],
-                                        axis=-1)
+            signal.time[idx] = np.roll(signal.time[idx], delay_int[idx],
+                                       axis=-1)
         else:
             d = delay_int[idx]
 
@@ -205,7 +205,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
             if d < 0:
                 if d + n_samples > 0:
                     # discard d starting samples
-                    time = delayed.time[idx, abs(d):].flatten()
+                    time = signal.time[idx, abs(d):].flatten()
                 else:
                     # we are left with a zero vector (strictly spoken we might
                     # have some tail left from 'full' convolution but zeros
@@ -213,7 +213,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
                     time = np.zeros(n_samples)
             elif d > 0:
                 # add d zeros
-                time = np.concatenate((np.zeros(d), delayed.time[idx]))
+                time = np.concatenate((np.zeros(d), signal.time[idx]))
 
             # adjust length to n_samples
             if time.size >= n_samples:
@@ -223,10 +223,10 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
                 time = np.concatenate(
                     (time, np.zeros(n_samples - time.size)))
 
-            delayed.time[idx, :n_samples] = time
+            signal.time[idx, :n_samples] = time
 
     # truncate signal
     if mode == "cut":
-        delayed.time = delayed.time[..., :n_samples]
+        signal.time = signal.time[..., :n_samples]
 
-    return delayed
+    return signal
