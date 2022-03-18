@@ -28,6 +28,79 @@ def test_fractional_delay_sinc_assertions():
     with raises(ValueError, match="The mode is 'full' but must be 'cut'"):
         fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
 
+@pytest.mark.parametrize("mode", ["cut", "cyclic"])
+@pytest.mark.parametrize("delays_impulse, fractional_delays", [
+    # single channel signals and delays
+    # (positive/negative with fractions <0.5 and >0.5)
+    (64, 10.4), (64, 10.6), (64, -10.4), (64, -10.6),
+    # special case for testing a special line
+    (64, -60),
+    # multi channel signal with single channel delays
+    ([64, 32], 10.4), ([[64, 32], [48, 16]], 10.4),
+    # multi channel signals with multi channel delays
+    ([64, 32], [10.4, 5.4]), ([[64, 32], [48, 16]], [10.4, 5.4])
+])
+def test_fractional_delay_sinc_channels(
+        mode, delays_impulse, fractional_delays):
+    """
+    Test fractional delay with different combinations of single/multi-channel
+    signals and delays and the two modes "cut" and "cyclic"
+    """
+
+    # generate input and delay signal
+    signal = pf.signals.impulse(128, delays_impulse)
+    delayed = fractional_delay_sinc(signal, fractional_delays, mode=mode)
+
+    # frequency up to which group delay is tested
+    f_id = delayed.find_nearest_frequency(19e3)
+
+    # get and broadcast actual and target group delays
+    group_delays = pf.dsp.group_delay(delayed)[..., :f_id]
+    group_delays = np.broadcast_to(group_delays, signal.cshape + (f_id, ))
+
+    target_delays = np.atleast_1d(
+        np.array(delays_impulse) + np.array(fractional_delays))
+    target_delays = np.broadcast_to(target_delays[..., np.newaxis],
+                                    signal.cshape + (f_id, ))
+
+    # check equality
+    npt.assert_allclose(group_delays[..., :f_id], target_delays, atol=.05)
+
+
+@pytest.mark.parametrize("order", [2, 3])
+def test_fractional_delay_order(order):
+    """Test if the order parameter behaves as intended"""
+
+    signal = pf.signals.impulse(32, 16)
+    delayed = pf.dsp.fractional_delay_sinc(signal, 0.5, order)
+
+    # number of non-zero samples must equal filter_length = order+1
+    assert np.count_nonzero(np.abs(delayed.time) > 1e-14) == order + 1
+
+
+@pytest.mark.parametrize("delay", [20.1, -20.1])
+def test_fractional_delay_mode_cut(delay):
+    """Test the mode cut"""
+
+    signal = pf.signals.impulse(16, 8)
+    delayed = fractional_delay_sinc(signal, delay, 2)
+
+    # if the delay is too large, the signal is shifted out of the sampled range
+    # and only zeros remain
+    npt.assert_array_equal(delayed.time, np.zeros_like(delayed.time))
+
+
+@pytest.mark.parametrize("delay", [30.4, -30.4])
+def test_fractional_delay_mode_cyclic(delay):
+    """Test the mode delay"""
+
+    signal = pf.signals.impulse(32, 16)
+    delayed = fractional_delay_sinc(signal, delay, mode="cyclic")
+
+    # if the delay is too large, it is cyclicly shifted
+    group_delay = pf.dsp.group_delay(delayed)[0]
+    npt.assert_allclose(group_delay, (16+delay) % 32, atol=.05)
+
 
 def test_interpolate_spectrum_init():
     """Test return objects"""

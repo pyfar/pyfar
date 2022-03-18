@@ -179,16 +179,18 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     kaiser = np.real(bessel_first_mod(0, Z)) / bessel_first_mod(0, beta)
 
     # apply fractional delay --------------------------------------------------
-    # compute filter and broadcast to signal shape
-    frac_delay_filter = np.broadcast_to(
-        sinc * kaiser, signal.cshape + (order + 1, ))
-    n_samples = signal.n_samples
-    # calculate full concolution, and cut later
-    convolve_mode = mode if mode == "cyclic" else "full"
+    # compute filter and match dimensions
+    frac_delay_filter = sinc * kaiser
+    while frac_delay_filter.ndim < signal.time.ndim:
+        frac_delay_filter = frac_delay_filter[np.newaxis]
     # apply filter
+    convolve_mode = mode if mode == "cyclic" else "full"
+    n_samples = signal.n_samples
+
     signal = pf.dsp.convolve(
         signal, pf.Signal(frac_delay_filter, signal.sampling_rate),
         mode=convolve_mode)
+    n_samples_full = signal.n_samples
 
     # apply integer delay -----------------------------------------------------
     # account for delay from applying the fractional filter
@@ -207,7 +209,8 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
             if d < 0:
                 if d + n_samples > 0:
                     # discard d starting samples
-                    time = signal.time[idx, abs(d):].flatten()
+                    time = signal.time[
+                        idx + (slice(abs(d), n_samples_full), )].flatten()
                 else:
                     # we are left with a zero vector (strictly spoken we might
                     # have some tail left from 'full' convolution but zeros
@@ -225,7 +228,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
                 time = np.concatenate(
                     (time, np.zeros(n_samples - time.size)))
 
-            signal.time[idx, :n_samples] = time
+            signal.time[idx + (slice(0, n_samples), )] = time
 
     # truncate signal
     if mode == "cut":
