@@ -12,8 +12,11 @@ from .dsp import (
     time_window,
     kaiser_window_beta,
     deconvolve,
-    convolve,
-    InterpolateSpectrum,
+    convolve
+)
+
+from .dsp_interpolation import (
+    InterpolateSpectrum
 )
 
 from . import filter
