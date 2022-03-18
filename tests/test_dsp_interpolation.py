@@ -9,7 +9,7 @@ from pyfar.dsp import InterpolateSpectrum
 # TODO: Finish `test_interpolation()` for 'magnitude_minimum'
 
 
-def test_init():
+def test_interpolate_spectrum_init():
     """Test return objects"""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
@@ -23,7 +23,7 @@ def test_init():
     assert isinstance(signal, pf.Signal)
 
 
-def test_init_assertions():
+def test_interpolate_spectrum_init_assertions():
     """Test if init raises assertions correctly"""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
@@ -85,7 +85,7 @@ def test_init_assertions():
      ("magnitude", [1, 2], [1, 2], 12, 6,
       [0, .5, 1, 1.5, 2, 2.5, 3])
     ])
-def test_interpolation(
+def test_interpolate_spectrum_interpolation(
         method, freq_in, frequencies, freq_out, n_samples, sampling_rate):
     """
     Test the if the interpolated spectrum matches the reference across methods.
@@ -108,7 +108,7 @@ def test_interpolation(
         npt.assert_allclose(signal.freq, np.atleast_2d(freq_out))
 
 
-def test_clip():
+def test_interpolate_spectrum_clip():
     """Test if clipping the magnitude data works."""
 
     data = pf.FrequencyData([1, 2], [1, 2])
@@ -127,7 +127,7 @@ def test_clip():
            np.all(np.abs(signal_clip.freq) <= 2)
 
 
-def test_fscale():
+def test_interpolate_spectrum_fscale():
     """
     Test frequency vectors for linear and logarithmic frequency interpolation.
     """
@@ -160,7 +160,7 @@ def test_fscale():
     npt.assert_allclose(interpolator_log._f_query, f_query_log)
 
 
-def test_show():
+def test_interpolate_spectrum_show():
     """Test plotting the results.
 
     This only tests if the code finishes without errors. Because the plot is

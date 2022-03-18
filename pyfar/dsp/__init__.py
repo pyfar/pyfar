@@ -12,11 +12,13 @@ from .dsp import (
     time_window,
     kaiser_window_beta,
     deconvolve,
-    convolve,
-    InterpolateSpectrum,
+    convolve
 )
 
-from .dsp_interpolation import fractional_delay_sinc
+from .dsp_interpolation import (
+    fractional_delay_sinc,
+    InterpolateSpectrum
+)
 
 from . import filter
 from . import fft
