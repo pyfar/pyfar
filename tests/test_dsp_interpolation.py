@@ -4,9 +4,29 @@ import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 import pyfar as pf
-from pyfar.dsp import InterpolateSpectrum
+from pyfar.dsp import (InterpolateSpectrum, fractional_delay_sinc)
 
-# TODO: Finish `test_interpolation()` for 'magnitude_minimum'
+
+def test_fractional_delay_sinc_assertions():
+    """Test if the assertions are raised correctly"""
+
+    # wrong audio data type
+    with raises(TypeError, match="Input data has to be of type pyfar.Signal"):
+        fractional_delay_sinc(pf.FrequencyData(1, 1), .5)
+
+    # wrong values for order and side_lobe_suppression
+    with raises(ValueError, match="The order must be > 0"):
+        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 0)
+    with raises(ValueError, match="The side lobe suppression must be > 0"):
+        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 2, 0)
+
+    # filter length exceeds signal length
+    with raises(ValueError, match="The order is 30 but must not exceed 2"):
+        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5)
+
+    # wrong mode
+    with raises(ValueError, match="The mode is 'full' but must be 'cut'"):
+        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
 
 
 def test_interpolate_spectrum_init():

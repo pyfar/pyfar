@@ -113,15 +113,15 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
 
     # check input -------------------------------------------------------------
     if not isinstance(signal, (pf.Signal)):
-        raise ValueError("Input data has to be of type pyfar.Signal")
-    if side_lobe_suppression <= 0:
+        raise TypeError("Input data has to be of type pyfar.Signal")
+    if order <= 0:
         raise ValueError("The order must be > 0")
     if side_lobe_suppression <= 0:
-        raise ValueError("The side lobe rejection must be > 0")
+        raise ValueError("The side lobe suppression must be > 0")
     if mode not in ["cut", "cyclic"]:
-        raise ValueError(f"mode is '{mode}' but must be 'cut' or 'cyclic'")
+        raise ValueError(f"The mode is '{mode}' but must be 'cut' or 'cyclic'")
     if order + 1 > signal.n_samples:
-        raise ValueError((f"order is {order} but must be smaller than "
+        raise ValueError((f"The order is {order} but must not exceed "
                           f"{signal.n_samples-1} (signal.n_samples-1)"))
 
     # separate integer and fractional delay -----------------------------------
