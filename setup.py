@@ -16,9 +16,11 @@ requirements = [
     'scipy>=1.5.0',
     'matplotlib',
     'sofar>=0.1.2',
+    'resampy',
     'urllib3',
     'deepdiff',
-    'soundfile'
+    'soundfile',
+    'joblib'
 ]
 
 setup_requirements = ['pytest-runner', ]

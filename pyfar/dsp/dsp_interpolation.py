@@ -1,8 +1,14 @@
 import numpy as np
 from scipy.special import iv as bessel_first_mod
 from scipy.interpolate import interp1d
+import resampy
 import matplotlib.pyplot as plt
+import multiprocessing
+from joblib import Memory
 import pyfar as pf
+
+# init cache
+memory = Memory('.pyfar_cache')
 
 
 def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
@@ -235,6 +241,89 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         signal.time = signal.time[..., :n_samples]
 
     return signal
+
+
+def resample_sinc(signal, sampling_rate, processes=1):
+    """
+    Resample signal to new sampling rate.
+
+    Uses sinc functions for high quality band limited interpolation [#]_ to
+    resample the input signal to a new sampling rate. This is a wrapper of
+    `resampy` [#]_ using the `kaiser_best` mode. It can make use multi-
+    processing and caching to speed up the computation for large input data or
+    repeated calls (see parameter `processes` for more information).
+
+    Parameters
+    ----------
+    signal : Signal
+        Input data to be resamples
+    sampling_rate : number
+        The new sampling rate in Hz
+    processes : int, optional
+        The number of processes that are used. The default is ``1``, which uses
+        a single process (no multi-processing) and no chaching. Any number
+        larger than ``1`` will trigger multi-processing and caching. Passing
+        ``None`` will use as many processes as available CPU cores. Note that
+        `processes` must not exceed the number of available cores.
+
+    Returns
+    -------
+    signal : pyfar.Signal
+        The resampled copy of the input data with the new sampling rate.
+    """
+
+    # check input
+    if not isinstance(signal, (pf.Signal)):
+        raise TypeError("Input data has to be of type pyfar.Signal")
+    if processes is None:
+        processes = multiprocessing.cpu_count()
+    elif processes < 0 or processes > multiprocessing.cpu_count():
+        raise ValueError((f"processes is {processes} but must be between"
+                          f"1 and {multiprocessing.cpu_count()}"))
+
+    # copy input because resampy.resample changes mutable data
+    signal = signal.copy()
+
+    if processes == 1:
+        # single process without caching
+        signal.time = resampy.resample(
+            signal.time, signal.sampling_rate, sampling_rate)
+    elif processes > 1:
+        # multi-process with caching (enabled in private function)
+        # Note: signal.time is flattened to ease iteration
+        time = _resample_sinc_multiprocess(
+            signal.flatten().time, signal.sampling_rate, sampling_rate,
+            processes)
+
+        signal.time = np.reshape(time, signal.cshape + (-1, ))
+
+    signal.sampling_rate = sampling_rate
+
+    return signal
+
+
+@memory.cache
+def _resample_sinc_multiprocess(
+        time, sampling_rate, sampling_rate_target, processes):
+    """Private sub-function of resample_sinc to make use of multi-processing"""
+
+    # allocate output array
+    L = sampling_rate_target / sampling_rate
+    time_out = np.zeros(time.shape[:-1] + (int(time.shape[-1] * L), ))
+
+    # start the pool
+    with multiprocessing.Pool(processes=processes) as pool:
+        # iterate over channels of signal by using the inherent iteration of
+        # numpy arrays
+        results = pool.starmap(
+            resampy.resample,
+            map(lambda x: (x, sampling_rate, sampling_rate_target),
+                time)
+        )
+        # assign output
+        time_out = np.array(results)
+
+    return time_out
 
 
 class InterpolateSpectrum():
