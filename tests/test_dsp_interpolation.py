@@ -28,6 +28,7 @@ def test_fractional_delay_sinc_assertions():
     with raises(ValueError, match="The mode is 'full' but must be 'cut'"):
         fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
 
+
 @pytest.mark.parametrize("mode", ["cut", "cyclic"])
 @pytest.mark.parametrize("delays_impulse, fractional_delays", [
     # single channel signals and delays
