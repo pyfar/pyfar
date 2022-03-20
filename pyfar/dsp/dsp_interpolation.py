@@ -286,8 +286,8 @@ def resample_sinc(signal, sampling_rate, processes=1):
 
     if processes == 1:
         # single process without caching
-        signal.time = resampy.resample(
-            signal.time, signal.sampling_rate, sampling_rate)
+        time = resampy.resample(
+            signal.flatten().time, signal.sampling_rate, sampling_rate)
     elif processes > 1:
         # multi-process with caching (enabled in private function)
         # Note: signal.time is flattened to ease iteration
@@ -295,8 +295,7 @@ def resample_sinc(signal, sampling_rate, processes=1):
             signal.flatten().time, signal.sampling_rate, sampling_rate,
             processes)
 
-        signal.time = np.reshape(time, signal.cshape + (-1, ))
-
+    signal.time = np.reshape(time, signal.cshape + (-1, ))
     signal.sampling_rate = sampling_rate
 
     return signal

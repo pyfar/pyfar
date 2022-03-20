@@ -4,7 +4,9 @@ import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 import pyfar as pf
-from pyfar.dsp import (InterpolateSpectrum, fractional_delay_sinc)
+from pyfar.dsp import (InterpolateSpectrum,
+                       fractional_delay_sinc,
+                       resample_sinc)
 
 
 def test_fractional_delay_sinc_assertions():
@@ -101,6 +103,70 @@ def test_fractional_delay_mode_cyclic(delay):
     # if the delay is too large, it is cyclicly shifted
     group_delay = pf.dsp.group_delay(delayed)[0]
     npt.assert_allclose(group_delay, (16+delay) % 32, atol=.05)
+
+
+def test_resample_sinc_assertions():
+    """Test if the assertions are raised correctly"""
+
+    # wrong audio data type
+    with raises(TypeError, match="Input data has to be of type pyfar.Signal"):
+        resample_sinc(pf.FrequencyData(1, 1), 22e3)
+
+    # too many processes
+    # wrong audio data type
+    with raises(ValueError, match="processes is 1000000"):
+        resample_sinc(pf.Signal(1, 1), 22e3, 1000000)
+
+
+def test_resample_sinc_single_channel():
+    """
+    The resempling itself is tested by resampy. Here we only test mutability
+    and the meta data of the output signal.
+    """
+
+    signal = pf.signals.impulse(256, 128)
+    signal_resampled = resample_sinc(signal, 48e3)
+
+    # check if input remained unchanged
+    npt.assert_equal(signal.time, pf.signals.impulse(256, 128).time)
+
+    # test target sampling rate and n_samples
+    assert signal_resampled.sampling_rate == 48e3
+    assert signal_resampled.n_samples > signal.n_samples
+
+
+@pytest.mark.parametrize("processes", [1, 2, None])
+def test_resample_sinc(processes):
+    """
+    The resempling itself is tested by resampy. Here we only test for different
+    array shapes and process modes.
+    """
+
+    # resample single channel signals for reference
+    ref_60 = resample_sinc(pf.signals.impulse(128, 60), 48e3).time
+    ref_62 = resample_sinc(pf.signals.impulse(128, 62), 48e3).time
+    ref_64 = resample_sinc(pf.signals.impulse(128, 64), 48e3).time
+    ref_66 = resample_sinc(pf.signals.impulse(128, 66), 48e3).time
+
+    # resample two channel signal with flat cshape
+    signal = pf.signals.impulse(128, [60, 62])
+    signal_resampled = resample_sinc(signal, 48e3, processes)
+
+    assert signal_resampled.cshape == signal.cshape
+
+    npt.assert_allclose(ref_60.flatten(), signal_resampled.time[0])
+    npt.assert_allclose(ref_62.flatten(), signal_resampled.time[1])
+
+    # resample two-by-two channel signal
+    signal = pf.signals.impulse(128, [[60, 62], [64, 66]])
+    signal_resampled = resample_sinc(signal, 48e3, processes)
+
+    assert signal_resampled.cshape == signal.cshape
+
+    npt.assert_allclose(ref_60.flatten(), signal_resampled.time[0, 0])
+    npt.assert_allclose(ref_62.flatten(), signal_resampled.time[0, 1])
+    npt.assert_allclose(ref_64.flatten(), signal_resampled.time[1, 0])
+    npt.assert_allclose(ref_66.flatten(), signal_resampled.time[1, 1])
 
 
 def test_interpolate_spectrum_init():
