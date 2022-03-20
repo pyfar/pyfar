@@ -248,15 +248,15 @@ def resample_sinc(signal, sampling_rate, processes=1):
     Resample signal to new sampling rate.
 
     Uses sinc functions for high quality band limited interpolation [#]_ to
-    resample the input signal to a new sampling rate. This is a wrapper of
-    `resampy` [#]_ using the `kaiser_best` mode. It can make use multi-
-    processing and caching to speed up the computation for large input data or
-    repeated calls (see parameter `processes` for more information).
+    resample the input signal to an arbitrary sampling rate. This is a wrapper
+    of `resampy` [#]_ using the `kaiser_best` mode. It can make use
+    multi-processing and caching to speed up the computation for large input
+    data or repeated calls (see parameter `processes` for more information).
 
     Parameters
     ----------
     signal : Signal
-        Input data to be resamples
+        Input data to be resampled
     sampling_rate : number
         The new sampling rate in Hz
     processes : int, optional
@@ -268,8 +268,35 @@ def resample_sinc(signal, sampling_rate, processes=1):
 
     Returns
     -------
-    signal : pyfar.Signal
+    signal : Signal
         The resampled copy of the input data with the new sampling rate.
+
+    References
+    ----------
+
+    .. [#] https://ccrma.stanford.edu/~jos/resample/
+    .. [#] https://resampy.readthedocs.io
+
+    Examples
+    --------
+
+    Resample a linear sweep to half the sampling rate. The dark lines show
+    remaining aliasing artifacts with a level of approximately -90 dB below
+    the actual signal.
+
+    .. plot::
+
+        >>> import matplotlib.pyplot as plt
+        >>> import pyfar as pf
+        >>>
+        >>> signal = pf.signals.linear_sweep_time(48000, [0, 20000])
+        >>> signal.fft_norm = "amplitude"
+        >>> signal_resampled = pf.dsp.resample_sinc(signal, 24000)
+        >>>
+        >>> pf.plot.use()
+        >>> _, ax = plt.subplots(2,1)
+        >>> pf.plot.spectrogram(signal, ax=ax[0])
+        >>> pf.plot.spectrogram(signal_resampled, ax=ax[1])
     """
 
     # check input
