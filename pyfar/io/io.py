@@ -8,7 +8,6 @@ imported and exported as WAV files using :py:func:`read_wav` and
 :py:func:`write_wav`. :py:func:`read_sofa` provides functionality to read the
 data stored in a SOFA file.
 """
-from distutils.util import convert_path
 import os.path
 import pathlib
 import warnings
