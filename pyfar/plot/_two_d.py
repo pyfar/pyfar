@@ -55,11 +55,13 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
     # plot data
     indices_x = indices if orientation == "vertical" else times
     indices_y = times if orientation == "vertical" else indices
-    qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
-    # color limits and colorbar
-    if dB:
-        qm.set_clim(ymin, ymax)
+    if dB and "vmin" not in kwargs:
+        kwargs["vmin"] = ymin
+    if dB and "vmax" not in kwargs:
+        kwargs["vmax"] = ymax
+
+    qm = ax[0].pcolormesh(indices_x, indices_y, data, cmap=cmap, **kwargs)
 
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
                               "Amplitude in dB" if dB else "Amplitude")
