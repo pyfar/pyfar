@@ -21,10 +21,11 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     signal : Signal
         The input data
     delay : float, array like
-        The fractional delay (positive or negative). If this is a float, the
-        same delay is applied to all channels of `signal`. If this is an array
-        like different delays are applied to the channels of `signal`. In this
-        case it must broadcast to `signal` (see `Numpy broadcasting
+        The fractional delay in samples (positive or negative). If this is a
+        float, the same delay is applied to all channels of `signal`. If this
+        is an array like different delays are applied to the channels of
+        `signal`. In this case it must broadcast to `signal.cshape` (see
+        `Numpy broadcasting
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
     order : int, optional
         The order of the fractional delay (sinc) filter. The precision of the
@@ -45,7 +46,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         ``"cyclic"``
             The delayed signal has the same length as the input signal. Parts
             of the signal that are shifted to values smaller than 0 are wrapped
-            around the end. Parts that are shifted to values larger than
+            around to the end. Parts that are shifted to values larger than
             ``signal.n_samples`` are wrapped around to the beginning.
 
         The default is ``"cut"``
