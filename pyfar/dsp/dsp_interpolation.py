@@ -11,18 +11,13 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
     """
     Smooth spectrum with a fractional octave width.
 
-    The smoothing is done according to Tylka et al. 2017 [#]_ method 2 in three
-    steps:
+    The smoothing is done according to Tylka et al. 2017 [#]_ (method 2) in
+    three steps:
 
     1. Interpolate the spectrum to a logarithmically spaced frequency scale
     2. Smooth the spectrum by convolution with a smoothing window
     3. Interpolate the spectrum to the original linear frequency scale
 
-    Note: Method 3 in Tylka at al. 2017 is mathematically more elegant at the
-    price of a largely increased computational and memory cost. In most
-    practical cases, methods 2 and 3 yield close to identical results (cf. Fig.
-    2 and 3 in Tylka et al. 2017). If the spectrum contains extreme
-    discontinuities, however, method 3 is superior (see examples below).
 
     Parameters
     ----------
@@ -35,13 +30,13 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
 
         ``"magnitude"``
             Only the magnitude response, i.e., the absolute spectrum is
-            smoothed. Note that this return as zero-phase signal. It might be
+            smoothed. Note that this return a zero-phase signal. It might be
             necessary to generate a minimum or linear phase if the data is
             subject to further processing after the smoothing (cf.
             :py:func:`~pyfar.dsp.minimum_phase` and
             :py:func:`~pyfar.dsp.linear_phase`)
         ``"magnitude_phase"``
-            Separately smooth the magnitude and unwrapped phase response
+            Separately smooth the magnitude and unwrapped phase response.
         ``"magnitude_copy"``
             Smooth the magnitude and keep the phase of the input signal.
         ``"complex"``
@@ -50,8 +45,8 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
 
         The default is ``"magnitude"``.
     window : str, optional
-        String that defines the smoothing window. All window from
-        :py:func:`~pyfar.dsp.time_window` that does not require an additional
+        String that defines the smoothing window. All windows from
+        :py:func:`~pyfar.dsp.time_window` that do not require an additional
         parameter can be used. The default is "boxcar", which uses the
         most commonly used rectangular window.
 
@@ -68,6 +63,13 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
             The actual window width in octaves. This can deviate due to the
             ideal width because the window must have an integer length
 
+    Notes
+    -----
+    Note: Method 3 in Tylka at al. 2017 is mathematically more elegant at the
+    price of a largely increased computational and memory cost. In most
+    practical cases, methods 2 and 3 yield close to identical results (cf. Fig.
+    2 and 3 in Tylka et al. 2017). If the spectrum contains extreme
+    discontinuities, however, method 3 is superior (see examples below).idea!
 
     References
     ----------
@@ -79,7 +81,7 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
     Examples
     --------
 
-    Octave smoothing of continuous spectrum consiting of two bell filters.
+    Octave smoothing of continuous spectrum consisting of two bell filters.
 
     .. plot::
 
@@ -96,8 +98,9 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
         >>> ax.legend(loc=3)
 
     Octave smoothing of the discontinuous spectrum of a sine signal causes
-    artifacts at the edges if using method 2 (cf. Tylka et al. 2017 Fig. 4).
-    This is caused be the intermediate interpolation steps described above.
+    artifacts at the edges if using this method due to the intermediate
+    interpolation steps described in the notes. However this is a rather
+    unusual application and is mentioned only for the sake of completeness.
 
     .. plot::
 
