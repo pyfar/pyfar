@@ -55,6 +55,16 @@ def test_read_sofa_position_type_spherical(
         sofa_reference_coordinates[1])
 
 
+def test_convert_sofa_assertion():
+    """
+    Test assertion for convert_sofa
+    (everything else is tested through read_sofa)
+    """
+
+    with pytest.raises(TypeError, match="Input must be a sofar.Sofa object"):
+        io.convert_sofa("test")
+
+
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_flat_data(tmpdir, flat_data):
