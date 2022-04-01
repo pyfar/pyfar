@@ -258,13 +258,13 @@ def test_write_read_numpy_ndarrays(tmpdir):
     """ Numpy ndarray
     Make sure `read` understands the bits written by `write`
     """
-    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
-    matrix_2d_float = matrix_2d_int.astype(np.float)
-    matrix_2d_complex = matrix_2d_int.astype(np.complex)
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
+    matrix_2d_float = matrix_2d_int.astype(float)
+    matrix_2d_complex = matrix_2d_int.astype(complex)
 
-    matrix_3d_int = np.arange(0, 24, dtype=np.int).reshape((2, 3, 4))
-    matrix_3d_float = matrix_3d_int.astype(np.float)
-    matrix_3d_complex = matrix_3d_int.astype(np.complex)
+    matrix_3d_int = np.arange(0, 24, dtype=int).reshape((2, 3, 4))
+    matrix_3d_float = matrix_3d_int.astype(float)
+    matrix_3d_complex = matrix_3d_int.astype(complex)
 
     filename = os.path.join(tmpdir, 'ndarray.far')
 
@@ -335,7 +335,7 @@ def test_write_read_multiplePyfarObjects(
     and read back.
     """
     filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
-    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
     io.write(
         filename,
         filter=filter,
@@ -393,7 +393,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     and read back with zip compression.
     """
     filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
-    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
     io.write(
         filename,
         compress=True,
