@@ -1,8 +1,225 @@
 import numpy as np
 from scipy.special import iv as bessel_first_mod
 from scipy.interpolate import interp1d
+import scipy.signal as sgn
 import matplotlib.pyplot as plt
 import pyfar as pf
+
+
+def smooth_fractional_octave(signal, width, mode="magnitude",
+                             window="boxcar"):
+    """
+    Smooth spectrum with a fractional octave width.
+
+    The smoothing is done according to Tylka et al. 2017 [#]_ method 2 in three
+    steps:
+
+    1. Interpolate the spectrum to a logarithmically spaced frequency scale
+    2. Smooth the spectrum by convolution with a smoothing window
+    3. Interpolate the spectrum to the original linear frequency scale
+
+    Note: Method 3 in Tylka at al. 2017 is mathematically more elegant at the
+    price of a largely increased computational and memory cost. In most
+    practical cases, methods 2 and 3 yield close to identical results (cf. Fig.
+    2 and 3 in Tylka et al. 2017). If the spectrum contains extreme
+    discontinuities, however, method 3 is superior (see examples below).
+
+    Parameters
+    ----------
+    signal : pyfar.Signal
+        The input data.
+    width : number
+        The width of the smoothing window in octaves, e.g., 1/3 will apply
+        third octave smoothing.
+    mode : str, optional
+
+        ``"magnitude"``
+            Only the magnitude response, i.e., the absolute spectrum is
+            smoothed. Note that this return as zero-phase signal. It might be
+            necessary to generate a minimum or linear phase if the data is
+            subject to further processing after the smoothing (cf.
+            :py:func:`~pyfar.dsp.minimum_phase` and
+            :py:func:`~pyfar.dsp.linear_phase`)
+        ``"magnitude_phase"``
+            Separately smooth the magnitude and unwrapped phase response
+        ``"magnitude_copy"``
+            Smooth the magnitude and keep the phase of the input signal.
+        ``"complex"``
+            Separately smooth the real and imaginary part of the spectrum. This
+            method often causes artifacts at high frequencies.
+
+        The default is ``"magnitude"``.
+    window : str, optional
+        String that defines the smoothing window. All window from
+        :py:func:`~pyfar.dsp.time_window` that does not require an additional
+        parameter can be used. The default is "boxcar", which uses the
+        most commonly used rectangular window.
+
+    Returns
+    -------
+    signal : pyfar.Signal
+        The smoothed output data
+    window_stats : tuple
+        A tuple containing information about the smoothing process
+
+        `n_window`
+            The window length in (logarithmically spaced) samples
+        `window_width`
+            The actual window width in octaves. This can deviate due to the
+            ideal width because the window must have an integer length
+
+
+    References
+    ----------
+    .. [#] J. G. Tylka, B. B. Boren, and E. Y. Choueiri, “A Generalized Method
+           for Fractional-Octave Smoothing of Transfer Functions that Preserves
+           Log-Frequency Symmetry (Engineering Report),” J. Audio Eng. Soc. 65,
+           239-245 (2017). doi:10.17743/jaes.2016.0053
+
+    Examples
+    --------
+
+    Octave smoothing of continuous spectrum consiting of two bell filters.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>>
+        >>> signal = pf.signals.impulse(441)
+        >>> signal = pf.dsp.filter.bell(signal, 1e3, 12, 1, "III")
+        >>> signal = pf.dsp.filter.bell(signal, 10e3, -60, 100, "III")
+        >>>
+        >>> smoothed, _ = pf.dsp.smooth_fractional_octave(signal, 1)
+        >>>
+        >>> ax = pf.plot.freq(signal, label="input")
+        >>> pf.plot.freq(smoothed, label="smoothed")
+        >>> ax.legend(loc=3)
+
+    Octave smoothing of the discontinuous spectrum of a sine signal causes
+    artifacts at the edges if using method 2 (cf. Tylka et al. 2017 Fig. 4).
+    This is caused be the intermediate interpolation steps described above.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>>
+        >>> signal = pf.signals.sine(1e3, 4410)
+        >>> signal.fft_norm = "amplitude"
+        >>>
+        >>> smoothed, _ = pf.dsp.smooth_fractional_octave(signal, 1)
+        >>>
+        >>> ax = pf.plot.freq(signal, label="input")
+        >>> pf.plot.freq(smoothed, label="smoothed")
+        >>> ax.set_xlim(200, 4e3)
+        >>> ax.set_ylim(-45, 5)
+        >>> ax.legend(loc=3)
+    """
+
+    if not isinstance(signal, pf.Signal):
+        raise TypeError("Input signal has to be of type pyfar.Signal")
+
+    if mode in ["magnitude", "magnitude_copy"]:
+        data = [np.atleast_2d(np.abs(signal.freq_raw))]
+    elif mode == "complex":
+        data = [np.atleast_2d(np.real(signal.freq_raw)),
+                np.atleast_2d(np.imag(signal.freq_raw))]
+    elif mode == "magnitude_phase":
+        data = [np.atleast_2d(np.abs(signal.freq_raw)),
+                np.atleast_2d(pf.dsp.phase(signal, unwrap=True))]
+    else:
+        raise ValueError((f"mode is '{mode}' but must be 'magnitude', "
+                          "'complex', or 'magnitude_phase'"))
+
+    # linearly and logarithmically spaced frequency bins ----------------------
+    N = signal.n_bins
+    n_lin = np.arange(N)
+    n_log = N**(n_lin/(N-1))
+
+    # frequency bin spacing in octaves: log2(n_log[n]/n_log[n-1])
+    # Note: n_log[0] = 1
+    delta_n = np.log2(n_log[1])
+
+    # width of the window in logarithmically spaced samples
+    # Note: Forcing the window to have an odd length increases the deviation
+    #       from the exact width, but makes sure that the delay introduced in
+    #       the convolution is integer and can be easily compensated
+    n_window = int(2 * np.floor(width / delta_n / 2) + 1)
+
+    if n_window == 1:
+        raise ValueError((
+            "The smoothing_width is below the frequency resolution of the "
+            "signal. Increase the signal length or decrease the smoothing "
+            "width"))
+
+    # generate the smoothing window
+    if isinstance(window, str):
+        window = sgn.windows.get_window(window, n_window, fftbins=False)
+    elif isinstance(window, (list, np.ndarray)):
+        # undocumented possibility for testing
+        window = np.asanyarray(window, dtype=float)
+        if window.shape != (n_window, ):
+            raise ValueError(
+                f"window.shape is {window.shape} but must be ({n_window}, )")
+    else:
+        raise ValueError(f"window is of type {str(type(window))} but must be "
+                         "of type string")
+
+    # normalize and match dimensions for convolution
+    window /= np.sum(window)
+
+    while window.ndim < data[0].ndim:
+        window = window[np.newaxis]
+
+    for nn in range(len(data)):
+        # interpolate to logarithmically spaced frequencies
+        interpolator = interp1d(
+            n_lin + 1, data[nn], "cubic", copy=False, assume_sorted=True)
+        data[nn] = interpolator(n_log)
+
+        # pad to account for window half length (The window is of length N with
+        # the frequency index -N//2, ..., -2, -1, 0, 1, 2, ... N//2. Because
+        # the convolution below does not now the frequency index, we must pad
+        # with N//2 and discard the additional bins after the convolution)
+        pad = np.ones(signal.cshape + (n_window // 2, ))
+        first_bin = data[nn][..., 0]
+        last_bin = data[nn][..., -1]
+        while pad.ndim > first_bin.ndim:
+            first_bin = first_bin[..., np.newaxis]
+            last_bin = last_bin[..., np.newaxis]
+
+        data[nn] = np.concatenate(
+            (pad * first_bin, data[nn], pad * last_bin), axis=-1)
+
+        # smooth (convolve with window)
+        data[nn] = sgn.oaconvolve(data[nn], window, mode="full", axes=-1)
+
+        # remove delay and excess length
+        data[nn] = data[nn][..., n_window - 1:N + n_window - 1]
+
+        # interpolate to original frequency axis
+        interpolator = interp1d(
+            n_log, data[nn], "cubic", copy=False, assume_sorted=True)
+        data[nn] = interpolator(n_lin + 1)
+
+    # generate return signal --------------------------------------------------
+    if mode == "magnitude":
+        data = data[0]
+    elif mode == "complex":
+        data = data[0] + 1j * data[1]
+    elif mode == "magnitude_phase":
+        data = data[0] * np.exp(1j * data[1])
+    elif mode == "magnitude_copy":
+        data = data[0] * np.exp(1j * np.angle(signal.freq_raw))
+
+    # force 0 Hz and Nyquist to be real if it might not be the case
+    if mode in ["complex", "magnitude_phase", "magnitude_copy"]:
+        data[..., 0] = np.abs(data[..., 0])
+        data[..., -1] = np.abs(data[..., -1])
+
+    signal = signal.copy()
+    signal.freq_raw = data
+
+    return signal, (n_window, n_window * delta_n)
 
 
 def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
