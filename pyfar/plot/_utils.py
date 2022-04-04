@@ -302,8 +302,8 @@ def _log_prefix(signal):
     return log_prefix
 
 
-def _prepare_2d_plot(data, instances, min_n_channels, indices, ax, colorbar,
-                     **kwargs):
+def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
+                     colorbar, **kwargs):
     """
     Check and prepare input for 2D plots
 
@@ -322,6 +322,17 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, ax, colorbar,
         otherwise)
     indices : None, array like
         parameter from 2d plots against which the channels are plotted
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     ax : matplotlib.pyplot.axes
         Axes to plot on.
 
@@ -367,6 +378,9 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, ax, colorbar,
     elif len(indices) != data.cshape[0]:
         raise ValueError('length of indices must match signal.cshape[0]')
 
+    if method not in ['pcolormesh', 'contourf']:
+        raise ValueError("method must be 'pcolormesh' or 'contourf'")
+
     # prepare the figure and axis for plotting the data and colorbar
     fig, ax = _prepare_plot(ax)
     if not isinstance(ax, (np.ndarray, list)):
@@ -377,7 +391,7 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, ax, colorbar,
         if kwargs["shading"] not in ["nearest", "gouraud"]:
             raise ValueError((f"shading is '{kwargs['shading']}' "
                               "but must be 'nearest' or 'gouraud'"))
-    else:
+    elif method == 'pcolormesh':
         kwargs["shading"] = "nearest"
 
     return fig, ax, indices, kwargs

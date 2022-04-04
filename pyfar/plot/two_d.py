@@ -8,14 +8,14 @@ import warnings
 
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
-            indices=None, orientation="vertical",
+            indices=None, orientation="vertical", method='pcolormesh',
             cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
             style='light', **kwargs):
     """
     2D color coded plot of time signals.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.pcolormesh()``.
+    ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
     Parameters
     ----------
@@ -51,6 +51,17 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -75,7 +86,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         ``matplotlib.style.available``. The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
 
     Returns
@@ -86,10 +97,10 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
         colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned.
     quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
-        way the data is displayed, e.g., by limiting the range of the colormap
-        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(quad_mesh, ...)``.
+        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+        to manipulate the way the data is displayed, e.g., by limiting the
+        range of the colormap by ``quad_mesh.set_clim()``. It can also be used
+        to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -112,7 +123,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     with context(style):
         ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
-            indices, orientation, cmap, colorbar, ax, **kwargs)
+            indices, orientation, method, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     plot_parameter = ia.PlotParameter(
@@ -131,13 +142,13 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
 
 def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
             freq_scale='log', indices=None, orientation="vertical",
-            cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-            style='light', **kwargs):
+            method='pcolormesh', cmap=mpl.cm.get_cmap(name='magma'),
+            colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of magnitude spectra.
 
     Plots ``abs(signal.freq)`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.pcolormesh()``.
+    ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
     Parameters
     ----------
@@ -171,6 +182,17 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -195,7 +217,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``matplotlib.style.available``. The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
     Returns
     -------
@@ -205,10 +227,10 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned.
     quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
-        way the data is displayed, e.g., by limiting the range of the colormap
-        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(quad_mesh, ...)``.
+        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+        to manipulate the way the data is displayed, e.g., by limiting the
+        range of the colormap by ``quad_mesh.set_clim()``. It can also be used
+        to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -231,7 +253,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, freq_scale, indices,
-            orientation, cmap, colorbar, ax, **kwargs)
+            orientation, method, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
@@ -250,13 +272,14 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
 
 def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
-             orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+             orientation="vertical", method='pcolormesh',
+             cmap=mpl.cm.get_cmap(name='magma'),
              colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of phase spectra.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.pcolormesh()``.
+    ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
     Parameters
     ----------
@@ -285,6 +308,17 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -309,7 +343,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ``matplotlib.style.available``. The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
     Returns
     -------
@@ -319,10 +353,10 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned.
     quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
-        way the data is displayed, e.g., by limiting the range of the colormap
-        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(quad_mesh, ...)``.
+        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+        to manipulate the way the data is displayed, e.g., by limiting the
+        range of the colormap by ``quad_mesh.set_clim()``. It can also be used
+        to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -344,8 +378,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
 
     with context(style):
         ax, qm, cb = _two_d._phase_2d(
-            signal, deg, unwrap, freq_scale, indices, orientation, cmap,
-            colorbar, ax, **kwargs)
+            signal, deg, unwrap, freq_scale, indices, orientation, method,
+            cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
@@ -363,13 +397,15 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
 
 
 def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
-                   orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+                   orientation="vertical", method='pcolormesh',
+                   cmap=mpl.cm.get_cmap(name='magma'),
                    colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of the group delay.
 
     Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
-    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
+    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()`` or
+    ``matplotlib.pyplot.contourf()``.
 
     Parameters
     ----------
@@ -397,6 +433,17 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -421,7 +468,7 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
         ``matplotlib.style.available``. The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
     Returns
     -------
@@ -431,10 +478,10 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
     quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
-        way the data is displayed, e.g., by limiting the range of the colormap
-        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(quad_mesh, ...)``.
+        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+        to manipulate the way the data is displayed, e.g., by limiting the
+        range of the colormap by ``quad_mesh.set_clim()``. It can also be used
+        to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -456,7 +503,7 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
 
     with context(style):
         ax, qm, cb = _two_d._group_delay_2d(
-            signal, unit, freq_scale, indices, orientation, cmap,
+            signal, unit, freq_scale, indices, orientation, method, cmap,
             colorbar, ax, **kwargs)
     _utils._tight_layout()
 
@@ -477,13 +524,14 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
 def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                  log_prefix_freq=None, log_reference=1, freq_scale='log',
                  unit=None, indices=None, orientation="vertical",
-                 cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-                 style='light', **kwargs):
+                 method='pcolormesh', cmap=mpl.cm.get_cmap(name='magma'),
+                 colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
 
     Plots ``signal.time`` and ``abs(signal.freq)`` passes keyword arguments
-    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
+    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()`` or
+    ``matplotlib.pyplot.contourf()``.
 
     Parameters
     ----------
@@ -529,6 +577,17 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -548,7 +607,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``matplotlib.style.available``. The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
 
     Returns
@@ -559,10 +618,10 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
     quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
-        way the data is displayed, e.g., by limiting the range of the colormap
-        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(quad_mesh, ...)``.
+        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+        to manipulate the way the data is displayed, e.g., by limiting the
+        range of the colormap by ``quad_mesh.set_clim()``. It can also be used
+        to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -585,8 +644,8 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     with context(style):
         ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
-            log_reference, freq_scale, unit, indices, orientation, cmap,
-            colorbar, ax, **kwargs)
+            log_reference, freq_scale, unit, indices, orientation, method,
+            cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
@@ -607,13 +666,15 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
                   freq_scale='log', deg=False, unwrap=False, indices=None,
-                  orientation="vertical", cmap=mpl.cm.get_cmap(name='magma'),
+                  orientation="vertical", method='pcolormesh',
+                  cmap=mpl.cm.get_cmap(name='magma'),
                   colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
-    arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
+    arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()`` or
+    ``matplotlib.pyplot.contourf()``.
 
     Parameters
     ----------
@@ -652,6 +713,17 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -671,7 +743,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``matplotlib.style.available``. The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
 
     Returns
@@ -682,10 +754,10 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
     quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
-        way the data is displayed, e.g., by limiting the range of the colormap
-        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(quad_mesh, ...)``.
+        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+        to manipulate the way the data is displayed, e.g., by limiting the
+        range of the colormap by ``quad_mesh.set_clim()``. It can also be used
+        to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -709,7 +781,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
-            indices, orientation, cmap, colorbar, ax, **kwargs)
+            indices, orientation, method, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
@@ -729,14 +801,15 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
 def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
                         unit=None, freq_scale='log', indices=None,
-                        orientation="vertical",
+                        orientation="vertical", method='pcolormesh',
                         cmap=mpl.cm.get_cmap(name='magma'), colorbar=True,
                         ax=None, style='light', **kwargs):
     """
     2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
-    passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``.
+    passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``
+    or ``matplotlib.pyplot.contourf()``.
 
     Parameters
     ----------
@@ -774,6 +847,17 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
             The channels of `signal` will be plotted as horizontal lines.
 
         The default is ``'vertical'``
+    method: string, optional
+        The Matplotlib plotting method.
+
+        ``'pcolormesh'``
+            Create a pseudocolor plot with a non-regular rectangular grid.
+            The resolution of the data is clearly visible.
+        ``'contourf'``
+            Create a filled contour plot. The data is smoothly interpolated,
+            which might mask the data's resolution.
+
+        The default is ``'pcolormesh'``.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -793,7 +877,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``matplotlib.style.available``. The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
 
     Returns
@@ -804,10 +888,10 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
     quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
-        way the data is displayed, e.g., by limiting the range of the colormap
-        by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
-        by ``cb = fig.colorbar(quad_mesh, ...)``.
+        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+        to manipulate the way the data is displayed, e.g., by limiting the
+        range of the colormap by ``quad_mesh.set_clim()``. It can also be used
+        to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
         The Matplotlib colorbar object if `colorbar` is ``True`` and ``None``
         otherwise. This can be used to control the appearance of the colorbar,
@@ -830,7 +914,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
-            orientation, cmap, colorbar, ax, **kwargs)
+            orientation, method, cmap, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
@@ -926,7 +1010,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()``.
+        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
 
     Returns
     -------
