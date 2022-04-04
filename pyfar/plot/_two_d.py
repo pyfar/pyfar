@@ -392,6 +392,15 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 def _plot_2d(x, y, data, method, cmap, ax, **kwargs):
     # Choose method and plot
     if method == 'contourf':
+        # adjust levels according to vmin and vmax
+        if "vmin" in kwargs and "vmax" in kwargs:
+            if "levels" not in kwargs:
+                # Default: 11 levels
+                kwargs["levels"] = np.linspace(
+                    kwargs["vmin"], kwargs["vmax"], 11)
+            elif isinstance(kwargs["levels"], int):
+                kwargs["levels"] = np.linspace(
+                    kwargs["vmin"], kwargs["vmax"], kwargs["levels"])
         qm = ax.contourf(x, y, data, cmap=cmap, **kwargs)
     else:
         qm = ax.pcolormesh(x, y, data, cmap=cmap, **kwargs)
