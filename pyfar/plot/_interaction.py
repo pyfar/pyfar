@@ -142,7 +142,8 @@ class PlotParameter(object):
                  window_overlap_fct=.5,
                  cmap=mpl.cm.get_cmap(name='magma'),       # colormap and bar
                  colorbar=True,
-                 orientation='vertical', indices=None):    # 2D plots
+                 orientation='vertical', indices=None,     # 2D plots
+                 method='pcolormesh'):
 
         # set plot type
         self._plot_type = ['line', '2d']
@@ -168,6 +169,7 @@ class PlotParameter(object):
         self.colorbar = colorbar
         self.orientation = orientation
         self.indices = indices
+        self.method = method
 
         # set axis types based on `plot`
         self.update(plot)
@@ -714,8 +716,8 @@ class Interaction(object):
                     self.all_axes, _, self.all_bars = _two_d._time_2d(
                         self.signal, prm.dB_time, prm.log_prefix_time,
                         prm.log_reference, prm.unit_time, prm.indices,
-                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
-                        **self.kwargs_2d)
+                        prm.orientation, prm.method, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['freq']:
@@ -730,8 +732,8 @@ class Interaction(object):
                     self.all_axes, _, self.all_bars = _two_d._freq_2d(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.indices,
-                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
-                        **self.kwargs_2d)
+                        prm.orientation, prm.method, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['phase']:
@@ -744,8 +746,8 @@ class Interaction(object):
                     self.params.update('phase_2d')
                     self.all_axes, _, self.all_bars = _two_d._phase_2d(
                         self.signal, prm.deg, prm.unwrap, prm.xscale,
-                        prm.indices, prm.orientation, prm.cmap, prm.colorbar,
-                        self.ax, **self.kwargs_2d)
+                        prm.indices, prm.orientation, prm.method, prm.cmap,
+                        prm.colorbar, self.ax, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['group_delay']:
@@ -758,8 +760,8 @@ class Interaction(object):
                     self.params.update('group_delay_2d')
                     self.all_axes, _, self.all_bars = _two_d._group_delay_2d(
                         self.signal, prm.unit_gd, prm.xscale, prm.indices,
-                        prm.orientation, prm.cmap, prm.colorbar, self.ax,
-                        **self.kwargs_2d)
+                        prm.orientation, prm.method, prm.cmap, prm.colorbar,
+                        self.ax, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['spectrogram']:
@@ -787,8 +789,8 @@ class Interaction(object):
                         self.signal, prm.dB_time, prm.dB_freq,
                         prm.log_prefix_time, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.unit_time,
-                        prm.indices, prm.orientation, prm.cmap, prm.colorbar,
-                        self.ax, **self.kwargs_2d)
+                        prm.indices, prm.orientation, prm.method, prm.cmap,
+                        prm.colorbar, self.ax, **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_phase']:
@@ -804,8 +806,8 @@ class Interaction(object):
                     self.all_axes, _, self.all_bars = _two_d._freq_phase_2d(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
-                        prm.indices, prm.orientation, prm.cmap, prm.colorbar,
-                        self.ax, **self.kwargs_2d)
+                        prm.indices, prm.orientation, prm.method, prm.cmap,
+                        prm.colorbar, self.ax, **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_group_delay']:
@@ -822,7 +824,7 @@ class Interaction(object):
                         _two_d._freq_group_delay_2d(
                             self.signal, prm.dB_freq, prm.log_prefix_freq,
                             prm.log_reference, prm.unit_gd, prm.xscale,
-                            prm.indices, prm.orientation, prm.cmap,
+                            prm.indices, prm.orientation, prm.method, prm.cmap,
                             prm.colorbar, self.ax, **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 

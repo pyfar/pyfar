@@ -56,17 +56,23 @@ def test_prepare_plot_2d():
     # assertion for data type
     with raises(TypeError, match="Input data has to be of type"):
         plot._utils._prepare_2d_plot(
-            data, (pf.FrequencyData, ), 1, [0], plt.gca(), False)
+            data, (pf.FrequencyData, ), 1, [0], 'pcolormesh', plt.gca(), False)
 
     # assertion for shading
     with raises(ValueError, match="shading is 'flat' but must be 'nearest'"):
         plot._utils._prepare_2d_plot(
-            data, (pf.Signal, ), 1, [0], plt.gca(), False, **kwargs)
+            data, (pf.Signal, ), 1, [0], 'pcolormesh', plt.gca(), False,
+            **kwargs)
 
     # assertion for indices
     with raises(ValueError, match="length of indices must match"):
         plot._utils._prepare_2d_plot(
-            data, (pf.Signal, ), 1, [0, 1], plt.gca(), False)
+            data, (pf.Signal, ), 1, [0, 1], 'pcolormesh', plt.gca(), False)
+
+    # assertion for method
+    with raises(ValueError, match="method must be"):
+        plot._utils._prepare_2d_plot(
+            data, (pf.Signal, ), 1, [0], 'pcontourmesh', plt.gca(), False)
 
 
 def test_lower_frequency_limit(

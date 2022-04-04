@@ -129,7 +129,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
         log_reference=log_reference, unit_time=unit, indices=indices,
-        orientation=orientation, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -260,7 +260,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     plot_parameter = ia.PlotParameter(
         'freq_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, indices=indices,
-        orientation=orientation, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -385,7 +385,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'phase_2d', deg=deg, unwrap=unwrap, xscale=freq_scale, indices=indices,
-        orientation=orientation, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -510,7 +510,7 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'group_delay_2d', unit_gd=unit, xscale=freq_scale, indices=indices,
-        orientation=orientation, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -653,7 +653,8 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         'time_freq_2d', dB_time=dB_time, dB_freq=dB_freq,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
         log_reference=log_reference, xscale=freq_scale, unit_time=unit,
-        indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
+        indices=indices, orientation=orientation, method=method, cmap=cmap,
+        colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -788,7 +789,8 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     plot_parameter = ia.PlotParameter(
         'freq_phase_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, deg=deg, unwrap=unwrap,
-        indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
+        indices=indices, orientation=orientation, method=method, cmap=cmap,
+        colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -921,7 +923,8 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     plot_parameter = ia.PlotParameter(
         'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, unit_gd=unit,
-        indices=indices, orientation=orientation, cmap=cmap, colorbar=colorbar)
+        indices=indices, orientation=orientation, method=method, cmap=cmap,
+        colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
