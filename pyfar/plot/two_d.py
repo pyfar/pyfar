@@ -1,4 +1,3 @@
-import matplotlib as mpl
 import numpy as np
 from pyfar.plot.utils import context
 from .. import Signal
@@ -9,8 +8,7 @@ import warnings
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
             indices=None, orientation="vertical", method='pcolormesh',
-            cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-            style='light', **kwargs):
+            colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of time signals.
 
@@ -123,13 +121,13 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     with context(style):
         ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
-            indices, orientation, method, cmap, colorbar, ax, **kwargs)
+            indices, orientation, method, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
         log_reference=log_reference, unit_time=unit, indices=indices,
-        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -142,8 +140,8 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
 
 def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
             freq_scale='log', indices=None, orientation="vertical",
-            method='pcolormesh', cmap=mpl.cm.get_cmap(name='magma'),
-            colorbar=True, ax=None, style='light', **kwargs):
+            method='pcolormesh', colorbar=True, ax=None, style='light',
+            **kwargs):
     """
     2D color coded plot of magnitude spectra.
 
@@ -253,14 +251,14 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, freq_scale, indices,
-            orientation, method, cmap, colorbar, ax, **kwargs)
+            orientation, method, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, indices=indices,
-        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -273,7 +271,6 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
 def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
              orientation="vertical", method='pcolormesh',
-             cmap=mpl.cm.get_cmap(name='magma'),
              colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of phase spectra.
@@ -379,13 +376,13 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
     with context(style):
         ax, qm, cb = _two_d._phase_2d(
             signal, deg, unwrap, freq_scale, indices, orientation, method,
-            cmap, colorbar, ax, **kwargs)
+            colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'phase_2d', deg=deg, unwrap=unwrap, xscale=freq_scale, indices=indices,
-        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -398,7 +395,6 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
 
 def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
                    orientation="vertical", method='pcolormesh',
-                   cmap=mpl.cm.get_cmap(name='magma'),
                    colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of the group delay.
@@ -503,14 +499,14 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
 
     with context(style):
         ax, qm, cb = _two_d._group_delay_2d(
-            signal, unit, freq_scale, indices, orientation, method, cmap,
+            signal, unit, freq_scale, indices, orientation, method,
             colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'group_delay_2d', unit_gd=unit, xscale=freq_scale, indices=indices,
-        orientation=orientation, method=method, cmap=cmap, colorbar=colorbar)
+        orientation=orientation, method=method, colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -524,8 +520,8 @@ def group_delay_2d(signal, unit=None, freq_scale='log', indices=None,
 def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                  log_prefix_freq=None, log_reference=1, freq_scale='log',
                  unit=None, indices=None, orientation="vertical",
-                 method='pcolormesh', cmap=mpl.cm.get_cmap(name='magma'),
-                 colorbar=True, ax=None, style='light', **kwargs):
+                 method='pcolormesh', colorbar=True, ax=None, style='light',
+                 **kwargs):
     """
     2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
 
@@ -645,7 +641,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
             log_reference, freq_scale, unit, indices, orientation, method,
-            cmap, colorbar, ax, **kwargs)
+            colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
@@ -653,7 +649,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         'time_freq_2d', dB_time=dB_time, dB_freq=dB_freq,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
         log_reference=log_reference, xscale=freq_scale, unit_time=unit,
-        indices=indices, orientation=orientation, method=method, cmap=cmap,
+        indices=indices, orientation=orientation, method=method,
         colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -668,7 +664,6 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
                   freq_scale='log', deg=False, unwrap=False, indices=None,
                   orientation="vertical", method='pcolormesh',
-                  cmap=mpl.cm.get_cmap(name='magma'),
                   colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
@@ -782,14 +777,14 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
-            indices, orientation, method, cmap, colorbar, ax, **kwargs)
+            indices, orientation, method, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_phase_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, deg=deg, unwrap=unwrap,
-        indices=indices, orientation=orientation, method=method, cmap=cmap,
+        indices=indices, orientation=orientation, method=method,
         colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -804,8 +799,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
 def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
                         unit=None, freq_scale='log', indices=None,
                         orientation="vertical", method='pcolormesh',
-                        cmap=mpl.cm.get_cmap(name='magma'), colorbar=True,
-                        ax=None, style='light', **kwargs):
+                        colorbar=True, ax=None, style='light', **kwargs):
     """
     2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
 
@@ -916,14 +910,14 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
-            orientation, method, cmap, colorbar, ax, **kwargs)
+            orientation, method, colorbar, ax, **kwargs)
     _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, unit_gd=unit,
-        indices=indices, orientation=orientation, method=method, cmap=cmap,
+        indices=indices, orientation=orientation, method=method,
         colorbar=colorbar)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
@@ -938,8 +932,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 freq_scale='linear', unit=None, window='hann',
                 window_length=1024, window_overlap_fct=0.5,
-                cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-                style='light', yscale=None, **kwargs):
+                colorbar=True, ax=None, style='light', yscale=None, **kwargs):
     """Plot blocks of the magnitude spectrum versus time.
 
     Parameters
@@ -977,8 +970,6 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         Ratio of indices to overlap between blocks [0...1]. The default is
         ``0.5``, which would result in 512 samples overlap for a window length
         of 1024 samples.
-    cmap : matplotlib.colors.Colormap(name, N=256)
-        Colormap for spectrogram. Defaults to matplotlibs ``magma`` colormap.
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
@@ -1056,8 +1047,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._spectrogram(
             signal.flatten(), dB, log_prefix, log_reference, freq_scale, unit,
-            window, window_length, window_overlap_fct,
-            cmap, colorbar, ax)
+            window, window_length, window_overlap_fct, colorbar, ax)
     _utils._tight_layout()
 
     # manage interaction
@@ -1065,7 +1055,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         'spectrogram', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, yscale=freq_scale, unit_time=unit,
         window=window, window_length=window_length,
-        window_overlap_fct=window_overlap_fct, cmap=cmap)
+        window_overlap_fct=window_overlap_fct)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction

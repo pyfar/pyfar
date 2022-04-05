@@ -1,4 +1,3 @@
-import matplotlib as mpl
 import numpy as np
 from pyfar import Signal, TimeData, FrequencyData
 import pyfar.dsp as dsp
@@ -12,7 +11,7 @@ from .ticker import (
 
 
 def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
-             orientation, method, cmap, colorbar, ax, **kwargs):
+             orientation, method, colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
@@ -61,7 +60,7 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
     # plot data
     indices_x = indices if orientation == "vertical" else times
     indices_y = times if orientation == "vertical" else indices
-    qm = _plot_2d(indices_x, indices_y, data, method, cmap, ax[0], **kwargs)
+    qm = _plot_2d(indices_x, indices_y, data, method, ax[0], **kwargs)
 
     # colorbar
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
@@ -71,7 +70,7 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
 
 
 def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
-             orientation, method, cmap, colorbar, ax, **kwargs):
+             orientation, method, colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
@@ -120,7 +119,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
     # plot data
     indices_x = indices if orientation == "vertical" else signal.frequencies
     indices_y = signal.frequencies if orientation == "vertical" else indices
-    qm = _plot_2d(indices_x, indices_y, data, method, cmap, ax[0], **kwargs)
+    qm = _plot_2d(indices_x, indices_y, data, method, ax[0], **kwargs)
 
     # colorbar
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
@@ -130,7 +129,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
 
 
 def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
-              cmap, colorbar, ax, **kwargs):
+              colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
@@ -165,7 +164,7 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
     # plot data
     indices_x = indices if orientation == "vertical" else signal.frequencies
     indices_y = signal.frequencies if orientation == "vertical" else indices
-    qm = _plot_2d(indices_x, indices_y, data, method, cmap, ax[0], **kwargs)
+    qm = _plot_2d(indices_x, indices_y, data, method, ax[0], **kwargs)
 
     ax_scale[0](freq_scale)
     if freq_scale == "log":
@@ -188,7 +187,7 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
 
 
 def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
-                    cmap, colorbar, ax, **kwargs):
+                    colorbar, ax, **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
@@ -236,7 +235,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
     # plot data
     indices_x = indices if orientation == "vertical" else signal.frequencies
     indices_y = signal.frequencies if orientation == "vertical" else indices
-    qm = _plot_2d(indices_x, indices_y, data, method, cmap, ax[0], **kwargs)
+    qm = _plot_2d(indices_x, indices_y, data, method, ax[0], **kwargs)
 
     # colorbar
     cb = _utils._add_colorbar(colorbar, fig, ax, qm, f"Group delay in {unit}")
@@ -246,7 +245,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
 
 def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
                   log_reference, freq_scale, unit, indices, orientation,
-                  method, cmap, colorbar, ax, **kwargs):
+                  method, colorbar, ax, **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
@@ -255,27 +254,27 @@ def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
 
     _, qm_0, cb_0 = _time_2d(
         signal, dB_time, log_prefix_time, log_reference, unit, indices,
-        orientation, method, cmap, colorbar, ax[0], **kwargs)
+        orientation, method, colorbar, ax[0], **kwargs)
     _, qm_1, cb_1 = _freq_2d(
         signal, dB_freq, log_prefix_freq, log_reference, freq_scale, indices,
-        orientation, method, cmap, colorbar, ax[1], **kwargs)
+        orientation, method, colorbar, ax[1], **kwargs)
     fig.align_ylabels()
 
     return ax, [qm_0, qm_1], [cb_0, cb_1]
 
 
 def _freq_phase_2d(signal, dB, log_prefix, log_reference, freq_scale, deg,
-                   unwrap, indices, orientation, method, cmap, colorbar, ax,
+                   unwrap, indices, orientation, method, colorbar, ax,
                    **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
-                             indices, orientation, method, cmap, colorbar,
+                             indices, orientation, method, colorbar,
                              ax[0], **kwargs)
     _, qm_1, cb_1 = _phase_2d(signal, deg, unwrap, freq_scale, indices,
-                              orientation, method, cmap, colorbar, ax[1],
+                              orientation, method, colorbar, ax[1],
                               **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
@@ -285,7 +284,7 @@ def _freq_phase_2d(signal, dB, log_prefix, log_reference, freq_scale, deg,
 
 def _freq_group_delay_2d(
         signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
-        orientation, method, cmap, colorbar, ax, **kwargs):
+        orientation, method, colorbar, ax, **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
@@ -293,10 +292,10 @@ def _freq_group_delay_2d(
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
-                             indices, orientation, method, cmap, colorbar,
+                             indices, orientation, method, colorbar,
                              ax[0], **kwargs)
     _, qm_1, cb_1 = _group_delay_2d(
-        signal, unit, freq_scale, indices, orientation, method, cmap,
+        signal, unit, freq_scale, indices, orientation, method,
         colorbar, ax[1], **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
@@ -305,10 +304,9 @@ def _freq_group_delay_2d(
 
 
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
-                 freq_scale='linear', unit=None,
-                 window='hann', window_length=1024, window_overlap_fct=0.5,
-                 cmap=mpl.cm.get_cmap(name='magma'), colorbar=True, ax=None,
-                 **kwargs):
+                 freq_scale='linear', unit=None, window='hann',
+                 window_length=1024, window_overlap_fct=0.5,
+                 colorbar=True, ax=None, **kwargs):
     """Plot the magnitude spectrum versus time.
 
     See pyfar.line.spectogram for more information.
@@ -360,7 +358,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         times = times * factor
 
     # plot the data
-    qm = ax[0].pcolormesh(times, frequencies, spectrogram, cmap=cmap, **kwargs)
+    qm = ax[0].pcolormesh(times, frequencies, spectrogram, **kwargs)
 
     # Adjust axes:
     ax[0].set_ylabel('Frequency in Hz')
@@ -389,7 +387,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     return ax[0], qm, cb
 
 
-def _plot_2d(x, y, data, method, cmap, ax, **kwargs):
+def _plot_2d(x, y, data, method, ax, **kwargs):
     # Choose method and plot
     if method == 'contourf':
         # adjust levels according to vmin and vmax
@@ -401,7 +399,7 @@ def _plot_2d(x, y, data, method, cmap, ax, **kwargs):
             elif isinstance(kwargs["levels"], int):
                 kwargs["levels"] = np.linspace(
                     kwargs["vmin"], kwargs["vmax"], kwargs["levels"])
-        qm = ax.contourf(x, y, data, cmap=cmap, **kwargs)
+        qm = ax.contourf(x, y, data, **kwargs)
     else:
-        qm = ax.pcolormesh(x, y, data, cmap=cmap, **kwargs)
+        qm = ax.pcolormesh(x, y, data, **kwargs)
     return qm

@@ -69,3 +69,6 @@ figure.edgecolor : none         ## figure edgecolor
 #### SAVING FIGURES
 savefig.facecolor   : [.1,.1,.1]    ## figure facecolor when saving
 savefig.edgecolor   : none          ## figure edgecolor when saving
+
+#### IMAGES
+image.cmap:     magma      # colormap for 2D plots
