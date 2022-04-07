@@ -63,7 +63,7 @@ jobs:
           pip-dependency-file: requirements_dev.txt
       - run:
           name: Flake8
-          command: flake8 spharpy
+          command: flake8 pyfar
 
   test_examples:
     parameters:
