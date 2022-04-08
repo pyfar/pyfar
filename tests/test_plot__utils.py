@@ -46,6 +46,29 @@ def test_prepare_plot():
     plt.close()
 
 
+def test_prepare_plot_2d():
+    """
+    Test assertion that are not tested directly with plots.
+    """
+    data = pf.Signal([1, 0, 0], 44100)
+    kwargs = {"shading": "flat"}
+
+    # assertion for data type
+    with raises(TypeError, match="Input data has to be of type"):
+        plot._utils._prepare_2d_plot(
+            data, (pf.FrequencyData, ), 1, [0], plt.gca(), False)
+
+    # assertion for shading
+    with raises(ValueError, match="shading is 'flat' but must be 'nearest'"):
+        plot._utils._prepare_2d_plot(
+            data, (pf.Signal, ), 1, [0], plt.gca(), False, **kwargs)
+
+    # assertion for indices
+    with raises(ValueError, match="length of indices must match"):
+        plot._utils._prepare_2d_plot(
+            data, (pf.Signal, ), 1, [0, 1], plt.gca(), False)
+
+
 def test_lower_frequency_limit(
         sine, sine_short, frequency_data,
         frequency_data_one_point, time_data):

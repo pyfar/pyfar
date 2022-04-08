@@ -350,8 +350,9 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, ax, colorbar,
     """
 
     # check input
-    if not isinstance(data, instances):
-        instances = [str(ii).split('.')[-1][:-2] for ii in instances]
+    instance = str(type(data)).split('.')[-1][:-2]
+    instances = [str(ii).split('.')[-1][:-2] for ii in instances]
+    if instance not in instances:
         raise TypeError(
             f'Input data has to be of type: {", ".join(instances)}.')
     if len(data.cshape) > 1 or np.prod(data.cshape) < min_n_channels:
@@ -372,7 +373,11 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, ax, colorbar,
         ax = [ax, None]
 
     # check the kwargs
-    if "shading" not in kwargs:
+    if "shading" in kwargs:
+        if kwargs["shading"] not in ["nearest", "gouraud"]:
+            raise ValueError((f"shading is '{kwargs['shading']}' "
+                              "but must be 'nearest' or 'gouraud'"))
+    else:
         kwargs["shading"] = "nearest"
 
     return fig, ax, indices, kwargs
