@@ -536,3 +536,20 @@ def test_time_freq_fft_norm_dB(noise):
     y_actual = ax[1].lines[0].get_ydata().flatten()
     y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
     npt.assert_allclose(y_actual, y_desired, rtol=1e-6)
+
+
+@pytest.mark.parametrize('style', [
+    ('light'), ('dark')])
+def test_title_style(style, handsome_signal):
+    """Test correct titles settings in the plot styles."""
+    filename = 'title_' + style
+    fig = create_figure()
+    # Apparently, the style needs to be set twice for tests
+    pf.plot.use(style)
+    ax = pf.plot.freq(handsome_signal, style=style)
+    fig.suptitle('Fig-Title')
+    ax.set_title('Ax-Title')
+    fig.tight_layout()
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+    plt.close('all')
