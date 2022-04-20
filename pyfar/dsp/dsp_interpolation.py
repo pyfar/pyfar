@@ -65,11 +65,11 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
 
     Notes
     -----
-    Note: Method 3 in Tylka at al. 2017 is mathematically more elegant at the
+    Method 3 in Tylka at al. 2017 is mathematically more elegant at the
     price of a largely increased computational and memory cost. In most
     practical cases, methods 2 and 3 yield close to identical results (cf. Fig.
     2 and 3 in Tylka et al. 2017). If the spectrum contains extreme
-    discontinuities, however, method 3 is superior (see examples below).idea!
+    discontinuities, however, method 3 is superior (see examples below).
 
     References
     ----------
@@ -98,9 +98,9 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
         >>> ax.legend(loc=3)
 
     Octave smoothing of the discontinuous spectrum of a sine signal causes
-    artifacts at the edges if using this method due to the intermediate
-    interpolation steps described in the notes. However this is a rather
-    unusual application and is mentioned only for the sake of completeness.
+    artifacts at the edges due to the intermediate interpolation steps (cf.
+    Tylka et al. 2017, Fig. 4). However this is a rather unusual application
+    and is mentioned only for the sake of completeness.
 
     .. plot::
 
