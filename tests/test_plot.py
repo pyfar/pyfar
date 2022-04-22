@@ -491,6 +491,27 @@ def test_2d_frequency_data(handsome_signal_2d, function):
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
+    (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
+def test_2d_contourf(function, handsome_signal_2d):
+    """Test 2d plots with contourf method."""
+    filename = function.__name__ + '_contourf'
+    create_figure()
+    function(handsome_signal_2d, method='contourf')
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
+    (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
+def test_2d_method_assertion(function, handsome_signal_2d):
+    """Test 2d plots method assertion ."""
+    with raises(ValueError, match="method must be"):
+        function(handsome_signal_2d, method='pcontourmesh')
+
+
 def test_use():
     """Test if use changes the plot style."""
 

@@ -71,3 +71,6 @@ figure.titleweight  : bold     ## weight of the figure title
 #### SAVING FIGURES
 savefig.facecolor   : white    ## figure facecolor when saving
 savefig.edgecolor   : white    ## figure edgecolor when saving
+
+#### IMAGES
+image.cmap:     magma      # colormap for 2D plots
