@@ -1159,6 +1159,12 @@ def minimum_phase(
         'hilbert'
             This method is designed to be used with equi-ripple filters with
             unity or zero gain regions.
+        'hilbert_2'
+            This method works best with practical data such as head-related
+            transfer functions. It does not generate the analytical minimum
+            phase solution but something close to it. If using this method,
+            `n_fft` values in the range of two to eight times
+            ``signal.n_samples`` often work well.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
         few times larger than the signal length. The default is ``None``,
@@ -1169,8 +1175,8 @@ def minimum_phase(
     pad : bool, optional
         If ``pad`` is ``True``, the resulting signal will be padded to the
         same length as the input. If ``pad`` is ``False`` the resulting minimum
-        phase representation is of length ``signal.n_samples/2+1``.
-        The default is ``False``
+        phase representation is of length
+        ``signal.n_samples/2 + signal.n_samples % 2``. The default is ``False``
     return_magnitude_ratio : bool, optional
         If ``True``, the ratio between the linear phase (input) and the
         minimum phase (output) filters is returned. See the examples for
@@ -1261,22 +1267,27 @@ def minimum_phase(
 
 
     """
-    signal_flat = signal.flatten()
-    original_cshape = signal.cshape
-    signal_minphase = signal.flatten()
-    signal_minphase.time = np.zeros(
-        (signal_minphase.cshape[0], int(np.floor((signal.n_samples + 1)/2))),
-        dtype=signal.dtype)
+    if method == "hilbert_2":
+        signal_minphase = _minimum_phase(signal, n_fft=None, pad=False)
+    else:
+        signal_flat = signal.flatten()
+        original_cshape = signal.cshape
+        signal_minphase = signal.flatten()
+        signal_minphase.time = np.zeros(
+            (signal_minphase.cshape[0],
+             int(np.floor((signal.n_samples + 1)/2))),
+            dtype=signal.dtype)
 
-    for ch in range(signal_minphase.cshape[0]):
-        signal_minphase.time[ch] = sgn.minimum_phase(
-            signal_flat.time[ch],
-            method=method,
-            n_fft=n_fft)
+        for ch in range(signal_minphase.cshape[0]):
+            signal_minphase.time[ch] = sgn.minimum_phase(
+                signal_flat.time[ch],
+                method=method,
+                n_fft=n_fft)
 
-    signal_minphase = signal_minphase.reshape(original_cshape)
+        signal_minphase = signal_minphase.reshape(original_cshape)
 
     if (pad is True) or (return_magnitude_ratio is True):
+
         sig_minphase_pad = pad_zeros(
             signal_minphase, signal.n_samples - signal_minphase.n_samples)
 
@@ -1292,6 +1303,55 @@ def minimum_phase(
             return sig_minphase_pad, error
     else:
         return signal_minphase
+
+
+def _minimum_phase(signal, n_fft, pad):
+
+    # center the energy by taking the shifted zero-phase signal
+    data = fft.irfft(np.abs(signal.freq_raw),
+                     signal.n_samples, signal.sampling_rate, "none")
+    data = np.roll(data, signal.n_samples // 2, -1)
+
+    # symmetrical zero-padding to avoid artifacts from the Hilbert transform
+    if n_fft is None:
+        n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
+
+    n_pad = n_fft - signal.n_samples
+    n_pad = (n_pad // 2, n_pad // 2 + 1) if n_pad % 2 \
+        else (n_pad // 2, n_pad // 2)
+
+    data = np.concatenate((np.zeros((signal.cshape) + (n_pad[0], )),
+                           data,
+                           np.zeros((signal.cshape) + (n_pad[1], ))),
+                          axis=-1)
+
+    # manual minimum phase calculation
+    data = np.abs(fft.rfft(data, n_fft, signal.sampling_rate, "none"))
+    data[data == 0] = np.finfo(float).eps
+
+    data = fft.irfft(np.log(data), n_fft, signal.sampling_rate, "none")
+
+    is_odd = n_fft % 2
+    window = np.concatenate(
+        ([1],
+         2 * np.ones((n_fft + is_odd) // 2 - 1),
+         np.ones(1 - is_odd),
+         np.zeros((n_fft + is_odd) // 2 - 1)))
+    data *= window
+
+    data = np.exp(fft.rfft(data, n_fft, signal.sampling_rate, "none"))
+    data = fft.irfft(data, n_fft, signal.sampling_rate, "none")
+
+    # cut to length
+    if pad:
+        data = data[..., :signal.n_samples]
+    else:
+        N = signal.n_samples // 2 + signal.n_samples % 2
+        data = data[..., :N]
+
+    signal = pyfar.Signal(data, signal.sampling_rate)
+
+    return signal
 
 
 def pad_zeros(signal, pad_width, mode='after'):
