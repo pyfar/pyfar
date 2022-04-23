@@ -537,59 +537,58 @@ def test_kaiser_window_beta():
     assert beta == beta_true
 
 
-def test_minimum_phase():
+@ pytest.mark.parametrize("method,input,output", (
+    ["hilbert", [0, 0, 0, 0, 1, 1, 0, 0, 0, 0], [1, 1, 0, 0, 0]],
+    ["hilbert_2", [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+     [0.87731124, 1.10503892, 0.03565372, -0.03607494, 0.03832436]],
+    ["homomorphic", [0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 0, 0, 0, 0]]))
+def test_minimum_phase_against_reference(method, input, output):
     # tests are separated since their reliability depends on the type of
     # filters. The homomorphic method works best for filters with odd numbers
-    # of taps
+    # of taps. Hilbert_2 approximates the ideal minimum phase
 
-    # method = 'hilbert'
-    n_samples = 9
-    filter_linphase = pyfar.Signal([0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 44100)
+    min_phase = pyfar.dsp.minimum_phase(
+        pyfar.Signal(input, 44100), method)
 
-    imp_minphase = pyfar.dsp.minimum_phase(
-        filter_linphase, pad=False, method='hilbert', n_fft=2**18)
+    npt.assert_allclose(min_phase.time.flatten(), np.array(output, dtype=float),
+                        rtol=1e-2, atol=1e-2)
 
-    ref = np.array([1, 1, 0, 0, 0], dtype=float)
-    npt.assert_allclose(
-        np.squeeze(imp_minphase.time), ref, rtol=1e-4, atol=1e-4)
 
-    # method = 'homomorphic'
-    n_samples = 8
-    imp_linphase = pyfar.signals.impulse(
-        n_samples+1, delay=int(n_samples/2))
-
-    ref = pyfar.signals.impulse(int(n_samples/2)+1)
-
-    imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=False)
-    npt.assert_allclose(imp_minphase.time, ref.time)
-
+@pytest.mark.parametrize("method", ("hilbert", "hilbert_2", "homomorphic"))
+def test_minimum_phase_pad_length(method):
     # test pad length
-    ref = pyfar.signals.impulse(n_samples+1)
+    n_samples = 9
     imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=True)
+        pyfar.signals.impulse(n_samples), method='homomorphic', pad=True)
 
-    assert imp_minphase.n_samples == imp_linphase.n_samples
-    npt.assert_allclose(imp_minphase.time, ref.time)
+    assert imp_minphase.n_samples == n_samples
 
-    # test error
-    ref = pyfar.signals.impulse(n_samples+1)
-    imp_minphase, mag_error = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', return_magnitude_ratio=True)
+
+@pytest.mark.parametrize("method,input", (
+    ["homomorphic", [0., 0., 0., 0., 1., 0., 0., 0., 0.]],
+    ["hilbert_2", [0., 0., 0., 0., 1., 0., 0., 0., 0.]]))
+def test_minimum_phase_error(method, input):
+    # test error (hilbert not tested because it uses the same function in the
+    # background as homomorphic)
+    _, mag_error = pyfar.dsp.minimum_phase(
+        pyfar.Signal(input, 44100), method, return_magnitude_ratio=True)
 
     npt.assert_allclose(
         np.squeeze(mag_error.freq),
-        np.ones(int(n_samples/2+1), dtype=complex))
+        np.ones(mag_error.n_bins, dtype=complex), atol=1e-3)
 
-    # test multidim
-    ref = pyfar.signals.impulse(n_samples+1, amplitude=np.ones((2, 3)))
+
+@pytest.mark.parametrize("method", ("hilbert", "hilbert_2", "homomorphic"))
+def test_minimum_phase_multidim(method):
+    # test multidim (only shape is tested because output is tested above)
+    n_samples = 8
     imp_linphase = pyfar.signals.impulse(
         n_samples+1, delay=int(n_samples/2), amplitude=np.ones((2, 3)))
     imp_minphase = pyfar.dsp.minimum_phase(
         imp_linphase, method='homomorphic', pad=True)
 
     assert imp_minphase.n_samples == imp_linphase.n_samples
-    npt.assert_allclose(imp_minphase.time, ref.time)
+    assert imp_minphase.cshape == imp_linphase.cshape
 
 
 def test_convolve_default():
