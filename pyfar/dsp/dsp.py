@@ -1296,41 +1296,28 @@ def minimum_phase(
 
 
 def _minimum_phase(signal, n_fft, pad):
-
+    from scipy.fft import fft, ifft
     # center the energy by taking the shifted zero-phase signal
-    data = fft.irfft(np.abs(signal.freq_raw),
-                     signal.n_samples, signal.sampling_rate, "none")
-    data = np.roll(data, signal.n_samples // 2, -1)
+    signal = pyfar.dsp.linear_phase(
+        signal.copy(), signal.n_samples // 2, unit='samples')
+    h = signal.time
 
-    # symmetrical zero-padding to avoid artifacts from the Hilbert transform
+    # check if the signal is symmetric
+    n_half = h.shape[-1] // 2
+    if not np.allclose(h[-n_half:][::-1], h[:n_half]):
+        warnings.warn(
+            'h does not appear to by symmetric, conversion may fail',
+            RuntimeWarning)
+
     if n_fft is None:
         n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
 
-    n_pad = n_fft - signal.n_samples
-    n_pad = (n_pad // 2, n_pad // 2 + 1) if n_pad % 2 \
-        else (n_pad // 2, n_pad // 2)
+    # add eps to the magnitude spectrum to avoid nans in log
+    H = np.abs(fft(h, n=n_fft)) + np.finfo(float).eps
 
-    data = np.concatenate((np.zeros((signal.cshape) + (n_pad[0], )),
-                           data,
-                           np.zeros((signal.cshape) + (n_pad[1], ))),
-                          axis=-1)
-
-    # manual minimum phase calculation
-    data = np.abs(fft.rfft(data, n_fft, signal.sampling_rate, "none"))
-    data[data == 0] = np.finfo(float).eps
-
-    data = fft.irfft(np.log(data), n_fft, signal.sampling_rate, "none")
-
-    is_odd = n_fft % 2
-    window = np.concatenate(
-        ([1],
-         2 * np.ones((n_fft + is_odd) // 2 - 1),
-         np.ones(1 - is_odd),
-         np.zeros((n_fft + is_odd) // 2 - 1)))
-    data *= window
-
-    data = np.exp(fft.rfft(data, n_fft, signal.sampling_rate, "none"))
-    data = fft.irfft(data, n_fft, signal.sampling_rate, "none")
+    # calculate the minimum phase using the Hilbert transform
+    phase = np.imag(-sgn.hilbert(np.log(H), N=n_fft))
+    data = ifft(H*np.exp(1j*phase)).real
 
     # cut to length
     if pad:
@@ -1339,9 +1326,7 @@ def _minimum_phase(signal, n_fft, pad):
         N = signal.n_samples // 2 + signal.n_samples % 2
         data = data[..., :N]
 
-    signal = pyfar.Signal(data, signal.sampling_rate)
-
-    return signal
+    return pyfar.Signal(data[..., :signal.n_samples], 44100)
 
 
 def pad_zeros(signal, pad_width, mode='after'):
