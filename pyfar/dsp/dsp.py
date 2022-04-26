@@ -1160,11 +1160,12 @@ def minimum_phase(
             This method is designed to be used with equi-ripple filters with
             unity or zero gain regions.
         'hilbert_2'
-            This method works best with practical data such as head-related
-            transfer functions. It does not generate the analytical minimum
-            phase solution but something close to it. If using this method,
-            `n_fft` values in the range of two to eight times
-            ``signal.n_samples`` often work well.
+            In many cases, this method yields a better approximation of the
+            magnitude response at the cost a worse approximation of the
+            theoretical minimum phase. It is especially usefull for
+            non-analytical data such as head-related transfer functions. If
+            using this method, `n_fft` values in the range of two to eight
+            times ``signal.n_samples`` often work well.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
         few times larger than the signal length. The default is ``None``,
@@ -1220,20 +1221,25 @@ def minimum_phase(
         >>> import matplotlib.pyplot as plt
         >>> # create minimum phase signals with different methods
         >>> freq = [0, 0.2, 0.3, 1.0]
-        >>> desired = [1, 0]
-        >>> h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
-        >>> h_min_hom = pf.dsp.minimum_phase(h_linear, method='homomorphic')
-        >>> h_min_hil = pf.dsp.minimum_phase(h_linear, method='hilbert')
+        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], Hz=2.), 44100)
+        >>> h_min_hom = pf.dsp.minimum_phase(
+        ...     h_linear, method='homomorphic', pad=True)
+        >>> h_min_hil = pf.dsp.minimum_phase(
+        ...     h_linear, method='hilbert', pad=True)
+        >>> h_min_hil_2 = pf.dsp.minimum_phase(
+        ...     h_linear, method='hilbert_2', pad=True)
         >>> # plot the results
         >>> fig, axs = plt.subplots(3, figsize=(8, 6))
         >>> for h, style in zip(
-        ...         (h_linear, h_min_hom, h_min_hil),
-        ...         ('-', '-.', '--')):
+        >>>         (h_linear, h_min_hom, h_min_hil, h_min_hil_2),
+        >>>         ('-', '-.', '--', ':')):
         >>>     pf.plot.time(h, linestyle=style, ax=axs[0])
         >>>     axs[0].grid(True)
         >>>     pf.plot.freq(h, linestyle=style, ax=axs[1])
-        >>>     pf.plot.group_delay(h, linestyle=style, ax=axs[2])
-        >>> axs[1].legend(['Linear', 'Homomorphic', 'Hilbert'])
+        >>>     pf.plot.group_delay(h, linestyle=style, ax=axs[2], unit="ms")
+        >>> axs[2].legend(['Linear', 'Homomorphic', 'Hilbert', 'Hilbert 2'],
+        ...     loc=3, ncol=2)
+        >>> axs[2].set_ylim(-2.5, 2.5)
 
     Return the magnitude ratios between the minimum and linear phase filters
     and indicate frequencies where the linear phase filter exhibits small
@@ -1268,7 +1274,7 @@ def minimum_phase(
 
     """
     if method == "hilbert_2":
-        signal_minphase = _minimum_phase(signal, n_fft=None, pad=False)
+        signal_minphase = _minimum_phase(signal, n_fft, pad)
     else:
         signal_flat = signal.flatten()
         original_cshape = signal.cshape
