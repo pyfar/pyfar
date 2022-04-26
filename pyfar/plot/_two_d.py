@@ -21,16 +21,14 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
-    data = signal.time.T if orientation == "vertical" else signal.time
     if dB:
-        if log_prefix is None:
-            log_prefix = _utils._log_prefix(signal)
-        # avoid any zero-values because they result in -inf in dB data
-        eps = np.finfo(float).eps
-        data = log_prefix * np.log10(np.abs(data) / log_reference + eps)
+        data = dsp.decibel(signal, domain='time', log_prefix=log_prefix,
+                           log_reference=log_reference)
         ymax = np.nanmax(data) + 10
         ymin = ymax - 100
-
+    else:
+        data = signal.time
+    data = data.T if orientation == "vertical" else data
     # auto detect the time unit
     if unit is None:
         unit = _utils._time_auto_unit(signal.times[..., -1])
@@ -77,18 +75,15 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
-    data = signal.freq.T if orientation == "vertical" else signal.freq
     if dB:
-        if log_prefix is None:
-            log_prefix = _utils._log_prefix(signal)
-        eps = np.finfo(float).eps
-        data = log_prefix*np.log10(np.abs(data)/log_reference + eps)
+        data = dsp.decibel(signal, domain='freq', log_prefix=log_prefix,
+                           log_reference=log_reference)
         ymax = np.nanmax(data)
         ymin = ymax - 90
         ymax = ymax + 10
     else:
-        data = np.abs(data)
-
+        data = np.abs(signal.freq)
+    data = data.T if orientation == "vertical" else data
     # setup axis label and data
     axis = [ax[0].yaxis, ax[0].xaxis]
     ax_lim = [ax[0].set_ylim, ax[0].set_xlim]
