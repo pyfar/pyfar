@@ -1195,22 +1195,6 @@ def minimum_phase(
     Examples
     --------
 
-    Minmum-phase version of an ideal impulse with a group delay of 64 samples
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> import matplotlib.pyplot as plt
-        >>> # create linear and minimum phase signal
-        >>> impulse_linear_phase = pf.signals.impulse(129, delay=64)
-        >>> impulse_minmum_phase = pf.dsp.minimum_phase(
-        ...     impulse_linear_phase, method='homomorphic')
-        >>> # plot the group delay
-        >>> plt.figure(figsize=(8, 2))
-        >>> pf.plot.group_delay(impulse_linear_phase, label='Linear phase')
-        >>> pf.plot.group_delay(impulse_minmum_phase, label='Minmum phase')
-        >>> plt.legend()
-
     Create a minimum phase equivalent of a linear phase FIR low-pass filter
 
     .. plot::
