@@ -537,10 +537,9 @@ def test_kaiser_window_beta():
     assert beta == beta_true
 
 
-@ pytest.mark.parametrize("method,input,output", (
+@pytest.mark.parametrize("method,input,output", (
     ["hilbert", [0, 0, 0, 0, 1, 1, 0, 0, 0, 0], [1, 1, 0, 0, 0]],
-    ["hilbert_2", [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-     [0.87731124, 1.10503892, 0.03565372, -0.03607494, 0.03832436]],
+    ["hilbert_2", [0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 0, 0, 0, 0]],
     ["homomorphic", [0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 0, 0, 0, 0]]))
 def test_minimum_phase_against_reference(method, input, output):
     # tests are separated since their reliability depends on the type of
@@ -550,8 +549,9 @@ def test_minimum_phase_against_reference(method, input, output):
     min_phase = pyfar.dsp.minimum_phase(
         pyfar.Signal(input, 44100), method)
 
-    npt.assert_allclose(min_phase.time.flatten(), np.array(output, dtype=float),
-                        rtol=1e-2, atol=1e-2)
+    npt.assert_allclose(
+        min_phase.time.flatten(), np.array(output, dtype=float),
+        rtol=1e-2, atol=1e-2)
 
 
 @pytest.mark.parametrize("method", ("hilbert", "hilbert_2", "homomorphic"))

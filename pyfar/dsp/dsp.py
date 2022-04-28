@@ -1326,7 +1326,7 @@ def _minimum_phase(signal, n_fft, pad):
         N = signal.n_samples // 2 + signal.n_samples % 2
         data = data[..., :N]
 
-    return pyfar.Signal(data[..., :signal.n_samples], 44100)
+    return pyfar.Signal(data, 44100)
 
 
 def pad_zeros(signal, pad_width, mode='after'):
