@@ -123,6 +123,5 @@ tests/test_plot_data/output/*.png
 .pyfar_cache/
 
 # workaround for failing test discovery in vscode
-tests/__init__.py
 tests/*/__init__.py
 tests/private/
