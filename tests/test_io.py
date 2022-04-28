@@ -55,6 +55,16 @@ def test_read_sofa_position_type_spherical(
         sofa_reference_coordinates[1])
 
 
+def test_convert_sofa_assertion():
+    """
+    Test assertion for convert_sofa
+    (everything else is tested through read_sofa)
+    """
+
+    with pytest.raises(TypeError, match="Input must be a sofar.Sofa object"):
+        io.convert_sofa("test")
+
+
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
 def test_write_read_flat_data(tmpdir, flat_data):
@@ -258,13 +268,13 @@ def test_write_read_numpy_ndarrays(tmpdir):
     """ Numpy ndarray
     Make sure `read` understands the bits written by `write`
     """
-    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
-    matrix_2d_float = matrix_2d_int.astype(np.float)
-    matrix_2d_complex = matrix_2d_int.astype(np.complex)
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
+    matrix_2d_float = matrix_2d_int.astype(float)
+    matrix_2d_complex = matrix_2d_int.astype(complex)
 
-    matrix_3d_int = np.arange(0, 24, dtype=np.int).reshape((2, 3, 4))
-    matrix_3d_float = matrix_3d_int.astype(np.float)
-    matrix_3d_complex = matrix_3d_int.astype(np.complex)
+    matrix_3d_int = np.arange(0, 24, dtype=int).reshape((2, 3, 4))
+    matrix_3d_float = matrix_3d_int.astype(float)
+    matrix_3d_complex = matrix_3d_int.astype(complex)
 
     filename = os.path.join(tmpdir, 'ndarray.far')
 
@@ -335,7 +345,7 @@ def test_write_read_multiplePyfarObjects(
     and read back.
     """
     filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
-    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
     io.write(
         filename,
         filter=filter,
@@ -393,7 +403,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     and read back with zip compression.
     """
     filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
-    matrix_2d_int = np.arange(0, 24, dtype=np.int).reshape((4, 6))
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
     io.write(
         filename,
         compress=True,
@@ -487,6 +497,9 @@ def test_write_audio(audio_format, subtype, tmpdir, noise):
                 io.write_audio(noise, filename, subtype=subtype)
         else:
             io.write_audio(noise, filename, subtype=subtype)
+        # In some cases a file 'C._t' is created
+        if os.path.exists('C._t'):
+            os.remove('C._t')
 
 
 def test_write_audio_overwrite(noise, tmpdir):
@@ -563,6 +576,9 @@ def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
             # A comparison between written and read signals is not implemented
             # due to the difference caused by the coding
             io.read_audio(filename)
+    # In some cases a file 'C._t' is created
+    if os.path.exists('C._t'):
+        os.remove('C._t')
 
 
 @pytest.mark.parametrize(

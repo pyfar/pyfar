@@ -2,6 +2,25 @@
 History
 =======
 
+0.4.1 (2022-04-08)
+------------------
+* Bugfix: do not allow 'flat' shading parameter in 2D plot functions (PR #291)
+
+0.4.0 (2022-03-02)
+------------------
+* `pyfar.plot`
+
+  * The plot module was largely extended by 2D color coded versions of the former line plot functions: `time_2d`, `freq_2d`, `phase_2d`, `group_delay_2d`, `time_freq_2d`, `freq_phase_2d` and `freq_group_delay_2d`. New shortcuts for interactive plots were added to cycle between line and 2D plots and to toggle between vertical and horizontal orientation of 2D plots. (PR #198, #273, #276)
+  * The `xscale` parameter was replaced by the more explicit `freq_scale` parameter in all plot functions. It will be removed in pyfar 0.6.0 (PR #282)
+
+* `pyfar.filter`
+
+  * Added cascaded shelving filters `low_shelve_cascade` and `high_shelve_cascade` used to generate filters with a user definable slope given in dB per octaves within a certain frequency region. (PR #284)
+
+* `pyfar.Signal`
+
+  * Added a `freq_raw` property, which is the frequency spectrum without normalization. It enables easy access and reduces complexity in internal computations. (PR #274)
+
 0.3.0 (2022-01-28)
 ------------------
 * More reasonable handling of FFT normalizations in `arithmetic operations <https://pyfar.readthedocs.io/en/latest/concepts/pyfar.arithmetic_operations.html>`_. This is a major change and might break backwards compatibility in some cases (although this is unlikely to happen, PR #253, #245, #235).
