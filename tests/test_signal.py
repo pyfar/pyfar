@@ -59,15 +59,12 @@ def test_domain_setter_freq_when_freq():
     assert signal.domain == domain
 
 
-def test_domain_setter_freq_when_time(sine_stub):
-    signal = Signal(
-        sine_stub.time, sine_stub.sampling_rate, domain='time',
-        fft_norm=sine_stub.fft_norm)
+def test_domain_setter_freq_when_time():
+    signal = Signal([1, 2, 3, 4], 44100, domain='time', fft_norm='rms')
     domain = 'freq'
     signal.domain = domain
     assert signal.domain == domain
-    npt.assert_allclose(
-        signal._data, sine_stub.freq, rtol=1e-10, atol=1e-10)
+    assert signal._data.shape == signal.cshape + (signal.n_bins,)
 
 
 def test_domain_setter_time_when_time():
@@ -78,21 +75,28 @@ def test_domain_setter_time_when_time():
     assert signal.domain == domain
 
 
-def test_domain_setter_time_when_freq(sine_stub):
-    signal = Signal(
-        sine_stub.freq, sine_stub.sampling_rate, domain='freq',
-        fft_norm=sine_stub.fft_norm)
+def test_domain_setter_time_when_freq():
+    signal = Signal([1, 2, 3, 4], 44100, domain='freq', fft_norm='rms')
     domain = 'time'
     signal.domain = domain
     assert signal.domain == domain
-    npt.assert_allclose(
-        signal._data, sine_stub.time, atol=1e-10, rtol=1e-10)
+    assert signal._data.shape == signal.cshape + (signal.n_samples,)
 
 
 def test_signal_init_val():
     """Test to init Signal with complete parameters."""
     signal = Signal([1, 2, 3], 44100, domain='time', fft_norm='none')
     assert isinstance(signal, Signal)
+
+
+def test_signal_init_freq():
+    """Test to init Signal with spectrum."""
+    signal = Signal(
+        [1, 2, 3], 44100, n_samples=4, domain='freq', fft_norm='amplitude')
+    assert isinstance(signal, Signal)
+    npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]), atol=1e-15)
+    desired = np.array([[1., 2./2, 3.]]) * 4
+    npt.assert_allclose(signal._data, desired, atol=1e-15)
 
 
 def test_n_samples():
@@ -133,18 +137,21 @@ def test_setter_time():
 
 def test_getter_freq():
     """Test if attribute freq is accessed correctly."""
-    signal = Signal([1, 2, 3], 44100, fft_norm='rms')
+    signal = Signal([1, 2, 3, 4], 44100, fft_norm='amplitude')
     signal._domain = 'freq'
     signal._data = np.array([[1., 2., 3.]])
-    npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]))
+    desired = np.array([[1., 2*2, 3.]]) / signal.n_samples
+    npt.assert_allclose(signal.freq, desired)
 
 
 def test_setter_freq():
     """Test if attribute freq is set correctly."""
-    signal = Signal([1, 2, 3], 44100, fft_norm='rms')
+    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
     signal.freq = np.array([[1., 2., 3.]])
     assert signal.domain == 'freq'
-    npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
+    desired = signal.n_samples * np.array([[1., 2./2, 3.]])
+    npt.assert_allclose(signal._data, desired)
+    npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]))
 
 
 def test_re_setter_freq():
@@ -191,6 +198,7 @@ def test_setter_fft_norm():
         fft_norm='unitary')
 
     # changing the fft_norm also changes the spectrum
+    npt.assert_allclose(signal.freq, spec_power_unitary, atol=1e-15)
     signal.fft_norm = 'amplitude'
     assert signal.fft_norm == 'amplitude'
     npt.assert_allclose(signal.freq, spec_power_amplitude, atol=1e-15)
@@ -378,3 +386,36 @@ def test___eq___notEqual():
     comment = f'{signal.comment} A completely different thing'
     actual = Signal(time, 44100, domain='time', comment=comment)
     assert not signal == actual
+
+
+def test__repr__(capfd):
+    """Test string representation"""
+    print(Signal([0, 1, 0], 44100))
+    out, _ = capfd.readouterr()
+    assert ("time domain energy Signal:\n"
+            "(1,) channels with 3 samples @ 44100 Hz sampling rate "
+            "and none FFT normalization") in out
+
+
+def test_freq_raw():
+    """Test to access unnormalized spectrum."""
+    signal = Signal([1, 0, 0, 0], 44100, domain='time')
+    npt.assert_allclose(signal.freq_raw, np.array([[1., 1., 1.]]))
+    signal.fft_norm = 'amplitude'
+    npt.assert_allclose(signal.freq, np.array([[1., 2., 1.]])/4)
+    npt.assert_allclose(signal.freq_raw, np.array([[1., 1., 1.]]))
+
+
+def test_setter_freq_raw():
+    """Test if attribute freq_raw is set correctly."""
+    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
+    signal.freq_raw = np.array([[1., 2., 3.]])
+    assert signal.domain == 'freq'
+    npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
+
+
+def test_setter_freq_raw_warning():
+    """Test the warning for estimating the number of samples from n_bins."""
+    signal = Signal([1, 2, 3], 44100, domain='freq', n_samples=4)
+    with pytest.warns(UserWarning, match="Number of frequency bins changed"):
+        signal.freq_raw = [1, 2, 3, 4]

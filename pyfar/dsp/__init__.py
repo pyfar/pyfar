@@ -12,6 +12,8 @@ from .dsp import (
     time_window,
     kaiser_window_beta,
     find_impulse_response_start,
+    deconvolve,
+    convolve,
     InterpolateSpectrum,
 )
 
@@ -35,5 +37,7 @@ __all__ = [
     'time_window',
     'kaiser_window_beta',
     'find_impulse_response_start',
+    'deconvolve',
+    'convolve',
     'InterpolateSpectrum',
 ]

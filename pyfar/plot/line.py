@@ -1,9 +1,7 @@
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 from pyfar.plot.utils import context
-from .. import Signal
-from . import _line
+from . import (_line, _utils)
 from . import _interaction as ia
+import warnings
 
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
@@ -16,7 +14,9 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     Parameters
     ----------
     signal : Signal, TimeData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -28,9 +28,10 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
         Reference for calculating the logarithmic time data. The default is
         ``1``.
     unit : str, None
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the time axis. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     ax : matplotlib.pyplot.axes
         Axes to plot on. The default is ``None``, which uses the current axis
         or creates a new figure if none exists.
@@ -57,22 +58,23 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit=None, ax=None,
     """
 
     with context(style):
-        ax = _line._time(signal, dB, log_prefix, log_reference, unit,
+        ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
-    plt.tight_layout()
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB, log_prefix=log_prefix,
-        log_reference=log_reference)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+        'time', dB_time=dB, log_prefix_time=log_prefix,
+        log_reference=log_reference, unit_time=unit)
+    interaction = ia.Interaction(
+        signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     return ax
 
 
-def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
-         ax=None, style='light', **kwargs):
+def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
+         ax=None, style='light', xscale=None, **kwargs):
     """
     Plot the magnitude spectrum.
 
@@ -82,18 +84,21 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer, float
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
@@ -102,6 +107,16 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
+    xscale : str
+
+        .. deprecated:: 0.4.0
+
+        This parameter was replaced by the more explicit ``freq_scale``,
+        which has the same functionality.
+        If not ``None``, it overwrites ``freq_scale``.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
+
+        The default is ``None``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -120,23 +135,31 @@ def freq(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
         >>> pf.plot.freq(sine)
     """
 
+    # xscale deprecation
+    if xscale is not None:
+        warnings.warn(('The xscale parameter will be removed in'
+                       'pyfar 0.6.0. in favor of freq_scale'),
+                      PendingDeprecationWarning)
+        freq_scale = xscale
+
     with context(style):
-        ax = _line._freq(signal, dB, log_prefix, log_reference, xscale, ax,
-                         **kwargs)
-    plt.tight_layout()
+        ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
+                         freq_scale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
-        log_reference=log_reference, xscale=xscale)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+        'freq', dB_freq=dB, log_prefix_freq=log_prefix,
+        log_reference=log_reference, xscale=freq_scale)
+    interaction = ia.Interaction(
+        signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     return ax
 
 
-def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
-          style='light', **kwargs):
+def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
+          style='light', xscale=None, **kwargs):
     """Plot the phase of the spectrum.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
@@ -145,14 +168,16 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     deg : bool
         Plot the phase in degrees. The default is ``False``, which plots the
         phase in radians.
     unwrap : bool, str
-        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``, which plots the wrapped phase.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes object
@@ -161,6 +186,16 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
+    xscale : str
+
+        .. deprecated:: 0.4.0
+
+        This parameter was replaced by the more explicit ``freq_scale``,
+        which has the same functionality.
+        If not ``None``, it overwrites ``freq_scale``.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
+
+        The default is ``None``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -179,34 +214,47 @@ def phase(signal, deg=False, unwrap=False, xscale='log', ax=None,
         >>> pf.plot.phase(impulse, unwrap=True)
     """
 
+    # xscale deprecation
+    if xscale is not None:
+        warnings.warn(('The xscale parameter will be removed in'
+                       'pyfar 0.6.0. in favor of freq_scale'),
+                      PendingDeprecationWarning)
+        freq_scale = xscale
+
     with context(style):
-        ax = _line._phase(signal, deg, unwrap, xscale, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._phase(
+            signal.flatten(), deg, unwrap, freq_scale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'phase', deg=deg, unwrap=unwrap, xscale=xscale)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+        'phase', deg=deg, unwrap=unwrap, xscale=freq_scale)
+    interaction = ia.Interaction(
+        signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     return ax
 
 
-def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
-                **kwargs):
+def group_delay(signal, unit=None, freq_scale='log', ax=None, style='light',
+                xscale=None, **kwargs):
     """Plot the group delay.
 
-    Passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
+    (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     unit : str, None
-        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the group delay. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
-    xscale : str
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
@@ -215,6 +263,16 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
+    xscale : str
+
+        .. deprecated:: 0.4.0
+
+        This parameter was replaced by the more explicit ``freq_scale``,
+        which has the same functionality.
+        If not ``None``, it overwrites ``freq_scale``.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
+
+        The default is ``None``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -233,112 +291,43 @@ def group_delay(signal, unit=None, xscale='log', ax=None, style='light',
         >>> pf.plot.group_delay(impulse, unit='samples')
     """
 
+    # xscale deprecation
+    if xscale is not None:
+        warnings.warn(('The xscale parameter will be removed in'
+                       'pyfar 0.6.0. in favor of freq_scale'),
+                      PendingDeprecationWarning)
+        freq_scale = xscale
+
     with context(style):
-        ax = _line._group_delay(signal, unit, xscale, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._group_delay(
+            signal.flatten(), unit, freq_scale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'group_delay', unit=unit, xscale=xscale)
-    interaction = ia.Interaction(signal, ax, style, plot_parameter, **kwargs)
+        'group_delay', unit_gd=unit, xscale=freq_scale)
+    interaction = ia.Interaction(
+        signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
 
     return ax
 
 
-def spectrogram(signal, dB=True, log_prefix=20, log_reference=1,
-                yscale='linear', unit=None, window='hann', window_length=1024,
-                window_overlap_fct=0.5, cmap=mpl.cm.get_cmap(name='magma'),
-                ax=None, style='light'):
-    """Plot blocks of the magnitude spectrum versus time.
+def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
+              log_prefix_freq=None, log_reference=1, freq_scale='log',
+              unit=None, ax=None, style='light', xscale=None, **kwargs):
+    """
+    Plot the time signal and magnitude spectrum (2 by 1 subplot).
+
+    Plots ``signal.time`` and ``abs(signal.freq)`` passes keyword arguments
+    (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
-    dB : bool
-        Indicate if the data should be plotted in dB in which case
-        ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
-        The default is ``True``.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
-    log_reference : integer
-        Reference for calculating the logarithmic frequency data. The default
-        is ``1``.
-    yscale : str
-        ``linear`` or ``log`` to plot on a linear or logarithmic frequency
-        axis. The default is ``linear``.
-    unit : str, None
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
-        The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
-    window : str
-        Specifies the window that is applied to each block of the time data
-        before applying the Fourier transform. The default is ``hann``. See
-        ``scipy.signal.get_window`` for a list of possible windows.
-    window_length : integer
-        Specifies the window/block length in samples. The default is ``1024``.
-    window_overlap_fct : double
-        Ratio of points to overlap between blocks [0...1]. The default is
-        ``0.5``, which would result in 512 samples overlap for a window length
-        of 1024 samples.
-    cmap : matplotlib.colors.Colormap(name, N=256)
-        Colormap for spectrogram. Defaults to matplotlibs ``magma`` colormap.
-    ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
-    style : str
-        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-
-    Returns
-    -------
-    ax : matplotlib.pyplot.axes
-        Axes or array of axes containing the plot.
-
-    Example
-    -------
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> sweep = pf.signals.linear_sweep(2**14, [0, 22050])
-        >>> pf.plot.spectrogram(sweep)
-    """
-    if not isinstance(signal, Signal):
-        raise TypeError('Input data has to be of type: Signal.')
-
-    with context(style):
-        ax = _line._spectrogram_cb(
-            signal, dB, log_prefix, log_reference, yscale, unit,
-            window, window_length, window_overlap_fct,
-            cmap, ax)
-    plt.tight_layout()
-
-    # manage interaction
-    plot_parameter = ia.PlotParameter(
-        'spectrogram', dB_freq=dB, log_prefix=log_prefix,
-        log_reference=log_reference, yscale=yscale, unit=unit, window=window,
-        window_length=window_length, window_overlap_fct=window_overlap_fct,
-        cmap=cmap)
-    interaction = ia.Interaction(signal, ax[0], style, plot_parameter)
-    ax[0].interaction = interaction
-
-    return ax
-
-
-def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
-              log_reference=1, xscale='log', unit=None,
-              ax=None, style='light', **kwargs):
-    """
-    Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
-
-
-    Parameters
-    ----------
-    signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB_time : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(signal.time / log_reference)`` is used. The
@@ -347,25 +336,40 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
-    log_prefix : integer, float
-        Prefix for calculating the logarithmic time/frequency data.
+    log_prefix_time : integer, float
+        Prefix for calculating the logarithmic time data.
         The default is ``20``.
+    log_prefix_freq : integer, float
+        Prefix for calculating the logarithmic frequency data. The default is
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic time/frequency data.
         The default is ``1``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     unit : str
-        Unit of the time axis. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the time axis. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
+        Array or list with two axes to plot on. The default is ``None``, which
+        uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
+    xscale : str
+
+        .. deprecated:: 0.4.0
+
+        This parameter was replaced by the more explicit ``freq_scale``,
+        which has the same functionality.
+        If not ``None``, it overwrites ``freq_scale``.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
+
+        The default is ``None``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -384,54 +388,80 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix=20,
         >>> pf.plot.time_freq(sine)
     """
 
+    # xscale deprecation
+    if xscale is not None:
+        warnings.warn(('The xscale parameter will be removed in'
+                       'pyfar 0.6.0. in favor of freq_scale'),
+                      PendingDeprecationWarning)
+        freq_scale = xscale
+
     with context(style):
-        ax = _line._time_freq(signal, dB_time, dB_freq, log_prefix,
-                              log_reference, xscale, unit, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
+                              log_prefix_time, log_prefix_freq,
+                              log_reference, freq_scale, unit, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'time', dB_time=dB_time, log_prefix=log_prefix,
-        log_reference=log_reference)
+        'time_freq', dB_time=dB_time, dB_freq=dB_freq,
+        log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
+        log_reference=log_reference, xscale=freq_scale, unit_time=unit)
     interaction = ia.Interaction(
-        signal, ax[0], style, plot_parameter, **kwargs)
+        signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
 
     return ax
 
 
-def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
-               deg=False, unwrap=False, ax=None, style='light', **kwargs):
-    """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout.
+def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
+               freq_scale='log', deg=False, unwrap=False, ax=None,
+               style='light', xscale=None, **kwargs):
+    """Plot the magnitude and phase spectrum (2 by 1 subplot).
+
+    Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
+    arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
     signal : Signal, FrequencyData
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Indicate if the data should be plotted in dB in which case
         ``log_prefix * np.log10(abs(signal.freq) / log_reference)`` is used.
         The default is ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
     deg : bool
         Flag to plot the phase in degrees. The default is ``False``.
     unwrap : bool, str
-        True to unwrap the phase or "360" to unwrap the phase to 2 pi. The
+        True to unwrap the phase or ``'360'`` to unwrap the phase to 2 pi. The
         default is ``False``.
-    xscale : str
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current figure
-        ore creates a new one if no figure exists.
+        Array or list with two axes to plot on. The default is ``None``, which
+        uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or style from
         ``matplotlib.style.available``. The default is ``light``.
+    xscale : str
+
+        .. deprecated:: 0.4.0
+
+        This parameter was replaced by the more explicit ``freq_scale``,
+        which has the same functionality.
+        If not ``None``, it overwrites ``freq_scale``.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
+
+        The default is ``None``.
     **kwargs
         Keyword arguments that are forwarded to matplotlib.pyplot.plot
 
@@ -440,60 +470,88 @@ def freq_phase(signal, dB=True, log_prefix=20, log_reference=1, xscale='log',
     ax : matplotlib.pyplot.axes
         Axes or array of axes containing the plot.
 
-    See Also
+    Examples
     --------
-    matplotlib.pyplot.plot() for possible **kwargs.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> impulse = pf.signals.impulse(100, 10)
+        >>> pf.plot.freq_phase(impulse, unwrap=True)
     """
 
+    # xscale deprecation
+    if xscale is not None:
+        warnings.warn(('The xscale parameter will be removed in'
+                       'pyfar 0.6.0. in favor of freq_scale'),
+                      PendingDeprecationWarning)
+        freq_scale = xscale
+
     with context(style):
-        ax = _line._freq_phase(signal, dB, log_prefix, log_reference, xscale,
-                               deg, unwrap, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
+                               freq_scale, deg, unwrap, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
-        log_reference=log_reference, xscale=xscale)
+        'freq_phase', dB_freq=dB, log_prefix_freq=log_prefix,
+        log_reference=log_reference, xscale=freq_scale, deg=deg,
+        unwrap=unwrap)
     interaction = ia.Interaction(
-        signal, ax[0], style, plot_parameter, **kwargs)
+        signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
 
     return ax
 
 
-def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
-                     unit=None, xscale='log', ax=None, style='light',
-                     **kwargs):
-    """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
+def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
+                     unit=None, freq_scale='log', ax=None, style='light',
+                     xscale=None, **kwargs):
+    """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
-    Passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
+    passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
 
     Parameters
     ----------
-    signal : Signal, FrequencyData
-        The input data to be plotted.
+    signal : Signal
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     dB : bool
         Flag to plot the logarithmic magnitude spectrum. The default is
         ``True``.
     log_prefix : integer, float
         Prefix for calculating the logarithmic frequency data. The default is
-        ``20``.
+        ``None``, so ``10`` is chosen if ``signal.fft_norm`` is ``'power'`` or
+        ``'psd'`` and ``20`` otherwise.
     log_reference : integer
         Reference for calculating the logarithmic frequency data. The default
         is ``1``.
     unit : str
-        Unit of the group delay. Can be ``s``, ``ms``, ``mus``, or ``samples``.
+        Unit of the group delay. Can be ``'s'``, ``'ms'``, ``'mus'``, or
+        ``'samples'``.
         The default is ``None``, which sets the unit to ``s`` (seconds), ``ms``
-        (milli seconds), or ``mus`` (micro seconds) depending on the data.
-    xscale : str
+        (milliseconds), or ``mus`` (microseconds) depending on the data.
+    freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
     ax : matplotlib.pyplot.axes
-        Axes to plot on. The default is ``None``, which uses the current axis
-        or creates a new figure if none exists.
+        Array or list with two axes to plot on. The default is ``None``, which
+        uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. The default is ``light``.
+    xscale : str
+
+        .. deprecated:: 0.4.0
+
+        This parameter was replaced by the more explicit ``freq_scale``,
+        which has the same functionality.
+        If not ``None``, it overwrites ``freq_scale``.
+        It is kept for backwards compatibility until pyfar version 0.6.0.
+
+        The default is ``None``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -512,17 +570,25 @@ def freq_group_delay(signal, dB=True, log_prefix=20, log_reference=1,
         >>> pf.plot.freq_group_delay(impulse, unit='samples')
     """
 
+    # xscale deprecation
+    if xscale is not None:
+        warnings.warn(('The xscale parameter will be removed in'
+                       'pyfar 0.6.0. in favor of freq_scale'),
+                      PendingDeprecationWarning)
+        freq_scale = xscale
+
     with context(style):
-        ax = _line._freq_group_delay(signal, dB, log_prefix, log_reference,
-                                     unit, xscale, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._freq_group_delay(
+            signal.flatten(), dB, log_prefix, log_reference,
+            unit, freq_scale, ax, **kwargs)
+    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
-        'freq', dB_freq=dB, log_prefix=log_prefix,
-        log_reference=log_reference, xscale=xscale)
+        'freq_group_delay', dB_freq=dB, log_prefix_freq=log_prefix,
+        log_reference=log_reference, unit_gd=unit, xscale=freq_scale)
     interaction = ia.Interaction(
-        signal, ax[0], style, plot_parameter, **kwargs)
+        signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
 
     return ax
@@ -539,7 +605,9 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     Parameters
     ----------
     signal : Signal
-        The input data to be plotted.
+        The input data to be plotted. Multidimensional data are flattened for
+        plotting, e.g, a signal of ``signal.cshape = (2, 2)`` would be plotted
+        in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     plots : list, nested list
         Function handles for plotting.
     ax : matplotlib.pyplot.axes
@@ -572,7 +640,7 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
     """
 
     with context(style):
-        ax = _line._custom_subplots(signal, plots, ax, **kwargs)
-    plt.tight_layout()
+        ax = _line._custom_subplots(signal.flatten(), plots, ax, **kwargs)
+    _utils._tight_layout()
 
     return ax

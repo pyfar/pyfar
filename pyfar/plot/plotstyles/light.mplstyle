@@ -13,6 +13,10 @@ lines.linewidth   : 1.5     ## line width in points
 lines.linestyle   : -       ## solid line
 
 
+#### SCATTER
+scatter.marker: .
+
+
 #### FONT
 
 font.family         : sans-serif
@@ -59,10 +63,14 @@ grid.alpha       :   .3     ## transparency, between 0.0 and 1.0
 
 #### FIGURE
 ## See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
-figure.facecolor : white    ## figure facecolor
-figure.edgecolor : none     ## figure edgecolor
+figure.facecolor    : white    ## figure facecolor
+figure.edgecolor    : none     ## figure edgecolor
+figure.titleweight  : bold     ## weight of the figure title
 
 
 #### SAVING FIGURES
 savefig.facecolor   : white    ## figure facecolor when saving
 savefig.edgecolor   : white    ## figure edgecolor when saving
+
+#### IMAGES
+image.cmap:     magma      # colormap for 2D plots

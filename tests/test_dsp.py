@@ -50,16 +50,19 @@ def test_group_delay_single_channel(impulse_group_delay):
 
     grp = dsp.group_delay(signal, method='scipy')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(signal, method='fft')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(
         signal, method='fft')
     assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(grp, impulse_group_delay[1].flatten(), rtol=1e-10)
+    npt.assert_allclose(
+        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
 
 def test_group_delay_two_channel(impulse_group_delay_two_channel):
@@ -95,7 +98,8 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency_idx = np.abs(signal.frequencies-frequency).argmin()
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == ()
-    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+    npt.assert_allclose(
+        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
     # Multiple frequencies
     frequency = np.array([1000, 2000])
@@ -103,7 +107,8 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
         signal.frequencies-frequency[..., np.newaxis]).argmin(axis=-1)
     grp = dsp.group_delay(signal, frequency, method='scipy')
     assert grp.shape == (2,)
-    npt.assert_allclose(grp, impulse_group_delay[1][0, frequency_idx])
+    npt.assert_allclose(
+        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
 
 def test_linear_phase():
@@ -186,16 +191,8 @@ def test_xfade(impulse):
     np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
 
 
-def test_regu_inversion(impulse):
-
-    with pytest.raises(
-            ValueError, match='needs to be of type pyfar.Signal'):
-        dsp.regularized_spectrum_inversion('error', (1, 2))
-
-    with pytest.raises(
-            ValueError, match='lower and upper limits'):
-        dsp.regularized_spectrum_inversion(impulse, (2))
-
+def test_regularized_spectrum_inversion(impulse):
+    """Test regularized_spectrum_inversion"""
     res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
 
     ind = impulse.find_nearest_frequency([200, 10e3])
@@ -205,6 +202,41 @@ def test_regu_inversion(impulse):
 
     npt.assert_allclose(res.freq[:, 0], [0.25])
     npt.assert_allclose(res.freq[:, -1], [0.25])
+
+
+def test_regularized_spectrum_inversion_assertions(impulse):
+    """Test regularized_spectrum_inversion errors"""
+    with pytest.raises(
+            ValueError, match='needs to be of type pyfar.Signal'):
+        dsp.regularized_spectrum_inversion('error', (1, 2))
+
+    with pytest.raises(
+            ValueError, match='lower and upper limits'):
+        dsp.regularized_spectrum_inversion(impulse, (2))
+
+    with pytest.raises(
+            TypeError, match="The normalized parameter"):
+        dsp.regularized_spectrum_inversion(impulse, [200, 10e3], normalized=1)
+
+
+def test_regularized_spectrum_inversion_normalized(impulse):
+    """Test normalized parameter of regularized_spectrum_inversion"""
+    impulse.fft_norm = 'amplitude'
+
+    # normalized = True
+    res = dsp.regularized_spectrum_inversion(
+        impulse * 2, [200, 10e3], normalized=True)
+    ind = impulse.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5*0.5*impulse.n_samples)
+    # normalized = False
+    res = dsp.regularized_spectrum_inversion(
+        impulse * 2, [200, 10e3], normalized=False)
+    ind = impulse.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5)
 
 
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
@@ -467,6 +499,28 @@ def test_time_window_multichannel():
     npt.assert_allclose(sig_win.time, time_win)
 
 
+@pytest.mark.parametrize("crop", ['none', 'window', 'end'])
+def test_time_window_return_window(crop):
+    """ Test return window parameter."""
+    sig = pyfar.Signal(np.ones(10), 44100)
+    sig_win, win = dsp.time_window(
+        sig, interval=(4, 8), crop=crop, return_window=True)
+    assert isinstance(win, pyfar.Signal)
+    assert sig_win.sampling_rate == win.sampling_rate
+    npt.assert_allclose(sig_win.time, win.time)
+    desired_comment = (
+        f"Time window with parameters interval=(4, 8),"
+        f"window='hann', shape='symmetric', unit='samples', crop='{crop}'")
+    assert win.comment == desired_comment
+
+
+def test_time_window_return_window_error():
+    """ Test return window with non bool parameter."""
+    sig = pyfar.Signal(np.ones(10), 44100)
+    with pytest.raises(TypeError, match="boolean"):
+        dsp.time_window(sig, interval=(4, 8), return_window='a')
+
+
 def test_kaiser_window_beta():
     """ Test function call."""
     A = 51
@@ -590,3 +644,54 @@ def test_start_ir_multidim():
     start_sample_est = dsp.find_impulse_response_start(ir_awgn)
 
     npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
+def test_convolve_default():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, -1, 0], 44100)
+
+    res = dsp.convolve(x, y)
+    desired = np.array([[1, -0.5, -0.25, -0.25, 0, 0]])
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+def test_convolve_sampling_rate_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, 0.5, 0.25, 0], 48000)
+
+    with pytest.raises(ValueError, match="sampling rates"):
+        dsp.convolve(x, y)
+
+
+def test_convolve_fft_norm_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='unitary')
+    y = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='amplitude')
+
+    with pytest.raises(ValueError, match="fft_norm"):
+        dsp.convolve(x, y)
+
+
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize("mode, desired", [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]])),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]])),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]]))])
+def test_convolve_mode_and_method(method, mode, desired):
+    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100)
+    y = pf.Signal([1, -1, 0.1], 44100)
+    res = dsp.convolve(x, y, mode=mode, method=method)
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+def test_convolve_mode_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, -1, 0], 44100)
+
+    with pytest.raises(ValueError, match='Invalid mode'):
+        dsp.convolve(x, y, mode='invalid')
+
+
+def test_convolve_method_error():
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pf.Signal([1, -1, 0], 44100)
+
+    with pytest.raises(ValueError, match='Invalid method'):
+        dsp.convolve(x, y, method='invalid')
