@@ -1,0 +1,104 @@
+{
+"plots": {
+    "time": {
+        "key": ["1", "T"],
+        "key_verbose": ["1", "shift+t"],
+        "info": "time"},
+    "freq": {
+        "key": ["2", "F"],
+        "key_verbose": ["2", "shift+f"],
+        "info": "freq"},
+    "phase": {
+        "key": ["3", "P"],
+        "key_verbose": ["3", "shift+p"],
+        "info": "phase"},
+    "group_delay": {
+        "key": ["4", "G"],
+        "key_verbose": ["4", "shift+g"],
+        "info": "group_delay"},
+    "spectrogram": {
+        "key": ["5", "S"],
+        "key_verbose": ["5", "shift+s"],
+        "info": "spectrogram"},
+    "time_freq": {
+        "key": ["6", "ctrl+T", "ctrl+F"],
+        "key_verbose": ["6", "ctrl+shift+t", "ctrl+shift+f"],
+        "info": "time_freq"},
+    "freq_phase": {
+        "key": ["7", "ctrl+P"],
+        "key_verbose": ["7", "ctrl+shift+p"],
+        "info": "freq_phase"},
+    "freq_group_delay": {
+        "key": ["8", "ctrl+G"],
+        "key_verbose": ["8", "ctrl+shift+g"],
+        "info": "freq_group_delay"}
+    },
+"controls": {
+    "move_left": {
+        "key": ["left"],
+        "info": "move x-axis view to the left"},
+    "move_right": {
+        "key": ["right"],
+        "info": "move x-axis view to the right"},
+    "move_up": {
+        "key": ["up"],
+        "info": "move y-axis view upwards"},
+    "move_down": {
+        "key": ["down"],
+        "info": "y-axis view downwards"},
+    "move_cm_up": {
+        "key": ["+", "ctrl+shift+up"],
+        "info": "move colormap range up"},
+    "move_cm_down": {
+        "key": ["-", "ctrl+shift+down"],
+        "info": "move colormap range down"},
+    "zoom_x_in": {
+        "key": ["shift+right"],
+        "info": "zoom in x-axis"},
+    "zoom_x_out": {
+        "key": ["shift+left"],
+        "info": "zoom out x-axis"},
+    "zoom_y_in": {
+        "key": ["shift+up"],
+        "info": "zoom out y-axis"},
+    "zoom_y_out": {
+        "key": ["shift+down"],
+        "info": "zoom in y-axis"},
+    "zoom_cm_in": {
+        "key": ["*", "alt+shift+up"],
+        "key_verbose": ["shift+plus", "alt+shift+up"],
+        "info": "zoom colormap range in"},
+    "zoom_cm_out": {
+        "key": ["_", "alt+shift+down"],
+        "key_verbose": ["shift+minus", "alt+shift+down"],
+        "info": "zoom colormap range out"},
+    "toggle_x": {
+        "key": ["X"],
+        "key_verbose": ["shift+x"],
+        "info": "toggle between linear and logarithmic x-axis"},
+    "toggle_y": {
+        "key": ["Y"],
+        "key_verbose": ["shift+y"],
+        "info": "toggle between linear and logarithmic y-axis"},
+    "toggle_cm": {
+        "key": ["C"],
+        "key_verbose": ["shift+c"],
+        "info": "toggle between linear and logarithmic color data"},
+    "toggle_all": {
+        "key": ["A"],
+        "key_verbose": ["shift+a"],
+        "info": "toggle between plotting all channels and plotting single channels"},
+    "cycle_plot_types": {
+        "key": ["<"],
+        "info": "cycle between line and 2D plots"},
+    "toggle_orientation": {
+        "key": [">"],
+        "info": "toggle between vertical and horizontal orientation of 2D plots"},
+    "next": {
+        "key": [".", "]"],
+        "info": "show next channel"},
+    "prev": {
+        "key": [",", "["],
+        "info": "show previous channel"}
+    }
+}

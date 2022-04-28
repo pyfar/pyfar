@@ -1,18 +1,16 @@
-PYFAR User Reference
-=====================
+Modules
+=======
+
+The following gives detailed information about all pyfar functions sorted
+according to their modules.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
-   pyfar.classes
-   pyfar.plot
-   pyfar.fft
-
-
-.. Module contents
-.. ---------------
-
-.. .. automodule:: pyfar
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+   modules/pyfar.dsp
+   modules/pyfar.dsp.fft
+   modules/pyfar.dsp.filter
+   modules/pyfar.io
+   modules/pyfar.plot
+   modules/pyfar.signals
+   modules/pyfar.samplings

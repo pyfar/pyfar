@@ -99,7 +99,7 @@ class LogFormatterITAToolbox(LogFormatter):
         if x == 0.0:  # Symlog
             return '0'
 
-        x = abs(x)
+        x = x
 
         vmin, vmax = self.axis.get_view_interval()
         vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
@@ -140,7 +140,7 @@ class MultipleFractionFormatter(Formatter):
 
     def __call__(self, x, pos=None):
         den = self._denominator
-        num = np.int(np.rint(den*x/self._base))
+        num = int(np.rint(den*x/self._base))
         com = self._gcd(num, den)
         (num, den) = (int(num / com), int(den/com))
         if den == 1:

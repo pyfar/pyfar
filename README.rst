@@ -2,80 +2,39 @@
 Readme
 ======
 
-pyfar - Python package for acoustic research.
+The python package for acoustics research (pyfar) offers classes to store
+audio data, filters, coordinates, and orientations. It also contains common
+functions for digital audio signal processing.
 
 Getting Started
 ===============
 
-There is no stable release and therefore no binary distribution yet. Hence, the
-package needs to be installed from source.
-
-Requirements
-============
-
-- Python 3 (>= 3.8 recommended)
-- Python packages: numpy, scipy, matplotlib, python-sofa, urllib3
+Check out the `examples notebook`_ for a tour of the most important pyfar
+functionality and `read the docs`_ for the complete documentation. Packages
+related to pyfar are listed at `pyfar.org`_.
 
 Installation
 ============
 
-The sources for spharpy can be downloaded from the `git repository`_.
-
-You can either clone the public repository
+Use pip to install pyfar
 
 .. code-block:: console
 
-    $ git clone git@github.com:pyfar/pyfar.git
+    $ pip install pyfar
 
-or download the code as zip archive.
+(Requires Python 3.7, 3.8 or 3.9)
 
-You can install it by running
+Audio file reading/writing is supported through `SoundFile`_, which is based on `libsndfile`_. On Windows and OS X, it will be installed automatically. On Linux, you need to install libsndfile using your distribution’s package manager, for example ``sudo apt-get install libsndfile1``.
 
-.. code-block:: console
+Contributing
+============
 
-    $ python setup.py install
-
-in the pyfar directory.
-The required packages to install the package can be installed using pip:
-
-.. code-block:: console
-
-    $ pip install -r requirements_dev.txt
-
-When actively developing for the package it is recommended to use a virtual environment and install using the
-develop option:
-
-.. code-block:: console
-
-    $ python setup.py develop
+Refer to the `contribution guidelines`_ for more information.
 
 
-Building the Documentation
-==========================
-
-We do not yet host the documentation on a public server.
-The documentation can however be built locally using Sphinx by
-executing the make script inside the docs folder.
-
-.. code-block:: console
-
-    $ cd docs/
-    $ make html
-
-After Sphinx finishes the documentation you can open the generated html found in
-
-.. code-block:: console
-
-    $ docs/_build/index.html
-
-using any browser.
-
-.. code-block:: console
-
-    $ make html
-
-inside the `docs` folder. For more information refer to the `contribution guidelines`_.
-
-
-.. _git repository: https://github.com/pyfar/pyfar
-.. _`contribution guidelines`: CONTRIBUTING.rst
+.. _contribution guidelines: https://github.com/pyfar/pyfar/blob/develop/CONTRIBUTING.rst
+.. _examples notebook: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
+.. _pyfar.org: https://pyfar.org
+.. _read the docs: https://pyfar.readthedocs.io/en/latest
+.. _SoundFile: https://pysoundfile.readthedocs.io/en/latest/
+.. _libsndfile: http://www.mega-nerd.com/libsndfile/
