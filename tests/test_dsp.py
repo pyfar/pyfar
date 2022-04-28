@@ -191,16 +191,8 @@ def test_xfade(impulse):
     np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
 
 
-def test_regu_inversion(impulse):
-
-    with pytest.raises(
-            ValueError, match='needs to be of type pyfar.Signal'):
-        dsp.regularized_spectrum_inversion('error', (1, 2))
-
-    with pytest.raises(
-            ValueError, match='lower and upper limits'):
-        dsp.regularized_spectrum_inversion(impulse, (2))
-
+def test_regularized_spectrum_inversion(impulse):
+    """Test regularized_spectrum_inversion"""
     res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
 
     ind = impulse.find_nearest_frequency([200, 10e3])
@@ -210,6 +202,41 @@ def test_regu_inversion(impulse):
 
     npt.assert_allclose(res.freq[:, 0], [0.25])
     npt.assert_allclose(res.freq[:, -1], [0.25])
+
+
+def test_regularized_spectrum_inversion_assertions(impulse):
+    """Test regularized_spectrum_inversion errors"""
+    with pytest.raises(
+            ValueError, match='needs to be of type pyfar.Signal'):
+        dsp.regularized_spectrum_inversion('error', (1, 2))
+
+    with pytest.raises(
+            ValueError, match='lower and upper limits'):
+        dsp.regularized_spectrum_inversion(impulse, (2))
+
+    with pytest.raises(
+            TypeError, match="The normalized parameter"):
+        dsp.regularized_spectrum_inversion(impulse, [200, 10e3], normalized=1)
+
+
+def test_regularized_spectrum_inversion_normalized(impulse):
+    """Test normalized parameter of regularized_spectrum_inversion"""
+    impulse.fft_norm = 'amplitude'
+
+    # normalized = True
+    res = dsp.regularized_spectrum_inversion(
+        impulse * 2, [200, 10e3], normalized=True)
+    ind = impulse.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5*0.5*impulse.n_samples)
+    # normalized = False
+    res = dsp.regularized_spectrum_inversion(
+        impulse * 2, [200, 10e3], normalized=False)
+    ind = impulse.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5)
 
 
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])

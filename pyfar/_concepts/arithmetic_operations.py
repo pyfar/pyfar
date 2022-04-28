@@ -16,8 +16,8 @@ and in the frequency domain by
 
 >>> result = pyfar.classes.audio.add((signal_1, signal_2), 'freq')
 
-**Note** that the :py:mod:`FFT normalization <pyfar._concepts.fft>` is
-temporarily removed for applying arithmetic operations in the frequency domain.
+**Note** that frequency domain operations are performed on the raw spectrum
+``signal.freq_raw``.
 
 Arithmetic operations also work with more than two instances and supports array
 likes and scalar values, e.g.,

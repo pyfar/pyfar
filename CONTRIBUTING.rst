@@ -210,8 +210,7 @@ A reminder for the maintainers on how to deploy.
 Switch to main and run::
 
 $ bumpversion patch # possible: major / minor / patch
-$ git push --tags
-$ git push
+$ git push --follow-tags
 
 Travis will then deploy to PyPI if tests pass.
 

@@ -20,3 +20,4 @@ tox-wheel
 autodocsumm
 soundfile
 sofar>=0.1.2
+nbmake>=0.7.0
