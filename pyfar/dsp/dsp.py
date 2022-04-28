@@ -1,3 +1,4 @@
+import multiprocessing
 import warnings
 import numpy as np
 from scipy.interpolate import interp1d
@@ -1139,37 +1140,24 @@ def _cross_fade(first, second, indices):
     return result
 
 
-def minimum_phase(
-        signal, method='homomorphic', n_fft=None,
-        pad=False, return_magnitude_ratio=False):
-    """Calculate the minimum phase equivalent of a signal or filter
+def minimum_phase(signal, n_fft=None, pad=False):
+    """Calculate the minimum phase equivalent of a finite impulse response.
+    The method is based on the Hilbert transform of the real-valued cepstrum
+    of the impulse response, that is the cepstrum of the magnitude spectrum
+    only. As a result the magnitude spectrum is not distorted. Potential
+    aliasing errors can occur due to the Fourier transform based calculation
+    of the magnitude spectrum, which however are negligible if the number of
+    Fourier transform samples ``n_fft`` is sufficiently high. [#]_
 
     Parameters
     ----------
     signal : Signal
-        The linear phase filter.
-    method : str, optional
-        The method:
-
-        'homomorphic' (default)
-            This method works best with filters with an odd number of taps,
-            and the resulting minimum phase filter will have a magnitude
-            response that approximates the square root of the the original
-            filter's magnitude response.
-        'hilbert'
-            This method is designed to be used with equi-ripple filters with
-            unity or zero gain regions.
-        'hilbert_2'
-            In many cases, this method yields a better approximation of the
-            magnitude response at the cost a worse approximation of the
-            theoretical minimum phase. It is especially usefull for
-            non-analytical data such as head-related transfer functions. If
-            using this method, `n_fft` values in the range of two to eight
-            times ``signal.n_samples`` often work well.
+        The linear phase impulse response.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
-        few times larger than the signal length. The default is ``None``,
-        resulting in an FFT length of:
+        few times larger than the signal length. Values in the range of two
+        to eight times ``signal.n_samples`` often work well.
+        The default is ``None``, resulting in an FFT length of:
 
             n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
 
@@ -1178,10 +1166,6 @@ def minimum_phase(
         same length as the input. If ``pad`` is ``False`` the resulting minimum
         phase representation is of length
         ``signal.n_samples/2 + signal.n_samples % 2``. The default is ``False``
-    return_magnitude_ratio : bool, optional
-        If ``True``, the ratio between the linear phase (input) and the
-        minimum phase (output) filters is returned. See the examples for
-        further information. The default is ``False``.
 
     Returns
     -------
@@ -1191,6 +1175,10 @@ def minimum_phase(
         The ratio between the (normalized) magnitude spectra of the linear
         phase and the minimum phase versions of the filter.
 
+    References
+    ----------
+    .. [#]  J. S. Lim and A. V. Oppenheim, Advanced topics in signal
+            processing, pp. 472-473, First Edition. Prentice Hall, 1988.
 
     Examples
     --------
@@ -1203,100 +1191,26 @@ def minimum_phase(
         >>> import numpy as np
         >>> from scipy.signal import remez
         >>> import matplotlib.pyplot as plt
-        >>> # create minimum phase signals with different methods
         >>> freq = [0, 0.2, 0.3, 1.0]
         >>> h_linear = pf.Signal(remez(151, freq, [1, 0], Hz=2.), 44100)
-        >>> h_min_hom = pf.dsp.minimum_phase(
-        ...     h_linear, method='homomorphic', pad=True)
-        >>> h_min_hil = pf.dsp.minimum_phase(
-        ...     h_linear, method='hilbert', pad=True)
-        >>> h_min_hil_2 = pf.dsp.minimum_phase(
-        ...     h_linear, method='hilbert_2', pad=True)
-        >>> # plot the results
+        >>> # create minimum phase impulse responses
+        >>> h_min = pf.dsp.minimum_phase(h_linear, pad=True)
+        >>> # plot the result
         >>> fig, axs = plt.subplots(3, figsize=(8, 6))
-        >>> for h, style in zip(
-        >>>         (h_linear, h_min_hom, h_min_hil, h_min_hil_2),
-        >>>         ('-', '-.', '--', ':')):
-        >>>     pf.plot.time(h, linestyle=style, ax=axs[0])
-        >>>     axs[0].grid(True)
-        >>>     pf.plot.freq(h, linestyle=style, ax=axs[1])
-        >>>     pf.plot.group_delay(h, linestyle=style, ax=axs[2], unit="ms")
-        >>> axs[2].legend(['Linear', 'Homomorphic', 'Hilbert', 'Hilbert 2'],
-        ...     loc=3, ncol=2)
+        >>> pf.plot.time(h_linear, ax=axs[0])
+        >>> pf.plot.time(h_min, ax=axs[0])
+        >>> axs[0].grid(True)
+        >>> pf.plot.freq(h_linear, ax=axs[1])
+        >>> pf.plot.group_delay(h_linear, ax=axs[2], unit="ms")
+        >>> pf.plot.freq(h_min, ax=axs[1])
+        >>> pf.plot.group_delay(h_min, ax=axs[2], unit="ms")
+        >>> axs[2].legend(['Linear', 'Minimum'], loc=3, ncol=2)
         >>> axs[2].set_ylim(-2.5, 2.5)
 
-    Return the magnitude ratios between the minimum and linear phase filters
-    and indicate frequencies where the linear phase filter exhibits small
-    amplitudes.
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> import numpy as np
-        >>> from scipy.signal import remez
-        >>> import matplotlib.pyplot as plt
-        >>> # generate linear and minimum phase signal
-        >>> freq = [0, 0.2, 0.3, 1.0]
-        >>> desired = [1, 0]
-        >>> h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
-        >>> h_minimum, ratio = pf.dsp.minimum_phase(h_linear,
-        ...     method='homomorphic', return_magnitude_ratio=True)
-        >>> # plot signals and difference between them
-        >>> fig, axs = plt.subplots(2, figsize=(8, 4))
-        >>> pf.plot.freq(h_linear, linestyle='-', ax=axs[0])
-        >>> pf.plot.freq(h_minimum, linestyle='--', ax=axs[0])
-        >>> pf.plot.freq(ratio, linestyle='-', ax=axs[1])
-        >>> mask = np.abs(h_linear.freq) < 10**(-60/20)
-        >>> ratio_masked = pf.FrequencyData(
-        ...     ratio.freq[mask], ratio.frequencies[mask[0]])
-        >>> pf.plot.freq(ratio_masked, color='k', linestyle='--', ax=axs[1])
-        >>> axs[1].set_ylabel('Magnitude error in dB')
-        >>> axs[0].legend(['Linear phase', 'Minimum phase'])
-        >>> axs[1].legend(['Broadband', 'Linear-phase < -60 dB'])
-        >>> axs[1].set_ylim((-5, 105))
-
-
     """
-    if method == "hilbert_2":
-        signal_minphase = _minimum_phase(signal, n_fft, pad)
-    else:
-        signal_flat = signal.flatten()
-        original_cshape = signal.cshape
-        signal_minphase = signal.flatten()
-        signal_minphase.time = np.zeros(
-            (signal_minphase.cshape[0],
-             int(np.floor((signal.n_samples + 1)/2))),
-            dtype=signal.dtype)
-
-        for ch in range(signal_minphase.cshape[0]):
-            signal_minphase.time[ch] = sgn.minimum_phase(
-                signal_flat.time[ch],
-                method=method,
-                n_fft=n_fft)
-
-        signal_minphase = signal_minphase.reshape(original_cshape)
-
-    if (pad is True) or (return_magnitude_ratio is True):
-
-        sig_minphase_pad = pad_zeros(
-            signal_minphase, signal.n_samples - signal_minphase.n_samples)
-
-        if return_magnitude_ratio is False:
-            return sig_minphase_pad
-
-        error_mag = np.abs(sig_minphase_pad.freq) / np.abs(signal.freq)
-        error = pyfar.FrequencyData(error_mag, signal.frequencies)
-
-        if pad_zeros is False:
-            return signal_minphase, error
-        else:
-            return sig_minphase_pad, error
-    else:
-        return signal_minphase
-
-
-def _minimum_phase(signal, n_fft, pad):
     from scipy.fft import fft, ifft
+
+    workers = multiprocessing.cpu_count()
     # center the energy by taking the shifted zero-phase signal
     signal = pyfar.dsp.linear_phase(
         signal.copy(), signal.n_samples // 2, unit='samples')
@@ -1306,24 +1220,25 @@ def _minimum_phase(signal, n_fft, pad):
     n_half = h.shape[-1] // 2
     if not np.allclose(h[-n_half:][::-1], h[:n_half]):
         warnings.warn(
-            'h does not appear to by symmetric, conversion may fail',
+            'Input does not appear to by symmetric, conversion may fail',
             RuntimeWarning)
 
     if n_fft is None:
         n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
 
     # add eps to the magnitude spectrum to avoid nans in log
-    H = np.abs(fft(h, n=n_fft)) + np.finfo(float).eps
+    H = np.abs(fft(h, n=n_fft, workers=workers, axis=-1))
+    H += np.finfo(float).eps
 
     # calculate the minimum phase using the Hilbert transform
-    phase = np.imag(-sgn.hilbert(np.log(H), N=n_fft))
-    data = ifft(H*np.exp(1j*phase)).real
+    phase = -np.imag(sgn.hilbert(np.log(H), N=n_fft, axis=-1))
+    data = ifft(H*np.exp(1j*phase), axis=-1, workers=workers).real
 
     # cut to length
     if pad:
         data = data[..., :signal.n_samples]
     else:
-        N = signal.n_samples // 2 + signal.n_samples % 2
+        N = n_half + signal.n_samples % 2
         data = data[..., :N]
 
     return pyfar.Signal(data, 44100)
