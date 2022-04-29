@@ -1140,32 +1140,33 @@ def _cross_fade(first, second, indices):
     return result
 
 
-def minimum_phase(signal, n_fft=None, pad=False):
-    """Calculate the minimum phase equivalent of a finite impulse response.
+def minimum_phase(signal, n_fft=None, truncate=True):
+    """
+    Calculate the minimum phase equivalent of a signal.
+
     The method is based on the Hilbert transform of the real-valued cepstrum
-    of the impulse response, that is the cepstrum of the magnitude spectrum
+    of the signal, that is the cepstrum of the magnitude spectrum
     only. As a result the magnitude spectrum is not distorted. Potential
     aliasing errors can occur due to the Fourier transform based calculation
-    of the magnitude spectrum, which however are negligible if the number of
-    Fourier transform samples ``n_fft`` is sufficiently high. [#]_
+    of the magnitude spectrum, which however are negligible if the length of
+    Fourier transform ``n_fft`` is sufficiently high. [#]_ (Section 8.5.4)
 
     Parameters
     ----------
     signal : Signal
-        The linear phase impulse response.
+        The data for which the minimum-phase version is computed.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
-        few times larger than the signal length. Values in the range of two
-        to eight times ``signal.n_samples`` often work well.
-        The default is ``None``, resulting in an FFT length of:
-
-            n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
-
-    pad : bool, optional
-        If ``pad`` is ``True``, the resulting signal will be padded to the
-        same length as the input. If ``pad`` is ``False`` the resulting minimum
-        phase representation is of length
-        ``signal.n_samples/2 + signal.n_samples % 2``. The default is ``False``
+        few times larger than the signal length. The default ``None`` uses
+        eight times the signal length rounded up to the next power of two,
+        that is ``2**int(np.ceil(np.log2(n_samples * 8)))``.
+    truncate : bool, optional
+        If ``truncate`` is ``True``, the resulting signal is truncated to a
+        length of ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
+        aliasing described above in any case but might distort the magnitude
+        response if ``signal.n_samples`` is to low. If truncate is ``False``
+        the output signal has the same length as the input signal. The default
+        is ``True``.
 
     Returns
     -------
@@ -1194,7 +1195,7 @@ def minimum_phase(signal, n_fft=None, pad=False):
         >>> freq = [0, 0.2, 0.3, 1.0]
         >>> h_linear = pf.Signal(remez(151, freq, [1, 0], Hz=2.), 44100)
         >>> # create minimum phase impulse responses
-        >>> h_min = pf.dsp.minimum_phase(h_linear, pad=True)
+        >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
         >>> # plot the result
         >>> fig, axs = plt.subplots(3, figsize=(8, 6))
         >>> pf.plot.time(h_linear, ax=axs[0])
@@ -1211,37 +1212,34 @@ def minimum_phase(signal, n_fft=None, pad=False):
     from scipy.fft import fft, ifft
 
     workers = multiprocessing.cpu_count()
-    # center the energy by taking the shifted zero-phase signal
+    # center the energy by taking the linear phase signal (using n_samples//2
+    # performs better than using n_samples/2)
     signal = pyfar.dsp.linear_phase(
-        signal.copy(), signal.n_samples // 2, unit='samples')
-    h = signal.time
-
-    # check if the signal is symmetric
-    n_half = h.shape[-1] // 2
-    if not np.allclose(h[-n_half:][::-1], h[:n_half]):
-        warnings.warn(
-            'Input does not appear to by symmetric, conversion may fail',
-            RuntimeWarning)
+        signal, signal.n_samples // 2, unit='samples')
 
     if n_fft is None:
-        n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
+        n_fft = 2**int(np.ceil(np.log2(signal.n_samples * 8)))
+    elif n_fft < signal.n_samples:
+        raise ValueError((
+            f"n_fft is {n_fft} but must be at least {signal.n_samples}, "
+            "which is the length of the input signal"))
 
     # add eps to the magnitude spectrum to avoid nans in log
-    H = np.abs(fft(h, n=n_fft, workers=workers, axis=-1))
-    H += np.finfo(float).eps
+    H = np.abs(fft(signal.time, n=n_fft, workers=workers, axis=-1))
+    H[H == 0] = np.finfo(float).eps
 
     # calculate the minimum phase using the Hilbert transform
     phase = -np.imag(sgn.hilbert(np.log(H), N=n_fft, axis=-1))
     data = ifft(H*np.exp(1j*phase), axis=-1, workers=workers).real
 
     # cut to length
-    if pad:
-        data = data[..., :signal.n_samples]
-    else:
-        N = n_half + signal.n_samples % 2
+    if truncate:
+        N = signal.n_samples // 2 + signal.n_samples % 2
         data = data[..., :N]
+    else:
+        data = data[..., :signal.n_samples]
 
-    return pyfar.Signal(data, 44100)
+    return pyfar.Signal(data, signal.sampling_rate)
 
 
 def pad_zeros(signal, pad_width, mode='after'):

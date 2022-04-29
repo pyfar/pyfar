@@ -551,11 +551,17 @@ def test_minimum_phase_against_reference():
         rtol=1e-10, atol=1e-10)
 
 
-def test_minimum_phase_pad_length():
-    # test pad length
+def test_minimum_phase_nfft():
+
+    with pytest.raises(ValueError, match="n_fft is 5 but must be at least 6"):
+        pf.dsp.minimum_phase(pf.Signal([0, 1, 0, 0, 0, 0], 44100), 5)
+
+
+def test_minimum_phase_truncation():
+    # test truncation parameter
     n_samples = 9
     imp_minphase = pyfar.dsp.minimum_phase(
-        pyfar.signals.impulse(n_samples), pad=True)
+        pyfar.signals.impulse(n_samples), truncate=False)
 
     assert imp_minphase.n_samples == n_samples
 
@@ -566,7 +572,7 @@ def test_minimum_phase_multidim():
     imp_linphase = pyfar.signals.impulse(
         n_samples+1, delay=int(n_samples/2), amplitude=np.ones((2, 3)))
     imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, pad=True)
+        imp_linphase, truncate=False)
 
     # assert imp_minphase.n_samples == imp_linphase.n_samples
     # assert imp_minphase.cshape == imp_linphase.cshape
