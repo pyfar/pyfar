@@ -1142,27 +1142,30 @@ def _cross_fade(first, second, indices):
 
 def minimum_phase(signal, n_fft=None, truncate=True):
     """
-    Calculate the minimum phase equivalent of a signal.
+    Calculate the minimum phase equivalent of a finite impulse response.
 
     The method is based on the Hilbert transform of the real-valued cepstrum
-    of the signal, that is the cepstrum of the magnitude spectrum
-    only. As a result the magnitude spectrum is not distorted. Potential
-    aliasing errors can occur due to the Fourier transform based calculation
-    of the magnitude spectrum, which however are negligible if the length of
-    Fourier transform ``n_fft`` is sufficiently high. [#]_ (Section 8.5.4)
+    of the finite impulse response, that is the cepstrum of the magnitude
+    spectrum only. As a result the magnitude spectrum is not distorted.
+    Potential aliasing errors can occur due to the Fourier transform based
+    calculation of the magnitude spectrum, which however are negligible if the
+    length of Fourier transform ``n_fft`` is sufficiently high. [#]_
+    (Section 8.5.4)
 
     Parameters
     ----------
     signal : Signal
-        The data for which the minimum-phase version is computed.
+        The finite impulse response for which the minimum-phase version is
+        computed.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
-        few times larger than the signal length. The default ``None`` uses
+        few times larger than ``signal.n_samples``. The default ``None`` uses
         eight times the signal length rounded up to the next power of two,
-        that is ``2**int(np.ceil(np.log2(n_samples * 8)))``.
+        that is: ``2**int(np.ceil(np.log2(n_samples * 8)))``.
     truncate : bool, optional
-        If ``truncate`` is ``True``, the resulting signal is truncated to a
-        length of ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
+        If ``truncate`` is ``True``, the resulting minimum phase impulse
+        response is truncated to a length of
+        ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
         aliasing described above in any case but might distort the magnitude
         response if ``signal.n_samples`` is to low. If truncate is ``False``
         the output signal has the same length as the input signal. The default
@@ -1171,7 +1174,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
     Returns
     -------
     signal_minphase : Signal
-        The minimum phase version of the filter.
+        The minimum phase version of the input data.
 
     References
     ----------
