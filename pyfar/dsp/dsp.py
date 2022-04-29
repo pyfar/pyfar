@@ -1172,9 +1172,6 @@ def minimum_phase(signal, n_fft=None, truncate=True):
     -------
     signal_minphase : Signal
         The minimum phase version of the filter.
-    magnitude_ratio : FrequencyData
-        The ratio between the (normalized) magnitude spectra of the linear
-        phase and the minimum phase versions of the filter.
 
     References
     ----------
