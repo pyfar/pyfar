@@ -117,13 +117,10 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
     .. plot::
 
         >>> import pyfar as pf
-        >>>
         >>> signal = pf.signals.impulse(441)
         >>> signal = pf.dsp.filter.bell(signal, 1e3, 12, 1, "III")
         >>> signal = pf.dsp.filter.bell(signal, 10e3, -60, 100, "III")
-        >>>
         >>> smoothed, _ = pf.dsp.smooth_fractional_octave(signal, 1)
-        >>>
         >>> ax = pf.plot.freq(signal, label="input")
         >>> pf.plot.freq(smoothed, label="smoothed")
         >>> ax.legend(loc=3)
@@ -136,12 +133,9 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
     .. plot::
 
         >>> import pyfar as pf
-        >>>
         >>> signal = pf.signals.sine(1e3, 4410)
         >>> signal.fft_norm = "amplitude"
-        >>>
         >>> smoothed, _ = pf.dsp.smooth_fractional_octave(signal, 1)
-        >>>
         >>> ax = pf.plot.freq(signal, label="input")
         >>> pf.plot.freq(smoothed, label="smoothed")
         >>> ax.set_xlim(200, 4e3)
