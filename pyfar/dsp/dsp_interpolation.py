@@ -4,6 +4,37 @@ from scipy.interpolate import interp1d
 import scipy.signal as sgn
 import matplotlib.pyplot as plt
 import pyfar as pf
+from scipy.ndimage import generic_filter1d
+
+
+def _weighted_moving_average(input, output, weights):
+    """Moving average filter of length N and arbitrary.
+
+    Parameters
+    ----------
+    input : numpy.ndarray
+        The input array
+    output : numpy.ndarray
+        The output buffer
+    N : int
+        Length of the filter
+    weights : numpy.ndarray
+        The weights used for averaging. The length of the weights also
+        specifies the length of the filter.
+
+    Note
+    ----
+    This function is primarily intended to be used in combination with
+    ``scipy.ndimage.generic_filter1d``. The input is strided instead of
+    reshaped, leaving the memory layout unchanged. The function does also not
+    return it's output but requires the output buffer as function input, which
+    is required by ``scipy.ndimage.generic_filter1d``.
+
+    """
+    strided = np.lib.stride_tricks.as_strided(
+        input, strides=input.strides*2,
+        shape=(weights.size, input.size - (weights.size-1)))
+    output[:] = np.average(strided, weights=weights, axis=0)
 
 
 def smooth_fractional_octave(signal, width, mode="magnitude",
@@ -167,37 +198,19 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
         raise ValueError(f"window is of type {str(type(window))} but must be "
                          "of type string")
 
-    # normalize and match dimensions for convolution
-    window /= np.sum(window)
-
-    while window.ndim < data[0].ndim:
-        window = window[np.newaxis]
-
     for nn in range(len(data)):
         # interpolate to logarithmically spaced frequencies
         interpolator = interp1d(
             n_lin + 1, data[nn], "cubic", copy=False, assume_sorted=True)
         data[nn] = interpolator(n_log)
 
-        # pad to account for window half length (The window is of length N with
-        # the frequency index -N//2, ..., -2, -1, 0, 1, 2, ... N//2. Because
-        # the convolution below does not now the frequency index, we must pad
-        # with N//2 and discard the additional bins after the convolution)
-        pad = np.ones(signal.cshape + (n_window // 2, ))
-        first_bin = data[nn][..., 0]
-        last_bin = data[nn][..., -1]
-        while pad.ndim > first_bin.ndim:
-            first_bin = first_bin[..., np.newaxis]
-            last_bin = last_bin[..., np.newaxis]
-
-        data[nn] = np.concatenate(
-            (pad * first_bin, data[nn], pad * last_bin), axis=-1)
-
-        # smooth (convolve with window)
-        data[nn] = sgn.oaconvolve(data[nn], window, mode="full", axes=-1)
-
-        # remove delay and excess length
-        data[nn] = data[nn][..., n_window - 1:N + n_window - 1]
+        # apply a moving average filter based on the window function
+        data[nn] = generic_filter1d(
+            data[nn],
+            function=_weighted_moving_average,
+            filter_size=n_window,
+            mode='nearest',
+            extra_arguments=(window,))
 
         # interpolate to original frequency axis
         interpolator = interp1d(
