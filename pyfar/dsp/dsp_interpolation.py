@@ -68,7 +68,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
             :py:func:`~pyfar.dsp.linear_phase`)
         ``"magnitude_phase"``
             Separately smooth the magnitude and unwrapped phase response.
-        ``"magnitude_copy"``
+        ``"magnitude_copy_phase"``
             Smooth the magnitude and keep the phase of the input signal.
         ``"complex"``
             Separately smooth the real and imaginary part of the spectrum. This
@@ -147,7 +147,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
     if not isinstance(signal, pf.Signal):
         raise TypeError("Input signal has to be of type pyfar.Signal")
 
-    if mode in ["magnitude", "magnitude_copy"]:
+    if mode in ["magnitude", "magnitude_copy_phase"]:
         data = [np.atleast_2d(np.abs(signal.freq_raw))]
     elif mode == "complex":
         data = [np.atleast_2d(np.real(signal.freq_raw)),
@@ -157,7 +157,8 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
                 np.atleast_2d(pf.dsp.phase(signal, unwrap=True))]
     else:
         raise ValueError((f"mode is '{mode}' but must be 'magnitude', "
-                          "'complex', or 'magnitude_phase'"))
+                          "'magnitude_phase', 'magnitude_copy_phase' or "
+                          "'complex'"))
 
     # linearly and logarithmically spaced frequency bins ----------------------
     N = signal.n_bins
@@ -219,11 +220,11 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
         data = data[0] + 1j * data[1]
     elif mode == "magnitude_phase":
         data = data[0] * np.exp(1j * data[1])
-    elif mode == "magnitude_copy":
+    elif mode == "magnitude_copy_phase":
         data = data[0] * np.exp(1j * np.angle(signal.freq_raw))
 
     # force 0 Hz and Nyquist to be real if it might not be the case
-    if mode in ["complex", "magnitude_phase", "magnitude_copy"]:
+    if mode in ["complex", "magnitude_phase", "magnitude_copy_phase"]:
         data[..., 0] = np.abs(data[..., 0])
         data[..., -1] = np.abs(data[..., -1])
 

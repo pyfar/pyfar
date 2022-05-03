@@ -26,9 +26,9 @@ y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_phase")
 pf.plot.time_freq(y, label="magnitude phase")
 np.savetxt("dsp.smooth_fractional_octave_magnitude_phase.csv", y.time)
 
-y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_copy")
+y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_copy_phase")
 pf.plot.time_freq(y, label="magnitude copy")
-np.savetxt("dsp.smooth_fractional_octave_magnitude_copy.csv", y.time)
+np.savetxt("dsp.smooth_fractional_octave_magnitude_copy_phase.csv", y.time)
 
 y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="complex")
 pf.plot.time_freq(y, label="complex")

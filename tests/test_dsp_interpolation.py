@@ -27,7 +27,7 @@ def test_smooth_fractional_octave_assertions():
 
 
 @pytest.mark.parametrize("mode", (
-    "magnitude", "magnitude_phase", "magnitude_copy", "complex"))
+    "magnitude", "magnitude_phase", "magnitude_copy_phase", "complex"))
 def test_smooth_fractional_octave_mode(mode):
     """
     Test return signal for different smoothing modes against saved references
