@@ -37,7 +37,7 @@ def _weighted_moving_average(input, output, weights):
     output[:] = np.average(strided, weights=weights, axis=0)
 
 
-def smooth_fractional_octave(signal, width, mode="magnitude",
+def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
                              window="boxcar"):
     """
     Smooth spectrum with a fractional octave width.
@@ -54,9 +54,9 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
     ----------
     signal : pyfar.Signal
         The input data.
-    width : number
-        The width of the smoothing window in octaves, e.g., 1/3 will apply
-        third octave smoothing.
+    num_fractions : number
+        The width of the smoothing window in fractional octaves, e.g., 3 will
+        apply third octave smoothing and 1 will apply octave smoothing.
     mode : str, optional
 
         ``"magnitude"``
@@ -90,9 +90,10 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
 
         `n_window`
             The window length in (logarithmically spaced) samples
-        `window_width`
-            The actual window width in octaves. This can deviate due to the
-            ideal width because the window must have an integer length
+        `num_fractions`
+            The actual width of the window in fractional octaves. This can
+            deviate from the desired width because the smoothing window must
+            have an integer sample length
 
     Notes
     -----
@@ -171,13 +172,13 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
     # Note: Forcing the window to have an odd length increases the deviation
     #       from the exact width, but makes sure that the delay introduced in
     #       the convolution is integer and can be easily compensated
-    n_window = int(2 * np.floor(width / delta_n / 2) + 1)
+    n_window = int(2 * np.floor(1 / (num_fractions * delta_n * 2)) + 1)
 
     if n_window == 1:
         raise ValueError((
-            "The smoothing_width is below the frequency resolution of the "
-            "signal. Increase the signal length or decrease the smoothing "
-            "width"))
+            "The smoothing width given by num_fractions is below the frequency"
+            " resolution of the signal. Increase the signal length or decrease"
+            " num_fractions"))
 
     # generate the smoothing window
     if isinstance(window, str):
@@ -229,7 +230,7 @@ def smooth_fractional_octave(signal, width, mode="magnitude",
     signal = signal.copy()
     signal.freq_raw = data
 
-    return signal, (n_window, n_window * delta_n)
+    return signal, (n_window, 1 / (n_window * delta_n))
 
 
 def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,

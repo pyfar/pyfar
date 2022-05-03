@@ -22,7 +22,7 @@ def test_smooth_fractional_octave_assertions():
         smooth_fractional_octave(pf.Signal(1, 1), 1, "smooth")
 
     # smoothing width too small
-    with raises(ValueError, match="The smoothing_width"):
+    with raises(ValueError, match="The smoothing width"):
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
 
@@ -49,8 +49,8 @@ def test_smooth_fractional_octave_mode(mode):
     npt.assert_allclose(output.time.flatten(), reference)
 
 
-@pytest.mark.parametrize("smoothing_width", (1, .2))
-def test_smooth_fractional_octave_smoothing_width(smoothing_width):
+@pytest.mark.parametrize("num_fractions", (1, 5))
+def test_smooth_fractional_octave_num_fractions(num_fractions):
     """
     Test return signal for different smoothing widths against saved references
     """
@@ -62,12 +62,12 @@ def test_smooth_fractional_octave_smoothing_width(smoothing_width):
     signal = pf.Signal(signal, 44100)
 
     # smooth
-    smoothed, _ = smooth_fractional_octave(signal, smoothing_width)
+    smoothed, _ = smooth_fractional_octave(signal, num_fractions)
 
     # compare to reference
     reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
-            f"dsp.smooth_fractional_octave_{smoothing_width}.csv"))
+            f"dsp.smooth_fractional_octave_{num_fractions}.csv"))
     npt.assert_allclose(smoothed.time.flatten(), reference)
 
 

@@ -44,8 +44,8 @@ y, _ = pf.dsp.smooth_fractional_octave(signal, 1)
 pf.plot.time_freq(y, label="1")
 np.savetxt("dsp.smooth_fractional_octave_1.csv", y.time)
 
-y, _ = pf.dsp.smooth_fractional_octave(signal, 0.2)
+y, _ = pf.dsp.smooth_fractional_octave(signal, 5)
 pf.plot.time_freq(y, label="0.2")
-np.savetxt("dsp.smooth_fractional_octave_0.2.csv", y.time)
+np.savetxt("dsp.smooth_fractional_octave_5.csv", y.time)
 
 ax[1].legend(loc=3)
