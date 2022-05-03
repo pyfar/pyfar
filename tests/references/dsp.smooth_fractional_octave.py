@@ -18,15 +18,15 @@ signal = pf.Signal(np.loadtxt("dsp.smooth_fractional_octave_input.csv"),
 plt.figure()
 ax = pf.plot.time_freq(signal)
 
-y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude")
-pf.plot.time_freq(y, label="magnitude")
-np.savetxt("dsp.smooth_fractional_octave_magnitude.csv", y.time)
+y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_zerophase")
+pf.plot.time_freq(y, label="magnitude_zerophase")
+np.savetxt("dsp.smooth_fractional_octave_magnitude_zerophase.csv", y.time)
 
 y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_phase")
 pf.plot.time_freq(y, label="magnitude phase")
 np.savetxt("dsp.smooth_fractional_octave_magnitude_phase.csv", y.time)
 
-y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_copy_phase")
+y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude")
 pf.plot.time_freq(y, label="magnitude copy")
 np.savetxt("dsp.smooth_fractional_octave_magnitude_copy_phase.csv", y.time)
 

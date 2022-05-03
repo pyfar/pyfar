@@ -37,7 +37,7 @@ def _weighted_moving_average(input, output, weights):
     output[:] = np.average(strided, weights=weights, axis=0)
 
 
-def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
+def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
                              window="boxcar"):
     """
     Smooth spectrum with a fractional octave width.
@@ -59,22 +59,27 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
         apply third octave smoothing and 1 will apply octave smoothing.
     mode : str, optional
 
-        ``"magnitude"``
+        ``"magnitude_zerophase"``
             Only the magnitude response, i.e., the absolute spectrum is
             smoothed. Note that this return a zero-phase signal. It might be
             necessary to generate a minimum or linear phase if the data is
             subject to further processing after the smoothing (cf.
             :py:func:`~pyfar.dsp.minimum_phase` and
             :py:func:`~pyfar.dsp.linear_phase`)
+        ``"magnitude"``
+            Smooth the magnitude and keep the phase of the input signal.
         ``"magnitude_phase"``
             Separately smooth the magnitude and unwrapped phase response.
-        ``"magnitude_copy_phase"``
-            Smooth the magnitude and keep the phase of the input signal.
         ``"complex"``
-            Separately smooth the real and imaginary part of the spectrum. This
-            method often causes artifacts at high frequencies.
+            Separately smooth the real and imaginary part of the spectrum.
 
-        The default is ``"magnitude"``.
+        Note that the modes `magnitude_zerophase` and `magnitude` make sure
+        that the smoothed magnitude response is as expected at the cost of an
+        artificial phase response. This is often desired, e.g., when plotting
+        signals or designing compensation filters. The modes `magnitude_phase`
+        and `complex` smooth all information but might cause a high frequency
+        energy loss in the smoothed magnitude response. The default is
+        ``"magnitude_zerophase"``.
     window : str, optional
         String that defines the smoothing window. All windows from
         :py:func:`~pyfar.dsp.time_window` that do not require an additional
@@ -147,7 +152,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
     if not isinstance(signal, pf.Signal):
         raise TypeError("Input signal has to be of type pyfar.Signal")
 
-    if mode in ["magnitude", "magnitude_copy_phase"]:
+    if mode in ["magnitude_zerophase", "magnitude"]:
         data = [np.atleast_2d(np.abs(signal.freq_raw))]
     elif mode == "complex":
         data = [np.atleast_2d(np.real(signal.freq_raw)),
@@ -156,9 +161,8 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
         data = [np.atleast_2d(np.abs(signal.freq_raw)),
                 np.atleast_2d(pf.dsp.phase(signal, unwrap=True))]
     else:
-        raise ValueError((f"mode is '{mode}' but must be 'magnitude', "
-                          "'magnitude_phase', 'magnitude_copy_phase' or "
-                          "'complex'"))
+        raise ValueError((f"mode is '{mode}' but must be 'magnitude_zerophase'"
+                          ", 'magnitude_phase', 'magnitude', or 'complex'"))
 
     # linearly and logarithmically spaced frequency bins ----------------------
     N = signal.n_bins
@@ -214,17 +218,17 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude",
         data[nn] = interpolator(n_lin + 1)
 
     # generate return signal --------------------------------------------------
-    if mode == "magnitude":
+    if mode == "magnitude_zerophase":
         data = data[0]
     elif mode == "complex":
         data = data[0] + 1j * data[1]
     elif mode == "magnitude_phase":
         data = data[0] * np.exp(1j * data[1])
-    elif mode == "magnitude_copy_phase":
+    elif mode == "magnitude":
         data = data[0] * np.exp(1j * np.angle(signal.freq_raw))
 
     # force 0 Hz and Nyquist to be real if it might not be the case
-    if mode in ["complex", "magnitude_phase", "magnitude_copy_phase"]:
+    if mode in ["complex", "magnitude_phase", "magnitude"]:
         data[..., 0] = np.abs(data[..., 0])
         data[..., -1] = np.abs(data[..., -1])
 
