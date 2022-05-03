@@ -37,10 +37,7 @@ def test_decibel_TimeData():
     npt.assert_almost_equal(pf.dsp.decibel(test_TimeData, domain='time'),
                             [[-40, -20, 0, 20, 40]], decimal=10)
     # Test wrong domain input
-    with raises(ValueError, match=("Domain is 'freq' and signal is type "
-                                   "'<class 'pyfar.classes.audio.TimeData'>',"
-                                   " but must be of type 'Signal'"
-                                   " or 'FrequencyData'.")):
+    with raises(ValueError, match="Domain is 'freq' and signal is type"):
         pf.dsp.decibel(test_TimeData, domain='freq')
 
 

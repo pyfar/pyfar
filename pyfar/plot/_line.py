@@ -9,7 +9,7 @@ from .ticker import (
     MultipleFractionFormatter)
 
 
-def _time(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
+def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
           ax=None, **kwargs):
     """Plot the time data of a signal."""
 
@@ -22,8 +22,7 @@ def _time(signal, dB=False, log_prefix=None, log_reference=1, unit=None,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     if dB:
         # avoid any zero-values because they result in -inf in dB data
-        data = dsp.decibel(signal, domain='time', log_prefix=log_prefix,
-                           log_reference=log_reference).T
+        data = dsp.decibel(signal, 'time', log_prefix, log_reference).T
         ymax = np.nanmax(data) + 10
         ymin = ymax - 100
     else:

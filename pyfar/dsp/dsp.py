@@ -1654,49 +1654,44 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
 
 def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
-    """Return array of given signal in decibel in choosen domain.
+Convert data of the selected signal domain into decibels (dB).
 
     Parameters
     ----------
     signal : Signal, TimeData, FrequencyData
         The signal which is converted into decibel
     domain : str
-        Signal domain, in which the signal is converted into decibel
-        The different domains:
+        The domain, that is converted to decibels:
 
         ``'freq'``
-            Converts signal in frequency domain. Signal must be of type
+            Convert normalized frequency domain data. Signal must be of type
             'Signal' or 'FrequencyData'.
         ``'time'``
-            Converts signal in time domain. Signal must be of type
+            Convert time domain data. Signal must be of type
             'Signal' or 'TimeData'.
         ``'freq_raw'``
-            Converts signal in freq_raw domain. Signal must be of type
+            Convert frequency domain data without normalization. Signal must be of type
             'Signal'.
 
         The default is ``'freq'``.
     log_prefix : int
-        Return prefix for dB calculation in frequency domain depending on
-        fft_norm..
-
-        For the FFT normalizations ``'psd'`` and ``'power'`` the prefix is 10,
-        for the other normalizations it is 20.
-
-        The default is None, but will be set during the fuction call.
+        The prefix for the dB calculation. The default ``None``, uses ``10``
+        for signals with ``'psd'`` and ``'power'`` FFT normalization and
+        ``20`` otherwise.
     log_reference : int or float
-        Sets the reference for the logarithm calculation
+      Reference for the logarithm calculation.
 
         The default is 1.
     Returns
     -------
-    numpy.ndarray
-        The given signal in decibel in choosen domain.
+    decibel : numpy.ndarray
+        The given signal in decibel in chosen domain.
 
     Examples
     --------
     >>> import pyfar as pf
     >>> signal = pf.signals.noise(41000, rms=[1, 1])
-    >>> decibel_signal = decibel(signal, domain='time')
+    >>> decibel_data = decibel(signal, domain='time')
     """
     if log_prefix is None:
         if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
