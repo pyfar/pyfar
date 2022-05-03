@@ -15,7 +15,7 @@ from .dsp import (
     convolve
 )
 
-from .dsp_interpolation import (
+from .interpolation import (
     InterpolateSpectrum
 )
 
