@@ -18,8 +18,7 @@ from .dsp import (
 from .dsp_interpolation import (
     smooth_fractional_octave,
     fractional_delay_sinc,
-    InterpolateSpectrum,
-    resample
+    InterpolateSpectrum
 )
 
 from . import filter
@@ -45,6 +44,5 @@ __all__ = [
     'convolve',
     'InterpolateSpectrum',
     'smooth_fractional_octave',
-    'fractional_delay_sinc',
-    'resample'
+    'fractional_delay_sinc'
 ]

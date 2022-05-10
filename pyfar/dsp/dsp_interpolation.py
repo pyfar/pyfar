@@ -1,14 +1,10 @@
 import numpy as np
-import scipy
 from scipy.special import iv as bessel_first_mod
 from scipy.interpolate import interp1d
 import scipy.signal as sgn
 import matplotlib.pyplot as plt
 import pyfar as pf
 from scipy.ndimage import generic_filter1d
-import warnings
-from fractions import Fraction
-from decimal import Decimal
 
 
 def _weighted_moving_average(input, output, weights):
@@ -749,25 +745,3 @@ class InterpolateSpectrum():
             frequencies = np.log(frequencies)
 
         return frequencies
-
-
-def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
-    L = sampling_rate / signal.sampling_rate
-    if frac_limit is None:
-        frac = Fraction(Decimal(L)).limit_denominator()
-    else:
-        frac = Fraction(Decimal(L)).limit_denominator(frac_limit)
-    up, down = frac.numerator, frac.denominator
-    error = abs(signal.sampling_rate * up / down - sampling_rate)
-    if sampling_rate % 10:
-        warnings.warn(f'Sampling_rate = {sampling_rate} is not divisible by 10'
-                      ', which can cause a infinite loop in the Scipy function'
-                      ' "resample_poly". In this case, interrupt and choose a '
-                      'different sampling_rate.')
-    data = scipy.signal.resample_poly(signal.time, up, down,
-                                      axis=-1, padtype=padtype)
-    if error != 0.0:
-        warnings.warn(f'up: {up}, down: {down}. With limit={frac_limit} there '
-                      f'is a resampling error of {error} Hz. Check '
-                      'documentation to choose a fitting limit')
-    return pf.Signal(data, sampling_rate)
