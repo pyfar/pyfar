@@ -21,8 +21,7 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     if dB:
-        data = dsp.decibel(signal, domain='time', log_prefix=log_prefix,
-                           log_reference=log_reference)
+        data = dsp.decibel(signal, 'time', log_prefix, log_reference)
         ymax = np.nanmax(data) + 10
         ymin = ymax - 100
     else:
@@ -79,8 +78,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     if dB:
-        data = dsp.decibel(signal, domain='freq', log_prefix=log_prefix,
-                           log_reference=log_reference)
+        data = dsp.decibel(signal, 'freq', log_prefix, log_reference)
         ymax = np.nanmax(data)
         ymin = ymax - 90
         ymax = ymax + 10

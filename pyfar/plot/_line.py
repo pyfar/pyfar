@@ -69,8 +69,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     if dB:
-        data = dsp.decibel(signal, domain='freq', log_prefix=log_prefix,
-                           log_reference=log_reference)
+        data = dsp.decibel(signal, 'freq', log_prefix, log_reference)
         ymax = np.nanmax(data)
         ymin = ymax - 90
         ymax = ymax + 10

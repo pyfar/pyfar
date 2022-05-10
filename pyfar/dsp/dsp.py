@@ -1654,7 +1654,22 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
 
 def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
-Convert data of the selected signal domain into decibels (dB).
+    r"""Convert data of the selected signal domain into decibels (dB).
+
+    The converted data is calculated by the base 10 logarithmic scale:
+    ``data(dB) = log_prefix * numpy.log10(data/log_reference)``. By using a
+    logarithmic scale, the deciBel is able to compare quantities that
+    may have vast ratios between them. As an example, the sound pressure in
+    dB can be calculated as followed:
+
+    .. math::
+
+        L_p(dB) = 20\log_{10}\biggl(\frac{p}{p_0}\biggr),
+
+    where :math:`20` is the logarithmic prefix for sound field quantities and
+    :math:`p_0` would be the reference for the sound pressure level. A list
+    of commonly used reference values can be found in the ``'log_reference'``
+    parameters section.
 
     Parameters
     ----------
@@ -1670,8 +1685,8 @@ Convert data of the selected signal domain into decibels (dB).
             Convert time domain data. Signal must be of type
             'Signal' or 'TimeData'.
         ``'freq_raw'``
-            Convert frequency domain data without normalization. Signal must be of type
-            'Signal'.
+            Convert frequency domain data without normalization. Signal must be
+            of type 'Signal'.
 
         The default is ``'freq'``.
     log_prefix : int
@@ -1679,7 +1694,22 @@ Convert data of the selected signal domain into decibels (dB).
         for signals with ``'psd'`` and ``'power'`` FFT normalization and
         ``20`` otherwise.
     log_reference : int or float
-      Reference for the logarithm calculation.
+        Reference for the logarithm calculation.
+        List of commonly used values:
+
+        +---------------------------------+--------------+
+        | log_reference                   | value        |
+        +=================================+==============+
+        | Voltage :math:`L_V` (dBu)       | 0.7746 volt  |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBV)       | 1 volt       |
+        +---------------------------------+--------------+
+        | Sound pressure :math:`L_p` (dB) | 2e-5 Pa      |
+        +---------------------------------+--------------+
+        | Sound intensity :math:`L_I` (dB)| 1e-12 W/m²   |
+        +---------------------------------+--------------+
+        | Electric power :math:`L_P` (dB) | 1 watt       |
+        +---------------------------------+--------------+
 
         The default is 1.
     Returns
@@ -1699,24 +1729,23 @@ Convert data of the selected signal domain into decibels (dB).
             log_prefix = 10
         else:
             log_prefix = 20
-    eps = np.finfo(float).eps
     if domain == 'freq':
         if isinstance(signal, (pyfar.FrequencyData, pyfar.Signal)):
-            data = signal.freq
+            data = signal.freq.copy()
         else:
             raise ValueError(
                 f"Domain is '{domain}' and signal is type '{signal.__class__}'"
                 ", but must be of type 'Signal' or 'FrequencyData'.")
     elif domain == 'time':
         if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
-            data = signal.time
+            data = signal.time.copy()
         else:
             raise ValueError(
                 f"Domain is '{domain}' and signal is type '{signal.__class__}'"
                 ", but must be of type 'Signal' or 'TimeData'.")
     elif domain == 'freq_raw':
         if isinstance(signal, (pyfar.Signal)):
-            data = signal.freq_raw
+            data = signal.freq_raw.copy()
         else:
             raise ValueError(
                 f"Domain is '{domain}' and signal is type '{signal.__class__}'"
@@ -1725,4 +1754,5 @@ Convert data of the selected signal domain into decibels (dB).
         raise ValueError(
             f"Domain is '{domain}', but has to be 'time', 'freq',"
             " or 'freq_raw'.")
-    return log_prefix * np.log10(np.abs(data) / log_reference + eps)
+    data[data == 0] = np.finfo(float).eps
+    return log_prefix * np.log10(np.abs(data) / log_reference)
