@@ -476,6 +476,14 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
 
 def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
     """Resample signal to new sampling rate.
+
+    For resampling the signal the SciPy function ``scipy.signal.resample_poly``
+    is used. Therefore, the factor ``L = new_sampling_rate/old_sampling_rate``
+    is converted into a fraction. Thereby, the signal is upsampled by the
+    numerator of the fraction, a zero-phase low-pass FIR filter is applied and
+    then it's downsampled by the denominator of the fraction.
+    Notice, that the new sampling rate should be divisible by 10, otherwise it
+    can cause a infinite loop in the resample_poly function. 
     ----------
     signal : Signal
         Input data to be resampled
