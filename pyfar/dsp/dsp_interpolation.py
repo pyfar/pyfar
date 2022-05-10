@@ -474,6 +474,53 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     return signal
 
 
+def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
+    """Resample signal to new sampling rate.
+    ----------
+    signal : Signal
+        Input data to be resampled
+    sampling_rate : number
+        The new sampling rate in Hz
+    padtype : string
+        Soon
+    frac_limit : int
+        Soon
+    Returns
+    -------
+    signal : pyfar.Signal
+        The resampled signal of the input data with the new sampling rate.
+    References
+    ----------
+    Soon
+    Examples
+    --------
+    Soon
+    """
+
+    # check input
+    if not isinstance(signal, (pf.Signal)):
+        raise TypeError("Input data has to be of type pyfar.Signal")
+    L = sampling_rate / signal.sampling_rate
+    if frac_limit is None:
+        frac = Fraction(Decimal(L)).limit_denominator()
+    else:
+        frac = Fraction(Decimal(L)).limit_denominator(frac_limit)
+    up, down = frac.numerator, frac.denominator
+    error = abs(signal.sampling_rate * up / down - sampling_rate)
+    if sampling_rate % 10:
+        warnings.warn(f'Sampling_rate = {sampling_rate} is not divisible by 10'
+                      ', which can cause a infinite loop in the Scipy function'
+                      ' "resample_poly". In this case, interrupt and choose a '
+                      'different sampling_rate.')
+    if error != 0.0:
+        warnings.warn(f'up: {up}, down: {down}. With limit={frac_limit} there '
+                      f'is a resampling error of {error} Hz. Check '
+                      'documentation to choose a fitting limit')
+    data = scipy.signal.resample_poly(signal.time, up, down,
+                                      axis=-1, padtype=padtype)
+    return pf.Signal(data, sampling_rate)
+
+
 class InterpolateSpectrum():
     """
     Interpolate an incomplete spectrum to a complete single sided spectrum.
@@ -749,25 +796,3 @@ class InterpolateSpectrum():
             frequencies = np.log(frequencies)
 
         return frequencies
-
-
-def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
-    L = sampling_rate / signal.sampling_rate
-    if frac_limit is None:
-        frac = Fraction(Decimal(L)).limit_denominator()
-    else:
-        frac = Fraction(Decimal(L)).limit_denominator(frac_limit)
-    up, down = frac.numerator, frac.denominator
-    error = abs(signal.sampling_rate * up / down - sampling_rate)
-    if sampling_rate % 10:
-        warnings.warn(f'Sampling_rate = {sampling_rate} is not divisible by 10'
-                      ', which can cause a infinite loop in the Scipy function'
-                      ' "resample_poly". In this case, interrupt and choose a '
-                      'different sampling_rate.')
-    data = scipy.signal.resample_poly(signal.time, up, down,
-                                      axis=-1, padtype=padtype)
-    if error != 0.0:
-        warnings.warn(f'up: {up}, down: {down}. With limit={frac_limit} there '
-                      f'is a resampling error of {error} Hz. Check '
-                      'documentation to choose a fitting limit')
-    return pf.Signal(data, sampling_rate)
