@@ -1664,11 +1664,11 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
 
     .. math::
 
-        L_p(dB) = 20\log_{10}\biggl(\frac{p}{p_0}\biggr),
+        L_p = 20\log_{10}\biggl(\frac{p}{p_0}\biggr),
 
     where :math:`20` is the logarithmic prefix for sound field quantities and
     :math:`p_0` would be the reference for the sound pressure level. A list
-    of commonly used reference values can be found in the ``'log_reference'``
+    of commonly used reference values can be found in the 'log_reference'
     parameters section.
 
     Parameters
@@ -1700,13 +1700,15 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
         +---------------------------------+--------------+
         | log_reference                   | value        |
         +=================================+==============+
-        | Voltage :math:`L_V` (dBu)       | 0.7746 volt  |
-        +---------------------------------+--------------+
-        | Voltage :math:`L_V` (dBV)       | 1 volt       |
+        | Digital signals (dBFs)          | 1            |
         +---------------------------------+--------------+
         | Sound pressure :math:`L_p` (dB) | 2e-5 Pa      |
         +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBu)       | 0.7746 volt  |
+        +---------------------------------+--------------+
         | Sound intensity :math:`L_I` (dB)| 1e-12 W/m²   |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBV)       | 1 volt       |
         +---------------------------------+--------------+
         | Electric power :math:`L_P` (dB) | 1 watt       |
         +---------------------------------+--------------+
@@ -1735,21 +1737,21 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
         else:
             raise ValueError(
                 f"Domain is '{domain}' and signal is type '{signal.__class__}'"
-                ", but must be of type 'Signal' or 'FrequencyData'.")
+                " but must be of type 'Signal' or 'FrequencyData'.")
     elif domain == 'time':
         if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
             data = signal.time.copy()
         else:
             raise ValueError(
                 f"Domain is '{domain}' and signal is type '{signal.__class__}'"
-                ", but must be of type 'Signal' or 'TimeData'.")
+                " but must be of type 'Signal' or 'TimeData'.")
     elif domain == 'freq_raw':
         if isinstance(signal, (pyfar.Signal)):
             data = signal.freq_raw.copy()
         else:
             raise ValueError(
                 f"Domain is '{domain}' and signal is type '{signal.__class__}'"
-                ", but must be of type 'Signal'.")
+                " but must be of type 'Signal'.")
     else:
         raise ValueError(
             f"Domain is '{domain}', but has to be 'time', 'freq',"
