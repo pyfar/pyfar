@@ -483,7 +483,7 @@ def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
     numerator of the fraction, a zero-phase low-pass FIR filter is applied and
     then it's downsampled by the denominator of the fraction.
     Notice, that the new sampling rate should be divisible by 10, otherwise it
-    can cause a infinite loop in the resample_poly function. 
+    can cause a infinite loop in the resample_poly function.
     ----------
     signal : Signal
         Input data to be resampled
@@ -515,18 +515,21 @@ def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
         frac = Fraction(Decimal(L)).limit_denominator(frac_limit)
     up, down = frac.numerator, frac.denominator
     error = abs(signal.sampling_rate * up / down - sampling_rate)
-    if sampling_rate % 10:
-        warnings.warn(f'Sampling_rate = {sampling_rate} is not divisible by 10'
-                      ', which can cause a infinite loop in the Scipy function'
-                      ' "resample_poly". In this case, interrupt and choose a '
-                      'different sampling_rate.')
+    if sampling_rate % 10 or signal.sampling_rate % 10:
+        warnings.warn((
+            f'At least one sampling rate is not divisible by 10, , which can '
+            'cause a infinite loop in `scipy.resample_poly`. If this occurs, '
+            'interrupt and choose different sampling rates.'))
     if error != 0.0:
-        warnings.warn(f'up: {up}, down: {down}. With limit={frac_limit} there '
-                      f'is a resampling error of {error} Hz. Check '
-                      'documentation to choose a fitting limit')
+        warnings.warn((
+            f'The target sampling rate was realized with an error of {error}.'
+            f'The error might be decreased by setting `frac_limit` to a value '
+            f'larger than {down} (This warning is not shown, if the target '
+            'sampling rate can exactly be realized).'))
     data = scipy.signal.resample_poly(signal.time, up, down,
                                       axis=-1, padtype=padtype)
-    return pf.Signal(data, sampling_rate)
+    return pf.Signal(data, sampling_rate, fft_norm=signal.fft_norm,
+                     comment=signal.comment)
 
 
 class InterpolateSpectrum():
