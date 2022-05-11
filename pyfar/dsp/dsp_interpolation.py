@@ -474,7 +474,8 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     return signal
 
 
-def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
+def resample(signal, sampling_rate, match_amplitude="time", padtype='constant',
+             frac_limit=None):
     """Resample signal to new sampling rate.
 
     For resampling the signal the SciPy function ``scipy.signal.resample_poly``
@@ -528,7 +529,9 @@ def resample(signal, sampling_rate, padtype='constant', frac_limit=None):
             'sampling rate can exactly be realized).'))
     data = scipy.signal.resample_poly(signal.time, up, down,
                                       axis=-1, padtype=padtype)
-    return pf.Signal(data, sampling_rate, fft_norm=signal.fft_norm,
+    gain = 1 if match_amplitude == "time" \
+        else signal.sampling_rate / sampling_rate
+    return pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
                      comment=signal.comment)
 
 
