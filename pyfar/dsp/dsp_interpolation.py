@@ -518,7 +518,7 @@ def resample(signal, sampling_rate, match_amplitude="time", padtype='constant',
     error = abs(signal.sampling_rate * up / down - sampling_rate)
     if sampling_rate % 10 or signal.sampling_rate % 10:
         warnings.warn((
-            f'At least one sampling rate is not divisible by 10, , which can '
+            'At least one sampling rate is not divisible by 10, , which can '
             'cause a infinite loop in `scipy.resample_poly`. If this occurs, '
             'interrupt and choose different sampling rates.'))
     if error != 0.0:
