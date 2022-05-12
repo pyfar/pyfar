@@ -484,7 +484,9 @@ def resample(signal, sampling_rate, match_amplitude="time", padtype='constant',
     numerator of the fraction, a zero-phase low-pass FIR filter is applied and
     then it's downsampled by the denominator of the fraction.
     Notice, that the new sampling rate should be divisible by 10, otherwise it
-    can cause a infinite loop in the resample_poly function.
+    can cause an infinite loop in the resample_poly function.
+
+    Parameters
     ----------
     signal : Signal
         Input data to be resampled
@@ -493,7 +495,7 @@ def resample(signal, sampling_rate, match_amplitude="time", padtype='constant',
     padtype : string
         Soon
     frac_limit : int
-        Soon
+        Sets the fractional limit of the denominator.
     Returns
     -------
     signal : pyfar.Signal
@@ -503,9 +505,21 @@ def resample(signal, sampling_rate, match_amplitude="time", padtype='constant',
     Soon
     Examples
     --------
-    Soon
-    """
+    Resamples a sine wave with a frecuency of 4410 Hz and a sampling rate of
+    44100 Hz to a sampling rate of 96000. For better clarity in the plot, the 
+    resampled signal is multiplied by 0.8.
 
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+
+        >>> signal = pf.signals.sine(4410, 20)
+        >>> resampled_signal = 0.8 * pf.dsp.resample(signal, 96000)
+        >>> pf.plot.time(signal, label = 'signal')
+        >>> pf.plot.time(resampled_signal, label = '0.8*resampled_signal')
+        >>> plt.legend()
+    """
     # check input
     if not isinstance(signal, (pf.Signal)):
         raise TypeError("Input data has to be of type pyfar.Signal")
