@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import pyfar as pf
 
 
-def fractional_time_shift(signal, shift, order=30, side_lobe_suppression=60,
-                          mode="cut"):
+def fractional_time_shift(signal, shift, unit="samples", order=30,
+                          side_lobe_suppression=60, mode="cut"):
     """
     Apply fractional time shift to input data.
 
@@ -124,6 +124,12 @@ def fractional_time_shift(signal, shift, order=30, side_lobe_suppression=60,
     if order + 1 > signal.n_samples:
         raise ValueError((f"The order is {order} but must not exceed "
                           f"{signal.n_samples-1} (signal.n_samples-1)"))
+
+    if unit == 's':
+        shift = shift*signal.sampling_rate
+    elif unit != 'samples':
+        raise ValueError(
+            f"Unit is '{unit}' but has to be 'samples' or 's'.")
 
     # separate integer and fractional shift -----------------------------------
     delay_int = np.atleast_1d(shift).astype(int)

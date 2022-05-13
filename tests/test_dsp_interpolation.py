@@ -16,13 +16,17 @@ def test_fractional_time_shift_assertions():
 
     # wrong values for order and side_lobe_suppression
     with raises(ValueError, match="The order must be > 0"):
-        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 0)
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, order=0)
     with raises(ValueError, match="The side lobe suppression must be > 0"):
-        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 2, 0)
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, "samples", 2, 0)
 
     # filter length exceeds signal length
     with raises(ValueError, match="The order is 30 but must not exceed 2"):
         fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5)
+
+    # wrong unit
+    with raises(ValueError, match="Unit is 'meter' but has to be"):
+        fractional_time_shift(pf.signals.impulse(64), 1, 'meter')
 
     # wrong mode
     with raises(ValueError, match="The mode is 'full' but must be 'cut'"):
@@ -68,12 +72,22 @@ def test_fractional_time_shift_channels(
     npt.assert_allclose(group_delays[..., :f_id], target_delays, atol=.05)
 
 
+def test_fractional_time_shift_unit():
+    """Test passing shift in different units"""
+
+    impulse = pf.signals.impulse(128, 64)
+    delayed_samples = fractional_time_shift(impulse, 1, 'samples')
+    delayed_seconds = fractional_time_shift(impulse, 1/44100, 's')
+
+    npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
+
+
 @pytest.mark.parametrize("order", [2, 3])
 def test_fractional_delay_order(order):
     """Test if the order parameter behaves as intended"""
 
     signal = pf.signals.impulse(32, 16)
-    delayed = pf.dsp.fractional_time_shift(signal, 0.5, order)
+    delayed = pf.dsp.fractional_time_shift(signal, 0.5, order=order)
 
     # number of non-zero samples must equal filter_length = order+1
     assert np.count_nonzero(np.abs(delayed.time) > 1e-14) == order + 1
@@ -84,7 +98,7 @@ def test_fractional_delay_mode_cut(delay):
     """Test the mode cut"""
 
     signal = pf.signals.impulse(16, 8)
-    delayed = fractional_time_shift(signal, delay, 2)
+    delayed = fractional_time_shift(signal, delay, order=2)
 
     # if the delay is too large, the signal is shifted out of the sampled range
     # and only zeros remain
