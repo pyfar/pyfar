@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pyfar as pf
 
 
-def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
+def fractional_time_shift(signal, delay, order=30, side_lobe_suppression=60,
                           mode="cut"):
     """
     Apply fractional delay to input data.
@@ -84,7 +84,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         >>> pf.plot.group_delay(signal, ax=ax[2], unit="samples")
         >>>
         >>> for order in [30, 6]:
-        >>>     delayed = pf.dsp.fractional_delay_sinc(signal, 2.3, order)
+        >>>     delayed = pf.dsp.fractional_time_shift(signal, 2.3, order)
         >>>     pf.plot.time_freq(delayed, ax=ax[:2],
         ...                       label=f"delayed, order={order}")
         >>>     pf.plot.group_delay(delayed, ax=ax[2], unit="samples")
@@ -105,7 +105,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         >>> ax = pf.plot.time(signal, label="input")
         >>>
         >>> for mode in ["cyclic", "cut"]:
-        >>>     delayed = pf.dsp.fractional_delay_sinc(
+        >>>     delayed = pf.dsp.fractional_time_shift(
         ...         signal, 25.3, order=10, mode=mode)
         >>>     pf.plot.time(delayed, label=f"delayed, mode={mode}")
         >>>

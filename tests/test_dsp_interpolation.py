@@ -4,29 +4,29 @@ import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 import pyfar as pf
-from pyfar.dsp import (InterpolateSpectrum, fractional_delay_sinc)
+from pyfar.dsp import (InterpolateSpectrum, fractional_time_shift)
 
 
-def test_fractional_delay_sinc_assertions():
+def test_fractional_time_shift_assertions():
     """Test if the assertions are raised correctly"""
 
     # wrong audio data type
     with raises(TypeError, match="Input data has to be of type pyfar.Signal"):
-        fractional_delay_sinc(pf.FrequencyData(1, 1), .5)
+        fractional_time_shift(pf.FrequencyData(1, 1), .5)
 
     # wrong values for order and side_lobe_suppression
     with raises(ValueError, match="The order must be > 0"):
-        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 0)
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 0)
     with raises(ValueError, match="The side lobe suppression must be > 0"):
-        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 2, 0)
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 2, 0)
 
     # filter length exceeds signal length
     with raises(ValueError, match="The order is 30 but must not exceed 2"):
-        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5)
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5)
 
     # wrong mode
     with raises(ValueError, match="The mode is 'full' but must be 'cut'"):
-        fractional_delay_sinc(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
 
 
 @pytest.mark.parametrize("mode", ["cut", "cyclic"])
@@ -41,7 +41,7 @@ def test_fractional_delay_sinc_assertions():
     # multi channel signals with multi channel delays
     ([64, 32], [10.4, 5.4]), ([[64, 32], [48, 16]], [10.4, 5.4])
 ])
-def test_fractional_delay_sinc_channels(
+def test_fractional_time_shift_channels(
         mode, delays_impulse, fractional_delays):
     """
     Test fractional delay with different combinations of single/multi-channel
@@ -50,7 +50,7 @@ def test_fractional_delay_sinc_channels(
 
     # generate input and delay signal
     signal = pf.signals.impulse(128, delays_impulse)
-    delayed = fractional_delay_sinc(signal, fractional_delays, mode=mode)
+    delayed = fractional_time_shift(signal, fractional_delays, mode=mode)
 
     # frequency up to which group delay is tested
     f_id = delayed.find_nearest_frequency(19e3)
@@ -73,7 +73,7 @@ def test_fractional_delay_order(order):
     """Test if the order parameter behaves as intended"""
 
     signal = pf.signals.impulse(32, 16)
-    delayed = pf.dsp.fractional_delay_sinc(signal, 0.5, order)
+    delayed = pf.dsp.fractional_time_shift(signal, 0.5, order)
 
     # number of non-zero samples must equal filter_length = order+1
     assert np.count_nonzero(np.abs(delayed.time) > 1e-14) == order + 1
@@ -84,7 +84,7 @@ def test_fractional_delay_mode_cut(delay):
     """Test the mode cut"""
 
     signal = pf.signals.impulse(16, 8)
-    delayed = fractional_delay_sinc(signal, delay, 2)
+    delayed = fractional_time_shift(signal, delay, 2)
 
     # if the delay is too large, the signal is shifted out of the sampled range
     # and only zeros remain
@@ -96,7 +96,7 @@ def test_fractional_delay_mode_cyclic(delay):
     """Test the mode delay"""
 
     signal = pf.signals.impulse(32, 16)
-    delayed = fractional_delay_sinc(signal, delay, mode="cyclic")
+    delayed = fractional_time_shift(signal, delay, mode="cyclic")
 
     # if the delay is too large, it is cyclicly shifted
     group_delay = pf.dsp.group_delay(delayed)[0]

@@ -16,7 +16,7 @@ from .dsp import (
 )
 
 from .dsp_interpolation import (
-    fractional_delay_sinc,
+    fractional_time_shift,
     InterpolateSpectrum
 )
 
@@ -42,5 +42,5 @@ __all__ = [
     'deconvolve',
     'convolve',
     'InterpolateSpectrum',
-    'fractional_delay_sinc'
+    'fractional_time_shift'
 ]
