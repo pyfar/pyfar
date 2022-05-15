@@ -226,6 +226,8 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
             elif d > 0:
                 # add d zeros
                 time = np.concatenate((np.zeros(d), signal.time[idx]))
+            else:
+                time = signal.time[idx]
 
             # adjust length to n_samples
             if time.size >= n_samples:
