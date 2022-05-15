@@ -6,7 +6,7 @@ import pyfar as pf
 
 
 def fractional_time_shift(signal, shift, unit="samples", order=30,
-                          side_lobe_suppression=60, mode="cut"):
+                          side_lobe_suppression=60, mode="linear"):
     """
     Apply fractional time shift to input data.
 
@@ -38,18 +38,17 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
     mode : str, optional
         The filtering mode
 
-        ``"cut"``
-            The delayed signal has the same length as the input signal but
-            parts of the signal that are shifted to values smaller than 0
-            samples and larger than ``signal.n_samples`` are removed from the
-            output
+        ``"linear"``
+            Apply linear shift, i.e., parts of the signal that are shifted to
+            times smaller than 0 samples and larger than ``signal.n_samples``
+            disappear.
         ``"cyclic"``
-            The delayed signal has the same length as the input signal. Parts
-            of the signal that are shifted to values smaller than 0 are wrapped
-            around to the end. Parts that are shifted to values larger than
-            ``signal.n_samples`` are wrapped around to the beginning.
+            Apply a cyclic shift, i.e., parts of the signal that are shifted to
+            values smaller than 0 are wrapped around to the end, and parts that
+            are shifted to values larger than ``signal.n_samples`` are wrapped
+            around to the beginning.
 
-        The default is ``"cut"``
+        The default is ``"linear"``
 
     Returns
     -------
@@ -93,8 +92,8 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         >>> ax[2].set_ylim(8, 14)
         >>> ax[0].legend()
 
-    Apply a shift that exceeds the signal length using the modes ``"cut"`` and
-    ``"cyclic"``
+    Apply a shift that exceeds the signal length using the modes ``"linear"``
+    and ``"cyclic"``
 
     .. plot::
 
@@ -104,7 +103,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         >>>
         >>> ax = pf.plot.time(signal, label="input")
         >>>
-        >>> for mode in ["cyclic", "cut"]:
+        >>> for mode in ["cyclic", "linear"]:
         >>>     delayed = pf.dsp.fractional_time_shift(
         ...         signal, 25.3, order=10, mode=mode)
         >>>     pf.plot.time(delayed, label=f"delayed, mode={mode}")
@@ -119,8 +118,9 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         raise ValueError("The order must be > 0")
     if side_lobe_suppression <= 0:
         raise ValueError("The side lobe suppression must be > 0")
-    if mode not in ["cut", "cyclic"]:
-        raise ValueError(f"The mode is '{mode}' but must be 'cut' or 'cyclic'")
+    if mode not in ["linear", "cyclic"]:
+        raise ValueError(
+            f"The mode is '{mode}' but must be 'linear' or 'cyclic'")
     if order + 1 > signal.n_samples:
         raise ValueError((f"The order is {order} but must not exceed "
                           f"{signal.n_samples-1} (signal.n_samples-1)"))
@@ -238,7 +238,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
             signal.time[idx + (slice(0, n_samples), )] = time
 
     # truncate signal
-    if mode == "cut":
+    if mode == "linear":
         signal.time = signal.time[..., :n_samples]
 
     return signal

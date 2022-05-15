@@ -29,11 +29,11 @@ def test_fractional_time_shift_assertions():
         fractional_time_shift(pf.signals.impulse(64), 1, 'meter')
 
     # wrong mode
-    with raises(ValueError, match="The mode is 'full' but must be 'cut'"):
+    with raises(ValueError, match="The mode is 'full' but must be 'linear'"):
         fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
 
 
-@pytest.mark.parametrize("mode", ["cut", "cyclic"])
+@pytest.mark.parametrize("mode", ["linear", "cyclic"])
 @pytest.mark.parametrize("delays_impulse, fractional_delays", [
     # single channel signals and delays
     # (positive/negative with fractions <0.5 and >0.5)
@@ -49,7 +49,7 @@ def test_fractional_time_shift_channels(
         mode, delays_impulse, fractional_delays):
     """
     Test fractional delay with different combinations of single/multi-channel
-    signals and delays and the two modes "cut" and "cyclic"
+    signals and delays and the two modes "linear" and "cyclic"
     """
 
     # generate input and delay signal
@@ -95,7 +95,7 @@ def test_fractional_delay_order(order):
 
 @pytest.mark.parametrize("delay", [20.1, -20.1])
 def test_fractional_delay_mode_cut(delay):
-    """Test the mode cut"""
+    """Test the mode linear"""
 
     signal = pf.signals.impulse(16, 8)
     delayed = fractional_time_shift(signal, delay, order=2)
