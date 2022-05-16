@@ -14,41 +14,20 @@ def test_get_nearest_deprecations():
     """Coordinates get_nearest* methods"""
     coords = pf.Coordinates(np.arange(6), 0, 0)
 
-    # nearest_k
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_nearest_k(1, 0, 0)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove get_nearest_k() from pyfar 0.5.0!
             coords.get_nearest_k(1, 0, 0)
-
-    # nearest_cart
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_nearest_cart(2.5, 0, 0, 1.5)
 
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove get_nearest_k() from pyfar 0.5.0!
             coords.get_nearest_cart(2.5, 0, 0, 1.5)
 
-    # nearest_sph
-    coords = pf.Coordinates([1, 0, -1, 0], [0, 1, 0, -1], 0)
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_nearest_sph(0, 0, 1, 1)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove get_nearest_k() from pyfar 0.5.0!
             coords.get_nearest_sph(0, 0, 1, 1)
-
-    # slice
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_slice('x', 'met', 0, 1)
 
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
@@ -60,50 +39,30 @@ def test_filter_deprecations():
     """Deprecate filter functions with non-verbose names"""
 
     # butter
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pfilt.butter(None, 2, 1000, 'lowpass', 44100)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove butter() from pyfar 0.5.0!
             pfilt.butter(None, 2, 1000, 'lowpass', 44100)
 
     # cheby1
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pfilt.cheby1(None, 2, 1, 1000, 'lowpass', 44100)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove cheby1() from pyfar 0.5.0!
             pfilt.cheby1(None, 2, 1, 1000, 'lowpass', 44100)
 
     # cheby2
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pfilt.cheby2(None, 2, 40, 1000, 'lowpass', 44100)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove cheby2() from pyfar 0.5.0!
             pfilt.cheby2(None, 2, 40, 1000, 'lowpass', 44100)
 
     # elipp
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass', 44100)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove ellip() from pyfar 0.5.0!
             pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass', 44100)
 
     # bell
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pfilt.peq(None, 1000, 10, 2, sampling_rate=44100)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove peq() from pyfar 0.5.0!
@@ -114,10 +73,6 @@ def test_filter_deprecations():
 def test_read_wav_deprecation(tmpdir):
     """Deprecate pf.io.read_wav"""
     filename = 'test.wav'
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pf.io.read_wav(filename)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove read_wav from pyfar 0.5.0!
@@ -128,10 +83,6 @@ def test_read_wav_deprecation(tmpdir):
 def test_write_wav_deprecation(write_mock, noise, tmpdir):
     """Deprecate pf.io.write_wav"""
     filename = pathlib.Path(tmpdir, 'test_wav')
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pf.io.write_wav(noise, filename)
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove write_wav from pyfar 0.5.0!
@@ -140,10 +91,6 @@ def test_write_wav_deprecation(write_mock, noise, tmpdir):
 
 def test_linear_sweep_deprecation():
     """Deprecate pf.signals.linear_sweep"""
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pf.signals.linear_sweep(2**10, [1e3, 20e3])
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove linear_sweep() from pyfar 0.5.0!
@@ -152,10 +99,6 @@ def test_linear_sweep_deprecation():
 
 def test_exponential_sweep_deprecation():
     """Deprecate pf.signals.exponential_sweep"""
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pf.signals.exponential_sweep(2**10, [1e3, 20e3])
-
     if version.parse(pf.__version__) >= version.parse('0.5.0'):
         with pytest.raises(AttributeError):
             # remove exponential_sweep() from pyfar 0.5.0!
