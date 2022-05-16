@@ -1209,23 +1209,69 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         >>> axs[2].set_ylim(-2.5, 2.5)
 
     """
-    from scipy.fft import fft, ifft
-
-    workers = multiprocessing.cpu_count()
     # center the energy by taking the linear phase signal (using n_samples//2
     # performs better than using n_samples/2)
     signal = pyfar.dsp.linear_phase(
         signal, signal.n_samples // 2, unit='samples')
 
+    return pyfar.Signal(
+        _minimum_phase(signal.time, n_fft, truncate),
+        signal.sampling_rate,
+        signal.comment)
+
+
+def _minimum_phase(signal, n_fft=None, truncate=True):
+    """Calculate the minimum phase equivalent of a finite impulse response.
+
+    The method is based on the Hilbert transform of the real-valued cepstrum
+    of the finite impulse response, that is the cepstrum of the magnitude
+    spectrum only. As a result the magnitude spectrum is not distorted.
+    Potential aliasing errors can occur due to the Fourier transform based
+    calculation of the magnitude spectrum, which however are negligible if the
+    length of Fourier transform ``n_fft`` is sufficiently high. [#]_
+    (Section 8.5.4)
+
+    Parameters
+    ----------
+    signal : numpy.array
+        The finite impulse response for which the minimum-phase version is
+        computed.
+    n_fft : int, optional
+        The FFT length used for calculating the cepstrum. Should be at least a
+        few times larger than ``signal.n_samples``. The default ``None`` uses
+        eight times the signal length rounded up to the next power of two,
+        that is: ``2**int(np.ceil(np.log2(n_samples * 8)))``.
+    truncate : bool, optional
+        If ``truncate`` is ``True``, the resulting minimum phase impulse
+        response is truncated to a length of
+        ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
+        aliasing described above in any case but might distort the magnitude
+        response if ``signal.n_samples`` is to low. If truncate is ``False``
+        the output signal has the same length as the input signal. The default
+        is ``True``.
+
+    Returns
+    -------
+    signal_minphase : numpy.ndarray
+        The minimum phase version of the input data.
+
+    References
+    ----------
+    .. [#]  J. S. Lim and A. V. Oppenheim, Advanced topics in signal
+            processing, pp. 472-473, First Edition. Prentice Hall, 1988.
+    """
+    from scipy.fft import fft, ifft
+    workers = multiprocessing.cpu_count()
+
     if n_fft is None:
-        n_fft = 2**int(np.ceil(np.log2(signal.n_samples * 8)))
-    elif n_fft < signal.n_samples:
+        n_fft = 2**int(np.ceil(np.log2(signal.shape[-1] * 8)))
+    elif n_fft < signal.shape[-1]:
         raise ValueError((
-            f"n_fft is {n_fft} but must be at least {signal.n_samples}, "
+            f"n_fft is {n_fft} but must be at least {signal.shape[-1]}, "
             "which is the length of the input signal"))
 
     # add eps to the magnitude spectrum to avoid nans in log
-    H = np.abs(fft(signal.time, n=n_fft, workers=workers, axis=-1))
+    H = np.abs(fft(signal, n=n_fft, workers=workers, axis=-1))
     H[H == 0] = np.finfo(float).eps
 
     # calculate the minimum phase using the Hilbert transform
@@ -1234,12 +1280,12 @@ def minimum_phase(signal, n_fft=None, truncate=True):
 
     # cut to length
     if truncate:
-        N = signal.n_samples // 2 + signal.n_samples % 2
+        N = signal.shape[-1] // 2 + signal.shape[-1] % 2
         data = data[..., :N]
     else:
-        data = data[..., :signal.n_samples]
+        data = data[..., :signal.shape[-1]]
 
-    return pyfar.Signal(data, signal.sampling_rate)
+    return data
 
 
 def pad_zeros(signal, pad_width, mode='after'):
