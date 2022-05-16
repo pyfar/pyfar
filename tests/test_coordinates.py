@@ -3,9 +3,7 @@ import numpy.testing as npt
 import pytest
 from pytest import raises
 import matplotlib.pyplot as plt
-from packaging import version
 
-import pyfar as pf
 from pyfar import Coordinates
 import pyfar.classes.coordinates as coordinates
 

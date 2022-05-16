@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import pytest
 from pytest import raises
-from packaging import version
 import pyfar.plot as plot
 import pyfar as pf
 
