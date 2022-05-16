@@ -537,59 +537,50 @@ def test_kaiser_window_beta():
     assert beta == beta_true
 
 
-def test_minimum_phase():
+def test_minimum_phase_against_reference():
     # tests are separated since their reliability depends on the type of
     # filters. The homomorphic method works best for filters with odd numbers
-    # of taps
+    # of taps. Hilbert_2 approximates the ideal minimum phase
+    input = [0, 0, 0, 0, 1, 0, 0, 0, 0]
+    output = [1, 0, 0, 0, 0]
+    min_phase = pyfar.dsp.minimum_phase(
+        pyfar.Signal(input, 44100))
 
-    # method = 'hilbert'
+    npt.assert_allclose(
+        min_phase.time.flatten(), np.array(output, dtype=float),
+        rtol=1e-10, atol=1e-10)
+
+
+def test_minimum_phase_nfft():
+
+    with pytest.raises(ValueError, match="n_fft is 5 but must be at least 6"):
+        pf.dsp.minimum_phase(pf.Signal([0, 1, 0, 0, 0, 0], 44100), 5)
+
+
+def test_minimum_phase_truncation():
+    # test truncation parameter
     n_samples = 9
-    filter_linphase = pyfar.Signal([0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 44100)
-
     imp_minphase = pyfar.dsp.minimum_phase(
-        filter_linphase, pad=False, method='hilbert', n_fft=2**18)
+        pyfar.signals.impulse(n_samples), truncate=False)
 
-    ref = np.array([1, 1, 0, 0, 0], dtype=float)
-    npt.assert_allclose(
-        np.squeeze(imp_minphase.time), ref, rtol=1e-4, atol=1e-4)
+    assert imp_minphase.n_samples == n_samples
 
-    # method = 'homomorphic'
+
+def test_minimum_phase_multidim():
+    # test multidim (only shape is tested because output is tested above)
     n_samples = 8
-    imp_linphase = pyfar.signals.impulse(
-        n_samples+1, delay=int(n_samples/2))
-
-    ref = pyfar.signals.impulse(int(n_samples/2)+1)
-
-    imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=False)
-    npt.assert_allclose(imp_minphase.time, ref.time)
-
-    # test pad length
-    ref = pyfar.signals.impulse(n_samples+1)
-    imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=True)
-
-    assert imp_minphase.n_samples == imp_linphase.n_samples
-    npt.assert_allclose(imp_minphase.time, ref.time)
-
-    # test error
-    ref = pyfar.signals.impulse(n_samples+1)
-    imp_minphase, mag_error = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', return_magnitude_ratio=True)
-
-    npt.assert_allclose(
-        np.squeeze(mag_error.freq),
-        np.ones(int(n_samples/2+1), dtype=complex))
-
-    # test multidim
-    ref = pyfar.signals.impulse(n_samples+1, amplitude=np.ones((2, 3)))
     imp_linphase = pyfar.signals.impulse(
         n_samples+1, delay=int(n_samples/2), amplitude=np.ones((2, 3)))
     imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=True)
+        imp_linphase, truncate=False)
 
-    assert imp_minphase.n_samples == imp_linphase.n_samples
-    npt.assert_allclose(imp_minphase.time, ref.time)
+    # assert imp_minphase.n_samples == imp_linphase.n_samples
+    # assert imp_minphase.cshape == imp_linphase.cshape
+
+    imp_zerophase = pyfar.signals.impulse(
+        n_samples+1, amplitude=np.ones((2, 3)))
+
+    npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
 
 
 def test_start_ir_insufficient_snr():
