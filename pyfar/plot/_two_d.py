@@ -31,7 +31,7 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
         ymin = ymax - 100
 
     # auto detect the time unit
-    if unit is None:
+    if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(signal.times[..., -1])
     # set the unit
     if unit == 'samples':
@@ -304,7 +304,7 @@ def _freq_group_delay_2d(
 
 
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
-                 freq_scale='linear', unit=None, window='hann',
+                 freq_scale='linear', unit="s", window='hann',
                  window_length=1024, window_overlap_fct=0.5,
                  colorbar=True, ax=None, **kwargs):
     """Plot the magnitude spectrum versus time.
@@ -348,7 +348,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
             np.abs(spectrogram) / log_reference + eps)
 
     # auto detect the time unit
-    if unit is None:
+    if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(times[..., -1])
     # set the unit
     if unit == 'samples':

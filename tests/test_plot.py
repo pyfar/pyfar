@@ -150,7 +150,7 @@ def test_line_freq_scale_assertion(function, sine):
 @pytest.mark.parametrize('function', [
     (plot.time), (plot.group_delay), (plot.spectrogram)])
 @pytest.mark.parametrize('unit', [
-    (None), ('s'), ('ms'), ('mus'), ('samples')])
+    ('auto'), ('s'), ('ms'), ('mus'), ('samples')])
 def test_time_unit(function, unit, handsome_signal):
     """Test plottin with different units."""
     print(f"Testing: {function.__name__} (unit={unit})")
@@ -438,7 +438,7 @@ def test_2d_freq_scale_assertion(handsome_signal_2d):
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.group_delay_2d)])
 @pytest.mark.parametrize('unit', [
-    (None), ('s'), ('ms'), ('mus'), ('samples')])
+    ('auto'), ('s'), ('ms'), ('mus'), ('samples')])
 def test_2d_time_unit(function, unit, handsome_signal_2d):
     """Test plottin with different units."""
     print(f"Testing: {function.__name__} (unit={unit})")

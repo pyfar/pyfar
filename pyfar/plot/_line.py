@@ -9,7 +9,7 @@ from .ticker import (
     MultipleFractionFormatter)
 
 
-def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
+def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
           ax=None, **kwargs):
     """Plot the time data of a signal."""
 
@@ -29,7 +29,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit=None,
         ymin = ymax - 100
 
     # auto detect the time unit
-    if unit is None:
+    if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(signal.times[..., -1])
     # set the unit
     if unit == 'samples':
@@ -161,7 +161,7 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     return ax
 
 
-def _group_delay(signal, unit=None, freq_scale='log', ax=None, **kwargs):
+def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
     """Plot the group delay on the positive frequency axis."""
 
     # check input
@@ -174,7 +174,7 @@ def _group_delay(signal, unit=None, freq_scale='log', ax=None, **kwargs):
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     data = dsp.group_delay(signal)
     # auto detect the unit
-    if unit is None:
+    if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(
             np.nanmax(np.abs(data) / signal.sampling_rate))
     # set the unit
@@ -208,7 +208,7 @@ def _group_delay(signal, unit=None, freq_scale='log', ax=None, **kwargs):
 
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                log_prefix_freq=None, log_reference=1, freq_scale='log',
-               unit=None, ax=None, **kwargs):
+               unit="s", ax=None, **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
@@ -241,7 +241,7 @@ def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
 
 def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
-                      unit=None, freq_scale='log', ax=None, **kwargs):
+                      unit="s", freq_scale='log', ax=None, **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
