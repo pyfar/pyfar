@@ -7,7 +7,6 @@ import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
 import numpy as np
 import numpy.testing as npt
-from packaging import version
 
 """
 Testing plots is difficult, as matplotlib does not create the exact same
@@ -235,20 +234,6 @@ def test_line_frequency_data(function, handsome_signal):
                      file_type, compare_output)
 
 
-@pytest.mark.parametrize('function', [
-    (plot.freq), (plot.phase), (plot.group_delay),
-    (plot.time_freq), (plot.freq_phase), (plot.freq_group_delay)])
-def test_xscale_deprecation(function, handsome_signal):
-    with pytest.warns(PendingDeprecationWarning,
-                      match="The xscale parameter will be removed"):
-        function(handsome_signal, xscale='linear')
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.6.0!
-            function(handsome_signal)
-
-
 def test_spectrogram():
     """Test spectrogram with default parameters"""
     function = plot.spectrogram
@@ -260,17 +245,6 @@ def test_spectrogram():
     function(pf.signals.exponential_sweep_time(2**16, [100, 10e3]))
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
-
-
-def test_spectrogram_yscale_deprecation(sine):
-    with pytest.warns(PendingDeprecationWarning,
-                      match="The yscale parameter will be removed"):
-        plot.spectrogram(sine, yscale='linear')
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.6.0!
-            plot.spectrogram(sine)
 
 
 @pytest.mark.parametrize('function', [

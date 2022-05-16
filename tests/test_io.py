@@ -3,7 +3,6 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from unittest.mock import patch
-from packaging import version
 import pyfar
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
@@ -669,32 +668,6 @@ def test_write_wav_suffix(noise, tmpdir):
         noise.time,
         np.atleast_2d(signal_reload),
         atol=1e-4)
-
-
-@patch('soundfile.read', return_value=(np.array([1., 2., 3.]), 1000))
-def test_read_wav_deprecation(tmpdir):
-    filename = 'test.wav'
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        io.read_wav(filename)
-
-    if version.parse(pyfar.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove read_wav from pyfar 0.5.0!
-            io.read_wav(filename)
-
-
-@patch('soundfile.write')
-def test_write_wav_deprecation(write_mock, noise, tmpdir):
-    filename = pathlib.Path(tmpdir, 'test_wav')
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        io.write_wav(noise, filename)
-
-    if version.parse(pyfar.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove write_wav from pyfar 0.5.0!
-            io.write_wav(noise, filename)
 
 
 @patch('soundfile.available_formats')

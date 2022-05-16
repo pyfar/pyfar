@@ -610,51 +610,6 @@ def test_find_slice():
     plt.close("all")
 
 
-def test_get_nearest_deprecations():
-    coords = Coordinates(np.arange(6), 0, 0)
-
-    # nearest_k
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_nearest_k(1, 0, 0)
-
-    if version.parse(pf.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove get_nearest_k() from pyfar 0.5.0!
-            coords.get_nearest_k(1, 0, 0)
-
-    # nearest_cart
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_nearest_cart(2.5, 0, 0, 1.5)
-
-    if version.parse(pf.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove get_nearest_k() from pyfar 0.5.0!
-            coords.get_nearest_cart(2.5, 0, 0, 1.5)
-
-    # nearest_sph
-    coords = Coordinates([1, 0, -1, 0], [0, 1, 0, -1], 0)
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_nearest_sph(0, 0, 1, 1)
-
-    if version.parse(pf.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove get_nearest_k() from pyfar 0.5.0!
-            coords.get_nearest_sph(0, 0, 1, 1)
-
-    # slice
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.get_slice('x', 'met', 0, 1)
-
-    if version.parse(pf.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove get_slice() from pyfar 0.5.0!
-            coords.get_slice('x', 'met', 0, 1)
-
-
 @pytest.mark.parametrize("rot_type,rot", [
     ('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)]),
     ('matrix',  [[0, -1, 0], [1, 0, 0], [0, 0, 1]]),
