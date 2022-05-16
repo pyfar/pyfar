@@ -1307,8 +1307,7 @@ def pad_zeros(signal, pad_width, mode='after'):
     return padded_signal
 
 
-def time_shift(
-        signal, shift, mode='cyclic', unit='samples', pad_value='zeros'):
+def time_shift(signal, shift, unit='samples'):
     """Apply a time-shift to a signal.
 
     The shift is performed as a cyclic shift on the time axis, potentially
@@ -1326,42 +1325,15 @@ def time_shift(
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
         dimensions ``cshape``.
-    mode : str, optional
-        The shifting mode
-
-        ``"linear"``
-            Apply linear shift, i.e., parts of the signal that are shifted to
-            times smaller than 0 samples and larger than ``signal.n_samples``
-            disappear. To maintain the shape of the signal, the signal is
-            padded at the respective other end. The pad value can either be
-            zeros or nans. See ``pad_type``.
-        ``"cyclic"``
-            Apply a cyclic shift, i.e., parts of the signal that are shifted to
-            values smaller than 0 are wrapped around to the end, and parts that
-            are shifted to values larger than ``signal.n_samples`` are wrapped
-            around to the beginning.
-
-        The default is ``"cyclic"``
     unit : str, optional
         Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
-    pad_type : str, optional
-        The pad value for linear shifts, by default ``"zeros"`` is used.
-
-        ``"zeros"``
-            Pad zeros to each channel
-        ``"NaN"``
-            Pad ``numpy.nan`` to the respective channels. This os recommended
-            if the rms of the signal is to be maintained for block-wise rms
-            estimation of the noise power of an signal. Note that if NaNs are
-            padded, the returned data will be a ``TimeData`` instead of
-            ``Signal``.
 
     Returns
     -------
-    Signal, TimeData
+    Signal
         The time-shifted signal.
 
     Examples
@@ -1419,37 +1391,19 @@ def time_shift(
         raise ValueError(
             f"Unit is: {unit}, but has to be 'samples' or 's'.")
 
-    if np.any(np.abs(shift_samples) > signal.n_samples):
-        raise ValueError(
+    if np.any(shift_samples > signal.n_samples):
+        warnings.warn(
             "Shifting by more samples than the length of the signal")
 
-    if pad_value == 'zeros':
-        pad = 0.
-    elif pad_value == 'nan':
-        pad = np.nan
-    elif np.isreal(pad_value):
-        pad = pad_value
-    else:
-        raise ValueError("Wrong pad value.")
-
-    shifted = signal.copy()
-    for ch in np.ndindex(signal.cshape):
+    shifted = signal.flatten()
+    shift_samples = shift_samples.flatten()
+    for ch in range(shifted.cshape[0]):
         shifted.time[ch] = np.roll(
             shifted.time[ch],
             shift_samples[ch],
             axis=-1)
 
-        if mode == 'linear':
-            if shift_samples[ch] > 0:
-                shifted.time[ch, shift_samples[ch]:] = pad
-            elif shift_samples[ch] < 0:
-                shifted.time[ch, :shift_samples[ch]] = pad
-
-    if np.any(np.isnan(shifted.time)):
-        shifted = pyfar.TimeData(
-            shifted.time, shifted.times, comment=shifted.comment)
-
-    return shifted
+    return shifted.reshape(signal.cshape)
 
 
 def deconvolve(system_output, system_input, fft_length=None, **kwargs):
