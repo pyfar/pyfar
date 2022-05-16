@@ -1,3 +1,15 @@
+"""
+Test deprecations. For each deprecation two things must be tested:
+1. Is a proper warning raised. This is done using
+   with pytest.warns(PendingDeprecationWarning, match="some text"):
+       call_of_function()
+2. Was the function properly deprecated. This is done using:
+   if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove get_nearest_k() from pyfar 0.5.0!
+            coords.get_nearest_k(1, 0, 0)
+
+"""
 import numpy as np
 from packaging import version
 import pathlib
