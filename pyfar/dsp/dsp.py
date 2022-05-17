@@ -1,3 +1,4 @@
+from logging import warning
 import multiprocessing
 import warnings
 import numpy as np
@@ -1432,110 +1433,109 @@ def time_shift(signal, shift, unit='samples'):
     return shifted.reshape(signal.cshape)
 
 
-def find_impulse_response_start(
-        impulse_response,
-        threshold=20,
-        noise_energy='auto'):
-    """Find the first sample of an impulse response in a accordance with the
-    ISO standard ISO 3382.
+def find_impulse_response_start(ir, N=1):
+    """Find the start of an impulse response.
+    The method relies on the analytic part of the cross-correlation function
+    of the impulse response and it's minimum-phase equivalent, which is zero
+    for the maximum of the correlation function. For sub-sample root finding,
+    the analytic signal is approximated using a polynomial of order ``N``.
+    The algorithm is based on [#]_ with the following modifications:
 
-    The start sample is identified as the first sample that varies
-    significantly from the noise floor but still has a level of at least 20 dB
-    below the maximum of the impulse response. The function further tries to
-    consider oscillations before the time below the threshold value. If the
-    function fails to identify a clear starting sample, zero values will be
-    returned by default.
+    1.  Values with negative gradient used for polynolmial fitting are
+        rejected, allowing to use larger part of the signal for fitting.
+    2.  By default a first order polynomial is used, as the slope of the
+        analytic signal should in theory be linear.
+
 
     Parameters
     ----------
-    impulse_response : Signal
+    ir : Signal
         The impulse response
-    threshold : double, optional
-        Threshold in dB according to ISO 3382. The default is 20 dB.
-    noise_energy: optional, float, str
-        The additive noise energy found in the signal. The default value 'auto'
-        will result in an automatic estimation of the noise energy from a time
-        interval corresponding to the last ten percent of the impulse response.
+    N : int, optional
+        The order of the polynom used for root finding, by default 1
 
     Returns
     -------
-    start_sample : array_like, int
-        Sample at which the impulse response starts. If the input is a
-        multi-channel object, the output will match the signals ``cshape``.
-
-    Note
-    ----
-    The function tries to estimate the SNR in the IR based on the signal energy
-    in the last 10 percent of the IR.
+    numpy.ndarray, float
+        Start samples of the impulse response, can be floating point values
+        in the case of sub-sample values.
 
     References
     ----------
-    .. [1]  ISO 3382-1:2009-10, Acoustics - Measurement of the reverberation
-            time of rooms with reference to other acoustical parameters. pp. 22
+
+    .. [#]  N. S. M. Tamim and F. Ghani, “Hilbert transform of FFT pruned
+            cross correlation function for optimization in time delay
+            estimation,” in Communications (MICC), 2009 IEEE 9th Malaysia
+            International Conference on, 2009, pp. 809-814.
+
+    Examples
+    --------
+    Create a band-limited impulse shifted by 0.5 samples and estimate the
+    starting sample of the impulse and plot.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> from scipy import signal as sgn
+        >>> n_samples = 64
+        >>> sampling_rate = 44100
+        >>> samples = np.arange(n_samples)
+        >>> delay_samples = n_samples // 2 + 1/2
+        >>> sinc = np.sinc(samples - delay_samples)
+        >>> win = sgn.get_window('hanning', n_samples, fftbins=False)
+        >>> ir = pf.Signal(sinc*win, sampling_rate)
+        >>> start_samples = pf.dsp.find_impulse_response_start(ir)
+        >>> ax = pf.plot.time(ir, unit='ms', label='impulse response')
+        >>> ax.axvline(
+        ...     start_samples/sampling_rate*1e3,
+        ...     color='k', linestyle='-.', label='start sample')
+        >>> ax.legend()
 
     """
-    ir_squared = np.abs(impulse_response.time)**2
+    n = int(np.ceil((N+2)/2))
 
-    mask_start = np.int(0.9*ir_squared.shape[-1])
+    start_samples = np.zeros(ir.cshape)
+    for ch in np.ndindex(ir.cshape):
+        # Calculate the correlation between the impulse response and its
+        # minimum phase equivalent. This requires a minimum phase equivalent
+        # in the strict sense, instead of the appriximation implemented in
+        # pyfar.
+        ir_minphase = sgn.minimum_phase(ir.time[ch], n_fft=4*ir.n_samples)
+        correlation = sgn.correlate(
+            ir.time[ch],
+            np.pad(ir_minphase, (0, ir.n_samples - (ir.n_samples + 1)//2)),
+            mode='full')
+        lags = np.arange(-ir.n_samples + 1, ir.n_samples)
 
-    if noise_energy == 'auto':
-        mask = np.arange(mask_start, ir_squared.shape[-1])
-        noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
-    else:
-        noise = noise_energy
+        # calculate the analytic signal of the correlation function
+        correlation_analytic = sgn.hilbert(correlation)
 
-    max_sample = np.argmax(ir_squared, axis=-1)
-    max_value = np.max(ir_squared, axis=-1)
+        # find the maximum of the analytic part of the correlation function
+        # and define the search range around the maximum
+        argmax = np.argmax(np.abs(correlation_analytic))
+        search_region_range = np.arange(argmax-n, argmax+n)
+        search_region = np.imag(correlation_analytic[search_region_range])
 
-    if np.any(max_value < 10**(threshold/10) * noise) or \
-            np.any(max_sample > mask_start):
-        raise ValueError(
-            "The SNR is lower than the defined threshold. Check "
-            "if this is a valid impulse response with sufficient SNR.")
+        # mask values with a negative gradient
+        mask = np.gradient(search_region, search_region_range) > 0
 
-    start_sample_shape = max_sample.shape
-    n_samples = ir_squared.shape[-1]
-    ir_squared = np.reshape(ir_squared, (-1, n_samples))
-    n_channels = ir_squared.shape[0]
-    max_sample = np.reshape(max_sample, n_channels)
-    max_value = np.reshape(max_value, n_channels)
+        # fit a polygon and estimate its roots
+        search_region_poly = np.polyfit(
+            search_region_range[mask]-argmax, search_region[mask], N)
+        roots = np.roots(search_region_poly)
 
-    start_sample = max_sample.copy()
-    for idx in range(0, n_channels):
-        # Only look for the start sample if the maximum index is bigger than 0
-        if start_sample[idx] > 0:
-            ir_before_max = ir_squared[idx, :max_sample[idx]+1] \
-                / max_value[idx]
-            # Last value before peak lower than the peak/threshold
-            idx_last_below_thresh = np.argwhere(
-                ir_before_max < 10**(-threshold/10))
-            if idx_last_below_thresh.size > 0:
-                start_sample[idx] = idx_last_below_thresh[-1]
-            else:
-                start_sample[idx] = 0
-                warnings.warn(
-                    'No values below threshold found before the maximum value,\
-                    defaulting to 0')
+        # Use only real-valued roots
+        if np.all(np.isreal(roots)):
+            root = roots[np.abs(roots) == np.min(np.abs(roots))]
+            start_sample = lags[argmax] + root
+        else:
+            start_sample = np.nan
+            warnings.warn(f"Starting sample not found for channel {ch}")
 
-            idx_6dB_above_threshold = np.argwhere(
-                ir_before_max[:start_sample[idx]+1] >
-                10**((-threshold+6)/10))
-            if idx_6dB_above_threshold.size > 0:
-                idx_6dB_above_threshold = int(idx_6dB_above_threshold[0])
-                tmp = np.argwhere(
-                    ir_before_max[:idx_6dB_above_threshold+1] <
-                    10**(-threshold/10))
-                if tmp.size == 0:
-                    start_sample[idx] = 0
-                    warnings.warn(
-                        'Oscillations detected in the impulse response. \
-                        No clear starting sample found, defaulting to 0')
-                else:
-                    start_sample[idx] = tmp[-1]
+        start_samples[ch] = start_sample
 
-    start_sample = np.reshape(start_sample, start_sample_shape)
-
-    return np.squeeze(start_sample)
+    return start_samples
 
 
 def deconvolve(system_output, system_input, fft_length=None, **kwargs):

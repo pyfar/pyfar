@@ -583,43 +583,34 @@ def test_minimum_phase_multidim():
     npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
 
 
-def test_start_ir_insufficient_snr():
-    n_samples = 2**9
-    snr = 15
-
-    ir = pf.signals.impulse(n_samples)
-    noise = pf.signals.noise(n_samples, rms=10**(-snr/20))
-    ir_noise = ir + noise
-
-    with pytest.raises(ValueError):
-        dsp.find_impulse_response_start(ir_noise)
-
-
 def test_start_ir():
     n_samples = 2**10
     snr = 60
-    start_sample = 24
+    start_sample = np.array([24])
 
     ir = pf.signals.impulse(n_samples, delay=start_sample)
     noise = pf.signals.noise(n_samples, rms=10**(-snr/20))
 
     start_sample_est = dsp.find_impulse_response_start(ir)
-    assert start_sample_est == start_sample - 1
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-6)
 
     ir_awgn = ir + noise
     start_sample_est = dsp.find_impulse_response_start(ir_awgn)
-    assert start_sample_est == start_sample - 1
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
-def test_start_ir_thresh():
-    n_samples = 2**10
-    start_sample = 24
+def test_start_ir_sinc():
+    sr = 44100
+    n_samples = 128
+    samples = np.arange(n_samples)
+    delay_samples = n_samples // 2 + 1/2
 
-    ir = pf.signals.impulse(n_samples, delay=start_sample)
-    ir.time[..., start_sample-4:start_sample] = 10**(-5/10)
+    sinc = np.sinc(samples - delay_samples)
+    win = sgn.get_window('hanning', n_samples, fftbins=False)
 
-    start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
-    assert start_sample_est == start_sample - 4 - 1
+    ir = pf.Signal(sinc*win, sr)
+    start_samples = pf.dsp.find_impulse_response_start(ir)
+    npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
 
 
 def test_start_ir_multidim():
@@ -634,7 +625,9 @@ def test_start_ir_multidim():
     ir_awgn = ir + noise
     start_sample_est = dsp.find_impulse_response_start(ir_awgn)
 
-    npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
+
+
 def test_convolve_default():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, -1, 0], 44100)
