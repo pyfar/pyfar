@@ -1366,8 +1366,8 @@ def time_shift(
 
     Examples
     --------
-    Individually shift a set of ideal impulses stored in three different
-    channels and plot the resulting signals
+    Individually do a cyclic shift of a set of ideal impulses stored in three
+    different channels and plot the resulting signals
 
     .. plot::
 
@@ -1377,6 +1377,26 @@ def time_shift(
         >>> impulse = pf.signals.impulse(
         ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
         >>> shifted = pf.dsp.time_shift(impulse, [-2, 0, 2])
+        >>> # time domain plot
+        >>> pf.plot.use('light')
+        >>> _, axs = plt.subplots(2, 1)
+        >>> pf.plot.time(impulse, ax=axs[0])
+        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> axs[0].set_title('Original signals')
+        >>> axs[1].set_title('Shifted signals')
+        >>> plt.tight_layout()
+
+    Perform a linear time shift instead and pad with NaNs
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> # generate and shift the impulses
+        >>> impulse = pf.signals.impulse(
+        ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+        >>> shifted = pf.dsp.time_shift(
+        ...     impulse, [-2, 0, 2], mode='cyclic', pad_value='nan')
         >>> # time domain plot
         >>> pf.plot.use('light')
         >>> _, axs = plt.subplots(2, 1)
