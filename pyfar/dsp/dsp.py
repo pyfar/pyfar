@@ -1396,7 +1396,7 @@ def time_shift(
         >>> impulse = pf.signals.impulse(
         ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
         >>> shifted = pf.dsp.time_shift(
-        ...     impulse, [-2, 0, 2], mode='cyclic', pad_value='nan')
+        ...     impulse, [-2, 0, 2], mode='linear', pad_value='nan')
         >>> # time domain plot
         >>> pf.plot.use('light')
         >>> _, axs = plt.subplots(2, 1)
@@ -1441,9 +1441,9 @@ def time_shift(
 
         if mode == 'linear':
             if shift_samples[ch] > 0:
-                shifted.time[ch, shift_samples[ch]:] = pad
-            elif shift_samples[ch] < 0:
                 shifted.time[ch, :shift_samples[ch]] = pad
+            elif shift_samples[ch] < 0:
+                shifted.time[ch, shift_samples[ch]:] = pad
 
     if np.any(np.isnan(shifted.time)):
         shifted = pyfar.TimeData(
