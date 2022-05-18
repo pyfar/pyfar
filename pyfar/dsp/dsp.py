@@ -1409,9 +1409,10 @@ def find_impulse_response_start(ir, N=1):
 
     Returns
     -------
-    numpy.ndarray, float
-        Start samples of the impulse response, can be floating point values
-        in the case of sub-sample values.
+    numpy.ndarray
+        Start samples of the impulse response,  as an array of shape
+        ``signal.cshape``. Can be floating point values in the case of
+        sub-sample values.
 
     References
     ----------
@@ -1430,18 +1431,14 @@ def find_impulse_response_start(ir, N=1):
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> from scipy import signal as sgn
         >>> n_samples = 64
-        >>> sampling_rate = 44100
-        >>> samples = np.arange(n_samples)
         >>> delay_samples = n_samples // 2 + 1/2
-        >>> sinc = np.sinc(samples - delay_samples)
-        >>> win = sgn.get_window('hanning', n_samples, fftbins=False)
-        >>> ir = pf.Signal(sinc*win, sampling_rate)
+        >>> ir = pf.signals.impulse(n_samples)
+        >>> ir = pf.dsp.linear_phase(ir, delay_samples, unit='samples')
         >>> start_samples = pf.dsp.find_impulse_response_start(ir)
         >>> ax = pf.plot.time(ir, unit='ms', label='impulse response')
         >>> ax.axvline(
-        ...     start_samples/sampling_rate*1e3,
+        ...     start_samples/ir.sampling_rate*1e3,
         ...     color='k', linestyle='-.', label='start sample')
         >>> ax.legend()
 

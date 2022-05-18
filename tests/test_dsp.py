@@ -589,7 +589,7 @@ def test_start_ir():
     start_sample = np.array([24])
 
     ir = pf.signals.impulse(n_samples, delay=start_sample)
-    noise = pf.signals.noise(n_samples, rms=10**(-snr/20))
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
 
     start_sample_est = dsp.find_impulse_response_start(ir)
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-6)
@@ -620,7 +620,7 @@ def test_start_ir_multidim():
     start_sample = [[14, 12, 16], [24, 5, 43]]
     ir = pf.signals.impulse(n_samples, delay=start_sample)
 
-    noise = pf.signals.noise(n_samples, rms=10**(-snr/20))
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
 
     ir_awgn = ir + noise
     start_sample_est = dsp.find_impulse_response_start(ir_awgn)
