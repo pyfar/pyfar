@@ -1,5 +1,4 @@
 import multiprocessing
-import warnings
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy import signal as sgn
