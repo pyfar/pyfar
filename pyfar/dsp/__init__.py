@@ -13,6 +13,7 @@ from .dsp import (
     kaiser_window_beta,
     deconvolve,
     convolve,
+    decibel,
     InterpolateSpectrum,
 )
 
@@ -37,5 +38,6 @@ __all__ = [
     'kaiser_window_beta',
     'deconvolve',
     'convolve',
+    'decibel',
     'InterpolateSpectrum',
 ]
