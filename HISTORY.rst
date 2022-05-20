@@ -2,6 +2,10 @@
 History
 =======
 
+0.4.2 (2022-05-20)
+------------------
+* Bugfix: Sweep functions marked for deprecation had no return value.
+
 0.4.1 (2022-04-08)
 ------------------
 * Bugfix: do not allow 'flat' shading parameter in 2D plot functions (PR #291)
