@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import pytest
 from pytest import raises
-from packaging import version
 import pyfar.plot as plot
 import pyfar as pf
 
@@ -142,14 +141,3 @@ def test__deal_time_units_mus():
     """Test previous bugfix for unit micro seconds in labels."""
     s = pf.signals.impulse(10, sampling_rate=44100)
     pf.plot.time(s)
-
-
-def test__check_time_unit():
-    with pytest.warns(PendingDeprecationWarning,
-                      match="unit=None will be deprecated"):
-        plot._utils._check_time_unit(None)
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(ValueError):
-            # remove xscale from pyfar 0.6.0!
-            plot._utils._check_time_unit(None)
