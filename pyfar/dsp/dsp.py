@@ -1346,17 +1346,12 @@ def time_shift(
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
-    pad_type : str, optional
-        The pad value for linear shifts, by default ``"zeros"`` is used.
-
-        ``"zeros"``
-            Pad zeros to each channel
-        ``"NaN"``
-            Pad ``numpy.nan`` to the respective channels. This os recommended
-            if the rms of the signal is to be maintained for block-wise rms
-            estimation of the noise power of an signal. Note that if NaNs are
-            padded, the returned data will be a ``TimeData`` instead of
-            ``Signal``.
+    pad_type : numeric, optional
+        The pad value for linear shifts, by default ``0.`` is used.
+        Pad ``numpy.nan`` to the respective channels if the rms value of the
+        signal is to be maintained for block-wise rms estimation of the noise
+        power of an signal. Note that if NaNs are padded, the returned data
+        will be a ``TimeData`` instead of ``Signal``.
 
     Returns
     -------
@@ -1390,12 +1385,13 @@ def time_shift(
     .. plot::
 
         >>> import pyfar as pf
+        >>> import numpy as np
         >>> import matplotlib.pyplot as plt
         >>> # generate and shift the impulses
         >>> impulse = pf.signals.impulse(
         ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
         >>> shifted = pf.dsp.time_shift(
-        ...     impulse, [-2, 0, 2], mode='linear', pad_value='nan')
+        ...     impulse, [-2, 0, 2], mode='linear', pad_value=np.nan)
         >>> # time domain plot
         >>> pf.plot.use('light')
         >>> _, axs = plt.subplots(2, 1)
@@ -1421,15 +1417,6 @@ def time_shift(
         raise ValueError(
             "Shifting by more samples than the length of the signal")
 
-    if pad_value == 'zeros':
-        pad = 0.
-    elif pad_value == 'nan':
-        pad = np.nan
-    elif np.isreal(pad_value):
-        pad = pad_value
-    else:
-        raise ValueError("Wrong pad value.")
-
     shifted = signal.copy()
     for ch in np.ndindex(signal.cshape):
         shifted.time[ch] = np.roll(
@@ -1439,9 +1426,9 @@ def time_shift(
 
         if mode == 'linear':
             if shift_samples[ch] > 0:
-                shifted.time[ch, :shift_samples[ch]] = pad
+                shifted.time[ch, :shift_samples[ch]] = pad_value
             elif shift_samples[ch] < 0:
-                shifted.time[ch, shift_samples[ch]:] = pad
+                shifted.time[ch, shift_samples[ch]:] = pad_value
 
     if np.any(np.isnan(shifted.time)):
         shifted = pyfar.TimeData(
