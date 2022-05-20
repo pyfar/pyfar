@@ -1306,8 +1306,7 @@ def pad_zeros(signal, pad_width, mode='after'):
     return padded_signal
 
 
-def time_shift(
-        signal, shift, mode='cyclic', unit='samples', pad_value='zeros'):
+def time_shift(signal, shift, unit='samples'):
     """Apply a time-shift to a signal.
 
     The shift is performed as a cyclic shift on the time axis, potentially
@@ -1325,42 +1324,15 @@ def time_shift(
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
         dimensions ``cshape``.
-    mode : str, optional
-        The shifting mode
-
-        ``"linear"``
-            Apply linear shift, i.e., parts of the signal that are shifted to
-            times smaller than 0 samples and larger than ``signal.n_samples``
-            disappear. To maintain the shape of the signal, the signal is
-            padded at the respective other end. The pad value can either be
-            zeros or nans. See ``pad_type``.
-        ``"cyclic"``
-            Apply a cyclic shift, i.e., parts of the signal that are shifted to
-            values smaller than 0 are wrapped around to the end, and parts that
-            are shifted to values larger than ``signal.n_samples`` are wrapped
-            around to the beginning.
-
-        The default is ``"cyclic"``
     unit : str, optional
         Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
-    pad_type : str, optional
-        The pad value for linear shifts, by default ``"zeros"`` is used.
-
-        ``"zeros"``
-            Pad zeros to each channel
-        ``"NaN"``
-            Pad ``numpy.nan`` to the respective channels. This os recommended
-            if the rms of the signal is to be maintained for block-wise rms
-            estimation of the noise power of an signal. Note that if NaNs are
-            padded, the returned data will be a ``TimeData`` instead of
-            ``Signal``.
 
     Returns
     -------
-    Signal, TimeData
+    Signal
         The time-shifted signal.
 
     Examples
@@ -1417,21 +1389,13 @@ def time_shift(
         raise ValueError(
             f"Unit is: {unit}, but has to be 'samples' or 's'.")
 
-    if np.any(np.abs(shift_samples) > signal.n_samples):
-        raise ValueError(
+    if np.any(shift_samples > signal.n_samples):
+        warnings.warn(
             "Shifting by more samples than the length of the signal")
 
-    if pad_value == 'zeros':
-        pad = 0.
-    elif pad_value == 'nan':
-        pad = np.nan
-    elif np.isreal(pad_value):
-        pad = pad_value
-    else:
-        raise ValueError("Wrong pad value.")
-
-    shifted = signal.copy()
-    for ch in np.ndindex(signal.cshape):
+    shifted = signal.flatten()
+    shift_samples = shift_samples.flatten()
+    for ch in range(shifted.cshape[0]):
         shifted.time[ch] = np.roll(
             shifted.time[ch],
             shift_samples[ch],
@@ -1663,3 +1627,110 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
     return pyfar.Signal(
         res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+
+
+def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
+    r"""Convert data of the selected signal domain into decibels (dB).
+
+    The converted data is calculated by the base 10 logarithmic scale:
+    ``data(dB) = log_prefix * numpy.log10(data/log_reference)``. By using a
+    logarithmic scale, the deciBel is able to compare quantities that
+    may have vast ratios between them. As an example, the sound pressure in
+    dB can be calculated as followed:
+
+    .. math::
+
+        L_p = 20\log_{10}\biggl(\frac{p}{p_0}\biggr),
+
+    where :math:`20` is the logarithmic prefix for sound field quantities and
+    :math:`p_0` would be the reference for the sound pressure level. A list
+    of commonly used reference values can be found in the 'log_reference'
+    parameters section.
+
+    Parameters
+    ----------
+    signal : Signal, TimeData, FrequencyData
+        The signal which is converted into decibel
+    domain : str
+        The domain, that is converted to decibels:
+
+        ``'freq'``
+            Convert normalized frequency domain data. Signal must be of type
+            'Signal' or 'FrequencyData'.
+        ``'time'``
+            Convert time domain data. Signal must be of type
+            'Signal' or 'TimeData'.
+        ``'freq_raw'``
+            Convert frequency domain data without normalization. Signal must be
+            of type 'Signal'.
+
+        The default is ``'freq'``.
+    log_prefix : int
+        The prefix for the dB calculation. The default ``None``, uses ``10``
+        for signals with ``'psd'`` and ``'power'`` FFT normalization and
+        ``20`` otherwise.
+    log_reference : int or float
+        Reference for the logarithm calculation.
+        List of commonly used values:
+
+        +---------------------------------+--------------+
+        | log_reference                   | value        |
+        +=================================+==============+
+        | Digital signals (dBFs)          | 1            |
+        +---------------------------------+--------------+
+        | Sound pressure :math:`L_p` (dB) | 2e-5 Pa      |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBu)       | 0.7746 volt  |
+        +---------------------------------+--------------+
+        | Sound intensity :math:`L_I` (dB)| 1e-12 W/m²   |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBV)       | 1 volt       |
+        +---------------------------------+--------------+
+        | Electric power :math:`L_P` (dB) | 1 watt       |
+        +---------------------------------+--------------+
+
+        The default is 1.
+    Returns
+    -------
+    decibel : numpy.ndarray
+        The given signal in decibel in chosen domain.
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> signal = pf.signals.noise(41000, rms=[1, 1])
+    >>> decibel_data = decibel(signal, domain='time')
+    """
+    if log_prefix is None:
+        if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
+                                                                    'psd'):
+            log_prefix = 10
+        else:
+            log_prefix = 20
+    if domain == 'freq':
+        if isinstance(signal, (pyfar.FrequencyData, pyfar.Signal)):
+            data = signal.freq.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'FrequencyData'.")
+    elif domain == 'time':
+        if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
+            data = signal.time.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'TimeData'.")
+    elif domain == 'freq_raw':
+        if isinstance(signal, (pyfar.Signal)):
+            data = signal.freq_raw.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal'.")
+    else:
+        raise ValueError(
+            f"Domain is '{domain}', but has to be 'time', 'freq',"
+            " or 'freq_raw'.")
+    data[data == 0] = np.finfo(float).eps
+    return log_prefix * np.log10(np.abs(data) / log_reference)

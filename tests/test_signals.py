@@ -2,8 +2,6 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import os
-from packaging import version
-import pyfar as pf
 from pyfar import Signal
 import pyfar.dsp.filter as pff
 import pyfar.signals as pfs
@@ -295,17 +293,6 @@ def test_linear_sweep_time_assertions():
         pfs.linear_sweep_time(100, [1, 40e3])
 
 
-def test_linear_sweep_deprecation():
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pfs.linear_sweep(2**10, [1e3, 20e3])
-
-    if version.parse(pf.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove linear_sweep() from pyfar 0.5.0!
-            pfs.linear_sweep(2**10, [1e3, 20e3])
-
-
 def test_exponential_sweep_time_against_reference():
     """Test exponential sweep against manually verified reference."""
     sweep = pfs.exponential_sweep_time(2**10, [1e3, 20e3])
@@ -346,17 +333,6 @@ def test_exponential_sweep_time_rate():
 def test_exponential_sweep_time_assertion():
     with pytest.raises(ValueError, match="The exponential sweep can not"):
         pfs.exponential_sweep_time(2**10, [0, 20e3])
-
-
-def test_exponential_sweep_deprecation():
-    with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
-        pfs.exponential_sweep(2**10, [1e3, 20e3])
-
-    if version.parse(pf.__version__) >= version.parse('0.5.0'):
-        with pytest.raises(AttributeError):
-            # remove exponential_sweep() from pyfar 0.5.0!
-            pfs.exponential_sweep(2**10, [1e3, 20e3])
 
 
 def test_get_common_shape():
