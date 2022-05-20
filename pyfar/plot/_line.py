@@ -20,14 +20,13 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
-    data = signal.time.T
     if dB:
         # avoid any zero-values because they result in -inf in dB data
-        eps = np.finfo(float).eps
-        data = log_prefix * np.log10(np.abs(data) / log_reference + eps)
+        data = dsp.decibel(signal, 'time', log_prefix, log_reference).T
         ymax = np.nanmax(data) + 10
         ymin = ymax - 100
-
+    else:
+        data = signal.time.T
     # auto detect the time unit
     if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(signal.times[..., -1])
@@ -70,10 +69,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     if dB:
-        if log_prefix is None:
-            log_prefix = _utils._log_prefix(signal)
-        eps = np.finfo(float).eps
-        data = log_prefix*np.log10(np.abs(signal.freq)/log_reference + eps)
+        data = dsp.decibel(signal, 'freq', log_prefix, log_reference)
         ymax = np.nanmax(data)
         ymin = ymax - 90
         ymax = ymax + 10

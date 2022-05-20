@@ -1599,3 +1599,110 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
     return pyfar.Signal(
         res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+
+
+def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
+    r"""Convert data of the selected signal domain into decibels (dB).
+
+    The converted data is calculated by the base 10 logarithmic scale:
+    ``data(dB) = log_prefix * numpy.log10(data/log_reference)``. By using a
+    logarithmic scale, the deciBel is able to compare quantities that
+    may have vast ratios between them. As an example, the sound pressure in
+    dB can be calculated as followed:
+
+    .. math::
+
+        L_p = 20\log_{10}\biggl(\frac{p}{p_0}\biggr),
+
+    where :math:`20` is the logarithmic prefix for sound field quantities and
+    :math:`p_0` would be the reference for the sound pressure level. A list
+    of commonly used reference values can be found in the 'log_reference'
+    parameters section.
+
+    Parameters
+    ----------
+    signal : Signal, TimeData, FrequencyData
+        The signal which is converted into decibel
+    domain : str
+        The domain, that is converted to decibels:
+
+        ``'freq'``
+            Convert normalized frequency domain data. Signal must be of type
+            'Signal' or 'FrequencyData'.
+        ``'time'``
+            Convert time domain data. Signal must be of type
+            'Signal' or 'TimeData'.
+        ``'freq_raw'``
+            Convert frequency domain data without normalization. Signal must be
+            of type 'Signal'.
+
+        The default is ``'freq'``.
+    log_prefix : int
+        The prefix for the dB calculation. The default ``None``, uses ``10``
+        for signals with ``'psd'`` and ``'power'`` FFT normalization and
+        ``20`` otherwise.
+    log_reference : int or float
+        Reference for the logarithm calculation.
+        List of commonly used values:
+
+        +---------------------------------+--------------+
+        | log_reference                   | value        |
+        +=================================+==============+
+        | Digital signals (dBFs)          | 1            |
+        +---------------------------------+--------------+
+        | Sound pressure :math:`L_p` (dB) | 2e-5 Pa      |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBu)       | 0.7746 volt  |
+        +---------------------------------+--------------+
+        | Sound intensity :math:`L_I` (dB)| 1e-12 W/m²   |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBV)       | 1 volt       |
+        +---------------------------------+--------------+
+        | Electric power :math:`L_P` (dB) | 1 watt       |
+        +---------------------------------+--------------+
+
+        The default is 1.
+    Returns
+    -------
+    decibel : numpy.ndarray
+        The given signal in decibel in chosen domain.
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> signal = pf.signals.noise(41000, rms=[1, 1])
+    >>> decibel_data = decibel(signal, domain='time')
+    """
+    if log_prefix is None:
+        if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
+                                                                    'psd'):
+            log_prefix = 10
+        else:
+            log_prefix = 20
+    if domain == 'freq':
+        if isinstance(signal, (pyfar.FrequencyData, pyfar.Signal)):
+            data = signal.freq.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'FrequencyData'.")
+    elif domain == 'time':
+        if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
+            data = signal.time.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'TimeData'.")
+    elif domain == 'freq_raw':
+        if isinstance(signal, (pyfar.Signal)):
+            data = signal.freq_raw.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal'.")
+    else:
+        raise ValueError(
+            f"Domain is '{domain}', but has to be 'time', 'freq',"
+            " or 'freq_raw'.")
+    data[data == 0] = np.finfo(float).eps
+    return log_prefix * np.log10(np.abs(data) / log_reference)
