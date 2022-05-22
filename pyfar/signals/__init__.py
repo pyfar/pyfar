@@ -17,7 +17,10 @@ from .deterministic import (
 from .stochastic import (
     noise, pulsed_noise)
 
+from .audio_files import hrirs
+
 __all__ = [
     'sine', 'impulse', 'noise', 'pulsed_noise',
     'linear_sweep_time', 'exponential_sweep_time',
-    'linear_sweep', 'exponential_sweep']
+    'linear_sweep', 'exponential_sweep',
+    'hrirs']
