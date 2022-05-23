@@ -5,7 +5,7 @@ import os
 from pyfar import Signal
 import pyfar.dsp.filter as pff
 import pyfar.signals as pfs
-from pyfar.signals.deterministic import _get_common_shape, _match_shape
+from pyfar.signals.deterministic import _match_shape
 
 
 def test_sine_with_defaults():
@@ -63,6 +63,8 @@ def test_sine_assertions():
     """Test assertions for sine."""
     with pytest.raises(ValueError, match="The frequency must be"):
         pfs.sine(40000, 100)
+    with pytest.raises(ValueError, match="The parameters frequency"):
+        pfs.sine(100, 100, [1, 2], [1, 2, 3])
 
 
 def test_impulse_with_defaults():
@@ -99,6 +101,12 @@ def test_impulse_float():
     """Test impulse signal with float number of samples."""
     signal = pfs.impulse(441.8)
     assert signal.n_samples == 441
+
+
+def test_impulse_assertions():
+    """Test assertions for impulse functions"""
+    with pytest.raises(ValueError, match="The parameters delay"):
+        pfs.impulse(10, [1, 2], [1, 2, 3])
 
 
 def test_noise_with_defaults():
@@ -335,34 +343,12 @@ def test_exponential_sweep_time_assertion():
         pfs.exponential_sweep_time(2**10, [0, 20e3])
 
 
-def test_get_common_shape():
-    """Test get_common_shape with all possible inputs."""
-    a = 1
-    b = [1, 2]
-    c = [[1, 2, 3], [1, 2, 3]]
-
-    # test with two numbers
-    assert _get_common_shape(a, a) == (1, )
-    # test with three numbers
-    assert _get_common_shape(a, a, a) == (1, )
-    # test with number and 1d data
-    assert _get_common_shape(a, b) == (2, )
-    # test with two 1d data entries
-    assert _get_common_shape(b, b) == (2, )
-    # test with number and 2d data
-    assert _get_common_shape(a, c) == (2, 3)
-    # test with two 2d data entries
-    assert _get_common_shape(c, c) == (2, 3)
-    # test not matching data
-    with pytest.raises(ValueError, match="Input data must be of the same"):
-        _get_common_shape(b, c)
-
-
 def test_match_shape():
     """Test _match_shape with all possible inputs."""
     a = 1
     b = [[1, 2, 3], [1, 2, 3]]
 
-    a_match, b_match = _match_shape((3, 2), a, b)
-    npt.assert_allclose(np.ones((3, 2)), a_match)
+    cshape, (a_match, b_match) = _match_shape(a, b)
+    assert cshape == (2, 3)
+    npt.assert_allclose(np.ones(cshape), a_match)
     npt.assert_allclose(b, b_match)
