@@ -287,18 +287,18 @@ def test_time_shift_seconds(shift_samples):
     npt.assert_allclose(shifted.time, ref.time)
 
 
-def test_time_shift_multi_dim():
+@pytest.mark.parametrize("shift_samples", [(
+    [1, 2, 3]), (np.array([1, 2, 3]))])
+def test_time_shift_multi_dim(shift_samples):
     delay = 2
     n_samples = 10
 
     # multi-dim signal with individual shifts
-    n_channels = np.array([2, 3])
     test_signal = impulse(
-        n_samples, delay=delay, amplitude=np.ones(n_channels))
-    shift_samples = np.reshape(np.arange(np.prod(n_channels)) + 1, n_channels)
+        n_samples, delay=delay, amplitude=np.ones((2, 3)))
     shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(
-        n_samples, delay=delay+shift_samples, amplitude=np.ones(n_channels))
+    ref = impulse(n_samples, delay=delay+np.array(shift_samples),
+                  amplitude=np.ones((2, 3)))
 
     npt.assert_allclose(shifted.time, ref.time, atol=1e-16)
 

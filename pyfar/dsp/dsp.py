@@ -1407,8 +1407,7 @@ def time_shift(
         >>> plt.tight_layout()
 
     """
-    if np.size(shift) == 1:
-        shift = np.broadcast_to(shift, signal.cshape)
+    shift = np.broadcast_to(shift, signal.cshape)
 
     if unit == 's':
         shift_samples = np.round(shift*signal.sampling_rate).astype(int)
