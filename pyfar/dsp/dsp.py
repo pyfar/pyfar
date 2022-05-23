@@ -1308,10 +1308,11 @@ def pad_zeros(signal, pad_width, mode='after'):
 
 def time_shift(
         signal, shift, mode='cyclic', unit='samples', pad_value='zeros'):
-    """Apply a time-shift to a signal.
+    """Apply a cyclic or linear time-shift to a signal.
 
-    The shift is performed as a cyclic shift on the time axis, potentially
-    resulting in non-causal signals for negative shift values.
+    The shift is performemed along the time axis and is forced to be an integer
+    sample value. For a shift using fractional sample values see
+    :py:func:`~pf.dsp.fractional_time_shift`.
 
     Parameters
     ----------
@@ -1332,8 +1333,8 @@ def time_shift(
             Apply linear shift, i.e., parts of the signal that are shifted to
             times smaller than 0 samples and larger than ``signal.n_samples``
             disappear. To maintain the shape of the signal, the signal is
-            padded at the respective other end. The pad value can either be
-            zeros or nans. See ``pad_type``.
+            padded at the respective other end. The pad value is determined by
+            ``pad_type``.
         ``"cyclic"``
             Apply a cyclic shift, i.e., parts of the signal that are shifted to
             values smaller than 0 are wrapped around to the end, and parts that
@@ -1350,13 +1351,17 @@ def time_shift(
         The pad value for linear shifts, by default ``0.`` is used.
         Pad ``numpy.nan`` to the respective channels if the rms value of the
         signal is to be maintained for block-wise rms estimation of the noise
-        power of an signal. Note that if NaNs are padded, the returned data
-        will be a ``TimeData`` instead of ``Signal``.
+        power of a signal. Note that if NaNs are padded, the returned data
+        will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
+        :py:class:`~pyfar.classes.audio.Signal` object.
 
     Returns
     -------
     Signal, TimeData
-        The time-shifted signal.
+        The time-shifted signal. This is a
+        :py:class:`~pyfar.classes.audio.TimeData` object in case a linear shift
+        was done and the signal was padded with Nans. In all other cases, a
+        :py:class:`~pyfar.classes.audio.Signal` object is returend.
 
     Examples
     --------
