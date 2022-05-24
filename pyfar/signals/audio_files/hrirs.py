@@ -6,7 +6,7 @@ import os
 import sofar as sf
 import pyfar as pf
 
-database = r"C:\Users\panik\Documents\Uni\Measurements\2020_FABIAN_HRTF_DATABASE_v4\1 HRIRs\SOFA"
+database = ""
 
 # read HRIRs
 file = os.path.join(database, "FABIAN_HRIR_measured_HATO_0.sofa")
