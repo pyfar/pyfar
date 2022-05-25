@@ -1307,7 +1307,7 @@ def pad_zeros(signal, pad_width, mode='after'):
 
 
 def time_shift(
-        signal, shift, mode='cyclic', unit='samples', pad_value='zeros'):
+        signal, shift, mode='cyclic', unit='samples', pad_value=0.):
     """Apply a cyclic or linear time-shift to a signal.
 
     The shift is performemed along the time axis and is forced to be an integer

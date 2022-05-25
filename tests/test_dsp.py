@@ -240,47 +240,20 @@ def test_regularized_spectrum_inversion_normalized(impulse):
 
 
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
-def test_time_shift_samples(shift_samples):
+@pytest.mark.parametrize("unit", ["samples", "s"])
+def test_time_shift_cyclic(shift_samples, unit):
+    """Test cyclic time shift using samples and seconds"""
+    # generate test signal
     sampling_rate = 100
     delay = 2
     n_samples = 10
     test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
 
-    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(
-        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+    # apply shift
+    shift = shift_samples if unit == "samples" else shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift, unit=unit)
 
-    npt.assert_allclose(shifted.time, ref.time)
-
-    # shift around one time
-    shift_samples = n_samples
-    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    npt.assert_allclose(shifted.time, ref.time)
-
-
-def test_time_shift_full_length():
-    sampling_rate = 100
-    delay = 2
-    n_samples = 10
-    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    shifted = dsp.time_shift(test_signal, n_samples, unit='samples')
-    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    npt.assert_allclose(shifted.time, ref.time)
-
-
-@pytest.mark.parametrize("shift_samples", [2, -2, 0])
-def test_time_shift_seconds(shift_samples):
-    sampling_rate = 100
-    delay = 2
-    n_samples = 10
-    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    shift_time = shift_samples/sampling_rate
-    shifted = dsp.time_shift(test_signal, shift_time, unit='s')
+    # compare to reference
     ref = impulse(
         n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
 
