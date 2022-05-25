@@ -260,6 +260,36 @@ def test_time_shift_cyclic(shift_samples, unit):
     npt.assert_allclose(shifted.time, ref.time)
 
 
+@pytest.mark.parametrize("shift", [2, -2, 0])
+@pytest.mark.parametrize("pad_value", [0, np.nan])
+def test_time_shift_linear(shift, pad_value):
+    """Test linear time shift with different pad values"""
+    # generate test signal
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    # apply shift
+    shifted = dsp.time_shift(
+        test_signal, shift, "linear", "samples", pad_value)
+
+    # compare to reference
+    ref = impulse(
+        n_samples, delay=delay+shift, sampling_rate=sampling_rate)
+
+    if pad_value != 0 and shift != 0:
+        ref = pf.TimeData(ref.time, ref.times)
+    if shift == 2:
+        ref.time[0, :2] = pad_value
+    elif shift == -2:
+        ref.time[0, -2:] = pad_value
+
+    npt.assert_allclose(shifted.time, ref.time)
+    assert type(shifted) == type(ref)
+
+
+
 @pytest.mark.parametrize("shift_samples", [(
     [1, 2, 3]), (np.array([1, 2, 3]))])
 def test_time_shift_multi_dim(shift_samples):
