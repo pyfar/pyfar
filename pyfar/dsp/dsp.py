@@ -1407,19 +1407,21 @@ def time_shift(
         >>> plt.tight_layout()
 
     """
-    shift = np.broadcast_to(shift, signal.cshape)
+    if mode not in ["linear", "cyclic"]:
+        raise ValueError(f"mode is '{mode}' but mist be 'linear' or cyclic'")
 
+    shift = np.broadcast_to(shift, signal.cshape)
     if unit == 's':
         shift_samples = np.round(shift*signal.sampling_rate).astype(int)
     elif unit == 'samples':
         shift_samples = shift.astype(int)
     else:
         raise ValueError(
-            f"Unit is: {unit}, but has to be 'samples' or 's'.")
+            f"unit is '{unit}' but must be 'samples' or 's'.")
 
-    if np.any(np.abs(shift_samples) > signal.n_samples):
-        raise ValueError(
-            "Shifting by more samples than the length of the signal")
+    if np.any(np.abs(shift_samples) > signal.n_samples) and mode == "linear":
+        raise ValueError(("Can not shift by more samples than signal.n_samples"
+                          " if mode is 'linear'"))
 
     shifted = signal.copy()
     for ch in np.ndindex(signal.cshape):

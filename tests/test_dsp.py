@@ -289,10 +289,10 @@ def test_time_shift_linear(shift, pad_value):
     assert type(shifted) == type(ref)
 
 
-
 @pytest.mark.parametrize("shift_samples", [(
     [1, 2, 3]), (np.array([1, 2, 3]))])
 def test_time_shift_multi_dim(shift_samples):
+    """Test with multi-channel signal and shift values as list and np.array"""
     delay = 2
     n_samples = 10
 
@@ -304,6 +304,24 @@ def test_time_shift_multi_dim(shift_samples):
                   amplitude=np.ones((2, 3)))
 
     npt.assert_allclose(shifted.time, ref.time, atol=1e-16)
+
+
+def test_time_shift_assertions():
+    """Test assertions for shift_time"""
+
+    # wrong mode
+    with pytest.raises(ValueError, match="mode is 'cut'"):
+        dsp.time_shift(impulse(10), 2, mode='cut')
+
+    # wrong unit
+    with pytest.raises(ValueError, match="unit is 'kg'"):
+        dsp.time_shift(impulse(10), 2, unit='kg')
+
+    # shift value exceeding signal length with both modes
+    with pytest.raises(ValueError, match="Can not shift"):
+        dsp.time_shift(impulse(10), 20, mode='linear')
+
+    dsp.time_shift(impulse(10), 20, mode='cyclic')
 
 
 def test_time_window_default():
