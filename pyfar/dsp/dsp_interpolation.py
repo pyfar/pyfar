@@ -479,7 +479,7 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
 
     The SciPy function ``scipy.signal.resample_poly`` is used for resmapling.
     Therefore, the factor ``L = sampling_rate/signal.sampling_rate``
-    is approximated by a fraction of two integer numbers. Therfore, the signal
+    is approximated by a fraction of two integer numbers. Therefore, the signal
     first upsampled by an integer number given by the numerator of the fraction
     , and downsampled by an integer value given by the denominator of the
     fraction.
