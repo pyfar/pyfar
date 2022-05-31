@@ -561,8 +561,9 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
         >>> pf.plot.time_freq(signal, label="original")
         >>> pf.plot.time_freq(resampled_freq, dashes=[2, 3],
         ...                   label="resampled (freq. domain matched)")
-        >>> pf.plot.time_freq(resampled_time, ls=":",
-        ...                   label="resampled (time domain matched)")
+        >>> ax = pf.plot.time_freq(resampled_time, ls=":",
+        ...                   label="resampled (time domain matched)", c='y')
+        >>> ax[0].set_xlim(1.2,1.46)
         >>> plt.legend()
     """
     # check input
