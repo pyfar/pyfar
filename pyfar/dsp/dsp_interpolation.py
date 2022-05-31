@@ -477,16 +477,21 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
 def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
     """Resample signal to new sampling rate.
 
-    For resampling the signal the SciPy function ``scipy.signal.resample_poly``
-    is used. Therefore, the factor ``L = new_sampling_rate/old_sampling_rate``
-    is converted into a fraction. Thereby, the signal is upsampled by the
-    numerator of the fraction, a zero-phase low-pass FIR filter is applied and
-    then it's downsampled by the denominator of the fraction.
-    Notice, that the new sampling rate should be divisible by 10, otherwise it
-    can cause an infinite loop in the resample_poly function. Also notice that
-    resampling can resulte in changing aplitudes in time and frequency domain.
-    Check the parameter ``match_amplitude`` and the examples for more detailed
-    information.
+    The SciPy function ``scipy.signal.resample_poly`` is used for resmapling.
+    Therefore, the factor ``L = sampling_rate/signal.sampling_rate``
+    is approximated by a fraction of two integer numbers. Therfore, the signal
+    first upsampled by an integer number given by the numerator of the fraction
+    , and downsampled by an integer value given by the denominator of the
+    fraction.
+
+    .. note ::
+
+        `sampling_rate` should be divisible by 10, otherwise it can cause an
+        infinite loop in the ``resample_poly`` function.
+
+        The amplitudes of the signal can match the amplitude of the input
+        signal in the time and frequency domain. See the parameter
+        `match_amplitude` and the examples for more information.
 
     Parameters
     ----------
@@ -495,65 +500,70 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
     sampling_rate : number
         The new sampling rate in Hz
     match_amplitude : string
-        Defines the domain to match the amplitude of the resampled data.
+        Define the domain to match the amplitude of the resampled data.
 
         ``'time'``
-            Sets the gain for amplitude matching with ``1``. Pyfar Signals with
-            ``signal_type = 'power'`` need to be matched in the time domain.
+            Maintains the amplitude in the time domain. This is useful for
+            recordings such as speech or music and must be used if
+            ``signal.signal_type = 'power'``.
         ``'freq'``
-            Sets the gain for amplitude matching with ``sr_old/sr_new``, which
-            leads to an amplitude matching in the frequency domain.
+            Maintains the amplitude in the frequency domain by multiplying the
+            resampled signal by ``1/L`` (see above). This is often desired
+            when resampling impulse responses.
 
         The default is ``'time'``.
     frac_limit : int
-        Sets the fractional limit of the denominator.
+        Limit the denominator for approximating the resampling factor `L`
+        (see above). This can be used in case the resampling gets stuck in an
+        infinite loop (see note above) at the potenital cost of not exactly
+        realizing the target sampling rate.
 
-        The default is ``None``, which will use the default of the
-        ``fractions.Fraction`` function with ``frac_limit = 1e6``.
+        The default is ``None``, which uses ``frac_limit = 1e6``.
+
     Returns
     -------
     signal : pyfar.Signal
-        The resampled signal of the input data with the new sampling rate.
+        The resampled the input data.
 
     Examples
     --------
-    Notice that resampling can resulte in changing aplitudes in time and
-    frequency domain. As shown in the example, upsampling will cause a higher
-    magnitude in the frequency domain, due to more energy resulting the bigger
-    sampling rate.
+    For power signals, the amplitude of the resampled signal is automatically
+    correct in the time `and` frequency domain if ``match_amplitude="time"``
 
     .. plot::
 
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
-
-        >>> fs_1 = 48000
-        >>> fs_2 = 96000
-        >>> signal = pf.signals.impulse(128, 64, sampling_rate=fs_1)
-        >>> resampled = pf.dsp.resample(signal, fs_2, match_amplitude = "time")
+        >>>
+        >>> signal = pf.signals.sine(200, 4800, sampling_rate=48000)
+        >>> resampled = pf.dsp.resample(signal, 96000)
+        >>>
         >>> pf.plot.time_freq(signal, label="original")
-        >>> pf.plot.time_freq(resampled, label="resampled")
-        >>> plt.tight_layout()
+        >>> pf.plot.time_freq(resampled, c="y", ls=":",
+        ...                   label="resampled (time domain matched)")
         >>> plt.legend()
 
-    If this is unwanted, the parameter ``match_amplitude`` can
-    be used to match the magnitude in the frequency domain. However, this will
-    cause a lower amplitude in the time domain.
+    With some energy signals, such as impulse responses, the amplitude can only
+    be correct in the time `or` frequency domain. In such cases, it is often
+    desired to match the amplitude in the frequency domain
 
     .. plot::
 
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
-
-        >>> fs_1 = 48000
-        >>> fs_2 = 96000
-        >>> signal = pf.signals.impulse(128, 64, sampling_rate=fs_1)
-        >>> resampled = pf.dsp.resample(signal, fs_2, match_amplitude = "freq")
+        >>>
+        >>> signal = pf.signals.impulse(128, 64, sampling_rate=48000)
+        >>> resampled_time = pf.dsp.resample(
+        ...     signal, 96000, match_amplitude = "time")
+        >>> resampled_freq = pf.dsp.resample(
+        ...     signal, 96000, match_amplitude = "freq")
+        >>>
         >>> pf.plot.time_freq(signal, label="original")
-        >>> pf.plot.time_freq(resampled, label="resampled")
-        >>> plt.tight_layout()
+        >>> pf.plot.time_freq(resampled_freq, dashes=[2, 3],
+        ...                   label="resampled (freq. domain matched)")
+        >>> pf.plot.time_freq(resampled_time, ls=":",
+        ...                   label="resampled (time domain matched)")
         >>> plt.legend()
-
     """
     # check input
     if not isinstance(signal, (pf.Signal)):
