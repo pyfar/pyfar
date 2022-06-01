@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.testing as npt
+import pytest
 from pytest import raises
 
 import pyfar as pf
@@ -426,7 +427,7 @@ def test_get_arithmetic_data_wrong_domain():
         signal._get_arithmetic_data(Signal(1, 44100), 1, 'space')
 
 
-def test_matrix_multiplication():
+def test_matrix_multiplication_default():
     """Test default behavior for signals"""
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = pf.signals.impulse(10, amplitude=np.array([[1, 2], [3, 4], [5, 6]]))
@@ -461,9 +462,9 @@ def test_matrix_multiplication_operator():
 def test_matrix_multiplication_higher_shape():
     """Test correct multiplication nd signals"""
     x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    y = pf.signals.impulse(10, amplitude=np.ones((3, 2, 4)))
+    y = pf.signals.impulse(10, amplitude=np.ones((2, 4, 5)))
     z = pf.matrix_multiplication((x, y))
-    desired = 3 * np.ones((2, 2, 4, 6))
+    desired = 4 * np.ones((2, 3, 5, 6))
     npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
@@ -472,11 +473,11 @@ def test_matrix_multiplication_shape_mismatch():
     # Signals
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = pf.signals.impulse(10, amplitude=np.array([[1, 2], [3, 4]]))
-    with raises(ValueError, match="The data shapes"):
+    with raises(ValueError, match="matmul: Input operand 1"):
         pf.matrix_multiplication((x, y))
     # Signal and array
     y = np.ones((2, 2, 6)) * np.array([[1, 2], [3, 4]])[..., None]
-    with raises(ValueError, match="The data shapes"):
+    with raises(ValueError, match="matmul: Input operand 1"):
         pf.matrix_multiplication((x, y))
 
 
@@ -515,7 +516,7 @@ def test_matrix_multiplication_FrequencyData():
 def test_matrix_multiplication_signal_times_array():
     """Test multiplication of signal with array"""
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
-    y = np.ones((3, 2, 6)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
+    y = np.ones((3, 2, 1)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
     z = x @ y
     desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 6))
     npt.assert_allclose(z.freq, desired, atol=1e-15)
@@ -530,7 +531,7 @@ def test_matrix_multiplication_TimeData_times_array():
     times = np.arange(10)
     xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
     x = pf.TimeData(xdata, times)
-    y = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
+    y = np.ones((3, 2, 1)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
     z = x @ y
     desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
     npt.assert_allclose(z.time, desired, atol=1e-15)
@@ -545,7 +546,7 @@ def test_matrix_multiplication_FrequencyData_times_array():
     times = np.arange(10)
     xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
     x = pf.FrequencyData(xdata, times)
-    y = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
+    y = np.ones((3, 2, 1)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
     z = x @ y
     desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
     npt.assert_allclose(z.freq, desired, atol=1e-15)
@@ -553,3 +554,43 @@ def test_matrix_multiplication_FrequencyData_times_array():
     desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
         * np.ones((3, 3, 10))
     npt.assert_allclose(z.freq, desired, atol=1e-15)
+
+
+def test_matrix_multiplication_axes():
+    """Test axes parameter"""
+    a = np.arange(2 * 3 * 5).reshape((2, 3, 5))
+    b = np.arange(3 * 4 * 5).reshape((3, 4, 5))
+    x = pf.signals.impulse(10, amplitude=a)
+    y = pf.signals.impulse(10, amplitude=b)
+    z = pf.matrix_multiplication((x, y), axes=[(0, 1), (0, 1), (0, 1)])
+    des = np.matmul(a, b, axes=[(0, 1), (0, 1), (0, 1)])[..., None] \
+        * np.ones((2, 4, 5, 6))
+    npt.assert_allclose(z.freq, des, atol=1e-15)
+
+
+@pytest.mark.parametrize("sx, sy, az, sz",
+                         [[(1, 3, 5), (3, 5, 4), 5, (3, 3, 4)],
+                          [(2,), (3, 2, 4), 2, (3, 1, 4)],
+                          [(1, 2), (3, 2, 4), 2, (3, 1, 4)],
+                          [(2, 3, 4), (4,), 4, (2, 3, 1)],
+                          [(2, 3, 4), (4, 1), 4, (2, 3, 1)]])
+def test_matrix_multiplication_broadcasting(sx, sy, az, sz):
+    """Test broadcasting"""
+    x = pf.signals.impulse(10, amplitude=np.ones(sx))
+    y = pf.signals.impulse(10, amplitude=np.ones(sy))
+    z = pf.matrix_multiplication((x, y))
+    des = az * np.ones(sz + (6,))
+    npt.assert_allclose(z.freq, des, atol=1e-15)
+
+
+def test_matrix_multiplication_multiple():
+    """Test 3 arguments in data"""
+    a = np.ones((2, 3))
+    b = np.ones((3, 4))
+    c = np.ones((4, 5))
+    x = pf.signals.impulse(10, amplitude=a)
+    y = pf.signals.impulse(10, amplitude=b)
+    z = pf.signals.impulse(10, amplitude=c)
+    res = pf.matrix_multiplication((x, y, z))
+    des = 12 * np.ones((2, 5, 6))
+    npt.assert_allclose(res.freq, des, atol=1e-15)
