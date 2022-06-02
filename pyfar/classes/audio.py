@@ -886,6 +886,11 @@ def add(data: tuple, domain='freq'):
         ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
         used.
 
+    Notes
+    -----
+    Arrays included in the data either need to match the ``cshape`` of the
+    resulting audio object or need to be broadcastable to the shape of the
+    underlying time/frequency data.
     """
     return _arithmetic(data, domain, _add)
 
@@ -920,6 +925,12 @@ def subtract(data: tuple, domain='freq'):
         audio object. The `fft_norm` is ``'none'`` if all FFT norms are
         ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
         used.
+
+    Notes
+    -----
+    Arrays included in the data either need to match the ``cshape`` of the
+    resulting audio object or need to be broadcastable to the shape of the
+    underlying time/frequency data.
     """
     return _arithmetic(data, domain, _subtract)
 
@@ -954,6 +965,12 @@ def multiply(data: tuple, domain='freq'):
         audio object. The `fft_norm` is ``'none'`` if all FFT norms are
         ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
         used.
+
+    Notes
+    -----
+    Arrays included in the data either need to match the ``cshape`` of the
+    resulting audio object or need to be broadcastable to the shape of the
+    underlying time/frequency data.
     """
     return _arithmetic(data, domain, _multiply)
 
@@ -987,6 +1004,12 @@ def divide(data: tuple, domain='freq'):
         audio object. The `fft_norm` is ``'none'`` if all FFT norms are
         ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
         used.
+
+    Notes
+    -----
+    Arrays included in the data either need to match the ``cshape`` of the
+    resulting audio object or need to be broadcastable to the shape of the
+    underlying time/frequency data.
    """
     return _arithmetic(data, domain, _divide)
 
@@ -1020,6 +1043,11 @@ def power(data: tuple, domain='freq'):
         audio object. The `fft_norm` is ``'none'`` if all FFT norms are
         ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
         used.
+
+    Notes
+    -----
+    Arrays included in the data either need to match the ``cshape`` of the
+    resulting audio object or the shape of the underlying time/frequency data.
     """
     return _arithmetic(data, domain, _power)
 
