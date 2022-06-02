@@ -21,6 +21,9 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
+    # indicate use of _Audio arithmetic operations for overloaded operators
+    # (e.g. __rmul__)
+    __array_priority__ = 1.0
 
     def __init__(self, domain, comment=None, dtype=np.double):
 
@@ -1026,15 +1029,16 @@ def _arithmetic(data: tuple, domain: str, operation: Callable):
 
     # check input and obtain meta data of new signal
     division = True if operation == _divide else False
-    sampling_rate, n_samples, fft_norm, times, frequencies, audio_type = \
+    sampling_rate, n_samples, fft_norm, times, frequencies, audio_type, \
+        cshape = \
         _assert_match_for_arithmetic(data, domain, division)
 
     # apply arithmetic operation
-    result = _get_arithmetic_data(data[0], n_samples, domain)
+    result = _get_arithmetic_data(data[0], n_samples, domain, cshape)
 
     for d in range(1, len(data)):
         result = operation(
-            result, _get_arithmetic_data(data[d], n_samples, domain))
+            result, _get_arithmetic_data(data[d], n_samples, domain, cshape))
 
     # check if to return an audio object
     if audio_type == Signal:
@@ -1056,7 +1060,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
 
     Check if sampling rate and number of samples agree if multiple signals are
     provided. Check if arrays are numeric. Check if a power signal is contained
-    in the input.
+    in the input. Extract cshape of result.
 
     Input:
     data : tuple
@@ -1083,6 +1087,9 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
         The frequencies if a FrequencyData object was passed. None otherwise.
     audio_type : type, None
         Type of the audio class if contained in data. Otherwise None.
+    cshape : tuple, None
+        Largest channel shape of the audio classes if contained in data.
+        Otherwise empty tuple.
 
     """
 
@@ -1101,6 +1108,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
     times = None
     frequencies = None
     audio_type = type(None)
+    cshape = ()
 
     # check input types and meta data
     found_audio_data = False
@@ -1124,7 +1132,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
                     if domain != "freq":
                         raise ValueError("The domain must be 'freq'.")
                     frequencies = d.frequencies
-
+                cshape = d.cshape
                 found_audio_data = True
                 audio_type = type(d)
 
@@ -1148,6 +1156,11 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
                             frequencies, d.frequencies, atol=1e-15):
                         raise ValueError(
                             "The frequencies do not match.")
+                try:
+                    cshape = np.broadcast_shapes(cshape, d.cshape)
+                except ValueError:
+                    raise ValueError(
+                        "The cshapes do not match.")
 
         # check type of non signal input
         else:
@@ -1162,10 +1175,11 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 
-    return sampling_rate, n_samples, fft_norm, times, frequencies, audio_type
+    return (sampling_rate, n_samples, fft_norm, times, frequencies, audio_type,
+            cshape)
 
 
-def _get_arithmetic_data(data, n_samples, domain):
+def _get_arithmetic_data(data, n_samples, domain, cshape):
     """
     Return data in desired domain without any fft normalization.
 
@@ -1178,6 +1192,9 @@ def _get_arithmetic_data(data, n_samples, domain):
         normalization).
     domain : 'time', 'freq'
         Domain in which the data is returned
+    cshape : tuple
+        Desired channel shape of output (required for operations including
+        array likes and Audio objects).
 
     Returns
     -------
@@ -1197,9 +1214,12 @@ def _get_arithmetic_data(data, n_samples, domain):
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")
-
     else:
         data_out = np.asarray(data)
+
+    if data_out.ndim <= len(cshape):
+        # extend by time/frequency axis, scalars are extended to shape (1,)
+        data_out = data_out[..., None]
 
     return data_out
 
