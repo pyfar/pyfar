@@ -3,26 +3,18 @@ import pytest
 import numpy as np
 
 
-def test_upsampling():
-    # Tests the upsampling of a noise signal to the double sampling rate.
+@pytest.mark.parametrize('L', [2, 0.5])
+def test_resampling(L):
+    """
+    Tests the up and downsampling of a noise signal to the double/half sampling 
+    rate.
+    """
     fs_1 = 48000
-    fs_2 = 2*fs_1
+    fs_2 = L*fs_1
     signal = pf.signals.noise(1024, sampling_rate=fs_1)
     resampled_sig = pf.dsp.resample(signal, fs_2)
     # asserts the sample length
-    assert 2*signal.n_samples == resampled_sig.n_samples
-    # asserts the length of time of the signals
-    assert signal.n_samples/fs_1 == resampled_sig.n_samples/fs_2
-
-
-def test_downsampling():
-    # Tests the upsampling of a noise signal to the double sampling rate.
-    fs_1 = 48000
-    fs_2 = 0.5*fs_1
-    signal = pf.signals.noise(1024, sampling_rate=fs_1)
-    resampled_sig = pf.dsp.resample(signal, fs_2)
-    # asserts the sample length
-    assert 0.5*signal.n_samples == resampled_sig.n_samples
+    assert L*signal.n_samples == resampled_sig.n_samples
     # asserts the length of time of the signals
     assert signal.n_samples/fs_1 == resampled_sig.n_samples/fs_2
 
@@ -69,15 +61,34 @@ def test_downsampling_delayed_impulse():
     np.testing.assert_almost_equal(resampled.time, sinc.time, decimal=3)
 
 
-def test_wrong_aplitude_matching():
-    # Tests ValueError for wrong aplitude matching for power signals.
+def test_resample_assertions():
+    # test the remaining errors and warnings
     fs_1 = 48000
     fs_2 = 96000
-    # Use power signal, which needs match_amplitude="time"
+    # use power signal, which needs match_amplitude="time"
     signal = pf.signals.sine(3000, 128, full_period=True, sampling_rate=fs_1)
     signal.fft_norm = "amplitude"
-    with pytest.raises(ValueError, match='match_aplitude must be "time"'):
+    # test ValueError with wrong value for match_amplitude
+    with pytest.raises(ValueError, match='match_amplitude must be "time"'):
         pf.dsp.resample(signal, fs_2, match_amplitude="freq")
+    # test TypeError for input is not a pyfar.Signal
+    with pytest.raises(TypeError,
+                       match="Input data has to be of type pyfar.Signal"):
+        pf.dsp.resample([0, 1, 0], fs_2, match_amplitude="freq")
+    # test ValueError for invalid match_amplitude, must be "time" or "freq"
+    with pytest.raises(ValueError,
+                       match="match_amplitude is 'invalid_match_amplitude'"):
+        pf.dsp.resample(signal, fs_2,
+                        match_amplitude="invalid_match_amplitude")
+    # test warning for target sampling rate is not divisible by 10
+    with pytest.warns(UserWarning,
+                      match="At least one sampling rate is not divisible"):
+        pf.dsp.resample(signal, 12345, match_amplitude="time")
+    # test warning for target sampling rate realisation with an error
+    signal2 = pf.signals.impulse(128, 64, sampling_rate=48000)
+    with pytest.warns(UserWarning,
+                      match="The target sampling rate was realized with"):
+        pf.dsp.resample(signal2, 420, frac_limit=100)
 
 
 def test_frequency_matching():

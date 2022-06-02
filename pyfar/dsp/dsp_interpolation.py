@@ -479,10 +479,8 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
 
     The SciPy function ``scipy.signal.resample_poly`` is used for resmapling.
     Therefore, the factor ``L = sampling_rate/signal.sampling_rate``
-    is approximated by a fraction of two integer numbers. Therefore, the signal
-    first upsampled by an integer number given by the numerator of the fraction
-    , and downsampled by an integer value given by the denominator of the
-    fraction.
+    is approximated by a fraction of two integer numbers `up/down`. Therefore,
+    the signal is first upsampled by `up` and downsampled by `down`.
 
     .. note ::
 
@@ -523,7 +521,8 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
     Returns
     -------
     signal : pyfar.Signal
-        The resampled the input data.
+        The resampled signal of the input data with a samplelength of 
+        `up/down * signal.n_samples`.
 
     Examples
     --------
@@ -580,17 +579,19 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
         # the time domain
         if signal.signal_type == "power":
             raise ValueError((
-                'match_aplitude must be "time" if signal.signal_type is '
+                'match_amplitude must be "time" if signal.signal_type is '
                 '"power".'))
     else:
-        raise ValueError((f"match_aplitude is '{match_amplitude}' but must be "
-                          "time' or 'freq'"))
+        raise ValueError((f"match_amplitude is '{match_amplitude}' but must be"
+                          " time' or 'freq'"))
     # check if one of the sampling rates is not divisible by 10
     if sampling_rate % 10 or signal.sampling_rate % 10:
         warnings.warn((
             'At least one sampling rate is not divisible by 10, , which can '
             'cause a infinite loop in `scipy.resample_poly`. If this occurs, '
-            'interrupt and choose different sampling rates.'))
+            'interrupt and choose different sampling rates or decrease '
+            'frac_limit. However, this can cause an error in the target '
+            'sampling rate realisation.'))
     # give the numerator and denomitor of the fraction for factor L
     if frac_limit is None:
         frac = Fraction(Decimal(L)).limit_denominator()
