@@ -230,6 +230,20 @@ workflows:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
+      - test_documentation_build:
+          matrix:
+            parameters:
+              version:
+                - "3.9"
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+
       - test_pypi_publish:
           matrix:
             parameters:
@@ -239,6 +253,7 @@ workflows:
             - build_and_test
             - flake
             - test_examples
+            - test_documentation_build
           filters:
             branches:
               ignore: /.*/
