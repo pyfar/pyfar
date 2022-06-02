@@ -175,33 +175,42 @@ def test_add_frequency_data_and_number_wrong_frequencies():
 
 
 def test_add_array_and_signal():
-    # With broadcasting
+    # shapes match
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     z = pf.add((x, y))
     npt.assert_allclose(
         z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
-    # without broadcasting, in frequency domain
-    x = np.arange(2 * 3 * 4 * 6).reshape((2, 3, 4, 6))
+    # broadcasting
+    x = np.arange(3 * 4).reshape((3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     z = pf.add((x, y))
     npt.assert_allclose(
-        z.freq, np.ones_like(z.freq)*x + 1, atol=1e-15)
+        z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
 
 
 def test_add_signal_and_array():
-    # With broadcasting
+    # shapes match
     x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     y = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     z = pf.add((x, y))
     npt.assert_allclose(
         z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
-    # without broadcasting, in frequency domain
+    # broadcasting
     x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    y = np.arange(2 * 3 * 4 * 6).reshape((2, 3, 4, 6))
+    y = np.arange(3 * 4).reshape((3, 4))
     z = pf.add((x, y))
     npt.assert_allclose(
-        z.freq, np.ones_like(z.freq)*y + 1, atol=1e-15)
+        z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
+
+
+def test_add_arrays():
+    # With broadcasting
+    x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    y = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    z = pf.add((x, y))
+    npt.assert_allclose(
+        z, x + y, atol=1e-15)
 
 
 def test_signal_inversion():
@@ -505,8 +514,13 @@ def test_get_arithmetic_data_wrong_domain():
         signal._get_arithmetic_data(Signal(1, 44100), 1, 'space', (1,))
 
 
-def test_array_broadcasting_error():
-    x = np.arange(2 * 3 * 4 * 11).reshape((2, 3, 4, 11))
+def test_array_broadcasting_errors():
+    x = np.arange(2 * 3 * 4 * 10).reshape((2, 3, 4, 10))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    with raises(ValueError):
+    with raises(ValueError, match="array dimension"):
         pf.add((x, y), domain='time')
+
+    x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
+    with raises(ValueError):
+        pf.add((x, y))

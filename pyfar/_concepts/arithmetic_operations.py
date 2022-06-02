@@ -19,24 +19,25 @@ and in the frequency domain by
 **Note** that frequency domain operations are performed on the raw spectrum
 ``signal.freq_raw``.
 
-Arithmetic operations also work with more than two instances and supports array
-likes and scalar values, e.g.,
+Arithmetic operations also work with more than two instances and support
+array likes and scalar values, e.g.,
 
 >>> result = pf.add((signal_1, 1), 'time')
 
 In this case the scalar `1` is broadcasted, i.e., it is is added to every
 sample of `signal` (or every bin in case of a frequency domain operation).
-Arrays are either need to match ``cshape``,
+The shape of arrays need to match the ``cshape`` of the resulting audio object,
+e.g.,
 
 >>> x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
 >>> y = pf.Signal(np.ones((2, 3, 4, 10)), 44100)
 >>> z = pf.add((x, y))
 
-or the shape of the underlying time or frequency data,
+or are broadcasted, e.g.,
 
->>> x = np.arange(2 * 3 * 4 * 10).reshape((2, 3, 4, 10))
+>>> x = np.arange(3 * 4).reshape((3, 4))
 >>> y = pf.Signal(np.ones((2, 3, 4, 10)), 44100)
->>> z = pf.add((x, y), domain='time')
+>>> z = pf.add((x, y))
 
 The operators ``+``, ``-``, ``*``, ``/``, and ``**`` are overloaded for
 convenience. Note, however, that their behavior depends on the Audio object.

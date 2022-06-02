@@ -888,9 +888,8 @@ def add(data: tuple, domain='freq'):
 
     Notes
     -----
-    Arrays included in the data either need to match the ``cshape`` of the
-    resulting audio object or need to be broadcastable to the shape of the
-    underlying time/frequency data.
+    The shape of arrays included in data need to match or be broadcastable
+    into the ``cshape`` of the resulting audio object.
     """
     return _arithmetic(data, domain, _add)
 
@@ -928,9 +927,8 @@ def subtract(data: tuple, domain='freq'):
 
     Notes
     -----
-    Arrays included in the data either need to match the ``cshape`` of the
-    resulting audio object or need to be broadcastable to the shape of the
-    underlying time/frequency data.
+    The shape of arrays included in data need to match or be broadcastable
+    into the ``cshape`` of the resulting audio object.
     """
     return _arithmetic(data, domain, _subtract)
 
@@ -968,9 +966,8 @@ def multiply(data: tuple, domain='freq'):
 
     Notes
     -----
-    Arrays included in the data either need to match the ``cshape`` of the
-    resulting audio object or need to be broadcastable to the shape of the
-    underlying time/frequency data.
+    The shape of arrays included in data need to match or be broadcastable
+    into the ``cshape`` of the resulting audio object.
     """
     return _arithmetic(data, domain, _multiply)
 
@@ -1007,9 +1004,8 @@ def divide(data: tuple, domain='freq'):
 
     Notes
     -----
-    Arrays included in the data either need to match the ``cshape`` of the
-    resulting audio object or need to be broadcastable to the shape of the
-    underlying time/frequency data.
+    The shape of arrays included in data need to match or be broadcastable
+    into the ``cshape`` of the resulting audio object.
    """
     return _arithmetic(data, domain, _divide)
 
@@ -1046,8 +1042,8 @@ def power(data: tuple, domain='freq'):
 
     Notes
     -----
-    Arrays included in the data either need to match the ``cshape`` of the
-    resulting audio object or the shape of the underlying time/frequency data.
+    The shape of arrays included in data need to match or be broadcastable
+    into the ``cshape`` of the resulting audio object.
     """
     return _arithmetic(data, domain, _power)
 
@@ -1245,9 +1241,13 @@ def _get_arithmetic_data(data, n_samples, domain, cshape):
     else:
         data_out = np.asarray(data)
 
-    if data_out.ndim <= len(cshape):
-        # extend by time/frequency axis, scalars are extended to shape (1,)
-        data_out = data_out[..., None]
+        if data_out.ndim <= len(cshape):
+            # extend by time/frequency axis, scalars are extended to shape (1,)
+            data_out = data_out[..., None]
+        elif cshape != ():
+            # operation includes arrays and audio objects
+            raise ValueError(
+                "array dimension is larger than the channel dimensions")
 
     return data_out
 
