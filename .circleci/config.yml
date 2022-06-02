@@ -117,7 +117,7 @@ jobs:
           command: |
             pip install -e .
             cd docs/
-            make html
+            make html SPHINXOPTS="-W"
 
   test_pypi_publish:
     parameters:
