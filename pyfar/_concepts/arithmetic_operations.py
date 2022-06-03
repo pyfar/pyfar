@@ -39,6 +39,9 @@ or are broadcasted, e.g.,
 >>> y = pf.Signal(np.ones((2, 3, 4, 10)), 44100)
 >>> z = pf.add((x, y))
 
+where ``y`` is a signal with ``y.cshape = (2, 3, 4)`` and a length of 10
+samples.
+
 The operators ``+``, ``-``, ``*``, ``/``, and ``**`` are overloaded for
 convenience. Note, however, that their behavior depends on the Audio object.
 Frequency domain operations are applied for
