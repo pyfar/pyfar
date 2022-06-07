@@ -105,16 +105,6 @@ def test_frequency_matching():
                                    signal.freq[0][:int(N/2)-10], decimal=2)
 
 
-def test_cshape_multidimensional_signal():
-    """
-    Tests the cshape maintenance with a multidimensional impulse with
-    cshape = (3,2)
-    """
-    signal = pf.signals.impulse(1024, amplitude=[[1, 2, 3], [4, 5, 6]])
-    resampled = pf.dsp.resample(signal, 96000)
-    assert signal.cshape == resampled.cshape
-
-
 def test_resample_multidimensional_impulse():
     """
     Compares an upsampled multidimensional delayed impulse with cshape = (3,2)
@@ -127,6 +117,8 @@ def test_resample_multidimensional_impulse():
                                 sampling_rate=fs_1)
     # Get resampled Signal with function
     resampled = pf.dsp.resample(signal, fs_2)
+    # Test the cshape
+    assert signal.cshape == resampled.cshape
     # Calculated the analytic signal with sinc function
     L = fs_2 / fs_1
     n = np.arange(-N/2, N/2, 1/L)
