@@ -590,7 +590,7 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
                 '"power".'))
     else:
         raise ValueError((f"match_amplitude is '{match_amplitude}' but must be"
-                          " time' or 'freq'"))
+                          " 'auto', 'time' or 'freq'"))
     # check if one of the sampling rates is not divisible by 10
     if sampling_rate % 10 or signal.sampling_rate % 10:
         warnings.warn((
