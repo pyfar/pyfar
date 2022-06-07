@@ -499,7 +499,11 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
         The new sampling rate in Hz
     match_amplitude : string
         Define the domain to match the amplitude of the resampled data.
-
+        ``'auto'``
+            Chooses domain to maintain the amplitude automatically, depending
+            on the ``signal.signal_type``. Sets ``match_amplitude == 'freq'``
+            for ``signal.signal_type = 'energy'`` like impulse responses and
+            ``match_amplitude == 'time'`` for other signals.
         ``'time'``
             Maintains the amplitude in the time domain. This is useful for
             recordings such as speech or music and must be used if
@@ -509,7 +513,7 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
             resampled signal by ``1/L`` (see above). This is often desired
             when resampling impulse responses.
 
-        The default is ``'time'``.
+        The default is ``'auto'``.
     frac_limit : int
         Limit the denominator for approximating the resampling factor `L`
         (see above). This can be used in case the resampling gets stuck in an
@@ -521,7 +525,7 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
     Returns
     -------
     signal : pyfar.Signal
-        The resampled signal of the input data with a samplelength of 
+        The resampled signal of the input data with a samplelength of
         `up/down * signal.n_samples`.
 
     Examples
@@ -570,6 +574,9 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
         raise TypeError("Input data has to be of type pyfar.Signal")
     # calculate factor L for up- or downsampling
     L = sampling_rate / signal.sampling_rate
+    # set match_amplitude domain depending on signal.signal_type
+    if match_amplitude == "auto":
+        match_amplitude = "freq" if signal.signal_type == "energy" else "time"
     # set gain depending on domain to match aplitude in
     if match_amplitude == "time":
         gain = 1
