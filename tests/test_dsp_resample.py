@@ -6,7 +6,7 @@ import numpy as np
 @pytest.mark.parametrize('L', [2, 0.5])
 def test_resampling(L):
     """
-    Tests the up and downsampling of a noise signal to the double/half sampling 
+    Tests the up and downsampling of a noise signal to the double/half sampling
     rate.
     """
     fs_1 = 48000
@@ -21,7 +21,7 @@ def test_resampling(L):
 
 def test_upsampling_delayed_impulse():
     """
-    Compares a upsampled delayed impulse with the analytic result of a
+    Compares an upsampled delayed impulse with the analytic result of a
     sync function.
     """
     fs_1 = 48000
@@ -103,3 +103,36 @@ def test_frequency_matching():
     resampled = pf.dsp.resample(signal, fs_2, match_amplitude="freq")
     np.testing.assert_almost_equal(resampled.freq[0][:int(N/2)-10],
                                    signal.freq[0][:int(N/2)-10], decimal=2)
+
+
+def test_cshape_multidimensional_signal():
+    """
+    Tests the cshape maintenance with a multidimensional impulse with
+    cshape = (3,2)
+    """
+    signal = pf.signals.impulse(1024, amplitude=[[1, 2, 3], [4, 5, 6]])
+    resampled = pf.dsp.resample(signal, 96000)
+    assert signal.cshape == resampled.cshape
+
+
+def test_resample_multidimensional_impulse():
+    """
+    Compares an upsampled multidimensional delayed impulse with cshape = (3,2)
+    with the analytic result of a sync function.
+    """
+    fs_1 = 48000
+    fs_2 = 96000
+    N = 128
+    signal = pf.signals.impulse(N, 64, amplitude=[[1, 2, 3], [4, 5, 6]],
+                                sampling_rate=fs_1)
+    # Get resampled Signal with function
+    resampled = pf.dsp.resample(signal, fs_2)
+    # Calculated the analytic signal with sinc function
+    L = fs_2 / fs_1
+    n = np.arange(-N/2, N/2, 1/L)
+    c = int(20*fs_2/fs_1)
+    s = np.sinc(n)
+    sinc = pf.Signal([[1*s, 2*s, 3*s], [4*s, 5*s, 6*s]], fs_2)
+    sinc = pf.dsp.time_window(sinc, [N*L/2-int(c/2), N*L/2+int(c/2)],
+                              window='hamming')
+    np.testing.assert_almost_equal(resampled.time, sinc.time, decimal=2)
