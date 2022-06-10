@@ -16,7 +16,7 @@ from .dsp import (
     decibel,
 )
 
-from .dsp_interpolation import (
+from .interpolation import (
     smooth_fractional_octave,
     fractional_time_shift,
     resample,
