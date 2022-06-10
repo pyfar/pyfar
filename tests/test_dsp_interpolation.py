@@ -93,18 +93,6 @@ def test_fractional_delay_order(order):
     assert np.count_nonzero(np.abs(delayed.time) > 1e-14) == order + 1
 
 
-@pytest.mark.parametrize("delay", [20.1, -20.1])
-def test_fractional_delay_mode_cut(delay):
-    """Test the mode linear"""
-
-    signal = pf.signals.impulse(16, 8)
-    delayed = fractional_time_shift(signal, delay, order=2)
-
-    # if the delay is too large, the signal is shifted out of the sampled range
-    # and only zeros remain
-    npt.assert_array_equal(delayed.time, np.zeros_like(delayed.time))
-
-
 @pytest.mark.parametrize("delay", [30.4, -30.4])
 def test_fractional_delay_mode_cyclic(delay):
     """Test the mode delay"""
