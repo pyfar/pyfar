@@ -478,9 +478,10 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
     """Resample signal to new sampling rate.
 
     The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
-    The resampling factor ``L = sampling_rate/signal.sampling_rate``
+    The resampling ratio ``L = sampling_rate/signal.sampling_rate``
     is approximated by a fraction of two integer numbers `up/down` to first
-    upsample the signal by `up` and then downsample by `down`.
+    upsample the signal by `up` and then downsample by `down`. This way `up`
+    and `down` are smaller than the respective new and old sampling rates.
 
     .. note ::
 
@@ -526,8 +527,8 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
     Returns
     -------
     signal : pyfar.Signal
-        The resampled signal of the input data with a samplelength of
-        `up/down * signal.n_samples`.
+        The resampled signal of the input data with a length of
+        `up/down * signal.n_samples` samples.
 
     Examples
     --------
@@ -548,8 +549,9 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
         >>> plt.legend()
 
     With some energy signals, such as impulse responses, the amplitude can only
-    be correct in the time `or` frequency domain. In such cases, it is often
-    desired to match the amplitude in the frequency domain
+    be correct in the time `or` frequency domain due to the lack of
+    normalization by the number of samples. In such cases, it is often desired
+    to match the amplitude in the frequency domain
 
     .. plot::
 
