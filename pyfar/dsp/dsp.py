@@ -1,4 +1,4 @@
-import warnings
+import multiprocessing
 import numpy as np
 from scipy import signal as sgn
 import pyfar
@@ -860,70 +860,49 @@ def _cross_fade(first, second, indices):
     return result
 
 
-def minimum_phase(
-        signal, method='homomorphic', n_fft=None,
-        pad=False, return_magnitude_ratio=False):
-    """Calculate the minimum phase equivalent of a signal or filter
+def minimum_phase(signal, n_fft=None, truncate=True):
+    """
+    Calculate the minimum phase equivalent of a finite impulse response.
+
+    The method is based on the Hilbert transform of the real-valued cepstrum
+    of the finite impulse response, that is the cepstrum of the magnitude
+    spectrum only. As a result the magnitude spectrum is not distorted.
+    Potential aliasing errors can occur due to the Fourier transform based
+    calculation of the magnitude spectrum, which however are negligible if the
+    length of Fourier transform ``n_fft`` is sufficiently high. [#]_
+    (Section 8.5.4)
 
     Parameters
     ----------
     signal : Signal
-        The linear phase filter.
-    method : str, optional
-        The method:
-
-        'homomorphic' (default)
-            This method works best with filters with an odd number of taps,
-            and the resulting minimum phase filter will have a magnitude
-            response that approximates the square root of the the original
-            filter's magnitude response.
-        'hilbert'
-            This method is designed to be used with equi-ripple filters with
-            unity or zero gain regions.
+        The finite impulse response for which the minimum-phase version is
+        computed.
     n_fft : int, optional
         The FFT length used for calculating the cepstrum. Should be at least a
-        few times larger than the signal length. The default is ``None``,
-        resulting in an FFT length of:
-
-            n_fft = 2 ** int(np.ceil(np.log2(2*(signal.n_samples - 1) / 0.01)))
-
-    pad : bool, optional
-        If ``pad`` is ``True``, the resulting signal will be padded to the
-        same length as the input. If ``pad`` is ``False`` the resulting minimum
-        phase representation is of length ``signal.n_samples/2+1``.
-        The default is ``False``
-    return_magnitude_ratio : bool, optional
-        If ``True``, the ratio between the linear phase (input) and the
-        minimum phase (output) filters is returned. See the examples for
-        further information. The default is ``False``.
+        few times larger than ``signal.n_samples``. The default ``None`` uses
+        eight times the signal length rounded up to the next power of two,
+        that is: ``2**int(np.ceil(np.log2(n_samples * 8)))``.
+    truncate : bool, optional
+        If ``truncate`` is ``True``, the resulting minimum phase impulse
+        response is truncated to a length of
+        ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
+        aliasing described above in any case but might distort the magnitude
+        response if ``signal.n_samples`` is to low. If truncate is ``False``
+        the output signal has the same length as the input signal. The default
+        is ``True``.
 
     Returns
     -------
     signal_minphase : Signal
-        The minimum phase version of the filter.
-    magnitude_ratio : FrequencyData
-        The ratio between the (normalized) magnitude spectra of the linear
-        phase and the minimum phase versions of the filter.
+        The minimum phase version of the input data.
 
+    References
+    ----------
+    .. [#]  J. S. Lim and A. V. Oppenheim, Advanced topics in signal
+            processing, pp. 472-473, First Edition. Prentice Hall, 1988.
 
     Examples
     --------
-
-    Minmum-phase version of an ideal impulse with a group delay of 64 samples
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> import matplotlib.pyplot as plt
-        >>> # create linear and minimum phase signal
-        >>> impulse_linear_phase = pf.signals.impulse(129, delay=64)
-        >>> impulse_minmum_phase = pf.dsp.minimum_phase(
-        ...     impulse_linear_phase, method='homomorphic')
-        >>> # plot the group delay
-        >>> plt.figure(figsize=(8, 2))
-        >>> pf.plot.group_delay(impulse_linear_phase, label='Linear phase')
-        >>> pf.plot.group_delay(impulse_minmum_phase, label='Minmum phase')
-        >>> plt.legend()
 
     Create a minimum phase equivalent of a linear phase FIR low-pass filter
 
@@ -933,86 +912,54 @@ def minimum_phase(
         >>> import numpy as np
         >>> from scipy.signal import remez
         >>> import matplotlib.pyplot as plt
-        >>> # create minimum phase signals with different methods
         >>> freq = [0, 0.2, 0.3, 1.0]
-        >>> desired = [1, 0]
-        >>> h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
-        >>> h_min_hom = pf.dsp.minimum_phase(h_linear, method='homomorphic')
-        >>> h_min_hil = pf.dsp.minimum_phase(h_linear, method='hilbert')
-        >>> # plot the results
+        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], Hz=2.), 44100)
+        >>> # create minimum phase impulse responses
+        >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
+        >>> # plot the result
         >>> fig, axs = plt.subplots(3, figsize=(8, 6))
-        >>> for h, style in zip(
-        ...         (h_linear, h_min_hom, h_min_hil),
-        ...         ('-', '-.', '--')):
-        >>>     pf.plot.time(h, linestyle=style, ax=axs[0])
-        >>>     axs[0].grid(True)
-        >>>     pf.plot.freq(h, linestyle=style, ax=axs[1])
-        >>>     pf.plot.group_delay(h, linestyle=style, ax=axs[2])
-        >>> axs[1].legend(['Linear', 'Homomorphic', 'Hilbert'])
-
-    Return the magnitude ratios between the minimum and linear phase filters
-    and indicate frequencies where the linear phase filter exhibits small
-    amplitudes.
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> import numpy as np
-        >>> from scipy.signal import remez
-        >>> import matplotlib.pyplot as plt
-        >>> # generate linear and minimum phase signal
-        >>> freq = [0, 0.2, 0.3, 1.0]
-        >>> desired = [1, 0]
-        >>> h_linear = pf.Signal(remez(151, freq, desired, Hz=2.), 44100)
-        >>> h_minimum, ratio = pf.dsp.minimum_phase(h_linear,
-        ...     method='homomorphic', return_magnitude_ratio=True)
-        >>> # plot signals and difference between them
-        >>> fig, axs = plt.subplots(2, figsize=(8, 4))
-        >>> pf.plot.freq(h_linear, linestyle='-', ax=axs[0])
-        >>> pf.plot.freq(h_minimum, linestyle='--', ax=axs[0])
-        >>> pf.plot.freq(ratio, linestyle='-', ax=axs[1])
-        >>> mask = np.abs(h_linear.freq) < 10**(-60/20)
-        >>> ratio_masked = pf.FrequencyData(
-        ...     ratio.freq[mask], ratio.frequencies[mask[0]])
-        >>> pf.plot.freq(ratio_masked, color='k', linestyle='--', ax=axs[1])
-        >>> axs[1].set_ylabel('Magnitude error in dB')
-        >>> axs[0].legend(['Linear phase', 'Minimum phase'])
-        >>> axs[1].legend(['Broadband', 'Linear-phase < -60 dB'])
-        >>> axs[1].set_ylim((-5, 105))
-
+        >>> pf.plot.time(h_linear, ax=axs[0])
+        >>> pf.plot.time(h_min, ax=axs[0])
+        >>> axs[0].grid(True)
+        >>> pf.plot.freq(h_linear, ax=axs[1])
+        >>> pf.plot.group_delay(h_linear, ax=axs[2], unit="ms")
+        >>> pf.plot.freq(h_min, ax=axs[1])
+        >>> pf.plot.group_delay(h_min, ax=axs[2], unit="ms")
+        >>> axs[2].legend(['Linear', 'Minimum'], loc=3, ncol=2)
+        >>> axs[2].set_ylim(-2.5, 2.5)
 
     """
-    signal_flat = signal.flatten()
-    original_cshape = signal.cshape
-    signal_minphase = signal.flatten()
-    signal_minphase.time = np.zeros(
-        (signal_minphase.cshape[0], int(np.floor((signal.n_samples + 1)/2))),
-        dtype=signal.dtype)
+    from scipy.fft import fft, ifft
 
-    for ch in range(signal_minphase.cshape[0]):
-        signal_minphase.time[ch] = sgn.minimum_phase(
-            signal_flat.time[ch],
-            method=method,
-            n_fft=n_fft)
+    workers = multiprocessing.cpu_count()
+    # center the energy by taking the linear phase signal (using n_samples//2
+    # performs better than using n_samples/2)
+    signal = pyfar.dsp.linear_phase(
+        signal, signal.n_samples // 2, unit='samples')
 
-    signal_minphase = signal_minphase.reshape(original_cshape)
+    if n_fft is None:
+        n_fft = 2**int(np.ceil(np.log2(signal.n_samples * 8)))
+    elif n_fft < signal.n_samples:
+        raise ValueError((
+            f"n_fft is {n_fft} but must be at least {signal.n_samples}, "
+            "which is the length of the input signal"))
 
-    if (pad is True) or (return_magnitude_ratio is True):
-        sig_minphase_pad = pad_zeros(
-            signal_minphase, signal.n_samples - signal_minphase.n_samples)
+    # add eps to the magnitude spectrum to avoid nans in log
+    H = np.abs(fft(signal.time, n=n_fft, workers=workers, axis=-1))
+    H[H == 0] = np.finfo(float).eps
 
-        if return_magnitude_ratio is False:
-            return sig_minphase_pad
+    # calculate the minimum phase using the Hilbert transform
+    phase = -np.imag(sgn.hilbert(np.log(H), N=n_fft, axis=-1))
+    data = ifft(H*np.exp(1j*phase), axis=-1, workers=workers).real
 
-        error_mag = np.abs(sig_minphase_pad.freq) / np.abs(signal.freq)
-        error = pyfar.FrequencyData(error_mag, signal.frequencies)
-
-        if pad_zeros is False:
-            return signal_minphase, error
-        else:
-            return sig_minphase_pad, error
+    # cut to length
+    if truncate:
+        N = signal.n_samples // 2 + signal.n_samples % 2
+        data = data[..., :N]
     else:
-        return signal_minphase
+        data = data[..., :signal.n_samples]
+
+    return pyfar.Signal(data, signal.sampling_rate)
 
 
 def pad_zeros(signal, pad_width, mode='after'):
@@ -1080,11 +1027,14 @@ def pad_zeros(signal, pad_width, mode='after'):
     return padded_signal
 
 
-def time_shift(signal, shift, unit='samples'):
-    """Apply a time-shift to a signal.
+def time_shift(
+        signal, shift, mode='cyclic', unit='samples', pad_value=0.):
+    """Apply a cyclic or linear time-shift to a signal.
 
-    The shift is performed as a cyclic shift on the time axis, potentially
-    resulting in non-causal signals for negative shift values.
+    This function only allows integer value sample shifts. If unit ``'time'``
+    is used, the shift samples will be rounded to the nearest integer value.
+    For a shift using fractional sample values see
+    :py:func:`~pf.dsp.fractional_time_shift`.
 
     Parameters
     ----------
@@ -1098,21 +1048,47 @@ def time_shift(signal, shift, unit='samples'):
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
         dimensions ``cshape``.
+    mode : str, optional
+        The shifting mode
+
+        ``"linear"``
+            Apply linear shift, i.e., parts of the signal that are shifted to
+            times smaller than 0 samples and larger than ``signal.n_samples``
+            disappear. To maintain the shape of the signal, the signal is
+            padded at the respective other end. The pad value is determined by
+            ``pad_type``.
+        ``"cyclic"``
+            Apply a cyclic shift, i.e., parts of the signal that are shifted to
+            values smaller than 0 are wrapped around to the end, and parts that
+            are shifted to values larger than ``signal.n_samples`` are wrapped
+            around to the beginning.
+
+        The default is ``"cyclic"``
     unit : str, optional
         Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
+    pad_type : numeric, optional
+        The pad value for linear shifts, by default ``0.`` is used.
+        Pad ``numpy.nan`` to the respective channels if the rms value of the
+        signal is to be maintained for block-wise rms estimation of the noise
+        power of a signal. Note that if NaNs are padded, the returned data
+        will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
+        :py:class:`~pyfar.classes.audio.Signal` object.
 
     Returns
     -------
-    Signal
-        The time-shifted signal.
+    Signal, TimeData
+        The time-shifted signal. This is a
+        :py:class:`~pyfar.classes.audio.TimeData` object in case a linear shift
+        was done and the signal was padded with Nans. In all other cases, a
+        :py:class:`~pyfar.classes.audio.Signal` object is returend.
 
     Examples
     --------
-    Individually shift a set of ideal impulses stored in three different
-    channels and plot the resulting signals
+    Individually do a cyclic shift of a set of ideal impulses stored in three
+    different channels and plot the resulting signals
 
     .. plot::
 
@@ -1131,32 +1107,65 @@ def time_shift(signal, shift, unit='samples'):
         >>> axs[1].set_title('Shifted signals')
         >>> plt.tight_layout()
 
-    """
-    shift = np.atleast_1d(shift)
-    if shift.size == 1:
-        shift = np.ones(signal.cshape) * shift
+    Perform a linear time shift instead and pad with NaNs
 
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> # generate and shift the impulses
+        >>> impulse = pf.signals.impulse(
+        ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+        >>> shifted = pf.dsp.time_shift(
+        ...     impulse, [-2, 0, 2], mode='linear', pad_value=np.nan)
+        >>> # time domain plot
+        >>> pf.plot.use('light')
+        >>> _, axs = plt.subplots(2, 1)
+        >>> pf.plot.time(impulse, ax=axs[0])
+        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> axs[0].set_title('Original signals')
+        >>> axs[1].set_title('Shifted signals')
+        >>> plt.tight_layout()
+
+    """
+    if mode not in ["linear", "cyclic"]:
+        raise ValueError(f"mode is '{mode}' but mist be 'linear' or cyclic'")
+
+    shift = np.broadcast_to(shift, signal.cshape)
     if unit == 's':
         shift_samples = np.round(shift*signal.sampling_rate).astype(int)
     elif unit == 'samples':
         shift_samples = shift.astype(int)
     else:
         raise ValueError(
-            f"Unit is: {unit}, but has to be 'samples' or 's'.")
+            f"unit is '{unit}' but must be 'samples' or 's'.")
 
-    if np.any(shift_samples > signal.n_samples):
-        warnings.warn(
-            "Shifting by more samples than the length of the signal")
+    if np.any(np.abs(shift_samples) > signal.n_samples) and mode == "linear":
+        raise ValueError(("Can not shift by more samples than signal.n_samples"
+                          " if mode is 'linear'"))
 
-    shifted = signal.flatten()
-    shift_samples = shift_samples.flatten()
-    for ch in range(shifted.cshape[0]):
+    shifted = signal.copy()
+    for ch in np.ndindex(signal.cshape):
         shifted.time[ch] = np.roll(
             shifted.time[ch],
             shift_samples[ch],
             axis=-1)
 
-    return shifted.reshape(signal.cshape)
+        if mode == 'linear':
+            if shift_samples[ch] > 0:
+                samples = slice(0, shift_samples[ch])
+                shifted.time[ch + (samples, )] = pad_value
+            elif shift_samples[ch] < 0:
+                samples = slice(shifted.n_samples + shift_samples[ch],
+                                shifted.n_samples)
+                shifted.time[ch + (samples, )] = pad_value
+
+    if np.any(np.isnan(shifted.time)):
+        shifted = pyfar.TimeData(
+            shifted.time, shifted.times, comment=shifted.comment)
+
+    return shifted
 
 
 def deconvolve(system_output, system_input, fft_length=None, **kwargs):
@@ -1372,3 +1381,110 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
     return pyfar.Signal(
         res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+
+
+def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
+    r"""Convert data of the selected signal domain into decibels (dB).
+
+    The converted data is calculated by the base 10 logarithmic scale:
+    ``data(dB) = log_prefix * numpy.log10(data/log_reference)``. By using a
+    logarithmic scale, the deciBel is able to compare quantities that
+    may have vast ratios between them. As an example, the sound pressure in
+    dB can be calculated as followed:
+
+    .. math::
+
+        L_p = 20\log_{10}\biggl(\frac{p}{p_0}\biggr),
+
+    where :math:`20` is the logarithmic prefix for sound field quantities and
+    :math:`p_0` would be the reference for the sound pressure level. A list
+    of commonly used reference values can be found in the 'log_reference'
+    parameters section.
+
+    Parameters
+    ----------
+    signal : Signal, TimeData, FrequencyData
+        The signal which is converted into decibel
+    domain : str
+        The domain, that is converted to decibels:
+
+        ``'freq'``
+            Convert normalized frequency domain data. Signal must be of type
+            'Signal' or 'FrequencyData'.
+        ``'time'``
+            Convert time domain data. Signal must be of type
+            'Signal' or 'TimeData'.
+        ``'freq_raw'``
+            Convert frequency domain data without normalization. Signal must be
+            of type 'Signal'.
+
+        The default is ``'freq'``.
+    log_prefix : int
+        The prefix for the dB calculation. The default ``None``, uses ``10``
+        for signals with ``'psd'`` and ``'power'`` FFT normalization and
+        ``20`` otherwise.
+    log_reference : int or float
+        Reference for the logarithm calculation.
+        List of commonly used values:
+
+        +---------------------------------+--------------+
+        | log_reference                   | value        |
+        +=================================+==============+
+        | Digital signals (dBFs)          | 1            |
+        +---------------------------------+--------------+
+        | Sound pressure :math:`L_p` (dB) | 2e-5 Pa      |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBu)       | 0.7746 volt  |
+        +---------------------------------+--------------+
+        | Sound intensity :math:`L_I` (dB)| 1e-12 W/m²   |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBV)       | 1 volt       |
+        +---------------------------------+--------------+
+        | Electric power :math:`L_P` (dB) | 1 watt       |
+        +---------------------------------+--------------+
+
+        The default is 1.
+    Returns
+    -------
+    decibel : numpy.ndarray
+        The given signal in decibel in chosen domain.
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> signal = pf.signals.noise(41000, rms=[1, 1])
+    >>> decibel_data = decibel(signal, domain='time')
+    """
+    if log_prefix is None:
+        if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
+                                                                    'psd'):
+            log_prefix = 10
+        else:
+            log_prefix = 20
+    if domain == 'freq':
+        if isinstance(signal, (pyfar.FrequencyData, pyfar.Signal)):
+            data = signal.freq.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'FrequencyData'.")
+    elif domain == 'time':
+        if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
+            data = signal.time.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'TimeData'.")
+    elif domain == 'freq_raw':
+        if isinstance(signal, (pyfar.Signal)):
+            data = signal.freq_raw.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal'.")
+    else:
+        raise ValueError(
+            f"Domain is '{domain}', but has to be 'time', 'freq',"
+            " or 'freq_raw'.")
+    data[data == 0] = np.finfo(float).eps
+    return log_prefix * np.log10(np.abs(data) / log_reference)
