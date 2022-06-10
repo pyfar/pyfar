@@ -5,6 +5,9 @@ import scipy.signal as sgn
 import matplotlib.pyplot as plt
 import pyfar as pf
 from scipy.ndimage import generic_filter1d
+from fractions import Fraction
+from decimal import Decimal
+import warnings
 
 
 def _weighted_moving_average(input, output, weights):
@@ -586,7 +589,7 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
             f'larger than {down} (This warning is not shown, if the target '
             'sampling rate can exactly be realized).'))
     # resample data with scipy resampe_poly function
-    data = scipy.signal.resample_poly(signal.time, up, down, axis=-1)
+    data = sgn.resample_poly(signal.time, up, down, axis=-1)
     return pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
                      comment=signal.comment)
 
