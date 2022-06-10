@@ -1612,7 +1612,6 @@ def find_impulse_response_start(
     return np.squeeze(start_sample)
 
 
-
 def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
