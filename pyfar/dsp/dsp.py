@@ -1154,9 +1154,12 @@ def time_shift(
 
         if mode == 'linear':
             if shift_samples[ch] > 0:
-                shifted.time[ch, :shift_samples[ch]] = pad_value
+                samples = slice(0, shift_samples[ch])
+                shifted.time[ch + (samples, )] = pad_value
             elif shift_samples[ch] < 0:
-                shifted.time[ch, shift_samples[ch]:] = pad_value
+                samples = slice(shifted.n_samples + shift_samples[ch],
+                                shifted.n_samples)
+                shifted.time[ch + (samples, )] = pad_value
 
     if np.any(np.isnan(shifted.time)):
         shifted = pyfar.TimeData(
