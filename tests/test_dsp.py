@@ -628,6 +628,97 @@ def test_delay_ir_multidim():
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
+def test_start_ir_insufficient_snr():
+    n_samples = 2**9
+    ir = np.zeros(n_samples, dtype=float)
+    ir[20] = 1
+    ir = pf.Signal(ir, 44100)
+
+    snr = 15
+
+    noise = np.random.randn(n_samples)
+    noise = noise / np.sqrt(np.mean(np.abs(noise**2))) * 10**(-snr/20)
+    noise = pf.Signal(noise, 44100)
+
+    ir_noise = ir + noise
+
+    with pytest.raises(ValueError):
+        dsp.find_impulse_response_start(ir_noise)
+
+
+def test_start_ir():
+    n_samples = 2**10
+    ir = np.zeros(n_samples)
+    snr = 60
+
+    noise = pf.Signal(np.random.randn(n_samples) * 10**(-snr/20), 44100)
+
+    start_sample = 24
+    ir[start_sample] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    start_sample_est = dsp.find_impulse_response_start(ir)
+    assert start_sample_est == start_sample - 1
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+    assert start_sample_est == start_sample - 1
+
+
+def test_start_ir_thresh():
+    n_samples = 2**10
+    ir = np.zeros(n_samples)
+
+    start_sample = 24
+    ir[start_sample] = 1
+    ir[start_sample-4:start_sample] = 10**(-5/10)
+
+    ir = pf.Signal(ir, 44100)
+
+    start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
+    assert start_sample_est == start_sample - 4 - 1
+
+
+def test_start_ir_multidim():
+    n_samples = 2**10
+    n_channels = 3
+    ir = np.zeros((n_channels, n_samples))
+
+    snr = 60
+
+    noise = pf.Signal(
+        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample = [24, 5, 43]
+    ir[[0, 1, 2], start_sample] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
+
+    ir = np.zeros((2, n_channels, n_samples))
+    noise = pf.Signal(
+        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample_1 = [24, 5, 43]
+    ir[0, [0, 1, 2], start_sample_1] = 1
+    start_sample_2 = [14, 12, 16]
+    ir[1, [0, 1, 2], start_sample_2] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    start_samples = np.vstack((start_sample_1, start_sample_2))
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, start_samples - 1)
+
+
 def test_convolve_default():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, -1, 0], 44100)
