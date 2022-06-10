@@ -1310,8 +1310,9 @@ def time_shift(
         signal, shift, mode='cyclic', unit='samples', pad_value=0.):
     """Apply a cyclic or linear time-shift to a signal.
 
-    The shift is performemed along the time axis and is forced to be an integer
-    sample value. For a shift using fractional sample values see
+    This function only allows integer value sample shifts. If unit ``'time'``
+    is used, the shift samples will be rounded to the nearest integer value.
+    For a shift using fractional sample values see
     :py:func:`~pf.dsp.fractional_time_shift`.
 
     Parameters
