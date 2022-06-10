@@ -1386,8 +1386,8 @@ def time_shift(signal, shift, unit='samples'):
     return shifted.reshape(signal.cshape)
 
 
-def find_impulse_response_start(ir, N=1):
-    """Find the start of an impulse response.
+def find_impulse_response_delay(ir, N=1):
+    """Find the delay in samples of an impulse response.
     The method relies on the analytic part of the cross-correlation function
     of the impulse response and it's minimum-phase equivalent, which is zero
     for the maximum of the correlation function. For sub-sample root finding,
@@ -1435,7 +1435,7 @@ def find_impulse_response_start(ir, N=1):
         >>> delay_samples = n_samples // 2 + 1/2
         >>> ir = pf.signals.impulse(n_samples)
         >>> ir = pf.dsp.linear_phase(ir, delay_samples, unit='samples')
-        >>> start_samples = pf.dsp.find_impulse_response_start(ir)
+        >>> start_samples = pf.dsp.find_impulse_response_delay(ir)
         >>> ax = pf.plot.time(ir, unit='ms', label='impulse response')
         >>> ax.axvline(
         ...     start_samples/ir.sampling_rate*1e3,

@@ -583,7 +583,7 @@ def test_minimum_phase_multidim():
     npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
 
 
-def test_start_ir():
+def test_delay_ir():
     n_samples = 2**10
     snr = 60
     start_sample = np.array([24])
@@ -591,15 +591,15 @@ def test_start_ir():
     ir = pf.signals.impulse(n_samples, delay=start_sample)
     noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
 
-    start_sample_est = dsp.find_impulse_response_start(ir)
+    start_sample_est = dsp.find_impulse_response_delay(ir)
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-6)
 
     ir_awgn = ir + noise
-    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+    start_sample_est = dsp.find_impulse_response_delay(ir_awgn)
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
-def test_start_ir_sinc():
+def test_delay_ir_sinc():
     sr = 44100
     n_samples = 128
     samples = np.arange(n_samples)
@@ -609,11 +609,11 @@ def test_start_ir_sinc():
     win = sgn.get_window('hanning', n_samples, fftbins=False)
 
     ir = pf.Signal(sinc*win, sr)
-    start_samples = pf.dsp.find_impulse_response_start(ir)
+    start_samples = pf.dsp.find_impulse_response_delay(ir)
     npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
 
 
-def test_start_ir_multidim():
+def test_delay_ir_multidim():
     n_samples = 2**10
     snr = 60
 
@@ -623,7 +623,7 @@ def test_start_ir_multidim():
     noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
 
     ir_awgn = ir + noise
-    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+    start_sample_est = dsp.find_impulse_response_delay(ir_awgn)
 
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
