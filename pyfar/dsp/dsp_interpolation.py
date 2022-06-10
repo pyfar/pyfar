@@ -197,49 +197,13 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
     signal = pf.dsp.convolve(
         signal, pf.Signal(frac_delay_filter, signal.sampling_rate),
         mode=convolve_mode)
-    n_samples_full = signal.n_samples
 
     # apply integer shift -----------------------------------------------------
     # account for shift from applying the fractional filter
     delay_int += M_opt.astype("int")
-    # broadcast to required shape for easier looping
-    delay_int = np.broadcast_to(delay_int, signal.cshape)
+    signal = pf.dsp.time_shift(signal, delay_int, mode)
 
-    for idx in np.ndindex(signal.cshape):
-        if mode == "cyclic":
-            signal.time[idx] = np.roll(signal.time[idx], delay_int[idx],
-                                       axis=-1)
-        else:
-            d = delay_int[idx]
-
-            # select correct part of time signal
-            if d < 0:
-                if d + n_samples > 0:
-                    # discard d starting samples
-                    time = signal.time[
-                        idx + (slice(abs(d), n_samples_full), )].flatten()
-                else:
-                    # we are left with a zero vector (strictly spoken we might
-                    # have some tail left from 'full' convolution but zeros
-                    # seem the more reasonable choice here)
-                    time = np.zeros(n_samples)
-            elif d > 0:
-                # add d zeros
-                time = np.concatenate((np.zeros(d), signal.time[idx]))
-            else:
-                time = signal.time[idx]
-
-            # adjust length to n_samples
-            if time.size >= n_samples:
-                # discard samples at end
-                time = time[:n_samples]
-            else:
-                time = np.concatenate(
-                    (time, np.zeros(n_samples - time.size)))
-
-            signal.time[idx + (slice(0, n_samples), )] = time
-
-    # truncate signal
+    # truncate signal (got padded during convolution with mode='full')
     if mode == "linear":
         signal.time = signal.time[..., :n_samples]
 
