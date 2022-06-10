@@ -88,6 +88,12 @@
         "key": ["A"],
         "key_verbose": ["shift+a"],
         "info": "toggle between plotting all channels and plotting single channels"},
+    "cycle_plot_types": {
+        "key": ["<"],
+        "info": "cycle between line and 2D plots"},
+    "toggle_orientation": {
+        "key": [">"],
+        "info": "toggle between vertical and horizontal orientation of 2D plots"},
     "next": {
         "key": [".", "]"],
         "info": "show next channel"},

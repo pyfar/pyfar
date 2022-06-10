@@ -1,10 +1,13 @@
 Classes
 =======
 
+pyfar uses classes for convenient handling of certain audio and meta data.
+These classes are introduced below.
+
 .. toctree::
    :maxdepth: 1
 
-   pyfar.classes_audio
-   pyfar.classes_filter
-   pyfar.classes_coordinates
-   pyfar.classes_orientations
+   classes/pyfar.audio
+   classes/pyfar.filter
+   classes/pyfar.coordinates
+   classes/pyfar.orientations

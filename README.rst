@@ -22,7 +22,9 @@ Use pip to install pyfar
 
     $ pip install pyfar
 
-(Requires Python 3.7 or 3.8)
+(Requires Python 3.7, 3.8 or 3.9)
+
+Audio file reading/writing is supported through `SoundFile`_, which is based on `libsndfile`_. On Windows and OS X, it will be installed automatically. On Linux, you need to install libsndfile using your distribution’s package manager, for example ``sudo apt-get install libsndfile1``.
 
 Contributing
 ============
@@ -34,3 +36,5 @@ Refer to the `contribution guidelines`_ for more information.
 .. _examples notebook: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
 .. _pyfar.org: https://pyfar.org
 .. _read the docs: https://pyfar.readthedocs.io/en/latest
+.. _SoundFile: https://pysoundfile.readthedocs.io/en/latest/
+.. _libsndfile: http://www.mega-nerd.com/libsndfile/

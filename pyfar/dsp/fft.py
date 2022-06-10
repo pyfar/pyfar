@@ -1,107 +1,17 @@
-r"""
-The discrete Fourier spectrum of an arbitrary, but band-limited signal
-:math:`x(n)` is defined as
-
-.. math::
-        X(\mu) = \sum_{n=0}^{N-1} x(n) e^{-i 2 \pi \frac{\mu n}{N}}
-
-using a negative sign convention in the transform kernel
-:math:`\kappa(\mu, n) = e^{-i 2 \pi \mu \frac{n}{N}}`.
-Analogously, the discrete inverse Fourier transform is implemented as
-
-.. math::
-        x(n) = \frac{1}{N} \sum_{\mu=0}^{N-1} X(\mu) e^{i2\pi\frac{\mu n}{N}}
-
-Pyfar uses a DFT implementation for purely real-valued time signals resulting
-in Fourier spectra with complex conjugate symmetry for negative and
-positive frequencies :math:`X(\mu) = X(-\mu)^*`. As a result,
-the left-hand side of the spectrum is discarded, yielding
-:math:`X_R(\mu) = X(\mu) \mbox{ }\forall 0 \le \mu \le N/2`. Complex valued
-time signals can be implemented, if required.
-
-Normalization [1]_
-------------------
-pyfar implements five normalization that can be applied to spectra. The
-normalizations are available from :py:func:`normalization`. Note that the time
-signals do not change regardless of the normalization.
-
-Energy Signals
-==============
-
-For energy signals with finite energy,
-such as impulse responses, no normalization is required, that is
-the spectrum of a energy signal is equivalent to the right-hand spectrum
-of a real-valued time signal defined above. The coresponding normalization is
-``'none'``.
-
-Power Signals
-=============
-
-For power signals however, which possess a finite power but infinite energy,
-a normalization for the time interval in which the signal is sampled, is
-chosen. In order for Parseval's theorem to remain valid, the single sided
-needs to be multiplied by a factor of 2, compensating for the discarded part
-of the spectrum (cf. [1]_, Eq. 8). The coresponding normalization is
-``'unitary'``. Additional normalizations can be applied to further scale the
-spectrum, e.g., according to the RMS value.
-
-.. plot::
-
-    >>> import numpy as np
-    >>> from pyfar.dsp import fft
-    >>> import matplotlib.pyplot as plt
-    >>> # properties
-    >>> fft_normalization = "rms"
-    >>> n_samples = 1024
-    >>> sampling_rate = 48e3
-    >>> frequency = 100
-    >>> times = np.linspace(0, 10, n_samples)
-    >>> freqs = fft.rfftfreq(n_samples, 48e3)
-    >>> # generate data
-    >>> sine = np.sin(times * 2*np.pi * frequency)
-    >>> spec = fft.rfft(sine, n_samples, sampling_rate, fft_normalization)
-    >>> # plot time and frequency data
-    >>> plt.subplot(1, 2, 1)
-    >>> plt.plot(times, sine)
-    >>> ax = plt.gca()
-    >>> ax.set_xlabel('Time in s')
-    >>> plt.subplot(1, 2, 2)
-    >>> plt.plot(freqs, np.abs(spec))
-    >>> ax = plt.gca()
-    >>> ax.set_xlabel('Frequency in Hz')
-    >>> plt.show()
-
-
-References
-----------
-.. [1]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
-        Scaling of the Discrete Fourier Transform and the Implied Physical
-        Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
-        May 2020, p. e-Brief 600.
-
-
+"""
+The following documents the FFT functionality. More details and background is
+given in the :py:mod:`FFT concepts <pyfar._concepts.fft>`.
 """
 import multiprocessing
-import warnings
 
 import numpy as np
-
-try:
-    import pyfftw
-    pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-    from pyfftw.interfaces import numpy_fft as fft_lib
-except ImportError:
-    warnings.warn(
-        "Using numpy FFT implementation.\
-        Install pyfftw for improved performance.")
-    from numpy import fft as fft_lib
+from scipy import fft
 
 
 def rfftfreq(n_samples, sampling_rate):
-    """
-    Returns the positive discrete frequencies in the range
-    :math:`[0, \\text{sampling\_rate}/2]` for which the FFT of a real valued
-    time-signal with `n_samples` is calculated. If the number of samples
+    """Returns the positive discrete frequencies for which the FFT is calculated.
+
+    If the number of samples
     :math:`N` is even the number of frequency bins will be :math:`2/N+1`, if
     :math:`N` is odd, the number of bins will be :math:`(N+1)/2`.
 
@@ -117,31 +27,29 @@ def rfftfreq(n_samples, sampling_rate):
     frequencies : array, double
         The positive discrete frequencies in Hz for which the FFT is
         calculated.
-    """  # noqa: W605 (ignore \_ which is valid only in LaTex)
-    return fft_lib.rfftfreq(n_samples, d=1/sampling_rate)
+    """
+    return fft.rfftfreq(n_samples, d=1/sampling_rate)
 
 
 def rfft(data, n_samples, sampling_rate, fft_norm):
     """
-    Calculate the FFT of a real-valued time-signal. The function returns only
-    the right-hand side of the axis-symmetric spectrum. The normalization
-    distinguishes between energy and power signals. Energy signals are not
-    normalized in the forward transform. Power signals are normalized by their
-    number of samples and to their effective value as well as compensated for
-    the missing energy from the left-hand side of the spectrum. This ensures
-    that the energy of the time signal and the right-hand side of the spectrum
-    are equal and thus fulfill Parseval's theorem.
+    Calculate the FFT of a real-valued time-signal.
+
+    The function returns only the right-hand side of the axis-symmetric
+    spectrum. The normalization is considered according to
+    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
+    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
 
     Parameters
     ----------
     data : array, double
         Array containing the time domain signal with dimensions
-        (..., n_samples)
+        (..., ``'n_samples'``)
     n_samples : int
         The number of samples
     sampling_rate : number
         sampling rate in Hz
-    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
+    fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentation of :py:func:`~pyfar.dsp.fft.normalization`.
 
     Returns
@@ -153,7 +61,8 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     """
 
     # DFT
-    spec = fft_lib.rfft(data, n=n_samples, axis=-1)
+    spec = fft.rfft(
+        data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
     # Normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=False, single_sided=True)
@@ -163,14 +72,12 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
 
 def irfft(spec, n_samples, sampling_rate, fft_norm):
     """
-    Calculate the IFFT of a axis-symmetric Fourier spectum. The function
-    takes only the right-hand side of the spectrum and returns a real-valued
-    time signal. The normalization distinguishes between energy and power
-    signals. Energy signals are not normalized by their number of samples.
-    Power signals are normalized by their effective value as well as
-    compensated for the missing energy from the left-hand side of the spectrum.
-    This ensures that the energy of the time signal and the right-hand side
-    of the spectrum are equal and thus fulfill Parseval's theorem.
+    Calculate the IFFT of a single-sided Fourier spectrum.
+
+    The function takes only the right-hand side of the spectrum and returns a
+    real-valued time signal. The normalization is considered according to
+    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
+    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
 
     Parameters
     ----------
@@ -178,26 +85,27 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
         The complex valued right-hand side of the spectrum with dimensions
         (..., n_bins)
     n_samples : int
-        The number of samples in the corresponding tim signal. This is crucial
+        The number of samples of the corresponding time signal. This is crucial
         to allow for the correct transform of time signals with an odd number
         of samples.
     sampling_rate : number
         sampling rate in Hz
-    fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
-        See documentaion of :py:func:`~pyfar.dsp.fft.normalization`.
+    fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
+        See :py:func:`~pyfar.dsp.fft.normalization`.
 
     Returns
     -------
     data : array, double
         Array containing the time domain signal with dimensions
-        (..., n_samples)
+        (..., ``'n_samples'``)
     """
 
     # Inverse normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True)
     # Inverse DFT
-    data = fft_lib.irfft(spec, n=n_samples, axis=-1)
+    data = fft.irfft(
+        spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
 
     return data
 
@@ -205,12 +113,15 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
                   inverse=False, single_sided=True, window=None):
     """
-    Normalize spectrum.
+    Normalize a Fourier spectrum.
 
-    Apply normalizations defined in [1]_ to the DFT spectrum. Note that, the
-    phase is maintained in all cases, i.e., instead of taking the squared
-    absolute values in Eq. (5-6), the complex spectra are multiplied with their
-    absolute values.
+    Apply normalizations defined in [1]_ to the DFT spectrum.
+    Note that the phase is maintained in all cases, i.e., instead of taking
+    the squared absolute values for ``'power'`` and ``'psd'``, the complex
+    spectra are multiplied with their absolute values to ensure a correct
+    renormalization.
+    For detailed information and explanations, refer to
+    :py:mod:`FFT concepts <pyfar._concepts.fft>`.
 
     Parameters
     ----------
@@ -223,42 +134,54 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     sampling_rate : number
         sampling rate of the corresponding time signal in Hz
     fft_norm : string, optional
-        'none'
-            Do not apply any normalization
-        'unitary'
-            Multiplied single sided spectra by factor two as in [1]_ Eq. (8)
+        ``'none'``
+            Do not apply any normalization. Appropriate for energy signals
+            such as impulse responses.
+        ``'unitary'``
+            Multiply `spec` by factor of two as in [1]_ Eq. (8)
             (except for 0 Hz and the Nyquist frequency at half the sampling
-            rate)
-        'amplitude'
-            scale `spec` by ``1/n_samples`` as in [1]_ Eq. (4)
+            rate) to obtain the single-sided spectrum.
+        ``'amplitude'``
+            Scale spectrum by ``1/n_samples`` as in [1]_ Eq. (4)
+            to obtain the amplitude spectrum.
         'rms'
-            scale `spec` by :math:`1/\\sqrt{2}` as in [1]_ Eq. (10)
+            Scale spectrum by :math:`1/\\sqrt{2}` as in [1]_
+            Eq.(10) to obtain the RMS spectrum.
         'power'
-            scale the power spectrum by ``1/n_samples**2`` as in [1]_ Eq. (5)
+            Power spectrum, which equals the squared RMS spectrum
+            (except for the retained phase).
         'psd'
-            scale the power spectrum by ``1/(sampling_rate * n_samples`` as in
+            The power spectrum is scaled by ``n_samples/sampling_rate`` as in
             [1]_ Eq. (6)
 
         Note that the `unitary` normalization is also applied for `amplitude`,
-        `rms`, `power`, and `psd` if the input spectrum is single sided (See
-        below).
+        `rms`, `power`, and `psd` if the input spectrum is single sided (see
+        `single_sided`).
     inverse : bool, optional
         apply the inverse normalization. The default is ``False``.
     single_sided : bool, optional
         denotes if `spec` is a single sided spectrum up to half the sampling
         rate or a both sided (full) spectrum. If ``single_sided=True`` the
-        normalization according to [1]_ Eq. (8) is unless ``fft_norm='none'``.
+        `unitary` normalization according to [1]_ Eq. (8) is applied unless
+        ``fft_norm='none'``.
         The default is ``True``.
     window : None, array like
         window that was applied to the time signal before performing the FFT.
-        window must be an array like with `n_samples` and affects the
-        normalization as in [1]_ Eqs. (11-13). The default is ``None``, which
-        denotes that no window was applied.
+        Affects the normalization as in [1]_ Eqs. (11-13). The window must be
+        an array-like with `n_samples` length and. The default is ``None``,
+        which denotes that no window was applied.
 
     Returns
     -------
     spec : numpy array
         normalized input spectrum
+
+    References
+    ----------
+    .. [1]  J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+            Scaling of the Discrete Fourier Transform and the Implied Physical
+            Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
+            May 2020, p. e-Brief 600.
     """
 
     # check if normalization should be applied

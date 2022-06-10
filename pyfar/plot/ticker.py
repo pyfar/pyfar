@@ -99,7 +99,7 @@ class LogFormatterITAToolbox(LogFormatter):
         if x == 0.0:  # Symlog
             return '0'
 
-        x = abs(x)
+        x = x
 
         vmin, vmax = self.axis.get_view_interval()
         vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)

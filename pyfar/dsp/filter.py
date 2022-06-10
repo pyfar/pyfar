@@ -1,3 +1,10 @@
+"""
+The following documents the pyfar filters. Visit
+:py:mod:`filter types <pyfar._concepts.filter_types>` for an introduction of
+the different filters and
+:py:mod:`filter classes <pyfar._concepts.filter_classes>` for more information
+on pyfar filter objects.
+"""
 import warnings
 
 import numpy as np
@@ -10,6 +17,71 @@ from . import _audiofilter as iir
 
 def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     """
+    This function will be deprecated in favor of :py:func:`~butterworth`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use butterworth instead'), PendingDeprecationWarning)
+
+    return butterworth(signal, N, frequency, btype, sampling_rate)
+
+
+def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~chebyshev1`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use chebyshev1 instead'), PendingDeprecationWarning)
+
+    return chebyshev1(signal, N, ripple, frequency, btype, sampling_rate)
+
+
+def cheby2(signal, N, attenuation, frequency, btype='lowpass',
+           sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~chebyshev2`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use chebyshev2 instead'), PendingDeprecationWarning)
+
+    return chebyshev2(signal, N, attenuation, frequency, btype, sampling_rate)
+
+
+def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
+          sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~elliptic`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use elliptic instead'), PendingDeprecationWarning)
+
+    return elliptic(signal, N, ripple, attenuation, frequency, btype,
+                    sampling_rate)
+
+
+def peq(signal, center_frequency, gain, quality, peq_type='II',
+        quality_warp='cos', sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~bell`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use bell instead'), PendingDeprecationWarning)
+
+    return bell(signal, center_frequency, gain, quality, peq_type,
+                quality_warp, sampling_rate)
+
+
+def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
+    """
     Create and apply a digital Butterworth IIR filter.
 
     This is a wrapper for ``scipy.signal.butter``. Which creates digital
@@ -18,7 +90,7 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
         The order of the Butterworth filter
@@ -69,7 +141,8 @@ def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
         return signal_filt
 
 
-def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
+def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
+               sampling_rate=None):
     """
     Create and apply digital Chebyshev Type I IIR filter.
 
@@ -79,10 +152,10 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Chebychev filter
+        The order of the Chebychev filter.
     ripple : number
         The passband ripple in dB.
     frequency : number, array like
@@ -134,8 +207,8 @@ def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
         return signal_filt
 
 
-def cheby2(signal, N, attenuation, frequency, btype='lowpass',
-           sampling_rate=None):
+def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
+               sampling_rate=None):
     """
     Create and apply digital Chebyshev Type II IIR filter.
 
@@ -145,16 +218,17 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Chebychev filter
+        The order of the Chebychev filter.
     attenuation : number
         The minimum stop band attenuation in dB.
     frequency : number, array like
-        The cut off-frequency in Hz if `btype` is ``'lowpass'`` or
-        ``'highpass'``. An array like containing the lower and upper cut-off
-        frequencies in Hz if `btype` is ``'bandpass'`` or ``'bandstop'``.
+        The frequency in Hz where the `attenuatoin` is first reached if `btype`
+        is ``'lowpass'`` or ``'highpass'``. An array like containing the lower
+        and upper frequencies in Hz if `btype` is ``'bandpass'`` or
+        ``'bandstop'``.
     btype : str
         One of the following ``'lowpass'``, ``'highpass'``, ``'bandpass'``,
         ``'bandstop'``. The default is ``'lowpass'``.
@@ -200,21 +274,21 @@ def cheby2(signal, N, attenuation, frequency, btype='lowpass',
         return signal_filt
 
 
-def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
-          sampling_rate=None):
+def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
+             sampling_rate=None):
     """
     Create and apply digital Elliptic (Cauer) IIR filter.
 
     This is a wrapper for ``scipy.signal.ellip``. Which creates digital
-    Chebyshev Type II filter coefficients in second-order sections (SOS).
+    Elliptic (Cauer) filter coefficients in second-order sections (SOS).
 
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Elliptic filter
+        The order of the Elliptic filter.
     ripple : number
         The passband ripple in dB.
     attenuation : number
@@ -275,15 +349,15 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
     Create and apply digital Bessel/Thomson IIR filter.
 
     This is a wrapper for ``scipy.signal.bessel``. Which creates digital
-    Butterworth filter coefficients in second-order sections (SOS).
+    Bessel filter coefficients in second-order sections (SOS).
 
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     N : int
-        The order of the Bessel/Thomson filter
+        The order of the Bessel/Thomson filter.
     frequency : number, array like
         The cut off-frequency in Hz if `btype` is ``'lowpass'`` or
         ``'highpass'``. An array
@@ -353,10 +427,10 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
         return signal_filt
 
 
-def peq(signal, center_frequency, gain, quality, peq_type='II',
-        quality_warp='cos', sampling_rate=None):
+def bell(signal, center_frequency, gain, quality, bell_type='II',
+         quality_warp='cos', sampling_rate=None):
     """
-    Create and apply second order parametric equalizer filter.
+    Create and apply second order bell (parametric equalizer) filter.
 
     Uses the implementation of [#]_.
 
@@ -372,15 +446,15 @@ def peq(signal, center_frequency, gain, quality, peq_type='II',
     quality : number
         Quality of the parametric equalizer, i.e., the inverse of the
         bandwidth
-    peq_type : str
-        Defines the bandwidth/quality. The default is ``'II'``
+    bell_type : str
+        Defines the bandwidth/quality. The default is ``'II'``.
 
         ``'I'``
-            not recommended. Also known as 'constant Q'
+            not recommended. Also known as 'constant Q'.
         ``'II'``
             defines the bandwidth by the points 3 dB below the maximum if the
             gain is positive and 3 dB above the minimum if the gain is
-            negative. Also known as 'symmetric'
+            negative. Also known as 'symmetric'.
         ``'III'``
             defines the bandwidth by the points at gain/2. Also known as
             'half pad loss'.
@@ -409,9 +483,9 @@ blob/master/filter_design/audiofilter.py
             or (signal is not None and sampling_rate is not None):
         raise ValueError('Either signal or sampling_rate must be none.')
 
-    if peq_type not in ['I', 'II', 'III']:
-        raise ValueError(("peq_type must be 'I', 'II' or "
-                          f"'III' but is '{peq_type}'.'"))
+    if bell_type not in ['I', 'II', 'III']:
+        raise ValueError(("bell_type must be 'I', 'II' or "
+                          f"'III' but is '{bell_type}'.'"))
 
     if quality_warp not in ['cos', 'sin', 'tan']:
         raise ValueError(("quality_warp must be 'cos', 'sin' or "
@@ -423,14 +497,14 @@ blob/master/filter_design/audiofilter.py
     # get filter coefficients
     ba = np.zeros((2, 3))
     _, _, b, a = iir.biquad_peq2nd(
-        center_frequency, gain, quality, fs, peq_type, quality_warp)
+        center_frequency, gain, quality, fs, bell_type, quality_warp)
     ba[0] = b
     ba[1] = a
 
     # generate filter object
     filt = pf.FilterIIR(ba, fs)
-    filt.comment = ("Second order parametric equalizer (PEQ) "
-                    f"of type {peq_type} with {gain} dB gain at "
+    filt.comment = ("Second order bell (parametric equalizer) "
+                    f"of type {bell_type} with {gain} dB gain at "
                     f"{center_frequency} Hz (Quality = {quality}).")
 
     # return the filter object
@@ -457,9 +531,9 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
         The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     frequency : number
-        Characteristic frequency of the shelve in Hz
+        Characteristic frequency of the shelve in Hz.
     gain : number
-        Gain of the shelve in dB
+        Gain of the shelve in dB.
     order : number
         The shelve order. Must be ``1`` or ``2``.
     shelve_type : str
@@ -471,6 +545,8 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
         ``'II'``
             defines the characteristic frequency at 3 dB if the gain is
             positive and at -3 dB if the gain is negative.
+        ``'III'``
+            defines the characteristic frequency at gain/2 dB.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -504,12 +580,12 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     frequency : number
-        Characteristic frequency of the shelve in Hz
+        Characteristic frequency of the shelve in Hz.
     gain : number
-        Gain of the shelve in dB
+        Gain of the shelve in dB.
     order : number
         The shelve order. Must be ``1`` or ``2``.
     shelve_type : str
@@ -517,12 +593,12 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 
         ``'I'``
             defines the characteristic frequency 3 dB below the gain value if
-            the gain is positive and 3 dB above the gain value otherwise
+            the gain is positive and 3 dB above the gain value otherwise.
         ``'II'``
             defines the characteristic frequency at 3 dB if the gain is
             positive and at -3 dB if the gain is negative.
         ``'III'``
-            defines the characteristic frequency at gain/2 dB
+            defines the characteristic frequency at gain/2 dB.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -546,12 +622,210 @@ blob/master/filter_design/audiofilter.py
     return output
 
 
+def high_shelve_cascade(
+        signal, frequency, frequency_type="lower", gain=None, slope=None,
+        bandwidth=None, N=None, sampling_rate=None):
+    """
+    Create and apply constant slope filter from cascaded 2nd order high shelves.
+
+    The filters - also known as High-Schultz filters (cf. [#]_) - are defined
+    by their characteristic frequency, gain, slope, and bandwidth. Two out of
+    the three parameter `gain`, `slope`, and `bandwidth` must be specified,
+    while the third parameter is calculated as
+
+    ``gain = bandwidth * slope``
+
+    ``bandwidth = abs(gain/slope)``
+
+    ``slope = gain/bandwidth``
+
+    Parameters
+    ----------
+    signal : Signal, None
+        The Signal to be filtered. Pass ``None`` to create the filter without
+        applying it.
+    frequency : number
+        Characteristic frequency in Hz (see `frequency_type`)
+    frequency_type : string
+        Defines how `frequency` is used
+
+        ``'upper'``
+            `frequency` gives the upper characteristic frequency. In this case
+            the lower characteristic frequency is given by
+            ``2**bandwidth / frequency``
+        ``'lower'``
+            `frequency` gives the lower characteristic frequency. In this case
+            the upper characteristic frequency is given by
+            ``2**bandwidth * frequency``
+    gain : number
+        The filter gain in dB. The default is ``None``, which calculates the
+        gain from the `slope` and `bandwidth` (must be given if `gain` is
+        ``None``).
+    slope : number
+        Filter slope in dB per octave, with positive values denoting a rising
+        filter slope and negative values denoting a falling filter slope. The
+        default is ``None``, which calculates the slope from the `gain` and
+        `bandwidth` (must be given if `slope` is ``None``).
+    bandwidth : number
+        The bandwidth of the filter in octaves. The default is ``None``, which
+        calculates the bandwidth from `gain` and `slope` (must be given if
+        `bandwidth` is ``None``).
+    N : int
+        Number of shelve filters that are cascaded. The default is ``None``,
+        which calculated the minimum ``N`` that is required to satisfy Eq. (11)
+        in Schultz et al. 2020, i.e., the minimum ``N`` that is required for
+        a good approximation of the ideal filter response.
+    sampling_rate : None, number
+        The sampling rate in Hz. Only required if signal is ``None``. The
+        default is ``None``.
+
+    Returns
+    -------
+    signal : :py:class:`~pyfar.classes.audio.Signal`, :py:class:`~pyfar.classes.filter.FilterSOS`
+        The filtered signal (returned if ``sampling_rate = None``) or the
+        Filter object (returned if ``signal = None``).
+    N : int
+        The number of shelve filters that were cascaded
+    ideal : :py:class:`~pyfar.classes.audio.FrequencyData`
+        The ideal, piece-wise magnitude response of the filter
+
+    References
+    ----------
+    .. [#] F. Schultz, N. Hahn, and S. Spors, “Shelving Filter Cascade with
+           Adjustable Transition Slope and Bandwidth,” in 148th AES Convention
+           (Vienna, Austria, 2020).
+
+    Examples
+    --------
+
+    Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
+    compare it to the piece-wise constant idealized magnitude response.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> impulse = pf.signals.impulse(40e3, sampling_rate=40000)
+        >>> impulse, N, ideal = pf.dsp.filter.high_shelve_cascade(
+        >>>     impulse, 250, "lower", -60, None, 4)
+        >>>
+        >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
+        >>> pf.plot.freq(impulse, label="actual")
+        >>> plt.legend()
+    """  # noqa E501
+    signal, N, ideal_response = _shelve_cascade(
+        signal, frequency, frequency_type, gain, slope, bandwidth, N,
+        sampling_rate, shelve_type="high")
+
+    return signal, N, ideal_response
+
+
+def low_shelve_cascade(
+        signal, frequency, frequency_type="upper", gain=None, slope=None,
+        bandwidth=None, N=None, sampling_rate=None):
+    """
+    Create and apply constant slope filter from cascaded 2nd order low shelves.
+
+    The filters - also known as Low-Schultz filters (cf. [#]_) - are defined
+    by their characteristic frequency, gain, slope, and bandwidth. Two out of
+    the three parameter `gain`, `slope`, and `bandwidth` must be specified,
+    while the third parameter is calculated as
+
+    ``gain = -bandwidth * slope``
+
+    ``bandwidth = abs(gain/slope)``
+
+    ``slope = -gain/bandwidth``
+
+    Parameters
+    ----------
+    signal : Signal, None
+        The Signal to be filtered. Pass ``None`` to create the filter without
+        applying it.
+    frequency : number
+        Characteristic frequency in Hz (see `frequency_type`)
+    frequency_type : string
+        Defines how `frequency` is used
+
+        ``'upper'``
+            `frequency` gives the upper characteristic frequency. In this case
+            the lower characteristic frequency is given by
+            ``2**bandwidth / frequency``
+        ``'lower'``
+            `frequency` gives the lower characteristic frequency. In this case
+            the upper characteristic frequency is given by
+            ``2**bandwidth * frequency``
+    gain : number
+        The filter gain in dB. The default is ``None``, which calculates the
+        gain from the `slope` and `bandwidth` (must be given if `gain` is
+        ``None``).
+    slope : number
+        Filter slope in dB per octave, with positive values denoting a rising
+        filter slope and negative values denoting a falling filter slope. The
+        default is ``None``, which calculates the slope from the `gain` and
+        `bandwidth` (must be given if `slope` is ``None``).
+    bandwidth : number
+        The bandwidth of the filter in octaves. The default is ``None``, which
+        calculates the bandwidth from `gain` and `slope` (must be given if
+        `bandwidth` is ``None``).
+    N : int
+        Number of shelve filters that are cascaded. The default is ``None``,
+        which calculated the minimum ``N`` that is required to satisfy Eq. (11)
+        in Schultz et al. 2020, i.e., the minimum ``N`` that is required for
+        a good approximation of the ideal filter response.
+    sampling_rate : None, number
+        The sampling rate in Hz. Only required if signal is ``None``. The
+        default is ``None``.
+
+    Returns
+    -------
+    signal : :py:class:`~pyfar.classes.audio.Signal`, :py:class:`~pyfar.classes.filter.FilterSOS`
+        The filtered signal (returned if ``sampling_rate = None``) or the
+        Filter object (returned if ``signal = None``).
+    N : int
+        The number of shelve filters that were cascaded
+    ideal : :py:class:`~pyfar.classes.audio.FrequencyData`
+        The ideal, piece-wise magnitude response of the filter
+
+    References
+    ----------
+    .. [#] F. Schultz, N. Hahn, and S. Spors, “Shelving Filter Cascade with
+           Adjustable Transition Slope and Bandwidth,” in 148th AES Convention
+           (Vienna, Austria, 2020).
+
+    Examples
+    --------
+
+    Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
+    compare it to the piece-wise constant idealized magnitude response.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> impulse = pf.signals.impulse(40e3, sampling_rate=40000)
+        >>> impulse, N, ideal = pf.dsp.filter.low_shelve_cascade(
+        >>>     impulse, 4000, "upper", -60, None, 4)
+        >>>
+        >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
+        >>> pf.plot.freq(impulse, label="actual")
+        >>> plt.legend()
+    """  # noqa E501
+    signal, N, ideal_response = _shelve_cascade(
+        signal, frequency, frequency_type, gain, slope, bandwidth, N,
+        sampling_rate, shelve_type="low")
+
+    return signal, N, ideal_response
+
+
 def crossover(signal, N, frequency, sampling_rate=None):
     """
-    Create and apply Linkwitz-Riley crossover network  [1]_, [2]_.
+    Create and apply Linkwitz-Riley crossover network.
 
-    Linkwitz-Riley crossover filters are designed by cascading Butterworth
-    filters of order `N/2`. where `N` must be even.
+    Linkwitz-Riley crossover filters ([#]_, [#]_) are designed by cascading
+    Butterworth filters of order `N/2`. where `N` must be even.
 
     Parameters
     ----------
@@ -578,9 +852,9 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
     References
     ----------
-    .. [1]  S. H. Linkwitz, 'Active crossover networks for noncoincident
+    .. [#]  S. H. Linkwitz, 'Active crossover networks for noncoincident
             drivers,' J. Audio Eng. Soc., vol. 24, no. 1, pp. 2–8, Jan. 1976.
-    .. [2]  D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
+    .. [#]  D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
             2005.
     """
 
@@ -702,10 +976,173 @@ def _shelve(signal, frequency, gain, order, shelve_type, sampling_rate, kind):
         return signal_filt
 
 
+def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
+                    N, sampling_rate, shelve_type):
+    """Design constant slope filter from shelve filter cascade.
+
+    Parameters
+    ----------
+    shelve_type : string
+        ``'low'``, or ``'high'`` for low- or high-shelve
+    other : see high_shelve_cascade and low_shelve_cascade
+
+    [1] F. Schultz, N. Hahn, and S. Spors, “Shelving Filter Cascade with
+        Adjustable Transition Slope and Bandwidth,” in 148th AES Convention
+        (Vienna, Austria, 2020).
+    """
+
+    # check input -------------------------------------------------------------
+    if (signal is None and sampling_rate is None) \
+            or (signal is not None and sampling_rate is not None):
+        raise ValueError('Either signal or sampling_rate must be none.')
+    if not isinstance(signal, (pf.Signal, type(None))):
+        raise ValueError("signal must be a pyfar Signal object or None")
+
+    # check and set filter slope parameters according to Eq. (4)
+    gain, slope, bandwidth = _shelving_cascade_slope_parameters(
+        gain, slope, bandwidth, shelve_type)
+    if bandwidth < 1:
+        warnings.warn((
+            f"The bandwidth is {bandwidth} octaves but should be at least 1 "
+            "to obtain an good approximation of the desired frequency response"
+        ))
+
+    # get sampling rate
+    sampling_rate = sampling_rate if signal is None else signal.sampling_rate
+
+    # get upper and lower cut-off frequency
+    if frequency_type == "upper":
+        frequency = [frequency / 2**bandwidth, frequency]
+    elif frequency_type == "lower":
+        frequency = [frequency, 2**bandwidth * frequency]
+    else:
+        raise ValueError((f"frequency_type is '{frequency_type}' but must be "
+                          "'lower' or 'upper'"))
+
+    # check characteristic frequencies
+    if frequency[0] == 0:
+        raise ValueError("The lower characteristic frequency must not be 0 Hz")
+    if frequency[0] > sampling_rate/2:
+        raise ValueError(("The lower characteristic frequency must be smaller "
+                          "than half the sampling rate"))
+    if frequency[1] > sampling_rate/2 and shelve_type == "low":
+        raise ValueError(("The upper characteristic frequency must be smaller "
+                          "than half the sampling rate"))
+    if frequency[1] > sampling_rate/2:
+        frequency[1] = sampling_rate/2
+        gain *= np.log2(frequency[1]/frequency[0]) / bandwidth
+        bandwidth = np.log2(frequency[1]/frequency[0])
+        warnings.warn((f"The upper frequency exceeded the Nyquist frequency "
+                       f"It was set to {sampling_rate/2} Hz, which equals "
+                       f"a restriction of the bandwidth to {bandwidth} "
+                       f"octaves and a reduction of the gain to {gain} dB to "
+                       f"maintain the intended slope of {slope} dB/octave."))
+
+    # determine number of shelve filters per octave ---------------------------
+
+    # recommended minimum shelve filters per octave according to Eq. (11.2)
+    N_octave_min = 1 if abs(slope) < 12.04 else abs(slope) / 12.04
+    # minimum total shelve filters according to Eq. (9)
+    N_min = np.ceil(N_octave_min*bandwidth).astype(int)
+
+    # actual total shelve filters either from user input or recommended minimum
+    N = int(N) if N else N_min
+
+    if N < N_min:
+        warnings.warn((
+            f"N is {N} but should be at least {N_min} to obtain an good "
+            "approximation of the desired frequency response"))
+
+    # used shelve filters per octave
+    N_octave = N / bandwidth
+
+    # get the filter ----------------------------------------------------------
+
+    # initialize variables
+    filter_func = high_shelve if shelve_type == "high" else low_shelve
+    shelve_gain = gain / N
+    SOS = np.zeros((1, N, 6))
+
+    # get the filter coefficients
+    for n in range(N):
+        # current frequency according to Eq. (5)
+        f = 2**(-(n+.5)/N_octave) * frequency[1]
+        # get shelve and cascade coefficients
+        shelve = filter_func(None, f, shelve_gain, 2, 'III', sampling_rate)
+        SOS[:, n] = shelve.coefficients.flatten()
+
+    # make filter object
+    comment = (f"Constant slope filter cascaded from {N} {shelve_type}-shelve "
+               f"filters ({frequency_type} frequency: {frequency} Hz, "
+               f"bandwidth: {bandwidth} octaves, gain: {gain} dB, {N_octave} "
+               "shelve filters per octave")
+    filt = pf.FilterSOS(SOS, sampling_rate, comment=comment)
+
+    # get the ideal filter response -------------------------------------------
+    magnitudes = np.array([10**(gain/20), 10**(gain/20), 1, 1])
+    if shelve_type == "high":
+        magnitudes = np.flip(magnitudes)
+    frequencies = [0, frequency[0], frequency[1], sampling_rate/2]
+
+    # remove duplicate entries (happens if the slope ends at Nyquist)
+    if frequencies[-2] == frequencies[-1]:
+        magnitudes = magnitudes[:-1]
+        frequencies = frequencies[:-1]
+
+    ideal_response = pf.FrequencyData(
+        magnitudes, frequencies,
+        "ideal magnitude response of cascaded shelve filter")
+
+    # return parameter --------------------------------------------------------
+    if signal is None:
+        return filt, N, ideal_response
+    else:
+        return filt.process(signal), N, ideal_response
+
+
+def _shelving_cascade_slope_parameters(gain, slope, bandwidth, shelve_type):
+    """Compute the third parameter from the given two.
+
+    Parameters
+    ----------
+    slope : float
+        Desired shelving slope in decibel per octave.
+    bandwidth : float
+        Desired bandwidth of the slope in octave.
+    gain : float
+        Desired gain of the stop band in decibel.
+
+    """
+    if slope == 0:
+        raise ValueError("slope must be non-zero.")
+
+    if gain is None and slope is not None and bandwidth is not None:
+        bandwidth = abs(bandwidth)
+        gain = -bandwidth * slope if shelve_type == "low" \
+            else bandwidth * slope
+    elif slope is None and gain is not None and bandwidth is not None:
+        bandwidth = abs(bandwidth)
+        slope = -gain / bandwidth if shelve_type == "low" \
+            else gain / bandwidth
+    elif bandwidth is None and gain is not None and slope is not None:
+        if shelve_type == "low" and np.sign(gain * slope) == 1:
+            raise ValueError("gain and slope must have different signs")
+        if shelve_type == "high" and np.sign(gain * slope) == -1:
+            raise ValueError("gain and slope must have the same signs")
+        bandwidth = abs(gain / slope)
+    else:
+        raise ValueError(("Exactly two out of the parameters gain, slope, and "
+                          "bandwidth must be given."))
+
+    return gain, slope, bandwidth
+
+
 def fractional_octave_frequencies(
         num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
     """Return the octave center frequencies according to the IEC 61260:1:2014
-    standard. For numbers of fractions other than ``1`` and ``3``, only the
+    standard.
+
+    For numbers of fractions other than ``1`` and ``3``, only the
     exact center frequencies are returned, since nominal frequencies are not
     specified by corresponding standards.
 
@@ -723,13 +1160,13 @@ def fractional_octave_frequencies(
     nominal : array, float
         The nominal center frequencies in Hz specified in the standard.
         Nominal frequencies are only returned for octave bands and third octave
-        bands
+        bands.
     exact : array, float
         The exact center frequencies in Hz, resulting in a uniform distribution
         of frequency bands over the frequency range.
     cutoff_freq : tuple, array, float
         The lower and upper critical frequencies in Hz of the bandpass filters
-        for each band as a tuple corresponding to ``(f_lower, f_upper)``
+        for each band as a tuple corresponding to ``(f_lower, f_upper)``.
     """
     nominal = None
 
@@ -868,8 +1305,8 @@ def fractional_octave_bands(
         This filter bank has -3 dB cut-off frequencies. For sufficiently large
         values of ``'order'``, the summed energy of the filter bank equals the
         energy of input signal, i.e., the filter bank is energy preserving
-        (reconstructing). This is usefull for analysis energetic properties of
-        the input signal such as the room acoustic propertie reverberation
+        (reconstructing). This is useful for analysis energetic properties of
+        the input signal such as the room acoustic property reverberation
         time. For an amplitude preserving filter bank with -6 dB cut-off
         frequencies see
         :py:func:`~pyfar.dsp.filter.reconstructing_fractional_octave_bands`.
@@ -887,7 +1324,7 @@ def fractional_octave_bands(
         default is ``None``.
     frequency_range : array, tuple, optional
         The lower and upper frequency limits. The default is
-         ``frequency_range=(20, 20e3)``
+        ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
 
@@ -1005,7 +1442,7 @@ def _coefficients_fractional_octave_bands(
             Wn = Wn[0]
             btype = 'highpass'
             sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
-            sos_coeff = pf.classes.filter.extend_sos_coefficients(
+            sos_coeff = pf.classes.filter._extend_sos_coefficients(
                 sos_hp, order)
         else:
             btype = 'bandpass'
@@ -1025,15 +1462,15 @@ def reconstructing_fractional_octave_bands(
         This filter bank has -6 dB cut-off frequencies. For sufficient lengths
         of ``'n_samples'``, the summed output of the filter bank equals the
         input signal, i.e., the filter bank is amplitude preserving
-        (reconstructing). This is usefull for analysis and synthesis
+        (reconstructing). This is useful for analysis and synthesis
         applications such as room acoustical simulations. For an energy
         preserving filter bank with -3 dB cut-off frequencies see
         :py:func:`~pyfar.dsp.filter.fractional_octave_bands`.
 
     The filters have a linear phase with a delay of ``n_samples/2`` and are
-    windowed with a Hann window to suppress side lobes of the finite filters.
-    The magnitude response of the filters is designed similar to [#]_ with
-    two exceptions:
+    windowed with a Hanning window to suppress side lobes of the finite
+    filters. The magnitude response of the filters is designed similar to [#]_
+    with two exceptions:
 
     1. The magnitude response is designed using squared sine/cosine ramps to
        obtain -6 dB at the cut-off frequencies.
@@ -1046,12 +1483,13 @@ def reconstructing_fractional_octave_bands(
     Parameters
     ----------
     signal : Signal, None
-        The Signal to be filtered. Pass None to create the filter without
+        The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
     num_fractions : int, optional
-        Octave fraction, e.g., 3 for third-octave bands. The default is ``1``.
+        Octave fraction, e.g., ``3`` for third-octave bands. The default is
+        ``1``.
     frequency_range : tuple, optional
-        frequency range for fractional octave in Hz. The default is
+        Frequency range for fractional octave in Hz. The default is
         ``(63, 16000)``
     overlap : float
         Band overlap of the filter slopes between 0 and 1. Smaller values yield
@@ -1084,7 +1522,7 @@ def reconstructing_fractional_octave_bands(
     Examples
     --------
 
-    Filter and re-synthesize impulse signal
+    Filter and re-synthesize an impulse signal.
 
     .. plot::
 
