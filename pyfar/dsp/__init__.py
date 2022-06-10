@@ -14,7 +14,11 @@ from .dsp import (
     deconvolve,
     convolve,
     decibel,
-    InterpolateSpectrum,
+)
+
+from .dsp_interpolation import (
+    fractional_time_shift,
+    InterpolateSpectrum
 )
 
 from . import filter
@@ -40,4 +44,5 @@ __all__ = [
     'convolve',
     'decibel',
     'InterpolateSpectrum',
+    'fractional_time_shift'
 ]

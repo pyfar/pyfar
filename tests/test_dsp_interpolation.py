@@ -4,12 +4,108 @@ import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 import pyfar as pf
-from pyfar.dsp import InterpolateSpectrum
-
-# TODO: Finish `test_interpolation()` for 'magnitude_minimum'
+from pyfar.dsp import (InterpolateSpectrum, fractional_time_shift)
 
 
-def test_init():
+def test_fractional_time_shift_assertions():
+    """Test if the assertions are raised correctly"""
+
+    # wrong audio data type
+    with raises(TypeError, match="Input data has to be of type pyfar.Signal"):
+        fractional_time_shift(pf.FrequencyData(1, 1), .5)
+
+    # wrong values for order and side_lobe_suppression
+    with raises(ValueError, match="The order must be > 0"):
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, order=0)
+    with raises(ValueError, match="The side lobe suppression must be > 0"):
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, "samples", 2, 0)
+
+    # filter length exceeds signal length
+    with raises(ValueError, match="The order is 30 but must not exceed 2"):
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5)
+
+    # wrong unit
+    with raises(ValueError, match="Unit is 'meter' but has to be"):
+        fractional_time_shift(pf.signals.impulse(64), 1, 'meter')
+
+    # wrong mode
+    with raises(ValueError, match="The mode is 'full' but must be 'linear'"):
+        fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
+
+
+@pytest.mark.parametrize("mode", ["linear", "cyclic"])
+@pytest.mark.parametrize("delays_impulse, fractional_delays", [
+    # single channel signals and delays
+    # (positive/negative with fractions <0.5 and >0.5)
+    (64, 10.4), (64, 10.6), (64, -10.4), (64, -10.6),
+    # special case for testing a special line
+    (64, -60),
+    # multi channel signal with single channel delays
+    ([64, 32], 10.4), ([[64, 32], [48, 16]], 10.4),
+    # multi channel signals with multi channel delays
+    ([64, 32], [10.4, 5.4]), ([[64, 32], [48, 16]], [10.4, 5.4])
+])
+def test_fractional_time_shift_channels(
+        mode, delays_impulse, fractional_delays):
+    """
+    Test fractional delay with different combinations of single/multi-channel
+    signals and delays and the two modes "linear" and "cyclic"
+    """
+
+    # generate input and delay signal
+    signal = pf.signals.impulse(128, delays_impulse)
+    delayed = fractional_time_shift(signal, fractional_delays, mode=mode)
+
+    # frequency up to which group delay is tested
+    f_id = delayed.find_nearest_frequency(19e3)
+
+    # get and broadcast actual and target group delays
+    group_delays = pf.dsp.group_delay(delayed)[..., :f_id]
+    group_delays = np.broadcast_to(group_delays, signal.cshape + (f_id, ))
+
+    target_delays = np.atleast_1d(
+        np.array(delays_impulse) + np.array(fractional_delays))
+    target_delays = np.broadcast_to(target_delays[..., np.newaxis],
+                                    signal.cshape + (f_id, ))
+
+    # check equality
+    npt.assert_allclose(group_delays[..., :f_id], target_delays, atol=.05)
+
+
+def test_fractional_time_shift_unit():
+    """Test passing shift in different units"""
+
+    impulse = pf.signals.impulse(128, 64)
+    delayed_samples = fractional_time_shift(impulse, 1, 'samples')
+    delayed_seconds = fractional_time_shift(impulse, 1/44100, 's')
+
+    npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
+
+
+@pytest.mark.parametrize("order", [2, 3])
+def test_fractional_delay_order(order):
+    """Test if the order parameter behaves as intended"""
+
+    signal = pf.signals.impulse(32, 16)
+    delayed = pf.dsp.fractional_time_shift(signal, 0.5, order=order)
+
+    # number of non-zero samples must equal filter_length = order+1
+    assert np.count_nonzero(np.abs(delayed.time) > 1e-14) == order + 1
+
+
+@pytest.mark.parametrize("delay", [30.4, -30.4])
+def test_fractional_delay_mode_cyclic(delay):
+    """Test the mode delay"""
+
+    signal = pf.signals.impulse(32, 16)
+    delayed = fractional_time_shift(signal, delay, mode="cyclic")
+
+    # if the delay is too large, it is cyclicly shifted
+    group_delay = pf.dsp.group_delay(delayed)[0]
+    npt.assert_allclose(group_delay, (16+delay) % 32, atol=.05)
+
+
+def test_interpolate_spectrum_init():
     """Test return objects"""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
@@ -23,7 +119,7 @@ def test_init():
     assert isinstance(signal, pf.Signal)
 
 
-def test_init_assertions():
+def test_interpolate_spectrum_init_assertions():
     """Test if init raises assertions correctly"""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
@@ -85,7 +181,7 @@ def test_init_assertions():
      ("magnitude", [1, 2], [1, 2], 12, 6,
       [0, .5, 1, 1.5, 2, 2.5, 3])
     ])
-def test_interpolation(
+def test_interpolate_spectrum_interpolation(
         method, freq_in, frequencies, freq_out, n_samples, sampling_rate):
     """
     Test the if the interpolated spectrum matches the reference across methods.
@@ -108,7 +204,7 @@ def test_interpolation(
         npt.assert_allclose(signal.freq, np.atleast_2d(freq_out))
 
 
-def test_clip():
+def test_interpolate_spectrum_clip():
     """Test if clipping the magnitude data works."""
 
     data = pf.FrequencyData([1, 2], [1, 2])
@@ -127,7 +223,7 @@ def test_clip():
            np.all(np.abs(signal_clip.freq) <= 2)
 
 
-def test_fscale():
+def test_interpolate_spectrum_fscale():
     """
     Test frequency vectors for linear and logarithmic frequency interpolation.
     """
@@ -160,7 +256,7 @@ def test_fscale():
     npt.assert_allclose(interpolator_log._f_query, f_query_log)
 
 
-def test_show():
+def test_interpolate_spectrum_show():
     """Test plotting the results.
 
     This only tests if the code finishes without errors. Because the plot is
