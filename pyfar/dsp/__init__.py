@@ -14,7 +14,6 @@ from .dsp import (
     deconvolve,
     convolve,
     decibel,
-    InterpolateSpectrum,
 )
 
 from .dsp_interpolation import (
