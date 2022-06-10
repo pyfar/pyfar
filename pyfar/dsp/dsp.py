@@ -1523,6 +1523,30 @@ def find_impulse_response_start(
     ----------
     .. [#]  ISO 3382-1:2009-10, Acoustics - Measurement of the reverberation
             time of rooms with reference to other acoustical parameters. pp. 22
+
+    Examples
+    --------
+    Create a band-limited impulse shifted by 0.5 samples and estimate the
+    starting sample of the impulse and plot.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> n_samples = 256
+        >>> delay_samples = n_samples // 2 + 1/2
+        >>> ir = pf.signals.impulse(n_samples)
+        >>> ir = pf.dsp.linear_phase(ir, delay_samples, unit='samples')
+        >>> start_samples = pf.dsp.find_impulse_response_start(ir)
+        >>> ax = pf.plot.time(ir, unit='ms', label='impulse response', dB=True)
+        >>> ax.axvline(
+        ...     start_samples/ir.sampling_rate*1e3,
+        ...     color='k', linestyle='-.', label='start sample')
+        >>> ax.axhline(
+        ...     20*np.log10(np.max(np.abs(ir.time)))-20,
+        ...     color='k', linestyle=':', label='threshold')
+        >>> ax.legend()
+
     """
     ir_squared = np.abs(impulse_response.time)**2
 
