@@ -22,7 +22,7 @@ def test_resampling(L):
 def test_upsampling_delayed_impulse():
     """
     Compares an upsampled delayed impulse with the analytic result of a
-    sync function.
+    sinc function.
     """
     fs_1 = 48000
     fs_2 = 96000
@@ -43,7 +43,7 @@ def test_upsampling_delayed_impulse():
 def test_downsampling_delayed_impulse():
     """
     Compares a downsampled delayed impulse with the analytic result of a
-    sync function.
+    sinc function.
     """
     fs_1 = 48000
     fs_2 = 24000
@@ -108,7 +108,7 @@ def test_frequency_matching():
 def test_resample_multidimensional_impulse():
     """
     Compares an upsampled multidimensional delayed impulse with cshape = (3,2)
-    with the analytic result of a sync function.
+    with the analytic result of a sinc function.
     """
     fs_1 = 48000
     fs_2 = 96000

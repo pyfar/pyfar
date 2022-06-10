@@ -477,18 +477,18 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
 def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
     """Resample signal to new sampling rate.
 
-    The SciPy function ``scipy.signal.resample_poly`` is used for resmapling.
-    Therefore, the factor ``L = sampling_rate/signal.sampling_rate``
-    is approximated by a fraction of two integer numbers `up/down`. Therefore,
-    the signal is first upsampled by `up` and downsampled by `down`.
+    The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
+    The resampling factor ``L = sampling_rate/signal.sampling_rate``
+    is approximated by a fraction of two integer numbers `up/down` to first
+    upsample the signal by `up` and then downsampled by `down`.
 
     .. note ::
 
         `sampling_rate` should be divisible by 10, otherwise it can cause an
         infinite loop in the ``resample_poly`` function.
 
-        The amplitudes of the signal can match the amplitude of the input
-        signal in the time and frequency domain. See the parameter
+        The amplitudes of the resampled signal can match the amplitude of the
+        input signal in the time or frequency domain. See the parameter
         `match_amplitude` and the examples for more information.
 
     Parameters
@@ -499,6 +499,7 @@ def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
         The new sampling rate in Hz
     match_amplitude : string
         Define the domain to match the amplitude of the resampled data.
+
         ``'auto'``
             Chooses domain to maintain the amplitude automatically, depending
             on the ``signal.signal_type``. Sets ``match_amplitude == 'freq'``
