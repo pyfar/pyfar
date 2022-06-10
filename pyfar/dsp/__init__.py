@@ -12,7 +12,9 @@ from .dsp import (
     time_window,
     kaiser_window_beta,
     deconvolve,
-    convolve
+    convolve,
+    decibel,
+    InterpolateSpectrum,
 )
 
 from .dsp_interpolation import (
@@ -41,6 +43,7 @@ __all__ = [
     'kaiser_window_beta',
     'deconvolve',
     'convolve',
+    'decibel',
     'InterpolateSpectrum',
     'fractional_time_shift'
 ]
