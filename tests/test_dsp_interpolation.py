@@ -3,8 +3,110 @@ from pytest import raises
 import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
+import os
 import pyfar as pf
-from pyfar.dsp import (InterpolateSpectrum, fractional_time_shift)
+from pyfar.dsp import (InterpolateSpectrum,
+                       smooth_fractional_octave,
+                       fractional_time_shift)
+
+
+def test_smooth_fractional_octave_assertions():
+    """Test if the assertions are raised correctly"""
+
+    # wrong audio data type
+    with raises(TypeError, match="Input signal has to be of type"):
+        smooth_fractional_octave(pf.FrequencyData(1, 1), .5)
+
+    # wrong value for mode
+    with raises(ValueError, match="mode is 'smooth' but must be"):
+        smooth_fractional_octave(pf.Signal(1, 1), 1, "smooth")
+
+    # smoothing width too small
+    with raises(ValueError, match="The smoothing width"):
+        smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
+
+
+@pytest.mark.parametrize("mode", (
+    "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
+def test_smooth_fractional_octave_mode(mode):
+    """
+    Test return signal for different smoothing modes against saved references
+    """
+
+    # load input data
+    input = np.loadtxt(os.path.join(
+            os.path.dirname(__file__), "references",
+            "dsp.smooth_fractional_octave_input.csv"))
+    input = pf.Signal(input, 44100)
+
+    # smooth
+    output, _ = smooth_fractional_octave(input, 1, mode)
+
+    # compare to reference
+    reference = np.loadtxt(os.path.join(
+            os.path.dirname(__file__), "references",
+            f"dsp.smooth_fractional_octave_{mode}.csv"))
+    npt.assert_allclose(output.time.flatten(), reference)
+
+
+@pytest.mark.parametrize("num_fractions", (1, 5))
+def test_smooth_fractional_octave_num_fractions(num_fractions):
+    """
+    Test return signal for different smoothing widths against saved references
+    """
+
+    # load input data
+    signal = np.loadtxt(os.path.join(
+            os.path.dirname(__file__), "references",
+            "dsp.smooth_fractional_octave_input.csv"))
+    signal = pf.Signal(signal, 44100)
+
+    # smooth
+    smoothed, _ = smooth_fractional_octave(signal, num_fractions)
+
+    # compare to reference
+    reference = np.loadtxt(os.path.join(
+            os.path.dirname(__file__), "references",
+            f"dsp.smooth_fractional_octave_{num_fractions}.csv"))
+    npt.assert_allclose(smoothed.time.flatten(), reference)
+
+
+def test_smooth_fractional_octave_window_parameter():
+    """
+    Test the returned window paramters. Only the types are tested. Testing
+    values would require implementing the same code as contained in the
+    function
+    """
+
+    _, window_paraeter = smooth_fractional_octave(pf.signals.impulse(64), 1)
+
+    assert len(window_paraeter) == 2
+    assert isinstance(window_paraeter[0], int)
+    assert isinstance(window_paraeter[1], float)
+
+
+@pytest.mark.parametrize("amplitudes", (
+    1,                   # single channel signal
+    [1, .9, .8, .7],     # flat multi-channel signal.
+    [[1, .9], [.8, .7]]  # 2D multi-channel signal
+))
+def test_smooth_fractional_octave_input_signal_shape(amplitudes):
+    """
+    - Test for different shapes of the input signal
+    - Test if padding is correct (if it would not be the output spectrum
+      would be shifted
+    """
+
+    # manually path a window for smoothing (undocumented feature for testing)
+    # The window does not smooth and thus the return spectrum should be
+    # identical to the input spectrum (appart from interpolation errors during
+    # step 1 and 3)
+    window = np.array([0, 0, 0, 1, 0, 0, 0])
+
+    signal = pf.signals.impulse(64, amplitude=amplitudes)
+    signal = pf.dsp.filter.bell(signal, 4e3, 10, 3)
+    smoothed, _ = smooth_fractional_octave(signal, 1, window=window)
+    npt.assert_allclose(np.abs(smoothed.freq), np.abs(signal.freq), atol=.02)
 
 
 def test_fractional_time_shift_assertions():

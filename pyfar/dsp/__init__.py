@@ -17,6 +17,7 @@ from .dsp import (
 )
 
 from .dsp_interpolation import (
+    smooth_fractional_octave,
     fractional_time_shift,
     InterpolateSpectrum
 )
@@ -44,5 +45,6 @@ __all__ = [
     'convolve',
     'decibel',
     'InterpolateSpectrum',
+    'smooth_fractional_octave',
     'fractional_time_shift'
 ]
