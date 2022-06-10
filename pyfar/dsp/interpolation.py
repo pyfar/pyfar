@@ -446,7 +446,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
     return signal
 
 
-def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
+def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None):
     """Resample signal to new sampling rate.
 
     The SciPy function ``scipy.signal.resample_poly`` is used for resampling.

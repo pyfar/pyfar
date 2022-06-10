@@ -116,7 +116,7 @@ def test_resample_multidimensional_impulse():
     signal = pf.signals.impulse(N, 64, amplitude=[[1, 2, 3], [4, 5, 6]],
                                 sampling_rate=fs_1)
     # Get resampled Signal with function
-    resampled = pf.dsp.resample(signal, fs_2)
+    resampled = pf.dsp.resample(signal, fs_2, 'time')
     # Test the cshape
     assert signal.cshape == resampled.cshape
     # Calculated the analytic signal with sinc function
