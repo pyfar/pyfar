@@ -33,14 +33,21 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
     Notes
     -----
-    The parameters `frequency`, `amplitude`, and `phase` must must be scalars
-    and/or array likes of the same shape.
+    The parameters `frequency`, `amplitude`, and `phase` are
+    `broadcasted <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    to the parameter that contains the most elements. For example `frequency`
+    could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)``, and `phase`
+    could be a scalar. In this case all parameters would be broadcasted to a
+    shape of ``(2, 4)``.
     """
 
     # check and match the cshape
-    cshape = _get_common_shape(frequency, amplitude, phase)
-    frequency, amplitude, phase = _match_shape(
-        cshape, frequency, amplitude, phase)
+    try:
+        cshape, (frequency, amplitude, phase) = _match_shape(
+            frequency, amplitude, phase)
+    except ValueError:
+        raise ValueError(("The parameters frequency, amplitude, and phase can "
+                          "not be broadcasted to the same shape"))
 
     if np.any(frequency < 0) or np.any(frequency > sampling_rate/2):
         raise ValueError(
@@ -107,12 +114,18 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
     Notes
     -----
-    The parameters `delay` and `amplitude` must be scalars and/or array likes
-    of the same shape.
+    The parameters `delay` and `amplitude` are
+    `broadcasted <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    to the parameter that contains the most elements. For example `delay`
+    could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)`` or a scalar.
+    In this case all parameters would be broadcasted to a shape of ``(2, 4)``.
     """
     # check and match the cshape
-    cshape = _get_common_shape(delay, amplitude)
-    delay, amplitude = _match_shape(cshape, delay, amplitude)
+    try:
+        cshape, (delay, amplitude) = _match_shape(delay, amplitude)
+    except ValueError:
+        raise ValueError(("The parameters delay and amplitude can not be "
+                          "broadcasted to the same shape"))
 
     # generate the impulse
     n_samples = int(n_samples)
@@ -354,59 +367,39 @@ def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
     return sweep
 
 
-def _get_common_shape(*data):
-    """Check if all entries in data have the same shape or shape (1, )
+def _match_shape(*args):
+    """
+    Match the shape of *args to the shape of the arg with the largest size
+    using np.broadcast_to()
 
     Parameters
     ----------
-    data : *args
-       Numbers and array likes for which the shape is checked.
+    *args :
+        data for matching shape
 
     Returns
     -------
-    cshape : tuple
-        Common shape of data, e.g., (1, ) if al entries in data are numbers or
-        (2, 3) if data has entries with shape (2, 3) (and (1, )).
-    """
-
-    cshape = None
-    for d in data:
-        d = np.atleast_1d(d)
-        if cshape is None or cshape == (1, ):
-            cshape = d.shape
-        elif d.shape != (1, ):
-            if d.shape != cshape:
-                raise ValueError(
-                    "Input data must be of the same shape or of shape (1, ).")
-
-    return cshape
-
-
-def _match_shape(shape, *args):
-    """
-    Match the shape of *args by using np.tile(shape) if the shape is not (1, 0)
-
-    Note that calling _get_common_shape before might be a good idea.
-
-    Parameters
-    ----------
     shape : tuple
-        The desired shape
-    *args : number array likes
-        All *args must be of shape (1, ) or shape
-
-    Returns
-    -------
-    args : tuple
-        (*arg_1, *arg_2, ..., arg_N)
+        new common shape of the args
+    args : list
+        args with new common shape
+        (*arg_1, *arg_2, ..., *arg_N)
     """
 
+    # find the shape of the largest array
+    size = 0
+    shape = (1, )
+    for arg in args:
+        arg = np.asarray(arg)
+        if arg.size > size:
+            size = arg.size
+            shape = arg.shape
+
+    # try to match the shape
     result = []
     for arg in args:
-        arg = np.atleast_1d(arg)
-        if arg.shape == (1, ):
-            arg = np.tile(arg, shape)
+        arg = np.broadcast_to(arg, shape)
+        arg.setflags(write=1)
+        result.append(np.atleast_1d(arg))
 
-        result.append(arg)
-
-    return tuple(result)
+    return shape, result
