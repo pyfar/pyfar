@@ -238,10 +238,10 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     return signal, (n_window, 1 / (n_window * delta_n))
 
 
-def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
-                          mode="cut"):
+def fractional_time_shift(signal, shift, unit="samples", order=30,
+                          side_lobe_suppression=60, mode="linear"):
     """
-    Apply fractional delay to input data.
+    Apply fractional time shift to input data.
 
     This function uses a windowed Sinc filter (Method FIR-2 in [#]_ according
     to Equations 21 and 22) to apply fractional delays, i.e., non-integer
@@ -253,14 +253,15 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     ----------
     signal : Signal
         The input data
-    delay : float, array like
-        The fractional delay (positive or negative). If this is a float, the
-        same delay is applied to all channels of `signal`. If this is an array
-        like different delays are applied to the channels of `signal`. In this
-        case it must broadcast to `signal` (see `Numpy broadcasting
+    shift : float, array like
+        The fractional shift in samples (positive or negative). If this is a
+        float, the same shift is applied to all channels of `signal`. If this
+        is an array like different delays are applied to the channels of
+        `signal`. In this case it must broadcast to `signal.cshape` (see
+        `Numpy broadcasting
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
     order : int, optional
-        The order of the fractional delay (sinc) filter. The precision of the
+        The order of the fractional shift (sinc) filter. The precision of the
         filter increases with the order. High frequency errors decrease with
         increasing order. The order must be smaller than
         ``signal.n_samples``. The default is ``30``.
@@ -270,18 +271,17 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     mode : str, optional
         The filtering mode
 
-        ``"cut"``
-            The delayed signal has the same length as the input signal but
-            parts of the signal that are shifted to values smaller than 0
-            samples and larger than ``signal.n_samples`` are removed from the
-            output
+        ``"linear"``
+            Apply linear shift, i.e., parts of the signal that are shifted to
+            times smaller than 0 samples and larger than ``signal.n_samples``
+            disappear.
         ``"cyclic"``
-            The delayed signal has the same length as the input signal. Parts
-            of the signal that are shifted to values smaller than 0 are wrapped
-            around the end. Parts that are shifted to values larger than
-            ``signal.n_samples`` are wrapped around to the beginning.
+            Apply a cyclic shift, i.e., parts of the signal that are shifted to
+            values smaller than 0 are wrapped around to the end, and parts that
+            are shifted to values larger than ``signal.n_samples`` are wrapped
+            around to the beginning.
 
-        The default is ``"cut"``
+        The default is ``"linear"``
 
     Returns
     -------
@@ -301,7 +301,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     Examples
     --------
 
-    Apply a fractional delay of 2.3 samples using filters of orders 6 and 30
+    Apply a fractional shift of 2.3 samples using filters of orders 6 and 30
 
     .. plot::
 
@@ -316,7 +316,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         >>> pf.plot.group_delay(signal, ax=ax[2], unit="samples")
         >>>
         >>> for order in [30, 6]:
-        >>>     delayed = pf.dsp.fractional_delay_sinc(signal, 2.3, order)
+        >>>     delayed = pf.dsp.fractional_time_shift(signal, 2.3, order)
         >>>     pf.plot.time_freq(delayed, ax=ax[:2],
         ...                       label=f"delayed, order={order}")
         >>>     pf.plot.group_delay(delayed, ax=ax[2], unit="samples")
@@ -325,8 +325,8 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         >>> ax[2].set_ylim(8, 14)
         >>> ax[0].legend()
 
-    Apply a delay that exceeds the signal length using the modes ``"cut"`` and
-    ``"cyclic"``
+    Apply a shift that exceeds the signal length using the modes ``"linear"``
+    and ``"cyclic"``
 
     .. plot::
 
@@ -336,8 +336,8 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         >>>
         >>> ax = pf.plot.time(signal, label="input")
         >>>
-        >>> for mode in ["cyclic", "cut"]:
-        >>>     delayed = pf.dsp.fractional_delay_sinc(
+        >>> for mode in ["cyclic", "linear"]:
+        >>>     delayed = pf.dsp.fractional_time_shift(
         ...         signal, 25.3, order=10, mode=mode)
         >>>     pf.plot.time(delayed, label=f"delayed, mode={mode}")
         >>>
@@ -351,32 +351,39 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
         raise ValueError("The order must be > 0")
     if side_lobe_suppression <= 0:
         raise ValueError("The side lobe suppression must be > 0")
-    if mode not in ["cut", "cyclic"]:
-        raise ValueError(f"The mode is '{mode}' but must be 'cut' or 'cyclic'")
+    if mode not in ["linear", "cyclic"]:
+        raise ValueError(
+            f"The mode is '{mode}' but must be 'linear' or 'cyclic'")
     if order + 1 > signal.n_samples:
         raise ValueError((f"The order is {order} but must not exceed "
                           f"{signal.n_samples-1} (signal.n_samples-1)"))
 
-    # separate integer and fractional delay -----------------------------------
-    delay_int = np.atleast_1d(delay).astype(int)
-    delay_frac = np.atleast_1d(delay - delay_int)
+    if unit == 's':
+        shift = shift*signal.sampling_rate
+    elif unit != 'samples':
+        raise ValueError(
+            f"Unit is '{unit}' but has to be 'samples' or 's'.")
+
+    # separate integer and fractional shift -----------------------------------
+    delay_int = np.atleast_1d(shift).astype(int)
+    delay_frac = np.atleast_1d(shift - delay_int)
     # force delay_frac >= 0 as required by Laakso et al. 1996 Eq. (2)
     mask = delay_frac < 0
     delay_int[mask] -= 1
     delay_frac[mask] += 1
 
-    # compute the sinc functions (fractional delay filters) -------------------
-    # Laakso et al. 1996 Eq. (21) applied to the fractional part of the delay
+    # compute the sinc functions (fractional shift filters) -------------------
+    # Laakso et al. 1996 Eq. (21) applied to the fractional part of the shift
     # M_opt essentially sets the center of the sinc function in the FIR filter.
-    # NOTE: This is also  the delay that is added when applying the fractional
-    #       part of the delay and has thus to be accounted for when realizing
+    # NOTE: This is also  the shift that is added when applying the fractional
+    #       part of the shift and has thus to be accounted for when realizing
     #       delay_int
     if order % 2:
         M_opt = delay_frac.astype("int") - (order-1)/2
     else:
         M_opt = np.round(delay_frac) - order / 2
 
-    # get matrix versions of the fractional delay and M_opt
+    # get matrix versions of the fractional shift and M_opt
     delay_frac_matrix = np.tile(
         delay_frac[..., np.newaxis],
         tuple(np.ones(delay_frac.ndim, dtype="int")) + (order + 1, ))
@@ -411,7 +418,7 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     # suppress small imaginary parts
     kaiser = np.real(bessel_first_mod(0, Z)) / bessel_first_mod(0, beta)
 
-    # apply fractional delay --------------------------------------------------
+    # apply fractional shift --------------------------------------------------
     # compute filter and match dimensions
     frac_delay_filter = sinc * kaiser
     while frac_delay_filter.ndim < signal.time.ndim:
@@ -423,48 +430,14 @@ def fractional_delay_sinc(signal, delay, order=30, side_lobe_suppression=60,
     signal = pf.dsp.convolve(
         signal, pf.Signal(frac_delay_filter, signal.sampling_rate),
         mode=convolve_mode)
-    n_samples_full = signal.n_samples
 
-    # apply integer delay -----------------------------------------------------
-    # account for delay from applying the fractional filter
+    # apply integer shift -----------------------------------------------------
+    # account for shift from applying the fractional filter
     delay_int += M_opt.astype("int")
-    # broadcast to required shape for easier looping
-    delay_int = np.broadcast_to(delay_int, signal.cshape)
+    signal = pf.dsp.time_shift(signal, delay_int, mode)
 
-    for idx in np.ndindex(signal.cshape):
-        if mode == "cyclic":
-            signal.time[idx] = np.roll(signal.time[idx], delay_int[idx],
-                                       axis=-1)
-        else:
-            d = delay_int[idx]
-
-            # select correct part of time signal
-            if d < 0:
-                if d + n_samples > 0:
-                    # discard d starting samples
-                    time = signal.time[
-                        idx + (slice(abs(d), n_samples_full), )].flatten()
-                else:
-                    # we are left with a zero vector (strictly spoken we might
-                    # have some tail left from 'full' convolution but zeros
-                    # seem the more reasonable choice here)
-                    time = np.zeros(n_samples)
-            elif d > 0:
-                # add d zeros
-                time = np.concatenate((np.zeros(d), signal.time[idx]))
-
-            # adjust length to n_samples
-            if time.size >= n_samples:
-                # discard samples at end
-                time = time[:n_samples]
-            else:
-                time = np.concatenate(
-                    (time, np.zeros(n_samples - time.size)))
-
-            signal.time[idx + (slice(0, n_samples), )] = time
-
-    # truncate signal
-    if mode == "cut":
+    # truncate signal (got padded during convolution with mode='full')
+    if mode == "linear":
         signal.time = signal.time[..., :n_samples]
 
     return signal
