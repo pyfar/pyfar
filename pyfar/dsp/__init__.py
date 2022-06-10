@@ -14,7 +14,13 @@ from .dsp import (
     deconvolve,
     convolve,
     decibel,
-    InterpolateSpectrum,
+)
+
+from .interpolation import (
+    smooth_fractional_octave,
+    fractional_time_shift,
+    resample,
+    InterpolateSpectrum
 )
 
 from . import filter
@@ -40,4 +46,7 @@ __all__ = [
     'convolve',
     'decibel',
     'InterpolateSpectrum',
+    'smooth_fractional_octave',
+    'resample',
+    'fractional_time_shift'
 ]
