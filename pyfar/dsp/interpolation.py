@@ -5,6 +5,9 @@ import scipy.signal as sgn
 import matplotlib.pyplot as plt
 import pyfar as pf
 from scipy.ndimage import generic_filter1d
+from fractions import Fraction
+from decimal import Decimal
+import warnings
 
 
 def _weighted_moving_average(input, output, weights):
@@ -441,6 +444,154 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         signal.time = signal.time[..., :n_samples]
 
     return signal
+
+
+def resample(signal, sampling_rate, match_amplitude="time", frac_limit=None):
+    """Resample signal to new sampling rate.
+
+    The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
+    The resampling ratio ``L = sampling_rate/signal.sampling_rate``
+    is approximated by a fraction of two integer numbers `up/down` to first
+    upsample the signal by `up` and then downsample by `down`. This way `up`
+    and `down` are smaller than the respective new and old sampling rates.
+
+    .. note ::
+
+        `sampling_rate` should be divisible by 10, otherwise it can cause an
+        infinite loop in the ``resample_poly`` function.
+
+        The amplitudes of the resampled signal can match the amplitude of the
+        input signal in the time or frequency domain. See the parameter
+        `match_amplitude` and the examples for more information.
+
+    Parameters
+    ----------
+    signal : Signal
+        Input data to be resampled
+    sampling_rate : number
+        The new sampling rate in Hz
+    match_amplitude : string
+        Define the domain to match the amplitude of the resampled data.
+
+        ``'auto'``
+            Chooses domain to maintain the amplitude automatically, depending
+            on the ``signal.signal_type``. Sets ``match_amplitude == 'freq'``
+            for ``signal.signal_type = 'energy'`` like impulse responses and
+            ``match_amplitude == 'time'`` for other signals.
+        ``'time'``
+            Maintains the amplitude in the time domain. This is useful for
+            recordings such as speech or music and must be used if
+            ``signal.signal_type = 'power'``.
+        ``'freq'``
+            Maintains the amplitude in the frequency domain by multiplying the
+            resampled signal by ``1/L`` (see above). This is often desired
+            when resampling impulse responses.
+
+        The default is ``'auto'``.
+    frac_limit : int
+        Limit the denominator for approximating the resampling factor `L`
+        (see above). This can be used in case the resampling gets stuck in an
+        infinite loop (see note above) at the potenital cost of not exactly
+        realizing the target sampling rate.
+
+        The default is ``None``, which uses ``frac_limit = 1e6``.
+
+    Returns
+    -------
+    signal : pyfar.Signal
+        The resampled signal of the input data with a length of
+        `up/down * signal.n_samples` samples.
+
+    Examples
+    --------
+    For power signals, the amplitude of the resampled signal is automatically
+    correct in the time `and` frequency domain if ``match_amplitude="time"``
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> signal = pf.signals.sine(200, 4800, sampling_rate=48000)
+        >>> resampled = pf.dsp.resample(signal, 96000)
+        >>>
+        >>> pf.plot.time_freq(signal, label="original")
+        >>> pf.plot.time_freq(resampled, c="y", ls=":",
+        ...                   label="resampled (time domain matched)")
+        >>> plt.legend()
+
+    With some energy signals, such as impulse responses, the amplitude can only
+    be correct in the time `or` frequency domain due to the lack of
+    normalization by the number of samples. In such cases, it is often desired
+    to match the amplitude in the frequency domain
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> signal = pf.signals.impulse(128, 64, sampling_rate=48000)
+        >>> resampled_time = pf.dsp.resample(
+        ...     signal, 96000, match_amplitude = "time")
+        >>> resampled_freq = pf.dsp.resample(
+        ...     signal, 96000, match_amplitude = "freq")
+        >>>
+        >>> pf.plot.time_freq(signal, label="original")
+        >>> pf.plot.time_freq(resampled_freq, dashes=[2, 3],
+        ...                   label="resampled (freq. domain matched)")
+        >>> ax = pf.plot.time_freq(resampled_time, ls=":",
+        ...                   label="resampled (time domain matched)", c='y')
+        >>> ax[0].set_xlim(1.2,1.46)
+        >>> plt.legend()
+    """
+    # check input
+    if not isinstance(signal, (pf.Signal)):
+        raise TypeError("Input data has to be of type pyfar.Signal")
+    # calculate factor L for up- or downsampling
+    L = sampling_rate / signal.sampling_rate
+    # set match_amplitude domain depending on signal.signal_type
+    if match_amplitude == "auto":
+        match_amplitude = "freq" if signal.signal_type == "energy" else "time"
+    # set gain depending on domain to match aplitude in
+    if match_amplitude == "time":
+        gain = 1
+    elif match_amplitude == "freq":
+        gain = 1/L
+        # the aplitude of signals with signal_type "power" must be matched in
+        # the time domain
+        if signal.signal_type == "power":
+            raise ValueError((
+                'match_amplitude must be "time" if signal.signal_type is '
+                '"power".'))
+    else:
+        raise ValueError((f"match_amplitude is '{match_amplitude}' but must be"
+                          " 'auto', 'time' or 'freq'"))
+    # check if one of the sampling rates is not divisible by 10
+    if sampling_rate % 10 or signal.sampling_rate % 10:
+        warnings.warn((
+            'At least one sampling rate is not divisible by 10, , which can '
+            'cause a infinite loop in `scipy.resample_poly`. If this occurs, '
+            'interrupt and choose different sampling rates or decrease '
+            'frac_limit. However, this can cause an error in the target '
+            'sampling rate realisation.'))
+    # give the numerator and denomitor of the fraction for factor L
+    if frac_limit is None:
+        frac = Fraction(Decimal(L)).limit_denominator()
+    else:
+        frac = Fraction(Decimal(L)).limit_denominator(frac_limit)
+    up, down = frac.numerator, frac.denominator
+    # calculate an error depending on samplings rates and fraction
+    error = abs(signal.sampling_rate * up / down - sampling_rate)
+    if error != 0.0:
+        warnings.warn((
+            f'The target sampling rate was realized with an error of {error}.'
+            f'The error might be decreased by setting `frac_limit` to a value '
+            f'larger than {down} (This warning is not shown, if the target '
+            'sampling rate can exactly be realized).'))
+    # resample data with scipy resampe_poly function
+    data = sgn.resample_poly(signal.time, up, down, axis=-1)
+    return pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
+                     comment=signal.comment)
 
 
 class InterpolateSpectrum():

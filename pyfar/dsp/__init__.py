@@ -16,9 +16,10 @@ from .dsp import (
     decibel,
 )
 
-from .dsp_interpolation import (
+from .interpolation import (
     smooth_fractional_octave,
     fractional_time_shift,
+    resample,
     InterpolateSpectrum
 )
 
@@ -46,5 +47,6 @@ __all__ = [
     'decibel',
     'InterpolateSpectrum',
     'smooth_fractional_octave',
+    'resample',
     'fractional_time_shift'
 ]
