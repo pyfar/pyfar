@@ -175,6 +175,45 @@ def test_add_frequency_data_and_number_wrong_frequencies():
         pf.add((x, y), 'freq')
 
 
+def test_add_array_and_signal():
+    # shapes match
+    x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
+    z = pf.add((x, y))
+    npt.assert_allclose(
+        z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
+    # broadcasting
+    x = np.arange(3 * 4).reshape((3, 4))
+    y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
+    z = pf.add((x, y))
+    npt.assert_allclose(
+        z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
+
+
+def test_add_signal_and_array():
+    # shapes match
+    x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
+    y = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    z = pf.add((x, y))
+    npt.assert_allclose(
+        z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
+    # broadcasting
+    x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
+    y = np.arange(3 * 4).reshape((3, 4))
+    z = pf.add((x, y))
+    npt.assert_allclose(
+        z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
+
+
+def test_add_arrays():
+    # With broadcasting
+    x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    y = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    z = pf.add((x, y))
+    npt.assert_allclose(
+        z, x + y, atol=1e-15)
+
+
 def test_signal_inversion():
     """Test signal inversion with different FFT norms"""
 
@@ -329,6 +368,47 @@ def test_overloaded_operators_frequency_data():
         npt.assert_allclose(z.freq, np.array([8, 4, 2], ndmin=2), atol=1e-15)
 
 
+def test_overloaded_operators_array_and_signal():
+    x = np.arange(2 * 3 * 4).reshape(2, 3, 4) + 1
+    y = Signal(np.ones((2, 3, 4, 5)), 44100, n_samples=8, domain='freq')
+
+    # addition
+    z = x + y
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) * x[..., None] + 1, atol=1e-15)
+    z = y + x
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) * x[..., None] + 1, atol=1e-15)
+    # subtraction
+    z = x - y
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) * x[..., None] - 1, atol=1e-15)
+    z = y - x
+    npt.assert_allclose(
+        z.freq, -1 * (np.ones((2, 3, 4, 5)) * x[..., None] - 1), atol=1e-15)
+    # multiplication
+    z = x * y
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
+    z = y * x
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
+    # division
+    z = x / y
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
+    z = y / x
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) / x[..., None], atol=1e-15)
+    # power
+    z = x**y
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
+    z = y**x
+    npt.assert_allclose(
+        z.freq, np.ones((2, 3, 4, 5)), atol=1e-15)
+
+
 def test_assert_match_for_arithmetic():
     s = Signal([1, 2, 3, 4], 44100)
     s1 = Signal([1, 2, 3, 4], 48000)
@@ -347,6 +427,7 @@ def test_assert_match_for_arithmetic():
     assert out[0] == 44100
     assert out[1] == 4
     assert out[2] == 'none'
+    assert out[-1] == (1,)
     out = signal._assert_match_for_arithmetic((s, s4), 'time', division=False)
     assert out[2] == 'rms'
 
@@ -372,7 +453,7 @@ def test_assert_match_for_arithmetic():
 def test_get_arithmetic_data_with_array():
 
     data_in = np.asarray(1)
-    data_out = signal._get_arithmetic_data(data_in, None, None)
+    data_out = signal._get_arithmetic_data(data_in, None, None, (1,))
     npt.assert_allclose(data_in, data_out)
 
 
@@ -404,7 +485,7 @@ def test_get_arithmetic_data_with_signal():
 
             # get output data
             data_out = signal._get_arithmetic_data(
-                s_in, n_samples=3, domain=domain)
+                s_in, n_samples=3, domain=domain, cshape=(1,))
             if domain == 'time':
                 npt.assert_allclose(s_ref.time, data_out, atol=1e-15)
             elif domain == 'freq':
@@ -422,9 +503,28 @@ def test_assert_match_for_arithmetic_data_wrong_domain():
         signal._assert_match_for_arithmetic((1, 1), 'space', division=False)
 
 
+def test_assert_match_for_arithmetic_data_wrong_cshape():
+    x = Signal(np.ones((2, 3, 4)), 44100)
+    y = Signal(np.ones((5, 4)), 44100)
+    with raises(ValueError, match="The cshapes"):
+        signal._assert_match_for_arithmetic((x, y), 'freq', division=False)
+
+
 def test_get_arithmetic_data_wrong_domain():
     with raises(ValueError):
-        signal._get_arithmetic_data(Signal(1, 44100), 1, 'space')
+        signal._get_arithmetic_data(Signal(1, 44100), 1, 'space', (1,))
+
+
+def test_array_broadcasting_errors():
+    x = np.arange(2 * 3 * 4 * 10).reshape((2, 3, 4, 10))
+    y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
+    with raises(ValueError, match="array dimension"):
+        pf.add((x, y), domain='time')
+
+    x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
+    with raises(ValueError):
+        pf.add((x, y))
 
 
 def test_matrix_multiplication_default():
