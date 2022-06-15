@@ -1104,7 +1104,7 @@ def matrix_multiplication(
         to the channel indexes the result should be stored in. If `data`
         contains more than two operands, the scheme given by `axes`
         refers to all of the sequential multiplications. Negative
-        values in ``axes`` refer to ``cshape`` not the frequency/time axis
+        values in `axes` refer to ``cshape`` not the frequency/time axis
         is in the underlying data. For instance, to
         multiply matrices residing (stacked) in the last two channel
         dimensions to be stored in the last two channel dimensions, this is
@@ -1122,16 +1122,16 @@ def matrix_multiplication(
 
     Notes
     -----
-    The behavior depends on the data in the following way.
+    The shape of arrays included in data need to match or be broadcastable
+    into the ``cshape`` of the resulting audio object. The behavior depends on
+    data in the following way.
 
-    - In case of more than two arguments in ``data``, ``axes`` refers to all
-      partial operations.
     - If the ``cshape`` of the arguments in data is 2-D, the arguments are
       multiplied like conventional matrices along the time/frequency dimension.
     - If either ``cshape`` is N-D, N > 2, the channels are treated as a stack
       of matrices residing in the last two indexes and broadcasted accordingly.
 
-    Depending on the position of the signal in `data`, a 1-D signal is either
+    Depending on the position of a 1-D signal in `data`, it is either
     extended in the "row" or "column" channel dimension before broadcasting.
 
     - If the first signal is 1-D, it is promoted to 2-D by prepending a 1 to
@@ -1169,14 +1169,14 @@ def matrix_multiplication(
     >>> pf.matrix_multiplication((a_bcast2, b)).cshape
     (2, 3, 5)
 
-    Use the axes parameter to multiply along first two channel dimensions.
+    Use the `axes` parameter to multiply along first two channel dimensions.
 
     >>> a = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     >>> b = pf.signals.impulse(10, amplitude=np.ones((3, 5, 4)))
     >>> pf.matrix_multiplication((a, b), axes=[(0, 1), (0, 1), (0, 1)]).cshape
     (2, 5, 4)
 
-    Fancy use of the axes parameter.
+    Fancy use of the `axes` parameter.
 
     >>> a = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     >>> b = pf.signals.impulse(10, amplitude=np.ones((4, 3, 6)))
