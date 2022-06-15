@@ -361,11 +361,11 @@ class TimeData(_Audio):
 
     def __matmul__(self, data):
         return matrix_multiplication(
-            (self, data), 'time', axes=[(-2, -1), (-2, -1), (-2, -1)])
+            (self, data), 'time')
 
     def __rmatmul__(self, data):
         return matrix_multiplication(
-            (data, self), 'time', axes=[(-2, -1), (-2, -1), (-2, -1)])
+            (data, self), 'time')
 
 
 class FrequencyData(_Audio):
@@ -531,11 +531,11 @@ class FrequencyData(_Audio):
 
     def __matmul__(self, data):
         return matrix_multiplication(
-            (self, data), 'freq', axes=[(-2, -1), (-2, -1), (-2, -1)])
+            (self, data), 'freq')
 
     def __rmatmul__(self, data):
         return matrix_multiplication(
-            (data, self), 'freq', axes=[(-2, -1), (-2, -1), (-2, -1)])
+            (data, self), 'freq')
 
 
 class Signal(FrequencyData, TimeData):
@@ -1044,8 +1044,12 @@ def matrix_multiplication(
     """Matrix multiplication of multidimensional pyfar audio objects and/or
     array likes.
 
-    This function is based on ``numpy.matmul`` and only acts on the channels,
-    not on the frequency/time dimension. Pyfar audio objects are:
+    This function is based on ``numpy.matmul``. It only acts on the channels,
+    so the operation is the same for all samples/frequency bins per channel
+    and the number of the samples/bins always stays the same
+    (this function is not meant, e.g, for subsampling or windowing,
+    use the  :py:mod:`pyfar.dsp` functions for that kind of purpose).
+    Pyfar audio objects are:
     :py:func:`Signal`, :py:func:`TimeData`, and :py:func:`FrequencyData`.
 
     Parameters
@@ -1054,8 +1058,9 @@ def matrix_multiplication(
         Data to be multiplied. Can contain pyfar audio objects or array likes.
         The data is `broadcasted
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
-        to the data with the highest number of channel dimensions. Pyfar audio
-        objects can not be mixed, e.g., :py:func:`TimeData` and
+        to the data with the highest number of channel dimensions
+        (``len(signal.cshape)``). Pyfar audio objects can not be mixed,
+        e.g., :py:func:`TimeData` and
         :py:func:`FrequencyData` objects do not work together. See
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
@@ -1065,16 +1070,21 @@ def matrix_multiplication(
         normalization is removed before the operation (See
         :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
     axes : list of 3 tuples
-        A list of tuples with the indices of the channels the
-        multiplication should operate on. The signature is (i,j),(j,k)->(i,k),
-        so the base elements of the multiplication are two-dimensional
-        matrices along the time/frequency dimension taken to be stored in the
-        indicated channels of the result. Negative values in ``axes`` refer to
-        ``cshape``, as the frequency/time axis is excluded. For instance, to
+        A list of 3 tuples with the indices of the channels the
+        multiplication should operate on. The base elements of the
+        multiplication are two-dimensional matrices residing along
+        the time/frequency dimension. So, the first tuple refers to the
+        channel indexes indicating the 2-D matrices of the first operand,
+        the second tuple to the indexes of the second operand and the third
+        to the channel indexes the result should be stored in. If `data`
+        contains more than two operands, the scheme given by `axes`
+        refers to all of the sequential multiplications. Negative
+        values in ``axes`` refer to ``cshape`` not the frequency/time axis
+        is in the underlying data. For instance, to
         multiply matrices residing (stacked) in the last two channel
         dimensions to be stored in the last two channel dimensions, this is
         indicated by ``[(-2, -1), (-2, -1), (-2, -1)]``, which is the default.
-        See notes and examples below.
+        See notes and examples below for more details.
 
     Returns
     -------
@@ -1095,10 +1105,14 @@ def matrix_multiplication(
       multiplied like conventional matrices along the time/frequency dimension.
     - If either ``cshape`` is N-D, N > 2, the channels are treated as a stack
       of matrices residing in the last two indexes and broadcasted accordingly.
-    - If the first ``cshape`` is 1-D, it is promoted to a 2-D ``cshape`` by
-      prepending a 1 to its dimensions.
-    - If the second ``cshape`` is 1-D, it is promoted to a 2-D ``cshape`` by
-      appending a 1 to its dimensions.
+
+    Depending on the position of the signal in `data`, a 1-D signal is either
+    extended in the "row" or "column" channel dimension before broadcasting.
+
+    - If the first signal is 1-D, it is promoted to 2-D by prepending a 1 to
+      its ``cshape``.
+    - If the second signal is 1-D, it is promoted to 2-D by appending a 1 to
+      its ``cshape``.
 
     The function implements the semantics of the ``@`` operator.
 
@@ -1116,8 +1130,8 @@ def matrix_multiplication(
     (2, 4)
 
     Matrix multiplication of three-dimensional signals. Per default, the
-    length of axis 0 (along the stacked matrices) need to match or it is
-    broadcasted.
+    length of axis 0 (the axis along the stacked matrices) need to match
+    or it is broadcasted.
 
     >>> a_match = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     >>> b = pf.signals.impulse(10, amplitude=np.ones((2, 4, 5)))
@@ -1137,7 +1151,14 @@ def matrix_multiplication(
     >>> pf.matrix_multiplication((a, b), axes=[(0, 1), (0, 1), (0, 1)]).cshape
     (2, 5, 4)
 
-    Extension of signal with a 1-D ``cshape``.
+    Fancy use of the axes parameter.
+
+    >>> a = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
+    >>> b = pf.signals.impulse(10, amplitude=np.ones((4, 3, 6)))
+    >>> pf.matrix_multiplication((a, b), axes=[(0, 1), (1, 2), (2, 1)]).cshape
+    (4, 6, 2)
+
+    Extension of a signal with a 1-D ``cshape``.
 
     >>> a = pf.signals.impulse(10, amplitude=np.ones((2,)))
     >>> a.cshape
