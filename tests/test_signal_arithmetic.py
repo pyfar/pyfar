@@ -416,38 +416,46 @@ def test_assert_match_for_arithmetic():
     s4 = Signal([1, 2, 3, 4], 44100, fft_norm="rms")
 
     # check with two signals
-    signal._assert_match_for_arithmetic((s, s), 'time', division=False)
+    signal._assert_match_for_arithmetic(
+        (s, s), 'time', division=False, matmul=False)
     # check with one signal and one array like
-    signal._assert_match_for_arithmetic((s, [1, 2]), 'time', division=False)
+    signal._assert_match_for_arithmetic(
+        (s, [1, 2]), 'time', division=False, matmul=False)
     # check with more than two inputs
-    signal._assert_match_for_arithmetic((s, s, s), 'time', division=False)
+    signal._assert_match_for_arithmetic(
+        (s, s, s), 'time', division=False, matmul=False)
 
     # check output
-    out = signal._assert_match_for_arithmetic((s, s), 'time', division=False)
+    out = signal._assert_match_for_arithmetic(
+        (s, s), 'time', division=False, matmul=False)
     assert out[0] == 44100
     assert out[1] == 4
     assert out[2] == 'none'
     assert out[-1] == (1,)
-    out = signal._assert_match_for_arithmetic((s, s4), 'time', division=False)
+    out = signal._assert_match_for_arithmetic(
+        (s, s4), 'time', division=False, matmul=False)
     assert out[2] == 'rms'
 
     # check with non-tuple input for first argument
     with raises(ValueError):
-        signal._assert_match_for_arithmetic(s, 'time', division=False)
+        signal._assert_match_for_arithmetic(
+            s, 'time', division=False, matmul=False)
     # check with invalid data type in first argument
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (s, ['str', 'ing']), 'time', division=False)
+            (s, ['str', 'ing']), 'time', division=False, matmul=False)
     # check with complex data and time domain operation
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (s, np.array([1 + 1j])), 'time', division=False)
+            (s, np.array([1 + 1j])), 'time', division=False, matmul=False)
     # test signals with different sampling rates
     with raises(ValueError):
-        signal._assert_match_for_arithmetic((s, s1), 'time', division=False)
+        signal._assert_match_for_arithmetic(
+            (s, s1), 'time', division=False, matmul=False)
     # test signals with different n_samples
     with raises(ValueError):
-        signal._assert_match_for_arithmetic((s, s2), 'time', division=False)
+        signal._assert_match_for_arithmetic(
+            (s, s2), 'time', division=False, matmul=False)
 
 
 def test_get_arithmetic_data_with_array():
@@ -495,19 +503,22 @@ def test_get_arithmetic_data_with_signal():
 def test_assert_match_for_arithmetic_data_different_audio_classes():
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (Signal(1, 1), TimeData(1, 1)), 'time', division=False)
+            (Signal(1, 1), TimeData(1, 1)), 'time', division=False,
+            matmul=False)
 
 
 def test_assert_match_for_arithmetic_data_wrong_domain():
     with raises(ValueError):
-        signal._assert_match_for_arithmetic((1, 1), 'space', division=False)
+        signal._assert_match_for_arithmetic(
+            (1, 1), 'space', division=False, matmul=False)
 
 
 def test_assert_match_for_arithmetic_data_wrong_cshape():
     x = Signal(np.ones((2, 3, 4)), 44100)
     y = Signal(np.ones((5, 4)), 44100)
     with raises(ValueError, match="The cshapes"):
-        signal._assert_match_for_arithmetic((x, y), 'freq', division=False)
+        signal._assert_match_for_arithmetic(
+            (x, y), 'freq', division=False, matmul=False)
 
 
 def test_get_arithmetic_data_wrong_domain():
@@ -569,7 +580,7 @@ def test_matrix_multiplication_higher_shape():
 
 
 def test_matrix_multiplication_shape_mismatch():
-    """Test default behavior for signals"""
+    """Test error for shape mismatch"""
     # Signals
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = pf.signals.impulse(10, amplitude=np.array([[1, 2], [3, 4]]))

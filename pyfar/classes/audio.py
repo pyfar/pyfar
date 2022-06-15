@@ -1205,9 +1205,10 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
 
     # check input and obtain meta data of new signal
     division = True if operation == _divide else False
+    matmul = True if operation == _matrix_multiplication else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type, \
         cshape = \
-        _assert_match_for_arithmetic(data, domain, division)
+        _assert_match_for_arithmetic(data, domain, division, matmul)
 
     # apply arithmetic operation
     result = _get_arithmetic_data(data[0], n_samples, domain, cshape)
@@ -1232,7 +1233,8 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     return result
 
 
-def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
+def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
+                                 matmul: bool):
     """Check if type and meta data of input is fine for arithmetic operations.
 
     Check if sampling rate and number of samples agree if multiple signals are
@@ -1247,6 +1249,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
         'freq'.
     division : bool
         ``True`` if a division is performed, ``False`` otherwise
+    matmul: bool
+        ``True`` if a  matrix multiplication is performed, ``False`` otherwise
 
     Returns
     -------
@@ -1309,7 +1313,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
                     if domain != "freq":
                         raise ValueError("The domain must be 'freq'.")
                     frequencies = d.frequencies
-                cshape = d.cshape
+                if not matmul:
+                    cshape = d.cshape
                 found_audio_data = True
                 audio_type = type(d)
 
@@ -1333,11 +1338,12 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
                             frequencies, d.frequencies, atol=1e-15):
                         raise ValueError(
                             "The frequencies do not match.")
-                try:
-                    cshape = np.broadcast_shapes(cshape, d.cshape)
-                except ValueError:
-                    raise ValueError(
-                        "The cshapes do not match.")
+                if not matmul:
+                    try:
+                        cshape = np.broadcast_shapes(cshape, d.cshape)
+                    except ValueError:
+                        raise ValueError(
+                            "The cshapes do not match.")
 
         # check type of non signal input
         else:
