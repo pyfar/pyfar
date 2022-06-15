@@ -90,6 +90,6 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
             '(http://dx.doi.org/10.14279/depositonce-5718.5)')
 
     if sampling_rate != 44100:
-        hrirs = pf.dsp.resample(hrirs, sampling_rate, 'time')
+        hrirs = pf.dsp.resample(hrirs, sampling_rate, 'freq')
 
     return hrirs, source_positions
