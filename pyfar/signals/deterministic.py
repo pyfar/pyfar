@@ -447,12 +447,13 @@ def _sweep_synthesis_freq(
     TODO Examples with spectrum="perfect"
     """
 
-    # calculte min and max frequency range limits for default frequency_range
-    delta_f = sampling_rate / n_samples
-    nyq = int(n_samples / 2) + 1
+    # spacing between frequency bins of FFT
+    df = sampling_rate / n_samples
+
+    # calculate min and max frequency range limits for default frequency_range
     if frequency_range is None:
-        f_max = sampling_rate / 2 - delta_f
-        frequency_range = [delta_f, f_max]
+        f_max = sampling_rate / 2 - df
+        frequency_range = [df, f_max]
 
     # check input
     if not isinstance(magnitude, (pyfar.Signal, str)):
@@ -481,22 +482,20 @@ def _sweep_synthesis_freq(
     if double and magnitude != 'perfect':
         n_samples *= 2
 
+    # get number of bins (works for even and odd n_samples)
+    n_bins = n_samples // 2 + 1
+
     # zero pad magnitude Signal, if needed
     if isinstance(magnitude, pyfar.Signal):
         if n_samples > magnitude.n_samples:
             magnitude = pyfar.dsp.pad_zeros(magnitude,
                                             n_samples - magnitude.n_samples)
 
-    # spacing between frequency bins of FFT
-    df = sampling_rate / n_samples
-    # index of nyquist frequency
-    nyq = int(n_samples / 2)
-
     # magnitude coloration
-    if magnitude == 'lin':
-        h_sweep = np.ones(int(n_samples / 2))
-    elif magnitude == 'exp':
-        h_sweep = np.zeros(int(n_samples / 2))
+    if magnitude == 'linear':
+        h_sweep = np.ones(n_bins)
+    elif magnitude == 'exponential':
+        h_sweep = np.zeros(n_bins)
         f_min = df
         f_max = sampling_rate / 2
         h_sweep[1:] = 1 / np.sqrt(2 * np.pi * np.arange(f_min, f_max, df))
@@ -504,16 +503,16 @@ def _sweep_synthesis_freq(
     # TODO: generate filter for frequency_range and multiply with h_sweep
 
     # initialize group delay
-    tg = np.zeros(nyq)
-    tg[1] = start_margin
-    tg[-1] = stop_margin
+    tg = np.zeros(n_bins)
+    tg[1] = start_margin / sampling_rate
+    tg[-1] = (n_samples - stop_margin) / sampling_rate
 
     # FORMULA (11, p.40 )
     sweep_power = np.sum(np.abs(h_sweep**2))
     C = (tg[-1] - tg[1]) / sweep_power
 
     # FORMULA (10, p.40 )
-    for k in range(2, nyq):  # index 2 to nyq
+    for k in range(2, n_bins):  # index 2 to nyq
         tg[k] = tg[k-1] + C * np.abs(h_sweep[k])**2
 
     sweep_ang = -1 * np.cumsum(tg) * 2 * np.pi * df
@@ -546,7 +545,7 @@ def _sweep_synthesis_freq(
                          domain='freq')
     sweep.domain = 'time'
 
-    return sweep, pyfar.dsp.group_delay(sweep)
+    return sweep, tg
 
 
 def _time_domain_sweep(n_samples, frequency_range, n_fade_out, amplitude,
