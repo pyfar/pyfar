@@ -1383,7 +1383,8 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
 
 
-def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
+def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
+            prefix_return=False):
     r"""Convert data of the selected signal domain into decibels (dB).
 
     The converted data is calculated by the base 10 logarithmic scale:
@@ -1444,10 +1445,16 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
         +---------------------------------+--------------+
 
         The default is 1.
+    prefix_return : bool, optional
+        If prefix_return is ``True``, the function will also return the 
+        log_prefix value. This can be used to delogrithmize the data. The 
+        default is ``False``.
     Returns
     -------
     decibel : numpy.ndarray
         The given signal in decibel in chosen domain.
+    log_prefix : int or float
+        Will be returned if prefix_return is set to ``True``.
 
     Examples
     --------
@@ -1487,4 +1494,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
             f"Domain is '{domain}', but has to be 'time', 'freq',"
             " or 'freq_raw'.")
     data[data == 0] = np.finfo(float).eps
-    return log_prefix * np.log10(np.abs(data) / log_reference)
+    if prefix_return is True:
+        return log_prefix * np.log10(np.abs(data) / log_reference), log_prefix
+    else:
+        return log_prefix * np.log10(np.abs(data) / log_reference)

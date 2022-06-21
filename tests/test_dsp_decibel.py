@@ -52,3 +52,9 @@ def test_decibel_FrequencyData():
     # Test wrong domain input
     with raises(ValueError, match="Domain is 'time' and signal is type"):
         pf.dsp.decibel(test_FreqData, domain='time')
+
+
+def test_prefix_return():
+    test_signal = pf.Signal([0, 1, 0], sampling_rate=44100, fft_norm='power')
+    dB_sig, prefix = pf.dsp.decibel(test_signal, prefix_return=True)
+    assert prefix == 10
