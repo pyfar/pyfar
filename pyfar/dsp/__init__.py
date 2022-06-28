@@ -14,6 +14,7 @@ from .dsp import (
     deconvolve,
     convolve,
     decibel,
+    soft_limit_spectrum
 )
 
 from .interpolation import (
@@ -45,6 +46,7 @@ __all__ = [
     'deconvolve',
     'convolve',
     'decibel',
+    'soft_limit_spectrum',
     'InterpolateSpectrum',
     'smooth_fractional_octave',
     'resample',
