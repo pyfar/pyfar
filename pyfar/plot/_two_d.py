@@ -20,15 +20,18 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
+    data = signal.time.T if orientation == "vertical" else signal.time
     if dB:
-        data = dsp.decibel(signal, 'time', log_prefix, log_reference)
+        if log_prefix is None:
+            log_prefix = _utils._log_prefix(signal)
+        # avoid any zero-values because they result in -inf in dB data
+        eps = np.finfo(float).eps
+        data = log_prefix * np.log10(np.abs(data) / log_reference + eps)
         ymax = np.nanmax(data) + 10
         ymin = ymax - 100
-    else:
-        data = signal.time
-    data = data.T if orientation == "vertical" else data
+
     # auto detect the time unit
-    if unit in [None, "auto"]:
+    if unit is None:
         unit = _utils._time_auto_unit(signal.times[..., -1])
     # set the unit
     if unit == 'samples':
@@ -77,14 +80,18 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
+    data = signal.freq.T if orientation == "vertical" else signal.freq
     if dB:
-        data = dsp.decibel(signal, 'freq', log_prefix, log_reference)
+        if log_prefix is None:
+            log_prefix = _utils._log_prefix(signal)
+        eps = np.finfo(float).eps
+        data = log_prefix*np.log10(np.abs(data)/log_reference + eps)
         ymax = np.nanmax(data)
         ymin = ymax - 90
         ymax = ymax + 10
     else:
-        data = np.abs(signal.freq)
-    data = data.T if orientation == "vertical" else data
+        data = np.abs(data)
+
     # setup axis label and data
     axis = [ax[0].yaxis, ax[0].xaxis]
     ax_lim = [ax[0].set_ylim, ax[0].set_xlim]
@@ -297,7 +304,7 @@ def _freq_group_delay_2d(
 
 
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
-                 freq_scale='linear', unit="s", window='hann',
+                 freq_scale='linear', unit=None, window='hann',
                  window_length=1024, window_overlap_fct=0.5,
                  colorbar=True, ax=None, **kwargs):
     """Plot the magnitude spectrum versus time.
@@ -341,7 +348,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
             np.abs(spectrogram) / log_reference + eps)
 
     # auto detect the time unit
-    if unit in [None, "auto"]:
+    if unit is None:
         unit = _utils._time_auto_unit(times[..., -1])
     # set the unit
     if unit == 'samples':

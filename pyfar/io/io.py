@@ -394,6 +394,66 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
             subtype=subtype, **kwargs)
 
 
+def read_wav(filename):
+    """
+    Import a WAV file as :py:class:`~pyfar.classes.audio.Signal` object.
+
+    Parameters
+    ----------
+    filename : string, Path
+        Input file.
+
+    Returns
+    -------
+    signal : Signal
+        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
+        data from the WAV file.
+
+    Notes
+    -----
+    * This function is based on :py:func:`read_audio`.
+    """
+    warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
+                   "of pyfar.io.read_audio."),
+                  PendingDeprecationWarning)
+    signal = read_audio(filename)
+    return signal
+
+
+def write_wav(signal, filename, subtype=None, overwrite=True):
+    """
+    Write a :py:class:`~pyfar.classes.audio.Signal` object as a WAV file to
+    disk.
+
+    Parameters
+    ----------
+    signal : Signal
+        Object to be written.
+    filename : string, Path
+        Output file.
+    overwrite : bool
+        Select wether to overwrite the WAV file, if it already exists.
+        The default is ``True``.
+
+    Notes
+    -----
+    * Signals are flattened before writing to disk (e.g. a signal with
+      ``cshape = (3, 2)`` will be written to disk as a six channel wav file).
+    * This function is based on :py:func:`write_audio`.
+    * Except for the subtypes ``'FLOAT'`` and ``'DOUBLE'``,
+      amplitudes larger than +/- 1 are clipped.
+
+
+    """
+    warnings.warn(("This function will be deprecated in pyfar 0.5.0 in favor "
+                   "of pyfar.io.read_audio."),
+                  PendingDeprecationWarning)
+    # .wav file extension
+    filename = pathlib.Path(filename).with_suffix('.wav')
+
+    write_audio(signal, filename, subtype=subtype, overwrite=overwrite)
+
+
 def audio_formats():
     """Return a dictionary of available audio formats.
 

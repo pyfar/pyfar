@@ -4,7 +4,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.tight_layout import get_subplotspec_list
 from pyfar import (Signal, FrequencyData)
-import warnings
 
 
 def _tight_layout(fig=None):
@@ -189,12 +188,7 @@ def _default_color_dict():
 
 def _check_time_unit(unit):
     """Check if a valid time unit is passed."""
-    units = ['s', 'ms', 'mus', 'samples', 'auto']
-    if unit is None:
-        warnings.warn((
-            "unit=None will be deprecated in pyfar This function will be "
-            "deprecated in pyfar 0.6.0. Use unit='auto' instead."),
-            PendingDeprecationWarning)
+    units = ['s', 'ms', 'mus', 'samples']
     if unit is not None and unit not in units:
         raise ValueError(
             f"Unit is {unit} but must be {', '.join(units)}, or None.")

@@ -15,6 +15,71 @@ import pyfar as pf
 from . import _audiofilter as iir
 
 
+def butter(signal, N, frequency, btype='lowpass', sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~butterworth`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use butterworth instead'), PendingDeprecationWarning)
+
+    return butterworth(signal, N, frequency, btype, sampling_rate)
+
+
+def cheby1(signal, N, ripple, frequency, btype='lowpass', sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~chebyshev1`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use chebyshev1 instead'), PendingDeprecationWarning)
+
+    return chebyshev1(signal, N, ripple, frequency, btype, sampling_rate)
+
+
+def cheby2(signal, N, attenuation, frequency, btype='lowpass',
+           sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~chebyshev2`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use chebyshev2 instead'), PendingDeprecationWarning)
+
+    return chebyshev2(signal, N, attenuation, frequency, btype, sampling_rate)
+
+
+def ellip(signal, N, ripple, attenuation, frequency, btype='lowpass',
+          sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~elliptic`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use elliptic instead'), PendingDeprecationWarning)
+
+    return elliptic(signal, N, ripple, attenuation, frequency, btype,
+                    sampling_rate)
+
+
+def peq(signal, center_frequency, gain, quality, peq_type='II',
+        quality_warp='cos', sampling_rate=None):
+    """
+    This function will be deprecated in favor of :py:func:`~bell`
+    in pyfar 0.5.0
+    """
+
+    warnings.warn(('This function will be deprecated in pyfar 0.5.0. '
+                   'Use bell instead'), PendingDeprecationWarning)
+
+    return bell(signal, center_frequency, gain, quality, peq_type,
+                quality_warp, sampling_rate)
+
+
 def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
     """
     Create and apply a digital Butterworth IIR filter.

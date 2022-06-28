@@ -13,16 +13,9 @@ from .dsp import (
     kaiser_window_beta,
     deconvolve,
     convolve,
+    InterpolateSpectrum,
     normalize,
-    average,
-    decibel
-)
-
-from .interpolation import (
-    smooth_fractional_octave,
-    fractional_time_shift,
-    resample,
-    InterpolateSpectrum
+    average
 )
 
 from . import filter
@@ -46,11 +39,7 @@ __all__ = [
     'kaiser_window_beta',
     'deconvolve',
     'convolve',
-    'decibel',
     'InterpolateSpectrum',
     'normalize',
-    'average',
-    'smooth_fractional_octave',
-    'resample',
-    'fractional_time_shift'
+    'average'
 ]

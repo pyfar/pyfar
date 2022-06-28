@@ -10,6 +10,7 @@ from scipy.spatial.transform import Rotation as sp_rot
 import deepdiff
 import re
 from copy import deepcopy
+import warnings
 
 import pyfar as pf
 
@@ -720,6 +721,87 @@ class Coordinates():
             colors = np.full(mask.shape, pf.plot.color('b'))
             colors[mask] = pf.plot.color('r')
             pf.plot.scatter(self, c=colors.flatten(), **kwargs)
+
+    def get_nearest_k(self, points_1, points_2, points_3, k=1,
+                      domain='cart', convention='right', unit='met',
+                      show=False):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_k`.
+
+        .. note::
+            This functions returns the parameters in the order `distance`,
+            `index`, `mask`, which is different in `find_nearest_k()`
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_k."),
+                  PendingDeprecationWarning)
+
+        # get the points
+        distance, index, mask = self._find_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, k, 'k')
+
+        return distance, index, mask
+
+    def get_nearest_cart(self, points_1, points_2, points_3, distance,
+                         domain='cart', convention='right', unit='met',
+                         show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_cart`.
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_cart."),
+                  PendingDeprecationWarning)
+
+        index, mask = self.find_nearest_cart(
+            points_1, points_2, points_3, distance, domain, convention, unit,
+            show, atol)
+
+        return index, mask
+
+    def get_nearest_sph(self, points_1, points_2, points_3, distance,
+                        domain='sph', convention='top_colat', unit='rad',
+                        show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_sph`.
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_sph."),
+                  PendingDeprecationWarning)
+
+        index, mask = self.find_nearest_sph(
+            points_1, points_2, points_3, distance, domain, convention,
+            unit, show, atol)
+
+        return index, mask
+
+    def get_slice(self, coordinate: str, unit: str, value, tol=0,
+                  show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_slice`.
+
+        .. note::
+            This functions returns only the `mask` which is different in
+            `find_slice()`
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_slice."),
+                  PendingDeprecationWarning)
+
+        _, mask = self.find_slice(coordinate, unit, value, tol, show, atol)
+        return mask
 
     def find_nearest_k(self, points_1, points_2, points_3, k=1,
                        domain='cart', convention='right', unit='met',

@@ -136,8 +136,8 @@ class PlotParameter(object):
                  log_reference=1,                          # same for time/freq
                  xscale='log', yscale='linear',            # axis scaling
                  deg=False, unwrap=False,                  # phase properties
-                 unit_time='s',                            # time axis unit
-                 unit_gd='s',                              # group delay unit
+                 unit_time=None,                           # time axis unit
+                 unit_gd=None,                             # group delay unit
                  window='hann', window_length=1014,        # spectrogram
                  window_overlap_fct=.5,
                  colorbar=True,
@@ -335,7 +335,7 @@ class PlotParameter(object):
             # y-axis
             self._y_type = ['other', 'other', 'other', 'other', 'other']
             self._y_param = 'unit_gd'
-            self._y_values = ['auto', 's', 'ms', 'mus', 'samples']
+            self._y_values = [None, 's', 'ms', 'mus', 'samples']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
             self._cm_type = None
@@ -357,7 +357,7 @@ class PlotParameter(object):
             # color map
             self._cm_type = ['other', 'other', 'other', 'other', 'other']
             self._cm_param = 'unit_gd'
-            self._cm_values = ['auto', 's', 'ms', 'mus', 'samples']
+            self._cm_values = [None, 's', 'ms', 'mus', 'samples']
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
             # cycler type
             self._cycler_type = None

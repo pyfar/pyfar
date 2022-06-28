@@ -2,10 +2,64 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 import os
+from packaging import version
 import pyfar as pf
 from pyfar import Signal
 import pyfar.dsp.filter as pfilt
 import pyfar.classes.filter as pclass
+
+
+def test_filter_deprecations():
+
+    # butter
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.butter(None, 2, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove butter() from pyfar 0.5.0!
+            pfilt.butter(None, 2, 1000, 'lowpass', 44100)
+
+    # cheby1
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.cheby1(None, 2, 1, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove cheby1() from pyfar 0.5.0!
+            pfilt.cheby1(None, 2, 1, 1000, 'lowpass', 44100)
+
+    # cheby2
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.cheby2(None, 2, 40, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove cheby2() from pyfar 0.5.0!
+            pfilt.cheby2(None, 2, 40, 1000, 'lowpass', 44100)
+
+    # elipp
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass', 44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove ellip() from pyfar 0.5.0!
+            pfilt.ellip(None, 2, 1, 40, 1000, 'lowpass', 44100)
+
+    # bell
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        pfilt.peq(None, 1000, 10, 2, sampling_rate=44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove peq() from pyfar 0.5.0!
+            pfilt.peq(None, 1000, 10, 2, sampling_rate=44100)
 
 
 def test_butterworth(impulse):

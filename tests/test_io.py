@@ -3,6 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from unittest.mock import patch
+from packaging import version
 import pyfar
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
@@ -507,9 +508,9 @@ def test_write_audio_overwrite(noise, tmpdir):
     io.write_audio(noise, filename)
     # Call with overwrite disabled
     with pytest.raises(FileExistsError):
-        io.write_audio(noise, filename, overwrite=False)
+        io.write_wav(noise, filename, overwrite=False)
     # Call with overwrite enabled
-    io.write_audio(noise, filename, overwrite=True)
+    io.write_wav(noise, filename, overwrite=True)
 
 
 @patch('soundfile.write')
@@ -610,15 +611,90 @@ def test_write_audio_read_audio_raw(subtype, tmpdir, noise):
         io.read_audio(filename, samplerate=44100, channels=1, subtype=subtype)
 
 
-def test_write_audio_pathlib(noise, tmpdir):
-    """Test write functionality with filename as pathlib Path object."""
-    filename = pathlib.Path(tmpdir, 'test_wav.wav')
-    io.write_audio(noise, filename)
+@patch('soundfile.read', return_value=(np.array([1., 2., 3.]), 1000))
+def test_read_wav(read_mock):
+    """Test correct call of the wrapped functions."""
+    signal = pyfar.io.read_wav('test.wav')
+    read_mock.assert_called_with(
+        file='test.wav', dtype='float64', always_2d=True)
+    assert isinstance(signal, pyfar.Signal)
+    assert np.allclose(signal.time, np.array([1., 2., 3.]))
+    assert signal.sampling_rate == 1000
+
+
+def test_write_wav(tmpdir, noise):
+    """Test default without optional parameters."""
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(noise, filename)
     signal_reload = soundfile.read(filename)[0].T
     npt.assert_allclose(
         noise.time,
         np.atleast_2d(signal_reload),
         atol=1e-4)
+
+
+def test_write_wav_subtype(tmpdir, noise):
+    """Test default optional subtype parameter."""
+    filename = os.path.join(tmpdir, 'test_wav.wav')
+    io.write_wav(noise, filename, subtype='DOUBLE')
+    signal_reload = soundfile.read(filename)[0].T
+    npt.assert_allclose(
+        noise.time,
+        np.atleast_2d(signal_reload),
+        atol=1e-4)
+
+
+def test_write_wav_pathlib(noise, tmpdir):
+    """Test write functionality with filename as pathlib Path object."""
+    filename = pathlib.Path(tmpdir, 'test_wav.wav')
+    io.write_wav(noise, filename)
+    signal_reload = soundfile.read(filename)[0].T
+    npt.assert_allclose(
+        noise.time,
+        np.atleast_2d(signal_reload),
+        atol=1e-4)
+
+
+def test_write_wav_suffix(noise, tmpdir):
+    """Test for .wav extension of filename."""
+    filename = pathlib.Path(tmpdir, 'test_wav')
+    io.write_wav(noise, filename)
+    # Without suffix
+    with pytest.raises(RuntimeError):
+        soundfile.read(filename)
+    # With suffix added
+    filename = filename.with_suffix('.wav')
+    signal_reload = soundfile.read(filename)[0].T
+    npt.assert_allclose(
+        noise.time,
+        np.atleast_2d(signal_reload),
+        atol=1e-4)
+
+
+@patch('soundfile.read', return_value=(np.array([1., 2., 3.]), 1000))
+def test_read_wav_deprecation(tmpdir):
+    filename = 'test.wav'
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        io.read_wav(filename)
+
+    if version.parse(pyfar.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove read_wav from pyfar 0.5.0!
+            io.read_wav(filename)
+
+
+@patch('soundfile.write')
+def test_write_wav_deprecation(write_mock, noise, tmpdir):
+    filename = pathlib.Path(tmpdir, 'test_wav')
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        io.write_wav(noise, filename)
+
+    if version.parse(pyfar.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove write_wav from pyfar 0.5.0!
+            io.write_wav(noise, filename)
 
 
 @patch('soundfile.available_formats')
