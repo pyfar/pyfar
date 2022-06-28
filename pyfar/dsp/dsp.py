@@ -1447,7 +1447,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         The default is 1.
     prefix_return : bool, optional
         If prefix_return is ``True``, the function will also return the
-        log_prefix value. This can be used to delogrithmize the data. The
+        `log_prefix` value. This can be used to delogrithmize the data. The
         default is ``False``.
     Returns
     -------
