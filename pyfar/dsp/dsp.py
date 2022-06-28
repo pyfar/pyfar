@@ -1707,8 +1707,8 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
                 2 * np.abs(freq_db - limit) <= knee, freq_mask)
             # gain factor
             gain_soft = (1 / ratio - 1) * (freq_db[..., soft] -
-                                            limit[..., soft] +
-                                            knee / 2)**2 / (2 * knee)
+                                           limit[..., soft] +
+                                           knee / 2)**2 / (2 * knee)
             # apply limiting
             freq[..., soft] *= 10**(gain_soft / log_prefix)
 
