@@ -1541,7 +1541,7 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
 
     Returns
     -------
-    limited, Signal, FrequencyData
+    limited : Signal, FrequencyData
         The limited input data.
 
     Examples
