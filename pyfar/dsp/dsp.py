@@ -1454,7 +1454,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
     decibel : numpy.ndarray
         The given signal in decibel in chosen domain.
     log_prefix : int or float
-        Will be returned if prefix_return is set to ``True``.
+        Will be returned if `prefix_return` is set to ``True``.
 
     Examples
     --------
