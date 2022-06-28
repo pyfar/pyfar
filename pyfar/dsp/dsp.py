@@ -1498,3 +1498,160 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference), log_prefix
     else:
         return log_prefix * np.log10(np.abs(data) / log_reference)
+
+
+def normalize(signal, mode='time', normalize='max',
+              channel_handling='max', value=None, freq_range=None,
+              return_values=False):
+    """
+    Normalize signal in the time or frequency domain.
+
+    Parameters
+    ----------
+    signal: Signal
+        Input signal of the signal class
+    mode: string
+
+        ``'time'``
+            normalize the time signals.
+        ``'magnitude'``
+            normalize the magnitude spectra.
+        ``'log_magnitude'``
+            normalize the log. magnitude spectra $20 \\log_{10}(X)$.
+        ``'power'``
+            normalize the power spectra $|X|^2$.
+
+        The default is ``'time'``
+    normalize: string
+
+        ``'max'``
+            compute the absolute maximum value of each channel for
+            normalization
+        ``'mean'``
+            compute the mean value of each channel for normalization
+        ``'rms'``
+            compute the route mean square value of channel for normalization
+
+        The default is ``'max'``
+    channel_handling: string
+        Define how multi-channel signals are normalized. This parameter does
+        not affect single-channel signals.
+
+        ``'each'``
+            normalize each channel separately
+        ``'max'``
+            Normalize to the maximum across channels
+        ``'min'``
+            normalize to the minimum across channels
+        ``'mean'``
+            normalize to the mean across channels
+
+       The default is ``'max'``
+    value: scalar, array
+        The value to which the signal is normalized in the unit according to
+        `normalize`.Can be a scalar or an array with shape equal to
+        ``signal.cshape``. The default is 0 dB if ``normalize='log_magnitude'``
+        and 1 otherwise.
+    freq_range: tuple
+        Two element vector specifying upper and lower frequency bounds
+        for normalization.
+
+    Returns
+    --------
+    normalized_signal: Signal
+        The normalized signal
+    values: numpy array
+        If return_values=True returns values, the values of all channels
+        before normalization.
+    """
+
+    # check input
+    if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
+                               pyfar.TimeData)):
+        raise TypeError("Input data has to be of type 'Signal', 'TimeData' "
+                        "or 'FrequencyData'.")
+    if type(signal) == pyfar.classes.audio.FrequencyData and mode == 'time':
+        raise ValueError(
+            f"mode is '{mode}' and signal is type '{signal.__class__}'"
+            " but must be of type 'Signal' or 'TimeData'.")
+    if type(signal) == pyfar.classes.audio.TimeData and (mode in
+                                                         ('magnitude',
+                                                          'log_magnitude',
+                                                          'power')):
+        raise ValueError(
+            f"mode is '{mode}' and signal is type '{signal.__class__}'"
+            " but must be of type 'Signal' or 'FrequencyData'.")
+    # set default values
+    if value is None:
+        value = 0 if mode == 'log_magnitude' else 1
+    if freq_range is None and isinstance(signal, pyfar.FrequencyData):
+        freq_range = (0, signal.frequencies[-1])
+
+    # copy and transform data to the desired domain
+    if mode == 'time':
+        input_data = np.abs(signal.time)
+    elif mode == 'magnitude':
+        input_data = np.abs(signal.freq)
+    elif mode == 'log_magnitude':
+        input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
+                                                   prefix_return=True)
+    elif mode == 'power':
+        input_data = np.abs(signal.freq)**2
+    else:
+        raise ValueError(
+                    "mode must be 'time', 'magnitude', 'log_magnitude', "
+                    "or 'power'")
+
+    # get bounds for normalization
+    if mode == 'time':
+        lim = (0, signal.n_samples)
+
+    else:
+        lim = signal.find_nearest_frequency(freq_range)
+        if signal.n_samples % 2:
+            lim[0] = np.max([lim[0], 1])
+        else:
+            lim = np.clip(lim, 1, signal.n_bins-1)
+
+    # get values for normalization
+    if normalize == 'max':
+        values = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
+                        keepdims=True)
+    elif normalize == 'mean':
+        values = np.mean(input_data[..., lim[0]:lim[1]], axis=-1,
+                         keepdims=True)
+    elif normalize == 'rms':
+        values = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
+                         axis=-1, keepdims=True))
+    else:
+        raise ValueError("normalize must be 'max', 'mean' or 'rms'")
+
+    # manipulate values
+    if channel_handling == 'each':
+        values_norm = values.copy()
+    elif channel_handling == 'max':
+        values_norm = np.max(values)
+    elif channel_handling == 'min':
+        values_norm = np.min(values)
+    elif channel_handling == 'mean':
+        values_norm = np.mean(values)
+    else:
+        raise ValueError(
+                    "channel_handling must be 'each', 'max', 'min' or 'mean'")
+
+    # de-logarthimize value
+    if mode == 'log_magnitude':
+        value = 10**(value/log_prefix)
+        values_norm = 10**(values_norm/log_prefix)
+
+    # replace input with normalized_input
+    normalized_signal = signal.copy()
+    if mode == 'time':
+        normalized_signal.time = signal.time.copy() / values_norm * value
+    else:
+        normalized_signal.freq = signal.freq.copy() / values_norm * value
+
+    if return_values:
+        return normalized_signal, values_norm
+    else:
+        return normalized_signal
