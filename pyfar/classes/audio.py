@@ -873,7 +873,7 @@ def add(data: tuple, domain='freq'):
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. Frequency domain operations work on the raw
-        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
+        spectrum (see :py:func:`pyfar.dsp.fft.normalization`). The default is
         ``'freq'``.
 
     Returns
