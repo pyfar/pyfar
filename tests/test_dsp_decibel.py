@@ -54,7 +54,7 @@ def test_decibel_FrequencyData():
         pf.dsp.decibel(test_FreqData, domain='time')
 
 
-def test_prefix_return():
+def test_return_prefix():
     test_signal = pf.Signal([0, 1, 0], sampling_rate=44100, fft_norm='power')
-    dB_sig, prefix = pf.dsp.decibel(test_signal, prefix_return=True)
+    dB_sig, prefix = pf.dsp.decibel(test_signal, return_prefix=True)
     assert prefix == 10
