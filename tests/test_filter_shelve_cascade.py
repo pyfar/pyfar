@@ -4,7 +4,7 @@ import numpy.testing as npt
 import os
 import pyfar as pf
 import pyfar.dsp.filter as pfilt
-from pyfar.dsp.filter import _shelving_cascade_slope_parameters
+from pyfar.dsp.filter.audiofilter import _shelving_cascade_slope_parameters
 
 
 @pytest.mark.parametrize("shelve_type,g_s_b", [
