@@ -83,10 +83,10 @@ addition and subtraction are equivalent in the time and frequency domain,
 this is not the case for multiplication and division. Nevertheless, **the same
 rules apply regardless of the domain** for convenience:
 
-Addition, subtraction and multiplication
-****************************************
+Addition, subtraction, multiplication, and power
+************************************************
 
-* If one signal has the FFT normalization ``'none'`` , the results gets the
+* If one signal has the FFT normalization ``'none'``, the results gets the
   normalization of the other signal.
 * If both signals have the same FFT normalization, the results gets the same
   normalization.
