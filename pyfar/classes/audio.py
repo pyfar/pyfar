@@ -881,18 +881,20 @@ def add(data: tuple, domain='freq'):
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` of the result is as follows
-
-        * If one signal has the FFT normalization ``'none'``, the results gets
-          the normalization of the other signal.
-        * If both signals have the same FFT normalization, the results gets the
-          same normalization.
-        * Other combinations raise an error.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _add)
 
@@ -924,18 +926,20 @@ def subtract(data: tuple, domain='freq'):
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` of the result is as follows
-
-        * If one signal has the FFT normalization ``'none'``, the results gets
-          the normalization of the other signal.
-        * If both signals have the same FFT normalization, the results gets the
-          same normalization.
-        * Other combinations raise an error.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _subtract)
 
@@ -967,18 +971,20 @@ def multiply(data: tuple, domain='freq'):
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` of the result is as follows
-
-        * If one signal has the FFT normalization ``'none'``, the results gets
-          the normalization of the other signal.
-        * If both signals have the same FFT normalization, the results gets the
-          same normalization.
-        * Other combinations raise an error.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _multiply)
 
@@ -1009,18 +1015,20 @@ def divide(data: tuple, domain='freq'):
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` of the result is as follows
-
-        * If the denominator signal has the FFT normalization ``'none'``, the
-          result gets the normalization of the numerator signal.
-        * If both signals have the same FFT normalization, the results gets the
-          normalization ``'none'``.
-        * Other combinations raise an error.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If the denominator signal has the FFT normalization ``'none'``, the
+      result gets the normalization of the numerator signal.
+    * If both signals have the same FFT normalization, the results gets the
+      normalization ``'none'``.
+    * Other combinations raise an error.
    """
     return _arithmetic(data, domain, _divide)
 
@@ -1051,18 +1059,20 @@ def power(data: tuple, domain='freq'):
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` of the result is as follows
-
-        * If one signal has the FFT normalization ``'none'``, the results gets
-          the normalization of the other signal.
-        * If both signals have the same FFT normalization, the results gets the
-          same normalization.
-        * Other combinations raise an error.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _power)
 
