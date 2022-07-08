@@ -8,7 +8,10 @@ class GammatoneBands():
     Generate reconstructing auditory filter bank.
 
     Generate a forth order reconstructing Gammatone auditory filter bank
-    according to [#]_. This is a Python port of the `hohmann2002` filter bank
+    according to [#]_. The center frequencies of the Gammatone filters
+    are calculated using the ERB scale (see :py:func:`~erb_frequencies`).
+
+    This is a Python port of the `hohmann2002` filter bank
     contained in the Auditory Modeling Toolbox [#]_. The filter bank can
     handle single and multi channel input and allows for an almost perfect
     reconstruction of the input signal (see examples below).
@@ -16,7 +19,7 @@ class GammatoneBands():
     Calling ``GFB = GammatoneBands()`` constructs the filter bank. Afterwards
     the class methods ``GFB.filter()`` and ``GFB.sum`` can be used to filter
     and reconstruct signals. All relevant data such as the filter coefficients
-    can be obtained for example through ``GFB.coefficients``. See below fore
+    can be obtained for example through ``GFB.coefficients``. See below for
     more documentation.
 
     Parameters
@@ -328,7 +331,7 @@ class GammatoneBands():
         The filter output is a complex valued time signal, whose real and
         imaginary part are returned separately.
 
-        - If the filter bank ist used for analysis purposes only, the imaginary
+        - If the filter bank is used for analysis purposes only, the imaginary
           part is not required for further processing.
         - If the filter bank is used for analysis and re-synthesis, any further
           processing must be applied to the real and imaginary part. Any
@@ -355,8 +358,8 @@ class GammatoneBands():
 
         Notes
         -----
-        - :math:`\\sqrt{real^2 + imag^2}` gives the envelope of the Gammatone
-          filter output.
+        -``sqrt(real.time**2 + imag.time**2)`` gives the envelope of the
+          Gammatone filter output.
         - If the cshape of the output signals ``real.cshape`` and
           ``imag.cshape`` generally is ``(self.n_bands, ) + signal.cshape``.
         - An exception to this occurs if ``signal.cshape`` is ``(1, )``, i.e.,
@@ -434,8 +437,8 @@ class GammatoneBands():
         Returns
         -------
         summed : Signal
-            The summed input.  ``summed.cshape`` is according to the original
-            signal before it was filtered.
+            The summed input.  ``summed.cshape`` matches the ``cshape`` or the
+            original signal before it was filtered.
         """
 
         # prepare output
@@ -463,8 +466,16 @@ def erb_frequencies(freq_range, resolution=1, reference_frequency=1000):
     """
     Get frequencies that are linearly spaced on the ERB frequency scale.
 
+    The human auditory system analyzes sound in auditory filters, whose band-
+    width is often given as a equivalent rectangular bandwidth (ERB). The ERB
+    denotes the bandwidth of a perfect rectangular band-pass that has the same
+    energy as the auditory filter. The ERB frequency scale is directly
+    constructed from this concept: One ERB unit is defined as the
+    frequency dependent ERB of the auditory filter at a given center frequency
+    (cf. [#]_, Section 3B).
+
     The implementation follows Eq. (16) and (17) in [#]_ and was ported from
-    the auditory modeling toolbox [#]_
+    the auditory modeling toolbox [#]_.
 
     Parameters
     ----------
@@ -487,6 +498,9 @@ def erb_frequencies(freq_range, resolution=1, reference_frequency=1000):
 
     References
     ----------
+    .. [#] B. C. J. Moore, An introduction to the psychology of hearing,
+           (Leiden, Boston, Brill, 2013), 6th ed.
+
     .. [#] V. Hohmann, “Frequency analysis and synthesis using a gammatone
            filterbank,” Acta Acust. united Ac. 88, 433-442 (2002).
 
