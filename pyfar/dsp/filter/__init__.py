@@ -1,4 +1,4 @@
-from .classic import (
+from .band_filter import (
     butterworth,
     chebyshev1,
     chebyshev2,
