@@ -48,8 +48,12 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
         The source positions for which the HRIRs are returned.
     """
 
+    # download files if requires
+    _load_files('hrirs')
+
+    # load HRIRs
     hrirs, source_positions, _ = pf.io.read_sofa(
-        os.path.join(os.path.dirname(__file__), 'audio_files', 'hrirs.sofa'))
+        os.path.join(os.path.dirname(__file__), 'files', 'hrirs.sofa'))
 
     # get indices of source positions
     if position == "horizontal":
@@ -76,7 +80,7 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
     # diffuse field compensation
     if diffuse_field_compensation:
         inverse_ctf, *_ = pf.io.read_sofa(os.path.join(
-            os.path.dirname(__file__), 'audio_files',
+            os.path.dirname(__file__), 'files',
             'hrirs_ctf_inverted_smoothed.sofa'))
 
         hrirs = pf.dsp.convolve(hrirs, inverse_ctf, 'cut')
@@ -93,3 +97,7 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
         hrirs = pf.dsp.resample(hrirs, sampling_rate, 'freq')
 
     return hrirs, source_positions
+
+
+def _load_files(file):
+    pass
