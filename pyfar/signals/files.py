@@ -16,6 +16,8 @@ import pyfar as pf
 disable_warnings(InsecureRequestWarning)
 # path for saving/reading files
 file_dir = os.path.join(os.path.dirname(__file__), 'files')
+if not os.path.isdir(file_dir):
+    os.mkdir(file_dir)
 
 
 def castanets(sampling_rate=44100):
