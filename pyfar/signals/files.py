@@ -494,7 +494,7 @@ def _load_files(data):
     # download files
     print(f"Loading {data} data. This is only done once.")
 
-    http = urllib3.PoolManager(cert_reqs='CERT_NONE')
+    http = urllib3.PoolManager(cert_reqs=False)
     url = 'https://www.ak.tu-berlin.de/fileadmin/a0135/pyfar_files/'
 
     for file in files:
