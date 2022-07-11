@@ -497,7 +497,7 @@ def _load_files(data):
     print(f"Loading {data} data. This is only done once.")
 
     http = urllib3.PoolManager(cert_reqs=False)
-    url = 'https://www.ak.tu-berlin.de/fileadmin/a0135/pyfar_files/'
+    url = 'https://pyfar.org/wp-content/uploads/pyfar_files/'
 
     for file in files:
 
