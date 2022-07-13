@@ -1517,12 +1517,17 @@ def normalize(signal, mode='time', normalize='max',
         ``'magnitude'``
             normalize the magnitude spectra.
         ``'log_magnitude'``
-            normalize the log. magnitude spectra $20 \\log_{10}(X)$.
+            normalize the log. magnitude spectra, which is calculated by
+            :meth:`pyfar.dsp.decibel` with:
+            ``data(dB) = log_prefix * numpy.log10(data/log_reference)``.
         ``'power'``
-            normalize the power spectra $|X|^2$.
+            normalize the power spectra :math:`|X|^2`.
 
-        The default is ``'time'``
-    normalize: string
+        Note that the normalized spectrum ``signal.freq`` is used for
+        normalization in mode ``'magnitude'``, ``'log_magnitude'`` and
+        ``'power'``.
+        The default is ``'time'``.
+    normalize: string, optional
 
         ``'max'``
             compute the absolute maximum value of each channel for
@@ -1530,10 +1535,11 @@ def normalize(signal, mode='time', normalize='max',
         ``'mean'``
             compute the mean value of each channel for normalization
         ``'rms'``
-            compute the route mean square value of channel for normalization
+            compute the route mean square value of eachchannel for
+            normalization
 
         The default is ``'max'``
-    channel_handling: string
+    channel_handling: string, optional
         Define how multi-channel signals are normalized. This parameter does
         not affect single-channel signals.
 
@@ -1549,19 +1555,20 @@ def normalize(signal, mode='time', normalize='max',
        The default is ``'max'``
     value: scalar, array
         The value to which the signal is normalized in the unit according to
-        `normalize`.Can be a scalar or an array with shape equal to
-        ``signal.cshape``. The default is 0 dB if ``normalize='log_magnitude'``
-        and 1 otherwise.
+        `normalize`. Can be a scalar or an array with shape which can be
+        broadcasted to ``signal.cshape``. The default is 0 dB if
+        ``normalize='log_magnitude'`` and 1 otherwise.
     freq_range: tuple
-        Two element vector specifying upper and lower frequency bounds
-        for normalization.
+        Two element vector specifying upper and lower frequency in Hz between
+        which the value for normalization is computed according to the
+        parameter `normalize`.
 
     Returns
     --------
     normalized_signal: Signal
         The normalized signal
     values: numpy array
-        If return_values=True returns values, the values of all channels
+        If ``return_values=True`` returns values, the values of all channels
         before normalization.
     """
 
@@ -1606,13 +1613,16 @@ def normalize(signal, mode='time', normalize='max',
     if mode == 'time':
         lim = (0, signal.n_samples)
 
-    else:
+    elif type(signal) != pyfar.classes.audio.FrequencyData:
+        # discard 0 Hz and Nyquist because they might be off by a factor of two
+        # (we are using the normalized spectra)
         lim = signal.find_nearest_frequency(freq_range)
         if signal.n_samples % 2:
             lim[0] = np.max([lim[0], 1])
         else:
             lim = np.clip(lim, 1, signal.n_bins-1)
-
+    else:
+        lim = signal.find_nearest_frequency(freq_range)
     # get values for normalization
     if normalize == 'max':
         values = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
@@ -1647,9 +1657,9 @@ def normalize(signal, mode='time', normalize='max',
     # replace input with normalized_input
     normalized_signal = signal.copy()
     if mode == 'time':
-        normalized_signal.time = signal.time.copy() / values_norm * value
+        normalized_signal.time *= value / values_norm
     else:
-        normalized_signal.freq = signal.freq.copy() / values_norm * value
+        normalized_signal.freq *= value / values_norm
 
     if return_values:
         return normalized_signal, values_norm
