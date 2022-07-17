@@ -1514,9 +1514,9 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
         an array like, it must be broadcastable to `signal.freq.shape`.
     knee : number, string
         ``'arctan'``
-            Apply an arcus tangens knee according to [#]_ Section 3.6.4. In this
-            case the parameter `ratio` (below) is ignored. This knee definition
-            originates from microphone array signal processing.
+            Apply an arcus tangens knee according to [#]_ Section 3.6.4. In
+            this case the parameter `ratio` (below) is ignored. This knee
+            definition originates from microphone array signal processing.
         number
             Apply a knee with a width of `number` dB according to [#]_ Eq. (4).
             This definition of the knee originates from the classic audio
