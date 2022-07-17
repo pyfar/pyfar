@@ -64,7 +64,7 @@ def castanets(sampling_rate=44100):
     return castanets
 
 
-def drums(sampling_rate=44100):
+def drums(sampling_rate=48000):
     """
     Get a dry drum sample.
 
@@ -100,7 +100,7 @@ def drums(sampling_rate=44100):
     drums.time *= .9
 
     # resample brir
-    if sampling_rate != 44100:
+    if sampling_rate != 48000:
         drums = pf.dsp.resample(drums, sampling_rate)
 
     return drums
