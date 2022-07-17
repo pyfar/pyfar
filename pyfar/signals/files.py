@@ -22,7 +22,7 @@ if not os.path.isdir(file_dir):
 
 def castanets(sampling_rate=44100):
     """
-    Get anechoic castanet sample.
+    Get an anechoic castanet sample.
 
     Castanets rhythm from EUB SQAM CD track 27 re-programmed as anechoic
     version using samples from the Vienna Symphonic Library [#]_.
@@ -66,7 +66,7 @@ def castanets(sampling_rate=44100):
 
 def drums(sampling_rate=44100):
     """
-    Get dry drum sample.
+    Get a dry drum sample.
 
     The sample was recorded with microphones close to the drums in a dry
     rehearsal room.
@@ -108,7 +108,7 @@ def drums(sampling_rate=44100):
 
 def guitar(sampling_rate=48000):
     """
-    Get anechoic guitar sample.
+    Get an anechoic guitar sample.
 
     The data is an excerpt from the file `Flamenco2_U89.wav` from the Cologne
     University of Applied Sciences, Anechoic Recordings  [#]_.
@@ -116,7 +116,7 @@ def guitar(sampling_rate=48000):
     .. note ::
 
         **License**: CC BY-SA Michio Woirgard, Philipp Stade, Jeffrey Amankwor,
-        Benjamin Bernschütz, and Johannes Arend Audio Group, Cologne University
+        Benjamin Bernschütz and Johannes Arend, Audio Group, Cologne University
         of Applied Sciences
 
     Parameters
@@ -156,7 +156,7 @@ def guitar(sampling_rate=48000):
 
 def speech(voice="female", sampling_rate=44100):
     """
-    Get anechoic speech sample.
+    Get an anechoic speech sample.
 
     The samples were taken from 'Music for Archimedes' [#]_ (Tracks 4, 5) with
     kind permission of Bang & Olufsen for research and personal purposes. Any
@@ -228,8 +228,8 @@ def brir(diffuse_field_compensation=False, sampling_rate=48000):
     diffuse_field_compensation : bool, optional
         Apply a diffuse field compensation to the BRIR. This can be used as a
         simple headphone compensation filter when listening to the BRIR. The
-        default is False, which does not apply the compensation. The diffuse
-        field compensation is taken from :py:func:`~hrirs`
+        default is ``False``, which does not apply the compensation. The
+        diffuse field compensation is taken from :py:func:`~hrirs`
     sampling_rate : int, optional
         The sampling rate of the BRIR in Hz. The default of ``48000`` uses the
         BRIR as it is, any other value uses :py:func:`~pyfar.dsp.resample`
@@ -347,7 +347,8 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
             (0 degree elevation) for azimuth angles of 30 and 330 degrees.
 
         The default is ``[[0, 0]]``, which returns the HRIR for frontal sound
-        incidence.
+        incidence. A ValueError is raised if the requested position is not
+        available.
     diffuse_field_compensation : bool, optional
         Apply a diffuse field compensation to the HRIRs. This can be used as a
         simple headphone compensation filter when listening to the HRIRs. The
@@ -421,7 +422,7 @@ def rir(sampling_rate=48000):
     """
     Get a room impulse response (RIR).
 
-    The RRIR was recorded with class I 1/2 inch measurement microphpone in the
+    The RIR was recorded with class I 1/2 inch measurement microphone in the
     Berliner Philharmonie [#]_ (Emitter 17). For more information see [#]_. A
     matching binaural room impulse response can be obtained by
     :py:func:`~brir`.
