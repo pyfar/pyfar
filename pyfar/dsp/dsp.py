@@ -1493,9 +1493,9 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1):
 def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
                         direction='above'):
     """
-    Soft limit spectrum of a Signal or FrequencyData object.
+    Apply a frequency-wise soft limiting to a spectrum.
 
-    Apply a frequency-wise soft limiting to a spectrum. Soft limiting denotes
+    Soft limiting denotes
     a smooth transition that is applied to limit discontinuities in the data
     that would appear in hard clipping. The transition phase is termed `knee`,
     and two different types of knees can be applied (see parameters and
@@ -1509,14 +1509,14 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
     signal : Signal, FrequencyData
         The input data
     limit : number, array like
-        The gain in dB at which the limiting reaches its full eeffect. If this
+        The gain in dB at which the limiting reaches its full effect. If this
         is a number, the same limit is applied to all frequencies. If this an
         an array like, it must be broadcastable to `signal.freq.shape`.
     knee : number, string
         ``'arctan'``
-            Apply an arcus tanges knee according to [#]_ Section 3.6.4. In this
+            Apply an arcus tangens knee according to [#]_ Section 3.6.4. In this
             case the parameter `ratio` (below) is ignored. This knee definition
-            originates from signal mircorphone array signal processing.
+            originates from microphone array signal processing.
         number
             Apply a knee with a width of `number` dB according to [#]_ Eq. (4).
             This definition of the knee originates from the classic audio
@@ -1534,10 +1534,10 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
         Define how the limiting works
 
         ``'above'`` (default)
-            Apply soft limiting to values above `limit`
+            Apply soft limiting to values above `limit`.
         ``'below'``
             Apply soft limiting to values below `limit`. This is achieved by
-            using ``1/signal.freq`` for the limitng.
+            using ``1/signal.freq`` for the limiting.
 
     Returns
     -------
@@ -1566,7 +1566,7 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
         >>> ax.set_ylim(-5, 25)
         >>> ax.legend()
 
-    Apply limiting with infinit ratio (strict limiting) and finite ratios
+    Apply limiting with infinite ratio (strict limiting) and finite ratios
     (compression)
 
     .. plot ::
