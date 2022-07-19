@@ -1635,6 +1635,8 @@ def normalize(signal, mode='time', normalize='max',
                          axis=-1, keepdims=True))
     else:
         raise ValueError("normalize must be 'max', 'mean' or 'rms'")
+    # discard last dimension (samples or bins, required for pyfar arithmetics)
+    values = np.squeeze(values, axis=-1)
 
     # manipulate values
     if channel_handling == 'each':
@@ -1654,13 +1656,8 @@ def normalize(signal, mode='time', normalize='max',
         value = 10**(value/log_prefix)
         values_norm = 10**(values_norm/log_prefix)
 
-    # replace input with normalized_input
-    normalized_signal = signal.copy()
-    if mode == 'time':
-        normalized_signal.time *= value / values_norm
-    else:
-        normalized_signal.freq *= value / values_norm
-    # normalized_signal = signal.copy() * value / values_norm
+    # apply normalization
+    normalized_signal = signal.copy() * value / values_norm
 
     if return_values:
         return normalized_signal, values_norm
