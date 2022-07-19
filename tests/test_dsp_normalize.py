@@ -55,12 +55,22 @@ def test_normalization_magnitude_mean_min_freqrange():
 
 
 def test_value_cshape_broadcasting():
-    """Test broadcasting of value with signal.cshape = (3,) to 
+    """Test broadcasting of value with signal.cshape = (3,) to
     signal.cshape = (2,3)."""
     signal = pf.Signal([[[1, 2, 1], [1, 4, 1], [1, 2, 1]],
                         [[1, 2, 1], [1, 4, 1], [1, 2, 1]]], 44100)
     answer = pf.dsp.normalize(signal, mode='time', value=[1, 2, 3])
     assert signal.cshape == answer.cshape
+
+
+def test_value_return():
+    """Test the parameter return_values = True, which returns the values_norm
+    data."""
+    n_samples, amplitude = 3., 1.
+    signal = pf.signals.impulse(n_samples, amplitude=amplitude)
+    _, values_norm = pf.dsp.normalize(signal, return_values=True,
+                                      normalize='mean')
+    assert values_norm == amplitude / n_samples
 
 
 def test_error_raises():

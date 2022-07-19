@@ -1388,7 +1388,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
     r"""Convert data of the selected signal domain into decibels (dB).
 
     The converted data is calculated by the base 10 logarithmic scale:
-    ``data(dB) = log_prefix * numpy.log10(data/log_reference)``. By using a
+    ``data_in_dB = log_prefix * numpy.log10(data/log_reference)``. By using a
     logarithmic scale, the deciBel is able to compare quantities that
     may have vast ratios between them. As an example, the sound pressure in
     dB can be calculated as followed:
@@ -1519,7 +1519,7 @@ def normalize(signal, mode='time', normalize='max',
         ``'log_magnitude'``
             normalize the log. magnitude spectra, which is calculated by
             :meth:`pyfar.dsp.decibel` with:
-            ``data(dB) = log_prefix * numpy.log10(data/log_reference)``.
+            ``data_in_dB = log_prefix * numpy.log10(data/log_reference)``.
         ``'power'``
             normalize the power spectra :math:`|X|^2`.
 
@@ -1535,7 +1535,7 @@ def normalize(signal, mode='time', normalize='max',
         ``'mean'``
             compute the mean value of each channel for normalization
         ``'rms'``
-            compute the route mean square value of eachchannel for
+            compute the route mean square value of each channel for
             normalization
 
         The default is ``'max'``
@@ -1660,6 +1660,7 @@ def normalize(signal, mode='time', normalize='max',
         normalized_signal.time *= value / values_norm
     else:
         normalized_signal.freq *= value / values_norm
+    # normalized_signal = signal.copy() * value / values_norm
 
     if return_values:
         return normalized_signal, values_norm
