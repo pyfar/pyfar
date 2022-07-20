@@ -1498,3 +1498,124 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference), log_prefix
     else:
         return log_prefix * np.log10(np.abs(data) / log_reference)
+
+
+def average(signal, mode='time', axis=None, phase_copy=None,
+            weights=None):
+    """
+    Average multichannel Signals.
+
+    Parameters
+    ----------
+    signal: Signal
+        Input signal of the Signal class
+    mode: string
+
+        ``'time'``
+            average in time domain. Note that this might cause artifacts if
+            the data is not aligned across channels.
+        ``'complex'``
+            average the complex spectra. Note that this might cause artifacts
+            if the data is not aligned across channels.
+        ``'magnitude'``
+            average the magnitude spectra and discard the phase
+            (see `phase_copy`)
+        ``'power'``
+            average the power spectra $|X|^2$ and discard the phase. The
+            squaring of the spectra is reversed before returning the averaged
+            signal.
+        ``'log_magnitude'``
+            average the log. magnitude spectra $20 \\log_{10}(X)$ and discard
+            the phase. The logarithm is reversed before returning the averaged
+            signal.
+
+        The default is ``'time'``
+    phase_copy: tuple
+        Some averaging modes discard the phase in which case the phase from
+        a channel before averaging can be copied to the averaged signal. Pass
+        the channel index as a tuple with as many elements as
+        ``signal.cshape``. The default ``None`` returns a zero-phase signal.
+    weights: array like
+        array that gives channel weights for averaging the data. Must be of
+        shape ``signal.cshape``. The default is ``None``, which applies equal
+        weights to all channels.
+
+    Returns
+    --------
+    averaged_signal: Signal
+        averaged input Signal
+
+    Notes
+    -----
+    The functions :py:func:`~pyfar.dsp.linear_phase` and
+    :py:func:`~pyfar.dsp.minimum_phase` can be used to obtain non-zero phase
+    responses. This can be usefull if the average mode discards the phase and
+    the paramter `phase_copy` can not be used.
+    """
+
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise TypeError('Input data has to be of type: Signal')
+
+    # set weights default
+    if weights is None:
+        weights = 1/(np.prod(signal.cshape))
+    else:
+        weights = weights/np.sum(weights)
+
+    # convert data to desired domain
+    if mode == 'time':
+        data = signal.time.copy()
+    elif mode == 'complex':
+        data = signal.freq.copy()
+    elif mode == 'magnitude':
+        data = np.abs(signal.freq.copy())
+    elif mode == 'power':
+        data = np.abs(signal.freq.copy())**2
+    elif mode == 'log_magnitude':
+        data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
+                                             prefix_return=True)
+
+    # apply weights
+    # NOT SURE IF THIS WORKS WITH MORE THAN FOR SIGNALS GREATER THAN 3D
+    # data = data * ca._get_arithmetic_data(weights,None, None)
+    data = data * np.asarray(weights)
+
+    # average the data
+    if (mode == 'time' or
+            mode == 'complex' or mode == 'magnitude'):
+        data = np.sum(data, axis=axis, keepdims=True)
+    elif mode == 'power':
+        data = np.sum(data, axis=axis, keepdims=True)
+        data = np.sqrt(data)
+    elif mode == 'log_magnitude':
+        data = np.sum(data, axis=axis, keepdims=True)
+        data = 10**(data/log_prefix)
+    else:
+        raise ValueError(
+            """mode must be 'time', 'complex', 'magnitude', 'power' or
+            'log_magnitude'"""
+            )
+
+    # phase handling
+    if phase_copy is None:
+        pass
+    else:
+        if mode == 'time':
+            data_ang = signal.time.copy()
+            # NOT SURE IF THIS COPPIES PHASE_COPY INDEX IN CORRECTLY
+            data_ang = np.angle(data_ang[phase_copy, ...])
+        else:
+            data_ang = signal.freq.copy()
+            data_ang = np.angle(data_ang[phase_copy, ...])
+
+        data = data * np.exp(1j * data_ang)
+
+    # input data into averaged_signal
+    averaged_signal = signal.copy()
+    if mode == 'time':
+        averaged_signal.time = data
+    else:
+        averaged_signal.freq = data
+
+    return averaged_signal
