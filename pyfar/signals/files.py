@@ -2,6 +2,16 @@
 This module contains anechoic audio content and impulse responses for listening
 and illustration. Note that each file has a separate license that is listed
 below.
+
+Quick listening is, e.g., possible with `sounddevice
+<https://python-sounddevice.readthedocs.io>`_ installed:
+
+>>> import pyfar as pf
+>>> import sounddevice as sd
+>>> # Load, illustrate and play speech signal
+>>> speech = pf.signals.files.speech()
+>>> pf.plot.spectrogram(speech)
+>>> sd.play(speech.time.T, speech.sampling_rate)
 """
 import os
 import numpy as np
