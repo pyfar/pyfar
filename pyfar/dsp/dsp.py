@@ -1624,6 +1624,10 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         else:
             lim = signal.find_nearest_frequency(freq_range)
 
+        if lim[0] == lim[1]:
+            raise ValueError(("The selected frequency range is 0 Hz. Use a "
+                              "longer signal or increase frequency_range"))
+
         if dB:
             input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
                                                        prefix_return=True)
