@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+import warnings
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -1500,64 +1501,69 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def normalize(signal, mode='time', normalize='max',
-              channel_handling='max', value=None, freq_range=None,
-              return_values=False):
+def normalize(signal, domain='time', dB=False, power=False, operation='max',
+              channel_handling='max', target=None, freq_range=None,
+              return_reference=False):
     """
-    Normalize signal in the time or frequency domain.
-
+    Apply a normalization in time or frequency domain.
+    Therefore, the data to normalize gets multiplied by the normalization
+    factor :math:`target/reference_norm`.
+        `domain`.
     Parameters
     ----------
     signal: Signal
-        Input signal of the signal class
-    mode: string
-
+        Input signal of the signal class.
+    domain: string
+        The data used to compute the normalization value.
         ``'time'``
-            normalize the time signals.
-        ``'magnitude'``
-            normalize the magnitude spectra.
-        ``'log_magnitude'``
-            normalize the log. magnitude spectra, which is calculated by
-            :meth:`pyfar.dsp.decibel` with:
-            ``data_in_dB = log_prefix * numpy.log10(data/log_reference)``.
-        ``'power'``
-            normalize the power spectra :math:`|X|^2`.
+            Time data. Normalize the data in time domain.
+        ``'freq'``
+            Frequency data. Normalize the data in frequency domain.
 
         Note that the normalized spectrum ``signal.freq`` is used for
-        normalization in mode ``'magnitude'``, ``'log_magnitude'`` and
-        ``'power'``.
+        normalization in domain ``'freq'``, ``signal.time`` otherwise.
         The default is ``'time'``.
-    normalize: string, optional
-
+    dB: bool, optional
+        If `dB` is ``True``, the logarithmic magnitude spectra will be used for
+        normalization, which is calculated by
+        :meth:`pyfar.dsp.decibel` with:
+        ``data_in_dB = log_prefix * numpy.log10(data/log_reference)``.
+        The default is ``False``.
+    power: bool, optional
+        If `power` is ``True``, the power spectra :math:`|X|^2` will be used
+        for normalization. Notice that if `dB` and `power` are both ``True``,
+        only the logarithmic magnitude spectra will be used.
+    operation: string, optional
+        Operation to compute the normalization value applied to the data
+        selected by `doamin`, `dB` and `power`.
         ``'max'``
-            compute the absolute maximum value of each channel for
-            normalization
+            Takes the absolute maximum value.
         ``'mean'``
-            compute the mean value of each channel for normalization
+            Takes the mean value.
         ``'rms'``
-            compute the route mean square value of each channel for
-            normalization
+            Takes the root mean square value.
 
         The default is ``'max'``
     channel_handling: string, optional
-        Define how multi-channel signals are normalized. This parameter does
+        Define how multi-channel signals are handled. This parameter does
         not affect single-channel signals.
 
         ``'each'``
-            normalize each channel separately
+            Separate normalization of each channel.
         ``'max'``
-            Normalize to the maximum across channels
+            Normalize to the maximum normalization value across the channels.
         ``'min'``
-            normalize to the minimum across channels
+            Normalize to the minimum normalization value across the channels.
         ``'mean'``
-            normalize to the mean across channels
+            Normalize to the mean normalization value across the channels.
 
        The default is ``'max'``
-    value: scalar, array
-        The value to which the signal is normalized in the unit according to
-        `normalize`. Can be a scalar or an array with shape which can be
-        broadcasted to ``signal.cshape``. The default is 0 dB if
-        ``normalize='log_magnitude'`` and 1 otherwise.
+    target: scalar, array
+        The target to which the signal is normalized in the unit according to
+        `domain`. Can be a scalar or an array with shape which can be
+        broadcasted to ``signal.cshape``. For ``dB=True`` the target should
+        also be given in dB. The default is 0 dB if ``dB=True`` and 1
+        otherwise.
     freq_range: tuple
         Two element vector specifying upper and lower frequency in Hz between
         which the value for normalization is computed according to the
@@ -1567,9 +1573,9 @@ def normalize(signal, mode='time', normalize='max',
     --------
     normalized_signal: Signal
         The normalized signal
-    values: numpy array
-        If ``return_values=True`` returns values, the values of all channels
-        before normalization.
+    reference_norm: numpy array
+        If ``return_reference=True`` the function also return the normalization
+        values of all channels.
     """
 
     # check input
@@ -1577,89 +1583,92 @@ def normalize(signal, mode='time', normalize='max',
                                pyfar.TimeData)):
         raise TypeError("Input data has to be of type 'Signal', 'TimeData' "
                         "or 'FrequencyData'.")
-    if type(signal) == pyfar.classes.audio.FrequencyData and mode == 'time':
+    if type(signal) == pyfar.classes.audio.FrequencyData and domain == 'time':
         raise ValueError(
-            f"mode is '{mode}' and signal is type '{signal.__class__}'"
+            f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'TimeData'.")
-    if type(signal) == pyfar.classes.audio.TimeData and (mode in
-                                                         ('magnitude',
-                                                          'log_magnitude',
-                                                          'power')):
+    if type(signal) == pyfar.classes.audio.TimeData and domain == 'freq':
         raise ValueError(
-            f"mode is '{mode}' and signal is type '{signal.__class__}'"
+            f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'.")
+    # check power and dB
+    if power and dB:
+        warnings.warn("power and dB are both 'True'. This will result in just"
+                      "the dB calculation.")
     # set default values
-    if value is None:
-        value = 0 if mode == 'log_magnitude' else 1
+    if target is None:
+        target = 0 if dB else 1
     if freq_range is None and isinstance(signal, pyfar.FrequencyData):
         freq_range = (0, signal.frequencies[-1])
 
     # copy and transform data to the desired domain
-    if mode == 'time':
-        input_data = np.abs(signal.time)
-    elif mode == 'magnitude':
-        input_data = np.abs(signal.freq)
-    elif mode == 'log_magnitude':
-        input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
-                                                   prefix_return=True)
-    elif mode == 'power':
-        input_data = np.abs(signal.freq)**2
-    else:
-        raise ValueError(
-                    "mode must be 'time', 'magnitude', 'log_magnitude', "
-                    "or 'power'")
-
-    # get bounds for normalization
-    if mode == 'time':
+    if domain == 'time':
+        # get bounds for normalization
         lim = (0, signal.n_samples)
-
-    elif type(signal) != pyfar.classes.audio.FrequencyData:
-        # discard 0 Hz and Nyquist because they might be off by a factor of two
-        # (we are using the normalized spectra)
-        lim = signal.find_nearest_frequency(freq_range)
-        if signal.n_samples % 2:
-            lim[0] = np.max([lim[0], 1])
+        if dB:
+            input_data, log_prefix = pyfar.dsp.decibel(signal, 'time',
+                                                       prefix_return=True)
         else:
-            lim = np.clip(lim, 1, signal.n_bins-1)
+            input_data = np.abs(signal.time)**2 if power \
+                                                else np.abs(signal.time)
+
+    elif domain == 'freq':
+        if type(signal) != pyfar.classes.audio.FrequencyData:
+            # discard 0 Hz and Nyquist because they might be off by a factor of
+            # two (we are using the normalized spectra)
+            lim = signal.find_nearest_frequency(freq_range)
+            if signal.n_samples % 2:
+                lim[0] = np.max([lim[0], 1])
+            else:
+                lim = np.clip(lim, 1, signal.n_bins-1)
+        else:
+            lim = signal.find_nearest_frequency(freq_range)
+
+        if dB:
+            input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
+                                                       prefix_return=True)
+        else:
+            input_data = np.abs(signal.freq)**2 if power \
+                                                else np.abs(signal.freq)
     else:
-        lim = signal.find_nearest_frequency(freq_range)
+        raise ValueError("domain must be 'time' or 'freq'.")
     # get values for normalization
-    if normalize == 'max':
-        values = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
-                        keepdims=True)
-    elif normalize == 'mean':
-        values = np.mean(input_data[..., lim[0]:lim[1]], axis=-1,
-                         keepdims=True)
-    elif normalize == 'rms':
-        values = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
-                         axis=-1, keepdims=True))
+    if operation == 'max':
+        reference = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
+                           keepdims=True)
+    elif operation == 'mean':
+        reference = np.mean(input_data[..., lim[0]:lim[1]], axis=-1,
+                            keepdims=True)
+    elif operation == 'rms':
+        reference = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
+                            axis=-1, keepdims=True))
     else:
-        raise ValueError("normalize must be 'max', 'mean' or 'rms'")
+        raise ValueError("operation must be 'max', 'mean' or 'rms'.")
     # discard last dimension (samples or bins, required for pyfar arithmetics)
-    values = np.squeeze(values, axis=-1)
+    reference = np.squeeze(reference, axis=-1)
 
     # manipulate values
     if channel_handling == 'each':
-        values_norm = values.copy()
+        reference_norm = reference.copy()
     elif channel_handling == 'max':
-        values_norm = np.max(values)
+        reference_norm = np.max(reference)
     elif channel_handling == 'min':
-        values_norm = np.min(values)
+        reference_norm = np.min(reference)
     elif channel_handling == 'mean':
-        values_norm = np.mean(values)
+        reference_norm = np.mean(reference)
     else:
         raise ValueError(
                     "channel_handling must be 'each', 'max', 'min' or 'mean'")
 
     # de-logarthimize value
-    if mode == 'log_magnitude':
-        value = 10**(value/log_prefix)
-        values_norm = 10**(values_norm/log_prefix)
+    if dB is True:
+        target = 10**(target/log_prefix)
+        reference_norm = 10**(reference_norm/log_prefix)
 
     # apply normalization
-    normalized_signal = signal.copy() * value / values_norm
+    normalized_signal = signal.copy() * target / reference_norm
 
-    if return_values:
-        return normalized_signal, values_norm
+    if return_reference:
+        return normalized_signal, reference_norm
     else:
         return normalized_signal
