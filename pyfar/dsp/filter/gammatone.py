@@ -1,5 +1,7 @@
 import numpy as np
 import scipy.signal as sgn
+from copy import deepcopy
+from deepdiff import DeepDiff
 import pyfar as pf
 
 
@@ -148,6 +150,10 @@ class GammatoneBands():
                 f"bands between {self.freq_range[0]} and {self.freq_range[1]} "
                 f"Hz spaced by {self.resolution} ERB units @ "
                 f"{self.sampling_rate} Hz sampling rate")
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not DeepDiff(self.__dict__, other.__dict__)
 
     @property
     def freq_range(self):
@@ -460,6 +466,38 @@ class GammatoneBands():
             summed.time = np.squeeze(summed.time, axis=0)
 
         return summed
+
+    def copy(self):
+        """Return a copy of the audio object."""
+        return deepcopy(self)
+
+    def _encode(self):
+        # get dictionary representation
+        obj_dict = self.copy().__dict__
+        # define required data
+        keep = ["_freq_range", "_resolution", "_reference_frequency",
+                "_delay", "_sampling_rate", "_state"]
+        # check if all required data is contained
+        for k in keep:
+            if k not in obj_dict:
+                raise KeyError(f"{k} is not a class variable")
+        # remove obsolete data
+        for k in obj_dict.copy().keys():
+            if k not in keep:
+                del obj_dict[k]
+
+        return obj_dict
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        # initialize new clas instance
+        obj = cls(obj_dict["_freq_range"], obj_dict["_resolution"],
+                  obj_dict["_reference_frequency"], obj_dict["_delay"],
+                  obj_dict["_sampling_rate"])
+        # set internal parameters
+        obj.__dict__.update(obj_dict)
+
+        return obj
 
 
 def erb_frequencies(freq_range, resolution=1, reference_frequency=1000):

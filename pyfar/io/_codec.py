@@ -362,6 +362,7 @@ def _is_pyfar_type(obj):
         'FilterFIR',
         'FilterIIR',
         'FilterSOS',
+        'GammatoneBands',
         'SphericalVoronoi',
         'TimeData',
         'FrequencyData',
