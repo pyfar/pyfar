@@ -14,9 +14,18 @@ import warnings
 import sofar as sf
 import zipfile
 import io
-import soundfile
 import tempfile
 import numpy as np
+
+try:
+    import soundfile
+    soundfile_imported = True
+except ModuleNotFoundError or OSError:
+    soundfile_imported = False
+    soundfile_warning = (
+        "python-soundfile could not be imported. Try to install it using `pip "
+        "install soundfile. If this not works search the documentation for "
+        "help: https://python-soundfile.readthedocs.io")
 
 import pyfar
 from pyfar import Signal, FrequencyData, Coordinates
@@ -276,6 +285,10 @@ def read_audio(filename, dtype='float64', **kwargs):
       [-1.0, 1.0). If the file contains ``np.array([42.6], dtype='float32')``,
       you will read ``np.array([43], dtype='int32')`` for ``dtype='int32'``.
     """
+    if not soundfile_imported:
+        warnings.warn(soundfile_warning)
+        return
+
     data, sampling_rate = soundfile.read(
         file=filename, dtype=dtype, always_2d=True, **kwargs)
     signal = Signal(data.T, sampling_rate, domain='time', dtype=dtype)
@@ -317,6 +330,10 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
       amplitudes larger than +/- 1 are clipped.
 
     """
+    if not soundfile_imported:
+        warnings.warn(soundfile_warning)
+        return
+
     sampling_rate = signal.sampling_rate
     data = signal.time
 
@@ -426,6 +443,10 @@ def audio_formats():
      'MAT5': 'MAT5 (GNU Octave 2.1 / Matlab 5.0)'}
 
     """
+    if not soundfile_imported:
+        warnings.warn(soundfile_warning)
+        return
+
     return soundfile.available_formats()
 
 
@@ -450,6 +471,10 @@ def audio_subtypes(format=None):
      'PCM_S8': 'Signed 8 bit PCM'}
 
     """
+    if not soundfile_imported:
+        warnings.warn(soundfile_warning)
+        return
+
     return soundfile.available_subtypes(format=format)
 
 
@@ -469,6 +494,10 @@ def default_audio_subtype(format):
     'DOUBLE'
 
     """
+    if not soundfile_imported:
+        warnings.warn(soundfile_warning)
+        return
+
     return soundfile.default_subtype(format)
 
 
@@ -480,6 +509,10 @@ def _clipped_audio_subtypes():
     to disk. It needs to be called manually:
     pyfar.io.io._clipped_audio_subtypes().
     """
+    if not soundfile_imported:
+        warnings.warn(soundfile_warning)
+        return
+
     collection = {}
     signal = pyfar.Signal([-1.5, -1, -.5, 0, .5, 1, 1.5]*100, 44100)
     with tempfile.TemporaryDirectory() as tmpdir:
