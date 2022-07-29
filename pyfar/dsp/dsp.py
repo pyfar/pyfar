@@ -1506,42 +1506,54 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
               return_reference=False):
     """
     Apply a normalization in time or frequency domain.
-    Therefore, the data to normalize gets multiplied by the normalization
-    factor :math:`target/reference_norm`.
-        `domain`.
+
+    In the default case, the normalization ensures that the maximum absolute
+    amplitude of the signal after normalization is 1. This is achieved by
+    the multiplication
+
+    ``signal_normalized = signal * target / reference``,
+
+    where `target` equals
+    1 and `reference` is the maximum absolute amplitude before the
+    normalization.
+
+    It is for example also possible normalize to the mean absolute amplitude or
+    to normalize the magnitude spectrum within a certain frequency range. This
+    is done as described above, but changes the way in which `reference` is
+    calculated.
+
     Parameters
     ----------
     signal: Signal
         Input signal of the signal class.
     domain: string
-        The data used to compute the normalization value.
-        ``'time'``
-            Time data. Normalize the data in time domain.
-        ``'freq'``
-            Frequency data. Normalize the data in frequency domain.
+        The domain in which the signal is normalized
 
-        Note that the normalized spectrum ``signal.freq`` is used for
-        normalization in domain ``'freq'``, ``signal.time`` otherwise.
+        ``'time'``
+            Normalize the absolute time data.
+        ``'freq'``
+           Normalize the absolute frequency data. In this case the magnitude
+           spectrum with FFT normalization is used (``signal.freq``, cf.
+           :py:mod:`FFT concepts <pyfar._concepts.fft>`).
+
         The default is ``'time'``.
     dB: bool, optional
-        If `dB` is ``True``, the logarithmic magnitude spectra will be used for
-        normalization, which is calculated by
-        :meth:`pyfar.dsp.decibel` with:
-        ``data_in_dB = log_prefix * numpy.log10(data/log_reference)``.
+        If `dB` is ``True``, the logarithmic magnitude spectra are used for
+        normalization. They are calculated by :py:func:`~pyfar.dsp.decibel`.
         The default is ``False``.
     power: bool, optional
         If `power` is ``True``, the power spectra :math:`|X|^2` will be used
-        for normalization. Notice that if `dB` and `power` are both ``True``,
-        only the logarithmic magnitude spectra will be used.
+        for normalization. Notice that `power` does have no effect if `dB` is
+        ``True``.
     operation: string, optional
-        Operation to compute the normalization value applied to the data
-        selected by `doamin`, `dB` and `power`.
+        Operation to compute the `reference` value described above
+
         ``'max'``
-            Takes the absolute maximum value.
+            Takes the absolute maximum value of each channel.
         ``'mean'``
-            Takes the mean value.
+            Takes the absolute mean value of each channel.
         ``'rms'``
-            Takes the root mean square value.
+            Takes the root mean square value of each channel.
 
         The default is ``'max'``
     channel_handling: string, optional
@@ -1551,31 +1563,29 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         ``'each'``
             Separate normalization of each channel.
         ``'max'``
-            Normalize to the maximum normalization value across the channels.
+            Normalize to the maximum `reference` value across channels.
         ``'min'``
-            Normalize to the minimum normalization value across the channels.
+            Normalize to the minimum `reference` value across channels.
         ``'mean'``
-            Normalize to the mean normalization value across the channels.
+            Normalize to the mean `reference` value across the channels.
 
        The default is ``'max'``
     target: scalar, array
         The target to which the signal is normalized in the unit according to
-        `domain`. Can be a scalar or an array with shape which can be
-        broadcasted to ``signal.cshape``. For ``dB=True`` the target should
-        also be given in dB. The default is 0 dB if ``dB=True`` and 1
-        otherwise.
+        `dB`. Can be a scalar or an array. In the latter case the shape of
+        `target` must be broadcasted ``signal.cshape``. The default is 0 dB if
+        ``dB=True`` and 1 otherwise.
     freq_range: tuple
         Two element vector specifying upper and lower frequency in Hz between
-        which the value for normalization is computed according to the
-        parameter `normalize`.
+        which the `reference` value for normalization is computed.
 
     Returns
     --------
     normalized_signal: Signal
         The normalized signal
-    reference_norm: numpy array
-        If ``return_reference=True`` the function also return the normalization
-        values of all channels.
+    reference: numpy array
+        If ``return_reference=True`` the function also return the `reference`
+        values described above.
     """
 
     # check input
@@ -1593,8 +1603,8 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
             " but must be of type 'Signal' or 'FrequencyData'.")
     # check power and dB
     if power and dB:
-        warnings.warn("power and dB are both 'True'. This will result in just"
-                      "the dB calculation.")
+        warnings.warn("power and dB are both 'True'. power does have no effect"
+                      " in this case.")
     # set default values
     if target is None:
         target = 0 if dB else 1
