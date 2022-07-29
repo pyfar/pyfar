@@ -20,7 +20,7 @@ import numpy as np
                         ['rms', 'mean', [np.sqrt(3.0)*0.3334,
                                          np.sqrt(3.0)*1.6667]]
                         ))
-def test_parametrized_normalization(operation, channel_handling, truth):
+def test_normalization(operation, channel_handling, truth):
     """Parametrized test for all combinations of operation and channel_handling
     parameters using an impulse.
     """
@@ -30,18 +30,17 @@ def test_parametrized_normalization(operation, channel_handling, truth):
     npt.assert_allclose(answer.time[..., 0], truth, rtol=1e-02)
 
 
-@pytest.mark.parametrize('domain,truth', (
-                        ['time', [0.25, 1.0, 0.25]],
-                        ['freq', [0.25, 1.0, 0.25]]
-                        ))
-def test_parametrized_domains_normalization(domain, truth):
-    """Parametrized test for normalization in time and frequency domain."""
-    signal = pf.Signal([1, 4, 1], 44100)
-    answer = pf.dsp.normalize(signal, domain=domain)
-    if domain == 'time':
-        npt.assert_allclose(abs(answer.time[0]), truth)
-    else:
-        npt.assert_allclose(abs(answer.freq[0]), truth)
+def test_domains_normalization():
+    """Test for normalization in time and frequency domain."""
+    signal = pf.signals.noise(128, seed=7)
+    time = pf.dsp.normalize(signal, "time")
+    freq = pf.dsp.normalize(signal, "freq")
+
+    assert np.max(np.abs(time.time)) == 1
+    assert np.max(np.abs(time.freq)) != 1
+
+    assert np.max(np.abs(freq.time)) != 1
+    assert np.max(np.abs(freq.freq)) == 1
 
 
 def test_dB_normalization():
