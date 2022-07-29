@@ -446,7 +446,8 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
     return signal
 
 
-def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None):
+def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
+             suppress_aliasing=True):
     """Resample signal to new sampling rate.
 
     The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
@@ -495,6 +496,14 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None):
         realizing the target sampling rate.
 
         The default is ``None``, which uses ``frac_limit = 1e6``.
+    suppress_aliasing : bool, optional
+        Suppress aliased energy above the Nyquist frequency of the input
+        signal, i.e., ``signal.sampling_rate/2``. This is recommended, and is
+        realized by applying a zero-phase Elliptic filter with a pass band
+        ripple of 0.1 dB, a stop band attenuation of 60 dB, and pass/stop
+        band frequencies of ``signal.sampling_rate/2`` and
+        ``min(1, 1.05 * signal.sampling_rate/2)`` Hz. Note that this is only
+        applied in case of up-sampling.
 
     Returns
     -------
@@ -548,7 +557,8 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None):
     if not isinstance(signal, (pf.Signal)):
         raise TypeError("Input data has to be of type pyfar.Signal")
     # calculate factor L for up- or downsampling
-    L = sampling_rate / signal.sampling_rate
+    sampling_rate_old = signal.sampling_rate
+    L = sampling_rate / sampling_rate_old
     # set match_amplitude domain depending on signal.signal_type
     if match_amplitude == "auto":
         match_amplitude = "freq" if signal.signal_type == "energy" else "time"
@@ -567,7 +577,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None):
         raise ValueError((f"match_amplitude is '{match_amplitude}' but must be"
                           " 'auto', 'time' or 'freq'"))
     # check if one of the sampling rates is not divisible by 10
-    if sampling_rate % 10 or signal.sampling_rate % 10:
+    if sampling_rate % 10 or sampling_rate_old % 10:
         warnings.warn((
             'At least one sampling rate is not divisible by 10, , which can '
             'cause a infinite loop in `scipy.resample_poly`. If this occurs, '
@@ -581,7 +591,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None):
         frac = Fraction(Decimal(L)).limit_denominator(frac_limit)
     up, down = frac.numerator, frac.denominator
     # calculate an error depending on samplings rates and fraction
-    error = abs(signal.sampling_rate * up / down - sampling_rate)
+    error = abs(sampling_rate_old * up / down - sampling_rate)
     if error != 0.0:
         warnings.warn((
             f'The target sampling rate was realized with an error of {error}.'
@@ -590,8 +600,30 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None):
             'sampling rate can exactly be realized).'))
     # resample data with scipy resampe_poly function
     data = sgn.resample_poly(signal.time, up, down, axis=-1)
-    return pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
+    data = pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
                      comment=signal.comment)
+
+    if suppress_aliasing and L > 1:
+
+        # Design elliptic filter
+        # (pass band is given by nyquist frequency of input signal, other
+        # parameters are freely chosen)
+        wp = sampling_rate_old / 2 / sampling_rate * 2
+        ws = min(1, 1.05 * wp)
+        gpass = .1
+        gstop = 60
+
+        # calculate the required order and -3 dB cut-off frequency
+        N, f_c = sgn.ellipord(wp, ws, gpass, gstop/2, fs=sampling_rate)
+        f_c *= sampling_rate / 2
+
+        # apply zero-phase filter
+        data = pf.dsp.filter.elliptic(data, N, gpass, gstop/2, f_c, 'lowpass')
+        data.time = np.flip(data.time, axis=-1)
+        data = pf.dsp.filter.elliptic(data, N, gpass, gstop/2, f_c, 'lowpass')
+        data.time = np.flip(data.time, axis=-1)
+
+    return data
 
 
 class InterpolateSpectrum():

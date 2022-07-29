@@ -12,7 +12,7 @@ def test_resampling(L):
     fs_1 = 48000
     fs_2 = L*fs_1
     signal = pf.signals.noise(1024, sampling_rate=fs_1)
-    resampled_sig = pf.dsp.resample(signal, fs_2)
+    resampled_sig = pf.dsp.resample(signal, fs_2, suppress_aliasing=False)
     # asserts the sample length
     assert L*signal.n_samples == resampled_sig.n_samples
     # asserts the length of time of the signals
@@ -29,7 +29,8 @@ def test_upsampling_delayed_impulse():
     N = 128
     signal = pf.signals.impulse(N, 64, sampling_rate=fs_1)
     # Get resampled Signal with function
-    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="time")
+    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="time",
+                                suppress_aliasing=False)
     # Calculated the analytic signal with sinc function
     L = fs_2 / fs_1
     n = np.arange(-N/2, N/2, 1/L)
@@ -100,7 +101,8 @@ def test_frequency_matching():
     fs_2 = 96000
     N = 128
     signal = pf.signals.impulse(N, 64, sampling_rate=fs_1)
-    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="freq")
+    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="freq",
+                                suppress_aliasing=False)
     np.testing.assert_almost_equal(resampled.freq[0][:int(N/2)-10],
                                    signal.freq[0][:int(N/2)-10], decimal=2)
 
@@ -116,7 +118,7 @@ def test_resample_multidimensional_impulse():
     signal = pf.signals.impulse(N, 64, amplitude=[[1, 2, 3], [4, 5, 6]],
                                 sampling_rate=fs_1)
     # Get resampled Signal with function
-    resampled = pf.dsp.resample(signal, fs_2, 'time')
+    resampled = pf.dsp.resample(signal, fs_2, 'time', suppress_aliasing=False)
     # Test the cshape
     assert signal.cshape == resampled.cshape
     # Calculated the analytic signal with sinc function
@@ -128,3 +130,17 @@ def test_resample_multidimensional_impulse():
     sinc = pf.dsp.time_window(sinc, [N*L/2-int(c/2), N*L/2+int(c/2)],
                               window='hamming')
     np.testing.assert_almost_equal(resampled.time, sinc.time, decimal=2)
+
+
+def test_resample_suppress_aliasing():
+
+    # test signal
+    signal = pf.signals.noise(512, seed=7)
+    # resample with and without aliasing suppression
+    true = pf.dsp.resample(signal, 48000, suppress_aliasing=True)
+    false = pf.dsp.resample(signal, 48000, suppress_aliasing=False)
+    # calculate energy above old Nyquist frequency
+    idx = true.find_nearest_frequency(22050)
+    energy_true = np.sum(true.freq_raw[..., idx:]**2)
+    energy_false = np.sum(false.freq_raw[..., idx:]**2)
+    assert energy_true < energy_false
