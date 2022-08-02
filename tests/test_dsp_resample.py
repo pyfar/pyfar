@@ -1,7 +1,6 @@
 import pyfar as pf
 import pytest
 import numpy as np
-import numpy.testing as npt
 
 
 @pytest.mark.parametrize('L', [2, 0.5])
@@ -134,6 +133,7 @@ def test_resample_multidimensional_impulse():
 
 
 def test_resample_suppress_aliasing():
+    """Test the aliasing suppression filter"""
 
     # test signal
     signal = pf.signals.impulse(1024, 512)
@@ -157,4 +157,3 @@ def test_resample_suppress_aliasing():
     # below -50 dB possibly due to the finite length of the signal)
     idx_stop = diff.find_nearest_frequency(22050 * 1.05)
     assert np.all(mag[..., idx_stop + 1:] < -50)
-
