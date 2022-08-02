@@ -1,6 +1,7 @@
 import pyfar as pf
 import pytest
 import numpy as np
+import numpy.testing as npt
 
 
 @pytest.mark.parametrize('L', [2, 0.5])
@@ -135,12 +136,25 @@ def test_resample_multidimensional_impulse():
 def test_resample_suppress_aliasing():
 
     # test signal
-    signal = pf.signals.noise(512, seed=7)
-    # resample with and without aliasing suppression
+    signal = pf.signals.impulse(1024, 512)
+    # measure impulse response of anti-aliasing filter
     true = pf.dsp.resample(signal, 48000, suppress_aliasing=True)
     false = pf.dsp.resample(signal, 48000, suppress_aliasing=False)
-    # calculate energy above old Nyquist frequency
-    idx = true.find_nearest_frequency(22050)
-    energy_true = np.sum(true.freq_raw[..., idx:]**2)
-    energy_false = np.sum(false.freq_raw[..., idx:]**2)
-    assert energy_true < energy_false
+    diff = true / false
+
+    phase = pf.dsp.phase(diff)
+    mag = pf.dsp.decibel(diff)
+
+    # check zero-phase in pass band (should be exactly 0, but is not possibly
+    # due to the limited length of the signal)
+    idx_pass = diff.find_nearest_frequency(22050)
+    assert np.all(np.abs(phase[..., :idx_pass - 1]) <= .02)
+    # check unity gain in pass band (deviations should be <= 0.1 dB, but are
+    # in the range of 0.25 dB possibly due to the finite length of the signal)
+    assert np.all(np.abs(mag[..., :idx_pass - 1]) <= .25)
+
+    # check stop band damping (magnitudes should be below -60 dB, but are
+    # below -50 dB possibly due to the finite length of the signal)
+    idx_stop = diff.find_nearest_frequency(22050 * 1.05)
+    assert np.all(mag[..., idx_stop + 1:] < -50)
+
