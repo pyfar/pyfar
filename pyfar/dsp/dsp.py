@@ -1569,9 +1569,9 @@ def average(signal, mode='time', axis=None, phase_copy=None,
     elif mode == 'complex':
         data = signal.freq.copy()
     elif mode == 'magnitude':
-        data = np.abs(signal.freq.copy())
+        data = np.abs(signal.freq)
     elif mode == 'power':
-        data = np.abs(signal.freq.copy())**2
+        data = np.abs(signal.freq)**2
     elif mode == 'log_magnitude':
         data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
                                              prefix_return=True)
@@ -1580,16 +1580,13 @@ def average(signal, mode='time', axis=None, phase_copy=None,
     # NOT SURE IF THIS WORKS WITH MORE THAN FOR SIGNALS GREATER THAN 3D
     # data = data * ca._get_arithmetic_data(weights,None, None)
     data = data * np.asarray(weights)
-
+    data = np.sum(data, axis=axis, keepdims=True)
     # average the data
-    if (mode == 'time' or
-            mode == 'complex' or mode == 'magnitude'):
-        data = np.sum(data, axis=axis, keepdims=True)
+    if mode in ['time', 'complex', 'magnitude']:
+        pass
     elif mode == 'power':
-        data = np.sum(data, axis=axis, keepdims=True)
         data = np.sqrt(data)
     elif mode == 'log_magnitude':
-        data = np.sum(data, axis=axis, keepdims=True)
         data = 10**(data/log_prefix)
     else:
         raise ValueError(
