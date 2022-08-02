@@ -24,7 +24,7 @@ except ModuleNotFoundError or OSError:
     soundfile_imported = False
     soundfile_warning = (
         "python-soundfile could not be imported. Try to install it using `pip "
-        "install soundfile. If this not works search the documentation for "
+        "install soundfile`. If this not works search the documentation for "
         "help: https://python-soundfile.readthedocs.io")
 
 import pyfar
