@@ -1505,7 +1505,7 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
               channel_handling='max', target=None, freq_range=None,
               return_reference=False):
     """
-    Apply a normalization in time or frequency domain.
+    Apply a normalization.
 
     In the default case, the normalization ensures that the maximum absolute
     amplitude of the signal after normalization is 1. This is achieved by
@@ -1517,45 +1517,46 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
     1 and `reference` is the maximum absolute amplitude before the
     normalization.
 
-    It is for example also possible normalize to the mean absolute amplitude or
-    to normalize the magnitude spectrum within a certain frequency range. This
-    is done as described above, but changes the way in which `reference` is
-    calculated.
+    Several normalizations are possible, which in fact are different ways
+    of computing the `reference` value (e.g. based on the spectrum).
+    See the parameters for details.
 
     Parameters
     ----------
-    signal: Signal
+    signal: Signal, TimeData, FrequencyData
         Input signal of the signal class.
     domain: string
-        The domain in which the signal is normalized
+        Domain of the data to compute the reference value.
 
         ``'time'``
-            Normalize the absolute time data.
+           Normalization based on the time data.
         ``'freq'``
-           Normalize the absolute frequency data. In this case the magnitude
-           spectrum with FFT normalization is used (``signal.freq``, cf.
-           :py:mod:`FFT concepts <pyfar._concepts.fft>`).
+           Normalization based on the frequency data. In this case the
+           magnitudespectrum with FFT normalization is used
+           (``signal.freq``, cf. :py:mod:`FFT concepts <pyfar._concepts.fft>`).
 
         The default is ``'time'``.
     dB: bool, optional
-        If `dB` is ``True``, the logarithmic magnitude spectra are used for
-        normalization. They are calculated by :py:func:`~pyfar.dsp.decibel`.
+        If `dB` is ``True``, the data is logarithmized according to
+        :py:func:`~pyfar.dsp.decibel` and the signal's properties before
+        the calculation of the reference value.
         The default is ``False``.
     power: bool, optional
         If `power` is ``True``, the power spectra :math:`|X|^2` will be used
         for normalization. Notice that `power` does have no effect if `dB` is
         ``True``.
     operation: string, optional
-        Operation to compute the `reference` value described above
+        Operation per channel to compute the `reference` value described above
+        (according to ``domain`` and ``dB``).
 
         ``'max'``
-            Takes the absolute maximum value of each channel.
+            Takes the maximum absolute value.
         ``'mean'``
-            Takes the absolute mean value of each channel.
+            Takes the mean of the absolute values.
         ``'rms'``
-            Takes the root mean square value of each channel.
+            Takes the root mean square value.
 
-        The default is ``'max'``
+        The default is ``'max'``.
     channel_handling: string, optional
         Define how multi-channel signals are handled. This parameter does
         not affect single-channel signals.
@@ -1577,13 +1578,17 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         ``dB=True`` and 1 otherwise.
     freq_range: tuple
         Two element vector specifying upper and lower frequency in Hz between
-        which the `reference` value for normalization is computed.
+        which the `reference` value for normalization is computed. This will
+        just effect if the normalization is based on the frequency data.
+        Therefore, `freq_range` won't be used if ``dB='time'``.
+        The default is ``None``, which will use the whole frequency range of
+        the signal.
 
     Returns
     --------
-    normalized_signal: Signal
+    normalized_signal: Signal, TimeData, FrequencyData
         The normalized signal
-    reference: numpy array
+    return_reference: bool
         If ``return_reference=True`` the function also return the `reference`
         values described above.
     """
