@@ -500,10 +500,11 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
         Suppress aliased energy above the Nyquist frequency of the input
         signal, i.e., ``signal.sampling_rate/2``. This is recommended, and is
         realized by applying a zero-phase Elliptic filter with a pass band
-        ripple of 0.1 dB, a stop band attenuation of 60 dB, and pass/stop
-        band frequencies of ``signal.sampling_rate/2`` and
-        ``min(1, 1.05 * signal.sampling_rate/2)`` Hz. Note that this is only
-        applied in case of up-sampling.
+        ripple of 0.1 dB, a stop band attenuation of 60 dB. The pass band edge
+        frequency is ``signal.sampling_rate/2``. The stop band edge frequency
+        is the minimum of 1.05 times the pass band frequency and the new
+        Nyquist frequency (``sampling_rate/2``). The default is ``True``. Note
+        that this is only applied in case of up-sampling.
 
     Returns
     -------
