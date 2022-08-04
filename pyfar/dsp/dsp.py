@@ -1550,8 +1550,8 @@ def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
         ``signal.cshape``. The default ``None`` returns a zero-phase signal.
     weights: array like
         array that gives channel weights for averaging the data. Must be of
-        shape ``signal.cshape``. The default is ``None``, which applies equal
-        weights to all channels.
+        shape which can be breadcasted to ``signal.cshape``.
+        The default is ``None``, which applies equal weights to all channels.
     Returns
     --------
     averaged_signal: Signal
