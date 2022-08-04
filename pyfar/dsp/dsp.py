@@ -1500,7 +1500,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def average(signal, mode='time', axis=None, phase_copy=None,
+def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
             weights=None):
     """
     Average multichannel Signals.
@@ -1517,19 +1517,32 @@ def average(signal, mode='time', axis=None, phase_copy=None,
         ``'complex'``
             average the complex spectra. Note that this might cause artifacts
             if the data is not aligned across channels.
-        ``'magnitude'``
+        ``'magnitude_zerophase'``
             average the magnitude spectra and discard the phase
             (see `phase_copy`)
         ``'power'``
             average the power spectra $|X|^2$ and discard the phase. The
             squaring of the spectra is reversed before returning the averaged
             signal.
-        ``'log_magnitude'``
+        ``'log_magnitude_zerophase'``
             average the log. magnitude spectra $20 \\log_{10}(X)$ and discard
             the phase. The logarithm is reversed before returning the averaged
             signal.
 
         The default is ``'time'``
+    axis: None or int or tuple of ints, optional
+        Axis or axes along which the averaging is done. Can be None, which will
+        take all channels to average the multichannel signal.  If axis is
+        negative it counts from the last to the first axis. If axis is a tuple
+        of ints, average will perform on the channels specified in the tuple.
+        The default is ``None``.
+    keepdims: bool, optional
+        If this is true, the axis which are reduced during the averaging are
+        kept as a dimension with size one. Also, the output will broadcast
+        correctly with the input Signal. If keepdims is False and the converted
+        domain data after summing up got more then two dimensions, the data
+        will be also squeezed to the shape of axis.
+        The default is ``False``.
     phase_copy: tuple
         Some averaging modes discard the phase in which case the phase from
         a channel before averaging can be copied to the averaged signal. Pass
@@ -1539,7 +1552,6 @@ def average(signal, mode='time', axis=None, phase_copy=None,
         array that gives channel weights for averaging the data. Must be of
         shape ``signal.cshape``. The default is ``None``, which applies equal
         weights to all channels.
-
     Returns
     --------
     averaged_signal: Signal
@@ -1557,53 +1569,60 @@ def average(signal, mode='time', axis=None, phase_copy=None,
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal')
 
+    # check for axis
+    if axis and np.max(axis) > len(signal.cshape):
+        raise ValueError('The maximum of axis needs to be smaller then '
+                         'len(signal.cshape).')
+
+    if axis is None:
+        axis = (0, len(signal.cshape))
+
     # set weights default
     if weights is None:
         weights = 1/(np.prod(signal.cshape))
-    else:
-        weights = weights/np.sum(weights)
+    # apply weights
+    signal *= weights
 
+    if not isinstance(axis, int):
+        axis = tuple([ax-1 if ax < 0 else ax for ax in axis])
     # convert data to desired domain
     if mode == 'time':
-        data = signal.time.copy()
+        data = signal.time
     elif mode == 'complex':
-        data = signal.freq.copy()
-    elif mode == 'magnitude':
+        data = signal.freq
+    elif mode == 'magnitude_zerophase':
         data = np.abs(signal.freq)
+    elif mode == 'magnitude_phase':
+        pass  # guck smooth_fractional_octave --> ??
     elif mode == 'power':
         data = np.abs(signal.freq)**2
-    elif mode == 'log_magnitude':
+    elif mode == 'log_magnitude_zerophase':
         data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
                                              prefix_return=True)
-
-    # apply weights
-    # NOT SURE IF THIS WORKS WITH MORE THAN FOR SIGNALS GREATER THAN 3D
-    # data = data * ca._get_arithmetic_data(weights,None, None)
-    data = data * np.asarray(weights)
-    data = np.sum(data, axis=axis, keepdims=True)
-    # average the data
-    if mode in ['time', 'complex', 'magnitude']:
-        pass
-    elif mode == 'power':
-        data = np.sqrt(data)
-    elif mode == 'log_magnitude':
-        data = 10**(data/log_prefix)
     else:
         raise ValueError(
-            """mode must be 'time', 'complex', 'magnitude', 'power' or
-            'log_magnitude'"""
+            """mode must be 'time', 'complex', 'magnitude_zerophase', 'power'
+            or 'log_magnitude_zerophase'."""
             )
-
+    # average the data
+    data = np.sum(data, axis=axis, keepdims=keepdims)
+    # This doesnt work yet -->
+    if not keepdims and data.ndim > 2:
+        np.squeeze(data, axis)
+    if mode == 'power':
+        data = np.sqrt(data)
+    elif mode == 'log_magnitude_zerophase':
+        data = 10**(data/log_prefix)
     # phase handling
     if phase_copy is None:
         pass
     else:
         if mode == 'time':
-            data_ang = signal.time.copy()
+            data_ang = signal.time
             # NOT SURE IF THIS COPPIES PHASE_COPY INDEX IN CORRECTLY
             data_ang = np.angle(data_ang[phase_copy, ...])
         else:
-            data_ang = signal.freq.copy()
+            data_ang = signal.freq
             data_ang = np.angle(data_ang[phase_copy, ...])
 
         data = data * np.exp(1j * data_ang)
