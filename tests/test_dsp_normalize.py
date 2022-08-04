@@ -120,3 +120,5 @@ def test_error_raises():
     with pytest.warns(UserWarning,
                       match="power and dB are both 'True'."):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), power=True, dB=True)
+    with raises(ValueError, match=("The frequency range needs to specify")):
+        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), freq_range=2)

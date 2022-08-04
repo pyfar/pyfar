@@ -1576,11 +1576,11 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         `dB`. Can be a scalar or an array. In the latter case the shape of
         `target` must be broadcasted ``signal.cshape``. The default is 0 dB if
         ``dB=True`` and 1 otherwise.
-    freq_range: tuple
+    freq_range: tuple, array_like, double
         Two element vector specifying upper and lower frequency in Hz between
         which the `reference` value for normalization is computed. This will
         just effect if the normalization is based on the frequency data.
-        Therefore, `freq_range` won't be used if ``dB='time'``.
+        Therefore, `freq_range` won't be used if ``domain='time'``.
         The default is ``None``, which will use the whole frequency range of
         the signal.
 
@@ -1615,7 +1615,11 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         target = 0 if dB else 1
     if freq_range is None and isinstance(signal, pyfar.FrequencyData):
         freq_range = (0, signal.frequencies[-1])
-
+    if freq_range:
+        freq_range = np.asarray(freq_range)
+        if freq_range.size < 2:
+            raise ValueError(
+                "The frequency range needs to specify lower and upper limits.")
     # copy and transform data to the desired domain
     if domain == 'time':
         # get bounds for normalization
