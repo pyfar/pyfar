@@ -1,7 +1,13 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
+import warnings
 
 import pyfar as pf
+
+# this warning needs to be caught and appears if numpy array are generated
+# from nested lists containing lists of unequal lengths, e.g.,
+#  [[1, 0, 0], [1, 0]]
+warnings.filterwarnings("error", category=np.VisibleDeprecationWarning)
 
 
 class Orientations(Rotation):
@@ -81,9 +87,15 @@ class Orientations(Rotation):
         orientations : `Orientations` instance
             Object containing the orientations represented by quaternions.
         """
-        views = np.atleast_2d(views).astype(np.float64)
-        ups = np.atleast_2d(ups).astype(np.float64)
 
+        # init views and up
+        try:
+            views = np.atleast_2d(views).astype(np.float64)
+            ups = np.atleast_2d(ups).astype(np.float64)
+        except np.VisibleDeprecationWarning:
+            raise ValueError("Expected `views` and `ups` to have shape (N, 3)")
+
+        # check views and ups
         if (views.ndim > 2 or views.shape[-1] != 3 or
                 ups.ndim > 2 or ups.shape[-1] != 3):
             raise ValueError(f"Expected `views` and `ups` to have shape (N, 3)"
