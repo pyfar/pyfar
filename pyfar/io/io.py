@@ -461,6 +461,59 @@ def default_audio_subtype(format):
     return soundfile.default_subtype(format)
 
 
+def read_comsol(filename, data_format='spreadsheet'):
+    """
+    Read data from COMSOL exported files into a Dictonary.
+
+    Parameters
+    ----------
+    filename : string, Path
+        Input file. .txt, .csv and .dat is supported and need to be given.
+    data_format : string
+        'spreadsheet' or 'sectionwise'
+
+    Returns
+    -------
+    collection: dict
+        Contains comsol data like
+        ``{ 'data': 'obj1', 'coordinates': 'obj2' ... }``.
+
+    Examples
+    --------
+    Read data from COMSOL export file.
+
+    >>> collection = pyfar.read_comsol('my_data.csv')
+    >>> my_data = collection['data']
+    >>> my_coordinates = collection['coordinates']
+    """
+    # Check for .far file extension
+    # if not pathlib.Path(filename).is_file:
+    #     raise FileNotFoundError(("{filename} doesn't exisits."))
+
+    # Check Datatype
+    # suffix = pathlib.Path(filename).suffix
+    # if suffix.endswith(('.txt')):
+    #     seperator_header = ' '
+    #     seperator_body = ' '
+    # elif suffix.endswith(('.dat')):
+    #     seperator_header = ' '
+    #     seperator_body = ','
+    # elif suffix.endswith(('.csv')):
+    #     seperator_header = ','
+    #     seperator_body = ','
+    # else:
+    #     raise SyntaxError((
+    #         "Input path must be a .txt, .csv or .dat file"
+    #         f"but is of type {str(suffix)}"))
+
+    # return dict()
+
+    # check data formate
+    # numpy.loadtxt
+    # https://doc.comsol.com/5.5/doc/com.comsol.help.comsol/comsol_api_fileformats.45.03.html
+    pass
+
+
 def _clipped_audio_subtypes():
     """Creates a dictionary of format/subtype combinations which are clipped by
     :py:func:´write_audio`.

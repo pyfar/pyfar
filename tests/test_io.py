@@ -642,3 +642,27 @@ def test_default_audio_subtype(default_audio_subtype_mock):
     subtype_return = pyfar.io.default_audio_subtype(format=audio_format)
     assert subtype_return == 'bla'
     default_audio_subtype_mock.assert_called_with(audio_format)
+
+
+def test_comsol_read_wrong_paths():
+    """Test error of find not found."""
+    path = 'bla.csv'
+    with pytest.raises(FileNotFoundError):
+        io.read_comsol(path)
+
+
+def test_comsol_read_wrong_file_type():
+    """Test read comsol file format."""
+    filename = 'bla.bla'
+    with pytest.raises(SyntaxError):
+        io.read_comsol(filename)
+
+
+def test_comsol_read_test_examples():
+    out1 = io.read_comsol(
+        "reflections_water_sediment_Lp_freq_all_angle_all_spreadsheet.csv"
+        )
+    out2 = io.read_comsol(
+        "reflections_water_sediment_Lp_freq_all_angle_all_spreadsheet.csv"
+        )
+    assert isinstance(out1, type(out2))
