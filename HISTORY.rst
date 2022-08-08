@@ -2,6 +2,11 @@
 History
 =======
 
+0.4.2 (2022-08-08)
+------------------
+* Make python-soundfile an optional requirement due to unsupported architectures. Note that without python-soundfile common audio file format are no longer supported via `pyfar.io`.
+* Developer: Switch to CircleCI for continuous testing.
+
 0.4.2 (2022-05-20)
 ------------------
 * Bugfix: Sweep functions marked for deprecation had no return value.
