@@ -1498,3 +1498,156 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference), log_prefix
     else:
         return log_prefix * np.log10(np.abs(data) / log_reference)
+
+
+def energy(signal, keepdims=False):
+    """
+    Compute the total energy of a signal in time domain. Therefore, the
+    Parseval's theorem [#] is used with:
+
+    .. math::
+
+        \\sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\\sum_{k=0}^{N-1}|X[k]|^2,
+
+    As the calculation in time domain is equivalent to the frequency domain,
+    just the time domain is used in this function. Nevertheless, for the energy
+    calculation in the frequency domain the unitary norm needs to be used.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to computed the energy from.
+    keepdims : bool, optional
+        If this is true, the axis which are reduced during summing up are
+        kept as a dimension with size one. Also, the output will broadcast
+        correctly with the input Signal. Thereafter, the last dimension of the
+        data gets squeezed.
+        The default is ``False``.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The total energy of the input signal.
+
+    Notes
+    -----
+    To compute the power and rms of a signal, :py:func:`~pyfar.dsp.power` and
+    :py:func:`~pyfar.dsp.rms` can be used.
+
+    References
+    -----------
+    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
+    Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # cumpute energy data
+    data = np.sum(signal.time, keepdims=keepdims)**2
+    if keepdims:
+        data = np.squeeze(data, axis=-1)
+    return data
+
+
+def power(signal, keepdims=False):
+    """
+    Compute the power of a signal in time domain. Therefore, the
+    Parseval's theorem [#] is used to calculate the energy of the signal with:
+
+    .. math::
+
+        \\sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\\sum_{k=0}^{N-1}|X[k]|^2,
+
+    As the calculation in time domain is equivalent to the frequency domain,
+    just the time domain is used in this function. Nevertheless, for the energy
+    calculation in the frequency domain the unitary norm needs to be used.
+    Then, the power is calculated by :math:`\frac{1}{signal.n_samples}*energy`.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to computed the power from.
+    keepdims : bool, optional
+        If this is true, the axis which are reduced during summing up are
+        kept as a dimension with size one. Also, the output will broadcast
+        correctly with the input Signal. Thereafter, the last dimension of the
+        data gets squeezed.
+        The default is ``False``.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The power of the input signal.
+
+    Notes
+    -----
+    To compute the energy and rms of a signal, :py:func:`~pyfar.dsp.energy` and
+    :py:func:`~pyfar.dsp.rms` can be used.
+
+    References
+    ----------
+    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
+    Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # cumpute power data
+    data = np.sum(signal.time, keepdims=keepdims)**2/signal.n_samples
+    if keepdims:
+        data = np.squeeze(data, axis=-1)
+    return data
+
+
+def rms(signal, keepdims=False):
+    """
+    Compute the rms of a signal in time domain. Therefore, the
+    Parseval's theorem [#] is used to calculate the energy of the signal with:
+
+    .. math::
+
+        \\sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\\sum_{k=0}^{N-1}|X[k]|^2,
+
+    As the calculation in time domain is equivalent to the frequency domain,
+    just the time domain is used in this function. Nevertheless, for the energy
+    calculation in the frequency domain the unitary norm needs to be used.
+    Then, the rms is calculated by
+    :math:`\\sqrt{\frac{1}{signal.n_samples}*energy}`.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to computed the rms from.
+    keepdims : bool, optional
+        If this is true, the axis which are reduced during summing up are
+        kept as a dimension with size one. Also, the output will broadcast
+        correctly with the input Signal. Thereafter, the last dimension of the
+        data gets squeezed.
+        The default is ``False``.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The rms of the input signal.
+
+    Notes
+    -----
+    To compute the energy and power of a signal, :py:func:`~pyfar.dsp.energy`
+    and :py:func:`~pyfar.dsp.power` can be used.
+
+    References
+    -----------
+    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
+    Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # cumpute rms data
+    data = np.sqrt(np.sum(signal.time, keepdims=keepdims)**2/signal.n_samples)
+    if keepdims:
+        data = np.squeeze(data, axis=-1)
+    return data
