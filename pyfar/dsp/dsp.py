@@ -1544,7 +1544,7 @@ def energy(signal, keepdims=False):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     # cumpute energy data
-    data = np.sum(signal.time, keepdims=keepdims)**2
+    data = np.sum(signal.time**2, keepdims=keepdims)
     if keepdims:
         data = np.squeeze(data, axis=-1)
     return data
@@ -1595,7 +1595,7 @@ def power(signal, keepdims=False):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     # cumpute power data
-    data = np.sum(signal.time, keepdims=keepdims)**2/signal.n_samples
+    data = np.sum(signal.time**2, keepdims=keepdims)/signal.n_samples
     if keepdims:
         data = np.squeeze(data, axis=-1)
     return data
@@ -1647,7 +1647,7 @@ def rms(signal, keepdims=False):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     # cumpute rms data
-    data = np.sqrt(np.sum(signal.time, keepdims=keepdims)**2/signal.n_samples)
+    data = np.sqrt(np.sum(signal.time**2, keepdims=keepdims)/signal.n_samples)
     if keepdims:
         data = np.squeeze(data, axis=-1)
     return data

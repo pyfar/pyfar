@@ -1,28 +1,23 @@
 import pyfar as pf
+import numpy as np
+import pytest
+import numpy.testing as npt
 
 
-def test_energy():
+@pytest.mark.parametrize('freq, amplitude', ([1, 1],
+                                             [44100/20, 2],
+                                             [44100/50, 3]))
+def test_sinewave(freq, amplitude):
     """
-    Test the energy of a Sinewave
+    Test the energy, power and rms of different full period Sinewaves.
     """
-    signal = pf.signals.sine(500, 500)
+    signal = pf.signals.sine(freq, 44100, amplitude)
     energy = pf.dsp.energy(signal)
-    assert energy == 1
-
-
-def test_power():
-    """
-    Test the power of a Sinewave
-    """
-    signal = pf.signals.sine(500, 500)
+    answer_e = 44100/2 * amplitude**2
     power = pf.dsp.power(signal)
-    assert power == 1
-
-
-def test_rms():
-    """
-    Test the rms of a Sinewave
-    """
-    signal = pf.signals.sine(500, 500)
+    answer_p = amplitude**2 / 2
     rms = pf.dsp.rms(signal)
-    assert rms == 0.707
+    answer_r = np.sqrt(1/2) * amplitude
+    npt.assert_almost_equal(energy, answer_e)
+    npt.assert_almost_equal(power, answer_p)
+    npt.assert_almost_equal(rms, answer_r)
