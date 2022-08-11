@@ -90,6 +90,7 @@ jobs:
       - run:
           name: Examples
           command: |
+            pip install astroid
             pip install -e .
             pytest --nbmake examples/*.ipynb
 
