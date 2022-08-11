@@ -1,0 +1,14 @@
+name: pyfar
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - numpy>=1.14.0
+  - matplotlib
+  - libsndfile
+  - pip:
+    - urllib3
+    - deepdiff
+    - soundfile
+    - sofar>=0.1.2
+    - pyfar
