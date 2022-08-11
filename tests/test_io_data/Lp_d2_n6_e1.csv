@@ -1,0 +1,15 @@
+% Model,reflections_water_sediment.mph
+% Version,COMSOL 6.0.0.354
+% Date,"Aug 8 2022, 16:01"
+% Dimension,2
+% Nodes,6
+% Expressions,1
+% Description,Total sound pressure level
+% Length unit,m
+% X,Y,pelw.Lp (dB) @ 1: freq=10000 Hz, theta0=0 deg
+0,-0.2828,-Inf
+0.002570909090907349,-0.2828,-Inf
+0,-0.28122888888888886,58.42592766682806
+0.002570909090907407,-0.28122888888888886,58.42592766682856
+0,-0.2796577777777778,64.46080221654015
+0.002570909090907465,-0.2796577777777777,NaN

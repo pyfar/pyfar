@@ -10,6 +10,7 @@ data stored in a SOFA file.
 """
 import os.path
 import pathlib
+
 import warnings
 import sofar as sf
 import zipfile
@@ -17,6 +18,7 @@ import io
 import soundfile
 import tempfile
 import numpy as np
+import re
 
 import pyfar
 from pyfar import Signal, FrequencyData, Coordinates
@@ -482,36 +484,150 @@ def read_comsol(filename, data_format='spreadsheet'):
     --------
     Read data from COMSOL export file.
 
-    >>> collection = pyfar.read_comsol('my_data.csv')
+    >>> collection = pyfar.io.read_comsol('my_data.csv')
     >>> my_data = collection['data']
     >>> my_coordinates = collection['coordinates']
     """
     # Check for .far file extension
-    # if not pathlib.Path(filename).is_file:
-    #     raise FileNotFoundError(("{filename} doesn't exisits."))
+    if not pathlib.Path(filename).exists:
+        raise FileNotFoundError(f"{str(filename)} doesn't exisits.")
 
     # Check Datatype
-    # suffix = pathlib.Path(filename).suffix
-    # if suffix.endswith(('.txt')):
-    #     seperator_header = ' '
-    #     seperator_body = ' '
-    # elif suffix.endswith(('.dat')):
-    #     seperator_header = ' '
-    #     seperator_body = ','
-    # elif suffix.endswith(('.csv')):
-    #     seperator_header = ','
-    #     seperator_body = ','
-    # else:
-    #     raise SyntaxError((
-    #         "Input path must be a .txt, .csv or .dat file"
-    #         f"but is of type {str(suffix)}"))
+    suffix = pathlib.Path(filename).suffix
+    if not suffix.endswith(('.txt', '.dat', '.csv')):
+        raise SyntaxError((
+            "Input path must be a .txt, .csv or .dat file"
+            f"but is of type {str(suffix)}"))
 
-    # return dict()
+    # create output dict
+    output = dict()
 
-    # check data formate
-    # numpy.loadtxt
-    # https://doc.comsol.com/5.5/doc/com.comsol.help.comsol/comsol_api_fileformats.45.03.html
-    pass
+    # read header
+    seperator_header = ','
+    seperator_body = ','
+    with open(filename) as f:
+        old_line = []
+        while True:
+            line = f.readline()
+            if line[0] != '%':
+                header_data = old_line
+                break
+            elif len(old_line) > 0:
+                number_names = ['dimension', 'nodes', 'expressions']
+                if suffix.endswith('.csv'):
+                    old_line = old_line[2:-1].replace('"', '').split(
+                        seperator_header)
+                elif suffix.endswith('.dat') or suffix.endswith('.txt'):
+                    old_line = " ".join(old_line[2:-1].replace(',', ';')
+                                        .replace(':', ',').split()).split(
+                        seperator_header)
+                if any(number_name == old_line[0].lower() for number_name in
+                       number_names):
+                    output[old_line[0]] = int(old_line[-1])
+                else:
+                    if suffix.endswith('.csv'):
+                        output[old_line[0]] = ",".join(old_line[1:])
+                    elif suffix.endswith('.dat') or suffix.endswith('.txt'):
+                        old_line[1] = old_line[1][1:]
+                        output[old_line[0]] = ":".join(
+                            old_line[1:]).replace(';', ',')
+            old_line = line
+    is_freq = 'freq=' in header_data
+
+    # read body
+    data_type = np.complex_ if is_freq else np.float_
+    txt = np.loadtxt(
+        filename,
+        dtype=data_type,
+        comments='%',
+        converters=lambda s: s.replace('i', 'j'),
+        encoding=None,
+        delimiter=seperator_body)
+    columns = header_data[2:].replace(', ', '; ').replace(' ', '').split(',')
+    names_coordinates = columns[0:output['Dimension']]
+    names_data = columns[output['Dimension']:]
+    if len(txt.shape) == 1:
+        txt = np.reshape(
+            txt,
+            (output['Nodes'], output['Expressions'] + output['Dimension']))
+    data = txt[:, len(names_coordinates):]
+
+    # read coordinates
+    coords_data = txt[:, 0:len(names_coordinates)].astype(np.float)
+    x = coords_data[:, 0]
+    y = coords_data[:, 1] if coords_data.shape[1] > 1 else np.zeros(
+        coords_data[:, 0].shape)
+    z = coords_data[:, 2] if coords_data.shape[1] > 2 else np.zeros(
+        coords_data[:, 0].shape)
+    output['Coordinates'] = Coordinates(x, y, z)
+
+    # read data formate
+    output['Data'] = dict()
+    _read_comsol_extract_data(data, header_data, names_data, output, data_type)
+
+    return output
+
+
+def _read_comsol_extract_data(data, header_data, names_data, output,
+                              data_type):
+    is_freq = 'freq=' in header_data
+    is_time = 't=' in header_data
+    domain_data_vector = []
+    data_indexes = []
+    for idx, name_data in enumerate(names_data):
+        header_split = name_data.replace('\n', '').split('@')
+        next_index = idx + 1 if len(names_data) > (idx + 1) else idx
+        next_header_split = names_data[next_index].replace('\n', '').split('@')
+        index_unit = header_split[0].find('(')
+        unit = '' if index_unit < 0 else header_split[0][index_unit + 1:-1]
+        data_set = header_split[0] if index_unit < 0 \
+            else header_split[0][:index_unit]
+        if header_split[1].find(';') >= 0:  # Postfix available
+            data_set = data_set + "_" + \
+                       header_split[1][header_split[1].find(';') + 1:].replace(
+                           '=', '_')
+        if is_freq:
+            domain_data = float(
+                re.search(r'freq=([0-9.]+)', header_split[1]).group()[5:])
+            next_domain_data = float(
+                re.search(r'freq=([0-9.]+)', next_header_split[1]).group()[5:])
+        elif is_time:
+            domain_data = float(
+                re.search(r't=([0-9.]+)', header_split[1]).group()[2:])
+            next_domain_data = float(
+                re.search(r't=([0-9.]+)', next_header_split[1]).group()[2:])
+        else:
+            raise (ValueError("Freq or time data not found."))
+        if header_split[1].find(':') > -1:  # found
+            index = int(header_split[1].split(':')[0]) - 1
+            if idx != index:
+                raise ValueError("Counted index and comsol index not "
+                                 "matching.")
+        domain_data_vector.append(domain_data)
+        data_indexes.append(idx)
+        if (next_domain_data == domain_data) or idx == len(names_data) - 1:
+            if is_freq:
+                data_in = data[:, data_indexes]
+                output['Data'][data_set] = FrequencyData(
+                    data_in, domain_data_vector, dtype=data_type,
+                    comment=data_set + "in " + unit)
+            if is_time:
+                data_in = data[:, data_indexes]
+                fs = 1 / np.mean(np.diff(domain_data_vector))
+                if len(domain_data_vector) < 2:
+                    raise ValueError(
+                        "More than one time sample need to be available to "
+                        "calculate the samplerate.")
+                diff_domain_data = np.diff(domain_data_vector) - \
+                                   np.diff(domain_data_vector)[0]
+                if np.any(diff_domain_data > 1e-8):
+                    raise ValueError(
+                        "Time vector does not have the same distance.")
+                output['Data'][data_set] = Signal(
+                    data_in, fs, comment=data_set + "in " + unit)
+
+            data_indexes = []
+            domain_data_vector = []
 
 
 def _clipped_audio_subtypes():
@@ -523,11 +639,11 @@ def _clipped_audio_subtypes():
     pyfar.io.io._clipped_audio_subtypes().
     """
     collection = {}
-    signal = pyfar.Signal([-1.5, -1, -.5, 0, .5, 1, 1.5]*100, 44100)
+    signal = pyfar.Signal([-1.5, -1, -.5, 0, .5, 1, 1.5] * 100, 44100)
     with tempfile.TemporaryDirectory() as tmpdir:
         formats = pyfar.io.audio_formats()
         for format in formats:
-            filename = os.path.join(tmpdir, 'test_file.'+format)
+            filename = os.path.join(tmpdir, 'test_file.' + format)
             for subtype in pyfar.io.audio_subtypes(format):
                 write_valid = not _soundfile_write_errors(format, subtype)
                 read_valid = not _soundfile_read_errors(format, subtype)
@@ -545,7 +661,7 @@ def _clipped_audio_subtypes():
                             np.any(signal_read.time < -1.1)):
                         behavior = 'not clipping (' + format + ')'
                     elif (np.any(signal_read.time > .1) and
-                            np.any(signal_read.time < -.1)):
+                          np.any(signal_read.time < -.1)):
                         behavior = 'clipping to +/- 1 (' + format + ')'
                     else:
                         raise ValueError(f"{format}/{subtype}")
