@@ -20,7 +20,7 @@ import numpy as np
 try:
     import soundfile
     soundfile_imported = True
-except ModuleNotFoundError or OSError:
+except (ModuleNotFoundError, OSError):
     soundfile_imported = False
     soundfile_warning = (
         "python-soundfile could not be imported. Try to install it using `pip "
