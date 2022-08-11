@@ -11,9 +11,10 @@ def test_sinewave(freq, amplitude):
     """
     Test the energy, power and rms of different full period Sinewaves.
     """
-    signal = pf.signals.sine(freq, 44100, amplitude)
+    n_samples = 44100
+    signal = pf.signals.sine(freq, n_samples, amplitude)
     energy = pf.dsp.energy(signal)
-    answer_e = 44100/2 * amplitude**2
+    answer_e = n_samples/2 * amplitude**2
     power = pf.dsp.power(signal)
     answer_p = amplitude**2 / 2
     rms = pf.dsp.rms(signal)
