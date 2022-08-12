@@ -42,12 +42,16 @@ class _Audio():
             raise ValueError("dtype must be None, float, or complex")
         elif dtype is None:
             self._data = np.atleast_2d(np.asarray(data))
+
+            # convert ints to float and check dtype of input
+            if str(self._data.dtype).startswith("int"):
+                self._data = self._data.astype(float)
+            elif str(self._data.dtype) not in ["float64", "complex128"]:
+                raise ValueError((
+                    f"data is of type {str(self._data.dtype)} but"
+                    " must be of type float, complex, or int"))
         else:
             self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
-
-        # convert ints to float
-        if self._data.dtype == int:
-            self._data = self._data.astype(float)
 
     def __eq__(self, other):
         """Check for equality of two objects."""
