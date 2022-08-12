@@ -1501,15 +1501,15 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
 
 
 def energy(signal, keepdims=False):
-    """
+    r"""
     Compute the total energy of a signal in time domain. Therefore, the
     Parseval's theorem [#] is used with:
 
     .. math::
 
-        \\sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\\sum_{k=0}^{N-1}|X[k]|^2,
+        \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
 
-    As the calculation in time domain is equivalent to the frequency domain,
+    as the calculation in time domain is equivalent to the frequency domain,
     just the time domain is used in this function. Nevertheless, for the energy
     calculation in the frequency domain the unitary norm needs to be used.
 
@@ -1537,7 +1537,7 @@ def energy(signal, keepdims=False):
     References
     -----------
     .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
-    Transform”, Biomedical Signal and Image Processing, Spring 2005.
+           Transform”, Biomedical Signal and Image Processing, Spring 2005.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
@@ -1551,13 +1551,13 @@ def energy(signal, keepdims=False):
 
 
 def power(signal, keepdims=False):
-    """
+    r"""
     Compute the power of a signal in time domain. Therefore, the
     Parseval's theorem [#] is used to calculate the energy of the signal with:
 
     .. math::
 
-        \\sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\\sum_{k=0}^{N-1}|X[k]|^2,
+        \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
 
     As the calculation in time domain is equivalent to the frequency domain,
     just the time domain is used in this function. Nevertheless, for the energy
@@ -1588,7 +1588,7 @@ def power(signal, keepdims=False):
     References
     ----------
     .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
-    Transform”, Biomedical Signal and Image Processing, Spring 2005.
+           Transform”, Biomedical Signal and Image Processing, Spring 2005.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
@@ -1602,13 +1602,13 @@ def power(signal, keepdims=False):
 
 
 def rms(signal, keepdims=False):
-    """
+    r"""
     Compute the rms of a signal in time domain. Therefore, the
     Parseval's theorem [#] is used to calculate the energy of the signal with:
 
     .. math::
 
-        \\sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\\sum_{k=0}^{N-1}|X[k]|^2,
+        \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
 
     As the calculation in time domain is equivalent to the frequency domain,
     just the time domain is used in this function. Nevertheless, for the energy
@@ -1640,7 +1640,7 @@ def rms(signal, keepdims=False):
     References
     -----------
     .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
-    Transform”, Biomedical Signal and Image Processing, Spring 2005.
+           Transform”, Biomedical Signal and Image Processing, Spring 2005.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
