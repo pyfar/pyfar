@@ -1503,7 +1503,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
 def energy(signal, keepdims=False):
     r"""
     Compute the total energy of a signal in time domain. Therefore, the
-    Parseval's theorem [#] is used with:
+    Parseval's theorem [#]_ is used with:
 
     .. math::
 
@@ -1553,7 +1553,7 @@ def energy(signal, keepdims=False):
 def power(signal, keepdims=False):
     r"""
     Compute the power of a signal in time domain. Therefore, the
-    Parseval's theorem [#] is used to calculate the energy of the signal with:
+    Parseval's theorem [#]_ is used to calculate the energy of the signal with:
 
     .. math::
 
@@ -1562,7 +1562,7 @@ def power(signal, keepdims=False):
     As the calculation in time domain is equivalent to the frequency domain,
     just the time domain is used in this function. Nevertheless, for the energy
     calculation in the frequency domain the unitary norm needs to be used.
-    Then, the power is calculated by :math:`\frac{1}{signal.n_samples}*energy`.
+    Then, the power is calculated by :math:`\frac{1}{N}*energy`.
 
     Parameters
     ----------
@@ -1604,7 +1604,7 @@ def power(signal, keepdims=False):
 def rms(signal, keepdims=False):
     r"""
     Compute the rms of a signal in time domain. Therefore, the
-    Parseval's theorem [#] is used to calculate the energy of the signal with:
+    Parseval's theorem [#]_ is used to calculate the energy of the signal with:
 
     .. math::
 
@@ -1614,7 +1614,7 @@ def rms(signal, keepdims=False):
     just the time domain is used in this function. Nevertheless, for the energy
     calculation in the frequency domain the unitary norm needs to be used.
     Then, the rms is calculated by
-    :math:`\\sqrt{\frac{1}{signal.n_samples}*energy}`.
+    :math:`\sqrt{\frac{1}{N}*energy}`.
 
     Parameters
     ----------
