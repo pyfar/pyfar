@@ -384,7 +384,7 @@ class FrequencyData(_Audio):
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
         dtype : string, optional
-            Raw data type of the audio object. The default is `float64`.
+            Raw data type of the audio object. The default is `complex`.
 
         Notes
         -----
