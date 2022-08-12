@@ -311,12 +311,13 @@ def read_audio(filename, dtype='float64', **kwargs):
     filename : string, Path
         Input file.
     dtype : {'float64', 'float32', 'int32', 'int16'}, optional
-        Data type of the returned signal, by default ``'float64'``.
+        Data type with which the wav file is read, by default ``'float64'``.
         Floating point audio data is typically in the range from
         ``-1.0`` to ``1.0``.  Note that ``'int16'`` and ``'int32'`` should only
         be used if the data was written in the same format. Integer data is in
         the range from ``-2**15`` to ``2**15-1`` for ``'int16'`` and from
-        ``-2**31`` to ``2**31-1`` for ``'int32'``.
+        ``-2**31`` to ``2**31-1`` for ``'int32'``. In any case, the data is
+        converted to float when writing it to the Signal.
     **kwargs
         Other keyword arguments to be passed to :py:func:`soundfile.read`. This
         is needed, e.g, to read RAW audio files.
@@ -340,8 +341,8 @@ def read_audio(filename, dtype='float64', **kwargs):
 
     data, sampling_rate = soundfile.read(
         file=filename, dtype=dtype, always_2d=True, **kwargs)
-    signal = Signal(data.T, sampling_rate, domain='time', dtype=dtype)
-    return signal
+
+    return Signal(data.T, sampling_rate, domain='time')
 
 
 def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):

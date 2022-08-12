@@ -218,7 +218,7 @@ def test_setter_fft_norm():
 def test_dtype():
     """Test for the getter of dtype."""
     dtype = float
-    signal = Signal([1, 2, 3], 44100, dtype=dtype)
+    signal = Signal([1, 2, 3], 44100)
     assert signal.dtype == dtype
 
 

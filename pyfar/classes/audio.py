@@ -25,23 +25,29 @@ class _Audio():
     # (e.g. __rmul__)
     __array_priority__ = 1.0
 
-    def __init__(self, domain, comment=None, dtype=np.double):
+    def __init__(self, data, domain, comment=None, dtype=None):
 
         # initialize valid parameter spaces
         self._VALID_DOMAINS = ["time", "freq"]
 
         # initialize global parameters
         self.comment = comment
-        self._dtype = dtype
         if domain in self._VALID_DOMAINS:
             self._domain = domain
         else:
             raise ValueError("Incorrect domain, needs to be time/freq.")
 
-        # initialize data with nan (this should make clear that this is an
-        # abstract private class that does not hold data and prevent class
-        # methods to fail that require data.)
-        self._data = np.atleast_2d(np.nan)
+        # set data and check dtype
+        if dtype not in (None, float, complex):
+            raise ValueError("dtype must be None, float, or complex")
+        elif dtype is None:
+            self._data = np.atleast_2d(np.asarray(data))
+        else:
+            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+
+        # convert ints to float
+        if self._data.dtype == int:
+            self._data = self._data.astype(float)
 
     def __eq__(self, other):
         """Check for equality of two objects."""
@@ -56,7 +62,7 @@ class _Audio():
     def dtype(self):
         """The data type of the audio object. This can be any data type and
         precision supported by numpy."""
-        return self._dtype
+        return float if str(self._data.dtype).startswith("float") else complex
 
     @property
     def cshape(self):
@@ -153,7 +159,9 @@ class _Audio():
 
     def _encode(self):
         """Return dictionary for the encoding."""
-        return self.copy().__dict__
+        class_dict = self.copy().__dict__
+        class_dict["_dtype"] = "float" if self.dtype == float else "complex"
+        return class_dict
 
     def _decode(self):
         """Return dictionary for the encoding."""
@@ -210,11 +218,12 @@ class _Audio():
 class TimeData(_Audio):
     """Class for time data.
 
-    Objects of this class contain time data which is not directly convertable
-    to frequency domain, i.e., non-equidistant samples.
+    Objects of this class contain time data which is not directly convertible
+    to frequency domain, i.e., non-equidistant samples. Can store real and
+    complex valued data.
 
     """
-    def __init__(self, data, times, comment=None, dtype=np.double):
+    def __init__(self, data, times, comment=None, dtype=None):
         """Create TimeData object with data, and times.
 
         Parameters
@@ -228,14 +237,12 @@ class TimeData(_Audio):
             must match the `size` of the last dimension of `data`.
         comment : str, optional
             A comment related to `data`. The default is ``'none'``.
-        dtype : string, optional
-            Raw data type of the audio object. The default is `float64`.
+        dtype : float, complex, optional
+            ``float`` or ``complex``. The default ``None`` uses the dtype
+            of the input `data`.
         """
 
-        _Audio.__init__(self, 'time', comment, dtype)
-
-        # init data and meta data
-        self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+        _Audio.__init__(self, data, 'time', comment, dtype)
 
         self._n_samples = self._data.shape[-1]
 
@@ -322,11 +329,13 @@ class TimeData(_Audio):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
+        dtype = float if obj_dict['_dtype'] == "float" else complex
+        del obj_dict['_dtype']
         obj = cls(
             obj_dict['_data'],
             obj_dict['_times'],
             obj_dict['_comment'],
-            obj_dict['_dtype'])
+            dtype)
         obj.__dict__.update(obj_dict)
         return obj
 
@@ -365,11 +374,11 @@ class FrequencyData(_Audio):
     """Class for frequency data.
 
     Objects of this class contain frequency data which is not directly
-    convertable to the time domain, i.e., non-equidistantly spaced bins or
-    incomplete spectra.
+    convertible to the time domain, i.e., non-equidistantly spaced bins or
+    incomplete spectra. Can store real and complex valued data.
 
     """
-    def __init__(self, data, frequencies, comment=None, dtype=complex):
+    def __init__(self, data, frequencies, comment=None, dtype=None):
         """Create FrequencyData with data, and frequencies.
 
         Parameters
@@ -383,8 +392,9 @@ class FrequencyData(_Audio):
             the size of the last dimension of data.
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
-        dtype : string, optional
-            Raw data type of the audio object. The default is `complex`.
+        dtype : float, complex, optional
+            ``float`` or ``complex``. The default ``None`` uses the dtype
+            of the input `data`.
 
         Notes
         -----
@@ -401,15 +411,16 @@ class FrequencyData(_Audio):
 
         """
 
-        _Audio.__init__(self, 'freq', comment, dtype)
+        _Audio.__init__(self, data, 'freq', comment, dtype)
 
-        # init frequencies
+        # init and check frequencies
         freqs = np.atleast_1d(np.asarray(frequencies).flatten())
         if np.any(np.diff(freqs) <= 0) and len(frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
+        if len(freqs) != self.n_bins:
+            raise ValueError(
+                "Number of frequencies does not match number of data points")
         self._frequencies = freqs
-        # init data
-        self.freq = data
 
     @property
     def freq(self):
@@ -484,11 +495,13 @@ class FrequencyData(_Audio):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
+        dtype = float if obj_dict['_dtype'] == "float" else complex
+        del obj_dict['_dtype']
         obj = cls(
             obj_dict['_data'],
             obj_dict['_frequencies'],
             obj_dict['_comment'],
-            obj_dict['_dtype'])
+            dtype)
         obj.__dict__.update(obj_dict)
         return obj
 
@@ -527,7 +540,9 @@ class Signal(FrequencyData, TimeData):
     """Class for audio signals.
 
     Objects of this class contain data which is directly convertable between
-    time and frequency domain (equally spaced samples and frequency bins).
+    time and frequency domain (equally spaced samples and frequency bins). The
+    data is always real valued in the time domain and complex valued in the
+    frequency domain.
 
     """
     def __init__(
@@ -537,8 +552,7 @@ class Signal(FrequencyData, TimeData):
             n_samples=None,
             domain='time',
             fft_norm='none',
-            comment=None,
-            dtype=np.double):
+            comment=None):
         """Create Signal with data, and sampling rate.
 
         Parameters
@@ -565,8 +579,6 @@ class Signal(FrequencyData, TimeData):
             used for energy signals, such as impulse responses.
         comment : str
             A comment related to `data`. The default is ``None``.
-        dtype : string, optional
-            Raw data type of the audio object. The default is `float64`
 
         References
         ----------
@@ -576,9 +588,6 @@ class Signal(FrequencyData, TimeData):
                Austria, May 2020, p. e-Brief 600.
 
         """
-
-        # initialize global parameter and valid parameter spaces
-        _Audio.__init__(self, domain, comment, dtype)
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
@@ -597,23 +606,30 @@ class Signal(FrequencyData, TimeData):
 
         # initialize domain specific parameters
         if domain == 'time':
-            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
-            self._n_samples = self._data.shape[-1]
-            TimeData.__init__(self, data, self.times, comment, dtype)
+            self._n_samples = np.atleast_2d(data).shape[-1]
+            TimeData.__init__(self, data, self.times, comment, dtype=float)
         elif domain == 'freq':
-            freq = np.atleast_2d(np.asarray(data, dtype=complex))
-            self._n_bins = freq.shape[-1]
+            # normalized frequency data
+            freq = np.atleast_2d(data)
+            # check and set n_samples
             if n_samples is None:
                 warnings.warn(
                     "Number of time samples not given, assuming an even "
                     "number of samples from the number of frequency bins.")
-                n_samples = (self._n_bins - 1)*2
+                n_samples = (freq.shape[-1] - 1)*2
             elif n_samples > 2 * freq.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
-            # Set spectrum incl. checks and denormalization
-            self.freq = freq
+            # raw frequency data
+            freq_raw = fft.normalization(
+                freq, self.n_samples, self.sampling_rate, self.fft_norm,
+                inverse=True)
+            self._n_bins = freq_raw.shape[-1]
+            # Init remaining parameters
+            FrequencyData.__init__(
+                self, freq_raw, self.frequencies, comment, dtype=complex)
+            delattr(self, '_frequencies')
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
@@ -768,13 +784,13 @@ class Signal(FrequencyData, TimeData):
         """Return new Signal object with data."""
         item = Signal(data, sampling_rate=self.sampling_rate,
                       n_samples=self.n_samples, domain=self.domain,
-                      fft_norm=self.fft_norm, comment=self.comment,
-                      dtype=self.dtype)
+                      fft_norm=self.fft_norm, comment=self.comment)
         return item
 
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
+        del obj_dict['_dtype']
         obj = cls(
             obj_dict['_data'],
             obj_dict['_sampling_rate'],
@@ -842,8 +858,7 @@ class _SignalIterator(object):
             sampling_rate=signal.sampling_rate,
             n_samples=signal.n_samples,
             domain=signal.domain,
-            fft_norm=signal.fft_norm,
-            dtype=signal.dtype)
+            fft_norm=signal.fft_norm)
 
     def __next__(self):
         if self._signal.domain == self._iterated_sig.domain:

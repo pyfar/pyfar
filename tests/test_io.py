@@ -467,7 +467,7 @@ def test_read_audio_kwargs(read_mock):
     assert np.allclose(signal.time, np.array([1., 2., 3.]))
     assert signal.time.shape == (1, 3)
     assert signal.sampling_rate == 1000
-    assert signal.dtype == 'float32'
+    assert signal.dtype == float
 
 
 @patch(
