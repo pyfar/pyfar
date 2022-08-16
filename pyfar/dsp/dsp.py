@@ -1510,18 +1510,17 @@ def energy(signal, keepdims=False):
 
         \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
 
-    It is calculated based on the time data and therefore independent of the
-    signal's ``fft_norm``.
+    The function calculates the energy from the time data for each channel
+    separately.
 
     Parameters
     ----------
     signal : Signal
-        The signal to computed the energy from.
+        The signal to compute the energy from.
     keepdims : bool, optional
-        If this is ``False``, the data will be returned in a shape which equals
-        ``signal.cshape``.  If this is ``True``, an axis will be appended
-        to the shape of the data, so it's broadcastable to the shape of
-        ``signal.time`` and ``signal.freq``.
+        If ``False``, the shape of the returned array equals ``signal.cshape``.
+        If ``True``, an axis will be appended, so it's broadcastable to the
+        shape of ``signal.time`` and ``signal.freq``.
         The default is ``False``.
 
     Returns
@@ -1531,8 +1530,10 @@ def energy(signal, keepdims=False):
 
     Notes
     -----
-    To compute the power and rms of a signal, :py:func:`~pyfar.dsp.power` and
-    :py:func:`~pyfar.dsp.rms` can be used.
+    Due to the calculation based on the time data, the returned energy is
+    independent of the signal's ``fft_norm``.
+    :py:func:`~pyfar.dsp.power` and :py:func:`~pyfar.dsp.rms` can be used
+    to compute the power and the rms of a signal.
 
     References
     -----------
@@ -1554,25 +1555,22 @@ def power(signal, keepdims=False):
     r"""
     Compute the power of a signal.
 
-    According to the Parseval's theorem [#]_ the power is
+    The power is calculated as
 
     .. math::
 
-        \frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2= \
-        \frac{1}{N^2}\sum_{k=0}^{N-1}|X[k]|^2,
+        \frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2
 
-    It is calculated based on the time data and therefore independent of the
-    signal's ``fft_norm``.
+    based on the time data for each channel separately.
 
     Parameters
     ----------
     signal : Signal
-        The signal to computed the power from.
+        The signal to compute the power from.
     keepdims : bool, optional
-        If this is ``False``, the data will be returned in a shape which equals
-        ``signal.cshape``.  If this is ``True``, an axis will be appended
-        to the shape of the data, so it's broadcastable to the shape of
-        ``signal.time`` and ``signal.freq``.
+        If ``False``, the shape of the returned array equals ``signal.cshape``.
+        If ``True``, an axis will be appended, so it's broadcastable to the
+        shape of ``signal.time`` and ``signal.freq``.
         The default is ``False``.
 
     Returns
@@ -1582,13 +1580,11 @@ def power(signal, keepdims=False):
 
     Notes
     -----
-    To compute the energy and rms of a signal, :py:func:`~pyfar.dsp.energy` and
-    :py:func:`~pyfar.dsp.rms` can be used.
-
-    References
-    ----------
-    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
-           Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    Due to the calculation based on the time data, the returned power is
+    independent of the signal's ``fft_norm``.
+    The power equals the squared RMS of a signal. :py:func:`~pyfar.dsp.energy`
+    and :py:func:`~pyfar.dsp.rms` can be used to compute the energy and the
+    RMS.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
@@ -1603,27 +1599,24 @@ def power(signal, keepdims=False):
 
 def rms(signal, keepdims=False):
     r"""
-    Compute the Root Mean Square (RMS) of a signal.
+    Compute the root mean square (RMS) of a signal.
 
-    According to the Parseval's theorem [#]_ the RMS is
+    The RMS is calculated as
 
     .. math::
 
-        \sqrt{\frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2}= \
-        \sqrt{\frac{1}{N^2}\sum_{k=0}^{N-1}|X[k]|^2},
+        \sqrt{\frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2}
 
-    It is calculated based on the time data and therefore independent of the
-    signal's ``fft_norm``.
+    based on the time data for each channel separately.
 
     Parameters
     ----------
     signal : Signal
-        The signal to computed the rms from.
+        The signal to compute the RMS from.
     keepdims : bool, optional
-        If this is ``False``, the data will be returned in a shape which equals
-        ``signal.cshape``.  If this is ``True``, an axis will be appended
-        to the shape of the data, so it's broadcastable to the shape of
-        ``signal.time`` and ``signal.freq``.
+        If ``False``, the shape of the returned array equals ``signal.cshape``.
+        If ``True``, an axis will be appended, so it's broadcastable to the
+        shape of ``signal.time`` and ``signal.freq``.
         The default is ``False``.
 
     Returns
@@ -1633,13 +1626,9 @@ def rms(signal, keepdims=False):
 
     Notes
     -----
-    To compute the energy and power of a signal, :py:func:`~pyfar.dsp.energy`
-    and :py:func:`~pyfar.dsp.power` can be used.
-
-    References
-    -----------
-    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
-           Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    The RMS equals the square root of the signal's power.
+    :py:func:`~pyfar.dsp.energy` and :py:func:`~pyfar.dsp.power` can be used
+    to compute the energy and the power.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
