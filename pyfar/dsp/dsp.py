@@ -1502,26 +1502,26 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
 
 def energy(signal, keepdims=False):
     r"""
-    Compute the total energy of a signal in time domain. Therefore, the
-    Parseval's theorem [#]_ is used with:
+    Compute the energy of a signal.
+
+    According to the Parseval's theorem [#]_ the energy is
 
     .. math::
 
         \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
 
-    as the calculation in time domain is equivalent to the frequency domain,
-    just the time domain is used in this function. Nevertheless, for the energy
-    calculation in the frequency domain the unitary norm needs to be used.
+    It is calculated based on the time data and therefore independent of the
+    signal's ``fft_norm``.
 
     Parameters
     ----------
     signal : Signal
         The signal to computed the energy from.
     keepdims : bool, optional
-        If this is true, the axis which are reduced during summing up are
-        kept as a dimension with size one. Also, the output will broadcast
-        correctly with the input Signal. Thereafter, the last dimension of the
-        data gets squeezed.
+        If this is ``False``, the data will be returned in a shape which equals
+        ``signal.cshape``.  If this is ``True``, an axis will be appended
+        to the shape of the data, so it's broadcastable to the shape of
+        ``signal.time`` and ``signal.freq``.
         The default is ``False``.
 
     Returns
@@ -1544,35 +1544,35 @@ def energy(signal, keepdims=False):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     # cumpute energy data
-    data = np.sum(signal.time**2, keepdims=keepdims)
+    data = np.sum(signal.time**2, axis=-1)
     if keepdims:
-        data = np.squeeze(data, axis=-1)
+        data = data[..., None]
     return data
 
 
 def power(signal, keepdims=False):
     r"""
-    Compute the power of a signal in time domain. Therefore, the
-    Parseval's theorem [#]_ is used to calculate the energy of the signal with:
+    Compute the power of a signal.
+
+    According to the Parseval's theorem [#]_ the power is
 
     .. math::
 
-        \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
+        \frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2= \
+        \frac{1}{N^2}\sum_{k=0}^{N-1}|X[k]|^2,
 
-    As the calculation in time domain is equivalent to the frequency domain,
-    just the time domain is used in this function. Nevertheless, for the energy
-    calculation in the frequency domain the unitary norm needs to be used.
-    Then, the power is calculated by :math:`\frac{1}{N}*energy`.
+    It is calculated based on the time data and therefore independent of the
+    signal's ``fft_norm``.
 
     Parameters
     ----------
     signal : Signal
         The signal to computed the power from.
     keepdims : bool, optional
-        If this is true, the axis which are reduced during summing up are
-        kept as a dimension with size one. Also, the output will broadcast
-        correctly with the input Signal. Thereafter, the last dimension of the
-        data gets squeezed.
+        If this is ``False``, the data will be returned in a shape which equals
+        ``signal.cshape``.  If this is ``True``, an axis will be appended
+        to the shape of the data, so it's broadcastable to the shape of
+        ``signal.time`` and ``signal.freq``.
         The default is ``False``.
 
     Returns
@@ -1595,42 +1595,41 @@ def power(signal, keepdims=False):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     # cumpute power data
-    data = np.sum(signal.time**2, keepdims=keepdims)/signal.n_samples
+    data = np.sum(signal.time**2, axis=-1)/signal.n_samples
     if keepdims:
-        data = np.squeeze(data, axis=-1)
+        data = data[..., None]
     return data
 
 
 def rms(signal, keepdims=False):
     r"""
-    Compute the rms of a signal in time domain. Therefore, the
-    Parseval's theorem [#]_ is used to calculate the energy of the signal with:
+    Compute the Root Mean Square (RMS) of a signal.
+
+    According to the Parseval's theorem [#]_ the RMS is
 
     .. math::
 
-        \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
+        \sqrt{\frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2}= \
+        \sqrt{\frac{1}{N^2}\sum_{k=0}^{N-1}|X[k]|^2},
 
-    As the calculation in time domain is equivalent to the frequency domain,
-    just the time domain is used in this function. Nevertheless, for the energy
-    calculation in the frequency domain the unitary norm needs to be used.
-    Then, the rms is calculated by
-    :math:`\sqrt{\frac{1}{N}*energy}`.
+    It is calculated based on the time data and therefore independent of the
+    signal's ``fft_norm``.
 
     Parameters
     ----------
     signal : Signal
         The signal to computed the rms from.
     keepdims : bool, optional
-        If this is true, the axis which are reduced during summing up are
-        kept as a dimension with size one. Also, the output will broadcast
-        correctly with the input Signal. Thereafter, the last dimension of the
-        data gets squeezed.
+        If this is ``False``, the data will be returned in a shape which equals
+        ``signal.cshape``.  If this is ``True``, an axis will be appended
+        to the shape of the data, so it's broadcastable to the shape of
+        ``signal.time`` and ``signal.freq``.
         The default is ``False``.
 
     Returns
     -------
     data : numpy.ndarray
-        The rms of the input signal.
+        The RMS of the input signal.
 
     Notes
     -----
@@ -1647,7 +1646,7 @@ def rms(signal, keepdims=False):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     # cumpute rms data
-    data = np.sqrt(np.sum(signal.time**2, keepdims=keepdims)/signal.n_samples)
+    data = np.sqrt(np.sum(signal.time**2, axis=-1)/signal.n_samples)
     if keepdims:
-        data = np.squeeze(data, axis=-1)
+        data = data[..., None]
     return data
