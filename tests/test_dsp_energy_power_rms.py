@@ -25,10 +25,20 @@ def test_sinewave(freq, amplitude):
 
 
 def test_multichannel_signals():
+    # Test returned values for multichannel signals
+    data = np.ones((2, 3, 3, 100))
+    signal = pf.Signal(data, 44100)
+    assert np.all(pf.dsp.energy(signal) == np.ones((2, 3, 3))*100)
+    assert np.all(pf.dsp.power(signal) == np.ones((2, 3, 3)))
+    assert np.all(pf.dsp.rms(signal) == np.sqrt(np.ones((2, 3, 3))))
+
+
+def test_keepdims_broadcasting():
     # Test returned data shape of a multichannel Signal
-    shape = np.zeros((2, 3, 3, 1))
-    signal = pf.Signal(shape, 44100)
+    data = np.ones((2, 3, 3, 100))
+    signal = pf.Signal(data, 44100)
     signal_keepdims_F = pf.dsp.energy(signal, keepdims=False)
     signal_keepdims_T = pf.dsp.energy(signal, keepdims=True)
     assert signal_keepdims_F.shape == signal.cshape
-    assert signal_keepdims_T.shape == signal.time.shape
+    signal_keepdims_T * signal.time
+    signal_keepdims_T * signal.freq
