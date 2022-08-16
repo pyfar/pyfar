@@ -1621,6 +1621,8 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
             raise ValueError(
                 "The frequency range needs to specify lower and upper limits.")
     # copy and transform data to the desired domain
+
+    #--> den Part brauch ich nicht wenn rms,power,energy
     if domain == 'time':
         # get bounds for normalization
         lim = (0, signal.n_samples)
@@ -1628,9 +1630,7 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
             input_data, log_prefix = pyfar.dsp.decibel(signal, 'time',
                                                        prefix_return=True)
         else:
-            input_data = np.abs(signal.time)**2 if power \
-                                                else np.abs(signal.time)
-
+            input_data = np.abs(signal.time)
     elif domain == 'freq':
         if type(signal) != pyfar.classes.audio.FrequencyData:
             # discard 0 Hz and Nyquist because they might be off by a factor of
@@ -1651,8 +1651,7 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
             input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
                                                        prefix_return=True)
         else:
-            input_data = np.abs(signal.freq)**2 if power \
-                                                else np.abs(signal.freq)
+            input_data = np.abs(signal.freq)
     else:
         raise ValueError("domain must be 'time' or 'freq'.")
     # get values for normalization
