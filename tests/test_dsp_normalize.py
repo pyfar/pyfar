@@ -54,7 +54,7 @@ def test_dB_normalization():
 def test_power_normalization():
     # Test normalizatin in dB
     signal = pf.Signal([1, 2, 3], 44100)
-    answer = pf.dsp.normalize(signal, power=True)
+    answer = pf.dsp.normalize(signal, operation='power')
     truth = [[1/9, 2/9, 3/9]]
     npt.assert_allclose(answer.time, truth)
 
@@ -110,15 +110,12 @@ def test_error_raises():
     with raises(ValueError, match=("domain must be 'time' or 'freq'.")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='invalid_domain')
 
-    with raises(ValueError, match=("operation must be 'max', 'mean' or")):
+    with raises(ValueError, match=("operation must be 'max', 'mean',")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          operation='invalid_operation')
 
     with raises(ValueError, match=("channel_handling must be 'each', ")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          channel_handling='invalid')
-    with pytest.warns(UserWarning,
-                      match="power and dB are both 'True'."):
-        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), power=True, dB=True)
     with raises(ValueError, match=("The frequency range needs to specify")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), freq_range=2)

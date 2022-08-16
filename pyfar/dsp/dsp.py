@@ -3,7 +3,6 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
-import warnings
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -1501,7 +1500,148 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def normalize(signal, domain='time', dB=False, power=False, operation='max',
+def energy(signal, keepdims=False):
+    r"""
+    Compute the energy of a signal.
+
+    According to the Parseval's theorem [#]_ the energy is
+
+    .. math::
+
+        \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
+
+    The function calculates the energy from the time data for each channel
+    separately.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to compute the energy from.
+    keepdims : bool, optional
+        If ``False``, the shape of the returned array equals ``signal.cshape``.
+        If ``True``, an axis will be appended, so it's broadcastable to the
+        shape of ``signal.time`` and ``signal.freq``.
+        The default is ``False``.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The total energy of the input signal.
+
+    Notes
+    -----
+    Due to the calculation based on the time data, the returned energy is
+    independent of the signal's ``fft_norm``.
+    :py:func:`~pyfar.dsp.power` and :py:func:`~pyfar.dsp.rms` can be used
+    to compute the power and the rms of a signal.
+
+    References
+    -----------
+    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
+           Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # cumpute energy data
+    data = np.sum(signal.time**2, axis=-1)
+    if keepdims:
+        data = data[..., None]
+    return data
+
+
+def power(signal, keepdims=False):
+    r"""
+    Compute the power of a signal.
+
+    The power is calculated as
+
+    .. math::
+
+        \frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2
+
+    based on the time data for each channel separately.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to compute the power from.
+    keepdims : bool, optional
+        If ``False``, the shape of the returned array equals ``signal.cshape``.
+        If ``True``, an axis will be appended, so it's broadcastable to the
+        shape of ``signal.time`` and ``signal.freq``.
+        The default is ``False``.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The power of the input signal.
+
+    Notes
+    -----
+    Due to the calculation based on the time data, the returned power is
+    independent of the signal's ``fft_norm``.
+    The power equals the squared RMS of a signal. :py:func:`~pyfar.dsp.energy`
+    and :py:func:`~pyfar.dsp.rms` can be used to compute the energy and the
+    RMS.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # cumpute power data
+    data = np.sum(signal.time**2, axis=-1)/signal.n_samples
+    if keepdims:
+        data = data[..., None]
+    return data
+
+
+def rms(signal, keepdims=False):
+    r"""
+    Compute the root mean square (RMS) of a signal.
+
+    The RMS is calculated as
+
+    .. math::
+
+        \sqrt{\frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2}
+
+    based on the time data for each channel separately.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to compute the RMS from.
+    keepdims : bool, optional
+        If ``False``, the shape of the returned array equals ``signal.cshape``.
+        If ``True``, an axis will be appended, so it's broadcastable to the
+        shape of ``signal.time`` and ``signal.freq``.
+        The default is ``False``.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The RMS of the input signal.
+
+    Notes
+    -----
+    The RMS equals the square root of the signal's power.
+    :py:func:`~pyfar.dsp.energy` and :py:func:`~pyfar.dsp.power` can be used
+    to compute the energy and the power.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # cumpute rms data
+    data = np.sqrt(np.sum(signal.time**2, axis=-1)/signal.n_samples)
+    if keepdims:
+        data = data[..., None]
+    return data
+
+
+def normalize(signal, domain='time', dB=False, operation='max',
               channel_handling='max', target=None, freq_range=None,
               return_reference=False):
     """
@@ -1541,10 +1681,6 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         :py:func:`~pyfar.dsp.decibel` and the signal's properties before
         the calculation of the reference value.
         The default is ``False``.
-    power: bool, optional
-        If `power` is ``True``, the power spectra :math:`|X|^2` will be used
-        for normalization. Notice that `power` does have no effect if `dB` is
-        ``True``.
     operation: string, optional
         Operation per channel to compute the `reference` value described above
         (according to ``domain`` and ``dB``).
@@ -1552,6 +1688,10 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         ``'max'``
             Takes the maximum absolute value.
         ``'mean'``
+            Takes the mean of the absolute values.
+        ``'energy'``
+            Takes the mean of the absolute values.
+        ``'power'``
             Takes the mean of the absolute values.
         ``'rms'``
             Takes the root mean square value.
@@ -1606,13 +1746,13 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         raise ValueError(
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'.")
-    # check power and dB
-    if power and dB:
-        warnings.warn("power and dB are both 'True'. power does have no effect"
-                      " in this case.")
     # set default values
     if target is None:
         target = 0 if dB else 1
+    if freq_range is not None and operation in ('energy', 'power', 'rms'):
+        raise ValueError(
+            f"operation is {operation} and freq_range is {freq_range}, but "
+            "needs to be None.")
     if freq_range is None and isinstance(signal, pyfar.FrequencyData):
         freq_range = (0, signal.frequencies[-1])
     if freq_range:
@@ -1620,40 +1760,47 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
         if freq_range.size < 2:
             raise ValueError(
                 "The frequency range needs to specify lower and upper limits.")
-    # copy and transform data to the desired domain
-
-    #--> den Part brauch ich nicht wenn rms,power,energy
-    if domain == 'time':
-        # get bounds for normalization
-        lim = (0, signal.n_samples)
-        if dB:
-            input_data, log_prefix = pyfar.dsp.decibel(signal, 'time',
-                                                       prefix_return=True)
-        else:
-            input_data = np.abs(signal.time)
-    elif domain == 'freq':
-        if type(signal) != pyfar.classes.audio.FrequencyData:
-            # discard 0 Hz and Nyquist because they might be off by a factor of
-            # two (we are using the normalized spectra)
-            lim = signal.find_nearest_frequency(freq_range)
-            if signal.n_samples % 2:
-                lim[0] = np.max([lim[0], 1])
-            else:
-                lim = np.clip(lim, 1, signal.n_bins-1)
-        else:
-            lim = signal.find_nearest_frequency(freq_range)
-
-        if lim[0] == lim[1]:
-            raise ValueError(("The selected frequency range is 0 Hz. Use a "
-                              "longer signal or increase frequency_range"))
-
-        if dB:
-            input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
-                                                       prefix_return=True)
-        else:
-            input_data = np.abs(signal.freq)
-    else:
+    if domain not in ('time', 'freq'):
         raise ValueError("domain must be 'time' or 'freq'.")
+    # copy and transform data to the desired domain
+    if operation in ('energy', 'power', 'rms'):
+        if operation == 'energy':
+            reference = pyfar.dsp.energy(signal)
+        elif operation == 'power':
+            reference = pyfar.dsp.power(signal)
+        else:
+            reference = pyfar.dsp.rms(signal)
+    else:
+        if domain == 'time':
+            # get bounds for normalization
+            lim = (0, signal.n_samples)
+            if dB:
+                input_data, log_prefix = pyfar.dsp.decibel(signal, 'time',
+                                                           prefix_return=True)
+            else:
+                input_data = np.abs(signal.time)
+        elif domain == 'freq':
+            if type(signal) != pyfar.classes.audio.FrequencyData:
+                # discard 0 Hz and Nyquist because they might be off by a
+                # factor of two (we are using the normalized spectra)
+                lim = signal.find_nearest_frequency(freq_range)
+                if signal.n_samples % 2:
+                    lim[0] = np.max([lim[0], 1])
+                else:
+                    lim = np.clip(lim, 1, signal.n_bins-1)
+            else:
+                lim = signal.find_nearest_frequency(freq_range)
+
+            if lim[0] == lim[1]:
+                raise ValueError(("The selected frequency range is 0 Hz. Use a"
+                                 " longer signal or increase frequency_range"))
+
+            if dB:
+                input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
+                                                           prefix_return=True)
+            else:
+                input_data = np.abs(signal.freq)
+
     # get values for normalization
     if operation == 'max':
         reference = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
@@ -1661,11 +1808,9 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
     elif operation == 'mean':
         reference = np.mean(input_data[..., lim[0]:lim[1]], axis=-1,
                             keepdims=True)
-    elif operation == 'rms':
-        reference = np.sqrt(np.mean(input_data[..., lim[0]:lim[1]]**2,
-                            axis=-1, keepdims=True))
-    else:
-        raise ValueError("operation must be 'max', 'mean' or 'rms'.")
+    if operation not in ('energy', 'power', 'rms', 'max', 'mean'):
+        raise ValueError("operation must be 'max', 'mean', 'power', 'energy' "
+                         "or 'rms'")
     # discard last dimension (samples or bins, required for pyfar arithmetics)
     reference = np.squeeze(reference, axis=-1)
 
@@ -1683,7 +1828,7 @@ def normalize(signal, domain='time', dB=False, power=False, operation='max',
                     "channel_handling must be 'each', 'max', 'min' or 'mean'")
 
     # de-logarthimize value
-    if dB is True:
+    if dB is True and operation not in ('energy', 'power', 'rms'):
         target = 10**(target/log_prefix)
         reference_norm = 10**(reference_norm/log_prefix)
 
