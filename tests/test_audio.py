@@ -42,8 +42,8 @@ def test_audio_dtype_casting():
     audio = _Audio(data, domain="time")
 
     assert audio.dtype == float
-    assert str(audio._data.dtype) == "float64"
-    assert str(data.dtype) == "int32"
+    assert str(audio._data.dtype).startswith("float")
+    assert str(data.dtype).startswith("int")
 
 
 def test_audio_dtype_assertion():

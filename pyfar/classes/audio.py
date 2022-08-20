@@ -227,7 +227,7 @@ class TimeData(_Audio):
     complex valued data.
 
     """
-    def __init__(self, data, times, comment=None, dtype=None):
+    def __init__(self, data, times, comment=None):
         """Create TimeData object with data, and times.
 
         Parameters
@@ -235,18 +235,15 @@ class TimeData(_Audio):
         data : array, double
             Raw data in the time domain. The memory layout of data is 'C'.
             E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
-            1024 samples each.
+            1024 samples each. The data is converted to float.
         times : array, double
             Times in seconds at which the data is sampled. The number of times
             must match the `size` of the last dimension of `data`.
         comment : str, optional
             A comment related to `data`. The default is ``'none'``.
-        dtype : float, complex, optional
-            ``float`` or ``complex``. The default ``None`` uses the dtype
-            of the input `data`.
         """
 
-        _Audio.__init__(self, data, 'time', comment, dtype)
+        _Audio.__init__(self, data, 'time', comment, dtype=float)
 
         self._n_samples = self._data.shape[-1]
 
@@ -319,7 +316,7 @@ class TimeData(_Audio):
     def _return_item(self, data):
         """Return new :py:func:`TimeData` object with data."""
         item = TimeData(
-            data, times=self.times, comment=self.comment, dtype=self.dtype)
+            data, times=self.times, comment=self.comment)
         return item
 
     def __repr__(self):
@@ -333,13 +330,11 @@ class TimeData(_Audio):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
-        dtype = float if obj_dict['_dtype'] == "float" else complex
         del obj_dict['_dtype']
         obj = cls(
             obj_dict['_data'],
             obj_dict['_times'],
-            obj_dict['_comment'],
-            dtype)
+            obj_dict['_comment'])
         obj.__dict__.update(obj_dict)
         return obj
 
@@ -611,7 +606,7 @@ class Signal(FrequencyData, TimeData):
         # initialize domain specific parameters
         if domain == 'time':
             self._n_samples = np.atleast_2d(data).shape[-1]
-            TimeData.__init__(self, data, self.times, comment, dtype=float)
+            TimeData.__init__(self, data, self.times, comment)
         elif domain == 'freq':
             # normalized frequency data
             freq = np.atleast_2d(data)
