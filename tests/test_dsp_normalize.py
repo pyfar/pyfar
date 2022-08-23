@@ -14,11 +14,22 @@ import numpy as np
                         ['mean', 'each', [3.0, 3.0]],
                         ['mean', 'min', [3.0, 15.0]],
                         ['mean', 'mean', [1.0, 5.0]],
-                        ['rms', 'max', [np.sqrt(3.0)/5, np.sqrt(3.0)]],
-                        ['rms', 'each', [np.sqrt(3.0), np.sqrt(3.0)]],
-                        ['rms', 'min', [np.sqrt(3.0), np.sqrt(3.0)*5]],
-                        ['rms', 'mean', [np.sqrt(3.0)*0.3334,
-                                         np.sqrt(3.0)*1.6667]]
+                        ['rms', 'max', [1*np.sqrt(3/5**2), 5*np.sqrt(3/5**2)]],
+                        ['rms', 'each', [1*np.sqrt(3/1**2),
+                                         5*np.sqrt(3/5**2)]],
+                        ['rms', 'min', [1*np.sqrt(3/1**2), 5*np.sqrt(3/1**2)]],
+                        ['rms', 'mean', [1*np.sqrt(3/((1**2+5**2)/2)),
+                                         5*np.sqrt(3/((1**2+5**2)/2))]],
+                        ['power', 'max', [1*3/5**2, 5*3/5**2]],
+                        ['power', 'each', [1*3/1**2, 5*3/5**2]],
+                        ['power', 'min', [1*3/1**2, 5*3/1**2]],
+                        ['power', 'mean', [1*3/((1**2+5**2)/2),
+                                           5*3/((1**2+5**2)/2)]],
+                        ['energy', 'max', [1/5**2, 5/5**2]],
+                        ['energy', 'each', [1/1**2, 5/5**2]],
+                        ['energy', 'min', [1/1**2, 5/1**2]],
+                        ['energy', 'mean', [1/((1**2+5**2)/2),
+                                            5/((1**2+5**2)/2)]]
                         ))
 def test_normalization(operation, channel_handling, truth):
     """Parametrized test for all combinations of operation and channel_handling
@@ -33,8 +44,8 @@ def test_normalization(operation, channel_handling, truth):
 def test_domains_normalization():
     """Test for normalization in time and frequency domain."""
     signal = pf.signals.noise(128, seed=7)
-    time = pf.dsp.normalize(signal, "time")
-    freq = pf.dsp.normalize(signal, "freq")
+    time = pf.dsp.normalize(signal, domain="time")
+    freq = pf.dsp.normalize(signal, domain="freq")
 
     assert np.max(np.abs(time.time)) == 1
     assert np.max(np.abs(time.freq)) != 1

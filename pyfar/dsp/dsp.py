@@ -1641,9 +1641,9 @@ def rms(signal, keepdims=False):
     return data
 
 
-def normalize(signal, domain='time', dB=False, operation='max',
-              channel_handling='max', target=None, freq_range=None,
-              return_reference=False):
+def normalize(signal, operation='max', domain='time',
+              channel_handling='each', target=None, limit=None,
+              unit=None, return_reference=False):
     """
     Apply a normalization.
 
@@ -1738,6 +1738,8 @@ def normalize(signal, domain='time', dB=False, operation='max',
                                pyfar.TimeData)):
         raise TypeError("Input data has to be of type 'Signal', 'TimeData' "
                         "or 'FrequencyData'.")
+    if domain not in ('time', 'freq'):
+        raise ValueError("domain must be 'time' or 'freq'.")
     if type(signal) == pyfar.classes.audio.FrequencyData and domain == 'time':
         raise ValueError(
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
@@ -1748,72 +1750,63 @@ def normalize(signal, domain='time', dB=False, operation='max',
             " but must be of type 'Signal' or 'FrequencyData'.")
     # set default values
     if target is None:
-        target = 0 if dB else 1
-    if freq_range is not None and operation in ('energy', 'power', 'rms'):
+        target = 1
+    if limit is not None and operation in ('energy', 'power', 'rms'):
         raise ValueError(
-            f"operation is {operation} and freq_range is {freq_range}, but "
+            f"operation is {operation} and limit is {limit}, but "
             "needs to be None.")
-    if freq_range is None and isinstance(signal, pyfar.FrequencyData):
-        freq_range = (0, signal.frequencies[-1])
-    if freq_range:
-        freq_range = np.asarray(freq_range)
-        if freq_range.size < 2:
-            raise ValueError(
-                "The frequency range needs to specify lower and upper limits.")
-    if domain not in ('time', 'freq'):
-        raise ValueError("domain must be 'time' or 'freq'.")
     # copy and transform data to the desired domain
-    if operation in ('energy', 'power', 'rms'):
-        if operation == 'energy':
-            reference = pyfar.dsp.energy(signal)
-        elif operation == 'power':
-            reference = pyfar.dsp.power(signal)
+    if limit is not None:
+        limit = np.asarray(limit)
+        if limit.size != 2:
+            raise ValueError("The limit range needs to specify lower and upper"
+                             " limits.")
+        if unit in (None, 's', 'hz'):
+            if unit == 's' and domain == 'freq':
+                raise ValueError("domain is 'freq' and unit is 's', but needs "
+                                 "to be 'hz' or 'bins'.")
+            elif unit == 'hz' and domain == 'time':
+                raise ValueError("domain is 'time' and unit is 'hz', but needs"
+                                 " to be 's', 'ms' or 'mus'.")
+            # Getting default lim in sec for domain=time and Hz for domain=freq
+            lim, unit = (signal.find_nearest_time(limit), 's') \
+                if domain == 'time' \
+                else (signal.find_nearest_frequency(limit), 'hz')
+        elif unit == 'ms' and domain == 'time':
+            lim = signal.find_nearest_time(limit*1e-3)
+        elif unit == 'mus' and domain == 'time':
+            lim = signal.find_nearest_time(limit*1e-6)
+        elif unit == 'bins' and domain == 'freq':
+            # Find bins here?
+            pass
         else:
-            reference = pyfar.dsp.rms(signal)
+            raise ValueError(f"unit is {unit}, but needs to be 's', 'ms' or "
+                             "'mus' for domain='time, 'hz' or 'bins' for "
+                             "domain='freq'.")
+        if lim[0] == lim[1]:
+            raise ValueError((f"The selected limit is {lim}{unit}. Use a"
+                              " longer signal or increase limit."))
     else:
-        if domain == 'time':
-            # get bounds for normalization
-            lim = (0, signal.n_samples)
-            if dB:
-                input_data, log_prefix = pyfar.dsp.decibel(signal, 'time',
-                                                           prefix_return=True)
-            else:
-                input_data = np.abs(signal.time)
-        elif domain == 'freq':
-            if type(signal) != pyfar.classes.audio.FrequencyData:
-                # discard 0 Hz and Nyquist because they might be off by a
-                # factor of two (we are using the normalized spectra)
-                lim = signal.find_nearest_frequency(freq_range)
-                if signal.n_samples % 2:
-                    lim[0] = np.max([lim[0], 1])
-                else:
-                    lim = np.clip(lim, 1, signal.n_bins-1)
-            else:
-                lim = signal.find_nearest_frequency(freq_range)
+        lim = np.array([None, None])
 
-            if lim[0] == lim[1]:
-                raise ValueError(("The selected frequency range is 0 Hz. Use a"
-                                 " longer signal or increase frequency_range"))
-
-            if dB:
-                input_data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
-                                                           prefix_return=True)
-            else:
-                input_data = np.abs(signal.freq)
-
+    if operation == 'energy':
+        reference = pyfar.dsp.energy(signal)
+    elif operation == 'power':
+        reference = pyfar.dsp.power(signal)
+    elif operation == 'rms':
+        reference = pyfar.dsp.rms(signal)
+    elif operation in ('max', 'mean'):
+        # prepare data for max or mean normalization.
+        input_data = np.abs(signal.time) if domain == 'time' else \
+            np.abs(signal.freq)
     # get values for normalization
-    if operation == 'max':
-        reference = np.max(input_data[..., lim[0]:lim[1]], axis=-1,
-                           keepdims=True)
-    elif operation == 'mean':
-        reference = np.mean(input_data[..., lim[0]:lim[1]], axis=-1,
-                            keepdims=True)
-    if operation not in ('energy', 'power', 'rms', 'max', 'mean'):
+        if operation == 'max':
+            reference = np.max(input_data[..., lim[0]:lim[1]], axis=-1)
+        elif operation == 'mean':
+            reference = np.mean(input_data[..., lim[0]:lim[1]], axis=-1)
+    else:
         raise ValueError("operation must be 'max', 'mean', 'power', 'energy' "
-                         "or 'rms'")
-    # discard last dimension (samples or bins, required for pyfar arithmetics)
-    reference = np.squeeze(reference, axis=-1)
-
+                         "or 'rms'.")
     # manipulate values
     if channel_handling == 'each':
         reference_norm = reference.copy()
@@ -1826,15 +1819,8 @@ def normalize(signal, domain='time', dB=False, operation='max',
     else:
         raise ValueError(
                     "channel_handling must be 'each', 'max', 'min' or 'mean'")
-
-    # de-logarthimize value
-    if dB is True and operation not in ('energy', 'power', 'rms'):
-        target = 10**(target/log_prefix)
-        reference_norm = 10**(reference_norm/log_prefix)
-
     # apply normalization
     normalized_signal = signal.copy() * target / reference_norm
-
     if return_reference:
         return normalized_signal, reference_norm
     else:
