@@ -18,8 +18,8 @@ import numpy as np
                         ['rms', 'each', [1*np.sqrt(3/1**2),
                                          5*np.sqrt(3/5**2)]],
                         ['rms', 'min', [1*np.sqrt(3/1**2), 5*np.sqrt(3/1**2)]],
-                        ['rms', 'mean', [1*np.sqrt(3/((1**2+5**2)/2)),
-                                         5*np.sqrt(3/((1**2+5**2)/2))]],
+                        ['rms', 'mean', [2/(np.sqrt(1/3)+np.sqrt(25/3)),
+                                         2*5/(np.sqrt(1/3)+np.sqrt(25/3))]],
                         ['power', 'max', [1*3/5**2, 5*3/5**2]],
                         ['power', 'each', [1*3/1**2, 5*3/5**2]],
                         ['power', 'min', [1*3/1**2, 5*3/1**2]],
@@ -52,34 +52,6 @@ def test_domains_normalization():
 
     assert np.max(np.abs(freq.time)) != 1
     assert np.max(np.abs(freq.freq)) == 1
-
-
-def test_dB_normalization():
-    # Test normalizatin in dB
-    signal = pf.Signal([1, 2, 3], 44100)
-    answer = pf.dsp.normalize(signal, dB=True)
-    truth = [[1/3, 2/3, 1]]
-    npt.assert_allclose(answer.time, truth)
-
-
-def test_power_normalization():
-    # Test normalizatin in dB
-    signal = pf.Signal([1, 2, 3], 44100)
-    answer = pf.dsp.normalize(signal, operation='power')
-    truth = [[1/9, 2/9, 3/9]]
-    npt.assert_allclose(answer.time, truth)
-
-
-def test_normalization_magnitude_mean_min_freqrange():
-    """Test the function along frequency domain, mean, min & target path."""
-    signal = pf.Signal([[1, 4, 1], [1, 10, 1]], 44100, n_samples=4,
-                       domain='freq')
-    truth = pf.Signal([[2.5, 10, 2.5], [2.5, 25, 2.5]], 44100, n_samples=4,
-                      domain='freq')
-    answer = pf.dsp.normalize(signal, domain='freq',
-                              operation='mean', channel_handling='min',
-                              target=10)
-    assert answer == truth
 
 
 def test_value_cshape_broadcasting():
@@ -128,5 +100,5 @@ def test_error_raises():
     with raises(ValueError, match=("channel_handling must be 'each', ")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          channel_handling='invalid')
-    with raises(ValueError, match=("The frequency range needs to specify")):
-        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), freq_range=2)
+    with raises(ValueError, match=("The limit range needs to specify")):
+        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limit=2)
