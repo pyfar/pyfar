@@ -1642,7 +1642,7 @@ def rms(signal, keepdims=False):
 
 
 def normalize(signal, operation='max', domain='time',
-              channel_handling='each', target=None, limit=None,
+              channel_handling='each', target=1, limit=None,
               unit=None, return_reference=False):
     """
     Apply a normalization.
@@ -1749,8 +1749,6 @@ def normalize(signal, operation='max', domain='time',
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'.")
     # set default values
-    if target is None:
-        target = 1
     if limit is not None and operation in ('energy', 'power', 'rms'):
         raise ValueError(
             f"operation is {operation} and limit is {limit}, but "
