@@ -1642,7 +1642,7 @@ def rms(signal, keepdims=False):
 
 
 def normalize(signal, operation='max', domain='time',
-              channel_handling='each', target=1, limit=None,
+              channel_handling='each', target=1, limits=(None, None),
               unit=None, return_reference=False):
     """
     Apply a normalization.
@@ -1736,56 +1736,38 @@ def normalize(signal, operation='max', domain='time',
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
                                pyfar.TimeData)):
-        raise TypeError("Input data has to be of type 'Signal', 'TimeData' "
-                        "or 'FrequencyData'.")
+        raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
+                         "or 'FrequencyData'."))
     if domain not in ('time', 'freq'):
         raise ValueError("domain must be 'time' or 'freq'.")
     if type(signal) == pyfar.classes.audio.FrequencyData and domain == 'time':
-        raise ValueError(
+        raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
-            " but must be of type 'Signal' or 'TimeData'.")
+            " but must be of type 'Signal' or 'TimeData'."))
     if type(signal) == pyfar.classes.audio.TimeData and domain == 'freq':
-        raise ValueError(
+        raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
-            " but must be of type 'Signal' or 'FrequencyData'.")
-    # set default values
-    if limit is not None and operation in ('energy', 'power', 'rms'):
+            " but must be of type 'Signal' or 'FrequencyData'."))
+    if len(limits) != 2:
+        raise ValueError("limits must be an array like of length 2.")
+    if tuple(limits) != (None, None) and \
+            operation in ('energy', 'power', 'rms'):
         raise ValueError(
-            f"operation is {operation} and limit is {limit}, but "
-            "needs to be None.")
-    # copy and transform data to the desired domain
-    if limit is not None:
-        limit = np.asarray(limit)
-        if limit.size != 2:
-            raise ValueError("The limit range needs to specify lower and upper"
-                             " limits.")
-        if unit in (None, 's', 'hz'):
-            if unit == 's' and domain == 'freq':
-                raise ValueError("domain is 'freq' and unit is 's', but needs "
-                                 "to be 'hz' or 'bins'.")
-            elif unit == 'hz' and domain == 'time':
-                raise ValueError("domain is 'time' and unit is 'hz', but needs"
-                                 " to be 's', 'ms' or 'mus'.")
-            # Getting default lim in sec for domain=time and Hz for domain=freq
-            lim, unit = (signal.find_nearest_time(limit), 's') \
-                if domain == 'time' \
-                else (signal.find_nearest_frequency(limit), 'hz')
-        elif unit == 'ms' and domain == 'time':
-            lim = signal.find_nearest_time(limit*1e-3)
-        elif unit == 'mus' and domain == 'time':
-            lim = signal.find_nearest_time(limit*1e-6)
-        elif unit == 'bins' and domain == 'freq':
-            # Find bins here?
-            pass
-        else:
-            raise ValueError(f"unit is {unit}, but needs to be 's', 'ms' or "
-                             "'mus' for domain='time, 'hz' or 'bins' for "
-                             "domain='freq'.")
-        if lim[0] == lim[1]:
-            raise ValueError((f"The selected limit is {lim}{unit}. Use a"
-                              " longer signal or increase limit."))
-    else:
-        lim = np.array([None, None])
+            f"limits must be (None, None) if operation is {operation}")
+    if (domain == "time" and unit not in ("s", "samples", None)) or \
+            (domain == "freq" and unit not in ("hz", "bins", None)):
+        raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
+
+    # get and check the limits
+    find = signal.find_nearest_time if domain == "time" \
+        else signal.find_nearest_frequency
+
+    if unit in ("hz", "s"):
+        limits = [None if lim is None else find(lim) for lim in limits]
+
+    if limits[0] == limits[1] and None not in limits:
+        raise ValueError(("Upper and lower limit are identical. Use a "
+                          "longer signal or increase limits."))
 
     if operation == 'energy':
         reference = pyfar.dsp.energy(signal)
@@ -1799,9 +1781,9 @@ def normalize(signal, operation='max', domain='time',
             np.abs(signal.freq)
     # get values for normalization
         if operation == 'max':
-            reference = np.max(input_data[..., lim[0]:lim[1]], axis=-1)
+            reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
         elif operation == 'mean':
-            reference = np.mean(input_data[..., lim[0]:lim[1]], axis=-1)
+            reference = np.mean(input_data[..., limits[0]:limits[1]], axis=-1)
     else:
         raise ValueError("operation must be 'max', 'mean', 'power', 'energy' "
                          "or 'rms'.")
