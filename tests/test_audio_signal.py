@@ -216,10 +216,10 @@ def test_setter_fft_norm():
 
 
 def test_dtype():
-    """Test for the getter of dtype."""
-    dtype = float
+    """Test for converting int to float upon init."""
+
     signal = Signal([1, 2, 3], 44100)
-    assert signal.dtype == dtype
+    assert str(signal._data.dtype).startswith("float")
 
 
 def test_signal_length():

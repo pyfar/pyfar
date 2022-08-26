@@ -26,13 +26,12 @@ def test_audio_comment():
 
 
 @pytest.mark.parametrize('dtype,str_dtype', (
-    [float, "float64"], [complex, "complex128"]))
+    [float, "float"], [complex, "complex"]))
 def test_audio_data_type(dtype, str_dtype):
     """Test different dtypes"""
 
     audio = _Audio([1, 2, 3], domain="time", dtype=dtype)
-    assert audio.dtype == dtype
-    assert str(audio._data.dtype) == str_dtype
+    assert str(audio._data.dtype).startswith(str_dtype)
 
 
 def test_audio_dtype_casting():
@@ -41,21 +40,8 @@ def test_audio_dtype_casting():
     data = np.array([1, 2, 3], dtype=int)
     audio = _Audio(data, domain="time")
 
-    assert audio.dtype == float
     assert str(audio._data.dtype).startswith("float")
     assert str(data.dtype).startswith("int")
-
-
-def test_audio_dtype_assertion():
-    """Test assertions for dtype"""
-
-    # invalid input argument for dtype
-    with pytest.raises(ValueError, match="dtype must be None, float"):
-        _Audio([1, 2, 3], "time", dtype=int)
-
-    # wrong dtype of data
-    with pytest.raises(ValueError, match="data is of type"):
-        _Audio(["1", "2", "3"], "time")
 
 
 def test_return_item():

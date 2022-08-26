@@ -46,7 +46,7 @@ class _Audio():
             # convert ints to float and check dtype of input
             if str(self._data.dtype).startswith("int"):
                 self._data = self._data.astype(float)
-            elif str(self._data.dtype) not in ["float64", "complex128"]:
+            elif not str(self._data.dtype).startswith(("float", "complex")):
                 raise ValueError((
                     f"data is of type {str(self._data.dtype)} but"
                     " must be of type float, complex, or int"))
@@ -61,12 +61,6 @@ class _Audio():
     def domain(self):
         """The domain the data is stored in."""
         return self._domain
-
-    @property
-    def dtype(self):
-        """The data type of the audio object. This can be any data type and
-        precision supported by numpy."""
-        return float if str(self._data.dtype).startswith("float") else complex
 
     @property
     def cshape(self):
@@ -164,7 +158,6 @@ class _Audio():
     def _encode(self):
         """Return dictionary for the encoding."""
         class_dict = self.copy().__dict__
-        class_dict["_dtype"] = "float" if self.dtype == float else "complex"
         return class_dict
 
     def _decode(self):
@@ -262,7 +255,7 @@ class TimeData(_Audio):
     @time.setter
     def time(self, value):
         """Set the time data."""
-        data = np.atleast_2d(np.asarray(value))
+        data = np.atleast_2d(np.asarray(value, dtype=float))
         self._data = data
         self._n_samples = data.shape[-1]
         # setting the domain is only required for Signal. Setting it here
@@ -377,7 +370,7 @@ class FrequencyData(_Audio):
     incomplete spectra. Can store real or complex valued data.
 
     """
-    def __init__(self, data, frequencies, comment=None, dtype=None):
+    def __init__(self, data, frequencies, comment=None):
         """Create FrequencyData with data, and frequencies.
 
         Parameters
@@ -385,15 +378,12 @@ class FrequencyData(_Audio):
         data : array, double
             Raw data in the frequency domain. The memory layout of Data is 'C'.
             E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
-            frequency bins each.
+            frequency bins each. Data can be float or complex.
         frequencies : array, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
-        dtype : float, complex, optional
-            ``float`` or ``complex``. The default ``None`` uses the dtype
-            of the input `data`.
 
         Notes
         -----
@@ -410,7 +400,7 @@ class FrequencyData(_Audio):
 
         """
 
-        _Audio.__init__(self, data, 'freq', comment, dtype)
+        _Audio.__init__(self, data, 'freq', comment)
 
         # init and check frequencies
         freqs = np.atleast_1d(np.asarray(frequencies).flatten())
@@ -429,7 +419,14 @@ class FrequencyData(_Audio):
     @freq.setter
     def freq(self, value):
         """Set the frequency data."""
-        data = np.atleast_2d(np.asarray(value, dtype=complex))
+
+        # check data type
+        data = np.atleast_2d(np.asarray(value))
+        if str(data.dtype).startswith("int"):
+            data = data.astype("float")
+        elif not str(data.dtype).startswith(("float", "complex")):
+            raise ValueError("frequency data must be float or complex")
+
         # match shape of frequencies
         if self.frequencies.size != data.shape[-1]:
             raise ValueError(
@@ -480,7 +477,7 @@ class FrequencyData(_Audio):
         """Return new FrequencyData object with data."""
         item = FrequencyData(
             data, frequencies=self.frequencies,
-            comment=self.comment, dtype=self.dtype)
+            comment=self.comment)
         return item
 
     def __repr__(self):
@@ -494,13 +491,10 @@ class FrequencyData(_Audio):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
-        dtype = float if obj_dict['_dtype'] == "float" else complex
-        del obj_dict['_dtype']
         obj = cls(
             obj_dict['_data'],
             obj_dict['_frequencies'],
-            obj_dict['_comment'],
-            dtype)
+            obj_dict['_comment'])
         obj.__dict__.update(obj_dict)
         return obj
 
@@ -627,7 +621,7 @@ class Signal(FrequencyData, TimeData):
             self._n_bins = freq_raw.shape[-1]
             # Init remaining parameters
             FrequencyData.__init__(
-                self, freq_raw, self.frequencies, comment, dtype=complex)
+                self, freq_raw.astype(complex), self.frequencies, comment)
             delattr(self, '_frequencies')
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
@@ -658,18 +652,24 @@ class Signal(FrequencyData, TimeData):
     @freq.setter
     def freq(self, value):
         """Set the normalized frequency domain data."""
+        # check data type
         data = np.atleast_2d(np.asarray(value))
+        if not str(data.dtype).startswith(("int", "float", "complex")):
+            raise ValueError(
+                "data must be int float or complex and is casted to complex")
         # Check n_samples
         if data.shape[-1] != self.n_bins:
             warnings.warn(UserWarning((
                 "Number of frequency bins changed, assuming an even "
                 "number of samples from the number of frequency bins.")))
             self._n_samples = (data.shape[-1] - 1)*2
+        # set domain
         self._domain = 'freq'
+        # remove normalization
         data_denorm = fft.normalization(
                 data, self._n_samples, self._sampling_rate,
                 self._fft_norm, inverse=True)
-        self._data = data_denorm
+        self._data = data_denorm.astype(complex)
 
     @property
     def freq_raw(self):
