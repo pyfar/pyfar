@@ -178,15 +178,7 @@ class _Audio():
 
 
         """
-        if isinstance(key, (int, slice, tuple)):
-            try:
-                data = self._data[key]
-            except KeyError:
-                raise KeyError("Index is out of bounds")
-        else:
-            raise TypeError(
-                    "Index must be int, not {}".format(type(key).__name__))
-
+        data = self._data[key]
         return self._return_item(data)
 
     def __setitem__(self, key, value):
@@ -202,14 +194,7 @@ class _Audio():
         >>> signal[0] = pf.signals.noise(10, rms=2)
         """
         self._assert_matching_meta_data(value)
-        if isinstance(key, (int, slice)):
-            try:
-                self._data[key] = value._data
-            except KeyError:
-                raise KeyError("Index is out of bound")
-        else:
-            raise TypeError(
-                    "Index must be int, not {}".format(type(key).__name__))
+        self._data[key] = value._data
 
 
 class TimeData(_Audio):
@@ -587,8 +572,6 @@ class Signal(FrequencyData, TimeData):
             "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # check fft norm
-        if fft_norm is None:
-            fft_norm = 'none'
         if fft_norm in self._VALID_FFT_NORMS:
             self._fft_norm = fft_norm
         else:
@@ -622,8 +605,6 @@ class Signal(FrequencyData, TimeData):
             FrequencyData.__init__(
                 self, freq_raw.astype(complex), self.frequencies, comment)
             delattr(self, '_frequencies')
-        else:
-            raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
     @TimeData.time.getter
     def time(self):
@@ -801,13 +782,8 @@ class Signal(FrequencyData, TimeData):
         The signal type is ``'energy'``  if the ``fft_norm = None`` and
         ``'power'`` otherwise.
         """
-        if self.fft_norm == 'none':
-            stype = 'energy'
-        elif self.fft_norm in [
-                "unitary", "amplitude", "rms", "power", "psd"]:
-            stype = 'power'
-        else:
-            raise ValueError("No valid fft norm set.")
+        stype = 'energy' if self.fft_norm == 'none' else 'power'
+
         return stype
 
     def __repr__(self):
