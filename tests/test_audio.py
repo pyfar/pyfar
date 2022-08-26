@@ -44,6 +44,15 @@ def test_audio_dtype_casting():
     assert str(data.dtype).startswith("int")
 
 
+def test_audio_dtype_assertions():
+
+    with pytest.raises(ValueError, match="dtype must be None, float"):
+        _Audio([1, 2, 3], "time", dtype=str)
+
+    with pytest.raises(ValueError, match="data is of dtype"):
+        _Audio(["1", "2", "3"], "time")
+
+
 def test_return_item():
     audio = _Audio([1, 2, 3], domain='time')
 

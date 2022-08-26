@@ -48,8 +48,8 @@ class _Audio():
                 self._data = self._data.astype(float)
             elif not str(self._data.dtype).startswith(("float", "complex")):
                 raise ValueError((
-                    f"data is of type {str(self._data.dtype)} but"
-                    " must be of type float, complex, or int"))
+                    f"data is of dtype {str(self._data.dtype)} but"
+                    " must be of dtype float, complex, or int"))
         else:
             self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
 
@@ -323,7 +323,6 @@ class TimeData(_Audio):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
-        del obj_dict['_dtype']
         obj = cls(
             obj_dict['_data'],
             obj_dict['_times'],
@@ -789,7 +788,6 @@ class Signal(FrequencyData, TimeData):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
-        del obj_dict['_dtype']
         obj = cls(
             obj_dict['_data'],
             obj_dict['_sampling_rate'],
