@@ -374,7 +374,7 @@ class FrequencyData(_Audio):
 
     Objects of this class contain frequency data which is not directly
     convertible to the time domain, i.e., non-equidistantly spaced bins or
-    incomplete spectra. Can store real and complex valued data.
+    incomplete spectra. Can store real or complex valued data.
 
     """
     def __init__(self, data, frequencies, comment=None, dtype=None):
