@@ -286,7 +286,7 @@ class TimeData(_Audio):
         """
         Check if the meta data matches across two :py:func:`TimeData` objects.
         """
-        if not isinstance(other, TimeData):
+        if other.__class__ != TimeData:
             raise ValueError("Comparison only valid against TimeData objects.")
         if self.n_samples != other.n_samples:
             raise ValueError("The number of samples does not match.")
@@ -450,7 +450,7 @@ class FrequencyData(_Audio):
 
     def _assert_matching_meta_data(self, other):
         """Check if the meta data matches across two FrequencyData objects."""
-        if not isinstance(other, FrequencyData):
+        if other.__class__ != FrequencyData:
             raise ValueError(
                 "Comparison only valid against FrequencyData objects.")
         if self.n_bins != other.n_bins:
@@ -605,6 +605,8 @@ class Signal(FrequencyData, TimeData):
             FrequencyData.__init__(
                 self, freq_raw.astype(complex), self.frequencies, comment)
             delattr(self, '_frequencies')
+        else:
+            raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
     @TimeData.time.getter
     def time(self):
@@ -636,7 +638,7 @@ class Signal(FrequencyData, TimeData):
         data = np.atleast_2d(np.asarray(value))
         if not str(data.dtype).startswith(("int", "float", "complex")):
             raise ValueError(
-                "data must be int float or complex and is casted to complex")
+                "data must be int, float, or complex and is casted to complex")
         # Check n_samples
         if data.shape[-1] != self.n_bins:
             warnings.warn(UserWarning((

@@ -3,6 +3,7 @@ import numpy.testing as npt
 import pytest
 
 from pyfar import Signal
+import pyfar as pf
 
 
 def test_signal_init():
@@ -23,6 +24,19 @@ def test_signal_init_default_parameter():
     assert signal.fft_norm == 'none'
     assert signal.comment == 'none'
     assert signal.fft_norm == 'none'
+
+
+def test_signal_init_assertions():
+    """Test assertions in initialization"""
+
+    with pytest.raises(ValueError, match="Invalid FFT normalization"):
+        Signal(1, 44100, fft_norm="funky")
+
+    with pytest.raises(ValueError, match="n_samples can not be larger"):
+        Signal(1, 44100, domain="freq", n_samples=10)
+
+    with pytest.raises(ValueError, match="Invalid domain"):
+        Signal(1, 44100, domain="space")
 
 
 def test_signal_comment():
@@ -152,6 +166,8 @@ def test_setter_freq():
     desired = signal.n_samples * np.array([[1., 2./2, 3.]])
     npt.assert_allclose(signal._data, desired)
     npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]))
+    with pytest.raises(ValueError, match="data must be int, float"):
+        signal.freq = "constant"
 
 
 def test_re_setter_freq():
@@ -286,6 +302,14 @@ def test_magic_setitem_wrong_n_samples():
     set_signal = Signal([1, 2, 3], 44100)
     with pytest.raises(ValueError, match='number of samples does not match'):
         signal[0] = set_signal
+
+
+@pytest.mark.parametrize("audio", (
+    pf.TimeData([1, 2], [1, 2]), pf.FrequencyData([1, 2], [1, 2])))
+def test_magic_setitem_wrong_type(audio):
+    signal = Signal([1, 2, 3, 4], 44100)
+    with pytest.raises(ValueError, match="Comparison only valid"):
+        signal[0] = audio
 
 
 def test_magic_len():
