@@ -409,7 +409,7 @@ class FrequencyData(_Audio):
         if str(data.dtype).startswith("int"):
             data = data.astype("float")
         elif not str(data.dtype).startswith(("float", "complex")):
-            raise ValueError("frequency data must be float or complex")
+            raise ValueError("frequency data must be int, float, or complex")
 
         # match shape of frequencies
         if self.frequencies.size != data.shape[-1]:

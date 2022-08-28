@@ -49,6 +49,12 @@ def test_data_frequency_setter_freq():
     freq.freq = data_b
     npt.assert_allclose(freq.freq, np.atleast_2d(np.asarray(data_b)))
 
+    with pytest.raises(ValueError, match="frequency data must be int, float"):
+        freq.freq = ["1", "2", "3"]
+
+    with pytest.raises(ValueError, match="Number of frequency values"):
+        freq.freq = 1
+
 
 def test_reshape():
 
