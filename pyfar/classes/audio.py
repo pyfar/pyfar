@@ -1070,10 +1070,10 @@ def matrix_multiplication(
     array likes.
 
     This function is based on ``numpy.matmul``. It only acts on the channels,
-    so the operation is the same for all samples/frequency bins per channel
+    so the operation is the same for all samples/frequency bins
     and the number of the samples/bins always stays the same
     (this function is not meant, e.g, for subsampling or windowing,
-    use the  :py:mod:`pyfar.dsp` functions for that kind of purpose).
+    use the :py:mod:`pyfar.dsp` functions instead).
     Pyfar audio objects are:
     :py:func:`Signal`, :py:func:`TimeData`, and :py:func:`FrequencyData`.
 
@@ -1081,14 +1081,19 @@ def matrix_multiplication(
     ----------
     data : tuple of the form (data_1, data_2, ..., data_N)
         Data to be multiplied. Can contain pyfar audio objects or array likes.
-        The data is `broadcasted
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
-        to the data with the highest number of channel dimensions
-        (``len(signal.cshape)``). Pyfar audio objects can not be mixed,
-        e.g., :py:func:`TimeData` and
+        Pyfar audio objects can not be mixed, e.g., :py:func:`TimeData` and
         :py:func:`FrequencyData` objects do not work together. See
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
+
+        The data is `broadcasted
+        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+        to the data with the highest number of channel dimensions
+        (``len(signal.cshape)``). If arrays are included, they need to match or
+        be broadcastable into the ``cshape`` of the resulting audio object
+        (an axis is implicitly appended).
+        See `axes` and notes for more details.
+
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. If working in the frequency domain, the FFT
@@ -1096,35 +1101,41 @@ def matrix_multiplication(
         :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
     axes : list of 3 tuples
         A list of 3 tuples with the indices of the channels the
-        multiplication should operate on. The base elements of the
-        multiplication are two-dimensional matrices residing along
-        the time/frequency dimension. So, the first tuple refers to the
-        channel indexes indicating the 2-D matrices of the first operand,
+        multiplication should operate on. The first tuple refers to the
+        channel indexes indicating the 2-D matrices for the first operand,
         the second tuple to the indexes of the second operand and the third
-        to the channel indexes the result should be stored in. If `data`
-        contains more than two operands, the scheme given by `axes`
-        refers to all of the sequential multiplications. Negative
-        values in `axes` refer to ``cshape`` not the frequency/time axis
-        is in the underlying data. For instance, to
-        multiply matrices residing (stacked) in the last two channel
-        dimensions to be stored in the last two channel dimensions, this is
-        indicated by ``[(-2, -1), (-2, -1), (-2, -1)]``, which is the default.
-        See notes and examples below for more details.
+        to the channel indexes the result should be stored in.
+
+        - In case of pyfar audio objects, the indices (including negative
+          values) refer to the channel dimensions, not the time/frequency
+          dimension of the underlying data.
+        - In case of arrays, the indices refer to the array dimensions.
+
+        If `data` contains more than two operands, the scheme given by `axes`
+        refers to all of the sequential multiplications.
+        For instance, to multiply matrices residing in the last two
+        channel dimensions to be stored in the last two channel dimensions,
+        this is indicated by ``[(-2, -1), (-2, -1), (-2, -1)]``, which is the
+        default.
+
+        See notes and examples for more details.
 
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data` contains an
+        likes. Result as pyfar audio object if `data` contains an
         audio object. The `fft_norm` is ``'none'`` if all FFT norms are
         ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
         used.
 
     Notes
     -----
-    The shape of arrays included in data need to match or be broadcastable
-    into the ``cshape`` of the resulting audio object. The behavior depends on
-    data in the following way.
+    The function implements the semantics of the ``@`` operator.
+
+    The base elements of the multiplication can be considered as
+    two-dimensional matrices residing along the time/frequency dimension.
+    The behavior depends on `data` in the following way.
 
     - If the ``cshape`` of the arguments in data is 2-D, the arguments are
       multiplied like conventional matrices along the time/frequency dimension.
@@ -1139,8 +1150,6 @@ def matrix_multiplication(
     - If the second signal is 1-D, it is promoted to 2-D by appending a 1 to
       its ``cshape``.
 
-    The function implements the semantics of the ``@`` operator.
-
     Examples
     --------
     Matrix multiplication of two-dimensional signals.
@@ -1154,9 +1163,9 @@ def matrix_multiplication(
     >>> pf.matrix_multiplication((a, b)).cshape
     (2, 4)
 
-    Matrix multiplication of three-dimensional signals. Per default, the
-    length of axis 0 (the axis along the stacked matrices) need to match
-    or it is broadcasted.
+    Matrix multiplication of three-dimensional signals. The length of the
+    dimension along the stacked matrices needs to match or it is broadcasted
+    (per default this refers to axis 0).
 
     >>> a_match = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     >>> b = pf.signals.impulse(10, amplitude=np.ones((2, 4, 5)))
@@ -1175,6 +1184,20 @@ def matrix_multiplication(
     >>> b = pf.signals.impulse(10, amplitude=np.ones((3, 5, 4)))
     >>> pf.matrix_multiplication((a, b), axes=[(0, 1), (0, 1), (0, 1)]).cshape
     (2, 5, 4)
+
+    Matrix multiplications of numpy arrays and signals.
+
+    >>> B = np.ones((3, 4))
+    >>> s1 = pf.signals.impulse(10, amplitude=np.ones((4)))
+    >>> s2 = pf.signals.impulse(10, amplitude=np.ones((4, 2)))
+    >>> s3 = pf.signals.impulse(10, amplitude=np.ones((2, 4)))
+    >>> pf.matrix_multiplication((B, s1)).cshape
+    (3, 1)
+    >>> pf.matrix_multiplication((B, s2)).cshape
+    (3, 2)
+    >>> pf.matrix_multiplication(
+    >>>     (B, s3), axes=[(-2, -1), (-1, -2), (-1, -2)]).cshape
+    (2, 3)
 
     Fancy use of the `axes` parameter.
 
@@ -1211,12 +1234,19 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
         _assert_match_for_arithmetic(data, domain, division, matmul)
 
     # apply arithmetic operation
-    result = _get_arithmetic_data(data[0], n_samples, domain, cshape)
+    result = _get_arithmetic_data(data[0], domain, cshape)
+    if matmul:
+        dtypes = [type(data[0]), type(data[1])]
 
     for d in range(1, len(data)):
+        if matmul:
+            # dtypes[0] equals type of previous result in sequence
+            if dtypes[0] not in (Signal, TimeData, FrequencyData):
+                dtypes[0] = type(data[d-1])
+            dtypes[1] = type(data[d])
+            kwargs['dtypes'] = dtypes
         result = operation(
-            result, _get_arithmetic_data(data[d], n_samples, domain, cshape),
-            **kwargs)
+            result, _get_arithmetic_data(data[d], domain, cshape), **kwargs)
 
     # check if to return an audio object
     if audio_type == Signal:
@@ -1362,7 +1392,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
             cshape)
 
 
-def _get_arithmetic_data(data, n_samples, domain, cshape):
+def _get_arithmetic_data(data, domain, cshape):
     """
     Return data in desired domain without any fft normalization.
 
@@ -1370,9 +1400,6 @@ def _get_arithmetic_data(data, n_samples, domain, cshape):
     ----------
     data : Signal, array like, number
         Input data
-    n_samples :
-        Number of samples of data if data is a Signal (required for fft
-        normalization).
     domain : 'time', 'freq'
         Domain in which the data is returned
     cshape : tuple
@@ -1431,15 +1458,23 @@ def _power(a, b):
     return a**b
 
 
-def _matrix_multiplication(a, b, axes):
-    # adjust time/frequency axis
-    axes = [tuple([ax-1 if ax < 0 else ax for ax in t]) for t in axes]
-    # Prepend dimension if cshape of first is 1D
-    if len(a.shape) == 2:
-        a = np.expand_dims(a, 0)
-    # Append dimension if cshape of second is 1D
-    if len(b.shape) == 2:
-        b = np.expand_dims(b, 1)
+def _matrix_multiplication(a, b, axes, dtypes):
+    # adjust axes according to time/frequency dimension
+    axes = axes.copy()
+    if dtypes[0] in (Signal, TimeData, FrequencyData):
+        a = np.expand_dims(a, 0) if a.ndim == 2 else a
+        axes[0] = tuple([ax-1 if ax < 0 else ax for ax in axes[0]])
+    elif a.ndim < b.ndim:
+        a = np.expand_dims(a, -1)
+        axes[0] = tuple([ax-1 if ax < 0 else ax for ax in axes[0]])
+    if dtypes[1] in (Signal, TimeData, FrequencyData):
+        b = np.expand_dims(b, 1) if b.ndim == 2 else b
+        axes[1] = tuple([ax-1 if ax < 0 else ax for ax in axes[1]])
+    elif a.ndim > b.ndim:
+        b = np.expand_dims(b, -1)
+        axes[1] = tuple([ax-1 if ax < 0 else ax for ax in axes[1]])
+    if any(dt in (Signal, TimeData, FrequencyData) for dt in dtypes):
+        axes[2] = tuple([ax-1 if ax < 0 else ax for ax in axes[2]])
     return np.matmul(a, b, axes=axes)
 
 
