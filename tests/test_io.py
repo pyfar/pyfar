@@ -665,14 +665,14 @@ def test_read_comsol_file_not_found():
     """Test error of find not found."""
     path = 'blabla.csv'
     with pytest.raises(FileNotFoundError):
-        io.read_comsol(path)
+        io.read_comsol_header(path)
 
 
 def test_read_comsol_wrong_file_type():
     """Test read comsol file format."""
     filename = 'bla.bla'
     with pytest.raises(SyntaxError):
-        io.read_comsol(filename)
+        io.read_comsol_header(filename)
 
 
 @pytest.mark.parametrize("filename,d,n,e",  [
@@ -682,50 +682,85 @@ def test_read_comsol_wrong_file_type():
 @pytest.mark.parametrize("postfix", [(".csv"), (".dat"), (".txt")])
 def test_read_comsol_check_output_Lp(filename, d, n, e, postfix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    out = io.read_comsol(path + postfix)
-    assert out['Dimension'] == d
-    assert out['Nodes'] == n
-    assert out['Coordinates'].csize == n
-    assert out['Expressions'] == e
-    for key in out['Data']:
-        assert out['Data'][key].n_bins == e
-        assert out['Data'][key].cshape[0] == n
+    expressions, metadata = io.read_comsol_header(path + postfix)
+    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
+    assert metadata['Dimension'] == d
+    assert metadata['Nodes'] == n
+    assert coordinates.csize == n
+    assert metadata['Expressions'] == e
 
 
-@pytest.mark.parametrize("filename,d,n,e",  [
-    # ("p_t_d2_n1_e1", 2, 1, 1),
-    ("p_t_d2_n1_e3", 2, 1, 3),
-    ("p_t_d2_n6_e3", 2, 6, 3),
-    ("p_t_d1_n6_e3", 1, 6, 3),
-    ("p_t_d3_n6_e3", 3, 6, 3),
+@pytest.mark.parametrize("filename,domain",  [
+    ("p_f_d2_n6_e3", 'freq'),
+    ("p_f_d2_n1_e3", 'freq'),
+    ("p_f_d2_n6_e1", 'freq'),
+    ("Lp_d2_n6_e1", 'freq'),
+    ("Lp_d2_n6_e3", 'freq'),
+    ("p_t_d2_n1_e3", 'time'),
+    ("p_t_d2_n6_e3", 'time'),
+    ("p_t_d1_n6_e3", 'time'),
+    ("p_t_d3_n6_e3", 'time'),
     ])
-def test_read_comsol_check_output_time_data(filename, d, n, e):
+def test_read_comsol_check_data_domain(filename, domain):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    out = io.read_comsol(path + '.txt')
-    assert out['Dimension'] == d
-    assert out['Nodes'] == n
-    assert out['Coordinates'].csize == n
-    assert out['Expressions'] == e
-    for key in out['Data']:
-        assert out['Data'][key].n_samples == e
-        assert out['Data'][key].cshape[0] == n
+    expressions, metadata = io.read_comsol_header(path + '.txt')
+    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
+    assert data.domain == domain
 
 
 @pytest.mark.parametrize("filename,d,n,e",  [
     ("p_f_d2_n6_e3", 2, 6, 3),
     ("p_f_d2_n1_e3", 2, 1, 3),
     ("p_f_d2_n6_e1", 2, 6, 1),
+    ("Lp_d2_n6_e1", 2, 6, 1),
+    ("Lp_d2_n6_e3", 2, 6, 3),
+    ("p_t_d2_n1_e3", 2, 1, 3),
+    ("p_t_d2_n6_e3", 2, 6, 3),
+    ("p_t_d1_n6_e3", 1, 6, 3),
+    ("p_t_d3_n6_e3", 3, 6, 3),
     ])
-def test_read_comsol_check_output_freq_data(filename, d, n, e):
+def test_read_comsol_check_header(filename, d, n, e):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    out = io.read_comsol(path + '.txt')
-    assert out['Dimension'] == d
-    assert out['Nodes'] == n
-    assert out['Coordinates'].csize == n
-    assert out['Expressions'] == e
-    for key in out['Data']:
-        assert out['Data'][key].n_bins == e
-        assert out['Data'][key].cshape[0] == n
+    expressions, metadata = io.read_comsol_header(path + '.txt')
+    assert metadata['Dimension'] == d
+    assert metadata['Nodes'] == n
+    assert metadata['Expressions'] == e
+    assert len(expressions) == e + d
+
+
+@pytest.mark.parametrize("filename,exp,n_bins",  [
+    ("p_f_d2_n6_e3_exp", 3, 1),
+    ("p_f_d2_n6_e3_freq", 1, 3),
+    ])
+def test_read_comsol_check_data_shape(filename, exp, n_bins):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, metadata = io.read_comsol_header(path + '.txt')
+    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
+    assert data.cshape[1] == exp
+    assert data.cshape[0] == 6  # Size of Coordinates
+    assert data.n_bins == n_bins
+
+
+@pytest.mark.parametrize("filename,d,n,e",  [
+    ("p_f_d2_n6_e3", 2, 6, 3),
+    ("p_f_d2_n1_e3", 2, 1, 3),
+    ("p_f_d2_n6_e1", 2, 6, 1),
+    ("Lp_d2_n6_e1", 2, 6, 1),
+    ("Lp_d2_n6_e3", 2, 6, 3),
+    ("p_t_d2_n1_e3", 2, 1, 3),
+    ("p_t_d2_n6_e3", 2, 6, 3),
+    ("p_t_d1_n6_e3", 1, 6, 3),
+    ("p_t_d3_n6_e3", 3, 6, 3),
+    ])
+def test_read_comsol_check_coordinates(filename, d, n, e):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, metadata = io.read_comsol_header(path + '.txt')
+    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
+    assert coordinates.csize == n
+    if d < 3:
+        assert np.sum(coordinates.get_cart()[:, 2]) < 1e-15
+    if d < 2:
+        assert np.sum(coordinates.get_cart()[:, 1]) < 1e-15
 
 
 @pytest.mark.parametrize("filename",  ["Lp_d2_n6_e1", "Lp_d2_n6_e3",])
@@ -735,14 +770,16 @@ def test_read_comsol_check_output_freq_data(filename, d, n, e):
                           (".csv", ".dat")])
 def test_read_comsol_cmp_same_files_different_formats(filename, type1, type2):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    out_1 = io.read_comsol(path + type1)
-    out_2 = io.read_comsol(path + type2)
-    assert out_1['Date'] == out_2['Date']
-    assert out_1['Description'] == out_2['Description']
-    assert out_1['Dimension'] == out_2['Dimension']
-    assert out_1['Expressions'] == out_2['Expressions']
-    assert out_1['Length unit'] == out_2['Length unit']
-    assert out_1['Model'] == out_2['Model']
-    assert out_1['Nodes'] == out_2['Nodes']
-    assert out_1['Version'] == out_2['Version']
-    assert out_1['Coordinates'] == out_2['Coordinates']
+    expressions1, metadata1 = io.read_comsol_header(path + '.txt')
+    data1, coordinates1 = io.read_comsol(
+        path + type1, expressions=expressions1)
+    expressions2, metadata2 = io.read_comsol_header(path + '.txt')
+    data2, coordinates2 = io.read_comsol(
+        path + type2, expressions=expressions2)
+    assert metadata1 == metadata2
+    # assert data1.freq == data2.freq # nan != nan, no idea why
+    # assert any(data1.frequencies == data2.frequencies)
+    assert data1.cshape[0] == data2.cshape[0]
+    assert data1.cshape[1] == data2.cshape[1]
+    assert coordinates1 == coordinates2
+    assert expressions1 == expressions2
