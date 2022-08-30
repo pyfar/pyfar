@@ -201,8 +201,7 @@ class TimeData(_Audio):
     """Class for time data.
 
     Objects of this class contain time data which is not directly convertible
-    to frequency domain, i.e., non-equidistant samples. Can store real and
-    complex valued data.
+    to frequency domain, i.e., non-equidistant samples.
 
     """
     def __init__(self, data, times, comment=None):
@@ -213,7 +212,8 @@ class TimeData(_Audio):
         data : array, double
             Raw data in the time domain. The memory layout of data is 'C'.
             E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
-            1024 samples each. The data is converted to float.
+            1024 samples each. The data can be ``int`` or ``float`` and is
+            converted to ``float`` in any case.
         times : array, double
             Times in seconds at which the data is sampled. The number of times
             must match the `size` of the last dimension of `data`.
@@ -351,7 +351,7 @@ class FrequencyData(_Audio):
 
     Objects of this class contain frequency data which is not directly
     convertible to the time domain, i.e., non-equidistantly spaced bins or
-    incomplete spectra. Can store real or complex valued data.
+    incomplete spectra.
 
     """
     def __init__(self, data, frequencies, comment=None):
@@ -362,7 +362,8 @@ class FrequencyData(_Audio):
         data : array, double
             Raw data in the frequency domain. The memory layout of Data is 'C'.
             E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
-            frequency bins each. Data can be float or complex.
+            frequency bins each. Data can be ``int``, ``float`` or ``complex``.
+            Data of type ``int`` is converted to ``float``.
         frequencies : array, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
@@ -516,7 +517,7 @@ class FrequencyData(_Audio):
 class Signal(FrequencyData, TimeData):
     """Class for audio signals.
 
-    Objects of this class contain data which is directly convertable between
+    Objects of this class contain data which is directly convertible between
     time and frequency domain (equally spaced samples and frequency bins). The
     data is always real valued in the time domain and complex valued in the
     frequency domain.
@@ -537,8 +538,9 @@ class Signal(FrequencyData, TimeData):
         data : ndarray, double
             Raw data of the signal in the time or frequency domain. The memory
             layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
-            3 x 2 channels with 1024 samples or frequency bins each. Frequency
-            data must be provided as single sided spectra, i.e., for all
+            3 x 2 channels with 1024 samples or frequency bins each. Time data
+            is converted to ``float``. Frequency is converted to ``complex``
+            and must be provided as single sided spectra, i.e., for all
             frequencies between 0 Hz and half the sampling rate.
         sampling_rate : double
             Sampling rate in Hz

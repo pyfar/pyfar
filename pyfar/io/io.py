@@ -317,7 +317,7 @@ def read_audio(filename, dtype='float64', **kwargs):
         be used if the data was written in the same format. Integer data is in
         the range from ``-2**15`` to ``2**15-1`` for ``'int16'`` and from
         ``-2**31`` to ``2**31-1`` for ``'int32'``. In any case, the data is
-        converted to float when writing it to the Signal.
+        converted to float.
     **kwargs
         Other keyword arguments to be passed to :py:func:`soundfile.read`. This
         is needed, e.g, to read RAW audio files.
