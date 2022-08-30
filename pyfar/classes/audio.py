@@ -1109,9 +1109,10 @@ def matrix_multiplication(
     Parameters
     ----------
     data : tuple of the form (data_1, data_2, ..., data_N)
-        Data to be multiplied. Can contain pyfar audio objects or array likes.
-        Pyfar audio objects can not be mixed, e.g., :py:func:`TimeData` and
-        :py:func:`FrequencyData` objects do not work together. See
+        Data to be multiplied. Can contain pyfar audio objects, array likes,
+        and scalars. Pyfar audio objects can not be mixed, e.g.,
+        :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
+        together. See below or
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
 
@@ -1125,9 +1126,9 @@ def matrix_multiplication(
 
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
-        frequency domain. If working in the frequency domain, the FFT
-        normalization is removed before the operation (See
-        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        frequency domain. Frequency domain operations work on the raw
+        spectrum (see :py:func:`pyfar.dsp.fft.normalization`). The default is
+        ``'freq'``.
     axes : list of 3 tuples
         A list of 3 tuples with the indices of the channels the
         multiplication should operate on. The first tuple refers to the
@@ -1153,10 +1154,8 @@ def matrix_multiplication(
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
-        likes. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` is ``'none'`` if all FFT norms are
-        ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
-        used.
+        likes and numbers. Result as pyfar audio object if `data` contains an
+        audio object.
 
     Notes
     -----
@@ -1178,6 +1177,14 @@ def matrix_multiplication(
       its ``cshape``.
     - If the second signal is 1-D, it is promoted to 2-D by appending a 1 to
       its ``cshape``.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
 
     Examples
     --------
