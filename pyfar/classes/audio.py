@@ -392,7 +392,7 @@ class FrequencyData(_Audio):
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
         dtype : string, optional
-            Raw data type of the audio object. The default is `float64`.
+            Raw data type of the audio object. The default is `complex`.
 
         Notes
         -----
@@ -883,29 +883,34 @@ def add(data: tuple, domain='freq'):
         Data to be added. Can contain pyfar audio objects, array likes, and
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See
+        together. See below or
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
-    for
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
-        frequency domain. If working in the frequency domain, the FFT
-        normalization is removed before the operation (See
-        :py:func:`pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        frequency domain. Frequency domain operations work on the raw
+        spectrum (see :py:func:`pyfar.dsp.fft.normalization`). The default is
+        ``'freq'``.
 
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` is ``'none'`` if all FFT norms are
-        ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
-        used.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _add)
 
@@ -923,28 +928,34 @@ def subtract(data: tuple, domain='freq'):
         Data to be subtracted. Can contain pyfar audio objects, array likes,
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See
+        together. See below or
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
-        frequency domain. If working in the frequency domain, the FFT
-        normalization is removed before the operation (See
-        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        frequency domain. Frequency domain operations work on the raw
+        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
+        ``'freq'``.
 
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` is ``'none'`` if all FFT norms are
-        ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
-        used.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _subtract)
 
@@ -962,28 +973,34 @@ def multiply(data: tuple, domain='freq'):
         Data to be multiplied. Can contain pyfar audio objects, array likes,
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See
+        together. See below or
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
-        frequency domain. If working in the frequency domain, the FFT
-        normalization is removed before the operation (See
-        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        frequency domain. Frequency domain operations work on the raw
+        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
+        ``'freq'``.
 
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` is ``'none'`` if all FFT norms are
-        ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
-        used.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _multiply)
 
@@ -1000,28 +1017,34 @@ def divide(data: tuple, domain='freq'):
         Data to be divided. Can contain pyfar audio objects, array likes, and
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See
+        together. See below or
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
-        frequency domain. If working in the frequency domain, the FFT
-        normalization is removed before the operation (See
-        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        frequency domain. Frequency domain operations work on the raw
+        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
+        ``'freq'``.
 
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` is ``'none'`` if all FFT norms are
-        ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
-        used.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If the denominator signal has the FFT normalization ``'none'``, the
+      result gets the normalization of the numerator signal.
+    * If both signals have the same FFT normalization, the results gets the
+      normalization ``'none'``.
+    * Other combinations raise an error.
    """
     return _arithmetic(data, domain, _divide)
 
@@ -1038,28 +1061,34 @@ def power(data: tuple, domain='freq'):
         The base for which the power is calculated. Can contain pyfar audio
         objects, array likes, and scalars. Pyfar audio objects can not be
         mixed, e.g., :py:func:`TimeData` and :py:func:`FrequencyData` objects
-        do not work together. See
+        do not work together. See below or
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
-        frequency domain. If working in the frequency domain, the FFT
-        normalization is removed before the operation (See
-        :py:func:`~pyfar.dsp.fft.normalization`). The default is ``'freq'``.
+        frequency domain. Frequency domain operations work on the raw
+        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
+        ``'freq'``.
 
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object. The `fft_norm` is ``'none'`` if all FFT norms are
-        ``'none'``. Otherwise the first `fft_norm` that is not ``'none'`` is
-        used.
+        audio object.
 
     Notes
     -----
     The shape of arrays included in data need to match or be broadcastable
     into the ``cshape`` of the resulting audio object.
+
+    The `fft_norm` of the result is as follows
+
+    * If one signal has the FFT normalization ``'none'``, the results gets
+      the normalization of the other signal.
+    * If both signals have the same FFT normalization, the results gets the
+      same normalization.
+    * Other combinations raise an error.
     """
     return _arithmetic(data, domain, _power)
 
