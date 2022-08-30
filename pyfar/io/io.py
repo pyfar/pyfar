@@ -568,9 +568,29 @@ def read_comsol(filename, expressions, data_format='spreadsheet'):
         ','.join(expressions_original))])
     additional_expressions = np.unique(
         [x.replace(';', '').replace('=', '_') for x in re.findall(
-            r'freq=[0-9.]+([;a-zA-Z0-9=]+),',
+            domain_str + r'=[0-9.]+([;a-zA-Z0-9=]+),',
             ','.join(expressions_original
-                     ).replace('Hz', '').replace('s', '')+',')])
+                     ).replace('Hz', '').replace('s', '') + ',')])
+
+    additional_expressions = dict()
+    additional_expression_names = np.unique(
+        re.findall(
+            r';([a-zA-Z0-9]+)=[0-9]+[a-zA-Z]+,',
+            ','.join(expressions_original
+                     ).replace('Hz', '').replace('s', '') + ','))
+    for exp in additional_expression_names:
+        exp_values = np.unique(
+            [float(x) for x in re.findall(
+                exp + r'=([0-9]+)[a-zA-Z]+',
+                ','.join(expressions_original
+                         ).replace('Hz', '').replace('s', '') + ',')])
+        exp_units = np.unique(
+            re.findall(
+                exp + r'=[0-9]+([a-zA-Z]+)',
+                ','.join(expressions_original
+                         ).replace('Hz', '').replace('s', '') + ','))
+        additional_expressions[exp + "_" + exp_units[0]] = exp_values
+
     all_solutions = np.unique(re.findall(
         r',([;a-zA-Z0-9.\(\_)]+)\([;a-zA-Z0-9.\(\_)]+\)@',
         ','.join(expressions_original)))
@@ -578,13 +598,18 @@ def read_comsol(filename, expressions, data_format='spreadsheet'):
         r',[;a-zA-Z0-9.\(\_)]+\(([;a-zA-Z0-9.\(\_)]+)\)@',
         ','.join(expressions_original)))
 
+    if 'dB' in all_units:
+        raise Warning("dB Values neglect information, it is strongly "
+                      "recommended not to use dB data.")
+
     dim_domain = len(domain_array)
     len_solution = len(all_solutions) if len(all_solutions) > 0 else 1
-    len_additional_expressions = len(additional_expressions) if len(additional_expressions) > 0 else 1
+    len_additional_expressions = len(additional_expressions) \
+        if len(additional_expressions) > 0 else 1
     dim_remaining = len_solution * len_additional_expressions
-    if dim_remaining*dim_domain != txt[:, num_dimension:].shape[1]:
+    if dim_remaining * dim_domain != txt[:, num_dimension:].shape[1]:
         raise SyntaxError((
-            "TODO"))
+            "Data Dimension is wrong, "))
 
     # apply datashape data.shape = (coordinates, Expressions, Domain bins)
     domain_data = np.reshape(txt[:, num_dimension:],
@@ -619,9 +644,9 @@ def read_comsol_header(filename):
         raise SyntaxError((
             "Input path must be a .txt, .csv or .dat file"
             f"but is of type {str(suffix)}"))
-    
+
     # read header
-    metadata = _read_comsol_header(filename)
+    metadata = _read_comsol_metadata(filename)
     expressions = _read_comsol_expressions(filename)
     return expressions, metadata
 
@@ -634,11 +659,12 @@ def _read_comsol_expressions(filename):
                 header_data = line
                 break
     header_data = header_data.replace('\n', '')
-    expressions = header_data[2:].replace(', ', '; ').replace(' ', '').split(',')
+    expressions = header_data[2:].replace(', ', '; ').replace(
+        ' ', '').split(',')
     return expressions
 
 
-def _read_comsol_header(filename):
+def _read_comsol_metadata(filename):
     suffix = pathlib.Path(filename).suffix
     metadata = dict()
     seperator_header = ','
@@ -654,7 +680,7 @@ def _read_comsol_header(filename):
                         seperator_header)
                 elif suffix.endswith('.dat') or suffix.endswith('.txt'):
                     line = " ".join(line[2:-1].replace(',', ';')
-                                        .replace(':', ',').split()).split(
+                                    .replace(':', ',').split()).split(
                         seperator_header)
                 if any(number_name == line[0].lower() for number_name in
                        number_names):
