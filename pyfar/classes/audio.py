@@ -1413,14 +1413,10 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
 
         # check type of non signal input
         else:
-            dtypes = ['int8', 'int16', 'int32', 'int64',
-                      'float32', 'float64',
-                      'complex64', 'complex128']
-            if np.asarray(d).dtype not in dtypes:
-                raise ValueError(
-                    f"Input must be of type Signal, {', '.join(dtypes)}")
-            if np.asarray(d).dtype in ['complex64', 'complex128'] \
-                    and domain == 'time':
+            dtype = str(np.asarray(d).dtype)
+            if not dtype.startswith(("int", "float", "complex")):
+                raise ValueError("Array likes must be int, float, or complex")
+            if dtype.startswith("complex") and domain == 'time':
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 
