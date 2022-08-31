@@ -675,111 +675,100 @@ def test_read_comsol_wrong_file_type():
         io.read_comsol_header(filename)
 
 
-@pytest.mark.parametrize("filename,d,n,e",  [
-    ("Lp_d2_n6_e1", 2, 6, 1),
-    ("Lp_d2_n6_e3", 2, 6, 3),
+@pytest.mark.parametrize("filename,expressions",  [
+    ("intensity_average", ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
+    ("intensity_only", ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
+    ("intensity_parametric", ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
+    ("level_only", ['pabe.Lp_t']),
+    ("pressure_acceleration_parametric_time", ['actd.p_t', 'actd.a_inst']),
+    ("pressure_only", ['pabe.p_t']),
+    ("pressure_parametric", ['pabe.p_t']),
     ])
-@pytest.mark.parametrize("postfix", [(".csv"), (".dat"), (".txt")])
-def test_read_comsol_check_output_Lp(filename, d, n, e, postfix):
+@pytest.mark.parametrize("type",
+                         [(".txt"),
+                          (".dat"),
+                          (".csv")])
+def test_read_comsol_header_expressions(filename, expressions, type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, metadata = io.read_comsol_header(path + postfix)
-    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
-    assert metadata['Dimension'] == d
-    assert metadata['Nodes'] == n
-    assert coordinates.csize == n
-    assert metadata['Expressions'] == e
+    actual_expressions, actual_expressions_unit, parameters, domain, domain_data = io.read_comsol_header(path + type)
+    assert len(actual_expressions) == len(expressions)
+    for i, exp in enumerate(expressions):
+        assert actual_expressions[i] == expressions[i]
+        
+
+@pytest.mark.parametrize("filename,expressions_unit",  [
+    ("intensity_average", ['W/m^2', 'W/m^2', 'W/m^2']),
+    ("intensity_only", ['W/m^2', 'W/m^2', 'W/m^2']),
+    ("intensity_parametric", ['W/m^2', 'W/m^2', 'W/m^2']),
+    ("level_only", ['dB']),
+    ("pressure_acceleration_parametric_time", ['Pa', 'm/s^2']),
+    ("pressure_only", ['Pa']),
+    ("pressure_parametric", ['Pa']),
+    ])
+@pytest.mark.parametrize("type",
+                         [(".txt"),
+                          (".dat"),
+                          (".csv")])
+def test_read_comsol_header_expressions_unit(filename, expressions_unit, type):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    actual_expressions, actual_expressions_unit, parameters, domain, domain_data = io.read_comsol_header(path + type)
+    assert len(actual_expressions_unit) == len(actual_expressions_unit)
+    for i, exp in enumerate(expressions_unit):
+        assert actual_expressions_unit[i] == expressions_unit[i]
+
+
+@pytest.mark.parametrize("filename,parameters",  [
+    ("intensity_average", {'theta': [0, 1.5708, 3.1416], 'phi': [0., 1.5708, 3.1416, 4.7124]}),
+    ("intensity_only", {}),
+    ("intensity_parametric", {'theta': [0, 1.5708, 3.1416], 'phi': [0., 1.5708, 3.1416, 4.7124]}),
+    ("level_only", {}),
+    ("pressure_acceleration_parametric_time", {'A0': [0.5, 1.], 'f0': [50, 100]}),
+    ("pressure_only", {}),
+    ("pressure_parametric", {'theta': [0, 1.5708, 3.1416], 'phi': [0., 1.5708, 3.1416, 4.7124]}),
+    ])
+@pytest.mark.parametrize("type",
+                         [(".txt"),
+                          (".dat"),
+                          (".csv")])
+def test_read_comsol_header_parameters(filename, parameters, type):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, expressions_unit, actual_parameters, actual_domain, domain_data = io.read_comsol_header(path + type)
+    assert parameters == actual_parameters
 
 
 @pytest.mark.parametrize("filename,domain",  [
-    ("p_f_d2_n6_e3", 'freq'),
-    ("p_f_d2_n1_e3", 'freq'),
-    ("p_f_d2_n6_e1", 'freq'),
-    ("Lp_d2_n6_e1", 'freq'),
-    ("Lp_d2_n6_e3", 'freq'),
-    ("p_t_d2_n1_e3", 'time'),
-    ("p_t_d2_n6_e3", 'time'),
-    ("p_t_d1_n6_e3", 'time'),
-    ("p_t_d3_n6_e3", 'time'),
+    ("intensity_average", 'freq'),
+    ("intensity_only", 'freq'),
+    ("intensity_parametric", 'freq'),
+    ("level_only", 'freq'),
+    ("pressure_acceleration_parametric_time", 'time'),
+    ("pressure_only", 'freq'),
+    ("pressure_parametric", 'freq'),
     ])
-def test_read_comsol_check_data_domain(filename, domain):
+@pytest.mark.parametrize("type",
+                         [(".txt"),
+                          (".dat"),
+                          (".csv")])
+def test_read_comsol_header_domain(filename, domain, type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, metadata = io.read_comsol_header(path + '.txt')
-    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
-    assert data.domain == domain
+    expressions, expressions_unit, parameters, actual_domain, domain_data = io.read_comsol_header(path + type)
+    assert domain == actual_domain
 
 
-@pytest.mark.parametrize("filename,d,n,e",  [
-    ("p_f_d2_n6_e3", 2, 6, 3),
-    ("p_f_d2_n1_e3", 2, 1, 3),
-    ("p_f_d2_n6_e1", 2, 6, 1),
-    ("Lp_d2_n6_e1", 2, 6, 1),
-    ("Lp_d2_n6_e3", 2, 6, 3),
-    ("p_t_d2_n1_e3", 2, 1, 3),
-    ("p_t_d2_n6_e3", 2, 6, 3),
-    ("p_t_d1_n6_e3", 1, 6, 3),
-    ("p_t_d3_n6_e3", 3, 6, 3),
+@pytest.mark.parametrize("filename,domain_data",  [
+    ("intensity_average", [100, 500, 1000]),
+    ("intensity_only", [100, 500, 1000]),
+    ("intensity_parametric", [100, 500, 1000]),
+    ("level_only", [100, 500, 1000]),
+    ("pressure_acceleration_parametric_time", [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]),
+    ("pressure_only", [100, 500, 1000]),
+    ("pressure_parametric", [100, 500, 1000]),
     ])
-def test_read_comsol_check_header(filename, d, n, e):
+@pytest.mark.parametrize("type",
+                         [(".txt"),
+                          (".dat"),
+                          (".csv")])
+def test_read_comsol_header_domain_data(filename, domain_data, type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, metadata = io.read_comsol_header(path + '.txt')
-    assert metadata['Dimension'] == d
-    assert metadata['Nodes'] == n
-    assert metadata['Expressions'] == e
-    assert len(expressions) == e + d
-
-
-@pytest.mark.parametrize("filename,exp,n_bins",  [
-    ("p_f_d2_n6_e3_exp", 3, 1),
-    ("p_f_d2_n6_e3_freq", 1, 3),
-    ])
-def test_read_comsol_check_data_shape(filename, exp, n_bins):
-    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, metadata = io.read_comsol_header(path + '.txt')
-    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
-    assert data.cshape[1] == exp
-    assert data.cshape[0] == 6  # Size of Coordinates
-    assert data.n_bins == n_bins
-
-
-@pytest.mark.parametrize("filename,d,n,e",  [
-    ("p_f_d2_n6_e3", 2, 6, 3),
-    ("p_f_d2_n1_e3", 2, 1, 3),
-    ("p_f_d2_n6_e1", 2, 6, 1),
-    ("Lp_d2_n6_e1", 2, 6, 1),
-    ("Lp_d2_n6_e3", 2, 6, 3),
-    ("p_t_d2_n1_e3", 2, 1, 3),
-    ("p_t_d2_n6_e3", 2, 6, 3),
-    ("p_t_d1_n6_e3", 1, 6, 3),
-    ("p_t_d3_n6_e3", 3, 6, 3),
-    ])
-def test_read_comsol_check_coordinates(filename, d, n, e):
-    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, metadata = io.read_comsol_header(path + '.txt')
-    data, coordinates = io.read_comsol(path + '.txt', expressions=expressions)
-    assert coordinates.csize == n
-    if d < 3:
-        assert np.sum(coordinates.get_cart()[:, 2]) < 1e-15
-    if d < 2:
-        assert np.sum(coordinates.get_cart()[:, 1]) < 1e-15
-
-
-@pytest.mark.parametrize("filename",  ["Lp_d2_n6_e1", "Lp_d2_n6_e3",])
-@pytest.mark.parametrize("type1,type2",
-                         [(".txt", ".dat"),
-                          (".txt", ".csv"),
-                          (".csv", ".dat")])
-def test_read_comsol_cmp_same_files_different_formats(filename, type1, type2):
-    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions1, metadata1 = io.read_comsol_header(path + '.txt')
-    data1, coordinates1 = io.read_comsol(
-        path + type1, expressions=expressions1)
-    expressions2, metadata2 = io.read_comsol_header(path + '.txt')
-    data2, coordinates2 = io.read_comsol(
-        path + type2, expressions=expressions2)
-    assert metadata1 == metadata2
-    # assert data1.freq == data2.freq # nan != nan, no idea why
-    # assert any(data1.frequencies == data2.frequencies)
-    assert data1.cshape[0] == data2.cshape[0]
-    assert data1.cshape[1] == data2.cshape[1]
-    assert coordinates1 == coordinates2
-    assert expressions1 == expressions2
+    expressions, expressions_unit, parameters, domain, actual_domain_data = io.read_comsol_header(path + type)
+    assert domain_data == actual_domain_data
