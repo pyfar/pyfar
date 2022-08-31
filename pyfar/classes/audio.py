@@ -1276,7 +1276,9 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
 
     for d in range(1, len(data)):
         if matmul:
-            # dtypes[0] equals type of previous result in sequence
+            # dtypes[0] equals type of previous result in sequence. But once an
+            # audio object was involved, the result will always be an audio
+            # object
             if dtypes[0] not in (Signal, TimeData, FrequencyData):
                 dtypes[0] = type(data[d-1])
             dtypes[1] = type(data[d])
@@ -1491,22 +1493,32 @@ def _power(a, b):
 
 
 def _matrix_multiplication(a, b, axes, dtypes):
-    # adjust axes according to time/frequency dimension
+    # copy axes because it could be used multiple times if matrix
+    # multiplication is called with a tuple containing more than three elements
     axes = axes.copy()
+
+    # adjust axes according to time/frequency dimension
+
+    #  handle first input
     if dtypes[0] in (Signal, TimeData, FrequencyData):
         a = np.expand_dims(a, 0) if a.ndim == 2 else a
         axes[0] = tuple([ax-1 if ax < 0 else ax for ax in axes[0]])
     elif a.ndim < b.ndim:
         a = np.expand_dims(a, -1)
         axes[0] = tuple([ax-1 if ax < 0 else ax for ax in axes[0]])
+
+    # handle second input
     if dtypes[1] in (Signal, TimeData, FrequencyData):
         b = np.expand_dims(b, 1) if b.ndim == 2 else b
         axes[1] = tuple([ax-1 if ax < 0 else ax for ax in axes[1]])
     elif a.ndim > b.ndim:
         b = np.expand_dims(b, -1)
         axes[1] = tuple([ax-1 if ax < 0 else ax for ax in axes[1]])
+
+    # adjust axis for output if output is a pyfar audio object
     if any(dt in (Signal, TimeData, FrequencyData) for dt in dtypes):
         axes[2] = tuple([ax-1 if ax < 0 else ax for ax in axes[2]])
+
     return np.matmul(a, b, axes=axes)
 
 
