@@ -1137,12 +1137,14 @@ def matrix_multiplication(
         If `data` contains more than two operands, the scheme given by `axes`
         refers to all of the sequential multiplications.
         See notes and examples for more details.
+
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
         audio object.
+
     Notes
     -----
     Audio objects with a one dimensional cshape are expanded to allow matrix
