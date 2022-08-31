@@ -463,7 +463,7 @@ def default_audio_subtype(format):
     return soundfile.default_subtype(format)
 
 
-def read_comsol(filename, expressions, data_format='spreadsheet'):
+def read_comsol(filename, expressions, parameters=None):
     """
     Read data from COMSOL exported files into a Dictonary.
 
@@ -495,9 +495,11 @@ def read_comsol(filename, expressions, data_format='spreadsheet'):
             "Input path must be a .txt, .csv or .dat file"
             f"but is of type {str(suffix)}"))
 
-    # get orginal expressions 
-    expressions_original = _read_comsol_expressions(filename)
+    # get header 
+    expressions, expressions_unit, parameters, actual_domain, domain_data = io.read_comsol_header(filename)
 
+    # get meta data
+    
     # get required metadata
     is_freq = 'freq=' in expressions[-1]
     num_dimension = 1
@@ -604,7 +606,8 @@ def read_comsol(filename, expressions, data_format='spreadsheet'):
         data_out = Signal(
             domain_data, fs, comment="data_set + in  + unit")
 
-    return data_out, coordinates
+    data = data_out
+    return data, coordinates
 
 
 def read_comsol_header(filename):
@@ -615,54 +618,75 @@ def read_comsol_header(filename):
             "Input path must be a .txt, .csv or .dat file"
             f"but is of type {str(suffix)}"))
 
-    # read header
-    metadata = _read_comsol_metadata(filename)
-    expressions = _read_comsol_expressions(filename)
-    return expressions, metadata
+    # read header and general Meta data
+    header_data = _read_comsol_header_get_headerline(filename)
+
+    # read expressions and expressions_units
+    expressions_with_unit = re.findall(
+        r'([a-zA-Z0-9\(\)\/\^ _.]+) @', header_data)
+
+    expressions, idx = _real_comsol_header_find_unique(
+        r'([a-zA-Z0-9\/\^_.]+) \(', ';'.join(expressions_with_unit))
+    expressions_unit, idx = _real_comsol_header_find_unique(
+        r'\(([a-zA-Z0-9\/\^ .]+)\)', ';'.join(expressions_with_unit), idx)
+
+    # read parameter
+    parameter_names, idx = _real_comsol_header_find_unique(
+        r'([a-zA-Z0-9\/\^_.]+)=', header_data)
+    parameters = dict()
+    domain_str = ''
+    for para_name in parameter_names:
+        unit, idx = _real_comsol_header_find_unique(
+            para_name + r'=[0-9.]+([a-zA-Z]+)', header_data)
+        values, idx = _real_comsol_header_find_unique(
+            para_name + r'=([0-9.]+)', header_data)
+        values = [float(x) for x in values]
+        if para_name in ['t', 'freq']:
+            domain_data = values
+            domain_str = para_name
+            continue
+        if len(unit) == 0:
+            parameters[para_name] = values
+        else:
+            parameters[para_name] = [x+unit for x in values]
+
+    # read domain data
+    domain = domain_str
+    if domain_str == 't':
+        domain = 'time'
+    elif domain_str == 'freq':
+        domain = domain_str
+    else:    
+        domain_str = np.unique(re.findall( 
+            r'@ ([a-zA-Z]+)=', header_data))[0]
+        raise ValueError(domain_str + " as domain data is not allowed.")
+    return expressions, expressions_unit, parameters, domain, domain_data
 
 
-def _read_comsol_expressions(filename):
+def _real_comsol_header_find_unique(pattern, string, idx=[]):
+    if len(idx) < 1:
+        expressions, idx = np.unique(re.findall(
+            pattern,
+            string), True)
+        idx.sort()
+    expressions_all = re.findall(
+        pattern,
+        string)
+    expressions = []
+    [expressions.append(expressions_all[i]) for i in idx]
+    return expressions, idx
+
+
+def _read_comsol_header_get_headerline(filename):
     header_data = []
     with open(filename) as f:
+        last_line = []
         for idx, line in enumerate(f):
-            if idx == 8:
-                header_data = line
+            if line[0] != '%':
+                header_data = last_line
                 break
-    header_data = header_data.replace('\n', '')
-    expressions = header_data[2:].replace(', ', '; ').replace(
-        ' ', '').split(',')
-    return expressions
-
-
-def _read_comsol_metadata(filename):
-    suffix = pathlib.Path(filename).suffix
-    metadata = dict()
-    seperator_header = ','
-    with open(filename) as f:
-        while True:
-            line = f.readline()
-            if line[0] != '%' or line[2] == 'X' or line[2] == 'x':
-                break
-            elif len(line) > 0:
-                number_names = ['dimension', 'nodes', 'expressions']
-                if suffix.endswith('.csv'):
-                    line = line[2:-1].replace('"', '').split(
-                        seperator_header)
-                elif suffix.endswith('.dat') or suffix.endswith('.txt'):
-                    line = " ".join(line[2:-1].replace(',', ';')
-                                    .replace(':', ',').split()).split(
-                        seperator_header)
-                if any(number_name == line[0].lower() for number_name in
-                       number_names):
-                    metadata[line[0]] = int(line[-1])
-                else:
-                    if suffix.endswith('.csv'):
-                        metadata[line[0]] = ",".join(line[1:])
-                    elif suffix.endswith('.dat') or suffix.endswith('.txt'):
-                        line[1] = line[1][1:]
-                        metadata[line[0]] = ":".join(
-                            line[1:]).replace(';', ',')
-    return metadata
+            last_line = line
+    return header_data[2:].replace('\n', '')
 
 
 def _clipped_audio_subtypes():
