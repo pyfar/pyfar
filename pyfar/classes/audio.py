@@ -1098,85 +1098,64 @@ def matrix_multiplication(
     """Matrix multiplication of multidimensional pyfar audio objects and/or
     array likes.
 
-    This function is based on ``numpy.matmul``. It only acts on the channels,
-    so the operation is the same for all samples/frequency bins
-    and the number of the samples/bins always stays the same
-    (this function is not meant, e.g, for subsampling or windowing,
-    use the :py:mod:`pyfar.dsp` functions instead).
-    Pyfar audio objects are:
-    :py:func:`Signal`, :py:func:`TimeData`, and :py:func:`FrequencyData`.
+    The multiplication is based on ``numpy.matmul`` and acts on the channels
+    of audio objects (:py:func:`Signal`, :py:func:`TimeData`, and
+    :py:func:`FrequencyData`), so the same operation is applied to all
+    samples or frequency bins. For frequency domain matrix multiplications with
+    the default parameters the ``@`` operator can be used.
 
     Parameters
     ----------
     data : tuple of the form (data_1, data_2, ..., data_N)
-        Data to be multiplied. Can contain pyfar audio objects, array likes,
-        and scalars. Pyfar audio objects can not be mixed, e.g.,
-        :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See below or
+        Data to be multiplied. Can contain pyfar audio objects and array likes.
+        If multiple audio objects are passed they must be of the same type and
+        their FFT normalizations must allow the multiplication (see
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
-        for possible combinations of Signal FFT normalizations.
-
-        The data is `broadcasted
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
-        to the data with the highest number of channel dimensions
-        (``len(signal.cshape)``). If arrays are included, they need to match or
-        be broadcastable into the ``cshape`` of the resulting audio object
-        (an axis is implicitly appended).
-        See `axes` and notes for more details.
-
+        and notes below). Information on the requirements regarding the shapes
+        and cshapes and their handling is also given in the notes below.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. Frequency domain operations work on the raw
         spectrum (see :py:func:`pyfar.dsp.fft.normalization`). The default is
         ``'freq'``.
     axes : list of 3 tuples
-        A list of 3 tuples with the indices of the channels the
-        multiplication should operate on. The first tuple refers to the
-        channel indexes indicating the 2-D matrices for the first operand,
-        the second tuple to the indexes of the second operand and the third
-        to the channel indexes the result should be stored in.
+        Each tuple in the list specifies two axes to define the matrices for
+        multiplication. The default ``[(-2, -1), (-2, -1), (-2, -1)]`` uses the
+        last two axes of the input to define the matrices (first and
+        second tuple) and writes the result to the last two axes of the output
+        data (third tuple).
 
-        - In case of pyfar audio objects, the indices (including negative
-          values) refer to the channel dimensions, not the time/frequency
-          dimension of the underlying data.
-        - In case of arrays, the indices refer to the array dimensions.
+        In case of pyfar audio objects, the indices refer to the channels and
+        ignore the last dimension of the underlying data that contains the
+        samples or frequency bins. For example, a signal with 4 times 2
+        channels and 120 frequency bins has a cshape of ``(4, 2)``, while the
+        shape of the underlying frequency data is  ``(4, 2, 120)``.
+        The default tuple ``(-2, -1)`` would result in a 120 matrices of shape
+        ``(4, 2)`` used for the multiplication and not 4 matrices of shape
+        ``(2, 120)``.
 
         If `data` contains more than two operands, the scheme given by `axes`
         refers to all of the sequential multiplications.
-        For instance, to multiply matrices residing in the last two
-        channel dimensions to be stored in the last two channel dimensions,
-        this is indicated by ``[(-2, -1), (-2, -1), (-2, -1)]``, which is the
-        default.
-
         See notes and examples for more details.
-
     Returns
     -------
     results : Signal, TimeData, FrequencyData, numpy array
         Result of the operation as numpy array, if `data` contains only array
         likes and numbers. Result as pyfar audio object if `data` contains an
         audio object.
-
     Notes
     -----
-    The function implements the semantics of the ``@`` operator.
+    Audio objects with a one dimensional cshape are expanded to allow matrix
+    multiplication:
 
-    The base elements of the multiplication can be considered as
-    two-dimensional matrices residing along the time/frequency dimension.
-    The behavior depends on `data` in the following way.
+    * If the first signal is 1-D, it is expanded to 2-D by prepending a
+      dimension. For example a cshape of ``(10,)`` becomes ``(1, 10)``.
+    * If the second signal is 1-D, it is expanded to 2-D by appending a
+      dimension. For example a cshape of ``(10,)`` becomes ``(10, 1)``
 
-    - If the ``cshape`` of the arguments in data is 2-D, the arguments are
-      multiplied like conventional matrices along the time/frequency dimension.
-    - If either ``cshape`` is N-D, N > 2, the channels are treated as a stack
-      of matrices residing in the last two indexes and broadcasted accordingly.
-
-    Depending on the position of a 1-D signal in `data`, it is either
-    extended in the "row" or "column" channel dimension before broadcasting.
-
-    - If the first signal is 1-D, it is promoted to 2-D by prepending a 1 to
-      its ``cshape``.
-    - If the second signal is 1-D, it is promoted to 2-D by appending a 1 to
-      its ``cshape``.
+    The shapes of array likes and cshapes of audio objects must be
+    `broadcastable <https://numpy.org/doc/stable/user/basics.broadcasting.
+    html>`_ except for the axes specified by the `axes` parameter.
 
     The `fft_norm` of the result is as follows
 
@@ -1198,10 +1177,11 @@ def matrix_multiplication(
     (3, 4)
     >>> pf.matrix_multiplication((a, b)).cshape
     (2, 4)
+    >>> (a @ b).cshape
+    (2, 4)
 
-    Matrix multiplication of three-dimensional signals. The length of the
-    dimension along the stacked matrices needs to match or it is broadcasted
-    (per default this refers to axis 0).
+    Matrix multiplication of three-dimensional signals. The third dimension
+    needs to match or it is broadcasted (per default this refers to axis 0).
 
     >>> a_match = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     >>> b = pf.signals.impulse(10, amplitude=np.ones((2, 4, 5)))
