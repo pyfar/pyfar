@@ -1270,21 +1270,15 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
         _assert_match_for_arithmetic(data, domain, division, matmul)
 
     # apply arithmetic operation
-    result = _get_arithmetic_data(data[0], domain, cshape)
-    if matmul:
-        dtypes = [type(data[0]), type(data[1])]
+    result = _get_arithmetic_data(data[0], domain, cshape, matmul, audio_type)
 
     for d in range(1, len(data)):
         if matmul:
-            # dtypes[0] equals type of previous result in sequence. But once an
-            # audio object was involved, the result will always be an audio
-            # object
-            if dtypes[0] not in (Signal, TimeData, FrequencyData):
-                dtypes[0] = type(data[d-1])
-            dtypes[1] = type(data[d])
-            kwargs['dtypes'] = dtypes
+            kwargs['audio_type'] = audio_type
         result = operation(
-            result, _get_arithmetic_data(data[d], domain, cshape), **kwargs)
+            result,
+            _get_arithmetic_data(data[d], domain, cshape, matmul, audio_type),
+            **kwargs)
 
     # check if to return an audio object
     if audio_type == Signal:
@@ -1426,7 +1420,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
             cshape)
 
 
-def _get_arithmetic_data(data, domain, cshape):
+def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
     """
     Return data in desired domain without any fft normalization.
 
@@ -1439,6 +1433,10 @@ def _get_arithmetic_data(data, domain, cshape):
     cshape : tuple
         Desired channel shape of output (required for operations including
         array likes and Audio objects).
+    matmul: bool
+        ``True`` if a  matrix multiplication is performed, ``False`` otherwise
+    audio_type : type, None
+        Type of the audio class of the operation's result.
 
     Returns
     -------
@@ -1460,15 +1458,14 @@ def _get_arithmetic_data(data, domain, cshape):
                 f"domain must be 'time' or 'freq' but found {domain}")
     else:
         data_out = np.asarray(data)
-
-        if data_out.ndim <= len(cshape):
+        if data_out.ndim <= len(cshape) or\
+                (matmul and not isinstance(None, audio_type)):
             # extend by time/frequency axis, scalars are extended to shape (1,)
             data_out = data_out[..., None]
         elif cshape != ():
             # operation includes arrays and audio objects
             raise ValueError(
                 "array dimension is larger than the channel dimensions")
-
     return data_out
 
 
@@ -1492,33 +1489,14 @@ def _power(a, b):
     return a**b
 
 
-def _matrix_multiplication(a, b, axes, dtypes):
-    # copy axes because it could be used multiple times if matrix
-    # multiplication is called with a tuple containing more than three elements
-    axes = axes.copy()
-
-    # adjust axes according to time/frequency dimension
-
-    #  handle first input
-    if dtypes[0] in (Signal, TimeData, FrequencyData):
+def _matrix_multiplication(a, b, axes, audio_type):
+    if not isinstance(None, audio_type):
+        # adjust data and axes if output is a pyfar audio object
+        # add dimension if operand is only 2d
         a = np.expand_dims(a, 0) if a.ndim == 2 else a
-        axes[0] = tuple([ax-1 if ax < 0 else ax for ax in axes[0]])
-    elif a.ndim < b.ndim:
-        a = np.expand_dims(a, -1)
-        axes[0] = tuple([ax-1 if ax < 0 else ax for ax in axes[0]])
-
-    # handle second input
-    if dtypes[1] in (Signal, TimeData, FrequencyData):
         b = np.expand_dims(b, 1) if b.ndim == 2 else b
-        axes[1] = tuple([ax-1 if ax < 0 else ax for ax in axes[1]])
-    elif a.ndim > b.ndim:
-        b = np.expand_dims(b, -1)
-        axes[1] = tuple([ax-1 if ax < 0 else ax for ax in axes[1]])
-
-    # adjust axis for output if output is a pyfar audio object
-    if any(dt in (Signal, TimeData, FrequencyData) for dt in dtypes):
-        axes[2] = tuple([ax-1 if ax < 0 else ax for ax in axes[2]])
-
+        # note: axes is implicitly copied
+        axes = [tuple([ax-1 if ax < 0 else ax for ax in t]) for t in axes]
     return np.matmul(a, b, axes=axes)
 
 
