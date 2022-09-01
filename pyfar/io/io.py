@@ -30,7 +30,7 @@ except (ModuleNotFoundError, OSError):
         "help: https://python-soundfile.readthedocs.io")
 
 import pyfar
-from pyfar import Signal, FrequencyData, Coordinates
+from pyfar import Signal, FrequencyData, Coordinates, TimeData
 from . import _codec as codec
 import pyfar.classes.filter as fo
 
@@ -493,31 +493,45 @@ def default_audio_subtype(format):
     return soundfile.default_subtype(format)
 
 
-def read_comsol(filename, expressions, parameters=None):
-    """
-    Read data from COMSOL exported files into a Dictonary.
+def read_comsol(filename, expressions=None):
+    """Read exported data from COMSOL.
 
     Parameters
     ----------
-    filename : string, Path
-        Input file. .txt, .csv and .dat is supported and need to be given.
-    data_format : string
-        'spreadsheet' or 'sectionwise'
+    filename : str, Path
+        Input file. Excepted input files are '.txt', '.dat' and '.csv'. '.csv'
+        Files are strongly recommended, since .txt and .dat are inconvenient
+        in their format.
+    expressions : list[str], optional
+        This list of expressions defines the output expressions. An example
+        can be like ``expressions=['pabe.Lp_t']``. Also see
+        :py:func:`~pyfar.dsp.comsol_read_header`. By default, all expressions
+        get returned.
 
     Returns
     -------
-    collection: dict
-        Contains comsol data like
-        ``{ 'data': 'obj1', 'coordinates': 'obj2' ... }``.
+    data : Signal or FrequencyData
+        Returns a Signal or FrequencyData object depending on the input data.
+    coordinates : Coordinates, optional
+        A Coordinates Object based on the Input Data. If the input dimension is
+        lower than three, the missing dimensions are set to zero. If there are
+        no positions given, this parameter will not be returned.
+
+    Raises
+    ------
+    SyntaxError
+        Raises SyntaxError if the file format is not supported.
+    ValueError
+        Raises ValueError if the Frequency or Time data are inconvenient in the
+        input file.
 
     Examples
     --------
-    Read data from COMSOL export file.
-
-    >>> collection = pyfar.io.read_comsol('my_data.csv')
-    >>> my_data = collection['data']
-    >>> my_coordinates = collection['coordinates']
+    Returns all expressions
+    >>> import pyfar as pf
+    >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv')
     """
+
     # Check Datatype
     suffix = pathlib.Path(filename).suffix
     if not suffix.endswith(('.txt', '.dat', '.csv')):
@@ -525,122 +539,144 @@ def read_comsol(filename, expressions, parameters=None):
             "Input path must be a .txt, .csv or .dat file"
             f"but is of type {str(suffix)}"))
 
-    # get header 
-    expressions, expressions_unit, parameters, actual_domain, domain_data = io.read_comsol_header(filename)
+    # get header
+    expressions, expressions_unit, parameters, domain, domain_data \
+        = read_comsol_header(filename)
+    header_data, is_complex, delimiter \
+        = _read_comsol_header_get_headerline(filename)
+    if 'dB' in expressions_unit:
+        raise ResourceWarning("Do you really want to use dB-values?")
 
     # get meta data
-    
-    # get required metadata
-    is_freq = 'freq=' in expressions[-1]
-    num_dimension = 1
-    if (expressions[1] == 'Y') or (expressions[1] == 'y'):
-        num_dimension = 2
-    if (expressions[2] == 'Z') or (expressions[2] == 'z'):
-        num_dimension = 3
-    num_data = len(expressions) - num_dimension
+    metadata = _read_comsol_metadata(filename)
+    num_dimension = metadata['Dimension']
+    num_notes = metadata['Nodes']
+    num_entries = metadata['Expressions']
+    num_expressions = len(expressions)
 
     # read body
-    data_type = np.complex_ if is_freq else np.float_
-    txt = np.loadtxt(
+    data_type = np.complex_ if is_complex else float
+    domain_str = domain if domain == 'freq' else 't'
+    read_data = np.loadtxt(
         filename,
         dtype=data_type,
         comments='%',
         converters=lambda s: s.replace('i', 'j'),
         encoding=None,
-        delimiter=',')
-    # txt.shape = (coordinates, Dimension+Expression)
-    if len(txt.shape) == 1:
-        txt = np.reshape(
-            txt,
-            (1, num_data + num_dimension))
+        delimiter=delimiter)
+
+    # num_expressions.shape = (coordinates, Dimension+Expression)
+    read_data = np.reshape(read_data, (num_notes, num_entries+num_dimension))
+
+    # restructure data -> out a
+    data_expressions = read_data[:, num_dimension:]
+    order_domain = _remove_neighbored_duplicates(
+        re.findall(domain_str + r'=([0-9.]+)', header_data))
+    length_list = [len(order_domain)]
+    dimension_list = [len(domain_data)]
+    for para_name in parameters:
+        a = _remove_neighbored_duplicates(
+            re.findall(para_name + r'=([0-9.]+)', header_data))
+        length_list.append(len(a))
+        dimension_list.append(len(parameters[para_name]))
+    indexes = np.argsort(length_list)
+    new_shape = [num_notes]
+    new_indexes = []
+    for i in indexes:
+        new_shape.append(dimension_list[i])
+        new_indexes.append(i+1)
+    new_shape.append(num_expressions)
+    a = new_indexes.pop(-1)
+    new_indexes.insert(0, a)
+    new_indexes.append(0)
+    data_expressions_shape = np.reshape(data_expressions, new_shape)
+
+    # put into right dimensions
+    switches = []
+    sorting_indexes = list(new_indexes)
+    for i in reversed(range(len(new_indexes))):
+        if sorting_indexes[i] != i:
+            idx = sorting_indexes.index(i)
+            sorting_indexes[idx] = sorting_indexes[i]
+            sorting_indexes[i] = i
+            switches.append([i+1, idx+1])
+    data_raw = data_expressions_shape
+    for idxes in switches:
+        data_raw = np.swapaxes(data_raw, idxes[0], idxes[1])
+
+    # create object
+    comment = ', '.join(
+        ' '.join(x) for x in zip(expressions, expressions_unit))
+    if domain == 'freq':
+        data = FrequencyData(
+            data_raw, domain_data, dtype=data_type,
+            comment=comment)
+    else:
+        data = TimeData(
+            data_raw, domain_data, comment=comment)
 
     # read coordinates
-    coords_data = txt[:, 0:num_dimension].astype(np.float)
-    x = coords_data[:, 0]
-    y = coords_data[:, 1] if coords_data.shape[1] > 1 else np.zeros(
-        coords_data[:, 0].shape)
-    z = coords_data[:, 2] if coords_data.shape[1] > 2 else np.zeros(
-        coords_data[:, 0].shape)
-    coordinates = Coordinates(x, y, z)
-
-    # read data
-    domain_str = 'freq' if 'freq=' in expressions_original[-1] else 't'
-    domain_array = np.unique([float(x) for x in re.findall(
-        domain_str + r'=([0-9.]+)',
-        ','.join(expressions_original))])
-    additional_expressions = np.unique(
-        [x.replace(';', '').replace('=', '_') for x in re.findall(
-            domain_str + r'=[0-9.]+([;a-zA-Z0-9=]+),',
-            ','.join(expressions_original
-                     ).replace('Hz', '').replace('s', '') + ',')])
-
-    additional_expressions = dict()
-    additional_expression_names = np.unique(
-        re.findall(
-            r';([a-zA-Z0-9]+)=[0-9]+[a-zA-Z]+,',
-            ','.join(expressions_original
-                     ).replace('Hz', '').replace('s', '') + ','))
-    for exp in additional_expression_names:
-        exp_values = np.unique(
-            [float(x) for x in re.findall(
-                exp + r'=([0-9]+)[a-zA-Z]+',
-                ','.join(expressions_original
-                         ).replace('Hz', '').replace('s', '') + ',')])
-        exp_units = np.unique(
-            re.findall(
-                exp + r'=[0-9]+([a-zA-Z]+)',
-                ','.join(expressions_original
-                         ).replace('Hz', '').replace('s', '') + ','))
-        additional_expressions[exp + "_" + exp_units[0]] = exp_values
-
-    all_solutions = np.unique(re.findall(
-        r',([;a-zA-Z0-9.\(\_)]+)\([;a-zA-Z0-9.\(\_)]+\)@',
-        ','.join(expressions_original)))
-    all_units = np.unique(re.findall(
-        r',[;a-zA-Z0-9.\(\_)]+\(([;a-zA-Z0-9.\(\_)]+)\)@',
-        ','.join(expressions_original)))
-
-    if 'dB' in all_units:
-        raise Warning("dB Values neglect information, it is strongly "
-                      "recommended not to use dB data.")
-
-    dim_domain = len(domain_array)
-    len_solution = len(all_solutions) if len(all_solutions) > 0 else 1
-    len_additional_expressions = len(additional_expressions) \
-        if len(additional_expressions) > 0 else 1
-    dim_remaining = len_solution * len_additional_expressions
-    if dim_remaining * dim_domain != txt[:, num_dimension:].shape[1]:
-        raise SyntaxError((
-            "Data Dimension is wrong, "))
-
-    # apply datashape data.shape = (coordinates, Expressions, Domain bins)
-    domain_data = np.reshape(txt[:, num_dimension:],
-                             (txt.shape[0], dim_remaining, dim_domain))
-    is_freq = 'freq=' in expressions_original[-1]
-
-    if is_freq:
-        data_out = FrequencyData(
-            domain_data, domain_array, dtype=data_type,
-            comment="data_set + in  + unit")
-    else:
-        fs = 1 / np.mean(np.diff(domain_array))
-        if len(domain_array) < 2:
-            raise ValueError(
-                "More than one time sample need to be available to "
-                "calculate the samplerate.")
-        diff_domain_data = np.diff(domain_array) - \
-                           np.diff(domain_array)[0]
-        if np.any(diff_domain_data > 1e-8):
-            raise ValueError(
-                "Time vector does not have the same distance.")
-        data_out = Signal(
-            domain_data, fs, comment="data_set + in  + unit")
-
-    data = data_out
-    return data, coordinates
+    if num_dimension > 0:
+        coords_data = read_data[:, 0:num_dimension].astype(np.float)
+        x = coords_data[:, 0]
+        y = coords_data[:, 1] if coords_data.shape[1] > 1 else np.zeros(
+            coords_data[:, 0].shape)
+        z = coords_data[:, 2] if coords_data.shape[1] > 2 else np.zeros(
+            coords_data[:, 0].shape)
+        coordinates = Coordinates(x, y, z)
+        return data, coordinates
+    return data, None
 
 
 def read_comsol_header(filename):
+    """Returns header information from exported data from COMSOL.
+
+    Parameters
+    ----------
+    filename : str, Path
+        Input file. Excepted input files are '.txt', '.dat' and '.csv'. '.csv'
+        Files are strongly recommended, since .txt and .dat are inconvenient
+        in their format.
+
+    Returns
+    -------
+    expressions : list[str]
+        This list of expressions defines the output expressions. An example
+        can be like ``expressions=['pabe.p_t']``. Also see
+        :py:func:`~pyfar.dsp.comsol_read`.
+    expressions_unit : list[str]
+        This list of expressions unit defines the units of the output
+        expressions. An example can be like ``expressions_unit=['Pa']``.
+    parameters : dict
+        This dict contains all parameters ins from the input file. If no
+        parameters are available, an emtpy dict is returnd. An example can be
+        like ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
+    domain : string
+        Returns the domain of the input data. Note that ``'lambda'`` domain
+        data is not allowed.
+
+        ``'freq'``
+            The data are in frequency domain.
+        ``'time'``
+            The data are in time domain.
+    domain_data : list[]
+        This list contains the domain data from the input file. Depending
+        on the data in the in the input file, the output will be float or
+        complex.
+
+    Raises
+    ------
+    SyntaxError
+        Raises SyntaxError if the file format is not supported.
+    ValueError
+        Raises ValueError if the domain is not supported.
+
+    Examples
+    --------
+    Returns all expressions
+    >>> import pyfar as pf
+    >>> expressions, expressions_unit, parameters, domain, domain_data = pf.io.read_comsol_header('my_comsol_data.csv')
+    """
     # Check Datatype
     suffix = pathlib.Path(filename).suffix
     if not suffix.endswith(('.txt', '.dat', '.csv')):
@@ -648,8 +684,9 @@ def read_comsol_header(filename):
             "Input path must be a .txt, .csv or .dat file"
             f"but is of type {str(suffix)}"))
 
-    # read header and general Meta data
-    header_data = _read_comsol_header_get_headerline(filename)
+    # read header
+    header_data, is_complex, delimiter \
+        = _read_comsol_header_get_headerline(filename)
 
     # read expressions and expressions_units
     expressions_with_unit = re.findall(
@@ -681,20 +718,61 @@ def read_comsol_header(filename):
             parameters[para_name] = [x+unit for x in values]
 
     # read domain data
-    domain = domain_str
     if domain_str == 't':
         domain = 'time'
     elif domain_str == 'freq':
         domain = domain_str
-    else:    
-        domain_str = np.unique(re.findall( 
+    else:
+        domain_str = np.unique(re.findall(
             r'@ ([a-zA-Z]+)=', header_data))[0]
         raise ValueError(domain_str + " as domain data is not allowed.")
     return expressions, expressions_unit, parameters, domain, domain_data
 
 
-def _real_comsol_header_find_unique(pattern, string, idx=[]):
-    if len(idx) < 1:
+def _remove_neighbored_duplicates(a):
+    res = [a[0]]
+    for i, c in enumerate(a[1:]):
+        if c != a[i]:
+            res.append(c)
+    return res
+
+
+def _read_comsol_metadata(filename):
+    suffix = pathlib.Path(filename).suffix
+    metadata = dict()
+    seperator_header = ','
+    with open(filename) as f:
+        last_line = f.readline()
+        while True:
+            line = f.readline()
+            if line[0] != '%':
+                break
+            elif len(last_line) > 0:
+                number_names = ['dimension', 'nodes', 'expressions']
+                if suffix.endswith('.csv'):
+                    last_line = last_line[2:-1].replace('"', '').split(
+                        seperator_header)
+                elif suffix.endswith('.dat') or suffix.endswith('.txt'):
+                    last_line = " ".join(last_line[2:-1].replace(',', ';')
+                                         .replace(':', ',').split()
+                                         ).split(seperator_header)
+                if any(number_name == last_line[0].lower() for number_name in
+                       number_names):
+                    metadata[last_line[0]] = int(last_line[-1])
+                else:
+                    if suffix.endswith('.csv'):
+                        metadata[last_line[0]] = ",".join(last_line[1:])
+                    elif suffix.endswith('.dat') or suffix.endswith('.txt'):
+                        last_line[1] = last_line[1][1:]
+                        metadata[last_line[0]] = ":".join(
+                            last_line[1:]).replace(';', ',')
+                last_line = line
+
+    return metadata
+
+
+def _real_comsol_header_find_unique(pattern, string, idx=None):
+    if idx is None:
         expressions, idx = np.unique(re.findall(
             pattern,
             string), True)
@@ -716,7 +794,8 @@ def _read_comsol_header_get_headerline(filename):
                 header_data = last_line
                 break
             last_line = line
-    return header_data[2:].replace('\n', '')
+    delimiter = ',' if ',' in line else None
+    return header_data[2:].replace('\n', ''), 'i' in line, delimiter
 
 
 def _clipped_audio_subtypes():
