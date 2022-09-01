@@ -675,7 +675,6 @@ def test_read_comsol_wrong_file_type():
         io.read_comsol_header(filename)
 
 
-@pytest.mark.read_comsol
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_warning_for_db_values(type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', 'level_only')
@@ -683,7 +682,6 @@ def test_read_comsol_warning_for_db_values(type):
         io.read_comsol(path + type)
 
 
-@pytest.mark.read_comsol
 @pytest.mark.parametrize("filename,expressions",  [
     ('intensity_average', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
     ('intensity_only', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
@@ -890,3 +888,39 @@ def test_read_comsol_another_value_data(filename, p1, type):
     theta = 1
     phi = 2
     assert data.freq[point, exp, theta, phi, freq] == p1
+
+
+@pytest.mark.parametrize("filename",  [
+    'intensity_average',
+    'intensity_only',
+    'intensity_parametric',
+    'pressure_acceleration_parametric_time',
+    'pressure_only',
+    'pressure_parametric',
+    ])
+@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_expressions(filename, type):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, expressions_unit, parameters, domain, domain_data \
+        = io.read_comsol_header(path + type)
+    data, coordinates = io.read_comsol(
+        path + type, expressions=[expressions[0]])
+    assert data.cshape[1] == 1
+
+
+@pytest.mark.parametrize("filename",  [
+    'intensity_parametric',
+    'intensity_average',
+    ])
+@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_expressions_value(filename, type):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, expressions_unit, parameters, domain, domain_data \
+        = io.read_comsol_header(path + type)
+    data_exp, coordinates = io.read_comsol(
+        path + type, expressions=[expressions[0], expressions[2]])
+    data, coordinates = io.read_comsol(path + type)
+    assert data_exp.freq[0, 0, 1, 1, 1] == data.freq[0, 0, 1, 1, 1]
+    assert data_exp.freq[0, 1, 1, 1, 1] == data.freq[0, 2, 1, 1, 1]
+    assert data_exp.freq[0, 0, 0, 2, 1] == data.freq[0, 0, 0, 2, 1]
+    assert data_exp.freq[0, 1, 0, 2, 1] == data.freq[0, 2, 0, 2, 1]

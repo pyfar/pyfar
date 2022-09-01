@@ -540,7 +540,7 @@ def read_comsol(filename, expressions=None):
             f"but is of type {str(suffix)}"))
 
     # get header
-    expressions, expressions_unit, parameters, domain, domain_data \
+    all_expressions, expressions_unit, parameters, domain, domain_data \
         = read_comsol_header(filename)
     header_data, is_complex, delimiter \
         = _read_comsol_header_get_headerline(filename)
@@ -552,7 +552,7 @@ def read_comsol(filename, expressions=None):
     num_dimension = metadata['Dimension']
     num_notes = metadata['Nodes']
     num_entries = metadata['Expressions']
-    num_expressions = len(expressions)
+    num_expressions = len(all_expressions)
 
     # read body
     data_type = np.complex_ if is_complex else float
@@ -604,9 +604,17 @@ def read_comsol(filename, expressions=None):
     for idxes in switches:
         data_raw = np.swapaxes(data_raw, idxes[0], idxes[1])
 
+    # remove unwanted expressions
+    if expressions is not None:
+        indexes = [all_expressions.index(exp) for exp in expressions]
+        indexes_remove = list(range(len(all_expressions)))
+        [indexes_remove.remove(i) for i in sorted(indexes, reverse=True)]
+        for i in sorted(indexes_remove, reverse=True):
+            data_raw = np.delete(data_raw, i, 1)
+
     # create object
     comment = ', '.join(
-        ' '.join(x) for x in zip(expressions, expressions_unit))
+        ' '.join(x) for x in zip(all_expressions, expressions_unit))
     if domain == 'freq':
         data = FrequencyData(
             data_raw, domain_data, dtype=data_type,
@@ -661,8 +669,7 @@ def read_comsol_header(filename):
             The data are in time domain.
     domain_data : list[]
         This list contains the domain data from the input file. Depending
-        on the data in the in the input file, the output will be float or
-        complex.
+        on the data in the input file, the output will be float or complex.
 
     Raises
     ------
