@@ -645,7 +645,8 @@ def read_comsol_header(filename):
     --------
     Returns all expressions
     >>> import pyfar as pf
-    >>> expressions, expressions_unit, parameters, domain, domain_data = pf.io.read_comsol_header('my_comsol_data.csv')
+    >>> expressions, expressions_unit, parameters, domain, domain_data \
+    >>>     = pf.io.read_comsol_header('my_comsol_data.csv')
     """
     # Check Datatype
     suffix = pathlib.Path(filename).suffix
