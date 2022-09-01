@@ -419,7 +419,7 @@ class FrequencyData(_Audio):
     @freq.setter
     def freq(self, value):
         """Set the frequency data."""
-        data = np.atleast_2d(np.asarray(value, dtype=complex))
+        data = np.atleast_2d(np.asarray(value, dtype=self._dtype))
         # match shape of frequencies
         if self.frequencies.size != data.shape[-1]:
             raise ValueError(

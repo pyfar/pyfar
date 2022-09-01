@@ -199,3 +199,11 @@ def test__repr__(capfd):
     out, _ = capfd.readouterr()
     assert ("FrequencyData:\n"
             "(1,) channels with 3 frequencies") in out
+
+
+def test_data_frequency_with_floats():
+    """Test if frequency data with floats works fine."""
+    data = [1, 0, -1]
+    freqs = [0, .1, .2]
+    obj = FrequencyData(data, freqs, dtype=float)
+    assert isinstance(obj.freq[0, 0], float)
