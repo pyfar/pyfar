@@ -847,25 +847,29 @@ def test_read_comsol_coordinates(filename, type):
 
 
 @pytest.mark.parametrize("filename,p1",  [
-    ('intensity_average', 1.2867253973047096E-24),
-    ('intensity_only', -1.0535540378988276E-8),
-    ('intensity_parametric', -1.0535540378988267E-8),
-    # ('level_only', 42.754551872360125),
-    ('pressure_acceleration_parametric_time', 2.2469262686436532E-14),
-    ('pressure_only', complex(-3.308489057665816E-5, -0.003883799752478906)),
+    ('intensity_average', np.float64(1.2867253973047096E-24)),
+    ('intensity_only', np.float64(-1.0535540378988276E-8)),
+    ('intensity_parametric', np.float64(-1.0535540378988267E-8)),
+    # ('level_only', np.float64(42.754551872360125)),
+    ('pressure_acceleration_parametric_time',
+     np.float64(2.2469262686436532E-14)),
+    ('pressure_only',
+     np.complex128(complex(-3.308489057665816E-5, -0.003883799752478906))),
     ('pressure_parametric',
-     complex(-3.3084890576658145E-5, -0.003883799752478905)),
+     np.complex128(complex(-3.3084890576658145E-5, -0.003883799752478905))),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_first_value_data(filename, p1, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_first_value_data(filename, p1, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     expressions, expressions_unit, parameters, domain, domain_data \
-        = io.read_comsol_header(path + type)
-    data, coordinates = io.read_comsol(path + type)
+        = io.read_comsol_header(path + suffix)
+    data, coordinates = io.read_comsol(path + suffix)
     if domain == 'freq':
         assert data.freq.flatten()[0] == p1
+        assert type(data.freq.flatten()[0]) == type(p1)
     else:
         assert data.time.flatten()[0] == p1
+        assert type(data.time.flatten()[0]) == type(p1)
 
 
 @pytest.mark.parametrize("filename,p1",  [
@@ -874,10 +878,7 @@ def test_read_comsol_first_value_data(filename, p1, type):
     ('pressure_parametric',
      complex(-1.6519703918208651E-4, -0.003880099599610891)),
     ])
-@pytest.mark.parametrize("type",
-                         ['.txt',
-                          '.dat',
-                          '.csv'])
+@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_another_value_data(filename, p1, type):
     """Test freq=500; theta=0.7854; phi=3.1416"""
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)

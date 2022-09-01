@@ -555,7 +555,7 @@ def read_comsol(filename, expressions=None):
     num_expressions = len(all_expressions)
 
     # read body
-    data_type = np.complex_ if is_complex else float
+    data_type = complex if is_complex else float
     domain_str = domain if domain == 'freq' else 't'
     read_data = np.loadtxt(
         filename,
