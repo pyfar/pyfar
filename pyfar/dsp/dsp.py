@@ -1526,7 +1526,7 @@ def energy(signal, keepdims=False):
     Returns
     -------
     data : numpy.ndarray
-        The total energy of the input signal.
+        The channel-wise energy of the input signal.
 
     Notes
     -----
@@ -1576,7 +1576,7 @@ def power(signal, keepdims=False):
     Returns
     -------
     data : numpy.ndarray
-        The power of the input signal.
+        The channel-wise power of the input signal.
 
     Notes
     -----
@@ -1622,7 +1622,7 @@ def rms(signal, keepdims=False):
     Returns
     -------
     data : numpy.ndarray
-        The RMS of the input signal.
+        The channel-wise RMS of the input signal.
 
     Notes
     -----
