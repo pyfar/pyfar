@@ -1664,7 +1664,7 @@ def normalize(signal, operation='max', domain='time',
     Parameters
     ----------
     signal: Signal, TimeData, FrequencyData
-        Input signal of the signal class.
+        Input signal.
     domain: string
         Domain of the data to compute the reference value.
 
@@ -1672,18 +1672,13 @@ def normalize(signal, operation='max', domain='time',
            Normalization based on the time data.
         ``'freq'``
            Normalization based on the frequency data. In this case the
-           magnitudespectrum with FFT normalization is used
+           magnitude spectrum with FFT normalization is used
            (``signal.freq``, cf. :py:mod:`FFT concepts <pyfar._concepts.fft>`).
 
         The default is ``'time'``.
-    dB: bool, optional
-        If `dB` is ``True``, the data is logarithmized according to
-        :py:func:`~pyfar.dsp.decibel` and the signal's properties before
-        the calculation of the reference value.
-        The default is ``False``.
     operation: string, optional
         Operation per channel to compute the `reference` value described above
-        (according to ``domain`` and ``dB``).
+        (according to ``domain``).
 
         ``'max'``
             Takes the maximum absolute value.
@@ -1698,8 +1693,8 @@ def normalize(signal, operation='max', domain='time',
 
         The default is ``'max'``.
     channel_handling: string, optional
-        Define how multi-channel signals are handled. This parameter does
-        not affect single-channel signals.
+        Define how multi-channel signals are handled. This parameter does not
+        affect single-channel signals.
 
         ``'each'``
             Separate normalization of each channel.
@@ -1710,27 +1705,73 @@ def normalize(signal, operation='max', domain='time',
         ``'mean'``
             Normalize to the mean `reference` value across the channels.
 
-       The default is ``'max'``
+       The default is ``'each'``.
     target: scalar, array
-        The target to which the signal is normalized in the unit according to
-        `dB`. Can be a scalar or an array. In the latter case the shape of
-        `target` must be broadcasted ``signal.cshape``. The default is 0 dB if
-        ``dB=True`` and 1 otherwise.
-    freq_range: tuple, array_like, double
-        Two element vector specifying upper and lower frequency in Hz between
-        which the `reference` value for normalization is computed. This will
-        just effect if the normalization is based on the frequency data.
-        Therefore, `freq_range` won't be used if ``domain='time'``.
-        The default is ``None``, which will use the whole frequency range of
-        the signal.
+        The target to which the signal is normalized. Can be a scalar or an
+        array. In the latter case the shape of `target` must be broadcasted
+        ``signal.cshape``.
+        The default is ``1``.
+    limits: tuple, array_like
+        Two element tuple specifying upper and lower normalization limits
+        according to `domain` and `unit`. A `None` element means no upper or
+        lower limitation.
+        The default is ``(None, None)``.
+    unit: string, optional
+        Unit used for specifying upper and lower limits. Note that ``'s'`` will
+        just work for ``domain='time'``, such as ``'Hz'`` for
+        ``domain='freq'``. To find the index that is closest to the query
+        time for ``unit='s'`` and the query frequency for ``unit='Hz'``
+        :py:func:`~signal.find_nearest_time` and
+        :py:func:`~signal.find_nearest_frequency` are used. If `unit` is
+        ``None``, samples or bins will be used for normalization limits,
+        depending on the domain.
+
+        ``'s'``
+            Set limits in seconds.
+        ``'Hz'``
+            Set limits in hertz.
+
+        The default is ``None``.
+    return_reference: bool
+        If ``return_reference=True``, the function also returns the `reference`
+        values described above.
+        The default is ``False``.
 
     Returns
     --------
     normalized_signal: Signal, TimeData, FrequencyData
         The normalized signal
-    return_reference: bool
-        If ``return_reference=True`` the function also return the `reference`
-        values described above.
+    reference_norm: numpy.ndarray
+        The reference data used for normalization. Will be returned if
+        `return_reference` is set to ``True``.
+
+    Examples
+    --------
+    For normalization in dB the pyfar.dsp.decibel() function can be used.
+    Therefore, the decibel target needs to be set and prefix is used to
+    delogarithmize the data correctly.
+
+    .. plot::
+
+    >>> import pyfar as pf
+    >>> import matplotlib.pyplot as plt
+    >>> #Get dB Signal for normalization in decibel.
+    >>> signal = pf.signals.sine(frequency=500, n_samples=1000, amplitude=2)
+    >>> dB_signal, prefix = pf.dsp.decibel(signal, 'time', prefix_return=True)
+    >>> dB_signal = pf.Signal(dB_signal, 44100, domain='freq')
+    >>> #Set target in decibel
+    >>> target_dB = 0
+    >>> target = 10**(target_dB/prefix)
+    >>> #Get reference data of decibel Signal.
+    >>> _, ref_norm = pf.dsp.normalize(dB_signal, target=target,
+    ...                                return_reference=True)
+    >>> ref_norm = 10**(ref_norm/prefix)
+    >>> #Compute normalized Signal
+    >>> signal_norm = signal * target / ref_norm
+    >>> #Plot old and normalized Signal
+    >>> pf.plot.time_freq(signal, label='Original Signal')
+    >>> pf.plot.time_freq(signal_norm, label='Normalized Signal')
+    >>> plt.legend()
     """
 
     # check input
@@ -1762,7 +1803,7 @@ def normalize(signal, operation='max', domain='time',
     find = signal.find_nearest_time if domain == "time" \
         else signal.find_nearest_frequency
 
-    if unit in ("hz", "s"):
+    if unit in ("Hz", "s"):
         limits = [None if lim is None else find(lim) for lim in limits]
 
     if limits[0] == limits[1] and None not in limits:
@@ -1787,7 +1828,7 @@ def normalize(signal, operation='max', domain='time',
     else:
         raise ValueError("operation must be 'max', 'mean', 'power', 'energy' "
                          "or 'rms'.")
-    # manipulate values
+    # Channel Handling
     if channel_handling == 'each':
         reference_norm = reference.copy()
     elif channel_handling == 'max':
