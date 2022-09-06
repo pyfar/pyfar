@@ -1738,7 +1738,7 @@ def normalize(signal, operation='max', domain='time',
         The default is ``False``.
 
     Returns
-    --------
+    -------
     normalized_signal: Signal, TimeData, FrequencyData
         The normalized signal
     reference_norm: numpy.ndarray
@@ -1753,25 +1753,27 @@ def normalize(signal, operation='max', domain='time',
 
     .. plot::
 
-    >>> import pyfar as pf
-    >>> import matplotlib.pyplot as plt
-    >>> #Get dB Signal for normalization in decibel.
-    >>> signal = pf.signals.sine(frequency=500, n_samples=1000, amplitude=2)
-    >>> dB_signal, prefix = pf.dsp.decibel(signal, 'time', prefix_return=True)
-    >>> dB_signal = pf.Signal(dB_signal, 44100, domain='freq')
-    >>> #Set target in decibel
-    >>> target_dB = 0
-    >>> target = 10**(target_dB/prefix)
-    >>> #Get reference data of decibel Signal.
-    >>> _, ref_norm = pf.dsp.normalize(dB_signal, target=target,
-    ...                                return_reference=True)
-    >>> ref_norm = 10**(ref_norm/prefix)
-    >>> #Compute normalized Signal
-    >>> signal_norm = signal * target / ref_norm
-    >>> #Plot old and normalized Signal
-    >>> pf.plot.time_freq(signal, label='Original Signal')
-    >>> pf.plot.time_freq(signal_norm, label='Normalized Signal')
-    >>> plt.legend()
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> #Get dB Signal for normalization in decibel.
+        >>> signal = pf.signals.sine(500, 1000, amplitude=2)
+        >>> dB_signal, prefix = pf.dsp.decibel(signal, 'time',
+        ...                                    prefix_return=True)
+        >>> dB_signal = pf.Signal(dB_signal, 44100, domain='freq')
+        >>> #Set target in decibel
+        >>> target_dB = 0
+        >>> target = 10**(target_dB/prefix)
+        >>> #Get reference data of decibel Signal.
+        >>> _, ref_norm = pf.dsp.normalize(dB_signal, target=target,
+        ...                                return_reference=True)
+        >>> ref_norm = 10**(ref_norm/prefix)
+        >>> #Compute normalized Signal
+        >>> signal_norm = signal * target / ref_norm
+        >>> #Plot old and normalized Signal
+        >>> pf.plot.time_freq(signal, label='Original Signal')
+        >>> pf.plot.time_freq(signal_norm, label='Normalized Signal')
+        >>> plt.legend()
+
     """
 
     # check input
