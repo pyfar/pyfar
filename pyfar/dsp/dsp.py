@@ -1721,8 +1721,8 @@ def normalize(signal, operation='max', domain='time',
         just work for ``domain='time'``, such as ``'Hz'`` for
         ``domain='freq'``. To find the index that is closest to the query
         time for ``unit='s'`` and the query frequency for ``unit='Hz'``
-        :py:func:`~signal.find_nearest_time` and
-        :py:func:`~signal.find_nearest_frequency` are used. If `unit` is
+        :py:class:`~signal.find_nearest_time` and
+        :py:class:`~signal.find_nearest_frequency` are used. If `unit` is
         ``None``, samples or bins will be used for normalization limits,
         depending on the domain.
 
@@ -1791,14 +1791,14 @@ def normalize(signal, operation='max', domain='time',
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
-    if len(limits) != 2:
+    if isinstance(limits, (int, float)) or len(limits) != 2:
         raise ValueError("limits must be an array like of length 2.")
     if tuple(limits) != (None, None) and \
             operation in ('energy', 'power', 'rms'):
         raise ValueError(
             f"limits must be (None, None) if operation is {operation}")
     if (domain == "time" and unit not in ("s", "samples", None)) or \
-            (domain == "freq" and unit not in ("hz", "bins", None)):
+            (domain == "freq" and unit not in ("Hz", "bins", None)):
         raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
 
     # get and check the limits

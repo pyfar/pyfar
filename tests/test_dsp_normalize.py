@@ -100,5 +100,12 @@ def test_error_raises():
     with raises(ValueError, match=("channel_handling must be 'each', ")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          channel_handling='invalid')
-    with raises(ValueError, match=("The limit range needs to specify")):
-        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limit=2)
+    with raises(ValueError, match=("limits must be an array like")):
+        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=2)
+    with raises(ValueError, match=("limits must be")):
+        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=(100, 200),
+                         operation='energy')
+    with raises(ValueError, match=("'Hz' is an invalid unit")):
+        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='time', unit='Hz')
+    with raises(ValueError, match=("Upper and lower limit are identical")):
+        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=(1, 1))
