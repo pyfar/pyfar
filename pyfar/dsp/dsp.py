@@ -1605,7 +1605,7 @@ def find_impulse_response_start(
         if start_sample[ch] > 0:
             # Check samples before maximum
             ir_before_max = np.squeeze(
-                ir_squared[*ch, :max_sample[ch]+1] / max_value[ch])
+                ir_squared[ch][:max_sample[ch]+1] / max_value[ch])
             # First sample above or at the threshold level
             idx_first_above_thresh = np.where(
                 ir_before_max >= 10**(-threshold/10))[0]
