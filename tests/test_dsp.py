@@ -583,7 +583,7 @@ def test_minimum_phase_multidim():
     npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
 
 
-def test_delay_ir():
+def test_impulse_response_delay():
     """Test delay of an ideal impulse"""
     n_samples = 2**10
     snr = 60
@@ -600,7 +600,7 @@ def test_delay_ir():
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
-def test_delay_ir_sinc():
+def test_impulse_response_delay_sinc():
     """Test delay of a band-limited sinc function shifted by 1/2 samples"""
     sr = 44100
     n_samples = 128
@@ -615,7 +615,7 @@ def test_delay_ir_sinc():
     npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
 
 
-def test_delay_ir_multidim():
+def test_impulse_response_delay_multidim():
     """Ideal multi-dimensional Signal of ideal impulses"""
     n_samples = 2**10
     snr = 60
@@ -631,7 +631,7 @@ def test_delay_ir_multidim():
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
-def test_start_ir_insufficient_snr():
+def test_impulse_response_start_insufficient_snr():
     n_samples = 2**9
     ir = np.zeros(n_samples, dtype=float)
     ir[20] = 1
@@ -649,7 +649,7 @@ def test_start_ir_insufficient_snr():
         dsp.find_impulse_response_start(ir_noise)
 
 
-def test_start_ir():
+def test_impulse_response_start():
     n_samples = 2**10
     ir = np.zeros(n_samples)
     snr = 60
@@ -669,7 +669,7 @@ def test_start_ir():
     assert start_sample_est == start_sample - 1
 
 
-def test_start_ir_thresh():
+def test_impulse_response_theshold():
     n_samples = 2**10
     ir = np.zeros(n_samples)
 
@@ -683,7 +683,7 @@ def test_start_ir_thresh():
     assert start_sample_est == start_sample - 4 - 1
 
 
-def test_start_rir_thresh():
+def test_impulse_response_train():
     n_samples = 256
     # The start_sample is the last first below the threshold
     start_sample = 25
@@ -697,18 +697,10 @@ def test_start_rir_thresh():
 
     start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
 
-    ax = pf.plot.time(
-        ir, dB=True, unit='samples',
-        label=f'peaks samples @ {delays}')
-    ax.axvline(
-        start_sample_est, linestyle=':', color='k',
-        label=f'start @ {start_sample_est}')
-    ax.legend()
-
     assert start_sample_est == start_sample
 
 
-def test_start_ir_multidim():
+def test_impulse_response_start_multidim():
     n_samples = 2**10
     n_channels = 3
     ir = np.zeros((n_channels, n_samples))
