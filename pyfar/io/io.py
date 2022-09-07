@@ -513,7 +513,7 @@ def read_comsol(filename, expressions=None):
     all_expressions, expressions_unit, parameters, domain, domain_data \
         = read_comsol_header(filename)
     header_data, is_complex, delimiter \
-        = _read_comsol_header_get_headerline(filename)
+        = _read_comsol_get_headerline(filename)
     if 'dB' in expressions_unit:
         raise ResourceWarning("Do you really want to use dB-values?")
 
@@ -663,48 +663,53 @@ def read_comsol_header(filename):
             f"but is of type {str(suffix)}"))
 
     # read header
-    header_data, is_complex, delimiter \
-        = _read_comsol_header_get_headerline(filename)
+    header, _, _ = _read_comsol_get_headerline(filename)
 
-    # read expressions and expressions_units
-    expressions_with_unit = re.findall(
-        r'([a-zA-Z0-9\(\)\/\^ _.]+) @', header_data)
+    # Define pattern for regular expressions, see test files for examples
+    exp_unit_pattern = r'([\w\(\)\/\^. ]+) @'
+    exp_pattern = r'([\w\/\^_.]+) \('
+    unit_pattern = r'\(([\w\/\^ .]+)\)'
+    domain_pattern = r'@ ([a-zA-Z]+)='
+    value_pattern = r'=([0-9.]+)'
+    param_pattern = r'([\w\/\^_.]+)='
+    param_unit_pattern = r'=[0-9.]+([a-zA-Z]+)'
 
-    expressions, idx = _real_comsol_header_find_unique(
-        r'([a-zA-Z0-9\/\^_.]+) \(', ';'.join(expressions_with_unit))
-    expressions_unit, idx = _real_comsol_header_find_unique(
-        r'\(([a-zA-Z0-9\/\^ .]+)\)', ';'.join(expressions_with_unit), idx)
-
-    # read parameter
-    parameter_names, idx = _real_comsol_header_find_unique(
-        r'([a-zA-Z0-9\/\^_.]+)=', header_data)
-    parameters = dict()
-    domain_str = ''
-    for para_name in parameter_names:
-        unit, idx = _real_comsol_header_find_unique(
-            para_name + r'=[0-9.]+([a-zA-Z]+)', header_data)
-        values, idx = _real_comsol_header_find_unique(
-            para_name + r'=([0-9.]+)', header_data)
-        values = [float(x) for x in values]
-        if para_name in ['t', 'freq']:
-            domain_data = values
-            domain_str = para_name
-            continue
-        if len(unit) == 0:
-            parameters[para_name] = values
-        else:
-            parameters[para_name] = [x+unit for x in values]
+    # read expressions
+    expressions_with_unit = re.findall(exp_unit_pattern , header)
+    expressions_all = re.findall(exp_pattern, ';'.join(expressions_with_unit))
+    expressions = _unique_strings(expressions_all)
+    # read corresponding units
+    exp_idxs = [expressions_all.index(e) for e in expressions]
+    units_all = re.findall(unit_pattern, ';'.join(expressions_with_unit))
+    units = [units_all[i] for i in exp_idxs]
 
     # read domain data
+    domain_str = re.findall(domain_pattern, header)[0]
     if domain_str == 't':
         domain = 'time'
     elif domain_str == 'freq':
         domain = domain_str
     else:
-        domain_str = np.unique(re.findall(
-            r'@ ([a-zA-Z]+)=', header_data))[0]
-        raise ValueError(domain_str + " as domain data is not allowed.")
-    return expressions, expressions_unit, parameters, domain, domain_data
+        raise ValueError(
+            f"Domain can be 'time' or 'freq', but is {domain_str}.")
+    domain_data = _unique_strings(
+            re.findall(domain_str + value_pattern, header))
+    domain_data = [float(d) for d in domain_data]
+
+
+    # create parameters dict
+    parameter_names = _unique_strings(re.findall(param_pattern, header))
+    parameter_names.remove(domain_str)
+    parameters = dict()
+    for para_name in parameter_names:
+        unit = _unique_strings(
+            re.findall(para_name + param_unit_pattern, header))
+        values = _unique_strings(
+            re.findall(para_name + value_pattern, header))
+        values = [float(v) for v in values]
+        parameters[para_name] = [x+unit for x in values] if unit else values
+
+    return expressions, units, parameters, domain, domain_data
 
 
 def _remove_neighbored_duplicates(a):
@@ -749,31 +754,27 @@ def _read_comsol_metadata(filename):
     return metadata
 
 
-def _real_comsol_header_find_unique(pattern, string, idx=None):
-    if idx is None:
-        expressions, idx = np.unique(re.findall(
-            pattern,
-            string), True)
-        idx.sort()
-    expressions_all = re.findall(
-        pattern,
-        string)
-    expressions = []
-    [expressions.append(expressions_all[i]) for i in idx]
-    return expressions, idx
+def _unique_strings(expression_list):
+    unique = []
+    for e in expression_list:
+        if e not in unique:
+            unique.append(e)
+    return unique
 
 
-def _read_comsol_header_get_headerline(filename):
-    header_data = []
+def _read_comsol_get_headerline(filename):
+    header = []
     with open(filename) as f:
         last_line = []
-        for idx, line in enumerate(f):
-            if line[0] != '%':
-                header_data = last_line
+        for line in f.readlines():
+            if not line.startswith('%'):
+                header = last_line
                 break
             last_line = line
+
+    is_complex = 'i' in line
     delimiter = ',' if ',' in line else None
-    return header_data[2:].replace('\n', ''), 'i' in line, delimiter
+    return header, is_complex, delimiter
 
 
 def _clipped_audio_subtypes():
