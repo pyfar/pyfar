@@ -645,7 +645,7 @@ def test_start_ir_insufficient_snr():
 
     ir_noise = ir + noise
 
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning, match='The SNR'):
         dsp.find_impulse_response_start(ir_noise)
 
 
@@ -681,6 +681,31 @@ def test_start_ir_thresh():
 
     start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
     assert start_sample_est == start_sample - 4 - 1
+
+
+def test_start_rir_thresh():
+    n_samples = 256
+    # The start_sample is the last first below the threshold
+    start_sample = 25
+    delays = np.array([14, 22, 26, 30, 33])
+    amplitudes = np.array([-40, -21, -6, 0, -9], dtype=float)
+
+    ir = pf.signals.impulse(n_samples, delays, 10**(amplitudes/20))
+    ir.time = np.sum(ir.time, axis=0)
+    awgn = pf.signals.noise(n_samples, rms=10**(-60/20))
+    ir += awgn
+
+    start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
+
+    ax = pf.plot.time(
+        ir, dB=True, unit='samples',
+        label=f'peaks samples @ {delays}')
+    ax.axvline(
+        start_sample_est, linestyle=':', color='k',
+        label=f'start @ {start_sample_est}')
+    ax.legend()
+
+    assert start_sample_est == start_sample
 
 
 def test_start_ir_multidim():
