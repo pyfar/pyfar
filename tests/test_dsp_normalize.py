@@ -54,6 +54,34 @@ def test_domains_normalization():
     assert np.max(np.abs(freq.freq)) == 1
 
 
+@pytest.mark.parametrize('unit, limit1, limit2', (
+                         [None, (0, 1000), (1000, 2000)],
+                         ['s', (0, 0.5), (0.5, 1)]))
+def test_time_limiting(unit, limit1, limit2):
+    # Test for normalization with setting limits in samples(None) and seconds.
+    signal = np.append(np.ones(1000), np.zeros(1000)+0.1)
+    signal = pf.Signal(signal, 2000)
+    sig_norm1 = pf.dsp.normalize(signal, domain='time', target=2,
+                                 limits=limit1, unit=unit)
+    sig_norm2 = pf.dsp.normalize(signal, domain='time', target=2,
+                                 limits=limit2, unit=unit)
+    npt.assert_allclose(np.max(sig_norm1.time), np.min(sig_norm2.time))
+    npt.assert_allclose(10*np.max(sig_norm1.time), np.max(sig_norm2.time))
+
+
+@pytest.mark.parametrize('unit, limit1, limit2', (
+                         [None, (20, 25), (5, 10)],
+                         ['Hz', (400, 600), (100, 200)]))
+def test_frequency_limiting(unit, limit1, limit2):
+    """Test for normalization with setting limits in bins(None) and hertz."""
+    signal = pf.signals.sine(500, 2000)
+    sig_norm1 = pf.dsp.normalize(signal, domain='freq',
+                                 limits=limit1, unit=unit)
+    sig_norm2 = pf.dsp.normalize(signal, domain='freq',
+                                 limits=limit2, unit=unit)
+    assert np.max(sig_norm1.time) < np.max(sig_norm2.time)
+
+
 def test_value_cshape_broadcasting():
     """Test broadcasting of value with signal.cshape = (3,) to
     signal.cshape = (2,3)."""

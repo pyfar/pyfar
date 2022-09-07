@@ -1802,7 +1802,7 @@ def normalize(signal, operation='max', domain='time',
     if limits[0] == limits[1] and None not in limits:
         raise ValueError(("Upper and lower limit are identical. Use a "
                           "longer signal or increase limits."))
-
+    # get values for normalization energy, power or rms
     if operation == 'energy':
         reference = pyfar.dsp.energy(signal)
     elif operation == 'power':
@@ -1813,7 +1813,7 @@ def normalize(signal, operation='max', domain='time',
         # prepare data for max or mean normalization.
         input_data = np.abs(signal.time) if domain == 'time' else \
             np.abs(signal.freq)
-    # get values for normalization
+    # get values for normalization max or mean
         if operation == 'max':
             reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
         elif operation == 'mean':
