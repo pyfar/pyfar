@@ -1554,6 +1554,33 @@ def find_impulse_response_start(
         ...     color='k', linestyle=':', label='threshold')
         >>> ax.legend()
 
+    Create a train of weighted impulses with levels below and above the
+    threshold, serving as a very abstract room impulse response. The starting
+    sample is identified as the last sample below the threshold relative to the
+    maximum of the impulse response.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> n_samples = 64
+        >>> delays = np.array([14, 22, 26, 30, 33])
+        >>> amplitudes = np.array([-35, -22, -6, 0, -9], dtype=float)
+        >>> ir = pf.signals.impulse(n_samples, delays, 10**(amplitudes/20))
+        >>> ir.time = np.sum(ir.time, axis=0)
+        >>> start_sample_est = pf.dsp.find_impulse_response_start(
+        ...     ir, threshold=20)
+        >>> ax = pf.plot.time(
+        ...     ir, dB=True, unit='samples',
+        ...     label=f'peak samples: {delays}')
+        >>> ax.axvline(
+        ...     start_sample_est, linestyle='-.', color='k',
+        ...     label=f'ir start sample: {start_sample_est}')
+        >>> ax.axhline(
+        ...     20*np.log10(np.max(np.abs(ir.time)))-20,
+        ...     color='k', linestyle=':', label='threshold')
+        >>> ax.legend()
+
     """
     ir_squared = np.abs(impulse_response.time)**2
 
@@ -1595,22 +1622,6 @@ def find_impulse_response_start(
                 warnings.warn(
                     'No values below threshold found before the maximum value,\
                     defaulting to 0')
-
-            # idx_6dB_above_threshold = np.argwhere(
-            #     ir_before_max[:start_sample[idx]+1] >
-            #     10**((-threshold+6)/10))
-            # if idx_6dB_above_threshold.size > 0:
-            #     idx_6dB_above_threshold = int(idx_6dB_above_threshold[0])
-            #     tmp = np.argwhere(
-            #         ir_before_max[:idx_6dB_above_threshold+1] <
-            #         10**(-threshold/10))
-            #     if tmp.size == 0:
-            #         start_sample[idx] = 0
-            #         warnings.warn(
-            #             'Oscillations detected in the impulse response. \
-            #             No clear starting sample found, defaulting to 0')
-            #     else:
-            #         start_sample[idx] = tmp[-1]
 
     start_sample = np.reshape(start_sample, start_sample_shape)
 
