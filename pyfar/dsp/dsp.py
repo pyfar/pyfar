@@ -1386,8 +1386,9 @@ def time_shift(signal, shift, unit='samples'):
     return shifted.reshape(signal.cshape)
 
 
-def find_impulse_response_delay(ir, N=1):
+def find_impulse_response_delay(impulse_response, N=1):
     """Find the delay in samples of an impulse response.
+
     The method relies on the analytic part of the cross-correlation function
     of the impulse response and it's minimum-phase equivalent, which is zero
     for the maximum of the correlation function. For sub-sample root finding,
@@ -1402,15 +1403,15 @@ def find_impulse_response_delay(ir, N=1):
 
     Parameters
     ----------
-    ir : Signal
-        The impulse response
+    impulse_response : Signal
+        The impulse response.
     N : int, optional
-        The order of the polynom used for root finding, by default 1
+        The order of the polynom used for root finding, by default 1.
 
     Returns
     -------
     numpy.ndarray
-        Start samples of the impulse response,  as an array of shape
+        Delay of the impulse response, as an array of shape
         ``signal.cshape``. Can be floating point values in the case of
         sub-sample values.
 
@@ -1445,18 +1446,20 @@ def find_impulse_response_delay(ir, N=1):
     """
     n = int(np.ceil((N+2)/2))
 
-    start_samples = np.zeros(ir.cshape)
-    for ch in np.ndindex(ir.cshape):
+    start_samples = np.zeros(impulse_response.cshape)
+    for ch in np.ndindex(impulse_response.cshape):
         # Calculate the correlation between the impulse response and its
         # minimum phase equivalent. This requires a minimum phase equivalent
         # in the strict sense, instead of the appriximation implemented in
         # pyfar.
-        ir_minphase = sgn.minimum_phase(ir.time[ch], n_fft=4*ir.n_samples)
+        n_samples = impulse_response.n_samples
+        ir_minphase = sgn.minimum_phase(
+            impulse_response.time[ch], n_fft=4*n_samples)
         correlation = sgn.correlate(
-            ir.time[ch],
-            np.pad(ir_minphase, (0, ir.n_samples - (ir.n_samples + 1)//2)),
+            impulse_response.time[ch],
+            np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
             mode='full')
-        lags = np.arange(-ir.n_samples + 1, ir.n_samples)
+        lags = np.arange(-n_samples + 1, n_samples)
 
         # calculate the analytic signal of the correlation function
         correlation_analytic = sgn.hilbert(correlation)
