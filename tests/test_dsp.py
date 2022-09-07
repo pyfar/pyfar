@@ -584,6 +584,7 @@ def test_minimum_phase_multidim():
 
 
 def test_delay_ir():
+    """Test delay of an ideal impulse"""
     n_samples = 2**10
     snr = 60
     start_sample = np.array([24])
@@ -600,6 +601,7 @@ def test_delay_ir():
 
 
 def test_delay_ir_sinc():
+    """Test delay of a band-limited sinc function shifted by 1/2 samples"""
     sr = 44100
     n_samples = 128
     samples = np.arange(n_samples)
@@ -614,6 +616,7 @@ def test_delay_ir_sinc():
 
 
 def test_delay_ir_multidim():
+    """Ideal multi-dimensional Signal of ideal impulses"""
     n_samples = 2**10
     snr = 60
 
