@@ -608,7 +608,7 @@ def test_impulse_response_delay_sinc():
     delay_samples = n_samples // 2 + 1/2
 
     sinc = np.sinc(samples - delay_samples)
-    win = sgn.get_window('hanning', n_samples, fftbins=False)
+    win = sgn.get_window('hann', n_samples, fftbins=False)
 
     ir = pf.Signal(sinc*win, sr)
     start_samples = pf.dsp.find_impulse_response_delay(ir)
