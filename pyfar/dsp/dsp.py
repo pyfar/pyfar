@@ -1747,28 +1747,19 @@ def normalize(signal, operation='max', domain='time',
 
     Examples
     --------
-    For normalization in dB the pyfar.dsp.decibel() function can be used.
-    Therefore, the decibel target needs to be set and prefix is used to
-    delogarithmize the data correctly.
+    For normalization in dB set target in decibel and delogarithmize it when
+    setting target parameter.
+
 
     .. plot::
 
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
-        >>> #Get dB Signal for normalization in decibel.
         >>> signal = pf.signals.sine(500, 1000, amplitude=2)
-        >>> dB_signal, prefix = pf.dsp.decibel(signal, 'time',
-        ...                                    prefix_return=True)
-        >>> dB_signal = pf.Signal(dB_signal, 44100, domain='freq')
         >>> #Set target in decibel
         >>> target_dB = 0
-        >>> target = 10**(target_dB/prefix)
-        >>> #Get reference data of decibel Signal.
-        >>> _, ref_norm = pf.dsp.normalize(dB_signal, target=target,
-        ...                                return_reference=True)
-        >>> ref_norm = 10**(ref_norm/prefix)
-        >>> #Compute normalized Signal
-        >>> signal_norm = signal * target / ref_norm
+        >>> #Normalize signal and delogarithmize target_dB
+        >>> signal_norm = pf.dsp.normalize(signal, target=10**(target_dB/20))
         >>> #Plot old and normalized Signal
         >>> pf.plot.time_freq(signal, label='Original Signal')
         >>> pf.plot.time_freq(signal_norm, label='Normalized Signal')
