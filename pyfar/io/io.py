@@ -532,60 +532,55 @@ def read_comsol(filename, expressions=None):
     >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv')
     """
 
-    # Check Datatype
+    # check Datatype
     suffix = pathlib.Path(filename).suffix
-    if not suffix.endswith(('.txt', '.dat', '.csv')):
-        raise SyntaxError((
+    if suffix not in ['.txt', '.dat', '.csv']:
+        raise ValueError((
             "Input path must be a .txt, .csv or .dat file"
             f"but is of type {str(suffix)}"))
 
     # get header
-    all_expressions, expressions_unit, parameters, domain, domain_data \
+    all_expressions, units, parameters, domain, domain_data \
         = read_comsol_header(filename)
-    header_data, is_complex, delimiter \
-        = _read_comsol_get_headerline(filename)
-    if 'dB' in expressions_unit:
+    if 'dB' in units:
         raise ResourceWarning("Do you really want to use dB-values?")
+    header, is_complex, delimiter = _read_comsol_get_headerline(filename)
 
     # get meta data
     metadata = _read_comsol_metadata(filename)
-    num_dimension = metadata['Dimension']
-    num_notes = metadata['Nodes']
-    num_entries = metadata['Expressions']
-    num_expressions = len(all_expressions)
+    n_dimension = metadata['Dimension']
+    n_nodes = metadata['Nodes']
+    n_entries = metadata['Expressions']
+    n_expressions = len(all_expressions)
 
-    # read body
-    data_type = complex if is_complex else float
+    # read data
+    dtype = complex if is_complex else float
     domain_str = domain if domain == 'freq' else 't'
-    read_data = np.loadtxt(
-        filename,
-        dtype=data_type,
-        comments='%',
-        converters=lambda s: s.replace('i', 'j'),
-        encoding=None,
+    conv = lambda s: s.replace('i', 'j')
+    raw_data = np.loadtxt(
+        filename, dtype=dtype, comments='%', converters=conv, encoding=None,
         delimiter=delimiter)
-
-    # num_expressions.shape = (coordinates, Dimension+Expression)
-    read_data = np.reshape(read_data, (num_notes, num_entries+num_dimension))
+    # reshape (needed in case raw_data is 1D)
+    raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
 
     # restructure data -> out a
-    data_expressions = read_data[:, num_dimension:]
+    data_expressions = raw_data[:, n_dimension:]
     order_domain = _remove_neighbored_duplicates(
-        re.findall(domain_str + r'=([0-9.]+)', header_data))
+        re.findall(domain_str + r'=([0-9.]+)', header))
     length_list = [len(order_domain)]
     dimension_list = [len(domain_data)]
     for para_name in parameters:
         a = _remove_neighbored_duplicates(
-            re.findall(para_name + r'=([0-9.]+)', header_data))
+            re.findall(para_name + r'=([0-9.]+)', header))
         length_list.append(len(a))
         dimension_list.append(len(parameters[para_name]))
     indexes = np.argsort(length_list)
-    new_shape = [num_notes]
+    new_shape = [n_nodes]
     new_indexes = []
     for i in indexes:
         new_shape.append(dimension_list[i])
         new_indexes.append(i+1)
-    new_shape.append(num_expressions)
+    new_shape.append(n_expressions)
     a = new_indexes.pop(-1)
     new_indexes.insert(0, a)
     new_indexes.append(0)
@@ -614,18 +609,18 @@ def read_comsol(filename, expressions=None):
 
     # create object
     comment = ', '.join(
-        ' '.join(x) for x in zip(all_expressions, expressions_unit))
+        ' '.join(x) for x in zip(all_expressions, units))
     if domain == 'freq':
         data = FrequencyData(
-            data_raw, domain_data, dtype=data_type,
+            data_raw, domain_data, dtype=dtype,
             comment=comment)
     else:
         data = TimeData(
             data_raw, domain_data, comment=comment)
 
     # read coordinates
-    if num_dimension > 0:
-        coords_data = read_data[:, 0:num_dimension].astype(np.float)
+    if n_dimension > 0:
+        coords_data = raw_data[:, 0:n_dimension].astype(np.float)
         x = coords_data[:, 0]
         y = coords_data[:, 1] if coords_data.shape[1] > 1 else np.zeros(
             coords_data[:, 0].shape)
@@ -753,34 +748,20 @@ def _remove_neighbored_duplicates(a):
 def _read_comsol_metadata(filename):
     suffix = pathlib.Path(filename).suffix
     metadata = dict()
-    seperator_header = ','
+    # loop over meta data lines (starting with %)
+    number_names = ['Dimension', 'Nodes', 'Expressions']
     with open(filename) as f:
-        last_line = f.readline()
-        while True:
-            line = f.readline()
+        for line in f.readlines():
             if line[0] != '%':
                 break
-            elif len(last_line) > 0:
-                number_names = ['dimension', 'nodes', 'expressions']
-                if suffix.endswith('.csv'):
-                    last_line = last_line[2:-1].replace('"', '').split(
-                        seperator_header)
-                elif suffix.endswith('.dat') or suffix.endswith('.txt'):
-                    last_line = " ".join(last_line[2:-1].replace(',', ';')
-                                         .replace(':', ',').split()
-                                         ).split(seperator_header)
-                if any(number_name == last_line[0].lower() for number_name in
-                       number_names):
-                    metadata[last_line[0]] = int(last_line[-1])
-                else:
-                    if suffix.endswith('.csv'):
-                        metadata[last_line[0]] = ",".join(last_line[1:])
-                    elif suffix.endswith('.dat') or suffix.endswith('.txt'):
-                        last_line[1] = last_line[1][1:]
-                        metadata[last_line[0]] = ":".join(
-                            last_line[1:]).replace(';', ',')
-                last_line = line
-
+            elif any(n in line for n in number_names):
+                # character replacements, splits
+                line = line.lstrip('% ')
+                if suffix == '.csv':
+                    line = line.replace('"', '').split(',')
+                elif suffix in ['.dat', '.txt']:
+                    line = line.replace(',', ';').replace(':', ',').split(',')
+                metadata[line[0]] = int(line[-1])
     return metadata
 
 
