@@ -1584,7 +1584,7 @@ def find_impulse_response_start(
     """
     ir_squared = np.abs(impulse_response.time)**2
 
-    mask_start = np.int(0.9*ir_squared.shape[-1])
+    mask_start = np.int(0.9*impulse_response.n_samples)
 
     mask = np.arange(mask_start, ir_squared.shape[-1])
     noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
@@ -1598,32 +1598,25 @@ def find_impulse_response_start(
             "The SNR seems lower than the specified threshold value. Check "
             "if this is a valid impulse response with sufficient SNR.")
 
-    start_sample_shape = max_sample.shape
-    n_samples = ir_squared.shape[-1]
-    ir_squared = np.reshape(ir_squared, (-1, n_samples))
-    n_channels = ir_squared.shape[0]
-    max_sample = np.reshape(max_sample, n_channels)
-    max_value = np.reshape(max_value, n_channels)
-
     start_sample = max_sample.copy()
-    for idx in range(0, n_channels):
+
+    for ch in np.ndindex(impulse_response.cshape):
         # Only look for the start sample if the maximum index is bigger than 0
-        if start_sample[idx] > 0:
-            ir_before_max = ir_squared[idx, :max_sample[idx]+1] \
-                / max_value[idx]
+        if start_sample[ch] > 0:
+            # Check samples before maximum
+            ir_before_max = np.squeeze(
+                ir_squared[*ch, :max_sample[ch]+1] / max_value[ch])
             # First sample above or at the threshold level
             idx_first_above_thresh = np.where(
                 ir_before_max >= 10**(-threshold/10))[0]
             if idx_first_above_thresh.size > 0:
                 # The start sample is the last sample below the threshold
-                start_sample[idx] = np.min(idx_first_above_thresh) - 1
+                start_sample[ch] = np.min(idx_first_above_thresh) - 1
             else:
-                start_sample[idx] = 0
+                start_sample[ch] = 0
                 warnings.warn(
-                    'No values below threshold found before the maximum value,\
-                    defaulting to 0')
-
-    start_sample = np.reshape(start_sample, start_sample_shape)
+                    f'No values below threshold found found for channel {ch}',
+                    'defaulting to 0')
 
     return np.squeeze(start_sample)
 
