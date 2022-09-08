@@ -6,31 +6,27 @@ import numpy as np
 
 
 @pytest.mark.parametrize('operation,channel_handling,truth', (
-                        ['max', 'max', [0.2, 1.0]],
-                        ['max', 'each', [1.0, 1.0]],
-                        ['max', 'min', [1.0, 5.0]],
-                        ['max', 'mean', [0.333, 1.666]],
-                        ['mean', 'max', [0.6, 3.0]],
-                        ['mean', 'each', [3.0, 3.0]],
-                        ['mean', 'min', [3.0, 15.0]],
-                        ['mean', 'mean', [1.0, 5.0]],
-                        ['rms', 'max', [1*np.sqrt(3/5**2), 5*np.sqrt(3/5**2)]],
-                        ['rms', 'each', [1*np.sqrt(3/1**2),
-                                         5*np.sqrt(3/5**2)]],
-                        ['rms', 'min', [1*np.sqrt(3/1**2), 5*np.sqrt(3/1**2)]],
-                        ['rms', 'mean', [2/(np.sqrt(1/3)+np.sqrt(25/3)),
-                                         2*5/(np.sqrt(1/3)+np.sqrt(25/3))]],
-                        ['power', 'max', [1*3/5**2, 5*3/5**2]],
-                        ['power', 'each', [1*3/1**2, 5*3/5**2]],
-                        ['power', 'min', [1*3/1**2, 5*3/1**2]],
-                        ['power', 'mean', [1*3/((1**2+5**2)/2),
-                                           5*3/((1**2+5**2)/2)]],
-                        ['energy', 'max', [1/5**2, 5/5**2]],
-                        ['energy', 'each', [1/1**2, 5/5**2]],
-                        ['energy', 'min', [1/1**2, 5/1**2]],
-                        ['energy', 'mean', [1/((1**2+5**2)/2),
-                                            5/((1**2+5**2)/2)]]
-                        ))
+    ['max', 'max', [0.2, 1.0]],
+    ['max', 'each', [1.0, 1.0]],
+    ['max', 'min', [1.0, 5.0]],
+    ['max', 'mean', [1/3, 5/3]],
+    ['mean', 'max', [0.6, 3.0]],
+    ['mean', 'each', [3.0, 3.0]],
+    ['mean', 'min', [3.0, 15.0]],
+    ['mean', 'mean', [1.0, 5.0]],
+    ['rms', 'max', [1*np.sqrt(3/5**2), 5*np.sqrt(3/5**2)]],
+    ['rms', 'each', [1*np.sqrt(3/1**2), 5*np.sqrt(3/5**2)]],
+    ['rms', 'min', [1*np.sqrt(3/1**2), 5*np.sqrt(3/1**2)]],
+    ['rms', 'mean', [2/(np.sqrt(1/3)+np.sqrt(25/3)),
+                     2*5/(np.sqrt(1/3)+np.sqrt(25/3))]],
+    ['power', 'max', [1*3/5**2, 5*3/5**2]],
+    ['power', 'each', [1*3/1**2, 5*3/5**2]],
+    ['power', 'min', [1*3/1**2, 5*3/1**2]],
+    ['power', 'mean', [1*3/((1**2+5**2)/2), 5*3/((1**2+5**2)/2)]],
+    ['energy', 'max', [1/5**2, 5/5**2]],
+    ['energy', 'each', [1/1**2, 5/5**2]],
+    ['energy', 'min', [1/1**2, 5/1**2]],
+    ['energy', 'mean', [1/((1**2+5**2)/2), 5/((1**2+5**2)/2)]]))
 def test_normalization(operation, channel_handling, truth):
     """Parametrized test for all combinations of operation and channel_handling
     parameters using an impulse.
@@ -38,7 +34,7 @@ def test_normalization(operation, channel_handling, truth):
     signal = pf.signals.impulse(3, amplitude=[1, 5])
     answer = pf.dsp.normalize(signal, domain='time', operation=operation,
                               channel_handling=channel_handling)
-    npt.assert_allclose(answer.time[..., 0], truth, rtol=1e-02)
+    npt.assert_allclose(answer.time[..., 0], truth, rtol=1e-14)
 
 
 def test_domains_normalization():
@@ -83,8 +79,7 @@ def test_frequency_limiting(unit, limit1, limit2):
 
 
 def test_value_cshape_broadcasting():
-    """Test broadcasting of value with signal.cshape = (3,) to
-    signal.cshape = (2,3)."""
+    """Test broadcasting of target with shape (3,) to signal.cshape = (2,3)."""
     signal = pf.Signal([[[1, 2, 1], [1, 4, 1], [1, 2, 1]],
                         [[1, 2, 1], [1, 4, 1], [1, 2, 1]]], 44100)
     answer = pf.dsp.normalize(signal, domain='time', target=[1, 2, 3])
