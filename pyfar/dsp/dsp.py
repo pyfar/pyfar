@@ -1666,35 +1666,35 @@ def normalize(signal, operation='max', domain='time',
     signal: Signal, TimeData, FrequencyData
         Input signal.
     domain: string
-        Domain of the data to compute the reference value.
+        Determines whih data is used to compute the `reference` value.
 
         ``'time'``
-           Normalization based on the time data.
+           Use the time data ``signal.time``.
         ``'freq'``
-           Normalization based on the frequency data. In this case the
-           magnitude spectrum with FFT normalization is used
-           (``signal.freq``, cf. :py:mod:`FFT concepts <pyfar._concepts.fft>`).
+          Use the frequency data ``signal.freq``. Note that the data with
+          FFT normalization is used (cf.
+          :py:mod:`FFT concepts <pyfar._concepts.fft>`).
 
         The default is ``'time'``.
     operation: string, optional
-        Operation per channel to compute the `reference` value described above
-        (according to ``domain``).
+        Operation to compute the channel-wise `reference` value using the data
+        according to `domain`.
 
         ``'max'``
-            Takes the maximum absolute value.
+            Compute the maximum absolute value per channel.
         ``'mean'``
-            Takes the mean of the absolute values.
+            Compute the mean absolute values per channel.
         ``'energy'``
-            Takes the mean of the absolute values.
+            Compute the energy per channel using :py:func:`~pyfar.dsp.energy`.
         ``'power'``
-            Takes the mean of the absolute values.
+            Compute the power per channel using :py:func:`~pyfar.dsp.power`.
         ``'rms'``
-            Takes the root mean square value.
+            Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
 
         The default is ``'max'``.
     channel_handling: string, optional
-        Define how multi-channel signals are handled. This parameter does not
-        affect single-channel signals.
+        Define how channel-wise `reference` values are handeled for multi-
+        channel signals. This parameter does not affect single-channel signals.
 
         ``'each'``
             Separate normalization of each channel.
@@ -1708,62 +1708,68 @@ def normalize(signal, operation='max', domain='time',
        The default is ``'each'``.
     target: scalar, array
         The target to which the signal is normalized. Can be a scalar or an
-        array. In the latter case the shape of `target` must be broadcasted
-        ``signal.cshape``.
-        The default is ``1``.
+        array. In the latter case the shape of `target` must be broadcastable
+        to ``signal.cshape``. The default is ``1``.
     limits: tuple, array_like
-        Two element tuple specifying upper and lower normalization limits
+        Restrict the time or frequency range that is used to compute the
+        `reference`value. Two element tuple specifying upper and lower limit
         according to `domain` and `unit`. A `None` element means no upper or
-        lower limitation.
-        The default is ``(None, None)``.
+        lower limitation. The default ``(None, None)`` uses the entire signal.
     unit: string, optional
-        Unit used for specifying upper and lower limits. Note that ``'s'`` will
-        just work for ``domain='time'``, such as ``'Hz'`` for
-        ``domain='freq'``. To find the index that is closest to the query
-        time for ``unit='s'`` and the query frequency for ``unit='Hz'``
-        :py:class:`~signal.find_nearest_time` and
-        :py:class:`~signal.find_nearest_frequency` are used. If `unit` is
-        ``None``, samples or bins will be used for normalization limits,
-        depending on the domain.
+        Unit of `limits`.
 
         ``'s'``
-            Set limits in seconds.
+            Set limits in seconds in case of time domain normalization. Uses
+            :py:class:`~signal.find_nearest_time` to find the limits.
         ``'Hz'``
-            Set limits in hertz.
+            Set limits in hertz in case of frequency domain normalization. Uses
+            :py:class:`~signal.find_nearest_frequency`
 
-        The default is ``None``.
+        The default ``None`` assumes that `limits` is given in samples in case
+        of time domain normalization and in bins in case of frequency domain
+        normalization.
     return_reference: bool
         If ``return_reference=True``, the function also returns the `reference`
-        values described above.
-        The default is ``False``.
+        values described above. The default is ``False``.
 
     Returns
     -------
     normalized_signal: Signal, TimeData, FrequencyData
-        The normalized signal
+        The normalized input signal
     reference_norm: numpy.ndarray
-        The reference data used for normalization. Will be returned if
-        `return_reference` is set to ``True``.
+        The reference values used for normalization. Will be returned if
+        `return_reference` is ``True``.
 
     Examples
     --------
-    For normalization in dB set target in decibel and delogarithmize it when
-    setting target parameter.
-
+    Time domain normalization with default parameters
 
     .. plot::
 
         >>> import pyfar as pf
-        >>> import matplotlib.pyplot as plt
-        >>> signal = pf.signals.sine(500, 1000, amplitude=2)
-        >>> #Set target in decibel
+        >>> signal = pf.signals.sine(1e3, 441, amplitude=2)
+        >>> signal_norm = pf.dsp.normalize(signal)
+        >>> # Plot input and normalized Signal
+        >>> ax = pf.plot.time(signal, label='Original Signal')
+        >>> pf.plot.time(signal_norm, label='Normalized Signal')
+        >>> ax.legend()
+
+    Frequency normalization with a restricted frequency range and targed in dB
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> signal = pf.signals.sine(1e3, 441, amplitude=2) + \
+        ...     pf.signals.sine(5e2, 441, amplitude=.5)
+        >>> # Normalize to dB target in restricted frequency range
         >>> target_dB = 0
-        >>> #Normalize signal and delogarithmize target_dB
-        >>> signal_norm = pf.dsp.normalize(signal, target=10**(target_dB/20))
-        >>> #Plot old and normalized Signal
+        >>> signal_norm = pf.dsp.normalize(signal, target=10**(target_dB/20),
+        ...     domain="freq", limits=(400, 600), unit="Hz")
+        >>> # Plot oinput and normalized Signal
+        >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal')
         >>> pf.plot.time_freq(signal, label='Original Signal')
-        >>> pf.plot.time_freq(signal_norm, label='Normalized Signal')
-        >>> plt.legend()
+        >>> ax[1].set_ylim(-15, 15)
+        >>> ax[1].legend()
 
     """
 
@@ -1788,8 +1794,8 @@ def normalize(signal, operation='max', domain='time',
             operation in ('energy', 'power', 'rms'):
         raise ValueError(
             f"limits must be (None, None) if operation is {operation}")
-    if (domain == "time" and unit not in ("s", "samples", None)) or \
-            (domain == "freq" and unit not in ("Hz", "bins", None)):
+    if (domain == "time" and unit not in ("s", None)) or \
+            (domain == "freq" and unit not in ("Hz", None)):
         raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
 
     # get and check the limits
