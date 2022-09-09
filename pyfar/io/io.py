@@ -513,7 +513,7 @@ def read_comsol(filename, expressions=None):
     all_expressions, units, parameters, domain, domain_data \
         = read_comsol_header(filename)
     if 'dB' in units:
-        raise ResourceWarning("Do you really want to use dB-values?")
+        warnings.warn("Do you really want to use dB-values?")
     header, is_complex, delimiter = _read_comsol_get_headerline(filename)
 
     # get meta data
@@ -690,7 +690,6 @@ def read_comsol_header(filename):
     domain_data = _unique_strings(
             re.findall(domain_str + value_pattern, header))
     domain_data = [float(d) for d in domain_data]
-
 
     # create parameters dict
     parameter_names = _unique_strings(re.findall(param_pattern, header))
