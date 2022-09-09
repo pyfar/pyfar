@@ -1666,7 +1666,7 @@ def normalize(signal, operation='max', domain='time',
     signal: Signal, TimeData, FrequencyData
         Input signal.
     domain: string
-        Determines whih data is used to compute the `reference` value.
+        Determines which data is used to compute the `reference` value.
 
         ``'time'``
            Use the time data ``signal.time``.
@@ -1712,7 +1712,7 @@ def normalize(signal, operation='max', domain='time',
         to ``signal.cshape``. The default is ``1``.
     limits: tuple, array_like
         Restrict the time or frequency range that is used to compute the
-        `reference`value. Two element tuple specifying upper and lower limit
+        `reference` value. Two element tuple specifying upper and lower limit
         according to `domain` and `unit`. A `None` element means no upper or
         lower limitation. The default ``(None, None)`` uses the entire signal.
     unit: string, optional
@@ -1730,14 +1730,14 @@ def normalize(signal, operation='max', domain='time',
         normalization.
     return_reference: bool
         If ``return_reference=True``, the function also returns the `reference`
-        values described above. The default is ``False``.
+        values for the channels. The default is ``False``.
 
     Returns
     -------
     normalized_signal: Signal, TimeData, FrequencyData
-        The normalized input signal
+        The normalized input signal.
     reference_norm: numpy.ndarray
-        The reference values used for normalization. Will be returned if
+        The reference values used for normalization. Only returned if
         `return_reference` is ``True``.
 
     Examples
@@ -1759,13 +1759,14 @@ def normalize(signal, operation='max', domain='time',
     .. plot::
 
         >>> import pyfar as pf
-        >>> signal = pf.signals.sine(1e3, 441, amplitude=2) + \
-        ...     pf.signals.sine(5e2, 441, amplitude=.5)
+        >>> sine1 = pf.signals.sine(1e3, 441, amplitude=2)
+        >>> sine2 = pf.signals.sine(5e2, 441, amplitude=.5)
+        >>> signal = sine1 + sine2
         >>> # Normalize to dB target in restricted frequency range
         >>> target_dB = 0
         >>> signal_norm = pf.dsp.normalize(signal, target=10**(target_dB/20),
         ...     domain="freq", limits=(400, 600), unit="Hz")
-        >>> # Plot oinput and normalized Signal
+        >>> # Plot input and normalized Signal
         >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal')
         >>> pf.plot.time_freq(signal, label='Original Signal')
         >>> ax[1].set_ylim(-15, 15)
