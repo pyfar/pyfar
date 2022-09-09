@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+import warnings
 
 
 def phase(signal, deg=False, unwrap=False):
