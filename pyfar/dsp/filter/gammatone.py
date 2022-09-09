@@ -19,10 +19,10 @@ class GammatoneBands():
     reconstruction of the input signal (see examples below).
 
     Calling ``GFB = GammatoneBands()`` constructs the filter bank. Afterwards
-    the class methods ``GFB.filter()`` and ``GFB.sum`` can be used to filter
-    and reconstruct signals. All relevant data such as the filter coefficients
-    can be obtained for example through ``GFB.coefficients``. See below for
-    more documentation.
+    the class methods ``GFB.filter()`` and ``GFB.reconstruct`` can be used to
+    filter and reconstruct signals. All relevant data such as the filter
+    coefficients can be obtained for example through ``GFB.coefficients``. See
+    below for more documentation.
 
     Parameters
     ----------
@@ -83,7 +83,7 @@ class GammatoneBands():
         >>> # reconstruct the filtered impulse
         >>> # the reconstruction error can be decreased
         >>> # using the filter bank parameter 'resolution'
-        >>> y = GFB.sum(real, imag)
+        >>> y = GFB.reconstruct(real, imag)
         >>> plt.figure()
         >>> ax = pf.plot.time_freq(y, label="reconstructed impulse")
         >>> ax[0].set_xlim(0, .02)
@@ -95,7 +95,7 @@ class GammatoneBands():
         >>> real.time[20:25] *= .5
         >>> imag.time[20:25] *= .5
         >>>
-        >>> y = GFB.sum(real, imag)
+        >>> y = GFB.reconstruct(real, imag)
         >>> plt.figure()
         >>> ax = pf.plot.time_freq(
         ...     y, label="manipulated and reconstructed and impulse")
@@ -425,11 +425,12 @@ class GammatoneBands():
 
         return real, imag
 
-    def sum(self, real, imag):
+    def reconstruct(self, real, imag):
         """
-        Sum filter bands using pre-calculated delays, phase factors and gains.
+        Reconstruct filter bands.
 
-        The summation process is described in Section 4 of Hohmann 2002.
+        The summation process is described in Section 4 of Hohmann 2002 and
+        uses the pre-calculated delays, phase factors and gains.
 
         Parameters
         ----------
@@ -442,7 +443,7 @@ class GammatoneBands():
 
         Returns
         -------
-        summed : Signal
+        reconstructed : Signal
             The summed input.  ``summed.cshape`` matches the ``cshape`` or the
             original signal before it was filtered.
         """

@@ -84,23 +84,23 @@ def test_gammatone_bands_roundtrip(amplitudes, shape_filtered):
     # filter and sum an impulse signal
     impulse = pf.signals.impulse(2048, amplitude=amplitudes)
     real, imag = GFB.filter(impulse)
-    summed = GFB.sum(real, imag)
+    reconstructed = GFB.reconstruct(real, imag)
 
     # assert shapes
     assert real.time.shape == shape_filtered
     assert imag.time.shape == shape_filtered
-    assert summed.time.shape == impulse.time.shape
+    assert reconstructed.time.shape == impulse.time.shape
 
     for idx in np.ndindex(impulse.cshape):
         # assert magnitude spectrum: must be constant
-        log_mag = pf.dsp.decibel(summed[idx] / amplitudes[idx])
+        log_mag = pf.dsp.decibel(reconstructed[idx] / amplitudes[idx])
         assert np.all(np.abs(log_mag) < 0.5)
 
         # assert group delay in seconds: must be constant above freq. limit
         grp_del = pf.dsp.group_delay(
-            summed[idx], [1e3, 2e3, 4e3, 8e3, 16e3], 'scipy')
+            reconstructed[idx], [1e3, 2e3, 4e3, 8e3, 16e3], 'scipy')
         assert np.all(np.abs(
-            grp_del / summed.sampling_rate - GFB.delay) < .0001)
+            grp_del / reconstructed.sampling_rate - GFB.delay) < .0001)
 
 
 def test_gammatone_bands_reset_state():
