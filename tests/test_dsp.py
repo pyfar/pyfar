@@ -654,16 +654,10 @@ def test_impulse_response_delay_multidim():
 
 def test_impulse_response_start_insufficient_snr():
     n_samples = 2**9
-    ir = np.zeros(n_samples, dtype=float)
-    ir[20] = 1
-    ir = pf.Signal(ir, 44100)
-
     snr = 15
 
-    noise = np.random.randn(n_samples)
-    noise = noise / np.sqrt(np.mean(np.abs(noise**2))) * 10**(-snr/20)
-    noise = pf.Signal(noise, 44100)
-
+    ir = pf.signals.impulse(n_samples, 20)
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20))
     ir_noise = ir + noise
 
     with pytest.warns(UserWarning, match='The SNR'):
