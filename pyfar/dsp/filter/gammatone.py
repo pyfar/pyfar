@@ -19,7 +19,7 @@ class GammatoneBands():
     reconstruction of the input signal (see examples below).
 
     Calling ``GFB = GammatoneBands()`` constructs the filter bank. Afterwards
-    the class methods ``GFB.filter()`` and ``GFB.reconstruct`` can be used to
+    the class methods ``GFB.process()`` and ``GFB.reconstruct`` can be used to
     filter and reconstruct signals. All relevant data such as the filter
     coefficients can be obtained for example through ``GFB.coefficients``. See
     below for more documentation.
@@ -62,7 +62,7 @@ class GammatoneBands():
         >>>
         >>> # apply the filter bank to an impulse
         >>> x = pf.signals.impulse(2**13)
-        >>> real, imag = GFB.filter(x)
+        >>> real, imag = GFB.process(x)
         >>> env = pf.Signal(np.abs(real.time + 1j * imag.time), 44100)
         >>>
         >>> # the output is complex:
@@ -275,7 +275,7 @@ class GammatoneBands():
         delay_samples = int(np.round(self.delay * self.sampling_rate))
 
         # apply filterbank to impulse to estimate the required values
-        real, imag = self.filter(pf.signals.impulse(delay_samples + 3))
+        real, imag = self.process(pf.signals.impulse(delay_samples + 3))
 
         # compute the envelope
         ir = real.time + 1j * imag.time
@@ -330,7 +330,7 @@ class GammatoneBands():
 
         return gains.flatten()
 
-    def filter(self, signal, reset_state=True):
+    def process(self, signal, reset=True):
         """
         Filter an input signal.
 
@@ -348,7 +348,7 @@ class GammatoneBands():
         ----------
         signal : Signal
             The data to be filtered
-        reset_state : bool, optional
+        reset : bool, optional
             If true the internal state of the filter bank is reset before the
             filters are applied. Not resetting the state can be useful for
             blockwise processing. The default is ``True``.
@@ -386,14 +386,14 @@ class GammatoneBands():
 
         # reset or initialize the state as a list of as many zero arrays as
         # the filter bank has bands
-        if reset_state or self._state is None:
+        if reset or self._state is None:
             state = np.zeros((4, time_in.shape[0], 2), dtype=complex)
             self._state = [state for _ in range(self.n_bands)]
         elif len(self._state) != self.n_bands \
                 or self._state[0].shape != (4, time_in.shape[0], 2):
             raise ValueError((
                 "The shape of the signal and the internal state of the filter "
-                "bank do not match. Try calling process with reset_state=True "
+                "bank do not match. Try calling process with reset=True "
                 "or with the signal that it was previously used with."
             ))
 

@@ -83,7 +83,7 @@ def test_gammatone_bands_roundtrip(amplitudes, shape_filtered):
 
     # filter and sum an impulse signal
     impulse = pf.signals.impulse(2048, amplitude=amplitudes)
-    real, imag = GFB.filter(impulse)
+    real, imag = GFB.process(impulse)
     reconstructed = GFB.reconstruct(real, imag)
 
     # assert shapes
@@ -108,12 +108,12 @@ def test_gammatone_bands_reset_state():
     GFB = filter.GammatoneBands([0, 22050])
 
     # filter in one block
-    real, imag = GFB.filter(pf.signals.impulse(2**12))
+    real, imag = GFB.process(pf.signals.impulse(2**12))
 
     # filter in two blocks
-    real_a, imag_a = GFB.filter(pf.signals.impulse(2**11))
-    real_b, imag_b = GFB.filter(pf.Signal(np.zeros(2**11), 44100),
-                                reset_state=False)
+    real_a, imag_a = GFB.process(pf.signals.impulse(2**11))
+    real_b, imag_b = GFB.process(
+        pf.Signal(np.zeros(2**11), 44100), reset=False)
 
     # check for equality
     npt.assert_array_equal(real_a.time, real.time[:, :2**11])
@@ -143,11 +143,11 @@ def test_gammatone_bands_assertions():
     # mismatching type for filter
     GFB = filter.GammatoneBands([0, 22050])
     with pytest.raises(TypeError, match="signal must be"):
-        GFB.filter([1, 0, 0])
+        GFB.process([1, 0, 0])
 
     # mismatching sampling rates
     with pytest.raises(ValueError, match="The sampling rates"):
-        GFB.filter(pf.Signal([1, 2, 3], 48000))
+        GFB.process(pf.Signal([1, 2, 3], 48000))
 
 
 def test_gammatone_bands_repr():
