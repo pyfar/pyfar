@@ -1387,7 +1387,7 @@ def time_shift(signal, shift, unit='samples'):
 
 
 def find_impulse_response_delay(impulse_response, N=1):
-    """Find the delay in samples of an impulse response.
+    """Find the delay in sub-sample values of an impulse response.
 
     The method relies on the analytic part of the cross-correlation function
     of the impulse response and it's minimum-phase equivalent, which is zero
@@ -1400,6 +1400,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     2.  By default a first order polynomial is used, as the slope of the
         analytic signal should in theory be linear.
 
+    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_start`.
 
     Parameters
     ----------
@@ -1410,7 +1411,7 @@ def find_impulse_response_delay(impulse_response, N=1):
 
     Returns
     -------
-    numpy.ndarray
+    delay : numpy.ndarray, float
         Delay of the impulse response, as an array of shape
         ``signal.cshape``. Can be floating point values in the case of
         sub-sample values.
@@ -1499,12 +1500,9 @@ def find_impulse_response_start(
     The start sample is identified as the first sample which is below the
     ``threshold`` level relative to the maximum level of the impulse response.
     For room impulse responses, ISO 3382 [#]_ specifies a threshold of 20 dB.
-
-    .. note::
-
-        This function is primary intended to be used when processing room
-        impulse responses.
-        Alternatively see :py:func:`pyfar.dsp.find_impulse_response_delay`.
+    This function is primary intended to be used when processing room impulse
+    responses.
+    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_delay`.
 
 
     Parameters
@@ -1521,10 +1519,11 @@ def find_impulse_response_start(
 
     Notes
     -----
-    The function tries to estimate the SNR in the IR based on the signal energy
-    in the last 10 percent of the IR. The automatic estimation may fail if the
-    noise spectrum is not white or the impulse response contains non-linear
-    distortions.
+    The function tries to estimate the PSNR in the IR based on the signal
+    power in the last 10 percent of the IR. The automatic estimation may fail
+    if the noise spectrum is not white or the impulse response contains
+    non-linear distortions. If the PSNR is lower than the specified threshold,
+    the function will issue a warning.
 
     References
     ----------
