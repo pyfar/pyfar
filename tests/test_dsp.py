@@ -240,67 +240,88 @@ def test_regularized_spectrum_inversion_normalized(impulse):
 
 
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
-def test_time_shift_samples(shift_samples):
+@pytest.mark.parametrize("unit", ["samples", "s"])
+def test_time_shift_cyclic(shift_samples, unit):
+    """Test cyclic time shift using samples and seconds"""
+    # generate test signal
     sampling_rate = 100
     delay = 2
     n_samples = 10
     test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
 
-    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(
-        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+    # apply shift
+    shift = shift_samples if unit == "samples" else shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift, unit=unit)
 
-    npt.assert_allclose(shifted.time, ref.time)
-
-    # shift around one time
-    shift_samples = n_samples
-    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    npt.assert_allclose(shifted.time, ref.time)
-
-
-def test_time_shift_full_length():
-    sampling_rate = 100
-    delay = 2
-    n_samples = 10
-    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    shifted = dsp.time_shift(test_signal, n_samples, unit='samples')
-    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    npt.assert_allclose(shifted.time, ref.time)
-
-
-@pytest.mark.parametrize("shift_samples", [2, -2, 0])
-def test_time_shift_seconds(shift_samples):
-    sampling_rate = 100
-    delay = 2
-    n_samples = 10
-    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    shift_time = shift_samples/sampling_rate
-    shifted = dsp.time_shift(test_signal, shift_time, unit='s')
+    # compare to reference
     ref = impulse(
         n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
 
     npt.assert_allclose(shifted.time, ref.time)
 
 
-def test_time_shift_multi_dim():
+@pytest.mark.parametrize("shift", [2, -2, 0])
+@pytest.mark.parametrize("pad_value", [0, np.nan])
+def test_time_shift_linear(shift, pad_value):
+    """Test linear time shift with different pad values"""
+    # generate test signal
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    # apply shift
+    shifted = dsp.time_shift(
+        test_signal, shift, "linear", "samples", pad_value)
+
+    # compare to reference
+    ref = impulse(
+        n_samples, delay=delay+shift, sampling_rate=sampling_rate)
+
+    if pad_value != 0 and shift != 0:
+        ref = pf.TimeData(ref.time, ref.times)
+    if shift == 2:
+        ref.time[0, :2] = pad_value
+    elif shift == -2:
+        ref.time[0, -2:] = pad_value
+
+    npt.assert_allclose(shifted.time, ref.time)
+    assert type(shifted) == type(ref)
+
+
+@pytest.mark.parametrize("shift_samples", [(
+    [1, 2, 3]), (np.array([1, 2, 3]))])
+def test_time_shift_multi_dim(shift_samples):
+    """Test with multi-channel signal and shift values as list and np.array"""
     delay = 2
     n_samples = 10
 
     # multi-dim signal with individual shifts
-    n_channels = np.array([2, 3])
     test_signal = impulse(
-        n_samples, delay=delay, amplitude=np.ones(n_channels))
-    shift_samples = np.reshape(np.arange(np.prod(n_channels)) + 1, n_channels)
+        n_samples, delay=delay, amplitude=np.ones((2, 3)))
     shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(
-        n_samples, delay=delay+shift_samples, amplitude=np.ones(n_channels))
+    ref = impulse(n_samples, delay=delay+np.array(shift_samples),
+                  amplitude=np.ones((2, 3)))
 
     npt.assert_allclose(shifted.time, ref.time, atol=1e-16)
+
+
+def test_time_shift_assertions():
+    """Test assertions for shift_time"""
+
+    # wrong mode
+    with pytest.raises(ValueError, match="mode is 'cut'"):
+        dsp.time_shift(impulse(10), 2, mode='cut')
+
+    # wrong unit
+    with pytest.raises(ValueError, match="unit is 'kg'"):
+        dsp.time_shift(impulse(10), 2, unit='kg')
+
+    # shift value exceeding signal length with both modes
+    with pytest.raises(ValueError, match="Can not shift"):
+        dsp.time_shift(impulse(10), 20, mode='linear')
+
+    dsp.time_shift(impulse(10), 20, mode='cyclic')
 
 
 def test_time_window_default():

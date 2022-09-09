@@ -15,7 +15,14 @@ from .dsp import (
     find_impulse_response_start,
     deconvolve,
     convolve,
-    InterpolateSpectrum,
+    decibel,
+)
+
+from .interpolation import (
+    smooth_fractional_octave,
+    fractional_time_shift,
+    resample,
+    InterpolateSpectrum
 )
 
 from . import filter
@@ -41,5 +48,9 @@ __all__ = [
     'find_impulse_response_start',
     'deconvolve',
     'convolve',
+    'decibel',
     'InterpolateSpectrum',
+    'smooth_fractional_octave',
+    'resample',
+    'fractional_time_shift'
 ]

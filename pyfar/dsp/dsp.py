@@ -1,9 +1,6 @@
 import multiprocessing
-import warnings
 import numpy as np
-from scipy.interpolate import interp1d
 from scipy import signal as sgn
-import matplotlib.pyplot as plt
 import pyfar
 from pyfar.dsp import fft
 
@@ -822,283 +819,6 @@ def regularized_spectrum_inversion(
     return inverse
 
 
-class InterpolateSpectrum():
-    """
-    Interpolate an incomplete spectrum to a complete single sided spectrum.
-
-    This is intended to interpolate transfer functions, for example sparse
-    spectra that are defined only at octave frequencies or incomplete spectra
-    from numerical simulations.
-
-    Parameters
-    ----------
-    data : FrequencyData
-        Input data to be interpolated. `data.fft_norm` must be `'none'`.
-    method : string
-        Specifies the input data for the interpolation
-
-        ``'complex'``
-            Separate interpolation of the real and imaginary part
-        ``'magnitude_phase'``
-            Separate interpolation if the magnitude and unwrapped phase values
-        ``'magnitude'``
-            Interpolate the magnitude values only. Results in a zero phase
-            signal, which is symmetric around the first sample. This phase
-            response might not be ideal for many applications. Minimum and
-            linear phase responses can be generated with
-            :py:func:`~pyfar.dsp.minimum_phase` and
-            :py:func:`~pyfar.dsp.linear_phase`.
-
-    kind : tuple
-        Three element tuple ``('first', 'second', 'third')`` that specifies the
-        kind of inter/extrapolation below the lowest frequency (first), between
-        the lowest and highest frequency (second), and above the highest
-        frequency (third).
-
-        The individual strings have to be
-
-        ``'zero'``, ``slinear``, ``'quadratic'``, ``'cubic'``
-            Spline interpolation of zeroth, first, second or third order
-        ``'previous'``, ``'next'``
-            Simply return the previous or next value of the point
-        ``'nearest-up'``, ``'nearest'``
-            Differ when interpolating half-integers (e.g. 0.5, 1.5) in that
-            ``'nearest-up'`` rounds up and ``'nearest'`` rounds down.
-
-        The interpolation is done using ``scipy.interpolate.interp1d``.
-    fscale : string, optional
-
-        ``'linear'``
-            Interpolate on a linear frequency axis.
-        ``'log'``
-            Interpolate on a logarithmic frequency axis. Note that 0 Hz can
-            not be interpolated on a logarithmic scale because the logarithm
-            of 0 does not exist. Frequencies of 0 Hz are thus replaced by the
-            next highest frequency before interpolation.
-
-        The default is ``'linear'``.
-    clip : bool, tuple
-        The interpolated magnitude response is clipped to the range specified
-        by this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
-        values smaller than 0 and larger than 1 occur in the interpolated
-        magnitude response. The clipping is applied after the interpolation.
-        The default is ``False`` which does not clip the data.
-
-    Returns
-    -------
-    interpolator : :py:class:`InterpolateSpectrum`
-        The interpolator can be called to interpolate the data (see examples
-        below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has
-        the following parameters
-
-        `n_samples` : int
-            Length of the interpolated time signal in samples
-        `sampling_rate`: int
-            Sampling rate of the output signal in Hz
-        `show` : bool, optional
-            Show a plot of the input and output data. The default is ``False``.
-
-    Examples
-    --------
-    Interpolate a magnitude spectrum, add an artificial linear phase and
-    inspect the results.
-    Note that a similar plot can be created by the interpolator object by
-    ``signal = interpolator(64, 44100, show=True)``
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> import matplotlib.pyplot as plt
-        >>> import numpy as np
-        >>> # generate data
-        >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
-        >>> interpolator = pf.dsp.InterpolateSpectrum(
-        ...     data, 'magnitude', ('nearest', 'linear', 'nearest'))
-        >>> # interpolate 64 samples at a sampling rate of 44100
-        >>> signal = interpolator(64, 44100)
-        >>> # add linear phase
-        >>> signal = pf.dsp.linear_phase(signal, 32)
-        >>> # plot input and output data
-        >>> with pf.plot.context():
-        >>>     _, ax = plt.subplots(2, 2)
-        >>>     # time signal (linear and logarithmic amplitude)
-        >>>     pf.plot.time(signal, ax=ax[0, 0])
-        >>>     pf.plot.time(signal, ax=ax[1, 0], dB=True)
-        >>>     # frequency plot (linear x-axis)
-        >>>     pf.plot.freq(signal, dB=False, freq_scale="linear",
-        ...                  ax=ax[0, 1])
-        >>>     pf.plot.freq(data, dB=False, freq_scale="linear",
-        ...                  ax=ax[0, 1], c='r', ls='', marker='.')
-        >>>     ax[0, 1].set_xlim(0, signal.sampling_rate/2)
-        >>>     # frequency plot (log x-axis)
-        >>>     pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
-        >>>     pf.plot.freq(data, dB=False, ax=ax[1, 1],
-        ...                  c='r', ls='', marker='.', label='output')
-        >>>     min_freq = np.min([signal.sampling_rate / signal.n_samples,
-        ...                        data.frequencies[0]])
-        >>>     ax[1, 1].set_xlim(min_freq, signal.sampling_rate/2)
-        >>>     ax[1, 1].legend(loc='best')
-
-    """
-
-    def __init__(self, data, method, kind, fscale='linear',
-                 clip=False, group_delay=None, unit='samples'):
-
-        # check input ---------------------------------------------------------
-        # ... data
-        if not isinstance(data, pyfar.FrequencyData):
-            raise TypeError('data must be a FrequencyData object.')
-        if data.n_bins < 2:
-            raise ValueError("data.n_bins must be at least 2")
-
-        # ... method
-        methods = ['complex', 'magnitude_phase', 'magnitude']
-        if method not in methods:
-            raise ValueError((f"method is '{method}'' but must be on of the "
-                              f"following: {', '.join(methods)}"))
-
-        # ... kind
-        if not isinstance(kind, tuple) or len(kind) != 3:
-            raise ValueError("kind must be a tuple of length 3")
-        kinds = ['linear', 'nearest', 'nearest-up', 'zero', 'slinear',
-                 'quadratic', 'cubic', 'previous', 'next']
-        for k in kind:
-            if k not in kinds:
-                raise ValueError((f"kind contains '{k}' but must only contain "
-                                  f"the following: {', '.join(kinds)}"))
-
-        # ... fscale
-        if fscale not in ["linear", "log"]:
-            raise ValueError(
-                f"fscale is '{fscale}'' but must be linear or log")
-
-        # ... clip
-        if clip:
-            if not isinstance(clip, tuple) or len(clip) != 2:
-                raise ValueError("clip must be a tuple of length 2")
-
-        # initialize the interpolators ----------------------------------------
-        # store required parameters
-        self._method = method
-        self._clip = clip
-        self._fscale = fscale
-
-        # flatten input data to work with scipy interpolators
-        self._cshape = data.cshape
-        data = data.flatten()
-        self._input = data
-
-        # get the required data for interpolation
-        if method == 'complex':
-            self._data = [np.real(data.freq), np.imag(data.freq)]
-        elif method == 'magnitude_phase':
-            self._data = [np.abs(data.freq),
-                          pyfar.dsp.phase(data, unwrap=True)]
-        else:
-            self._data = [np.abs(data.freq)]
-
-        # frequencies for interpolation (store for testing)
-        self._f_in = self._get_frequencies(data.frequencies.copy())
-
-        # frequency range
-        self._freq_range = [self._f_in[0], self._f_in[-1]]
-
-        # get the interpolators
-        self._interpolators = []
-        for d in self._data:
-            interpolators = []
-            for idx, k in enumerate(kind):
-                if idx == 1:
-                    interpolators.append(interp1d(self._f_in, d, k))
-                else:
-                    interpolators.append(interp1d(
-                        self._f_in, d, k, fill_value="extrapolate"))
-            self._interpolators.append(interpolators)
-
-    def __call__(self, n_samples, sampling_rate, show=False):
-        """
-        Interpolate a Signal with n_samples length.
-        (see class docstring) for more information.
-        """
-
-        # get the query frequencies (store for testing)
-        self._f_query = self._get_frequencies(
-            pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate))
-
-        # get interpolation ranges
-        id_below = self._f_query < self._freq_range[0]
-        id_within = np.logical_and(self._f_query >= self._freq_range[0],
-                                   self._f_query <= self._freq_range[1])
-        id_above = self._f_query > self._freq_range[1]
-
-        # interpolate the data
-        interpolated = []
-        for data in self._interpolators:
-            data_interpolated = np.concatenate((
-                (data[0](self._f_query[id_below])),
-                (data[1](self._f_query[id_within])),
-                (data[2](self._f_query[id_above]))),
-                axis=-1)
-            interpolated.append(data_interpolated)
-
-        # get half sided spectrum
-        if self._method == "complex":
-            freq = interpolated[0] + 1j * interpolated[1]
-        elif self._method == 'magnitude_phase':
-            freq = interpolated[0] * np.exp(-1j * interpolated[1])
-        else:
-            freq = interpolated[0]
-
-        # get initial signal
-        signal = pyfar.Signal(freq, sampling_rate, n_samples, "freq")
-
-        # clip the magnitude
-        if self._clip:
-            signal.freq = np.clip(
-                np.abs(signal.freq),
-                self._clip[0],
-                self._clip[1]) * np.exp(-1j * phase(signal))
-
-        if show:
-            # plot input and output data
-            with pyfar.plot.context():
-                _, ax = plt.subplots(2, 2)
-                # time signal (linear amplitude)
-                pyfar.plot.time(signal, ax=ax[0, 0])
-                # time signal (log amplitude)
-                pyfar.plot.time(signal, ax=ax[1, 0], dB=True)
-                # frequency plot (linear x-axis)
-                pyfar.plot.freq(signal, dB=False, freq_scale="linear",
-                                ax=ax[0, 1])
-                pyfar.plot.freq(self._input, dB=False, freq_scale="linear",
-                                ax=ax[0, 1], c='r', ls='', marker='.')
-                ax[0, 1].set_xlim(0, sampling_rate/2)
-                # frequency plot (log x-axis)
-                pyfar.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
-                pyfar.plot.freq(self._input, dB=False, ax=ax[1, 1],
-                                c='r', ls='', marker='.', label='output')
-                min_freq = np.min([sampling_rate / n_samples,
-                                   self._input.frequencies[0]])
-                ax[1, 1].set_xlim(min_freq, sampling_rate/2)
-                ax[1, 1].legend(loc='best')
-
-        return signal
-
-    def _get_frequencies(self, frequencies):
-        """
-        Return frequencies for creating or quering interpolation objects.
-
-        In case logfrequencies are requested, 0 Hz entries are replaced by
-        the next highest frequency, because the logarithm of 0 does not exist.
-        """
-        if self._fscale == "log":
-            if frequencies[0] == 0:
-                frequencies[0] = frequencies[1]
-            frequencies = np.log(frequencies)
-
-        return frequencies
-
-
 def _cross_fade(first, second, indices):
     """Cross-fade two numpy arrays by multiplication with a raised cosine
     window inside the range specified by the indices. Outside the range, the
@@ -1307,11 +1027,14 @@ def pad_zeros(signal, pad_width, mode='after'):
     return padded_signal
 
 
-def time_shift(signal, shift, unit='samples'):
-    """Apply a time-shift to a signal.
+def time_shift(
+        signal, shift, mode='cyclic', unit='samples', pad_value=0.):
+    """Apply a cyclic or linear time-shift to a signal.
 
-    The shift is performed as a cyclic shift on the time axis, potentially
-    resulting in non-causal signals for negative shift values.
+    This function only allows integer value sample shifts. If unit ``'time'``
+    is used, the shift samples will be rounded to the nearest integer value.
+    For a shift using fractional sample values see
+    :py:func:`~pf.dsp.fractional_time_shift`.
 
     Parameters
     ----------
@@ -1325,21 +1048,47 @@ def time_shift(signal, shift, unit='samples'):
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
         dimensions ``cshape``.
+    mode : str, optional
+        The shifting mode
+
+        ``"linear"``
+            Apply linear shift, i.e., parts of the signal that are shifted to
+            times smaller than 0 samples and larger than ``signal.n_samples``
+            disappear. To maintain the shape of the signal, the signal is
+            padded at the respective other end. The pad value is determined by
+            ``pad_type``.
+        ``"cyclic"``
+            Apply a cyclic shift, i.e., parts of the signal that are shifted to
+            values smaller than 0 are wrapped around to the end, and parts that
+            are shifted to values larger than ``signal.n_samples`` are wrapped
+            around to the beginning.
+
+        The default is ``"cyclic"``
     unit : str, optional
         Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
+    pad_type : numeric, optional
+        The pad value for linear shifts, by default ``0.`` is used.
+        Pad ``numpy.nan`` to the respective channels if the rms value of the
+        signal is to be maintained for block-wise rms estimation of the noise
+        power of a signal. Note that if NaNs are padded, the returned data
+        will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
+        :py:class:`~pyfar.classes.audio.Signal` object.
 
     Returns
     -------
-    Signal
-        The time-shifted signal.
+    Signal, TimeData
+        The time-shifted signal. This is a
+        :py:class:`~pyfar.classes.audio.TimeData` object in case a linear shift
+        was done and the signal was padded with Nans. In all other cases, a
+        :py:class:`~pyfar.classes.audio.Signal` object is returend.
 
     Examples
     --------
-    Individually shift a set of ideal impulses stored in three different
-    channels and plot the resulting signals
+    Individually do a cyclic shift of a set of ideal impulses stored in three
+    different channels and plot the resulting signals
 
     .. plot::
 
@@ -1358,32 +1107,65 @@ def time_shift(signal, shift, unit='samples'):
         >>> axs[1].set_title('Shifted signals')
         >>> plt.tight_layout()
 
-    """
-    shift = np.atleast_1d(shift)
-    if shift.size == 1:
-        shift = np.ones(signal.cshape) * shift
+    Perform a linear time shift instead and pad with NaNs
 
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> # generate and shift the impulses
+        >>> impulse = pf.signals.impulse(
+        ...     32, amplitude=(1, 1.5, 1), delay=(14, 15, 16))
+        >>> shifted = pf.dsp.time_shift(
+        ...     impulse, [-2, 0, 2], mode='linear', pad_value=np.nan)
+        >>> # time domain plot
+        >>> pf.plot.use('light')
+        >>> _, axs = plt.subplots(2, 1)
+        >>> pf.plot.time(impulse, ax=axs[0])
+        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> axs[0].set_title('Original signals')
+        >>> axs[1].set_title('Shifted signals')
+        >>> plt.tight_layout()
+
+    """
+    if mode not in ["linear", "cyclic"]:
+        raise ValueError(f"mode is '{mode}' but mist be 'linear' or cyclic'")
+
+    shift = np.broadcast_to(shift, signal.cshape)
     if unit == 's':
         shift_samples = np.round(shift*signal.sampling_rate).astype(int)
     elif unit == 'samples':
         shift_samples = shift.astype(int)
     else:
         raise ValueError(
-            f"Unit is: {unit}, but has to be 'samples' or 's'.")
+            f"unit is '{unit}' but must be 'samples' or 's'.")
 
-    if np.any(shift_samples > signal.n_samples):
-        warnings.warn(
-            "Shifting by more samples than the length of the signal")
+    if np.any(np.abs(shift_samples) > signal.n_samples) and mode == "linear":
+        raise ValueError(("Can not shift by more samples than signal.n_samples"
+                          " if mode is 'linear'"))
 
-    shifted = signal.flatten()
-    shift_samples = shift_samples.flatten()
-    for ch in range(shifted.cshape[0]):
+    shifted = signal.copy()
+    for ch in np.ndindex(signal.cshape):
         shifted.time[ch] = np.roll(
             shifted.time[ch],
             shift_samples[ch],
             axis=-1)
 
-    return shifted.reshape(signal.cshape)
+        if mode == 'linear':
+            if shift_samples[ch] > 0:
+                samples = slice(0, shift_samples[ch])
+                shifted.time[ch + (samples, )] = pad_value
+            elif shift_samples[ch] < 0:
+                samples = slice(shifted.n_samples + shift_samples[ch],
+                                shifted.n_samples)
+                shifted.time[ch + (samples, )] = pad_value
+
+    if np.any(np.isnan(shifted.time)):
+        shifted = pyfar.TimeData(
+            shifted.time, shifted.times, comment=shifted.comment)
+
+    return shifted
 
 
 def find_impulse_response_delay(impulse_response, N=1):
@@ -1833,3 +1615,120 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
     return pyfar.Signal(
         res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+
+
+def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
+            return_prefix=False):
+    r"""Convert data of the selected signal domain into decibels (dB).
+
+    The converted data is calculated by the base 10 logarithmic scale:
+    ``data(dB) = log_prefix * numpy.log10(data/log_reference)``. By using a
+    logarithmic scale, the deciBel is able to compare quantities that
+    may have vast ratios between them. As an example, the sound pressure in
+    dB can be calculated as followed:
+
+    .. math::
+
+        L_p = 20\log_{10}\biggl(\frac{p}{p_0}\biggr),
+
+    where :math:`20` is the logarithmic prefix for sound field quantities and
+    :math:`p_0` would be the reference for the sound pressure level. A list
+    of commonly used reference values can be found in the 'log_reference'
+    parameters section.
+
+    Parameters
+    ----------
+    signal : Signal, TimeData, FrequencyData
+        The signal which is converted into decibel
+    domain : str
+        The domain, that is converted to decibels:
+
+        ``'freq'``
+            Convert normalized frequency domain data. Signal must be of type
+            'Signal' or 'FrequencyData'.
+        ``'time'``
+            Convert time domain data. Signal must be of type
+            'Signal' or 'TimeData'.
+        ``'freq_raw'``
+            Convert frequency domain data without normalization. Signal must be
+            of type 'Signal'.
+
+        The default is ``'freq'``.
+    log_prefix : int
+        The prefix for the dB calculation. The default ``None``, uses ``10``
+        for signals with ``'psd'`` and ``'power'`` FFT normalization and
+        ``20`` otherwise.
+    log_reference : int or float
+        Reference for the logarithm calculation.
+        List of commonly used values:
+
+        +---------------------------------+--------------+
+        | log_reference                   | value        |
+        +=================================+==============+
+        | Digital signals (dBFs)          | 1            |
+        +---------------------------------+--------------+
+        | Sound pressure :math:`L_p` (dB) | 2e-5 Pa      |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBu)       | 0.7746 volt  |
+        +---------------------------------+--------------+
+        | Sound intensity :math:`L_I` (dB)| 1e-12 W/m²   |
+        +---------------------------------+--------------+
+        | Voltage :math:`L_V` (dBV)       | 1 volt       |
+        +---------------------------------+--------------+
+        | Electric power :math:`L_P` (dB) | 1 watt       |
+        +---------------------------------+--------------+
+
+        The default is 1.
+    return_prefix : bool, optional
+        If return_prefix is ``True``, the function will also return the
+        `log_prefix` value. This can be used to delogrithmize the data. The
+        default is ``False``.
+    Returns
+    -------
+    decibel : numpy.ndarray
+        The given signal in decibel in chosen domain.
+    log_prefix : int or float
+        Will be returned if `return_prefix` is set to ``True``.
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> signal = pf.signals.noise(41000, rms=[1, 1])
+    >>> decibel_data = decibel(signal, domain='time')
+    """
+    if log_prefix is None:
+        if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
+                                                                    'psd'):
+            log_prefix = 10
+        else:
+            log_prefix = 20
+    if domain == 'freq':
+        if isinstance(signal, (pyfar.FrequencyData, pyfar.Signal)):
+            data = signal.freq.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'FrequencyData'.")
+    elif domain == 'time':
+        if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
+            data = signal.time.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal' or 'TimeData'.")
+    elif domain == 'freq_raw':
+        if isinstance(signal, (pyfar.Signal)):
+            data = signal.freq_raw.copy()
+        else:
+            raise ValueError(
+                f"Domain is '{domain}' and signal is type '{signal.__class__}'"
+                " but must be of type 'Signal'.")
+    else:
+        raise ValueError(
+            f"Domain is '{domain}', but has to be 'time', 'freq',"
+            " or 'freq_raw'.")
+    data[data == 0] = np.finfo(float).eps
+    if return_prefix is True:
+        return log_prefix * np.log10(np.abs(data) / log_reference), log_prefix
+    else:
+        return log_prefix * np.log10(np.abs(data) / log_reference)
