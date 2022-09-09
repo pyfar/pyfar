@@ -447,7 +447,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
 
 
 def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
-             suppress_aliasing=True):
+             suppress_aliasing=False):
     """Resample signal to new sampling rate.
 
     The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
@@ -497,14 +497,15 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
 
         The default is ``None``, which uses ``frac_limit = 1e6``.
     suppress_aliasing : bool, optional
-        Suppress aliased energy above the Nyquist frequency of the input
-        signal, i.e., ``signal.sampling_rate/2``. This is recommended, and is
-        realized by applying a zero-phase Elliptic filter with a pass band
-        ripple of 0.1 dB, a stop band attenuation of 60 dB. The pass band edge
-        frequency is ``signal.sampling_rate/2``. The stop band edge frequency
-        is the minimum of 1.05 times the pass band frequency and the new
-        Nyquist frequency (``sampling_rate/2``). The default is ``True``. Note
-        that this is only applied in case of up-sampling.
+        In some cases the up-sampling causes artifacts above the Nyquist
+        frequency of the input signal, i.e., ``signal.sampling_rate/2``. If
+        ``True`` the artifacts are suppressed by applying a zero-phase Elliptic
+        filter with a pass band ripple of 0.1 dB, a stop band attenuation of 60
+        dB. The pass band edge frequency is ``signal.sampling_rate/2``. The
+        stop band edge frequency is the minimum of 1.05 times the pass band
+        frequency and the new Nyquist frequency (``sampling_rate/2``). The
+        default is ``False``. Note that this is only applied in case of
+        up-sampling.
 
     Returns
     -------

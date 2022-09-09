@@ -12,7 +12,7 @@ def test_resampling(L):
     fs_1 = 48000
     fs_2 = L*fs_1
     signal = pf.signals.noise(1024, sampling_rate=fs_1)
-    resampled_sig = pf.dsp.resample(signal, fs_2, suppress_aliasing=False)
+    resampled_sig = pf.dsp.resample(signal, fs_2, suppress_artifacts=False)
     # asserts the sample length
     assert L*signal.n_samples == resampled_sig.n_samples
     # asserts the length of time of the signals
@@ -30,7 +30,7 @@ def test_upsampling_delayed_impulse():
     signal = pf.signals.impulse(N, 64, sampling_rate=fs_1)
     # Get resampled Signal with function
     resampled = pf.dsp.resample(signal, fs_2, match_amplitude="time",
-                                suppress_aliasing=False)
+                                suppress_artifacts=False)
     # Calculated the analytic signal with sinc function
     L = fs_2 / fs_1
     n = np.arange(-N/2, N/2, 1/L)
@@ -102,7 +102,7 @@ def test_frequency_matching():
     N = 128
     signal = pf.signals.impulse(N, 64, sampling_rate=fs_1)
     resampled = pf.dsp.resample(signal, fs_2, match_amplitude="freq",
-                                suppress_aliasing=False)
+                                suppress_artifacts=False)
     np.testing.assert_almost_equal(resampled.freq[0][:int(N/2)-10],
                                    signal.freq[0][:int(N/2)-10], decimal=2)
 
@@ -118,7 +118,7 @@ def test_resample_multidimensional_impulse():
     signal = pf.signals.impulse(N, 64, amplitude=[[1, 2, 3], [4, 5, 6]],
                                 sampling_rate=fs_1)
     # Get resampled Signal with function
-    resampled = pf.dsp.resample(signal, fs_2, 'time', suppress_aliasing=False)
+    resampled = pf.dsp.resample(signal, fs_2, 'time', suppress_artifacts=False)
     # Test the cshape
     assert signal.cshape == resampled.cshape
     # Calculated the analytic signal with sinc function
@@ -138,8 +138,8 @@ def test_resample_suppress_aliasing():
     # test signal
     signal = pf.signals.impulse(1024, 512)
     # measure impulse response of anti-aliasing filter
-    true = pf.dsp.resample(signal, 48000, suppress_aliasing=True)
-    false = pf.dsp.resample(signal, 48000, suppress_aliasing=False)
+    true = pf.dsp.resample(signal, 48000, suppress_artifacts=True)
+    false = pf.dsp.resample(signal, 48000, suppress_artifacts=False)
     diff = true / false
 
     phase = pf.dsp.phase(diff)
