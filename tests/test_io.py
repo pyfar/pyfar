@@ -827,7 +827,7 @@ def test_read_comsol_data_shapes(filename, nodes, type):
 @pytest.mark.parametrize("filename",  [
     'intensity_only',
     'intensity_parametric',
-    # 'level_only',
+    'level_only',
     'pressure_only',
     'pressure_parametric',
     ])
