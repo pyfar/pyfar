@@ -447,7 +447,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
 
 
 def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
-             suppress_artifacts=False):
+             post_filter=False):
     """Resample signal to new sampling rate.
 
     The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
@@ -496,7 +496,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
         realizing the target sampling rate.
 
         The default is ``None``, which uses ``frac_limit = 1e6``.
-    suppress_artifacts : bool, optional
+    post_filter : bool, optional
         In some cases the up-sampling causes artifacts above the Nyquist
         frequency of the input signal, i.e., ``signal.sampling_rate/2``. If
         ``True`` the artifacts are suppressed by applying a zero-phase Elliptic
@@ -605,7 +605,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
     data = pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
                      comment=signal.comment)
 
-    if suppress_artifacts and L > 1:
+    if post_filter and L > 1:
 
         # Design elliptic filter
         # (pass band is given by nyquist frequency of input signal, other
