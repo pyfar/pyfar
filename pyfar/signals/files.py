@@ -69,7 +69,7 @@ def castanets(sampling_rate=44100):
 
     # resample brir
     if sampling_rate != 44100:
-        castanets = pf.dsp.resample(castanets, sampling_rate)
+        castanets = pf.dsp.resample(castanets, sampling_rate, post_filter=True)
 
     return castanets
 
@@ -111,7 +111,7 @@ def drums(sampling_rate=48000):
 
     # resample brir
     if sampling_rate != 48000:
-        drums = pf.dsp.resample(drums, sampling_rate)
+        drums = pf.dsp.resample(drums, sampling_rate, post_filter=True)
 
     return drums
 
@@ -159,7 +159,7 @@ def guitar(sampling_rate=48000):
 
     # resample brir
     if sampling_rate != 48000:
-        guitar = pf.dsp.resample(guitar, sampling_rate)
+        guitar = pf.dsp.resample(guitar, sampling_rate, post_filter=True)
 
     return guitar
 
@@ -214,7 +214,7 @@ def speech(voice="female", sampling_rate=44100):
 
     # resample brir
     if sampling_rate != 44100:
-        speech = pf.dsp.resample(speech, sampling_rate)
+        speech = pf.dsp.resample(speech, sampling_rate, post_filter=True)
 
     return speech
 
@@ -278,7 +278,7 @@ def brir(diffuse_field_compensation=False, sampling_rate=48000):
 
     # resample brir
     if sampling_rate != 48000:
-        brir = pf.dsp.resample(brir, sampling_rate)
+        brir = pf.dsp.resample(brir, sampling_rate, post_filter=True)
 
     return brir
 
@@ -320,7 +320,7 @@ def hpirs(sampling_rate=44100):
     hpirs, *_ = pf.io.read_sofa(os.path.join(file_dir, files[0]))
 
     if sampling_rate != 44100:
-        hpirs = pf.dsp.resample(hpirs, sampling_rate, 'freq')
+        hpirs = pf.dsp.resample(hpirs, sampling_rate, 'freq', post_filter=True)
 
     return hpirs
 
@@ -423,7 +423,7 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
             '(http://dx.doi.org/10.14279/depositonce-5718.5)')
 
     if sampling_rate != 44100:
-        hrirs = pf.dsp.resample(hrirs, sampling_rate, 'freq')
+        hrirs = pf.dsp.resample(hrirs, sampling_rate, 'freq', post_filter=True)
 
     return hrirs, sources
 
@@ -472,7 +472,7 @@ def rir(sampling_rate=48000):
 
     # resample brir
     if sampling_rate != 48000:
-        rir = pf.dsp.resample(rir, sampling_rate)
+        rir = pf.dsp.resample(rir, sampling_rate, post_filter=True)
 
     return rir
 
