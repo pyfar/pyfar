@@ -12,7 +12,7 @@ def test_resampling(L):
     fs_1 = 48000
     fs_2 = L*fs_1
     signal = pf.signals.noise(1024, sampling_rate=fs_1)
-    resampled_sig = pf.dsp.resample(signal, fs_2)
+    resampled_sig = pf.dsp.resample(signal, fs_2, post_filter=False)
     # asserts the sample length
     assert L*signal.n_samples == resampled_sig.n_samples
     # asserts the length of time of the signals
@@ -29,7 +29,8 @@ def test_upsampling_delayed_impulse():
     N = 128
     signal = pf.signals.impulse(N, 64, sampling_rate=fs_1)
     # Get resampled Signal with function
-    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="time")
+    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="time",
+                                post_filter=False)
     # Calculated the analytic signal with sinc function
     L = fs_2 / fs_1
     n = np.arange(-N/2, N/2, 1/L)
@@ -100,7 +101,8 @@ def test_frequency_matching():
     fs_2 = 96000
     N = 128
     signal = pf.signals.impulse(N, 64, sampling_rate=fs_1)
-    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="freq")
+    resampled = pf.dsp.resample(signal, fs_2, match_amplitude="freq",
+                                post_filter=False)
     np.testing.assert_almost_equal(resampled.freq[0][:int(N/2)-10],
                                    signal.freq[0][:int(N/2)-10], decimal=2)
 
@@ -116,7 +118,7 @@ def test_resample_multidimensional_impulse():
     signal = pf.signals.impulse(N, 64, amplitude=[[1, 2, 3], [4, 5, 6]],
                                 sampling_rate=fs_1)
     # Get resampled Signal with function
-    resampled = pf.dsp.resample(signal, fs_2)
+    resampled = pf.dsp.resample(signal, fs_2, 'time', post_filter=False)
     # Test the cshape
     assert signal.cshape == resampled.cshape
     # Calculated the analytic signal with sinc function
@@ -128,3 +130,30 @@ def test_resample_multidimensional_impulse():
     sinc = pf.dsp.time_window(sinc, [N*L/2-int(c/2), N*L/2+int(c/2)],
                               window='hamming')
     np.testing.assert_almost_equal(resampled.time, sinc.time, decimal=2)
+
+
+def test_resample_suppress_aliasing():
+    """Test the aliasing suppression filter"""
+
+    # test signal
+    signal = pf.signals.impulse(1024, 512)
+    # measure impulse response of anti-aliasing filter
+    true = pf.dsp.resample(signal, 48000, post_filter=True)
+    false = pf.dsp.resample(signal, 48000, post_filter=False)
+    diff = true / false
+
+    phase = pf.dsp.phase(diff)
+    mag = pf.dsp.decibel(diff)
+
+    # check zero-phase in pass band (should be exactly 0, but is not possibly
+    # due to the limited length of the signal)
+    idx_pass = diff.find_nearest_frequency(22050)
+    assert np.all(np.abs(phase[..., :idx_pass - 1]) <= .02)
+    # check unity gain in pass band (deviations should be <= 0.1 dB, but are
+    # in the range of 0.25 dB possibly due to the finite length of the signal)
+    assert np.all(np.abs(mag[..., :idx_pass - 1]) <= .25)
+
+    # check stop band damping (magnitudes should be below -60 dB, but are
+    # below -50 dB possibly due to the finite length of the signal)
+    idx_stop = diff.find_nearest_frequency(22050 * 1.05)
+    assert np.all(mag[..., idx_stop + 1:] < -50)

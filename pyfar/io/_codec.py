@@ -3,9 +3,12 @@ Brief
 =====
 
 This module is not part of the public API. It contains encoding and decoding
-functionality which is exclusively used by `io.write` and `io.read`. It enables
-storing and transmitting Pyfar- and Numpy-objects without using the unsafe
-pickle protocoll.
+functionality which is used by `io.write` and `io.read`. It enables to save
+Pyfar, and Numpy, and Python built-in objects without using the unsafe pickle
+protocol.
+
+For information on how to add read/write support to pyfar objects see the
+`Class-Level` section below.
 
 Design and Function
 ===================
@@ -39,21 +42,50 @@ such as `$ndarray`, become the name of the node in the zipfile.
 Class-Level
 ===========
 
-Actually pyfar_obj.__dict__ could be passed to `_encode` or `_decode`
-respectively. Some objects however need special treatment at the highest level
-of encoding and decoding. Therefore `PyfarClass._encode` and
-`PyfarClass._decode` must be implemented in each class. E.g.:
-
-class MyClass:
+For saving pyfar objects, the class method ``_encode`` must return a dictionary
+representation containing all required class variables. In the simplest case
+this is
 
     def _encode(self):
         return self.copy().__dict__
+
+and requires the class method ``copy``
+
+    def copy(self):
+        return copy.deepcopy(self)
+
+In some cases not all data of an object must be written to the dict during
+encoding. See pyfar.dsp.filter.GammatoneBands for an example of removing
+redundant data. For reading pyfar objects, a new class instance is created.
+This requires the class method ``_encode`` and in the simplest case looks like
 
     @classmethod
     def _decode(cls, obj_dict):
         obj = cls()
         obj.__dict__.update(obj_dict)
         return obj
+
+Note that the ``cls`` command creates a new class instance by calling the
+``__init__`` functions. It thus might require additional parameters, for
+example
+
+    obj = cls(obj_dict["_sampling_rate"])
+
+The last step is to add a test to pyfar/tests/test_io.py, e.g.
+
+    def test_write_gammatone_bands(tmpdir):
+        filename = os.path.join(tmpdir, 'gammatone_bands.far')
+        gammatone_bands = pyfar.dsp.filter.GammatoneBands((0, 22050))
+        io.write(filename, gammatone_bands=gammatone_bands)
+        actual = io.read(filename)["gammatone_bands"]
+        assert isinstance(actual, pyfar.dsp.filter.GammatoneBands)
+        assert actual == gammatone_bands
+
+Note that this requires the `__eq__` class method to assess equality
+
+    def __eq__(self, other):
+        return not deepdiff.DeepDiff(self.__dict__, other.__dict__)
+
 
 Data Inspection
 ===============
@@ -362,6 +394,7 @@ def _is_pyfar_type(obj):
         'FilterFIR',
         'FilterIIR',
         'FilterSOS',
+        'GammatoneBands',
         'SphericalVoronoi',
         'TimeData',
         'FrequencyData',
