@@ -569,7 +569,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     raw_data = np.loadtxt(
         filename, dtype=dtype, comments='%', delimiter=delimiter,
         converters=lambda s: s.replace('i', 'j'), encoding=None)
-    # reshape (needed in case raw_data is 1D)
+    # force raw_data to 2D
     raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
 
     # Define pattern for regular expressions, see test files for examples
@@ -577,15 +577,19 @@ def read_comsol(filename, expressions=None, parameters=None):
     domain_pattern = domain_str + r'=([0-9.]+)'
     value_pattern = r'=([0-9.]+)'
 
+    # read parameter and header data
     expressions_header = np.array(re.findall(exp_pattern, header))
     domain_header = np.array(
         [float(x) for x in re.findall(domain_pattern, header)])
     parameter_header = dict()
-    shape = [n_nodes, len(expressions), 1]
-    new_shape = [n_nodes, len(expressions)]
     for search_key in parameters:
         parameter_header[search_key] = np.array(
             [float(x) for x in re.findall(search_key+value_pattern, header)])
+
+    # get final data shape
+    shape = [n_nodes, len(expressions), 1]
+    new_shape = [n_nodes, len(expressions)]
+    for search_key in parameters:
         shape[-1] *= len(parameters[search_key])
         new_shape.append(len(parameters[search_key]))
     shape.append(len(domain_data))
@@ -597,9 +601,11 @@ def read_comsol(filename, expressions=None, parameters=None):
     for idx, key in enumerate(parameters):
         parameters_pairs[key] = np.transpose(pairs[idx]).flatten()
 
-    # restructure data -> out a
+    # loop over all data and write it into final shape
     data_expressions = raw_data[:, n_dimension:]
-    data_out = np.zeros(shape, dtype=dtype)
+    data_out = np.empty(shape, dtype=dtype)
+    data_out[:] = np.nan
+    data_inconsistent = False
     for parameters_idx in range(shape[2]):
         for i_expression, search_expression in enumerate(expressions):
             for i_domain, search_domain_value in enumerate(domain_data):
@@ -609,10 +615,17 @@ def read_comsol(filename, expressions=None, parameters=None):
                 for key in parameters:
                     parameter_idxes &= (parameter_header[key] == parameters_pairs[key][parameters_idx])
                 idxes = parameter_idxes & domain_idxes & expression_idxes
-                data_out[:, i_expression, parameters_idx, i_domain] \
-                    = data_expressions[:, idxes].flatten()
+                if any(idxes):
+                    data_out[:, i_expression, parameters_idx, i_domain] \
+                        = data_expressions[:, idxes].flatten()
+                else:
+                    data_inconsistent = True
 
-    if np.prod(shape) == np.prod(new_shape):
+    # reshape data to final shape
+    if data_inconsistent:
+        warnings.warn(r'Parameter data is inconsistent. Missing data is \
+            filled with nans.')
+    else:
         data_out = np.reshape(data_out, new_shape)
 
     # create object
@@ -626,7 +639,7 @@ def read_comsol(filename, expressions=None, parameters=None):
         data = TimeData(
             data_out, domain_data, comment=comment)
 
-    # read coordinates
+    # create coordinates
     if n_dimension > 0:
         coords_data = raw_data[:, 0:n_dimension].astype(np.float)
         x = coords_data[:, 0]
@@ -733,7 +746,6 @@ def read_comsol_header(filename):
     parameter_names = _unique_strings(re.findall(param_pattern, header))
     parameter_names.remove(domain_str)
     parameters = dict()
-    parameters['type'] = 'all'
     for para_name in parameter_names:
         unit = _unique_strings(
             re.findall(para_name + param_unit_pattern, header))

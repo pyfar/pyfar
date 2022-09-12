@@ -934,6 +934,22 @@ def test_read_comsol_expressions(filename, type):
 
 
 @pytest.mark.parametrize("filename",  [
+    'pressure_parametric_incomplete',
+    ])
+@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_check_incomplete(filename, type):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, expressions_unit, parameters, domain, domain_data \
+        = io.read_comsol_header(path + type)
+    with pytest.warns(Warning, match='inconsistent'):
+        data, coordinates = io.read_comsol(
+            path + type, expressions=[expressions[0]])
+    assert all(np.isnan(data.freq[:, 0, -1, 1]))
+    data.freq[:, 0, -1, 1] = 0
+    assert any(np.isnan(data.freq.flatten()) == False)
+
+
+@pytest.mark.parametrize("filename",  [
     'intensity_parametric',
     'intensity_average',
     ])
