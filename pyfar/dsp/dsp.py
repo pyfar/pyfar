@@ -1641,7 +1641,7 @@ def rms(signal, keepdims=False):
     return data
 
 
-def normalize(signal, operation='max', domain='time',
+def normalize(signal, reference_method='max', domain='time',
               channel_handling='each', target=1, limits=(None, None),
               unit=None, return_reference=False):
     """
@@ -1653,9 +1653,8 @@ def normalize(signal, operation='max', domain='time',
 
     ``signal_normalized = signal * target / reference``,
 
-    where `target` equals
-    1 and `reference` is the maximum absolute amplitude before the
-    normalization.
+    where `target` equals 1 and `reference` is the maximum absolute amplitude
+    before the normalization.
 
     Several normalizations are possible, which in fact are different ways
     of computing the `reference` value (e.g. based on the spectrum).
@@ -1669,16 +1668,16 @@ def normalize(signal, operation='max', domain='time',
         Determines which data is used to compute the `reference` value.
 
         ``'time'``
-           Use the time data ``signal.time``.
+           Use the absolute of the time domain data ``np.abs(signal.time)``.
         ``'freq'``
-          Use the frequency data ``signal.freq``. Note that the data with
-          FFT normalization is used (cf.
-          :py:mod:`FFT concepts <pyfar._concepts.fft>`).
+          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
+          normalized magnitude spectrum used
+          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
 
         The default is ``'time'``.
-    operation: string, optional
-        Operation to compute the channel-wise `reference` value using the data
-        according to `domain`.
+    reference_method: string, optional
+        Reference method to compute the channel-wise `reference` value using
+        the data according to `domain`.
 
         ``'max'``
             Compute the maximum absolute value per channel.
@@ -1697,7 +1696,7 @@ def normalize(signal, operation='max', domain='time',
         channel signals. This parameter does not affect single-channel signals.
 
         ``'each'``
-            Separate normalization of each channel.
+            Separate normalization of each individual channel.
         ``'max'``
             Normalize to the maximum `reference` value across channels.
         ``'min'``
@@ -1715,6 +1714,10 @@ def normalize(signal, operation='max', domain='time',
         `reference` value. Two element tuple specifying upper and lower limit
         according to `domain` and `unit`. A `None` element means no upper or
         lower limitation. The default ``(None, None)`` uses the entire signal.
+        Note that in case of limiting in samples or bins with ``unit=None``,
+        the second value defines the first sample/bin that is excluded.
+        Also note that `limits` need to be ``(None, None)`` if
+        `reference_method` is ``rms``, ``power`` or ``energy``.
     unit: string, optional
         Unit of `limits`.
 
@@ -1781,27 +1784,30 @@ def normalize(signal, operation='max', domain='time',
                          "or 'FrequencyData'."))
     if domain not in ('time', 'freq'):
         raise ValueError("domain must be 'time' or 'freq'.")
-    if type(signal) == pyfar.classes.audio.FrequencyData and domain == 'time':
+    if type(signal) == pyfar.FrequencyData and domain == 'time':
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'TimeData'."))
-    if type(signal) == pyfar.classes.audio.TimeData and domain == 'freq':
+    if type(signal) == pyfar.TimeData and domain == 'freq':
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
     if isinstance(limits, (int, float)) or len(limits) != 2:
         raise ValueError("limits must be an array like of length 2.")
     if tuple(limits) != (None, None) and \
-            operation in ('energy', 'power', 'rms'):
+            reference_method in ('energy', 'power', 'rms'):
         raise ValueError(
-            f"limits must be (None, None) if operation is {operation}")
+            "limits must be (None, None) if reference_method  is "
+            f"{reference_method}")
     if (domain == "time" and unit not in ("s", None)) or \
             (domain == "freq" and unit not in ("Hz", None)):
         raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
 
     # get and check the limits
-    find = signal.find_nearest_time if domain == "time" \
-        else signal.find_nearest_frequency
+    if domain == 'time':
+        find = signal.find_nearest_time
+    else:
+        find = signal.find_nearest_frequency
 
     if unit in ("Hz", "s"):
         limits = [None if lim is None else find(lim) for lim in limits]
@@ -1810,24 +1816,26 @@ def normalize(signal, operation='max', domain='time',
         raise ValueError(("Upper and lower limit are identical. Use a "
                           "longer signal or increase limits."))
     # get values for normalization energy, power or rms
-    if operation == 'energy':
+    if reference_method == 'energy':
         reference = pyfar.dsp.energy(signal)
-    elif operation == 'power':
+    elif reference_method == 'power':
         reference = pyfar.dsp.power(signal)
-    elif operation == 'rms':
+    elif reference_method == 'rms':
         reference = pyfar.dsp.rms(signal)
-    elif operation in ('max', 'mean'):
+    elif reference_method in ('max', 'mean'):
         # prepare data for max or mean normalization.
-        input_data = np.abs(signal.time) if domain == 'time' else \
-            np.abs(signal.freq)
+        if domain == 'time':
+            input_data = np.abs(signal.time)
+        else:
+            input_data = np.abs(signal.freq)
     # get values for normalization max or mean
-        if operation == 'max':
+        if reference_method == 'max':
             reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
-        elif operation == 'mean':
+        elif reference_method == 'mean':
             reference = np.mean(input_data[..., limits[0]:limits[1]], axis=-1)
     else:
-        raise ValueError("operation must be 'max', 'mean', 'power', 'energy' "
-                         "or 'rms'.")
+        raise ValueError("reference_method must be 'max', 'mean', 'power', "
+                         "'energy' or 'rms'.")
     # Channel Handling
     if channel_handling == 'each':
         reference_norm = reference.copy()

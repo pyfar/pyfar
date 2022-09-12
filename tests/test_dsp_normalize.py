@@ -5,7 +5,7 @@ import numpy.testing as npt
 import numpy as np
 
 
-@pytest.mark.parametrize('operation,channel_handling,truth', (
+@pytest.mark.parametrize('reference_method,channel_handling,truth', (
     ['max', 'max', [0.2, 1.0]],
     ['max', 'each', [1.0, 1.0]],
     ['max', 'min', [1.0, 5.0]],
@@ -27,12 +27,13 @@ import numpy as np
     ['energy', 'each', [1/1**2, 5/5**2]],
     ['energy', 'min', [1/1**2, 5/1**2]],
     ['energy', 'mean', [1/((1**2+5**2)/2), 5/((1**2+5**2)/2)]]))
-def test_normalization(operation, channel_handling, truth):
-    """Parametrized test for all combinations of operation and channel_handling
-    parameters using an impulse.
+def test_normalization(reference_method, channel_handling, truth):
+    """Parametrized test for all combinations of reference_method and
+    channel_handling parameters using an impulse.
     """
     signal = pf.signals.impulse(3, amplitude=[1, 5])
-    answer = pf.dsp.normalize(signal, domain='time', operation=operation,
+    answer = pf.dsp.normalize(signal, domain='time',
+                              reference_method=reference_method,
                               channel_handling=channel_handling)
     npt.assert_allclose(answer.time[..., 0], truth, rtol=1e-14)
 
@@ -92,7 +93,7 @@ def test_value_return():
     n_samples, amplitude = 3., 1.
     signal = pf.signals.impulse(n_samples, amplitude=amplitude)
     _, values_norm = pf.dsp.normalize(signal, return_reference=True,
-                                      operation='mean')
+                                      reference_method='mean')
     assert values_norm == amplitude / n_samples
 
 
@@ -116,9 +117,9 @@ def test_error_raises():
     with raises(ValueError, match=("domain must be 'time' or 'freq'.")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='invalid_domain')
 
-    with raises(ValueError, match=("operation must be 'max', 'mean',")):
+    with raises(ValueError, match=("reference_method must be 'max', 'mean',")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
-                         operation='invalid_operation')
+                         reference_method='invalid_reference_method')
 
     with raises(ValueError, match=("channel_handling must be 'each', ")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
@@ -127,7 +128,7 @@ def test_error_raises():
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=2)
     with raises(ValueError, match=("limits must be")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=(100, 200),
-                         operation='energy')
+                         reference_method='energy')
     with raises(ValueError, match=("'Hz' is an invalid unit")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='time', unit='Hz')
     with raises(ValueError, match=("Upper and lower limit are identical")):
