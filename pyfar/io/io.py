@@ -477,6 +477,11 @@ def read_comsol(filename, expressions=None, parameters=None):
         can be like ``expressions=['pabe.Lp_t']``. Also see
         :py:func:`~pyfar.dsp.comsol_read_header`. By default, all expressions
         get returned.
+    parameters : dict
+        This dict contains the parameters, which sould be read. An example can
+        be like ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
+        Also see :py:func:`~pyfar.dsp.comsol_read_header`. Default is None,
+        then all parameters are read.
 
     Returns
     -------
@@ -527,7 +532,6 @@ def read_comsol(filename, expressions=None, parameters=None):
     n_dimension = metadata['Dimension']
     n_nodes = metadata['Nodes']
     n_entries = metadata['Expressions']
-    n_expressions = len(all_expressions)
 
     # read data
     dtype = complex if is_complex else float
@@ -547,20 +551,17 @@ def read_comsol(filename, expressions=None, parameters=None):
     domain_header = np.array(
         [float(x) for x in re.findall(domain_pattern, header)])
     parameter_header = dict()
-    parameters_out = dict()
     shape = [n_nodes, len(expressions), 1]
     new_shape = [n_nodes, len(expressions)]
     for search_key in parameters:
         parameter_header[search_key] = np.array(
             [float(x) for x in re.findall(search_key+value_pattern, header)])
-        parameters_out[search_key] \
-            = parameter_header[search_key][::n_expressions*len(domain_data)]
         shape[-1] *= len(parameters[search_key])
         new_shape.append(len(parameters[search_key]))
     shape.append(len(domain_data))
     new_shape.append(len(domain_data))
 
-    #
+    # Create paired parameter
     pairs = np.meshgrid(*[x for x in parameters.values()])
     parameters_pairs = parameters.copy()
     for idx, key in enumerate(parameters):
@@ -702,6 +703,7 @@ def read_comsol_header(filename):
     parameter_names = _unique_strings(re.findall(param_pattern, header))
     parameter_names.remove(domain_str)
     parameters = dict()
+    parameters['type'] = 'all'
     for para_name in parameter_names:
         unit = _unique_strings(
             re.findall(para_name + param_unit_pattern, header))

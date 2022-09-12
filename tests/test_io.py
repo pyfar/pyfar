@@ -875,6 +875,29 @@ def test_read_comsol_another_value_data(filename, p1, type):
     assert data.freq[point, exp, theta, phi, freq] == p1
 
 
+@pytest.mark.parametrize("filename,p1",  [
+    ('intensity_parametric',
+     -1.0533947432793473E-8),
+    ('pressure_parametric',
+     complex(-1.6519703918208651E-4, -0.003880099599610891)),
+    ])
+@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_parameters_another_value_data(filename, p1, type):
+    """Test freq=500; theta=0.7854; phi=3.1416"""
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, expressions_unit, parameters, domain, domain_data \
+        = io.read_comsol_header(path + type)
+    theta = 1
+    phi = 2
+    parameters['theta'] = [parameters['theta'][theta]]
+    parameters['phi'] = [parameters['phi'][phi]]
+    data, coordinates = io.read_comsol(path + type, parameters=parameters)
+    point = 0
+    exp = 0
+    freq = 1
+    assert data.freq[point, exp, 0, 0, freq] == p1
+
+
 @pytest.mark.parametrize("filename",  [
     'intensity_average',
     'intensity_only',
@@ -891,6 +914,25 @@ def test_read_comsol_expressions(filename, type):
     data, coordinates = io.read_comsol(
         path + type, expressions=[expressions[0]])
     assert data.cshape[1] == 1
+
+
+@pytest.mark.parametrize("filename",  [
+    'intensity_parametric',
+    'intensity_average',
+    ])
+@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_parameters_shape(filename, type):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, expressions_unit, parameters, domain, domain_data \
+        = io.read_comsol_header(path + type)
+    parameters['theta'] = parameters['theta'][:1]
+    parameters['phi'] = parameters['phi'][:2]
+    data, coordinates = io.read_comsol(
+        path + type, parameters=parameters)
+    assert data.cshape[1] == len(expressions)
+    assert data.cshape[2] == len(parameters['theta'][:1])
+    assert data.cshape[3] == len(parameters['phi'][:2])
+    assert data.n_bins == 2
 
 
 @pytest.mark.parametrize("filename",  [
