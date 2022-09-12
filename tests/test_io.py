@@ -678,7 +678,7 @@ def test_read_comsol_wrong_file_type():
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_warning_for_db_values(type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', 'level_only')
-    with pytest.raises(ResourceWarning):
+    with pytest.warns(Warning, match='dB'):
         io.read_comsol(path + type)
 
 
