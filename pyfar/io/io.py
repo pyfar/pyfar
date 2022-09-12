@@ -620,12 +620,11 @@ def read_comsol(filename, expressions=None, parameters=None):
                         = data_expressions[:, idxes].flatten()
                 else:
                     data_inconsistent = True
+                    warnings.warn(r'Parameter data is inconsistent. Missing \
+                        data is filled with nans.')
 
     # reshape data to final shape
-    if data_inconsistent:
-        warnings.warn(r'Parameter data is inconsistent. Missing data is \
-            filled with nans.')
-    else:
+    if not data_inconsistent:
         data_out = np.reshape(data_out, new_shape)
 
     # create object
