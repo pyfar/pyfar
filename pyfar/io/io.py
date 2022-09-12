@@ -463,7 +463,7 @@ def default_audio_subtype(format):
     return soundfile.default_subtype(format)
 
 
-def read_comsol(filename, expressions=None):
+def read_comsol(filename, expressions=None, parameters=None):
     """Read exported data from COMSOL.
 
     Parameters
@@ -510,11 +510,17 @@ def read_comsol(filename, expressions=None):
             f"but is of type {str(suffix)}"))
 
     # get header
-    all_expressions, units, parameters, domain, domain_data \
+    all_expressions, units, all_parameters, domain, domain_data \
         = read_comsol_header(filename)
     if 'dB' in units:
-        warnings.warn("Do you really want to use dB-values?")
+        warnings.warn(r'Do you really want to use dB-values?')
     header, is_complex, delimiter = _read_comsol_get_headerline(filename)
+
+    # set default variables
+    if expressions is None:
+        expressions = all_expressions.copy()
+    if parameters is None:
+        parameters = all_parameters.copy()
 
     # get meta data
     metadata = _read_comsol_metadata(filename)
@@ -526,67 +532,68 @@ def read_comsol(filename, expressions=None):
     # read data
     dtype = complex if is_complex else float
     domain_str = domain if domain == 'freq' else 't'
-    conv = lambda s: s.replace('i', 'j')
     raw_data = np.loadtxt(
-        filename, dtype=dtype, comments='%', converters=conv, encoding=None,
-        delimiter=delimiter)
+        filename, dtype=dtype, comments='%', delimiter=delimiter,
+        converters=lambda s: s.replace('i', 'j'), encoding=None)
     # reshape (needed in case raw_data is 1D)
     raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
 
+    # Define pattern for regular expressions, see test files for examples
+    exp_pattern = r'([\w\/\^_.]+) \('
+    domain_pattern = domain_str + r'=([0-9.]+)'
+    value_pattern = r'=([0-9.]+)'
+
+    expressions_header = np.array(re.findall(exp_pattern, header))
+    domain_header = np.array(
+        [float(x) for x in re.findall(domain_pattern, header)])
+    parameter_header = dict()
+    parameters_out = dict()
+    shape = [n_nodes, len(expressions), 1]
+    new_shape = [n_nodes, len(expressions)]
+    for search_key in parameters:
+        parameter_header[search_key] = np.array(
+            [float(x) for x in re.findall(search_key+value_pattern, header)])
+        parameters_out[search_key] \
+            = parameter_header[search_key][::n_expressions*len(domain_data)]
+        shape[-1] *= len(parameters[search_key])
+        new_shape.append(len(parameters[search_key]))
+    shape.append(len(domain_data))
+    new_shape.append(len(domain_data))
+
+    #
+    pairs = np.meshgrid(*[x for x in parameters.values()])
+    parameters_pairs = parameters.copy()
+    for idx, key in enumerate(parameters):
+        parameters_pairs[key] = np.transpose(pairs[idx]).flatten()
+
     # restructure data -> out a
     data_expressions = raw_data[:, n_dimension:]
-    order_domain = _remove_neighbored_duplicates(
-        re.findall(domain_str + r'=([0-9.]+)', header))
-    length_list = [len(order_domain)]
-    dimension_list = [len(domain_data)]
-    for para_name in parameters:
-        a = _remove_neighbored_duplicates(
-            re.findall(para_name + r'=([0-9.]+)', header))
-        length_list.append(len(a))
-        dimension_list.append(len(parameters[para_name]))
-    indexes = np.argsort(length_list)
-    new_shape = [n_nodes]
-    new_indexes = []
-    for i in indexes:
-        new_shape.append(dimension_list[i])
-        new_indexes.append(i+1)
-    new_shape.append(n_expressions)
-    a = new_indexes.pop(-1)
-    new_indexes.insert(0, a)
-    new_indexes.append(0)
-    data_expressions_shape = np.reshape(data_expressions, new_shape)
+    data_out = np.zeros(shape, dtype=dtype)
+    for parameters_idx in range(shape[2]):
+        for i_expression, search_expression in enumerate(expressions):
+            for i_domain, search_domain_value in enumerate(domain_data):
+                expression_idxes = expressions_header == search_expression
+                domain_idxes = domain_header == search_domain_value
+                parameter_idxes = np.array(domain_idxes | True)
+                for key in parameters:
+                    parameter_idxes &= (parameter_header[key] == parameters_pairs[key][parameters_idx])
+                idxes = parameter_idxes & domain_idxes & expression_idxes
+                data_out[:, i_expression, parameters_idx, i_domain] \
+                    = data_expressions[:, idxes].flatten()
 
-    # put into right dimensions
-    switches = []
-    sorting_indexes = list(new_indexes)
-    for i in reversed(range(len(new_indexes))):
-        if sorting_indexes[i] != i:
-            idx = sorting_indexes.index(i)
-            sorting_indexes[idx] = sorting_indexes[i]
-            sorting_indexes[i] = i
-            switches.append([i+1, idx+1])
-    data_raw = data_expressions_shape
-    for idxes in switches:
-        data_raw = np.swapaxes(data_raw, idxes[0], idxes[1])
-
-    # remove unwanted expressions
-    if expressions is not None:
-        indexes = [all_expressions.index(exp) for exp in expressions]
-        indexes_remove = list(range(len(all_expressions)))
-        [indexes_remove.remove(i) for i in sorted(indexes, reverse=True)]
-        for i in sorted(indexes_remove, reverse=True):
-            data_raw = np.delete(data_raw, i, 1)
+    if np.prod(shape) == np.prod(new_shape):
+        data_out = np.reshape(data_out, new_shape)
 
     # create object
     comment = ', '.join(
         ' '.join(x) for x in zip(all_expressions, units))
     if domain == 'freq':
         data = FrequencyData(
-            data_raw, domain_data, dtype=dtype,
+            data_out, domain_data, dtype=dtype,
             comment=comment)
     else:
         data = TimeData(
-            data_raw, domain_data, comment=comment)
+            data_out, domain_data, comment=comment)
 
     # read coordinates
     if n_dimension > 0:
@@ -670,7 +677,7 @@ def read_comsol_header(filename):
     param_unit_pattern = r'=[0-9.]+([a-zA-Z]+)'
 
     # read expressions
-    expressions_with_unit = re.findall(exp_unit_pattern , header)
+    expressions_with_unit = re.findall(exp_unit_pattern, header)
     expressions_all = re.findall(exp_pattern, ';'.join(expressions_with_unit))
     expressions = _unique_strings(expressions_all)
     # read corresponding units
