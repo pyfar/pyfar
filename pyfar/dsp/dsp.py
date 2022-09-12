@@ -549,7 +549,7 @@ def kaiser_window_beta(A):
 
     References
     ----------
-    .. [#]  A. V.  and R. W. Schafer, Discrete-time signal processing,
+    .. [#]  A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
             Third edition, Upper Saddle, Pearson, 2010.
     """
     A = np.abs(A)
