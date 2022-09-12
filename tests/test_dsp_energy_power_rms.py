@@ -31,14 +31,3 @@ def test_multichannel_signals():
     assert np.all(pf.dsp.energy(signal) == np.ones((2, 3, 3))*100)
     assert np.all(pf.dsp.power(signal) == np.ones((2, 3, 3)))
     assert np.all(pf.dsp.rms(signal) == np.sqrt(np.ones((2, 3, 3))))
-
-
-def test_keepdims_broadcasting():
-    # Test returned data shape of a multichannel Signal
-    data = np.ones((2, 3, 3, 100))
-    signal = pf.Signal(data, 44100)
-    signal_keepdims_F = pf.dsp.energy(signal, keepdims=False)
-    signal_keepdims_T = pf.dsp.energy(signal, keepdims=True)
-    assert signal_keepdims_F.shape == signal.cshape
-    signal_keepdims_T * signal.time
-    signal_keepdims_T * signal.freq

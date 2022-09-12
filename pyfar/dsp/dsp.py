@@ -549,7 +549,7 @@ def kaiser_window_beta(A):
 
     References
     ----------
-    .. [#]  A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
+    .. [#]  A. V.  and R. W. Schafer, Discrete-time signal processing,
             Third edition, Upper Saddle, Pearson, 2010.
     """
     A = np.abs(A)
@@ -1500,28 +1500,21 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def energy(signal, keepdims=False):
+def energy(signal):
     r"""
-    Compute the energy of a signal.
-
-    According to the Parseval's theorem [#]_ the energy is
+    Computes the channel wise energy in the time domain
 
     .. math::
 
         \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
 
-    The function calculates the energy from the time data for each channel
-    separately.
+    , which is equivalent to the frequency domain computation according to
+    Parseval's theorem [#]_.
 
     Parameters
     ----------
     signal : Signal
         The signal to compute the energy from.
-    keepdims : bool, optional
-        If ``False``, the shape of the returned array equals ``signal.cshape``.
-        If ``True``, an axis will be appended, so it's broadcastable to the
-        shape of ``signal.time`` and ``signal.freq``.
-        The default is ``False``.
 
     Returns
     -------
@@ -1537,21 +1530,18 @@ def energy(signal, keepdims=False):
 
     References
     -----------
-    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
-           Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
+           (Upper Saddle et al., Pearson, 2010), Third edition.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
-    # cumpute energy data
-    data = np.sum(signal.time**2, axis=-1)
-    if keepdims:
-        data = data[..., None]
-    return data
+    # return and compute data
+    return np.sum(signal.time**2, axis=-1)
 
 
-def power(signal, keepdims=False):
+def power(signal):
     r"""
     Compute the power of a signal.
 
@@ -1567,11 +1557,6 @@ def power(signal, keepdims=False):
     ----------
     signal : Signal
         The signal to compute the power from.
-    keepdims : bool, optional
-        If ``False``, the shape of the returned array equals ``signal.cshape``.
-        If ``True``, an axis will be appended, so it's broadcastable to the
-        shape of ``signal.time`` and ``signal.freq``.
-        The default is ``False``.
 
     Returns
     -------
@@ -1590,14 +1575,11 @@ def power(signal, keepdims=False):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
-    # cumpute power data
-    data = np.sum(signal.time**2, axis=-1)/signal.n_samples
-    if keepdims:
-        data = data[..., None]
-    return data
+    # return and compute data
+    return np.sum(signal.time**2, axis=-1)/signal.n_samples
 
 
-def rms(signal, keepdims=False):
+def rms(signal):
     r"""
     Compute the root mean square (RMS) of a signal.
 
@@ -1613,11 +1595,6 @@ def rms(signal, keepdims=False):
     ----------
     signal : Signal
         The signal to compute the RMS from.
-    keepdims : bool, optional
-        If ``False``, the shape of the returned array equals ``signal.cshape``.
-        If ``True``, an axis will be appended, so it's broadcastable to the
-        shape of ``signal.time`` and ``signal.freq``.
-        The default is ``False``.
 
     Returns
     -------
@@ -1634,8 +1611,5 @@ def rms(signal, keepdims=False):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
-    # cumpute rms data
-    data = np.sqrt(np.sum(signal.time**2, axis=-1)/signal.n_samples)
-    if keepdims:
-        data = data[..., None]
-    return data
+    # return and compute data
+    return np.sqrt(power(signal))
