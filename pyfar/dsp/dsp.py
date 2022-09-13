@@ -1500,8 +1500,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
-            weights=None):
+def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     """
     Average multichannel Signals.
 
@@ -1519,11 +1518,12 @@ def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
             if the data is not aligned across channels.
         ``'magnitude_zerophase'``
             average the magnitude spectra and discard the phase
-            (see `phase_copy`)
+        ``'magnitude_phase'``
+            average the magnitude spectra and keep the phase
         ``'power'``
-            average the power spectra $|X|^2$ and discard the phase. The
-            squaring of the spectra is reversed before returning the averaged
-            signal.
+            average the power spectra $|X|^2$ and discard the phase(zerophase).
+            The squaring of the spectra is reversed before returning the
+            averaged signal.
         ``'log_magnitude_zerophase'``
             average the log. magnitude spectra $20 \\log_{10}(X)$ and discard
             the phase. The logarithm is reversed before returning the averaged
@@ -1543,11 +1543,6 @@ def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
         domain data after summing up got more then two dimensions, the data
         will be also squeezed to the shape of axis.
         The default is ``False``.
-    phase_copy: tuple
-        Some averaging modes discard the phase in which case the phase from
-        a channel before averaging can be copied to the averaged signal. Pass
-        the channel index as a tuple with as many elements as
-        ``signal.cshape``. The default ``None`` returns a zero-phase signal.
     weights: array like
         array that gives channel weights for averaging the data. Must be of
         shape which can be breadcasted to ``signal.cshape``.
@@ -1574,12 +1569,16 @@ def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
         raise ValueError('The maximum of axis needs to be smaller then '
                          'len(signal.cshape).')
 
+    # set axis default 
     if axis is None:
-        axis = (0, len(signal.cshape))
+        axis = tuple([i for i in range(len((signal.cshape)))])
 
     # set weights default
     if weights is None:
-        weights = 1/(np.prod(signal.cshape))
+        weights = 1
+        for idx, size in enumerate(signal.cshape):
+            if idx in axis:
+                weights /= signal.cshape[idx]
     # apply weights
     signal *= weights
 
@@ -1593,7 +1592,8 @@ def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
     elif mode == 'magnitude_zerophase':
         data = np.abs(signal.freq)
     elif mode == 'magnitude_phase':
-        pass  # guck smooth_fractional_octave --> ??
+        data = np.abs(signal.freq) * \
+               np.exp(1j*pyfar.dsp.phase(signal, unwrap=True))
     elif mode == 'power':
         data = np.abs(signal.freq)**2
     elif mode == 'log_magnitude_zerophase':
@@ -1606,26 +1606,10 @@ def average(signal, mode='time', axis=None, keepdims=False, phase_copy=None,
             )
     # average the data
     data = np.sum(data, axis=axis, keepdims=keepdims)
-    # This doesnt work yet -->
-    if not keepdims and data.ndim > 2:
-        np.squeeze(data, axis)
     if mode == 'power':
         data = np.sqrt(data)
     elif mode == 'log_magnitude_zerophase':
         data = 10**(data/log_prefix)
-    # phase handling
-    if phase_copy is None:
-        pass
-    else:
-        if mode == 'time':
-            data_ang = signal.time
-            # NOT SURE IF THIS COPPIES PHASE_COPY INDEX IN CORRECTLY
-            data_ang = np.angle(data_ang[phase_copy, ...])
-        else:
-            data_ang = signal.freq
-            data_ang = np.angle(data_ang[phase_copy, ...])
-
-        data = data * np.exp(1j * data_ang)
 
     # input data into averaged_signal
     averaged_signal = signal.copy()
