@@ -1545,7 +1545,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         The default is ``False``.
     weights: array like
         array that gives channel weights for averaging the data. Must be of
-        shape which can be breadcasted to ``signal.cshape``.
+        shape which can be broadcasted to ``signal.cshape``.
         The default is ``None``, which applies equal weights to all channels.
     Returns
     --------
@@ -1556,20 +1556,31 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     -----
     The functions :py:func:`~pyfar.dsp.linear_phase` and
     :py:func:`~pyfar.dsp.minimum_phase` can be used to obtain non-zero phase
-    responses. This can be usefull if the average mode discards the phase and
-    the paramter `phase_copy` can not be used.
+    responses. This can be usefull if the average mode discards the phase.
     """
 
     # check input
-    if not isinstance(signal, pyfar.Signal):
-        raise TypeError('Input data has to be of type: Signal')
-
+    if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
+                               pyfar.TimeData)):
+        raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
+                         "or 'FrequencyData'."))
+    if type(signal) == pyfar.FrequencyData and mode == 'time':
+        raise ValueError((
+            f"mode is '{mode}' and signal is type '{signal.__class__}'"
+            " but must be of type 'Signal' or 'TimeData'."))
+    if type(signal) == pyfar.TimeData and mode in ('log_magnitude_zerophase',
+                                                   'magnitude_zerophase',
+                                                   'magnitude_phase', 'power',
+                                                   'complex'):
+        raise ValueError((
+            f"mode is '{mode}' and signal is type '{signal.__class__}'"
+            " but must be of type 'Signal' or 'FrequencyData'."))
     # check for axis
     if axis and np.max(axis) > len(signal.cshape):
         raise ValueError('The maximum of axis needs to be smaller then '
                          'len(signal.cshape).')
 
-    # set axis default 
+    # set axis default
     if axis is None:
         axis = tuple([i for i in range(len((signal.cshape)))])
 
@@ -1601,8 +1612,8 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
                                              prefix_return=True)
     else:
         raise ValueError(
-            """mode must be 'time', 'complex', 'magnitude_zerophase', 'power'
-            or 'log_magnitude_zerophase'."""
+            """mode must be 'time', 'complex', 'magnitude_zerophase', 'power',
+            'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
     # average the data
     data = np.sum(data, axis=axis, keepdims=keepdims)
