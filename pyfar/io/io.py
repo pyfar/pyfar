@@ -602,7 +602,7 @@ def read_comsol(filename, expressions=None, parameters=None):
         parameters_pairs[key] = np.transpose(pairs[idx]).flatten()
 
     # loop over all data and write it into final shape
-    data_expressions = raw_data[:, n_dimension:]
+    data_expressions = raw_data[:, -n_entries:]
     data_out = np.empty(shape, dtype=dtype)
     data_out[:] = np.nan
     data_inconsistent = False
