@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+import warnings
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -1583,7 +1584,10 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     # set axis default
     if axis is None:
         axis = tuple([i for i in range(len((signal.cshape)))])
-
+    if 1 in signal.cshape:
+        for i, ax in enumerate(axis):
+            if signal.cshape[ax] == 1:
+                warnings.warn("Sinnvolles Warning")
     # set weights default
     if weights is None:
         weights = 1
