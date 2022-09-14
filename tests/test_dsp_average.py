@@ -33,3 +33,6 @@ def test_error_raises():
     with pytest.raises(ValueError,
                        match="mode must be 'time', 'complex',"):
         pf.dsp.average(signal, mode='invalid_mode')
+    with pytest.warns(Warning,
+                      match="Sinnvolles Warning"):
+        pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), axis=(1, 2))
