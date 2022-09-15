@@ -612,11 +612,11 @@ def test_matrix_multiplication_TimeData():
 
 def test_matrix_multiplication_FrequencyData():
     """Test @ operator for FrequencyData"""
-    times = np.arange(10)
+    freqs = np.arange(10)
     xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
     ydata = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
-    x = pf.FrequencyData(xdata, times)
-    y = pf.FrequencyData(ydata, times)
+    x = pf.FrequencyData(xdata, freqs)
+    y = pf.FrequencyData(ydata, freqs)
     z = x @ y
     desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
     npt.assert_allclose(z.freq, desired, atol=1e-15)
@@ -624,6 +624,19 @@ def test_matrix_multiplication_FrequencyData():
     desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
         * np.ones((3, 3, 10))
     npt.assert_allclose(z.freq, desired, atol=1e-15)
+
+
+def test_matrix_multiplication_frequency_axis():
+    """Test frequency dependent matrix explicitly"""
+    freqs = np.arange(3)
+    xdata = np.array([[[1, 2, 3], [4, 5, 6]]])
+    ydata = np.array([[[1, 2, 3]], [[4, 5, 6]]])
+    x = pf.FrequencyData(xdata, freqs)
+    y = pf.FrequencyData(ydata, freqs)
+    z = x @ y
+    desired = np.array([[[17, 29, 45]]])
+    npt.assert_allclose(z.freq, desired, atol=1e-15)
+    assert isinstance(z, pf.FrequencyData)
 
 
 def test_matrix_multiplication_signal_times_array():
@@ -738,7 +751,7 @@ def test_matrix_multiplication_array_mismatch_errors():
 
 
 def test_matrix_multiplication_undocumented():
-    """Test errors for multiplication of signal with array"""
+    """Test undesired, but not restricted multiplication along time axis"""
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
     pf.matrix_multiplication(

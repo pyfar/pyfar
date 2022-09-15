@@ -1100,9 +1100,8 @@ def matrix_multiplication(
 
     The multiplication is based on ``numpy.matmul`` and acts on the channels
     of audio objects (:py:func:`Signal`, :py:func:`TimeData`, and
-    :py:func:`FrequencyData`), so the same operation is applied to all
-    samples or frequency bins. For frequency domain matrix multiplications with
-    the default parameters the ``@`` operator can be used.
+    :py:func:`FrequencyData`). Alternatively, the ``@`` operator can be used
+    for frequency domain matrix multiplications with the default parameters.
 
     Parameters
     ----------
@@ -1111,8 +1110,11 @@ def matrix_multiplication(
         If multiple audio objects are passed they must be of the same type and
         their FFT normalizations must allow the multiplication (see
         :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
-        and notes below). Information on the requirements regarding the shapes
-        and cshapes and their handling is also given in the notes below.
+        and notes below).
+        If audio objects and arrays are included, the arrays' shape need
+        to match the audio objects' cshape (not the shape of the underlying
+        time or frequency data). More Information on the requirements regarding
+        the shapes and cshapes and their handling is given in the notes below.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
         frequency domain. Frequency domain operations work on the raw
@@ -1147,6 +1149,11 @@ def matrix_multiplication(
 
     Notes
     -----
+    Matrix muliplitcation of arrays including a time of frequency dependent
+    dimension is possible by first converting these audio objects
+    (:py:func:`Signal`, :py:func:`TimeData`, :py:func:`FrequencyData`).
+    See example below.
+
     Audio objects with a one dimensional cshape are expanded to allow matrix
     multiplication:
 
@@ -1181,6 +1188,17 @@ def matrix_multiplication(
     (2, 4)
     >>> (a @ b).cshape
     (2, 4)
+
+    Matrix multiplication of signal with a frequency dependent matrix
+    requires to convert the matrix into a Signal object first.
+
+    >>> x = pf.signals.impulse(10, amplitude=np.ones((3, 1)))
+    >>> M = np.ones((2, 3, x.n_bins)) * x.frequencies
+    >>> # convert to Signal
+    >>> Ms = pf.Signal(M, x.sampling_rate, domain='freq')
+    >>> # pf.matrix_multiplication((M, x)) raises an error
+    >>> pf.matrix_multiplication((Ms, x)).cshape
+    (2, 1)
 
     Matrix multiplication of three-dimensional signals. The third dimension
     needs to match or it is broadcasted (per default this refers to axis 0).
