@@ -8,15 +8,16 @@ import pyfar as pf
     pf.signals.files.castanets,
     pf.signals.files.drums,
     pf.signals.files.guitar,
-    pf.signals.files.rir,
-    pf.signals.files.hpirs
+    pf.signals.files.binaural_room_impulse_response,
+    pf.signals.files.room_impulse_response,
+    pf.signals.files.headphone_impulse_responses
 ])
 @pytest.mark.parametrize('sampling_rate', (44100, 48000))
 def test_files(function, sampling_rate):
     """Test all files that only have the sampling rate as parameter"""
 
     # load data
-    signal = function(sampling_rate)
+    signal = function(sampling_rate=sampling_rate)
     # assert type and sampling rate
     assert isinstance(signal, pf.Signal)
     assert signal.sampling_rate == sampling_rate
@@ -59,7 +60,7 @@ def test_hrirs_position(position, convention, first, second):
     """Test `position` argument"""
 
     # get the data
-    hrirs, sources = pf.signals.files.hrirs(position)
+    hrirs, sources = pf.signals.files.head_related_impulse_responses(position)
 
     # test hrirs
     assert hrirs.cshape == (len(first), 2)
@@ -72,8 +73,10 @@ def test_hrirs_position(position, convention, first, second):
 
 def test_hrirs_diffuse_field_compensation():
     """Test diffuse field compensation for HRIRs"""
-    hrirs, _ = pf.signals.files.hrirs(diffuse_field_compensation=False)
-    dtfs, _ = pf.signals.files.hrirs(diffuse_field_compensation=True)
+    hrirs, _ = pf.signals.files.head_related_impulse_responses(
+        diffuse_field_compensation=False)
+    dtfs, _ = pf.signals.files.head_related_impulse_responses(
+        diffuse_field_compensation=True)
 
     # HRIRs must contain more energy
     assert np.all(np.sum(hrirs.time**2, -1) - np.sum(dtfs.time**2, -1) > 0)
@@ -87,11 +90,12 @@ def test_hrirs_diffuse_field_compensation():
 def test_hrirs_sampling_rate(sampling_rate):
     """Test getting HRIRs in different sampling rates"""
 
-    hrirs, _ = pf.signals.files.hrirs(sampling_rate=sampling_rate)
+    hrirs, _ = pf.signals.files.head_related_impulse_responses(
+        sampling_rate=sampling_rate)
     assert hrirs.sampling_rate == sampling_rate
 
 
 def test_hrirs_assertions():
     """Test assertions for getting HRIRs"""
     with pytest.raises(ValueError, match="HRIR for azimuth=1"):
-        pf.signals.files.hrirs([[1, 0]])
+        pf.signals.files.head_related_impulse_responses([[1, 0]])

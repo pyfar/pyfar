@@ -62,12 +62,12 @@ def castanets(sampling_rate=44100):
     # download files if requires
     files = _load_files('castanets')
 
-    # load brir
+    # load castanets
     castanets = pf.io.read_audio(os.path.join(file_dir, files[0]))
 
     castanets.fft_norm = "rms"
 
-    # resample brir
+    # resample castanets
     if sampling_rate != 44100:
         castanets = pf.dsp.resample(castanets, sampling_rate, post_filter=True)
 
@@ -102,14 +102,14 @@ def drums(sampling_rate=48000):
     # download files if requires
     files = _load_files('drums')
 
-    # load brir
+    # load drums
     drums = pf.io.read_audio(os.path.join(file_dir, files[0]))
     drums.fft_norm = "rms"
 
     # level to make sure all contents have approximately the same loudness
     drums.time *= .9
 
-    # resample brir
+    # resample drums
     if sampling_rate != 48000:
         drums = pf.dsp.resample(drums, sampling_rate, post_filter=True)
 
@@ -150,14 +150,14 @@ def guitar(sampling_rate=48000):
     # download files if requires
     files = _load_files('guitar')
 
-    # load brir
+    # load guitar
     guitar = pf.io.read_audio(os.path.join(file_dir, files[0]))
     guitar.fft_norm = "rms"
 
     # level to make sure all contents have approximately the same loudness
     guitar.time *= .6
 
-    # resample brir
+    # resample guitar
     if sampling_rate != 48000:
         guitar = pf.dsp.resample(guitar, sampling_rate, post_filter=True)
 
@@ -203,7 +203,7 @@ def speech(voice="female", sampling_rate=44100):
     # download files if requires
     files = _load_files('speech')
 
-    # load brir
+    # load speech
     file = files[0] if voice == "female" else files[1]
     speech = pf.io.read_audio(os.path.join(file_dir, file))
     speech.fft_norm = "rms"
@@ -212,21 +212,22 @@ def speech(voice="female", sampling_rate=44100):
     gain = 0.5 if voice == "female" else 0.3
     speech.time *= gain
 
-    # resample brir
+    # resample speech
     if sampling_rate != 44100:
         speech = pf.dsp.resample(speech, sampling_rate, post_filter=True)
 
     return speech
 
 
-def brir(diffuse_field_compensation=False, sampling_rate=48000):
+def binaural_room_impulse_response(
+        diffuse_field_compensation=False, sampling_rate=48000):
     """
     Get a binaural room impulse response (BRIR).
 
     The BRIR was recorded with the FABIAN head and torso simulator in the
     Berliner Philharmonie [#]_ (Emitter 17). The head of FABIAN was rotated
     25 degree to the right. For more information see [#]_. A matching room
-    impulse response can be obtained by :py:func:`~rir`.
+    impulse response can be obtained by :py:func:`~room_impulse_response`.
 
     .. note ::
 
@@ -239,7 +240,8 @@ def brir(diffuse_field_compensation=False, sampling_rate=48000):
         Apply a diffuse field compensation to the BRIR. This can be used as a
         simple headphone compensation filter when listening to the BRIR. The
         default is ``False``, which does not apply the compensation. The
-        diffuse field compensation is taken from :py:func:`~hrirs`
+        diffuse field compensation is taken from
+        :py:func:`~head_related_impulse_responses`
     sampling_rate : int, optional
         The sampling rate of the BRIR in Hz. The default of ``48000`` uses the
         BRIR as it is, any other value uses :py:func:`~pyfar.dsp.resample`
@@ -261,9 +263,9 @@ def brir(diffuse_field_compensation=False, sampling_rate=48000):
     """
 
     # download files if requires
-    files = _load_files('brir')
+    files = _load_files('binaural_room_impulse_response')
     if diffuse_field_compensation:
-        files_2 = _load_files('hrirs')
+        files_2 = _load_files('head_related_impulse_responses')
 
     # load brir
     brir = pf.io.read_audio(os.path.join(file_dir, files[0]))
@@ -283,7 +285,7 @@ def brir(diffuse_field_compensation=False, sampling_rate=48000):
     return brir
 
 
-def hpirs(sampling_rate=44100):
+def headphone_impulse_responses(sampling_rate=44100):
     """
     Get Headphone Impulse Responses (HpIRs).
 
@@ -314,7 +316,7 @@ def hpirs(sampling_rate=44100):
     """
 
     # download files if requires
-    files = _load_files('hpirs')
+    files = _load_files('headphone_impulse_responses')
 
     # load HRIRs
     hpirs, *_ = pf.io.read_sofa(os.path.join(file_dir, files[0]))
@@ -325,8 +327,9 @@ def hpirs(sampling_rate=44100):
     return hpirs
 
 
-def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
-          sampling_rate=44100):
+def head_related_impulse_responses(
+        position=[[0, 0]], diffuse_field_compensation=False,
+        sampling_rate=44100):
     """
     Get HRIRs for specified source positions and sampling rate.
 
@@ -381,7 +384,7 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
     """
 
     # download files if requires
-    files = _load_files('hrirs')
+    files = _load_files('head_related_impulse_responses')
 
     # load HRIRs
     hrirs, sources, _ = pf.io.read_sofa(os.path.join(file_dir, files[0]))
@@ -428,7 +431,7 @@ def hrirs(position=[[0, 0]], diffuse_field_compensation=False,
     return hrirs, sources
 
 
-def rir(sampling_rate=48000):
+def room_impulse_response(sampling_rate=48000):
     """
     Get a room impulse response (RIR).
 
@@ -445,14 +448,14 @@ def rir(sampling_rate=48000):
     Parameters
     ----------
     sample_rate : int, optional
-        The sampling rate of the BRIR in Hz. The default of ``48000`` uses the
-        BRIR as it is, any other value uses :py:func:`~pyfar.dsp.resample`
+        The sampling rate of the RIR in Hz. The default of ``48000`` uses the
+        RIR as it is, any other value uses :py:func:`~pyfar.dsp.resample`
         for resampling to the desired sampling rate.
 
     Returns
     -------
     rir : Signal
-        The BRIR
+        The RIR
 
     References
     ----------
@@ -465,12 +468,12 @@ def rir(sampling_rate=48000):
     """
 
     # download files if requires
-    files = _load_files('rir')
+    files = _load_files('room_impulse_response')
 
-    # load brir
+    # load rir
     rir = pf.io.read_audio(os.path.join(file_dir, files[0]))
 
-    # resample brir
+    # resample rir
     if sampling_rate != 48000:
         rir = pf.dsp.resample(rir, sampling_rate, post_filter=True)
 
@@ -481,12 +484,15 @@ def _load_files(data):
     """Download files from Audio Communication Server if they do not exist."""
 
     # set the filenames
-    if data in ['brir', 'castanets', 'drums', 'guitar', 'rir']:
+    if data in ['binaural_room_impulse_response', 'castanets', 'drums',
+                'guitar', 'room_impulse_response']:
         files = (f'{data}.wav', )
-    elif data == 'hpirs':
-        files = ('hpirs.sofa', )
-    elif data == 'hrirs':
-        files = ('hrirs.sofa', 'hrirs_ctf_inverted_smoothed.sofa', 'hrirs.py')
+    elif data == 'headphone_impulse_responses':
+        files = ('headphone_impulse_responses.sofa', )
+    elif data == 'head_related_impulse_responses':
+        files = ('head_related_impulse_responses.sofa',
+                 'head_related_impulse_responses_ctf_inverted_smoothed.sofa',
+                 'head_related_impulse_responses.py')
     elif data == 'speech':
         files = ('speech_female.wav', 'speech_male.wav')
     else:
