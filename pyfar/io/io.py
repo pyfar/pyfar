@@ -487,7 +487,7 @@ def read_comsol(filename, expressions=None, parameters=None):
         the parameters, which sould be extracted from the comsol file. An
         example can be like
         ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
-        A list of all expressions can be obtained with 
+        A list of all expressions can be obtained with
         :py:func:`~pyfar.io.comsol_read_header`. Default is None, then all
         parameters are read.
 
