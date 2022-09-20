@@ -155,7 +155,6 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.7"
                 - "3.8"
                 - "3.9"
                 - "3.10"
@@ -192,7 +191,6 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.7"
                 - "3.8"
                 - "3.9"
                 - "3.10"
