@@ -7,24 +7,24 @@ import numpy as np
 
 @pytest.mark.parametrize('reference_method,channel_handling,truth', (
     ['max', 'max', [0.2, 1.0]],
-    ['max', 'each', [1.0, 1.0]],
+    ['max', 'individual', [1.0, 1.0]],
     ['max', 'min', [1.0, 5.0]],
     ['max', 'mean', [1/3, 5/3]],
     ['mean', 'max', [0.6, 3.0]],
-    ['mean', 'each', [3.0, 3.0]],
+    ['mean', 'individual', [3.0, 3.0]],
     ['mean', 'min', [3.0, 15.0]],
     ['mean', 'mean', [1.0, 5.0]],
     ['rms', 'max', [1*np.sqrt(3/5**2), 5*np.sqrt(3/5**2)]],
-    ['rms', 'each', [1*np.sqrt(3/1**2), 5*np.sqrt(3/5**2)]],
+    ['rms', 'individual', [1*np.sqrt(3/1**2), 5*np.sqrt(3/5**2)]],
     ['rms', 'min', [1*np.sqrt(3/1**2), 5*np.sqrt(3/1**2)]],
     ['rms', 'mean', [2/(np.sqrt(1/3)+np.sqrt(25/3)),
                      2*5/(np.sqrt(1/3)+np.sqrt(25/3))]],
     ['power', 'max', [1*3/5**2, 5*3/5**2]],
-    ['power', 'each', [1*3/1**2, 5*3/5**2]],
+    ['power', 'individual', [1*3/1**2, 5*3/5**2]],
     ['power', 'min', [1*3/1**2, 5*3/1**2]],
     ['power', 'mean', [1*3/((1**2+5**2)/2), 5*3/((1**2+5**2)/2)]],
     ['energy', 'max', [1/5**2, 5/5**2]],
-    ['energy', 'each', [1/1**2, 5/5**2]],
+    ['energy', 'individual', [1/1**2, 5/5**2]],
     ['energy', 'min', [1/1**2, 5/1**2]],
     ['energy', 'mean', [1/((1**2+5**2)/2), 5/((1**2+5**2)/2)]]))
 def test_normalization(reference_method, channel_handling, truth):
@@ -121,7 +121,7 @@ def test_error_raises():
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          reference_method='invalid_reference_method')
 
-    with raises(ValueError, match=("channel_handling must be 'each', ")):
+    with raises(ValueError, match=("channel_handling must be 'individual', ")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          channel_handling='invalid')
     with raises(ValueError, match=("limits must be an array like")):

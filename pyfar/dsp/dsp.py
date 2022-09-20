@@ -1642,7 +1642,7 @@ def rms(signal, keepdims=False):
 
 
 def normalize(signal, reference_method='max', domain='time',
-              channel_handling='each', target=1, limits=(None, None),
+              channel_handling='individual', target=1, limits=(None, None),
               unit=None, return_reference=False):
     """
     Apply a normalization.
@@ -1695,8 +1695,8 @@ def normalize(signal, reference_method='max', domain='time',
         Define how channel-wise `reference` values are handeled for multi-
         channel signals. This parameter does not affect single-channel signals.
 
-        ``'each'``
-            Separate normalization of each individual channel.
+        ``'individual'``
+            Separate normalization of each channel individually.
         ``'max'``
             Normalize to the maximum `reference` value across channels.
         ``'min'``
@@ -1704,7 +1704,7 @@ def normalize(signal, reference_method='max', domain='time',
         ``'mean'``
             Normalize to the mean `reference` value across the channels.
 
-       The default is ``'each'``.
+       The default is ``'individual'``.
     target: scalar, array
         The target to which the signal is normalized. Can be a scalar or an
         array. In the latter case the shape of `target` must be broadcastable
@@ -1837,7 +1837,7 @@ def normalize(signal, reference_method='max', domain='time',
         raise ValueError("reference_method must be 'max', 'mean', 'power', "
                          "'energy' or 'rms'.")
     # Channel Handling
-    if channel_handling == 'each':
+    if channel_handling == 'individual':
         reference_norm = reference.copy()
     elif channel_handling == 'max':
         reference_norm = np.max(reference)
@@ -1847,7 +1847,7 @@ def normalize(signal, reference_method='max', domain='time',
         reference_norm = np.mean(reference)
     else:
         raise ValueError(
-                    "channel_handling must be 'each', 'max', 'min' or 'mean'")
+                    "channel_handling must be 'individual', 'max', 'min' or")
     # apply normalization
     normalized_signal = signal.copy() * target / reference_norm
     if return_reference:
