@@ -544,22 +544,28 @@ def read_comsol(filename, expressions=None, parameters=None):
 
     Examples
     --------
-    Returns all expressions
     >>> import pyfar as pf
-    >>> expressions, expressions_unit, parameters, domain, domain_data \
-    >>>     = io.read_comsol_header('my_comsol_data.csv')
-    >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv')
-
-    Returns only the first expression
-    >>> import pyfar as pf
-    >>> expressions, expressions_unit, parameters, domain, domain_data = pf.io.read_comsol_header('my_comsol_data.csv')
-    >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv', expressions=[expressions[0]])
-
-    Returns only the first two theta value
-    >>> import pyfar as pf
-    >>> expressions, expressions_unit, parameters, domain, domain_data = pf.io.read_comsol_header('my_comsol_data.csv')
-    >>> parameters['theta'] = parameters['theta'][:2]
-    >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv', parameters=parameters)
+    >>> import os.path
+    >>> filename = os.path.join('tests', 'test_io_data', 'pressure_parametric.csv')
+    >>> path = os.path.join(os.getcwd(), '..', '..', filename)
+    >>> expressions, _, parameters, _, _ = pf.io.read_comsol_header(path)
+    >>> expressions
+    ['pabe.p_t']
+    >>> parameters
+    {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
+     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> parameters['theta'] = parameters['phi'][1:]
+    {'theta': [1.5708, 3.1416, 4.7124],
+     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> data, coordinates = pf.io.read_comsol(path, parameters=parameters)
+    >>> data
+    FrequencyData:
+    (8, 1, 3, 4) channels with 2 frequencies
+    >>> coordinates
+    1D Coordinates object with 8 points of cshape (8,)
+    domain: cart, convention: right, unit: met
+    coordinates: x in meters, y in meters, z in meters
+    Does not contain sampling weights
     """
 
     # check Datatype
@@ -643,8 +649,9 @@ def read_comsol(filename, expressions=None, parameters=None):
                     data_out[:, i_expression, parameters_idx, i_domain] \
                         = data_expressions[:, idxes].flatten()
                 else:
-                    warnings.warn(r'Parameter data is inconsistent. Missing \
-                        data is filled with nans.')
+                    if parameters == all_parameters:
+                        warnings.warn(r'Parameter data is inconsistent. \
+                            Missing data is filled with nans.')
 
     # reshape data to final shape
     data_out = np.reshape(data_out, new_shape)
@@ -662,7 +669,7 @@ def read_comsol(filename, expressions=None, parameters=None):
 
     # create coordinates
     if n_dimension > 0:
-        coords_data = raw_data[:, 0:n_dimension].astype(np.float)
+        coords_data = np.real(raw_data[:, 0:n_dimension])
         x = coords_data[:, 0]
         y = coords_data[:, 1] if coords_data.shape[1] > 1 else np.zeros(
             coords_data[:, 0].shape)
