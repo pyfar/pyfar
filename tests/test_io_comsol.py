@@ -329,3 +329,24 @@ def test_read_comsol_expressions_value(filename, type):
     assert data_exp.freq[0, 1, 1, 1, 1] == data.freq[0, 2, 1, 1, 1]
     assert data_exp.freq[0, 0, 0, 2, 1] == data.freq[0, 0, 0, 2, 1]
     assert data_exp.freq[0, 1, 0, 2, 1] == data.freq[0, 2, 0, 2, 1]
+
+
+@pytest.mark.parametrize("filename",  [
+    'intensity_average_specific',
+    'intensity_parametric_specific',
+    'pressure_parametric_specific',
+    ])
+@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_check_specific_combination(filename, type):
+    path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
+    expressions, _, _, _, _ = io.read_comsol_header(path + type)
+    with pytest.warns(Warning, match='inconsistent'):
+        data, coordinates = io.read_comsol(
+            path + type, expressions=[expressions[0]])
+    # For specific combinations shape of parameters need to be same
+    assert data.cshape[2] == data.cshape[3]
+    # test if the right values are nan and not nan
+    for i in range(data.cshape[2]):
+        assert all(np.isnan(data.freq[:, :, i, i, :]).flatten() == False)
+        data.freq[:, :, i, i, :] = np.nan
+    assert all(np.isnan(data.freq.flatten()))
