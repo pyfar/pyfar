@@ -38,10 +38,17 @@ class _Audio():
             raise ValueError("Incorrect domain, needs to be time/freq.")
 
         # set data and check dtype
+        data = np.atleast_2d(np.asarray(data))
         if dtype not in (None, float, complex):
             raise ValueError("dtype must be None, float, or complex")
+        elif domain == "time" and not \
+                str(data.dtype).startswith(("int", "float")):
+            raise ValueError("")
+        elif domain == "freq" and not \
+                str(data.dtype).startswith(("int", "float", "complex")):
+            raise ValueError("")
         elif dtype is None:
-            self._data = np.atleast_2d(np.asarray(data))
+            self._data = data
 
             # convert ints to float and check dtype of input
             if str(self._data.dtype).startswith("int"):
@@ -51,7 +58,7 @@ class _Audio():
                     f"data is of dtype {str(self._data.dtype)} but"
                     " must be of dtype float, complex, or int"))
         else:
-            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
+            self._data = data.astype(dtype=dtype)
 
     def __eq__(self, other):
         """Check for equality of two objects."""
@@ -240,6 +247,13 @@ class TimeData(_Audio):
     @time.setter
     def time(self, value):
         """Set the time data."""
+        # check and set the data and meta data
+        data = np.atleast_2d(np.asarray(value))
+        if str(data.dtype).startswith("int"):
+            data = data.astype("float")
+        elif not str(data.dtype).startswith("float"):
+            raise ValueError(
+                f"time data is {data.dtype}  must be int or float")
         data = np.atleast_2d(np.asarray(value, dtype=float))
         self._data = data
         self._n_samples = data.shape[-1]
