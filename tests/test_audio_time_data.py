@@ -22,6 +22,15 @@ def test_data_time_init_with_defaults():
     assert time.domain == 'time'
 
 
+def test_data_time_init_wrong_dtype():
+    """
+    Test assertion from non integer/float data (also test time setter because
+    it is called during initialization)
+    """
+    with pytest.raises(ValueError, match="time data is complex"):
+        TimeData(np.arange(2).astype(complex), [0, 1])
+
+
 def test_data_time_init_wrong_number_of_times():
     """Test if entering a wrong number of times raises an assertion."""
     data = [1, 0, -1]

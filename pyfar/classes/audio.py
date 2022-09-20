@@ -25,7 +25,7 @@ class _Audio():
     # (e.g. __rmul__)
     __array_priority__ = 1.0
 
-    def __init__(self, data, domain, comment=None, dtype=None):
+    def __init__(self, domain, comment=None):
 
         # initialize valid parameter spaces
         self._VALID_DOMAINS = ["time", "freq"]
@@ -36,29 +36,6 @@ class _Audio():
             self._domain = domain
         else:
             raise ValueError("Incorrect domain, needs to be time/freq.")
-
-        # set data and check dtype
-        data = np.atleast_2d(np.asarray(data))
-        if dtype not in (None, float, complex):
-            raise ValueError("dtype must be None, float, or complex")
-        elif domain == "time" and not \
-                str(data.dtype).startswith(("int", "float")):
-            raise ValueError("")
-        elif domain == "freq" and not \
-                str(data.dtype).startswith(("int", "float", "complex")):
-            raise ValueError("")
-        elif dtype is None:
-            self._data = data
-
-            # convert ints to float and check dtype of input
-            if str(self._data.dtype).startswith("int"):
-                self._data = self._data.astype(float)
-            elif not str(self._data.dtype).startswith(("float", "complex")):
-                raise ValueError((
-                    f"data is of dtype {str(self._data.dtype)} but"
-                    " must be of dtype float, complex, or int"))
-        else:
-            self._data = data.astype(dtype=dtype)
 
     def __eq__(self, other):
         """Check for equality of two objects."""
@@ -228,9 +205,9 @@ class TimeData(_Audio):
             A comment related to `data`. The default is ``'none'``.
         """
 
-        _Audio.__init__(self, data, 'time', comment, dtype=float)
+        _Audio.__init__(self, 'time', comment)
 
-        self._n_samples = self._data.shape[-1]
+        self.time = data
 
         self._times = np.atleast_1d(np.asarray(times).flatten())
         if self._times.size != self.n_samples:
@@ -399,16 +376,19 @@ class FrequencyData(_Audio):
 
         """
 
-        _Audio.__init__(self, data, 'freq', comment)
+        _Audio.__init__(self, 'freq', comment)
 
-        # init and check frequencies
+        # init
         freqs = np.atleast_1d(np.asarray(frequencies).flatten())
+        self._frequencies = freqs
+        self.freq = data
+
+        # check frequencies
         if np.any(np.diff(freqs) <= 0) and len(frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
         if len(freqs) != self.n_bins:
             raise ValueError(
                 "Number of frequencies does not match number of data points")
-        self._frequencies = freqs
 
     @property
     def freq(self):
@@ -424,7 +404,8 @@ class FrequencyData(_Audio):
         if str(data.dtype).startswith("int"):
             data = data.astype("float")
         elif not str(data.dtype).startswith(("float", "complex")):
-            raise ValueError("frequency data must be int, float, or complex")
+            raise ValueError((f"frequency data is {data.dtype} must be int, "
+                              "float, or complex"))
 
         # match shape of frequencies
         if self.frequencies.size != data.shape[-1]:
@@ -594,32 +575,29 @@ class Signal(FrequencyData, TimeData):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but "
                               f"found '{fft_norm}'"))
+        # time / normalized frequency data (depending on domain)
+        data = np.atleast_2d(data)
 
         # initialize domain specific parameters
         if domain == 'time':
-            self._n_samples = np.atleast_2d(data).shape[-1]
-            TimeData.__init__(self, data, self.times, comment)
+            self._n_samples = data.shape[-1]
+            times = np.atleast_1d(
+                np.arange(0, self._n_samples) / sampling_rate)
+            TimeData.__init__(self, data, times, comment)
         elif domain == 'freq':
-            # normalized frequency data
-            freq = np.atleast_2d(data)
             # check and set n_samples
             if n_samples is None:
                 warnings.warn(
                     "Number of time samples not given, assuming an even "
                     "number of samples from the number of frequency bins.")
-                n_samples = (freq.shape[-1] - 1)*2
-            elif n_samples > 2 * freq.shape[-1] - 1:
+                n_samples = (data.shape[-1] - 1)*2
+            elif n_samples > 2 * data.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
-            # raw frequency data
-            freq_raw = fft.normalization(
-                freq, self.n_samples, self.sampling_rate, self.fft_norm,
-                inverse=True)
-            self._n_bins = freq_raw.shape[-1]
+            self._n_bins = data.shape[-1]
             # Init remaining parameters
-            FrequencyData.__init__(
-                self, freq_raw.astype(complex), self.frequencies, comment)
+            FrequencyData.__init__(self, data, self.frequencies, comment)
             delattr(self, '_frequencies')
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
@@ -653,8 +631,8 @@ class Signal(FrequencyData, TimeData):
         # check data type
         data = np.atleast_2d(np.asarray(value))
         if not str(data.dtype).startswith(("int", "float", "complex")):
-            raise ValueError(
-                "data must be int, float, or complex and is casted to complex")
+            raise ValueError((f"frequency data is {data.dtype} must be int, "
+                              "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
             warnings.warn(UserWarning((
@@ -686,6 +664,9 @@ class Signal(FrequencyData, TimeData):
     def freq_raw(self, value):
         """Set the frequency domain data without normalization."""
         data = np.atleast_2d(np.asarray(value))
+        if not str(data.dtype).startswith(("int", "float", "complex")):
+            raise ValueError((f"frequency data is {data.dtype} must be int, "
+                              "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
             warnings.warn(UserWarning((
@@ -693,7 +674,7 @@ class Signal(FrequencyData, TimeData):
                 "number of samples from the number of frequency bins.")))
             self._n_samples = (data.shape[-1] - 1)*2
         self._domain = 'freq'
-        self._data = data
+        self._data = data.astype(complex)
 
     @_Audio.domain.setter
     def domain(self, new_domain):

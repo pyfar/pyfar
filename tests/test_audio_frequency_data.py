@@ -39,6 +39,29 @@ def test_data_frequency_with_non_monotonously_increasing_frequencies():
         FrequencyData(data, freqs)
 
 
+def test_data_frequency_init_dtype():
+    """
+    Test casting and assertions of dtype (also test freq setter because
+    it is called during initialization)
+    """
+
+    # integer to float casting
+    data = FrequencyData([1, 2, 3], [1, 2, 3])
+    assert data.freq.dtype.kind == "f"
+
+    # float
+    data = FrequencyData([1., 2., 3.], [1, 2, 3])
+    assert data.freq.dtype.kind == "f"
+
+    # complex
+    data = FrequencyData([1+1j, 2+2j, 3+3j], [1, 2, 3])
+    assert data.freq.dtype.kind == "c"
+
+    # object array
+    with pytest.raises(ValueError, match="frequency data is"):
+        FrequencyData(["1", "2", "3"], [1, 2, 3])
+
+
 def test_data_frequency_setter_freq():
     """Test the setter for the frequency data."""
     data_a = [1, 0, -1]
@@ -48,9 +71,6 @@ def test_data_frequency_setter_freq():
     freq = FrequencyData(data_a, freqs)
     freq.freq = data_b
     npt.assert_allclose(freq.freq, np.atleast_2d(np.asarray(data_b)))
-
-    with pytest.raises(ValueError, match="frequency data must be int, float"):
-        freq.freq = ["1", "2", "3"]
 
     with pytest.raises(ValueError, match="Number of frequency values"):
         freq.freq = 1
