@@ -1584,10 +1584,11 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     # set axis default
     if axis is None:
         axis = tuple([i for i in range(len((signal.cshape)))])
+    # check if averaging over one dimensional axis
     if 1 in signal.cshape:
         for i, ax in enumerate(axis):
             if signal.cshape[ax] == 1:
-                warnings.warn("Sinnvolles Warning")
+                warnings.warn(f"Averaging one dimensional axis={axis}.")
     # set weights default
     if weights is None:
         weights = 1
@@ -1607,8 +1608,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     elif mode == 'magnitude_zerophase':
         data = np.abs(signal.freq)
     elif mode == 'magnitude_phase':
-        data = np.abs(signal.freq) * \
-               np.exp(1j*pyfar.dsp.phase(signal, unwrap=True))
+        data = [np.abs(signal.freq), pyfar.dsp.phase(signal, unwrap=True)]
     elif mode == 'power':
         data = np.abs(signal.freq)**2
     elif mode == 'log_magnitude_zerophase':
@@ -1620,12 +1620,16 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
     # average the data
-    data = np.sum(data, axis=axis, keepdims=keepdims)
+    if mode == 'magnitude_phase':
+        data[0] = np.sum(data[0], axis=axis, keepdims=keepdims)
+        data[1] = np.sum(data[1], axis=axis, keepdims=keepdims)
+        data = data[0]*np.exp(1j*data[1])
+    else:
+        data = np.sum(data, axis=axis, keepdims=keepdims)
     if mode == 'power':
         data = np.sqrt(data)
     elif mode == 'log_magnitude_zerophase':
         data = 10**(data/log_prefix)
-
     # input data into averaged_signal
     averaged_signal = signal.copy()
     if mode == 'time':
