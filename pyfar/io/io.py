@@ -643,7 +643,8 @@ def read_comsol(filename, expressions=None, parameters=None):
                 domain_idxes = domain_header == search_domain_value
                 parameter_idxes = np.array(domain_idxes | True)
                 for key in parameters:
-                    parameter_idxes &= (parameter_header[key] == parameters_pairs[key][parameters_idx])
+                    parameter_idxes &= parameter_header[key] \
+                        == parameters_pairs[key][parameters_idx]
                 idxes = parameter_idxes & domain_idxes & expression_idxes
                 if any(idxes):
                     data_out[:, i_expression, parameters_idx, i_domain] \
