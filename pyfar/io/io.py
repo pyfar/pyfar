@@ -470,27 +470,39 @@ def read_comsol(filename, expressions=None, parameters=None):
     ----------
     filename : str, Path
         Input file. Excepted input files are '.txt', '.dat' and '.csv'. '.csv'
-        Files are strongly recommended, since .txt and .dat are inconvenient
-        in their format.
+        Files are strongly recommended, since .txt and .dat are varies in its
+        format definition.
     expressions : list[str], optional
-        This list of expressions defines the output expressions. An example
-        can be like ``expressions=['pabe.Lp_t']``. Also see
-        :py:func:`~pyfar.dsp.comsol_read_header`. By default, all expressions
-        get returned.
+        The expressions in COMSOL are the pysical property of the calculated
+        solution, e.g. total sound pressure in Pa. The expression depends on
+        the physics and have unit. Multiple expressions are possible in one
+        file. This parameter defines which parts of the COMSOL data is
+        returned as a pyfar audio object. By default, all expressions get
+        returned. An example can be like ``expressions=['pabe.Lp_t']``.
+        A list of all expressions can be obtained with
+        :py:func:`~pyfar.io.comsol_read_header`.
     parameters : dict
-        This dict contains the parameters, which sould be read. An example can
-        be like ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
-        Also see :py:func:`~pyfar.dsp.comsol_read_header`. Default is None,
-        then all parameters are read.
+        Solutions or expressions can be evalueted for different parameters,
+        such as differnet angles or other parameter. This input dict contains
+        the parameters, which sould be extracted from the comsol file. An
+        example can be like
+        ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
+        A list of all expressions can be obtained with 
+        :py:func:`~pyfar.io.comsol_read_header`. Default is None, then all
+        parameters are read.
 
     Returns
     -------
     data : Signal or FrequencyData
         Returns a Signal or FrequencyData object depending on the input data.
+        The output data always have the cshape (#nodes, #expressions,
+        #parameter1, #parameter2, ...).
     coordinates : Coordinates, optional
-        A Coordinates Object based on the Input Data. If the input dimension is
-        lower than three, the missing dimensions are set to zero. If there are
-        no positions given, this parameter will not be returned.
+        A Coordinates Object based on the Input path. The coordinate system is
+        always cartesian. If the input dimension is lower than three, the
+        missing dimensions are set to zero. If there are no positions given,
+        this parameter will not be returned. The cshape of this object is
+        (#nodes,)
 
     Raises
     ------
@@ -504,7 +516,20 @@ def read_comsol(filename, expressions=None, parameters=None):
     --------
     Returns all expressions
     >>> import pyfar as pf
+    >>> expressions, expressions_unit, parameters, domain, domain_data \
+    >>>     = io.read_comsol_header('my_comsol_data.csv')
     >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv')
+
+    Returns only the first expression
+    >>> import pyfar as pf
+    >>> expressions, expressions_unit, parameters, domain, domain_data = pf.io.read_comsol_header('my_comsol_data.csv')
+    >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv', expressions=[expressions[0]])
+
+    Returns only the first two theta value
+    >>> import pyfar as pf
+    >>> expressions, expressions_unit, parameters, domain, domain_data = pf.io.read_comsol_header('my_comsol_data.csv')
+    >>> parameters['theta'] = parameters['theta'][:2]
+    >>> data, coordinates = pf.io.read_comsol('my_comsol_data.csv', parameters=parameters)
     """
 
     # check Datatype
@@ -575,7 +600,6 @@ def read_comsol(filename, expressions=None, parameters=None):
     data_expressions = raw_data[:, -n_entries:]
     data_out = np.empty(shape, dtype=dtype)
     data_out[:] = np.nan
-    data_inconsistent = False
     for parameters_idx in range(shape[2]):
         for i_expression, search_expression in enumerate(expressions):
             for i_domain, search_domain_value in enumerate(domain_data):
@@ -589,13 +613,11 @@ def read_comsol(filename, expressions=None, parameters=None):
                     data_out[:, i_expression, parameters_idx, i_domain] \
                         = data_expressions[:, idxes].flatten()
                 else:
-                    data_inconsistent = True
                     warnings.warn(r'Parameter data is inconsistent. Missing \
                         data is filled with nans.')
 
     # reshape data to final shape
-    if not data_inconsistent:
-        data_out = np.reshape(data_out, new_shape)
+    data_out = np.reshape(data_out, new_shape)
 
     # create object
     comment = ', '.join(
@@ -628,8 +650,8 @@ def read_comsol_header(filename):
     ----------
     filename : str, Path
         Input file. Excepted input files are '.txt', '.dat' and '.csv'. '.csv'
-        Files are strongly recommended, since .txt and .dat are inconvenient
-        in their format.
+        Files are strongly recommended, since .txt and .dat are varies in its
+        format definition.
 
     Returns
     -------
