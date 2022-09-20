@@ -21,6 +21,11 @@ from .fractional_octaves import (
     fractional_octave_frequencies
 )
 
+from .gammatone import (
+    GammatoneBands,
+    erb_frequencies
+)
+
 
 __all__ = [
     'butterworth',
@@ -36,5 +41,7 @@ __all__ = [
     'low_shelve_cascade',
     'fractional_octave_bands',
     'reconstructing_fractional_octave_bands',
-    'fractional_octave_frequencies'
+    'fractional_octave_frequencies',
+    'GammatoneBands',
+    'erb_frequencies'
 ]

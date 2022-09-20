@@ -1025,8 +1025,8 @@ def _sph_extremal_load_data(orders='all'):
             with open(save_name, 'wb') as out:
                 out.write(http_data.data)
         else:
-            raise ConnectionError("Connection error. Please check your internet \
-                    connection.")
+            raise ConnectionError(
+                "Connection error. Please check your internet connection.")
 
 
 def _sph_t_design_load_data(degrees='all'):
@@ -1075,5 +1075,5 @@ def _sph_t_design_load_data(degrees='all'):
             with open(save_name, 'wb') as out:
                 out.write(http_data.data)
         else:
-            raise ConnectionError("Connection error. Please check your internet \
-                    connection.")
+            raise ConnectionError(
+                "Connection error. Please check your internet connection.")

@@ -263,6 +263,18 @@ def test_write_filterSOS(filterSOS, tmpdir):
     assert actual == filterSOS
 
 
+def test_write_gammatone_bands(tmpdir):
+    """ dsp.filter.GammatoneBands
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'gammatone_bands.far')
+    gammatone_bands = pyfar.dsp.filter.GammatoneBands((0, 22050))
+    io.write(filename, gammatone_bands=gammatone_bands)
+    actual = io.read(filename)["gammatone_bands"]
+    assert isinstance(actual, pyfar.dsp.filter.GammatoneBands)
+    assert actual == gammatone_bands
+
+
 def test_write_read_numpy_ndarrays(tmpdir):
     """ Numpy ndarray
     Make sure `read` understands the bits written by `write`

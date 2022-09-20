@@ -20,6 +20,9 @@ from unittest.mock import patch
 import pyfar as pf
 import pyfar.dsp.filter as pfilt
 
+# This defines the plot size and the backend
+from pyfar.testing.plot_utils import create_figure
+
 
 # deprecate in 0.5.0 ----------------------------------------------------------
 def test_get_nearest_deprecations():
@@ -126,11 +129,13 @@ def test_xscale_deprecation(function, handsome_signal):
 
     with pytest.warns(PendingDeprecationWarning,
                       match="The xscale parameter will be removed"):
+        create_figure()
         function(handsome_signal, xscale='linear')
 
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove xscale from pyfar 0.6.0!
+            create_figure()
             function(handsome_signal)
 
 
@@ -139,11 +144,13 @@ def test_spectrogram_yscale_deprecation(sine):
 
     with pytest.warns(PendingDeprecationWarning,
                       match="The yscale parameter will be removed"):
+        create_figure()
         pf.plot.spectrogram(sine, yscale='linear')
 
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove xscale from pyfar 0.6.0!
+            create_figure()
             pf.plot.spectrogram(sine)
 
 
@@ -152,9 +159,11 @@ def test__check_time_unit():
 
     with pytest.warns(PendingDeprecationWarning,
                       match="unit=None will be deprecated"):
+        create_figure()
         pf.plot._utils._check_time_unit(None)
 
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(ValueError):
             # remove xscale from pyfar 0.6.0!
+            create_figure()
             pf.plot._utils._check_time_unit(None)
