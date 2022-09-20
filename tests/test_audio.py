@@ -31,3 +31,6 @@ def test_not_implemented():
 
     with pytest.raises(NotImplementedError):
         audio._assert_matching_meta_data()
+
+    with pytest.raises(NotImplementedError):
+        audio._decode()
