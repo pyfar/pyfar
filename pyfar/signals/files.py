@@ -526,7 +526,7 @@ def _load_files(data):
             with open(save_name, 'wb') as out:
                 out.write(http_data.data)
         else:
-            raise ConnectionError("Connection error. Please check your internet \
-                    connection.")
+            raise ConnectionError(
+                "Connection error. Please check your internet connection.")
 
     return files
