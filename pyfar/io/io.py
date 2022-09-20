@@ -704,7 +704,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     comment = ', '.join(' '.join(x) for x in zip(all_expressions, units))
     if domain == 'freq':
         data = FrequencyData(
-            data_out, domain_data, dtype=dtype, comment=comment)
+            data_out, domain_data, comment=comment)
     else:
         data = TimeData(data_out, domain_data, comment=comment)
 
