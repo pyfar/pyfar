@@ -34,5 +34,5 @@ def test_error_raises():
                        match="mode must be 'time', 'complex',"):
         pf.dsp.average(signal, mode='invalid_mode')
     with pytest.warns(Warning,
-                      match="Sinnvolles Warning"):
+                      match="Averaging one dimensional axis=(1, 2)."):
         pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), axis=(1, 2))
