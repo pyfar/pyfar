@@ -546,8 +546,8 @@ def read_comsol(filename, expressions=None, parameters=None):
     --------
     >>> import pyfar as pf
     >>> import os.path
-    >>> filename = os.path.join('tests', 'test_io_data', 'pressure_parametric.csv')
-    >>> path = os.path.join(os.getcwd(), '..', '..', filename)
+    >>> path = os.path.join(os.getcwd(), '..', '..', \\
+    >>>     'tests', 'test_io_data', 'pressure_parametric.csv')
     >>> expressions, _, parameters, _, _ = pf.io.read_comsol_header(path)
     >>> expressions
     ['pabe.p_t']
@@ -693,16 +693,19 @@ def read_comsol_header(filename):
     Returns
     -------
     expressions : list[str]
-        This list of expressions defines the output expressions. An example
-        can be like ``expressions=['pabe.p_t']``. Also see
-        :py:func:`~pyfar.dsp.comsol_read`.
+        The expressions in COMSOL are the pysical property of the calculated
+        solution, e.g. total sound pressure in Pa. The expression depends on
+        the physics and have unit. An example can be like
+        ``expressions=['pabe.Lp_t']``.
     expressions_unit : list[str]
         This list of expressions unit defines the units of the output
         expressions. An example can be like ``expressions_unit=['Pa']``.
     parameters : dict
-        This dict contains all parameters ins from the input file. If no
-        parameters are available, an emtpy dict is returnd. An example can be
-        like ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
+        Solutions or expressions can be evalueted for different parameters,
+        such as differnet angles or other parameters. This dict contains all
+        parameters from the input file. If no parameters are available, an
+        emtpy dict is returnd. An example can be like
+        ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
     domain : string
         Returns the domain of the input data. Note that ``'lambda'`` domain
         data is not allowed.
@@ -713,7 +716,7 @@ def read_comsol_header(filename):
             The data are in time domain.
     domain_data : list[]
         This list contains the domain data from the input file. Depending
-        on the data in the input file, the output will be float or complex.
+        on the data in the input file, the output will be float.
 
     Raises
     ------
@@ -724,10 +727,23 @@ def read_comsol_header(filename):
 
     Examples
     --------
-    Returns all expressions
     >>> import pyfar as pf
-    >>> expressions, expressions_unit, parameters, domain, domain_data \
-    >>>     = pf.io.read_comsol_header('my_comsol_data.csv')
+    >>> import os.path
+    >>> path = os.path.join(os.getcwd(), '..', '..', \\
+    >>>     'tests', 'test_io_data', 'pressure_parametric.csv')
+    >>> expressions, units, parameters, domain, domain_data = \\
+    >>>     pf.io.read_comsol_header(path)
+    >>> expressions
+    ['pabe.p_t']
+    >>> units
+    ['Pa']
+    >>> parameters
+    {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
+     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> domain
+    'freq'
+    >>> domain_data
+    [100.0, 500.0]
     """
     # Check Datatype
     suffix = pathlib.Path(filename).suffix
