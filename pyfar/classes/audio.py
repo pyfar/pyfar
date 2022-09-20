@@ -226,9 +226,9 @@ class TimeData(_Audio):
         """Set the time data."""
         # check and set the data and meta data
         data = np.atleast_2d(np.asarray(value))
-        if str(data.dtype).startswith("int"):
+        if data.dtype.kind == "i":
             data = data.astype("float")
-        elif not str(data.dtype).startswith("float"):
+        elif data.dtype.kind != "f":
             raise ValueError(
                 f"time data is {data.dtype}  must be int or float")
         data = np.atleast_2d(np.asarray(value, dtype=float))
@@ -401,9 +401,9 @@ class FrequencyData(_Audio):
 
         # check data type
         data = np.atleast_2d(np.asarray(value))
-        if str(data.dtype).startswith("int"):
+        if data.dtype.kind == "i":
             data = data.astype("float")
-        elif not str(data.dtype).startswith(("float", "complex")):
+        elif data.dtype.kind not in ["f", "c"]:
             raise ValueError((f"frequency data is {data.dtype} must be int, "
                               "float, or complex"))
 
@@ -630,7 +630,7 @@ class Signal(FrequencyData, TimeData):
         """Set the normalized frequency domain data."""
         # check data type
         data = np.atleast_2d(np.asarray(value))
-        if not str(data.dtype).startswith(("int", "float", "complex")):
+        if data.dtype.kind not in ["i", "f", "c"]:
             raise ValueError((f"frequency data is {data.dtype} must be int, "
                               "float, or complex"))
         # Check n_samples
@@ -664,7 +664,7 @@ class Signal(FrequencyData, TimeData):
     def freq_raw(self, value):
         """Set the frequency domain data without normalization."""
         data = np.atleast_2d(np.asarray(value))
-        if not str(data.dtype).startswith(("int", "float", "complex")):
+        if data.dtype.kind not in ["i", "f", "c"]:
             raise ValueError((f"frequency data is {data.dtype} must be int, "
                               "float, or complex"))
         # Check n_samples
@@ -1204,14 +1204,10 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool):
 
         # check type of non signal input
         else:
-            dtypes = ['int8', 'int16', 'int32', 'int64',
-                      'float32', 'float64',
-                      'complex64', 'complex128']
-            if np.asarray(d).dtype not in dtypes:
+            if np.asarray(d).dtype.kind not in ["i", "f", "c"]:
                 raise ValueError(
-                    f"Input must be of type Signal, {', '.join(dtypes)}")
-            if np.asarray(d).dtype in ['complex64', 'complex128'] \
-                    and domain == 'time':
+                    "Input must be of type Signal, int, float, or complex")
+            if np.asarray(d).dtype.kind == "c" and domain == 'time':
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 
