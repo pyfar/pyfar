@@ -371,6 +371,7 @@ class GammatoneBands():
         - An exception to this occurs if ``signal.cshape`` is ``(1, )``, i.e.,
           signal is a single channel signal. In this case the cshape of the
           output signals is ``(self.n_bands)`` and `not` ``(self.n_bands, 1)``.
+
         """
 
         # check input
