@@ -1733,3 +1733,118 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference), log_prefix
     else:
         return log_prefix * np.log10(np.abs(data) / log_reference)
+
+
+def energy(signal):
+    r"""
+    Computes the channel wise energy in the time domain
+
+    .. math::
+
+        \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
+
+    which is equivalent to the frequency domain computation according to
+    Parseval's theorem [#]_.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to compute the energy from.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The channel-wise energy of the input signal.
+
+    Notes
+    -----
+    Due to the calculation based on the time data, the returned energy is
+    independent of the signal's ``fft_norm``.
+    :py:func:`~pyfar.dsp.power` and :py:func:`~pyfar.dsp.rms` can be used
+    to compute the power and the rms of a signal.
+
+    References
+    -----------
+    .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
+           (Upper Saddle et al., Pearson, 2010), Third edition.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # return and compute data
+    return np.sum(signal.time**2, axis=-1)
+
+
+def power(signal):
+    r"""
+    Compute the power of a signal.
+
+    The power is calculated as
+
+    .. math::
+
+        \frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2
+
+    based on the time data for each channel separately.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to compute the power from.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The channel-wise power of the input signal.
+
+    Notes
+    -----
+    Due to the calculation based on the time data, the returned power is
+    independent of the signal's ``fft_norm``.
+    The power equals the squared RMS of a signal. :py:func:`~pyfar.dsp.energy`
+    and :py:func:`~pyfar.dsp.rms` can be used to compute the energy and the
+    RMS.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # return and compute data
+    return np.sum(signal.time**2, axis=-1)/signal.n_samples
+
+
+def rms(signal):
+    r"""
+    Compute the root mean square (RMS) of a signal.
+
+    The RMS is calculated as
+
+    .. math::
+
+        \sqrt{\frac{1}{N}\sum_{n=0}^{N-1}|x[n]|^2}
+
+    based on the time data for each channel separately.
+
+    Parameters
+    ----------
+    signal : Signal
+        The signal to compute the RMS from.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        The channel-wise RMS of the input signal.
+
+    Notes
+    -----
+    The RMS equals the square root of the signal's power.
+    :py:func:`~pyfar.dsp.energy` and :py:func:`~pyfar.dsp.power` can be used
+    to compute the energy and the power.
+    """
+    # check input
+    if not isinstance(signal, pyfar.Signal):
+        raise ValueError(f"signal is type '{signal.__class__}'"
+                         " but must be of type 'Signal'.")
+    # return and compute data
+    return np.sqrt(power(signal))
