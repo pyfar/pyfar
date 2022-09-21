@@ -1623,7 +1623,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
     r"""Convert data of the selected signal domain into decibels (dB).
 
     The converted data is calculated by the base 10 logarithmic scale:
-    ``data(dB) = log_prefix * numpy.log10(data/log_reference)``. By using a
+    ``data_in_dB = log_prefix * numpy.log10(data/log_reference)``. By using a
     logarithmic scale, the deciBel is able to compare quantities that
     may have vast ratios between them. As an example, the sound pressure in
     dB can be calculated as followed:
@@ -1846,5 +1846,221 @@ def rms(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
     # return and compute data
     return np.sqrt(power(signal))
+
+
+def normalize(signal, reference_method='max', domain='time',
+              channel_handling='individual', target=1, limits=(None, None),
+              unit=None, return_reference=False):
+    """
+    Apply a normalization.
+
+    In the default case, the normalization ensures that the maximum absolute
+    amplitude of the signal after normalization is 1. This is achieved by
+    the multiplication
+
+    ``signal_normalized = signal * target / reference``,
+
+    where `target` equals 1 and `reference` is the maximum absolute amplitude
+    before the normalization.
+
+    Several normalizations are possible, which in fact are different ways
+    of computing the `reference` value (e.g. based on the spectrum).
+    See the parameters for details.
+
+    Parameters
+    ----------
+    signal: Signal, TimeData, FrequencyData
+        Input signal.
+    domain: string
+        Determines which data is used to compute the `reference` value.
+
+        ``'time'``
+           Use the absolute of the time domain data ``np.abs(signal.time)``.
+        ``'freq'``
+          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
+          normalized magnitude spectrum used
+          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
+
+        The default is ``'time'``.
+    reference_method: string, optional
+        Reference method to compute the channel-wise `reference` value using
+        the data according to `domain`.
+
+        ``'max'``
+            Compute the maximum absolute value per channel.
+        ``'mean'``
+            Compute the mean absolute values per channel.
+        ``'energy'``
+            Compute the energy per channel using :py:func:`~pyfar.dsp.energy`.
+        ``'power'``
+            Compute the power per channel using :py:func:`~pyfar.dsp.power`.
+        ``'rms'``
+            Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
+
+        The default is ``'max'``.
+    channel_handling: string, optional
+        Define how channel-wise `reference` values are handeled for multi-
+        channel signals. This parameter does not affect single-channel signals.
+
+        ``'individual'``
+            Separate normalization of each channel individually.
+        ``'max'``
+            Normalize to the maximum `reference` value across channels.
+        ``'min'``
+            Normalize to the minimum `reference` value across channels.
+        ``'mean'``
+            Normalize to the mean `reference` value across the channels.
+
+       The default is ``'individual'``.
+    target: scalar, array
+        The target to which the signal is normalized. Can be a scalar or an
+        array. In the latter case the shape of `target` must be broadcastable
+        to ``signal.cshape``. The default is ``1``.
+    limits: tuple, array_like
+        Restrict the time or frequency range that is used to compute the
+        `reference` value. Two element tuple specifying upper and lower limit
+        according to `domain` and `unit`. A `None` element means no upper or
+        lower limitation. The default ``(None, None)`` uses the entire signal.
+        Note that in case of limiting in samples or bins with ``unit=None``,
+        the second value defines the first sample/bin that is excluded.
+        Also note that `limits` need to be ``(None, None)`` if
+        `reference_method` is ``rms``, ``power`` or ``energy``.
+    unit: string, optional
+        Unit of `limits`.
+
+        ``'s'``
+            Set limits in seconds in case of time domain normalization. Uses
+            :py:class:`~signal.find_nearest_time` to find the limits.
+        ``'Hz'``
+            Set limits in hertz in case of frequency domain normalization. Uses
+            :py:class:`~signal.find_nearest_frequency`
+
+        The default ``None`` assumes that `limits` is given in samples in case
+        of time domain normalization and in bins in case of frequency domain
+        normalization.
+    return_reference: bool
+        If ``return_reference=True``, the function also returns the `reference`
+        values for the channels. The default is ``False``.
+
+    Returns
+    -------
+    normalized_signal: Signal, TimeData, FrequencyData
+        The normalized input signal.
+    reference_norm: numpy.ndarray
+        The reference values used for normalization. Only returned if
+        `return_reference` is ``True``.
+
+    Examples
+    --------
+    Time domain normalization with default parameters
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> signal = pf.signals.sine(1e3, 441, amplitude=2)
+        >>> signal_norm = pf.dsp.normalize(signal)
+        >>> # Plot input and normalized Signal
+        >>> ax = pf.plot.time(signal, label='Original Signal')
+        >>> pf.plot.time(signal_norm, label='Normalized Signal')
+        >>> ax.legend()
+
+    Frequency normalization with a restricted frequency range and targed in dB
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> sine1 = pf.signals.sine(1e3, 441, amplitude=2)
+        >>> sine2 = pf.signals.sine(5e2, 441, amplitude=.5)
+        >>> signal = sine1 + sine2
+        >>> # Normalize to dB target in restricted frequency range
+        >>> target_dB = 0
+        >>> signal_norm = pf.dsp.normalize(signal, target=10**(target_dB/20),
+        ...     domain="freq", limits=(400, 600), unit="Hz")
+        >>> # Plot input and normalized Signal
+        >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal')
+        >>> pf.plot.time_freq(signal, label='Original Signal')
+        >>> ax[1].set_ylim(-15, 15)
+        >>> ax[1].legend()
+
+    """
+
+    # check input
+    if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
+                               pyfar.TimeData)):
+        raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
+                         "or 'FrequencyData'."))
+    if domain not in ('time', 'freq'):
+        raise ValueError("domain must be 'time' or 'freq'.")
+    if type(signal) == pyfar.FrequencyData and domain == 'time':
+        raise ValueError((
+            f"domain is '{domain}' and signal is type '{signal.__class__}'"
+            " but must be of type 'Signal' or 'TimeData'."))
+    if type(signal) == pyfar.TimeData and domain == 'freq':
+        raise ValueError((
+            f"domain is '{domain}' and signal is type '{signal.__class__}'"
+            " but must be of type 'Signal' or 'FrequencyData'."))
+    if isinstance(limits, (int, float)) or len(limits) != 2:
+        raise ValueError("limits must be an array like of length 2.")
+    if tuple(limits) != (None, None) and \
+            reference_method in ('energy', 'power', 'rms'):
+        raise ValueError(
+            "limits must be (None, None) if reference_method  is "
+            f"{reference_method}")
+    if (domain == "time" and unit not in ("s", None)) or \
+            (domain == "freq" and unit not in ("Hz", None)):
+        raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
+
+    # get and check the limits
+    if domain == 'time':
+        find = signal.find_nearest_time
+    else:
+        find = signal.find_nearest_frequency
+
+    if unit in ("Hz", "s"):
+        limits = [None if lim is None else find(lim) for lim in limits]
+
+    if limits[0] == limits[1] and None not in limits:
+        raise ValueError(("Upper and lower limit are identical. Use a "
+                          "longer signal or increase limits."))
+    # get values for normalization energy, power or rms
+    if reference_method == 'energy':
+        reference = pyfar.dsp.energy(signal)
+    elif reference_method == 'power':
+        reference = pyfar.dsp.power(signal)
+    elif reference_method == 'rms':
+        reference = pyfar.dsp.rms(signal)
+    elif reference_method in ('max', 'mean'):
+        # prepare data for max or mean normalization.
+        if domain == 'time':
+            input_data = np.abs(signal.time)
+        else:
+            input_data = np.abs(signal.freq)
+    # get values for normalization max or mean
+        if reference_method == 'max':
+            reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
+        elif reference_method == 'mean':
+            reference = np.mean(input_data[..., limits[0]:limits[1]], axis=-1)
+    else:
+        raise ValueError(("reference_method must be 'max', 'mean', 'power', "
+                         "'energy' or 'rms'."))
+    # Channel Handling
+    if channel_handling == 'individual':
+        reference_norm = reference.copy()
+    elif channel_handling == 'max':
+        reference_norm = np.max(reference)
+    elif channel_handling == 'min':
+        reference_norm = np.min(reference)
+    elif channel_handling == 'mean':
+        reference_norm = np.mean(reference)
+    else:
+        raise ValueError(("channel_handling must be 'individual', 'max', "
+                          "'min' or 'mean'."))
+    # apply normalization
+    normalized_signal = signal.copy() * target / reference_norm
+    if return_reference:
+        return normalized_signal, reference_norm
+    else:
+        return normalized_signal

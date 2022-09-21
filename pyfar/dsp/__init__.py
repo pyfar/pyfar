@@ -19,6 +19,7 @@ from .dsp import (
     energy,
     power,
     rms,
+    normalize,
 )
 
 from .interpolation import (
@@ -58,5 +59,6 @@ __all__ = [
     'InterpolateSpectrum',
     'smooth_fractional_octave',
     'resample',
+    'normalize',
     'fractional_time_shift'
 ]
