@@ -377,8 +377,8 @@ class Coordinates():
             return self._points
 
         # get cartesian system first
-        if not(self._system['domain'] == 'cart' and
-               self._system['convention'] == 'right'):
+        if not (self._system['domain'] == 'cart' and
+                self._system['convention'] == 'right'):
             pts = self.get_cart('right', 'met')
             # remove noise below eps
             eps = np.finfo(np.float64).eps
@@ -511,8 +511,8 @@ class Coordinates():
             return self._points
 
         # convert to cartesian system first
-        if not(self._system['domain'] == 'cart' and
-               self._system['convention'] == 'right'):
+        if not (self._system['domain'] == 'cart' and
+                self._system['convention'] == 'right'):
             pts = self.get_cart('right', 'met')
             # remove noise below eps
             eps = np.finfo(np.float64).eps
