@@ -1834,8 +1834,8 @@ def normalize(signal, reference_method='max', domain='time',
         elif reference_method == 'mean':
             reference = np.mean(input_data[..., limits[0]:limits[1]], axis=-1)
     else:
-        raise ValueError("reference_method must be 'max', 'mean', 'power', "
-                         "'energy' or 'rms'.")
+        raise ValueError(("reference_method must be 'max', 'mean', 'power', "
+                         "'energy' or 'rms'."))
     # Channel Handling
     if channel_handling == 'individual':
         reference_norm = reference.copy()
@@ -1846,8 +1846,8 @@ def normalize(signal, reference_method='max', domain='time',
     elif channel_handling == 'mean':
         reference_norm = np.mean(reference)
     else:
-        raise ValueError(
-                    "channel_handling must be 'individual', 'max', 'min' or")
+        raise ValueError(("channel_handling must be 'individual', 'max', "
+                          "'min' or 'mean'."))
     # apply normalization
     normalized_signal = signal.copy() * target / reference_norm
     if return_reference:
