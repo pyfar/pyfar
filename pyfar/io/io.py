@@ -522,8 +522,8 @@ def read_comsol(filename, expressions=None, parameters=None):
 
     Returns
     -------
-    data : Signal or FrequencyData
-        Returns a Signal or FrequencyData object depending on the input data.
+    data : TimeData or FrequencyData
+        Returns a TimeData or FrequencyData object depending on the input data.
         The output data always have the cshape (#nodes, #expressions,
         #parameter1, #parameter2, ...).
     coordinates : Coordinates, optional
