@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+import warnings
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -1168,6 +1169,240 @@ def time_shift(
     return shifted
 
 
+def find_impulse_response_delay(impulse_response, N=1):
+    """Find the delay in sub-sample values of an impulse response.
+
+    The method relies on the analytic part of the cross-correlation function
+    of the impulse response and it's minimum-phase equivalent, which is zero
+    for the maximum of the correlation function. For sub-sample root finding,
+    the analytic signal is approximated using a polynomial of order ``N``.
+    The algorithm is based on [#]_ with the following modifications:
+
+    1.  Values with negative gradient used for polynolmial fitting are
+        rejected, allowing to use larger part of the signal for fitting.
+    2.  By default a first order polynomial is used, as the slope of the
+        analytic signal should in theory be linear.
+
+    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_start`.
+
+    Parameters
+    ----------
+    impulse_response : Signal
+        The impulse response.
+    N : int, optional
+        The order of the polynom used for root finding, by default 1.
+
+    Returns
+    -------
+    delay : numpy.ndarray, float
+        Delay of the impulse response, as an array of shape
+        ``signal.cshape``. Can be floating point values in the case of
+        sub-sample values.
+
+    References
+    ----------
+
+    .. [#]  N. S. M. Tamim and F. Ghani, “Hilbert transform of FFT pruned
+            cross correlation function for optimization in time delay
+            estimation,” in Communications (MICC), 2009 IEEE 9th Malaysia
+            International Conference on, 2009, pp. 809-814.
+
+    Examples
+    --------
+    Create a band-limited impulse shifted by 0.5 samples and estimate the
+    starting sample of the impulse and plot.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> n_samples = 64
+        >>> delay_samples = n_samples // 2 + 1/2
+        >>> ir = pf.signals.impulse(n_samples)
+        >>> ir = pf.dsp.linear_phase(ir, delay_samples, unit='samples')
+        >>> start_samples = pf.dsp.find_impulse_response_delay(ir)
+        >>> ax = pf.plot.time(ir, unit='ms', label='impulse response')
+        >>> ax.axvline(
+        ...     start_samples/ir.sampling_rate*1e3,
+        ...     color='k', linestyle='-.', label='start sample')
+        >>> ax.legend()
+
+    """
+    n = int(np.ceil((N+2)/2))
+
+    start_samples = np.zeros(impulse_response.cshape)
+    for ch in np.ndindex(impulse_response.cshape):
+        # Calculate the correlation between the impulse response and its
+        # minimum phase equivalent. This requires a minimum phase equivalent
+        # in the strict sense, instead of the appriximation implemented in
+        # pyfar.
+        n_samples = impulse_response.n_samples
+        ir_minphase = sgn.minimum_phase(
+            impulse_response.time[ch], n_fft=4*n_samples)
+        correlation = sgn.correlate(
+            impulse_response.time[ch],
+            np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
+            mode='full')
+        lags = np.arange(-n_samples + 1, n_samples)
+
+        # calculate the analytic signal of the correlation function
+        correlation_analytic = sgn.hilbert(correlation)
+
+        # find the maximum of the analytic part of the correlation function
+        # and define the search range around the maximum
+        argmax = np.argmax(np.abs(correlation_analytic))
+        search_region_range = np.arange(argmax-n, argmax+n)
+        search_region = np.imag(correlation_analytic[search_region_range])
+
+        # mask values with a negative gradient
+        mask = np.gradient(search_region, search_region_range) > 0
+
+        # fit a polygon and estimate its roots
+        search_region_poly = np.polyfit(
+            search_region_range[mask]-argmax, search_region[mask], N)
+        roots = np.roots(search_region_poly)
+
+        # Use only real-valued roots
+        if np.all(np.isreal(roots)):
+            root = roots[np.abs(roots) == np.min(np.abs(roots))]
+            start_sample = lags[argmax] + root
+        else:
+            start_sample = np.nan
+            warnings.warn(f"Starting sample not found for channel {ch}")
+
+        start_samples[ch] = start_sample
+
+    return start_samples
+
+
+def find_impulse_response_start(
+        impulse_response,
+        threshold=20):
+    """Find the start sample of an impulse response.
+
+    The start sample is identified as the first sample which is below the
+    ``threshold`` level relative to the maximum level of the impulse response.
+    For room impulse responses, ISO 3382 [#]_ specifies a threshold of 20 dB.
+    This function is primary intended to be used when processing room impulse
+    responses.
+    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_delay`.
+
+
+    Parameters
+    ----------
+    impulse_response : pyfar.Signal
+        The impulse response
+    threshold : float, optional
+        The threshold level in dB, by default 20, which complies with ISO 3382.
+
+    Returns
+    -------
+    start_sample : numpy.ndarray, int
+        Sample at which the impulse response starts
+
+    Notes
+    -----
+    The function tries to estimate the PSNR in the IR based on the signal
+    power in the last 10 percent of the IR. The automatic estimation may fail
+    if the noise spectrum is not white or the impulse response contains
+    non-linear distortions. If the PSNR is lower than the specified threshold,
+    the function will issue a warning.
+
+    References
+    ----------
+    .. [#]  ISO 3382-1:2009-10, Acoustics - Measurement of the reverberation
+            time of rooms with reference to other acoustical parameters. pp. 22
+
+    Examples
+    --------
+    Create a band-limited impulse shifted by 0.5 samples and estimate the
+    starting sample of the impulse and plot.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> n_samples = 256
+        >>> delay_samples = n_samples // 2 + 1/2
+        >>> ir = pf.signals.impulse(n_samples)
+        >>> ir = pf.dsp.linear_phase(ir, delay_samples, unit='samples')
+        >>> start_samples = pf.dsp.find_impulse_response_start(ir)
+        >>> ax = pf.plot.time(ir, unit='ms', label='impulse response', dB=True)
+        >>> ax.axvline(
+        ...     start_samples/ir.sampling_rate*1e3,
+        ...     color='k', linestyle='-.', label='start sample')
+        >>> ax.axhline(
+        ...     20*np.log10(np.max(np.abs(ir.time)))-20,
+        ...     color='k', linestyle=':', label='threshold')
+        >>> ax.legend()
+
+    Create a train of weighted impulses with levels below and above the
+    threshold, serving as a very abstract room impulse response. The starting
+    sample is identified as the last sample below the threshold relative to the
+    maximum of the impulse response.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> n_samples = 64
+        >>> delays = np.array([14, 22, 26, 30, 33])
+        >>> amplitudes = np.array([-35, -22, -6, 0, -9], dtype=float)
+        >>> ir = pf.signals.impulse(n_samples, delays, 10**(amplitudes/20))
+        >>> ir.time = np.sum(ir.time, axis=0)
+        >>> start_sample_est = pf.dsp.find_impulse_response_start(
+        ...     ir, threshold=20)
+        >>> ax = pf.plot.time(
+        ...     ir, dB=True, unit='samples',
+        ...     label=f'peak samples: {delays}')
+        >>> ax.axvline(
+        ...     start_sample_est, linestyle='-.', color='k',
+        ...     label=f'ir start sample: {start_sample_est}')
+        >>> ax.axhline(
+        ...     20*np.log10(np.max(np.abs(ir.time)))-20,
+        ...     color='k', linestyle=':', label='threshold')
+        >>> ax.legend()
+
+    """
+    ir_squared = np.abs(impulse_response.time)**2
+
+    mask_start = np.int(0.9*impulse_response.n_samples)
+
+    mask = np.arange(mask_start, ir_squared.shape[-1])
+    noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
+
+    max_sample = np.argmax(ir_squared, axis=-1)
+    max_value = np.max(ir_squared, axis=-1)
+
+    if np.any(max_value < 10**(threshold/10) * noise) or \
+            np.any(max_sample > mask_start):
+        warnings.warn(
+            "The SNR seems lower than the specified threshold value. Check "
+            "if this is a valid impulse response with sufficient SNR.")
+
+    start_sample = max_sample.copy()
+
+    for ch in np.ndindex(impulse_response.cshape):
+        # Only look for the start sample if the maximum index is bigger than 0
+        if start_sample[ch] > 0:
+            # Check samples before maximum
+            ir_before_max = np.squeeze(
+                ir_squared[ch][:max_sample[ch]+1] / max_value[ch])
+            # First sample above or at the threshold level
+            idx_first_above_thresh = np.where(
+                ir_before_max >= 10**(-threshold/10))[0]
+            if idx_first_above_thresh.size > 0:
+                # The start sample is the last sample below the threshold
+                start_sample[ch] = np.min(idx_first_above_thresh) - 1
+            else:
+                start_sample[ch] = 0
+                warnings.warn(
+                    f'No values below threshold found found for channel {ch}',
+                    'defaulting to 0')
+
+    return np.squeeze(start_sample)
+
+
 def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
@@ -1384,7 +1619,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
 
 def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
-            prefix_return=False):
+            return_prefix=False):
     r"""Convert data of the selected signal domain into decibels (dB).
 
     The converted data is calculated by the base 10 logarithmic scale:
@@ -1445,8 +1680,8 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         +---------------------------------+--------------+
 
         The default is 1.
-    prefix_return : bool, optional
-        If prefix_return is ``True``, the function will also return the
+    return_prefix : bool, optional
+        If return_prefix is ``True``, the function will also return the
         `log_prefix` value. This can be used to delogrithmize the data. The
         default is ``False``.
     Returns
@@ -1454,7 +1689,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
     decibel : numpy.ndarray
         The given signal in decibel in chosen domain.
     log_prefix : int or float
-        Will be returned if `prefix_return` is set to ``True``.
+        Will be returned if `return_prefix` is set to ``True``.
 
     Examples
     --------
@@ -1494,39 +1729,32 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
             f"Domain is '{domain}', but has to be 'time', 'freq',"
             " or 'freq_raw'.")
     data[data == 0] = np.finfo(float).eps
-    if prefix_return is True:
+    if return_prefix is True:
         return log_prefix * np.log10(np.abs(data) / log_reference), log_prefix
     else:
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def energy(signal, keepdims=False):
+def energy(signal):
     r"""
-    Compute the energy of a signal.
-
-    According to the Parseval's theorem [#]_ the energy is
+    Computes the channel wise energy in the time domain
 
     .. math::
 
         \sum_{n=0}^{N-1}|x[n]|^2=\frac{1}{N}\sum_{k=0}^{N-1}|X[k]|^2,
 
-    The function calculates the energy from the time data for each channel
-    separately.
+    which is equivalent to the frequency domain computation according to
+    Parseval's theorem [#]_.
 
     Parameters
     ----------
     signal : Signal
         The signal to compute the energy from.
-    keepdims : bool, optional
-        If ``False``, the shape of the returned array equals ``signal.cshape``.
-        If ``True``, an axis will be appended, so it's broadcastable to the
-        shape of ``signal.time`` and ``signal.freq``.
-        The default is ``False``.
 
     Returns
     -------
     data : numpy.ndarray
-        The total energy of the input signal.
+        The channel-wise energy of the input signal.
 
     Notes
     -----
@@ -1537,21 +1765,18 @@ def energy(signal, keepdims=False):
 
     References
     -----------
-    .. [#] B. Delgutte and J. Greenberg , “The discrete Fourier
-           Transform”, Biomedical Signal and Image Processing, Spring 2005.
+    .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
+           (Upper Saddle et al., Pearson, 2010), Third edition.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
-    # cumpute energy data
-    data = np.sum(signal.time**2, axis=-1)
-    if keepdims:
-        data = data[..., None]
-    return data
+    # return and compute data
+    return np.sum(signal.time**2, axis=-1)
 
 
-def power(signal, keepdims=False):
+def power(signal):
     r"""
     Compute the power of a signal.
 
@@ -1567,16 +1792,11 @@ def power(signal, keepdims=False):
     ----------
     signal : Signal
         The signal to compute the power from.
-    keepdims : bool, optional
-        If ``False``, the shape of the returned array equals ``signal.cshape``.
-        If ``True``, an axis will be appended, so it's broadcastable to the
-        shape of ``signal.time`` and ``signal.freq``.
-        The default is ``False``.
 
     Returns
     -------
     data : numpy.ndarray
-        The power of the input signal.
+        The channel-wise power of the input signal.
 
     Notes
     -----
@@ -1590,14 +1810,11 @@ def power(signal, keepdims=False):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
-    # cumpute power data
-    data = np.sum(signal.time**2, axis=-1)/signal.n_samples
-    if keepdims:
-        data = data[..., None]
-    return data
+    # return and compute data
+    return np.sum(signal.time**2, axis=-1)/signal.n_samples
 
 
-def rms(signal, keepdims=False):
+def rms(signal):
     r"""
     Compute the root mean square (RMS) of a signal.
 
@@ -1613,16 +1830,11 @@ def rms(signal, keepdims=False):
     ----------
     signal : Signal
         The signal to compute the RMS from.
-    keepdims : bool, optional
-        If ``False``, the shape of the returned array equals ``signal.cshape``.
-        If ``True``, an axis will be appended, so it's broadcastable to the
-        shape of ``signal.time`` and ``signal.freq``.
-        The default is ``False``.
 
     Returns
     -------
     data : numpy.ndarray
-        The RMS of the input signal.
+        The channel-wise RMS of the input signal.
 
     Notes
     -----
@@ -1634,11 +1846,9 @@ def rms(signal, keepdims=False):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
-    # cumpute rms data
-    data = np.sqrt(np.sum(signal.time**2, axis=-1)/signal.n_samples)
-    if keepdims:
-        data = data[..., None]
-    return data
+
+    # return and compute data
+    return np.sqrt(power(signal))
 
 
 def normalize(signal, reference_method='max', domain='time',

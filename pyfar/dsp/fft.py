@@ -9,7 +9,8 @@ from scipy import fft
 
 
 def rfftfreq(n_samples, sampling_rate):
-    """Returns the positive discrete frequencies for which the FFT is calculated.
+    """
+    Returns the positive discrete frequencies for which the FFT is calculated.
 
     If the number of samples
     :math:`N` is even the number of frequency bins will be :math:`2/N+1`, if
