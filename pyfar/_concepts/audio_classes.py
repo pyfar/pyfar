@@ -21,15 +21,15 @@ The :py:func:`~pyfar.classes.audio.Signal` class distinguishes between two
 kinds of signals
 
 - *energy signals* are of finite length and energy, such as impulse responses.
-- *power signals*  are finite samples of signals with infinite length and
-  and energy, such as noise signals or sound textures.
+- *power signals* are finite samples of signals with infinite length and
+  energy, such as noise signals or sound textures.
 
 The difference is important for
 
 - plotting the frequency response of signals because different signal types
   require different :py:mod:`FFT normalizations <pyfar._concepts.fft>`.
 - performing
-  :py:mod:`arithmetic operatoins <pyfar._concepts.arithmetic_operations>`
-  because not all signals types can be combined with each other.
+  :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+  because not all signal types can be combined with each other.
 
 """
