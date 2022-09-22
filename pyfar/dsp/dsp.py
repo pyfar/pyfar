@@ -1621,9 +1621,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
             )
     # average the data
     if mode == 'magnitude_phase':
-        data[0] = np.sum(data[0], axis=axis, keepdims=keepdims)
-        data[1] = np.sum(data[1], axis=axis, keepdims=keepdims)
-        data = d for d in data 
+        data = [np.sum(d, axis=axis, keepdims=False) for d in data]
         data = data[0]*np.exp(1j*data[1])
     else:
         data = np.sum(data, axis=axis, keepdims=keepdims)

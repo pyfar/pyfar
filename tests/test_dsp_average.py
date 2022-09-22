@@ -11,6 +11,20 @@ def test_averaging_time():
     npt.assert_equal(ave_sig.time[0], answer)
 
 
+@pytest.mark.parametrize('signal, mode, answer',
+        [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100)[2, 0.5]])
+def test_averaging(signal, mode, answer):
+    """
+    Tests the up and downsampling of a noise signal to the double/half sampling
+    rate.
+    """
+    ave_sig = pf.dsp.average(signal, mode)
+    if mode == 'time':
+        npt.assert_equal(ave_sig.time[0], answer)
+    else:
+        npt.assert_equal(ave_sig.freq[0], answer)
+
+
 def test_error_raises():
     # test wrong signal type
     with pytest.raises(TypeError, match='Input data has to be of type'):
