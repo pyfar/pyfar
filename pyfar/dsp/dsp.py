@@ -1586,15 +1586,19 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         axis = tuple([i for i in range(len((signal.cshape)))])
     # check if averaging over one dimensional axis
     if 1 in signal.cshape:
-        for i, ax in enumerate(axis):
+        for ax in axis:
             if signal.cshape[ax] == 1:
                 warnings.warn(f"Averaging one dimensional axis={axis}.")
     # set weights default
     if weights is None:
         weights = 1
         for idx, size in enumerate(signal.cshape):
-            if idx in axis:
-                weights /= signal.cshape[idx]
+            if isinstance(axis, int):
+                if idx == axis:
+                    weights /= signal.cshape[idx]
+            else:
+                if idx in axis:
+                    weights /= signal.cshape[idx]
     # apply weights
     signal *= weights
 
@@ -1613,7 +1617,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         data = np.abs(signal.freq)**2
     elif mode == 'log_magnitude_zerophase':
         data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
-                                             prefix_return=True)
+                                             return_prefix=True)
     else:
         raise ValueError(
             """mode must be 'time', 'complex', 'magnitude_zerophase', 'power',
