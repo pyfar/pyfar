@@ -5,9 +5,10 @@ import numpy.testing as npt
 
 
 @pytest.mark.parametrize('signal, mode, answer', (
-    [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100), 'time', [2.5, 3.5, 4.5]],
-    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100), 'complex',
-     [2.5, 3.5, 4.5]],
+    [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100),
+     'time', [2.5, 3.5, 4.5]],
+    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
+     'complex', [2.5, 3.5, 4.5]],
     [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
      'magnitude_zerophase', [2.5, 3.5, 4.5]],
     [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
