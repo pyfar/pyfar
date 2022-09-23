@@ -1589,18 +1589,9 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         for ax in axis:
             if signal.cshape[ax] == 1:
                 warnings.warn(f"Averaging one dimensional axis={axis}.")
-    # set weights default
-    if weights is None:
-        weights = 1
-        for idx, size in enumerate(signal.cshape):
-            if isinstance(axis, int):
-                if idx == axis:
-                    weights /= signal.cshape[idx]
-            else:
-                if idx in axis:
-                    weights /= signal.cshape[idx]
+
     # apply weights
-    signal *= weights
+    # signal *= weights
 
     if not isinstance(axis, int):
         axis = tuple([ax-1 if ax < 0 else ax for ax in axis])
@@ -1623,12 +1614,28 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
             """mode must be 'time', 'complex', 'magnitude_zerophase', 'power',
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
+    # set weights default
+    if weights is not None:
+        """
+        weights = 1
+        for idx, size in enumerate(signal.cshape):
+            if isinstance(axis, int):
+                if idx == axis:
+                    weights /= signal.cshape[idx]
+            else:
+                if idx in axis:
+                    weights /= signal.cshape[idx]
+        """
+        weights = np.broadcast_to(np.array(weights)[..., None],
+                                  data.shape)
     # average the data
     if mode == 'magnitude_phase':
-        data = [np.sum(d, axis=axis, keepdims=False) for d in data]
+        # data = [np.sum(d, axis=axis, keepdims=False) for d in data]
+        data = [np.average(d, axis=axis, weights=weights) for d in data]
         data = data[0]*np.exp(1j*data[1])
     else:
-        data = np.sum(data, axis=axis, keepdims=keepdims)
+        # data = np.sum(data, axis=axis, keepdims=keepdims)
+        data = np.average(data, axis=axis, weights=weights)
     if mode == 'power':
         data = np.sqrt(data)
     elif mode == 'log_magnitude_zerophase':

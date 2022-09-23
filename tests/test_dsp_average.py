@@ -26,7 +26,7 @@ def test_averaging(signal, mode, answer):
     if mode == 'time':
         npt.assert_equal(ave_sig.time[0], answer)
     else:
-        npt.assert_almost_equal(ave_sig.freq[0], answer, decimal=15)
+        npt.assert_almost_equal(ave_sig.freq[0], answer, decimal=8)
 
 
 @pytest.mark.parametrize('axis, answer', (
