@@ -612,72 +612,70 @@ def read_comsol(filename, expressions=None, parameters=None):
     domain_header = np.array(
         [float(x) for x in re.findall(domain_pattern, header)])
     parameter_header = dict()
-    for search_key in parameters:
-        parameter_header[search_key] = np.array(
-            [float(x) for x in re.findall(search_key+value_pattern, header)])
+    for key in parameters:
+        parameter_header[key] = np.array(
+            [float(x) for x in re.findall(key+value_pattern, header)])
 
-    # get final data shape
-    shape = [n_nodes, len(expressions), 1]
-    new_shape = [n_nodes, len(expressions)]
-    for search_key in parameters:
-        shape[-1] *= len(parameters[search_key])
-        new_shape.append(len(parameters[search_key]))
-    shape.append(len(domain_data))
-    new_shape.append(len(domain_data))
+    # final data shape
+    final_shape = [n_nodes, len(expressions)]
+    for key in parameters:
+        final_shape.append(len(parameters[key]))
+    final_shape.append(len(domain_data))
 
-    # Create paired parameter
+    # temporary shape
+    n_combinations = np.prod(final_shape[2:-1]) if parameters else 1
+    temp_shape = [n_nodes, len(expressions), n_combinations, len(domain_data)]
+
+    # create pairs of parameter values
     pairs = np.meshgrid(*[x for x in parameters.values()])
-    parameters_pairs = parameters.copy()
+    parameter_pairs = dict()
     for idx, key in enumerate(parameters):
-        parameters_pairs[key] = np.transpose(pairs[idx]).flatten()
+        parameter_pairs[key] = pairs[idx].T.flatten()
 
-    # loop over all data and write it into final shape
-    data_expressions = raw_data[:, -n_entries:]
-    data_out = np.empty(shape, dtype=dtype)
-    data_out[:] = np.nan
-    for parameters_idx in range(shape[2]):
-        for i_expression, search_expression in enumerate(expressions):
-            for i_domain, search_domain_value in enumerate(domain_data):
-                expression_idxes = expressions_header == search_expression
-                domain_idxes = domain_header == search_domain_value
-                parameter_idxes = np.array(domain_idxes | True)
-                for key in parameters:
-                    parameter_idxes &= parameter_header[key] \
-                        == parameters_pairs[key][parameters_idx]
-                idxes = parameter_idxes & domain_idxes & expression_idxes
-                if any(idxes):
-                    data_out[:, i_expression, parameters_idx, i_domain] \
-                        = data_expressions[:, idxes].flatten()
+    # loop over expressions, domain, parameters
+    # extract the data by comparing with header
+    # first fill the array with temporary shape, then reshape
+    data_in = raw_data[:, -n_entries:]
+    data_out = np.full(temp_shape, np.nan, dtype=dtype)
+    for expression_idx, expression_key in enumerate(expressions):
+        expression_mask = expressions_header == expression_key
+        for parameter_idx in range(temp_shape[2]):
+            parameter_mask = np.full_like(expression_mask, True)
+            for key in parameters:
+                parameter_mask &= parameter_header[key] \
+                    == parameter_pairs[key][parameter_idx]
+            for domain_idx, domain_value in enumerate(domain_data):
+                domain_mask = domain_header == domain_value
+                mask = parameter_mask & domain_mask & expression_mask
+                if any(mask):
+                    data_out[:, expression_idx, parameter_idx, domain_idx] \
+                        = data_in[:, mask].flatten()
                 else:
                     if parameters == all_parameters:
                         warnings.warn(r'Parameter data is inconsistent. \
                             Missing data is filled with nans.')
 
     # reshape data to final shape
-    data_out = np.reshape(data_out, new_shape)
+    data_out = np.reshape(data_out, final_shape)
 
     # create object
-    comment = ', '.join(
-        ' '.join(x) for x in zip(all_expressions, units))
+    comment = ', '.join(' '.join(x) for x in zip(all_expressions, units))
     if domain == 'freq':
         data = FrequencyData(
-            data_out, domain_data, dtype=dtype,
-            comment=comment)
+            data_out, domain_data, dtype=dtype, comment=comment)
     else:
-        data = TimeData(
-            data_out, domain_data, comment=comment)
+        data = TimeData(data_out, domain_data, comment=comment)
 
     # create coordinates
     if n_dimension > 0:
         coords_data = np.real(raw_data[:, 0:n_dimension])
         x = coords_data[:, 0]
-        y = coords_data[:, 1] if coords_data.shape[1] > 1 else np.zeros(
-            coords_data[:, 0].shape)
-        z = coords_data[:, 2] if coords_data.shape[1] > 2 else np.zeros(
-            coords_data[:, 0].shape)
+        y = coords_data[:, 1] if n_dimension > 1 else np.zeros_like(x)
+        z = coords_data[:, 2] if n_dimension > 2 else np.zeros_like(x)
         coordinates = Coordinates(x, y, z)
-        return data, coordinates
-    return data, None
+    else:
+        coordinates = None
+    return data, coordinates
 
 
 def read_comsol_header(filename):
@@ -799,14 +797,6 @@ def read_comsol_header(filename):
         parameters[para_name] = [x+unit for x in values] if unit else values
 
     return expressions, units, parameters, domain, domain_data
-
-
-def _remove_neighbored_duplicates(a):
-    res = [a[0]]
-    for i, c in enumerate(a[1:]):
-        if c != a[i]:
-            res.append(c)
-    return res
 
 
 def _read_comsol_metadata(filename):
