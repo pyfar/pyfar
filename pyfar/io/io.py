@@ -751,7 +751,7 @@ def read_comsol_header(filename):
         Solutions or expressions can be evalueted for different parameters,
         such as differnet angles or other parameters. This dict contains all
         parameters from the input file. If no parameters are available, an
-        emtpy dict is returnd. This dict is same for `All Combinations` and 
+        emtpy dict is returnd. This dict is same for `All Combinations` and
         `Specific Conbinations`. An example can be like
         ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
     domain : string
@@ -773,7 +773,7 @@ def read_comsol_header(filename):
     ``pabe.p_t`` with the Unit ``Pa``. Furthermore, incident angles and two
     frequncy bins were set in a ``Parametric Sweep``. The incident angles are
     defined in parameters and the frequeny bins (domain ``freq``) in
-    ``domain_data``. The output would be same for `All Combinations` and 
+    ``domain_data``. The output would be same for `All Combinations` and
     `Specific Conbinations`.
 
     >>> import pyfar as pf
