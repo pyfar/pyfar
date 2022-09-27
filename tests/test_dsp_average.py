@@ -9,14 +9,14 @@ import numpy.testing as npt
      'time', [2.5, 3.5, 4.5]],
     [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
      'complex', [2.5, 3.5, 4.5]],
+    [pf.signals.impulse(128, [0, 2], [1, 3]),
+     'magnitude_zerophase', np.zeros(65)+2],
+    [pf.signals.impulse(128, [0, 2], [1, 3]),
+     'magnitude_phase', pf.signals.impulse(128, 1, 2).freq[0]],
     [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
-     'magnitude_zerophase', [2.5, 3.5, 4.5]],
-    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
-     'magnitude_phase', [2.5, 3.5, 4.5]],
-    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
-     'power', np.sqrt([0.5**2+2**2, 1**2+2.5**2, 1.5**2+3**2])],
-    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
-     'log_magnitude_zerophase', [1, 2.5, 4.5]]
+     'power', np.sqrt([(1+16)/2, (4+25)/2, (9+36)/2])],
+    [pf.FrequencyData([[0.01, 0.1, ], [1, 10]], [1, 2], 44100),
+     'log_magnitude_zerophase', 10**(np.array([(-40+0)/2, (-20+20)/2])/20)]
     ))
 def test_averaging(signal, mode, answer):
     """
@@ -26,11 +26,11 @@ def test_averaging(signal, mode, answer):
     if mode == 'time':
         npt.assert_equal(ave_sig.time[0], answer)
     else:
-        npt.assert_almost_equal(ave_sig.freq[0], answer, decimal=8)
+        npt.assert_almost_equal(ave_sig.freq[0], answer, decimal=15)
 
 
 @pytest.mark.parametrize('axis, answer', (
-    [(0, 1), [[(1+3+5+7)/4, (2+4+6+8)/4]]],
+    [(0, 2), [[(1+2+5+6)/4, (3+4+7+8)/4]]],
     [1, [[(1+3)/2, (2+4)/2], [(5+7)/2, (6+8)/2]]]
     ))
 def test_axis_averaging(axis, answer):
