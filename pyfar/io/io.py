@@ -493,15 +493,15 @@ def default_audio_subtype(format):
 
 
 def read_comsol(filename, expressions=None, parameters=None):
-    """Read exported data from COMSOL.
+    """Read exported data from COMSOL Multiphysics.
 
     Parameters
     ----------
     filename : str, Path
-        Input file. Excepted input files are '.txt', '.dat' and '.csv'. '.csv'
-        Files are strongly recommended, since .txt and .dat are varies in its
+        Input file. Excepted input files are .txt, .dat and .csv. .csv-
+        files are strongly recommended, since .txt and .dat-files vary in their
         format definition.
-    expressions : list[str], optional
+    expressions : list of strings, optional
         The expressions in COMSOL are the pysical property of the calculated
         solution, e.g. total sound pressure in Pa. The expression depends on
         the physics and have unit. Multiple expressions are possible in one
@@ -571,7 +571,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     suffix = pathlib.Path(filename).suffix
     if suffix not in ['.txt', '.dat', '.csv']:
         raise ValueError((
-            "Input path must be a .txt, .csv or .dat file"
+            "Input file must be of type .txt, .csv or .dat."
             f"but is of type {str(suffix)}"))
 
     # get header
@@ -712,9 +712,9 @@ def read_comsol_header(filename):
             The data are in frequency domain.
         ``'time'``
             The data are in time domain.
-    domain_data : list[]
-        This list contains the domain data from the input file. Depending
-        on the data in the input file, the output will be float.
+    domain_data : list
+        List containing the time samples or frequency bins depending
+        on the data in the input file.
 
     Raises
     ------
