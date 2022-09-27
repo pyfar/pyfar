@@ -286,12 +286,12 @@ def test_read_comsol_check_incomplete(filename, type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     expressions, expressions_unit, parameters, domain, domain_data \
         = io.read_comsol_header(path + type)
-    with pytest.warns(Warning, match='inconsistent'):
+    with pytest.warns(Warning, match='Specific'):
         data, coordinates = io.read_comsol(
             path + type, expressions=[expressions[0]])
     assert all(np.isnan(data.freq[:, 0, -1, -1, 1]).flatten())
     data.freq[:, 0, -1, -1, 1] = 0
-    assert any(np.isnan(data.freq.flatten()) == False)
+    assert any(~np.isnan(data.freq.flatten()))
 
 
 @pytest.mark.parametrize("filename",  [
@@ -340,13 +340,13 @@ def test_read_comsol_expressions_value(filename, type):
 def test_read_comsol_check_specific_combination(filename, type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     expressions, _, _, _, _ = io.read_comsol_header(path + type)
-    with pytest.warns(Warning, match='inconsistent'):
+    with pytest.warns(Warning, match='Specific'):
         data, coordinates = io.read_comsol(
             path + type, expressions=[expressions[0]])
     # For specific combinations shape of parameters need to be same
     assert data.cshape[2] == data.cshape[3]
     # test if the right values are nan and not nan
     for i in range(data.cshape[2]):
-        assert all(np.isnan(data.freq[:, :, i, i, :]).flatten() == False)
+        assert all(~np.isnan(data.freq[:, :, i, i, :]).flatten())
         data.freq[:, :, i, i, :] = np.nan
     assert all(np.isnan(data.freq.flatten()))
