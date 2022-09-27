@@ -1615,10 +1615,11 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
                                   data.shape)
     # average the data
     if mode == 'magnitude_phase':
-        data = [np.average(d, axis=axis, weights=weights) for d in data]
+        data = [np.average(d, axis=axis, weights=weights,
+                           keepdims=keepdims) for d in data]
         data = data[0]*np.exp(1j*data[1])
     else:
-        data = np.average(data, axis=axis, weights=weights)
+        data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
     if mode == 'power':
         data = np.sqrt(data)
     elif mode == 'log_magnitude_zerophase':
