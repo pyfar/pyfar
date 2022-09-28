@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import pyfar as pf
 import pyfar.plot._interaction as ia
 from pyfar.plot._utils import _get_quad_mesh_from_axis
+from pyfar.testing.plot_utils import create_figure
 
 # use non showing backend for speed
 mpl.use("Agg")
@@ -143,6 +144,9 @@ def test_interaction_attached():
     # with at least two channels)
     signal = pf.signals.impulse(1024, [0, 0])
 
+    # Use create figure to specify the plot backend
+    create_figure()
+
     # loop functions
     for function in getmembers(pf.plot.line, isfunction) + \
             getmembers(pf.plot.two_d, isfunction):
@@ -170,6 +174,9 @@ def test_toggle_plots(plot_type, initial_function, function_list):
     # dummy signal (needs to as longe as the default spectrogram block size
     # with at least two channels)
     signal = pf.signals.impulse(1024, [0, 1000])
+
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # initital plot
     ax = initial_function(signal)
@@ -229,6 +236,8 @@ def test_interaction_not_allowed(plot, signal, shortcut):
     Test interactions that are not allowed are caught.
     Can be extended if required in the future.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # plot signal
     ax = plot(signal)
@@ -255,6 +264,8 @@ def test_interaction_not_allowed(plot, signal, shortcut):
 def test_get_new_axis_limits(ax_type, operation, direction,
                              limits, new_limits):
     """Test calculation of new axis limits for all parameter combinations."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     test_limits = ia.get_new_axis_limits(
         limits, ax_type, operation, direction)
@@ -272,6 +283,8 @@ def test_move_and_zoom_linear():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # initialize the plot
     signal = pf.signals.impulse(1024)
@@ -335,6 +348,8 @@ def test_toggle_x_axis():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init the plot
     ax = pf.plot.freq(pf.Signal([1, 2, 3, 4, 5], 44100))
@@ -356,6 +371,8 @@ def test_toggle_y_axis():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init the plot
     ax = pf.plot.freq(pf.Signal([1, 2, 3, 4, 5], 44100))
@@ -377,6 +394,8 @@ def test_toggle_colormap():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init the plot
     ax, *_ = pf.plot.spectrogram(pf.signals.impulse(1024))
@@ -396,6 +415,9 @@ def test_toggle_orientation_2d_plots():
     Test if the orientation is toggled by comparing the axis labels before
     and after toggling.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
+
 
     signal = pf.signals.impulse(1024, [0, 1000])
     key = sc_ctr["toggle_orientation"]["key"][0]
@@ -446,6 +468,8 @@ def test_toggle_orientation_2d_plots():
 
 def test_cycle_and_toggle_lines_1d_signal():
     """Test toggling and cycling channels of a one-dimensional Signal."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init and check start conditions
     signal = pf.Signal([[1, 0], [2, 0]], 44100)
@@ -479,6 +503,8 @@ def test_cycle_and_toggle_lines_1d_signal():
 
 def test_cycle_and_toggle_lines_2d_signal():
     """Test toggling and cycling channels of a two-dimensional Signal."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init and check start conditions
     signal = pf.signals.impulse(10, [[1, 2], [3, 4]])
@@ -515,6 +541,8 @@ def test_cycle_and_toggle_lines_2d_signal():
 
 def test_cycle_and_toggle_signals():
     """Test toggling and cycling Signal slices."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init and check start conditions
     signal = pf.signals.impulse(1024, amplitude=[1, 2])
@@ -543,6 +571,8 @@ def test_cycle_and_toggle_signals():
 
 def test_cycle_plot_styles():
     """Test cycle the plot styles between line and 2d plots."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # dummy signal (needs to as longe as the default spectrogram block size
     # with at least two channels)
