@@ -1512,9 +1512,9 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     mode: string
 
         ``'time'``
-            average in time domain. Note that this might cause artifacts if
-            the data is not aligned across channels. This is equivalent of
-            averaging the complex spectra.
+            average in time domain. This is equivalent of
+            averaging the complex spectra. Note that this might cause artifacts
+            if the data is not aligned across channels.
         ``'magnitude_zerophase'``
             average the magnitude spectra and discard the phase
         ``'magnitude_phase'``
@@ -1569,8 +1569,8 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
             " but must be of type 'Signal' or 'TimeData'."))
     if type(signal) == pyfar.TimeData and mode in ('log_magnitude_zerophase',
                                                    'magnitude_zerophase',
-                                                   'magnitude_phase', 'power',
-                                                   'complex'):
+                                                   'magnitude_phase',
+                                                   'power',):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
