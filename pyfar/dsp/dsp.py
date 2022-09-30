@@ -1513,14 +1513,12 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
 
         ``'time'``
             average in time domain. Note that this might cause artifacts if
-            the data is not aligned across channels.
-        ``'complex'``
-            average the complex spectra. Note that this might cause artifacts
-            if the data is not aligned across channels.
+            the data is not aligned across channels. This is equivalent of
+            averaging the complex spectra.
         ``'magnitude_zerophase'``
             average the magnitude spectra and discard the phase
         ``'magnitude_phase'``
-            average the magnitude spectra and keep the phase
+            average the magnitude spectra and the phase seperatly.
         ``'power'``
             average the power spectra $|X|^2$ and discard the phase(zerophase).
             The squaring of the spectra is reversed before returning the
@@ -1592,9 +1590,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         axis = tuple([ax-1 if ax < 0 else ax for ax in axis])
     # convert data to desired domain
     if mode == 'time':
-        data = signal.time
-    elif mode == 'complex':
-        data = signal.freq
+        data = signal.time if signal.domain == 'time' else signal.freq
     elif mode == 'magnitude_zerophase':
         data = np.abs(signal.freq)
     elif mode == 'magnitude_phase':
@@ -1606,7 +1602,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
                                              return_prefix=True)
     else:
         raise ValueError(
-            """mode must be 'time', 'complex', 'magnitude_zerophase', 'power',
+            """mode must be 'time', 'magnitude_zerophase', 'power',
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
     # set weights default
@@ -1626,7 +1622,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         data = 10**(data/log_prefix)
     # input data into averaged_signal
     averaged_signal = signal.copy()
-    if mode == 'time':
+    if signal.domain == 'time':
         averaged_signal.time = data
     else:
         averaged_signal.freq = data
