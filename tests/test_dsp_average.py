@@ -7,8 +7,6 @@ import numpy.testing as npt
 @pytest.mark.parametrize('signal, mode, answer', (
     [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100),
      'time', [2.5, 3.5, 4.5]],
-    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
-     'complex', [2.5, 3.5, 4.5]],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
      'magnitude_zerophase', np.zeros(65)+2],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
@@ -70,8 +68,8 @@ def test_error_raises():
         pf.dsp.average(signal, 'time')
     signal = pf.TimeData([1, 2, 3], [1, 2, 3])
     with pytest.raises(ValueError,
-                       match="mode is 'complex' and signal is type"):
-        pf.dsp.average(signal, 'complex')
+                       match="mode is 'magnitude_phase' and signal is type"):
+        pf.dsp.average(signal, 'magnitude_phase')
     # test wrong axis input
     signal = pf.Signal(np.ones((2, 3, 4)), 44100)
     with pytest.raises(ValueError,
@@ -79,7 +77,7 @@ def test_error_raises():
         pf.dsp.average(signal, axis=(0, 3))
     # test invalid mode input
     with pytest.raises(ValueError,
-                       match="mode must be 'time', 'complex',"):
+                       match="mode must be 'time', 'magnitude_zerophase',"):
         pf.dsp.average(signal, mode='invalid_mode')
     with pytest.warns(UserWarning,
                       match="Averaging one dimensional axis"):
