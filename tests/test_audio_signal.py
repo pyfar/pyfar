@@ -274,7 +274,7 @@ def test_dtype():
     """Test for converting int to float upon init."""
 
     signal = Signal([1, 2, 3], 44100)
-    assert str(signal._data.dtype).startswith("float")
+    assert signal._data.dtype.kind == "f"
 
 
 def test_signal_length():
