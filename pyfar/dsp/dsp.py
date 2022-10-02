@@ -1862,8 +1862,8 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     mode: string
 
         ``'time'``
-            average `` signal.time` if the signal is in the time domain and
-            ``signal.freq` if the signal is in the frequency domain. Note that
+            average ``signal.time`` if the signal is in the time domain and
+            ``signal.freq`` if the signal is in the frequency domain. Note that
             these operations are equivalent due to the linearity of the
             averagingthis and the FFT. This mode might cause artifacts if the
             data is not aligned across channels.
