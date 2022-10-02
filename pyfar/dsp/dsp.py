@@ -1853,52 +1853,51 @@ def rms(signal):
 
 def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     """
-    Average multichannel Signals.
+    Average multi-channel Signals.
 
     Parameters
     ----------
-    signal: Signal
-        Input signal of the Signal class
+    signal: Signal, TimeData, FrequencyData
+        Input signal as pyfar audio object.
     mode: string
 
         ``'time'``
-            average in time domain. This is equivalent of
-            averaging the complex spectra. Note that this might cause artifacts
-            if the data is not aligned across channels.
+            average `` signal.time` if the signal is in the time domain and
+            ``signal.freq` if the signal is in the frequency domain. Note that
+            these operations are equivalent due to the linearity of the
+            averagingthis and the FFT. This mode might cause artifacts if the
+            data is not aligned across channels.
         ``'magnitude_zerophase'``
             average the magnitude spectra and discard the phase
         ``'magnitude_phase'``
-            average the magnitude spectra and the phase seperatly.
+            average the magnitude spectra and the unwrapped phase seperatly.
         ``'power'``
-            average the power spectra $|X|^2$ and discard the phase(zerophase).
-            The squaring of the spectra is reversed before returning the
-            averaged signal.
-        ``'log_magnitude_zerophase'``
-            average the log. magnitude spectra $20 \\log_{10}(X)$ and discard
-            the phase. The logarithm is reversed before returning the averaged
+            average the power spectra $|X|^2$ and discard the phase. The
+            squaring of the spectra is reversed before returning the averaged
             signal.
+        ``'log_magnitude_zerophase'``
+            average the logarithmic magnitude spectra $20 \\log_{10}(X)$ and
+            discard the phase. The logarithm is reversed before returning the
+            averaged signal.
 
         The default is ``'time'``
-    axis: None or int or tuple of ints, optional
+    axis: None, int, or tuple of ints, optional
         Axis or axes along which the averaging is done. Can be None, which will
-        take all channels to average the multichannel signal.  If axis is
-        negative it counts from the last to the first axis. If axis is a tuple
-        of ints, average will perform on the channels specified in the tuple.
-        The default is ``None``.
+        take average across all axes signal. Negative values refer to
+        ``signal.cshape`` to avoid averaging across the time or frequency axis.
+        If axis is a tuple of ints, average will perform on the channels
+        specified in the tuple. The default is ``None``.
     keepdims: bool, optional
         If this is true, the axis which are reduced during the averaging are
-        kept as a dimension with size one. Also, the output will broadcast
-        correctly with the input Signal. If keepdims is False and the converted
-        domain data after summing up got more then two dimensions, the data
-        will be also squeezed to the shape of axis.
-        The default is ``False``.
+        kept as a dimension with size one. Otherwise, singular dimensions will
+        be squeezed after averaging. The default is ``False``.
     weights: array like
-        array that gives channel weights for averaging the data. Must be of
-        shape which can be broadcasted to ``signal.cshape``.
-        The default is ``None``, which applies equal weights to all channels.
+        array that gives channel weights for averaging the data. Must be
+        broadcastable to ``signal.cshape``. The default is ``None``, which
+        applies equal weights to all channels.
     Returns
     --------
-    averaged_signal: Signal
+    averaged_signal: Signal, TimeData, FrequencyData
         averaged input Signal
 
     Notes
@@ -1926,6 +1925,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
+
     # check for axis
     if axis and np.max(axis) > len(signal.cshape):
         raise ValueError('The maximum of axis needs to be smaller then '
@@ -1933,6 +1933,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     # set axis default
     if axis is None:
         axis = tuple([i for i in range(len((signal.cshape)))])
+
     # check if averaging over one dimensional axis
     if 1 in signal.cshape:
         for ax in axis:
@@ -1940,6 +1941,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
                 warnings.warn(f"Averaging one dimensional axis={axis}.")
     if not isinstance(axis, int):
         axis = tuple([ax-1 if ax < 0 else ax for ax in axis])
+
     # convert data to desired domain
     if mode == 'time':
         data = signal.time if signal.domain == 'time' else signal.freq
@@ -1957,6 +1959,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
             """mode must be 'time', 'magnitude_zerophase', 'power',
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
+
     # set weights default
     if weights is not None:
         weights = np.broadcast_to(np.array(weights)[..., None],
@@ -1965,13 +1968,16 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     if mode == 'magnitude_phase':
         data = [np.average(d, axis=axis, weights=weights,
                            keepdims=keepdims) for d in data]
-        data = data[0]*np.exp(1j*data[1])
+        data = data[0] * np.exp(1j * data[1])
     else:
         data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
+
+    # reconstruct frequency data
     if mode == 'power':
         data = np.sqrt(data)
     elif mode == 'log_magnitude_zerophase':
         data = 10**(data/log_prefix)
+
     # input data into averaged_signal
     averaged_signal = signal.copy()
     if signal.domain == 'time':
