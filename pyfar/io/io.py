@@ -14,7 +14,6 @@ import warnings
 import sofar as sf
 import zipfile
 import io
-import tempfile
 import numpy as np
 
 try:
@@ -27,7 +26,6 @@ except (ModuleNotFoundError, OSError):
         "install soundfile`. If this not works search the documentation for "
         "help: https://python-soundfile.readthedocs.io")
 
-import pyfar
 from pyfar import Signal, FrequencyData, Coordinates
 from . import _codec as codec
 import pyfar.classes.filter as fo
