@@ -590,23 +590,6 @@ def read_comsol(filename, expressions=None, parameters=None):
     >>> data
     FrequencyData:
     (8, 1, 3, 4) channels with 2 frequencies
-
-    Now assume that instead of `All Combinations` only four `Specific
-    Combinations` of the incident angles were simulated and exported to
-    `comsol_sample_specific.csv`. Accordingly, the returned object contains
-    nans. Remove the nans and squeeze `cshape` by summing of the parameter
-    axes.
-
-    >>> data, coordinates = pf.io.read_comsol('comsol_sample_specific.csv')
-    UserWarning: Specific combinations is set in the Parametric Sweep in
-    Comsol. Missing data is filled with nans.
-    >>> data
-    FrequencyData:
-    (8, 1, 4, 4) channels with 2 frequencies
-    >>> data.freq = data.freq.sum(where=~np.isnan(data.freq), axis=-2)
-    >>> data
-    FrequencyData:
-    (8, 1, 4) channels with 2 frequencies
     """
 
     # check Datatype
