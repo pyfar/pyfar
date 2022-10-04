@@ -6,7 +6,7 @@ import numpy.testing as npt
 
 @pytest.mark.parametrize('signal, mode, answer', (
     [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100),
-     'time', [2.5, 3.5, 4.5]],
+     'linear', [2.5, 3.5, 4.5]],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
      'magnitude_zerophase', np.zeros(65)+2],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
@@ -21,7 +21,7 @@ def test_averaging(signal, mode, answer):
     Parametrized test for averaging data in all modi.
     """
     ave_sig = pf.dsp.average(signal, mode)
-    if mode == 'time':
+    if mode == 'linear':
         npt.assert_equal(ave_sig.time[0], answer)
     else:
         npt.assert_almost_equal(ave_sig.freq[0], answer, decimal=15)
@@ -62,10 +62,6 @@ def test_error_raises():
     with pytest.raises(TypeError, match='Input data has to be of type'):
         pf.dsp.average([1, 2, 3])
     # test wrong mode for signal types
-    signal = pf.FrequencyData([1, 2, 3], [1, 2, 3])
-    with pytest.raises(ValueError,
-                       match="mode is 'time' and signal is type"):
-        pf.dsp.average(signal, 'time')
     signal = pf.TimeData([1, 2, 3], [1, 2, 3])
     with pytest.raises(ValueError,
                        match="mode is 'magnitude_phase' and signal is type"):
@@ -77,7 +73,7 @@ def test_error_raises():
         pf.dsp.average(signal, axis=(0, 3))
     # test invalid mode input
     with pytest.raises(ValueError,
-                       match="mode must be 'time', 'magnitude_zerophase',"):
+                       match="mode must be 'linear', 'magnitude_zerophase',"):
         pf.dsp.average(signal, mode='invalid_mode')
     with pytest.warns(UserWarning,
                       match="Averaging one dimensional axis"):

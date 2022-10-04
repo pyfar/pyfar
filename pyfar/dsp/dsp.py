@@ -1851,7 +1851,7 @@ def rms(signal):
     return np.sqrt(power(signal))
 
 
-def average(signal, mode='time', axis=None, keepdims=False, weights=None):
+def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
     """
     Average multi-channel Signals.
 
@@ -1861,11 +1861,11 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         Input signal as pyfar audio object.
     mode: string
 
-        ``'time'``
+        ``'linear'``
             average ``signal.time`` if the signal is in the time domain and
             ``signal.freq`` if the signal is in the frequency domain. Note that
             these operations are equivalent due to the linearity of the
-            averagingthis and the FFT. This mode might cause artifacts if the
+            averaging and the FFT. This mode might cause artifacts if the
             data is not aligned across channels.
         ``'magnitude_zerophase'``
             average the magnitude spectra and discard the phase
@@ -1876,25 +1876,25 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
             squaring of the spectra is reversed before returning the averaged
             signal.
         ``'log_magnitude_zerophase'``
-            average the logarithmic magnitude spectra $20 \\log_{10}(X)$ and
+            average the logarithmic magnitude spectra $20 \\log_{10}(|X|)$ and
             discard the phase. The logarithm is reversed before returning the
             averaged signal.
 
-        The default is ``'time'``
+        The default is ``'linear'``
     axis: None, int, or tuple of ints, optional
-        Axis or axes along which the averaging is done. Can be None, which will
-        take average across all axes signal. Negative values refer to
-        ``signal.cshape`` to avoid averaging across the time or frequency axis.
-        If axis is a tuple of ints, average will perform on the channels
-        specified in the tuple. The default is ``None``.
-    keepdims: bool, optional
-        If this is true, the axis which are reduced during the averaging are
-        kept as a dimension with size one. Otherwise, singular dimensions will
-        be squeezed after averaging. The default is ``False``.
+        Axis or axes along which the averaging is done. Can be ``None``, which
+        will calculate the average across all channel axes. Negative values
+        refer to ``signal.cshape`` to avoid averaging across the time or
+        frequency axis. If axis is a tuple of ints, average will perform on the
+        channels specified in the tuple. The default is ``None``.
     weights: array like
-        array that gives channel weights for averaging the data. Must be
+        array with channel weights for averaging the data. Must be
         broadcastable to ``signal.cshape``. The default is ``None``, which
         applies equal weights to all channels.
+    keepdims: bool, optional
+        If this is ``True``, the axes which are reduced during the averaging
+        are kept as a dimension with size one. Otherwise, singular dimensions
+        will be squeezed after averaging. The default is ``False``.
     Returns
     --------
     averaged_signal: Signal, TimeData, FrequencyData
@@ -1913,11 +1913,6 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
                                pyfar.TimeData)):
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
-
-    if type(signal) == pyfar.FrequencyData and mode == 'time':
-        raise ValueError((
-            f"mode is '{mode}' and signal is type '{signal.__class__}'"
-            " but must be of type 'Signal' or 'TimeData'."))
     if type(signal) == pyfar.TimeData and mode in ('log_magnitude_zerophase',
                                                    'magnitude_zerophase',
                                                    'magnitude_phase',
@@ -1943,7 +1938,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
         axis = tuple([ax-1 if ax < 0 else ax for ax in axis])
 
     # convert data to desired domain
-    if mode == 'time':
+    if mode == 'linear':
         data = signal.time if signal.domain == 'time' else signal.freq
     elif mode == 'magnitude_zerophase':
         data = np.abs(signal.freq)
@@ -1956,7 +1951,7 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
                                              return_prefix=True)
     else:
         raise ValueError(
-            """mode must be 'time', 'magnitude_zerophase', 'power',
+            """mode must be 'linear', 'magnitude_zerophase', 'power',
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
 
@@ -1978,14 +1973,15 @@ def average(signal, mode='time', axis=None, keepdims=False, weights=None):
     elif mode == 'log_magnitude_zerophase':
         data = 10**(data/log_prefix)
 
-    # input data into averaged_signal
-    averaged_signal = signal.copy()
-    if signal.domain == 'time':
-        averaged_signal.time = data
+    # return average data as pyfar object, depending on input signal type
+    if isinstance(signal, pyfar.Signal):
+        return pyfar.Signal(data, signal.sampling_rate, signal.n_samples,
+                            signal.domain, signal.fft_norm, signal.comment)
+    elif isinstance(signal, pyfar.TimeData):
+        return pyfar.TimeData(data, signal.times, signal.comment, signal.dtype)
     else:
-        averaged_signal.freq = data
-
-    return averaged_signal
+        return pyfar.FrequencyData(data, signal.frequencies, signal.comment,
+                                   signal.dtype)
 
 
 def normalize(signal, reference_method='max', domain='time',
