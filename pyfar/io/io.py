@@ -15,7 +15,6 @@ import warnings
 import sofar as sf
 import zipfile
 import io
-import tempfile
 import numpy as np
 import re
 
