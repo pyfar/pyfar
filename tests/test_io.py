@@ -495,14 +495,19 @@ def test_read_audio_stereo(read_mock):
     assert signal.sampling_rate == 1000
 
 
-@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
 @pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())
+@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
 def test_write_audio(audio_format, subtype, tmpdir, noise):
     """Test all available audio formats and subtypes."""
     if soundfile.check_format(audio_format, subtype):
         filename = os.path.join(tmpdir, 'test_file.'+audio_format)
-        if audio_format == 'AIFF' and subtype == 'DWVW_12':
-            # This seems to be an error in soundfile/libsndfile?
+        # Catch Errors due to soundfile/libsndfile
+        libsndfile_errors = [('AIFF', 'DWVW_12'),
+                             ('MP3', 'MPEG_LAYER_I'),
+                             ('MP3', 'MPEG_LAYER_II'),
+                             ('OGG', 'OPUS'),
+                             ('WAV', 'MPEG_LAYER_III')]
+        if (audio_format, subtype) in libsndfile_errors:
             with pytest.raises(RuntimeError):
                 io.write_audio(noise, filename, subtype=subtype)
         else:
@@ -553,72 +558,47 @@ def test_write_audio_clip(sf_write_mock):
             signal=signal, filename='test.wav', subtype='PCM_16')
 
 
-@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
 @pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())
+@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
 def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
     """Test all reading and writing of available audio formats and subtypes."""
     if soundfile.check_format(audio_format, subtype):
         filename = os.path.join(tmpdir, 'test_file.'+audio_format)
         # Write Audio file
-        # For exceptions see tests below
-        if audio_format == 'AIFF' and subtype == 'DWVW_12':
+        # Some combinations of formats and subtype cause libsndfile errors
+        libsndfile_errors = [('AIFF', 'DWVW_12'),
+                             ('MP3', 'MPEG_LAYER_I'),
+                             ('MP3', 'MPEG_LAYER_II'),
+                             ('OGG', 'OPUS'),
+                             ('WAV', 'MPEG_LAYER_III')]
+        if (audio_format, subtype) in libsndfile_errors:
             with pytest.raises(RuntimeError):
                 io.write_audio(noise, filename, subtype=subtype)
         else:
             io.write_audio(noise, filename, subtype=subtype)
-        # Read Audio file
-        # For exceptions see tests below
-        if audio_format == 'AIFF' and 'DWVW' in subtype:
-            # This seems to be an error in soundfile/libsndfile?
-            with pytest.raises(RuntimeError):
-                io.read_audio(filename)
-        elif audio_format == 'RAW':
-            if 'DWVW' in subtype:
+            # Read Audio file
+            # Some combinations of formats and subtype cause libsndfile errors
+            if audio_format == 'AIFF' and 'DWVW' in subtype:
                 with pytest.raises(RuntimeError):
+                    io.read_audio(filename)
+            elif audio_format == 'RAW':
+                if 'DWVW' in subtype:
+                    with pytest.raises(RuntimeError):
+                        io.read_audio(
+                            filename, samplerate=44100, channels=1,
+                            subtype=subtype)
+                else:
+                    # RAW files need to be read with additional parameters
                     io.read_audio(
                         filename, samplerate=44100, channels=1,
                         subtype=subtype)
             else:
-                # RAW files need to be read with additional parameters
-                io.read_audio(
-                    filename, samplerate=44100, channels=1, subtype=subtype)
-        else:
-            # A comparison between written and read signals is not implemented
-            # due to the difference caused by the coding
-            io.read_audio(filename)
+                # A comparison between written and read signals is not
+                # implemented due to the difference caused by the coding
+                io.read_audio(filename)
     # In some cases a file 'C._t' is created
     if os.path.exists('C._t'):
         os.remove('C._t')
-
-
-@pytest.mark.parametrize(
-    "subtype", soundfile.available_subtypes('AIFF').keys())
-def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
-    """Test for errors in soundfile/libsndfile for AIFF format"""
-    filename = os.path.join(tmpdir, 'test_file.aiff')
-    if subtype == 'DWVW_12':
-        with pytest.raises(RuntimeError):
-            io.write_audio(noise, filename, subtype=subtype)
-    else:
-        io.write_audio(noise, filename, subtype=subtype)
-    if 'DWVW' in subtype:
-        with pytest.raises(RuntimeError):
-            io.read_audio(filename)
-    else:
-        io.read_audio(filename)
-
-
-@pytest.mark.parametrize("subtype", soundfile.available_subtypes('RAW').keys())
-def test_write_audio_read_audio_raw(subtype, tmpdir, noise):
-    """Test for errors in soundfile/libsndfile for RAW format"""
-    filename = os.path.join(tmpdir, 'test_file.raw')
-    io.write_audio(noise, filename, subtype=subtype)
-    if 'DWVW' in subtype:
-        with pytest.raises(RuntimeError):
-            io.read_audio(
-                filename, samplerate=44100, channels=1, subtype=subtype)
-    else:
-        io.read_audio(filename, samplerate=44100, channels=1, subtype=subtype)
 
 
 def test_write_audio_pathlib(noise, tmpdir):
