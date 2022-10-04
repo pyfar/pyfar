@@ -16,6 +16,10 @@ from .dsp import (
     deconvolve,
     convolve,
     decibel,
+    energy,
+    power,
+    rms,
+    normalize,
 )
 
 from .interpolation import (
@@ -49,8 +53,12 @@ __all__ = [
     'deconvolve',
     'convolve',
     'decibel',
+    'energy',
+    'power',
+    'rms',
     'InterpolateSpectrum',
     'smooth_fractional_octave',
     'resample',
+    'normalize',
     'fractional_time_shift'
 ]

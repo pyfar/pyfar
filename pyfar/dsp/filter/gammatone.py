@@ -364,7 +364,7 @@ class GammatoneBands():
 
         Notes
         -----
-        -``sqrt(real.time**2 + imag.time**2)`` gives the envelope of the
+        - ``sqrt(real.time**2 + imag.time**2)`` gives the envelope of the
           Gammatone filter output.
         - If the cshape of the output signals ``real.cshape`` and
           ``imag.cshape`` generally is ``(self.n_bands, ) + signal.cshape``.

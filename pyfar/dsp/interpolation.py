@@ -319,7 +319,8 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         >>> pf.plot.group_delay(signal, ax=ax[2], unit="samples")
         >>>
         >>> for order in [30, 6]:
-        >>>     delayed = pf.dsp.fractional_time_shift(signal, 2.3, order)
+        >>>     delayed = pf.dsp.fractional_time_shift(
+        ...         signal, 2.3, order=order)
         >>>     pf.plot.time_freq(delayed, ax=ax[:2],
         ...                       label=f"delayed, order={order}")
         >>>     pf.plot.group_delay(delayed, ax=ax[2], unit="samples")

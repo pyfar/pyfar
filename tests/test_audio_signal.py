@@ -3,6 +3,7 @@ import numpy.testing as npt
 import pytest
 
 from pyfar import Signal
+import pyfar as pf
 
 
 def test_signal_init():
@@ -23,6 +24,60 @@ def test_signal_init_default_parameter():
     assert signal.fft_norm == 'none'
     assert signal.comment == 'none'
     assert signal.fft_norm == 'none'
+
+
+def test_signal_init_assertions():
+    """Test assertions in initialization"""
+
+    with pytest.raises(ValueError, match="Invalid FFT normalization"):
+        Signal(1, 44100, fft_norm="funky")
+
+    with pytest.raises(ValueError, match="n_samples can not be larger"):
+        Signal(1, 44100, domain="freq", n_samples=10)
+
+    with pytest.raises(ValueError, match="Invalid domain"):
+        Signal(1, 44100, domain="space")
+
+
+def test_signal_init_time_dtype():
+    """
+    Test casting and assertions of dtype (also test time setter because
+    it is called during initialization)
+    """
+    # integer to float casting
+    signal = Signal([1, 2, 3], 44100)
+    assert signal.time.dtype.kind == "f"
+
+    # float
+    signal = Signal([1., 2., 3.], 44100)
+    assert signal.time.dtype.kind == "f"
+
+    # complex
+    with pytest.raises(ValueError, match="time data is complex"):
+        Signal([1+1j, 2+2j, 3+3j], 44100)
+
+
+def test_data_frequency_init_dtype():
+    """
+    Test casting and assertions of dtype (also test freq setter because
+    it is called during initialization)
+    """
+
+    # integer to float casting
+    signal = Signal([1, 2, 3], 44100, 4, "freq")
+    assert signal.freq.dtype.kind == "c"
+
+    # float
+    signal = Signal([1., 2., 3.], 44100, 4, "freq")
+    assert signal.freq.dtype.kind == "c"
+
+    # complex
+    signal = Signal([1+1j, 2+2j, 3+3j], 44100, 4, "freq")
+    assert signal.freq.dtype.kind == "c"
+
+    # object array
+    with pytest.raises(ValueError, match="frequency data is"):
+        Signal(["1", "2", "3"], 44100, 4, "freq")
 
 
 def test_signal_comment():
@@ -216,10 +271,10 @@ def test_setter_fft_norm():
 
 
 def test_dtype():
-    """Test for the getter of dtype."""
-    dtype = float
-    signal = Signal([1, 2, 3], 44100, dtype=dtype)
-    assert signal.dtype == dtype
+    """Test for converting int to float upon init."""
+
+    signal = Signal([1, 2, 3], 44100)
+    assert signal._data.dtype.kind == "f"
 
 
 def test_signal_length():
@@ -286,6 +341,14 @@ def test_magic_setitem_wrong_n_samples():
     set_signal = Signal([1, 2, 3], 44100)
     with pytest.raises(ValueError, match='number of samples does not match'):
         signal[0] = set_signal
+
+
+@pytest.mark.parametrize("audio", (
+    pf.TimeData([1, 2], [1, 2]), pf.FrequencyData([1, 2], [1, 2])))
+def test_magic_setitem_wrong_type(audio):
+    signal = Signal([1, 2, 3, 4], 44100)
+    with pytest.raises(ValueError, match="Comparison only valid"):
+        signal[0] = audio
 
 
 def test_magic_len():
@@ -419,3 +482,28 @@ def test_setter_freq_raw_warning():
     signal = Signal([1, 2, 3], 44100, domain='freq', n_samples=4)
     with pytest.warns(UserWarning, match="Number of frequency bins changed"):
         signal.freq_raw = [1, 2, 3, 4]
+
+
+def test_setter_freq_raw_dtype():
+    """
+    Test casting and assertions of dtype (not tested during initialization
+    because that calls the `freq` setter)
+    """
+    signal = Signal([0, 1, 2], 44100, 4, "freq")
+
+    # integer to float casting
+    signal.freq_raw = [1, 2, 3]
+    assert signal.freq_raw.dtype.kind == "c"
+    npt.assert_allclose(signal.freq_raw, np.array([[1., 2., 3.]]))
+
+    # float
+    signal.freq_raw = [1., 2., 3.]
+    assert signal.freq_raw.dtype.kind == "c"
+
+    # complex
+    signal.freq_raw = [1+1j, 2+2j, 3+3j]
+    assert signal.freq_raw.dtype.kind == "c"
+
+    # object array
+    with pytest.raises(ValueError, match="frequency data is"):
+        signal.freq_raw = ["1", "2", "3"]
