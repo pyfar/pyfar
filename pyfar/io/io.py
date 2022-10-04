@@ -513,33 +513,36 @@ def read_comsol(filename, expressions=None, parameters=None):
     expressions : list of strings, optional
         This parameter defines which parts of the COMSOL data is
         returned as a pyfar FrequencyData or TimeData object. By default, all
-        expressions are returned. An example can be like
-        ``expressions=['pabe.Lp_t']``.
+        expressions are returned. The COMSOL terminology is used, e.g.,
+        ``expressions=['pabe.p_t']``.
         Further information and a list of all expressions can be obtained with
         :py:func:`~pyfar.io.read_comsol_header`.
-    parameters : dict
-        Solutions or expressions can be evalueted for different parameters,
-        such as differnet angles or other parameter. This input dict contains
-        the parameters, which can be extracted from the comsol file. An
-        example can be like
+    parameters : dict, optional
+        COMSOL supports `Parametric Sweeps` to vary certain parameters in a
+        sequence of simulations. The `parameters` dict contains the parameters
+        and the parameter values that should be included in the returned data.
+        For example, in a study with a varying angle, the dict could be
         ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
-        A list of all expressions can be obtained with
-        :py:func:`~pyfar.io.read_comsol_header`. Default is None, then all
-        parameters are read.
+        A list of all parameters included in a file can be obtained with
+        :py:func:`~pyfar.io.read_comsol_header`. The default is ``None``, which
+        means all parameters are included.
 
     Returns
     -------
     data : FrequencyData, TimeData
-        Returns a TimeData or FrequencyData object depending on the input data.
-        The output data always have the cshape (#points, #expressions,
-        #parameter1, #parameter2, ...). If no parameters are used, this
-        dimension is neglected.
+        Returns a TimeData or FrequencyData object depending the domain of the
+        input data. The output has the `cshape` (#points, #expressions,
+        #parameter1, #parameter2, ...). In case of missing parameter value
+        combinations in the input, the missing data is filled with nans.
+        If the input does not include parameters, the `cshape` is just
+        (#points, #expressions).
     coordinates : Coordinates
-        A Coordinates Object based on the Input path. The coordinate system is
-        always cartesian. If the input dimension is lower than three, the
-        missing dimensions are set to zero. If there are no positions given,
-        this parameter will not be returned. The cshape of this object is
-        (#points,). If no coordinates are given ``None`` is returned.
+        Evaluation points extracted from the input file as Coordinates object.
+        The coordinate system is always cartesian. If the input dimension is
+        lower than three, missing dimensions are set to zero.
+        If the input file does not include evaluation points (e.g., in case of
+        non-local datasets such as averages or integrals) no `coordinates` are
+        returned.
 
     Examples
     --------
@@ -715,21 +718,20 @@ def read_comsol(filename, expressions=None, parameters=None):
         y = coords_data[:, 1] if n_dimension > 1 else np.zeros_like(x)
         z = coords_data[:, 2] if n_dimension > 2 else np.zeros_like(x)
         coordinates = Coordinates(x, y, z)
+        return data, coordinates
     else:
-        coordinates = None
-    return data, coordinates
+        return data
 
 
 def read_comsol_header(filename):
-    """Returns header information from exported data from COMSOL.
+    """Read header information on exported data from COMSOL Multiphysics.
 
     .. note::
         The data is created by defining at least one `Expression` within a
         `Data` node in Comsol's `Results/Export` section. The `data format`
         needs to be `Spreadsheet`. This function supports several `Expressions`
         as well as results for `Parametric Sweeps`.
-        For more information see
-        :py:func:`~pyfar.io.read_comsol_header`.
+        For more information see below.
 
     Parameters
     ----------
@@ -741,43 +743,38 @@ def read_comsol_header(filename):
     Returns
     -------
     expressions : list of strings
-        The expressions in COMSOL are the pysical property of the calculated
-        solution, e.g. total sound pressure in Pa. The expression depends on
-        the physics and have unit. Multiple expressions are possible in one
-        file. An example can be like ``expressions=['pabe.p_t']``.
-    expressions_unit : list of strings
-        This list of expressions unit defines the units of the output
-        expressions. An example can be like ``expressions_unit=['Pa']``.
+        When exporting data in COMSOL, certain `Expressions` need to be
+        specified that define the physical quantities to be exported. This
+        function returns the expressions as a list, e.g.,
+        ``expressions=['pabe.p_t']``.
+    units : list of strings
+        List of the units corresponding to `expressions`, e.g.,
+        ``units=['Pa']``.
     parameters : dict
-        Solutions or expressions can be evalueted for different parameters,
-        such as differnet angles or other parameters. This dict contains all
-        parameters from the input file. If no parameters are available, an
-        emtpy dict is returnd. This dict is same for `All Combinations` and
-        `Specific Conbinations`. An example can be like
-        ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
+        COMSOL supports `Parametric Sweeps` to vary certain parameters in a
+        sequence of simulations. This function returns the parameters
+        and the parameter values as a dict. For example, in a study with a
+        varying angle, the dict could be ``parameters={'theta': [0.0, 0.7854],
+        'phi': [0., 1.5708]}``. If the input does not include parameters, an
+        emtpy dict is returnd. Note that the dict is same for
+        `All Combinations` and `Specific Combinations` of parameters as a
+        distinction is not possible based due to the data format.
     domain : string
-        Returns the domain of the input data. Note that ``'lambda'`` domain
-        data is not allowed.
-
-        ``'freq'``
-            The data are in frequency domain.
-        ``'time'``
-            The data are in time domain.
+        Domain of the input data. Only time domain (``'time'``) or
+        frequency domain (``'freq'``) simulations are supported.
     domain_data : list
         List containing the time samples or frequency bins depending
-        on the data in the input file.
+        on the domain of the data in the input file.
 
     Examples
     --------
-    Assuming a Pressure Acoustics BEM Simulation in COMSOL Multipysics. The
-    total sound pressure was exported. Accordingly the expression is
-    ``pabe.p_t`` with the Unit ``Pa``. Furthermore, incident angles and two
-    frequncy bins were set in a ``Parametric Sweep``. The incident angles are
-    defined in parameters and the frequeny bins (domain ``freq``) in
-    ``domain_data``. The output would be same for `All Combinations` and
-    `Specific Conbinations`.
+    Assume a `Pressure Acoustics BEM Simulation` (named "pabe" in COMSOL) for
+    two frequencies 100 Hz and 500 Hz including a `Parametric Sweep` of certain
+    incident angles theta and phi for the incident sound wave. The sound
+    pressure ("p_t") is exported to a file `comsol_sample.csv`.
 
-    >>> import pyfar as pf
+    Obtain information on the input file.
+
     >>> expressions, units, parameters, domain, domain_data = \\
     >>>     pf.io.read_comsol_header('comsol_sample.csv')
     >>> expressions
