@@ -42,6 +42,7 @@ History
 * `pyfar.io`
 
   * Added `read_comsol` and `read_comsol_header` to import data from COMSOL (PR #339)
+  * Include updates incl. MP3 support from `soundfile v0.11.0 <https://python-soundfile.readthedocs.io/en/0.11.0/#news>`_ for `write_audio` and `read_audio` (PR #365)
 
 * `pyfar.plot`
 
