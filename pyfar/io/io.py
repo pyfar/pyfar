@@ -301,8 +301,8 @@ def read_audio(filename, dtype='float64', **kwargs):
     """
     Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
 
-    Reads 'wav', 'aiff', 'ogg', and 'flac' files among others. For a complete
-    list see :py:func:`audio_formats`.
+    Reads 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
+    complete list see :py:func:`audio_formats`.
 
     Parameters
     ----------
@@ -345,11 +345,11 @@ def read_audio(filename, dtype='float64', **kwargs):
 
 def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     """
-    Write a :py:class:`~pyfar.classes.audio.Signal` object as a audio file to
+    Write a :py:class:`~pyfar.classes.audio.Signal` object as an audio file to
     disk.
 
-    Writes 'wav', 'aiff', 'ogg', and 'flac' files among others. For a complete
-    list see :py:func:`audio_formats`.
+    Writes 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
+    complete list see :py:func:`audio_formats`.
 
     Parameters
     ----------
