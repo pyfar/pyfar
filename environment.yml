@@ -11,6 +11,6 @@ dependencies:
   - pip:
     - urllib3
     - deepdiff
-    - soundfile
+    - soundfile>=0.11.0
     - sofar>=0.1.2
     - pyfar

@@ -18,7 +18,7 @@ requirements = [
     'sofar>=0.1.2',
     'urllib3',
     'deepdiff',
-    'soundfile'
+    'soundfile>=0.11.0'
 ]
 
 setup_requirements = ['pytest-runner', ]
