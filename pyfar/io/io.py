@@ -759,7 +759,7 @@ def read_comsol_header(filename):
         'phi': [0., 1.5708]}``. If the input does not include parameters, an
         emtpy dict is returnd. Note that the dict is same for
         `All Combinations` and `Specific Combinations` of parameters as a
-        distinction is not possible based due to the data format.
+        distinction is not possible due to the data format.
     domain : string
         Domain of the input data. Only time domain (``'time'``) or
         frequency domain (``'freq'``) simulations are supported.
