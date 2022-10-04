@@ -546,11 +546,30 @@ def read_comsol(filename, expressions=None, parameters=None):
 
     Examples
     --------
-    Assuming a Pressure Acoustics BEM Simulation in COMSOL Multipysics. In a
-    `Parametric Sweep` `All Combinations` of incident angles for the incident
-    sound wave is given. All parameters are read.
+    Assume a `Pressure Acoustics BEM Simulation` (named "pabe" in COMSOL) for
+    two frequencies including a `Parametric Sweep` with `All Combinations` of
+    certain incident angles theta and phi for the incident sound wave.
+    The sound pressure ("p_t") is exported to a file `comsol_sample.csv`.
 
-    >>> import pyfar as pf
+    Obtain information on the input file with
+    :py:func:`~pyfar.io.read_comsol_header`.
+
+    >>> expressions, units, parameters, domain, domain_data = \\
+    >>>     pf.io.read_comsol_header('comsol_sample.csv')
+    >>> expressions
+    ['pabe.p_t']
+    >>> units
+    ['Pa']
+    >>> parameters
+    {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
+     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> domain
+    'freq'
+    >>> domain_data
+    [100.0, 500.0]
+
+    Read the data including all parameter combinations.
+
     >>> data, coordinates = pf.io.read_comsol('comsol_sample.csv')
     >>> data
     FrequencyData:
@@ -561,36 +580,24 @@ def read_comsol(filename, expressions=None, parameters=None):
     coordinates: x in meters, y in meters, z in meters
     Does not contain sampling weights
 
-    Assuming a Pressure Acoustics BEM Simulation in COMSOL Multipysics. In a
-    `Parametric Sweep` `All Combinations` of incident angles for the incident
-    sound wave is given. Here a subset of the parameters is read.
+    Read the data with a subset of the parameters.
 
-    >>> import pyfar as pf
-    >>> _, _, parameters, _, _ = pf.io.read_comsol_header('comsol_sample.csv')
-    >>> parameters
-    {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
-     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
-    >>> parameters['theta'] = parameters['theta'][1:]
-    {'theta': [1.5708, 2.3562, 3.1416],
-     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> parameter_subset = {
+            'theta': [1.5708, 2.3562, 3.1416],
+            'phi': [0.0, 1.5708, 3.1416, 4.7124]}
     >>> data, coordinates = pf.io.read_comsol(
-    >>>     'comsol_sample.csv', parameters=parameters)
+    >>>     'comsol_sample.csv', parameters=parameter_subset)
     >>> data
     FrequencyData:
     (8, 1, 3, 4) channels with 2 frequencies
-    >>> coordinates
-    1D Coordinates object with 8 points of cshape (8,)
-    domain: cart, convention: right, unit: met
-    coordinates: x in meters, y in meters, z in meters
-    Does not contain sampling weights
 
-    Assuming a Pressure Acoustics BEM Simulation in COMSOL Multipysics. In a
-    `Parametric Sweep` `Specific Combinations` of incident angles for the
-    incident sound wave is given. All parameters are read. Then the nans are
-    removed from the data and 4x4 dimention is squeezed to 4.
+    Now assume that instead of `All Combinations` only four `Specific
+    Combinations` of the incident angles were simulated and exported to
+    `comsol_sample_specific.csv`. Accordingly, the returned object contains
+    nans. Remove the nans and squeeze `cshape` by summing of the parameter
+    axes.
 
-    >>> import pyfar as pf
-    >>> data, coordinates = pf.io.read_comsol('comsol_sample.csv')
+    >>> data, coordinates = pf.io.read_comsol('comsol_sample_specific.csv')
     UserWarning: Specific combinations is set in the Parametric Sweep in
     Comsol. Missing data is filled with nans.
     >>> data
@@ -600,11 +607,6 @@ def read_comsol(filename, expressions=None, parameters=None):
     >>> data
     FrequencyData:
     (8, 1, 4) channels with 2 frequencies
-    >>> coordinates
-    1D Coordinates object with 8 points of cshape (8,)
-    domain: cart, convention: right, unit: met
-    coordinates: x in meters, y in meters, z in meters
-    Does not contain sampling weights
     """
 
     # check Datatype
