@@ -1366,7 +1366,7 @@ def find_impulse_response_start(
     """
     ir_squared = np.abs(impulse_response.time)**2
 
-    mask_start = np.int(0.9*impulse_response.n_samples)
+    mask_start = int(0.9*impulse_response.n_samples)
 
     mask = np.arange(mask_start, ir_squared.shape[-1])
     noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
