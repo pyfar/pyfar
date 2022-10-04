@@ -18,6 +18,6 @@ deepdiff
 insipid-sphinx-theme
 tox-wheel
 autodocsumm
-soundfile
+soundfile>=0.11.0
 sofar>=0.1.2
 nbmake>=0.7.0
