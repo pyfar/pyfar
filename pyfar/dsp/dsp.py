@@ -1853,32 +1853,32 @@ def rms(signal):
 
 def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
     """
-    Average multi-channel Signals.
+    Average multi-channel signals.
 
     Parameters
     ----------
     signal: Signal, TimeData, FrequencyData
-        Input signal as pyfar audio object.
+        Input signal.
     mode: string
 
         ``'linear'``
-            average ``signal.time`` if the signal is in the time domain and
+            Average ``signal.time`` if the signal is in the time domain and
             ``signal.freq`` if the signal is in the frequency domain. Note that
-            these operations are equivalent due to the linearity of the
-            averaging and the FFT. This mode might cause artifacts if the
-            data is not aligned across channels.
+            these operations are equivalent for `Signal` objects due to the
+            linearity of the averaging and the FFT. This mode might cause
+            artifacts if the data is not aligned across channels.
         ``'magnitude_zerophase'``
-            average the magnitude spectra and discard the phase
+            Average the magnitude spectra and discard the phase.
         ``'magnitude_phase'``
-            average the magnitude spectra and the unwrapped phase seperatly.
+            Average the magnitude spectra and the unwrapped phase separatly.
         ``'power'``
-            average the power spectra :math:`|X|^2` and discard the phase. The
+            Average the power spectra :math:`|X|^2` and discard the phase. The
             squaring of the spectra is reversed before returning the averaged
             signal.
         ``'log_magnitude_zerophase'``
-            average the logarithmic magnitude spectra
-            :math:`20 \\log_{10}(|X|)` and discard the phase. The logarithm is
-            reversed before returning the averaged signal.
+            Average the logarithmic magnitude spectra using
+            :py:func:`~pyfar.dsp.decibel` and discard the phase. The logarithm
+            is reversed before returning the averaged signal.
 
         The default is ``'linear'``
     axis: None, int, or tuple of ints, optional
@@ -1888,23 +1888,24 @@ def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
         frequency axis. If axis is a tuple of ints, average will perform on the
         channels specified in the tuple. The default is ``None``.
     weights: array like
-        array with channel weights for averaging the data. Must be
+        Array with channel weights for averaging the data. Must be
         broadcastable to ``signal.cshape``. The default is ``None``, which
         applies equal weights to all channels.
     keepdims: bool, optional
         If this is ``True``, the axes which are reduced during the averaging
         are kept as a dimension with size one. Otherwise, singular dimensions
         will be squeezed after averaging. The default is ``False``.
+
     Returns
     --------
     averaged_signal: Signal, TimeData, FrequencyData
-        averaged input Signal
+        Averaged input Signal.
 
     Notes
     -----
     The functions :py:func:`~pyfar.dsp.linear_phase` and
-    :py:func:`~pyfar.dsp.minimum_phase` can be used to obtain non-zero phase
-    responses. This can be usefull if the average mode discards the phase.
+    :py:func:`~pyfar.dsp.minimum_phase` can be used to obtain a phase for
+    magnitude spectra after using a mode that discards the phase.
 
     """
 
