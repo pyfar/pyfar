@@ -7,6 +7,8 @@ import numpy.testing as npt
 @pytest.mark.parametrize('signal, mode, answer', (
     [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100),
      'linear', [2.5, 3.5, 4.5]],
+    [pf.TimeData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
+     'linear', [2.5, 3.5, 4.5]],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
      'magnitude_zerophase', np.zeros(65)+2],
     [pf.signals.impulse(128, [0, 2], [1, 3]),

@@ -1978,10 +1978,9 @@ def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
         return pyfar.Signal(data, signal.sampling_rate, signal.n_samples,
                             signal.domain, signal.fft_norm, signal.comment)
     elif isinstance(signal, pyfar.TimeData):
-        return pyfar.TimeData(data, signal.times, signal.comment, signal.dtype)
+        return pyfar.TimeData(data, signal.times, signal.comment)
     else:
-        return pyfar.FrequencyData(data, signal.frequencies, signal.comment,
-                                   signal.dtype)
+        return pyfar.FrequencyData(data, signal.frequencies, signal.comment)
 
 
 def normalize(signal, reference_method='max', domain='time',
