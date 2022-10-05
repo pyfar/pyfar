@@ -1872,13 +1872,13 @@ def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
         ``'magnitude_phase'``
             average the magnitude spectra and the unwrapped phase seperatly.
         ``'power'``
-            average the power spectra $|X|^2$ and discard the phase. The
+            average the power spectra :math:`|X|^2` and discard the phase. The
             squaring of the spectra is reversed before returning the averaged
             signal.
         ``'log_magnitude_zerophase'``
-            average the logarithmic magnitude spectra $20 \\log_{10}(|X|)$ and
-            discard the phase. The logarithm is reversed before returning the
-            averaged signal.
+            average the logarithmic magnitude spectra
+            :math:`20 \\log_{10}(|X|)` and discard the phase. The logarithm is
+            reversed before returning the averaged signal.
 
         The default is ``'linear'``
     axis: None, int, or tuple of ints, optional
