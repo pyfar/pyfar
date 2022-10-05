@@ -1851,7 +1851,7 @@ def rms(signal):
     return np.sqrt(power(signal))
 
 
-def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
+def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
     """
     Average multi-channel signals.
 
@@ -1880,12 +1880,11 @@ def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
             is reversed before returning the averaged signal.
 
         The default is ``'linear'``
-    axis: None, int, or tuple of ints, optional
-        Axis or axes along which the averaging is done. Can be ``None``, which
-        will calculate the average across all channel axes. Negative values
-        refer to ``signal.cshape`` to avoid averaging across the time or
-        frequency axis. If axis is a tuple of ints, average will perform on the
-        channels specified in the tuple. The default is ``None``.
+    caxis: None, int, or tuple of ints, optional
+        Channel axis or axes along which the averaging is done. The default
+        ``None``, average across all channel axes. See
+        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
+        information.
     weights: array like
         Array with channel weights for averaging the data. Must be
         broadcastable to ``signal.cshape``. The default is ``None``, which
@@ -1921,21 +1920,23 @@ def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
 
-    # check for axis
-    if axis and np.max(axis) > len(signal.cshape):
-        raise ValueError('The maximum of axis needs to be smaller then '
-                         'len(signal.cshape).')
-    # set axis default
-    if axis is None:
-        axis = tuple([i for i in range(len((signal.cshape)))])
+    # check for caxis
+    if caxis and np.max(caxis) > len(signal.cshape):
+        raise ValueError(('The maximum of caxis needs to be smaller then '
+                          'len(signal.cshape).'))
+    # set caxis default
+    if caxis is None:
+        caxis = tuple([i for i in range(len((signal.cshape)))])
 
-    # check if averaging over one dimensional axis
+    # check if averaging over one dimensional caxis
     if 1 in signal.cshape:
-        for ax in axis:
+        for ax in caxis:
             if signal.cshape[ax] == 1:
-                warnings.warn(f"Averaging one dimensional axis={axis}.")
-    if not isinstance(axis, int):
-        axis = tuple([ax-1 if ax < 0 else ax for ax in axis])
+                warnings.warn(f"Averaging one dimensional caxis={caxis}.")
+    if not isinstance(caxis, int):
+        axis = tuple([cax-1 if cax < 0 else cax for cax in caxis])
+    else:
+        axis = caxis-1 if caxis < 0 else caxis
 
     # convert data to desired domain
     if mode == 'linear':
