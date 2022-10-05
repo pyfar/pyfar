@@ -711,3 +711,65 @@ def test___eq___differInShComment_notEqual():
     coordinates = Coordinates(1, 2, 3, comment="Madre mia!")
     actual = Coordinates(1, 2, 3, comment="Oh my woooooosh!")
     assert not coordinates == actual
+
+
+@pytest.mark.parametrize(
+    'x, y, z, radius, radius_z', [
+        (1, 0, 0, 1, 1),
+        (-1, 0, 0, 1, 1),
+        (0, 2, 0, 2, 2),
+        (0, 3, 4, 5, 3),
+        (0, 0, 0, 0, 0),
+    ])
+def test_getter_radii_from_cart(x, y, z, radius, radius_z):
+    coords = Coordinates(x, y, z)
+    npt.assert_allclose(coords.radius, radius, atol=1e-15)
+    npt.assert_allclose(coords.radius_z, radius_z, atol=1e-15)
+    npt.assert_allclose(coords.radius, radius, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    'x, y, z, azimuth, elevation', [
+        (1, 0, 0, 0, 0),
+        (-1, 0, 0, np.pi, 0),
+        (0, 1, 0, np.pi/2, 0),
+        (0, -1, 0, 3*np.pi/2, 0),
+        (0, 0, 1, 0, np.pi/2),
+        (0, 0, -1, 0, -np.pi/2),
+    ])
+def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
+    coords = Coordinates(x, y, z)
+    colatitude = np.abs(elevation - np.pi/2)
+    npt.assert_allclose(coords.azimuth, azimuth, atol=1e-15)
+    npt.assert_allclose(coords.elevation, elevation, atol=1e-15)
+    npt.assert_allclose(coords.colatitude, colatitude, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    'x, y, z, phi, theta', [
+        (0, 1, 0, 0, np.pi/2),
+        (0, -1, 0, np.pi, np.pi/2),
+        (0, 0, 1, np.pi/2, np.pi/2),
+        (0, 0, -1, 3*np.pi/2, np.pi/2),
+        (1, 0, 0, 0, 0),
+        (-1, 0, 0, 0, np.pi),
+    ])
+def test_getter_sph_front_from_cart(x, y, z, phi, theta):
+    coords = Coordinates(x, y, z)
+    npt.assert_allclose(coords.phi, phi, atol=1e-15)
+    npt.assert_allclose(coords.theta, theta, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    'x, y, z, lateral, polar', [
+        (0, 1, 0, np.pi/2, 0),
+        (0, -1, 0, -np.pi/2, 0),
+        (0, 0, 1, 0, np.pi/2),
+        (0, 0, -1, 0, -np.pi/2),
+        (1, 0, 0, 0, 0),
+        (-1, 0, 0, 0, np.pi),
+    ])
+def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
+    coords = Coordinates(x, y, z)
+    npt.assert_allclose(coords.lateral, lateral, atol=1e-15)
+    npt.assert_allclose(coords.polar, polar, atol=1e-15)

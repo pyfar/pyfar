@@ -139,6 +139,138 @@ class Coordinates():
         self._sh_order = sh_order
         self._comment = comment
 
+    @property
+    def x(self):
+        """The x-axis coordinates for each point."""
+        xyz = self.get_cart()
+        return xyz[..., 0]
+
+    @x.setter
+    def x(self, value):
+        xyz = self.get_cart()
+        self.set_cart(xyz[..., 0], value, xyz[..., 2])
+
+    @property
+    def y(self):
+        """The y-axis coordinate for each point."""
+        xyz = self.get_cart()
+        return xyz[..., 1]
+
+    @y.setter
+    def y(self, value):
+        xyz = self.get_cart()
+        self.set_cart(xyz[..., 0], value, xyz[..., 2])
+
+    @property
+    def z(self):
+        """The z-axis coordinate for each point."""
+        xyz = self.get_cart()
+        return xyz[..., 2]
+
+    @z.setter
+    def z(self, value):
+        xyz = self.get_cart()
+        self.set_cart(xyz[..., 0], xyz[..., 1], value)
+
+    @property
+    def radius_z(self):
+        """The radius_z for each point."""
+        cyl = self.get_cyl()
+        return cyl[..., 2]
+
+    @radius_z.setter
+    def radius_z(self, radius_z):
+        cyl = self.get_cyl()
+        self.set_cyl(cyl[..., 0], cyl[..., 1], radius_z)
+
+    @property
+    def radius(self):
+        """The radius for each point."""
+        sph = self.get_sph(convention='top_elev')
+        return sph[..., 2]
+
+    @radius.setter
+    def radius(self, radius):
+        sph = self.get_sph(convention='top_elev')
+        self.set_sph(sph[..., 0], sph[..., 1], radius, convention='top_elev')
+
+    @property
+    def azimuth(self):
+        """The azimuth angle for each point."""
+        sph = self.get_sph(convention='top_elev')
+        return sph[..., 0]
+
+    @azimuth.setter
+    def azimuth(self, azimuth):
+        sph = self.get_sph(convention='top_elev')
+        self.set_sph(azimuth, sph[..., 1], sph[..., 2], convention='top_elev')
+
+    @property
+    def elevation(self):
+        """The elevation angle for each point"""
+        sph = self.get_sph(convention='top_elev')
+        return sph[..., 1]
+
+    @elevation.setter
+    def elevation(self, elevation):
+        sph = self.get_sph(convention='top_elev')
+        self.set_sph(sph[..., 0], elevation, sph[..., 2], convention='top_elev')
+
+    @property
+    def colatitude(self):
+        """The colatitude angle for each point"""
+        sph = self.get_sph(convention='top_colat')
+        return sph[..., 1]
+
+    @colatitude.setter
+    def colatitude(self, colatitude):
+        sph = self.get_sph(convention='top_colat')
+        self.set_sph(sph[..., 0], colatitude, sph[..., 2], convention='top_colat')
+
+    @property
+    def phi(self):
+        """The phi angle for each point."""
+        sph = self.get_sph(convention='front')
+        return sph[..., 0]
+
+    @phi.setter
+    def phi(self, phi):
+        sph = self.get_sph(convention='front')
+        self.set_sph(phi, sph[..., 1], sph[..., 2], convention='front')
+
+    @property
+    def theta(self):
+        """The theta angle for each point"""
+        sph = self.get_sph(convention='front')
+        return sph[..., 1]
+
+    @theta.setter
+    def theta(self, theta):
+        sph = self.get_sph(convention='front')
+        self.set_sph(sph[..., 0], theta, sph[..., 2], convention='front')
+
+    @property
+    def lateral(self):
+        """The lateral angle for each point."""
+        sph = self.get_sph(convention='side')
+        return sph[..., 0]
+
+    @lateral.setter
+    def lateral(self, lateral):
+        sph = self.get_sph(convention='side')
+        self.set_sph(lateral, sph[..., 1], sph[..., 2], convention='side')
+
+    @property
+    def polar(self):
+        """The polar angle for each point"""
+        sph = self.get_sph(convention='side')
+        return sph[..., 1]
+
+    @polar.setter
+    def polar(self, polar):
+        sph = self.get_sph(convention='side')
+        self.set_sph(sph[..., 0], polar, sph[..., 2], convention='side')
+
     def set_cart(self, points_1, points_2, points_3,
                  convention='right', unit='met'):
         """
