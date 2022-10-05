@@ -1865,8 +1865,7 @@ def average(signal, mode='linear', axis=None, weights=None, keepdims=False):
             Average ``signal.time`` if the signal is in the time domain and
             ``signal.freq`` if the signal is in the frequency domain. Note that
             these operations are equivalent for `Signal` objects due to the
-            linearity of the averaging and the FFT. This mode might cause
-            artifacts if the data is not aligned across channels.
+            linearity of the averaging and the FFT.
         ``'magnitude_zerophase'``
             Average the magnitude spectra and discard the phase.
         ``'magnitude_phase'``
