@@ -25,23 +25,17 @@ class _Audio():
     # (e.g. __rmul__)
     __array_priority__ = 1.0
 
-    def __init__(self, domain, comment=None, dtype=np.double):
+    def __init__(self, domain, comment=None):
 
         # initialize valid parameter spaces
         self._VALID_DOMAINS = ["time", "freq"]
 
         # initialize global parameters
         self.comment = comment
-        self._dtype = dtype
         if domain in self._VALID_DOMAINS:
             self._domain = domain
         else:
             raise ValueError("Incorrect domain, needs to be time/freq.")
-
-        # initialize data with nan (this should make clear that this is an
-        # abstract private class that does not hold data and prevent class
-        # methods to fail that require data.)
-        self._data = np.atleast_2d(np.nan)
 
     def __eq__(self, other):
         """Check for equality of two objects."""
@@ -51,12 +45,6 @@ class _Audio():
     def domain(self):
         """The domain the data is stored in."""
         return self._domain
-
-    @property
-    def dtype(self):
-        """The data type of the audio object. This can be any data type and
-        precision supported by numpy."""
-        return self._dtype
 
     @property
     def cshape(self):
@@ -153,7 +141,8 @@ class _Audio():
 
     def _encode(self):
         """Return dictionary for the encoding."""
-        return self.copy().__dict__
+        class_dict = self.copy().__dict__
+        return class_dict
 
     def _decode(self):
         """Return dictionary for the encoding."""
@@ -173,15 +162,7 @@ class _Audio():
 
 
         """
-        if isinstance(key, (int, slice, tuple)):
-            try:
-                data = self._data[key]
-            except KeyError:
-                raise KeyError("Index is out of bounds")
-        else:
-            raise TypeError(
-                    "Index must be int, not {}".format(type(key).__name__))
-
+        data = self._data[key]
         return self._return_item(data)
 
     def __setitem__(self, key, value):
@@ -197,24 +178,17 @@ class _Audio():
         >>> signal[0] = pf.signals.noise(10, rms=2)
         """
         self._assert_matching_meta_data(value)
-        if isinstance(key, (int, slice)):
-            try:
-                self._data[key] = value._data
-            except KeyError:
-                raise KeyError("Index is out of bound")
-        else:
-            raise TypeError(
-                    "Index must be int, not {}".format(type(key).__name__))
+        self._data[key] = value._data
 
 
 class TimeData(_Audio):
     """Class for time data.
 
-    Objects of this class contain time data which is not directly convertable
+    Objects of this class contain time data which is not directly convertible
     to frequency domain, i.e., non-equidistant samples.
 
     """
-    def __init__(self, data, times, comment=None, dtype=np.double):
+    def __init__(self, data, times, comment=None):
         """Create TimeData object with data, and times.
 
         Parameters
@@ -222,22 +196,18 @@ class TimeData(_Audio):
         data : array, double
             Raw data in the time domain. The memory layout of data is 'C'.
             E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
-            1024 samples each.
+            1024 samples each. The data can be ``int`` or ``float`` and is
+            converted to ``float`` in any case.
         times : array, double
             Times in seconds at which the data is sampled. The number of times
             must match the `size` of the last dimension of `data`.
         comment : str, optional
             A comment related to `data`. The default is ``'none'``.
-        dtype : string, optional
-            Raw data type of the audio object. The default is `float64`.
         """
 
-        _Audio.__init__(self, 'time', comment, dtype)
+        _Audio.__init__(self, 'time', comment)
 
-        # init data and meta data
-        self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
-
-        self._n_samples = self._data.shape[-1]
+        self.time = data
 
         self._times = np.atleast_1d(np.asarray(times).flatten())
         if self._times.size != self.n_samples:
@@ -254,7 +224,14 @@ class TimeData(_Audio):
     @time.setter
     def time(self, value):
         """Set the time data."""
+        # check and set the data and meta data
         data = np.atleast_2d(np.asarray(value))
+        if data.dtype.kind == "i":
+            data = data.astype("float")
+        elif data.dtype.kind != "f":
+            raise ValueError(
+                f"time data is {data.dtype}  must be int or float")
+        data = np.atleast_2d(np.asarray(value, dtype=float))
         self._data = data
         self._n_samples = data.shape[-1]
         # setting the domain is only required for Signal. Setting it here
@@ -300,7 +277,7 @@ class TimeData(_Audio):
         """
         Check if the meta data matches across two :py:func:`TimeData` objects.
         """
-        if not isinstance(other, TimeData):
+        if other.__class__ != TimeData:
             raise ValueError("Comparison only valid against TimeData objects.")
         if self.n_samples != other.n_samples:
             raise ValueError("The number of samples does not match.")
@@ -308,7 +285,7 @@ class TimeData(_Audio):
     def _return_item(self, data):
         """Return new :py:func:`TimeData` object with data."""
         item = TimeData(
-            data, times=self.times, comment=self.comment, dtype=self.dtype)
+            data, times=self.times, comment=self.comment)
         return item
 
     def __repr__(self):
@@ -325,8 +302,7 @@ class TimeData(_Audio):
         obj = cls(
             obj_dict['_data'],
             obj_dict['_times'],
-            obj_dict['_comment'],
-            obj_dict['_dtype'])
+            obj_dict['_comment'])
         obj.__dict__.update(obj_dict)
         return obj
 
@@ -373,11 +349,11 @@ class FrequencyData(_Audio):
     """Class for frequency data.
 
     Objects of this class contain frequency data which is not directly
-    convertable to the time domain, i.e., non-equidistantly spaced bins or
+    convertible to the time domain, i.e., non-equidistantly spaced bins or
     incomplete spectra.
 
     """
-    def __init__(self, data, frequencies, comment=None, dtype=complex):
+    def __init__(self, data, frequencies, comment=None):
         """Create FrequencyData with data, and frequencies.
 
         Parameters
@@ -385,14 +361,13 @@ class FrequencyData(_Audio):
         data : array, double
             Raw data in the frequency domain. The memory layout of Data is 'C'.
             E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
-            frequency bins each.
+            frequency bins each. Data can be ``int``, ``float`` or ``complex``.
+            Data of type ``int`` is converted to ``float``.
         frequencies : array, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
         comment : str, optional
             A comment related to the data. The default is ``'none'``.
-        dtype : string, optional
-            Raw data type of the audio object. The default is `complex`.
 
         Notes
         -----
@@ -409,15 +384,19 @@ class FrequencyData(_Audio):
 
         """
 
-        _Audio.__init__(self, 'freq', comment, dtype)
+        _Audio.__init__(self, 'freq', comment)
 
-        # init frequencies
+        # init
         freqs = np.atleast_1d(np.asarray(frequencies).flatten())
+        self._frequencies = freqs
+        self.freq = data
+
+        # check frequencies
         if np.any(np.diff(freqs) <= 0) and len(frequencies) > 1:
             raise ValueError("Frequencies must be monotonously increasing.")
-        self._frequencies = freqs
-        # init data
-        self.freq = data
+        if len(freqs) != self.n_bins:
+            raise ValueError(
+                "Number of frequencies does not match number of data points")
 
     @property
     def freq(self):
@@ -427,7 +406,15 @@ class FrequencyData(_Audio):
     @freq.setter
     def freq(self, value):
         """Set the frequency data."""
-        data = np.atleast_2d(np.asarray(value, dtype=complex))
+
+        # check data type
+        data = np.atleast_2d(np.asarray(value))
+        if data.dtype.kind == "i":
+            data = data.astype("float")
+        elif data.dtype.kind not in ["f", "c"]:
+            raise ValueError((f"frequency data is {data.dtype} must be int, "
+                              "float, or complex"))
+
         # match shape of frequencies
         if self.frequencies.size != data.shape[-1]:
             raise ValueError(
@@ -467,7 +454,7 @@ class FrequencyData(_Audio):
 
     def _assert_matching_meta_data(self, other):
         """Check if the meta data matches across two FrequencyData objects."""
-        if not isinstance(other, FrequencyData):
+        if other.__class__ != FrequencyData:
             raise ValueError(
                 "Comparison only valid against FrequencyData objects.")
         if self.n_bins != other.n_bins:
@@ -478,7 +465,7 @@ class FrequencyData(_Audio):
         """Return new FrequencyData object with data."""
         item = FrequencyData(
             data, frequencies=self.frequencies,
-            comment=self.comment, dtype=self.dtype)
+            comment=self.comment)
         return item
 
     def __repr__(self):
@@ -495,8 +482,7 @@ class FrequencyData(_Audio):
         obj = cls(
             obj_dict['_data'],
             obj_dict['_frequencies'],
-            obj_dict['_comment'],
-            obj_dict['_dtype'])
+            obj_dict['_comment'])
         obj.__dict__.update(obj_dict)
         return obj
 
@@ -542,8 +528,10 @@ class FrequencyData(_Audio):
 class Signal(FrequencyData, TimeData):
     """Class for audio signals.
 
-    Objects of this class contain data which is directly convertable between
-    time and frequency domain (equally spaced samples and frequency bins).
+    Objects of this class contain data which is directly convertible between
+    time and frequency domain (equally spaced samples and frequency bins). The
+    data is always real valued in the time domain and complex valued in the
+    frequency domain.
 
     """
     def __init__(
@@ -553,8 +541,7 @@ class Signal(FrequencyData, TimeData):
             n_samples=None,
             domain='time',
             fft_norm='none',
-            comment=None,
-            dtype=np.double):
+            comment=None):
         """Create Signal with data, and sampling rate.
 
         Parameters
@@ -562,8 +549,9 @@ class Signal(FrequencyData, TimeData):
         data : ndarray, double
             Raw data of the signal in the time or frequency domain. The memory
             layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
-            3 x 2 channels with 1024 samples or frequency bins each. Frequency
-            data must be provided as single sided spectra, i.e., for all
+            3 x 2 channels with 1024 samples or frequency bins each. Time data
+            is converted to ``float``. Frequency is converted to ``complex``
+            and must be provided as single sided spectra, i.e., for all
             frequencies between 0 Hz and half the sampling rate.
         sampling_rate : double
             Sampling rate in Hz
@@ -581,8 +569,6 @@ class Signal(FrequencyData, TimeData):
             used for energy signals, such as impulse responses.
         comment : str
             A comment related to `data`. The default is ``None``.
-        dtype : string, optional
-            Raw data type of the audio object. The default is `float64`
 
         References
         ----------
@@ -593,43 +579,42 @@ class Signal(FrequencyData, TimeData):
 
         """
 
-        # initialize global parameter and valid parameter spaces
-        _Audio.__init__(self, domain, comment, dtype)
-
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
         self._VALID_FFT_NORMS = [
             "none", "unitary", "amplitude", "rms", "power", "psd"]
 
         # check fft norm
-        if fft_norm is None:
-            fft_norm = 'none'
         if fft_norm in self._VALID_FFT_NORMS:
             self._fft_norm = fft_norm
         else:
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but "
                               f"found '{fft_norm}'"))
+        # time / normalized frequency data (depending on domain)
+        data = np.atleast_2d(data)
 
         # initialize domain specific parameters
         if domain == 'time':
-            self._data = np.atleast_2d(np.asarray(data, dtype=dtype))
-            self._n_samples = self._data.shape[-1]
-            TimeData.__init__(self, data, self.times, comment, dtype)
+            self._n_samples = data.shape[-1]
+            times = np.atleast_1d(
+                np.arange(0, self._n_samples) / sampling_rate)
+            TimeData.__init__(self, data, times, comment)
         elif domain == 'freq':
-            freq = np.atleast_2d(np.asarray(data, dtype=complex))
-            self._n_bins = freq.shape[-1]
+            # check and set n_samples
             if n_samples is None:
                 warnings.warn(
                     "Number of time samples not given, assuming an even "
                     "number of samples from the number of frequency bins.")
-                n_samples = (self._n_bins - 1)*2
-            elif n_samples > 2 * freq.shape[-1] - 1:
+                n_samples = (data.shape[-1] - 1)*2
+            elif n_samples > 2 * data.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
-            # Set spectrum incl. checks and denormalization
-            self.freq = freq
+            self._n_bins = data.shape[-1]
+            # Init remaining parameters
+            FrequencyData.__init__(self, data, self.frequencies, comment)
+            delattr(self, '_frequencies')
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
@@ -659,18 +644,24 @@ class Signal(FrequencyData, TimeData):
     @freq.setter
     def freq(self, value):
         """Set the normalized frequency domain data."""
+        # check data type
         data = np.atleast_2d(np.asarray(value))
+        if data.dtype.kind not in ["i", "f", "c"]:
+            raise ValueError((f"frequency data is {data.dtype} must be int, "
+                              "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
             warnings.warn(UserWarning((
                 "Number of frequency bins changed, assuming an even "
                 "number of samples from the number of frequency bins.")))
             self._n_samples = (data.shape[-1] - 1)*2
+        # set domain
         self._domain = 'freq'
+        # remove normalization
         data_denorm = fft.normalization(
                 data, self._n_samples, self._sampling_rate,
                 self._fft_norm, inverse=True)
-        self._data = data_denorm
+        self._data = data_denorm.astype(complex)
 
     @property
     def freq_raw(self):
@@ -689,6 +680,9 @@ class Signal(FrequencyData, TimeData):
     def freq_raw(self, value):
         """Set the frequency domain data without normalization."""
         data = np.atleast_2d(np.asarray(value))
+        if data.dtype.kind not in ["i", "f", "c"]:
+            raise ValueError((f"frequency data is {data.dtype} must be int, "
+                              "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
             warnings.warn(UserWarning((
@@ -696,7 +690,7 @@ class Signal(FrequencyData, TimeData):
                 "number of samples from the number of frequency bins.")))
             self._n_samples = (data.shape[-1] - 1)*2
         self._domain = 'freq'
-        self._data = data
+        self._data = data.astype(complex)
 
     @_Audio.domain.setter
     def domain(self, new_domain):
@@ -784,8 +778,7 @@ class Signal(FrequencyData, TimeData):
         """Return new Signal object with data."""
         item = Signal(data, sampling_rate=self.sampling_rate,
                       n_samples=self.n_samples, domain=self.domain,
-                      fft_norm=self.fft_norm, comment=self.comment,
-                      dtype=self.dtype)
+                      fft_norm=self.fft_norm, comment=self.comment)
         return item
 
     @classmethod
@@ -804,13 +797,8 @@ class Signal(FrequencyData, TimeData):
         The signal type is ``'energy'``  if the ``fft_norm = None`` and
         ``'power'`` otherwise.
         """
-        if self.fft_norm == 'none':
-            stype = 'energy'
-        elif self.fft_norm in [
-                "unitary", "amplitude", "rms", "power", "psd"]:
-            stype = 'power'
-        else:
-            raise ValueError("No valid fft norm set.")
+        stype = 'energy' if self.fft_norm == 'none' else 'power'
+
         return stype
 
     def __repr__(self):
@@ -858,8 +846,7 @@ class _SignalIterator(object):
             sampling_rate=signal.sampling_rate,
             n_samples=signal.n_samples,
             domain=signal.domain,
-            fft_norm=signal.fft_norm,
-            dtype=signal.dtype)
+            fft_norm=signal.fft_norm)
 
     def __next__(self):
         if self._signal.domain == self._iterated_sig.domain:
@@ -1409,10 +1396,10 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
 
         # check type of non signal input
         else:
-            dtype = str(np.asarray(d).dtype)
-            if not dtype.startswith(("int", "float", "complex")):
-                raise ValueError("Array likes must be int, float, or complex")
-            if dtype.startswith("complex") and domain == 'time':
+            if np.asarray(d).dtype.kind not in ["i", "f", "c"]:
+                raise ValueError(
+                    "Input must be of type Signal, int, float, or complex")
+            if np.asarray(d).dtype.kind == "c" and domain == 'time':
                 raise ValueError(
                     "Complex input can not be applied in the time domain.")
 

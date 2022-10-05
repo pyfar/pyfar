@@ -7,10 +7,11 @@ def test_audio_init_with_defaults():
     audio = _Audio(domain='time')
     assert isinstance(audio, _Audio)
     assert audio.domain == 'time'
+    assert audio.comment == 'none'
 
 
 def test_audio_init_invalid_domain():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Incorrect domain"):
         _Audio(domain='space')
 
 
@@ -22,15 +23,14 @@ def test_audio_comment():
     assert audio.comment == 'Blub'
 
 
-def test_return_item():
+def test_not_implemented():
     audio = _Audio(domain='time')
 
     with pytest.raises(NotImplementedError):
         audio._return_item()
 
-
-def test_assert_matching_meta_data():
-    audio = _Audio(domain='time')
-
     with pytest.raises(NotImplementedError):
         audio._assert_matching_meta_data()
+
+    with pytest.raises(NotImplementedError):
+        audio._decode()
