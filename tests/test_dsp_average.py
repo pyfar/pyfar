@@ -29,16 +29,16 @@ def test_averaging(signal, mode, answer):
         npt.assert_almost_equal(ave_sig.freq[0], answer, decimal=15)
 
 
-@pytest.mark.parametrize('axis, answer', (
+@pytest.mark.parametrize('caxis, answer', (
     [(0, 2), [[(1+2+5+6)/4, (3+4+7+8)/4]]],
     [1, [[(1+3)/2, (2+4)/2], [(5+7)/2, (6+8)/2]]]
     ))
-def test_axis_averaging(axis, answer):
+def test_caxis_averaging(caxis, answer):
     """
-    Parametrized test for averaging along axis
+    Parametrized test for averaging along caxis
     """
     signal = pf.Signal(np.arange(1, 9).reshape(2, 2, 2), 44100)
-    ave_sig = pf.dsp.average(signal, axis=axis)
+    ave_sig = pf.dsp.average(signal, caxis=caxis)
     npt.assert_equal(ave_sig.time, answer)
 
 
@@ -68,15 +68,15 @@ def test_error_raises():
     with pytest.raises(ValueError,
                        match="mode is 'magnitude_phase' and signal is type"):
         pf.dsp.average(signal, 'magnitude_phase')
-    # test wrong axis input
+    # test wrong caxis input
     signal = pf.Signal(np.ones((2, 3, 4)), 44100)
     with pytest.raises(ValueError,
-                       match="The maximum of axis needs to be smaller"):
-        pf.dsp.average(signal, axis=(0, 3))
+                       match="The maximum of caxis needs to be smaller"):
+        pf.dsp.average(signal, caxis=(0, 3))
     # test invalid mode input
     with pytest.raises(ValueError,
                        match="mode must be 'linear', 'magnitude_zerophase',"):
         pf.dsp.average(signal, mode='invalid_mode')
     with pytest.warns(UserWarning,
-                      match="Averaging one dimensional axis"):
-        pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), axis=(1, 2))
+                      match="Averaging one dimensional caxis"):
+        pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), caxis=(1, 2))
