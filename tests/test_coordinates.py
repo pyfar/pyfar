@@ -4,7 +4,7 @@ import pytest
 # from pytest import raises
 # import matplotlib.pyplot as plt
 
-from pyfar import Coordinates
+from pf import Coordinates
 # import pyfar.classes.coordinates as coordinates
 
 

@@ -37,9 +37,9 @@ def test_read_sofa_coordinates(
     """Test for reading coordinates in sofa file"""
     _, s_coords, r_coords, = io.read_sofa(generate_sofa_GeneralFIR)
     npt.assert_allclose(
-        s_coords.get_cart(), sofa_reference_coordinates[0])
+        s_coords.xyz, sofa_reference_coordinates[0])
     npt.assert_allclose(
-        r_coords.get_cart(), sofa_reference_coordinates[1])
+        r_coords.xyz, sofa_reference_coordinates[1])
 
 
 def test_read_sofa_position_type_spherical(
@@ -47,11 +47,17 @@ def test_read_sofa_position_type_spherical(
     """Test to verify correct position type of sofa file"""
     _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
     npt.assert_allclose(
-        s_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[0])
+        s_coords.azimuth * 180 / np.pi, sofa_reference_coordinates[0][..., 0])
     npt.assert_allclose(
-        r_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[1])
+        s_coords.elevation * 180 / np.pi, sofa_reference_coordinates[0][..., 1])
+    npt.assert_allclose(
+        s_coords.radius, sofa_reference_coordinates[0][..., 2])
+    npt.assert_allclose(
+        r_coords.azimuth * 180 / np.pi, sofa_reference_coordinates[1][..., 0])
+    npt.assert_allclose(
+        r_coords.elevation * 180 / np.pi, sofa_reference_coordinates[1][..., 1])
+    npt.assert_allclose(
+        r_coords.radius, sofa_reference_coordinates[1][..., 2])
 
 
 def test_convert_sofa_assertion():
@@ -268,10 +274,10 @@ def test_write_gammatone_bands(tmpdir):
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'gammatone_bands.far')
-    gammatone_bands = pyfar.dsp.filter.GammatoneBands((0, 22050))
+    gammatone_bands = pf.dsp.filter.GammatoneBands((0, 22050))
     io.write(filename, gammatone_bands=gammatone_bands)
     actual = io.read(filename)["gammatone_bands"]
-    assert isinstance(actual, pyfar.dsp.filter.GammatoneBands)
+    assert isinstance(actual, pf.dsp.filter.GammatoneBands)
     assert actual == gammatone_bands
 
 
@@ -459,10 +465,10 @@ def test_write_read_multiplePyfarObjectsWithCompression(
 @patch('soundfile.read', return_value=(np.array([1., 2., 3.]), 1000))
 def test_read_audio_defaults(read_mock):
     """Test correct call of the wrapped soundfile.read() function."""
-    signal = pyfar.io.read_audio('test.wav')
+    signal = pf.io.read_audio('test.wav')
     read_mock.assert_called_with(
         file='test.wav', dtype='float64', always_2d=True)
-    assert isinstance(signal, pyfar.Signal)
+    assert isinstance(signal, pf.Signal)
     assert np.allclose(signal.time, np.array([1., 2., 3.]))
     assert signal.sampling_rate == 1000
 
@@ -470,12 +476,12 @@ def test_read_audio_defaults(read_mock):
 @patch('soundfile.read', return_value=(np.array([1., 2., 3.]), 1000))
 def test_read_audio_kwargs(read_mock):
     """Test correct call of the wrapped soundfile.read() function."""
-    signal = pyfar.io.read_audio(
+    signal = pf.io.read_audio(
         'test.wav', dtype='float32', kwarg1='kwarg1', kwarg2='kwarg2')
     read_mock.assert_called_with(
         file='test.wav', dtype='float32', always_2d=True,
         kwarg1='kwarg1', kwarg2='kwarg2')
-    assert isinstance(signal, pyfar.Signal)
+    assert isinstance(signal, pf.Signal)
     assert np.allclose(signal.time, np.array([1., 2., 3.]))
     assert signal.time.shape == (1, 3)
     assert signal.sampling_rate == 1000
@@ -486,10 +492,10 @@ def test_read_audio_kwargs(read_mock):
     return_value=(np.array([[1., 4.], [2., 5.], [3., 6.]]), 1000))
 def test_read_audio_stereo(read_mock):
     """Test correct call of the wrapped soundfile.read() function."""
-    signal = pyfar.io.read_audio('test.wav')
+    signal = pf.io.read_audio('test.wav')
     read_mock.assert_called_with(
         file='test.wav', dtype='float64', always_2d=True)
-    assert isinstance(signal, pyfar.Signal)
+    assert isinstance(signal, pf.Signal)
     assert np.allclose(signal.time, np.array([[1., 2., 3.], [4., 5., 6.]]))
     assert signal.time.shape == (2, 3)
     assert signal.sampling_rate == 1000
@@ -525,7 +531,7 @@ def test_write_audio_overwrite(noise, tmpdir):
 
 @patch('soundfile.write')
 def test_write_audio_kwargs(sf_write_mock, noise):
-    pyfar.io.write_audio(
+    pf.io.write_audio(
         signal=noise, filename='test.wav', kwarg1='kwarg1', kwarg2='kwarg2')
     actual_args = sf_write_mock.call_args[1]
     assert actual_args['kwarg1'] == 'kwarg1'
@@ -547,9 +553,9 @@ def test_write_audio_nd(noise_two_by_three_channel, tmpdir):
 @patch('soundfile.write')
 def test_write_audio_clip(sf_write_mock):
     """Test for clipping warning."""
-    signal = pyfar.Signal([1., 2., 3.], 44100)
+    signal = pf.Signal([1., 2., 3.], 44100)
     with pytest.warns(Warning, match='clipped'):
-        pyfar.io.write_audio(
+        pf.io.write_audio(
             signal=signal, filename='test.wav', subtype='PCM_16')
 
 
@@ -635,14 +641,14 @@ def test_write_audio_pathlib(noise, tmpdir):
 @patch('soundfile.available_formats')
 def test_audio_formats(audio_formats_mock):
     """Test correct call of the wrapped soundfile function."""
-    pyfar.io.audio_formats()
+    pf.io.audio_formats()
     audio_formats_mock.assert_called()
 
 
 @patch('soundfile.available_subtypes')
 def test_audio_subtypes(audio_subtypes_mock):
     """Test correct call of the wrapped soundfile function."""
-    pyfar.io.audio_subtypes()
+    pf.io.audio_subtypes()
     audio_subtypes_mock.assert_called()
 
 
@@ -650,6 +656,6 @@ def test_audio_subtypes(audio_subtypes_mock):
 def test_default_audio_subtype(default_audio_subtype_mock):
     """Test correct call of the wrapped soundfile function."""
     audio_format = 'wav'
-    subtype_return = pyfar.io.default_audio_subtype(format=audio_format)
+    subtype_return = pf.io.default_audio_subtype(format=audio_format)
     assert subtype_return == 'bla'
     default_audio_subtype_mock.assert_called_with(audio_format)
