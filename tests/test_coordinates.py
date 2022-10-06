@@ -4,7 +4,7 @@ import pytest
 # from pytest import raises
 # import matplotlib.pyplot as plt
 
-from pf import Coordinates
+from pyfar import Coordinates
 # import pyfar.classes.coordinates as coordinates
 
 
@@ -254,7 +254,6 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
     np.testing.assert_allclose(coords.x, x, atol=1e-15)
     np.testing.assert_allclose(coords.y, y, atol=1e-15)
     np.testing.assert_allclose(coords.z, z, atol=1e-15)
-
 
 
 @pytest.mark.parametrize(

@@ -6,12 +6,9 @@ Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
 """
 import numpy as np
 # from scipy.spatial import cKDTree
-# from scipy.spatial.transform import Rotation as sp_rot
 import re
 from copy import deepcopy
 from scipy.spatial.transform import Rotation as sp_rot
-
-# import pyfar as pf
 
 
 class Coordinates():
@@ -26,10 +23,79 @@ class Coordinates():
     _comment: str = ""
 
     def __init__(
-            self, x: np.array = np.asarray([]), y: np.array = np.asarray([]),
-            z: np.array = np.asarray([]), weights: np.array = None,
-            comment: str = "") -> None:
-        self._set_points(x, y, z)
+            self, points_1: np.array = np.asarray([]),
+            points_2: np.array = np.asarray([]),
+            points_3: np.array = np.asarray([]),
+            domain: str = 'cart', convention: str = 'right', unit: str = 'met',
+            weights: np.array = None, comment: str = "") -> None:
+        """
+        Create :py:func:`Coordinates` object with or without coordinate points.
+        The points that enter the Coordinates object are defined by the
+        `domain`, `convention`, and `unit` as illustrated in the
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
+        +--------------------+----------+------------+----------+----------+
+        | domain, convention | points_1 | points_2   | points_3 | unit     |
+        +====================+==========+============+==========+==========+
+        | cart, right        | x        | y          | z        | met      |
+        +--------------------+----------+------------+----------+----------+
+        | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, side          | lateral  | polar      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | sph, front         | phi      | theta      | radius   | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        | cyl, top           | azimuth  | z          | radius_z | rad, deg |
+        +--------------------+----------+------------+----------+----------+
+        For more information run
+        >>> coords = Coordinates()
+        >>> coords.systems()
+        Parameters
+        ----------
+        points_1 : array like, number
+            points for the first coordinate
+        points_2 : array like, number
+            points for the second coordinate
+        points_3 : array like, number
+            points for the third coordinate
+        domain : string
+            domain of the coordinate system
+            ``'cart'``
+                Cartesian
+            ``'sph'``
+                Spherical
+            ``'cyl'``
+                Cylindrical
+            The default is ``'cart'``.
+        convention: string
+             coordinate convention (see above)
+             The default is ``'right'`` if domain is ``'cart'``,
+             ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
+             ``'cyl'``.
+        unit: string
+             unit of the coordinate system. By default the first available unit
+             is used, which is meters (``'met'``) for ``domain = 'cart'`` and
+             radians (``'rad'``) in all other cases (See above).
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same `size`
+            as the points points, i.e., if `points` have five entries, the
+            `weights` must also have five entries. The default is ``None``.
+        comment : str, optional
+            comment about the stored coordinate points. The default is
+            ``None``.
+        """
+
+        if domain == 'cart':
+            self.set_cart(points_1, points_2, points_3)
+        elif domain == 'sph':
+            self.set_sph(points_1, points_2, points_3, convention, unit)
+        elif domain == 'cyl':
+            self.set_cyl(points_1, points_2, points_3, convention, unit)
+        else:
+            raise ValueError(
+                f"Domain for {domain} is not implemented.")
+
         self._set_weights(weights)
         self._comment = comment
 
@@ -247,13 +313,6 @@ class Coordinates():
         lateral, _, radius = self.get_sph(convention='side')
         self.set_sph(lateral, polar, radius, convention='side')
 
-    @classmethod
-    def from_sph_top_elevation(self, azimuth, elevation, radius, unit='rad'):
-
-        self.set_sph(
-            azimuth, elevation, radius, convention='top_elev', unit=unit)
-        return self
-
     def _set_points(self, x, y, z):
         """
         Check points and convert to matrix.
@@ -322,6 +381,17 @@ class Coordinates():
 
         # set class variable
         self._weights = weights
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective ``_encode`` counterpart."""
+        obj = cls()
+        obj.__dict__.update(obj_dict)
+        return obj
 
     def set_cart(self, x, y, z, convention='right', unit='met'):
         """

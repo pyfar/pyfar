@@ -3,7 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from unittest.mock import patch
-import pyfar
+import pyfar as pf
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
