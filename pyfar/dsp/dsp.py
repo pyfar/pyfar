@@ -1403,7 +1403,7 @@ def find_impulse_response_start(
     return np.squeeze(start_sample)
 
 
-def deconvolve(system_output, system_input, fft_length=None, **kwargs):
+def deconvolve(system_output, system_input, freq_range=None, fft_length=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
     The transfer function :math:`H(\omega)` is calculated by spectral
@@ -1471,6 +1471,11 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
 
+    if freq_range is not None:
+        assert hasattr(freq_range, '__iter__') and len(freq_range) == 2
+    else:
+        freq_range = (0, system_input.sampling_rate)
+
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value
     if fft_length is None:
@@ -1493,7 +1498,7 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
     system_response = (system_output *
-                       regularized_spectrum_inversion(system_input, **kwargs))
+                       regularized_spectrum_inversion(system_input, freq_range, **kwargs))
 
     # Check if the signals have any comments,
     # if yes: concatenate the comments for the system_response
