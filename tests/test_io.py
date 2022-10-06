@@ -37,9 +37,9 @@ def test_read_sofa_coordinates(
     """Test for reading coordinates in sofa file"""
     _, s_coords, r_coords, = io.read_sofa(generate_sofa_GeneralFIR)
     npt.assert_allclose(
-        s_coords.xyz, sofa_reference_coordinates[0])
+        s_coords.cart, sofa_reference_coordinates[0])
     npt.assert_allclose(
-        r_coords.xyz, sofa_reference_coordinates[1])
+        r_coords.cart, sofa_reference_coordinates[1])
 
 
 def test_read_sofa_position_type_spherical(
@@ -47,15 +47,15 @@ def test_read_sofa_position_type_spherical(
     """Test to verify correct position type of sofa file"""
     _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
     npt.assert_allclose(
-        s_coords.azimuth * 180 / np.pi, sofa_reference_coordinates[0][..., 0])
+        s_coords.azimuth * 180/np.pi, sofa_reference_coordinates[0][..., 0])
     npt.assert_allclose(
-        s_coords.elevation * 180 / np.pi, sofa_reference_coordinates[0][..., 1])
+        s_coords.elevation * 180/np.pi, sofa_reference_coordinates[0][..., 1])
     npt.assert_allclose(
         s_coords.radius, sofa_reference_coordinates[0][..., 2])
     npt.assert_allclose(
-        r_coords.azimuth * 180 / np.pi, sofa_reference_coordinates[1][..., 0])
+        r_coords.azimuth * 180/np.pi, sofa_reference_coordinates[1][..., 0])
     npt.assert_allclose(
-        r_coords.elevation * 180 / np.pi, sofa_reference_coordinates[1][..., 1])
+        r_coords.elevation * 180/np.pi, sofa_reference_coordinates[1][..., 1])
     npt.assert_allclose(
         r_coords.radius, sofa_reference_coordinates[1][..., 2])
 

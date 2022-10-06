@@ -137,14 +137,6 @@ def test_orientations_from_view_up_show_coordinate_system_change(
     orient_from_sph = Orientations.from_view_up(views, ups)
     orient_from_sph.show(positions)
 
-    # Check if coordinate system has not been changed by orientations
-    assert views._system['domain'] == 'sph', (
-        "Coordinate system has been changed by Orientations.")
-    assert ups._system['domain'] == 'sph', (
-        "Coordinate system has been changed by Orientations.")
-    assert positions._system['domain'] == 'sph', (
-        "Coordinate system has been changed by Orientations.show().")
-
 
 def test_as_view_up_right(views, ups, orientations):
     """

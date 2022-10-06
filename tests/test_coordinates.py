@@ -2,7 +2,7 @@ import numpy as np
 # import numpy.testing as npt
 import pytest
 # from pytest import raises
-# import matplotlib.pyplot as plt
+import matplotlib
 
 from pyfar import Coordinates
 # import pyfar.classes.coordinates as coordinates
@@ -97,6 +97,30 @@ def test_assertion_for_getter():
         coords.get_sph()
     with pytest.raises(ValueError, match="Object is empty"):
         coords.get_cyl()
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.x
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.y
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.z
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.azimuth
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.elevation
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.colatitude
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.radius
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.radius_z
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.phi
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.theta
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.lateral
+    with pytest.raises(ValueError, match="Object is empty"):
+        coords.polar
 
 
 @pytest.mark.parametrize(
@@ -246,6 +270,10 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
     np.testing.assert_allclose(coords.azimuth, azimuth, atol=1e-15)
     np.testing.assert_allclose(coords.elevation, elevation, atol=1e-15)
     np.testing.assert_allclose(coords.colatitude, colatitude, atol=1e-15)
+    np.testing.assert_allclose(
+        coords.sph_top_elev, [azimuth, elevation, 1], atol=1e-15)
+    np.testing.assert_allclose(
+        coords.sph_top_colat, [azimuth, colatitude, 1], atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.azimuth = azimuth
     coords.elevation = elevation
@@ -269,6 +297,7 @@ def test_getter_sph_front_from_cart(x, y, z, phi, theta):
     coords = Coordinates(x, y, z)
     np.testing.assert_allclose(coords.phi, phi, atol=1e-15)
     np.testing.assert_allclose(coords.theta, theta, atol=1e-15)
+    np.testing.assert_allclose(coords.sph_front, [phi, theta, 1], atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.phi = phi
     coords.theta = theta
@@ -291,6 +320,8 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
     coords = Coordinates(x, y, z)
     np.testing.assert_allclose(coords.lateral, lateral, atol=1e-15)
     np.testing.assert_allclose(coords.polar, polar, atol=1e-15)
+    np.testing.assert_allclose(
+        coords.sph_side, [lateral, polar, 1], atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.lateral = lateral
     coords.polar = polar
@@ -314,14 +345,175 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
         (np.ones((2,)), 2, 1),
         (np.ones((2, 3, 1)), np.zeros((2, 3, 1)), np.ones((2, 3, 1))),
     ])
-def test_xyz_setter(x, y, z):
+def test_cart_setter(x, y, z):
     coords = Coordinates(x, y, z)
     np.testing.assert_allclose(coords.x, x, atol=1e-15)
     np.testing.assert_allclose(coords.y, y, atol=1e-15)
     np.testing.assert_allclose(coords.z, z, atol=1e-15)
     if x is np.array:
-        np.testing.assert_allclose(coords.xyz.shape[:-1], x.shape, atol=1e-15)
-    np.testing.assert_allclose(coords.xyz.shape[-1], 3, atol=1e-15)
-    np.testing.assert_allclose(coords.xyz[..., 0], x, atol=1e-15)
-    np.testing.assert_allclose(coords.xyz[..., 1], y, atol=1e-15)
-    np.testing.assert_allclose(coords.xyz[..., 2], z, atol=1e-15)
+        np.testing.assert_allclose(coords.cart.shape[:-1], x.shape, atol=1e-15)
+    np.testing.assert_allclose(coords.cart.shape[-1], 3, atol=1e-15)
+    np.testing.assert_allclose(coords.cart[..., 0], x, atol=1e-15)
+    np.testing.assert_allclose(coords.cart[..., 1], y, atol=1e-15)
+    np.testing.assert_allclose(coords.cart[..., 2], z, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    'x, y, z', [
+        (0, 1, 0),
+        (0, -1, 0),
+        (0., 0, 1),
+        (0, .0, -1),
+        (1, 0, 0),
+        (-1, 0, 0),
+        (np.ones((2, 3, 1)), 10, -1),
+        (np.ones((3, 1)), 7, 3),
+        (np.ones((1, 2)), 5, 1),
+        (np.ones((2,)), 2, 1),
+        (np.ones((2, 3, 1)), np.zeros((2, 3, 1)), np.ones((2, 3, 1))),
+    ])
+def test__array__getter(x, y, z):
+    coords = Coordinates(x, y, z)
+    np.testing.assert_allclose(np.array(coords)[..., 0], x, atol=1e-15)
+    np.testing.assert_allclose(np.array(coords)[..., 1], y, atol=1e-15)
+    np.testing.assert_allclose(np.array(coords)[..., 2], z, atol=1e-15)
+
+
+def test__getitem__():
+    """Test getitem with different parameters."""
+    # test without weights
+    coords = Coordinates([1, 2], 0, 0)
+    new = coords[0]
+    assert isinstance(new, Coordinates)
+    np.testing.assert_allclose(new.x, 1)
+    np.testing.assert_allclose(new.y, 0)
+    np.testing.assert_allclose(new.z, 0)
+
+
+def test__getitem__weights():
+    # test with weights
+    coords = Coordinates([1, 2], 0, 0, weights=[.1, .9])
+    new = coords[0]
+    assert isinstance(new, Coordinates)
+    np.testing.assert_allclose(new.x, 1)
+    np.testing.assert_allclose(new.y, 0)
+    np.testing.assert_allclose(new.z, 0)
+    assert new.weights == np.array(.1)
+
+
+def test__getitem__3D_array():
+    # test with 3D array
+    coords = Coordinates([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]], 0, 0)
+    new = coords[0:1]
+    assert isinstance(new, Coordinates)
+    assert new.cshape == (1, 5)
+
+
+def test__getitem__untouced():
+    # test if sliced object stays untouched
+    coords = Coordinates([0, 1], [0, 1], [0, 1])
+    new = coords[0]
+    new.set_cart(2, 2, 2)
+    assert coords.cshape == (2,)
+    np.testing.assert_allclose(coords.x[0], 0)
+    np.testing.assert_allclose(coords.y[0], 0)
+    np.testing.assert_allclose(coords.z[0], 0)
+
+
+def test_obsolete():
+    coords = Coordinates(0, 0, 0)
+    with pytest.warns(UserWarning, match="obsolete"):
+        coords.get_cart()
+    with pytest.warns(UserWarning, match="obsolete"):
+        coords.get_cyl()
+    with pytest.warns(UserWarning, match="obsolete"):
+        coords.get_sph()
+    with pytest.warns(UserWarning, match="obsolete"):
+        coords.set_cart(0, 0, 0)
+    with pytest.warns(UserWarning, match="obsolete"):
+        coords.set_sph(0, 0, 1)
+    with pytest.warns(UserWarning, match="obsolete"):
+        coords.set_cyl(0, 0, 1)
+    with pytest.warns(UserWarning, match="obsolete"):
+        Coordinates(0, 0, 0, sh_order=1)
+
+
+def test_find_nearest_sph():
+    """Tests returns of find_nearest_sph."""
+    # test only 1D case since most of the code from self.find_nearest_k is used
+    az = np.linspace(0, 40, 5)
+    coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
+    i, m = coords.find_nearest_sph(25, 0, 1, 5, 'sph', 'top_elev', 'deg')
+    np.testing.assert_allclose(i, np.array([2, 3]))
+    np.testing.assert_allclose(m, np.array([0, 0, 1, 1, 0]))
+
+    # test search with empty results
+    i, m = coords.find_nearest_sph(25, 0, 1, 1, 'sph', 'top_elev', 'deg')
+    assert len(i) == 0
+    np.testing.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
+
+    # test out of range parameters
+    with pytest.raises(AssertionError):
+        coords.find_nearest_sph(1, 0, 0, -1)
+    with pytest.raises(AssertionError):
+        coords.find_nearest_sph(1, 0, 0, 181)
+
+    # test assertion for multiple radii
+    coords = Coordinates([1, 2], 0, 0)
+    with pytest.raises(ValueError, match="find_nearest_sph only works if"):
+        coords.find_nearest_sph(0, 0, 1, 1)
+
+
+def test_find_slice_cart():
+    """Test different queries for find slice."""
+    # test only for self.cdim = 1.
+    # self.find_slice uses KDTree, which is tested with N-dimensional arrays
+    # in test_find_nearest_k()
+    d = np.linspace(-2, 2, 5)
+
+    c = Coordinates(d, 0, 0)
+    index, mask = c.find_slice('x', 'met', 0, 1)
+    np.testing.assert_allclose(index[0], np.array([1, 2, 3]))
+    np.testing.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+
+    c = Coordinates(0, d, 0)
+    index, mask = c.find_slice('y', 'met', 0, 1)
+    np.testing.assert_allclose(index[0], np.array([1, 2, 3]))
+    np.testing.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+
+    c = Coordinates(0, 0, d)
+    index, mask = c.find_slice('z', 'met', 0, 1)
+    np.testing.assert_allclose(index[0], np.array([1, 2, 3]))
+    np.testing.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+
+
+@pytest.mark.parametrize(
+    'coordinate, unit, value, tol, des_index, des_mask', [
+        ('azimuth', 'deg', 0, 1, np.array([1, 2, 3]), np.array([0, 1, 1, 1, 0])),
+        ('azimuth', 'deg', 359, 2,
+            np.array([0, 1, 2, 3]), np.array([1, 1, 1, 1, 0])),
+        ('azimuth', 'deg', 1, 1,
+            np.array([2, 3, 4]), np.array([0, 0, 1, 1, 1])),
+    ])
+def test_find_slice_sph(coordinate, unit, value, tol, des_index, des_mask):
+    """Test different queries for find slice."""
+    # spherical grid
+    d = np.array([358, 359, 0, 1, 2])
+    c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
+
+    index, mask = c.find_slice(coordinate, unit, value, tol)
+    np.testing.assert_allclose(index[0], des_index)
+    np.testing.assert_allclose(mask, des_mask)
+
+
+def test_find_slice_error():
+    d = np.array([358, 359, 0, 1, 2])
+    c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
+    # out of range query
+    # with pytest.raises(AssertionError):
+    #     c.find_slice('azimuth', 'deg', -1, 1)
+    # non existing coordinate query
+    with pytest.raises(ValueError, match="does not exist"):
+        c.find_slice('elevation', 'ged', 1, 1)
+    with pytest.raises(ValueError, match="does not exist"):
+        c.find_slice('Ola', 'red', 1, 1)

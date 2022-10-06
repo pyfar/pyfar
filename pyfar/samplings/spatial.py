@@ -36,8 +36,8 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         :py:func:`calculate_sph_voronoi_weights`
 
         """
-        points = sampling.get_cart()
-        radius = sampling.get_sph()[:, -1]
+        points = sampling.cart
+        radius = sampling.radius
         radius_round = np.unique(np.round(radius, decimals=round_decimals))
         if len(radius_round) > 1:
             raise ValueError("All sampling points need to be on the \
