@@ -1,11 +1,9 @@
 import numpy as np
-# import numpy.testing as npt
 import pytest
-# from pytest import raises
-import matplotlib
-
 from pyfar import Coordinates
-# import pyfar.classes.coordinates as coordinates
+from packaging import version
+import pyfar as pf
+import matplotlib.pyplot as plt
 
 
 def test_coordinates_init():
@@ -150,6 +148,12 @@ def test___eq___differInShComment_notEqual():
     assert not coordinates == actual
 
 
+def test___eq___differInShOrder_notEqual():
+    coordinates = Coordinates(1, 2, 3, sh_order=2)
+    actual = Coordinates(1, 2, 3, sh_order=8)
+    assert not coordinates == actual
+
+
 def test___eq___copy():
     coordinates = Coordinates(1, 2, 3, comment="Madre mia!")
     actual = coordinates.copy()
@@ -271,9 +275,11 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
     np.testing.assert_allclose(coords.elevation, elevation, atol=1e-15)
     np.testing.assert_allclose(coords.colatitude, colatitude, atol=1e-15)
     np.testing.assert_allclose(
-        coords.sph_top_elev, [azimuth, elevation, 1], atol=1e-15)
+        coords.sph_top_elev,
+        np.atleast_2d([azimuth, elevation, 1]), atol=1e-15)
     np.testing.assert_allclose(
-        coords.sph_top_colat, [azimuth, colatitude, 1], atol=1e-15)
+        coords.sph_top_colat,
+        np.atleast_2d([azimuth, colatitude, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.azimuth = azimuth
     coords.elevation = elevation
@@ -297,7 +303,8 @@ def test_getter_sph_front_from_cart(x, y, z, phi, theta):
     coords = Coordinates(x, y, z)
     np.testing.assert_allclose(coords.phi, phi, atol=1e-15)
     np.testing.assert_allclose(coords.theta, theta, atol=1e-15)
-    np.testing.assert_allclose(coords.sph_front, [phi, theta, 1], atol=1e-15)
+    np.testing.assert_allclose(
+        coords.sph_front, np.atleast_2d([phi, theta, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.phi = phi
     coords.theta = theta
@@ -321,7 +328,7 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
     np.testing.assert_allclose(coords.lateral, lateral, atol=1e-15)
     np.testing.assert_allclose(coords.polar, polar, atol=1e-15)
     np.testing.assert_allclose(
-        coords.sph_side, [lateral, polar, 1], atol=1e-15)
+        coords.sph_side, np.atleast_2d([lateral, polar, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.lateral = lateral
     coords.polar = polar
@@ -420,22 +427,18 @@ def test__getitem__untouced():
     np.testing.assert_allclose(coords.z[0], 0)
 
 
-def test_obsolete():
-    coords = Coordinates(0, 0, 0)
-    with pytest.warns(UserWarning, match="obsolete"):
-        coords.get_cart()
-    with pytest.warns(UserWarning, match="obsolete"):
-        coords.get_cyl()
-    with pytest.warns(UserWarning, match="obsolete"):
-        coords.get_sph()
-    with pytest.warns(UserWarning, match="obsolete"):
-        coords.set_cart(0, 0, 0)
-    with pytest.warns(UserWarning, match="obsolete"):
-        coords.set_sph(0, 0, 1)
-    with pytest.warns(UserWarning, match="obsolete"):
-        coords.set_cyl(0, 0, 1)
-    with pytest.warns(UserWarning, match="obsolete"):
-        Coordinates(0, 0, 0, sh_order=1)
+def test__repr__dim():
+    coords = Coordinates([0, 1], [0, 1], [0, 1])
+    x = coords.__repr__()
+    assert '1D' in x
+    assert '2' in x
+    assert '(2,)' in x
+
+
+def test__repr__comment():
+    coords = Coordinates([0, 1], [0, 1], [0, 1], comment="Madre Mia!")
+    x = coords.__repr__()
+    assert 'Madre Mia!' in x
 
 
 def test_find_nearest_sph():
@@ -464,6 +467,155 @@ def test_find_nearest_sph():
         coords.find_nearest_sph(0, 0, 1, 1)
 
 
+def test_get_nearest_deprecations():
+    coords = Coordinates(np.arange(6), 0, 0)
+
+    # nearest_k
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.get_nearest_k(1, 0, 0)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove get_nearest_k() from pyfar 0.5.0!
+            coords.get_nearest_k(1, 0, 0)
+
+    # nearest_cart
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.get_nearest_cart(2.5, 0, 0, 1.5)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove get_nearest_k() from pyfar 0.5.0!
+            coords.get_nearest_cart(2.5, 0, 0, 1.5)
+
+    # nearest_sph
+    coords = Coordinates([1, 0, -1, 0], [0, 1, 0, -1], 0)
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.get_nearest_sph(0, 0, 1, 1)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove get_nearest_k() from pyfar 0.5.0!
+            coords.get_nearest_sph(0, 0, 1, 1)
+
+    # slice
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.get_slice('x', 'met', 0, 1)
+
+    if version.parse(pf.__version__) >= version.parse('0.5.0'):
+        with pytest.raises(AttributeError):
+            # remove get_slice() from pyfar 0.5.0!
+            coords.get_slice('x', 'met', 0, 1)
+
+
+@pytest.mark.parametrize(
+    'statement', [
+        ('coords.get_cart()'),
+        ('coords.sh_order'),
+        ('coords.set_cart(1,1,1)'),
+        ('coords.get_cyl()'),
+        ('coords.set_cyl(1,1,1)'),
+        ('coords.get_sph()'),
+        ('coords.set_sph(1,1,1)'),
+        ('Coordinates(0, 0, 0, sh_order=1)'),
+    ])
+def test_get_nearest_deprecations_0_6_0(statement):
+    coords = Coordinates(np.arange(6), 0, 0)
+    coords.y = 1
+
+    # sh_order getter
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        eval(statement)
+
+    # remove statement from pyfar 0.6.0!
+    if version.parse(pf.__version__) >= version.parse('0.6.0'):
+        with pytest.raises(AttributeError):
+            eval(statement)
+
+
+def test_get_nearest_deprecations_0_6_0_set_sh_order():
+    coords = Coordinates(np.arange(6), 0, 0)
+
+    # sh_order getter
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.sh_order = 1
+
+    # remove statement from pyfar 0.6.0!
+    if version.parse(pf.__version__) >= version.parse('0.6.0'):
+        with pytest.raises(AttributeError):
+            coords.sh_order = 1
+
+
+def test_find_nearest_cart():
+    """Tests returns of find_nearest_cart."""
+    # test only 1D case since most of the code from self.find_nearest_k is used
+    x = np.arange(6)
+    coords = Coordinates(x, 0, 0)
+    i, m = coords.find_nearest_cart(2.5, 0, 0, 1.5)
+    np.testing.assert_allclose(i, np.array([1, 2, 3, 4]))
+    np.testing.assert_allclose(m, np.array([0, 1, 1, 1, 1, 0]))
+
+    # test search with empty results
+    i, m = coords.find_nearest_cart(2.5, 0, 0, .1)
+    assert len(i) == 0
+    np.testing.assert_allclose(m, np.array([0, 0, 0, 0, 0, 0]))
+
+    # test out of range parameters
+    with pytest.raises(AssertionError):
+        coords.find_nearest_cart(1, 0, 0, -1)
+
+
+def test_find_nearest_k():
+    """Test returns of find_nearest_k"""
+    # 1D cartesian, nearest point
+    x = np.arange(6)
+    coords = Coordinates(x, 0, 0)
+    i, m = coords.find_nearest_k(1, 0, 0)
+    assert i == 1
+    np.testing.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
+
+    # 1D spherical, nearest point
+    i, m = coords.find_nearest_k(0, 0, 1, 1, 'sph', 'top_elev', 'deg')
+    assert i == 1
+    np.testing.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
+
+    # 1D cartesian, two nearest points
+    i, m = coords.find_nearest_k(1.2, 0, 0, 2)
+    np.testing.assert_allclose(i, np.array([1, 2]))
+    np.testing.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
+
+    # 1D cartesian query two points
+    i, m = coords.find_nearest_k([1, 2], 0, 0)
+    np.testing.assert_allclose(i, [1, 2])
+    np.testing.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
+
+    # 2D cartesian, nearest point
+    coords = Coordinates(x.reshape(2, 3), 0, 0)
+    i, m = coords.find_nearest_k(1, 0, 0)
+    assert i == 1
+    np.testing.assert_allclose(m, np.array([[0, 1, 0], [0, 0, 0]]))
+
+    # test with plot
+    coords = Coordinates(x, 0, 0)
+    coords.find_nearest_k(1, 0, 0, show=True)
+
+    # test object with a single point
+    coords = Coordinates(1, 0, 0)
+    coords.find_nearest_k(1, 0, 0, show=True)
+
+    # test out of range parameters
+    with pytest.raises(AssertionError):
+        coords.find_nearest_k(1, 0, 0, -1)
+
+    # plt.close("all")
+
+
 def test_find_slice_cart():
     """Test different queries for find slice."""
     # test only for self.cdim = 1.
@@ -489,11 +641,12 @@ def test_find_slice_cart():
 
 @pytest.mark.parametrize(
     'coordinate, unit, value, tol, des_index, des_mask', [
-        ('azimuth', 'deg', 0, 1, np.array([1, 2, 3]), np.array([0, 1, 1, 1, 0])),
-        ('azimuth', 'deg', 359, 2,
-            np.array([0, 1, 2, 3]), np.array([1, 1, 1, 1, 0])),
-        ('azimuth', 'deg', 1, 1,
-            np.array([2, 3, 4]), np.array([0, 0, 1, 1, 1])),
+        ('azimuth', 'deg', 0, 1, np.array([1, 2, 3]),
+            np.array([0, 1, 1, 1, 0])),
+        ('azimuth', 'deg', 359, 2, np.array([0, 1, 2, 3]),
+            np.array([1, 1, 1, 1, 0])),
+        ('azimuth', 'deg', 1, 1, np.array([2, 3, 4]),
+            np.array([0, 0, 1, 1, 1])),
     ])
 def test_find_slice_sph(coordinate, unit, value, tol, des_index, des_mask):
     """Test different queries for find slice."""
@@ -517,3 +670,77 @@ def test_find_slice_error():
         c.find_slice('elevation', 'ged', 1, 1)
     with pytest.raises(ValueError, match="does not exist"):
         c.find_slice('Ola', 'red', 1, 1)
+
+
+def test_show():
+    """Test if possible calls of show() pass."""
+    coords = Coordinates([-1, 0, 1], 0, 0)
+    # show without mask
+    coords.show()
+    # show with mask as list
+    coords.show([1, 0, 1])
+    # show with mask as ndarray
+    coords.show(np.array([1, 0, 1], dtype=bool))
+    # test assertion
+    with pytest.raises(AssertionError):
+        coords.show(np.array([1, 0], dtype=bool))
+
+    plt.close("all")
+
+
+def test_getter_with_degrees():
+    """Test if getter return correct values also in degrees"""
+    coords = Coordinates(0, 1, 0)
+
+    sph = coords.get_sph(unit="deg")
+    np.testing.assert_allclose(sph, np.atleast_2d(np.array([90, 90, 1])))
+
+    cyl = coords.get_cyl(unit="deg")
+    np.testing.assert_allclose(cyl, np.atleast_2d(np.array([90, 0, 1])))
+
+
+def test_setter_sh_order():
+    """Test setting the SH order."""
+    coords = Coordinates()
+    coords.sh_order = 10
+    assert coords.sh_order == 10
+
+
+@pytest.mark.parametrize(
+    'coordinate, min, max', [
+        ('azimuth', 0, 2*np.pi),
+        ('polar', -np.pi/2, 3*np.pi/2),
+        ('phi', 0, 2*np.pi),
+    ])
+def test_angle_limits_cyclic(coordinate, min, max):
+    """Test different queries for find slice."""
+    # spherical grid
+    d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
+    c = Coordinates(d, 0, 1)
+    c.__setattr__(coordinate, d)
+    attr = c.__getattribute__(coordinate)
+    desired = (d - min) % (max - min) + min
+    np.testing.assert_allclose(attr, desired, atol=2e-14)
+
+
+@pytest.mark.parametrize(
+    'coordinate, min, max', [
+        ('azimuth', 0, 2*np.pi),
+        ('polar', -np.pi/2, 3*np.pi/2),
+        ('phi', 0, 2*np.pi),
+        ('colatitude', 0, np.pi),
+        ('theta', 0, np.pi),
+        ('elevation', -np.pi/2, np.pi/2),
+        ('lateral', -np.pi/2, np.pi/2),
+        ('radius', 0, np.inf),
+        ('radius_z', 0, np.inf),
+    ])
+def test_angle_limits(coordinate, min, max):
+    """Test different queries for find slice."""
+    # spherical grid
+    d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
+    c = Coordinates(d, 0, 1)
+    c.__setattr__(coordinate, d)
+    attr = c.__getattribute__(coordinate)
+    assert all(attr <= max)
+    assert all(attr >= min)

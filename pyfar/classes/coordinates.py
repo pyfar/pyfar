@@ -10,6 +10,7 @@ import re
 from copy import deepcopy
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
+import pyfar as pf
 
 
 class Coordinates():
@@ -22,7 +23,7 @@ class Coordinates():
     _z: np.array = np.empty
     _weights: np.array = None
     _sh_order: int = None
-    _comment: str = ""
+    _comment: str = None
 
     def __init__(
             self, points_1: np.array = np.asarray([]),
@@ -30,7 +31,7 @@ class Coordinates():
             points_3: np.array = np.asarray([]),
             domain: str = 'cart', convention: str = 'right', unit: str = 'met',
             weights: np.array = None, sh_order=None,
-            comment: str = "") -> None:
+            comment: str = None) -> None:
         """
         Create :py:func:`Coordinates` object with or without coordinate points.
         The points that enter the Coordinates object are defined by the
@@ -85,7 +86,9 @@ class Coordinates():
             as the points points, i.e., if `points` have five entries, the
             `weights` must also have five entries. The default is ``None``.
         sh_order : int, optional
-            Obsolte. maximum spherical harmonic order of the sampling grid.
+            This function will be deprecated in pyfar 0.5.0 in favor
+            of :py:func:`SamplingSphere`.
+            maximum spherical harmonic order of the sampling grid.
             The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
@@ -107,9 +110,10 @@ class Coordinates():
 
         if sh_order is not None:
             self._sh_order = sh_order
-            warnings.warn(
-                "This parameter is obsolete and will be removed in future"
-                "versions. Please use TODO instead.")
+            warnings.warn((
+                "This function will be deprecated in pyfar 0.5.0 in favor "
+                "of SamplingSphere."),
+                    PendingDeprecationWarning)
 
     def __eq__(self, other):
         """Check for equality of two objects."""
@@ -120,10 +124,11 @@ class Coordinates():
         eq_y = self._y == other._y
         eq_z = self._z == other._z
         eq_weights = self._weights == other._weights
+        eq_sh_order = self._sh_order == other._sh_order
         eq_comment = self._comment == other._comment
         if self._x.shape == ():
-            return eq_x & eq_y & eq_z & eq_weights & eq_comment
-        return all(eq_x & eq_y & eq_z) & eq_weights & eq_comment
+            return eq_x & eq_y & eq_z & eq_weights & eq_comment & eq_sh_order
+        return all(eq_x & eq_y & eq_z) & eq_weights & eq_comment & eq_sh_order
 
     def __array__(self):
         """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
@@ -143,6 +148,34 @@ class Coordinates():
             new._weights = new._weights[index]
 
         return new
+
+    def __repr__(self):
+        """Get info about Coordinates object."""
+        # object type
+        if self.cshape != (0,):
+            obj = f"{self.cdim}D Coordinates object with {self.csize} points "\
+                  f"of cshape {self.cshape}"
+        else:
+            obj = "Empty Coordinates object"
+
+        # join information
+        _repr = obj
+
+        # check for sampling weights
+        if self._weights is None:
+            _repr += "\nDoes not contain sampling weights"
+        else:
+            _repr += "\nContains sampling weights"
+
+        # check for sh_order
+        if self._sh_order is not None:
+            _repr += f"\nSpherical harmonic order: {self._sh_order}"
+
+        # check for comment
+        if self._comment is not None:
+            _repr += f"\nComment: {self._comment}"
+
+        return _repr
 
     def copy(self):
         """Return a deep copy of the Coordinates object."""
@@ -195,6 +228,30 @@ class Coordinates():
         self._set_weights(value)
 
     @property
+    def sh_order(self):
+        """This function will be deprecated in pyfar 0.5.0 in favor
+            of :py:func:`SamplingSphere`.
+            Get the maximum spherical harmonic order."""
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of SamplingSphere."),
+                PendingDeprecationWarning)
+
+        return self._sh_order
+
+    @sh_order.setter
+    def sh_order(self, value):
+        """This function will be deprecated in pyfar 0.5.0 in favor
+            of :py:func:`SamplingSphere`.
+            Set the maximum spherical harmonic order."""
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of SamplingSphere."),
+                PendingDeprecationWarning)
+
+        self._sh_order = np.int(value)
+
+    @property
     def comment(self):
         """Get comment."""
         return self._comment
@@ -210,7 +267,8 @@ class Coordinates():
         ``points[...,0]`` holds the points for the x-coordinate,
         ``points[...,1]`` the points for the y-coordinate, and
         ``points[...,2]`` the points for the z-coordinate."""
-        return np.moveaxis(np.array([self.x, self.y, self.z]), 0, -1)
+        return np.atleast_2d(np.moveaxis(
+            np.array([self.x, self.y, self.z]), 0, -1))
 
     @cart.setter
     def cart(self, value):
@@ -221,8 +279,8 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         elevation angle, and ``points[...,2]`` the radius."""
-        return np.moveaxis(
-            np.array([self.azimuth, self.elevation, self.radius]), 0, -1)
+        return np.atleast_2d(np.moveaxis(
+            np.array([self.azimuth, self.elevation, self.radius]), 0, -1))
 
     @sph_top_elev.setter
     def sph_top_elev(self, value):
@@ -234,8 +292,8 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         colatitude angle, and ``points[...,2]`` the radius."""
-        return np.moveaxis(
-            np.array([self.azimuth, self.colatitude, self.radius]), 0, -1)
+        return np.atleast_2d(np.moveaxis(
+            np.array([self.azimuth, self.colatitude, self.radius]), 0, -1))
 
     @sph_top_colat.setter
     def sph_top_colat(self, value):
@@ -248,8 +306,8 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the lateral angle in rad, ``points[...,1]``
         polar angle, and ``points[...,2]`` the radius."""
-        return np.moveaxis(
-            np.array([self.lateral, self.polar, self.radius]), 0, -1)
+        return np.atleast_2d(np.moveaxis(
+            np.array([self.lateral, self.polar, self.radius]), 0, -1))
 
     @sph_side.setter
     def sph_side(self, value):
@@ -261,8 +319,8 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the phi angle in rad, ``points[...,1]``
         theta angle, and ``points[...,2]`` the radius."""
-        return np.moveaxis(
-            np.array([self.phi, self.theta, self.radius]), 0, -1)
+        return np.atleast_2d(np.moveaxis(
+            np.array([self.phi, self.theta, self.radius]), 0, -1))
 
     @sph_front.setter
     def sph_front(self, value):
@@ -274,8 +332,8 @@ class Coordinates():
         """Get coordinate points in cylindircal coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         z_coordinate, and ``points[...,2]`` the radius in z-plane."""
-        return np.moveaxis(
-            np.array([self.azimuth, self.z, self.radius_z]), 0, -1)
+        return np.atleast_2d(np.moveaxis(
+            np.array([self.azimuth, self.z, self.radius_z]), 0, -1))
 
     @cyl.setter
     def cyl(self, value):
@@ -417,8 +475,8 @@ class Coordinates():
 
     def set_cart(self, x, y, z, convention='right', unit='met'):
         """
-        This method is obsolete and will be removed in future versions.
-        Please use .cart, .x, .y or .z instead.
+        This function will be deprecated in pyfar 0.5.0 in favor
+        of .cart, .x, .y or .z.
         Enter coordinate points in cartesian coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -447,16 +505,17 @@ class Coordinates():
             ``'met'`` for meters.
         """
 
-        warnings.warn(
-            "This method is obsolete and will be removed in future versions."
-            " Please use .cart, .x, .y or .z instead.")
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of .cart, .x, .y or .z."),
+                PendingDeprecationWarning)
 
         self._set_cart(x, y, z)
 
     def get_cart(self, convention='right', unit='met', convert=False):
         """
-        This method is obsolete and will be removed in future versions.
-        Please use .cart instead.
+        This function will be deprecated in pyfar 0.5.0 in favor
+        of .cart
         Get coordinate points in cartesian coordinate systems.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -493,9 +552,10 @@ class Coordinates():
             coordinate, ``points[...,1]`` the points for the second, and
             ``points[...,2]`` the points for the third coordinate.
         """
-        warnings.warn(
-            "This method is obsolete and will be removed in future versions."
-            " Please use .cart instead.")
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of .cart"),
+                PendingDeprecationWarning)
 
         return self.cart
 
@@ -503,8 +563,8 @@ class Coordinates():
             self, angles_1, angles_2, radius,
             convention='top_colat', unit='rad'):
         """
-        This method is obsolete and will be removed in future versions.
-        Please use the coresponding setter (such as .azimuth, .radius) instead.
+        This function will be deprecated in pyfar 0.5.0 in favor
+        of the new setter such as .sph_top_elev
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -538,16 +598,17 @@ class Coordinates():
             unit in which the coordinate points are stored. The default is
             ``'rad'``.
         """
-        warnings.warn(
-            "This method is obsolete and will be removed in future versions."
-            " Please use the coresponding setter (such as .azimuth, .radius) "
-            "instead.")
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of the new setter such as .sph_top_elev"),
+                PendingDeprecationWarning)
+
         self._set_sph(angles_1, angles_2, radius, convention, unit)
 
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
-        This method is obsolete and will be removed in future versions.
-        Please use .sph_* instead
+        This function will be deprecated in pyfar 0.5.0 in favor
+        of the new setter such as .sph_top_elev
         Get coordinate points in spherical coordinate systems.
 
         The points that are returned are defined by the `domain`,
@@ -590,27 +651,32 @@ class Coordinates():
             coordinate, ``points[...,1]`` the points for the second, and
             ``points[...,2]`` the points for the third coordinate.
         """
-        warnings.warn(
-            "This method is obsolete and will be removed in future versions."
-            " Please use .sph_* instead.")
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of the new setter such as .sph_top_elev"),
+                PendingDeprecationWarning)
 
-        conversion_factor = 1 if unit == 'rad' else 180 / np.pi
         if convention == 'top_colat':
-            return self.sph_top_colat * conversion_factor
+            points = self.sph_top_colat
         elif convention == 'top_elev':
-            return self.sph_top_elev * conversion_factor
+            points = self.sph_top_elev
         elif convention == 'front':
-            return self.sph_front * conversion_factor
+            points = self.sph_front
         elif convention == 'side':
-            return self.sph_side * conversion_factor
+            points = self.sph_side
         else:
             raise ValueError(
                 f"Conversion for {convention} is not implemented.")
 
+        conversion_factor = 1 if unit == 'rad' else 180 / np.pi
+        points[..., 0] = points[..., 0] * conversion_factor
+        points[..., 1] = points[..., 1] * conversion_factor
+        return points
+
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
         """
-        This method is obsolete and will be removed in future versions.
-        Please use .cyl instead.
+        This function will be deprecated in pyfar 0.5.0 in favor
+        of the new setter such as .cyl
         Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -638,15 +704,16 @@ class Coordinates():
             unit in which the coordinate points are stored. The default is
             ``'rad'``.
         """
-        warnings.warn(
-            "This method is obsolete and will be removed in future versions."
-            " Please use .cyl instead.")
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of the new setter such as .cyl"),
+                PendingDeprecationWarning)
         self._set_cyl(azimuth, z, radius_z, convention)
 
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
-        This method is obsolete and will be removed in future versions.
-        Please use .cyl instead.
+        This function will be deprecated in pyfar 0.5.0 in favor
+        of the new setter such as .cyl
         Get coordinate points in cylindircal coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -683,13 +750,19 @@ class Coordinates():
             coordinate, ``points[...,1]`` the points for the second, and
             ``points[...,2]`` the points for the third coordinate.
         """
-        warnings.warn(
-            "This method is obsolete and will be removed in future versions."
-            " Please use .cyl instead.")
-        return self.cyl
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of the new setter such as .cyl"),
+                PendingDeprecationWarning)
+        points = self.cyl
 
-    def find_slice(self, coordinate: str, unit: str, value: float, tol=0,
-                   show=False, atol=1e-15):
+        conversion_factor = 1 if unit == 'rad' else 180 / np.pi
+        points[..., 0] = points[..., 0] * conversion_factor
+        return points
+
+    def find_slice(
+            self, coordinate: str, unit: str, value: float, tol=0,
+            show=False, atol=1e-15):
         """
         Find a slice of the coordinates points.
         Parameters
@@ -758,8 +831,8 @@ class Coordinates():
 
         # plot all and returned points
         if show:
-            warnings.warn("Come on! Do it by yourself.")
-            # self.show(mask)
+            # warnings.warn("Come on! Do it by yourself.")
+            self.show(mask)
 
         index = np.asarray(mask).nonzero()
 
@@ -873,9 +946,97 @@ class Coordinates():
             points[:, 1].reshape(shape),
             points[:, 2].reshape(shape))
 
-    def find_nearest_sph(self, points_1, points_2, points_3, distance,
-                         domain='sph', convention='top_colat', unit='rad',
-                         show=False, atol=1e-15):
+    def show(self, mask=None, **kwargs):
+        """
+        Show a scatter plot of the coordinate points.
+        Parameters
+        ----------
+        mask : boolean numpy array, None, optional
+            Plot points in red if ``mask==True``. The default is ``None``,
+            which the same color for all points.
+        kwargs : optional
+            keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
+            If a mask is provided and the key `c` is contained in kwargs, it
+            will be overwritten.
+        Returns
+        -------
+        ax : matplotlib.axes._subplots.Axes3DSubplot
+            The axis used for the plot.
+        """
+        if mask is None:
+            pf.plot.scatter(self, **kwargs)
+        else:
+            mask = np.asarray(mask)
+            assert mask.shape == self.cshape,\
+                "'mask.shape' must be self.cshape"
+            colors = np.full(mask.shape, pf.plot.color('b'))
+            colors[mask] = pf.plot.color('r')
+            pf.plot.scatter(self, c=colors.flatten(), **kwargs)
+
+    def find_nearest_k(
+            self, points_1, points_2, points_3, k=1, domain='cart',
+            convention='right', unit='met', show=False):
+        """
+        Find the k nearest coordinates points.
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        k : int, optional
+            Number of points to return. k must be > 0. The default is ``1``.
+        domain : string, optional
+            domain of the points. The default is ``'cart'``.
+        convention: string, optional
+            convention of points. The default is ``'right'``.
+        unit : string, optional
+            unit of the points. The default is ``'met'`` for meters.
+        show : bool, optional
+            show a plot of the coordinate points. The default is ``False``.
+        Returns
+        -------
+        index : numpy array of ints
+            The locations of the neighbors in the getter methods (e.g.,
+            ``self.get_cart``). Dimension according to `distance` (see below).
+            Missing neighbors are indicated with ``csize``. Also see Notes
+            below.
+        mask : boolean numpy array
+            mask that contains ``True`` at the positions of the selected points
+            and ``False`` otherwise. Mask is of shape ``cshape``.
+        Notes
+        -----
+        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (`csize`, 3) before they are passed to ``cKDTree``. The index that
+        is returned refers to the reshaped coordinate points. To access the
+        points for example use
+        >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
+        >>> points_reshaped[index]
+        Examples
+        --------
+        Find frontal point from a spherical coordinate system
+        .. plot::
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.find_nearest_k(1, 0, 0, show=True)
+        """
+
+        # check the input
+        assert isinstance(k, int) and k > 0 and k <= self.csize,\
+            "k must be an integer > 0 and <= self.csize."
+
+        # get target point in cartesian coordinates
+        coords = Coordinates(
+            points_1, points_2, points_3, domain, convention, unit)
+
+        # get the points
+        _, index, mask = self._find_nearest(coords, show, k, 'k')
+
+        return index, mask
+
+    def find_nearest_sph(
+            self, points_1, points_2, points_3, distance, domain='sph',
+            convention='top_colat', unit='rad', show=False, atol=1e-15):
         """
         Find coordinates within certain angular distance to the query points.
         Parameters
@@ -946,9 +1107,72 @@ class Coordinates():
 
         return index, mask
 
+    def find_nearest_cart(
+            self, points_1, points_2, points_3, distance, domain='cart',
+            convention='right', unit='met', show=False, atol=1e-15):
+        """
+        Find coordinates within a certain distance in meters to query points.
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        distance : number
+            Euclidean distance in meters in which the nearest points are
+            searched. Must be >= 0.
+        domain : string, optional
+            domain of the points. The default is ``'cart'``.
+        convention: string, optional
+            convention of points. The default is ``'right'``.
+        unit : string, optional
+            unit of the points. The default is ``'met'`` for meters.
+        show : bool, optional
+            show a plot of the coordinate points. The default is ``False``.
+        atol : float, optional
+            a tolerance that is added to `distance`. The default is`` 1e-15``.
+        Returns
+        -------
+        index : numpy array of ints
+            The locations of the neighbors in the getter methods (e.g.,
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
+            Missing neighbors are indicated with ``csize``. Also see Notes
+            below.
+        mask : boolean numpy array
+            mask that contains ``True`` at the positions of the selected points
+            and ``False`` otherwise. Mask is of shape ``cshape``.
+        Notes
+        -----
+        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (`csize`, 3) before they are passed to ``cKDTree``. The index that
+        is returned refers to the reshaped coordinate points. To access the
+        points for example use
+        >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
+        >>> points_reshaped[index]
+        Examples
+        --------
+        Find frontal points within a distance of 0.5 meters
+        .. plot::
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
+        """
+
+        # check the input
+        assert distance >= 0, "distance must be >= 0"
+
+        # get target point in cartesian coordinates
+        coords = Coordinates(
+            points_1, points_2, points_3, domain, convention, unit)
+
+        # get the points
+        distance, index, mask = self._find_nearest(
+            coords, show, distance, 'cart', atol)
+
+        return index, mask
+
     def _find_nearest(
-            self, coords,
-            show, value, measure, atol=1e-15, radius=None):
+            self, coords, show, value, measure, atol=1e-15, radius=None):
 
         # get KDTree
         kdtree = self._make_kdtree()
@@ -1214,6 +1438,111 @@ class Coordinates():
 
         # return points and convert internal state if desired
         return azimuth, z, radius_z
+
+    def get_nearest_k(self, points_1, points_2, points_3, k=1,
+                      domain='cart', convention='right', unit='met',
+                      show=False):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_k`.
+        .. note::
+            This functions returns the parameters in the order `distance`,
+            `index`, `mask`, which is different in `find_nearest_k()`
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_k."),
+                  PendingDeprecationWarning)
+
+        # get target point in cartesian coordinates
+        coords = Coordinates(
+            points_1, points_2, points_3, domain, convention, unit)
+
+        # get the points
+        distance, index, mask = self._find_nearest(
+            coords, show, k, 'k')
+
+        return distance, index, mask
+
+    def get_nearest_sph(self, points_1, points_2, points_3, distance,
+                        domain='sph', convention='top_colat', unit='rad',
+                        show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_sph`.
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_sph."),
+                  PendingDeprecationWarning)
+
+        index, mask = self.find_nearest_sph(
+            points_1, points_2, points_3, distance, domain, convention,
+            unit, show, atol)
+
+        return index, mask
+
+    def get_nearest_cart(self, points_1, points_2, points_3, distance,
+                         domain='cart', convention='right', unit='met',
+                         show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_nearest_cart`.
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_nearest_cart."),
+                  PendingDeprecationWarning)
+
+        index, mask = self.find_nearest_cart(
+            points_1, points_2, points_3, distance, domain, convention, unit,
+            show, atol)
+
+        return index, mask
+
+    def get_slice(self, coordinate: str, unit: str, value, tol=0,
+                  show=False, atol=1e-15):
+        """
+        This function will be deprecated in pyfar 0.5.0. See
+        :py:func:`~Coordinates.find_slice`.
+        .. note::
+            This functions returns only the `mask` which is different in
+            `find_slice()`
+        """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "of Coordinates.find_slice."),
+                  PendingDeprecationWarning)
+
+        _, mask = self.find_slice(coordinate, unit, value, tol, show, atol)
+        return mask
+
+
+class SamplingSphere(Coordinates):
+    """Class for samplings on a sphere"""
+
+    def __init__(self, x=None, y=None, z=None, sh_order=None, weights=None):
+        """Init for sampling class
+        """
+        Coordinates.__init__(self, x, y, z)
+        if sh_order is not None:
+            self._sh_order = np.int(sh_order)
+        else:
+            self._sh_order = None
+
+    @property
+    def sh_order(self):
+        """Get the maximum spherical harmonic order."""
+        return self._sh_order
+
+    @sh_order.setter
+    def sh_order(self, value):
+        """Set the maximum spherical harmonic order."""
+        self._sh_order = np.int(value)
 
 
 def cart2cyl(x, y, z):
