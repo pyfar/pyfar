@@ -1471,9 +1471,7 @@ def deconvolve(system_output, system_input, freq_range=None, fft_length=None, **
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
 
-    if freq_range is not None:
-        assert hasattr(freq_range, '__iter__') and len(freq_range) == 2
-    else:
+    if freq_range is None:
         freq_range = (0, system_input.sampling_rate)
 
     # Set fft_length to the max n_samples of both signals,
