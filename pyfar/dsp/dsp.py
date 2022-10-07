@@ -1472,7 +1472,13 @@ def deconvolve(system_output, system_input, freq_range=None, fft_length=None, **
         The system input signal (e.g., used to perform a measurement).
         The system input signal is zero padded, if it is shorter than the
         system output signal.
-    fft_length: int or None
+    freq_range : tuple, array_like, double
+        The upper and lower frequency limits outside of which the
+        regularization factor is to be applied. The default ``None``
+        bypasses the regularization, which might cause numerical
+        instabilities in case of band-limited `system_input`. Also see
+        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+    fft_length : int or None
         The length the signals system_output and system_input are zero padded
         to before deconvolving. The default is None. In this case only the
         shorter signal is padded to the length of the longer signal, no padding
