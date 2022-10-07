@@ -63,7 +63,7 @@ def test_output_type():
 
 
 def test_output_length():
-    """Test im output length is correct"""
+    """Test if output length is correct"""
     res = deconvolve(impulse(3), impulse(3), freq_range=(1, 22050))
     assert res.n_samples == 3
     res = deconvolve(impulse(5), impulse(3), freq_range=(1, 22050))
@@ -95,3 +95,10 @@ def test_fft_norm():
     sig3 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
     with pytest.raises(ValueError, match="Either fft_norm_2 "):
         deconvolve(sig2, sig3, freq_range=(1, 44100))
+
+
+def test_freq_range():
+    """Test if freq_range default is correct"""
+    res1 = deconvolve(impulse(3), impulse(3), freq_range=None)
+    res2 = deconvolve(impulse(3), impulse(3), freq_range=(0, 22050))
+    npt.assert_allclose(res1.time, res2.time, rtol=1e-9)
