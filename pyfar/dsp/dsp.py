@@ -1881,8 +1881,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
 
         The default is ``'linear'``
     caxis: None, int, or tuple of ints, optional
-        Channel axis or axes along which the averaging is done. The default
-        ``None``, average across all channel axes. See
+        Channel axes along which the averaging is done. The default ``None``
+        averages across all channels. See
         :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
         information.
     weights: array like
@@ -1922,7 +1922,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
 
     # check for caxis
     if caxis and np.max(caxis) > len(signal.cshape):
-        raise ValueError(('The maximum of caxis needs to be smaller then '
+        raise ValueError(('The maximum of caxis needs to be smaller than '
                           'len(signal.cshape).'))
     # set caxis default
     if caxis is None:
