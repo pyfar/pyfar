@@ -595,8 +595,8 @@ def read_comsol(filename, expressions=None, parameters=None):
     # check Datatype
     suffix = pathlib.Path(filename).suffix
     if suffix not in ['.txt', '.dat', '.csv']:
-        raise ValueError((
-            "Input file must be of type .txt, .csv or .dat."
+        raise SyntaxError((
+            "Input path must be a .txt, .csv or .dat file"
             f"but is of type {str(suffix)}"))
 
     # get header
