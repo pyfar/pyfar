@@ -19,6 +19,9 @@ def test_read_comsol_wrong_file_type():
     with pytest.raises(SyntaxError):
         io.read_comsol_header(filename)
 
+    with pytest.raises(SyntaxError):
+        io.read_comsol(filename)
+
 
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_warning_for_db_values(type):
@@ -27,11 +30,17 @@ def test_read_comsol_warning_for_db_values(type):
         io.read_comsol(path + type)
 
 
+def test_read_comsol_error_wrong_domain():
+    path = os.path.join(
+        os.getcwd(), 'tests', 'test_io_data', 'wrong_domain.txt')
+    with pytest.raises(ValueError, match='Domain'):
+        io.read_comsol(path)
+
+
 @pytest.mark.parametrize("filename,expressions",  [
     ('intensity_average', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
     ('intensity_only', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
     ('intensity_parametric', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
-    ('level_only', ['pabe.Lp_t']),
     ('pressure_acceleration_parametric_time', ['actd.p_t', 'actd.a_inst']),
     ('pressure_only', ['pabe.p_t']),
     ('pressure_parametric', ['pabe.p_t']),
@@ -49,7 +58,6 @@ def test_read_comsol_header_expressions(filename, expressions, type):
     ('intensity_average', ['W/m^2', 'W/m^2', 'W/m^2']),
     ('intensity_only', ['W/m^2', 'W/m^2', 'W/m^2']),
     ('intensity_parametric', ['W/m^2', 'W/m^2', 'W/m^2']),
-    ('level_only', ['dB']),
     ('pressure_acceleration_parametric_time', ['Pa', 'm/s^2']),
     ('pressure_only', ['Pa']),
     ('pressure_parametric', ['Pa']),
@@ -71,7 +79,6 @@ def test_read_comsol_header_expressions_unit(filename, expressions_unit, type):
     ('intensity_parametric',
      {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
       'phi': [0., 1.5708, 3.1416, 4.7124]}),
-    ('level_only', {}),
     ('pressure_acceleration_parametric_time',
      {'A0': [0.5, 1., 1.5], 'f0': [50, 100, 150, 200]}),
     ('pressure_only', {}),
@@ -90,7 +97,6 @@ def test_read_comsol_header_parameters(filename, parameters, type):
     ('intensity_average', 'freq'),
     ('intensity_only', 'freq'),
     ('intensity_parametric', 'freq'),
-    ('level_only', 'freq'),
     ('pressure_acceleration_parametric_time', 'time'),
     ('pressure_only', 'freq'),
     ('pressure_parametric', 'freq'),
@@ -106,7 +112,6 @@ def test_read_comsol_header_domain(filename, domain, type):
     ("intensity_average", [100, 500]),
     ("intensity_only", [100, 500]),
     ("intensity_parametric", [100, 500]),
-    ("level_only", [100, 500]),
     ("pressure_acceleration_parametric_time",
      [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]),
     ("pressure_only", [100, 500]),
@@ -123,7 +128,6 @@ def test_read_comsol_header_domain_data(filename, domain_data, type):
     'intensity_average',
     'intensity_only',
     'intensity_parametric',
-    'level_only',
     'pressure_acceleration_parametric_time',
     'pressure_only',
     'pressure_parametric',
@@ -145,7 +149,6 @@ def test_read_comsol_data_domain(filename, type):
     ('intensity_average', 1),
     ('intensity_only', 8),
     ('intensity_parametric', 8),
-    ('level_only', 8),
     ('pressure_acceleration_parametric_time', 46),
     ('pressure_only', 8),
     ('pressure_parametric', 8),
@@ -168,7 +171,6 @@ def test_read_comsol_data_shapes(filename, nodes, type):
 @pytest.mark.parametrize("filename",  [
     'intensity_only',
     'intensity_parametric',
-    'level_only',
     'pressure_only',
     'pressure_parametric',
     ])
@@ -191,7 +193,6 @@ def test_read_comsol_coordinates(filename, type):
     ('intensity_average', np.float64(1.2867253973047096E-24)),
     ('intensity_only', np.float64(-1.0535540378988276E-8)),
     ('intensity_parametric', np.float64(-1.0535540378988267E-8)),
-    ('level_only', np.float64(42.754551872360125)),
     ('pressure_acceleration_parametric_time',
      np.float64(2.2469262686436532E-14)),
     ('pressure_only',
