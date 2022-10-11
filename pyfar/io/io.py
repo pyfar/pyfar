@@ -301,7 +301,7 @@ def read_audio(filename, dtype='float64', **kwargs):
     """
     Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
 
-    Reads 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
+    Reads 'wav', 'aiff', 'ogg', 'flac', and 'mp3' files among others. For a
     complete list see :py:func:`audio_formats`.
 
     Parameters
