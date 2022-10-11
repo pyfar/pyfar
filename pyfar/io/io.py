@@ -885,11 +885,11 @@ def _clipped_audio_subtypes():
         return
 
     collection = {}
-    signal = pyfar.Signal([-1.5, -1, -.5, 0, .5, 1, 1.5] * 100, 44100)
+    signal = pyfar.Signal([-1.5, -1, -.5, 0, .5, 1, 1.5]*100, 44100)
     with tempfile.TemporaryDirectory() as tmpdir:
         formats = pyfar.io.audio_formats()
         for format in formats:
-            filename = os.path.join(tmpdir, 'test_file.' + format)
+            filename = os.path.join(tmpdir, 'test_file.'+format)
             for subtype in pyfar.io.audio_subtypes(format):
                 write_valid = not _soundfile_write_errors(format, subtype)
                 read_valid = not _soundfile_read_errors(format, subtype)
@@ -907,7 +907,7 @@ def _clipped_audio_subtypes():
                             np.any(signal_read.time < -1.1)):
                         behavior = 'not clipping (' + format + ')'
                     elif (np.any(signal_read.time > .1) and
-                          np.any(signal_read.time < -.1)):
+                            np.any(signal_read.time < -.1)):
                         behavior = 'clipping to +/- 1 (' + format + ')'
                     else:
                         raise ValueError(f"{format}/{subtype}")
