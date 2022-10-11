@@ -494,7 +494,7 @@ def default_audio_subtype(format):
 
 
 def read_comsol(filename, expressions=None, parameters=None):
-    """Read exported data from COMSOL Multiphysics.
+    """Read data exported from COMSOL Multiphysics.
 
     .. note::
         The data is created by defining at least one `Expression` within a
@@ -509,18 +509,18 @@ def read_comsol(filename, expressions=None, parameters=None):
     filename : str, Path
         Input file. Excepted input files are .txt, .dat and .csv. .csv-
         files are strongly recommended, since .txt and .dat-files vary in their
-        format definition.
+        format definitions.
     expressions : list of strings, optional
         This parameter defines which parts of the COMSOL data is
         returned as a pyfar FrequencyData or TimeData object. By default, all
-        expressions are returned. The COMSOL terminology is used, e.g.,
+        expressions are returned. COMSOL terminology is used, e.g.,
         ``expressions=['pabe.p_t']``.
         Further information and a list of all expressions can be obtained with
         :py:func:`~pyfar.io.read_comsol_header`.
     parameters : dict, optional
         COMSOL supports `Parametric Sweeps` to vary certain parameters in a
         sequence of simulations. The `parameters` dict contains the parameters
-        and the parameter values that should be included in the returned data.
+        and the their values that are to be returned.
         For example, in a study with a varying angle, the dict could be
         ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
         A list of all parameters included in a file can be obtained with
@@ -539,7 +539,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     coordinates : Coordinates
         Evaluation points extracted from the input file as Coordinates object.
         The coordinate system is always cartesian. If the input dimension is
-        lower than three, missing dimensions are set to zero.
+        lower than three, missing dimensions are filled with zeros.
         If the input file does not include evaluation points (e.g., in case of
         non-local datasets such as averages or integrals) no `coordinates` are
         returned.
@@ -722,7 +722,7 @@ def read_comsol_header(filename):
     filename : str, Path
         Input file. Excepted input files are .txt, .dat and .csv. .csv-
         files are strongly recommended, since .txt and .dat-files vary in their
-        format definition.
+        format definitions.
 
     Returns
     -------
@@ -747,7 +747,7 @@ def read_comsol_header(filename):
         Domain of the input data. Only time domain (``'time'``) or
         frequency domain (``'freq'``) simulations are supported.
     domain_data : list
-        List containing the time samples or frequency bins depending
+        List containing the sampling times or frequency bins depending
         on the domain of the data in the input file.
 
     Examples
