@@ -8,8 +8,10 @@ The pyfar developers
 - Marco Berzborn
 - Fabian Brinkmann
 - Alexander Deutsch
+- Anne Heimes
 - Kai Jurgeit
 - Simon Kersten
+- Tim Wennemann
 
 
 Contributors
