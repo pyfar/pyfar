@@ -4,8 +4,8 @@ Read and write objects to disk, read and write audio files, read SOFA files.
 The functions :py:func:`read` and :py:func:`write` allow to save or load
 several pyfar objects and other variables. So, e.g., workspaces in notebooks
 can be stored. :py:class:`Signal <pyfar.signal.Signal>` objects can be
-imported and exported as WAV files using :py:func:`read_wav` and
-:py:func:`write_wav`. :py:func:`read_sofa` provides functionality to read the
+imported and exported as audio files using :py:func:`read_audio` and
+:py:func:`write_audio`. :py:func:`read_sofa` provides functionality to read the
 data stored in a SOFA file.
 """
 import os.path
