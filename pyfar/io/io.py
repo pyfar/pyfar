@@ -10,11 +10,13 @@ data stored in a SOFA file.
 """
 import os.path
 import pathlib
+
 import warnings
 import sofar as sf
 import zipfile
 import io
 import numpy as np
+import re
 
 try:
     import soundfile
@@ -26,7 +28,8 @@ except (ModuleNotFoundError, OSError):
         "install soundfile`. If this not works search the documentation for "
         "help: https://python-soundfile.readthedocs.io")
 
-from pyfar import Signal, FrequencyData, Coordinates
+import pyfar
+from pyfar import Signal, FrequencyData, Coordinates, TimeData
 from . import _codec as codec
 import pyfar.classes.filter as fo
 
@@ -487,3 +490,382 @@ def default_audio_subtype(format):
         return
 
     return soundfile.default_subtype(format)
+
+
+def read_comsol(filename, expressions=None, parameters=None):
+    """Read data exported from COMSOL Multiphysics.
+
+    .. note::
+        The data is created by defining at least one `Expression` within a
+        `Data` node in Comsol's `Results/Export` section. The `data format`
+        needs to be `Spreadsheet`. This function supports several `Expressions`
+        as well as results for `Parametric Sweeps`.
+        For more information see
+        :py:func:`~pyfar.io.read_comsol_header`.
+
+    Parameters
+    ----------
+    filename : str, Path
+        Input file. Excepted input files are .txt, .dat and .csv. .csv-
+        files are strongly recommended, since .txt and .dat-files vary in their
+        format definitions.
+    expressions : list of strings, optional
+        This parameter defines which parts of the COMSOL data is
+        returned as a pyfar FrequencyData or TimeData object. By default, all
+        expressions are returned. COMSOL terminology is used, e.g.,
+        ``expressions=['pabe.p_t']``.
+        Further information and a list of all expressions can be obtained with
+        :py:func:`~pyfar.io.read_comsol_header`.
+    parameters : dict, optional
+        COMSOL supports `Parametric Sweeps` to vary certain parameters in a
+        sequence of simulations. The `parameters` dict contains the parameters
+        and the their values that are to be returned.
+        For example, in a study with a varying angle, the dict could be
+        ``parameters={'theta': [0.0, 0.7854], 'phi': [0., 1.5708]}``.
+        A list of all parameters included in a file can be obtained with
+        :py:func:`~pyfar.io.read_comsol_header`. The default is ``None``, which
+        means all parameters are included.
+
+    Returns
+    -------
+    data : FrequencyData, TimeData
+        Returns a TimeData or FrequencyData object depending the domain of the
+        input data. The output has the `cshape` (#points, #expressions,
+        #parameter1, #parameter2, ...). In case of missing parameter value
+        combinations in the input, the missing data is filled with nans.
+        If the input does not include parameters, the `cshape` is just
+        (#points, #expressions).
+    coordinates : Coordinates
+        Evaluation points extracted from the input file as Coordinates object.
+        The coordinate system is always cartesian. If the input dimension is
+        lower than three, missing dimensions are filled with zeros.
+        If the input file does not include evaluation points (e.g., in case of
+        non-local datasets such as averages or integrals) no `coordinates` are
+        returned.
+
+    Examples
+    --------
+    Assume a `Pressure Acoustics BEM Simulation` (named "pabe" in COMSOL) for
+    two frequencies including a `Parametric Sweep` with `All Combinations` of
+    certain incident angles theta and phi for the incident sound wave.
+    The sound pressure ("p_t") is exported to a file `comsol_sample.csv`.
+
+    Obtain information on the input file with
+    :py:func:`~pyfar.io.read_comsol_header`.
+
+    >>> expressions, units, parameters, domain, domain_data = \\
+    >>>     pf.io.read_comsol_header('comsol_sample.csv')
+    >>> expressions
+    ['pabe.p_t']
+    >>> units
+    ['Pa']
+    >>> parameters
+    {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
+     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> domain
+    'freq'
+    >>> domain_data
+    [100.0, 500.0]
+
+    Read the data including all parameter combinations.
+
+    >>> data, coordinates = pf.io.read_comsol('comsol_sample.csv')
+    >>> data
+    FrequencyData:
+    (8, 1, 5, 4) channels with 2 frequencies
+    >>> coordinates
+    1D Coordinates object with 8 points of cshape (8,)
+    domain: cart, convention: right, unit: met
+    coordinates: x in meters, y in meters, z in meters
+    Does not contain sampling weights
+
+    Read the data with a subset of the parameters.
+
+    >>> parameter_subset = {
+            'theta': [1.5708, 2.3562, 3.1416],
+            'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> data, coordinates = pf.io.read_comsol(
+    >>>     'comsol_sample.csv', parameters=parameter_subset)
+    >>> data
+    FrequencyData:
+    (8, 1, 3, 4) channels with 2 frequencies
+    """
+
+    # check Datatype
+    suffix = pathlib.Path(filename).suffix
+    if suffix not in ['.txt', '.dat', '.csv']:
+        raise SyntaxError((
+            "Input path must be a .txt, .csv or .dat file"
+            f"but is of type {str(suffix)}"))
+
+    # get header
+    all_expressions, units, all_parameters, domain, domain_data \
+        = read_comsol_header(filename)
+    if 'dB' in units:
+        warnings.warn(
+            r'The data contains values in dB. Consider to use de-logarithmize '
+            r'data, such as sound pressure, if possible. otherwise any '
+            r'further processing of the data might lead to erroneous results.')
+    header, is_complex, delimiter = _read_comsol_get_headerline(filename)
+
+    # set default variables
+    if expressions is None:
+        expressions = all_expressions.copy()
+    if parameters is None:
+        parameters = all_parameters.copy()
+
+    # get meta data
+    metadata = _read_comsol_metadata(filename)
+    n_dimension = metadata['Dimension']
+    n_nodes = metadata['Nodes']
+    n_entries = metadata['Expressions']
+
+    # read data
+    dtype = complex if is_complex else float
+    domain_str = domain if domain == 'freq' else 't'
+    raw_data = np.loadtxt(
+        filename, dtype=dtype, comments='%', delimiter=delimiter,
+        converters=lambda s: s.replace('i', 'j'), encoding=None)
+    # force raw_data to 2D
+    raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
+
+    # Define pattern for regular expressions, see test files for examples
+    exp_pattern = r'([\w\/\^_.]+) \('
+    domain_pattern = domain_str + r'=([0-9.]+)'
+    value_pattern = r'=([0-9.]+)'
+
+    # read parameter and header data
+    expressions_header = np.array(re.findall(exp_pattern, header))
+    domain_header = np.array(
+        [float(x) for x in re.findall(domain_pattern, header)])
+    parameter_header = dict()
+    for key in parameters:
+        parameter_header[key] = np.array(
+            [float(x) for x in re.findall(key+value_pattern, header)])
+
+    # final data shape
+    final_shape = [n_nodes, len(expressions)]
+    for key in parameters:
+        final_shape.append(len(parameters[key]))
+    final_shape.append(len(domain_data))
+
+    # temporary shape
+    n_combinations = np.prod(final_shape[2:-1]) if parameters else 1
+    temp_shape = [n_nodes, len(expressions), n_combinations, len(domain_data)]
+
+    # create pairs of parameter values
+    pairs = np.meshgrid(*[x for x in parameters.values()])
+    parameter_pairs = dict()
+    for idx, key in enumerate(parameters):
+        parameter_pairs[key] = pairs[idx].T.flatten()
+
+    # loop over expressions, domain, parameters
+    # extract the data by comparing with header
+    # first fill the array with temporary shape, then reshape
+    data_in = raw_data[:, -n_entries:]
+    data_out = np.full(temp_shape, np.nan, dtype=dtype)
+    for expression_idx, expression_key in enumerate(expressions):
+        expression_mask = expressions_header == expression_key
+        for parameter_idx in range(temp_shape[2]):
+            parameter_mask = np.full_like(expression_mask, True)
+            for key in parameters:
+                parameter_mask &= parameter_header[key] \
+                    == parameter_pairs[key][parameter_idx]
+            for domain_idx, domain_value in enumerate(domain_data):
+                domain_mask = domain_header == domain_value
+                mask = parameter_mask & domain_mask & expression_mask
+                if any(mask):
+                    data_out[:, expression_idx, parameter_idx, domain_idx] \
+                        = data_in[:, mask].flatten()
+                else:
+                    if parameters == all_parameters:
+                        warnings.warn(
+                            r'Specific combinations is set in the Parametric '
+                            r'Sweep in Comsol. Missing data is filled with '
+                            r'nans.')
+
+    # reshape data to final shape
+    data_out = np.reshape(data_out, final_shape)
+
+    # create object
+    comment = ', '.join(' '.join(x) for x in zip(all_expressions, units))
+    if domain == 'freq':
+        data = FrequencyData(data_out, domain_data, comment=comment)
+    else:
+        data = TimeData(data_out, domain_data, comment=comment)
+
+    # create coordinates
+    if n_dimension > 0:
+        coords_data = np.real(raw_data[:, 0:n_dimension])
+        x = coords_data[:, 0]
+        y = coords_data[:, 1] if n_dimension > 1 else np.zeros_like(x)
+        z = coords_data[:, 2] if n_dimension > 2 else np.zeros_like(x)
+        coordinates = Coordinates(x, y, z)
+        return data, coordinates
+    else:
+        return data
+
+
+def read_comsol_header(filename):
+    """Read header information on exported data from COMSOL Multiphysics.
+
+    .. note::
+        The data is created by defining at least one `Expression` within a
+        `Data` node in Comsol's `Results/Export` section. The `data format`
+        needs to be `Spreadsheet`. This function supports several `Expressions`
+        as well as results for `Parametric Sweeps`.
+        For more information see below.
+
+    Parameters
+    ----------
+    filename : str, Path
+        Input file. Excepted input files are .txt, .dat and .csv. .csv-
+        files are strongly recommended, since .txt and .dat-files vary in their
+        format definitions.
+
+    Returns
+    -------
+    expressions : list of strings
+        When exporting data in COMSOL, certain `Expressions` need to be
+        specified that define the physical quantities to be exported. This
+        function returns the expressions as a list, e.g.,
+        ``expressions=['pabe.p_t']``.
+    units : list of strings
+        List of the units corresponding to `expressions`, e.g.,
+        ``units=['Pa']``.
+    parameters : dict
+        COMSOL supports `Parametric Sweeps` to vary certain parameters in a
+        sequence of simulations. This function returns the parameters
+        and the parameter values as a dict. For example, in a study with a
+        varying angle, the dict could be ``parameters={'theta': [0.0, 0.7854],
+        'phi': [0., 1.5708]}``. If the input does not include parameters, an
+        emtpy dict is returnd. Note that the dict is same for
+        `All Combinations` and `Specific Combinations` of parameters as a
+        distinction is not possible due to the data format.
+    domain : string
+        Domain of the input data. Only time domain (``'time'``) or
+        frequency domain (``'freq'``) simulations are supported.
+    domain_data : list
+        List containing the sampling times or frequency bins depending
+        on the domain of the data in the input file.
+
+    Examples
+    --------
+    Assume a `Pressure Acoustics BEM Simulation` (named "pabe" in COMSOL) for
+    two frequencies 100 Hz and 500 Hz including a `Parametric Sweep` of certain
+    incident angles theta and phi for the incident sound wave. The sound
+    pressure ("p_t") is exported to a file `comsol_sample.csv`.
+
+    Obtain information on the input file.
+
+    >>> expressions, units, parameters, domain, domain_data = \\
+    >>>     pf.io.read_comsol_header('comsol_sample.csv')
+    >>> expressions
+    ['pabe.p_t']
+    >>> units
+    ['Pa']
+    >>> parameters
+    {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
+     'phi': [0.0, 1.5708, 3.1416, 4.7124]}
+    >>> domain
+    'freq'
+    >>> domain_data
+    [100.0, 500.0]
+    """
+    # Check Datatype
+    suffix = pathlib.Path(filename).suffix
+    if not suffix.endswith(('.txt', '.dat', '.csv')):
+        raise SyntaxError((
+            "Input path must be a .txt, .csv or .dat file"
+            f"but is of type {str(suffix)}"))
+
+    # read header
+    header, _, _ = _read_comsol_get_headerline(filename)
+
+    # Define pattern for regular expressions, see test files for examples
+    exp_unit_pattern = r'([\w\(\)\/\^. ]+) @'
+    exp_pattern = r'([\w\/\^_.]+) \('
+    unit_pattern = r'\(([\w\/\^ .]+)\)'
+    domain_pattern = r'@ ([a-zA-Z]+)='
+    value_pattern = r'=([0-9.]+)'
+    param_pattern = r'([\w\/\^_.]+)='
+    param_unit_pattern = r'=[0-9.]+([a-zA-Z]+)'
+
+    # read expressions
+    expressions_with_unit = re.findall(exp_unit_pattern, header)
+    expressions_all = re.findall(exp_pattern, ';'.join(expressions_with_unit))
+    expressions = _unique_strings(expressions_all)
+    # read corresponding units
+    exp_idxs = [expressions_all.index(e) for e in expressions]
+    units_all = re.findall(unit_pattern, ';'.join(expressions_with_unit))
+    units = [units_all[i] for i in exp_idxs]
+
+    # read domain data
+    domain_str = re.findall(domain_pattern, header)[0]
+    if domain_str == 't':
+        domain = 'time'
+    elif domain_str == 'freq':
+        domain = domain_str
+    else:
+        raise ValueError(
+            f"Domain can be 'time' or 'freq', but is {domain_str}.")
+    domain_data = _unique_strings(
+            re.findall(domain_str + value_pattern, header))
+    domain_data = [float(d) for d in domain_data]
+
+    # create parameters dict
+    parameter_names = _unique_strings(re.findall(param_pattern, header))
+    parameter_names.remove(domain_str)
+    parameters = dict()
+    for para_name in parameter_names:
+        unit = _unique_strings(
+            re.findall(para_name + param_unit_pattern, header))
+        values = _unique_strings(
+            re.findall(para_name + value_pattern, header))
+        values = [float(v) for v in values]
+        parameters[para_name] = [x+unit for x in values] if unit else values
+
+    return expressions, units, parameters, domain, domain_data
+
+
+def _read_comsol_metadata(filename):
+    suffix = pathlib.Path(filename).suffix
+    metadata = dict()
+    # loop over meta data lines (starting with %)
+    number_names = ['Dimension', 'Nodes', 'Expressions']
+    with open(filename) as f:
+        for line in f.readlines():
+            if line[0] != '%':
+                break
+            elif any(n in line for n in number_names):
+                # character replacements, splits
+                line = line.lstrip('% ')
+                if suffix == '.csv':
+                    line = line.replace('"', '').split(',')
+                elif suffix in ['.dat', '.txt']:
+                    line = line.replace(',', ';').replace(':', ',').split(',')
+                metadata[line[0]] = int(line[-1])
+    return metadata
+
+
+def _unique_strings(expression_list):
+    unique = []
+    for e in expression_list:
+        if e not in unique:
+            unique.append(e)
+    return unique
+
+
+def _read_comsol_get_headerline(filename):
+    header = []
+    with open(filename) as f:
+        last_line = []
+        for line in f.readlines():
+            if not line.startswith('%'):
+                header = last_line
+                break
+            last_line = line
+
+    is_complex = 'i' in line
+    delimiter = ',' if ',' in line else None
+    return header, is_complex, delimiter

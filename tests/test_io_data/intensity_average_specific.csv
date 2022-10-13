@@ -1,0 +1,9 @@
+% Model,pyfar_example_model_pabe_specific_order.mph
+% Version,COMSOL 6.0.0.354
+% Date,"Sep 20 2022, 09:54"
+% Dimension,0
+% Nodes,1
+% Expressions,24
+% Description,"Intensity, x component, Intensity, y component, Intensity, z component"
+% pabe.Ix (W/m^2) @ freq=100, theta=0, phi=0,pabe.Iy (W/m^2) @ freq=100, theta=0, phi=0,pabe.Iz (W/m^2) @ freq=100, theta=0, phi=0,pabe.Ix (W/m^2) @ freq=500, theta=0, phi=0,pabe.Iy (W/m^2) @ freq=500, theta=0, phi=0,pabe.Iz (W/m^2) @ freq=500, theta=0, phi=0,pabe.Ix (W/m^2) @ freq=100, theta=0.7854, phi=1.5708,pabe.Iy (W/m^2) @ freq=100, theta=0.7854, phi=1.5708,pabe.Iz (W/m^2) @ freq=100, theta=0.7854, phi=1.5708,pabe.Ix (W/m^2) @ freq=500, theta=0.7854, phi=1.5708,pabe.Iy (W/m^2) @ freq=500, theta=0.7854, phi=1.5708,pabe.Iz (W/m^2) @ freq=500, theta=0.7854, phi=1.5708,pabe.Ix (W/m^2) @ freq=100, theta=1.5708, phi=3.1416,pabe.Iy (W/m^2) @ freq=100, theta=1.5708, phi=3.1416,pabe.Iz (W/m^2) @ freq=100, theta=1.5708, phi=3.1416,pabe.Ix (W/m^2) @ freq=500, theta=1.5708, phi=3.1416,pabe.Iy (W/m^2) @ freq=500, theta=1.5708, phi=3.1416,pabe.Iz (W/m^2) @ freq=500, theta=1.5708, phi=3.1416,pabe.Ix (W/m^2) @ freq=100, theta=2.3562, phi=4.7124,pabe.Iy (W/m^2) @ freq=100, theta=2.3562, phi=4.7124,pabe.Iz (W/m^2) @ freq=100, theta=2.3562, phi=4.7124,pabe.Ix (W/m^2) @ freq=500, theta=2.3562, phi=4.7124,pabe.Iy (W/m^2) @ freq=500, theta=2.3562, phi=4.7124,pabe.Iz (W/m^2) @ freq=500, theta=2.3562, phi=4.7124
+1.2867253973047096E-24,1.838179139006728E-24,4.1359030627651384E-25,-2.757268708510092E-25,1.378634354255046E-25,-1.838179139006728E-25,5.514537417020184E-25,1.838179139006728E-25,-4.59544784751682E-26,-2.757268708510092E-25,1.838179139006728E-25,1.378634354255046E-25,-3.676358278013456E-25,2.941086622410765E-24,2.0679515313825692E-24,2.757268708510092E-25,1.378634354255046E-25,0,9.19089569503364E-26,2.757268708510092E-25,2.29772392375841E-25,-1.378634354255046E-25,-5.054992632268502E-25,5.514537417020184E-25
