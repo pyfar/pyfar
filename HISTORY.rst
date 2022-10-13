@@ -30,6 +30,7 @@ History
   * Added `fractional_time_shift` function for applying linear and cyclic fractional delays (PR # 292)
   * Added `fractional_octave_smoothing` function (PR #297)
   * Added `decibel` function (PR #305, #322)
+  * Added new mandatory parameter `freq_range` to `deconvolve` (PR #370)
 
 * `pyfar.dsp.filter`
 
