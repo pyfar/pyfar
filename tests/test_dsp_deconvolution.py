@@ -101,4 +101,4 @@ def test_freq_range():
     """Test if freq_range default is correct"""
     res1 = deconvolve(impulse(3), impulse(3), freq_range=None)
     res2 = deconvolve(impulse(3), impulse(3), freq_range=(0, 22050))
-    npt.assert_allclose(res1.time, res2.time, rtol=1e-9)
+    npt.assert_allclose(res1.time, res2.time, rtol=1e-14)
