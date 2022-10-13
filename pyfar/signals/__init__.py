@@ -11,13 +11,14 @@ For example:
 """
 
 from .deterministic import (
-    sine, impulse, linear_sweep_time, exponential_sweep_time,
-    linear_sweep, exponential_sweep)
+    sine, impulse, linear_sweep_time, exponential_sweep_time)
 
 from .stochastic import (
     noise, pulsed_noise)
 
+from . import files
+
 __all__ = [
     'sine', 'impulse', 'noise', 'pulsed_noise',
     'linear_sweep_time', 'exponential_sweep_time',
-    'linear_sweep', 'exponential_sweep']
+    'files']

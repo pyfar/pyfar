@@ -7,7 +7,6 @@ import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
 import numpy as np
 import numpy.testing as npt
-from packaging import version
 
 """
 Testing plots is difficult, as matplotlib does not create the exact same
@@ -91,6 +90,7 @@ def test_line_phase_options(param, handsome_signal):
 
 def test_line_phase_unwrap_assertion(sine):
     """Test assertion for unwrap parameter."""
+    create_figure()
     with raises(ValueError):
         plot.phase(sine, unwrap='infinity')
 
@@ -141,6 +141,7 @@ def test_line_freq_scale_assertion(function, sine):
     Test if all line plots raise an assertion for a wrong scale parameter.
     """
 
+    create_figure()
     with raises(ValueError):
         function(sine, freq_scale="warped")
 
@@ -150,7 +151,7 @@ def test_line_freq_scale_assertion(function, sine):
 @pytest.mark.parametrize('function', [
     (plot.time), (plot.group_delay), (plot.spectrogram)])
 @pytest.mark.parametrize('unit', [
-    (None), ('s'), ('ms'), ('mus'), ('samples')])
+    ('auto'), ('s'), ('ms'), ('mus'), ('samples')])
 def test_time_unit(function, unit, handsome_signal):
     """Test plottin with different units."""
     print(f"Testing: {function.__name__} (unit={unit})")
@@ -165,6 +166,7 @@ def test_time_unit(function, unit, handsome_signal):
 def test_time_unit_assertion(sine):
     """Test if all line plots raise an assertion for a wrong unit parameter."""
 
+    create_figure()
     with raises(ValueError):
         plot.time(sine, unit="pascal")
 
@@ -235,20 +237,6 @@ def test_line_frequency_data(function, handsome_signal):
                      file_type, compare_output)
 
 
-@pytest.mark.parametrize('function', [
-    (plot.freq), (plot.phase), (plot.group_delay),
-    (plot.time_freq), (plot.freq_phase), (plot.freq_group_delay)])
-def test_xscale_deprecation(function, handsome_signal):
-    with pytest.warns(PendingDeprecationWarning,
-                      match="The xscale parameter will be removed"):
-        function(handsome_signal, xscale='linear')
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.6.0!
-            function(handsome_signal)
-
-
 def test_spectrogram():
     """Test spectrogram with default parameters"""
     function = plot.spectrogram
@@ -260,17 +248,6 @@ def test_spectrogram():
     function(pf.signals.exponential_sweep_time(2**16, [100, 10e3]))
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
-
-
-def test_spectrogram_yscale_deprecation(sine):
-    with pytest.warns(PendingDeprecationWarning,
-                      match="The yscale parameter will be removed"):
-        plot.spectrogram(sine, yscale='linear')
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.6.0!
-            plot.spectrogram(sine)
 
 
 @pytest.mark.parametrize('function', [
@@ -340,6 +317,7 @@ def test_2d_colorbar_assertion(function, handsome_signal_2d):
     """
     Test assertion when passing an array of axes but not having a colorbar.
     """
+    create_figure()
     with raises(ValueError, match="A list of axes"):
         function(handsome_signal_2d, colorbar=False,
                  ax=[plt.gca(), plt.gca()])
@@ -354,6 +332,7 @@ def test_2d_cshape_assertion(function):
     Test assertion when passing a signal with wrong cshape.
     """
     error_str = r"signal.cshape must be \(m, \) with m\>=2 but is \(2, 2\)"
+    create_figure()
     with raises(ValueError, match=error_str):
         function(pf.signals.impulse(10, [[0, 0], [0, 0]]))
 
@@ -375,6 +354,7 @@ def test_2d_phase_options(param, handsome_signal_2d):
 
 def test_phase_2d_unwrap_assertion(handsome_signal_2d):
     """Test assertion for unwrap parameter."""
+    create_figure()
     with raises(ValueError):
         plot.phase_2d(handsome_signal_2d, unwrap='infinity')
 
@@ -423,6 +403,7 @@ def test_2d_freq_scale_assertion(handsome_signal_2d):
     Test if all 2d plots raise an assertion for a wrong scale parameter.
     """
 
+    create_figure()
     with raises(ValueError):
         plot.freq_2d(handsome_signal_2d, freq_scale="warped")
 
@@ -438,7 +419,7 @@ def test_2d_freq_scale_assertion(handsome_signal_2d):
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.group_delay_2d)])
 @pytest.mark.parametrize('unit', [
-    (None), ('s'), ('ms'), ('mus'), ('samples')])
+    ('auto'), ('s'), ('ms'), ('mus'), ('samples')])
 def test_2d_time_unit(function, unit, handsome_signal_2d):
     """Test plottin with different units."""
     print(f"Testing: {function.__name__} (unit={unit})")
@@ -453,6 +434,7 @@ def test_2d_time_unit(function, unit, handsome_signal_2d):
 def test_2d_time_unit_assertion(handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
 
+    create_figure()
     with raises(ValueError):
         plot.time_2d(handsome_signal_2d, unit="pascal")
 
@@ -489,6 +471,28 @@ def test_2d_frequency_data(handsome_signal_2d, function):
     function(frequency_data)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
+    (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
+def test_2d_contourf(function, handsome_signal_2d):
+    """Test 2d plots with contourf method."""
+    filename = function.__name__ + '_contourf'
+    create_figure()
+    function(handsome_signal_2d, method='contourf')
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
+    (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
+def test_2d_method_assertion(function, handsome_signal_2d):
+    """Test 2d plots method assertion ."""
+    create_figure()
+    with raises(ValueError, match="method must be"):
+        function(handsome_signal_2d, method='pcontourmesh')
 
 
 def test_use():
@@ -536,3 +540,20 @@ def test_time_freq_fft_norm_dB(noise):
     y_actual = ax[1].lines[0].get_ydata().flatten()
     y_desired = 10*np.log10(np.abs(noise.freq)).flatten()
     npt.assert_allclose(y_actual, y_desired, rtol=1e-6)
+
+
+@pytest.mark.parametrize('style', [
+    ('light'), ('dark')])
+def test_title_style(style, handsome_signal):
+    """Test correct titles settings in the plot styles."""
+    filename = 'title_' + style
+    fig = create_figure()
+    # Apparently, the style needs to be set twice for tests
+    pf.plot.use(style)
+    ax = pf.plot.freq(handsome_signal, style=style)
+    fig.suptitle('Fig-Title')
+    ax.set_title('Ax-Title')
+    fig.tight_layout()
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+    plt.close('all')

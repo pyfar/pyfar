@@ -2,10 +2,63 @@
 History
 =======
 
-0.4.2 (2022-08-08)
+0.5.0 (2022-10-13)
 ------------------
-* Make python-soundfile an optional requirement due to unsupported architectures. Note that without python-soundfile common audio file format are no longer supported via `pyfar.io`.
-* Developer: Switch to CircleCI for continuous testing.
+* General
+
+  * End support for Python 3.7 because it was deprecated in numpy functionality also used by pyfar (PR #350)
+  * Deprecate `read_wav` and `write_wav` from the `pyfar.io` module in favor or `read_audio` and `write_audio` (PR# 310)
+  * Deprecate the `get_nearst_*` functions from the `Coordinates` class in favor of `find_nearest_*` functions (PR #310)
+  * Deprecate `linear_sweep` and `exponential_sweep` from the `pyfar.signals` module in favor or `linear_sweep_time` and `exponential_sweep_time` (PR #310)
+  * Deprecate cryptic names in `pyfar.dsp.filter` module for more verbose names, e.g., `butter` was deprecated in favor of `butterworth` (PR #310)
+  * Improved Documentation and bugfixes (PR #324, #354, #355)
+
+* Audio classes (`Signal`, `TimeData`, and `FrequencyData`)
+
+  * Added matrix multiplication to arithmetic operations (PR #277)
+  * Improved broadcasting and documentation for arithmetic operations (PR #318)
+  * The data type is now automatically derived from the input. The parameter `dtype` was removed and the class structure improved (PR #344)
+
+* `pyfar.dsp`
+
+  * Improved algorithm of `minimum_phase` for arbitrary impulse responses (PR #303)
+  * Added `resample` function for sample rate conversions (PR #297, #321, #333)
+  * Added `find_impulse_response_start` and `find_impulse_response_delay` to detect the time of arrival in impulse responses (PR # 203)
+  * Added `normalize` function for time and frequency domain normalization (PR #323)
+  * Added `energy`, `power`, and `rms` for computing energy measures in the time domain (PR #338)
+  * Added `time_shift` function for applying linear and cyclic integer delays (PR #312)
+  * Added `fractional_time_shift` function for applying linear and cyclic fractional delays (PR # 292)
+  * Added `fractional_octave_smoothing` function (PR #297)
+  * Added `decibel` function (PR #305, #322)
+  * Added new mandatory parameter `freq_range` to `deconvolve` (PR #370)
+
+* `pyfar.dsp.filter`
+
+  * Added reconstructing auditory `GammatoneBands` filter bank (PR #327)
+
+* `pyfar.signals`
+
+  * Improved flexibility and broadcasting of parameters for `impulse` and `sine` signals (PR #313)
+
+* `pyfar.io`
+
+  * Added `read_comsol` and `read_comsol_header` to import data from COMSOL (PR #339)
+  * Include updates incl. MP3 support from `soundfile v0.11.0 <https://python-soundfile.readthedocs.io/en/0.11.0/#news>`_ for `write_audio` and `read_audio` (PR #365)
+
+* `pyfar.plot`
+
+  * Time domain plots now always use seconds as the default unit. The previous default `'auto'` caused unexpected behavior by changing the unit of already existing plots depending on the lengths of the Signal that was plotted last (PR #308)
+
+* Other
+
+  * Test building the documentation using CI (PR #319, #348)
+  * Fixed broken mybinder.org examples (PR #341)
+  * Internal refactoring, documentation, and bug fixes (PR #326, #331, #352)
+
+0.4.3 (2022-08-08)
+------------------
+* Make python-soundfile an optional requirement due to unsupported architectures. Note that without python-soundfile common audio file format are no longer supported via `pyfar.io` (PR #334, #340).
+* Developer: Switch to CircleCI for continuous testing (PR #336).
 
 0.4.2 (2022-05-20)
 ------------------

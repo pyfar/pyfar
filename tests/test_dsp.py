@@ -240,67 +240,88 @@ def test_regularized_spectrum_inversion_normalized(impulse):
 
 
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
-def test_time_shift_samples(shift_samples):
+@pytest.mark.parametrize("unit", ["samples", "s"])
+def test_time_shift_cyclic(shift_samples, unit):
+    """Test cyclic time shift using samples and seconds"""
+    # generate test signal
     sampling_rate = 100
     delay = 2
     n_samples = 10
     test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
 
-    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(
-        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+    # apply shift
+    shift = shift_samples if unit == "samples" else shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift, unit=unit)
 
-    npt.assert_allclose(shifted.time, ref.time)
-
-    # shift around one time
-    shift_samples = n_samples
-    shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    npt.assert_allclose(shifted.time, ref.time)
-
-
-def test_time_shift_full_length():
-    sampling_rate = 100
-    delay = 2
-    n_samples = 10
-    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    shifted = dsp.time_shift(test_signal, n_samples, unit='samples')
-    ref = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    npt.assert_allclose(shifted.time, ref.time)
-
-
-@pytest.mark.parametrize("shift_samples", [2, -2, 0])
-def test_time_shift_seconds(shift_samples):
-    sampling_rate = 100
-    delay = 2
-    n_samples = 10
-    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
-
-    shift_time = shift_samples/sampling_rate
-    shifted = dsp.time_shift(test_signal, shift_time, unit='s')
+    # compare to reference
     ref = impulse(
         n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
 
     npt.assert_allclose(shifted.time, ref.time)
 
 
-def test_time_shift_multi_dim():
+@pytest.mark.parametrize("shift", [2, -2, 0])
+@pytest.mark.parametrize("pad_value", [0, np.nan])
+def test_time_shift_linear(shift, pad_value):
+    """Test linear time shift with different pad values"""
+    # generate test signal
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+
+    # apply shift
+    shifted = dsp.time_shift(
+        test_signal, shift, "linear", "samples", pad_value)
+
+    # compare to reference
+    ref = impulse(
+        n_samples, delay=delay+shift, sampling_rate=sampling_rate)
+
+    if pad_value != 0 and shift != 0:
+        ref = pf.TimeData(ref.time, ref.times)
+    if shift == 2:
+        ref.time[0, :2] = pad_value
+    elif shift == -2:
+        ref.time[0, -2:] = pad_value
+
+    npt.assert_allclose(shifted.time, ref.time)
+    assert type(shifted) == type(ref)
+
+
+@pytest.mark.parametrize("shift_samples", [(
+    [1, 2, 3]), (np.array([1, 2, 3]))])
+def test_time_shift_multi_dim(shift_samples):
+    """Test with multi-channel signal and shift values as list and np.array"""
     delay = 2
     n_samples = 10
 
     # multi-dim signal with individual shifts
-    n_channels = np.array([2, 3])
     test_signal = impulse(
-        n_samples, delay=delay, amplitude=np.ones(n_channels))
-    shift_samples = np.reshape(np.arange(np.prod(n_channels)) + 1, n_channels)
+        n_samples, delay=delay, amplitude=np.ones((2, 3)))
     shifted = dsp.time_shift(test_signal, shift_samples, unit='samples')
-    ref = impulse(
-        n_samples, delay=delay+shift_samples, amplitude=np.ones(n_channels))
+    ref = impulse(n_samples, delay=delay+np.array(shift_samples),
+                  amplitude=np.ones((2, 3)))
 
     npt.assert_allclose(shifted.time, ref.time, atol=1e-16)
+
+
+def test_time_shift_assertions():
+    """Test assertions for shift_time"""
+
+    # wrong mode
+    with pytest.raises(ValueError, match="mode is 'cut'"):
+        dsp.time_shift(impulse(10), 2, mode='cut')
+
+    # wrong unit
+    with pytest.raises(ValueError, match="unit is 'kg'"):
+        dsp.time_shift(impulse(10), 2, unit='kg')
+
+    # shift value exceeding signal length with both modes
+    with pytest.raises(ValueError, match="Can not shift"):
+        dsp.time_shift(impulse(10), 20, mode='linear')
+
+    dsp.time_shift(impulse(10), 20, mode='cyclic')
 
 
 def test_time_window_default():
@@ -537,59 +558,200 @@ def test_kaiser_window_beta():
     assert beta == beta_true
 
 
-def test_minimum_phase():
+def test_minimum_phase_against_reference():
     # tests are separated since their reliability depends on the type of
     # filters. The homomorphic method works best for filters with odd numbers
-    # of taps
+    # of taps. Hilbert_2 approximates the ideal minimum phase
+    input = [0, 0, 0, 0, 1, 0, 0, 0, 0]
+    output = [1, 0, 0, 0, 0]
+    min_phase = pyfar.dsp.minimum_phase(
+        pyfar.Signal(input, 44100))
 
-    # method = 'hilbert'
+    npt.assert_allclose(
+        min_phase.time.flatten(), np.array(output, dtype=float),
+        rtol=1e-10, atol=1e-10)
+
+
+def test_minimum_phase_nfft():
+
+    with pytest.raises(ValueError, match="n_fft is 5 but must be at least 6"):
+        pf.dsp.minimum_phase(pf.Signal([0, 1, 0, 0, 0, 0], 44100), 5)
+
+
+def test_minimum_phase_truncation():
+    # test truncation parameter
     n_samples = 9
-    filter_linphase = pyfar.Signal([0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 44100)
-
     imp_minphase = pyfar.dsp.minimum_phase(
-        filter_linphase, pad=False, method='hilbert', n_fft=2**18)
+        pyfar.signals.impulse(n_samples), truncate=False)
 
-    ref = np.array([1, 1, 0, 0, 0], dtype=float)
-    npt.assert_allclose(
-        np.squeeze(imp_minphase.time), ref, rtol=1e-4, atol=1e-4)
+    assert imp_minphase.n_samples == n_samples
 
-    # method = 'homomorphic'
+
+def test_minimum_phase_multidim():
+    # test multidim (only shape is tested because output is tested above)
     n_samples = 8
-    imp_linphase = pyfar.signals.impulse(
-        n_samples+1, delay=int(n_samples/2))
-
-    ref = pyfar.signals.impulse(int(n_samples/2)+1)
-
-    imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=False)
-    npt.assert_allclose(imp_minphase.time, ref.time)
-
-    # test pad length
-    ref = pyfar.signals.impulse(n_samples+1)
-    imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=True)
-
-    assert imp_minphase.n_samples == imp_linphase.n_samples
-    npt.assert_allclose(imp_minphase.time, ref.time)
-
-    # test error
-    ref = pyfar.signals.impulse(n_samples+1)
-    imp_minphase, mag_error = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', return_magnitude_ratio=True)
-
-    npt.assert_allclose(
-        np.squeeze(mag_error.freq),
-        np.ones(int(n_samples/2+1), dtype=complex))
-
-    # test multidim
-    ref = pyfar.signals.impulse(n_samples+1, amplitude=np.ones((2, 3)))
     imp_linphase = pyfar.signals.impulse(
         n_samples+1, delay=int(n_samples/2), amplitude=np.ones((2, 3)))
     imp_minphase = pyfar.dsp.minimum_phase(
-        imp_linphase, method='homomorphic', pad=True)
+        imp_linphase, truncate=False)
 
-    assert imp_minphase.n_samples == imp_linphase.n_samples
-    npt.assert_allclose(imp_minphase.time, ref.time)
+    # assert imp_minphase.n_samples == imp_linphase.n_samples
+    # assert imp_minphase.cshape == imp_linphase.cshape
+
+    imp_zerophase = pyfar.signals.impulse(
+        n_samples+1, amplitude=np.ones((2, 3)))
+
+    npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
+
+
+def test_impulse_response_delay():
+    """Test delay of an ideal impulse"""
+    n_samples = 2**10
+    snr = 60
+    start_sample = np.array([24])
+
+    ir = pf.signals.impulse(n_samples, delay=start_sample)
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
+
+    start_sample_est = dsp.find_impulse_response_delay(ir)
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-6)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_delay(ir_awgn)
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
+
+
+def test_impulse_response_delay_sinc():
+    """Test delay of a band-limited sinc function shifted by 1/2 samples"""
+    sr = 44100
+    n_samples = 128
+    samples = np.arange(n_samples)
+    delay_samples = n_samples // 2 + 1/2
+
+    sinc = np.sinc(samples - delay_samples)
+    win = sgn.get_window('hann', n_samples, fftbins=False)
+
+    ir = pf.Signal(sinc*win, sr)
+    start_samples = pf.dsp.find_impulse_response_delay(ir)
+    npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
+
+
+def test_impulse_response_delay_multidim():
+    """Ideal multi-dimensional Signal of ideal impulses"""
+    n_samples = 2**10
+    snr = 60
+
+    start_sample = [[14, 12, 16], [24, 5, 43]]
+    ir = pf.signals.impulse(n_samples, delay=start_sample)
+
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_delay(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
+
+
+def test_impulse_response_start_insufficient_snr():
+    n_samples = 2**9
+    snr = 15
+
+    ir = pf.signals.impulse(n_samples, 20)
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20))
+    ir_noise = ir + noise
+
+    with pytest.warns(UserWarning, match='The SNR'):
+        dsp.find_impulse_response_start(ir_noise)
+
+
+def test_impulse_response_start():
+    n_samples = 2**10
+    ir = np.zeros(n_samples)
+    snr = 60
+
+    noise = pf.Signal(np.random.randn(n_samples) * 10**(-snr/20), 44100)
+
+    start_sample = 24
+    ir[start_sample] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    start_sample_est = dsp.find_impulse_response_start(ir)
+    assert start_sample_est == start_sample - 1
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+    assert start_sample_est == start_sample - 1
+
+
+def test_impulse_response_theshold():
+    n_samples = 2**10
+    ir = np.zeros(n_samples)
+
+    start_sample = 24
+    ir[start_sample] = 1
+    ir[start_sample-4:start_sample] = 10**(-5/10)
+
+    ir = pf.Signal(ir, 44100)
+
+    start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
+    assert start_sample_est == start_sample - 4 - 1
+
+
+def test_impulse_response_train():
+    n_samples = 256
+    # The start_sample is the last first below the threshold
+    start_sample = 25
+    delays = np.array([14, 22, 26, 30, 33])
+    amplitudes = np.array([-40, -21, -6, 0, -9], dtype=float)
+
+    ir = pf.signals.impulse(n_samples, delays, 10**(amplitudes/20))
+    ir.time = np.sum(ir.time, axis=0)
+    awgn = pf.signals.noise(n_samples, rms=10**(-60/20))
+    ir += awgn
+
+    start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
+
+    assert start_sample_est == start_sample
+
+
+def test_impulse_response_start_multidim():
+    n_samples = 2**10
+    n_channels = 3
+    ir = np.zeros((n_channels, n_samples))
+
+    snr = 60
+
+    noise = pf.Signal(
+        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample = [24, 5, 43]
+    ir[[0, 1, 2], start_sample] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
+
+    ir = np.zeros((2, n_channels, n_samples))
+    noise = pf.Signal(
+        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample_1 = [24, 5, 43]
+    ir[0, [0, 1, 2], start_sample_1] = 1
+    start_sample_2 = [14, 12, 16]
+    ir[1, [0, 1, 2], start_sample_2] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    start_samples = np.vstack((start_sample_1, start_sample_2))
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, start_samples - 1)
 
 
 def test_convolve_default():

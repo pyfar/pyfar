@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+import pyfar as pf
 from pyfar import TimeData
 
 
@@ -19,6 +20,15 @@ def test_data_time_init_with_defaults():
     assert time.signal_length == .3
     assert time.n_samples == 3
     assert time.domain == 'time'
+
+
+def test_data_time_init_wrong_dtype():
+    """
+    Test assertion from non integer/float data (also test time setter because
+    it is called during initialization)
+    """
+    with pytest.raises(ValueError, match="time data is complex"):
+        TimeData(np.arange(2).astype(complex), [0, 1])
 
 
 def test_data_time_init_wrong_number_of_times():
@@ -142,6 +152,14 @@ def test_magic_setitem_wrong_n_samples():
     time_b = TimeData([2, 0, -2, 0], [0, .1, .3, .7])
     with pytest.raises(ValueError):
         time_a[0] = time_b
+
+
+@pytest.mark.parametrize("audio", (
+    pf.FrequencyData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)))
+def test_magic_setitem_wrong_type(audio):
+    time_data = TimeData([1, 2, 3, 4], [1, 2, 3, 4])
+    with pytest.raises(ValueError, match="Comparison only valid"):
+        time_data[0] = audio
 
 
 def test_separation_from_data_frequency():
