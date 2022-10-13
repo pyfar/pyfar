@@ -1502,9 +1502,9 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
 
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
-    system_response = \
-        system_output * regularized_spectrum_inversion(
+    inverse_input = regularized_spectrum_inversion(
             system_input, freq_range, **kwargs)
+    system_response = system_output * inverse_input
 
     # Check if the signals have any comments,
     # if yes: concatenate the comments for the system_response
