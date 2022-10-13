@@ -4,8 +4,8 @@ Read and write objects to disk, read and write audio files, read SOFA files.
 The functions :py:func:`read` and :py:func:`write` allow to save or load
 several pyfar objects and other variables. So, e.g., workspaces in notebooks
 can be stored. :py:class:`Signal <pyfar.signal.Signal>` objects can be
-imported and exported as WAV files using :py:func:`read_wav` and
-:py:func:`write_wav`. :py:func:`read_sofa` provides functionality to read the
+imported and exported as audio files using :py:func:`read_audio` and
+:py:func:`write_audio`. :py:func:`read_sofa` provides functionality to read the
 data stored in a SOFA file.
 """
 import os.path
@@ -15,7 +15,6 @@ import warnings
 import sofar as sf
 import zipfile
 import io
-import tempfile
 import numpy as np
 import re
 
@@ -29,7 +28,6 @@ except (ModuleNotFoundError, OSError):
         "install soundfile`. If this not works search the documentation for "
         "help: https://python-soundfile.readthedocs.io")
 
-import pyfar
 from pyfar import Signal, FrequencyData, Coordinates, TimeData
 from . import _codec as codec
 import pyfar.classes.filter as fo
@@ -305,8 +303,8 @@ def read_audio(filename, dtype='float64', **kwargs):
     """
     Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
 
-    Reads 'wav', 'aiff', 'ogg', and 'flac' files among others. For a complete
-    list see :py:func:`audio_formats`.
+    Reads 'wav', 'aiff', 'ogg', 'flac', and 'mp3' files among others. For a
+    complete list see :py:func:`audio_formats`.
 
     Parameters
     ----------
@@ -349,11 +347,11 @@ def read_audio(filename, dtype='float64', **kwargs):
 
 def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     """
-    Write a :py:class:`~pyfar.classes.audio.Signal` object as a audio file to
+    Write a :py:class:`~pyfar.classes.audio.Signal` object as an audio file to
     disk.
 
-    Writes 'wav', 'aiff', 'ogg', and 'flac' files among others. For a complete
-    list see :py:func:`audio_formats`.
+    Writes 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
+    complete list see :py:func:`audio_formats`.
 
     Parameters
     ----------
@@ -870,75 +868,3 @@ def _read_comsol_get_headerline(filename):
     is_complex = 'i' in line
     delimiter = ',' if ',' in line else None
     return header, is_complex, delimiter
-
-
-def _clipped_audio_subtypes():
-    """Creates a dictionary of format/subtype combinations which are clipped by
-    :py:func:´write_audio`.
-
-    This function is not called directly due to the need of writing all files
-    to disk. It needs to be called manually:
-    pyfar.io.io._clipped_audio_subtypes().
-    """
-    if not soundfile_imported:
-        warnings.warn(soundfile_warning)
-        return
-
-    collection = {}
-    signal = pyfar.Signal([-1.5, -1, -.5, 0, .5, 1, 1.5]*100, 44100)
-    with tempfile.TemporaryDirectory() as tmpdir:
-        formats = pyfar.io.audio_formats()
-        for format in formats:
-            filename = os.path.join(tmpdir, 'test_file.'+format)
-            for subtype in pyfar.io.audio_subtypes(format):
-                write_valid = not _soundfile_write_errors(format, subtype)
-                read_valid = not _soundfile_read_errors(format, subtype)
-                format_valid = soundfile.check_format(format, subtype)
-                if write_valid and read_valid and format_valid:
-                    if format == 'RAW':
-                        write_audio(signal, filename, subtype=subtype)
-                        signal_read = read_audio(
-                            filename, samplerate=44100, channels=1,
-                            subtype=subtype)
-                    else:
-                        write_audio(signal, filename, subtype=subtype)
-                        signal_read = read_audio(filename)
-                    if (np.any(signal_read.time > 1.1) and
-                            np.any(signal_read.time < -1.1)):
-                        behavior = 'not clipping (' + format + ')'
-                    elif (np.any(signal_read.time > .1) and
-                            np.any(signal_read.time < -.1)):
-                        behavior = 'clipping to +/- 1 (' + format + ')'
-                    else:
-                        raise ValueError(f"{format}/{subtype}")
-
-                    if subtype not in collection:
-                        collection[subtype] = [behavior]
-                    else:
-                        collection[subtype] = collection[subtype] + [behavior]
-
-    return collection
-
-
-def _soundfile_write_errors(format, subtype):
-    """Checks if a write error due to soundfile/libsnfile can be expected.
-
-    Written according to test_write_audio_read_audio.
-    """
-    if format == 'AIFF' and subtype == 'DWVW_12':
-        error_expected = True
-    else:
-        error_expected = False
-    return error_expected
-
-
-def _soundfile_read_errors(format, subtype):
-    """Checks if a read error due to soundfile/libsnfile can be expected.
-
-    Written according to test_write_audio_read_audio.
-    """
-    if 'DWVW' in subtype and (format == 'AIFF' or format == 'RAW'):
-        error_expected = True
-    else:
-        error_expected = False
-    return error_expected
