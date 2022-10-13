@@ -1403,7 +1403,7 @@ def find_impulse_response_start(
     return np.squeeze(start_sample)
 
 
-def deconvolve(system_output, system_input, fft_length=None, **kwargs):
+def deconvolve(system_output, system_input, freq_range=None, fft_length=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
     The transfer function :math:`H(\omega)` is calculated by spectral
@@ -1437,7 +1437,13 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
         The system input signal (e.g., used to perform a measurement).
         The system input signal is zero padded, if it is shorter than the
         system output signal.
-    fft_length: int or None
+    freq_range : tuple, array_like, double
+        The upper and lower frequency limits outside of which the
+        regularization factor is to be applied. The default ``None``
+        bypasses the regularization, which might cause numerical
+        instabilities in case of band-limited `system_input`. Also see
+        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+    fft_length : int or None
         The length the signals system_output and system_input are zero padded
         to before deconvolving. The default is None. In this case only the
         shorter signal is padded to the length of the longer signal, no padding
@@ -1471,6 +1477,9 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
 
+    if freq_range is None:
+        freq_range = (0, system_input.sampling_rate)
+
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value
     if fft_length is None:
@@ -1493,7 +1502,7 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
     system_response = (system_output *
-                       regularized_spectrum_inversion(system_input, **kwargs))
+                       regularized_spectrum_inversion(system_input, freq_range, **kwargs))
 
     # Check if the signals have any comments,
     # if yes: concatenate the comments for the system_response
