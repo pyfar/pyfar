@@ -28,7 +28,6 @@ except (ModuleNotFoundError, OSError):
         "install soundfile`. If this not works search the documentation for "
         "help: https://python-soundfile.readthedocs.io")
 
-import pyfar
 from pyfar import Signal, FrequencyData, Coordinates, TimeData
 from . import _codec as codec
 import pyfar.classes.filter as fo
