@@ -2,7 +2,7 @@
 History
 =======
 
-0.5.0 (2022-XX-XX)
+0.5.0 (2022-10-13)
 ------------------
 * General
 
@@ -21,13 +21,13 @@ History
 
 * `pyfar.dsp`
 
-  * Improved algorithm of `minimum_phase` to work for non-analytic real world signals (PR #303)
+  * Improved algorithm of `minimum_phase` for arbitrary impulse responses (PR #303)
   * Added `resample` function for sample rate conversions (PR #297, #321, #333)
   * Added `find_impulse_response_start` and `find_impulse_response_delay` to detect the time of arrival in impulse responses (PR # 203)
   * Added `normalize` function for time and frequency domain normalization (PR #323)
   * Added `energy`, `power`, and `rms` for computing energy measures in the time domain (PR #338)
   * Added `time_shift` function for applying linear and cyclic integer delays (PR #312)
-  * Added `fraction_time_shift` function for applying linear and cyclic fractional delays (PR # 292)
+  * Added `fractional_time_shift` function for applying linear and cyclic fractional delays (PR # 292)
   * Added `fractional_octave_smoothing` function (PR #297)
   * Added `decibel` function (PR #305, #322)
 
@@ -50,7 +50,7 @@ History
 
 * Other
 
-  * Include building the documentation in the testing (PR #319, #348)
+  * Test building the documentation using CI (PR #319, #348)
   * Fixed broken mybinder.org examples (PR #341)
   * Internal refactoring, documentation, and bug fixes (PR #326, #331, #352)
 
