@@ -37,6 +37,8 @@ pyfar contains two types of filter banks:
 - The :py:func:`~pyfar.dsp.filter.reconstructing_fractional_octave_bands` can
   be used if a perfect reconstruction is required, e.g., in room acoustical
   simulations.
+- The :py:func:`auditory gammatone filters <pyfar.dsp.filter.GammatoneBands>`
+  can be used for binaural modeling.
 
 |filter_banks|
 
@@ -65,7 +67,7 @@ a certain frequency region.
    :alt: Standard filters contained in pyfar
 
 .. |filter_banks| image:: resources/filter_types_filterbanks.png
-   :width: 100%
+   :width: 66%
    :alt: Filter banks contained in pyfar
 
 .. |crossover| image:: resources/filter_types_crossover.png
