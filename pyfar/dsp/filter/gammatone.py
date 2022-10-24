@@ -275,7 +275,8 @@ class GammatoneBands():
         delay_samples = int(np.round(self.delay * self.sampling_rate))
 
         # apply filterbank to impulse to estimate the required values
-        real, imag = self.process(pf.signals.impulse(delay_samples + 3))
+        real, imag = self.process(pf.signals.impulse(
+            delay_samples + 3, sampling_rate=self.sampling_rate))
 
         # compute the envelope
         ir = real.time + 1j * imag.time

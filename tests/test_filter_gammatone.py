@@ -68,10 +68,13 @@ def test_gammatone_bands_init_and_getter():
                                                    0.483240051077418])
 
 
-@pytest.mark.parametrize('amplitudes,shape_filtered', (
-    [np.array([1]), (85, 2048)], [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048)]
+@pytest.mark.parametrize('amplitudes,shape_filtered,sampling_rate', (
+    [np.array([1]), (85, 2048), 44100],
+    [np.array([1]), (85, 2048), 48000],
+    [np.array([1]), (85, 2048), 96000],
+    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100]
 ))
-def test_gammatone_bands_roundtrip(amplitudes, shape_filtered):
+def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     """
     Verify the entire filter bank processing with a round trip using single and
     multi channel signals. Assert shape of intermediate results. Assert values
@@ -79,10 +82,12 @@ def test_gammatone_bands_roundtrip(amplitudes, shape_filtered):
     """
 
     # initialize filter bank
-    GFB = filter.GammatoneBands([0, 22050], resolution=.5)
+    GFB = filter.GammatoneBands(
+        [0, 22050], resolution=.5, sampling_rate=sampling_rate)
 
     # filter and sum an impulse signal
-    impulse = pf.signals.impulse(2048, amplitude=amplitudes)
+    impulse = pf.signals.impulse(
+        2048, amplitude=amplitudes, sampling_rate=sampling_rate)
     real, imag = GFB.process(impulse)
     reconstructed = GFB.reconstruct(real, imag)
 
@@ -94,7 +99,8 @@ def test_gammatone_bands_roundtrip(amplitudes, shape_filtered):
     for idx in np.ndindex(impulse.cshape):
         # assert magnitude spectrum: must be constant
         log_mag = pf.dsp.decibel(reconstructed[idx] / amplitudes[idx])
-        assert np.all(np.abs(log_mag) < 0.5)
+        f_max = reconstructed.find_nearest_frequency(20e3)
+        assert np.all(np.abs(log_mag[..., :f_max]) < 0.5)
 
         # assert group delay in seconds: must be constant above freq. limit
         grp_del = pf.dsp.group_delay(
