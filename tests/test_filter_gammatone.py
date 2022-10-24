@@ -77,8 +77,8 @@ def test_gammatone_bands_init_and_getter():
 def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     """
     Verify the entire filter bank processing with a round trip using single and
-    multi channel signals. Assert shape of intermediate results. Assert values
-    of final result.
+    multi channel signals of different sampling rates. Assert shape of
+    intermediate results. Assert values of final result.
     """
 
     # initialize filter bank
