@@ -30,18 +30,21 @@ Filter banks
 -----------------------------------------------------
 
 Filter banks are commonly used in audio and acoustics signal processing,
-pyfar contains two types of filter banks:
+pyfar contains the following types of filter banks:
 
 - The :py:func:`~pyfar.dsp.filter.fractional_octave_bands` are often used for
   calculating room acoustic parameters
 - The :py:func:`~pyfar.dsp.filter.reconstructing_fractional_octave_bands` can
   be used if a perfect reconstruction is required, e.g., in room acoustical
   simulations.
+- The :py:func:`auditory gammatone filters <pyfar.dsp.filter.GammatoneBands>`
+  can be used for binaural modeling.
 
 |filter_banks|
 
 The corresponding center frequencies are accessible via
-:py:func:`~pyfar.dsp.filter.fractional_octave_frequencies`.
+:py:func:`~pyfar.dsp.filter.fractional_octave_frequencies` and
+:py:func:`~pyfar.dsp.filter.erb_frequencies`.
 
 Parametric equalizer
 -----------------------------------------------------
@@ -65,7 +68,7 @@ a certain frequency region.
    :alt: Standard filters contained in pyfar
 
 .. |filter_banks| image:: resources/filter_types_filterbanks.png
-   :width: 100%
+   :width: 66%
    :alt: Filter banks contained in pyfar
 
 .. |crossover| image:: resources/filter_types_crossover.png
