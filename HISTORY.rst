@@ -2,6 +2,12 @@
 History
 =======
 
+0.5.1 (2022-10-28)
+------------------
+* Bugfix: Allow setting of the sampling rate in GammatoneBands (PR #374)
+* Bugfix: Added GammatoneBands filter bank to concepts (PR #372)
+
+
 0.5.0 (2022-10-13)
 ------------------
 * General
@@ -31,6 +37,7 @@ History
   * Added `fractional_octave_smoothing` function (PR #297)
   * Added `decibel` function (PR #305, #322)
   * Added new mandatory parameter `freq_range` to `deconvolve` (PR #370)
+  * Added `average` function for averaging channels (PR #330)
 
 * `pyfar.dsp.filter`
 
