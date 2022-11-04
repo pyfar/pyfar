@@ -1509,9 +1509,9 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
     # Check if the signals have any comments,
     # if yes: concatenate the comments for the system_response
     system_response.comment = "Calculated with pyfar.dsp.deconvolve."
-    if system_output.comment != 'none':
+    if system_output.comment != '':
         system_response.comment += f" system input: {system_output.comment}."
-    if system_input.comment != 'none':
+    if system_input.comment != '':
         system_response.comment += f" system output: {system_input.comment}."
 
     # return the impulse resonse

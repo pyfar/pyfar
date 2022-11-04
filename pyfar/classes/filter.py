@@ -112,7 +112,7 @@ class Filter(object):
             coefficients=None,
             sampling_rate=None,
             state=None,
-            comment=None):
+            comment=""):
         """
         Initialize a general Filter object.
 
@@ -124,8 +124,9 @@ class Filter(object):
             The sampling rate of the filter in Hz.
         state : array, double, optional
             The state of the buffer elements.
-        comment : str, optional
-            A comment. The default is ``'None'``.
+        comment : str
+            A comment. The default is ``''``, which initializes an empty
+            string.
 
         Returns
         -------
@@ -264,7 +265,10 @@ class Filter(object):
     @comment.setter
     def comment(self, value):
         """Set comment."""
-        self._comment = str(value)
+        if not isinstance(value, str):
+            raise TypeError("comment has to be of type string.")
+        else:
+            self._comment = value
 
     def copy(self):
         """Return a copy of the Filter object."""
@@ -302,15 +306,16 @@ class FilterFIR(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
-    comment : str, optional
-            A comment. The default is ``'None'``.
+    comment : str
+            A comment. The default is ``''``, which initializes an empty
+            string.
 
     Returns
     -------
     FilterFIR
         The FIR filter object.
     """
-    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
 
@@ -396,15 +401,16 @@ class FilterIIR(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
-    comment : str, optional
-            A comment. The default is ``'None'``.
+    comment : str
+            A comment. The default is ``''``, which initializes an empty
+            string.
 
     Returns
     -------
     FilterIIR
         The IIR filter object.
     """
-    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
 
@@ -464,15 +470,16 @@ class FilterSOS(Filter):
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
         the channel shape of the ``~py:class:Signal`` to be filtered.
-    comment : str, optional
-            A comment. The default is ``'None'``.
+    comment : str
+            A comment. The default is ``''``, which initializes an emptry
+            string.
 
     Returns
     -------
     FilterSOS
         The SOS filter object.
     """
-    def __init__(self, coefficients, sampling_rate, state=None, comment=None):
+    def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         if state is not None:
             state = _atleast_4d_first_dim(state)

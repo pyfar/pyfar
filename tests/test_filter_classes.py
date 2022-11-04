@@ -11,7 +11,7 @@ def test_filter_init_empty_coefficients():
     assert filt.coefficients is None
     assert filt.sampling_rate is None
     assert filt.state is None
-    assert filt.comment == 'None'
+    assert filt.comment == ''
 
 
 def test_filter_init_empty_coefficients_with_state():
@@ -39,8 +39,8 @@ def test_filter_comment():
     assert filt.comment == 'Bla'
     filt.comment = 'Blub'
     assert filt.comment == 'Blub'
-    filt.comment = 500
-    assert filt.comment == '500'
+    with pytest.raises(TypeError, match="comment has to be of type string."):
+        pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
 
 def test_filter_iir_init():
