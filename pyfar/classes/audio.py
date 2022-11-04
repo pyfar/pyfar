@@ -25,7 +25,7 @@ class _Audio():
     # (e.g. __rmul__)
     __array_priority__ = 1.0
 
-    def __init__(self, domain, comment=None):
+    def __init__(self, domain, comment=""):
 
         # initialize valid parameter spaces
         self._VALID_DOMAINS = ["time", "freq"]
@@ -127,7 +127,10 @@ class _Audio():
     @comment.setter
     def comment(self, value):
         """Set comment."""
-        self._comment = 'none' if value is None else str(value)
+        if not isinstance(value, str):
+            raise TypeError("comment has to be of type string.")
+        else:
+            self._comment = value
 
     def copy(self):
         """Return a copy of the audio object."""
@@ -188,7 +191,7 @@ class TimeData(_Audio):
     to frequency domain, i.e., non-equidistant samples.
 
     """
-    def __init__(self, data, times, comment=None):
+    def __init__(self, data, times, comment=""):
         """Create TimeData object with data, and times.
 
         Parameters
@@ -201,8 +204,10 @@ class TimeData(_Audio):
         times : array, double
             Times in seconds at which the data is sampled. The number of times
             must match the `size` of the last dimension of `data`.
-        comment : str, optional
-            A comment related to `data`. The default is ``'none'``.
+        comment : str
+            A comment related to `data`. The default is ``''``, which
+            initializes an empty string.
+.
         """
 
         _Audio.__init__(self, 'time', comment)
@@ -353,7 +358,7 @@ class FrequencyData(_Audio):
     incomplete spectra.
 
     """
-    def __init__(self, data, frequencies, comment=None):
+    def __init__(self, data, frequencies, comment=""):
         """Create FrequencyData with data, and frequencies.
 
         Parameters
@@ -367,7 +372,9 @@ class FrequencyData(_Audio):
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
         comment : str, optional
-            A comment related to the data. The default is ``'none'``.
+            A comment related to the data. The default is ``""``, which
+            initializes an empty string.
+
 
         Notes
         -----
@@ -541,7 +548,7 @@ class Signal(FrequencyData, TimeData):
             n_samples=None,
             domain='time',
             fft_norm='none',
-            comment=None):
+            comment=""):
         """Create Signal with data, and sampling rate.
 
         Parameters
@@ -568,7 +575,9 @@ class Signal(FrequencyData, TimeData):
             for more information. The default is ``'none'``, which is typically
             used for energy signals, such as impulse responses.
         comment : str
-            A comment related to `data`. The default is ``None``.
+            A comment related to `data`. The default is ``""``, which
+            initializes an empty string.
+
 
         References
         ----------

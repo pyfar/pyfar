@@ -49,7 +49,7 @@ class Coordinates():
 
     def __init__(self, points_1=None, points_2=None, points_3=None,
                  domain='cart', convention=None, unit=None,
-                 weights=None, sh_order=None, comment=None):
+                 weights=None, sh_order=None, comment=""):
         """
         Create :py:func:`Coordinates` object with or without coordinate points.
 
@@ -113,9 +113,9 @@ class Coordinates():
         sh_order : int, optional
             maximum spherical harmonic order of the sampling grid.
             The default is ``None``.
-        comment : str, optional
+        comment : str
             comment about the stored coordinate points. The default is
-            ``None``.
+            ``""``, which initializes an empty string.
         """
 
         if points_1 is None:
@@ -567,7 +567,10 @@ class Coordinates():
     @comment.setter
     def comment(self, value):
         """Set comment."""
-        self._comment = value
+        if not isinstance(value, str):
+            raise TypeError("comment has to be of type string.")
+        else:
+            self._comment = value
 
     @property
     def cshape(self):
@@ -1684,7 +1687,7 @@ class Coordinates():
             _repr += f"\nSpherical harmonic order: {self._sh_order}"
 
         # check for comment
-        if self._comment is not None:
+        if self._comment != "":
             _repr += f"\nComment: {self._comment}"
 
         return _repr
