@@ -237,22 +237,23 @@ def test_reconstructing_fractional_octave_bands():
     """Test the reconstructing fractional octave filter bank."""
 
     # test filter object
-    f_obj, f = pfilt.reconstructing_fractional_octave_bands(
-        None, sampling_rate=44100)
-    assert isinstance(f_obj, pclass.FilterFIR)
-    assert f_obj.comment == \
+    FOFB = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands(
+        sampling_rate=44100)
+    assert isinstance(FOFB, pclass.FilterFIR)
+    assert FOFB.comment == \
         ("Reconstructing linear phase fractional octave filter bank."
          "(num_fractions=1, frequency_range=(63, 16000), overlap=1, slope=0)")
-    assert f_obj.sampling_rate == 44100
+    assert FOFB.sampling_rate == 44100
 
     # test frequencies
-    _, f_test = pfilt.fractional_octave_frequencies(
-        frequency_range=(63, 16000))
-    npt.assert_allclose(f, f_test)
+    FOFB_ = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands(
+        freq_range=(63, 16000))
+    npt.assert_allclose(FOFB.norm_frequencies, FOFB_.norm_frequencies)
 
     # test filtering
     x = pf.signals.impulse(2**12)
-    y, f = pfilt.reconstructing_fractional_octave_bands(x)
+    FOFB = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands()
+    y = FOFB.process(x)
     assert isinstance(y, Signal)
     assert y.cshape == (9, )
     assert y.fft_norm == 'none'
@@ -270,9 +271,12 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
     x = pf.signals.impulse(2**10)
 
     for overlap, slope in zip([1, 1, 0], [0, 3, 0]):
-        y, _ = pfilt.reconstructing_fractional_octave_bands(
-            x, frequency_range=(8e3, 16e3), overlap=overlap, slope=slope,
-            n_samples=2**10)
+        FOFB = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands(
+                freq_range=(8e3, 16e3),
+                overlap=overlap,
+                slope=slope,
+                n_samples=2**10)
+        y = FOFB.process(x)
         reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             f"filter.reconstructing_octaves_{overlap}_{slope}.csv"))
@@ -286,4 +290,6 @@ def test_reconstructing_fractional_octave_bands_warning():
     """Test warning for octave frequency exceeding half the sampling rate."""
     with pytest.warns(UserWarning):
         x = pf.signals.impulse(2**12, sampling_rate=16e3)
-        y, f = pfilt.reconstructing_fractional_octave_bands(x)
+        FOFB = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands(
+            sampling_rate=16e3)
+        y = FOFB.process(x)
