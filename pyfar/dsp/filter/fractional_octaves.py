@@ -4,9 +4,10 @@ import scipy.signal as sgn
 from copy import deepcopy
 from deepdiff import DeepDiff
 import pyfar as pf
+import pyfar.classes.filter as pft
 
 
-class FractionalOctaveBands(pf.FilterSOS):
+class FractionalOctaveBands(pft.FilterSOS):
 
     def __init__(
             self,
@@ -24,29 +25,28 @@ class FractionalOctaveBands(pf.FilterSOS):
         self._order = order
 
         coefficients = self._get_coefficients(
-                sampling_rate=self._sampling_rate, 
+                sampling_rate=self._sampling_rate,
                 num_fractions=self._num_fractions,
-                freq_range=self._freq_range, 
+                freq_range=self._freq_range,
                 order=self._order)
 
         # initialize superclass
         super().__init__(coefficients, self._sampling_rate)
         self.comment = (
             "Second order section 1/{num_fractions} fractional octave band"
-            "filter of order {order}") 
-
+            "filter of order {order}")
 
     def __repr__(self):
         """Nice string representation of class instances"""
-        return (f"Energy-preserving {self.num_fractions}.-octave filter bank with {self.n_bands} "
-                f"bands between {self.freq_range[0]} and {self.freq_range[1]} Hz with "
+        return (f"Energy-preserving {self.num_fractions}."
+                f"-octave filter bank with {self.n_bands} "
+                f"bands between {self.freq_range[0]} and "
+                f"{self.freq_range[1]} Hz with "
                 f"{self.sampling_rate} Hz sampling rate")
-
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not DeepDiff(self.__dict__, other.__dict__)    
-    
+        return not DeepDiff(self.__dict__, other.__dict__)
 
     @property
     def num_fractions(self):
@@ -65,23 +65,30 @@ class FractionalOctaveBands(pf.FilterSOS):
 
     @property
     def norm_frequencies(self):
-        """Get the IEC center frequencies of the (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(self._num_fractions, self._freq_range)[0]
+        """Get the IEC center frequencies of the (fractional)
+         octave filters in Hz"""
+        return fractional_octave_frequencies(
+                self._num_fractions, self._freq_range)[0]
 
     @property
     def exact_frequencies(self):
-        """Get the exact center frequencies of the (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(self._num_fractions, self._freq_range)[1]
+        """Get the exact center frequencies of the (fractional)
+        octave filters in Hz"""
+        return fractional_octave_frequencies(
+                self._num_fractions, self._freq_range)[1]
 
     @property
     def cutoff_frequencies(self):
-        """Get the cutoff frequencies of the (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(self._num_fractions, self._freq_range, True)[2]
+        """Get the cutoff frequencies of the (fractional)
+        octave filters in Hz"""
+        return fractional_octave_frequencies(
+                self._num_fractions, self._freq_range, True)[2]
 
     @property
     def n_bands(self):
         """Get the number of bands in the filter bank"""
-        return len(fractional_octave_frequencies(self._num_fractions, self._freq_range)[1])
+        return len(fractional_octave_frequencies(
+                self._num_fractions, self._freq_range)[1])
 
     @property
     def sampling_rate(self):
@@ -91,25 +98,26 @@ class FractionalOctaveBands(pf.FilterSOS):
     @property
     def coefficients(self):
         """Get the filter coefficients"""
-        return self._coefficients  
+        return self._coefficients
 
     def _get_coefficients(
             self,
-            sampling_rate, 
+            sampling_rate,
             num_fractions,
-            freq_range=(20.0, 20e3), 
+            freq_range=(20.0, 20e3),
             order=14):
-        """Calculate the second order section filter coefficients of a fractional
-        octave band filter bank.
+        """Calculate the second order section filter
+        coefficients of a fractional octave band filter bank.
 
         Parameters
         ----------
         num_fractions : int, optional
-            The number of bands an octave is divided into. Eg., 1 refers to octave
-            bands and 3 to third octave bands. The default is 1.
+            The number of bands an octave is divided into. Eg.,
+            1 refers to octave bands and 3 to third octave bands.
+            The default is 1.
         sampling_rate : None, int
-            The sampling rate in Hz. Only required if signal is None. The default
-            is None.
+            The sampling rate in Hz. Only required if signal is None.
+            The default is None.
         freq_range : array, tuple, optional
             The lower and upper frequency limits. The default is (20, 20e3)
         order : integer, optional
@@ -145,7 +153,8 @@ class FractionalOctaveBands(pf.FilterSOS):
         sos = np.zeros((num_bands, order, 6), np.double)
 
         for idx, Wn in enumerate(Wns):
-            # in case the upper frequency limit is above Nyquist, use a highpass
+            # in case the upper frequency limit is above Nyquist,
+            # use a highpass
             if Wn[-1] > 1:
                 warnings.warn('The upper frequency limit {} Hz is above the \
                     Nyquist frequency. Using a highpass filter instead of a \
@@ -162,11 +171,9 @@ class FractionalOctaveBands(pf.FilterSOS):
             sos[idx, :, :] = sos_coeff
         return sos
 
-
     def copy(self):
         """Return a copy of the audio object."""
         return deepcopy(self)
-
 
     def _encode(self):
         # get dictionary representation
@@ -185,7 +192,6 @@ class FractionalOctaveBands(pf.FilterSOS):
 
         return obj_dict
 
-
     @classmethod
     def _decode(cls, obj_dict):
         # initialize new class instance
@@ -197,17 +203,17 @@ class FractionalOctaveBands(pf.FilterSOS):
         return obj
 
 
-class ReconstructingFractionalOctaveBands(pf.FilterFIR):
+class ReconstructingFractionalOctaveBands(pft.FilterFIR):
 
     def __init__(
             self,
-            num_fractions=1, 
+            num_fractions=1,
             freq_range=(63, 16000),
-            overlap=1, 
-            slope=0, 
-            n_samples=2**12, 
+            overlap=1,
+            slope=0,
+            n_samples=2**12,
             sampling_rate=None):
-        
+
         # sanitize input
         freq_range = np.asarray(freq_range)
         if overlap < 0 or overlap > 1:
@@ -234,22 +240,23 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
         # initialize superclass
         super().__init__(self._coefficients, self._sampling_rate)
         self.comment = (
-            "Reconstructing linear phase fractional octave filter bank."
-            f"(num_fractions={self._num_fractions}, frequency_range={self._freq_range}, "
-            f"overlap={self._overlap}, slope={self._slope})")        
-
+            "Reconstructing linear phase fractional "
+            "octave filter bank."
+            f"(num_fractions={self._num_fractions}, "
+            f"frequency_range={self._freq_range}, "
+            f"overlap={self._overlap}, slope={self._slope})")
 
     def __repr__(self):
         """Nice string representation of class instances"""
-        return (f"Amplitude-preserving {self.num_fractions}.-octave filter bank with {self.n_bands} "
-                f"bands between {self.freq_range[0]} and {self.freq_range[1]} Hz with "
+        return (f"Amplitude-preserving {self.num_fractions}."
+                f"-octave filter bank with {self.n_bands} "
+                f"bands between {self.freq_range[0]} and "
+                f"{self.freq_range[1]} Hz with "
                 f"{self.sampling_rate} Hz sampling rate")
-
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        return not DeepDiff(self.__dict__, other.__dict__)    
-    
+        return not DeepDiff(self.__dict__, other.__dict__)
 
     @property
     def num_fractions(self):
@@ -263,23 +270,30 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
 
     @property
     def norm_frequencies(self):
-        """Get the IEC center frequencies of the (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(self._num_fractions, self._freq_range)[0]
+        """Get the IEC center frequencies of the
+        (fractional) octave filters in Hz"""
+        return fractional_octave_frequencies(
+                    self._num_fractions, self._freq_range)[0]
 
     @property
     def exact_frequencies(self):
-        """Get the exact center frequencies of the (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(self._num_fractions, self._freq_range)[1]
+        """Get the exact center frequencies of the
+        (fractional) octave filters in Hz"""
+        return fractional_octave_frequencies(
+                    self._num_fractions, self._freq_range)[1]
 
     @property
     def cutoff_frequencies(self):
-        """Get the cutoff frequencies of the (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(self._num_fractions, self._freq_range, True)[2]
+        """Get the cutoff frequencies of the
+        (fractional) octave filters in Hz"""
+        return fractional_octave_frequencies(
+                    self._num_fractions, self._freq_range, True)[2]
 
     @property
     def n_bands(self):
         """Get the number of bands in the filter bank"""
-        return len(fractional_octave_frequencies(self._num_fractions, self._freq_range)[1])
+        return len(fractional_octave_frequencies(
+                    self._num_fractions, self._freq_range)[1])
 
     @property
     def sampling_rate(self):
@@ -299,12 +313,12 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
     @property
     def n_samples(self):
         """Get the number of samples per filter"""
-        return self._n_samples      
+        return self._n_samples
 
     @property
     def coefficients(self):
         """Get the filter coefficients"""
-        return self._coefficients  
+        return self._coefficients
 
     def _get_coefficients(
             self,
@@ -315,24 +329,25 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
             n_samples,
             sampling_rate):
         """
-        Create and/or apply an amplitude preserving fractional octave filter bank.
+        Create and/or apply an amplitude preserving fractional
+        octave filter bank.
 
         .. note::
-            This filter bank has -6 dB cut-off frequencies. For sufficient lengths
-            of ``'n_samples'``, the summed output of the filter bank equals the
-            input signal, i.e., the filter bank is amplitude preserving
-            (reconstructing). This is useful for analysis and synthesis
-            applications such as room acoustical simulations. For an energy
-            preserving filter bank with -3 dB cut-off frequencies see
-            :py:func:`~pyfar.dsp.filter.fractional_octave_bands`.
+            This filter bank has -6 dB cut-off frequencies. For sufficient
+            lengths of ``'n_samples'``, the summed output of the filter
+            bank equals the input signal, i.e., the filter bank is amplitude
+            preserving (reconstructing). This is useful for analysis and
+            synthesis applications such as room acoustical simulations.
+            For an energy preserving filter bank with -3 dB cut-off frequencies
+            see :py:func:`~pyfar.dsp.filter.fractional_octave_bands`.
 
         The filters have a linear phase with a delay of ``n_samples/2`` and are
         windowed with a Hanning window to suppress side lobes of the finite
-        filters. The magnitude response of the filters is designed similar to [#]_
-        with two exceptions:
+        filters. The magnitude response of the filters is designed similar to
+        [#]_ with two exceptions:
 
-        1. The magnitude response is designed using squared sine/cosine ramps to
-        obtain -6 dB at the cut-off frequencies.
+        1. The magnitude response is designed using squared sine/cosine ramps
+        to obtain -6 dB at the cut-off frequencies.
         2. The overlap between the filters is calculated between the center and
         upper cut-off frequencies and not between the center and lower cut-off
         frequencies. This enables smaller pass-bands with unity gain, which
@@ -342,8 +357,8 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
         Parameters
         ----------
         signal : Signal, None
-            The Signal to be filtered. Pass ``None`` to create the filter without
-            applying it.
+            The Signal to be filtered. Pass ``None`` to create the filter
+            without applying it.
         num_fractions : int, optional
             Octave fraction, e.g., ``3`` for third-octave bands. The default is
             ``1``.
@@ -351,12 +366,13 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
             Frequency range for fractional octave in Hz. The default is
             ``(63, 16000)``
         overlap : float
-            Band overlap of the filter slopes between 0 and 1. Smaller values yield
-            wider pass-bands and steeper filter slopes. The default is ``1``.
+            Band overlap of the filter slopes between 0 and 1.
+            Smaller values yield wider pass-bands and steeper
+            filter slopes. The default is ``1``.
         slope : int, optional
-            Number > 0 that defines the width and steepness of the filter slopes.
-            Larger values yield wider pass-bands and steeper filter slopes. The
-            default is ``0``.
+            Number > 0 that defines the width and steepness of the filter
+            slopes. Larger values yield wider pass-bands and
+            steeper filter slopes. The default is ``0``.
         n_samples : int, optional
             Length of the filter in samples. Longer filters yield more exact
             filters. The default is ``2**12``.
@@ -375,7 +391,8 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
 
         References
         ----------
-        .. [#] Antoni, J. (2010). Orthogonal-like fractional-octave-band filters.
+        .. [#] Antoni, J. (2010). Orthogonal-like
+            fractional-octave-band filters.
             J. Acous. Soc. Am., 127(2), 884–895, doi: 10.1121/1.3273888
 
         Examples
@@ -396,7 +413,8 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
             >>> ax = pf.plot.time_freq(y_sum, color='k')
             >>> pf.plot.time(x, ax=ax[0])
             >>> ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
-            >>> ax[0].set_title("Original (blue) and reconstructed pulse (black)")
+            >>> ax[0].set_title(
+            >>>    "Original (blue) and reconstructed pulse (black)")
             >>> # frequency domain plot
             >>> pf.plot.freq(y_sum, color='k', ax=ax[1])
             >>> pf.plot.freq(y, ax=ax[1])
@@ -420,9 +438,12 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
 
         # DFT lines of the lower cut-off and center frequency as in
         # Antoni, Eq. (14)
-        k_1 = np.round(n_samples * f_cut_off[0][f_id] / sampling_rate).astype(int)
-        k_m = np.round(n_samples * f_m[f_id] / sampling_rate).astype(int)
-        k_2 = np.round(n_samples * f_cut_off[1][f_id] / sampling_rate).astype(int)
+        k_1 = np.round(n_samples *
+                       f_cut_off[0][f_id] / sampling_rate).astype(int)
+        k_m = np.round(n_samples *
+                       f_m[f_id] / sampling_rate).astype(int)
+        k_2 = np.round(n_samples *
+                       f_cut_off[1][f_id] / sampling_rate).astype(int)
 
         # overlap in samples (symmetrical around the cut-off frequencies)
         P = np.round(overlap / 2 * (k_2 - k_m)).astype(int)
@@ -438,8 +459,8 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
                 p = np.arange(-P[b_idx], P[b_idx] + 1)
                 # initialize phi_l in the range [-1, 1]
                 # (Antoni suggest to initialize this in the range of [0, 1] but
-                # that yields wrong results and might be an error in the original
-                # paper)
+                # that yields wrong results and might be an error
+                # in the original paper)
                 phi = p / P[b_idx]
                 # recursion if slope>0 as in Antoni, Eq. (20)
                 for _ in range(slope):
@@ -448,7 +469,8 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
                 phi = .5 * (phi + 1)
 
                 # apply fade out to current channel
-                g[b_idx - 1, k_1[b_idx] - P[b_idx]:k_1[b_idx] + P[b_idx] + 1] = \
+                g[b_idx - 1, k_1[b_idx] -
+                    P[b_idx]:k_1[b_idx] + P[b_idx] + 1] = \
                     np.cos(np.pi / 2 * phi)
                 # apply fade in in to next channel
                 g[b_idx, k_1[b_idx] - P[b_idx]:k_1[b_idx] + P[b_idx] + 1] = \
@@ -458,13 +480,15 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
             g[b_idx - 1, k_1[b_idx] + P[b_idx]:] = 0.
             g[b_idx, :k_1[b_idx] - P[b_idx]] = 0.
 
-        # Force -6 dB at the cut-off frequencies. This is not part of Antony (2010)
+        # Force -6 dB at the cut-off frequencies.
+        # This is not part of Antony (2010)
         g = g**2
 
         # generate linear phase
         frequencies = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
         group_delay = n_samples / 2 / sampling_rate
-        g = g.astype(complex) * np.exp(-1j * 2 * np.pi * frequencies * group_delay)
+        g = g.astype(complex) * \
+            np.exp(-1j * 2 * np.pi * frequencies * group_delay)
 
         # get impulse responses
         time = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
@@ -473,11 +497,9 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
         time *= sgn.windows.hann(time.shape[-1])
         return time
 
-
     def copy(self):
         """Return a copy of the audio object."""
         return deepcopy(self)
-
 
     def _encode(self):
         # get dictionary representation
@@ -495,7 +517,6 @@ class ReconstructingFractionalOctaveBands(pf.FilterFIR):
                 del obj_dict[k]
 
         return obj_dict
-
 
     @classmethod
     def _decode(cls, obj_dict):
@@ -655,4 +676,4 @@ def __center_frequencies_fractional_octaves_iec(nominal, num_fractions):
 
     exact = reference_freq * octave_ratio**exponent
 
-    return nominal, exact    
+    return nominal, exact
