@@ -23,18 +23,18 @@ def test_center_frequencies_iec():
     npt.assert_allclose(actual_thirds_nom, nominal_thirds)
 
     with pytest.raises(ValueError, match="lower and upper limit"):
-        filter.fractional_octave_frequencies(frequency_range=(1,))
+        filter.fractional_octave_frequencies(freq_range=(1,))
 
     with pytest.raises(ValueError, match="lower and upper limit"):
-        filter.fractional_octave_frequencies(frequency_range=(3, 4, 5))
+        filter.fractional_octave_frequencies(freq_range=(3, 4, 5))
 
     with pytest.raises(
             ValueError, match="second frequency needs to be higher"):
         filter.fractional_octave_frequencies(
-            frequency_range=(8e3, 1e3))
+            freq_range=(8e3, 1e3))
 
     actual_octs = filter.fractional_octave_frequencies(
-        num_fractions=1, frequency_range=(100, 4e3))
+        num_fractions=1, freq_range=(100, 4e3))
     actual_octs_nom = actual_octs[0]
     nominal_octs_part = [125, 250, 500, 1000, 2000, 4000]
     npt.assert_allclose(actual_octs_nom, nominal_octs_part)

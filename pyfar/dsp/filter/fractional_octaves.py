@@ -16,13 +16,16 @@ class FractionalOctaveBands(pft.FilterSOS):
             freq_range=(20.0, 20e3),
             order=14):
 
-        # sanitize input
-        freq_range = np.asarray(freq_range)
-
+        # check input
         self._num_fractions = num_fractions
         self._sampling_rate = sampling_rate
         self._freq_range = freq_range
         self._order = order
+
+        self._norm_frequencies,\
+            self._exact_frequencies,\
+            self._cutoff_frequencies = fractional_octave_frequencies(
+                self._num_fractions, self._freq_range, True)
 
         coefficients = self._get_coefficients(
                 sampling_rate=self._sampling_rate,
@@ -67,38 +70,29 @@ class FractionalOctaveBands(pft.FilterSOS):
     def norm_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
          octave filters in Hz"""
-        return fractional_octave_frequencies(
-                self._num_fractions, self._freq_range)[0]
+        return self._norm_frequencies
 
     @property
     def exact_frequencies(self):
         """Get the exact center frequencies of the (fractional)
         octave filters in Hz"""
-        return fractional_octave_frequencies(
-                self._num_fractions, self._freq_range)[1]
+        return self._exact_frequencies
 
     @property
     def cutoff_frequencies(self):
         """Get the cutoff frequencies of the (fractional)
         octave filters in Hz"""
-        return fractional_octave_frequencies(
-                self._num_fractions, self._freq_range, True)[2]
+        return self._cutoff_frequencies
 
     @property
     def n_bands(self):
         """Get the number of bands in the filter bank"""
-        return len(fractional_octave_frequencies(
-                self._num_fractions, self._freq_range)[1])
+        return len(self._exact_frequencies)
 
     @property
     def sampling_rate(self):
         """Get the sampling rate of the filter bank in Hz"""
         return self._sampling_rate
-
-    @property
-    def coefficients(self):
-        """Get the filter coefficients"""
-        return self._coefficients
 
     def _get_coefficients(
             self,
@@ -212,10 +206,9 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
             overlap=1,
             slope=0,
             n_samples=2**12,
-            sampling_rate=None):
+            sampling_rate=44100):
 
-        # sanitize input
-        freq_range = np.asarray(freq_range)
+        # check input
         if overlap < 0 or overlap > 1:
             raise ValueError("overlap must be between 0 and 1")
 
@@ -228,6 +221,11 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         self._slope = slope
         self._n_samples = n_samples
         self._sampling_rate = sampling_rate
+
+        self._norm_frequencies,\
+            self._exact_frequencies,\
+            self._cutoff_frequencies = fractional_octave_frequencies(
+                self._num_fractions, self._freq_range, True)
 
         self._coefficients = self._get_coefficients(
                 num_fractions=self._num_fractions,
@@ -270,30 +268,26 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
 
     @property
     def norm_frequencies(self):
-        """Get the IEC center frequencies of the
-        (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(
-                    self._num_fractions, self._freq_range)[0]
+        """Get the IEC center frequencies of the (fractional)
+         octave filters in Hz"""
+        return self._norm_frequencies
 
     @property
     def exact_frequencies(self):
-        """Get the exact center frequencies of the
-        (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(
-                    self._num_fractions, self._freq_range)[1]
+        """Get the exact center frequencies of the (fractional)
+        octave filters in Hz"""
+        return self._exact_frequencies
 
     @property
     def cutoff_frequencies(self):
-        """Get the cutoff frequencies of the
-        (fractional) octave filters in Hz"""
-        return fractional_octave_frequencies(
-                    self._num_fractions, self._freq_range, True)[2]
+        """Get the cutoff frequencies of the (fractional)
+        octave filters in Hz"""
+        return self._cutoff_frequencies
 
     @property
     def n_bands(self):
         """Get the number of bands in the filter bank"""
-        return len(fractional_octave_frequencies(
-                    self._num_fractions, self._freq_range)[1])
+        return len(self._exact_frequencies)
 
     @property
     def sampling_rate(self):
@@ -314,11 +308,6 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     def n_samples(self):
         """Get the number of samples per filter"""
         return self._n_samples
-
-    @property
-    def coefficients(self):
-        """Get the filter coefficients"""
-        return self._coefficients
 
     def _get_coefficients(
             self,
