@@ -66,7 +66,7 @@ def test_fractional_coeff_oct_filter_iec():
     order = 6
 
     FOFB = filter.fractional_octaves.FractionalOctaveBands(
-        1, sr, freq_range=(1e3, 4e3), order=order)
+        1, sr, freq_range=(5e3, 20e3), order=order)
 
     assert FOFB.coefficients.shape == (1, order, 6)
 

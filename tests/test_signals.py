@@ -162,7 +162,9 @@ def test_noise_rms_pink_spectrum():
     # filtered pink noise
     # (use only center octaves, because the spectrum is less stochastic there)
     signal = pfs.noise(5000, "pink", seed=1)
-    signal = pff.fractional_octave_bands(signal, 1, freq_range=(1e3, 16e3))
+    FOFB = pff.fractional_octaves.FractionalOctaveBands(
+        1, signal.sampling_rate, freq_range=(1e3, 16e3))
+    signal = FOFB.process(signal)
     # check if stdandard deviation is less then 1%
     rms = np.atleast_1d(np.sqrt(np.mean(signal.time**2, axis=-1)))
     assert np.std(rms) < .01
