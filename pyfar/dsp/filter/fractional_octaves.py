@@ -27,7 +27,8 @@ class FractionalOctaveBands(pft.FilterSOS):
     Calling ``FOFB = FractionalOctaveBands()`` constructs the filter bank.
     Afterwards the class methods ``FOFB.process()`` can be used to filter
     signals. All relevant data such as the filter coefficients can be obtained
-    for example through ``FOFB.coefficients``. See below for more documentation.
+    for example through ``FOFB.coefficients``. See below for more
+    documentation.
 
     .. note::
         This filter bank has -3 dB cut-off frequencies. For sufficiently large
@@ -72,7 +73,8 @@ class FractionalOctaveBands(pft.FilterSOS):
         ...     y.frequencies)
         >>> pf.plot.freq(y)
         >>> ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
-        >>> ax.set_title("Filter bands and the sum of their squared magnitudes")
+        >>> ax.set_title(
+        ...     "Filter bands and the sum of their squared magnitudes")
         >>> plt.tight_layout()
         >>> plt.show()
     """
@@ -473,11 +475,12 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         freq_range : tuple
             Frequency range for fractional octave in Hz.
         overlap : float
-            Band overlap of the filter slopes between 0 and 1. Smaller values yield
-            wider pass-bands and steeper filter slopes.
+            Band overlap of the filter slopes between 0 and 1. Smaller values
+            yield wider pass-bands and steeper filter slopes.
         slope : int
-            Number > 0 that defines the width and steepness of the filter slopes.
-            Larger values yield wider pass-bands and steeper filter slopes.
+            Number > 0 that defines the width and steepness of the
+            filter slopes. Larger values yield wider pass-bands and steeper
+            filter slopes.
         n_samples : int
             Length of the filter in samples. Longer filters yield more exact
             filters.
