@@ -8,10 +8,78 @@ import pyfar.classes.filter as pft
 
 
 class FractionalOctaveBands(pft.FilterSOS):
+    """
+    Generate frational octave filter bank.
+
+    Generate a high order fractional octave filter bank.
+    The center frequencies of the filters adhere either
+    to the IEC 61260:1:2014 standard in case of a fraction
+    of either 1 or 3 or are calculated exactly in relation
+    to the given frequency range and number of fractions.
+
+    The filters are designed using second order sections of Butterworth
+    band-pass filters. Note that if the upper cut-off frequency of a band lies
+    above the Nyquist frequency, a high-pass filter is applied instead. Due to
+    differences in the design of band-pass and high-pass filters, their slopes
+    differ, potentially introducing an error in the summed energy in the stop-
+    band region of the respective filters.
+
+    Calling ``FOFB = FractionalOctaveBands()`` constructs the filter bank.
+    Afterwards the class methods ``FOFB.process()`` can be used to filter
+    signals. All relevant data such as the filter coefficients can be obtained
+    for example through ``FOFB.coefficients``. See below for more documentation.
+
+    .. note::
+        This filter bank has -3 dB cut-off frequencies. For sufficiently large
+        values of ``'order'``, the summed energy of the filter bank equals the
+        energy of input signal, i.e., the filter bank is energy preserving
+        (reconstructing). This is useful for analysis energetic properties of
+        the input signal such as the room acoustic property reverberation
+        time. For an amplitude preserving filter bank with -6 dB cut-off
+        frequencies see
+        :py:func:`~pyfar.dsp.filter.ReconstructingFractionalOctaveBands`.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., ``1`` refers to
+        octave bands and ``3`` to third octave bands. The default is ``1``.
+    sampling_rate : int, optional
+        The sampling rate in Hz. Only required if signal is ``None``. The
+        default is ``None``.
+    freq_range : array, tuple, optional
+        The lower and upper frequency limits. The default is
+        ``frequency_range=(20, 20e3)``.
+    order : int, optional
+        Order of the Butterworth filter. The default is ``14``.
+
+
+    Examples
+    --------
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> # generate the data
+        >>> x = (pf.signals.impulse(2**17))
+        >>> FOFB = pf.dsp.filter.FractionalOctaveBands(num_fractions=1,
+        ...     freq_range=(20, 8e3))
+        >>> y = FOFB.process(x)
+        >>> # frequency domain plot
+        >>> y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0),
+        ...     y.frequencies)
+        >>> pf.plot.freq(y)
+        >>> ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
+        >>> ax.set_title("Filter bands and the sum of their squared magnitudes")
+        >>> plt.tight_layout()
+        >>> plt.show()
+    """
 
     def __init__(
             self,
-            num_fractions,
+            num_fractions=1,
             sampling_rate=44100,
             freq_range=(20.0, 20e3),
             order=14):
@@ -98,24 +166,22 @@ class FractionalOctaveBands(pft.FilterSOS):
             self,
             sampling_rate,
             num_fractions,
-            freq_range=(20.0, 20e3),
-            order=14):
+            freq_range,
+            order):
         """Calculate the second order section filter
         coefficients of a fractional octave band filter bank.
 
         Parameters
         ----------
-        num_fractions : int, optional
+        sampling_rate : int
+            The sampling rate in Hz.
+        num_fractions : int
             The number of bands an octave is divided into. Eg.,
             1 refers to octave bands and 3 to third octave bands.
-            The default is 1.
-        sampling_rate : None, int
-            The sampling rate in Hz. Only required if signal is None.
-            The default is None.
-        freq_range : array, tuple, optional
-            The lower and upper frequency limits. The default is (20, 20e3)
+        freq_range : array, tuple
+            The lower and upper frequency limits.
         order : integer, optional
-            Order of the Butterworth filter. The default is 14.
+            Order of the Butterworth filter.
 
 
         Returns
@@ -198,6 +264,85 @@ class FractionalOctaveBands(pft.FilterSOS):
 
 
 class ReconstructingFractionalOctaveBands(pft.FilterFIR):
+    """
+    Create and/or apply an amplitude preserving fractional octave filter bank.
+
+    The filters have a linear phase with a delay of ``n_samples/2`` and are
+    windowed with a Hanning window to suppress side lobes of the finite
+    filters. The magnitude response of the filters is designed similar to [#]_
+    with two exceptions:
+
+    1. The magnitude response is designed using squared sine/cosine ramps to
+       obtain -6 dB at the cut-off frequencies.
+    2. The overlap between the filters is calculated between the center and
+       upper cut-off frequencies and not between the center and lower cut-off
+       frequencies. This enables smaller pass-bands with unity gain, which
+       might be advantageous for applications that apply analysis and
+       resynthesis.
+
+    .. note::
+        This filter bank has -6 dB cut-off frequencies. For sufficient lengths
+        of ``'n_samples'``, the summed output of the filter bank equals the
+        input signal, i.e., the filter bank is amplitude preserving
+        (reconstructing). This is useful for analysis and synthesis
+        applications such as room acoustical simulations. For an energy
+        preserving filter bank with -3 dB cut-off frequencies see
+        :py:func:`~pyfar.dsp.filter.fractional_octave_bands`.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        Octave fraction, e.g., ``3`` for third-octave bands. The default is
+        ``1``.
+    freq_range : tuple, optional
+        Frequency range for fractional octave in Hz. The default is
+        ``(63, 16000)``
+    overlap : float
+        Band overlap of the filter slopes between 0 and 1. Smaller values yield
+        wider pass-bands and steeper filter slopes. The default is ``1``.
+    slope : int, optional
+        Number > 0 that defines the width and steepness of the filter slopes.
+        Larger values yield wider pass-bands and steeper filter slopes. The
+        default is ``0``.
+    n_samples : int, optional
+        Length of the filter in samples. Longer filters yield more exact
+        filters. The default is ``2**12``.
+    sampling_rate : int
+        Sampling frequency in Hz. The default is ``44100`` Hz.
+
+    References
+    ----------
+    .. [#] Antoni, J. (2010). Orthogonal-like fractional-octave-band filters.
+           J. Acous. Soc. Am., 127(2), 884–895, doi: 10.1121/1.3273888
+
+    Examples
+    --------
+
+    Filter and re-synthesize an impulse signal.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> # generate data
+        >>> x = pf.signals.impulse(2**12)
+        >>> FOFB = pf.dsp.filter.ReconstructingFractionalOctaveBands()
+        >>> y = FOFB.process(x)
+        >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
+        >>> # time domain plot
+        >>> ax = pf.plot.time_freq(y_sum, color='k')
+        >>> pf.plot.time(x, ax=ax[0])
+        >>> ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
+        >>> ax[0].set_title("Original (blue) and reconstructed pulse (black)")
+        >>> # frequency domain plot
+        >>> pf.plot.freq(y_sum, color='k', ax=ax[1])
+        >>> pf.plot.freq(y, ax=ax[1])
+        >>> ax[1].set_title(
+        ...     "Reconstructed (black) and filtered impulse (colored)")
+        >>> plt.tight_layout()
+        >>> plt.show()
+    """
 
     def __init__(
             self,
@@ -317,99 +462,33 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
             slope,
             n_samples,
             sampling_rate):
-        """
-        Create and/or apply an amplitude preserving fractional
-        octave filter bank.
 
-        .. note::
-            This filter bank has -6 dB cut-off frequencies. For sufficient
-            lengths of ``'n_samples'``, the summed output of the filter
-            bank equals the input signal, i.e., the filter bank is amplitude
-            preserving (reconstructing). This is useful for analysis and
-            synthesis applications such as room acoustical simulations.
-            For an energy preserving filter bank with -3 dB cut-off frequencies
-            see :py:func:`~pyfar.dsp.filter.fractional_octave_bands`.
-
-        The filters have a linear phase with a delay of ``n_samples/2`` and are
-        windowed with a Hanning window to suppress side lobes of the finite
-        filters. The magnitude response of the filters is designed similar to
-        [#]_ with two exceptions:
-
-        1. The magnitude response is designed using squared sine/cosine ramps
-        to obtain -6 dB at the cut-off frequencies.
-        2. The overlap between the filters is calculated between the center and
-        upper cut-off frequencies and not between the center and lower cut-off
-        frequencies. This enables smaller pass-bands with unity gain, which
-        might be advantageous for applications that apply analysis and
-        resynthesis.
+        """Calculate the filter coefficients of a fractional octave
+        band filter bank.
 
         Parameters
         ----------
-        signal : Signal, None
-            The Signal to be filtered. Pass ``None`` to create the filter
-            without applying it.
-        num_fractions : int, optional
-            Octave fraction, e.g., ``3`` for third-octave bands. The default is
-            ``1``.
-        freq_range : tuple, optional
-            Frequency range for fractional octave in Hz. The default is
-            ``(63, 16000)``
+        num_fractions : int
+            Octave fraction, e.g., ``3`` for third-octave bands.
+        freq_range : tuple
+            Frequency range for fractional octave in Hz.
         overlap : float
-            Band overlap of the filter slopes between 0 and 1.
-            Smaller values yield wider pass-bands and steeper
-            filter slopes. The default is ``1``.
-        slope : int, optional
-            Number > 0 that defines the width and steepness of the filter
-            slopes. Larger values yield wider pass-bands and
-            steeper filter slopes. The default is ``0``.
-        n_samples : int, optional
+            Band overlap of the filter slopes between 0 and 1. Smaller values yield
+            wider pass-bands and steeper filter slopes.
+        slope : int
+            Number > 0 that defines the width and steepness of the filter slopes.
+            Larger values yield wider pass-bands and steeper filter slopes.
+        n_samples : int
             Length of the filter in samples. Longer filters yield more exact
-            filters. The default is ``2**12``.
+            filters.
         sampling_rate : int
-            Sampling frequency in Hz. The default is ``None``. Only required if
-            ``signal=None``.
+            Sampling frequency in Hz.
+
 
         Returns
         -------
-        signal : Signal
-            The filtered signal. Only returned if ``sampling_rate = None``.
-        filter : FilterFIR
-            FIR Filter object. Only returned if ``signal = None``.
-        frequencies : np.ndarray
-            Center frequencies of the filters.
-
-        References
-        ----------
-        .. [#] Antoni, J. (2010). Orthogonal-like
-            fractional-octave-band filters.
-            J. Acous. Soc. Am., 127(2), 884–895, doi: 10.1121/1.3273888
-
-        Examples
-        --------
-
-        Filter and re-synthesize an impulse signal.
-
-        .. plot::
-
-            >>> import pyfar as pf
-            >>> import numpy as np
-            >>> import matplotlib.pyplot as plt
-            >>> # generate data
-            >>> x = pf.signals.impulse(2**12)
-            >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
-            >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
-            >>> # time domain plot
-            >>> ax = pf.plot.time_freq(y_sum, color='k')
-            >>> pf.plot.time(x, ax=ax[0])
-            >>> ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
-            >>> ax[0].set_title(
-            >>>    "Original (blue) and reconstructed pulse (black)")
-            >>> # frequency domain plot
-            >>> pf.plot.freq(y_sum, color='k', ax=ax[1])
-            >>> pf.plot.freq(y, ax=ax[1])
-            >>> ax[1].set_title(
-            ...     "Reconstructed (black) and filtered impulse (colored)")
-            >>> plt.tight_layout()
+        coeffs : array, float
+            Filter coefficients
         """
 
         # number of frequency bins
@@ -536,6 +615,9 @@ def fractional_octave_frequencies(
     freq_range : array, tuple
         The lower and upper frequency limits, the default is
         ``freq_range=(20, 20e3)``.
+    return_cutoff : bool, optional
+        Specifies if the cutoff frequencies aka ``fu`` and ``fo`` should be
+        returned as well.
 
     Returns
     -------
@@ -611,7 +693,8 @@ def __exact_center_frequencies_fractional_octaves(
 
 
 def __center_frequencies_fractional_octaves_iec(nominal, num_fractions):
-    """Returns the exact center frequencies for fractional octave bands
+    """
+    Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
     octave ratio
     .. G = 10^{3/10}
