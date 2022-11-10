@@ -210,3 +210,9 @@ def test_get_nearest_deprecations_0_7_0_set_sh_order():
     if version.parse(pf.__version__) >= version.parse('0.7.0'):
         with pytest.raises(AttributeError):
             coords.sh_order = 1
+
+
+def test_pad_zero_modi():
+    with pytest.warns(PendingDeprecationWarning,
+                      match='Mode "before" and "after" will be renamed into'):
+        pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, 'before')
