@@ -10,6 +10,7 @@ according to their modules.
    modules/pyfar.dsp
    modules/pyfar.dsp.fft
    modules/pyfar.dsp.filter
+   modules/pyfar.dsp.utils
    modules/pyfar.io
    modules/pyfar.plot
    modules/pyfar.signals

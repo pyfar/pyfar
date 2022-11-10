@@ -32,11 +32,13 @@ from .interpolation import (
 
 from . import filter
 from . import fft
+from . import utils
 
 
 __all__ = [
     'fft',
     'filter',
+    'utils',
     'phase',
     'group_delay',
     'wrap_to_2pi',
