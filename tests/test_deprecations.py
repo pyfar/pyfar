@@ -167,3 +167,9 @@ def test__check_time_unit():
             # remove xscale from pyfar 0.6.0!
             create_figure()
             pf.plot._utils._check_time_unit(None)
+
+
+def test_pad_zero_modi():
+    with pytest.warns(PendingDeprecationWarning,
+                      match='Mode "before" and "after" will be renamed into'):
+        pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, 'before')
