@@ -1028,7 +1028,7 @@ class Coordinates():
         if show:
             self.show(mask)
 
-        index = np.asarray(mask).nonzero()
+        index = np.asarray(mask).nonzero()[0]
 
         return index, mask
 
