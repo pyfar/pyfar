@@ -1237,8 +1237,14 @@ def find_impulse_response_delay(impulse_response, N=1):
         # in the strict sense, instead of the appriximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
-        ir_minphase = sgn.minimum_phase(
-            impulse_response.time[ch], n_fft=4*n_samples)
+
+        # minimum phase warns if the input signal is not symmetric, which is
+        # not critical for this application
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            ir_minphase = sgn.minimum_phase(
+                impulse_response.time[ch], n_fft=4*n_samples)
+
         correlation = sgn.correlate(
             impulse_response.time[ch],
             np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
