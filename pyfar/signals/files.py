@@ -18,12 +18,10 @@ import numpy as np
 
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
-from urllib3 import disable_warnings
+import warnings
 
 import pyfar as pf
 
-# disable warning about non-certified connection
-disable_warnings(InsecureRequestWarning)
 # path for saving/reading files
 file_dir = os.path.join(os.path.dirname(__file__), 'files')
 if not os.path.isdir(file_dir):
@@ -518,7 +516,10 @@ def _load_files(data):
 
     for file in files:
 
-        http_data = http.urlopen('GET', url + file)
+        # Kontrolle ist gut, Vertrauen ist besser
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", InsecureRequestWarning)
+            http_data = http.urlopen('GET', url + file)
 
         # save the data
         if http_data.status == 200:
