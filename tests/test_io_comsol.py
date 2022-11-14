@@ -44,6 +44,7 @@ def test_read_comsol_error_wrong_domain():
     ('pressure_acceleration_parametric_time', ['actd.p_t', 'actd.a_inst']),
     ('pressure_only', ['pabe.p_t']),
     ('pressure_parametric', ['pabe.p_t']),
+    ('intensity_product', ['pabe.p_t*pabe.v_inst*2/sqrt(2)']),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_expressions(filename, expressions, type):
@@ -61,6 +62,7 @@ def test_read_comsol_header_expressions(filename, expressions, type):
     ('pressure_acceleration_parametric_time', ['Pa', 'm/s^2']),
     ('pressure_only', ['Pa']),
     ('pressure_parametric', ['Pa']),
+    ('intensity_product', ['Pa*m/s']),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_expressions_unit(filename, expressions_unit, type):
@@ -100,6 +102,7 @@ def test_read_comsol_header_parameters(filename, parameters, type):
     ('pressure_acceleration_parametric_time', 'time'),
     ('pressure_only', 'freq'),
     ('pressure_parametric', 'freq'),
+    ('intensity_product', 'freq'),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_domain(filename, domain, type):
@@ -116,6 +119,7 @@ def test_read_comsol_header_domain(filename, domain, type):
      [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]),
     ("pressure_only", [100, 500]),
     ("pressure_parametric", [100, 500]),
+    ('intensity_product', [100, 500]),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_domain_data(filename, domain_data, type):
@@ -131,6 +135,7 @@ def test_read_comsol_header_domain_data(filename, domain_data, type):
     'pressure_acceleration_parametric_time',
     'pressure_only',
     'pressure_parametric',
+    'intensity_product',
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_data_domain(filename, type):
@@ -152,6 +157,7 @@ def test_read_comsol_data_domain(filename, type):
     ('pressure_acceleration_parametric_time', 46),
     ('pressure_only', 8),
     ('pressure_parametric', 8),
+    ('intensity_product', 8),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_data_shapes(filename, nodes, type):
@@ -173,6 +179,7 @@ def test_read_comsol_data_shapes(filename, nodes, type):
     'intensity_parametric',
     'pressure_only',
     'pressure_parametric',
+    'intensity_product',
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_coordinates(filename, type):
@@ -199,6 +206,8 @@ def test_read_comsol_coordinates(filename, type):
      np.complex128(complex(-3.308489057665816E-5, -0.003883799752478906))),
     ('pressure_parametric',
      np.complex128(complex(-3.3084890576658145E-5, -0.003883799752478905))),
+    ('intensity_product',
+     np.complex128(-2.810452490679023E-10-3.299159978287418E-8j)),
     ])
 @pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_first_value_data(filename, p1, suffix):
@@ -263,6 +272,7 @@ def test_read_comsol_parameters_another_value_data(filename, p1, type):
     'pressure_acceleration_parametric_time',
     'pressure_only',
     'pressure_parametric',
+    'intensity_product'
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_expressions(filename, type):
