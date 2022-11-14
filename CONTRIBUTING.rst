@@ -215,6 +215,3 @@ $ git push --follow-tags
 Travis will then deploy to PyPI if tests pass.
 
 - merge main back into develop
-- check `binder`_
-
-.. _binder: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
