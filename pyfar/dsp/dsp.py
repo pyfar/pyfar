@@ -1003,10 +1003,9 @@ def pad_zeros(signal, pad_width, mode='end'):
         raise TypeError('Input data has to be of type: Signal.')
 
     if mode in ['before', 'after']:
-        warnings.simplefilter('always')
         warnings.warn(('Mode "before" and "after" will be renamed into '
                        '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.5.8.'), PendingDeprecationWarning)
+                       'Pyfar 0.8.0.'), DeprecationWarning)
 
         mode = 'beginning' if mode == 'before' else 'end'
 
