@@ -207,7 +207,7 @@ class TimeData(_Audio):
         comment : str
             A comment related to `data`. The default is ``''``, which
             initializes an empty string.
-.
+
         """
 
         _Audio.__init__(self, 'time', comment)
