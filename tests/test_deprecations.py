@@ -213,6 +213,11 @@ def test_get_nearest_deprecations_0_7_0_set_sh_order():
 
 
 def test_pad_zero_modi():
-    with pytest.warns(PendingDeprecationWarning,
+    with pytest.warns(DeprecationWarning,
                       match='Mode "before" and "after" will be renamed into'):
         pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, 'before')
+
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+        with pytest.raises(ValueError):
+            # remove mode 'before' and 'after' from pyfar 0.8.0!
+            pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, mode='before')
