@@ -114,7 +114,7 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     order : number
         The shelve order. Must be ``1`` or ``2``.
     shelve_type : str
-        Defines the characteristic frequency. The default is ``'I'``
+        Defines the characteristic frequency. The default is ``'I'``.
 
         ``'I'``
             Defines the characteristic frequency 3 dB below the gain value if
