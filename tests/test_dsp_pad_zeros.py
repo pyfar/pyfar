@@ -14,8 +14,8 @@ def test_pad_zeros():
     with pytest.raises(ValueError, match="Unknown padding mode"):
         pyfar.dsp.pad_zeros(test_signal, 1, mode='invalid')
 
-    # test padding before start of the signal
-    padded = pyfar.dsp.pad_zeros(test_signal, num_zeros, mode='before')
+    # test padding at the beginning of the signal
+    padded = pyfar.dsp.pad_zeros(test_signal, num_zeros, mode='beginning')
     # check of dimensions are maintained
     assert test_signal.cshape == padded.cshape
     # check if final number of samples after padding is correct
@@ -27,8 +27,8 @@ def test_pad_zeros():
 
     np.testing.assert_allclose(padded.time, desired.time)
 
-    # test padding after end of the signal
-    padded = pyfar.dsp.pad_zeros(test_signal, num_zeros, mode='after')
+    # test padding at the end of the signal
+    padded = pyfar.dsp.pad_zeros(test_signal, num_zeros, mode='end')
     # check of dimensions are maintained
     assert test_signal.cshape == padded.cshape
     # check if final number of samples after padding is correct
