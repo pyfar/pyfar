@@ -117,15 +117,16 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
         Defines the characteristic frequency. The default is ``'I'``.
 
         ``'I'``
-            Defines the characteristic frequency 3 dB below the gain value if
-            the gain is positive and 3 dB above the gain value otherwise
+            Defines the characteristic frequency 3 dB below the `gain` value if
+            the `gain` is positive and 3 dB above the `gain` value if the `gain`
+            is negative.
         ``'II'``
-            Defines the characteristic frequency at 3 dB if the gain is
-            positive and at -3 dB if the gain is negative.
+            Defines the characteristic frequency at 3 dB if the `gain` is
+            positive and at -3 dB if the `gain` is negative.
         ``'III'``
-            Defines the characteristic frequency at gain/2 dB.
+            Defines the characteristic frequency at `gain`/2 dB.
 
-        For types ``I`` and ``II`` the absolute value of the gain must be
+        For types ``I`` and ``II`` the absolute value of the `gain` must be
         sufficiently large (>12 dB) to set the characteristic frequency
         according to the above rules.
     sampling_rate : None, number
