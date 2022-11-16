@@ -978,7 +978,7 @@ def pad_zeros(signal, pad_width, mode='end'):
         ``'end'``
             Append zeros to the end of the signal
         ``'beginning'``
-            Pre-pend zeros before the starting time of the signal
+            Prepend zeros to the beginning of the signal
         ``'center'``
             Insert the number of zeros in the middle of the signal.
             This mode can be used to pad signals with a symmetry with respect
