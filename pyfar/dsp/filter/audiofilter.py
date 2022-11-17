@@ -118,8 +118,8 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
 
         ``'I'``
             Defines the characteristic frequency 3 dB below the `gain` value if
-            the `gain` is positive and 3 dB above the `gain` value if the `gain`
-            is negative.
+            the `gain` is positive and 3 dB above the `gain` value if the
+            `gain` is negative.
         ``'II'``
             Defines the characteristic frequency at 3 dB if the `gain` is
             positive and at -3 dB if the `gain` is negative.
@@ -175,8 +175,8 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 
         ``'I'``
             Defines the characteristic frequency 3 dB below the `gain` value if
-            the `gain` is positive and 3 dB above the `gain` value if the `gain`
-            is negative.
+            the `gain` is positive and 3 dB above the `gain` value if the
+            `gain` is negative.
         ``'II'``
             Defines the characteristic frequency at 3 dB if the `gain` is
             positive and at -3 dB if the `gain` is negative.
