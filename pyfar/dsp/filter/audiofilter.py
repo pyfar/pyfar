@@ -128,7 +128,7 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
 
         For types ``I`` and ``II`` the absolute value of the `gain` must be
         sufficiently large (>12 dB) to set the characteristic frequency
-        according to the above rules. For smaller absolute values the
+        according to the above rules. For smaller absolute `gain` values the
         characteristic frequency becomes less accurate.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
@@ -186,7 +186,7 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 
         For types ``I`` and ``II`` the absolute value of the `gain` must be
         sufficiently large (>12 dB) to set the characteristic frequency
-        according to the above rules. For smaller absolute values the
+        according to the above rules. For smaller absolute `gain` values the
         characteristic frequency becomes less accurate.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
