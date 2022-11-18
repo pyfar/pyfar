@@ -631,33 +631,39 @@ def test_find_slice():
 
     c = Coordinates(d, 0, 0)
     index, mask = c.find_slice('x', 'met', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
 
     c = Coordinates(0, d, 0)
     index, mask = c.find_slice('y', 'met', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
 
     c = Coordinates(0, 0, d)
     index, mask = c.find_slice('z', 'met', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
+
+    # cartesian grid, multi-dimensional coordinates
+    c = Coordinates([[0, 1], [1, 0]], 2, 3)
+    index, mask = c.find_slice('x', 'met', 0)
+    npt.assert_allclose(index, ([0, 1], [0, 1]))
+    npt.assert_allclose(mask, np.array([[1, 0], [0, 1]]))
 
     # spherical grid
     d = [358, 359, 0, 1, 2]
     c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
     # cyclic query for lower bound
     index, mask = c.find_slice('azimuth', 'deg', 0, 1)
-    npt.assert_allclose(index, np.array([1, 2, 3]))
+    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
     # cyclic query for upper bound
     index, mask = c.find_slice('azimuth', 'deg', 359, 2)
-    npt.assert_allclose(index, np.array([0, 1, 2, 3]))
+    npt.assert_allclose(index, (np.array([0, 1, 2, 3]), ))
     npt.assert_allclose(mask, np.array([1, 1, 1, 1, 0]))
     # non-cyclic query
     index, mask = c.find_slice('azimuth', 'deg', 1, 1)
-    npt.assert_allclose(index, np.array([2, 3, 4]))
+    npt.assert_allclose(index, (np.array([2, 3, 4]), ))
     npt.assert_allclose(mask, np.array([0, 0, 1, 1, 1]))
     # out of range query
     with raises(AssertionError):
@@ -672,6 +678,17 @@ def test_find_slice():
     # not tested here.
 
     plt.close("all")
+
+
+@pytest.mark.parametrize("coordinates,desired", [
+    (Coordinates([0, 1], 2, 3), [0, 2, 3]),
+    (Coordinates([[0, 1], [1, 0]], 2, 3), [[0, 2, 3], [0, 2, 3]])])
+def test_find_slice_slicing(coordinates, desired):
+    """Test if return values can be used for slicing"""
+
+    index, mask = coordinates.find_slice('x', 'met', 0)
+    assert coordinates[index] == coordinates[mask]
+    npt.assert_equal(coordinates[index].get_cart(), np.atleast_2d(desired))
 
 
 @pytest.mark.parametrize("rot_type,rot", [
