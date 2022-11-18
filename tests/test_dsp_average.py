@@ -7,15 +7,15 @@ import numpy.testing as npt
 @pytest.mark.parametrize('signal, mode, answer', (
     [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100),
      'linear', [2.5, 3.5, 4.5]],
-    [pf.TimeData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
+    [pf.TimeData([[1, 2, 3], [4, 5, 6]], [1, 2, 3]),
      'linear', [2.5, 3.5, 4.5]],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
      'magnitude_zerophase', np.zeros(65)+2],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
      'magnitude_phase', pf.signals.impulse(128, 1, 2).freq[0]],
-    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3], 44100),
+    [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3]),
      'power', np.sqrt([(1+16)/2, (4+25)/2, (9+36)/2])],
-    [pf.FrequencyData([[0.01, 0.1, ], [1, 10]], [1, 2], 44100),
+    [pf.FrequencyData([[0.01, 0.1, ], [1, 10]], [1, 2]),
      'log_magnitude_zerophase', 10**(np.array([(-40+0)/2, (-20+20)/2])/20)]
     ))
 def test_averaging(signal, mode, answer):
