@@ -32,7 +32,6 @@ from .interpolation import (
 
 from . import filter
 from . import fft
-from . import utils
 
 
 __all__ = [
