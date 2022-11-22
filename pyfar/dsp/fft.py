@@ -5,7 +5,7 @@ given in the :py:mod:`FFT concepts <pyfar._concepts.fft>`.
 import multiprocessing
 
 import numpy as np
-from scipy import fft
+from scipy import fft as _fft
 
 
 def rfftfreq(n_samples, sampling_rate):
@@ -29,7 +29,7 @@ def rfftfreq(n_samples, sampling_rate):
         The positive discrete frequencies in Hz for which the FFT is
         calculated.
     """
-    return fft.rfftfreq(n_samples, d=1/sampling_rate)
+    return _fft.rfftfreq(n_samples, d=1/sampling_rate)
 
 
 def rfft(data, n_samples, sampling_rate, fft_norm):
@@ -62,7 +62,7 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     """
 
     # DFT
-    spec = fft.rfft(
+    spec = _fft.rfft(
         data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
     # Normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
@@ -105,11 +105,109 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True)
     # Inverse DFT
-    data = fft.irfft(
+    data = _fft.irfft(
         spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
 
     return data
 
+def fftfreq(n_samples, sampling_rate):
+    """
+    Returns the positive discrete frequencies for which the FFT is calculated.
+
+    If the number of samples
+    :math:`N` is even the number of frequency bins will be :math:`2/N+1`, if
+    :math:`N` is odd, the number of bins will be :math:`(N+1)/2`.
+
+    Parameters
+    ----------
+    n_samples : int
+        The number of samples in the signal
+    sampling_rate : int
+        The sampling rate of the signal
+
+    Returns
+    -------
+    frequencies : array, double
+        The positive discrete frequencies in Hz for which the FFT is
+        calculated.
+    """
+    return _fft.fftshift(_fft.fftfreq(n_samples, d=1/sampling_rate))
+
+def fft(data, n_samples, sampling_rate, fft_norm):
+    """
+    Calculate the FFT of a complex-valued time-signal.
+
+    The function returns the double sided spectrum. The normalization is considered according to
+    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
+    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+
+    Parameters
+    ----------
+    data : array, double
+        Array containing the time domain signal with dimensions
+        (..., ``'n_samples'``)
+    n_samples : int
+        The number of samples
+    sampling_rate : number
+        sampling rate in Hz
+    fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
+        See documentation of :py:func:`~pyfar.dsp.fft.normalization`.
+
+    Returns
+    -------
+    spec : array, complex
+        The complex valued right-hand side of the spectrum with dimensions
+        (..., n_bins)
+
+    """
+
+    # DFT
+    spec = _fft.fft(
+        data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
+    # Normalization
+    spec = normalization(spec, n_samples, sampling_rate, fft_norm,
+                         inverse=False, single_sided=False)
+
+    return spec
+
+def ifft(spec, n_samples, sampling_rate, fft_norm):
+    """
+    Calculate the IFFT of a double-sided Fourier spectrum.
+
+    The function takes double-sided spectrum and returns a  time signal.
+    The normalization is considered according to
+    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
+    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+
+    Parameters
+    ----------
+    spec : array, complex
+        The complex valued right-hand side of the spectrum with dimensions
+        (..., n_bins)
+    n_samples : int
+        The number of samples of the corresponding time signal. This is crucial
+        to allow for the correct transform of time signals with an odd number
+        of samples.
+    sampling_rate : number
+        sampling rate in Hz
+    fft_norm : 'none', 'unitary', 'amplitude', 'rms', 'power', 'psd'
+        See :py:func:`~pyfar.dsp.fft.normalization`.
+
+    Returns
+    -------
+    data : array, double
+        Array containing the time domain signal with dimensions
+        (..., ``'n_samples'``)
+    """
+
+    # Inverse normalization
+    spec = normalization(spec, n_samples, sampling_rate, fft_norm,
+                         inverse=True, single_sided=False)
+    # Inverse DFT
+    data = _fft.ifft(
+        spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
+
+    return data
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
                   inverse=False, single_sided=True, window=None):

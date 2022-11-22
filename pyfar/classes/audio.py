@@ -188,7 +188,7 @@ class TimeData(_Audio):
     to frequency domain, i.e., non-equidistant samples.
 
     """
-    def __init__(self, data, times, comment=None):
+    def __init__(self, data, times, complex=False, comment=None):
         """Create TimeData object with data, and times.
 
         Parameters
@@ -207,6 +207,7 @@ class TimeData(_Audio):
 
         _Audio.__init__(self, 'time', comment)
 
+        self.complex = complex
         self.time = data
 
         self._times = np.atleast_1d(np.asarray(times).flatten())
@@ -228,15 +229,29 @@ class TimeData(_Audio):
         data = np.atleast_2d(np.asarray(value))
         if data.dtype.kind == "i":
             data = data.astype("float")
+            data = np.atleast_2d(np.asarray(value, dtype=float))
+        elif data.dtype.kind == "c":
+            #assert not self._complex
+            data = np.atleast_2d(np.asarray(value, dtype=complex))
         elif data.dtype.kind != "f":
             raise ValueError(
-                f"time data is {data.dtype}  must be int or float")
-        data = np.atleast_2d(np.asarray(value, dtype=float))
+                f"time data is {data.dtype} must be int, float, or complex")
+
         self._data = data
         self._n_samples = data.shape[-1]
         # setting the domain is only required for Signal. Setting it here
         # avoids the need for overloading the setter and does not harm TimeData
         self._domain = 'time'
+
+    @property
+    def complex(self):
+        return self._complex
+
+    @complex.setter
+    def complex(self, is_complex):
+        assert isinstance(is_complex, bool)
+
+        self._complex = is_complex
 
     @property
     def n_samples(self):
@@ -541,6 +556,7 @@ class Signal(FrequencyData, TimeData):
             n_samples=None,
             domain='time',
             fft_norm='none',
+            complex=False,
             comment=None):
         """Create Signal with data, and sampling rate.
 
@@ -597,19 +613,30 @@ class Signal(FrequencyData, TimeData):
         # initialize domain specific parameters
         if domain == 'time':
             self._n_samples = data.shape[-1]
+            if not complex:
+                if data.dtype.kind == "c":
+                    raise ValueError("Invalid dtype: Set complex flag or pass real-valued data.")
+                else:
+                    self._n_bins = fft._n_bins(self.n_samples)
+            else:
+                self._n_bins = data.shape[-1]
+
             times = np.atleast_1d(
                 np.arange(0, self._n_samples) / sampling_rate)
-            TimeData.__init__(self, data, times, comment)
+            TimeData.__init__(self, data, times, complex, comment)
         elif domain == 'freq':
             # check and set n_samples
-            if n_samples is None:
+            if n_samples is None and not complex:
                 warnings.warn(
                     "Number of time samples not given, assuming an even "
                     "number of samples from the number of frequency bins.")
                 n_samples = (data.shape[-1] - 1)*2
+            elif n_samples is None and complex:
+                n_samples = data.shape[-1]
             elif n_samples > 2 * data.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
+
             self._n_samples = n_samples
             self._n_bins = data.shape[-1]
             # Init remaining parameters
@@ -704,15 +731,33 @@ class Signal(FrequencyData, TimeData):
                 # If the new domain should be time, we had a saved spectrum
                 # (without normalization)
                 # and need to do an inverse Fourier Transform
-                self._data = fft.irfft(
-                    self._data, self.n_samples, self._sampling_rate,
-                    fft_norm='none')
+                if self.n_bins == self.n_samples:
+                    # assume frequency data came from a complex-valued time signal
+                    # and we have a double-sided Fourier spectrum
+                    self._data = fft.ifft(
+                        self._data, self.n_samples, self._sampling_rate,
+                        fft_norm='none')
+                else:
+                    # assume frequency data came from a real-valued time signal
+                    # and we have a single-sided Fourier spectrum
+                    self._data = fft.irfft(
+                        self._data, self.n_samples, self._sampling_rate,
+                        fft_norm='none')
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform (without normalization)
-                self._data = fft.rfft(
-                    self._data, self.n_samples, self._sampling_rate,
-                    fft_norm='none')
+                if self.complex:
+                    # If the time data are complex-valued, calculate a double-sided
+                    # Fourier spectrum
+                    self._data = fft.fft(
+                        self._data, self.n_samples, self._sampling_rate,
+                        fft_norm='none')
+                else:
+                    # If the time data are real-valued, calculate a single-sided
+                    # Fourier spectrum
+                    self._data = fft.rfft(
+                        self._data, self.n_samples, self._sampling_rate,
+                        fft_norm='none')
             self._domain = new_domain
 
     @property
@@ -732,12 +777,17 @@ class Signal(FrequencyData, TimeData):
     @property
     def frequencies(self):
         """Frequencies of the discrete signal spectrum."""
-        return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
+        if self.n_bins == self.n_samples:  # assume the time domain data were complex-valued such that we need
+                                           # a two-sided Fourier spectrum
+
+            return np.atleast_1d(fft.fftfreq(self.n_samples, self.sampling_rate))
+        else:
+            return np.atleast_1d(fft.rfftfreq(self.n_samples, self.sampling_rate))
 
     @property
     def n_bins(self):
         """Number of frequency bins."""
-        return fft._n_bins(self.n_samples)
+        return self._n_bins  #fft._n_bins(self.n_samples)
 
     @property
     def fft_norm(self):
