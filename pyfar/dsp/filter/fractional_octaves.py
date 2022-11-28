@@ -9,7 +9,7 @@ import pyfar.classes.filter as pft
 
 class FractionalOctaveBands(pft.FilterSOS):
     """
-    Generate frational octave filter bank.
+    Generate fractional octave filter bank.
 
     Generate a high order fractional octave filter bank.
     The center frequencies of the filters adhere either
