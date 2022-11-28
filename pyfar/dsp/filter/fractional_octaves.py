@@ -647,7 +647,7 @@ def fractional_octave_frequencies(
             "The second frequency needs to be higher than the first.")
 
     if num_fractions in [1, 3]:
-        nominal, exact = __center_frequencies_fractional_octaves_iec(
+        nominal, exact = _center_frequencies_fractional_octaves_iec(
             nominal, num_fractions)
 
         mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
@@ -696,7 +696,7 @@ def __exact_center_frequencies_fractional_octaves(
     return exact
 
 
-def __center_frequencies_fractional_octaves_iec(nominal, num_fractions):
+def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     """
     Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
