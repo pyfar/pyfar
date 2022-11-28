@@ -7,7 +7,6 @@ import pyfar as pf
 import pyfar.classes.filter as pft
 
 
-
 def fractional_octave_bands(
         signal,
         num_fractions,

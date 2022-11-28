@@ -87,7 +87,8 @@ def test_fract_oct_filter_iec():
     assert isinstance(sig, Signal)
 
     FOFB = filter.fractional_octaves.FractionalOctaveBands(
-        num_fractions=1, sampling_rate=sr, frequency_range=(1e3, 4e3), order=order)
+        num_fractions=1, sampling_rate=sr, frequency_range=(1e3, 4e3),
+        order=order)
     ir_actual = FOFB.process(impulse)
 
     assert ir_actual.time.shape[0] == 3
