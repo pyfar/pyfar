@@ -1661,9 +1661,9 @@ class Coordinates():
         """
 
         # cast to numpy array
-        x = np.asarray(x, dtype=np.float64)
-        y = np.asarray(y, dtype=np.float64)
-        z = np.asarray(z, dtype=np.float64)
+        x = np.atleast_1d(np.asarray(x, dtype=np.float64))
+        y = np.atleast_1d(np.asarray(y, dtype=np.float64))
+        z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
         # transpose
         if len(x.shape) == 2 and (x.shape[0] == 1 or x.shape[1] == 1):
@@ -1774,9 +1774,9 @@ class Coordinates():
 
         new = self.copy()
         # slice points
-        new._x = np.atleast_2d(new._x[index])
-        new._y = np.atleast_2d(new._y[index])
-        new._z = np.atleast_2d(new._z[index])
+        new._x = np.atleast_1d(new._x[index])
+        new._y = np.atleast_1d(new._y[index])
+        new._z = np.atleast_1d(new._z[index])
         # slice weights
         if new._weights is not None:
             new._weights = new._weights[index]
