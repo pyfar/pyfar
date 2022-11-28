@@ -247,7 +247,7 @@ def test_reconstructing_fractional_octave_bands():
 
     # test frequencies
     FOFB_ = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands(
-        freq_range=(63, 16000))
+        frequency_range=(63, 16000))
     npt.assert_allclose(FOFB.norm_frequencies, FOFB_.norm_frequencies)
 
     # test filtering
@@ -272,7 +272,7 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
 
     for overlap, slope in zip([1, 1, 0], [0, 3, 0]):
         FOFB = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands(
-                freq_range=(8e3, 16e3),
+                frequency_range=(8e3, 16e3),
                 overlap=overlap,
                 slope=slope,
                 n_samples=2**10)

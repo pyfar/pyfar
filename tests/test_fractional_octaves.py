@@ -96,7 +96,7 @@ def test_fract_oct_filter_iec():
 
 def test_fract_oct_bands_non_iec():
     exact = filter.fractional_octaves.\
-        __exact_center_frequencies_fractional_octaves(1, (2e3, 20e3))
+        _exact_center_frequencies_fractional_octaves(1, (2e3, 20e3))
     expected = np.array([2e3, 4e3, 8e3, 16e3])
 
     np.testing.assert_allclose(exact, expected)
