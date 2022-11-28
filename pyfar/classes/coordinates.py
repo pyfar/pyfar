@@ -24,12 +24,13 @@ class Coordinates():
     _weights: np.array = None
     _sh_order: int = None
     _comment: str = None
+    _system: dict = None
 
     def __init__(
             self, points_1: np.array = np.asarray([]),
             points_2: np.array = np.asarray([]),
             points_3: np.array = np.asarray([]),
-            domain: str = 'cart', convention: str = 'right', unit: str = 'met',
+            domain: str = 'cart', convention: str = None, unit: str = None,
             weights: np.array = None, sh_order=None,
             comment: str = None) -> None:
         """
@@ -95,6 +96,21 @@ class Coordinates():
             ``None``.
         """
 
+        # set the coordinate system
+        self._system = self._make_system(domain, convention, unit)
+
+        # Set default convention
+        if domain == 'cart':
+            convention = 'right'
+            unit = 'met'
+        elif domain == 'sph':
+            convention = 'top_colat'
+            unit = 'rad'
+        elif domain == 'cyl':
+            convention = 'top'
+            unit = 'rad'
+
+        # set coordinates according to system
         if domain == 'cart':
             self._set_cart(points_1, points_2, points_3)
         elif domain == 'sph':
@@ -1595,6 +1611,37 @@ class Coordinates():
              "self.systems() for a list of possible "
              "coordinates and units"))
 
+    def _make_system(self, domain=None, convention=None, unit=None):
+        """
+        Make and return class internal information about coordinate system.
+        """
+
+        # check if coordinate system exists
+        self._exist_system(domain, convention, unit)
+
+        # get the new system
+        system = self._systems()
+        if convention is None:
+            convention = list(system[domain])[0]
+        system = system[domain][convention]
+
+        # get the units
+        if unit is not None:
+            units = [units for units in system['units']
+                     if unit == units[0][0:3]]
+            units = units[0]
+        else:
+            units = system['units'][0]
+            unit = units[0][0:3]
+
+        # add class internal keys
+        system['domain'] = domain
+        system['convention'] = convention
+        system['unit'] = unit
+        system['units'] = units
+
+        return system
+
     def _set_points(self, x, y, z):
         """
         Check points and convert to matrix.
@@ -1617,6 +1664,14 @@ class Coordinates():
         x = np.asarray(x, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
         z = np.asarray(z, dtype=np.float64)
+
+        # transpose
+        if len(x.shape) == 2 and (x.shape[0] == 1 or x.shape[1] == 1):
+            x = x.flatten()
+        if len(y.shape) == 2 and (y.shape[0] == 1 or y.shape[1] == 1):
+            y = y.flatten()
+        if len(z.shape) == 2 and (z.shape[0] == 1 or z.shape[1] == 1):
+            z = z.flatten()
 
         # shapes of non scalar entries
         shapes = [p.shape for p in [x, y, z] if p.shape != ()]
@@ -1772,9 +1827,12 @@ class Coordinates():
         eq_weights = self._weights == other._weights
         eq_sh_order = self._sh_order == other._sh_order
         eq_comment = self._comment == other._comment
+        eq_system = self._system == other._system
         if self._x.shape == ():
-            return eq_x & eq_y & eq_z & eq_weights & eq_comment & eq_sh_order
-        return all(eq_x & eq_y & eq_z) & eq_weights & eq_comment & eq_sh_order
+            return eq_x & eq_y & eq_z & eq_weights & eq_comment \
+                & eq_sh_order & eq_system
+        return all(eq_x & eq_y & eq_z) & eq_weights & eq_comment \
+            & eq_sh_order & eq_system
 
     def _check_empty(self):
         """check if object is empty"""

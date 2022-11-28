@@ -178,7 +178,7 @@ def test__check_time_unit():
         ('coords.set_cyl(1,1,1)'),
         ('coords.get_sph()'),
         ('coords.set_sph(1,1,1)'),
-        ('Coordinates(0, 0, 0, sh_order=1)'),
+        ('pf.Coordinates(0, 0, 0, sh_order=1)'),
     ])
 def test_get_nearest_deprecations_0_6_0(statement):
     coords = pf.Coordinates(np.arange(6), 0, 0)
