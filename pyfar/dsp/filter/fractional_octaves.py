@@ -46,8 +46,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         The number of bands an octave is divided into. Eg., ``1`` refers to
         octave bands and ``3`` to third octave bands. The default is ``1``.
     sampling_rate : int, optional
-        The sampling rate in Hz. Only required if signal is ``None``. The
-        default is ``None``.
+        The sampling rate in Hz. The default is ``44100``.
     freq_range : array, tuple, optional
         The lower and upper frequency limits. The default is
         ``frequency_range=(20, 20e3)``.
