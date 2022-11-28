@@ -81,6 +81,10 @@ def fractional_octave_bands(
         >>> plt.tight_layout()
 
     """
+    warnings.warn((
+            "This function will be deprecated in pyfar 0.6.0. "
+            "Use the 'FractionalOctaveBands' class instead."),
+            PendingDeprecationWarning)
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -138,6 +142,11 @@ def _coefficients_fractional_octave_bands(
     increased numeric accuracy and stability.
     """
 
+    warnings.warn((
+            "This function will be deprecated in pyfar 0.6.0. "
+            "Coefficients are obtained from the 'FractionalOctaveBands' "
+            "private method '_get_coefficients()'."),
+            PendingDeprecationWarning)
     f_crit = fractional_octave_frequencies(
         num_fractions, freq_range, return_cutoff=True)[2]
 
@@ -163,12 +172,12 @@ def _coefficients_fractional_octave_bands(
                 bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
             Wn = Wn[0]
             btype = 'highpass'
-            sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
+            sos_hp = sgn.butter(order, Wn, btype=btype, output='sos')
             sos_coeff = pf.classes.filter._extend_sos_coefficients(
                 sos_hp, order)
         else:
             btype = 'bandpass'
-            sos_coeff = spsignal.butter(
+            sos_coeff = sgn.butter(
                 order, Wn, btype=btype, output='sos')
         sos[idx, :, :] = sos_coeff
     return sos
@@ -268,6 +277,10 @@ def reconstructing_fractional_octave_bands(
         >>> plt.tight_layout()
     """
 
+    warnings.warn((
+            "This function will be deprecated in pyfar 0.6.0. "
+            "Use the 'ReconstructingFractionalOctaveBands' class instead."),
+            PendingDeprecationWarning)
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -348,7 +361,7 @@ def reconstructing_fractional_octave_bands(
     time = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
 
     # window
-    time *= spsignal.windows.hann(time.shape[-1])
+    time *= sgn.windows.hann(time.shape[-1])
 
     # create filter object
     filt = pf.FilterFIR(time, sampling_rate)
