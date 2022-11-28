@@ -47,7 +47,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         octave bands and ``3`` to third octave bands. The default is ``1``.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
-    freq_range : array, tuple, optional
+    frequency_range : array, tuple, optional
         The lower and upper frequency limits. The default is
         ``frequency_range=(20, 20e3)``.
     order : int, optional
@@ -65,7 +65,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         >>> # generate the data
         >>> x = (pf.signals.impulse(2**17))
         >>> FOFB = pf.dsp.filter.FractionalOctaveBands(num_fractions=1,
-        ...     freq_range=(20, 8e3))
+        ...     frequency_range=(20, 8e3))
         >>> y = FOFB.process(x)
         >>> # frequency domain plot
         >>> y_sum = pf.FrequencyData(np.sum(np.abs(y.freq)**2, 0),
@@ -82,24 +82,24 @@ class FractionalOctaveBands(pft.FilterSOS):
             self,
             num_fractions=1,
             sampling_rate=44100,
-            freq_range=(20.0, 20e3),
+            frequency_range=(20.0, 20e3),
             order=14):
 
         # check input
         self._num_fractions = num_fractions
         self._sampling_rate = sampling_rate
-        self._freq_range = freq_range
+        self._frequency_range = frequency_range
         self._order = order
 
         self._norm_frequencies,\
             self._exact_frequencies,\
             self._cutoff_frequencies = fractional_octave_frequencies(
-                self._num_fractions, self._freq_range, True)
+                self._num_fractions, self._frequency_range, True)
 
         coefficients = self._get_coefficients(
                 sampling_rate=self._sampling_rate,
                 num_fractions=self._num_fractions,
-                freq_range=self._freq_range,
+                frequency_range=self._frequency_range,
                 order=self._order)
 
         # initialize superclass
@@ -112,8 +112,8 @@ class FractionalOctaveBands(pft.FilterSOS):
         """Nice string representation of class instances"""
         return (f"Energy-preserving fractional "
                 f"octave filter bank with {self.n_bands} "
-                f"bands between {self.freq_range[0]} and "
-                f"{self.freq_range[1]} Hz with "
+                f"bands between {self.frequency_range[0]} and "
+                f"{self.frequency_range[1]} Hz with "
                 f"{self.sampling_rate} Hz sampling rate and "
                 f"{self.num_fractions} per octave.")
 
@@ -127,9 +127,9 @@ class FractionalOctaveBands(pft.FilterSOS):
         return self._num_fractions
 
     @property
-    def freq_range(self):
+    def frequency_range(self):
         """Get the frequency range of the filter bank in Hz"""
-        return self._freq_range
+        return self._frequency_range
 
     @property
     def order(self):
@@ -168,7 +168,7 @@ class FractionalOctaveBands(pft.FilterSOS):
             self,
             sampling_rate,
             num_fractions,
-            freq_range,
+            frequency_range,
             order):
         """Calculate the second order section filter
         coefficients of a fractional octave band filter bank.
@@ -180,7 +180,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         num_fractions : int
             The number of bands an octave is divided into. Eg.,
             1 refers to octave bands and 3 to third octave bands.
-        freq_range : array, tuple
+        frequency_range : array, tuple
             The lower and upper frequency limits.
         order : integer, optional
             Order of the Butterworth filter.
@@ -198,7 +198,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         """
 
         f_crit = fractional_octave_frequencies(
-            num_fractions, freq_range, return_cutoff=True)[2]
+            num_fractions, frequency_range, return_cutoff=True)[2]
 
         freqs_upper = f_crit[1]
         freqs_lower = f_crit[0]
@@ -241,7 +241,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         # get dictionary representation
         obj_dict = self.copy().__dict__
         # define required data
-        keep = ["_num_fractions", "_freq_range", "_order",
+        keep = ["_num_fractions", "_frequency_range", "_order",
                 "_sampling_rate"]
         # check if all required data is contained
         for k in keep:
@@ -257,7 +257,7 @@ class FractionalOctaveBands(pft.FilterSOS):
     @classmethod
     def _decode(cls, obj_dict):
         # initialize new class instance
-        obj = cls(obj_dict["_num_fractions"], obj_dict["_freq_range"],
+        obj = cls(obj_dict["_num_fractions"], obj_dict["_frequency_range"],
                   obj_dict["_order"], obj_dict["_sampling_rate"])
         # set internal parameters
         obj.__dict__.update(obj_dict)
@@ -296,7 +296,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     num_fractions : int, optional
         Octave fraction, e.g., ``3`` for third-octave bands. The default is
         ``1``.
-    freq_range : tuple, optional
+    frequency_range : tuple, optional
         Frequency range for fractional octave in Hz. The default is
         ``(63, 16000)``
     overlap : float
@@ -349,7 +349,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     def __init__(
             self,
             num_fractions=1,
-            freq_range=(63, 16000),
+            frequency_range=(63, 16000),
             overlap=1,
             slope=0,
             n_samples=2**12,
@@ -363,7 +363,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
             raise ValueError("slope must be a positive integer.")
 
         self._num_fractions = num_fractions
-        self._freq_range = freq_range
+        self._frequency_range = frequency_range
         self._overlap = overlap
         self._slope = slope
         self._n_samples = n_samples
@@ -372,11 +372,11 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         self._norm_frequencies,\
             self._exact_frequencies,\
             self._cutoff_frequencies = fractional_octave_frequencies(
-                self._num_fractions, self._freq_range, True)
+                self._num_fractions, self._frequency_range, True)
 
         self._coefficients = self._get_coefficients(
                 num_fractions=self._num_fractions,
-                freq_range=self._freq_range,
+                frequency_range=self._frequency_range,
                 overlap=self._overlap,
                 slope=self._slope,
                 n_samples=self._n_samples,
@@ -388,15 +388,15 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
             "Reconstructing linear phase fractional "
             "octave filter bank."
             f"(num_fractions={self._num_fractions}, "
-            f"frequency_range={self._freq_range}, "
+            f"frequency_range={self._frequency_range}, "
             f"overlap={self._overlap}, slope={self._slope})")
 
     def __repr__(self):
         """Nice string representation of class instances"""
         return (f"Amplitude-preserving fractional "
                 f"octave filter bank with {self.n_bands} "
-                f"bands between {self.freq_range[0]} and "
-                f"{self.freq_range[1]} Hz with "
+                f"bands between {self.frequency_range[0]} and "
+                f"{self.frequency_range[1]} Hz with "
                 f"{self.sampling_rate} Hz sampling rate and "
                 f"{self.num_fractions} per octave.")
 
@@ -410,9 +410,9 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         return self._num_fractions
 
     @property
-    def freq_range(self):
+    def frequency_range(self):
         """Get the frequency range of the filter bank in Hz"""
-        return self._freq_range
+        return self._frequency_range
 
     @property
     def norm_frequencies(self):
@@ -460,7 +460,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     def _get_coefficients(
             self,
             num_fractions,
-            freq_range,
+            frequency_range,
             overlap,
             slope,
             n_samples,
@@ -473,7 +473,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         ----------
         num_fractions : int
             Octave fraction, e.g., ``3`` for third-octave bands.
-        freq_range : tuple
+        frequency_range : tuple
             Frequency range for fractional octave in Hz.
         overlap : float
             Band overlap of the filter slopes between 0 and 1. Smaller values
@@ -500,7 +500,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
 
         # fractional octave frequencies
         _, f_m, f_cut_off = fractional_octave_frequencies(
-            num_fractions, freq_range, return_cutoff=True)
+            num_fractions, frequency_range, return_cutoff=True)
 
         # discard fractional octaves, if the center frequency exceeds
         # half the sampling rate
@@ -577,7 +577,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         # get dictionary representation
         obj_dict = self.copy().__dict__
         # define required data
-        keep = ["_num_fractions", "_freq_range", "_sampling_rate",
+        keep = ["_num_fractions", "_frequency_range", "_sampling_rate",
                 "_overlap", "_slope", "_n_samples"]
         # check if all required data is contained
         for k in keep:
@@ -593,7 +593,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     @classmethod
     def _decode(cls, obj_dict):
         # initialize new class instance
-        obj = cls(obj_dict["_num_fractions"], obj_dict["_freq_range"],
+        obj = cls(obj_dict["_num_fractions"], obj_dict["_frequency_range"],
                   obj_dict["_sampling_rate"], obj_dict["_overlap"],
                   obj_dict["_slope"], obj_dict["_n_samples"])
         # set internal parameters
@@ -603,7 +603,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
 
 
 def fractional_octave_frequencies(
-        num_fractions=1, freq_range=(20, 20e3), return_cutoff=False):
+        num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
     """Return the octave center frequencies according to the IEC 61260:1:2014
     standard.
 
@@ -616,9 +616,9 @@ def fractional_octave_frequencies(
     num_fractions : int, optional
         The number of bands an octave is divided into. Eg., ``1`` refers to
         octave bands and ``3`` to third octave bands. The default is ``1``.
-    freq_range : array, tuple
+    frequency_range : array, tuple
         The lower and upper frequency limits, the default is
-        ``freq_range=(20, 20e3)``.
+        ``frequency_range=(20, 20e3)``.
     return_cutoff : bool, optional
         Specifies if the cutoff frequencies aka ``fu`` and ``fo`` should be
         returned as well.
@@ -638,7 +638,7 @@ def fractional_octave_frequencies(
     """
     nominal = None
 
-    f_lims = np.asarray(freq_range)
+    f_lims = np.asarray(frequency_range)
     if f_lims.size != 2:
         raise ValueError(
             "You need to specify a lower and upper limit frequency.")
@@ -669,14 +669,14 @@ def fractional_octave_frequencies(
 
 
 def __exact_center_frequencies_fractional_octaves(
-        num_fractions, freq_range):
+        num_fractions, frequency_range):
     """Calculate the center frequencies of arbitrary fractional octave bands.
 
     Parameters
     ----------
     num_fractions : int
         The number of fractions
-    freq_range
+    frequency_range
         The upper and lower frequency limits
 
     Returns
@@ -687,8 +687,8 @@ def __exact_center_frequencies_fractional_octaves(
 
     """
     ref_freq = 1e3
-    Nmax = np.around(num_fractions*(np.log2(freq_range[1]/ref_freq)))
-    Nmin = np.around(num_fractions*(np.log2(ref_freq/freq_range[0])))
+    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
+    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
 
     indices = np.arange(-Nmin, Nmax+1)
     exact = ref_freq * 2**(indices / num_fractions)
