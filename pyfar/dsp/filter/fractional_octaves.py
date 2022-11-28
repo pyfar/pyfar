@@ -110,11 +110,12 @@ class FractionalOctaveBands(pft.FilterSOS):
 
     def __repr__(self):
         """Nice string representation of class instances"""
-        return (f"Energy-preserving {self.num_fractions}."
-                f"-octave filter bank with {self.n_bands} "
+        return (f"Energy-preserving fractional "
+                f"octave filter bank with {self.n_bands} "
                 f"bands between {self.freq_range[0]} and "
                 f"{self.freq_range[1]} Hz with "
-                f"{self.sampling_rate} Hz sampling rate")
+                f"{self.sampling_rate} Hz sampling rate and "
+                f"{self.num_fractions} per octave.")
 
     def __eq__(self, other):
         """Check for equality of two objects."""
@@ -392,11 +393,12 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
 
     def __repr__(self):
         """Nice string representation of class instances"""
-        return (f"Amplitude-preserving {self.num_fractions}."
-                f"-octave filter bank with {self.n_bands} "
+        return (f"Amplitude-preserving fractional "
+                f"octave filter bank with {self.n_bands} "
                 f"bands between {self.freq_range[0]} and "
                 f"{self.freq_range[1]} Hz with "
-                f"{self.sampling_rate} Hz sampling rate")
+                f"{self.sampling_rate} Hz sampling rate and "
+                f"{self.num_fractions} per octave.")
 
     def __eq__(self, other):
         """Check for equality of two objects."""
