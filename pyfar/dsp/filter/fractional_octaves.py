@@ -105,7 +105,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         # initialize superclass
         super().__init__(coefficients, self._sampling_rate)
         self.comment = (
-            "Second order section 1/{num_fractions} fractional octave band"
+            f"Second order section 1/{num_fractions} fractional octave band"
             "filter of order {order}")
 
     def __repr__(self):
