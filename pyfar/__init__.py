@@ -13,7 +13,7 @@ from .classes.audio import (add, subtract, multiply, divide, power,
 from .classes.coordinates import Coordinates
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
-from .classes.warnings import PyfarDeprecationWarning
+
 
 from . import plot
 from . import samplings
@@ -41,5 +41,4 @@ __all__ = [
     'samplings',
     'io',
     'dsp',
-    'signals',
-    'PyfarDeprecationWarning']
+    'signals']

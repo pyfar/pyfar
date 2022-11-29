@@ -1,4 +1,4 @@
-from pyfar import PyfarDeprecationWarning
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import pytest
 import warnings
 
