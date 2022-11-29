@@ -7,7 +7,7 @@ Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
-import deepdiff
+# import deepdiff
 import re
 from copy import deepcopy
 import warnings
@@ -234,7 +234,7 @@ class Coordinates():
             "of .cart"),
                 PendingDeprecationWarning)
 
-        return self.cart
+        return self.cartesian
 
     def set_sph(
             self, angles_1, angles_2, radius,
@@ -374,13 +374,13 @@ class Coordinates():
                 PendingDeprecationWarning)
 
         if convention == 'top_colat':
-            points = self.sph_top_colat
+            points = self.spherical_top_colatitude
         elif convention == 'top_elev':
-            points = self.sph_top_elev
+            points = self.spherical_top_elevation
         elif convention == 'front':
-            points = self.sph_front
+            points = self.spherical_front
         elif convention == 'side':
-            points = self.sph_side
+            points = self.spherical_side
         else:
             raise ValueError(
                 f"Conversion for {convention} is not implemented.")
@@ -541,7 +541,7 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.7.0 in favor "
             "of the new setter such as .cyl"),
                 PendingDeprecationWarning)
-        points = self.cyl
+        points = self.cylindrical
 
         conversion_factor = 1 if unit == 'rad' else 180 / np.pi
         points[..., 0] = points[..., 0] * conversion_factor
@@ -654,7 +654,7 @@ class Coordinates():
         return self._x.size
 
     @property
-    def cart(self):
+    def cartesian(self):
         """Get coordinate points in cartesian coordinate systems.
         ``points[...,0]`` holds the points for the x-coordinate,
         ``points[...,1]`` the points for the y-coordinate, and
@@ -668,15 +668,15 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
 
-    @cart.setter
-    def cart(self, value):
+    @cartesian.setter
+    def cartesian(self, value):
         # set the coordinate system
         self._system = self._make_system('cart', 'right', 'met')
 
         self._set_points(value[..., 0], value[..., 1], value[..., 2])
 
     @property
-    def sph_top_elev(self):
+    def spherical_top_elevation(self):
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         elevation angle, and ``points[...,2]`` the radius."""
@@ -686,8 +686,8 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.elevation, self.radius]), 0, -1))
 
-    @sph_top_elev.setter
-    def sph_top_elev(self, value):
+    @spherical_top_elevation.setter
+    def spherical_top_elevation(self, value):
         # set the coordinate system
         self._system = self._make_system('sph', 'top_elev', 'rad')
 
@@ -695,7 +695,7 @@ class Coordinates():
             value[..., 0], value[..., 1], value[..., 2], convention='top_elev')
 
     @property
-    def sph_top_colat(self):
+    def spherical_top_colatitude(self):
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         colatitude angle, and ``points[...,2]`` the radius."""
@@ -706,8 +706,8 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.colatitude, self.radius]), 0, -1))
 
-    @sph_top_colat.setter
-    def sph_top_colat(self, value):
+    @spherical_top_colatitude.setter
+    def spherical_top_colatitude(self, value):
         # set the coordinate system
         self._system = self._make_system('sph', 'top_colat', 'rad')
 
@@ -716,7 +716,7 @@ class Coordinates():
             convention='top_colat')
 
     @property
-    def sph_side(self):
+    def spherical_side(self):
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the lateral angle in rad, ``points[...,1]``
         polar angle, and ``points[...,2]`` the radius."""
@@ -726,8 +726,8 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.lateral, self.polar, self.radius]), 0, -1))
 
-    @sph_side.setter
-    def sph_side(self, value):
+    @spherical_side.setter
+    def spherical_side(self, value):
         # set the coordinate system
         self._system = self._make_system('sph', 'side', 'rad')
 
@@ -735,7 +735,7 @@ class Coordinates():
             value[..., 0], value[..., 1], value[..., 2], convention='side')
 
     @property
-    def sph_front(self):
+    def spherical_front(self):
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the phi angle in rad, ``points[...,1]``
         theta angle, and ``points[...,2]`` the radius."""
@@ -745,8 +745,8 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.phi, self.theta, self.radius]), 0, -1))
 
-    @sph_front.setter
-    def sph_front(self, value):
+    @spherical_front.setter
+    def spherical_front(self, value):
         # set the coordinate system
         self._system = self._make_system('sph', 'front', 'rad')
 
@@ -754,8 +754,8 @@ class Coordinates():
             value[..., 0], value[..., 1], value[..., 2], convention='front')
 
     @property
-    def cyl(self):
-        """Get coordinate points in cylindircal coordinate systems in rad.
+    def cylindrical(self):
+        """Get coordinate points in cylindrical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         z_coordinate, and ``points[...,2]`` the radius in z-plane."""
 
@@ -765,8 +765,8 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.z, self.radius_z]), 0, -1))
 
-    @cyl.setter
-    def cyl(self, value):
+    @cylindrical.setter
+    def cylindrical(self, value):
 
         # set the coordinate system
         self._system = self._make_system('cyl', 'top', 'rad')
@@ -1840,7 +1840,7 @@ class Coordinates():
         # get KDTree
         kdtree = self._make_kdtree()
 
-        points = coords.cart
+        points = coords.cartesian
 
         # querry nearest neighbors
         points = points.flatten() if coords.csize == 1 else points
@@ -1901,7 +1901,7 @@ class Coordinates():
     def __array__(self):
         """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
         # copy to avoid changing the coordinate system of the original object
-        return self.copy().cart
+        return self.copy().cartesian
 
     def __repr__(self):
         """Get info about Coordinates object."""

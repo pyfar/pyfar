@@ -292,6 +292,7 @@ def test_setter_and_getter_from_cartesian():
                 p_out = systems[domain_out][convention_out][point]
                 # empty object
                 c = Coordinates()
+                c._system
                 # --- set point ---
                 eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
                         '{convention_in}')")
@@ -333,6 +334,7 @@ def test_setter_and_getter_to_cartesian():
                 p_out = systems[domain_out][convention_out][point]
                 # empty object
                 c = Coordinates()
+                c._system
                 # --- set point ---
                 eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
                         '{convention_in}')")
@@ -816,10 +818,10 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
     np.testing.assert_allclose(coords.elevation, elevation, atol=1e-15)
     np.testing.assert_allclose(coords.colatitude, colatitude, atol=1e-15)
     np.testing.assert_allclose(
-        coords.sph_top_elev,
+        coords.spherical_top_elevation,
         np.atleast_2d([azimuth, elevation, 1]), atol=1e-15)
     np.testing.assert_allclose(
-        coords.sph_top_colat,
+        coords.spherical_top_colatitude,
         np.atleast_2d([azimuth, colatitude, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.azimuth = azimuth
@@ -845,7 +847,7 @@ def test_getter_sph_front_from_cart(x, y, z, phi, theta):
     np.testing.assert_allclose(coords.phi, phi, atol=1e-15)
     np.testing.assert_allclose(coords.theta, theta, atol=1e-15)
     np.testing.assert_allclose(
-        coords.sph_front, np.atleast_2d([phi, theta, 1]), atol=1e-15)
+        coords.spherical_front, np.atleast_2d([phi, theta, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.phi = phi
     coords.theta = theta
@@ -869,7 +871,7 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
     np.testing.assert_allclose(coords.lateral, lateral, atol=1e-15)
     np.testing.assert_allclose(coords.polar, polar, atol=1e-15)
     np.testing.assert_allclose(
-        coords.sph_side, np.atleast_2d([lateral, polar, 1]), atol=1e-15)
+        coords.spherical_side, np.atleast_2d([lateral, polar, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.lateral = lateral
     coords.polar = polar
@@ -895,11 +897,12 @@ def test_cart_setter_same_size(x, y, z):
     np.testing.assert_allclose(coords.y, y, atol=1e-15)
     np.testing.assert_allclose(coords.z, z, atol=1e-15)
     if x is np.array:
-        np.testing.assert_allclose(coords.cart.shape[:-1], x.shape, atol=1e-15)
-    np.testing.assert_allclose(coords.cart.shape[-1], 3, atol=1e-15)
-    np.testing.assert_allclose(coords.cart[..., 0], coords.x, atol=1e-15)
-    np.testing.assert_allclose(coords.cart[..., 1], coords.y, atol=1e-15)
-    np.testing.assert_allclose(coords.cart[..., 2], coords.z, atol=1e-15)
+        np.testing.assert_allclose(
+            coords.cartesian.shape[:-1], x.shape, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian.shape[-1], 3, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian[..., 0], coords.x, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian[..., 1], coords.y, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian[..., 2], coords.z, atol=1e-15)
 
 
 @pytest.mark.parametrize(
@@ -913,11 +916,12 @@ def test_cart_setter_different_size(x, y, z):
     np.testing.assert_allclose(coords.y, y, atol=1e-15)
     np.testing.assert_allclose(coords.z, z, atol=1e-15)
     if x is np.array:
-        np.testing.assert_allclose(coords.cart.shape[:-1], x.shape, atol=1e-15)
-    np.testing.assert_allclose(coords.cart.shape[-1], 3, atol=1e-15)
-    np.testing.assert_allclose(coords.cart[..., 0], coords.x, atol=1e-15)
-    np.testing.assert_allclose(coords.cart[..., 1], coords.y, atol=1e-15)
-    np.testing.assert_allclose(coords.cart[..., 2], coords.z, atol=1e-15)
+        np.testing.assert_allclose(
+            coords.cartesian.shape[:-1], x.shape, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian.shape[-1], 3, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian[..., 0], coords.x, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian[..., 1], coords.y, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian[..., 2], coords.z, atol=1e-15)
 
 
 @pytest.mark.parametrize(
@@ -933,8 +937,9 @@ def test_cart_setter_different_size_with_flatten(x, y, z):
     np.testing.assert_allclose(coords.y, np.ones(shape)*y, atol=1e-15)
     np.testing.assert_allclose(coords.z, np.ones(shape)*z, atol=1e-15)
     if x is np.array:
-        np.testing.assert_allclose(coords.cart.shape[:-1], x.shape, atol=1e-15)
-    np.testing.assert_allclose(coords.cart.shape[-1], 3, atol=1e-15)
+        np.testing.assert_allclose(
+            coords.cartesian.shape[:-1], x.shape, atol=1e-15)
+    np.testing.assert_allclose(coords.cartesian.shape[-1], 3, atol=1e-15)
 
 
 @pytest.mark.parametrize(
