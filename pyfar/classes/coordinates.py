@@ -97,26 +97,20 @@ class Coordinates():
         """
 
         # set the coordinate system
-        self._system = self._make_system(domain, convention, unit)
-
-        # Set default convention
-        if domain == 'cart':
-            convention = 'right'
-            unit = 'met'
-        elif domain == 'sph':
-            convention = 'top_colat'
-            unit = 'rad'
-        elif domain == 'cyl':
-            convention = 'top'
-            unit = 'rad'
+        system = self._make_system(domain, convention, unit)
+        self._system = system
 
         # set coordinates according to system
         if domain == 'cart':
             self._set_cart(points_1, points_2, points_3)
         elif domain == 'sph':
-            self._set_sph(points_1, points_2, points_3, convention, unit)
+            self._set_sph(
+                points_1, points_2, points_3,
+                system['convention'], system['unit'])
         elif domain == 'cyl':
-            self._set_cyl(points_1, points_2, points_3, convention, unit)
+            self._set_cyl(
+                points_1, points_2, points_3,
+                system['convention'], system['unit'])
         else:
             raise ValueError(
                 f"Domain for {domain} is not implemented.")
@@ -168,6 +162,10 @@ class Coordinates():
             "of .cart, .x, .y or .z."),
                 PendingDeprecationWarning)
 
+        # set the coordinate system
+        self._system = self._make_system('cart', convention, unit)
+
+        # save coordinates to self
         self._set_cart(x, y, z)
 
     def _set_cart(self, x, y, z, convention='right', unit='met'):
@@ -276,6 +274,12 @@ class Coordinates():
     def _set_sph(
             self, angles_1, angles_2, radius,
             convention='top_colat', unit='rad'):
+
+        # Convert to array
+        angles_1 = np.asarray(angles_1)
+        angles_2 = np.asarray(angles_2)
+        radius = np.asarray(radius)
+
         # convert to radians
         if unit == 'deg':
             angles_1 = angles_1 / 180 * np.pi
@@ -300,6 +304,9 @@ class Coordinates():
             # is not fully implemented.
             raise ValueError(
                 (f"Conversion for {convention} is not implemented."))
+
+        # set the coordinate system
+        self._system = self._make_system('sph', convention, unit)
 
         # save coordinates to self
         self._set_points(x, y, z)
@@ -451,6 +458,12 @@ class Coordinates():
         self._set_cyl(azimuth, z, radius_z, convention)
 
     def _set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
+
+        # Convert to array
+        azimuth = np.asarray(azimuth)
+        z = np.asarray(z)
+        radius_z = np.asarray(radius_z)
+
         # convert to radians
         if unit == 'deg':
             azimuth = azimuth / 180 * np.pi
@@ -466,6 +479,9 @@ class Coordinates():
             # is not fully implemented.
             raise ValueError(
                 (f"Conversion for {convention} is not implemented."))
+
+        # set the coordinate system
+        self._system = self._make_system('cyl', convention, unit)
 
         # save coordinates to self
         self._set_points(x, y, z)
@@ -632,11 +648,17 @@ class Coordinates():
         ``points[...,0]`` holds the points for the x-coordinate,
         ``points[...,1]`` the points for the y-coordinate, and
         ``points[...,2]`` the points for the z-coordinate."""
+        # set the coordinate system
+        self._system = self._make_system('cart', 'right', 'met')
+
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
 
     @cart.setter
     def cart(self, value):
+        # set the coordinate system
+        self._system = self._make_system('cart', 'right', 'met')
+
         self._set_points(value[..., 0], value[..., 1], value[..., 2])
 
     @property
@@ -644,11 +666,17 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         elevation angle, and ``points[...,2]`` the radius."""
+        # set the coordinate system
+        self._system = self._make_system('sph', 'top_elev', 'rad')
+
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.elevation, self.radius]), 0, -1))
 
     @sph_top_elev.setter
     def sph_top_elev(self, value):
+        # set the coordinate system
+        self._system = self._make_system('sph', 'top_elev', 'rad')
+
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2], convention='top_elev')
 
@@ -657,11 +685,18 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         colatitude angle, and ``points[...,2]`` the radius."""
+
+        # set the coordinate system
+        self._system = self._make_system('sph', 'top_colat', 'rad')
+
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.colatitude, self.radius]), 0, -1))
 
     @sph_top_colat.setter
     def sph_top_colat(self, value):
+        # set the coordinate system
+        self._system = self._make_system('sph', 'top_colat', 'rad')
+
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2],
             convention='top_colat')
@@ -671,11 +706,17 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the lateral angle in rad, ``points[...,1]``
         polar angle, and ``points[...,2]`` the radius."""
+        # set the coordinate system
+        self._system = self._make_system('sph', 'side', 'rad')
+
         return np.atleast_2d(np.moveaxis(
             np.array([self.lateral, self.polar, self.radius]), 0, -1))
 
     @sph_side.setter
     def sph_side(self, value):
+        # set the coordinate system
+        self._system = self._make_system('sph', 'side', 'rad')
+
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2], convention='side')
 
@@ -684,11 +725,17 @@ class Coordinates():
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the phi angle in rad, ``points[...,1]``
         theta angle, and ``points[...,2]`` the radius."""
+        # set the coordinate system
+        self._system = self._make_system('sph', 'front', 'rad')
+
         return np.atleast_2d(np.moveaxis(
             np.array([self.phi, self.theta, self.radius]), 0, -1))
 
     @sph_front.setter
     def sph_front(self, value):
+        # set the coordinate system
+        self._system = self._make_system('sph', 'front', 'rad')
+
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2], convention='front')
 
@@ -697,11 +744,19 @@ class Coordinates():
         """Get coordinate points in cylindircal coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         z_coordinate, and ``points[...,2]`` the radius in z-plane."""
+
+        # set the coordinate system
+        self._system = self._make_system('cyl', 'top', 'rad')
+
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.z, self.radius_z]), 0, -1))
 
     @cyl.setter
     def cyl(self, value):
+
+        # set the coordinate system
+        self._system = self._make_system('cyl', 'top', 'rad')
+
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2], convention='front')
 
@@ -1188,18 +1243,19 @@ class Coordinates():
             >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
         """
         # check if the coordinate and unit exist
-        if not hasattr(self, coordinate):
-            raise ValueError((
-                f"'{coordinate}' does not exist."))
-        if unit not in ['deg', 'rad', 'met']:
-            raise ValueError((
-                f"'{unit}' does not exist."))
+        domain, convention, index = self._exist_coordinate(coordinate, unit)
 
-        coords = getattr(self, coordinate)
+        # get type and range of coordinate
+        c_info = self._systems()[domain][convention][coordinate]
 
         # convert input to radians
         value = value / 180 * np.pi if unit == 'deg' else value
         tol = tol / 180 * np.pi if unit == 'deg' else tol
+
+        # check if  value is within the range of coordinate
+        if c_info[0] in ["bound", "cyclic"]:
+            assert c_info[1][0] <= value <= c_info[1][1],\
+                f"'value' is {value} but must be in the range {c_info[1]}."
 
         # get the search range
         rng = [value - tol, value + tol]
@@ -1209,6 +1265,7 @@ class Coordinates():
             rng = [x % (2*np.pi) for x in rng]
 
         # get the mask
+        coords = getattr(self, coordinate)
         if rng[0] <= rng[1]:
             mask = (coords >= rng[0] - atol) & (coords <= rng[1] + atol)
         else:
@@ -1216,7 +1273,6 @@ class Coordinates():
 
         # plot all and returned points
         if show:
-            # warnings.warn("Come on! Do it by yourself.")
             self.show(mask)
 
         index = np.asarray(mask).nonzero()
@@ -1674,7 +1730,7 @@ class Coordinates():
             z = z.flatten()
 
         # shapes of non scalar entries
-        shapes = [p.shape for p in [x, y, z] if p.shape != ()]
+        shapes = [p.shape for p in [x, y, z] if len(p) != 1]
 
         # repeat scalar entries if non-scalars exists
         if len(shapes):

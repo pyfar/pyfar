@@ -939,16 +939,33 @@ def test_cart_setter_different_size_with_flatten(x, y, z):
         (1, 0, 0),
         (-1, 0, 0),
         (np.ones((2, 3, 1)), 10, -1),
-        (np.ones((3, 1)), 7, 3),
-        (np.ones((1, 2)), 5, 1),
         (np.ones((2,)), 2, 1),
         (np.ones((2, 3, 1)), np.zeros((2, 3, 1)), np.ones((2, 3, 1))),
     ])
 def test__array__getter(x, y, z):
     coords = Coordinates(x, y, z)
-    np.testing.assert_allclose(np.array(coords)[..., 0], x, atol=1e-15)
-    np.testing.assert_allclose(np.array(coords)[..., 1], y, atol=1e-15)
-    np.testing.assert_allclose(np.array(coords)[..., 2], z, atol=1e-15)
+    np.testing.assert_allclose(
+        np.array(coords)[..., 0], x, atol=1e-15)
+    np.testing.assert_allclose(
+        np.array(coords)[..., 1], y, atol=1e-15)
+    np.testing.assert_allclose(
+        np.array(coords)[..., 2], z, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    'x, y, z', [
+        (np.ones((3, 1)), 7, 3),
+        (np.ones((1, 2)), 5, 1),
+        (np.ones((1, 1)), 5, 1),
+    ])
+def test__array__getter_with_flatten(x, y, z):
+    coords = Coordinates(x, y, z)
+    np.testing.assert_allclose(
+        np.array(coords)[..., 0], x.flatten(), atol=1e-15)
+    np.testing.assert_allclose(
+        np.array(coords)[..., 1], y, atol=1e-15)
+    np.testing.assert_allclose(
+        np.array(coords)[..., 2], z, atol=1e-15)
 
 
 def test__getitem__():
