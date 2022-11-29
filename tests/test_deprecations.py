@@ -167,3 +167,43 @@ def test__check_time_unit():
             # remove xscale from pyfar 0.6.0!
             create_figure()
             pf.plot._utils._check_time_unit(None)
+
+
+@pytest.mark.parametrize(
+    'statement', [
+        ('coords.get_cart()'),
+        ('coords.sh_order'),
+        ('coords.set_cart(1,1,1)'),
+        ('coords.get_cyl()'),
+        ('coords.set_cyl(1,1,1)'),
+        ('coords.get_sph()'),
+        ('coords.set_sph(1,1,1)'),
+        ('pf.Coordinates(0, 0, 0, sh_order=1)'),
+    ])
+def test_get_nearest_deprecations_0_7_0(statement):
+    coords = pf.Coordinates(np.arange(6), 0, 0)
+    coords.y = 1
+
+    # PendingDeprecationWarning for
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        eval(statement)
+
+    # remove statement from pyfar 0.7.0!
+    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+        with pytest.raises(AttributeError):
+            eval(statement)
+
+
+def test_get_nearest_deprecations_0_7_0_set_sh_order():
+    coords = pf.Coordinates(np.arange(6), 0, 0)
+
+    # sh_order setter
+    with pytest.warns(PendingDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.sh_order = 1
+
+    # remove statement from pyfar 0.7.0!
+    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+        with pytest.raises(AttributeError):
+            coords.sh_order = 1
