@@ -301,8 +301,7 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
     if colorbar == "off":
         # test not plotting a colorbar
         if function == plot.spectrogram:
-            with pytest.warns(UserWarning, match="Using only the first"):
-                function(signal, colorbar=False)
+            function(signal[0], colorbar=False)
         else:
             function(signal, colorbar=False)
     elif colorbar == "axes":
@@ -310,8 +309,7 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
         fig.clear()
         _, ax = plt.subplots(1, 2, num=fig.number)
         if function == plot.spectrogram:
-            with pytest.warns(UserWarning, match="Using only the first"):
-                function(signal, colorbar=False)
+            function(signal[0], colorbar=False)
         else:
             function(signal, colorbar=False)
     save_and_compare(create_baseline, baseline_path, output_path,

@@ -154,8 +154,7 @@ def test_interaction_attached():
         if function[0] in ["context", "custom_subplots"]:
             continue
         if function[1] == pf.plot.spectrogram:
-            with pytest.warns(UserWarning, match="Using only the first"):
-                ax = function[1](signal)
+            ax = function[1](signal[0])
         else:
             ax = function[1](signal)
         # axis is first return parameter if function returns multiple
