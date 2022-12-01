@@ -14,7 +14,6 @@ from .classes.coordinates import Coordinates
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 
-
 from . import plot
 from . import samplings
 from . import io
