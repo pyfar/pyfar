@@ -2183,9 +2183,11 @@ def normalize(signal, reference_method='max', domain='time',
             input_data = np.abs(signal.freq)
     # get values for normalization max or mean
         if reference_method == 'max':
-            reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
+            reference = np.nanmax(input_data[..., limits[0]:limits[1]],
+                                  axis=-1)
         elif reference_method == 'mean':
-            reference = np.mean(input_data[..., limits[0]:limits[1]], axis=-1)
+            reference = np.nanmean(input_data[..., limits[0]:limits[1]],
+                                   axis=-1)
     else:
         raise ValueError(("reference_method must be 'max', 'mean', 'power', "
                          "'energy' or 'rms'."))

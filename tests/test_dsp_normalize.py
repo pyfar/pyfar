@@ -97,6 +97,18 @@ def test_value_return():
     assert values_norm == amplitude / n_samples
 
 
+@pytest.mark.parametrize('data', (
+                        pf.TimeData([1, np.nan, 2], [1, 2, 3]),
+                        pf.FrequencyData([1, np.nan, 2], [1, 2, 3])))
+def test_nan_value_normalization(data):
+    if data.domain == 'time':
+        norm = pf.dsp.normalize(data)
+        npt.assert_equal(norm.time[0], [0.5, np.nan, 1.0])
+    else:
+        norm = pf.dsp.normalize(data, domain='freq')
+        npt.assert_equal(norm.freq[0], [0.5, np.nan, 1.0])
+
+
 def test_error_raises():
     """Test normalize function errors"""
     with raises(TypeError, match=("Input data has to be of type 'Signal', "
