@@ -1027,6 +1027,8 @@ class Coordinates():
                        domain='cart', convention='right', unit='met',
                        show=False):
         """
+        This function will be deprecated in pyfar 0.7.0 in favor
+        of :py:func:`find_nearest_points`.
         Find the k nearest coordinates points.
 
         Parameters
@@ -1078,6 +1080,10 @@ class Coordinates():
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> result = coords.find_nearest_k(1, 0, 0, show=True)
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "of find_nearest_points."),
+                PendingDeprecationWarning)
 
         # check the input
         assert isinstance(k, int) and k > 0 and k <= self.csize,\
@@ -1096,6 +1102,8 @@ class Coordinates():
                           domain='cart', convention='right', unit='met',
                           show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.7.0 in favor
+        of :py:func:`find_nearest_by_distance`.
         Find coordinates within a certain distance in meters to query points.
 
         Parameters
@@ -1151,6 +1159,10 @@ class Coordinates():
             >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "of find_nearest_by_distance."),
+                PendingDeprecationWarning)
 
         # check the input
         assert distance >= 0, "distance must be >= 0"
@@ -1169,6 +1181,8 @@ class Coordinates():
                          domain='sph', convention='top_colat', unit='rad',
                          show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.7.0 in favor
+        of :py:func:`find_nearest_by_distance`.
         Find coordinates within certain angular distance to the query points.
 
         Parameters
@@ -1223,6 +1237,10 @@ class Coordinates():
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "of find_nearest_by_distance."),
+                PendingDeprecationWarning)
 
         # check the input
         assert distance >= 0 and distance <= 180, \
@@ -1316,8 +1334,9 @@ class Coordinates():
         .. plot::
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
-            >>> self.show(mask)
+            >>> find = pf.Coordinates(1, 0, 0)
+            >>> result = coords.find_nearest_by_distance(find, 0.5)
+            >>> coords.show(mask)
         """
 
         if measure == 'direct':

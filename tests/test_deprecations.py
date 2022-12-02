@@ -179,9 +179,12 @@ def test__check_time_unit():
         ('coords.get_sph()'),
         ('coords.set_sph(1,1,1)'),
         ('pf.Coordinates(0, 0, 0, sh_order=1)'),
+        ('coords.find_nearest_k(0,0,1,1)'),
+        ('coords.find_nearest_cart(0,0,1,1)'),
+        ('coords.find_nearest_sph(0,0,1,1)'),
     ])
 def test_get_nearest_deprecations_0_7_0(statement):
-    coords = pf.Coordinates(np.arange(6), 0, 0)
+    coords = pf.Coordinates(np.arange(6), 0, 0, 'sph')
     coords.y = 1
 
     # PendingDeprecationWarning for
