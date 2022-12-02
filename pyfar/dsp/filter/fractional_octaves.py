@@ -384,7 +384,7 @@ class FractionalOctaveBands(pft.FilterSOS):
 
     Generate a high order fractional octave filter bank.
     The center frequencies of the filters adhere either
-    to the IEC 61260:1:2014 standard in case of a fraction
+    to the [#]_ standard in case of a fraction
     of either 1 or 3 or are calculated exactly in relation
     to the given frequency range and number of fractions.
 
@@ -447,6 +447,14 @@ class FractionalOctaveBands(pft.FilterSOS):
         ...     "Filter bands and the sum of their squared magnitudes")
         >>> plt.tight_layout()
         >>> plt.show()
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission, International
+           Electrotechnical Commission und Technical Committee 29,
+           'Electroacoustics: Octave-Band and Fractional-Octave-Band
+           Filters.(IEC61260)', Part 1, Part 1, (2014),
+           ISBN: 978-2-8322-1417-6
     """
 
     def __init__(
