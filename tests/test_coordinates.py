@@ -1225,11 +1225,30 @@ def test__repr__dim():
     assert '(2,)' in x
 
 
-def test_find_nearest_points_higher_dim():
-    x = np.linspace(0, 1, 11)
-    coords = Coordinates(x, 0, 1)
-    find_coords = Coordinates([0.5, 0.6], 0, 1)
-    d, i, m = coords.find_nearest_points(find_coords, 1)
-    assert i[0] == 5
-    assert i[1] == 6
-    npt.assert_array_almost_equal(d, 0)
+@pytest.mark.parametrize(
+    'coords', [
+        (Coordinates(np.linspace(0, 1, 11), 0, 5)),
+    ])
+def test_find_nearest_points_distance_1d(coords):
+    for index in range(coords.csize):
+        find = coords[index]
+        d, i, m = coords.find_nearest_points(find, 1)
+        npt.assert_array_almost_equal(d, 0)
+        npt.assert_array_almost_equal(find.cartesian, coords[m].cartesian)
+        npt.assert_array_almost_equal(coords[i].cartesian, find.cartesian)
+
+
+
+@pytest.mark.parametrize(
+    'coords', [
+        (Coordinates(np.arange(9).reshape(3, 3), 0, 1))
+    ])
+def test_find_nearest_points_distance_2d(coords):
+    for i in range(coords.cshape[0]):
+        for j in range(coords.cshape[1]):
+            find = coords[i, j]
+            d, idx, m = coords.find_nearest_points(find, 1)
+            npt.assert_array_almost_equal(d, 0)
+            # assert find == coords[idx]
+            npt.assert_array_almost_equal(find.cartesian, coords[m].cartesian)
+            npt.assert_array_almost_equal(coords[idx].cartesian, find.cartesian)

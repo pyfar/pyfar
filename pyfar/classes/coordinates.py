@@ -231,7 +231,7 @@ class Coordinates():
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.7.0 in favor "
-            "of .cart"),
+            "of .carteasian"),
                 PendingDeprecationWarning)
 
         return self.cartesian
@@ -241,7 +241,7 @@ class Coordinates():
             convention='top_colat', unit='rad'):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of the new setter such as .sph_top_elev
+        of the new setter such as .spherical_elevation
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -277,7 +277,7 @@ class Coordinates():
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.7.0 in favor "
-            "of the new setter such as .sph_top_elev"),
+            "of the new setter such as .spherical_elevation"),
                 PendingDeprecationWarning)
 
         self._set_sph(angles_1, angles_2, radius, convention, unit)
@@ -1336,6 +1336,7 @@ class Coordinates():
         Find frontal points within a distance of 0.5 meters
 
         .. plot::
+
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> find = pf.Coordinates(1, 0, 0)
@@ -1995,6 +1996,8 @@ class Coordinates():
         mask = np.full((self.csize), False)
         mask[index] = True
         mask = mask.reshape(self.cshape)
+
+        index = np.where(mask)
 
         # plot all and returned points
         if show:
