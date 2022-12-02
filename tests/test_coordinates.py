@@ -1225,7 +1225,7 @@ def test__repr__dim():
     assert '(2,)' in x
 
 
-def test_find_nearest_points():
+def test_find_nearest_points_higher_dim():
     x = np.linspace(0, 1, 11)
     coords = Coordinates(x, 0, 1)
     find_coords = Coordinates([0.5, 0.6], 0, 1)
