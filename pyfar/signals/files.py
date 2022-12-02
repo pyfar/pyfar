@@ -15,11 +15,7 @@ Quick listening is, e.g., possible with `sounddevice
 """
 import os
 import numpy as np
-
 import urllib3
-from urllib3.exceptions import InsecureRequestWarning
-import warnings
-
 import pyfar as pf
 
 # path for saving/reading files
@@ -511,15 +507,12 @@ def _load_files(data):
     # download files
     print(f"Loading {data} data. This is only done once.")
 
-    http = urllib3.PoolManager(cert_reqs=False)
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
     url = 'https://pyfar.org/wp-content/uploads/pyfar_files/'
 
     for file in files:
 
-        # Kontrolle ist gut, Vertrauen ist besser
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", InsecureRequestWarning)
-            http_data = http.urlopen('GET', url + file)
+        http_data = http.urlopen('GET', url + file)
 
         # save the data
         if http_data.status == 200:
