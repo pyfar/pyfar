@@ -581,37 +581,37 @@ def test_find_nearest_points():
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
     find = Coordinates(1, 0, 0)
-    i, m = coords.find_nearest_points(find)
+    d, i, m = coords.find_nearest_points(find)
     assert i == 1
     npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
 
     # 1D spherical, nearest point
     find = Coordinates(0, 0, 1, 'sph', 'top_elev', 'deg')
-    i, m = coords.find_nearest_points(find, 1)
+    d, i, m = coords.find_nearest_points(find, 1)
     assert i == 1
     npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
 
     # 1D cartesian, two nearest points
     find = Coordinates(1.2, 0, 0)
-    i, m = coords.find_nearest_points(find, 2)
+    d, i, m = coords.find_nearest_points(find, 2)
     npt.assert_allclose(i, np.array([1, 2]))
     npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
 
     # 1D cartesian query two points
     find = Coordinates([1, 2], 0, 0)
-    i, m = coords.find_nearest_points(find)
+    d, i, m = coords.find_nearest_points(find)
     npt.assert_allclose(i, [1, 2])
     npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
 
     # 2D cartesian, nearest point
     coords = Coordinates(x.reshape(2, 3), 0, 0)
     find = Coordinates(1, 0, 0)
-    i, m = coords.find_nearest_points(find)
+    d, i, m = coords.find_nearest_points(find)
     assert i == 1
     npt.assert_allclose(m, np.array([[0, 1, 0], [0, 0, 0]]))
 
     # test out of range parameters
-    with raises(AssertionError):
+    with raises(AssertionError, match='number of points must be'):
         coords.find_nearest_points(find, -1)
 
 

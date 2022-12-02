@@ -1279,6 +1279,10 @@ class Coordinates():
             mask that contains ``True`` at the positions of the selected points
             and ``False`` otherwise. Mask is of shape ``cshape``.
         """
+        # check the input
+        assert isinstance(number_of_points, int) and number_of_points > 0 and \
+            number_of_points <= self.csize,\
+            "number of points must be an integer > 0 and <= self.csize."
 
         distance, index, mask = self._find_nearest(
             coords, False, value=number_of_points, measure='k')
