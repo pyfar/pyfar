@@ -394,6 +394,8 @@ def _is_pyfar_type(obj):
         'FilterFIR',
         'FilterIIR',
         'FilterSOS',
+        'FractionalOctaveBands',
+        'ReconstructingFractionalOctaveBands',
         'GammatoneBands',
         'SphericalVoronoi',
         'TimeData',
