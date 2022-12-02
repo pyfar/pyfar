@@ -1241,7 +1241,9 @@ def find_impulse_response_delay(impulse_response, N=1):
         # minimum phase warns if the input signal is not symmetric, which is
         # not critical for this application
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)
+            warnings.filterwarnings(
+                "ignore", message="h does not appear to by symmetric",
+                category=RuntimeWarning)
             ir_minphase = sgn.minimum_phase(
                 impulse_response.time[ch], n_fft=4*n_samples)
 
