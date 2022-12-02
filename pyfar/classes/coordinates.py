@@ -1228,21 +1228,115 @@ class Coordinates():
         assert distance >= 0 and distance <= 180, \
             "distance must be >= 0 and <= 180."
 
-        # get radius and check for equality
-        radius = self.radius
-        delta_radius = np.max(radius) - np.min(radius)
-        if delta_radius > 1e-15:
-            raise ValueError(
-                "find_nearest_sph only works if all points have the same \
-                radius. Differences are larger than 1e-15")
-
         # get target point in cartesian coordinates
         coords = Coordinates(
             points_1, points_2, points_3, domain, convention, unit)
 
         # get the points
         distance, index, mask = self._find_nearest(
-            coords, show, distance, 'sph', atol, np.max(radius))
+            coords, show, distance, 'sph', atol)
+
+        return index, mask
+
+    def find_nearest_points(self, coords, number_of_points=1):
+        """
+        Find the closest Coordinate point to given Points.
+        The search for the nearest point is performed using the scipy
+        cKDTree implementation..
+
+        Parameters
+        ----------
+        coords : Coordinates
+            Point to find nearest neighboring Coordinate
+        number_of_points : int, optional
+            Number of points to return. It must be > 0. The default is 1.
+
+        Returns
+        -------
+        distance : ndarray, double
+            Distance between the point and it's closest neighbor
+        index : int
+            Indexes of the closest points.
+        mask : boolean numpy array
+            mask that contains ``True`` at the positions of the selected points
+            and ``False`` otherwise. Mask is of shape ``cshape``.
+        """
+
+        distance, index, mask = self._find_nearest(
+            coords, False, value=number_of_points, measure='k')
+        return distance, index, mask
+
+    def find_nearest_by_distance(self, coords, distance, measure='direct'):
+        """
+        Find coordinates within a certain direct distance in meters for
+        ``measure='direct'`` or angular distance in meter for
+        ``measure='angular'`` to query points.
+
+        Parameters
+        ----------
+        coords : Coordinates
+            Point to find nearest neighboring Coordinate
+        distance : number
+            For ``measure='direct'``, the euclidean distance in meters in
+            which the nearest points are searched. Must be >= 0.
+            For ``measure='angular'``, the great circle distance in degrees in
+            which the nearest points are searched. Must be >= 0 and <= 180.
+        measure : string
+            Defines the measure for the distance calculation. For ``'direct'``
+            the direct distance in meters will be calcualted. For ``'angular'`
+            the angular distance will be used. Defauld is ``'direct'``.
+
+        Returns
+        -------
+        index : numpy array of ints
+            The locations of the neighbors in the getter methods (e.g.,
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
+            Missing neighbors are indicated with ``csize``. Also see Notes
+            below.
+        mask : boolean numpy array
+            mask that contains ``True`` at the positions of the selected points
+            and ``False`` otherwise. Mask is of shape ``cshape``.
+
+        Notes
+        -----
+        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (`csize`, 3) before they are passed to ``cKDTree``. The index that
+        is returned refers to the reshaped coordinate points. To access the
+        points for example use
+
+        >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
+        >>> points_reshaped[index]
+
+        Examples
+        --------
+
+        Find frontal points within a distance of 0.5 meters
+
+        .. plot::
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
+            >>> self.show(mask)
+        """
+
+        if measure == 'direct':
+            # check the input
+            assert distance >= 0, "distance must be >= 0"
+
+            distance, index, mask = self._find_nearest(
+                coords, False, value=distance, measure='cart')
+        elif measure == 'angular':
+            # check the input
+            assert distance >= 0 and distance <= 180, \
+                "distance must be >= 0 and <= 180."
+
+            distance, index, mask = self._find_nearest(
+                coords, False, value=distance, measure='sph')
+        else:
+            raise ValueError(
+                f"measure is '{measure}' and should be 'direct' or "
+                "'angular'.")
 
         return index, mask
 
@@ -1835,7 +1929,7 @@ class Coordinates():
         self._weights = weights
 
     def _find_nearest(
-            self, coords, show, value, measure, atol=1e-15, radius=None):
+            self, coords, show, value, measure, atol=1e-15):
 
         # get KDTree
         kdtree = self._make_kdtree()
@@ -1854,6 +1948,15 @@ class Coordinates():
             index = kdtree.query_ball_point(points, value + atol)
             distance = None
         elif measure == 'sph':
+            # get radius and check for equality
+            radius = self.radius
+            delta_radius = np.max(radius) - np.min(radius)
+            if delta_radius > 1e-15:
+                raise ValueError(
+                    "find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than 1e-15")
+            radius = np.max(radius)
+
             # convert great circle to euclidean distance
             x, y, z = sph2cart([0, value / 180 * np.pi],
                                [np.pi / 2, np.pi / 2],
