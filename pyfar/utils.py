@@ -4,7 +4,7 @@ import numpy as np
 
 def broadcast_cshape(signal, cshape):
     """
-    Broadcast signal to cshape.
+    Broadcast a signal to a certain cshape.
 
     The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal is
     broadcasted following the `numpy broadcasting rules
@@ -20,11 +20,11 @@ def broadcast_cshape(signal, cshape):
     Returns
     -------
     signal : Signal, TimeData, FrequencyData
-        The broadcasted input signal
+        Broadcasted copy of the input signal
     """
 
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
-        raise TypeError("All input data must be pyfar audio objects")
+        raise TypeError("Input data must be pyfar a audio object")
 
     signal = signal.copy()
     signal._data = np.broadcast_to(
@@ -42,17 +42,17 @@ def broadcast_cshapes(signals, cshape=None):
 
     Parameters
     ----------
-    signals : tuple of Signal, TimeData, and FrequencyData objects
-        The signals to be broadcasted.
+    signals : tuple of Signal, TimeData, FrequencyData
+        The signals to be broadcasted in a tuple.
     cshape : tuple, optional
-        The cshape to which the signals are broadcasted. If `chsape` is
+        The cshape to which the signals are broadcasted. If `cshape` is
         ``None`` it is determined from the cshapes of the input signals using
         ``numpy.broadcast_shapes``. The default is ``None``.
 
     Returns
     -------
-    signals : tuple of Signal, TimeData, and FrequencyData objects
-        The broadcasted input signals
+    signals : tuple of Signal, TimeData, FrequencyData
+        The broadcasted input signals in a tuple
     """
 
     for signal in signals:
@@ -66,7 +66,7 @@ def broadcast_cshapes(signals, cshape=None):
 
 def broadcast_cdim(signal, cdim):
     """
-    Broadcast signal to cdim.
+    Broadcast a signal to a certain cdim.
 
     The channel dimension (cdim) is the length of the
     :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal. The signal
@@ -87,7 +87,7 @@ def broadcast_cdim(signal, cdim):
     """
 
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
-        raise TypeError("All input data must be pyfar audio objects")
+        raise TypeError("Input data must be pyfar a pyfar audio object")
     if len(signal.cshape) > cdim:
         raise ValueError(
             "Can not broadcast: Current channel dimensions exceeds cdim")
@@ -109,16 +109,16 @@ def broadcast_cdims(signals, cdim=None):
 
     Parameters
     ----------
-    signals : tuple of Signal, TimeData, and FrequencyData objects
-        The signals to be broadcasted.
+    signals : tuple of Signal, TimeData, FrequencyData
+        The signals to be broadcasted in a tuple.
     cdim : int
         The cdim to which `signal` is broadcasted. If `cdim` is ``None`` the
         signals are broadcasted to the largest `cdim`. The default is ``None``.
 
     Returns
     -------
-    signals : tuple of Signal, TimeData, and FrequencyData objects
-        The broadcasted input signals
+    signals : tuple of Signal, TimeData, FrequencyData
+        The broadcasted input signals in a tuple
     """
 
     for signal in signals:
