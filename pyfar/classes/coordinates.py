@@ -1335,7 +1335,7 @@ class Coordinates():
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> find = pf.Coordinates(1, 0, 0)
-            >>> result = coords.find_nearest_by_distance(find, 0.5)
+            >>> index, mask = coords.find_nearest_by_distance(find, 0.5)
             >>> coords.show(mask)
         """
 
