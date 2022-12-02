@@ -374,9 +374,9 @@ class Coordinates():
                 PendingDeprecationWarning)
 
         if convention == 'top_colat':
-            points = self.spherical_top_colatitude
+            points = self.spherical_colatitude
         elif convention == 'top_elev':
-            points = self.spherical_top_elevation
+            points = self.spherical_elevation
         elif convention == 'front':
             points = self.spherical_front
         elif convention == 'side':
@@ -676,7 +676,7 @@ class Coordinates():
         self._set_points(value[..., 0], value[..., 1], value[..., 2])
 
     @property
-    def spherical_top_elevation(self):
+    def spherical_elevation(self):
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         elevation angle, and ``points[...,2]`` the radius."""
@@ -686,8 +686,8 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.elevation, self.radius]), 0, -1))
 
-    @spherical_top_elevation.setter
-    def spherical_top_elevation(self, value):
+    @spherical_elevation.setter
+    def spherical_elevation(self, value):
         # set the coordinate system
         self._system = self._make_system('sph', 'top_elev', 'rad')
 
@@ -695,7 +695,7 @@ class Coordinates():
             value[..., 0], value[..., 1], value[..., 2], convention='top_elev')
 
     @property
-    def spherical_top_colatitude(self):
+    def spherical_colatitude(self):
         """Get coordinate points in spherical coordinate systems in rad.
         ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
         colatitude angle, and ``points[...,2]`` the radius."""
@@ -706,8 +706,8 @@ class Coordinates():
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.colatitude, self.radius]), 0, -1))
 
-    @spherical_top_colatitude.setter
-    def spherical_top_colatitude(self, value):
+    @spherical_colatitude.setter
+    def spherical_colatitude(self, value):
         # set the coordinate system
         self._system = self._make_system('sph', 'top_colat', 'rad')
 
@@ -763,7 +763,7 @@ class Coordinates():
         self._system = self._make_system('cyl', 'top', 'rad')
 
         return np.atleast_2d(np.moveaxis(
-            np.array([self.azimuth, self.z, self.radius_z]), 0, -1))
+            np.array([self.azimuth, self.z, self.rho]), 0, -1))
 
     @cylindrical.setter
     def cylindrical(self, value):
@@ -808,14 +808,14 @@ class Coordinates():
         self._set_points(self.x, self.y, value)
 
     @property
-    def radius_z(self):
+    def rho(self):
         """The z-axis coordinates for each point in a right handed cartesian
         coordinate system."""
         azimuth, z, radius_z = self._get_cyl()
         return radius_z
 
-    @radius_z.setter
-    def radius_z(self, radius_z):
+    @rho.setter
+    def rho(self, radius_z):
         azimuth, z, _ = self._get_cyl()
         self._set_cyl(azimuth, z, radius_z)
 

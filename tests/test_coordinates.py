@@ -430,7 +430,7 @@ def test_assertion_for_getter():
     with pytest.raises(ValueError, match="Object is empty"):
         coords.radius
     with pytest.raises(ValueError, match="Object is empty"):
-        coords.radius_z
+        coords.rho
     with pytest.raises(ValueError, match="Object is empty"):
         coords.phi
     with pytest.raises(ValueError, match="Object is empty"):
@@ -798,7 +798,7 @@ def test___eq___copy():
 def test_getter_radii_from_cart(x, y, z, radius, radius_z):
     coords = Coordinates(x, y, z)
     np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
-    np.testing.assert_allclose(coords.radius_z, radius_z, atol=1e-15)
+    np.testing.assert_allclose(coords.rho, radius_z, atol=1e-15)
     np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
 
 
@@ -818,10 +818,10 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
     np.testing.assert_allclose(coords.elevation, elevation, atol=1e-15)
     np.testing.assert_allclose(coords.colatitude, colatitude, atol=1e-15)
     np.testing.assert_allclose(
-        coords.spherical_top_elevation,
+        coords.spherical_elevation,
         np.atleast_2d([azimuth, elevation, 1]), atol=1e-15)
     np.testing.assert_allclose(
-        coords.spherical_top_colatitude,
+        coords.spherical_colatitude,
         np.atleast_2d([azimuth, colatitude, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
     coords.azimuth = azimuth
@@ -1110,7 +1110,7 @@ def test_angle_limits_cyclic(coordinate, min, max):
         ('elevation', -np.pi/2, np.pi/2),
         ('lateral', -np.pi/2, np.pi/2),
         ('radius', 0, np.inf),
-        ('radius_z', 0, np.inf),
+        ('rho', 0, np.inf),
     ])
 def test_angle_limits(coordinate, min, max):
     """Test different queries for find slice."""
