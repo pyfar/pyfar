@@ -1066,7 +1066,7 @@ def _sph_t_design_load_data(degrees='all'):
 
         # load the data
         filename = "sf%03d.%05d" % (degree, n_points)
-        url = "http://web.maths.unsw.edu.au/~rsw/Sphere/Points/SF/"\
+        url = "https://web.maths.unsw.edu.au/~rsw/Sphere/Points/SF/"\
               "SF29-Nov-2012/"
         fileurl = url + filename
 
