@@ -19,7 +19,7 @@ def test_broadcast_cshape_assertions():
     """Test assertions"""
 
     # invalid input type
-    with pytest.raises(TypeError, match="All input data must be pyfar"):
+    with pytest.raises(TypeError, match="Input data must be a pyfar audio"):
         pf.utils.broadcast_cshape([1, 2, 3], (1, ))
 
 
@@ -66,7 +66,7 @@ def test_broadcast_cdim_assertions():
     """Test assertions"""
 
     # invalid input type
-    with pytest.raises(TypeError, match="All input data must be pyfar"):
+    with pytest.raises(TypeError, match="Input data must be a pyfar audio"):
         pf.utils.broadcast_cdim([1, 2, 3], 2)
 
     # invalid cdim

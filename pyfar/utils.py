@@ -24,7 +24,7 @@ def broadcast_cshape(signal, cshape):
     """
 
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
-        raise TypeError("Input data must be pyfar a audio object")
+        raise TypeError("Input data must be a pyfar audio object")
 
     signal = signal.copy()
     signal._data = np.broadcast_to(
@@ -87,7 +87,7 @@ def broadcast_cdim(signal, cdim):
     """
 
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
-        raise TypeError("Input data must be pyfar a pyfar audio object")
+        raise TypeError("Input data must be a pyfar audio object")
     if len(signal.cshape) > cdim:
         raise ValueError(
             "Can not broadcast: Current channel dimensions exceeds cdim")
