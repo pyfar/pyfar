@@ -1050,7 +1050,7 @@ def _sph_t_design_load_data(degrees='all'):
         raise ValueError("degrees must an int, list, or string.")
 
     print("Loading t-design sampling points from \
-        https://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html. \
+        http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html. \
         This might take a while but is only done once.")
 
     http = urllib3.PoolManager(cert_reqs=False)
