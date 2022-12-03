@@ -1053,7 +1053,7 @@ def _sph_t_design_load_data(degrees='all'):
         https://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html. \
         This might take a while but is only done once.")
 
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
+    http = urllib3.PoolManager(cert_reqs=False)
     prefix = 'samplings_t_design_'
 
     n_points_exceptions = {3: 8, 5: 18, 7: 32, 9: 50, 11: 72, 13: 98, 15: 128}
@@ -1070,7 +1070,10 @@ def _sph_t_design_load_data(degrees='all'):
               "SF29-Nov-2012/"
         fileurl = url + filename
 
-        http_data = http.urlopen('GET', fileurl)
+        # Kontrolle ist gut, Vertrauen ist besser
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", InsecureRequestWarning)
+            http_data = http.urlopen('GET', fileurl)
 
         # save the data
         if http_data.status == 200:
