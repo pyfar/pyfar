@@ -575,6 +575,46 @@ def test_find_nearest_k():
     plt.close("all")
 
 
+def test_find_nearest_points():
+    """Test returns of find_nearest_k"""
+    # 1D cartesian, nearest point
+    x = np.arange(6)
+    coords = Coordinates(x, 0, 0)
+    find = Coordinates(1, 0, 0)
+    d, i, m = coords.find_nearest_points(find)
+    assert i == 1
+    npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
+
+    # 1D spherical, nearest point
+    find = Coordinates(0, 0, 1, 'sph', 'top_elev', 'deg')
+    d, i, m = coords.find_nearest_points(find, 1)
+    assert i == 1
+    npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
+
+    # 1D cartesian, two nearest points
+    find = Coordinates(1.2, 0, 0)
+    d, i, m = coords.find_nearest_points(find, 2)
+    npt.assert_allclose(i, np.array([1, 2]))
+    npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
+
+    # 1D cartesian query two points
+    find = Coordinates([1, 2], 0, 0)
+    d, i, m = coords.find_nearest_points(find)
+    npt.assert_allclose(i, [1, 2])
+    npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
+
+    # 2D cartesian, nearest point
+    coords = Coordinates(x.reshape(2, 3), 0, 0)
+    find = Coordinates(1, 0, 0)
+    d, i, m = coords.find_nearest_points(find)
+    assert i == 1
+    npt.assert_allclose(m, np.array([[0, 1, 0], [0, 0, 0]]))
+
+    # test out of range parameters
+    with raises(AssertionError, match='number of points must be'):
+        coords.find_nearest_points(find, -1)
+
+
 def test_find_nearest_cart():
     """Tests returns of find_nearest_cart."""
     # test only 1D case since most of the code from self.find_nearest_k is used
@@ -592,6 +632,26 @@ def test_find_nearest_cart():
     # test out of range parameters
     with raises(AssertionError):
         coords.find_nearest_cart(1, 0, 0, -1)
+
+
+def test_find_nearest_by_distance_direct():
+    """Tests returns of find_nearest_cart."""
+    # test only 1D case since most of the code from self.find_nearest_k is used
+    x = np.arange(6)
+    coords = Coordinates(x, 0, 0)
+    find = Coordinates(2.5, 0, 0)
+    i, m = coords.find_nearest_by_distance(find, 1.5)
+    npt.assert_allclose(i, np.array([1, 2, 3, 4]))
+    npt.assert_allclose(m, np.array([0, 1, 1, 1, 1, 0]))
+
+    # test search with empty results
+    i, m = coords.find_nearest_by_distance(find, .1)
+    assert len(i) == 0
+    npt.assert_allclose(m, np.array([0, 0, 0, 0, 0, 0]))
+
+    # test out of range parameters
+    with raises(AssertionError):
+        coords.find_nearest_by_distance(find, -1)
 
 
 def test_find_nearest_sph():
@@ -618,6 +678,40 @@ def test_find_nearest_sph():
     coords = Coordinates([1, 2], 0, 0)
     with raises(ValueError, match="find_nearest_sph only works if"):
         coords.find_nearest_sph(0, 0, 1, 1)
+
+
+def test_find_nearest_by_distance_angular():
+    """Tests returns of find_nearest_sph."""
+    # test only 1D case since most of the code from self.find_nearest_k is used
+    az = np.linspace(0, 40, 5)
+    coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
+    find = Coordinates(25, 0, 1, 'sph', 'top_elev', 'deg')
+    i, m = coords.find_nearest_by_distance(find, 5, 'angular')
+    npt.assert_allclose(i, np.array([2, 3]))
+    npt.assert_allclose(m, np.array([0, 0, 1, 1, 0]))
+
+    # test search with empty results
+    i, m = coords.find_nearest_sph(25, 0, 1, 1, 'sph', 'top_elev', 'deg')
+    i, m = coords.find_nearest_by_distance(find, 1, 'angular')
+    assert len(i) == 0
+    npt.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
+
+    # test out of range parameters
+    with raises(AssertionError):
+        find = Coordinates(1, 0, 0)
+        coords.find_nearest_by_distance(find, -1, 'angular')
+        # coords.find_nearest_sph(1, 0, 0, -1)
+    with raises(AssertionError):
+        find = Coordinates(1, 0, 0)
+        coords.find_nearest_by_distance(find, 181, 'angular')
+        # coords.find_nearest_sph(1, 0, 0, 181)
+
+    # test assertion for multiple radii
+    coords = Coordinates([1, 2], 0, 0)
+    with raises(ValueError, match="find_nearest_sph only works if"):
+        find = Coordinates(0, 0, 1)
+        coords.find_nearest_by_distance(find, 1, 'angular')
+        # coords.find_nearest_sph(0, 0, 1, 1)
 
 
 def test_find_slice():
@@ -1151,7 +1245,6 @@ def test__repr__dim():
 @pytest.mark.parametrize(
     'coords', [
         (Coordinates(np.linspace(0, 1, 11), 0, 5)),
-        (Coordinates(np.arange(10), 0, 5)),
     ])
 def test_find_nearest_points_distance_1d(coords):
     for index in range(coords.csize):
@@ -1162,10 +1255,10 @@ def test_find_nearest_points_distance_1d(coords):
         npt.assert_array_almost_equal(coords[i].cartesian, find.cartesian)
 
 
+
 @pytest.mark.parametrize(
     'coords', [
-        (Coordinates(np.arange(9).reshape(3, 3), 0, 1)),
-        (Coordinates(np.arange(8).reshape(2, 4), 5, 1))
+        (Coordinates(np.arange(9).reshape(3, 3), 0, 1))
     ])
 def test_find_nearest_points_distance_2d(coords):
     for i in range(coords.cshape[0]):
@@ -1175,132 +1268,4 @@ def test_find_nearest_points_distance_2d(coords):
             npt.assert_array_almost_equal(d, 0)
             # assert find == coords[idx]
             npt.assert_array_almost_equal(find.cartesian, coords[m].cartesian)
-            npt.assert_array_almost_equal(find.cartesian, coords[idx].cartesian)
-
-
-def test_find_nearest_by_distance_angular():
-    """Tests returns of find_nearest_sph."""
-    # test only 1D case since most of the code from self.find_nearest_k is used
-    az = np.linspace(0, 40, 5)
-    coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
-    find = Coordinates(25, 0, 1, 'sph', 'top_elev', 'deg')
-    i, m = coords.find_nearest_by_distance(find, 5, 'angular')
-    npt.assert_allclose(i, np.array([[2, 3]]))
-    npt.assert_allclose(m, np.array([0, 0, 1, 1, 0]))
-
-    # test search with empty results
-    i, m = coords.find_nearest_by_distance(find, 1, 'angular')
-    assert len(i) is 1
-    assert not i[0]
-    npt.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
-
-
-def test_find_nearest_by_distance_angular_error():
-    az = np.linspace(0, 40, 5)
-    coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
-    # test out of range parameters
-    with raises(AssertionError):
-        find = Coordinates(1, 0, 0)
-        coords.find_nearest_by_distance(find, -1, 'angular')
-        # coords.find_nearest_sph(1, 0, 0, -1)
-    with raises(AssertionError):
-        find = Coordinates(1, 0, 0)
-        coords.find_nearest_by_distance(find, 181, 'angular')
-        # coords.find_nearest_sph(1, 0, 0, 181)
-
-    # test assertion for multiple radii
-    coords = Coordinates([1, 2], 0, 0)
-    with raises(ValueError, match="find_nearest_sph only works if"):
-        find = Coordinates(0, 0, 1)
-        coords.find_nearest_by_distance(find, 1, 'angular')
-        # coords.find_nearest_sph(0, 0, 1, 1)
-
-
-def test_find_nearest_by_distance_direct():
-    """Tests returns of find_nearest_cart."""
-    # test only 1D case since most of the code from self.find_nearest_k is used
-    x = np.arange(6)
-    coords = Coordinates(x, 0, 0)
-    find = Coordinates(2.5, 0, 0)
-    i, m = coords.find_nearest_by_distance(find, 1.5)
-    npt.assert_allclose(i, np.array([[1, 2, 3, 4]]))
-    npt.assert_allclose(m, np.array([0, 1, 1, 1, 1, 0]))
-
-    # test search with empty results
-    i, m = coords.find_nearest_by_distance(find, .1)
-    assert len(i) is 1
-    assert not i[0]
-    npt.assert_allclose(m, np.array([0, 0, 0, 0, 0, 0]))
-
-
-def test_find_nearest_by_distance_direct_error():
-    x = np.arange(6)
-    coords = Coordinates(x, 0, 0)
-    find = Coordinates(2.5, 0, 0)
-    # test out of range parameters
-    with raises(AssertionError):
-        coords.find_nearest_by_distance(find, -1)
-
-
-def test_find_nearest_points():
-    """Test returns of find_nearest_k"""
-    x = np.arange(6)
-    coords = Coordinates(x, 0, 0)
-    find = Coordinates(1, 0, 0)
-    # 1D cartesian, nearest point
-    d, i, m = coords.find_nearest_points(find)
-    assert i[0] == 1
-    npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
-
-    # 1D spherical, nearest point
-    find = Coordinates(0, 0, 1, 'sph', 'top_elev', 'deg')
-    d, i, m = coords.find_nearest_points(find, 1)
-    assert i[0] == 1
-    npt.assert_allclose(m, np.array([0, 1, 0, 0, 0, 0]))
-
-
-def test_find_nearest_2_points():
-    """Test returns of find_nearest_k"""
-    x = np.arange(6)
-    coords = Coordinates(x, 0, 0)
-    find = Coordinates(1, 0, 0)
-    # 1D cartesian, two nearest points
-    find = Coordinates(1.2, 0, 0)
-    d, i, m = coords.find_nearest_points(find, 2)
-    npt.assert_allclose(i, np.array([[1, 2]]))
-    npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
-
-
-def test_find_nearest_points_2():
-    """Test returns of find_nearest_k"""
-    x = np.arange(6)
-    coords = Coordinates(x, 0, 0)
-    find = Coordinates(1, 0, 0)
-    # 1D cartesian query two points
-    find = Coordinates([1, 2], 0, 0)
-    d, i, m = coords.find_nearest_points(find)
-    npt.assert_allclose(i, [[1, 2]])
-    npt.assert_allclose(m, np.array([0, 1, 1, 0, 0, 0]))
-
-
-def test_find_nearest_points_2d():
-    """Test returns of find_nearest_k"""
-    x = np.arange(6)
-    # 2D cartesian, nearest point
-    coords = Coordinates(x.reshape(2, 3), 0, 0)
-    find = Coordinates(1, 0, 0)
-    d, i, m = coords.find_nearest_points(find)
-    assert i[0] == 0
-    assert i[1] == 1
-    npt.assert_allclose(m, np.array([[0, 1, 0], [0, 0, 0]]))
-    npt.assert_almost_equal(find.cartesian, coords[i].cartesian)
-    npt.assert_almost_equal(find.cartesian, coords[m].cartesian)
-
-
-def test_find_nearest_points_errors():
-    x = np.arange(6)
-    coords = Coordinates(x, 0, 0)
-    find = Coordinates(1, 0, 0)
-    # test out of range parameters
-    with raises(AssertionError, match='number of points must be'):
-        coords.find_nearest_points(find, -1)
+            npt.assert_array_almost_equal(coords[idx].cartesian, find.cartesian)
