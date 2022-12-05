@@ -1286,6 +1286,8 @@ class Coordinates():
 
         distance, index, mask = self._find_nearest(
             coords, False, value=number_of_points, measure='k')
+
+        index = np.where(mask)
         return distance, index, mask
 
     def find_nearest_by_distance(self, coords, distance, measure='direct'):
@@ -1361,6 +1363,7 @@ class Coordinates():
             raise ValueError(
                 f"measure is '{measure}' and should be 'direct' or "
                 "'angular'.")
+        index = np.where(mask)
 
         return index, mask
 
@@ -1996,8 +1999,6 @@ class Coordinates():
         mask = np.full((self.csize), False)
         mask[index] = True
         mask = mask.reshape(self.cshape)
-
-        index = np.where(mask)
 
         # plot all and returned points
         if show:
