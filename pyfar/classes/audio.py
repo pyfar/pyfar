@@ -186,12 +186,12 @@ class _Audio():
 
 class TimeData(_Audio):
     """Class for time data.
-    
+
     Objects of this class contain time data which is not directly convertible
     to frequency domain, i.e., non-equidistant samples.
-    
+
     """
-    def __init__(self, data, times, comment=None, complex=False):
+    def __init__(self, data, times, comment="", complex=False):
 
         """Create TimeData object with data, and times.
 
