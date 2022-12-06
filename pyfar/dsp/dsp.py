@@ -963,7 +963,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
     return pyfar.Signal(data, signal.sampling_rate)
 
 
-def pad_zeros(signal, pad_width, mode='after'):
+def pad_zeros(signal, pad_width, mode='end'):
     """Pad a signal with zeros in the time domain.
 
     Parameters
@@ -975,16 +975,16 @@ def pad_zeros(signal, pad_width, mode='after'):
     mode : str, optional
         The padding mode:
 
-        ``'after'``
+        ``'end'``
             Append zeros to the end of the signal
-        ``'before'``
-            Pre-pend zeros before the starting time of the signal
+        ``'beginning'``
+            Prepend zeros to the beginning of the signal
         ``'center'``
             Insert the number of zeros in the middle of the signal.
             This mode can be used to pad signals with a symmetry with respect
             to the time ``t=0``.
 
-        The default is ``'after'``.
+        The default is ``'end'``.
 
     Returns
     -------
@@ -995,18 +995,25 @@ def pad_zeros(signal, pad_width, mode='after'):
     --------
     >>> import pyfar as pf
     >>> impulse = pf.signals.impulse(512, amplitude=1)
-    >>> impulse_padded = pf.dsp.pad_zeros(impulse, 128, mode='after')
+    >>> impulse_padded = pf.dsp.pad_zeros(impulse, 128, mode='end')
 
     """
 
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
+    if mode in ['before', 'after']:
+        warnings.warn(('Mode "before" and "after" will be renamed into '
+                       '"beginning" and "end" and can no longer be used in '
+                       'Pyfar 0.8.0.'), DeprecationWarning)
+
+        mode = 'beginning' if mode == 'before' else 'end'
+
     padded_signal = signal.flatten()
 
-    if mode in ['after', 'center']:
+    if mode in ['end', 'center']:
         pad_array = ((0, 0), (0, pad_width))
-    elif mode == 'before':
+    elif mode == 'beginning':
         pad_array = ((0, 0), (pad_width, 0))
     else:
         raise ValueError("Unknown padding mode.")
@@ -1509,9 +1516,9 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
     # Check if the signals have any comments,
     # if yes: concatenate the comments for the system_response
     system_response.comment = "Calculated with pyfar.dsp.deconvolve."
-    if system_output.comment != 'none':
+    if system_output.comment != '':
         system_response.comment += f" system input: {system_output.comment}."
-    if system_input.comment != 'none':
+    if system_input.comment != '':
         system_response.comment += f" system output: {system_input.comment}."
 
     # return the impulse resonse
