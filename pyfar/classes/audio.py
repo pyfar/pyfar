@@ -210,6 +210,8 @@ class TimeData(_Audio):
 
         _Audio.__init__(self, 'time', comment)
 
+        assert(isinstance(complex, bool))
+
         self._complex = complex
         self.time = data
 
@@ -230,17 +232,19 @@ class TimeData(_Audio):
         """Set the time data."""
         # check and set the data and meta data
         data = np.atleast_2d(np.asarray(value))
-        if data.dtype.kind == "i":
-            data = data.astype("float")
-            data = np.atleast_2d(np.asarray(value, dtype=float))
-        elif data.dtype.kind == "c":
-            if not self._complex:
-                raise ValueError("Invalid dtype: Set complex flag or"
-                                 "pass real-valued data.")
+        if self.complex:
+            data = data.astype("complex")
             data = np.atleast_2d(np.asarray(value, dtype=complex))
-        elif data.dtype.kind != "f":
-            raise ValueError(
-                f"time data is {data.dtype} must be int, float, or complex")
+        else:
+            if data.dtype.kind == "i":
+                data = data.astype("float")
+                data = np.atleast_2d(np.asarray(value, dtype=float))
+            elif data.dtype.kind == "c":
+                raise ValueError("time data is complex, set complex "
+                                 "flag or pass real-valued data.")
+            elif data.dtype.kind != "f":
+                raise ValueError(
+                    f"time data is {data.dtype} must be int, float, or complex")
 
         self._data = data
         self._n_samples = data.shape[-1]
@@ -585,11 +589,11 @@ class Signal(FrequencyData, TimeData):
         comment : str
             A comment related to `data`. The default is ``None``.
         complex : bool
-            A flag which indicates if: in the case of raw data in the time
-            domain, the data are real or complex-valued, and in the case of
-            raw data in the frequency domain, the data are the Fourier
-            spectrum of a real or complex-valued time signal. The default
-            is ``False``.
+            In case of time domain raw data, the complex flag indicates
+            if the data are complex or real-valued data.
+            In case of frequency domain raw data, the complex flag indicates
+            if the data are the Fourier spectrum of a real or complex-valued
+            time signal. The default is ``False``.
 
         References
         ----------
@@ -602,6 +606,8 @@ class Signal(FrequencyData, TimeData):
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
+
+        assert (isinstance(complex, bool))
         self._complex = complex
         self._VALID_FFT_NORMS = [
             "none", "unitary", "amplitude", "rms", "power", "psd"]
@@ -628,13 +634,18 @@ class Signal(FrequencyData, TimeData):
                 warnings.warn(
                     "Number of time samples not given, assuming an even "
                     "number of samples from the number of frequency bins.")
-                if self._complex:
+                if self.complex:
                     n_samples = data.shape[-1]
                 else:
                     n_samples = (data.shape[-1] - 1)*2
-            elif n_samples > 2 * data.shape[-1] - 1:
+            elif (n_samples > 2 * data.shape[-1] - 1) and not self.complex:
                 raise ValueError(("n_samples can not be larger than "
-                                  "2 * data.shape[-1] - 2"))
+                                  "2 * data.shape[-1] - 2"
+                                  "when passing one-sided Fourier spectrum"))
+            elif (n_samples > data.shape[-1]) and self.complex:
+                raise ValueError(("n_samples can not be larger than "
+                                  "data.shape[-1] when passing double-"
+                                  "sided Fourier spectrum"))
 
             self._n_samples = n_samples
             self._n_bins = data.shape[-1]
@@ -662,9 +673,14 @@ class Signal(FrequencyData, TimeData):
         domain convolution, require the non-normalized data stored as
         ``freq_raw``.
         """
-        data = fft.normalization(
+        if self.complex:
+            data = fft.normalization(
                 self.freq_raw, self.n_samples, self.sampling_rate,
-                self.fft_norm, inverse=False)
+                self.fft_norm, inverse=False, single_sided=False)
+        else:
+            data = fft.normalization(
+                    self.freq_raw, self.n_samples, self.sampling_rate,
+                    self.fft_norm, inverse=False)
         return data
 
     @freq.setter
@@ -684,9 +700,14 @@ class Signal(FrequencyData, TimeData):
         # set domain
         self._domain = 'freq'
         # remove normalization
-        data_denorm = fft.normalization(
+        if self.complex:
+            data_denorm = fft.normalization(
                 data, self._n_samples, self._sampling_rate,
-                self._fft_norm, inverse=True)
+                self._fft_norm, inverse=True, single_sided=False)
+        else:
+            data_denorm = fft.normalization(
+                    data, self._n_samples, self._sampling_rate,
+                    self._fft_norm, inverse=True)
         self._data = data_denorm.astype(complex)
 
     @property
@@ -730,7 +751,7 @@ class Signal(FrequencyData, TimeData):
                 # If the new domain should be time, we had a saved spectrum
                 # (without normalization)
                 # and need to do an inverse Fourier Transform
-                if self._complex:
+                if self.complex:
                     # assume frequency data came from a complex-valued time
                     # signal and we have a double-sided Fourier spectrum
                     self._data = fft.ifft(
@@ -745,7 +766,7 @@ class Signal(FrequencyData, TimeData):
             elif new_domain == 'freq':
                 # If the new domain should be freq, we had sampled time data
                 # and need to do a Fourier Transform (without normalization)
-                if self._complex:
+                if self.complex:
                     # If the time data are complex-valued, calculate a
                     # double-sided Fourier spectrum
                     self._data = fft.fft(
@@ -776,7 +797,8 @@ class Signal(FrequencyData, TimeData):
     @property
     def frequencies(self):
         """Frequencies of the discrete signal spectrum."""
-        if self._complex:  # assume the time domain data were complex-valued
+        if self.complex:
+            # assume the time domain data were complex-valued
             # such that we need a two-sided Fourier spectrum
 
             return np.atleast_1d(fft.fftfreq(self.n_samples,
@@ -788,7 +810,7 @@ class Signal(FrequencyData, TimeData):
     @property
     def n_bins(self):
         """Number of frequency bins."""
-        if self._complex:
+        if self.complex:
             return self.n_samples
         else:
             return fft._n_bins(self.n_samples)

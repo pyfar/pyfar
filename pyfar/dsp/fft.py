@@ -5,7 +5,7 @@ given in the :py:mod:`FFT concepts <pyfar._concepts.fft>`.
 import multiprocessing
 
 import numpy as np
-from scipy import fft as _fft
+from scipy import fft as sfft
 
 
 def rfftfreq(n_samples, sampling_rate):
@@ -29,7 +29,7 @@ def rfftfreq(n_samples, sampling_rate):
         The positive discrete frequencies in Hz for which the FFT is
         calculated.
     """
-    return _fft.rfftfreq(n_samples, d=1/sampling_rate)
+    return sfft.rfftfreq(n_samples, d=1/sampling_rate)
 
 
 def rfft(data, n_samples, sampling_rate, fft_norm):
@@ -62,7 +62,7 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     """
 
     # DFT
-    spec = _fft.rfft(
+    spec = sfft.rfft(
         data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
     # Normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
@@ -105,10 +105,11 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True)
     # Inverse DFT
-    data = _fft.irfft(
+    data = sfft.irfft(
         spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
 
     return data
+
 
 def fftfreq(n_samples, sampling_rate):
     """
@@ -131,14 +132,16 @@ def fftfreq(n_samples, sampling_rate):
         The positive discrete frequencies in Hz for which the FFT is
         calculated.
     """
-    return _fft.fftshift(_fft.fftfreq(n_samples, d=1/sampling_rate))
+    return sfft.fftshift(sfft.fftfreq(n_samples, d=1/sampling_rate))
+
 
 def fft(data, n_samples, sampling_rate, fft_norm):
     """
     Calculate the FFT of a complex-valued time-signal.
 
-    The function returns the double sided spectrum. The normalization is considered according to
-    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
+    The function returns the double sided spectrum. The normalization is
+    considered according to ``'fft_norm'`` as described in
+    :py:func:`~pyfar.dsp.fft.normalization`
     and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
 
     Parameters
@@ -162,13 +165,14 @@ def fft(data, n_samples, sampling_rate, fft_norm):
     """
 
     # DFT
-    spec = _fft.fft(
+    spec = sfft.fft(
         data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
     # Normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=False, single_sided=False)
 
     return spec
+
 
 def ifft(spec, n_samples, sampling_rate, fft_norm):
     """
@@ -204,10 +208,11 @@ def ifft(spec, n_samples, sampling_rate, fft_norm):
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=False)
     # Inverse DFT
-    data = _fft.ifft(
+    data = sfft.ifft(
         spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
 
     return data
+
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
                   inverse=False, single_sided=True, window=None):
