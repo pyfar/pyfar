@@ -52,7 +52,7 @@ def broadcast_cshapes(signals, cshape=None):
     Returns
     -------
     signals : tuple of Signal, TimeData, FrequencyData
-        The broadcasted input signals in a tuple
+        The broadcasted copies input signals in a tuple
     """
 
     for signal in signals:
@@ -83,7 +83,7 @@ def broadcast_cdim(signal, cdim):
     Returns
     -------
     signal : Signal, TimeData, FrequencyData
-        The broadcasted input signal
+        The broadcasted copy input signal
     """
 
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
@@ -111,14 +111,14 @@ def broadcast_cdims(signals, cdim=None):
     ----------
     signals : tuple of Signal, TimeData, FrequencyData
         The signals to be broadcasted in a tuple.
-    cdim : int
+    cdim : int, optional
         The cdim to which `signal` is broadcasted. If `cdim` is ``None`` the
         signals are broadcasted to the largest `cdim`. The default is ``None``.
 
     Returns
     -------
     signals : tuple of Signal, TimeData, FrequencyData
-        The broadcasted input signals in a tuple
+        The broadcasted copies input signals in a tuple
     """
 
     for signal in signals:

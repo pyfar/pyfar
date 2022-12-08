@@ -37,7 +37,6 @@ from . import fft
 __all__ = [
     'fft',
     'filter',
-    'utils',
     'phase',
     'group_delay',
     'wrap_to_2pi',
