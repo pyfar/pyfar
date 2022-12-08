@@ -22,7 +22,7 @@ def test_signal_init_default_parameter():
     signal = Signal([1, 2, 3], 44100)
     assert signal.domain == 'time'
     assert signal.fft_norm == 'none'
-    assert signal.comment == 'none'
+    assert signal.comment == ''
     assert signal.fft_norm == 'none'
 
 
@@ -86,6 +86,9 @@ def test_signal_comment():
 
     signal.comment = 'Blub'
     assert signal.comment == 'Blub'
+
+    with pytest.raises(TypeError, match="comment has to be of type string."):
+        Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
 
 def test_domain_getter_freq():

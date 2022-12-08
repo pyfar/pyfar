@@ -115,7 +115,7 @@ plt.savefig('filter_types_standard.png', dpi=150)
 
 # %% filter banks -------------------------------------------------------------
 
-_, ax = plt.subplots(1, 2, figsize=(30/2.54, 12/2.54), sharey=True)
+_, ax = plt.subplots(3, 1, figsize=(20/2.54, 30/2.54), sharey=True)
 
 # DIN Filterbank
 axis = ax[0]
@@ -129,7 +129,16 @@ axis.set_ylim(-60, 10)
 axis = ax[1]
 y, *_ = pf.dsp.filter.reconstructing_fractional_octave_bands(impulse, 1)
 pf.plot.freq(y, ax=axis)
-axis.set_title('Fractional octave bands (perfect reconstructing)')
+axis.set_title('Fractional octave bands (perfectly reconstructing)')
+axis.set_xlim(20, 20e3)
+axis.set_ylim(-60, 10)
+
+# Auditory Filterbank
+axis = ax[2]
+gtf = pf.dsp.filter.GammatoneBands((20, 20e3))
+y, _ = gtf.process(impulse)
+pf.plot.freq(y, ax=axis)
+axis.set_title('Auditory gammatone bands (almost perfectly reconstructing)')
 axis.set_xlim(20, 20e3)
 axis.set_ylim(-60, 10)
 

@@ -20,6 +20,7 @@ from .dsp import (
     power,
     rms,
     normalize,
+    average
 )
 
 from .interpolation import (
@@ -59,6 +60,7 @@ __all__ = [
     'InterpolateSpectrum',
     'smooth_fractional_octave',
     'resample',
+    'average',
     'normalize',
     'fractional_time_shift'
 ]

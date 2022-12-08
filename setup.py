@@ -12,13 +12,13 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'numpy>=1.14.0',
+    'numpy>=1.23.0',
     'scipy>=1.5.0',
     'matplotlib',
     'sofar>=0.1.2',
     'urllib3',
     'deepdiff',
-    'soundfile'
+    'soundfile>=0.11.0'
 ]
 
 setup_requirements = ['pytest-runner', ]
@@ -59,8 +59,14 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/pyfar/pyfar',
-    version='0.4.3',
+    url="https://pyfar.org/",
+    download_url="https://pypi.org/project/pyfar/",
+    project_urls={
+        "Bug Tracker": "https://github.com/pyfar/pyfar/issues",
+        "Documentation": "https://pyfar.readthedocs.io/",
+        "Source Code": "https://github.com/pyfar/pyfar",
+    },
+    version='0.5.1',
     zip_safe=False,
     python_requires='>=3.8'
 )

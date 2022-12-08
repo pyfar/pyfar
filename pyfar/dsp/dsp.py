@@ -963,7 +963,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
     return pyfar.Signal(data, signal.sampling_rate)
 
 
-def pad_zeros(signal, pad_width, mode='after'):
+def pad_zeros(signal, pad_width, mode='end'):
     """Pad a signal with zeros in the time domain.
 
     Parameters
@@ -975,16 +975,16 @@ def pad_zeros(signal, pad_width, mode='after'):
     mode : str, optional
         The padding mode:
 
-        ``'after'``
+        ``'end'``
             Append zeros to the end of the signal
-        ``'before'``
-            Pre-pend zeros before the starting time of the signal
+        ``'beginning'``
+            Prepend zeros to the beginning of the signal
         ``'center'``
             Insert the number of zeros in the middle of the signal.
             This mode can be used to pad signals with a symmetry with respect
             to the time ``t=0``.
 
-        The default is ``'after'``.
+        The default is ``'end'``.
 
     Returns
     -------
@@ -995,18 +995,25 @@ def pad_zeros(signal, pad_width, mode='after'):
     --------
     >>> import pyfar as pf
     >>> impulse = pf.signals.impulse(512, amplitude=1)
-    >>> impulse_padded = pf.dsp.pad_zeros(impulse, 128, mode='after')
+    >>> impulse_padded = pf.dsp.pad_zeros(impulse, 128, mode='end')
 
     """
 
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
+    if mode in ['before', 'after']:
+        warnings.warn(('Mode "before" and "after" will be renamed into '
+                       '"beginning" and "end" and can no longer be used in '
+                       'Pyfar 0.8.0.'), DeprecationWarning)
+
+        mode = 'beginning' if mode == 'before' else 'end'
+
     padded_signal = signal.flatten()
 
-    if mode in ['after', 'center']:
+    if mode in ['end', 'center']:
         pad_array = ((0, 0), (0, pad_width))
-    elif mode == 'before':
+    elif mode == 'beginning':
         pad_array = ((0, 0), (pad_width, 0))
     else:
         raise ValueError("Unknown padding mode.")
@@ -1403,7 +1410,8 @@ def find_impulse_response_start(
     return np.squeeze(start_sample)
 
 
-def deconvolve(system_output, system_input, fft_length=None, **kwargs):
+def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
+               **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
     The transfer function :math:`H(\omega)` is calculated by spectral
@@ -1437,7 +1445,13 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
         The system input signal (e.g., used to perform a measurement).
         The system input signal is zero padded, if it is shorter than the
         system output signal.
-    fft_length: int or None
+    freq_range : tuple, array_like, double
+        The upper and lower frequency limits outside of which the
+        regularization factor is to be applied. The default ``None``
+        bypasses the regularization, which might cause numerical
+        instabilities in case of band-limited `system_input`. Also see
+        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+    fft_length : int or None
         The length the signals system_output and system_input are zero padded
         to before deconvolving. The default is None. In this case only the
         shorter signal is padded to the length of the longer signal, no padding
@@ -1471,6 +1485,9 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
 
+    if freq_range is None:
+        freq_range = (0, system_input.sampling_rate/2)
+
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value
     if fft_length is None:
@@ -1492,15 +1509,16 @@ def deconvolve(system_output, system_input, fft_length=None, **kwargs):
 
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
-    system_response = (system_output *
-                       regularized_spectrum_inversion(system_input, **kwargs))
+    inverse_input = regularized_spectrum_inversion(
+            system_input, freq_range, **kwargs)
+    system_response = system_output * inverse_input
 
     # Check if the signals have any comments,
     # if yes: concatenate the comments for the system_response
     system_response.comment = "Calculated with pyfar.dsp.deconvolve."
-    if system_output.comment != 'none':
+    if system_output.comment != '':
         system_response.comment += f" system input: {system_output.comment}."
-    if system_input.comment != 'none':
+    if system_input.comment != '':
         system_response.comment += f" system output: {system_input.comment}."
 
     # return the impulse resonse
@@ -1851,6 +1869,139 @@ def rms(signal):
     return np.sqrt(power(signal))
 
 
+def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
+    """
+    Average multi-channel signals.
+
+    Parameters
+    ----------
+    signal: Signal, TimeData, FrequencyData
+        Input signal.
+    mode: string
+
+        ``'linear'``
+            Average ``signal.time`` if the signal is in the time domain and
+            ``signal.freq`` if the signal is in the frequency domain. Note that
+            these operations are equivalent for `Signal` objects due to the
+            linearity of the averaging and the FFT.
+        ``'magnitude_zerophase'``
+            Average the magnitude spectra and discard the phase.
+        ``'magnitude_phase'``
+            Average the magnitude spectra and the unwrapped phase separatly.
+        ``'power'``
+            Average the power spectra :math:`|X|^2` and discard the phase. The
+            squaring of the spectra is reversed before returning the averaged
+            signal.
+        ``'log_magnitude_zerophase'``
+            Average the logarithmic magnitude spectra using
+            :py:func:`~pyfar.dsp.decibel` and discard the phase. The logarithm
+            is reversed before returning the averaged signal.
+
+        The default is ``'linear'``
+    caxis: None, int, or tuple of ints, optional
+        Channel axes along which the averaging is done. The default ``None``
+        averages across all channels. See
+        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
+        information.
+    weights: array like
+        Array with channel weights for averaging the data. Must be
+        broadcastable to ``signal.cshape``. The default is ``None``, which
+        applies equal weights to all channels.
+    keepdims: bool, optional
+        If this is ``True``, the axes which are reduced during the averaging
+        are kept as a dimension with size one. Otherwise, singular dimensions
+        will be squeezed after averaging. The default is ``False``.
+
+    Returns
+    --------
+    averaged_signal: Signal, TimeData, FrequencyData
+        Averaged input Signal.
+
+    Notes
+    -----
+    The functions :py:func:`~pyfar.dsp.linear_phase` and
+    :py:func:`~pyfar.dsp.minimum_phase` can be used to obtain a phase for
+    magnitude spectra after using a mode that discards the phase.
+
+    """
+
+    # check input
+    if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
+                               pyfar.TimeData)):
+        raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
+                         "or 'FrequencyData'."))
+    if type(signal) == pyfar.TimeData and mode in ('log_magnitude_zerophase',
+                                                   'magnitude_zerophase',
+                                                   'magnitude_phase',
+                                                   'power',):
+        raise ValueError((
+            f"mode is '{mode}' and signal is type '{signal.__class__}'"
+            " but must be of type 'Signal' or 'FrequencyData'."))
+
+    # check for caxis
+    if caxis and np.max(caxis) > len(signal.cshape):
+        raise ValueError(('The maximum of caxis needs to be smaller than '
+                          'len(signal.cshape).'))
+    # set caxis default
+    if caxis is None:
+        caxis = tuple([i for i in range(len((signal.cshape)))])
+
+    # check if averaging over one dimensional caxis
+    if 1 in signal.cshape:
+        for ax in caxis:
+            if signal.cshape[ax] == 1:
+                warnings.warn(f"Averaging one dimensional caxis={caxis}.")
+    if not isinstance(caxis, int):
+        axis = tuple([cax-1 if cax < 0 else cax for cax in caxis])
+    else:
+        axis = caxis-1 if caxis < 0 else caxis
+
+    # convert data to desired domain
+    if mode == 'linear':
+        data = signal.time if signal.domain == 'time' else signal.freq
+    elif mode == 'magnitude_zerophase':
+        data = np.abs(signal.freq)
+    elif mode == 'magnitude_phase':
+        data = [np.abs(signal.freq), pyfar.dsp.phase(signal, unwrap=True)]
+    elif mode == 'power':
+        data = np.abs(signal.freq)**2
+    elif mode == 'log_magnitude_zerophase':
+        data, log_prefix = pyfar.dsp.decibel(signal, 'freq',
+                                             return_prefix=True)
+    else:
+        raise ValueError(
+            """mode must be 'linear', 'magnitude_zerophase', 'power',
+            'magnitude_phase' or 'log_magnitude_zerophase'."""
+            )
+
+    # set weights default
+    if weights is not None:
+        weights = np.broadcast_to(np.array(weights)[..., None],
+                                  data.shape)
+    # average the data
+    if mode == 'magnitude_phase':
+        data = [np.average(d, axis=axis, weights=weights,
+                           keepdims=keepdims) for d in data]
+        data = data[0] * np.exp(1j * data[1])
+    else:
+        data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
+
+    # reconstruct frequency data
+    if mode == 'power':
+        data = np.sqrt(data)
+    elif mode == 'log_magnitude_zerophase':
+        data = 10**(data/log_prefix)
+
+    # return average data as pyfar object, depending on input signal type
+    if isinstance(signal, pyfar.Signal):
+        return pyfar.Signal(data, signal.sampling_rate, signal.n_samples,
+                            signal.domain, signal.fft_norm, signal.comment)
+    elif isinstance(signal, pyfar.TimeData):
+        return pyfar.TimeData(data, signal.times, signal.comment)
+    else:
+        return pyfar.FrequencyData(data, signal.frequencies, signal.comment)
+
+
 def normalize(signal, reference_method='max', domain='time',
               channel_handling='individual', target=1, limits=(None, None),
               unit=None, return_reference=False):
@@ -1984,14 +2135,13 @@ def normalize(signal, reference_method='max', domain='time',
         >>> pf.plot.time_freq(signal, label='Original Signal')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
-
     """
-
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
                                pyfar.TimeData)):
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
+
     if domain not in ('time', 'freq'):
         raise ValueError("domain must be 'time' or 'freq'.")
     if type(signal) == pyfar.FrequencyData and domain == 'time':

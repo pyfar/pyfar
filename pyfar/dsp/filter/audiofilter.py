@@ -114,16 +114,24 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     order : number
         The shelve order. Must be ``1`` or ``2``.
     shelve_type : str
-        Defines the characteristic frequency. The default is ``'I'``
+        Defines the characteristic frequency. The default is ``'I'``.
 
         ``'I'``
-            defines the characteristic frequency 3 dB below the gain value if
-            the gain is positive and 3 dB above the gain value otherwise
+            Defines the characteristic frequency 3 dB below the `gain` value if
+            the `gain` is positive and 3 dB above the `gain` value if the
+            `gain` is negative.
         ``'II'``
-            defines the characteristic frequency at 3 dB if the gain is
-            positive and at -3 dB if the gain is negative.
+            Defines the characteristic frequency at 3 dB if the `gain` is
+            positive and at -3 dB if the `gain` is negative.
         ``'III'``
-            defines the characteristic frequency at gain/2 dB.
+            Defines the characteristic frequency at `gain`/2 dB.
+
+        For types ``I`` and ``II`` the absolute value of the `gain` must be
+        sufficiently large (> 9 dB) to set the characteristic
+        frequency according to the above rules with an error below 0.5 dB.
+        For smaller absolute `gain` values the gain at the characteristic
+        frequency becomes less accurate.
+        For type ``III`` the characteristic frequency is always set correctly.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -166,16 +174,24 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     order : number
         The shelve order. Must be ``1`` or ``2``.
     shelve_type : str
-        Defines the characteristic frequency. The default is ``'I'``
+        Defines the characteristic frequency. The default is ``'I'``.
 
         ``'I'``
-            defines the characteristic frequency 3 dB below the gain value if
-            the gain is positive and 3 dB above the gain value otherwise.
+            Defines the characteristic frequency 3 dB below the `gain` value if
+            the `gain` is positive and 3 dB above the `gain` value if the
+            `gain` is negative.
         ``'II'``
-            defines the characteristic frequency at 3 dB if the gain is
-            positive and at -3 dB if the gain is negative.
+            Defines the characteristic frequency at 3 dB if the `gain` is
+            positive and at -3 dB if the `gain` is negative.
         ``'III'``
-            defines the characteristic frequency at gain/2 dB.
+            Defines the characteristic frequency at `gain`/2 dB.
+
+        For types ``I`` and ``II`` the absolute value of the `gain` must be
+        sufficiently large (> 9 dB) to set the characteristic
+        frequency according to the above rules with an error below 0.5 dB.
+        For smaller absolute `gain` values the gain at the characteristic
+        frequency becomes less accurate.
+        For type ``III`` the characteristic frequency is always set correctly.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
