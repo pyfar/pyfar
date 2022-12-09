@@ -216,7 +216,7 @@ class TimeData(_Audio):
 
         _Audio.__init__(self, 'time', comment)
 
-        assert(isinstance(complex, bool))
+        assert isinstance(complex, bool)
 
         self._complex = complex
         self.time = data
@@ -250,7 +250,8 @@ class TimeData(_Audio):
                                  "flag or pass real-valued data.")
             elif data.dtype.kind != "f":
                 raise ValueError(
-                    f"time data is {data.dtype} must be int, float, or complex")
+                    f"time data is {data.dtype} must be int, float, or "
+                    f"complex")
 
         self._data = data
         self._n_samples = data.shape[-1]

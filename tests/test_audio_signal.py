@@ -44,16 +44,30 @@ def test_signal_init_time_dtype():
     Test casting and assertions of dtype (also test time setter because
     it is called during initialization)
     """
-    # integer to float casting
+    # pass integer values, expect float casting
     signal = Signal([1, 2, 3], 44100)
     assert signal.time.dtype.kind == "f"
 
-    # float
+    # pass real-valued int data and set complex flag, expect complex casting
+    signal = Signal([1, 2, 3], 44100, complex=True)
+    assert signal.time.dtype.kind == "c"
+
+    # pass float data
     signal = Signal([1., 2., 3.], 44100)
     assert signal.time.dtype.kind == "f"
 
-    # complex
-    with pytest.raises(ValueError, match="time data is complex"):
+    # pass real-valued float data and set complex flag
+    signal = Signal([1., 2., 3.], 44100, complex=True)
+    assert signal.time.dtype.kind == "c"
+
+    # pass complex-valued data and set complex flag
+    signal = Signal([1+1j, 2+2j, 3+3j], 44100, complex=True)
+    assert signal.time.dtype.kind == "c"
+
+    # pass complex data but dont set complex flag
+    with pytest.raises(ValueError, match="time data is complex, "
+                                         "set complex flag or pass "
+                                         "real-valued data."):
         Signal([1+1j, 2+2j, 3+3j], 44100)
 
 
@@ -169,6 +183,10 @@ def test_n_bins():
     assert signal.n_bins == 2
     signal = Signal([1, 2, 3, 4], 44100, domain='time')
     assert signal.n_bins == 3
+    signal = Signal([1, 2, 3], 44100, domain='time', complex=True)
+    assert signal.n_bins == 3
+    signal = Signal([1, 2, 3, 4], 44100, domain='time', complex=True)
+    assert signal.n_bins == 4
 
 
 def test_times():
@@ -271,6 +289,15 @@ def test_setter_fft_norm():
     # setting an invalid fft_norm
     with pytest.raises(ValueError):
         signal.fft_norm = 'bullshit'
+
+
+def test_fft_selection():
+    """Test if appropriate FFT is computed"""
+    signal = Signal([1, 2, 3], 44100, complex=False)
+    assert signal.freq.shape[1] == 2
+
+    signal = Signal([1, 2, 3], 44100, complex=True)
+    assert signal.freq.shape[1] == 3
 
 
 def test_dtype():
