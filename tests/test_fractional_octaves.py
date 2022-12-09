@@ -65,8 +65,10 @@ def test_fractional_coeff_oct_filter_iec():
     sr = 16e3
     order = 6
 
-    actual = filter.fractional_octaves._coefficients_fractional_octave_bands(
-        sr, 1, freq_range=(5e3, 20e3), order=order)
+    with pytest.warns(UserWarning, match="Skipping bands"):
+        actual = filter.fractional_octaves. \
+                    _coefficients_fractional_octave_bands(
+                        sr, 1, freq_range=(5e3, 20e3), order=order)
 
     assert actual.shape == (1, order, 6)
 

@@ -153,8 +153,10 @@ def test_interaction_attached():
         # exclude functions that do not support interaction
         if function[0] in ["context", "custom_subplots"]:
             continue
-
-        ax = function[1](signal)
+        if function[1] == pf.plot.spectrogram:
+            ax = function[1](signal[0])
+        else:
+            ax = function[1](signal)
         # axis is first return parameter if function returns multiple
         ax = ax[0] if isinstance(ax, (tuple)) else ax
         # interaction axis is first axis if functions returns multiple
@@ -546,7 +548,8 @@ def test_cycle_and_toggle_signals():
 
     # init and check start conditions
     signal = pf.signals.impulse(1024, amplitude=[1, 2])
-    ax, *_ = pf.plot.spectrogram(signal)
+    with pytest.warns(UserWarning, match="Using only the first"):
+        ax, *_ = pf.plot.spectrogram(signal)
 
     assert ax[0].interaction.txt is None
     # use the clim because the image data is identical

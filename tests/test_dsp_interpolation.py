@@ -348,7 +348,8 @@ def test_interpolate_spectrum_fscale():
     # generate interpolator with logarithmic frequency
     interpolator_log = InterpolateSpectrum(
         data, "magnitude", ("linear", "linear", "linear"), fscale="log")
-    _ = interpolator_log(n_samples, sampling_rate)
+    with pytest.warns(RuntimeWarning):
+        _ = interpolator_log(n_samples, sampling_rate)
 
     # test frequency vectors
     npt.assert_allclose(interpolator_lin._f_in, f_in_lin)
