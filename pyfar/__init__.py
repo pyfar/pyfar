@@ -19,6 +19,7 @@ from . import samplings
 from . import io
 from . import dsp
 from . import signals
+from . import utils
 
 
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     'samplings',
     'io',
     'dsp',
-    'signals']
+    'signals',
+    'utils']

@@ -155,9 +155,7 @@ def test_interaction_attached():
         # exclude functions that do not support interaction
         if function[0] in ["context", "custom_subplots"]:
             continue
-
-        # use first channel to avoid warning that only first channel was used
-        if function[0] == "spectrogram":
+        if function[1] == pf.plot.spectrogram:
             ax = function[1](signal[0])
         else:
             ax = function[1](signal)
