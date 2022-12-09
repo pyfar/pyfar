@@ -15,15 +15,9 @@ Quick listening is, e.g., possible with `sounddevice
 """
 import os
 import numpy as np
-
 import urllib3
-from urllib3.exceptions import InsecureRequestWarning
-from urllib3 import disable_warnings
-
 import pyfar as pf
 
-# disable warning about non-certified connection
-disable_warnings(InsecureRequestWarning)
 # path for saving/reading files
 file_dir = os.path.join(os.path.dirname(__file__), 'files')
 if not os.path.isdir(file_dir):
@@ -513,7 +507,7 @@ def _load_files(data):
     # download files
     print(f"Loading {data} data. This is only done once.")
 
-    http = urllib3.PoolManager(cert_reqs=False)
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
     url = 'https://pyfar.org/wp-content/uploads/pyfar_files/'
 
     for file in files:
