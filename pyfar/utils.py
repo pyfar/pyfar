@@ -52,7 +52,7 @@ def broadcast_cshapes(signals, cshape=None):
     Returns
     -------
     signals : tuple of Signal, TimeData, FrequencyData
-        The broadcasted copies input signals in a tuple
+        The broadcasted copies of the input signals in a tuple.
     """
 
     for signal in signals:
@@ -118,7 +118,7 @@ def broadcast_cdims(signals, cdim=None):
     Returns
     -------
     signals : tuple of Signal, TimeData, FrequencyData
-        The broadcasted copies input signals in a tuple
+        The broadcasted copies of the input signals in a tuple.
     """
 
     for signal in signals:
