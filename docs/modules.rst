@@ -15,3 +15,4 @@ according to their modules.
    modules/pyfar.signals
    modules/pyfar.signals.files
    modules/pyfar.samplings
+   modules/pyfar.utils
