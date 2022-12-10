@@ -553,7 +553,7 @@ def test_time_freq_fft_norm_dB(noise):
 def test_title_style(style, handsome_signal):
     """Test correct titles settings in the plot styles."""
     filename = 'title_' + style
-    fig = create_figure(style)
+    fig = create_figure(style=style)
     # Apparently, the style needs to be set twice for tests
     pf.plot.use(style)
     ax = pf.plot.freq(handsome_signal, style=style)
