@@ -396,7 +396,7 @@ def head_related_impulse_responses(
         idx, _ = sources.find_slice('lateral', 'deg', 0)
         # sort positions according to polar angle
         polar = sources.get_sph("side", "deg")[idx, 1].flatten()
-        idx = idx[np.argsort(polar)]
+        idx = (idx[0][np.argsort(polar)], )
     else:
         idx = []
         for pos in position:
