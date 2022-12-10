@@ -89,6 +89,28 @@ In the following, you'll find a guideline. Note: these instructions are not gene
 - Make sure that all important parts of pyfar are covered by the tests. This can be checked using *coverage* (see below).
 - In case of pyfar, mainly **state verification** is applied in the tests. This means that the outcome of a function is compared to a desired value (``assert ...``). For more information, it is refered to `Martin Fowler's article <https://martinfowler.com/articles/mocksArentStubs.html.>`_.
 
+Required Tests
+~~~~~~~~~~~~~~
+
+The testing should include
+
+- Test all errors and warnings (also see next list)
+- Test all parameters
+- Test specific parameter combinations if required
+- Test with single and multi-dimensional input data such Signal objects and array likes
+- Test with audio objects with complex time data and NaN values (if applicable)
+
+pyfar functions should raise errors if
+
+- audio objects do not have the correct type
+- strings have invalid values
+- invalid parameter combinations are used
+
+pyfar functions should raise warnings if
+
+- results might be wrong or unexpected
+- possibly bad parameter combinations are used
+
 Tips
 ~~~~~~~~~~~
 Pytest provides several, sophisticated functionalities which could reduce the effort of implementing tests.
@@ -101,7 +123,7 @@ Pytest provides several, sophisticated functionalities which could reduce the ef
 
 - Exclude tests (for example the time consuming test of plot) with
 
-    $ pytest -k 'not plot'
+    $ pytest -k 'not plot and not interaction'
 
 - Create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ with
 
