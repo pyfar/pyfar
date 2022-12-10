@@ -1544,7 +1544,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal
+        The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
+        of this signal must be `broadcastable
+        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
+        cshape of the first signal.
     mode : string, optional
         A string indicating the size of the output:
 
@@ -1577,7 +1580,9 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     Returns
     -------
     Signal
-        The convolution result as a Signal object.
+        The convolution result as a Signal object. The
+        :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
+        of the two input signals.
 
     Notes
     -----
@@ -1615,6 +1620,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
 
     """
+    # check input
     if not signal1.sampling_rate == signal2.sampling_rate:
         raise ValueError("The sampling rates do not match")
     fft_norm = pyfar.classes.audio._match_fft_norm(
@@ -1624,6 +1630,11 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
             f"Invalid mode {mode}, needs to be "
             "'full', 'cut' or 'cyclic'.")
 
+    # check cdims
+    if len(signal1.cshape) != len(signal2.cshape):
+        signal1, signal2 = pyfar.utils.broadcast_cdims((signal1, signal2))
+
+    # convolve
     if method == 'overlap_add':
         res = sgn.oaconvolve(signal1.time, signal2.time, mode='full', axes=-1)
     elif method == 'fft':
@@ -1632,6 +1643,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         raise ValueError(
             f"Invalid method {method}, needs to be 'overlap_add' or 'fft'.")
 
+    # make convolution truncated or cyclic
     if mode == 'cut':
         res = res[..., :np.max((signal1.n_samples, signal2.n_samples))]
     elif mode == 'cyclic':
