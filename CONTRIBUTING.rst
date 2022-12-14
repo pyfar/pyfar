@@ -76,7 +76,7 @@ Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put your new functionality into a function with a docstring.
-3. If checks to not pass, have a look at https://travis-ci.com/pyfar/pyfar/pull_requests for more information.
+3. If checks do not pass, have a look at https://app.circleci.com/pipelines/github/pyfar/pyfar for more information.
 
 
 Testing Guidelines
