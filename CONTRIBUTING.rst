@@ -108,7 +108,7 @@ Required Tests
 
 The testing should include
 
-- Test all errors and warnings (also see next list)
+- Test all errors and warnings (also function and class guidelines above)
 - Test all parameters
 - Test specific parameter combinations if required
 - Test with single and multi-dimensional input data such Signal objects and array likes
