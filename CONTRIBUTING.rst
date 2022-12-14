@@ -78,6 +78,20 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put your new functionality into a function with a docstring.
 3. If checks do not pass, have a look at https://app.circleci.com/pipelines/github/pyfar/pyfar for more information.
 
+Function and Class Guidelines
+-----------------------------
+
+pyfar functions and classes should raise errors if
+
+- audio objects do not have the correct type (e.g. a TimeData instance is passed but a Signal instance is required)
+- strings have invalid values
+- invalid parameter combinations are used
+
+pyfar functions and classes should raise warnings if
+
+- results might be wrong or unexpected
+- possibly bad parameter combinations are used
+
 
 Testing Guidelines
 -----------------------
@@ -99,17 +113,6 @@ The testing should include
 - Test specific parameter combinations if required
 - Test with single and multi-dimensional input data such Signal objects and array likes
 - Test with audio objects with complex time data and NaN values (if applicable)
-
-pyfar functions should raise errors if
-
-- audio objects do not have the correct type
-- strings have invalid values
-- invalid parameter combinations are used
-
-pyfar functions should raise warnings if
-
-- results might be wrong or unexpected
-- possibly bad parameter combinations are used
 
 Tips
 ~~~~~~~~~~~
