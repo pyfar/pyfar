@@ -140,9 +140,11 @@ def test_interaction_attached():
     does not have an interaction. This is intended behavior.
     """
 
-    # dummy signal (needs to as longe as the default spectrogram block size
-    # with at least two channels)
-    signal = pf.signals.impulse(1024, [0, 0])
+    # dummy signal
+    # - long enough to avoid warning due to identical xlims in spectrogram
+    # - with delay to avoid warning due to identical ylims in group delay
+    # - at least to channels to work for 2D plots
+    signal = pf.signals.impulse(2048, [10, 10])
 
     # Use create figure to specify the plot backend
     create_figure()
@@ -153,8 +155,10 @@ def test_interaction_attached():
         # exclude functions that do not support interaction
         if function[0] in ["context", "custom_subplots"]:
             continue
-
-        ax = function[1](signal)
+        if function[1] == pf.plot.spectrogram:
+            ax = function[1](signal[0])
+        else:
+            ax = function[1](signal)
         # axis is first return parameter if function returns multiple
         ax = ax[0] if isinstance(ax, (tuple)) else ax
         # interaction axis is first axis if functions returns multiple
@@ -171,9 +175,11 @@ def test_interaction_attached():
 def test_toggle_plots(plot_type, initial_function, function_list):
     """Test toggling plots by checking labels after toggling."""
 
-    # dummy signal (needs to as longe as the default spectrogram block size
-    # with at least two channels)
-    signal = pf.signals.impulse(1024, [0, 1000])
+    # dummy signal
+    # - long enough to avoid warning due to identical xlims in spectrogram
+    # - with delay to avoid warning due to identical ylims in group delay
+    # - at least to channels to work for 2D plots
+    signal = pf.signals.impulse(2048, [0, 1000])
 
     # Use create figure to specify the plot backend
     create_figure()
@@ -287,7 +293,8 @@ def test_move_and_zoom_linear():
     create_figure()
 
     # initialize the plot
-    signal = pf.signals.impulse(1024)
+    # - long enough to avoid warning due to identical xlims in spectrogram
+    signal = pf.signals.impulse(2048)
 
     for axes in ['x', 'y', 'cm']:
         if axes == 'x':
@@ -327,7 +334,7 @@ def test_move_and_zoom_linear():
         ax.interaction.select_action(ia.EventEmu(move[0]))
         npt.assert_allclose(getter(), (lim[0] + shift, lim[1] + shift))
         ax.interaction.select_action(ia.EventEmu(move[1]))
-        npt.assert_allclose(getter(), lim)
+        npt.assert_allclose(getter(), lim, atol=1e-12)
 
         # zoom in and out
         ax.interaction.select_action(ia.EventEmu(zoom[0]))
@@ -398,7 +405,7 @@ def test_toggle_colormap():
     create_figure()
 
     # init the plot
-    ax, *_ = pf.plot.spectrogram(pf.signals.impulse(1024))
+    ax, *_ = pf.plot.spectrogram(pf.signals.impulse(2048))
     assert ax[1].get_ylabel() == "Magnitude in dB"
     # toggle x-axis
     ax[0].interaction.select_action(ia.EventEmu(sc_ctr["toggle_cm"]["key"][0]))
@@ -417,7 +424,6 @@ def test_toggle_orientation_2d_plots():
     """
     # Use create figure to specify the plot backend
     create_figure()
-
 
     signal = pf.signals.impulse(1024, [0, 1000])
     key = sc_ctr["toggle_orientation"]["key"][0]
@@ -545,8 +551,9 @@ def test_cycle_and_toggle_signals():
     create_figure()
 
     # init and check start conditions
-    signal = pf.signals.impulse(1024, amplitude=[1, 2])
-    ax, *_ = pf.plot.spectrogram(signal)
+    signal = pf.signals.impulse(2048, amplitude=[1, 2])
+    with pytest.warns(UserWarning, match="Using only the first channel"):
+        ax, *_ = pf.plot.spectrogram(signal)
 
     assert ax[0].interaction.txt is None
     # use the clim because the image data is identical

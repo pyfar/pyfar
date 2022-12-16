@@ -300,12 +300,18 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
     fig = create_figure()
     if colorbar == "off":
         # test not plotting a colorbar
-        function(signal, colorbar=False)
+        if function == plot.spectrogram:
+            function(signal[0], colorbar=False)
+        else:
+            function(signal, colorbar=False)
     elif colorbar == "axes":
         # test plotting colorbar to specified axis
         fig.clear()
         _, ax = plt.subplots(1, 2, num=fig.number)
-        function(signal, ax=ax)
+        if function == plot.spectrogram:
+            function(signal[0], colorbar=False)
+        else:
+            function(signal, colorbar=False)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
