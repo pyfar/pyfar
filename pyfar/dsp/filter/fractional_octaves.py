@@ -81,7 +81,7 @@ def fractional_octave_bands(
 
     """
     warnings.warn((
-            "This function will be deprecated in pyfar 0.6.0. "
+            "This function will be deprecated in pyfar 0.8.0. "
             "Use the 'FractionalOctaveBands' class instead."),
             PendingDeprecationWarning)
     # check input
@@ -142,7 +142,7 @@ def _coefficients_fractional_octave_bands(
     """
 
     warnings.warn((
-            "This function will be deprecated in pyfar 0.6.0. "
+            "This function will be deprecated in pyfar 0.8.0. "
             "Coefficients are obtained from the 'FractionalOctaveBands' "
             "private method '_get_coefficients()'."),
             PendingDeprecationWarning)
@@ -277,7 +277,7 @@ def reconstructing_fractional_octave_bands(
     """
 
     warnings.warn((
-            "This function will be deprecated in pyfar 0.6.0. "
+            "This function will be deprecated in pyfar 0.8.0. "
             "Use the 'ReconstructingFractionalOctaveBands' class instead."),
             PendingDeprecationWarning)
     # check input
