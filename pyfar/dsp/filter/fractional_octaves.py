@@ -223,7 +223,6 @@ def fractional_octave_bands(
         >>> ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
         >>> ax.set_title(
         ...     "Filter bands and the sum of their squared magnitudes")
-        >>> plt.tight_layout()
 
     """
     # check input
@@ -410,7 +409,6 @@ def reconstructing_fractional_octave_bands(
         >>> pf.plot.freq(y, ax=ax[1])
         >>> ax[1].set_title(
         ...     "Reconstructed (black) and filtered impulse (colored)")
-        >>> plt.tight_layout()
     """
 
     # check input

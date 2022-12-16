@@ -309,9 +309,9 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
         fig.clear()
         _, ax = plt.subplots(1, 2, num=fig.number)
         if function == plot.spectrogram:
-            function(signal[0], colorbar=False)
+            function(signal[0], ax=ax)
         else:
-            function(signal, colorbar=False)
+            function(signal, ax=ax)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
@@ -508,7 +508,7 @@ def test_use():
 
         filename = 'use_' + style
         plot.utils.use(style)
-        create_figure()
+        create_figure(style=style)
         plt.plot([1, 2, 3], [1, 2, 3])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
@@ -553,13 +553,12 @@ def test_time_freq_fft_norm_dB(noise):
 def test_title_style(style, handsome_signal):
     """Test correct titles settings in the plot styles."""
     filename = 'title_' + style
-    fig = create_figure()
+    fig = create_figure(style=style)
     # Apparently, the style needs to be set twice for tests
     pf.plot.use(style)
     ax = pf.plot.freq(handsome_signal, style=style)
     fig.suptitle('Fig-Title')
     ax.set_title('Ax-Title')
-    fig.tight_layout()
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
     plt.close('all')

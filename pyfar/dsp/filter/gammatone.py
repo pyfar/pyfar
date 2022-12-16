@@ -65,6 +65,9 @@ class GammatoneBands():
         >>> real, imag = GFB.process(x)
         >>> env = pf.Signal(np.abs(real.time + 1j * imag.time), 44100)
         >>>
+        >>> # use pyfar plot style
+        >>> pf.plot.use()
+        >>>
         >>> # the output is complex:
         >>> # Real part gives band-limited Gammatone output
         >>> # Imaginary part gives the Hilbert Transform thereof
