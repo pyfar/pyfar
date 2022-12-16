@@ -1579,8 +1579,8 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
     Returns
     -------
-    Signal
-        The convolution result as a Signal object. The
+    signal : Signal
+        The result of the convolution. The
         :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
         of the two input signals.
 
