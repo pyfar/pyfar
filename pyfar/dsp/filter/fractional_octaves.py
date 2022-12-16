@@ -416,13 +416,13 @@ class FractionalOctaveBands(pft.FilterSOS):
     num_fractions : int, optional
         The number of bands an octave is divided into. Eg., ``1`` refers to
         octave bands and ``3`` to third octave bands. The default is ``1``.
-    sampling_rate : int, optional
-        The sampling rate in Hz. The default is ``44100``.
     frequency_range : array, tuple, optional
         The lower and upper frequency limits. The default is
         ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is ``44100``.    
 
 
     Examples
@@ -460,15 +460,14 @@ class FractionalOctaveBands(pft.FilterSOS):
     def __init__(
             self,
             num_fractions=1,
-            sampling_rate=44100,
             frequency_range=(20.0, 20e3),
-            order=14):
+            order=14,
+            sampling_rate=44100):
 
-        # check input
         self._num_fractions = num_fractions
-        self._sampling_rate = sampling_rate
         self._frequency_range = frequency_range
         self._order = order
+        self._sampling_rate = sampling_rate
 
         self._norm_frequencies,\
             self._exact_frequencies,\
