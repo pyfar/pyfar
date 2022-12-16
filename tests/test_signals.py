@@ -163,7 +163,7 @@ def test_noise_rms_pink_spectrum():
     # (use only center octaves, because the spectrum is less stochastic there)
     signal = pfs.noise(5000, "pink", seed=1)
     FOFB = pff.fractional_octaves.FractionalOctaveBands(
-        1, signal.sampling_rate, frequency_range=(1e3, 16e3))
+        1, frequency_range=(1e3, 16e3), sampling_rate=signal.sampling_rate)
     signal = FOFB.process(signal)
     signal = pfs.noise(5000, "pink", seed=1, sampling_rate=48000)
     signal = pff.fractional_octave_bands(signal, 1, freq_range=(1e3, 16e3))

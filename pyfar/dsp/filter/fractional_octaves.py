@@ -422,8 +422,7 @@ class FractionalOctaveBands(pft.FilterSOS):
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
     sampling_rate : int, optional
-        The sampling rate in Hz. The default is ``44100``.    
-
+        The sampling rate in Hz. The default is ``44100``.
 
     Examples
     --------

@@ -59,15 +59,14 @@ def test_fractional_coeff_oct_filter_iec():
           1.00000000e+00, -1.67171842e+00,  8.18664740e-01]]])
 
     FOFB = filter.fractional_octaves.FractionalOctaveBands(
-        1, sr, frequency_range=(1e3, 4e3), order=order)
+        1, frequency_range=(1e3, 4e3), order=order, sampling_rate=sr)
     np.testing.assert_allclose(FOFB.coefficients, expected)
 
     sr = 16e3
     order = 6
 
-
     FOFB = filter.fractional_octaves.FractionalOctaveBands(
-        1, sr, frequency_range=(5e3, 20e3), order=order)
+        1, frequency_range=(5e3, 20e3), order=order, sampling_rate=sr)
 
     with pytest.warns(UserWarning, match="Skipping bands"):
         actual = filter.fractional_octaves. \
@@ -86,15 +85,15 @@ def test_fract_oct_filter_iec():
     impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
     FOFB = filter.fractional_octaves.FractionalOctaveBands(
-        num_fractions=3, sampling_rate=sr, order=order)
+        num_fractions=3, order=order, sampling_rate=sr)
     assert isinstance(FOFB, FilterSOS)
 
     sig = FOFB.process(impulse)
     assert isinstance(sig, Signal)
 
     FOFB = filter.fractional_octaves.FractionalOctaveBands(
-        num_fractions=1, sampling_rate=sr, frequency_range=(1e3, 4e3),
-        order=order)
+        num_fractions=1, frequency_range=(1e3, 4e3),
+        order=order, sampling_rate=sr)
     ir_actual = FOFB.process(impulse)
 
     assert ir_actual.time.shape[0] == 3
@@ -128,13 +127,13 @@ def test_sum_bands_din():
     two bands.
     """
     n_samples = 2**17
-    sampling_rate = 48e3
-    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate)
+    sr = 48e3
+    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
     ideal = np.squeeze(np.abs(impulse.freq)**2)
 
     FOFB = filter.fractional_octaves.FractionalOctaveBands(
-        num_fractions=3, sampling_rate=sampling_rate, order=14)
+        num_fractions=3, order=14, sampling_rate=sr)
     bp_imp = FOFB.process(impulse)
 
     sum_bands = np.sum(np.abs(bp_imp.freq)**2, axis=0)
