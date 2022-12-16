@@ -954,8 +954,8 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         # get dictionary representation
         obj_dict = self.copy().__dict__
         # define required data
-        keep = ["_num_fractions", "_frequency_range", "_sampling_rate",
-                "_overlap", "_slope", "_n_samples"]
+        keep = ["_num_fractions", "_frequency_range", "_overlap", 
+        "_slope", "_n_samples", "_sampling_rate"]
         # check if all required data is contained
         for k in keep:
             if k not in obj_dict:
@@ -971,8 +971,8 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     def _decode(cls, obj_dict):
         # initialize new class instance
         obj = cls(obj_dict["_num_fractions"], obj_dict["_frequency_range"],
-                  obj_dict["_sampling_rate"], obj_dict["_overlap"],
-                  obj_dict["_slope"], obj_dict["_n_samples"])
+                  obj_dict["_overlap"], obj_dict["_slope"],
+                  obj_dict["_n_samples"], obj_dict["_sampling_rate"])
         # set internal parameters
         obj.__dict__.update(obj_dict)
 
