@@ -2116,7 +2116,7 @@ class Coordinates():
     def _make_kdtree(self):
         """Make a numpy KDTree for fast search of nearest points."""
 
-        xyz = self.get_cart()
+        xyz = self.cartesian
         kdtree = cKDTree(xyz.reshape((self.csize, 3)))
 
         return kdtree
@@ -2393,7 +2393,8 @@ def cart2sph(x, y, z):
     implementation from numpy is used.
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
-    z_div_r = np.where(radius != 0, z / radius, 0)
+    z_div_r = np.divide(
+        z, radius, out=np.zeros_like(radius, dtype=float), where=radius!=0)
     colatitude = np.arccos(z_div_r)
     azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
 

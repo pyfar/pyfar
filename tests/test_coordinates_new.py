@@ -240,7 +240,7 @@ def test__getitem__untouced():
     # test if sliced object stays untouched
     coords = Coordinates([0, 1], [0, 1], [0, 1])
     new = coords[0]
-    new.set_cart(2, 2, 2)
+    new.x = 2
     assert coords.cshape == (2,)
     np.testing.assert_allclose(coords.x[0], 0)
     np.testing.assert_allclose(coords.y[0], 0)
@@ -401,7 +401,7 @@ def test_find_nearest_by_distance_angular():
     # test search with empty results
     i, m = coords.find_nearest_by_distance(find, 1, 'angular')
     assert len(i) == 1
-    assert not i[0]
+    assert i[0].size == 0
     npt.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
 
 
@@ -439,7 +439,7 @@ def test_find_nearest_by_distance_direct():
     # test search with empty results
     i, m = coords.find_nearest_by_distance(find, .1)
     assert len(i) == 1
-    assert not i[0]
+    assert i[0].size == 0
     npt.assert_allclose(m, np.array([0, 0, 0, 0, 0, 0]))
 
 
