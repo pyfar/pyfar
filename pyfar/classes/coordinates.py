@@ -36,7 +36,7 @@ class Coordinates():
             weights: np.array = None, sh_order=None,
             comment: str = "") -> None:
         """
-        This function will be chanched in pyfar 0.7.0 in favor
+        This function will be changed in pyfar 0.7.0 in favor
         of from_*.
         Create :py:func:`Coordinates` object with or without coordinate points.
         The points that enter the Coordinates object are defined by the
