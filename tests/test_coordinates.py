@@ -269,88 +269,57 @@ def test_show():
     plt.close("all")
 
 
-def test_setter_and_getter_from_cartesian():
+@pytest.mark.parametrize(
+    'domain_in', list(Coordinates()._systems()))
+@pytest.mark.parametrize(
+    'domain_out', list(Coordinates()._systems()))
+@pytest.mark.parametrize(
+    'point', [
+        'positive_x', 'positive_y', 'positive_z',
+        'negative_x', 'negative_y', 'negative_z'])
+def test_setter_and_getter_with_conversion(domain_in, domain_out, point):
     """Test conversion between coordinate systems using the default unit."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
     # test points contained in system definitions
-    points = ['positive_x', 'positive_y', 'positive_z',
-              'negative_x', 'negative_y', 'negative_z']
 
-    domain_in = 'cart'
-    convention_in = 'right'
     # test setter and getter with all systems and default unit
-    for domain_out in list(systems):
+    for convention_in in list(systems[domain_in]):
         for convention_out in list(systems[domain_out]):
-            for point in points:
-                # for debugging
-                print(f"{domain_in}({convention_in}) -> "
-                      f"{domain_out}({convention_out}): {point}")
-                # in and out points
-                p_in = systems[domain_in][convention_in][point]
-                p_out = systems[domain_out][convention_out][point]
-                # empty object
-                c = Coordinates()
-                c._system
-                # --- set point ---
-                eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
-                        '{convention_in}')")
-                # check point
-                p = eval(f"c.get_{domain_in}('{convention_in}')")
-                npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
-                # --- test without conversion ---
-                p = eval(f"c.get_{domain_out}('{convention_out}')")
-                # check internal and returned point
-                npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
-
-                # --- test with conversion ---
-                p = eval(f"c.get_{domain_out}('{convention_out}', \
-                            convert=True)")
-                # check point
-                npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
-
-
-def test_setter_and_getter_to_cartesian():
-    """Test conversion between coordinate systems using the default unit."""
-    # get list of available coordinate systems
-    coords = Coordinates()
-    systems = coords._systems()
-    # test points contained in system definitions
-    points = ['positive_x', 'positive_y', 'positive_z',
-              'negative_x', 'negative_y', 'negative_z']
-
-    domain_out = 'cart'
-    convention_out = 'right'
-    # test setter and getter with all systems and default unit
-    for domain_in in list(systems):
-        for convention_in in list(systems[domain_in]):
-            for point in points:
-                # for debugging
-                print(f"{domain_in}({convention_in}) -> "
-                      "cartesian (met): {point}")
-                # in and out points
-                p_in = systems[domain_in][convention_in][point]
-                p_out = systems[domain_out][convention_out][point]
-                # empty object
-                c = Coordinates()
-                c._system
-                # --- set point ---
-                eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
-                        '{convention_in}')")
-                # check point
-                p = eval(f"c.get_{domain_in}('{convention_in}')")
-                npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
-                # --- test without conversion ---
-                p = eval(f"c.get_{domain_out}('{convention_out}')")
-                # check internal and returned point
-                npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
-
-                # --- test with conversion ---
-                p = eval(f"c.get_{domain_out}('{convention_out}', \
-                            convert=True)")
-                # check point
-                npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+            # for debugging
+            print(f"{domain_in}({convention_in}) -> "
+                  f"{domain_out}({convention_out}): {point}")
+            # in and out points
+            p_in = systems[domain_in][convention_in][point]
+            p_out = systems[domain_out][convention_out][point]
+            # empty object
+            c = Coordinates()
+            # --- set point ---
+            eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
+                    '{convention_in}')")
+            # check point
+            p = eval(f"c.get_{domain_in}('{convention_in}')")
+            npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
+            # --- test without conversion ---
+            p = eval(f"c.get_{domain_out}('{convention_out}')")
+            npt.assert_almost_equal(
+                systems['cart']['right'][point], c.cartesian.flatten())
+            # check internal and returned point
+            # npt.assert_allclose(
+            #     c.cartesian.flatten(), p_in, atol=1e-15)
+            npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+            # check if system was converted
+            # assert c._system["domain"] == domain_in
+            # assert c._system["convention"] == convention_in
+            # --- test with conversion ---
+            p = eval(f"c.get_{domain_out}('{convention_out}', \
+                        convert=True)")
+            # check point
+            npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+            # check if system was converted
+            # assert c._system["domain"] == domain_out
+            # assert c._system["convention"] == convention_out
 
 
 def test_multiple_getter_with_conversion():
@@ -409,36 +378,13 @@ def test_assertion_for_getter():
         coords.get_sph()
     with raises(ValueError, match="Object is empty"):
         coords.get_cyl()
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.get_cart()
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.get_sph()
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.get_cyl()
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.x
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.y
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.z
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.azimuth
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.elevation
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.colatitude
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.radius
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.rho
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.phi
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.theta
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.lateral
-    with pytest.raises(ValueError, match="Object is empty"):
-        coords.polar
+
+
+def test_setter_weights():
+    """Test setting weights."""
+    coords = Coordinates([1, 2], 0, 0)
+    coords.weights = [.5, .5]
+    assert (coords.weights == np.array([.5, .5])).all()
 
 
 def test_setter_sh_order():
@@ -624,39 +570,33 @@ def test_find_slice():
 
     c = Coordinates(d, 0, 0)
     index, mask = c.find_slice('x', 'met', 0, 1)
-    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
 
     c = Coordinates(0, d, 0)
     index, mask = c.find_slice('y', 'met', 0, 1)
-    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
 
     c = Coordinates(0, 0, d)
     index, mask = c.find_slice('z', 'met', 0, 1)
-    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
-
-    # cartesian grid, multi-dimensional coordinates
-    c = Coordinates([[0, 1], [1, 0]], 2, 3)
-    index, mask = c.find_slice('x', 'met', 0)
-    npt.assert_allclose(index, ([0, 1], [0, 1]))
-    npt.assert_allclose(mask, np.array([[1, 0], [0, 1]]))
 
     # spherical grid
     d = [358, 359, 0, 1, 2]
     c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
     # cyclic query for lower bound
     index, mask = c.find_slice('azimuth', 'deg', 0, 1)
-    npt.assert_allclose(index, (np.array([1, 2, 3]), ))
+    npt.assert_allclose(index[0], np.array([1, 2, 3]))
     npt.assert_allclose(mask, np.array([0, 1, 1, 1, 0]))
     # cyclic query for upper bound
     index, mask = c.find_slice('azimuth', 'deg', 359, 2)
-    npt.assert_allclose(index, (np.array([0, 1, 2, 3]), ))
+    npt.assert_allclose(index[0], np.array([0, 1, 2, 3]))
     npt.assert_allclose(mask, np.array([1, 1, 1, 1, 0]))
     # non-cyclic query
     index, mask = c.find_slice('azimuth', 'deg', 1, 1)
-    npt.assert_allclose(index, (np.array([2, 3, 4]), ))
+    npt.assert_allclose(index[0], np.array([2, 3, 4]))
     npt.assert_allclose(mask, np.array([0, 0, 1, 1, 1]))
     # out of range query
     with raises(AssertionError):
@@ -671,17 +611,6 @@ def test_find_slice():
     # not tested here.
 
     plt.close("all")
-
-
-@pytest.mark.parametrize("coordinates,desired", [
-    (Coordinates([0, 1], 2, 3), [0, 2, 3]),
-    (Coordinates([[0, 1], [1, 0]], 2, 3), [[0, 2, 3], [0, 2, 3]])])
-def test_find_slice_slicing(coordinates, desired):
-    """Test if return values can be used for slicing"""
-
-    index, mask = coordinates.find_slice('x', 'met', 0)
-    assert coordinates[index] == coordinates[mask]
-    npt.assert_equal(coordinates[index].get_cart(), np.atleast_2d(desired))
 
 
 @pytest.mark.parametrize("rot_type,rot", [
@@ -729,8 +658,6 @@ def test_converters():
 @pytest.mark.parametrize(
     'points_1, points_2, points_3, actual, expected', [
         (1, 1, 1,                Coordinates(1, 1, -1),                 False),
-        (1, 1, 1,                Coordinates(),                         False),
-        (1, 1, 1,                Coordinates(1, 1, 1),                  True),
         ([1, 1], [1, 1], [1, 1], Coordinates([1, 1], [1, 1], [1, 2]),   False),
         ([1, 1], [1, 1], [1, 1], Coordinates([1, 1.0], [1, 1.0], [1, 1]), True)
     ])

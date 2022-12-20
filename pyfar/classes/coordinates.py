@@ -2387,7 +2387,9 @@ def cart2sph(x, y, z):
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.where(radius != 0, z / radius, 0)
     colatitude = np.arccos(z_div_r)
-    azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
+    azimuth = np.zeros(colatitude.size)
+    mask = colatitude == 0 or colatitude == np.pi
+    azimuth[~mask] = np.mod(np.arctan2(y, x), 2 * np.pi)
 
     return azimuth, colatitude, radius
 
