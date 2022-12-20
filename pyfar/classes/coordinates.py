@@ -2326,12 +2326,20 @@ def cyl2cart(azimuth, height, radius):
     To ensure proper handling of the azimuth angle, the ``arctan2``
     implementation from numpy is used.
     """
+    azimuth = np.atleast_1d(azimuth)
+    height = np.atleast_1d(height)
+    radius = np.atleast_1d(radius)
+
     x = radius * np.cos(azimuth)
     y = radius * np.sin(azimuth)
     if isinstance(height, np.ndarray):
         z = height.copy()
     else:
         z = height
+
+    x[np.abs(x) < 1e-15] = 0
+    y[np.abs(y) < 1e-15] = 0
+    z[np.abs(z) < 1e-15] = 0
 
     return x, y, z
 
@@ -2387,9 +2395,7 @@ def cart2sph(x, y, z):
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.where(radius != 0, z / radius, 0)
     colatitude = np.arccos(z_div_r)
-    azimuth = np.zeros(colatitude.size)
-    mask = colatitude == 0 or colatitude == np.pi
-    azimuth[~mask] = np.mod(np.arctan2(y, x), 2 * np.pi)
+    azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
 
     return azimuth, colatitude, radius
 
@@ -2438,9 +2444,17 @@ def sph2cart(azimuth, colatitude, radius):
     z : numpy array, number
         z vales
     """
+    azimuth = np.atleast_1d(azimuth)
+    colatitude = np.atleast_1d(colatitude)
+    radius = np.atleast_1d(radius)
+
     r_sin_cola = radius * np.sin(colatitude)
     x = r_sin_cola * np.cos(azimuth)
     y = r_sin_cola * np.sin(azimuth)
     z = radius * np.cos(colatitude)
+
+    x[np.abs(x) < 1e-15] = 0
+    y[np.abs(y) < 1e-15] = 0
+    z[np.abs(z) < 1e-15] = 0
 
     return x, y, z
