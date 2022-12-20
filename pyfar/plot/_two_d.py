@@ -351,6 +351,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         times = times * factor
 
     # plot the data
+    ax[0].grid(False)
     qm = ax[0].pcolormesh(times, frequencies, spectrogram, **kwargs)
 
     # Adjust axes:
@@ -394,5 +395,6 @@ def _plot_2d(x, y, data, method, ax, **kwargs):
                     kwargs["vmin"], kwargs["vmax"], kwargs["levels"])
         qm = ax.contourf(x, y, data, **kwargs)
     else:
+        ax.grid(False)
         qm = ax.pcolormesh(x, y, data, **kwargs)
     return qm

@@ -1,5 +1,7 @@
 import numpy as np
 import urllib3
+from urllib3.exceptions import InsecureRequestWarning
+import warnings
 import os
 import scipy.io as sio
 import pyfar
@@ -1015,7 +1017,10 @@ def _sph_extremal_load_data(orders='all'):
         url = "https://web.maths.unsw.edu.au/~rsw/Sphere/S2Pts/MD/"
         fileurl = url + filename
 
-        http_data = http.urlopen('GET', fileurl)
+        # Kontrolle ist gut, Vertrauen ist besser
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", InsecureRequestWarning)
+            http_data = http.urlopen('GET', fileurl)
 
         # save the data
         if http_data.status == 200:
@@ -1045,7 +1050,7 @@ def _sph_t_design_load_data(degrees='all'):
         raise ValueError("degrees must an int, list, or string.")
 
     print("Loading t-design sampling points from \
-        https://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html. \
+        http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html. \
         This might take a while but is only done once.")
 
     http = urllib3.PoolManager(cert_reqs=False)
@@ -1065,7 +1070,10 @@ def _sph_t_design_load_data(degrees='all'):
               "SF29-Nov-2012/"
         fileurl = url + filename
 
-        http_data = http.urlopen('GET', fileurl)
+        # Kontrolle ist gut, Vertrauen ist besser
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", InsecureRequestWarning)
+            http_data = http.urlopen('GET', fileurl)
 
         # save the data
         if http_data.status == 200:

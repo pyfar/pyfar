@@ -1113,7 +1113,6 @@ def time_shift(
         >>> pf.plot.time(shifted, ax=axs[1])
         >>> axs[0].set_title('Original signals')
         >>> axs[1].set_title('Shifted signals')
-        >>> plt.tight_layout()
 
     Perform a linear time shift instead and pad with NaNs
 
@@ -1134,7 +1133,6 @@ def time_shift(
         >>> pf.plot.time(shifted, ax=axs[1])
         >>> axs[0].set_title('Original signals')
         >>> axs[1].set_title('Shifted signals')
-        >>> plt.tight_layout()
 
     """
     if mode not in ["linear", "cyclic"]:
@@ -1244,8 +1242,16 @@ def find_impulse_response_delay(impulse_response, N=1):
         # in the strict sense, instead of the appriximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
-        ir_minphase = sgn.minimum_phase(
-            impulse_response.time[ch], n_fft=4*n_samples)
+
+        # minimum phase warns if the input signal is not symmetric, which is
+        # not critical for this application
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", message="h does not appear to by symmetric",
+                category=RuntimeWarning)
+            ir_minphase = sgn.minimum_phase(
+                impulse_response.time[ch], n_fft=4*n_samples)
+
         correlation = sgn.correlate(
             impulse_response.time[ch],
             np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
@@ -1373,7 +1379,7 @@ def find_impulse_response_start(
     """
     ir_squared = np.abs(impulse_response.time)**2
 
-    mask_start = np.int(0.9*impulse_response.n_samples)
+    mask_start = int(0.9*impulse_response.n_samples)
 
     mask = np.arange(mask_start, ir_squared.shape[-1])
     noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
@@ -1536,7 +1542,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal
+        The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
+        of this signal must be `broadcastable
+        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
+        cshape of the first signal.
     mode : string, optional
         A string indicating the size of the output:
 
@@ -1568,8 +1577,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
     Returns
     -------
-    Signal
-        The convolution result as a Signal object.
+    signal : Signal
+        The result of the convolution. The
+        :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
+        of the two input signals.
 
     Notes
     -----
@@ -1603,10 +1614,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         >>>     ax[1].set_title('Convolution Result')
         >>>     ax[1].set_ylim(-1.1, 1.1)
         >>>     ax[1].legend()
-        >>>     fig.tight_layout()
 
 
     """
+    # check input
     if not signal1.sampling_rate == signal2.sampling_rate:
         raise ValueError("The sampling rates do not match")
     fft_norm = pyfar.classes.audio._match_fft_norm(
@@ -1616,6 +1627,11 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
             f"Invalid mode {mode}, needs to be "
             "'full', 'cut' or 'cyclic'.")
 
+    # check cdims
+    if len(signal1.cshape) != len(signal2.cshape):
+        signal1, signal2 = pyfar.utils.broadcast_cdims((signal1, signal2))
+
+    # convolve
     if method == 'overlap_add':
         res = sgn.oaconvolve(signal1.time, signal2.time, mode='full', axes=-1)
     elif method == 'fft':
@@ -1624,6 +1640,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         raise ValueError(
             f"Invalid method {method}, needs to be 'overlap_add' or 'fft'.")
 
+    # make convolution truncated or cyclic
     if mode == 'cut':
         res = res[..., :np.max((signal1.n_samples, signal2.n_samples))]
     elif mode == 'cyclic':
