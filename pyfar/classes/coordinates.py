@@ -712,7 +712,7 @@ class Coordinates():
             "of SamplingSphere."),
                 PendingDeprecationWarning)
 
-        self._sh_order = np.int(value)
+        self._sh_order = int(value)
 
     @property
     def comment(self):
@@ -2209,7 +2209,7 @@ class SamplingSphere(Coordinates):
         """
         Coordinates.__init__(self, x, y, z)
         if sh_order is not None:
-            self._sh_order = np.int(sh_order)
+            self._sh_order = int(sh_order)
         else:
             self._sh_order = None
 
@@ -2221,7 +2221,7 @@ class SamplingSphere(Coordinates):
     @sh_order.setter
     def sh_order(self, value):
         """Set the maximum spherical harmonic order."""
-        self._sh_order = np.int(value)
+        self._sh_order = int(value)
 
 
 def cart2cyl(x, y, z):
