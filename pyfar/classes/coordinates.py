@@ -36,6 +36,8 @@ class Coordinates():
             weights: np.array = None, sh_order=None,
             comment: str = "") -> None:
         """
+        This function will be chanched in pyfar 0.7.0 in favor
+        of from_*.
         Create :py:func:`Coordinates` object with or without coordinate points.
         The points that enter the Coordinates object are defined by the
         `domain`, `convention`, and `unit` as illustrated in the
@@ -135,6 +137,111 @@ class Coordinates():
                 "This function will be deprecated in pyfar 0.7.0 in favor "
                 "of SamplingSphere."),
                     PendingDeprecationWarning)
+
+    @classmethod
+    def from_cartesian(cls, x, y, z):
+        """Create a Coordinates class object from a set of points in the
+        Cartesian coordinate system.
+        Parameters
+        ----------
+        x : ndarray, double
+            x-coordinate
+        y : ndarray, double
+            y-coordinate
+        z : ndarray, double
+            z-coordinate
+        """
+        return Coordinates(x, y, z)
+
+    @classmethod
+    def from_spherical_elevation(
+            cls, azimuth, elevation, radius, weights: np.array = None,
+            comment: str = ""):
+        """Create a Coordinates class object from a set of points in the
+        spherical coordinate system.
+        Parameters
+        ----------
+        azimuth : ndarray, double
+            The azimuth angle in radians
+        elevation : ndarray, double
+            The elevation angle in radians
+        radius : ndarray, double
+            The radius for each point
+        """
+        x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
+        return Coordinates(x, y, z, weights=weights, comment=comment)
+
+    @classmethod
+    def from_spherical_colatitude(
+            cls, azimuth, colatitude, radius, weights: np.array = None,
+            comment: str = ""):
+        """Create a Coordinates class object from a set of points in the
+        spherical coordinate system.
+        Parameters
+        ----------
+        azimuth : ndarray, double
+            The azimuth angle in radians
+        colatitude : ndarray, double
+            The colatitude angle in radians
+        radius : ndarray, double
+            The radius for each point
+        """
+        x, y, z = sph2cart(azimuth, colatitude, radius)
+        return Coordinates(x, y, z, weights=weights, comment=comment)
+
+    @classmethod
+    def from_spherical_side(
+            cls, lateral, polar, radius, weights: np.array = None,
+            comment: str = ""):
+        """Create a Coordinates class object from a set of points in the
+        spherical coordinate system.
+        Parameters
+        ----------
+        azimuth : ndarray, double
+            The azimuth angle in radians
+        colatitude : ndarray, double
+            The colatitude angle in radians
+        radius : ndarray, double
+            The radius for each point
+        """
+        x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
+        return Coordinates(x, y, z, weights=weights, comment=comment)
+
+    @classmethod
+    def from_spherical_front(
+            cls, phi, theta, radius, weights: np.array = None,
+            comment: str = ""):
+        """Create a Coordinates class object from a set of points in the
+        spherical coordinate system.
+        Parameters
+        ----------
+        phi : ndarray, double
+            The phi angle in radians
+        theta : ndarray, double
+            The theta angle in radians
+        radius : ndarray, double
+            The radius for each point
+        """
+        y, z, x = sph2cart(phi, theta, radius)
+        return Coordinates(x, y, z, weights=weights, comment=comment)
+
+    @classmethod
+    def from_cylindrical(
+            cls, azimuth, z, radius_z, weights: np.array = None,
+            comment: str = ""):
+        """Create a Coordinates class object from a set of points in the
+        cylindrical coordinate system.
+        Parameters
+        ----------
+        azimuth : ndarray, double
+            The azimuth angle in radians
+        z : ndarray, double
+            The z cordinate
+        radius_z : ndarray, double
+            The radius in x-y-plane for each point
+        """
+        x, y, z = cyl2cart(azimuth, z, radius_z)
+        return Coordinates(x, y, z, weights=weights, comment=comment)
 
     def set_cart(self, x, y, z, convention='right', unit='met'):
         """
