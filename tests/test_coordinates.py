@@ -1,11 +1,14 @@
+ #!/usr/bin/env python -W ignore::PendingDeprecationWarning
 import numpy as np
 import numpy.testing as npt
 import pytest
 from pytest import raises
 import matplotlib.pyplot as plt
-
-from pyfar import Coordinates
-import pyfar.classes.coordinates as coordinates
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=PendingDeprecationWarning)
+    from pyfar import Coordinates
+    import pyfar.classes.coordinates as coordinates
 
 
 def test_coordinates_init():
