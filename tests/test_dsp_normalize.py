@@ -44,11 +44,11 @@ def test_domains_normalization():
     time = pf.dsp.normalize(signal, domain="time")
     freq = pf.dsp.normalize(signal, domain="freq")
 
-    assert np.max(np.abs(time.time)) == 1
+    assert np.abs(1 - np.max(np.abs(time.time))) < 1e-15
     assert np.max(np.abs(time.freq)) != 1
 
     assert np.max(np.abs(freq.time)) != 1
-    assert np.max(np.abs(freq.freq)) == 1
+    assert np.abs(1 - np.max(np.abs(freq.freq))) < 1e-15
 
 
 @pytest.mark.parametrize('unit, limit1, limit2', (
