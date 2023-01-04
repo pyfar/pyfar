@@ -619,7 +619,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         obj_dict = self.copy().__dict__
         # define required data
         keep = ["_num_fractions", "_frequency_range", "_order",
-                "_sampling_rate"]
+                "_sampling_rate", "_state", "_initialized"]
         # check if all required data is contained
         for k in keep:
             if k not in obj_dict:
@@ -955,7 +955,8 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         obj_dict = self.copy().__dict__
         # define required data
         keep = ["_num_fractions", "_frequency_range", "_overlap",
-                "_slope", "_n_samples", "_sampling_rate"]
+                "_slope", "_n_samples", "_sampling_rate",
+                "_state", "_initialized"]
         # check if all required data is contained
         for k in keep:
             if k not in obj_dict:

@@ -270,6 +270,8 @@ def test_write_fractionaloctave_bands(tmpdir):
     filename = os.path.join(tmpdir, 'fractionaloctave_bands.far')
     fractionaloctave_bands = pyfar.dsp.filter.FractionalOctaveBands(
         frequency_range=(20, 10000))
+    fractionaloctave_bands.init_state((1, ))
+    fractionaloctave_bands.process(pyfar.signals.sine(1000, 441), True)
     io.write(filename, fractionaloctave_bands=fractionaloctave_bands)
     actual = io.read(filename)["fractionaloctave_bands"]
     assert isinstance(actual, pyfar.dsp.filter.FractionalOctaveBands)
@@ -287,6 +289,8 @@ def test_write_reconstructingfractionaloctave_bands(tmpdir):
         pyfar.dsp.filter.ReconstructingFractionalOctaveBands(
             frequency_range=(20, 10000),
             overlap=1)
+    rfractionaloctave_bands.init_state((1, ))
+    rfractionaloctave_bands.process(pyfar.signals.sine(1000, 441), True)
     io.write(filename, rfractionaloctave_bands=rfractionaloctave_bands)
     actual = io.read(filename)["rfractionaloctave_bands"]
     assert isinstance(
