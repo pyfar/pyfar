@@ -4,6 +4,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar import (Signal, FrequencyData)
 import warnings
+import json
+import os
 
 
 def _prepare_plot(ax=None, subplots=None):
@@ -430,3 +432,13 @@ def _phase_label(unwrap, deg):
         raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
     return phase_label
+
+
+def _get_2d_grid_properties():
+
+    file_name = os.path.join(
+        os.path.dirname(__file__), 'plotstyles', '2d_grids.json')
+    with open(file_name, "r") as file:
+        grid_properties = json.load(file)
+
+    return grid_properties

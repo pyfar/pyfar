@@ -9,12 +9,6 @@ from .ticker import (
     MultipleFractionLocator,
     MultipleFractionFormatter)
 
-# define the grid settings
-# (not possible in mplstyle file)
-grid_on = True
-grid_color = "white"
-grid_linestyle = "dotted"
-
 
 def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
              orientation, method, colorbar, ax, **kwargs):
@@ -68,7 +62,7 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
     # colorbar and grid
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
                               "Amplitude in dB" if dB else "Amplitude")
-    ax[0].grid(grid_on, ls=grid_linestyle, color=grid_color)
+    ax[0].grid(**_utils._get_2d_grid_properties())
 
     return ax[0], qm, cb
 
@@ -124,7 +118,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
     # colorbar and grid
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
                               "Magnitude in dB" if dB else "Magnitude")
-    ax[0].grid(grid_on, ls=grid_linestyle, color=grid_color)
+    ax[0].grid(**_utils._get_2d_grid_properties())
 
     return ax[0], qm, cb
 
@@ -175,7 +169,7 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
     # colorbar and grid
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
                               _utils._phase_label(unwrap, deg))
-    ax[0].grid(grid_on, ls=grid_linestyle, color=grid_color)
+    ax[0].grid(**_utils._get_2d_grid_properties())
 
     if colorbar and not deg and (not unwrap or unwrap == "360"):
         # nice tick formatting is not done for unwrap=True. In this case
@@ -241,7 +235,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
 
     # colorbar and grid
     cb = _utils._add_colorbar(colorbar, fig, ax, qm, f"Group delay in {unit}")
-    ax[0].grid(grid_on, ls=grid_linestyle, color=grid_color)
+    ax[0].grid(**_utils._get_2d_grid_properties())
 
     return ax[0], qm, cb
 
@@ -382,7 +376,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ax[0].set_yscale('symlog')
         ax[0].yaxis.set_major_locator(LogLocatorITAToolbox())
     ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
-    ax[0].grid(grid_on, ls=grid_linestyle, color=grid_color)
+    ax[0].grid(**_utils._get_2d_grid_properties())
 
     # colorbar
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,

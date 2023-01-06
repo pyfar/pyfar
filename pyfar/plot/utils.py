@@ -280,3 +280,22 @@ def shortcuts(show=True):
         print(" ")
 
     return short_cuts
+
+
+def set_2d_grid_properties(**kwargs):
+
+    # default parameter
+    defaults = {"visible": True,
+                "color": "white",
+                "linestyle": "dotted"}
+
+    # add defaults if not passed
+    for key, value in defaults.items():
+        if key not in kwargs:
+            kwargs[key] = value
+
+    # write to json file
+    file_name = os.path.join(
+        os.path.dirname(__file__), 'plotstyles', '2d_grids.json')
+    with open(file_name, "w") as file:
+        json.dump(kwargs, file, indent=4)

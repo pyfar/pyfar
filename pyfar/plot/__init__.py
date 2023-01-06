@@ -37,7 +37,8 @@ from .utils import (
     context,
     use,
     color,
-    shortcuts
+    shortcuts,
+    set_2d_grid_properties
 )
 
 __all__ = [
@@ -63,5 +64,6 @@ __all__ = [
     'context',
     'use',
     'color',
-    'shortcuts'
+    'shortcuts',
+    'set_2d_grid_properties'
 ]
