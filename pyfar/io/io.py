@@ -378,6 +378,7 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     * This function is based on :py:func:`soundfile.write`.
     * Except for the subtypes ``'FLOAT'``, ``'DOUBLE'`` and ``'VORBIS'`` ´
       amplitudes larger than +/- 1 are clipped.
+    * Only integer values are allowed for ``signal.sampling_rate``.
 
     """
     if not soundfile_imported:
@@ -386,6 +387,16 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
 
     sampling_rate = signal.sampling_rate
     data = signal.time
+
+    # check sampling rate (libsoundfile only support ints)
+    if not isinstance(sampling_rate, int):
+        if sampling_rate % 1:
+            raise ValueError((
+                f"The sampling rate is {sampling_rate} but must have an "
+                f"integer value, e.g., {int(sampling_rate)} or "
+                f"{int(sampling_rate + 1)} (See pyfar.dsp.resample for help)"))
+        else:
+            sampling_rate = int(sampling_rate)
 
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
