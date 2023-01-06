@@ -81,14 +81,10 @@ Before you submit a pull request, check that it meets these guidelines:
 Function and Class Guidelines
 -----------------------------
 
-pyfar functions and classes should meet the following
-- The function name should describe what the function does
-- All parameters and returns are explained in the docstring
-
 pyfar functions and classes should raise errors if
 
 - Audio objects do not have the correct type (e.g. a TimeData instance is passed but a Signal instance is required)
-- Strings input specifying function option have invalid values (e.g. 'linea' was passed but 'linear' was required)
+- String input that specifies a function option has an invalid valuee (e.g. 'linea' was passed but 'linear' was required)
 - Invalid parameter combinations are used
 
 pyfar functions and classes should raise warnings if
