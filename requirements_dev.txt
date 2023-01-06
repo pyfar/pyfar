@@ -5,7 +5,7 @@ watchdog
 flake8
 tox
 coverage
-Sphinx
+Sphinx<5.3
 twine
 pytest
 pytest-runner
