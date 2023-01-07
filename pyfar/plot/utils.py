@@ -197,9 +197,11 @@ def color(color):
 def shortcuts(show=True, report=False, layout="console"):
     """Show and return keyboard shortcuts for interactive figures.
 
-    Note that the shortcuts are listened in the
-    :py:mod:`plots concepts <pyfar._concepts.plots>` and are only available if
-    using an interactive backend in Matplotlib, e.g., by ``%matplotlib qt``.
+    Note that the shortcuts are only available if using an interactive
+    `Matplotlib backend
+    <https://matplotlib.org/stable/users/explain/backends.html>`_
+
+    .. include:: ../../docs/concepts/resources/plot_shortcuts.rst
 
     Parameters
     ----------
