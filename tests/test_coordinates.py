@@ -1,4 +1,4 @@
- #!/usr/bin/env python -W ignore::PendingDeprecationWarning
+#!/usr/bin/env python -W ignore::PendingDeprecationWarning
 import numpy as np
 import numpy.testing as npt
 import pytest
