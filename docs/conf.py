@@ -38,7 +38,6 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'matplotlib.sphinxext.plot_directive',
-    # 'sphinx.ext.imgmath',
     'sphinx.ext.mathjax',
     'autodocsumm']
 
@@ -49,9 +48,6 @@ autodoc_default_options = {'autosummary': True}
 # show the code of plots that follows the command .. plot:: based on the
 # package matplotlib.sphinxext.plot_directive
 plot_include_source = True
-
-# imgmath_latex_preamble = r'\usepackage{array}'
-# imgmath_image_format = 'svg'
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ['_templates']
