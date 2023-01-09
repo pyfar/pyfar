@@ -388,21 +388,104 @@ def test_find_nearest_points_distance_2d(coords):
                 find.cartesian, coords[idx].cartesian)
 
 
-def test_find_nearest_by_distance_angular():
-    """Tests returns of find_nearest_sph."""
-    # test only 1D case since most of the code from self.find_nearest_k is used
-    az = np.linspace(0, 40, 5)
-    coords = Coordinates(az, 0, 1, 'sph', 'top_elev', 'deg')
-    find = Coordinates(25, 0, 1, 'sph', 'top_elev', 'deg')
-    i, m = coords.find_nearest_by_distance(find, 5, 'angular')
-    npt.assert_allclose(i, np.array([[2, 3]]))
-    npt.assert_allclose(m, np.array([0, 0, 1, 1, 0]))
+# @pytest.mark.parametrize(
+#     'azimuth', [
+#         np.arange(0, 60, 10),
+#         np.arange(0, 60, 10).reshape((2, 3)),
+#         np.arange(0, 60, 10).reshape((3, 2))
+#     ])
+# @pytest.mark.parametrize(
+#     'find_azimuth', [
+#         20,
+#         30,
+#         np.array([20, 30]),
+#         [[20, 20], [20, 20]]
+#     ])
+# def test_find_nearest_angular(azimuth, find_azimuth):
+#     """Tests returns of find_nearest_sph."""
+#     # test only 1D case since most of the code from self.find_nearest_k is
+# used
+#     coords = Coordinates.from_spherical_elevation(azimuth/180*np.pi, 0, 1)
+#     find = Coordinates.from_spherical_elevation(find_azimuth/180*np.pi, 0, 1)
+#     i = coords.find_nearest_angular(find, 5)
+#     assert find == coords[i]
 
-    # test search with empty results
-    i, m = coords.find_nearest_by_distance(find, 1, 'angular')
-    assert len(i) == 1
-    assert i[0].size == 0
-    npt.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
+
+@pytest.mark.parametrize(
+    'azimuth', [
+        np.arange(0, 60, 10),
+        np.arange(0, 60, 10).reshape((2, 3)),
+        np.arange(0, 60, 10).reshape((3, 2))
+    ])
+@pytest.mark.parametrize(
+    'find_azimuth', [20, 30, 0])
+def test_find_nearest_angular(azimuth, find_azimuth):
+    # test normal condition with multiple inputs
+    coords = Coordinates.from_spherical_elevation(azimuth/180*np.pi, 0, 1)
+    find = Coordinates.from_spherical_elevation(find_azimuth/180*np.pi, 0, 1)
+    i = coords.find_nearest_angular(find, 5)
+    assert find == coords[i]
+
+
+@pytest.mark.parametrize(
+    'x', [
+        np.arange(0, 60, 10),
+        np.arange(0, 60, 10).reshape((2, 3)),
+        np.arange(0, 60, 10).reshape((3, 2))
+    ])
+@pytest.mark.parametrize('find_x', [20, 30, 0])
+def test_find_nearest_euclidean(x, find_x):
+    # test normal condition with multiple inputs
+    coords = Coordinates(x, 0, 1)
+    find = Coordinates(find_x, 0, 1)
+    i = coords.find_nearest_euclidean(find, 5)
+    npt.assert_array_almost_equal(find.cartesian, coords[i].cartesian)
+    i = coords.find_nearest_euclidean(find, 500)
+    actual = coords[i].cartesian
+    coords = Coordinates(x.flatten(), 0, 1)
+    npt.assert_array_almost_equal(coords.cartesian, actual)
+
+
+@pytest.mark.parametrize(
+    'azimuth', [
+        np.arange(0, 60, 10),
+        np.arange(0, 60, 10).reshape((2, 3)),
+        np.arange(0, 60, 10).reshape((3, 2))
+    ])
+@pytest.mark.parametrize(
+    'find_azimuth', [20, 30, 0])
+def test_find_nearest_angular_tol_radius(azimuth, find_azimuth):
+    # test tolerance radius
+    radius = np.ones(azimuth.shape)
+    radius[..., -1] = 5
+    coords = Coordinates.from_spherical_elevation(azimuth/180*np.pi, 0, radius)
+    find = Coordinates.from_spherical_elevation(find_azimuth/180*np.pi, 0, 1)
+    coords_copy = coords.copy()
+    i = coords.find_nearest_angular(find, 5, atol_radius=5)
+    npt.assert_array_almost_equal(find.cartesian, coords[i].cartesian)
+    assert coords_copy == coords
+    with raises(ValueError, match='if all points have the same'):
+        coords.find_nearest_angular(find, 5, atol_radius=1)
+
+
+def test_find_nearest_angular_error():
+    coords = Coordinates.from_spherical_elevation(
+        np.arange(0, 60, 10)/180*np.pi, 0, 1)
+    find_error = Coordinates.from_spherical_elevation(
+        np.arange(0, 20, 10)/180*np.pi, 0, 1)
+    find = Coordinates.from_spherical_elevation(
+        0/180*np.pi, 0, 1)
+
+    with raises(ValueError, match='only works for one input.'):
+        coords.find_nearest_angular(find_error, 5)
+    with raises(ValueError, match='distance must be >= 0 and <= 180.'):
+        coords.find_nearest_angular(find, -5)
+    with raises(
+            ValueError,
+            match='absolute radius tolerance \'atol_radius\' must be >= 0.'):
+        coords.find_nearest_angular(find, 5, atol_radius=-5)
+    with raises(ValueError, match='absolute tolerance \'atol\' must be >= 0.'):
+        coords.find_nearest_angular(find, 5, atol=-5)
 
 
 def test_find_nearest_by_distance_angular_error():

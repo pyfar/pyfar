@@ -1289,7 +1289,7 @@ class Coordinates():
                          show=False, atol=1e-15):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of :py:func:`find_nearest_by_distance`.
+        of :py:func:`find_nearest_angular`.
         Find coordinates within certain angular distance to the query points.
 
         Parameters
@@ -1362,6 +1362,181 @@ class Coordinates():
             coords, show, distance, 'sph', atol)
 
         return index, mask
+
+    def find_nearest_angular(
+            self, coordinate, distance, atol=1e-15, atol_radius=1e-15):
+        """
+        Find coordinates within certain angular distance to the query points.
+
+        Parameters
+        ----------
+        coordinate : pf.Coordinate
+            one coorinate to which the nearest neighbors are searched.
+        distance : number
+            Great circle distance in degrees in which the nearest points are
+            searched. Must be >= 0 and <= 180.
+        atol : float, optional
+            a tolerance that is added to `distance`. The default is ``1e-15``.
+        atol_radius : float, optional
+            a tolerance that is added to `radius`, since the radius need to be
+            same. The default is ``1e-15``.
+
+        Returns
+        -------
+        index : numpy array of ints
+            The locations of the neighbors in the getter methods (e.g.,
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
+            Missing neighbors are indicated with ``csize``. Also see Notes
+            below.
+
+        Notes
+        -----
+        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (`csize`, 3) before they are passed to ``cKDTree``. The index that
+        is returned refers to the reshaped coordinate points. To access the
+        points for example use
+
+        ``points_reshaped = points.get_sph().reshape((points.csize, 3))``
+        ``points_reshaped[index]``
+
+        Examples
+        --------
+
+        Find top points within a distance of 45 degrees
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
+        """
+        # check the input
+        if distance <= 0 or distance >= 180:
+            raise ValueError('distance must be >= 0 and <= 180.')
+        if coordinate.cdim != 1 or coordinate.cshape[0] != 1:
+            raise ValueError('only works for one input.')
+        if atol_radius <= 0:
+            raise ValueError(
+                'absolute radius tolerance \'atol_radius\' must be >= 0.')
+        if atol <= 0:
+            raise ValueError('absolute tolerance \'atol\' must be >= 0.')
+
+        # get radius and check for equality
+        radius = self.radius
+        delta_radius = np.max(radius) - np.min(radius)
+        if delta_radius > atol_radius:
+            raise ValueError(
+                'find_nearest_angular only works if all points have the same '
+                f'radius. Differences are larger than {atol_radius}')
+        radius = np.max(radius)
+
+        # make radius same eqaul again
+        coords = self.copy()
+        coords.radius = coordinate.radius
+
+        # get KDTree
+        kdtree = coords._make_kdtree()
+
+        # convert great circle to euclidean distance
+        x, y, z = sph2cart([0, distance / 180 * np.pi],
+                           [np.pi / 2, np.pi / 2],
+                           [radius, radius])
+        value = np.sqrt((x[0] - x[1])**2
+                        + (y[0] - y[1])**2
+                        + (z[0] - z[1])**2)
+        # points within great circle distance
+        index = kdtree.query_ball_point(coordinate.cartesian, value + atol)
+        if self.cdim == 1:
+            return tuple([np.array(index[0][0])], )
+        else:
+            return np.where(
+                index[0][0] == np.arange(self.csize).reshape(self.cshape))
+
+    def find_nearest_euclidean(
+            self, coordinate, distance, atol=1e-15, atol_radius=1e-15):
+        """
+        This function will be deprecated in pyfar 0.7.0 in favor
+        of :py:func:`find_nearest_by_distance`.
+        Find coordinates within a certain distance in meters to query points.
+
+        Parameters
+        ----------
+        points_i : array like, number
+            first, second and third coordinate of the points to which the
+            nearest neighbors are searched.
+        distance : number
+            Euclidean distance in meters in which the nearest points are
+            searched. Must be >= 0.
+        domain : string, optional
+            domain of the points. The default is ``'cart'``.
+        convention: string, optional
+            convention of points. The default is ``'right'``.
+        unit : string, optional
+            unit of the points. The default is ``'met'`` for meters.
+        show : bool, optional
+            show a plot of the coordinate points. The default is ``False``.
+        atol : float, optional
+            a tolerance that is added to `distance`. The default is`` 1e-15``.
+
+        Returns
+        -------
+        index : numpy array of ints
+            The locations of the neighbors in the getter methods (e.g.,
+            ``get_cart``). Dimension as in :py:func:`~find_nearest_k`.
+            Missing neighbors are indicated with ``csize``. Also see Notes
+            below.
+
+        Notes
+        -----
+        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        (N, 3) array. The coordinate points in self are thus reshaped to
+        (`csize`, 3) before they are passed to ``cKDTree``. The index that
+        is returned refers to the reshaped coordinate points. To access the
+        points for example use
+
+        >>> points_reshaped = self.get_cart().reshape((self.csize, 3))
+        >>> points_reshaped[index]
+
+        Examples
+        --------
+
+        Find frontal points within a distance of 0.5 meters
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
+
+        """
+        # check the input
+        if distance <= 0:
+            raise ValueError('distance must be >= 0.')
+        if coordinate.cdim != 1 or coordinate.cshape[0] != 1:
+            raise ValueError('only works for one input.')
+        if atol_radius <= 0:
+            raise ValueError(
+                'absolute radius tolerance \'atol_radius\' must be >= 0.')
+        if atol <= 0:
+            raise ValueError('absolute tolerance \'atol\' must be >= 0.')
+
+        # get KDTree
+        kdtree = self._make_kdtree()
+
+        # points within euclidean distance
+        index = kdtree.query_ball_point(coordinate.cartesian, distance + atol)
+        if self.cdim == 1:
+            return tuple([np.array(index[0])], )
+        else:
+            bla = []
+            for i in index[0]:
+                bla.append(np.where(
+                    i == np.arange(self.csize).reshape(self.cshape)))
+            bla = np.transpose(np.array(bla)[..., 0])
+            return tuple(bla)
+            return np.where(
+                index[0] == np.arange(self.csize).reshape(self.cshape))
 
     def find_nearest_points(self, coords, number_of_points=1):
         """
@@ -2192,7 +2367,7 @@ class Coordinates():
         if self._x.shape == ():
             return eq_x & eq_y & eq_z & eq_weights & eq_comment \
                 & eq_sh_order & eq_system
-        return all(eq_x & eq_y & eq_z) & eq_weights & eq_comment \
+        return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment \
             & eq_sh_order & eq_system
 
     def _check_empty(self):
