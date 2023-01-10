@@ -124,7 +124,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         >>> import numpy as np
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
-        >>> pf.plot.time_2d(impulses)
+        >>> pf.plot.time_2d(impulses, unit='ms')
     """
 
     with context(style):
@@ -661,7 +661,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         >>> import numpy as np
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
-        >>> pf.plot.time_freq_2d(impulses, dB_freq=False)
+        >>> pf.plot.time_freq_2d(impulses, dB_freq=False, unit='ms')
     """
 
     with context(style):

@@ -70,9 +70,9 @@ class GammatoneBands():
         >>> # Imaginary part gives the Hilbert Transform thereof
         >>> # Absolute value gives the Envelope
         >>> plt.figure()
-        >>> ax = pf.plot.time(real[2], label='real part')
-        >>> pf.plot.time(imag[2], label='imaginary part')
-        >>> pf.plot.time(env[2], label='envelope')
+        >>> ax = pf.plot.time(real[2], label='real part', unit='ms')
+        >>> pf.plot.time(imag[2], label='imaginary part', unit='ms')
+        >>> pf.plot.time(env[2], label='envelope', unit='ms')
         >>> plt.legend()
         >>>
         >>> # show the magnitude response of the filter bank
@@ -85,8 +85,8 @@ class GammatoneBands():
         >>> # using the filter bank parameter 'resolution'
         >>> y = GFB.reconstruct(real, imag)
         >>> plt.figure()
-        >>> ax = pf.plot.time_freq(y, label="reconstructed impulse")
-        >>> ax[0].set_xlim(0, .02)
+        >>> ax = pf.plot.time_freq(y, label="reconstructed impulse", unit='ms')
+        >>> ax[0].set_xlim(0, 20)
         >>> ax[1].set_ylim(-40, 5)
         >>> ax[0].legend()
         >>>
@@ -97,9 +97,9 @@ class GammatoneBands():
         >>>
         >>> y = GFB.reconstruct(real, imag)
         >>> plt.figure()
-        >>> ax = pf.plot.time_freq(
-        ...     y, label="manipulated and reconstructed and impulse")
-        >>> ax[0].set_xlim(0, .02)
+        >>> ax = pf.plot.time_freq(y, unit='ms',
+        ...     label="manipulated and reconstructed and impulse")
+        >>> ax[0].set_xlim(0, 20)
         >>> ax[1].set_ylim(-40, 5)
         >>> ax[0].legend()
 
