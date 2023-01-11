@@ -2087,18 +2087,18 @@ def normalize(signal, reference_method='max', domain='time',
         normalization.
     nan_policy: string, optional
         Define how to handle NaNs in input signal.
-        
+
         ``'propagate'``
            If the input signal includes NaNs within the time or frequency range
            , NaN will be used as normalization reference. The resulting output
            signal values are NaN.
         ``'omit'``
            NaNs will be omitted in the normalization. Cshape will still remain,
-           as the normalized signal still includes the NaNs. 
+           as the normalized signal still includes the NaNs.
         ``'raise'``
             A ``'ValueError'`` will be raised, if the input signal includes
             NaNs.
-        
+
         The default is 'raise'.
     return_reference: bool
         If ``return_reference=True``, the function also returns the `reference`
