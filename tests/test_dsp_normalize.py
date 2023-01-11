@@ -101,12 +101,18 @@ def test_value_return():
                         pf.TimeData([1, np.nan, 2], [1, 2, 3]),
                         pf.FrequencyData([1, np.nan, 2], [1, 2, 3])))
 def test_nan_value_normalization(data):
+    # Test normalization with data including NaNs.
     if data.domain == 'time':
-        norm = pf.dsp.normalize(data)
-        npt.assert_equal(norm.time[0], [0.5, np.nan, 1.0])
+        norm_prop = pf.dsp.normalize(data, nan_policy='propagate')
+        npt.assert_equal(norm_prop.time[0], [np.nan, np.nan, np.nan])
+        norm_omit = pf.dsp.normalize(data, nan_policy='omit')
+        npt.assert_equal(norm_omit.time[0], [0.5, np.nan, 1.0])
     else:
-        norm = pf.dsp.normalize(data, domain='freq')
-        npt.assert_equal(norm.freq[0], [0.5, np.nan, 1.0])
+        norm_prop = pf.dsp.normalize(data, domain='freq',
+                                     nan_policy='propagate')
+        npt.assert_equal(norm_prop.freq[0], [np.nan, np.nan, np.nan])
+        norm_omit = pf.dsp.normalize(data, domain='freq', nan_policy='omit')
+        npt.assert_equal(norm_omit.freq[0], [0.5, np.nan, 1.0])
 
 
 def test_error_raises():
@@ -145,3 +151,7 @@ def test_error_raises():
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='time', unit='Hz')
     with raises(ValueError, match=("Upper and lower limit are identical")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=(1, 1))
+    with raises(ValueError, match=("nan_policy has to be 'propagate',")):
+        pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), nan_policy='invalid')
+    with raises(ValueError, match=("The signal includes NaNs.")):
+        pf.dsp.normalize(pf.Signal([0, np.nan, 0], 44100), nan_policy='raise')
