@@ -23,7 +23,7 @@
    * - 8, ctrl+shift+g
      - :py:func:`~pyfar.plot.freq_group_delay`
 
-Note that not all plots are available for TimeData and FrequencyData objects as detailed in the documentation of plots.
+Note that not all plots are available for TimeData and FrequencyData objects as detailed in the :py:mod:`plots module <pyfar.plot>` documentation.
 
 **Use these shortcuts to control the plot**
 
@@ -78,7 +78,7 @@ Note that not all plots are available for TimeData and FrequencyData objects as 
 
 - Moving and zooming the x and y axes is supported by all plots.
 - Moving and zooming the colormap is only supported by plots that have a colormap.
-- Toggling the x-axis is supported by: time, freq, phase, group_delay, spectrogram, time_freq, freq_phase, freq_group_delay
-- Toggling the y-axis is supported by: time, freq, phase, group_delay, spectrogram, time_freq, freq_phase, freq_group_delay
-- Toggling the colormap is supported by: spectrogram
+- Toggling the x-axis is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay`
+- Toggling the y-axis is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay`
+- Toggling the colormap is supported by: :py:func:`~pyfar.plot.spectrogram`
 - Toggling between line and 2D plots is not supported by: spectrogram

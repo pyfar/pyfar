@@ -277,8 +277,8 @@ def shortcuts(show=True, report=False, layout="console"):
                            f'     - :py:func:`~pyfar.plot.{p}`\n')
 
         sc_str += ("\nNote that not all plots are available for TimeData and "
-                   "FrequencyData objects as detailed in the documentation of "
-                   "plots.\n\n")
+                   "FrequencyData objects as detailed in the "
+                   ":py:mod:`plot module <pyfar.plot>` documentation.\n\n")
 
         # shortcut for controlling the plot
         if layout == "console":
@@ -313,16 +313,20 @@ def shortcuts(show=True, report=False, layout="console"):
         elif layout == "sphinx":
             sc_str += "\n**Notes on plot controls**\n\n"
 
+        x_toggle_str = [f":py:func:`~pyfar.plot.{x}`" for x in x_toggle]
+        y_toggle_str = [f":py:func:`~pyfar.plot.{y}`" for y in y_toggle]
+        cm_toggle_str = [f":py:func:`~pyfar.plot.{c}`" for c in cm_toggle]
+
         sc_str += ("- Moving and zooming the x and y axes is supported by all "
                    "plots.\n"
                    "- Moving and zooming the colormap is only supported by "
                    "plots that have a colormap.\n"
                    "- Toggling the x-axis is supported by: "
-                   f"{', '.join(x_toggle)}\n"
+                   f"{', '.join(x_toggle_str)}\n"
                    "- Toggling the y-axis is supported by: "
-                   f"{', '.join(y_toggle)}\n"
+                   f"{', '.join(y_toggle_str)}\n"
                    "- Toggling the colormap is supported by: "
-                   f"{', '.join(cm_toggle)}\n"
+                   f"{', '.join(cm_toggle_str)}\n"
                    "- Toggling between line and 2D plots is not supported by:"
                    " spectrogram\n")
 
