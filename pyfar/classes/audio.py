@@ -825,7 +825,7 @@ class Signal(FrequencyData, TimeData):
         """Length of the object which is the number of samples stored.
         """
         warnings.warn(
-            ("len(Signal) wil be deprecated in pyfar 0.8.0 "
+            ("len(Signal) will be deprecated in pyfar 0.8.0 "
              "Use Signal.n_samples instead"), PyfarDeprecationWarning)
         return self.n_samples
 
