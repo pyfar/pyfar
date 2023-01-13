@@ -2155,7 +2155,7 @@ def normalize(signal, reference_method='max', domain='time',
         >>> # Plot input and normalized Signal
         >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal',
         ...                        unit='ms')
-        >>> pf.plot.time_freq(signal, label='Original Signal')
+        >>> pf.plot.time_freq(signal, label='Original Signal', unit='ms')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
     """
