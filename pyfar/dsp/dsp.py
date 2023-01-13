@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 
 
@@ -1005,7 +1006,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     if mode in ['before', 'after']:
         warnings.warn(('Mode "before" and "after" will be renamed into '
                        '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), DeprecationWarning)
+                       'Pyfar 0.8.0.'), PyfarDeprecationWarning)
 
         mode = 'beginning' if mode == 'before' else 'end'
 

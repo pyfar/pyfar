@@ -3,6 +3,7 @@ from pyfar.plot.utils import context
 from .. import Signal
 from . import _two_d
 from . import _interaction as ia
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 
 
@@ -1079,7 +1080,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     if yscale is not None:
         warnings.warn(('The yscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = yscale
 
     with context(style):
