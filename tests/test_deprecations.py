@@ -13,6 +13,7 @@ Test deprecations. For each deprecation two things must be tested:
 import numpy as np
 from packaging import version
 import pathlib
+import re
 
 import pytest
 from unittest.mock import patch
@@ -170,6 +171,7 @@ def test__check_time_unit():
             pf.plot._utils._check_time_unit(None)
 
 
+# deprecate in 0.8.0 ----------------------------------------------------------
 def test_pad_zero_modi():
     with pytest.warns(PyfarDeprecationWarning,
                       match='Mode "before" and "after" will be renamed into'):
@@ -179,3 +181,14 @@ def test_pad_zero_modi():
         with pytest.raises(ValueError):
             # remove mode 'before' and 'after' from pyfar 0.8.0!
             pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, mode='before')
+
+
+def test_signal_len():
+    with pytest.warns(PyfarDeprecationWarning,
+                      match=re.escape("len(Signal) will be deprecated")):
+        len(pf.Signal([1, 2, 3], 44100))
+
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+        with pytest.raises(TypeError, match=re.escape("had no len()")):
+            # remove Signal.__len__ from pyfar 0.8.0!
+            len(pf.Signal([1, 2, 3], 44100))
