@@ -1436,17 +1436,14 @@ class Coordinates():
         coords.radius = coordinate.radius
 
         # get KDTree
-        kdtree = coords._make_kdtree()
+        spherical = coords.spherical_colatitude.copy()
+        spherical[..., 2] = 1
+        kdtree = cKDTree(spherical.reshape((self.csize, 3)))
+        find = coordinate.spherical_colatitude.copy()
+        find[..., 2] = 1
 
         # convert great circle to euclidean distance
-        x, y, z = sph2cart([0, distance / 180 * np.pi],
-                           [np.pi / 2, np.pi / 2],
-                           [radius, radius])
-        value = np.sqrt((x[0] - x[1])**2
-                        + (y[0] - y[1])**2
-                        + (z[0] - z[1])**2)
-        # points within great circle distance
-        index = kdtree.query_ball_point(coordinate.cartesian, value + atol)
+        index = kdtree.query_ball_point(find, distance/180.*np.pi + atol)
         if self.cdim == 1:
             return tuple([np.array(index[0][0])], )
         else:

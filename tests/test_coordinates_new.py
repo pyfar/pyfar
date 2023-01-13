@@ -418,13 +418,14 @@ def test_find_nearest_points_distance_2d(coords):
         np.arange(0, 60, 10).reshape((3, 2))
     ])
 @pytest.mark.parametrize(
-    'find_azimuth', [20, 30, 0])
+    'find_azimuth', [0, 10, 20, 30, 40, 50])
 def test_find_nearest_angular(azimuth, find_azimuth):
     # test normal condition with multiple inputs
     coords = Coordinates.from_spherical_elevation(azimuth/180*np.pi, 0, 1)
     find = Coordinates.from_spherical_elevation(find_azimuth/180*np.pi, 0, 1)
     i = coords.find_nearest_angular(find, 5)
-    assert find == coords[i]
+    npt.assert_array_almost_equal(
+        find.spherical_colatitude, coords[i].spherical_colatitude)
 
 
 @pytest.mark.parametrize(
@@ -433,7 +434,7 @@ def test_find_nearest_angular(azimuth, find_azimuth):
         np.arange(0, 60, 10).reshape((2, 3)),
         np.arange(0, 60, 10).reshape((3, 2))
     ])
-@pytest.mark.parametrize('find_x', [20, 30, 0])
+@pytest.mark.parametrize('find_x', [0, 10, 20, 30, 40, 50])
 def test_find_nearest_euclidean(x, find_x):
     # test normal condition with multiple inputs
     coords = Coordinates(x, 0, 1)
@@ -453,7 +454,7 @@ def test_find_nearest_euclidean(x, find_x):
         np.arange(0, 60, 10).reshape((3, 2))
     ])
 @pytest.mark.parametrize(
-    'find_azimuth', [20, 30, 0])
+    'find_azimuth', [0, 10, 20, 30, 40, 50])
 def test_find_nearest_angular_tol_radius(azimuth, find_azimuth):
     # test tolerance radius
     radius = np.ones(azimuth.shape)
@@ -462,7 +463,8 @@ def test_find_nearest_angular_tol_radius(azimuth, find_azimuth):
     find = Coordinates.from_spherical_elevation(find_azimuth/180*np.pi, 0, 1)
     coords_copy = coords.copy()
     i = coords.find_nearest_angular(find, 5, atol_radius=5)
-    npt.assert_array_almost_equal(find.cartesian, coords[i].cartesian)
+    npt.assert_array_almost_equal(find.theta, coords[i].theta)
+    npt.assert_array_almost_equal(find.phi, coords[i].phi)
     assert coords_copy == coords
     with raises(ValueError, match='if all points have the same'):
         coords.find_nearest_angular(find, 5, atol_radius=1)
