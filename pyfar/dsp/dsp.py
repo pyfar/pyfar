@@ -1,6 +1,7 @@
 import multiprocessing
 import numpy as np
 from scipy import signal as sgn
+from scipy import stats
 import pyfar
 from pyfar.dsp import fft
 import warnings
@@ -1997,7 +1998,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
 
 def normalize(signal, reference_method='max', domain='time',
               channel_handling='individual', target=1, limits=(None, None),
-              unit=None, nan_policy='raise', return_reference=False):
+              unit=None, return_reference=False, nan_policy='raise'):
     """
     Apply a normalization.
 
@@ -2085,6 +2086,9 @@ def normalize(signal, reference_method='max', domain='time',
         The default ``None`` assumes that `limits` is given in samples in case
         of time domain normalization and in bins in case of frequency domain
         normalization.
+    return_reference: bool
+        If ``return_reference=True``, the function also returns the `reference`
+        values for the channels. The default is ``False``.
     nan_policy: string, optional
         Define how to handle NaNs in input signal.
 
@@ -2100,9 +2104,6 @@ def normalize(signal, reference_method='max', domain='time',
             NaNs.
 
         The default is 'raise'.
-    return_reference: bool
-        If ``return_reference=True``, the function also returns the `reference`
-        values for the channels. The default is ``False``.
 
     Returns
     -------
@@ -2206,13 +2207,11 @@ def normalize(signal, reference_method='max', domain='time',
             input_data = np.abs(signal.freq)
     # get values for normalization max or mean
         if reference_method == 'max':
-            get_max = np.nanmax if nan_policy == 'omit' else np.max
-            reference = get_max(input_data[..., limits[0]:limits[1]],
-                                axis=-1)
+            reference = stats.tmax(input_data[..., limits[0]:limits[1]],
+                                   axis=-1, nan_policy=nan_policy)
         elif reference_method == 'mean':
-            get_mean = np.nanmean if nan_policy == 'omit' else np.mean
-            reference = get_mean(input_data[..., limits[0]:limits[1]],
-                                 axis=-1)
+            reference = stats.pmean(input_data[..., limits[0]:limits[1]], 1,
+                                    axis=-1, nan_policy=nan_policy)
     else:
         raise ValueError(("reference_method must be 'max', 'mean', 'power', "
                          "'energy' or 'rms'."))
