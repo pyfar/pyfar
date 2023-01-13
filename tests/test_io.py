@@ -9,6 +9,7 @@ from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 import os.path
 import pathlib
 import soundfile
+import re
 
 from pyfar import io
 from pyfar import Signal
@@ -556,6 +557,26 @@ def test_write_audio_clip(sf_write_mock):
     with pytest.warns(Warning, match='clipped'):
         pyfar.io.write_audio(
             signal=signal, filename='test.wav', subtype='PCM_16')
+
+
+def test_write_audio_sampling_rate_type(tmpdir):
+    """Test sampling_rates of type float"""
+
+    # test with integer value as float
+    signal = pyfar.signals.impulse(1024)
+    signal.sampling_rate = 44100.0
+    pyfar.io.write_audio(
+        signal, os.path.join(tmpdir, 'test_sampling_rate_float_1.wav'))
+
+    # test with non-integer value
+    signal.sampling_rate = 44100.5
+    error_message = re.escape((
+        "The sampling rate is 44100.5 but must have an "
+        "integer value, e.g., 44100 "
+        "or 44101 (See pyfar.dsp.resample for help)"))
+    with pytest.raises(ValueError, match=error_message):
+        pyfar.io.write_audio(
+            signal, os.path.join(tmpdir, 'test_sampling_rate_float_2.wav'))
 
 
 @pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())
