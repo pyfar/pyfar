@@ -15,15 +15,9 @@ Quick listening is, e.g., possible with `sounddevice
 """
 import os
 import numpy as np
-
 import urllib3
-from urllib3.exceptions import InsecureRequestWarning
-from urllib3 import disable_warnings
-
 import pyfar as pf
 
-# disable warning about non-certified connection
-disable_warnings(InsecureRequestWarning)
 # path for saving/reading files
 file_dir = os.path.join(os.path.dirname(__file__), 'files')
 if not os.path.isdir(file_dir):
@@ -391,25 +385,28 @@ def head_related_impulse_responses(
 
     # get indices of source positions
     if position == "horizontal":
-        _, mask = sources.find_slice('elevation', 'deg', 0)
+        idx, _ = sources.find_slice('elevation', 'deg', 0)
     elif position == "median":
-        _, mask = sources.find_slice('lateral', 'deg', 0)
+        idx, _ = sources.find_slice('lateral', 'deg', 0)
+        # sort positions according to polar angle
+        polar = sources.get_sph("side", "deg")[idx, 1].flatten()
+        idx = (idx[0][np.argsort(polar)], )
     else:
-        mask = np.full((358, ), False)
+        idx = []
         for pos in position:
-            _, mask_current = sources.find_nearest_sph(
+            idx_current, _ = sources.find_nearest_sph(
                 pos[0], pos[1], 1.7, distance=0,
                 domain="sph", convention="top_elev", unit="deg")
-            if np.any(mask_current):
-                mask = mask | mask_current
+            if idx_current:
+                idx.append(idx_current[0])
             else:
                 raise ValueError((
                     f"HRIR for azimuth={pos[0]} and elevation={pos[1]} degrees"
                     " is not available. See help for more information."))
 
     # select data for desired source positions
-    hrirs.time = hrirs.time[mask]
-    sources = sources[mask]
+    hrirs.time = hrirs.time[idx]
+    sources = sources[idx]
 
     # diffuse field compensation
     if diffuse_field_compensation:
@@ -513,7 +510,7 @@ def _load_files(data):
     # download files
     print(f"Loading {data} data. This is only done once.")
 
-    http = urllib3.PoolManager(cert_reqs=False)
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
     url = 'https://pyfar.org/wp-content/uploads/pyfar_files/'
 
     for file in files:

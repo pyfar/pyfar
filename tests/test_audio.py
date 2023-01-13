@@ -1,5 +1,6 @@
 import pytest
 from pyfar.classes.audio import _Audio
+import pyfar as pf
 
 
 def test_audio_init_with_defaults():
@@ -7,7 +8,7 @@ def test_audio_init_with_defaults():
     audio = _Audio(domain='time')
     assert isinstance(audio, _Audio)
     assert audio.domain == 'time'
-    assert audio.comment == 'none'
+    assert audio.comment == ''
 
 
 def test_audio_init_invalid_domain():
@@ -21,6 +22,9 @@ def test_audio_comment():
 
     audio.comment = 'Blub'
     assert audio.comment == 'Blub'
+
+    with pytest.raises(TypeError, match="comment has to be of type string."):
+        pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
 
 def test_not_implemented():

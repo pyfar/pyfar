@@ -22,7 +22,7 @@ def test_signal_init_default_parameter():
     signal = Signal([1, 2, 3], 44100)
     assert signal.domain == 'time'
     assert signal.fft_norm == 'none'
-    assert signal.comment == 'none'
+    assert signal.comment == ''
     assert signal.fft_norm == 'none'
 
 
@@ -87,6 +87,9 @@ def test_signal_comment():
     signal.comment = 'Blub'
     assert signal.comment == 'Blub'
 
+    with pytest.raises(TypeError, match="comment has to be of type string."):
+        Signal([1, 2, 3], 44100, comment=[1, 2, 3])
+
 
 def test_domain_getter_freq():
     signal = Signal(np.array([1]), 44100)
@@ -131,7 +134,8 @@ def test_domain_setter_time_when_time():
 
 
 def test_domain_setter_time_when_freq():
-    signal = Signal([1, 2, 3, 4], 44100, domain='freq', fft_norm='rms')
+    with pytest.warns(UserWarning, match="Number of time samples"):
+        signal = Signal([1, 2, 3, 4], 44100, domain='freq', fft_norm='rms')
     domain = 'time'
     signal.domain = domain
     assert signal.domain == domain
@@ -200,20 +204,15 @@ def test_getter_freq():
 
 
 def test_setter_freq():
-    """Test if attribute freq is set correctly."""
+    """Test if attribute freq is set correctly and for the warning for
+    estimating the number of samples from n_bins."""
     signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
-    signal.freq = np.array([[1., 2., 3.]])
+    with pytest.warns(UserWarning, match="Number of frequency bins"):
+        signal.freq = np.array([[1., 2., 3.]])
     assert signal.domain == 'freq'
     desired = signal.n_samples * np.array([[1., 2./2, 3.]])
     npt.assert_allclose(signal._data, desired)
     npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]))
-
-
-def test_re_setter_freq():
-    """Test the warning for estimating the number of samples from n_bins."""
-    signal = Signal([1, 2, 3], 44100, domain='freq', n_samples=4)
-    with pytest.warns(UserWarning):
-        signal.freq = [1, 2, 3, 4]
 
 
 def test_getter_sampling_rate():
@@ -471,17 +470,11 @@ def test_freq_raw():
 
 def test_setter_freq_raw():
     """Test if attribute freq_raw is set correctly."""
-    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
-    signal.freq_raw = np.array([[1., 2., 3.]])
+    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude', n_samples=4)
+    with pytest.warns(UserWarning, match="Number of frequency bins"):
+        signal.freq_raw = np.array([[1., 2., 3.]])
     assert signal.domain == 'freq'
     npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
-
-
-def test_setter_freq_raw_warning():
-    """Test the warning for estimating the number of samples from n_bins."""
-    signal = Signal([1, 2, 3], 44100, domain='freq', n_samples=4)
-    with pytest.warns(UserWarning, match="Number of frequency bins changed"):
-        signal.freq_raw = [1, 2, 3, 4]
 
 
 def test_setter_freq_raw_dtype():

@@ -53,7 +53,8 @@ def test_speech(sampling_rate):
 
 @pytest.mark.parametrize('position,convention,first,second', [
     ([[0, 20]], 'top_elev', [0], [20]),
-    ([[0, 20], [10, 0]], 'top_elev', [0, 10], [0, 20]),
+    ([[0, 20], [10, 0]], 'top_elev', [0, 10], [20, 0]),
+    ([[90, 0], [0, 0]], 'top_elev', [90, 0], [0, 0]),
     ('horizontal', 'top_elev', np.arange(0, 180)*2, np.zeros(180)),
     ('median', 'side', np.zeros(180), np.arange(-45, 135)*2)])
 def test_hrirs_position(position, convention, first, second):
@@ -67,8 +68,8 @@ def test_hrirs_position(position, convention, first, second):
 
     # test source positions
     sg = sources.get_sph(convention, 'deg')
-    npt.assert_allclose(first, np.sort(sg[..., 0].flatten()), atol=1e-12)
-    npt.assert_allclose(second, np.sort(sg[..., 1].flatten()), atol=1e-12)
+    npt.assert_allclose(first, sg[..., 0].flatten(), atol=1e-12)
+    npt.assert_allclose(second, sg[..., 1].flatten(), atol=1e-12)
 
 
 def test_hrirs_diffuse_field_compensation():
