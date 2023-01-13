@@ -100,7 +100,8 @@ class GammatoneBands():
         >>>
         >>> y = GFB.reconstruct(real, imag)
         >>> plt.figure()
-        >>> ax = pf.plot.time_freq(y, unit='ms',
+        >>> ax = pf.plot.time_freq(
+        ...     y, unit='ms',
         ...     label="manipulated and reconstructed and impulse")
         >>> ax[0].set_xlim(0, 20)
         >>> ax[1].set_ylim(-40, 5)

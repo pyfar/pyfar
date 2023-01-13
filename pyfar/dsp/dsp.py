@@ -1605,17 +1605,17 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         >>> with pf.plot.context():
         >>>     fig, ax = plt.subplots(2, 1, sharex=True)
         >>>     pf.plot.time(s1, ax=ax[0], label='Signal 1', marker='o',
-        ...     unit='samples')
+        ...                  unit='samples')
         >>>     pf.plot.time(s2, ax=ax[0], label='Signal 2', marker='o',
-        ...     unit='samples')
+        ...                  unit='samples')
         >>>     ax[0].set_title('Input Signals')
         >>>     ax[0].legend()
         >>>     pf.plot.time(full, ax=ax[1], label='full', marker='o',
-        ...     unit='samples')
+        ...                  unit='samples')
         >>>     pf.plot.time(cut, ax=ax[1], label='cut', ls='--',  marker='o',
-        ...     unit='samples')
+        ...                  unit='samples')
         >>>     pf.plot.time(cyc, ax=ax[1], label='cyclic', ls=':', marker='o',
-        ...     unit='samples')
+        ...                  unit='samples')
         >>>     ax[1].set_title('Convolution Result')
         >>>     ax[1].set_ylim(-1.1, 1.1)
         >>>     ax[1].legend()
@@ -2154,7 +2154,7 @@ def normalize(signal, reference_method='max', domain='time',
         ...     domain="freq", limits=(400, 600), unit="Hz")
         >>> # Plot input and normalized Signal
         >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal',
-        ... unit='ms')
+        ...                        unit='ms')
         >>> pf.plot.time_freq(signal, label='Original Signal')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
