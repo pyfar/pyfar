@@ -918,6 +918,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         >>> # create minimum phase impulse responses
         >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
         >>> # plot the result
+        >>> pf.plot.use()
         >>> fig, axs = plt.subplots(3, figsize=(8, 6))
         >>> pf.plot.time(h_linear, ax=axs[0], unit='ms')
         >>> pf.plot.time(h_min, ax=axs[0], unit='ms')
