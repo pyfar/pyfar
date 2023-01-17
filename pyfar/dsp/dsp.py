@@ -1936,7 +1936,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
            If the input signal includes NaNs, the resulting averaged output 
            signal values are NaN.
         ``'omit'``
-           NaNs will be omitted while averaging.  
+           NaNs will be omitted while averaging.
         ``'raise'``
             A ``'ValueError'`` will be raised, if the input signal includes
             NaNs.
