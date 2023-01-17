@@ -1933,12 +1933,10 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     nan_policy: string, optional
         Define how to handle NaNs in input signal.
         ``'propagate'``
-           If the input signal includes NaNs within the time or frequency range
-           , NaN will be used as normalization reference. The resulting output
+           If the input signal includes NaNs, the resulting averaged output 
            signal values are NaN.
         ``'omit'``
-           NaNs will be omitted in the normalization. Cshape will still remain,
-           as the normalized signal still includes the NaNs.
+           NaNs will be omitted while averaging.  
         ``'raise'``
             A ``'ValueError'`` will be raised, if the input signal includes
             NaNs.
