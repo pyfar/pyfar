@@ -1,7 +1,6 @@
 import multiprocessing
 import numpy as np
 from scipy import signal as sgn
-from scipy import stats
 import pyfar
 from pyfar.dsp import fft
 import warnings
@@ -2205,13 +2204,14 @@ def normalize(signal, reference_method='max', domain='time',
             input_data = np.abs(signal.time)
         else:
             input_data = np.abs(signal.freq)
-    # get values for normalization max or mean
+        # create masked array if data includes NaNs and nan_policy is omit
+        if nan_policy == 'omit' and True in np.isnan(input_data):
+            input_data = np.ma.masked_array(input_data, np.isnan(input_data))
+        # get values for normalization max or mean
         if reference_method == 'max':
-            reference = stats.tmax(input_data[..., limits[0]:limits[1]],
-                                   axis=-1, nan_policy=nan_policy)
+            reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
         elif reference_method == 'mean':
-            reference = stats.pmean(input_data[..., limits[0]:limits[1]], 1,
-                                    axis=-1, nan_policy=nan_policy)
+            reference = np.mean(input_data[..., limits[0]:limits[1]], axis=-1)
     else:
         raise ValueError(("reference_method must be 'max', 'mean', 'power', "
                          "'energy' or 'rms'."))
