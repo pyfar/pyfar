@@ -1932,6 +1932,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         will be squeezed after averaging. The default is ``False``.
     nan_policy: string, optional
         Define how to handle NaNs in input signal.
+
         ``'propagate'``
            If the input signal includes NaNs, the resulting averaged output
            signal values are NaN.
@@ -1940,7 +1941,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         ``'raise'``
             A ``'ValueError'`` will be raised, if the input signal includes
             NaNs.
-        The default is 'raise'.
+
+        The default is ``'raise'``.
 
     Returns
     --------
