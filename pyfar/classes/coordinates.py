@@ -36,8 +36,9 @@ class Coordinates():
             weights: np.array = None, sh_order=None,
             comment: str = "") -> None:
         """
-        This function will be changed in pyfar 0.7.0 in favor
-        of from_*.
+        This function will be changed in pyfar 0.7.0 and will just be able to
+        get cartesian coordinates. If you want to initialize in an other
+        domain use of from_* instead.
         Create :py:func:`Coordinates` object with or without coordinate points.
         The points that enter the Coordinates object are defined by the
         `domain`, `convention`, and `unit` as illustrated in the
@@ -107,6 +108,13 @@ class Coordinates():
 
         # init emtpy object
         super(Coordinates, self).__init__()
+
+        # test Deprecation warning
+        if domain != 'cart' or convention is not None or unit is not None:
+            warnings.warn((
+                "This function will be changed in pyfar 0.7.0 to "
+                "init(x, y, z)."),
+                    PendingDeprecationWarning)
 
         # set the coordinate system
         system = self._make_system(domain, convention, unit)

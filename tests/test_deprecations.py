@@ -179,6 +179,9 @@ def test__check_time_unit():
         ('coords.get_sph()'),
         ('coords.set_sph(1,1,1)'),
         ('pf.Coordinates(0, 0, 0, sh_order=1)'),
+        ("pf.Coordinates(0, 0, 0, domain='sph')"),
+        ("pf.Coordinates(0, 0, 0, domain='sph', unit='deg')"),
+        ("pf.Coordinates(0, 0, 0, domain='sph', convention='top_colat')"),
         ('coords.find_nearest_k(0,0,1,1)'),
         ('coords.find_nearest_cart(0,0,1,1)'),
         ('coords.find_nearest_sph(0,0,1,1)'),
@@ -189,7 +192,7 @@ def test_get_nearest_deprecations_0_7_0(statement):
 
     # PendingDeprecationWarning for
     with pytest.warns(PendingDeprecationWarning,
-                      match="This function will be deprecated"):
+                      match="This function will be"):
         eval(statement)
 
     # remove statement from pyfar 0.7.0!
