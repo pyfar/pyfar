@@ -649,7 +649,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
 
     # Define pattern for regular expressions, see test files for examples
-    exp_pattern = r'([\w\/\^_.]+) \('
+    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
     domain_pattern = domain_str + r'=([0-9.]+)'
     value_pattern = r'=([0-9.]+)'
 
@@ -802,9 +802,9 @@ def read_comsol_header(filename):
     header, _, _ = _read_comsol_get_headerline(filename)
 
     # Define pattern for regular expressions, see test files for examples
-    exp_unit_pattern = r'([\w\(\)\/\^. ]+) @'
-    exp_pattern = r'([\w\/\^_.]+) \('
-    unit_pattern = r'\(([\w\/\^ .]+)\)'
+    exp_unit_pattern = r'([\w\(\)\/\^\*. ]+) @'
+    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
+    unit_pattern = r'\(([\w\/\^\* .]+)\) @'
     domain_pattern = r'@ ([a-zA-Z]+)='
     value_pattern = r'=([0-9.]+)'
     param_pattern = r'([\w\/\^_.]+)='
@@ -816,7 +816,7 @@ def read_comsol_header(filename):
     expressions = _unique_strings(expressions_all)
     # read corresponding units
     exp_idxs = [expressions_all.index(e) for e in expressions]
-    units_all = re.findall(unit_pattern, ';'.join(expressions_with_unit))
+    units_all = re.findall(unit_pattern, header)
     units = [units_all[i] for i in exp_idxs]
 
     # read domain data
