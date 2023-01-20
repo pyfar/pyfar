@@ -503,6 +503,35 @@ def generate_sofa_GeneralTF(
 
 
 @pytest.fixture
+def generate_sofa_GeneralFIR_E(tmpdir):
+    """ Generate the reference sofa files of type GeneralFIR-E."""
+    filename = os.path.join(tmpdir, ('GeneralFIR-E.sofa'))
+
+    sofafile = sf.Sofa('GeneralFIR-E', True)
+    sofafile.Data_IR = np.zeros((4, 2, 10, 3))
+    sofafile.Data_Delay = np.zeros((4, 2, 3))
+
+    sf.write_sofa(filename, sofafile)
+
+    return filename
+
+
+@pytest.fixture
+def generate_sofa_GeneralTF_E(tmpdir):
+    """ Generate the reference sofa files of type GeneralFIR-E."""
+    filename = os.path.join(tmpdir, ('GeneralTF-E.sofa'))
+
+    sofafile = sf.Sofa('GeneralTF-E', True)
+    sofafile.Data_Real = np.ones((4, 2, 10, 3))
+    sofafile.Data_Imag = np.zeros((4, 2, 10, 3))
+    sofafile.N = np.arange(10)
+
+    sf.write_sofa(filename, sofafile)
+
+    return filename
+
+
+@pytest.fixture
 def generate_sofa_postype_spherical(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
     """ Generate the reference sofa files of type GeneralFIR,
