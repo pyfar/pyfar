@@ -1543,7 +1543,7 @@ class Coordinates():
             return np.where(
                 index[0] == np.arange(self.csize).reshape(self.cshape))
 
-    def find_nearest_points(self, coords, number_of_points=1):
+    def find_nearest_points(self, coord, number_of_points=1):
         """
         Find the closest Coordinate point to given Points.
         The search for the nearest point is performed using the scipy
@@ -1551,7 +1551,7 @@ class Coordinates():
 
         Parameters
         ----------
-        coords : Coordinates
+        coord : Coordinate
             Point to find nearest neighboring Coordinate
         number_of_points : int, optional
             Number of points to return. It must be > 0. The default is 1.
@@ -1562,20 +1562,47 @@ class Coordinates():
             Distance between the point and it's closest neighbor
         index : int
             Indexes of the closest points.
-        mask : boolean numpy array
-            mask that contains ``True`` at the positions of the selected points
-            and ``False`` otherwise. Mask is of shape ``cshape``.
         """
         # check the input
         assert isinstance(number_of_points, int) and number_of_points > 0 and \
             number_of_points <= self.csize,\
             "number of points must be an integer > 0 and <= self.csize."
+        assert isinstance(coord, Coordinates) and coord.csize == 1,\
+            "coord need to be of type Coordinates containing one Coordiante"
 
         distance, index, mask = self._find_nearest(
-            coords, False, value=number_of_points, measure='k')
+            coord, False, value=number_of_points, measure='k')
 
         index = np.where(mask)
-        return distance, index, mask
+        return distance, index
+
+    def find_nearest_point(self, coord):
+        """
+        Find the closest Coordinate point to given Points.
+        The search for the nearest point is performed using the scipy
+        cKDTree implementation..
+
+        Parameters
+        ----------
+        coord : Coordinate
+            Points to find nearest neighboring Coordinate
+        number_of_points : int, optional
+            Number of points to return. It must be > 0. The default is 1.
+
+        Returns
+        -------
+        index : int
+            Indexes of the closest points.
+        """
+        # check the input
+        assert isinstance(coord, Coordinates),\
+            "coord need to be of type Coordinates."
+
+        distance, index, mask = self._find_nearest(
+            coord, False, value=1, measure='k')
+
+        index = np.where(mask)
+        return index
 
     def find_nearest_by_distance(self, coords, distance, measure='direct'):
         """
