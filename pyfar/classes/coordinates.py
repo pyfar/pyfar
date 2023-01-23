@@ -485,7 +485,7 @@ class Coordinates():
             ``points[...,2]`` the points for the third coordinate.
         """
         warnings.warn((
-            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "This function will be deprecated in pyfar 0.7.0 in favor "
             "of the new setter such as .sph_top_elev"),
                 PyfarDeprecationWarning)
 
@@ -579,7 +579,7 @@ class Coordinates():
             ``'rad'``.
         """
         warnings.warn((
-            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "This function will be deprecated in pyfar 0.7.0 in favor "
             "of the new setter such as .cyl"),
                 PyfarDeprecationWarning)
         self._set_cyl(azimuth, z, radius_z, convention)
@@ -701,11 +701,11 @@ class Coordinates():
 
     @property
     def sh_order(self):
-        """This function will be deprecated in pyfar 0.5.0 in favor
+        """This function will be deprecated in pyfar 0.7.0 in favor
             of :py:func:`SamplingSphere`.
             Get the maximum spherical harmonic order."""
         warnings.warn((
-            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "This function will be deprecated in pyfar 0.7.0 in favor "
             "of SamplingSphere."),
                 PyfarDeprecationWarning)
 
@@ -713,11 +713,11 @@ class Coordinates():
 
     @sh_order.setter
     def sh_order(self, value):
-        """This function will be deprecated in pyfar 0.5.0 in favor
+        """This function will be deprecated in pyfar 0.7.0 in favor
             of :py:func:`SamplingSphere`.
             Set the maximum spherical harmonic order."""
         warnings.warn((
-            "This function will be deprecated in pyfar 0.5.0 in favor "
+            "This function will be deprecated in pyfar 0.7.0 in favor "
             "of SamplingSphere."),
                 PyfarDeprecationWarning)
 
