@@ -11,6 +11,7 @@ from scipy.spatial.transform import Rotation as sp_rot
 import re
 from copy import deepcopy
 import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 import pyfar as pf
 
@@ -114,7 +115,7 @@ class Coordinates():
             warnings.warn((
                 "This function will be changed in pyfar 0.7.0 to "
                 "init(x, y, z)."),
-                    PendingDeprecationWarning)
+                    PyfarDeprecationWarning)
 
         # set the coordinate system
         system = self._make_system(domain, convention, unit)
@@ -144,7 +145,7 @@ class Coordinates():
             warnings.warn((
                 "This function will be deprecated in pyfar 0.7.0 in favor "
                 "of SamplingSphere."),
-                    PendingDeprecationWarning)
+                    PyfarDeprecationWarning)
 
     @classmethod
     def from_cartesian(cls, x, y, z):
@@ -286,7 +287,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.7.0 in favor "
             "of .cart, .x, .y or .z."),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
 
         # set the coordinate system
         self._system = self._make_system('cart', convention, unit)
@@ -347,7 +348,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.7.0 in favor "
             "of .carteasian"),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
 
         return self.cartesian
 
@@ -393,7 +394,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.7.0 in favor "
             "of the new setter such as .spherical_elevation"),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
 
         self._set_sph(angles_1, angles_2, radius, convention, unit)
 
@@ -486,7 +487,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.5.0 in favor "
             "of the new setter such as .sph_top_elev"),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
 
         if convention == 'top_colat':
             points = self.spherical_colatitude
@@ -580,7 +581,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.5.0 in favor "
             "of the new setter such as .cyl"),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
         self._set_cyl(azimuth, z, radius_z, convention)
 
     def _set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
@@ -655,7 +656,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.7.0 in favor "
             "of the new setter such as .cyl"),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
         points = self.cylindrical
 
         conversion_factor = 1 if unit == 'rad' else 180 / np.pi
@@ -706,7 +707,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.5.0 in favor "
             "of SamplingSphere."),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
 
         return self._sh_order
 
@@ -718,7 +719,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.5.0 in favor "
             "of SamplingSphere."),
-                PendingDeprecationWarning)
+                PyfarDeprecationWarning)
 
         self._sh_order = int(value)
 

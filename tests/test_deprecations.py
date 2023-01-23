@@ -19,6 +19,7 @@ from unittest.mock import patch
 
 import pyfar as pf
 import pyfar.dsp.filter as pfilt
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 # This defines the plot size and the backend
 from pyfar.testing.plot_utils import create_figure
@@ -178,3 +179,49 @@ def test_pad_zero_modi():
         with pytest.raises(ValueError):
             # remove mode 'before' and 'after' from pyfar 0.8.0!
             pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, mode='before')
+
+
+@pytest.mark.parametrize(
+    'statement', [
+        ('coords.get_cart()'),
+        ('coords.sh_order'),
+        ('coords.set_cart(1,1,1)'),
+        ('coords.get_cyl()'),
+        ('coords.set_cyl(1,1,1)'),
+        ('coords.get_sph()'),
+        ('coords.set_sph(1,1,1)'),
+        ('pf.Coordinates(0, 0, 0, sh_order=1)'),
+        ("pf.Coordinates(0, 0, 0, domain='sph')"),
+        ("pf.Coordinates(0, 0, 0, domain='sph', unit='deg')"),
+        ("pf.Coordinates(0, 0, 0, domain='sph', convention='top_colat')"),
+        ('coords.find_nearest_k(0,0,1,1)'),
+        ('coords.find_nearest_cart(0,0,1,1)'),
+        ('coords.find_nearest_sph(0,0,1,1)'),
+    ])
+def test_get_nearest_deprecations_0_7_0(statement):
+    coords = pf.Coordinates(np.arange(6), 0, 0, 'sph')
+    coords.y = 1
+
+    # PyfarDeprecationWarning for
+    with pytest.warns(PyfarDeprecationWarning,
+                      match="This function will be"):
+        eval(statement)
+
+    # remove statement from pyfar 0.7.0!
+    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+        with pytest.raises(AttributeError):
+            eval(statement)
+
+
+def test_get_nearest_deprecations_0_7_0_set_sh_order():
+    coords = pf.Coordinates(np.arange(6), 0, 0)
+
+    # sh_order setter
+    with pytest.warns(PyfarDeprecationWarning,
+                      match="This function will be deprecated"):
+        coords.sh_order = 1
+
+    # remove statement from pyfar 0.7.0!
+    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+        with pytest.raises(AttributeError):
+            coords.sh_order = 1
