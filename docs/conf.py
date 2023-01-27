@@ -22,7 +22,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import pyfar
+import pyfar  # noqa
 
 # -- General configuration ---------------------------------------------
 
@@ -181,3 +181,12 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+# -- pyfar specifics -----------------------------------------------------
+
+# write shortcuts to sphinx readable format
+_, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
+shortcuts_path = os.path.join("concepts", "resources", "plot_shortcuts.rst")
+with open(shortcuts_path, "w") as f_id:
+    f_id.writelines(shortcuts)
