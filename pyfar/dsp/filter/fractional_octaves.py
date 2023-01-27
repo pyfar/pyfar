@@ -400,9 +400,9 @@ def reconstructing_fractional_octave_bands(
         >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
         >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
         >>> # time domain plot
-        >>> ax = pf.plot.time_freq(y_sum, color='k')
-        >>> pf.plot.time(x, ax=ax[0])
-        >>> ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
+        >>> ax = pf.plot.time_freq(y_sum, color='k', unit='ms')
+        >>> pf.plot.time(x, ax=ax[0], unit='ms')
+        >>> ax[0].set_xlim(-20, 250)
         >>> ax[0].set_title("Original (blue) and reconstructed pulse (black)")
         >>> # frequency domain plot
         >>> pf.plot.freq(y_sum, color='k', ax=ax[1])

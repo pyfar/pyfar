@@ -63,7 +63,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
         >>> import pyfar as pf
         >>> sine = pf.signals.sine(100, 4410)
-        >>> pf.plot.time(sine)
+        >>> pf.plot.time(sine, unit='ms')
 
     """
 
@@ -409,7 +409,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
         >>> import pyfar as pf
         >>> sine = pf.signals.sine(100, 4410)
-        >>> pf.plot.time_freq(sine)
+        >>> pf.plot.time_freq(sine, unit='ms')
     """
 
     # xscale deprecation
