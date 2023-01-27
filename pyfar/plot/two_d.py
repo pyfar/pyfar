@@ -1,8 +1,9 @@
 import numpy as np
 from pyfar.plot.utils import context
 from .. import Signal
-from . import (_two_d, _utils)
+from . import _two_d
 from . import _interaction as ia
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 
 
@@ -131,7 +132,6 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
             indices, orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
@@ -261,7 +261,6 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, freq_scale, indices,
             orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -386,7 +385,6 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ax, qm, cb = _two_d._phase_2d(
             signal, deg, unwrap, freq_scale, indices, orientation, method,
             colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -519,7 +517,6 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         ax, qm, cb = _two_d._group_delay_2d(
             signal, unit, freq_scale, indices, orientation, method,
             colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -669,7 +666,6 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
             log_reference, freq_scale, unit, indices, orientation, method,
             colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -805,7 +801,6 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
             indices, orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -947,7 +942,6 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
             orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -1086,14 +1080,13 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     if yscale is not None:
         warnings.warn(('The yscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = yscale
 
     with context(style):
         ax, qm, cb = _two_d._spectrogram(
             signal.flatten(), dB, log_prefix, log_reference, freq_scale, unit,
             window, window_length, window_overlap_fct, colorbar, ax)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(

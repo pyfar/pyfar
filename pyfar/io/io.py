@@ -378,6 +378,7 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     * This function is based on :py:func:`soundfile.write`.
     * Except for the subtypes ``'FLOAT'``, ``'DOUBLE'`` and ``'VORBIS'`` ´
       amplitudes larger than +/- 1 are clipped.
+    * Only integer values are allowed for ``signal.sampling_rate``.
 
     """
     if not soundfile_imported:
@@ -386,6 +387,16 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
 
     sampling_rate = signal.sampling_rate
     data = signal.time
+
+    # check sampling rate (libsoundfile only support ints)
+    if not isinstance(sampling_rate, int):
+        if sampling_rate % 1:
+            raise ValueError((
+                f"The sampling rate is {sampling_rate} but must have an "
+                f"integer value, e.g., {int(sampling_rate)} or "
+                f"{int(sampling_rate + 1)} (See pyfar.dsp.resample for help)"))
+        else:
+            sampling_rate = int(sampling_rate)
 
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
@@ -629,7 +640,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
 
     # Define pattern for regular expressions, see test files for examples
-    exp_pattern = r'([\w\/\^_.]+) \('
+    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
     domain_pattern = domain_str + r'=([0-9.]+)'
     value_pattern = r'=([0-9.]+)'
 
@@ -782,9 +793,9 @@ def read_comsol_header(filename):
     header, _, _ = _read_comsol_get_headerline(filename)
 
     # Define pattern for regular expressions, see test files for examples
-    exp_unit_pattern = r'([\w\(\)\/\^. ]+) @'
-    exp_pattern = r'([\w\/\^_.]+) \('
-    unit_pattern = r'\(([\w\/\^ .]+)\)'
+    exp_unit_pattern = r'([\w\(\)\/\^\*. ]+) @'
+    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
+    unit_pattern = r'\(([\w\/\^\* .]+)\) @'
     domain_pattern = r'@ ([a-zA-Z]+)='
     value_pattern = r'=([0-9.]+)'
     param_pattern = r'([\w\/\^_.]+)='
@@ -796,7 +807,7 @@ def read_comsol_header(filename):
     expressions = _unique_strings(expressions_all)
     # read corresponding units
     exp_idxs = [expressions_all.index(e) for e in expressions]
-    units_all = re.findall(unit_pattern, ';'.join(expressions_with_unit))
+    units_all = re.findall(unit_pattern, header)
     units = [units_all[i] for i in exp_idxs]
 
     # read domain data
