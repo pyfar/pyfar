@@ -4,6 +4,7 @@ coordinate conversion. More background information is given in
 :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
 Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
 """
+
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
@@ -39,11 +40,16 @@ class Coordinates():
         """
         This function will be changed in pyfar 0.7.0 and will just be able to
         get cartesian coordinates. If you want to initialize in an other
-        domain use of from_* instead.
+        domain use of :py:func:`from_atitude`, 
+        :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`, 
+        :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`. 
+        instead.
+
         Create :py:func:`Coordinates` object with or without coordinate points.
         The points that enter the Coordinates object are defined by the
         `domain`, `convention`, and `unit` as illustrated in the
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
+
         +--------------------+----------+------------+----------+----------+
         | domain, convention | points_1 | points_2   | points_3 | unit     |
         +====================+==========+============+==========+==========+
@@ -68,12 +74,20 @@ class Coordinates():
         Parameters
         ----------
         points_1 : array like, number
-            points for the first coordinate
+            points for the first coordinate.
+            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.7.0.
         points_2 : array like, number
-            points for the second coordinate
+            points for the second coordinate.
+            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.7.0.
         points_3 : array like, number
-            points for the third coordinate
+            points for the third coordinate.
+            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.7.0.
         domain : string
+            ``'domain'`` and ``'convention'`` function will be deprecated in 
+            pyfar 0.7.0 in favor of ``from_*``
             domain of the coordinate system
 
             ``'cart'``
@@ -85,14 +99,18 @@ class Coordinates():
 
             The default is ``'cart'``.
         convention: string
-             coordinate convention (see above)
-             The default is ``'right'`` if domain is ``'cart'``,
-             ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
-             ``'cyl'``.
+            ``'domain'`` and ``'convention'`` function will be deprecated in 
+            pyfar 0.7.0 in favor of ``from_*``
+            This function will be deprecated in pyfar 0.7.0 in favor
+            of :py:func:`SamplingSphere`.
+            coordinate convention (see above)
+            The default is ``'right'`` if domain is ``'cart'``,
+            ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
+            ``'cyl'``.
         unit: string
-             unit of the coordinate system. By default the first available unit
-             is used, which is meters (``'met'``) for ``domain = 'cart'`` and
-             radians (``'rad'``) in all other cases (See above).
+            unit of the coordinate system. By default the first available unit
+            is used, which is meters (``'met'``) for ``domain = 'cart'`` and
+            radians (``'rad'``) in all other cases (See above).
         weights: array like, number, optional
             sampling weights for the coordinate points. Must have same `size`
             as the points points, i.e., if `points` have five entries, the
@@ -148,9 +166,11 @@ class Coordinates():
                     PyfarDeprecationWarning)
 
     @classmethod
-    def from_cartesian(cls, x, y, z):
+    def from_cartesian(cls, x, y, z, weights: np.array = None,
+            comment: str = ""):
         """Create a Coordinates class object from a set of points in the
-        Cartesian coordinate system.
+        right-handed cartesian coordinate system.
+
         Parameters
         ----------
         x : ndarray, double
@@ -159,6 +179,13 @@ class Coordinates():
             y-coordinate
         z : ndarray, double
             z-coordinate
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same `size`
+            as the points points, i.e., if `points` have five entries, the
+            `weights` must also have five entries. The default is ``None``.
+        comment : str, optional
+            comment about the stored coordinate points. The default is
+            ``""``, which initializes an empty string.
         """
         return Coordinates(x, y, z)
 
@@ -168,14 +195,26 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system.
+
         Parameters
         ----------
         azimuth : ndarray, double
-            The azimuth angle in radians
+            angle in radiant of rotation from the x-y-plane facing towards
+            positive x direction. Used for spherical and cylindrical coordinate
+            systems.
         elevation : ndarray, double
-            The elevation angle in radians
+            angle in radiant with respect to horizontal plane (x-z-axe).
+            Used for spherical coordinate systems.
         radius : ndarray, double
-            The radius for each point
+            distance to origin for each point. Used for spherical coordinate
+            systems.
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same `size`
+            as the points points, i.e., if `points` have five entries, the
+            `weights` must also have five entries. The default is ``None``.
+        comment : str, optional
+            comment about the stored coordinate points. The default is
+            ``""``, which initializes an empty string.
         """
         x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
         return Coordinates(x, y, z, weights=weights, comment=comment)
@@ -186,14 +225,26 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system.
+
         Parameters
         ----------
         azimuth : ndarray, double
-            The azimuth angle in radians
+            angle in radiant of rotation from the x-y-plane facing towards
+            positive x direction. Used for spherical and cylindrical coordinate
+            systems.
         colatitude : ndarray, double
-            The colatitude angle in radians
+            angle in radiant with respect to polar axis (z-axe). Used for
+            spherical coordinate systems.
         radius : ndarray, double
-            The radius for each point
+            distance to origin for each point. Used for spherical coordinate
+            systems.
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same `size`
+            as the points points, i.e., if `points` have five entries, the
+            `weights` must also have five entries. The default is ``None``.
+        comment : str, optional
+            comment about the stored coordinate points. The default is
+            ``""``, which initializes an empty string.
         """
         x, y, z = sph2cart(azimuth, colatitude, radius)
         return Coordinates(x, y, z, weights=weights, comment=comment)
@@ -204,14 +255,25 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system.
+
         Parameters
         ----------
-        azimuth : ndarray, double
-            The azimuth angle in radians
-        colatitude : ndarray, double
-            The colatitude angle in radians
+        lateral : ndarray, double
+            angle in radiant with respect to horizontal plane (x-y-axe). 
+            Used for spherical coordinate systems..
+        polar : ndarray, double
+            angle in radiant of rotation from the x-z-plane facing towards
+            positive x direction. Used for spherical coordinate systems.
         radius : ndarray, double
-            The radius for each point
+            distance to origin for each point. Used for spherical coordinate
+            systems.
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same `size`
+            as the points points, i.e., if `points` have five entries, the
+            `weights` must also have five entries. The default is ``None``.
+        comment : str, optional
+            comment about the stored coordinate points. The default is
+            ``""``, which initializes an empty string.
         """
         x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
         return Coordinates(x, y, z, weights=weights, comment=comment)
@@ -222,34 +284,56 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system.
+
         Parameters
         ----------
         phi : ndarray, double
-            The phi angle in radians
+            Tangle in radiant of rotation from the y-z-plane facing towards
+            positive y direction. Used for spherical coordinate systems.
         theta : ndarray, double
-            The theta angle in radians
+            angle in radiant with respect to polar axis (x-axe). Used for
+            spherical coordinate systems.
         radius : ndarray, double
-            The radius for each point
+            distance to origin for each point. Used for spherical coordinate
+            systems.
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same `size`
+            as the points points, i.e., if `points` have five entries, the
+            `weights` must also have five entries. The default is ``None``.
+        comment : str, optional
+            comment about the stored coordinate points. The default is
+            ``""``, which initializes an empty string.
         """
         y, z, x = sph2cart(phi, theta, radius)
         return Coordinates(x, y, z, weights=weights, comment=comment)
 
     @classmethod
     def from_cylindrical(
-            cls, azimuth, z, radius_z, weights: np.array = None,
+            cls, azimuth, z, rho, weights: np.array = None,
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         cylindrical coordinate system.
+
         Parameters
         ----------
         azimuth : ndarray, double
-            The azimuth angle in radians
+            angle in radiant of rotation from the x-y-plane facing towards
+            positive x direction. Used for spherical and cylindrical coordinate
+            systems.
         z : ndarray, double
             The z cordinate
-        radius_z : ndarray, double
-            The radius in x-y-plane for each point
+        rho : ndarray, double
+            distance to origin for each point in the x-y-plane. Used for
+            cylindrical coordinate systems.
+        weights: array like, number, optional
+            sampling weights for the coordinate points. Must have same `size`
+            as the points points, i.e., if `points` have five entries, the
+            `weights` must also have five entries. The default is ``None``.
+        comment : str, optional
+            comment about the stored coordinate points. The default is
+            ``""``, which initializes an empty string.
         """
-        x, y, z = cyl2cart(azimuth, z, radius_z)
+        x, y, z = cyl2cart(azimuth, z, rho)
         return Coordinates(x, y, z, weights=weights, comment=comment)
 
     def set_cart(self, x, y, z, convention='right', unit='met'):
@@ -491,12 +575,16 @@ class Coordinates():
 
         if convention == 'top_colat':
             points = self.spherical_colatitude
+            self._system = self._make_system('sph', 'top_colat', 'rad')
         elif convention == 'top_elev':
             points = self.spherical_elevation
+            self._system = self._make_system('sph', 'top_elev', 'rad')
         elif convention == 'front':
             points = self.spherical_front
+            self._system = self._make_system('sph', 'front', 'rad')
         elif convention == 'side':
             points = self.spherical_side
+            self._system = self._make_system('sph', 'side', 'rad')
         else:
             raise ValueError(
                 f"Conversion for {convention} is not implemented.")
@@ -584,12 +672,12 @@ class Coordinates():
                 PyfarDeprecationWarning)
         self._set_cyl(azimuth, z, radius_z, convention)
 
-    def _set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
+    def _set_cyl(self, azimuth, z, rho, convention='top', unit='rad'):
 
         # Convert to array
         azimuth = np.asarray(azimuth)
         z = np.asarray(z)
-        radius_z = np.asarray(radius_z)
+        rho = np.asarray(rho)
 
         # convert to radians
         if unit == 'deg':
@@ -600,7 +688,7 @@ class Coordinates():
 
         # ... from cylindrical coordinate systems
         if convention == 'top':
-            x, y, z = cyl2cart(azimuth, z, radius_z)
+            x, y, z = cyl2cart(azimuth, z, rho)
         else:
             # Can not be tested. Will only be raised if a coordinate system
             # is not fully implemented.
@@ -672,7 +760,7 @@ class Coordinates():
         # convert to cylindrical ...
         # ... top systems
         if convention == 'top':
-            azimuth, z, radius_z = cart2cyl(self.x, self.y, self.z)
+            azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         else:
             # Can not be tested. Will only be raised if a coordinate system
             # is not fully implemented.
@@ -687,7 +775,7 @@ class Coordinates():
                 f"unit for {unit} is not implemented.")
 
         # return points and convert internal state if desired
-        return azimuth, z, radius_z
+        return azimuth, z, rho
 
     @property
     def weights(self):
@@ -774,10 +862,8 @@ class Coordinates():
 
     @property
     def cartesian(self):
-        """Get coordinate points in cartesian coordinate systems.
-        ``points[...,0]`` holds the points for the x-coordinate,
-        ``points[...,1]`` the points for the y-coordinate, and
-        ``points[...,2]`` the points for the z-coordinate."""
+        """Right handed cartesian coordinate system. Returns :py:func:`x`, 
+        :py:func:`y`, :py:func:`z`"""
         # check if empty
         self._check_empty()
 
@@ -796,9 +882,16 @@ class Coordinates():
 
     @property
     def spherical_elevation(self):
-        """Get coordinate points in spherical coordinate systems in rad.
-        ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
-        elevation angle, and ``points[...,2]`` the radius."""
+        """returns :py:func:`azimuth`, :py:func:`elevation`,
+        :py:func:`radius` in radiant. Conform with
+        AES69-2015: AES standard for file exchange - Spatial acoustic data 
+        file format (SOFA). The azimuth denotes the counter clockwise angle in
+        the x/y-plane with 0 pointing in positive x-direction and pi/2 in
+        positive y-direction. The elevation denotes the angle upwards and
+        downwards from the x/y-plane with pi/2 pointing at positive 
+        z-direction and -pi/2 pointing in negative z-direction. The azimuth
+        and elevation can be in radians or degrees, the radius is always in
+        meters."""
         # set the coordinate system
         self._system = self._make_system('sph', 'top_elev', 'rad')
 
@@ -815,81 +908,73 @@ class Coordinates():
 
     @property
     def spherical_colatitude(self):
-        """Get coordinate points in spherical coordinate systems in rad.
-        ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
-        colatitude angle, and ``points[...,2]`` the radius."""
-
-        # set the coordinate system
-        self._system = self._make_system('sph', 'top_colat', 'rad')
-
+        """returns :py:func:`azimuth`, :py:func:`colatitude`, 
+        :py:func:`radius` in radiant, where the azimuth
+        denotes the counter clockwise angle in the x/y-plane with 0 pointing in
+        positive x-direction and pi/2 in positive y-direction. The colatitude
+        denotes the angle downwards from the z-axis with 0 pointing in positve
+        z-direction and pi in negative z-direction. The azimuth and colatitude
+        can be in radians or degrees, the radius is always in meters."""
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.colatitude, self.radius]), 0, -1))
 
     @spherical_colatitude.setter
     def spherical_colatitude(self, value):
-        # set the coordinate system
-        self._system = self._make_system('sph', 'top_colat', 'rad')
-
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2],
             convention='top_colat')
 
     @property
     def spherical_side(self):
-        """Get coordinate points in spherical coordinate systems in rad.
-        ``points[...,0]`` holds the lateral angle in rad, ``points[...,1]``
-        polar angle, and ``points[...,2]`` the radius."""
-        # set the coordinate system
-        self._system = self._make_system('sph', 'side', 'rad')
+        """returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius` in
+        radiant, where the lateral angle denotes the angle in the x/y-plane 
+        with pi/2 pointing in positive y-direction and -pi/2 in negative
+        y-direction. The polar angle denotes the angle in the x/z-plane with
+        -pi/2 pointing in negative z-direction, 0 in positive x-direction, 
+        pi/2 in positive z-direction, pi in negative x-direction. The polar
+        and lateral angle can be in radians and degree, the radius is
+        always in meters."""
 
         return np.atleast_2d(np.moveaxis(
             np.array([self.lateral, self.polar, self.radius]), 0, -1))
 
     @spherical_side.setter
     def spherical_side(self, value):
-        # set the coordinate system
-        self._system = self._make_system('sph', 'side', 'rad')
 
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2], convention='side')
 
     @property
     def spherical_front(self):
-        """Get coordinate points in spherical coordinate systems in rad.
-        ``points[...,0]`` holds the phi angle in rad, ``points[...,1]``
-        theta angle, and ``points[...,2]`` the radius."""
-        # set the coordinate system
-        self._system = self._make_system('sph', 'front', 'rad')
+        """returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius` in
+        radiant, where  phi denotes the angle in the y/z-plane with 0 
+        pointing in positive y-direction, pi/2 in positive z-direction, pi
+        in negative y-direction, and 3*pi/2 in negative z-direction. Theta 
+        denotes the angle measured from the x-axis with 0 pointing in positve 
+        x-direction and pi in negative x-direction. Phi and theta can be in
+        radians and degrees, the radius is always in meters."""
 
         return np.atleast_2d(np.moveaxis(
             np.array([self.phi, self.theta, self.radius]), 0, -1))
 
     @spherical_front.setter
     def spherical_front(self, value):
-        # set the coordinate system
-        self._system = self._make_system('sph', 'front', 'rad')
-
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2], convention='front')
 
     @property
     def cylindrical(self):
-        """Get coordinate points in cylindrical coordinate systems in rad.
-        ``points[...,0]`` holds the azimuth angle in rad, ``points[...,1]``
-        z_coordinate, and ``points[...,2]`` the radius in z-plane."""
-
-        # set the coordinate system
-        self._system = self._make_system('cyl', 'top', 'rad')
+        """returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho` in
+        radiant, where the azimuth denotes the counter clockwise angle in 
+        the x/y-plane with 0 pointing in positive x-direction and pi/2 in
+        positive y-direction. The heigt is given by z, and radius_z denotes
+        the radius measured orthogonal to the z-axis."""
 
         return np.atleast_2d(np.moveaxis(
             np.array([self.azimuth, self.z, self.rho]), 0, -1))
 
     @cylindrical.setter
     def cylindrical(self, value):
-
-        # set the coordinate system
-        self._system = self._make_system('cyl', 'top', 'rad')
-
         self._set_sph(
             value[..., 0], value[..., 1], value[..., 2], convention='front')
 
@@ -928,19 +1013,20 @@ class Coordinates():
 
     @property
     def rho(self):
-        """The z-axis coordinates for each point in a right handed cartesian
-        coordinate system."""
-        azimuth, z, radius_z = self._get_cyl()
-        return radius_z
+        """distance to origin for each point in the x-y-plane. Used for
+        cylindrical coordinate systems."""
+        azimuth, z, rho = self._get_cyl()
+        return rho
 
     @rho.setter
-    def rho(self, radius_z):
+    def rho(self, rho):
         azimuth, z, _ = self._get_cyl()
-        self._set_cyl(azimuth, z, radius_z)
+        self._set_cyl(azimuth, z, rho)
 
     @property
     def radius(self):
-        """The radius for each point."""
+        """distance to origin for each point. Used for spherical coordinate
+        systems."""
         azimuth, elevation, radius = self._get_sph(convention='top_elev')
         return radius
 
@@ -951,7 +1037,9 @@ class Coordinates():
 
     @property
     def azimuth(self):
-        """The azimuth angle for each point."""
+        """angle in radiant of rotation from the x-y-plane facing towards
+        positive x direction. Used for spherical and cylindrical coordinate
+        systems."""
         azimuth, _, _ = self._get_sph(convention='top_elev')
         return azimuth
 
@@ -962,7 +1050,8 @@ class Coordinates():
 
     @property
     def elevation(self):
-        """The elevation angle for each point"""
+        """angle in radiant with respect to horizontal plane (x-z-axe). 
+        Used for spherical coordinate systems."""
         _, elevation, _ = self._get_sph(convention='top_elev')
         return elevation
 
@@ -973,7 +1062,8 @@ class Coordinates():
 
     @property
     def colatitude(self):
-        """The colatitude angle for each point"""
+        """angle in radiant with respect to polar axis (z-axe). Used for
+        spherical coordinate systems."""
         azimuth, colatitude, radius = self._get_sph(convention='top_colat')
         return colatitude
 
@@ -984,7 +1074,8 @@ class Coordinates():
 
     @property
     def phi(self):
-        """The phi angle for each point."""
+        """angle in radiant of rotation from the y-z-plane facing towards
+        positive y direction. Used for spherical coordinate systems."""
         phi, theta, radius = self._get_sph(convention='front')
         return phi
 
@@ -995,7 +1086,8 @@ class Coordinates():
 
     @property
     def theta(self):
-        """The theta angle for each point"""
+        """angle in radiant with respect to polar axis (x-axe). Used for
+        spherical coordinate systems."""
         phi, theta, radius = self._get_sph(convention='front')
         return theta
 
@@ -1006,7 +1098,8 @@ class Coordinates():
 
     @property
     def lateral(self):
-        """The lateral angle for each point."""
+        """angle in radiant with respect to horizontal plane (x-y-axe).
+        Used for spherical coordinate systems."""
         lateral, polar, radius = self._get_sph(convention='side')
         return lateral
 
@@ -1017,7 +1110,8 @@ class Coordinates():
 
     @property
     def polar(self):
-        """The polar angle for each point"""
+        """angle in radiant of rotation from the x-z-plane facing towards
+        positive x direction. Used for spherical coordinate systems."""
         lateral, polar, radius = self._get_sph(convention='side')
         return polar
 
