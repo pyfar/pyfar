@@ -40,9 +40,9 @@ class Coordinates():
         """
         This function will be changed in pyfar 0.7.0 and will just be able to
         get cartesian coordinates. If you want to initialize in an other
-        domain use of :py:func:`from_atitude`, 
-        :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`, 
-        :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`. 
+        domain use of :py:func:`from_atitude`,
+        :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
+        :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`.
         instead.
 
         Create :py:func:`Coordinates` object with or without coordinate points.
@@ -86,7 +86,7 @@ class Coordinates():
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
             in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.7.0.
         domain : string
-            ``'domain'`` and ``'convention'`` function will be deprecated in 
+            ``'domain'`` and ``'convention'`` function will be deprecated in
             pyfar 0.7.0 in favor of ``from_*``
             domain of the coordinate system
 
@@ -99,7 +99,7 @@ class Coordinates():
 
             The default is ``'cart'``.
         convention: string
-            ``'domain'`` and ``'convention'`` function will be deprecated in 
+            ``'domain'`` and ``'convention'`` function will be deprecated in
             pyfar 0.7.0 in favor of ``from_*``
             This function will be deprecated in pyfar 0.7.0 in favor
             of :py:func:`SamplingSphere`.
@@ -166,8 +166,8 @@ class Coordinates():
                     PyfarDeprecationWarning)
 
     @classmethod
-    def from_cartesian(cls, x, y, z, weights: np.array = None,
-            comment: str = ""):
+    def from_cartesian(
+            cls, x, y, z, weights: np.array = None, comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         right-handed cartesian coordinate system.
 
@@ -259,8 +259,8 @@ class Coordinates():
         Parameters
         ----------
         lateral : ndarray, double
-            angle in radiant with respect to horizontal plane (x-y-axe). 
-            Used for spherical coordinate systems..
+            angle in radiant with respect to horizontal plane (x-y-axe).
+            Used for spherical coordinate systems.
         polar : ndarray, double
             angle in radiant of rotation from the x-z-plane facing towards
             positive x direction. Used for spherical coordinate systems.
@@ -862,7 +862,7 @@ class Coordinates():
 
     @property
     def cartesian(self):
-        """Right handed cartesian coordinate system. Returns :py:func:`x`, 
+        """Right handed cartesian coordinate system. Returns :py:func:`x`,
         :py:func:`y`, :py:func:`z`"""
         # check if empty
         self._check_empty()
@@ -884,11 +884,11 @@ class Coordinates():
     def spherical_elevation(self):
         """returns :py:func:`azimuth`, :py:func:`elevation`,
         :py:func:`radius` in radiant. Conform with
-        AES69-2015: AES standard for file exchange - Spatial acoustic data 
+        AES69-2015: AES standard for file exchange - Spatial acoustic data
         file format (SOFA). The azimuth denotes the counter clockwise angle in
         the x/y-plane with 0 pointing in positive x-direction and pi/2 in
         positive y-direction. The elevation denotes the angle upwards and
-        downwards from the x/y-plane with pi/2 pointing at positive 
+        downwards from the x/y-plane with pi/2 pointing at positive
         z-direction and -pi/2 pointing in negative z-direction. The azimuth
         and elevation can be in radians or degrees, the radius is always in
         meters."""
@@ -908,7 +908,7 @@ class Coordinates():
 
     @property
     def spherical_colatitude(self):
-        """returns :py:func:`azimuth`, :py:func:`colatitude`, 
+        """returns :py:func:`azimuth`, :py:func:`colatitude`,
         :py:func:`radius` in radiant, where the azimuth
         denotes the counter clockwise angle in the x/y-plane with 0 pointing in
         positive x-direction and pi/2 in positive y-direction. The colatitude
@@ -927,10 +927,10 @@ class Coordinates():
     @property
     def spherical_side(self):
         """returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius` in
-        radiant, where the lateral angle denotes the angle in the x/y-plane 
+        radiant, where the lateral angle denotes the angle in the x/y-plane
         with pi/2 pointing in positive y-direction and -pi/2 in negative
         y-direction. The polar angle denotes the angle in the x/z-plane with
-        -pi/2 pointing in negative z-direction, 0 in positive x-direction, 
+        -pi/2 pointing in negative z-direction, 0 in positive x-direction,
         pi/2 in positive z-direction, pi in negative x-direction. The polar
         and lateral angle can be in radians and degree, the radius is
         always in meters."""
@@ -947,10 +947,10 @@ class Coordinates():
     @property
     def spherical_front(self):
         """returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius` in
-        radiant, where  phi denotes the angle in the y/z-plane with 0 
+        radiant, where  phi denotes the angle in the y/z-plane with 0
         pointing in positive y-direction, pi/2 in positive z-direction, pi
-        in negative y-direction, and 3*pi/2 in negative z-direction. Theta 
-        denotes the angle measured from the x-axis with 0 pointing in positve 
+        in negative y-direction, and 3*pi/2 in negative z-direction. Theta
+        denotes the angle measured from the x-axis with 0 pointing in positve
         x-direction and pi in negative x-direction. Phi and theta can be in
         radians and degrees, the radius is always in meters."""
 
@@ -965,7 +965,7 @@ class Coordinates():
     @property
     def cylindrical(self):
         """returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho` in
-        radiant, where the azimuth denotes the counter clockwise angle in 
+        radiant, where the azimuth denotes the counter clockwise angle in
         the x/y-plane with 0 pointing in positive x-direction and pi/2 in
         positive y-direction. The heigt is given by z, and radius_z denotes
         the radius measured orthogonal to the z-axis."""
@@ -1050,7 +1050,7 @@ class Coordinates():
 
     @property
     def elevation(self):
-        """angle in radiant with respect to horizontal plane (x-z-axe). 
+        """angle in radiant with respect to horizontal plane (x-z-axe).
         Used for spherical coordinate systems."""
         _, elevation, _ = self._get_sph(convention='top_elev')
         return elevation
