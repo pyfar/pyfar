@@ -339,7 +339,7 @@ class Coordinates():
     def set_cart(self, x, y, z, convention='right', unit='met'):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of .cart, .x, .y or .z.
+        of :py:func:`cartesian`, :py:func:`x`, :py:func:`y` or :py:func:`z`.
         Enter coordinate points in cartesian coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -392,7 +392,7 @@ class Coordinates():
     def get_cart(self, convention='right', unit='met', convert=False):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of .cart
+        of :py:func:`cartesian`
         Get coordinate points in cartesian coordinate systems.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -433,7 +433,7 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.7.0 in favor "
             "of .carteasian"),
                 PyfarDeprecationWarning)
-        
+
         self._system = self._make_system('cart', convention, unit)
         return self.cartesian
 
@@ -442,7 +442,7 @@ class Coordinates():
             convention='top_colat', unit='rad'):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of the new setter such as .spherical_elevation
+        of the new setter such as :py:func:`spherical_elevation`
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -526,7 +526,7 @@ class Coordinates():
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of the new setter such as .sph_top_elev
+        of the new setter such as :py:func:`from_spherical_elevation`
         Get coordinate points in spherical coordinate systems.
 
         The points that are returned are defined by the `domain`,
@@ -639,7 +639,7 @@ class Coordinates():
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of the new setter such as .cyl
+        of the new setter such as :py:func:`cylindrical`
         Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -705,7 +705,7 @@ class Coordinates():
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.7.0 in favor
-        of the new setter such as .cyl
+        of the new setter such as :py:func:`cylindrical`
         Get coordinate points in cylindircal coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
