@@ -433,7 +433,8 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.7.0 in favor "
             "of .carteasian"),
                 PyfarDeprecationWarning)
-
+        
+        self._system = self._make_system('cart', convention, unit)
         return self.cartesian
 
     def set_sph(
@@ -864,20 +865,11 @@ class Coordinates():
     def cartesian(self):
         """Right handed cartesian coordinate system. Returns :py:func:`x`,
         :py:func:`y`, :py:func:`z`"""
-        # check if empty
-        self._check_empty()
-
-        # set the coordinate system
-        self._system = self._make_system('cart', 'right', 'met')
-
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
 
     @cartesian.setter
     def cartesian(self, value):
-        # set the coordinate system
-        self._system = self._make_system('cart', 'right', 'met')
-
         self._set_points(value[..., 0], value[..., 1], value[..., 2])
 
     @property
@@ -892,19 +884,16 @@ class Coordinates():
         z-direction and -pi/2 pointing in negative z-direction. The azimuth
         and elevation can be in radians or degrees, the radius is always in
         meters."""
-        # set the coordinate system
-        self._system = self._make_system('sph', 'top_elev', 'rad')
-
+        azimuth, elevation, radius = cart2sph(self.x, self.y, self.z)
+        elevation = np.pi / 2 - elevation
         return np.atleast_2d(np.moveaxis(
-            np.array([self.azimuth, self.elevation, self.radius]), 0, -1))
+            np.array([azimuth, elevation, radius]), 0, -1))
 
     @spherical_elevation.setter
     def spherical_elevation(self, value):
-        # set the coordinate system
-        self._system = self._make_system('sph', 'top_elev', 'rad')
-
-        self._set_sph(
-            value[..., 0], value[..., 1], value[..., 2], convention='top_elev')
+        x, y, z = sph2cart(
+            value[..., 0], np.pi / 2 - value[..., 1], value[..., 2])
+        self._set_points(x, y, z)
 
     @property
     def spherical_colatitude(self):
@@ -915,14 +904,14 @@ class Coordinates():
         denotes the angle downwards from the z-axis with 0 pointing in positve
         z-direction and pi in negative z-direction. The azimuth and colatitude
         can be in radians or degrees, the radius is always in meters."""
+        azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
-            np.array([self.azimuth, self.colatitude, self.radius]), 0, -1))
+            np.array([azimuth, colatitude, radius]), 0, -1))
 
     @spherical_colatitude.setter
     def spherical_colatitude(self, value):
-        self._set_sph(
-            value[..., 0], value[..., 1], value[..., 2],
-            convention='top_colat')
+        x, y, z = sph2cart(value[..., 0], value[..., 1], value[..., 2])
+        self._set_points(x, y, z)
 
     @property
     def spherical_side(self):
@@ -934,15 +923,17 @@ class Coordinates():
         pi/2 in positive z-direction, pi in negative x-direction. The polar
         and lateral angle can be in radians and degree, the radius is
         always in meters."""
-
+        polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
+        lateral = lateral - np.pi / 2
+        polar = np.mod(polar + np.pi / 2, 2 * np.pi) - np.pi / 2
         return np.atleast_2d(np.moveaxis(
-            np.array([self.lateral, self.polar, self.radius]), 0, -1))
+            np.array([lateral, polar, radius]), 0, -1))
 
     @spherical_side.setter
     def spherical_side(self, value):
-
-        self._set_sph(
-            value[..., 0], value[..., 1], value[..., 2], convention='side')
+        x, z, y = sph2cart(
+            value[..., 1], np.pi / 2 - value[..., 0], value[..., 2])
+        self._set_points(x, y, z)
 
     @property
     def spherical_front(self):
@@ -954,13 +945,14 @@ class Coordinates():
         x-direction and pi in negative x-direction. Phi and theta can be in
         radians and degrees, the radius is always in meters."""
 
+        phi, theta, radius = cart2sph(self.y, self.z, self.x)
         return np.atleast_2d(np.moveaxis(
-            np.array([self.phi, self.theta, self.radius]), 0, -1))
+            np.array([phi, theta, radius]), 0, -1))
 
     @spherical_front.setter
     def spherical_front(self, value):
-        self._set_sph(
-            value[..., 0], value[..., 1], value[..., 2], convention='front')
+        y, z, x = sph2cart(value[..., 0], value[..., 1], value[..., 2])
+        self._set_points(x, y, z)
 
     @property
     def cylindrical(self):
@@ -969,14 +961,14 @@ class Coordinates():
         the x/y-plane with 0 pointing in positive x-direction and pi/2 in
         positive y-direction. The heigt is given by z, and radius_z denotes
         the radius measured orthogonal to the z-axis."""
-
+        azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
-            np.array([self.azimuth, self.z, self.rho]), 0, -1))
+            np.array([azimuth, z, rho]), 0, -1))
 
     @cylindrical.setter
     def cylindrical(self, value):
-        self._set_sph(
-            value[..., 0], value[..., 1], value[..., 2], convention='front')
+        x, y, z = cyl2cart(value[..., 0], value[..., 1], value[..., 2])
+        self._set_points(x, y, z)
 
     @property
     def x(self):
@@ -1015,110 +1007,110 @@ class Coordinates():
     def rho(self):
         """distance to origin for each point in the x-y-plane. Used for
         cylindrical coordinate systems."""
-        azimuth, z, rho = self._get_cyl()
-        return rho
+        return self.cylindrical[..., 2]
 
     @rho.setter
     def rho(self, rho):
-        azimuth, z, _ = self._get_cyl()
-        self._set_cyl(azimuth, z, rho)
+        cylindrical = self.cylindrical
+        cylindrical[..., 2] = rho
+        self.cylindrical = cylindrical
 
     @property
     def radius(self):
         """distance to origin for each point. Used for spherical coordinate
         systems."""
-        azimuth, elevation, radius = self._get_sph(convention='top_elev')
-        return radius
+        return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     @radius.setter
     def radius(self, radius):
-        azimuth, elevation, _ = self._get_sph(convention='top_elev')
-        self._set_sph(azimuth, elevation, radius, convention='top_elev')
+        spherical_colatitude = self.spherical_colatitude
+        spherical_colatitude[..., 2] = radius
+        self.spherical_colatitude = spherical_colatitude
 
     @property
     def azimuth(self):
         """angle in radiant of rotation from the x-y-plane facing towards
         positive x direction. Used for spherical and cylindrical coordinate
         systems."""
-        azimuth, _, _ = self._get_sph(convention='top_elev')
-        return azimuth
+        return self.spherical_colatitude[..., 0]
 
     @azimuth.setter
     def azimuth(self, azimuth):
-        _, elevation, radius = self._get_sph(convention='top_elev')
-        self._set_sph(azimuth, elevation, radius, convention='top_elev')
+        spherical_colatitude = self.spherical_colatitude
+        spherical_colatitude[..., 0] = azimuth
+        self.spherical_colatitude = spherical_colatitude
 
     @property
     def elevation(self):
         """angle in radiant with respect to horizontal plane (x-z-axe).
         Used for spherical coordinate systems."""
-        _, elevation, _ = self._get_sph(convention='top_elev')
-        return elevation
+        return self.spherical_elevation[..., 1]
 
     @elevation.setter
     def elevation(self, elevation):
-        azimuth, _, radius = self._get_sph(convention='top_elev')
-        self._set_sph(azimuth, elevation, radius, convention='top_elev')
+        spherical_elevation = self.spherical_elevation
+        spherical_elevation[..., 1] = elevation
+        self.spherical_elevation = spherical_elevation
 
     @property
     def colatitude(self):
         """angle in radiant with respect to polar axis (z-axe). Used for
         spherical coordinate systems."""
-        azimuth, colatitude, radius = self._get_sph(convention='top_colat')
-        return colatitude
+        return self.spherical_colatitude[..., 1]
 
     @colatitude.setter
     def colatitude(self, colatitude):
-        azimuth, _, radius = self._get_sph(convention='top_colat')
-        self._set_sph(azimuth, colatitude, radius, convention='top_colat')
+        spherical_colatitude = self.spherical_colatitude
+        spherical_colatitude[..., 1] = colatitude
+        self.spherical_colatitude = spherical_colatitude
 
     @property
     def phi(self):
         """angle in radiant of rotation from the y-z-plane facing towards
         positive y direction. Used for spherical coordinate systems."""
-        phi, theta, radius = self._get_sph(convention='front')
-        return phi
+        return self.spherical_front[..., 0]
 
     @phi.setter
     def phi(self, phi):
-        _, theta, radius = self._get_sph(convention='front')
-        self._set_sph(phi, theta, radius, convention='front')
+        spherical_front = self.spherical_front
+        spherical_front[..., 0] = phi
+        self.spherical_front = spherical_front
 
     @property
     def theta(self):
         """angle in radiant with respect to polar axis (x-axe). Used for
         spherical coordinate systems."""
-        phi, theta, radius = self._get_sph(convention='front')
-        return theta
+        return self.spherical_front[..., 1]
 
     @theta.setter
     def theta(self, theta):
-        phi, _, radius = self._get_sph(convention='front')
-        self._set_sph(phi, theta, radius, convention='front')
+        spherical_front = self.spherical_front
+        spherical_front[..., 1] = theta
+        self.spherical_front = spherical_front
 
     @property
     def lateral(self):
         """angle in radiant with respect to horizontal plane (x-y-axe).
         Used for spherical coordinate systems."""
-        lateral, polar, radius = self._get_sph(convention='side')
-        return lateral
+        return self.spherical_side[..., 0]
 
     @lateral.setter
     def lateral(self, lateral):
-        _, polar, radius = self._get_sph(convention='side')
-        self._set_sph(lateral, polar, radius, convention='side')
+        spherical_side = self.spherical_side
+        spherical_side[..., 0] = lateral
+        self.spherical_side = spherical_side
 
     @property
     def polar(self):
         """angle in radiant of rotation from the x-z-plane facing towards
         positive x direction. Used for spherical coordinate systems."""
-        lateral, polar, radius = self._get_sph(convention='side')
-        return polar
+        return self.spherical_side[..., 1]
 
     @polar.setter
     def polar(self, polar):
-        lateral, _, radius = self._get_sph(convention='side')
-        self._set_sph(lateral, polar, radius, convention='side')
+        spherical_side = self.spherical_side
+        spherical_side[..., 1] = polar
+        self.spherical_side = spherical_side
 
     def systems(self, show='all', brief=False):
         """
