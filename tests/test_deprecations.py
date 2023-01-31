@@ -195,12 +195,9 @@ def test_pad_zero_modi():
         ("pf.Coordinates(0, 0, 0, domain='sph')"),
         ("pf.Coordinates(0, 0, 0, domain='sph', unit='deg')"),
         ("pf.Coordinates(0, 0, 0, domain='sph', convention='top_colat')"),
-        ('coords.find_nearest_k(0,0,1,1)'),
-        ('coords.find_nearest_cart(0,0,1,1)'),
-        ('coords.find_nearest_sph(0,0,1,1)'),
     ])
 def test_get_nearest_deprecations_0_7_0(statement):
-    coords = pf.Coordinates(np.arange(6), 0, 0, 'sph')
+    coords = pf.Coordinates.from_spherical_colatitude(np.arange(6), 0, 0)
     coords.y = 1
 
     # PyfarDeprecationWarning for

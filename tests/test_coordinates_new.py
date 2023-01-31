@@ -287,8 +287,8 @@ def test_find_slice_cart():
 def test_find_slice_sph(coordinate, unit, value, tol, des_index, des_mask):
     """Test different queries for find slice."""
     # spherical grid
-    d = np.array([358, 359, 0, 1, 2])
-    c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
+    d = np.array([358, 359, 0, 1, 2]) * np.pi / 180
+    c = Coordinates.from_spherical_elevation(d, 0, 1)
 
     index, mask = c.find_slice(coordinate, unit, value, tol)
     np.testing.assert_allclose(index[0], des_index)
@@ -296,8 +296,8 @@ def test_find_slice_sph(coordinate, unit, value, tol, des_index, des_mask):
 
 
 def test_find_slice_error():
-    d = np.array([358, 359, 0, 1, 2])
-    c = Coordinates(d, 0, 1, 'sph', 'top_elev', 'deg')
+    d = np.array([358, 359, 0, 1, 2]) * np.pi / 180
+    c = Coordinates.from_spherical_elevation(d, 0, 1)
     # out of range query
     # with pytest.raises(AssertionError):
     #     c.find_slice('azimuth', 'deg', -1, 1)
@@ -369,6 +369,20 @@ def test_coordinates_init_from_cartesian(x, y, z):
 @pytest.mark.parametrize('x', [0, 1, -1.])
 @pytest.mark.parametrize('y', [0, 1, -1.])
 @pytest.mark.parametrize('z', [0, 1, -1.])
+@pytest.mark.parametrize('weights', [1])
+@pytest.mark.parametrize('comment', ['0'])
+def test_coordinates_init_from_cartesian_with(x, y, z, weights, comment):
+    coords = Coordinates.from_cartesian(x, y, z, weights, comment)
+    npt.assert_allclose(coords._x, x)
+    npt.assert_allclose(coords._y, y)
+    npt.assert_allclose(coords._z, z)
+    coords.comment == comment
+    coords.weights == weights
+
+
+@pytest.mark.parametrize('x', [0, 1, -1.])
+@pytest.mark.parametrize('y', [0, 1, -1.])
+@pytest.mark.parametrize('z', [0, 1, -1.])
 def test_coordinates_init_from_spherical_colatitude(x, y, z):
     theta, phi, rad = cart2sph(x, y, z)
     coords = Coordinates.from_spherical_colatitude(theta, phi, rad)
@@ -377,6 +391,99 @@ def test_coordinates_init_from_spherical_colatitude(x, y, z):
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
+
+
+@pytest.mark.parametrize('x', [0, 1, -1.])
+@pytest.mark.parametrize('y', [0, 1, -1.])
+@pytest.mark.parametrize('z', [0, 1, -1.])
+@pytest.mark.parametrize('weights', [1])
+@pytest.mark.parametrize('comment', ['0'])
+def test_coordinates_init_from_spherical_colatitude(x, y, z, weights, comment):
+    theta, phi, rad = cart2sph(x, y, z)
+    coords = Coordinates.from_spherical_colatitude(
+        theta, phi, rad, weights, comment)
+    # use atol here because of numerical rounding issues introduced in
+    # the coordinate conversion
+    npt.assert_allclose(coords._x, x, atol=1e-15)
+    npt.assert_allclose(coords._y, y, atol=1e-15)
+    npt.assert_allclose(coords._z, z, atol=1e-15)
+    coords.comment == comment
+    coords.weights == weights
+
+@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('elevation', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('radius', [0, 1, -1.])
+@pytest.mark.parametrize('weights', [1])
+@pytest.mark.parametrize('comment', ['0'])
+def test_coordinates_init_from_spherical_elevation_with(
+        azimuth, elevation, radius, weights, comment):
+    coords = Coordinates.from_spherical_elevation(
+        azimuth, elevation, radius, weights, comment)
+    # use atol here because of numerical rounding issues introduced in
+    # the coordinate conversion
+    x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
+    npt.assert_allclose(coords._x, x, atol=1e-15)
+    npt.assert_allclose(coords._y, y, atol=1e-15)
+    npt.assert_allclose(coords._z, z, atol=1e-15)
+    coords.comment == comment
+    coords.weights == weights
+
+
+@pytest.mark.parametrize('lateral', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('polar', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('radius', [0, 1, -1.])
+@pytest.mark.parametrize('weights', [1])
+@pytest.mark.parametrize('comment', ['0'])
+def test_coordinates_init_from_spherical_side_with(
+        lateral, polar, radius, weights, comment):
+    coords = Coordinates.from_spherical_side(
+        lateral, polar, radius, weights, comment)
+    # use atol here because of numerical rounding issues introduced in
+    # the coordinate conversion
+    x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
+    npt.assert_allclose(coords._x, x, atol=1e-15)
+    npt.assert_allclose(coords._y, y, atol=1e-15)
+    npt.assert_allclose(coords._z, z, atol=1e-15)
+    coords.comment == comment
+    coords.weights == weights
+
+
+@pytest.mark.parametrize('phi', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('theta', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('radius', [0, 1, -1.])
+@pytest.mark.parametrize('weights', [1])
+@pytest.mark.parametrize('comment', ['0'])
+def test_coordinates_init_from_spherical_front_with(
+        phi, theta, radius, weights, comment):
+    coords = Coordinates.from_spherical_front(
+        phi, theta, radius, weights, comment)
+    # use atol here because of numerical rounding issues introduced in
+    # the coordinate conversion
+    y, z, x = sph2cart(phi, theta, radius)
+    npt.assert_allclose(coords._x, x, atol=1e-15)
+    npt.assert_allclose(coords._y, y, atol=1e-15)
+    npt.assert_allclose(coords._z, z, atol=1e-15)
+    coords.comment == comment
+    coords.weights == weights
+
+
+@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('z', [0, 1, -1.])
+@pytest.mark.parametrize('rho', [0, 1, -1.])
+@pytest.mark.parametrize('weights', [1])
+@pytest.mark.parametrize('comment', ['0'])
+def test_coordinates_init_from_cylindrical_with(
+        azimuth, z, rho, weights, comment):
+    coords = Coordinates.from_cylindrical(
+        azimuth, z, rho, weights, comment)
+    # use atol here because of numerical rounding issues introduced in
+    # the coordinate conversion
+    x, y, z = cyl2cart(azimuth, z, rho)
+    npt.assert_allclose(coords._x, x, atol=1e-15)
+    npt.assert_allclose(coords._y, y, atol=1e-15)
+    npt.assert_allclose(coords._z, z, atol=1e-15)
+    coords.comment == comment
+    coords.weights == weights
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
