@@ -2213,7 +2213,6 @@ class SamplingSphere(Coordinates):
         else:
             self._sh_order = None
 
-
     @classmethod
     def from_cartesian(
             cls, x, y, z, sh_order=None, weights=None, comment: str = ""):
@@ -2243,7 +2242,7 @@ class SamplingSphere(Coordinates):
 
     @classmethod
     def from_spherical_elevation(
-            cls, azimuth, elevation, radius, 
+            cls, azimuth, elevation, radius,
             sh_order=None, weights=None, comment: str = ""):
         """Create a SamplingSphere class object from a set of points in the
         spherical coordinate system.
@@ -2276,7 +2275,7 @@ class SamplingSphere(Coordinates):
 
     @classmethod
     def from_spherical_colatitude(
-            cls, azimuth, colatitude, radius, 
+            cls, azimuth, colatitude, radius,
             sh_order=None, weights=None, comment: str = ""):
         """Create a SamplingSphere class object from a set of points in the
         spherical coordinate system.
@@ -2309,7 +2308,7 @@ class SamplingSphere(Coordinates):
 
     @classmethod
     def from_spherical_side(
-            cls, lateral, polar, radius, 
+            cls, lateral, polar, radius,
             sh_order=None, weights=None, comment: str = ""):
         """Create a SamplingSphere class object from a set of points in the
         spherical coordinate system.

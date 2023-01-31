@@ -3,14 +3,14 @@ import numpy.testing as npt
 from pytest import raises
 
 import pyfar
-from pyfar import Coordinates
+from pyfar import SamplingSphere
 import pyfar.samplings as samplings
 
 
 def test_cart_equidistant_cube():
     # test with int
     c = samplings.cart_equidistant_cube(3)
-    assert isinstance(c, Coordinates)
+    assert isinstance(c, SamplingSphere)
     assert c.csize == 3**3
 
     # test with tuple
@@ -21,23 +21,23 @@ def test_cart_equidistant_cube():
 def test_sph_dodecahedron():
     # test with default radius
     c = samplings.sph_dodecahedron()
-    assert isinstance(c, Coordinates)
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    assert isinstance(c, SamplingSphere)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test with user radius
     c = samplings.sph_dodecahedron(1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
 
 def test_sph_icosahedron():
     # test with default radius
     c = samplings.sph_icosahedron()
-    assert isinstance(c, Coordinates)
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    assert isinstance(c, SamplingSphere)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test with user radius
     c = samplings.sph_icosahedron(1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
 
 def test_sph_equiangular():
@@ -47,7 +47,7 @@ def test_sph_equiangular():
 
     # test with single number of points
     c = samplings.sph_equiangular(5)
-    isinstance(c, Coordinates)
+    isinstance(c, SamplingSphere)
     assert c.csize == 5**2
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -62,11 +62,11 @@ def test_sph_equiangular():
     npt.assert_allclose(np.sum(c.weights), 1)
 
     # test default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test user radius
     c = samplings.sph_equiangular(5, radius=1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
 
 def test_sph_gaussian():
@@ -76,7 +76,7 @@ def test_sph_gaussian():
 
     # test with single number of points
     c = samplings.sph_gaussian(5)
-    isinstance(c, Coordinates)
+    isinstance(c, SamplingSphere)
     assert c.csize == 5**2
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -91,11 +91,11 @@ def test_sph_gaussian():
     npt.assert_allclose(np.sum(c.weights), 1)
 
     # test default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test user radius
     c = samplings.sph_gaussian(5, radius=1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
 
 def test_sph_extremal():
@@ -107,7 +107,7 @@ def test_sph_extremal():
 
     # test with n_points
     c = samplings.sph_extremal(4)
-    isinstance(c, Coordinates)
+    isinstance(c, SamplingSphere)
     assert c.csize == 4
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -117,11 +117,11 @@ def test_sph_extremal():
     npt.assert_allclose(np.sum(c.weights), 1)
 
     # test default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test user radius
     c = samplings.sph_extremal(4, radius=1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
     # test loading SH order > 99
     c = samplings.sph_extremal(sh_order=100)
@@ -144,7 +144,7 @@ def test_sph_t_design():
 
     # test with degree
     c = samplings.sph_t_design(2)
-    isinstance(c, Coordinates)
+    isinstance(c, SamplingSphere)
     assert c.csize == 6
 
     # test with spherical harmonic order
@@ -154,11 +154,11 @@ def test_sph_t_design():
     assert c.csize == 8
 
     # test default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test user radius
     c = samplings.sph_t_design(2, radius=1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
     # test loading degree order > 99
     c = samplings.sph_t_design(100)
@@ -177,14 +177,14 @@ def test_sph_t_design():
 def test_sph_equal_angle():
     # test with tuple
     c = samplings.sph_equal_angle((10, 20))
-    assert isinstance(c, Coordinates)
+    assert isinstance(c, SamplingSphere)
     # test with number
     c = samplings.sph_equal_angle(10)
     # test default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
     # test user radius
     c = samplings.sph_equal_angle(10, 1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
     # test assertions
     with raises(ValueError):
@@ -196,23 +196,23 @@ def test_sph_equal_angle():
 def test_sph_great_circle():
     # test with default values
     c = samplings.sph_great_circle()
-    assert isinstance(c, Coordinates)
+    assert isinstance(c, SamplingSphere)
     # check default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test if azimuth matching angles work
     c = samplings.sph_great_circle(0, 4, match=90)
-    azimuth = c.get_sph(unit='deg')[:, 0]
+    azimuth = c.azimuth * 180 / np.pi
     for deg in [0, 90, 180, 270]:
         assert deg in azimuth
 
     # test user radius
     c = samplings.sph_great_circle(radius=1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
     # test fractional azimuth resolution
     c = samplings.sph_great_circle(60, 4,  azimuth_res=.1, match=90)
-    npt.assert_allclose(c.get_sph(unit='deg')[1, 0], 7.5, atol=1e-15)
+    npt.assert_allclose(c.azimuth[1] * 180 / np.pi, 7.5, atol=1e-15)
 
     # test assertion: 1 / azimuth_res is not an integer
     with raises(AssertionError):
@@ -231,7 +231,7 @@ def test_sph_lebedev():
 
     # test with degree
     c = samplings.sph_lebedev(14)
-    isinstance(c, Coordinates)
+    isinstance(c, SamplingSphere)
     assert c.csize == 14
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -241,11 +241,11 @@ def test_sph_lebedev():
     npt.assert_allclose(np.sum(c.weights), 1)
 
     # test default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test user radius
     c = samplings.sph_lebedev(6, radius=1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
 
 def test_sph_fliege():
@@ -254,7 +254,7 @@ def test_sph_fliege():
 
     # test with degree
     c = samplings.sph_fliege(16)
-    isinstance(c, Coordinates)
+    isinstance(c, SamplingSphere)
     assert c.csize == 16
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -264,11 +264,11 @@ def test_sph_fliege():
     npt.assert_allclose(np.sum(c.weights), 1)
 
     # test default radius
-    npt.assert_allclose(c.get_sph()[..., 2], 1, atol=1e-15)
+    npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test user radius
     c = samplings.sph_fliege(4, radius=1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
     # test exceptions
     with raises(ValueError):
@@ -280,10 +280,10 @@ def test_sph_fliege():
 def test_sph_equal_area():
     # test with points only
     c = samplings.sph_equal_area(10)
-    assert isinstance(c, Coordinates)
+    assert isinstance(c, SamplingSphere)
     assert c.csize == 10
-    npt.assert_allclose(c.get_sph()[..., 2], 1., atol=1e-15)
+    npt.assert_allclose(c.radius, 1., atol=1e-15)
 
     # test with user radius
     c = samplings.sph_equal_area(10, 1.5)
-    npt.assert_allclose(c.get_sph()[..., 2], 1.5, atol=1e-15)
+    npt.assert_allclose(c.radius, 1.5, atol=1e-15)

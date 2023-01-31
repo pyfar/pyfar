@@ -398,7 +398,8 @@ def test_coordinates_init_from_spherical_colatitude(x, y, z):
 @pytest.mark.parametrize('z', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
 @pytest.mark.parametrize('comment', ['0'])
-def test_coordinates_init_from_spherical_colatitude(x, y, z, weights, comment):
+def test_coordinates_init_from_spherical_colatitude_with(
+        x, y, z, weights, comment):
     theta, phi, rad = cart2sph(x, y, z)
     coords = Coordinates.from_spherical_colatitude(
         theta, phi, rad, weights, comment)
@@ -409,6 +410,7 @@ def test_coordinates_init_from_spherical_colatitude(x, y, z, weights, comment):
     npt.assert_allclose(coords._z, z, atol=1e-15)
     coords.comment == comment
     coords.weights == weights
+
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
 @pytest.mark.parametrize('elevation', [0, np.pi, -np.pi])
