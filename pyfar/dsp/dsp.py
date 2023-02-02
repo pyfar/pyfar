@@ -1934,10 +1934,11 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         Define how to handle NaNs in input signal.
 
         ``'propagate'``
-           If the input signal includes NaNs, the resulting averaged output
-           signal values are NaN.
+           If the input signal includes NaNs, the corresponding averaged output
+           signal value will be NaN.
         ``'omit'``
-           NaNs will be omitted while averaging.
+           NaNs will be omitted while averaging. For each NaN value, the number
+           of values used for the average division is also reduced by one.
         ``'raise'``
             A ``'ValueError'`` will be raised, if the input signal includes
             NaNs.
