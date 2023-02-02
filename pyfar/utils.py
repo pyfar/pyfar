@@ -32,7 +32,7 @@ def broadcast_cshape(signal, cshape):
     return signal
 
 
-def broadcast_cshapes(signals, cshape=None):
+def broadcast_cshapes(signals, cshape=None, ignore_axis=None):
     """
     Broadcast multiple signals to a common cshape.
 
@@ -60,7 +60,24 @@ def broadcast_cshapes(signals, cshape=None):
             raise TypeError("All input data must be pyfar audio objects")
 
     if cshape is None:
-        cshape = np.broadcast_shapes(*[s.cshape for s in signals])
+        if ignore_axis is not None:
+            data_shapes = [s.cshape for s in signals]
+            cshape = np.broadcast_shapes(*np.delete(data_shapes, ignore_axis,
+                                         axis=-1))
+            if ignore_axis in (-1, len(cshape)):
+                cshape = [np.append(cshape, data_shapes[idx][ignore_axis])
+                          for idx, s in enumerate(signals)]
+            else:
+                insert_axis = ignore_axis+1 if ignore_axis < 0 else ignore_axis
+                cshape = [np.insert(cshape, insert_axis,
+                                    data_shapes[idx][ignore_axis])
+                          for idx, s in enumerate(signals)]
+            broad_signals = [broadcast_cshape(s, tuple(cshape[idx]))
+                             for idx, s in enumerate(signals)]
+            return broad_signals
+        else:
+            cshape = np.broadcast_shapes(*[s.cshape for s in signals])
+
     return [broadcast_cshape(s, cshape) for s in signals]
 
 

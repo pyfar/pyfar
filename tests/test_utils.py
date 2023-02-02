@@ -1,5 +1,6 @@
 import pyfar as pf
 import pytest
+import numpy as np
 
 
 @pytest.mark.parametrize("signal", [
@@ -38,6 +39,19 @@ def test_broadcast_cshapes(cshape, reference):
         assert signal.cshape == cshape
         assert broadcast.cshape == reference
         assert isinstance(broadcast, type(signal))
+
+
+@pytest.mark.parametrize("shape1, shape2, axis, reference1, reference2", [
+    ((1, 2, 3, 1), (1, 1, 2, 1), -1, (1, 2, 3), (1, 2, 2)),
+    ((1, 3, 2, 1), (1, 2, 1, 1), -2, (1, 3, 2), (1, 2, 2)),
+    ((1, 2, 1), (3, 1, 1), 0, (1, 2), (3, 2)),
+    ((1, 4, 3, 1000), (1, 1, 2, 1000), 2, (1, 4, 3), (1, 4, 2))])
+def test_broadcast_ignore_axis(shape1, shape2, axis, reference1, reference2):
+    signals = (pf.Signal(np.ones(shape1), 44100),
+               pf.Signal(np.ones(shape2), 44100))
+    broadcasted = pf.utils.broadcast_cshapes(signals, ignore_axis=axis)
+    assert broadcasted[0].cshape == reference1
+    assert broadcasted[1].cshape == reference2
 
 
 def test_broadcast_cshapes_assertions():
