@@ -187,7 +187,7 @@ class Coordinates():
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
-        return cls(x, y, z)
+        return cls(x, y, z, weights=weights, comment=comment)
 
     @classmethod
     def from_spherical_elevation(
@@ -2523,9 +2523,9 @@ def sph2cart(azimuth, colatitude, radius):
     y = r_sin_cola * np.sin(azimuth)
     z = radius * np.cos(colatitude)
 
-    x[np.abs(x) < 1e-15] = 0
-    y[np.abs(y) < 1e-15] = 0
-    z[np.abs(z) < 1e-15] = 0
+    x[np.abs(x) < np.finfo(x.dtype).eps] = 0
+    y[np.abs(y) < np.finfo(y.dtype).eps] = 0
+    z[np.abs(z) < np.finfo(x.dtype).eps] = 0
 
     return x, y, z
 
@@ -2643,8 +2643,8 @@ def cyl2cart(azimuth, height, radius):
     else:
         z = height
 
-    x[np.abs(x) < 1e-15] = 0
-    y[np.abs(y) < 1e-15] = 0
-    z[np.abs(z) < 1e-15] = 0
+    x[np.abs(x) < np.finfo(x.dtype).eps] = 0
+    y[np.abs(y) < np.finfo(y.dtype).eps] = 0
+    z[np.abs(z) < np.finfo(x.dtype).eps] = 0
 
     return x, y, z
