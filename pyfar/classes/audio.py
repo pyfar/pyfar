@@ -654,24 +654,7 @@ class Signal(FrequencyData, TimeData):
     @freq.setter
     def freq(self, value):
         """Set the normalized frequency domain data."""
-        # check data type
-        data = np.atleast_2d(np.asarray(value))
-        if data.dtype.kind not in ["i", "f", "c"]:
-            raise ValueError((f"frequency data is {data.dtype} must be int, "
-                              "float, or complex"))
-        # Check n_samples
-        if data.shape[-1] != self.n_bins:
-            self._n_samples = max(1, (data.shape[-1] - 1)*2)
-            warnings.warn(
-                f"Number of samples not given, assuming {self.n_samples} "
-                f"samples from {data.shape[-1]} frequency bins.")
-        # set domain
-        self._domain = 'freq'
-        # remove normalization
-        data_denorm = fft.normalization(
-                data, self._n_samples, self._sampling_rate,
-                self._fft_norm, inverse=True)
-        self._data = data_denorm.astype(complex)
+        self._freq(value, raw=False)
 
     @property
     def freq_raw(self):
@@ -689,6 +672,11 @@ class Signal(FrequencyData, TimeData):
     @freq_raw.setter
     def freq_raw(self, value):
         """Set the frequency domain data without normalization."""
+        self._freq(value, raw=True)
+
+    def _freq(self, value, raw):
+        """Set the frequency domain data."""
+        # check data type
         data = np.atleast_2d(np.asarray(value))
         if data.dtype.kind not in ["i", "f", "c"]:
             raise ValueError((f"frequency data is {data.dtype} must be int, "
@@ -699,7 +687,13 @@ class Signal(FrequencyData, TimeData):
             warnings.warn(
                 f"Number of samples not given, assuming {self.n_samples} "
                 f"samples from {data.shape[-1]} frequency bins.")
+        # set domain
         self._domain = 'freq'
+        if not raw:
+            # remove normalization
+            data = fft.normalization(
+                    data, self._n_samples, self._sampling_rate,
+                    self._fft_norm, inverse=True)
         self._data = data.astype(complex)
 
     @_Audio.domain.setter
