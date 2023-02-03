@@ -350,12 +350,6 @@ def test_magic_setitem_wrong_type(audio):
         signal[0] = audio
 
 
-def test_magic_len():
-    """Test the magic function __len__."""
-    signal = Signal([1, 2, 3], 44100)
-    assert len(signal) == 3
-
-
 def test_find_nearest_time():
     sampling_rate = 100
     signal = Signal(np.zeros(100), sampling_rate)

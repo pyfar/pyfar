@@ -1,4 +1,6 @@
 import importlib
+from types import ModuleType
+from inspect import isclass
 
 
 def test_import_importlib():
@@ -7,8 +9,7 @@ def test_import_importlib():
 
 def test_import_pyfar():
     import pyfar
-    __all__ = [pyfar]
-    return __all__
+    isinstance(pyfar, ModuleType)
 
 
 def test_import_classes():
@@ -23,25 +24,23 @@ def test_import_classes():
     from pyfar import FilterFIR
     from pyfar import FilterIIR
 
-    __all__ = [
-        Signal,
-        TimeData,
-        FrequencyData,
-        Coordinates,
-        Orientations,
-        FilterSOS,
-        FilterFIR,
-        FilterIIR
-    ]
-    return __all__
+    assert isclass(Signal)
+    assert isclass(TimeData)
+    assert isclass(FrequencyData)
+    assert isclass(Coordinates)
+    assert isclass(Orientations)
+    assert isclass(FilterSOS)
+    assert isclass(FilterFIR)
+    assert isclass(FilterIIR)
 
 
 def test_import_submodules():
     import pyfar
-    assert pyfar.dsp
-    assert pyfar.dsp.fft
-    assert pyfar.dsp.filter
-    assert pyfar.io
-    assert pyfar.samplings
-    assert pyfar.plot
-    assert pyfar.signals
+    assert isinstance(pyfar.dsp, ModuleType)
+    assert isinstance(pyfar.dsp.fft, ModuleType)
+    assert isinstance(pyfar.dsp.filter, ModuleType)
+    assert isinstance(pyfar.io, ModuleType)
+    assert isinstance(pyfar.samplings, ModuleType)
+    assert isinstance(pyfar.plot, ModuleType)
+    assert isinstance(pyfar.signals, ModuleType)
+    assert isinstance(pyfar.signals.files, ModuleType)
