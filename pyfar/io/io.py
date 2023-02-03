@@ -105,10 +105,16 @@ def convert_sofa(sofa):
 
         - :py:class:`~pyfar.classes.audio.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
-            ``'FIR-E'``, or ``'FIRE'``.
+            ``'FIR-E'``, or ``'FIRE'``. In case of ``'FIR-E'``, the time data
+            is returned with the `cshape` EMRN (samples are in the last
+            dimension) and not MRNE as in the SOFA standard (emitters are in
+            the last dimension).
         - :py:class:`~pyfar.classes.audio.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
-            ``'TF-E'``, or ``'TFE'``.
+            ``'TF-E'``, or ``'TFE'``. In case of ``'TF-E'``, the frequency data
+            is returned with the `cshape` EMRN (frequencies are in the last
+            dimension) and not MRNE as in the SOFA standard (emitters are in
+            the last dimension).
 
         The `cshape` of the object is is ``(M, R)`` with `M` being the number
         of measurements and `R` being the number of receivers from the SOFA
@@ -135,16 +141,30 @@ def convert_sofa(sofa):
 
     # Check for DataType
     if sofa.GLOBAL_DataType in ['FIR', 'FIR-E', 'FIRE']:
+        # order axis according to pyfar convention
+        # (samples go in last dimension)
+        if sofa.GLOBAL_DataType == 'FIR-E':
+            time = np.moveaxis(sofa.Data_IR, -1, 0)
+        else:
+            time = sofa.Data_IR
+
         # make a Signal
-        signal = Signal(sofa.Data_IR, sofa.Data_SamplingRate)
+        signal = Signal(time, sofa.Data_SamplingRate)
 
     elif sofa.GLOBAL_DataType in ['TF', 'TF-E', 'TFE']:
+        # order axis according to pyfar convention
+        # frequencies go in last dimension)
+        if sofa.GLOBAL_DataType == 'TF-E':
+            freq = np.moveaxis(sofa.Data_Real, -1, 0) + \
+                1j * np.moveaxis(sofa.Data_Imag, -1, 0)
+        else:
+            freq = sofa.Data_Real + 1j * sofa.Data_Imag
+
         # make FrequencyData
-        signal = FrequencyData(
-            sofa.Data_Real + 1j * sofa.Data_Imag, sofa.N)
+        signal = FrequencyData(freq, sofa.N)
     else:
         raise ValueError(
-            "DataType {sofa.GLOBAL_DataType} is not supported.")
+            f"DataType {sofa.GLOBAL_DataType} is not supported.")
 
     # Source
     s_values = sofa.SourcePosition

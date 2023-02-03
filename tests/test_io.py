@@ -33,6 +33,18 @@ def test_read_sofa_GeneralTF(
     npt.assert_allclose(signal.freq, noise_two_by_three_channel.freq)
 
 
+def test_read_sofa_GeneralFIR_E(generate_sofa_GeneralFIR_E):
+    "Test order of axis for emitter dependent FIR data"
+    signal = io.read_sofa(generate_sofa_GeneralFIR_E)[0]
+    assert signal.cshape == (3, 4, 2)
+
+
+def test_read_sofa_GeneralTF_E(generate_sofa_GeneralTF_E):
+    "Test order of axis for emitter dependent TF data"
+    signal = io.read_sofa(generate_sofa_GeneralTF_E)[0]
+    assert signal.cshape == (3, 4, 2)
+
+
 def test_read_sofa_coordinates(
         generate_sofa_GeneralFIR, sofa_reference_coordinates):
     """Test for reading coordinates in sofa file"""
