@@ -614,9 +614,9 @@ class Signal(FrequencyData, TimeData):
             # check and set n_samples
             if n_samples is None:
                 warnings.warn(
-                    "Number of time samples not given, assuming an even "
-                    "number of samples from the number of frequency bins.")
-                n_samples = (data.shape[-1] - 1)*2
+                    f"Number of samples not given, assuming {n_samples} "
+                    f"samples from {data.shape[-1]} frequency bins.")
+                n_samples = max(1, (data.shape[-1] - 1)*2)
             elif n_samples > 2 * data.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
@@ -661,10 +661,10 @@ class Signal(FrequencyData, TimeData):
                               "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
-            warnings.warn(UserWarning((
-                "Number of frequency bins changed, assuming an even "
-                "number of samples from the number of frequency bins.")))
-            self._n_samples = (data.shape[-1] - 1)*2
+            self._n_samples = max(1, (data.shape[-1] - 1)*2)
+            warnings.warn(
+                f"Number of samples not given, assuming {self.n_samples} "
+                f"samples from {data.shape[-1]} frequency bins.")
         # set domain
         self._domain = 'freq'
         # remove normalization
@@ -695,10 +695,10 @@ class Signal(FrequencyData, TimeData):
                               "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
-            warnings.warn(UserWarning((
-                "Number of frequency bins changed, assuming an even "
-                "number of samples from the number of frequency bins.")))
-            self._n_samples = (data.shape[-1] - 1)*2
+            self._n_samples = max(1, (data.shape[-1] - 1)*2)
+            warnings.warn(
+                f"Number of samples not given, assuming {self.n_samples} "
+                f"samples from {data.shape[-1]} frequency bins.")
         self._domain = 'freq'
         self._data = data.astype(complex)
 
