@@ -48,6 +48,9 @@ def broadcast_cshapes(signals, cshape=None, ignore_axis=None):
         The cshape to which the signals are broadcasted. If `cshape` is
         ``None`` it is determined from the cshapes of the input signals using
         ``numpy.broadcast_shapes``. The default is ``None``.
+    ignore_axis : int, optional
+        Axis which will be ignore while broadcasting. Has to be ``None``, if
+        `cshape` is not ``None``. The default is ``None``.
 
     Returns
     -------
@@ -58,22 +61,26 @@ def broadcast_cshapes(signals, cshape=None, ignore_axis=None):
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
             raise TypeError("All input data must be pyfar audio objects")
-
+    if cshape is not None and ignore_axis is not None:
+        raise ValueError(f"Use ignore_axis = 'None' to broadcast to cshape ="
+                         f" {cshape}.")
     if cshape is None:
         if ignore_axis is not None:
             data_shapes = [s.cshape for s in signals]
+            # Finds broadcast cshape without the axis to ignore
             cshape = np.broadcast_shapes(*np.delete(data_shapes, ignore_axis,
                                          axis=-1))
-            if ignore_axis in (-1, len(cshape)):
-                cshape = [np.append(cshape, data_shapes[idx][ignore_axis])
-                          for idx, s in enumerate(signals)]
-            else:
-                insert_axis = ignore_axis+1 if ignore_axis < 0 else ignore_axis
-                cshape = [np.insert(cshape, insert_axis,
-                                    data_shapes[idx][ignore_axis])
-                          for idx, s in enumerate(signals)]
-            broad_signals = [broadcast_cshape(s, tuple(cshape[idx]))
-                             for idx, s in enumerate(signals)]
+            broad_signals = []
+            for idx, s in enumerate(signals):
+                # Appends the axis to ignore back into cshape to broadcast to.
+                if ignore_axis in (-1, len(cshape)):
+                    # Use append if ignore_axis is defined for last dimension
+                    cs = np.append(cshape, data_shapes[idx][ignore_axis])
+                else:
+                    # Use insert if ignore_axis is not defined for last dim
+                    axis = ignore_axis+1 if ignore_axis < 0 else ignore_axis
+                    cs = np.insert(cshape, axis, data_shapes[idx][ignore_axis])
+                broad_signals.append(broadcast_cshape(s, tuple(cs)))
             return broad_signals
         else:
             cshape = np.broadcast_shapes(*[s.cshape for s in signals])

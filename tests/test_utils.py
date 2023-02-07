@@ -47,6 +47,7 @@ def test_broadcast_cshapes(cshape, reference):
     ((1, 2, 1), (3, 1, 1), 0, (1, 2), (3, 2)),
     ((1, 4, 3, 1000), (1, 1, 2, 1000), 2, (1, 4, 3), (1, 4, 2))])
 def test_broadcast_ignore_axis(shape1, shape2, axis, reference1, reference2):
+    # Test ignore_axis broadcasting
     signals = (pf.Signal(np.ones(shape1), 44100),
                pf.Signal(np.ones(shape2), 44100))
     broadcasted = pf.utils.broadcast_cshapes(signals, ignore_axis=axis)
@@ -60,6 +61,10 @@ def test_broadcast_cshapes_assertions():
     # invalid input type
     with pytest.raises(TypeError, match="All input data must be pyfar"):
         pf.utils.broadcast_cshapes([1, 2, 3], (1, ))
+    with pytest.raises(ValueError, match="Use ignore_axis = 'None'"):
+        pf.utils.broadcast_cshapes((pf.Signal(np.ones((1, 2, 3, 1)), 44100),
+                                    pf.Signal(np.ones((1, 1, 2, 1)), 44100)),
+                                   (1, 2, 3), ignore_axis=-1)
 
 
 @pytest.mark.parametrize("signal", [
