@@ -84,7 +84,6 @@ def broadcast_cshapes(signals, cshape=None, ignore_axis=None):
             return broad_signals
         else:
             cshape = np.broadcast_shapes(*[s.cshape for s in signals])
-
     return [broadcast_cshape(s, cshape) for s in signals]
 
 
