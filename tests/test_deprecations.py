@@ -181,7 +181,7 @@ def test_pad_zero_modi():
             pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, mode='before')
 
 
-# deprecate in 0.7.0 ----------------------------------------------------------
+# deprecate in 0.8.0 ----------------------------------------------------------
 @pytest.mark.parametrize(
     'statement', [
         ('coords.get_cart()'),
@@ -207,16 +207,16 @@ def test_get_nearest_deprecations_0_7_0(statement):
 
     # PyfarDeprecationWarning check version
     with pytest.warns(PyfarDeprecationWarning,
-                      match="0.7.0"):
+                      match="0.8.0"):
         eval(statement)
 
-    # remove statement from pyfar 0.7.0!
-    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+    # remove statement from pyfar 0.8.0!
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(AttributeError):
             eval(statement)
 
 
-def test_get_nearest_deprecations_0_7_0_set_sh_order():
+def test_get_nearest_deprecations_0_8_0_set_sh_order():
     coords = pf.Coordinates(np.arange(6), 0, 0)
     # sh_order setter
     with pytest.warns(PyfarDeprecationWarning,
@@ -225,10 +225,10 @@ def test_get_nearest_deprecations_0_7_0_set_sh_order():
 
     # sh_order setter
     with pytest.warns(PyfarDeprecationWarning,
-                      match="0.7.0"):
+                      match="0.8.0"):
         coords.sh_order = 1
 
-    # remove statement from pyfar 0.7.0!
-    if version.parse(pf.__version__) >= version.parse('0.7.0'):
+    # remove statement from pyfar 0.8.0!
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(AttributeError):
             coords.sh_order = 1

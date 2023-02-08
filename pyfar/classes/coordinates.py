@@ -38,7 +38,7 @@ class Coordinates():
             weights: np.array = None, sh_order=None,
             comment: str = "") -> None:
         """
-        This function will be changed in pyfar 0.7.0 and will just be able to
+        This function will be changed in pyfar 0.8.0 and will just be able to
         get cartesian coordinates. If you want to initialize in an other
         domain use of :py:func:`from_colatitude`,
         :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
@@ -76,18 +76,18 @@ class Coordinates():
         points_1 : array like, number
             points for the first coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.7.0.
+            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         points_2 : array like, number
             points for the second coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.7.0.
+            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         points_3 : array like, number
             points for the third coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.7.0.
+            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         domain : string
             ``'domain'`` and ``'convention'`` function will be deprecated in
-            pyfar 0.7.0 in favor of ``from_*``
+            pyfar 0.8.0 in favor of ``from_*``
             domain of the coordinate system
 
             ``'cart'``
@@ -100,8 +100,8 @@ class Coordinates():
             The default is ``'cart'``.
         convention: string
             ``'domain'`` and ``'convention'`` function will be deprecated in
-            pyfar 0.7.0 in favor of ``from_*``
-            This function will be deprecated in pyfar 0.7.0 in favor
+            pyfar 0.8.0 in favor of ``from_*``
+            This function will be deprecated in pyfar 0.8.0 in favor
             of :py:func:`SamplingSphere`.
             coordinate convention (see above)
             The default is ``'right'`` if domain is ``'cart'``,
@@ -116,7 +116,7 @@ class Coordinates():
             as the points points, i.e., if `points` have five entries, the
             `weights` must also have five entries. The default is ``None``.
         sh_order : int, optional
-            This function will be deprecated in pyfar 0.7.0 in favor
+            This function will be deprecated in pyfar 0.8.0 in favor
             of :py:func:`SamplingSphere`.
             maximum spherical harmonic order of the sampling grid.
             The default is ``None``.
@@ -131,7 +131,7 @@ class Coordinates():
         # test Deprecation warning
         if domain != 'cart' or convention is not None or unit is not None:
             warnings.warn((
-                "This function will be changed in pyfar 0.7.0 to "
+                "This function will be changed in pyfar 0.8.0 to "
                 "init(x, y, z)."),
                     PyfarDeprecationWarning)
 
@@ -161,7 +161,7 @@ class Coordinates():
 
         if sh_order is not None:
             warnings.warn((
-                "This function will be deprecated in pyfar 0.7.0 in favor "
+                "This function will be deprecated in pyfar 0.8.0 in favor "
                 "of SamplingSphere."),
                     PyfarDeprecationWarning)
 
@@ -338,7 +338,7 @@ class Coordinates():
 
     def set_cart(self, x, y, z, convention='right', unit='met'):
         """
-        This function will be deprecated in pyfar 0.7.0 in favor
+        This function will be deprecated in pyfar 0.8.0 in favor
         of :py:func:`cartesian`, :py:func:`x`, :py:func:`y` or :py:func:`z`.
         Enter coordinate points in cartesian coordinate systems.
 
@@ -369,7 +369,7 @@ class Coordinates():
         """
 
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of .cart, .x, .y or .z."),
                 PyfarDeprecationWarning)
 
@@ -391,7 +391,7 @@ class Coordinates():
 
     def get_cart(self, convention='right', unit='met', convert=False):
         """
-        This function will be deprecated in pyfar 0.7.0 in favor
+        This function will be deprecated in pyfar 0.8.0 in favor
         of :py:func:`cartesian`
         Get coordinate points in cartesian coordinate systems.
 
@@ -430,7 +430,7 @@ class Coordinates():
             ``points[...,2]`` the points for the third coordinate.
         """
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of .carteasian"),
                 PyfarDeprecationWarning)
 
@@ -441,7 +441,7 @@ class Coordinates():
             self, angles_1, angles_2, radius,
             convention='top_colat', unit='rad'):
         """
-        This function will be deprecated in pyfar 0.7.0 in favor
+        This function will be deprecated in pyfar 0.8.0 in favor
         of the new setter such as :py:func:`spherical_elevation`
         Enter coordinate points in spherical coordinate systems.
 
@@ -477,7 +477,7 @@ class Coordinates():
             ``'rad'``.
         """
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the new setter such as .spherical_elevation"),
                 PyfarDeprecationWarning)
 
@@ -525,7 +525,7 @@ class Coordinates():
 
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
-        This function will be deprecated in pyfar 0.7.0 in favor
+        This function will be deprecated in pyfar 0.8.0 in favor
         of the new setter such as :py:func:`from_spherical_elevation`
         Get coordinate points in spherical coordinate systems.
 
@@ -570,7 +570,7 @@ class Coordinates():
             ``points[...,2]`` the points for the third coordinate.
         """
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the new setter such as .sph_top_elev"),
                 PyfarDeprecationWarning)
 
@@ -638,7 +638,7 @@ class Coordinates():
 
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
         """
-        This function will be deprecated in pyfar 0.7.0 in favor
+        This function will be deprecated in pyfar 0.8.0 in favor
         of the new setter such as :py:func:`cylindrical`
         Enter coordinate points in cylindrical coordinate systems.
 
@@ -668,7 +668,7 @@ class Coordinates():
             ``'rad'``.
         """
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the new setter such as .cyl"),
                 PyfarDeprecationWarning)
         self._set_cyl(azimuth, z, radius_z, convention)
@@ -704,7 +704,7 @@ class Coordinates():
 
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
-        This function will be deprecated in pyfar 0.7.0 in favor
+        This function will be deprecated in pyfar 0.8.0 in favor
         of the new setter such as :py:func:`cylindrical`
         Get coordinate points in cylindircal coordinate system.
 
@@ -743,7 +743,7 @@ class Coordinates():
             ``points[...,2]`` the points for the third coordinate.
         """
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the new setter such as .cyl"),
                 PyfarDeprecationWarning)
         points = self.cylindrical
@@ -790,11 +790,11 @@ class Coordinates():
 
     @property
     def sh_order(self):
-        """This function will be deprecated in pyfar 0.7.0 in favor
+        """This function will be deprecated in pyfar 0.8.0 in favor
             of :py:func:`SamplingSphere`.
             Get the maximum spherical harmonic order."""
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of SamplingSphere."),
                 PyfarDeprecationWarning)
 
@@ -802,11 +802,11 @@ class Coordinates():
 
     @sh_order.setter
     def sh_order(self, value):
-        """This function will be deprecated in pyfar 0.7.0 in favor
+        """This function will be deprecated in pyfar 0.8.0 in favor
             of :py:func:`SamplingSphere`.
             Set the maximum spherical harmonic order."""
         warnings.warn((
-            "This function will be deprecated in pyfar 0.7.0 in favor "
+            "This function will be deprecated in pyfar 0.8.0 in favor "
             "of SamplingSphere."),
                 PyfarDeprecationWarning)
 
