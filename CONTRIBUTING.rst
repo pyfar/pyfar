@@ -203,7 +203,6 @@ A reminder for the maintainers on how to deploy.
 
 - Commit all changes to develop
 - Update HISTORY.rst in develop
-- Check if new contributors should be added to AUTHORS.rst
 - Check if examples/pyfar_demo.ipynb needs to be updated
 - Merge develop into main
 

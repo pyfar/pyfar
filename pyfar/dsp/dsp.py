@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 
 
@@ -428,7 +429,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         >>> for shape in ['symmetric', 'symmetric_zero', 'left', 'right']:
         >>>     signal_windowed = pf.dsp.time_window(
         ...         signal, interval=[25,45], shape=shape)
-        >>>     ax = pf.plot.time(signal_windowed, label=shape)
+        >>>     ax = pf.plot.time(signal_windowed, label=shape, unit='ms')
         >>> ax.legend(loc='right')
 
     Window with fade-in and fade-out defined by four values in `interval`.
@@ -440,7 +441,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         >>> signal = pf.Signal(np.ones(100), 44100)
         >>> signal_windowed = pf.dsp.time_window(
         ...         signal, interval=[25, 40, 60, 90], window='hann')
-        >>> pf.plot.time(signal_windowed)
+        >>> pf.plot.time(signal_windowed, unit='ms')
 
 
     """
@@ -918,9 +919,10 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         >>> # create minimum phase impulse responses
         >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
         >>> # plot the result
+        >>> pf.plot.use()
         >>> fig, axs = plt.subplots(3, figsize=(8, 6))
-        >>> pf.plot.time(h_linear, ax=axs[0])
-        >>> pf.plot.time(h_min, ax=axs[0])
+        >>> pf.plot.time(h_linear, ax=axs[0], unit='ms')
+        >>> pf.plot.time(h_min, ax=axs[0], unit='ms')
         >>> axs[0].grid(True)
         >>> pf.plot.freq(h_linear, ax=axs[1])
         >>> pf.plot.group_delay(h_linear, ax=axs[2], unit="ms")
@@ -1005,7 +1007,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     if mode in ['before', 'after']:
         warnings.warn(('Mode "before" and "after" will be renamed into '
                        '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), DeprecationWarning)
+                       'Pyfar 0.8.0.'), PyfarDeprecationWarning)
 
         mode = 'beginning' if mode == 'before' else 'end'
 
@@ -1109,11 +1111,10 @@ def time_shift(
         >>> # time domain plot
         >>> pf.plot.use('light')
         >>> _, axs = plt.subplots(2, 1)
-        >>> pf.plot.time(impulse, ax=axs[0])
-        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> pf.plot.time(impulse, ax=axs[0], unit='samples')
+        >>> pf.plot.time(shifted, ax=axs[1], unit='samples')
         >>> axs[0].set_title('Original signals')
         >>> axs[1].set_title('Shifted signals')
-        >>> plt.tight_layout()
 
     Perform a linear time shift instead and pad with NaNs
 
@@ -1130,11 +1131,10 @@ def time_shift(
         >>> # time domain plot
         >>> pf.plot.use('light')
         >>> _, axs = plt.subplots(2, 1)
-        >>> pf.plot.time(impulse, ax=axs[0])
-        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> pf.plot.time(impulse, ax=axs[0], unit='samples')
+        >>> pf.plot.time(shifted, ax=axs[1], unit='samples')
         >>> axs[0].set_title('Original signals')
         >>> axs[1].set_title('Shifted signals')
-        >>> plt.tight_layout()
 
     """
     if mode not in ["linear", "cyclic"]:
@@ -1244,8 +1244,16 @@ def find_impulse_response_delay(impulse_response, N=1):
         # in the strict sense, instead of the appriximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
-        ir_minphase = sgn.minimum_phase(
-            impulse_response.time[ch], n_fft=4*n_samples)
+
+        # minimum phase warns if the input signal is not symmetric, which is
+        # not critical for this application
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", message="h does not appear to by symmetric",
+                category=RuntimeWarning)
+            ir_minphase = sgn.minimum_phase(
+                impulse_response.time[ch], n_fft=4*n_samples)
+
         correlation = sgn.correlate(
             impulse_response.time[ch],
             np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
@@ -1373,7 +1381,7 @@ def find_impulse_response_start(
     """
     ir_squared = np.abs(impulse_response.time)**2
 
-    mask_start = np.int(0.9*impulse_response.n_samples)
+    mask_start = int(0.9*impulse_response.n_samples)
 
     mask = np.arange(mask_start, ir_squared.shape[-1])
     noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
@@ -1536,7 +1544,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal
+        The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
+        of this signal must be `broadcastable
+        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
+        cshape of the first signal.
     mode : string, optional
         A string indicating the size of the output:
 
@@ -1568,8 +1579,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
     Returns
     -------
-    Signal
-        The convolution result as a Signal object.
+    signal : Signal
+        The result of the convolution. The
+        :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
+        of the two input signals.
 
     Notes
     -----
@@ -1593,20 +1606,25 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         >>> # Plot input and output
         >>> with pf.plot.context():
         >>>     fig, ax = plt.subplots(2, 1, sharex=True)
-        >>>     pf.plot.time(s1, ax=ax[0], label='Signal 1', marker='o')
-        >>>     pf.plot.time(s2, ax=ax[0], label='Signal 2', marker='o')
+        >>>     pf.plot.time(s1, ax=ax[0], label='Signal 1', marker='o',
+        ...                  unit='samples')
+        >>>     pf.plot.time(s2, ax=ax[0], label='Signal 2', marker='o',
+        ...                  unit='samples')
         >>>     ax[0].set_title('Input Signals')
         >>>     ax[0].legend()
-        >>>     pf.plot.time(full, ax=ax[1], label='full', marker='o')
-        >>>     pf.plot.time(cut, ax=ax[1], label='cut', ls='--',  marker='o')
-        >>>     pf.plot.time(cyc, ax=ax[1], label='cyclic', ls=':', marker='o')
+        >>>     pf.plot.time(full, ax=ax[1], label='full', marker='o',
+        ...                  unit='samples')
+        >>>     pf.plot.time(cut, ax=ax[1], label='cut', ls='--',  marker='o',
+        ...                  unit='samples')
+        >>>     pf.plot.time(cyc, ax=ax[1], label='cyclic', ls=':', marker='o',
+        ...                  unit='samples')
         >>>     ax[1].set_title('Convolution Result')
         >>>     ax[1].set_ylim(-1.1, 1.1)
         >>>     ax[1].legend()
-        >>>     fig.tight_layout()
 
 
     """
+    # check input
     if not signal1.sampling_rate == signal2.sampling_rate:
         raise ValueError("The sampling rates do not match")
     fft_norm = pyfar.classes.audio._match_fft_norm(
@@ -1616,6 +1634,11 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
             f"Invalid mode {mode}, needs to be "
             "'full', 'cut' or 'cyclic'.")
 
+    # check cdims
+    if len(signal1.cshape) != len(signal2.cshape):
+        signal1, signal2 = pyfar.utils.broadcast_cdims((signal1, signal2))
+
+    # convolve
     if method == 'overlap_add':
         res = sgn.oaconvolve(signal1.time, signal2.time, mode='full', axes=-1)
     elif method == 'fft':
@@ -1624,6 +1647,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         raise ValueError(
             f"Invalid method {method}, needs to be 'overlap_add' or 'fft'.")
 
+    # make convolution truncated or cyclic
     if mode == 'cut':
         res = res[..., :np.max((signal1.n_samples, signal2.n_samples))]
     elif mode == 'cyclic':
@@ -2114,8 +2138,8 @@ def normalize(signal, reference_method='max', domain='time',
         >>> signal = pf.signals.sine(1e3, 441, amplitude=2)
         >>> signal_norm = pf.dsp.normalize(signal)
         >>> # Plot input and normalized Signal
-        >>> ax = pf.plot.time(signal, label='Original Signal')
-        >>> pf.plot.time(signal_norm, label='Normalized Signal')
+        >>> ax = pf.plot.time(signal, label='Original Signal', unit='ms')
+        >>> pf.plot.time(signal_norm, label='Normalized Signal', unit='ms')
         >>> ax.legend()
 
     Frequency normalization with a restricted frequency range and targed in dB
@@ -2131,8 +2155,9 @@ def normalize(signal, reference_method='max', domain='time',
         >>> signal_norm = pf.dsp.normalize(signal, target=10**(target_dB/20),
         ...     domain="freq", limits=(400, 600), unit="Hz")
         >>> # Plot input and normalized Signal
-        >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal')
-        >>> pf.plot.time_freq(signal, label='Original Signal')
+        >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal',
+        ...                        unit='ms')
+        >>> pf.plot.time_freq(signal, label='Original Signal', unit='ms')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
     """

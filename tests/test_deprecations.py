@@ -1,7 +1,7 @@
 """
 Test deprecations. For each deprecation two things must be tested:
 1. Is a proper warning raised. This is done using
-   with pytest.warns(PendingDeprecationWarning, match="some text"):
+   with pytest.warns(PyfarDeprecationWarning, match="some text"):
        call_of_function()
 2. Was the function properly deprecated. This is done using:
    if version.parse(pf.__version__) >= version.parse('0.5.0'):
@@ -13,12 +13,14 @@ Test deprecations. For each deprecation two things must be tested:
 import numpy as np
 from packaging import version
 import pathlib
+import re
 
 import pytest
 from unittest.mock import patch
 
 import pyfar as pf
 import pyfar.dsp.filter as pfilt
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 # This defines the plot size and the backend
 from pyfar.testing.plot_utils import create_figure
@@ -127,7 +129,7 @@ def test_exponential_sweep_deprecation():
 def test_xscale_deprecation(function, handsome_signal):
     """Deprecate xscale parameter in plot functions"""
 
-    with pytest.warns(PendingDeprecationWarning,
+    with pytest.warns(PyfarDeprecationWarning,
                       match="The xscale parameter will be removed"):
         create_figure()
         function(handsome_signal, xscale='linear')
@@ -142,7 +144,7 @@ def test_xscale_deprecation(function, handsome_signal):
 def test_spectrogram_yscale_deprecation(sine):
     """Deprecate yscale parameter in plot functions"""
 
-    with pytest.warns(PendingDeprecationWarning,
+    with pytest.warns(PyfarDeprecationWarning,
                       match="The yscale parameter will be removed"):
         create_figure()
         pf.plot.spectrogram(sine, yscale='linear')
@@ -157,7 +159,7 @@ def test_spectrogram_yscale_deprecation(sine):
 def test__check_time_unit():
     """Deprecate unit=None in plots showing the time or group delay"""
 
-    with pytest.warns(PendingDeprecationWarning,
+    with pytest.warns(PyfarDeprecationWarning,
                       match="unit=None will be deprecated"):
         create_figure()
         pf.plot._utils._check_time_unit(None)
@@ -169,8 +171,9 @@ def test__check_time_unit():
             pf.plot._utils._check_time_unit(None)
 
 
+# deprecate in 0.8.0 ----------------------------------------------------------
 def test_pad_zero_modi():
-    with pytest.warns(DeprecationWarning,
+    with pytest.warns(PyfarDeprecationWarning,
                       match='Mode "before" and "after" will be renamed into'):
         pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, 'before')
 
@@ -178,3 +181,14 @@ def test_pad_zero_modi():
         with pytest.raises(ValueError):
             # remove mode 'before' and 'after' from pyfar 0.8.0!
             pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, mode='before')
+
+
+def test_signal_len():
+    with pytest.warns(PyfarDeprecationWarning,
+                      match=re.escape("len(Signal) will be deprecated")):
+        len(pf.Signal([1, 2, 3], 44100))
+
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+        with pytest.raises(TypeError, match=re.escape("had no len()")):
+            # remove Signal.__len__ from pyfar 0.8.0!
+            len(pf.Signal([1, 2, 3], 44100))

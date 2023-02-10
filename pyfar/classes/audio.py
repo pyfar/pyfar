@@ -12,6 +12,7 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
+from .warnings import PyfarDeprecationWarning
 
 
 class _Audio():
@@ -642,18 +643,18 @@ class Signal(FrequencyData, TimeData):
         elif domain == 'freq':
             # check and set n_samples
             if n_samples is None:
-                warnings.warn(
-                    "Number of time samples not given, assuming an even "
-                    "number of samples from the number of frequency bins.")
                 if self.complex:
                     n_samples = data.shape[-1]
-                else:
-                    n_samples = (data.shape[-1] - 1)*2
-            elif (n_samples > 2 * data.shape[-1] - 1) and not self.complex:
+                else:    
+                    n_samples = max(1, (data.shape[-1] - 1)*2)
+                warnings.warn(
+                    f"Number of samples not given, assuming {n_samples} "
+                    f"samples from {data.shape[-1]} frequency bins.")
+        elif (n_samples > 2 * data.shape[-1] - 1) and not self.complex:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"
                                   "when passing one-sided Fourier spectrum"))
-            elif (n_samples > data.shape[-1]) and self.complex:
+        elif (n_samples > data.shape[-1]) and self.complex:
                 raise ValueError(("n_samples can not be larger than "
                                   "data.shape[-1] when passing double-"
                                   "sided Fourier spectrum"))
@@ -697,29 +698,7 @@ class Signal(FrequencyData, TimeData):
     @freq.setter
     def freq(self, value):
         """Set the normalized frequency domain data."""
-        # check data type
-        data = np.atleast_2d(np.asarray(value))
-        if data.dtype.kind not in ["i", "f", "c"]:
-            raise ValueError((f"frequency data is {data.dtype} must be int, "
-                              "float, or complex"))
-        # Check n_samples
-        if data.shape[-1] != self.n_bins:
-            warnings.warn(UserWarning((
-                "Number of frequency bins changed, assuming an even "
-                "number of samples from the number of frequency bins.")))
-            self._n_samples = (data.shape[-1] - 1)*2
-        # set domain
-        self._domain = 'freq'
-        # remove normalization
-        if self.complex:
-            data_denorm = fft.normalization(
-                data, self._n_samples, self._sampling_rate,
-                self._fft_norm, inverse=True, single_sided=False)
-        else:
-            data_denorm = fft.normalization(
-                    data, self._n_samples, self._sampling_rate,
-                    self._fft_norm, inverse=True)
-        self._data = data_denorm.astype(complex)
+        self._freq(value, raw=False)
 
     @property
     def freq_raw(self):
@@ -737,17 +716,34 @@ class Signal(FrequencyData, TimeData):
     @freq_raw.setter
     def freq_raw(self, value):
         """Set the frequency domain data without normalization."""
+        self._freq(value, raw=True)
+
+    def _freq(self, value, raw):
+        """Set the frequency domain data."""
+        # check data type
         data = np.atleast_2d(np.asarray(value))
         if data.dtype.kind not in ["i", "f", "c"]:
             raise ValueError((f"frequency data is {data.dtype} must be int, "
                               "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
-            warnings.warn(UserWarning((
-                "Number of frequency bins changed, assuming an even "
-                "number of samples from the number of frequency bins.")))
-            self._n_samples = (data.shape[-1] - 1)*2
+            self._n_samples = max(1, (data.shape[-1] - 1)*2)
+            warnings.warn(
+                f"Number of samples not given, assuming {self.n_samples} "
+                f"samples from {data.shape[-1]} frequency bins.")
+        # set domain
         self._domain = 'freq'
+        if not raw:
+            # remove normalization
+            if self.complex:
+                data_denorm = fft.normalization(
+                    data, self._n_samples, self._sampling_rate,
+                    self._fft_norm, inverse=True, single_sided=False)
+                else:
+                    data_denorm = fft.normalization(
+                            data, self._n_samples, self._sampling_rate,
+                            self._fft_norm, inverse=True)
+                self._data = data_denorm.astype(complex)
         self._data = data.astype(complex)
 
     @_Audio.domain.setter
@@ -901,6 +897,9 @@ class Signal(FrequencyData, TimeData):
     def __len__(self):
         """Length of the object which is the number of samples stored.
         """
+        warnings.warn(
+            ("len(Signal) will be deprecated in pyfar 0.8.0 "
+             "Use Signal.n_samples instead"), PyfarDeprecationWarning)
         return self.n_samples
 
     def __iter__(self):

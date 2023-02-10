@@ -315,14 +315,14 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         >>>
         >>> pf.plot.use()
         >>> _, ax = plt.subplots(3, 1, figsize=(8, 8))
-        >>> pf.plot.time_freq(signal, ax=ax[:2], label="input")
+        >>> pf.plot.time_freq(signal, ax=ax[:2], label="input", unit='ms')
         >>> pf.plot.group_delay(signal, ax=ax[2], unit="samples")
         >>>
         >>> for order in [30, 6]:
         >>>     delayed = pf.dsp.fractional_time_shift(
         ...         signal, 2.3, order=order)
         >>>     pf.plot.time_freq(delayed, ax=ax[:2],
-        ...                       label=f"delayed, order={order}")
+        ...                       label=f"delayed, order={order}", unit='ms')
         >>>     pf.plot.group_delay(delayed, ax=ax[2], unit="samples")
         >>>
         >>> ax[1].set_ylim(-15, 5)
@@ -338,12 +338,12 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         >>>
         >>> signal = pf.signals.impulse(32, 16)
         >>>
-        >>> ax = pf.plot.time(signal, label="input")
+        >>> ax = pf.plot.time(signal, label="input", unit='ms')
         >>>
         >>> for mode in ["cyclic", "linear"]:
         >>>     delayed = pf.dsp.fractional_time_shift(
         ...         signal, 25.3, order=10, mode=mode)
-        >>>     pf.plot.time(delayed, label=f"delayed, mode={mode}")
+        >>>     pf.plot.time(delayed, label=f"delayed, mode={mode}", unit='ms')
         >>>
         >>> ax.legend()
     """
@@ -527,8 +527,8 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
         >>> signal = pf.signals.sine(200, 4800, sampling_rate=48000)
         >>> resampled = pf.dsp.resample(signal, 96000)
         >>>
-        >>> pf.plot.time_freq(signal, label="original")
-        >>> pf.plot.time_freq(resampled, c="y", ls=":",
+        >>> pf.plot.time_freq(signal, label="original", unit='ms')
+        >>> pf.plot.time_freq(resampled, c="y", ls=":", unit='ms',
         ...                   label="resampled (time domain matched)")
         >>> plt.legend()
 
@@ -548,10 +548,10 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
         >>> resampled_freq = pf.dsp.resample(
         ...     signal, 96000, match_amplitude = "freq")
         >>>
-        >>> pf.plot.time_freq(signal, label="original")
-        >>> pf.plot.time_freq(resampled_freq, dashes=[2, 3],
+        >>> pf.plot.time_freq(signal, label="original", unit='ms')
+        >>> pf.plot.time_freq(resampled_freq, dashes=[2, 3], unit='ms',
         ...                   label="resampled (freq. domain matched)")
-        >>> ax = pf.plot.time_freq(resampled_time, ls=":",
+        >>> ax = pf.plot.time_freq(resampled_time, ls=":", unit='ms',
         ...                   label="resampled (time domain matched)", c='y')
         >>> ax[0].set_xlim(1.2,1.46)
         >>> plt.legend()
@@ -729,8 +729,8 @@ class InterpolateSpectrum():
         >>> with pf.plot.context():
         >>>     _, ax = plt.subplots(2, 2)
         >>>     # time signal (linear and logarithmic amplitude)
-        >>>     pf.plot.time(signal, ax=ax[0, 0])
-        >>>     pf.plot.time(signal, ax=ax[1, 0], dB=True)
+        >>>     pf.plot.time(signal, ax=ax[0, 0], unit='ms')
+        >>>     pf.plot.time(signal, ax=ax[1, 0], unit='ms', dB=True)
         >>>     # frequency plot (linear x-axis)
         >>>     pf.plot.freq(signal, dB=False, freq_scale="linear",
         ...                  ax=ax[0, 1])

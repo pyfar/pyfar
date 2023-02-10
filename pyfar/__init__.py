@@ -4,7 +4,7 @@
 
 __author__ = """The pyfar developers"""
 __email__ = ''
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 
 from .classes.audio import Signal, TimeData, FrequencyData
@@ -19,6 +19,7 @@ from . import samplings
 from . import io
 from . import dsp
 from . import signals
+from . import utils
 
 
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     'samplings',
     'io',
     'dsp',
-    'signals']
+    'signals',
+    'utils']

@@ -110,7 +110,6 @@ axis.set_xlim(20, 20e3)
 axis.set_ylim(-95, 5)
 axis.legend(loc=3)
 
-plt.tight_layout()
 plt.savefig('filter_types_standard.png', dpi=150)
 
 # %% filter banks -------------------------------------------------------------
@@ -142,7 +141,6 @@ axis.set_title('Auditory gammatone bands (almost perfectly reconstructing)')
 axis.set_xlim(20, 20e3)
 axis.set_ylim(-60, 10)
 
-plt.tight_layout()
 plt.savefig('filter_types_filterbanks.png', dpi=150)
 
 # %% cross-over ---------------------------------------------------------------
@@ -160,7 +158,6 @@ axis.set_xlabel('')
 axis.set_xlim(20, 20e3)
 axis.set_ylim(-95, 5)
 
-plt.tight_layout()
 plt.savefig('filter_types_crossover.png', dpi=150)
 
 # %% audio filter -------------------------------------------------------------
@@ -222,6 +219,4 @@ axis.set_xlim(20, 20e3)
 axis.set_ylim(-70, 20)
 axis.legend(loc=4, ncol=2)
 
-
-plt.tight_layout()
 plt.savefig('filter_types_parametric-eq.png', dpi=150)
