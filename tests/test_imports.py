@@ -9,7 +9,7 @@ def test_import_importlib():
 
 def test_import_pyfar():
     import pyfar
-    isinstance(pyfar, ModuleType)
+    assert isinstance(pyfar, ModuleType)
 
 
 def test_import_classes():
