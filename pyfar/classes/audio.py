@@ -613,10 +613,10 @@ class Signal(FrequencyData, TimeData):
         elif domain == 'freq':
             # check and set n_samples
             if n_samples is None:
+                n_samples = max(1, (data.shape[-1] - 1)*2)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
                     f"samples from {data.shape[-1]} frequency bins.")
-                n_samples = max(1, (data.shape[-1] - 1)*2)
             elif n_samples > 2 * data.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
