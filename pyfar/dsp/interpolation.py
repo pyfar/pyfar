@@ -895,12 +895,14 @@ class InterpolateSpectrum():
         """
         Return frequencies for creating or quering interpolation objects.
 
-        In case logfrequencies are requested, 0 Hz entries are replaced by
-        the next highest frequency, because the logarithm of 0 does not exist.
+        In case logfrequencies are requested, 0 Hz can not be used, because the
+        logarithm of 0 does not exist. 0 Hz is replaced with a frequency close
+        (but not too close) to 0 Hz to avoid numerical issues during the
+        interpolation.
         """
         if self._fscale == "log":
             if frequencies[0] == 0:
-                frequencies[0] = frequencies[1]
+                frequencies[0] = min(1, frequencies[1]/2)
             frequencies = np.log(frequencies)
 
         return frequencies
