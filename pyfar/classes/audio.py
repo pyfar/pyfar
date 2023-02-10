@@ -603,6 +603,11 @@ class Signal(FrequencyData, TimeData):
                               f"found '{fft_norm}'"))
         # time / normalized frequency data (depending on domain)
         data = np.atleast_2d(data)
+        # check input
+        if data.dtype.kind not in ["u", "i", "f", "c"] or \
+                np.any(np.isnan(data)) or np.any(np.isinf(data)):
+            raise ValueError(("The input data contains at least one non-"
+                              "numerical value (NaN, inf, string, etc.)"))
 
         # initialize domain specific parameters
         if domain == 'time':

@@ -38,6 +38,16 @@ def test_signal_init_assertions():
     with pytest.raises(ValueError, match="Invalid domain"):
         Signal(1, 44100, domain="space")
 
+    # invalid data: object array
+    with pytest.raises(ValueError, match="The input data contains at least"):
+        Signal([1, 2, "3"], 44100)
+    # invalid data: NaN
+    with pytest.raises(ValueError, match="The input data contains at least"):
+        Signal([1, 2, np.nan], 44100)
+    # invalid data: infinity
+    with pytest.raises(ValueError, match="The input data contains at least"):
+        Signal([1, 2, np.inf], 44100)
+
 
 def test_signal_init_time_dtype():
     """
@@ -74,10 +84,6 @@ def test_data_frequency_init_dtype():
     # complex
     signal = Signal([1+1j, 2+2j, 3+3j], 44100, 4, "freq")
     assert signal.freq.dtype.kind == "c"
-
-    # object array
-    with pytest.raises(ValueError, match="frequency data is"):
-        Signal(["1", "2", "3"], 44100, 4, "freq")
 
 
 def test_signal_comment():
