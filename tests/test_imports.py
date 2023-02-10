@@ -1,6 +1,9 @@
+"""
+Test imports separately for each module and top level functions/classes. These
+tests will give hints in case a single export breaks, whereas im `import pyfar`
+would fail completely and make possible issues harder to find.
+"""
 import importlib
-from types import ModuleType
-from inspect import isclass
 
 
 def test_import_importlib():
@@ -8,39 +11,37 @@ def test_import_importlib():
 
 
 def test_import_pyfar():
-    import pyfar
-    assert isinstance(pyfar, ModuleType)
+    import pyfar                             # noqa: F401
 
 
 def test_import_classes():
-    from pyfar import Signal
-    from pyfar import TimeData
-    from pyfar import FrequencyData
+    from pyfar import Signal                 # noqa: F401
+    from pyfar import TimeData               # noqa: F401
+    from pyfar import FrequencyData          # noqa: F401
 
-    from pyfar import Coordinates
-    from pyfar import Orientations
+    from pyfar import Coordinates            # noqa: F401
+    from pyfar import Orientations           # noqa: F401
 
-    from pyfar import FilterSOS
-    from pyfar import FilterFIR
-    from pyfar import FilterIIR
-
-    assert isclass(Signal)
-    assert isclass(TimeData)
-    assert isclass(FrequencyData)
-    assert isclass(Coordinates)
-    assert isclass(Orientations)
-    assert isclass(FilterSOS)
-    assert isclass(FilterFIR)
-    assert isclass(FilterIIR)
+    from pyfar import FilterSOS              # noqa: F401
+    from pyfar import FilterFIR              # noqa: F401
+    from pyfar import FilterIIR              # noqa: F401
 
 
 def test_import_submodules():
-    import pyfar
-    assert isinstance(pyfar.dsp, ModuleType)
-    assert isinstance(pyfar.dsp.fft, ModuleType)
-    assert isinstance(pyfar.dsp.filter, ModuleType)
-    assert isinstance(pyfar.io, ModuleType)
-    assert isinstance(pyfar.samplings, ModuleType)
-    assert isinstance(pyfar.plot, ModuleType)
-    assert isinstance(pyfar.signals, ModuleType)
-    assert isinstance(pyfar.signals.files, ModuleType)
+    from pyfar import dsp                    # noqa: F401
+    from pyfar.dsp import fft                # noqa: F401
+    from pyfar.dsp import filter             # noqa: F401
+    from pyfar import io                     # noqa: F401
+    from pyfar import plot                   # noqa: F401
+    from pyfar import samplings              # noqa: F401
+    from pyfar import signals                # noqa: F401
+    from pyfar.signals import files          # noqa: F401
+
+
+def test_import_functions():
+    from pyfar import add                    # noqa: F401
+    from pyfar import subtract               # noqa: F401
+    from pyfar import multiply               # noqa: F401
+    from pyfar import divide                 # noqa: F401
+    from pyfar import power                  # noqa: F401
+    from pyfar import matrix_multiplication  # noqa: F401
