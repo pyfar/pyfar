@@ -208,10 +208,9 @@ class Coordinates():
         radius : ndarray, double
             distance to origin for each point. Used for spherical coordinate
             systems.
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
+        weights: array like, float, None, optional
+            Weighting factors for coordinate points. The `shape` of the array must match the `shape`
+            of the individual coordinate arrays. The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
