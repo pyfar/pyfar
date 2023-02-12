@@ -125,7 +125,7 @@ class Coordinates():
             ``""``, which initializes an empty string.
         """
 
-        # init emtpy object
+        # init empty object
         super(Coordinates, self).__init__()
 
         # test Deprecation warning
@@ -320,7 +320,7 @@ class Coordinates():
             positive x direction. Used for spherical and cylindrical coordinate
             systems.
         z : ndarray, double
-            The z cordinate
+            The z coordinate
         rho : ndarray, double
             distance to origin for each point in the x-y-plane. Used for
             cylindrical coordinate systems.
@@ -430,7 +430,7 @@ class Coordinates():
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of .carteasian"),
+            "of .cartesian"),
                 PyfarDeprecationWarning)
 
         self._system = self._make_system('cart', convention, unit)
@@ -610,7 +610,7 @@ class Coordinates():
                 angles_2 = np.pi / 2 - angles_2
 
         # ... side polar system
-        # (idea for simple converions from Robert Baumgartner and SOFA_API)
+        # (idea for simple conversions from Robert Baumgartner and SOFA_API)
         elif convention == 'side':
             angles_2, angles_1, radius = cart2sph(x, z, -y)
             # range angles
@@ -705,7 +705,7 @@ class Coordinates():
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of the new setter such as :py:func:`cylindrical`
-        Get coordinate points in cylindircal coordinate system.
+        Get coordinate points in cylindrical coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
         and `unit`:
@@ -752,7 +752,7 @@ class Coordinates():
         return points
 
     def _get_cyl(self, convention='top', unit='rad'):
-        """internal function to convert cart to cyl coordintes"""
+        """internal function to convert cart to cyl coordinates"""
 
         # check if object is empty
         self._check_empty()
@@ -900,7 +900,7 @@ class Coordinates():
         :py:func:`radius` in radiant, where the azimuth
         denotes the counter clockwise angle in the x/y-plane with 0 pointing in
         positive x-direction and pi/2 in positive y-direction. The colatitude
-        denotes the angle downwards from the z-axis with 0 pointing in positve
+        denotes the angle downwards from the z-axis with 0 pointing in positive
         z-direction and pi in negative z-direction. The azimuth and colatitude
         can be in radians or degrees, the radius is always in meters."""
         azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
@@ -940,7 +940,7 @@ class Coordinates():
         radiant, where  phi denotes the angle in the y/z-plane with 0
         pointing in positive y-direction, pi/2 in positive z-direction, pi
         in negative y-direction, and 3*pi/2 in negative z-direction. Theta
-        denotes the angle measured from the x-axis with 0 pointing in positve
+        denotes the angle measured from the x-axis with 0 pointing in positive
         x-direction and pi in negative x-direction. Phi and theta can be in
         radians and degrees, the radius is always in meters."""
 
@@ -958,7 +958,7 @@ class Coordinates():
         """returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho` in
         radiant, where the azimuth denotes the counter clockwise angle in
         the x/y-plane with 0 pointing in positive x-direction and pi/2 in
-        positive y-direction. The heigt is given by z, and radius_z denotes
+        positive y-direction. The height is given by z, and radius_z denotes
         the radius measured orthogonal to the z-axis."""
         azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
@@ -1125,7 +1125,7 @@ class Coordinates():
         Parameters
         ----------
         show: string, optional
-            ``'current'`` to list the current corrdinate system or ``'all'``
+            ``'current'`` to list the current coordinate system or ``'all'``
             to list all coordinate systems. The default is ``'all'``.
         brief : boolean, optional
             Will only list the domains, conventions and units if True. The
@@ -1726,7 +1726,7 @@ class Coordinates():
                         "the x/y-plane with 0 pointing in positive x-"
                         "direction and pi/2 in positive y-direction. The "
                         "colatitude denotes the angle downwards from the z-"
-                        "axis with 0 pointing in positve z-direction and pi "
+                        "axis with 0 pointing in positive z-direction and pi "
                         "in negative z-direction. The azimuth and colatitude "
                         "can be in radians or degrees, the radius is always "
                         "in meters.",
@@ -1809,7 +1809,7 @@ class Coordinates():
                         "pointing in positive y-direction, pi/2 in positive "
                         "z-direction, pi in negative y-direction, and 3*pi/2 "
                         "in negative z-direction. Theta denotes the angle "
-                        "measured from the x-axis with 0 pointing in positve "
+                        "measured from the x-axis with 0 pointing in positive "
                         "x-direction and pi in negative x-direction. Phi and "
                         "theta can be in radians and degrees, the radius is "
                         "always in meters.",
@@ -1836,7 +1836,7 @@ class Coordinates():
                         "The azimuth denotes the counter clockwise angle in "
                         "the x/y-plane with 0 pointing in positive x-"
                         "direction and pi/2 in positive y-direction. The "
-                        "heigt is given by z, and radius_z denotes the radius "
+                        "height is given by z, and radius_z denotes the radius "
                         "measured orthogonal to the z-axis.",
                     "positive_x": [0, 0, 1],
                     "positive_y": [np.pi / 2, 0, 1],
@@ -1861,7 +1861,7 @@ class Coordinates():
         Parameters
         ----------
         domain : string
-            Sepcify the domain of the coordinate system, e.g., 'cart'.
+            Specify the domain of the coordinate system, e.g., 'cart'.
         convention : string
             The convention of the coordinate system, e.g., 'top_colat'
         units: string
@@ -1877,10 +1877,10 @@ class Coordinates():
 
         # check if domain exists
         assert domain in systems or domain is None, \
-            f"{domain} does not exist. Domain must be one of the follwing: "\
+            f"{domain} does not exist. Domain must be one of the following: "\
             f"{', '.join(list(systems))}."
 
-        # check if convention exisits in domain
+        # check if convention exists in domain
         if convention is not None:
             assert convention in systems[domain] or convention is None,\
                 f"{convention} does not exist in {domain}. Convention must "\
@@ -1967,7 +1967,7 @@ class Coordinates():
         ----------
         convert : boolean, optional
             Set self._points if convert = True. Return points as
-            matrix otherwise. The fefault is False.
+            matrix otherwise. The default is False.
         system: dict, optional
             The coordinate system against which the range of the points are
             checked as returned from self._make_system. If system = None
@@ -2048,7 +2048,7 @@ class Coordinates():
                              domain, convention, unit)
         points = coords.cartesian
 
-        # querry nearest neighbors
+        # query nearest neighbors
         points = points.flatten() if coords.csize == 1 else points
 
         # get the points depending on measure and value
@@ -2383,7 +2383,7 @@ class SamplingSphere(Coordinates):
             positive x direction. Used for spherical and cylindrical coordinate
             systems.
         z : ndarray, double
-            The z cordinate
+            The z coordinate
         rho : ndarray, double
             distance to origin for each point in the x-y-plane. Used for
             cylindrical coordinate systems.

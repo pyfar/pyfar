@@ -217,7 +217,7 @@ def test_coordinates_init_default_convention():
 
 
 def test_coordinates_init_default_convention_and_unit():
-    """Test initialization with the default convention and untit."""
+    """Test initialization with the default convention and unit."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -379,7 +379,7 @@ def test_cshape():
 
 
 def test_cdim():
-    """Test the csim attribute."""
+    """Test the cdim attribute."""
     # empty
     coords = Coordinates()
     assert coords.cdim == 0
@@ -627,7 +627,7 @@ def test_inverse_rotation():
 
 def test_converters():
     """
-    Test if converterts can handle numbers (correctness of theconversion is
+    Test if converters can handle numbers (correctness of the conversion is
     tested in test_setter_and_getter_with_conversion)
     """
     coordinates.cart2sph(0, 0, 1)
@@ -681,7 +681,7 @@ def test___eq___differInUnit_notEqual():
     assert not is_equal
 
 
-def test___eq___differInWeigths_notEqual():
+def test___eq___differInWeights_notEqual():
     coordinates = Coordinates(1, 2, 3, weights=.5)
     actual = Coordinates(1, 2, 3, weights=0.0)
     assert not coordinates == actual

@@ -235,7 +235,7 @@ def test__getitem__3D_array():
     assert new.cshape == (1, 5)
 
 
-def test__getitem__untouced():
+def test__getitem__untouched():
     # test if sliced object stays untouched
     coords = Coordinates([0, 1], [0, 1], [0, 1])
     new = coords[0]
