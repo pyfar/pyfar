@@ -86,8 +86,9 @@ class Coordinates():
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
             in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         domain : string
-            ``'domain'`` and ``'convention'`` function will be deprecated in
-            pyfar 0.8.0 in favor of ``from_*``
+            ``'domain'``, ``'unit'`` and ``'convention'`` function will be
+            deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
+            are no longer supported. Default angle unit is radiant.
             domain of the coordinate system
 
             ``'cart'``
@@ -99,22 +100,24 @@ class Coordinates():
 
             The default is ``'cart'``.
         convention: string
-            ``'domain'`` and ``'convention'`` function will be deprecated in
-            pyfar 0.8.0 in favor of ``from_*``
-            This function will be deprecated in pyfar 0.8.0 in favor
-            of :py:func:`SamplingSphere`.
+            ``'domain'``, ``'unit'`` and ``'convention'`` function will be
+            deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
+            are no longer supported. Default angle unit is radiant.
             coordinate convention (see above)
             The default is ``'right'`` if domain is ``'cart'``,
             ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
             ``'cyl'``.
         unit: string
+            ``'domain'``, ``'unit'`` and ``'convention'`` function will be
+            deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
+            are no longer supported. Default angle unit is radiant.
             unit of the coordinate system. By default the first available unit
             is used, which is meters (``'met'``) for ``domain = 'cart'`` and
             radians (``'rad'``) in all other cases (See above).
         weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
+            weighting factors for coordinate points. The `shape` of the array
+            must match the `shape` of the individual coordinate arrays.
+            The default is ``None``.
         sh_order : int, optional
             This function will be deprecated in pyfar 0.8.0 in favor
             of :py:func:`SamplingSphere`.
@@ -180,9 +183,9 @@ class Coordinates():
         z : ndarray, double
             z-coordinate
         weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
+            weighting factors for coordinate points. The `shape` of the array
+            must match the `shape` of the individual coordinate arrays.
+            The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
@@ -209,8 +212,9 @@ class Coordinates():
             distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, float, None, optional
-            Weighting factors for coordinate points. The `shape` of the array must match the `shape`
-            of the individual coordinate arrays. The default is ``None``.
+            weighting factors for coordinate points. The `shape` of the array
+            must match the `shape` of the individual coordinate arrays.
+            The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
@@ -238,9 +242,9 @@ class Coordinates():
             distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
+            weighting factors for coordinate points. The `shape` of the array
+            must match the `shape` of the individual coordinate arrays.
+            The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
@@ -267,9 +271,9 @@ class Coordinates():
             distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
+            weighting factors for coordinate points. The `shape` of the array
+            must match the `shape` of the individual coordinate arrays.
+            The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
@@ -296,9 +300,9 @@ class Coordinates():
             distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
+            weighting factors for coordinate points. The `shape` of the array
+            must match the `shape` of the individual coordinate arrays.
+            The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
@@ -325,9 +329,9 @@ class Coordinates():
             distance to origin for each point in the x-y-plane. Used for
             cylindrical coordinate systems.
         weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
+            weighting factors for coordinate points. The `shape` of the array
+            must match the `shape` of the individual coordinate arrays.
+            The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
@@ -357,7 +361,7 @@ class Coordinates():
 
         Parameters
         ----------
-        x, y, z: array like, number
+        x, y, z: array like, float
             points for the first, second, and third coordinate
         convention : string, optional
             convention in which the coordinate points are stored. The default
@@ -1836,8 +1840,8 @@ class Coordinates():
                         "The azimuth denotes the counter clockwise angle in "
                         "the x/y-plane with 0 pointing in positive x-"
                         "direction and pi/2 in positive y-direction. The "
-                        "height is given by z, and radius_z denotes the radius "
-                        "measured orthogonal to the z-axis.",
+                        "height is given by z, and radius_z denotes the "
+                        "radius measured orthogonal to the z-axis.",
                     "positive_x": [0, 0, 1],
                     "positive_y": [np.pi / 2, 0, 1],
                     "negative_x": [np.pi, 0, 1],
@@ -1982,13 +1986,10 @@ class Coordinates():
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
-        # transpose
-        if len(x.shape) == 2 and (x.shape[0] == 1 or x.shape[1] == 1):
-            x = x.flatten()
-        if len(y.shape) == 2 and (y.shape[0] == 1 or y.shape[1] == 1):
-            y = y.flatten()
-        if len(z.shape) == 2 and (z.shape[0] == 1 or z.shape[1] == 1):
-            z = z.flatten()
+        # squeeze arrays
+        x = np.squeeze(x)
+        y = np.squeeze(y)
+        z = np.squeeze(z)
 
         # shapes of non scalar entries
         shapes = [p.shape for p in [x, y, z] if len(p) != 1]
@@ -2177,239 +2178,6 @@ class Coordinates():
         """check if object is empty"""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
-
-
-class SamplingSphere(Coordinates):
-    """Class for samplings on a sphere"""
-
-    def __init__(
-            self, x=None, y=None, z=None,
-            sh_order=None, weights=None, comment=""):
-        """Create a SamplingSphere class object from a set of points in the
-        right-handed cartesian coordinate system.
-
-        Parameters
-        ----------
-        x : ndarray, double
-            x-coordinate
-        y : ndarray, double
-            y-coordinate
-        z : ndarray, double
-            z-coordinate
-        sh_order: int
-            the maximum spherical harmonic order
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
-        comment : str, optional
-            comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
-        Coordinates.__init__(self, x, y, z, weights=weights, comment=comment)
-        if sh_order is not None:
-            self._sh_order = int(sh_order)
-        else:
-            self._sh_order = None
-
-    @classmethod
-    def from_cartesian(
-            cls, x, y, z, sh_order=None, weights=None, comment: str = ""):
-        """Create a SamplingSphere class object from a set of points in the
-        right-handed cartesian coordinate system.
-
-        Parameters
-        ----------
-        x : ndarray, double
-            x-coordinate
-        y : ndarray, double
-            y-coordinate
-        z : ndarray, double
-            z-coordinate
-        sh_order: int
-            the maximum spherical harmonic order
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
-        comment : str, optional
-            comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
-        return cls(
-            x, y, z, sh_order=sh_order, weights=weights, comment=comment)
-
-    @classmethod
-    def from_spherical_elevation(
-            cls, azimuth, elevation, radius,
-            sh_order=None, weights=None, comment: str = ""):
-        """Create a SamplingSphere class object from a set of points in the
-        spherical coordinate system.
-
-        Parameters
-        ----------
-        azimuth : ndarray, double
-            angle in radiant of rotation from the x-y-plane facing towards
-            positive x direction. Used for spherical and cylindrical coordinate
-            systems.
-        elevation : ndarray, double
-            angle in radiant with respect to horizontal plane (x-z-axe).
-            Used for spherical coordinate systems.
-        radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
-            systems.
-        sh_order: int
-            the maximum spherical harmonic order
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
-        comment : str, optional
-            comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
-        x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
-        return cls(
-            x, y, z, sh_order=sh_order, weights=weights, comment=comment)
-
-    @classmethod
-    def from_spherical_colatitude(
-            cls, azimuth, colatitude, radius,
-            sh_order=None, weights=None, comment: str = ""):
-        """Create a SamplingSphere class object from a set of points in the
-        spherical coordinate system.
-
-        Parameters
-        ----------
-        azimuth : ndarray, double
-            angle in radiant of rotation from the x-y-plane facing towards
-            positive x direction. Used for spherical and cylindrical coordinate
-            systems.
-        colatitude : ndarray, double
-            angle in radiant with respect to polar axis (z-axe). Used for
-            spherical coordinate systems.
-        radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
-            systems.
-        sh_order: int
-            the maximum spherical harmonic order
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
-        comment : str, optional
-            comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
-        x, y, z = sph2cart(azimuth, colatitude, radius)
-        return cls(
-            x, y, z, sh_order=sh_order, weights=weights, comment=comment)
-
-    @classmethod
-    def from_spherical_side(
-            cls, lateral, polar, radius,
-            sh_order=None, weights=None, comment: str = ""):
-        """Create a SamplingSphere class object from a set of points in the
-        spherical coordinate system.
-
-        Parameters
-        ----------
-        lateral : ndarray, double
-            angle in radiant with respect to horizontal plane (x-y-axe).
-            Used for spherical coordinate systems.
-        polar : ndarray, double
-            angle in radiant of rotation from the x-z-plane facing towards
-            positive x direction. Used for spherical coordinate systems.
-        radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
-            systems.
-        sh_order: int
-            the maximum spherical harmonic order
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
-        comment : str, optional
-            comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
-        x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
-        return cls(
-            x, y, z, sh_order=sh_order, weights=weights, comment=comment)
-
-    @classmethod
-    def from_spherical_front(
-            cls, phi, theta, radius,
-            sh_order=None, weights=None, comment: str = ""):
-        """Create a SamplingSphere class object from a set of points in the
-        spherical coordinate system.
-
-        Parameters
-        ----------
-        phi : ndarray, double
-            Tangle in radiant of rotation from the y-z-plane facing towards
-            positive y direction. Used for spherical coordinate systems.
-        theta : ndarray, double
-            angle in radiant with respect to polar axis (x-axe). Used for
-            spherical coordinate systems.
-        radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
-            systems.
-        sh_order: int
-            the maximum spherical harmonic order
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
-        comment : str, optional
-            comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
-        y, z, x = sph2cart(phi, theta, radius)
-        return cls(
-            x, y, z, sh_order=sh_order, weights=weights, comment=comment)
-
-    @classmethod
-    def from_cylindrical(
-            cls, azimuth, z, rho,
-            sh_order=None, weights=None, comment: str = ""):
-        """Create a SamplingSphere class object from a set of points in the
-        cylindrical coordinate system.
-
-        Parameters
-        ----------
-        azimuth : ndarray, double
-            angle in radiant of rotation from the x-y-plane facing towards
-            positive x direction. Used for spherical and cylindrical coordinate
-            systems.
-        z : ndarray, double
-            The z coordinate
-        rho : ndarray, double
-            distance to origin for each point in the x-y-plane. Used for
-            cylindrical coordinate systems.
-        sh_order: int
-            the maximum spherical harmonic order
-        weights: array like, number, optional
-            sampling weights for the coordinate points. Must have same `size`
-            as the points points, i.e., if `points` have five entries, the
-            `weights` must also have five entries. The default is ``None``.
-        comment : str, optional
-            comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
-        x, y, z = cyl2cart(azimuth, z, rho)
-        return cls(
-            x, y, z, sh_order=sh_order, weights=weights, comment=comment)
-
-    @property
-    def sh_order(self):
-        """Get the maximum spherical harmonic order."""
-        return self._sh_order
-
-    @sh_order.setter
-    def sh_order(self, value):
-        """Set the maximum spherical harmonic order."""
-        self._sh_order = int(value)
 
 
 def cart2sph(x, y, z):

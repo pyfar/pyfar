@@ -3,14 +3,14 @@ import numpy.testing as npt
 from pytest import raises
 
 import pyfar
-from pyfar import SamplingSphere
+from pyfar import Coordinates
 import pyfar.samplings as samplings
 
 
 def test_cart_equidistant_cube():
     # test with int
     c = samplings.cart_equidistant_cube(3)
-    assert isinstance(c, SamplingSphere)
+    assert isinstance(c, Coordinates)
     assert c.csize == 3**3
 
     # test with tuple
@@ -21,7 +21,7 @@ def test_cart_equidistant_cube():
 def test_sph_dodecahedron():
     # test with default radius
     c = samplings.sph_dodecahedron()
-    assert isinstance(c, SamplingSphere)
+    assert isinstance(c, Coordinates)
     npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test with user radius
@@ -32,7 +32,7 @@ def test_sph_dodecahedron():
 def test_sph_icosahedron():
     # test with default radius
     c = samplings.sph_icosahedron()
-    assert isinstance(c, SamplingSphere)
+    assert isinstance(c, Coordinates)
     npt.assert_allclose(c.radius, 1, atol=1e-15)
 
     # test with user radius
@@ -47,7 +47,7 @@ def test_sph_equiangular():
 
     # test with single number of points
     c = samplings.sph_equiangular(5)
-    isinstance(c, SamplingSphere)
+    isinstance(c, Coordinates)
     assert c.csize == 5**2
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -76,7 +76,7 @@ def test_sph_gaussian():
 
     # test with single number of points
     c = samplings.sph_gaussian(5)
-    isinstance(c, SamplingSphere)
+    isinstance(c, Coordinates)
     assert c.csize == 5**2
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -107,7 +107,7 @@ def test_sph_extremal():
 
     # test with n_points
     c = samplings.sph_extremal(4)
-    isinstance(c, SamplingSphere)
+    isinstance(c, Coordinates)
     assert c.csize == 4
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -144,7 +144,7 @@ def test_sph_t_design():
 
     # test with degree
     c = samplings.sph_t_design(2)
-    isinstance(c, SamplingSphere)
+    isinstance(c, Coordinates)
     assert c.csize == 6
 
     # test with spherical harmonic order
@@ -177,7 +177,7 @@ def test_sph_t_design():
 def test_sph_equal_angle():
     # test with tuple
     c = samplings.sph_equal_angle((10, 20))
-    assert isinstance(c, SamplingSphere)
+    assert isinstance(c, Coordinates)
     # test with number
     c = samplings.sph_equal_angle(10)
     # test default radius
@@ -196,7 +196,7 @@ def test_sph_equal_angle():
 def test_sph_great_circle():
     # test with default values
     c = samplings.sph_great_circle()
-    assert isinstance(c, SamplingSphere)
+    assert isinstance(c, Coordinates)
     # check default radius
     npt.assert_allclose(c.radius, 1, atol=1e-15)
 
@@ -231,7 +231,7 @@ def test_sph_lebedev():
 
     # test with degree
     c = samplings.sph_lebedev(14)
-    isinstance(c, SamplingSphere)
+    isinstance(c, Coordinates)
     assert c.csize == 14
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -254,7 +254,7 @@ def test_sph_fliege():
 
     # test with degree
     c = samplings.sph_fliege(16)
-    isinstance(c, SamplingSphere)
+    isinstance(c, Coordinates)
     assert c.csize == 16
     npt.assert_allclose(np.sum(c.weights), 1)
 
@@ -280,7 +280,7 @@ def test_sph_fliege():
 def test_sph_equal_area():
     # test with points only
     c = samplings.sph_equal_area(10)
-    assert isinstance(c, SamplingSphere)
+    assert isinstance(c, Coordinates)
     assert c.csize == 10
     npt.assert_allclose(c.radius, 1., atol=1e-15)
 

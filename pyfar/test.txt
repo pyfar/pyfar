@@ -1,0 +1,183 @@
+X           
+Y           
+z           
+azimuth     angle in radiant of rotation from the x-y-plane facing towards
+            positive x direction. Used for spherical and cylindrical coordinate systems.
+colatitude  angle in radiant with respect to polar axis (z-axe). Used for spherical coordinate systems.
+elevation   angle in radiant with respect to horizontal plane (x-z-axe). Used for spherical coordinate systems.
+lateral     angle in radiant with respect to horizontal plane (x-y-axe). Used for spherical coordinate systems.
+phi         angle in radiant of rotation from the y-z-plane facing towards
+            positive y direction. Used for spherical coordinate systems.
+theta       angle in radiant with respect to polar axis (x-axe). Used for spherical coordinate systems.
+polar       angle in radiant of rotation from the x-z-plane facing towards
+            positive x direction. Used for spherical coordinate systems.
+radius      distance to origin for each point. Used for spherical coordinate systems.
+rho         distance to origin for each point in the x-y-plane. Used for cylindrical coordinate systems.
+cartesian               right handed carteasian coordinate system (x, y, z).
+spherical_colatitude    returns (azimuth, colatitude, radius) whre the azimuth denotes the counter clockwise angle in the x/y-plane with 0 pointing in positive x-direction and pi/2 in positive y-direction. The colatitude denotes the angle downwards from the z-axis with 0 pointing in positve z-direction and pi in negative z-direction. The azimuth and colatitude can be in radians or degrees, the radius is always in meters.
+spherical_elevation     Get coordinate points in spherical coordinate systems in rad.
+spherical_front         Get coordinate points in spherical coordinate systems in rad.
+spherical_side          Get coordinate points in spherical coordinate systems in rad.
+cylindrical             Get coordinate points in cylindrical coordinate systems in rad.
+
+
+    _systems = {
+            "cart": {
+                "right": {
+                    "description_short":
+                        "Right handed cartesian coordinate system.",
+                    "coordinates":
+                        ["x", "y", "z"],
+                    "units":
+                        [["meters", "meters", "meters"]],
+                    "description":
+                        "Right handed cartesian coordinate system with x,y, "
+                        "and z in meters.",
+                    "positive_x": [1, 0, 0],
+                    "positive_y": [0, 1, 0],
+                    "negative_x": [-1, 0, 0],
+                    "negative_y": [0, -1, 0],
+                    "positive_z": [0, 0, 1],
+                    "negative_z": [0, 0, -1],
+                    "x": ["unbound", [-np.inf, np.inf]],
+                    "y": ["unbound", [-np.inf, np.inf]],
+                    "z": ["unbound", [-np.inf, np.inf]]}
+            },
+            "sph": {
+                "top_colat": {
+                    "description_short":
+                        "Spherical coordinate system with North and South "
+                        "Pole.",
+                    "coordinates":
+                        ["azimuth", "colatitude", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "The azimuth denotes the counter clockwise angle in "
+                        "the x/y-plane with 0 pointing in positive x-"
+                        "direction and pi/2 in positive y-direction. The "
+                        "colatitude denotes the angle downwards from the z-"
+                        "axis with 0 pointing in positve z-direction and pi "
+                        "in negative z-direction. The azimuth and colatitude "
+                        "can be in radians or degrees, the radius is always "
+                        "in meters.",
+                    "positive_x": [0, np.pi / 2, 1],
+                    "positive_y": [np.pi / 2, np.pi / 2, 1],
+                    "negative_x": [np.pi, np.pi / 2, 1],
+                    "negative_y": [3 * np.pi / 2, np.pi / 2, 1],
+                    "positive_z": [0, 0, 1],
+                    "negative_z": [0, np.pi, 1],
+                    "azimuth": ["cyclic", [0, 2 * np.pi]],
+                    "colatitude": ["bound", [0, np.pi]],
+                    "radius": ["bound", [0, np.inf]]},
+                "top_elev": {
+                    "description_short":
+                        "Spherical coordinate system with North and South "
+                        "Pole. Conform with AES69-2015: AES standard for file "
+                        "exchange - Spatial acoustic data file format (SOFA).",
+                    "coordinates":
+                        ["azimuth", "elevation", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "The azimuth denotes the counter clockwise angle in "
+                        "the x/y-plane with 0 pointing in positive x-"
+                        "direction and pi/2 in positive y-direction. The "
+                        "elevation denotes the angle upwards and downwards "
+                        "from the x/y-plane with pi/2 pointing at positive "
+                        "z-direction and -pi/2 pointing in negative z-"
+                        "direction. The azimuth and elevation can be in "
+                        "radians or degrees, the radius is always in meters.",
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [np.pi / 2, 0, 1],
+                    "negative_x": [np.pi, 0, 1],
+                    "negative_y": [3 * np.pi / 2, 0, 1],
+                    "positive_z": [0, np.pi / 2, 1],
+                    "negative_z": [0, -np.pi / 2, 1],
+                    "azimuth": ["cyclic", [0, 2 * np.pi]],
+                    "elevation": ["bound", [-np.pi / 2, np.pi / 2]],
+                    "radius": ["bound", [0, np.inf]]},
+                "side": {
+                    "description_short":
+                        "Spherical coordinate system with poles on the "
+                        "y-axis.",
+                    "coordinates":
+                        ["lateral", "polar", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "The lateral angle denotes the angle in the x/y-plane "
+                        "with pi/2 pointing in positive y-direction and -pi/2 "
+                        "in negative y-direction. The polar angle denotes the "
+                        "angle in the x/z-plane with -pi/2 pointing in "
+                        "negative z-direction, 0 in positive x-direction, "
+                        "pi/2 in positive z-direction, pi in negative x-"
+                        "direction. The polar and lateral angle can be in "
+                        "radians and degree, the radius is always in meters.",
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [np.pi / 2, 0, 1],
+                    "negative_x": [0, np.pi, 1],
+                    "negative_y": [-np.pi / 2, 0, 1],
+                    "positive_z": [0, np.pi / 2, 1],
+                    "negative_z": [0, -np.pi / 2, 1],
+                    "lateral": ["bound", [-np.pi / 2, np.pi / 2]],
+                    "polar": ["cyclic", [-np.pi / 2, np.pi * 3 / 2]],
+                    "radius": ["bound", [0, np.inf]]},
+                "front": {
+                    "description_short":
+                        "Spherical coordinate system with poles on the x-axis."
+                        " Conform with AES56-2008 (r2019): AES standard on "
+                        "acoustics - Sound source modeling.",
+                    "coordinates":
+                        ["phi", "theta", "radius"],
+                    "units":
+                        [["radians", "radians", "meters"],
+                         ["degrees", "degrees", "meters"]],
+                    "description":
+                        "Phi denotes the angle in the y/z-plane with 0 "
+                        "pointing in positive y-direction, pi/2 in positive "
+                        "z-direction, pi in negative y-direction, and 3*pi/2 "
+                        "in negative z-direction. Theta denotes the angle "
+                        "measured from the x-axis with 0 pointing in positve "
+                        "x-direction and pi in negative x-direction. Phi and "
+                        "theta can be in radians and degrees, the radius is "
+                        "always in meters.",
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [0, np.pi / 2, 1],
+                    "negative_x": [0, np.pi, 1],
+                    "negative_y": [np.pi, np.pi / 2, 1],
+                    "positive_z": [np.pi / 2, np.pi / 2, 1],
+                    "negative_z": [3 * np.pi / 2, np.pi / 2, 1],
+                    "phi": ["cyclic", [0, 2 * np.pi]],
+                    "theta": ["bound", [0, np.pi]],
+                    "radius": ["bound", [0, np.inf]]}
+            },
+            "cyl": {
+                "top": {
+                    "description_short":
+                        "Cylindrical coordinate system along the z-axis.",
+                    "coordinates":
+                        ["azimuth", "z", "radius_z"],
+                    "units":
+                        [["radians", "meters", "meters"],
+                         ["degrees", "meters", "meters"]],
+                    "description":
+                        "The azimuth denotes the counter clockwise angle in "
+                        "the x/y-plane with 0 pointing in positive x-"
+                        "direction and pi/2 in positive y-direction. The "
+                        "heigt is given by z, and radius_z denotes the radius "
+                        "measured orthogonal to the z-axis.",
+                    "positive_x": [0, 0, 1],
+                    "positive_y": [np.pi / 2, 0, 1],
+                    "negative_x": [np.pi, 0, 1],
+                    "negative_y": [3 * np.pi / 2, 0, 1],
+                    "positive_z": [0, 1, 0],
+                    "negative_z": [0, -1, 0],
+                    "azimuth": ["cyclic", [0, 2 * np.pi]],
+                    "z": ["unbound", [-np.inf, np.inf]],
+                    "radius_z": ["bound", [0, np.inf]]}
+            }
+        }
