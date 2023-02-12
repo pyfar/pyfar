@@ -651,9 +651,9 @@ class Signal(FrequencyData, TimeData):
                     f"Number of samples not given, assuming {n_samples} "
                     f"samples from {data.shape[-1]} frequency bins.")
             elif (n_samples > 2 * data.shape[-1] - 1) and not self.complex:
-                    raise ValueError(("n_samples can not be larger than "
-                                      "2 * data.shape[-1] - 2"
-                                      "when passing one-sided Fourier spectrum"))
+                raise ValueError(("n_samples can not be larger than "
+                                  "2 * data.shape[-1] - 2"
+                                  "when passing one-sided Fourier spectrum"))
             elif (n_samples > data.shape[-1]) and self.complex:
                 raise ValueError(("n_samples can not be larger than "
                                   "data.shape[-1] when passing double-"
