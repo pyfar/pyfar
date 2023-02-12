@@ -1117,6 +1117,8 @@ class Coordinates():
 
     def systems(self, show='all', brief=False):
         """
+        This function will be deprecated in pyfar 0.8.0, check the 
+        documentation instead.
         Print coordinate systems and their description on the console.
 
         .. note::
@@ -1139,6 +1141,10 @@ class Coordinates():
         -------
         Prints to console.
         """
+
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0."),
+                PyfarDeprecationWarning)
 
         if show == 'current':
             domain = self._system['domain']
@@ -1986,13 +1992,12 @@ class Coordinates():
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
-        # squeeze arrays
-        x = np.squeeze(x)
-        y = np.squeeze(y)
-        z = np.squeeze(z)
+        x = x.squeeze()
+        y = y.squeeze()
+        z = z.squeeze()
 
         # shapes of non scalar entries
-        shapes = [p.shape for p in [x, y, z] if len(p) != 1]
+        shapes = [p.shape for p in [x, y, z] if p.size != 1]
 
         # repeat scalar entries if non-scalars exists
         if len(shapes):

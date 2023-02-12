@@ -25,7 +25,7 @@ def cart_equidistant_cube(n_points):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions. Does not contain sampling weights.
 
     """
@@ -47,7 +47,7 @@ def cart_equidistant_cube(n_points):
 
     x_grid, y_grid, z_grid = np.meshgrid(x, y, z)
 
-    sampling = pyfar.SamplingSphere(
+    sampling = pyfar.Coordinates(
         x_grid.flatten(),
         y_grid.flatten(),
         z_grid.flatten(),
@@ -68,7 +68,7 @@ def sph_dodecahedron(radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
 
@@ -106,7 +106,7 @@ def sph_dodecahedron(radius=1.):
         phi3 + np.pi / 3]), 2)
     rad = radius * np.ones(np.size(theta))
 
-    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
         phi, theta, rad,
         comment='dodecahedral sampling grid')
     return sampling
@@ -123,7 +123,7 @@ def sph_icosahedron(radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
 
@@ -140,7 +140,7 @@ def sph_icosahedron(radius=1.):
     phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi / 5, 2)))
 
     rad = radius * np.ones(20)
-    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
         phi, theta, rad,
         comment='icosahedral spherical sampling grid')
     return sampling
@@ -170,7 +170,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions including sampling weights.
 
     References
@@ -221,8 +221,8 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     w = np.tile(w, n_phi)
     w = w / np.sum(w)
 
-    # make SamplingSphere object
-    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+    # make Coordinates object
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
         phi.reshape(-1), theta.reshape(-1), rad,
         comment='equiangular spherical sampling grid',
         weights=w, sh_order=n_max)
@@ -254,7 +254,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions including sampling weights.
 
     References
@@ -300,8 +300,8 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     weights = np.tile(weights, n_phi)
     weights = weights / np.sum(weights)
 
-    # make SamplingSphere object
-    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+    # make Coordinates object
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
         phi.reshape(-1), theta.reshape(-1), rad,
         comment='gaussian spherical sampling grid',
         weights=weights, sh_order=n_max)
@@ -331,7 +331,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions including sampling weights.
 
     Notes
@@ -391,8 +391,8 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     # normalize weights
     weights = file_data[:, 3] / 4 / np.pi
 
-    # generate SamplingSphere object
-    sampling = pyfar.SamplingSphere(
+    # generate Coordinates object
+    sampling = pyfar.Coordinates(
         file_data[:, 0] * radius,
         file_data[:, 1] * radius,
         file_data[:, 2] * radius,
@@ -441,7 +441,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
 
@@ -486,7 +486,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
             degree = 2 * sh_order
         else:
             degree = 2 * sh_order + 1
-    # get the SH order for the meta data entry in the SamplingSphere object
+    # get the SH order for the meta data entry in the Coordinates object
     else:
         if criterion == 'const_energy':
             sh_order = int(degree / 2)
@@ -522,8 +522,8 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
         dtype=np.double,
         sep=' ').reshape((n_points, 3))
 
-    # generate SamplingSphere object
-    sampling = pyfar.SamplingSphere(
+    # generate Coordinates object
+    sampling = pyfar.Coordinates(
         points[..., 0] * radius,
         points[..., 1] * radius,
         points[..., 2] * radius,
@@ -554,7 +554,7 @@ def sph_equal_angle(delta_angles, radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
 
@@ -588,8 +588,8 @@ def sph_equal_angle(delta_angles, radius=1.):
     phi = np.concatenate(([0], phi, [0]))
     theta = np.concatenate(([0], theta, [180]))
 
-    # make SamplingSphere object
-    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+    # make Coordinates object
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
         phi/180*np.pi, theta/180*np.pi, radius,
         comment='equal angle spherical sampling grid')
 
@@ -627,7 +627,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
 
@@ -677,8 +677,8 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     # round to precision of azimuth_res to avoid numerical errors
     azim = np.round(azim/azimuth_res) * azimuth_res
 
-    # make SamplingSphere object
-    sampling = pyfar.SamplingSphere.from_spherical_elevation(
+    # make Coordinates object
+    sampling = pyfar.Coordinates.from_spherical_elevation(
         azim/180*np.pi, elev/180*np.pi, radius,
         comment='spherical great circle sampling grid')
 
@@ -707,7 +707,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions including sampling weights.
 
     Notes
@@ -771,8 +771,8 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     # normalize the weights
     weights = leb["w"] / (4 * np.pi)
 
-    # generate SamplingSphere object
-    sampling = pyfar.SamplingSphere(
+    # generate Coordinates object
+    sampling = pyfar.Coordinates(
         leb["x"] * radius,
         leb["y"] * radius,
         leb["z"] * radius,
@@ -804,7 +804,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions including sampling weights.
 
     Notes
@@ -927,15 +927,15 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
         variable_names=f"Fliege_{int(n_points)}")
     fliege = fliege[f"Fliege_{int(n_points)}"]
 
-    # generate SamplingSphere object
-    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+    # generate Coordinates object
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
         fliege[:, 0],
         fliege[:, 1],
         radius,
         sh_order=sh_order, weights=fliege[:, 2],
         comment='spherical Fliege sampling grid')
 
-    # switch and invert SamplingSphere in Cartesian representation to be
+    # switch and invert Coordinates in Cartesian representation to be
     # consistent with [1]
     xyz = sampling.cartesian
     sampling.x = xyz[:, 1]
@@ -961,7 +961,7 @@ def sph_equal_area(n_points, radius=1.):
 
     Returns
     -------
-    sampling : SamplingSphere
+    sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
 
@@ -974,7 +974,7 @@ def sph_equal_area(n_points, radius=1.):
     """
 
     point_set = external.eq_point_set(2, n_points)
-    sampling = pyfar.SamplingSphere(
+    sampling = pyfar.Coordinates(
         point_set[0] * radius, point_set[1] * radius, point_set[2] * radius,
         comment='Equal area partitioning of the sphere.')
 

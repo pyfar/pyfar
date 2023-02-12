@@ -107,6 +107,24 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
 
 
 @pytest.mark.parametrize(
+    'x, actual', [
+        (0, np.array(0)),
+        (np.ones((1, 2)), np.ones((2,))),
+        (np.ones((2, 1)), np.ones((2,))),
+        (np.ones((3, 2, 1)), np.ones((3, 2))),
+        (np.ones((1, 2, 3)), np.ones((2, 3))),
+    ])
+def test_coordinates_squeeze(x, actual):
+    coords = Coordinates(x, 0, 1)
+    np.testing.assert_allclose(coords.x, actual, atol=1e-15)
+    np.testing.assert_allclose(coords.x.shape, actual.shape, atol=1e-15)
+    np.testing.assert_allclose(coords.y.shape, actual.shape, atol=1e-15)
+    np.testing.assert_allclose(coords.z.shape, actual.shape, atol=1e-15)
+    np.testing.assert_allclose(coords.y, 0, atol=1e-15)
+    np.testing.assert_allclose(coords.z, 1, atol=1e-15)
+
+
+@pytest.mark.parametrize(
     'x, y, z', [
         (0, 1, 0),
         (0, -1, 0),

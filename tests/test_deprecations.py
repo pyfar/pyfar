@@ -191,6 +191,7 @@ def test_pad_zero_modi():
         ('coords.set_cyl(1,1,1)'),
         ('coords.get_sph()'),
         ('coords.set_sph(1,1,1)'),
+        ('coords.systems()'),
         ('pf.Coordinates(0, 0, 0, sh_order=1)'),
         ("pf.Coordinates(0, 0, 0, domain='sph')"),
         ("pf.Coordinates(0, 0, 0, domain='sph', unit='deg')"),
