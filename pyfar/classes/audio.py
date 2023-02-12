@@ -645,20 +645,19 @@ class Signal(FrequencyData, TimeData):
             if n_samples is None:
                 if self.complex:
                     n_samples = data.shape[-1]
-                else:    
+                else:
                     n_samples = max(1, (data.shape[-1] - 1)*2)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
                     f"samples from {data.shape[-1]} frequency bins.")
-        elif (n_samples > 2 * data.shape[-1] - 1) and not self.complex:
-                raise ValueError(("n_samples can not be larger than "
-                                  "2 * data.shape[-1] - 2"
-                                  "when passing one-sided Fourier spectrum"))
-        elif (n_samples > data.shape[-1]) and self.complex:
+            elif (n_samples > 2 * data.shape[-1] - 1) and not self.complex:
+                    raise ValueError(("n_samples can not be larger than "
+                                      "2 * data.shape[-1] - 2"
+                                      "when passing one-sided Fourier spectrum"))
+            elif (n_samples > data.shape[-1]) and self.complex:
                 raise ValueError(("n_samples can not be larger than "
                                   "data.shape[-1] when passing double-"
                                   "sided Fourier spectrum"))
-
             self._n_samples = n_samples
             self._n_bins = data.shape[-1]
             # Init remaining parameters
@@ -736,14 +735,13 @@ class Signal(FrequencyData, TimeData):
         if not raw:
             # remove normalization
             if self.complex:
-                data_denorm = fft.normalization(
+                data = fft.normalization(
                     data, self._n_samples, self._sampling_rate,
                     self._fft_norm, inverse=True, single_sided=False)
-                else:
-                    data_denorm = fft.normalization(
-                            data, self._n_samples, self._sampling_rate,
-                            self._fft_norm, inverse=True)
-                self._data = data_denorm.astype(complex)
+            else:
+                data = fft.normalization(
+                    data, self._n_samples, self._sampling_rate,
+                    self._fft_norm, inverse=True)
         self._data = data.astype(complex)
 
     @_Audio.domain.setter

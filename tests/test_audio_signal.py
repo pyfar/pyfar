@@ -24,6 +24,7 @@ def test_signal_init_default_parameter():
     assert signal.fft_norm == 'none'
     assert signal.comment == ''
     assert signal.fft_norm == 'none'
+    assert not signal.complex
 
 
 def test_signal_init_assertions():
@@ -38,6 +39,8 @@ def test_signal_init_assertions():
     with pytest.raises(ValueError, match="Invalid domain"):
         Signal(1, 44100, domain="space")
 
+    with pytest.raises(ValueError, match="n_samples can not be larger"):
+        Signal(1, 44100, domain="freq", complex=True, n_samples=10)
 
 def test_signal_init_time_dtype():
     """
