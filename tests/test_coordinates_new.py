@@ -108,11 +108,15 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
 
 @pytest.mark.parametrize(
     'x, actual', [
-        (0, np.array(0)),
-        (np.ones((1, 2)), np.ones((2,))),
-        (np.ones((2, 1)), np.ones((2,))),
-        (np.ones((3, 2, 1)), np.ones((3, 2))),
-        (np.ones((1, 2, 3)), np.ones((2, 3))),
+        (0, np.array([0])),
+        (np.ones((1,)), np.ones((1,))),
+        (np.ones((3,)), np.ones((3,))),
+        (np.ones((1, 2)), np.ones((1, 2))),
+        (np.ones((1, 1)), np.ones((1, 1))),
+        (np.ones((2, 1)), np.ones((2, 1))),
+        (np.ones((3, 2, 1)), np.ones((3, 2, 1))),
+        (np.ones((1, 1, 1)), np.ones((1, 1, 1))),
+        (np.ones((1, 2, 3)), np.ones((1, 2, 3))),
     ])
 def test_coordinates_squeeze(x, actual):
     coords = Coordinates(x, 0, 1)
@@ -175,8 +179,8 @@ def test_cart_setter_different_size(x, y, z):
     ])
 def test_cart_setter_different_size_with_flatten(x, y, z):
     coords = Coordinates(x, y, z)
-    shape = x.flatten().shape
-    np.testing.assert_allclose(coords.x, x.flatten(), atol=1e-15)
+    shape = x.shape
+    np.testing.assert_allclose(coords.x, x, atol=1e-15)
     np.testing.assert_allclose(coords.y, np.ones(shape)*y, atol=1e-15)
     np.testing.assert_allclose(coords.z, np.ones(shape)*z, atol=1e-15)
     if x is np.array:
@@ -214,9 +218,9 @@ def test__array__getter(x, y, z):
         (np.ones((1, 1)), 5, 1),
     ])
 def test__array__getter_with_flatten(x, y, z):
-    coords = Coordinates(x, y, z)
+    coords = Coordinates.from_cartesian(x, y, z)
     np.testing.assert_allclose(
-        np.array(coords)[..., 0], x.flatten(), atol=1e-15)
+        np.array(coords)[..., 0], x, atol=1e-15)
     np.testing.assert_allclose(
         np.array(coords)[..., 1], y, atol=1e-15)
     np.testing.assert_allclose(

@@ -222,8 +222,8 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     w = w / np.sum(w)
 
     # make Coordinates object
-    sampling = pyfar.Coordinates.from_spherical_colatitude(
-        phi.reshape(-1), theta.reshape(-1), rad,
+    sampling = pyfar.Coordinates(
+        phi.reshape(-1), theta.reshape(-1), rad, 'sph', 'top_colat',
         comment='equiangular spherical sampling grid',
         weights=w, sh_order=n_max)
 
@@ -301,8 +301,8 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     weights = weights / np.sum(weights)
 
     # make Coordinates object
-    sampling = pyfar.Coordinates.from_spherical_colatitude(
-        phi.reshape(-1), theta.reshape(-1), rad,
+    sampling = pyfar.Coordinates(
+        phi.reshape(-1), theta.reshape(-1), rad, 'sph', 'top_colat',
         comment='gaussian spherical sampling grid',
         weights=weights, sh_order=n_max)
 
@@ -928,10 +928,11 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     fliege = fliege[f"Fliege_{int(n_points)}"]
 
     # generate Coordinates object
-    sampling = pyfar.Coordinates.from_spherical_colatitude(
+    sampling = pyfar.Coordinates(
         fliege[:, 0],
         fliege[:, 1],
         radius,
+        'sph', 'top_colat',
         sh_order=sh_order, weights=fliege[:, 2],
         comment='spherical Fliege sampling grid')
 

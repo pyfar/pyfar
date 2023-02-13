@@ -25,13 +25,7 @@ coordinate systems are shown in the image below
 
 |coordinate_systems|
 
-The unit for length is always meter, while the unit for angles can be radians
-and degrees.
-
-A complete list of coordinate systems can also by obtained by
-
->>> coords = Coordinates()  # get an empty instance of the class
->>> coords.systems()        # list all systems
+The unit for length is always meter, while the unit for angles are in radians.
 
 Samplings
 ---------

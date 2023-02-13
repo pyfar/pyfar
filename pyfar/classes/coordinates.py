@@ -40,7 +40,7 @@ class Coordinates():
         """
         This function will be changed in pyfar 0.8.0 and will just be able to
         get cartesian coordinates. If you want to initialize in an other
-        domain use of :py:func:`from_colatitude`,
+        domain use of :py:func:`from_spherical_colatitude`,
         :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
         :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`.
         instead.
@@ -65,11 +65,6 @@ class Coordinates():
         +--------------------+----------+------------+----------+----------+
         | cyl, top           | azimuth  | z          | radius_z | rad, deg |
         +--------------------+----------+------------+----------+----------+
-
-        For more information run
-
-        >>> coords = Coordinates()
-        >>> coords.systems()
 
         Parameters
         ----------
@@ -144,7 +139,7 @@ class Coordinates():
 
         # set coordinates according to system
         if domain == 'cart':
-            self._set_cart(points_1, points_2, points_3)
+            self._set_points(points_1, points_2, points_3)
         elif domain == 'sph':
             self._set_sph(
                 points_1, points_2, points_3,
@@ -389,6 +384,19 @@ class Coordinates():
             raise ValueError(
                 (f"Conversion for {convention} is not implemented."))
 
+        # make array
+        x = np.atleast_1d(np.asarray(x, dtype=np.float64))
+        y = np.atleast_1d(np.asarray(y, dtype=np.float64))
+        z = np.atleast_1d(np.asarray(z, dtype=np.float64))
+
+        # squeeze
+        if len(x.shape) == 2 and (x.shape[0] == 1 or x.shape[1] == 1):
+            x = x.flatten()
+        if len(y.shape) == 2 and (y.shape[0] == 1 or y.shape[1] == 1):
+            y = y.flatten()
+        if len(z.shape) == 2 and (z.shape[0] == 1 or z.shape[1] == 1):
+            z = z.flatten()
+
         # save coordinates to self
         self._set_points(x, y, z)
 
@@ -484,6 +492,11 @@ class Coordinates():
             "of the new setter such as .spherical_elevation"),
                 PyfarDeprecationWarning)
 
+        # make array
+        angles_1 = np.atleast_1d(np.asarray(angles_1, dtype=np.float64))
+        angles_2 = np.atleast_1d(np.asarray(angles_2, dtype=np.float64))
+        radius = np.atleast_1d(np.asarray(radius, dtype=np.float64))
+
         self._set_sph(angles_1, angles_2, radius, convention, unit)
 
     def _set_sph(
@@ -494,6 +507,17 @@ class Coordinates():
         angles_1 = np.asarray(angles_1)
         angles_2 = np.asarray(angles_2)
         radius = np.asarray(radius)
+
+        # squeeze
+        if len(angles_1.shape) == 2 and \
+                (angles_1.shape[0] == 1 or angles_1.shape[1] == 1):
+            angles_1 = angles_1.flatten()
+        if len(angles_2.shape) == 2 and \
+                (angles_2.shape[0] == 1 or angles_2.shape[1] == 1):
+            angles_2 = angles_2.flatten()
+        if len(radius.shape) == 2 and \
+                (radius.shape[0] == 1 or radius.shape[1] == 1):
+            radius = radius.flatten()
 
         # convert to radians
         if unit == 'deg':
@@ -682,6 +706,17 @@ class Coordinates():
         azimuth = np.asarray(azimuth)
         z = np.asarray(z)
         rho = np.asarray(rho)
+
+        # squeeze
+        if len(azimuth.shape) == 2 and \
+                (azimuth.shape[0] == 1 or azimuth.shape[1] == 1):
+            azimuth = azimuth.flatten()
+        if len(z.shape) == 2 and \
+                (z.shape[0] == 1 or z.shape[1] == 1):
+            z = z.flatten()
+        if len(rho.shape) == 2 and \
+                (rho.shape[0] == 1 or rho.shape[1] == 1):
+            rho = rho.flatten()
 
         # convert to radians
         if unit == 'deg':
@@ -1117,7 +1152,7 @@ class Coordinates():
 
     def systems(self, show='all', brief=False):
         """
-        This function will be deprecated in pyfar 0.8.0, check the 
+        This function will be deprecated in pyfar 0.8.0, check the
         documentation instead.
         Print coordinate systems and their description on the console.
 
@@ -1986,18 +2021,13 @@ class Coordinates():
         Set self._points, which is an atleast_2d numpy array of shape
         [L,M,...,N, 3].
         """
-
         # cast to numpy array
         x = np.atleast_1d(np.asarray(x, dtype=np.float64))
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
-        x = x.squeeze()
-        y = y.squeeze()
-        z = z.squeeze()
-
         # shapes of non scalar entries
-        shapes = [p.shape for p in [x, y, z] if p.size != 1]
+        shapes = [p.shape for p in [x, y, z] if p.ndim != 1 or p.shape[0] > 1]
 
         # repeat scalar entries if non-scalars exists
         if len(shapes):

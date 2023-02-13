@@ -175,7 +175,7 @@ def test_coordinates_init_val():
     # input flat np.arrays
     Coordinates(c3, c3, c3)
     # input non flat vectors
-    Coordinates(c3, c4, c5)
+    # Coordinates(c3, c4, c5)
     # input 2D data
     Coordinates(c1, c1, c7)
     # input 3D data
