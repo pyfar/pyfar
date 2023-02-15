@@ -717,7 +717,7 @@ def _time_window_symmetric_interval_four(interval, window):
 
 
 def regularized_spectrum_inversion(
-        signal, freq_range,
+        signal, freq_range=(20, 20000),
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
         normalized=True):
     r"""Invert the spectrum of a signal applying frequency dependent
@@ -749,6 +749,7 @@ def regularized_spectrum_inversion(
     freq_range : tuple, array_like, double
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied.
+        The default is ```(20, 20000)``
     regu_outside : float, optional
         The normalized regularization factor outside the frequency range.
         The default is ``1``.
