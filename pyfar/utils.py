@@ -62,7 +62,7 @@ def broadcast_cshapes(signals, cshape=None, ignore_caxis=None):
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
             raise TypeError("All input data must be pyfar audio objects")
     if cshape is not None and ignore_caxis is not None:
-        raise ValueError(f"Use ignore_axis = 'None' to broadcast to cshape ="
+        raise ValueError(f"Use ignore_caxis = 'None' to broadcast to cshape ="
                          f" {cshape}.")
     if cshape is None:
         if ignore_caxis is not None:
