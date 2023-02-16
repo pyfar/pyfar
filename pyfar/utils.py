@@ -48,7 +48,7 @@ def broadcast_cshapes(signals, cshape=None, ignore_caxis=None):
         The cshape to which the signals are broadcasted. If `cshape` is
         ``None`` it is determined from the cshapes of the input signals using
         ``numpy.broadcast_shapes``. The default is ``None``.
-    ignore_axis : int, optional
+    ignore_caxis : int, optional
         Axis which will be ignore while broadcasting. Has to be ``None``, if
         `cshape` is not ``None``. The default is ``None``.
 
