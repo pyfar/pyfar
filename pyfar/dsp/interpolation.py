@@ -640,7 +640,7 @@ class InterpolateSpectrum():
     Parameters
     ----------
     data : FrequencyData
-        Input data to be interpolated. `data.fft_norm` must be `'none'`.
+        Input data to be interpolated.
     method : string
         Specifies the input data for the interpolation
 
@@ -680,8 +680,8 @@ class InterpolateSpectrum():
         ``'log'``
             Interpolate on a logarithmic frequency axis. Note that 0 Hz can
             not be interpolated on a logarithmic scale because the logarithm
-            of 0 does not exist. Frequencies of 0 Hz are thus replaced by the
-            next highest frequency before interpolation.
+            of 0 does not exist. Instead of 0 Hz, 1 Hz or the half of the
+            second lowest frequency are used (whatever is smaller).
 
         The default is ``'linear'``.
     clip : bool, tuple
