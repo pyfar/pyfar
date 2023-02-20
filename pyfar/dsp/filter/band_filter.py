@@ -450,3 +450,68 @@ def crossover(signal, N, frequency, sampling_rate=None):
         # return the filtered signal
         signal_filt = filt.process(signal)
         return signal_filt
+
+
+def notch(signal, center_frequency, quality, sampling_rate=None):
+    """
+    Create and apply a second order IIR notch filter.
+
+    A notch filter has a magnitude of 0 (-infinity dB) at the center frequency
+    and a magnitude of 1 (0 dB) at almost all other frequencies. This is a
+    wrapper for ``scipy.signal.iirnotch``.
+
+    Parameters
+    ----------
+    signal : Signal, None
+        The Signal to be filtered. Pass ``None`` to create the filter without
+        applying it.
+    center_ frequency : number
+        Frequency in Hz at which the magnitude response will be 0
+        (-infinity dB).
+    quality : number
+        The quality is defined at the -3 dB points around the
+        `center_frequency` and is the inverse band width in octaves relative
+        to the `center_frequency`
+    sampling_rate : None, number
+        The sampling rate in Hz. Only required if `signal` is ``None``. The
+        default is ``None``.
+
+    Returns
+    -------
+    signal : Signal
+        The filtered signal. Only returned if ``sampling_rate = None``.
+    filter : FilterSOS
+        Filter object. Only returned if ``signal = None``.
+
+    References
+    ----------
+    .. [#]  S. J. Orfanidis, “Introduction To Signal Processing”,
+            Prentice-Hall, 1996
+    """
+
+    # check input
+    if (signal is None and sampling_rate is None) \
+            or (signal is not None and sampling_rate is not None):
+        raise ValueError('Either signal or sampling_rate must be none.')
+
+    fs = signal.sampling_rate if sampling_rate is None else sampling_rate
+
+    # get filter coefficients
+    b, a = spsignal.iirnotch(center_frequency, quality, fs)
+    ba = np.zeros((2, 3))
+    ba[0] = b
+    ba[1] = a
+
+    # generate filter object
+    filt = pf.FilterIIR(ba, fs)
+    filt.comment = ("Second order notch filter at "
+                    f"{center_frequency} Hz (Quality = {quality}).")
+
+    # return the filter object
+    if signal is None:
+        # return the filter object
+        return filt
+    else:
+        # return the filtered signal
+        signal_filt = filt.process(signal)
+        return signal_filt
