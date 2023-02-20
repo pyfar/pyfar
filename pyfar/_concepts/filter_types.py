@@ -49,7 +49,8 @@ The corresponding center frequencies are accessible via
 Parametric equalizer
 -----------------------------------------------------
 The :py:func:`~pyfar.dsp.filter.high_shelve`,
-:py:func:`~pyfar.dsp.filter.low_shelve`, and :py:func:`~pyfar.dsp.filter.bell`
+:py:func:`~pyfar.dsp.filter.low_shelve`, :py:func:`~pyfar.dsp.filter.bell`, and
+:py:func:`~pyfar.dsp.filter.notch`
 filters shown on the left are specific filters for digital audio signal
 processing and are often used for audio effects and loudspeaker or room
 compensation. Bell filters manipulate the magnitude response around a

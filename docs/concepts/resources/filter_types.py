@@ -161,11 +161,11 @@ axis.set_ylim(-95, 5)
 plt.savefig('filter_types_crossover.png', dpi=150)
 
 # %% audio filter -------------------------------------------------------------
-_, ax = plt.subplots(1, 2, figsize=(30/2.54, 12/2.54), sharey=True)
+_, ax = plt.subplots(2, 2, figsize=(30/2.54, 24/2.54), sharey=True)
 
 # bell and shelve
 frequency = 1e3
-axis = ax[0]
+axis = ax[0, 0]
 y = pf.dsp.filter.bell(impulse, frequency, 10, 2)
 pf.plot.freq(y, ax=axis, label='Bell')
 
@@ -191,7 +191,7 @@ axis.set_ylim(-70, 20)
 axis.legend(loc=4, ncol=3)
 
 # shelve cascades
-axis = ax[1]
+axis = ax[0, 1]
 gain = 10
 y, _, ideal = pf.dsp.filter.high_shelve_cascade(
     impulse, 125, 'lower', gain, None, 5)
@@ -218,5 +218,24 @@ axis.set_xlabel('')
 axis.set_xlim(20, 20e3)
 axis.set_ylim(-70, 20)
 axis.legend(loc=4, ncol=2)
+
+# notch filter
+axis = ax[1, 0]
+y = pf.dsp.filter.notch(impulse, 100, 4)
+pf.plot.freq(y, ax=axis, label='Notch')
+
+y = pf.dsp.filter.notch(impulse * .1, 1000, 4)
+pf.plot.freq(y, ax=axis, label='Notch')
+
+y = pf.dsp.filter.notch(impulse * .01, 10000, 4)
+pf.plot.freq(y, ax=axis, label='Notch')
+
+axis.set_title('')
+axis.set_xlabel('')
+axis.set_xlim(20, 20e3)
+axis.set_ylim(-70, 20)
+axis.legend(loc=4, ncol=3)
+
+ax[1, 1].remove()
 
 plt.savefig('filter_types_parametric-eq.png', dpi=150)
