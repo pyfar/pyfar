@@ -187,11 +187,13 @@ def test_write_read_coordinates(coordinates, tmpdir):
     assert actual == coordinates
 
 
-def test_write_read_signal(sine, tmpdir):
+@pytest.mark.parametrize("domain", ["time", "freq"])
+def test_write_read_signal(domain, sine, tmpdir):
     """ Signal
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'signal.far')
+    sine.domain = domain
     io.write(filename, signal=sine)
     actual = io.read(filename)['signal']
     assert isinstance(actual, Signal)
