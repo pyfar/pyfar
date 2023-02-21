@@ -621,7 +621,6 @@ class Signal(FrequencyData, TimeData):
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
-            self._n_bins = data.shape[-1]
             # Init remaining parameters
             FrequencyData.__init__(self, data, self.frequencies, comment)
             delattr(self, '_frequencies')
@@ -791,7 +790,9 @@ class Signal(FrequencyData, TimeData):
         obj = cls(
             obj_dict['_data'],
             obj_dict['_sampling_rate'],
-            obj_dict['_n_samples'])
+            obj_dict['_n_samples'],
+            obj_dict['_domain'],
+            obj_dict['_fft_norm'])
         obj.__dict__.update(obj_dict)
         return obj
 
