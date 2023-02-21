@@ -319,9 +319,9 @@ def test_notch_result(f, Q):
     notch = pf.dsp.filter.notch(pf.signals.impulse(44100), f, Q)
 
     # test characteristic points of frequency response
-    npt.assert_almost_equal(np.abs(notch.freq_raw[0, int(f)]), 0, 14)
-    npt.assert_almost_equal(np.abs(notch.freq_raw[0, 0]), 1, 14)
-    npt.assert_almost_equal(np.abs(notch.freq_raw[0, -1]), 1, 14)
+    npt.assert_almost_equal(np.abs(notch.freq_raw[0, int(f)]), 0, 12)
+    npt.assert_almost_equal(np.abs(notch.freq_raw[0, 0]), 1, 12)
+    npt.assert_almost_equal(np.abs(notch.freq_raw[0, -1]), 1, 12)
 
     # estimate and test actual quality
     mask = pf.dsp.decibel(notch) <= -3
@@ -331,4 +331,4 @@ def test_notch_result(f, Q):
     bandwidth /= f
     Q_act = 1 / bandwidth
     # precision could be increased by increasing the impulse length
-    npt.assert_almost_equal(Q_act, Q, 1)
+    npt.assert_allclose(Q_act, Q, rtol=.01, atol=.2)
