@@ -41,18 +41,18 @@ def test_broadcast_cshapes(cshape, reference):
         assert isinstance(broadcast, type(signal))
 
 
-@pytest.mark.parametrize("shape1, shape2, caxis, reference1, reference2", [
-    ((1, 2, 3, 1), (1, 1, 2, 1), -1, (1, 2, 3), (1, 2, 2)),
-    ((1, 3, 2, 1), (1, 2, 1, 1), -2, (1, 3, 2), (1, 2, 2)),
-    ((1, 2, 1), (3, 1, 1), 0, (1, 2), (3, 2)),
-    ((1, 4, 3, 1000), (1, 1, 2, 1000), 2, (1, 4, 3), (1, 4, 2))])
-def test_broadcast_ignore_axis(shape1, shape2, caxis, reference1, reference2):
-    # Test ignore_axis broadcasting
-    signals = (pf.Signal(np.ones(shape1), 44100),
-               pf.Signal(np.ones(shape2), 44100))
+@pytest.mark.parametrize("shape1, shape2, n_samples, caxis, ref1, ref2", [
+    ((1, 2, 3), (1, 1, 2), 1, -1, (1, 2, 3), (1, 2, 2)),
+    ((1, 3, 2), (1, 2, 1), 5, -2, (1, 3, 2), (1, 2, 2)),
+    ((1, 2), (3, 1), 10, 0, (1, 2), (3, 2)),
+    ((1, 4, 3), (1, 1, 2), 1000, 2, (1, 4, 3), (1, 4, 2))])
+def test_broadcast_ignore_caxis(shape1, shape2, n_samples, caxis, ref1, ref2):
+    # Test ignore_caxis broadcasting
+    signals = (pf.Signal(np.ones(shape1 + (n_samples, )), 44100),
+               pf.Signal(np.ones(shape2 + (n_samples, )), 44100))
     broadcasted = pf.utils.broadcast_cshapes(signals, ignore_caxis=caxis)
-    assert broadcasted[0].cshape == reference1
-    assert broadcasted[1].cshape == reference2
+    assert broadcasted[0].cshape == ref1
+    assert broadcasted[1].cshape == ref2
 
 
 def test_broadcast_cshapes_assertions():

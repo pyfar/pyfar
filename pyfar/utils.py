@@ -49,8 +49,9 @@ def broadcast_cshapes(signals, cshape=None, ignore_caxis=None):
         ``None`` it is determined from the cshapes of the input signals using
         ``numpy.broadcast_shapes``. The default is ``None``.
     ignore_caxis : int, optional
-        Axis which will be ignore while broadcasting. Has to be ``None``, if
-        `cshape` is not ``None``. The default is ``None``.
+        Channel axis (:py:mod:`caxis <pyfar._concepts.audio_classes>`) which
+        will be ignore during broadcasting. Must be ``None``, if `cshape` is
+        not ``None``. The default is ``None``, which broadcasts all caxis.
 
     Returns
     -------
