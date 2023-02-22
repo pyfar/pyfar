@@ -8,7 +8,6 @@ Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation as sp_rot
-# import deepdiff
 import re
 from copy import deepcopy
 import warnings
@@ -71,15 +70,15 @@ class Coordinates():
         points_1 : array like, number
             points for the first coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         points_2 : array like, number
             points for the second coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         points_3 : array like, number
             points for the third coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            in ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         domain : string
             ``'domain'``, ``'unit'`` and ``'convention'`` function will be
             deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units

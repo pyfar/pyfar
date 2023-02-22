@@ -33,7 +33,6 @@ __all__ = [
     'power',
     'matrix_multiplication',
     'Coordinates',
-    'SamplingSphere',
     'Orientations',
     'FilterFIR',
     'FilterIIR',
