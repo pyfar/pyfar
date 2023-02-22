@@ -65,16 +65,10 @@ def test_keepdims_parameters():
                         pf.FrequencyData([[1, np.nan], [1, 2]], [1, 2])))
 def test_nan_value_averaging(data):
     # Test average with data including NaNs.
-    if data.domain == 'time':
-        norm_prop = pf.dsp.average(data, nan_policy='propagate')
-        npt.assert_equal(norm_prop.time[0], [1, np.nan])
-        norm_omit = pf.dsp.average(data, nan_policy='omit')
-        npt.assert_equal(norm_omit.time[0], [1, 2])
-    else:
-        norm_prop = pf.dsp.average(data, nan_policy='propagate')
-        npt.assert_equal(norm_prop.freq[0], [1, np.nan])
-        norm_omit = pf.dsp.average(data, nan_policy='omit')
-        npt.assert_equal(norm_omit.freq[0], [1, 2])
+    norm_prop = pf.dsp.average(data, nan_policy='propagate')
+    npt.assert_equal(getattr(norm_prop, data.domain)[0], [1, np.nan])
+    norm_omit = pf.dsp.average(data, nan_policy='omit')
+    npt.assert_equal(getattr(norm_omit, data.domain)[0], [1, 2])
 
 
 def test_error_raises():

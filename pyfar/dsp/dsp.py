@@ -1938,7 +1938,11 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
            signal value will be NaN.
         ``'omit'``
            NaNs will be omitted while averaging. For each NaN value, the number
-           of values used for the average division is also reduced by one.
+           of values used for the average operation is also reduced by one. If
+           a signal contains only NaN values in a specific dimensions, the
+           output will be zero. For example if the second sample of a multi
+           channel signal is always NaN, the average will be zero at the
+           second sample.
         ``'raise'``
             A ``'ValueError'`` will be raised, if the input signal includes
             NaNs.
@@ -2009,10 +2013,10 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
     # check if data includes NaNs and raise error or create masked array
-    if nan_policy == 'raise' and True in np.isnan(data):
+    if nan_policy == 'raise' and np.any(np.isnan(data)):
         raise ValueError("The signal includes NaNs. Change 'nan_policy' to "
                          "'propagate' or 'omit'.")
-    elif nan_policy == 'omit' and True in np.isnan(data):
+    elif nan_policy == 'omit' and np.any(np.isnan(data)):
         data = np.ma.masked_array(data, np.isnan(data))
     # set weights default
     if weights is not None:
