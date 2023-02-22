@@ -40,7 +40,7 @@ class Coordinates():
         """
         This function will be changed in pyfar 0.8.0 and will just be able to
         get cartesian coordinates. If you want to initialize in an other
-        domain use of :py:func:`from_spherical_colatitude`,
+        domain use :py:func:`from_spherical_colatitude`,
         :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
         :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`.
         instead.
