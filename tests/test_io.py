@@ -67,6 +67,23 @@ def test_read_sofa_position_type_spherical(
         sofa_reference_coordinates[1])
 
 
+@pytest.mark.parametrize('file,version', [
+    ('erroneous_data_with_version_string.far', '0.5.2'),
+    ('erroneous_data_without_version_string.far', '<0.5.2')])
+def test_read_erroneous_data(file, version):
+    """
+    Test exception for reading outdated or erroneous objects. Files contain a
+    signal object but the mandatory field '_data' was manually removed. The
+    files can thus not be read.
+    """
+
+    file = os.path.join('tests', 'test_io_data', file)
+    message = re.escape(
+        f"'signal' object in {file} was written with pyfar {version}")
+    with pytest.raises(TypeError, match=message):
+        io.read(file)
+
+
 def test_convert_sofa_assertion():
     """
     Test assertion for convert_sofa

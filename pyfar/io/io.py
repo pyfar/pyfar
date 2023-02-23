@@ -12,6 +12,7 @@ import os.path
 import pathlib
 
 import warnings
+import pyfar as pf
 import sofar as sf
 import zipfile
 import io
@@ -231,6 +232,7 @@ def read(filename):
     filename = pathlib.Path(filename).with_suffix('.far')
 
     collection = {}
+    pyfar_version = None
     with open(filename, 'rb') as f:
         zip_buffer = io.BytesIO()
         zip_buffer.write(f.read())
@@ -238,17 +240,43 @@ def read(filename):
             zip_paths = zip_file.namelist()
             obj_names_hints = [
                 path.split('/')[:2] for path in zip_paths if '/$' in path]
+
+            # read build in data and look for pyfar version
             for name, hint in obj_names_hints:
-                if codec._is_pyfar_type(hint[1:]):
-                    obj = codec._decode_object_json_aided(name, hint, zip_file)
-                elif hint == '$ndarray':
-                    obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
+                if hint[1:] != 'BuiltinsWrapper':
+                    continue
+                obj = codec._decode_object_json_aided(name, hint, zip_file)
+                if 'pyfar.__version__' in obj:
+                    pyfar_version = obj['pyfar.__version__']
                 else:
-                    raise TypeError(
-                        '.far-file contains unknown types.'
-                        'This might occur when writing and reading files with'
-                        'different versions of Pyfar.')
-                collection[name] = obj
+                    collection[name] = obj
+
+            # check version (writing the version was introduced in 0.5.2)
+            if pyfar_version is None:
+                pyfar_version = "<0.5.2"
+
+            # read remaining data (pyfar objects and numpy arrays)
+            for name, hint in obj_names_hints:
+                if hint[1:] == 'BuiltinsWrapper':
+                    continue
+                try:
+                    if codec._is_pyfar_type(hint[1:]):
+                        obj = codec._decode_object_json_aided(
+                            name, hint, zip_file)
+                    elif hint == '$ndarray':
+                        obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
+                    else:
+                        raise TypeError((
+                            '.far-file contains unknown types. This might '
+                            'occur when writing and reading files with '
+                            'different versions of Pyfar.'))
+                    collection[name] = obj
+                except:  # noqa
+                    # all kinds of errors could happen, we want to catch all
+                    raise TypeError((
+                        f"'{name}' object in {filename} was written with "
+                        f"pyfar {pyfar_version} and could not be read with "
+                        f"pyfar {pf.__version__}."))
 
         if 'builtin_wrapper' in collection:
             for key, value in collection['builtin_wrapper'].items():
@@ -297,6 +325,9 @@ def write(filename, compress=False, **objs):
     zip_buffer = io.BytesIO()
     builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
+        # write pyfar version
+        builtin_wrapper["pyfar.__version__"] = pf.__version__
+        # write requested data
         for name, obj in objs.items():
             if codec._is_pyfar_type(obj):
                 codec._encode_object_json_aided(obj, name, zip_file)
