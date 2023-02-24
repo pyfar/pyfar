@@ -465,7 +465,7 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     signal : Signal, None
         The Signal to be filtered. Pass ``None`` to create the filter without
         applying it.
-    center_ frequency : number
+    center_frequency : number
         Frequency in Hz at which the magnitude response will be 0
         (-infinity dB).
     quality : number
@@ -480,7 +480,7 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     -------
     signal : Signal
         The filtered signal. Only returned if ``sampling_rate = None``.
-    filter : FilterSOS
+    filter : FilterIIR
         Filter object. Only returned if ``signal = None``.
 
     References
