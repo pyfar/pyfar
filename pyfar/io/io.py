@@ -251,9 +251,9 @@ def read(filename):
                 else:
                     collection[name] = obj
 
-            # check version (writing the version was introduced in 0.5.2)
+            # check version (writing the version was introduced in 0.5.3)
             if pyfar_version is None:
-                pyfar_version = "<0.5.2"
+                pyfar_version = "<0.5.3"
 
             # read remaining data (pyfar objects and numpy arrays)
             for name, hint in obj_names_hints:
