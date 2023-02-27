@@ -626,7 +626,11 @@ class Signal(FrequencyData, TimeData):
 
         # check fft norm
         if fft_norm in self._VALID_FFT_NORMS:
-            self._fft_norm = fft_norm
+            if self._complex and fft_norm == "rms":
+                raise ValueError(("'rms' normalization is not valid for "
+                                  "complex time signals"))
+            else:
+                self._fft_norm = fft_norm
         else:
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but "
