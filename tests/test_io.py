@@ -69,7 +69,7 @@ def test_read_sofa_position_type_spherical(
 
 @pytest.mark.parametrize('file,version', [
     ('erroneous_data_with_version_string.far', '0.5.2'),
-    ('erroneous_data_without_version_string.far', '<0.5.2')])
+    ('erroneous_data_without_version_string.far', '<0.5.3')])
 def test_read_erroneous_data(file, version):
     """
     Test exception for reading outdated or erroneous objects. Files contain a

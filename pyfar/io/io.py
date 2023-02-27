@@ -248,7 +248,8 @@ def read(filename):
                 obj = codec._decode_object_json_aided(name, hint, zip_file)
                 if 'pyfar.__version__' in obj:
                     pyfar_version = obj['pyfar.__version__']
-                else:
+                    del obj['pyfar.__version__']
+                if obj:
                     collection[name] = obj
 
             # check version (writing the version was introduced in 0.5.3)
@@ -271,8 +272,12 @@ def read(filename):
                             'occur when writing and reading files with '
                             'different versions of Pyfar.'))
                     collection[name] = obj
-                except:  # noqa
-                    # all kinds of errors could happen, we want to catch all
+                except Exception as e:  # noqa
+                    # check for more specific pyfar errors that could be raised
+                    if "You must implement" in str(e) and \
+                            ("encode" in str(e) or "decode" in str(e)):
+                        raise e
+                    # raise general error with version hint
                     raise TypeError((
                         f"'{name}' object in {filename} was written with "
                         f"pyfar {pyfar_version} and could not be read with "
