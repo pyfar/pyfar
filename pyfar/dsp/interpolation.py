@@ -749,7 +749,7 @@ class InterpolateSpectrum():
     """
 
     def __init__(self, data, method, kind, fscale='linear',
-                 clip=False, group_delay=None, unit='samples'):
+                 clip=False):
 
         # check input ---------------------------------------------------------
         # ... data
@@ -789,6 +789,7 @@ class InterpolateSpectrum():
         self._method = method
         self._clip = clip
         self._fscale = fscale
+        self._kind = kind
 
         # flatten input data to work with scipy interpolators
         self._cshape = data.cshape
@@ -805,22 +806,7 @@ class InterpolateSpectrum():
             self._data = [np.abs(data.freq)]
 
         # frequencies for interpolation (store for testing)
-        self._f_in = self._get_frequencies(data.frequencies.copy())
-
-        # frequency range
-        self._freq_range = [self._f_in[0], self._f_in[-1]]
-
-        # get the interpolators
-        self._interpolators = []
-        for d in self._data:
-            interpolators = []
-            for idx, k in enumerate(kind):
-                if idx == 1:
-                    interpolators.append(interp1d(self._f_in, d, k))
-                else:
-                    interpolators.append(interp1d(
-                        self._f_in, d, k, fill_value="extrapolate"))
-            self._interpolators.append(interpolators)
+        self._f_in = data.frequencies.copy()
 
     def __call__(self, n_samples, sampling_rate, show=False):
         """
@@ -828,9 +814,33 @@ class InterpolateSpectrum():
         (see class docstring) for more information.
         """
 
-        # get the query frequencies (store for testing)
-        self._f_query = self._get_frequencies(
-            pf.dsp.fft.rfftfreq(n_samples, sampling_rate))
+        # length of half sided spectrum and highest frequency
+        n_fft = n_samples//2 + 1
+        f_max = sampling_rate / n_samples * (n_fft - 1)
+        # get the frequency values
+        if self._fscale == "linear":
+            # linearly spaced frequencies
+            self._f_query = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
+            self._f_base = self._f_in
+        else:
+            # logarithmically scaled frequencies between 0 and log10(n_fft)
+            self._f_query = np.log10(np.arange(1, n_fft+1))
+            self._f_base = np.log10(self._f_in / f_max * (n_fft - 1) + 1)
+
+        # frequency range
+        self._freq_range = [self._f_base[0], self._f_base[-1]]
+
+        # get the interpolators
+        self._interpolators = []
+        for d in self._data:
+            interpolators = []
+            for idx, k in enumerate(self._kind):
+                if idx == 1:
+                    interpolators.append(interp1d(self._f_base, d, k))
+                else:
+                    interpolators.append(interp1d(
+                        self._f_base, d, k, fill_value="extrapolate"))
+            self._interpolators.append(interpolators)
 
         # get interpolation ranges
         id_below = self._f_query < self._freq_range[0]
