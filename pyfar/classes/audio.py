@@ -784,15 +784,19 @@ class Signal(FrequencyData, TimeData):
                       fft_norm=self.fft_norm, comment=self.comment)
         return item
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        self.domain = "time"
+        class_dict = self.copy().__dict__
+        return class_dict
+
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
         obj = cls(
             obj_dict['_data'],
             obj_dict['_sampling_rate'],
-            obj_dict['_n_samples'],
-            obj_dict['_domain'],
-            obj_dict['_fft_norm'])
+            obj_dict['_n_samples'])
         obj.__dict__.update(obj_dict)
         return obj
 
