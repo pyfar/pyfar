@@ -325,26 +325,27 @@ def test_interpolate_spectrum_clip():
            np.all(np.abs(signal_clip.freq) <= 2)
 
 
-def test_interpolate_spectrum_fscale():
+@pytest.mark.parametrize(
+    'fscale,n_samples,sampling_rate,f_in,f_base,f_query',
+    [('linear', 10, 40, [0, 10, 20], [0, 10, 20],
+     pf.dsp.fft.rfftfreq(10, 40)),
+     ('log', 10, 40, [0, 10, 20], [0, .544, .778],
+      [0, .301, .477, .602, .699, .778])])
+def test_interpolate_spectrum_fscale(
+        fscale, n_samples, sampling_rate, f_in, f_base, f_query):
     """
     Test frequency vectors for linear and logarithmic frequency interpolation.
     """
 
-    # test parametres and data
-    f_in_lin = [0, 10, 20]
-    f_in_log = np.log([1, 10, 20])
-    n_samples = 10
-    sampling_rate = 40
-    f_query_lin = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
-    f_query_log = f_query_lin.copy()
-    f_query_log[0] = 1
-    f_query_log = np.log(f_query_log)
-    data = pf.FrequencyData([1, 1, 1], f_in_lin)
+    # test data
+    data = pf.FrequencyData([1, 1, 1], f_in)
 
-    # generate interpolator with linear frequency
-    interpolator_lin = InterpolateSpectrum(
-        data, "magnitude", ("linear", "linear", "linear"), fscale="linear")
-    signal = interpolator_lin(n_samples, sampling_rate)
+    # generate interpolator
+    interpolator = InterpolateSpectrum(
+        data, "magnitude", ("linear", "linear", "linear"), fscale=fscale)
+    signal = interpolator(n_samples, sampling_rate)
+
+    # test time and frequency vectors
     npt.assert_allclose(signal.time, pf.signals.impulse(n_samples).time)
     # generate interpolator with logarithmic frequency
     interpolator_log = InterpolateSpectrum(
