@@ -43,9 +43,9 @@ def test_broadcast_cshapes(cshape, reference):
 
 @pytest.mark.parametrize("shape1, shape2, n_samples, caxis, ref1, ref2", [
     ((1, 2, 3), (1, 1, 2), 1, -1, (1, 2, 3), (1, 2, 2)),
-    ((1, 3, 2), (1, 2, 1), 5, -2, (1, 3, 2), (1, 2, 2)),
+    ((1, 3, 2), (2, 1), 5, -2, (1, 3, 2), (1, 2, 2)),
     ((1, 2), (3, 1), 10, 0, (1, 2), (3, 2)),
-    ((1, 4, 3), (1, 1, 2), 1000, 2, (1, 4, 3), (1, 4, 2))])
+    ((1, 4, 3), (2,), 1000, 2, (1, 4, 3), (1, 4, 2))])
 def test_broadcast_ignore_caxis(shape1, shape2, n_samples, caxis, ref1, ref2):
     # Test ignore_caxis broadcasting
     signals = (pf.Signal(np.ones(shape1 + (n_samples, )), 44100),

@@ -67,7 +67,12 @@ def broadcast_cshapes(signals, cshape=None, ignore_caxis=None):
                          f" {cshape}.")
     if cshape is None:
         if ignore_caxis is not None:
+            # Adjust cshapes to largest dimention
             data_shapes = [s.cshape for s in signals]
+            max_dim = np.max([len(sh) for sh in data_shapes], axis=0)
+            for i, sh in enumerate(data_shapes):
+                for _ in range(max_dim-len(sh)):
+                    data_shapes[i] = (1,) + data_shapes[i]
             # Finds broadcast cshape without the axis to ignore
             cshape = np.broadcast_shapes(*np.delete(data_shapes, ignore_caxis,
                                          axis=-1))
