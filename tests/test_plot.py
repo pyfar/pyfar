@@ -568,8 +568,8 @@ def test_title_style(style, handsome_signal):
     ['lines.linestyle', ':'],
     ['axes.facecolor', 'black'],
     ['axes.grid', False]])
-def test_context_manager_empty_dicts(rcParams, value):
-    # Test calling empty dict to use current active plotstyle
+def test_pyfar_plot_with_empty_style(rcParams, value):
+    # Test passing an empty style to a pyfar plot function to check if the currently active plot stlye remains active
     with pf.plot.context({rcParams: value}):
         pf.plot.time(pf.TimeData([0, 1, 0, -1], range(4)), style={})
         assert plt.rcParams[rcParams] == value
