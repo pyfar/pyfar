@@ -782,8 +782,9 @@ class Signal(FrequencyData, TimeData):
 
     def _encode(self):
         """Return dictionary for the encoding."""
-        self.domain = "time"
-        class_dict = self.copy().__dict__
+        selfcopy = self.copy()
+        selfcopy.domain = "time"
+        class_dict = selfcopy.__dict__
         return class_dict
 
     @classmethod
