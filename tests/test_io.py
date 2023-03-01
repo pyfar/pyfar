@@ -198,6 +198,8 @@ def test_write_read_signal(domain, sine, tmpdir):
     io.write(filename, signal=sine)
     actual = io.read(filename)['signal']
     assert isinstance(actual, Signal)
+    # io.write encodes in domain = 'time'
+    sine.domain = "time"
     assert actual == sine
 
 
