@@ -185,18 +185,12 @@ y = pf.dsp.filter.low_shelve(impulse, 1/4*frequency, -10, 2, 'II')
 pf.plot.freq(y * 10**(-40/20), ax=axis, label='Low-shelve')
 
 # notch filter
-y = pf.dsp.filter.notch(impulse * .1**3, 100, 4)
-pf.plot.freq(y, ax=axis, label='Notch')
-
-y = pf.dsp.filter.notch(impulse * .1**4, 1000, 4)
-pf.plot.freq(y, ax=axis, label='Notch')
-
-y = pf.dsp.filter.notch(impulse * .1**5, 10000, 4)
+y = pf.dsp.filter.notch(impulse * .1**3, 1000, 4)
 pf.plot.freq(y, ax=axis, label='Notch')
 
 axis.set_title('')
 axis.set_xlim(20, 20e3)
-axis.set_ylim(-140, 20)
+axis.set_ylim(-100, 20)
 axis.legend(loc='lower center', ncol=3, bbox_to_anchor=(.5, -.4))
 
 plt.savefig('filter_types_audio_filter_1.png', dpi=150)
@@ -207,24 +201,20 @@ _, ax = plt.subplots(1, 1, figsize=(15/2.54, 8/2.54), sharey=True)
 # shelve cascades
 axis = ax
 gain = 10
-y, _, ideal = pf.dsp.filter.high_shelve_cascade(
+y, *_ = pf.dsp.filter.high_shelve_cascade(
     impulse, 125, 'lower', gain, None, 5)
-# pf.plot.freq(ideal, c=[0, 0, 0, .5], ax=axis, ls="--", label="Ideal response")
 pf.plot.freq(y, ax=axis, label="High-shelve cascade")
 
-y, _, ideal = pf.dsp.filter.high_shelve_cascade(
+y, *_ = pf.dsp.filter.high_shelve_cascade(
     impulse, 125, 'lower', -gain, None, 5)
-# pf.plot.freq(ideal, c=[0, 0, 0, .5], ax=axis, ls="--")
 pf.plot.freq(y, ax=axis, label="High-shelve cascade")
 
-y, _, ideal = pf.dsp.filter.low_shelve_cascade(
+y, *_ = pf.dsp.filter.low_shelve_cascade(
     impulse, 125, 'lower', gain, None, 5)
-# pf.plot.freq(ideal*.01, c=[0, 0, 0, .5], ax=axis, ls="--")
 pf.plot.freq(y*.01, ax=axis, label="Low-shelve cascade")
 
-y, _, ideal = pf.dsp.filter.low_shelve_cascade(
+y, *_ = pf.dsp.filter.low_shelve_cascade(
     impulse, 125, 'lower', -gain, None, 5)
-# pf.plot.freq(ideal*.01, c=[0, 0, 0, .5], ax=axis, ls="--")
 pf.plot.freq(y*.01, ax=axis, label="Low-shelve cascade")
 
 axis.set_title('')

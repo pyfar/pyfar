@@ -471,7 +471,7 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     quality : number
         The quality is defined at the -3 dB points around the
         `center_frequency` and is the inverse band width in octaves relative
-        to the `center_frequency`
+        to the `center_frequency`.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if `signal` is ``None``. The
         default is ``None``.
