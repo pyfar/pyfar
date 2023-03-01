@@ -562,3 +562,15 @@ def test_title_style(style, handsome_signal):
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
     plt.close('all')
+
+
+@pytest.mark.parametrize('rcParams, value', [
+    ['lines.linestyle', ':'],
+    ['axes.facecolor', 'black'],
+    ['axes.grid', False]])
+def test_context_manager_empty_dicts(rcParams, value):
+    # Test calling empty dict to use current active plotstyle
+    with pf.plot.context({rcParams: value}):
+        pf.plot.time(pf.TimeData([0, 1, 0, -1], range(4)), style={})
+        assert plt.rcParams[rcParams] == value
+    plt.close('all')
