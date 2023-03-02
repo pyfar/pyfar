@@ -81,16 +81,32 @@ Before you submit a pull request, check that it meets these guidelines:
 Function and Class Guidelines
 -----------------------------
 
-pyfar functions and classes should raise errors if
+Functions and classes should
 
-- Audio objects do not have the correct type (e.g. a TimeData instance is passed but a Signal instance is required)
-- String input that specifies a function option has an invalid value (e.g. 'linea' was passed but 'linear' was required)
-- Invalid parameter combinations are used
+* have a single clear purpose and a functionality limited to that purpose. Conditional arguments are fine in some cases but are an indicator that a function or class does not have a clear purpose. Conditional arguments are
 
-pyfar functions and classes should raise warnings if
+  - arguments that are obsolete if another argument is provided
+  - arguments that or necessary only if another argument is provided
+  - arguments that must have a specific value depending on other arguments
 
-- Results might be wrong or unexpected
-- Possibly bad parameter combinations are used
+* be split into multiple functions or classes if their purpose is not clear or the functionality not well limited.
+* contain documentation for all input and output parameters.
+* contain examples in the documentation if they are non-trivial to use.
+* contain comments in the code that explain decisions and parts that are not trivial to read from the code. As a rule of thumb, too much comments are better than to little comments.
+* use clear names for all variables
+
+It is also a good idea to follow `the Zen of Python <https://peps.python.org/pep-0020/>`_
+
+Errors should be raised if
+
+* Audio objects do not have the correct type (e.g. a TimeData instance is passed but a Signal instance is required)
+* String input that specifies a function option has an invalid value (e.g. 'linea' was passed but 'linear' was required)
+* Invalid parameter combinations are used
+
+Warnings should be raised if
+
+* Results might be wrong or unexpected
+* Possibly bad parameter combinations are used
 
 
 Testing Guidelines
