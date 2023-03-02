@@ -416,9 +416,6 @@ def _n_bins(n_samples, complex=False):
     if complex:
         n_bins = n_samples
     else:
-        if _is_odd(n_samples):
-            n_bins = (n_samples+1)/2
-        else:
-            n_bins = n_samples/2+1
+        n_bins = n_samples // 2 + 1
 
     return int(n_bins)
