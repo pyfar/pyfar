@@ -395,7 +395,7 @@ def _is_odd(num):
     return bool(num & 0x1)
 
 
-def _n_bins(n_samples):
+def _n_bins(n_samples, complex=False):
     """
     Helper function to calculate the number of bins resulting from a FFT
     with n_samples
@@ -404,6 +404,8 @@ def _n_bins(n_samples):
     ---------
     n_samples : int
         Number of samples
+    complex : bool
+        Flag which indicates if the time data are real or complex-valued.
 
     Returns
     -------
@@ -411,9 +413,12 @@ def _n_bins(n_samples):
         Resulting number of frequency bins
 
     """
-    if _is_odd(n_samples):
-        n_bins = (n_samples+1)/2
+    if complex:
+        n_bins = n_samples
     else:
-        n_bins = n_samples/2+1
+        if _is_odd(n_samples):
+            n_bins = (n_samples+1)/2
+        else:
+            n_bins = n_samples/2+1
 
     return int(n_bins)
