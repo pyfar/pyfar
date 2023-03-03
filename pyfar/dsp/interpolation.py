@@ -678,10 +678,7 @@ class InterpolateSpectrum():
         ``'linear'``
             Interpolate on a linear frequency axis.
         ``'log'``
-            Interpolate on a logarithmic frequency axis. Note that 0 Hz can
-            not be interpolated on a logarithmic scale because the logarithm
-            of 0 does not exist. Instead of 0 Hz, 1 Hz or the half of the
-            second lowest frequency are used (whatever is smaller).
+            Interpolate on a logarithmic frequency axis.
 
         The default is ``'linear'``.
     clip : bool, tuple
@@ -900,19 +897,3 @@ class InterpolateSpectrum():
                 ax[1, 1].legend(loc='best')
 
         return signal
-
-    def _get_frequencies(self, frequencies):
-        """
-        Return frequencies for creating or quering interpolation objects.
-
-        In case logfrequencies are requested, 0 Hz can not be used, because the
-        logarithm of 0 does not exist. 0 Hz is replaced with a frequency close
-        (but not too close) to 0 Hz to avoid numerical issues during the
-        interpolation.
-        """
-        if self._fscale == "log":
-            if frequencies[0] == 0:
-                frequencies[0] = min(1, frequencies[1]/2)
-            frequencies = np.log(frequencies)
-
-        return frequencies
