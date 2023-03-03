@@ -2028,7 +2028,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
 
 def normalize(signal, reference_method='max', domain='time',
               channel_handling='individual', target=1, limits=(None, None),
-              unit=None, return_reference=False):
+              unit=None, return_reference=False, nan_policy='raise'):
     """
     Apply a normalization.
 
@@ -2119,6 +2119,21 @@ def normalize(signal, reference_method='max', domain='time',
     return_reference: bool
         If ``return_reference=True``, the function also returns the `reference`
         values for the channels. The default is ``False``.
+    nan_policy: string, optional
+        Define how to handle NaNs in input signal.
+
+        ``'propagate'``
+           If the input signal includes NaNs within the time or frequency range
+           , NaN will be used as normalization reference. The resulting output
+           signal values are NaN.
+        ``'omit'``
+           NaNs will be omitted in the normalization. Cshape will still remain,
+           as the normalized signal still includes the NaNs.
+        ``'raise'``
+            A ``'ValueError'`` will be raised, if the input signal includes
+            NaNs.
+
+        The default is 'raise'.
 
     Returns
     -------
@@ -2187,6 +2202,14 @@ def normalize(signal, reference_method='max', domain='time',
     if (domain == "time" and unit not in ("s", None)) or \
             (domain == "freq" and unit not in ("Hz", None)):
         raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
+    if nan_policy not in ('propagate', 'omit', 'raise'):
+        raise ValueError("nan_policy has to be 'propagate', 'omit', or"
+                         "'raise'.")
+    # raise error if input includes NaNs.
+    check_nans = signal.time if domain == 'time' else signal.freq
+    if nan_policy == 'raise' and True in np.isnan(check_nans):
+        raise ValueError("The signal includes NaNs. Change 'nan_policy' to "
+                         "'propagate' or 'omit'.")
 
     # get and check the limits
     if domain == 'time':
@@ -2213,7 +2236,10 @@ def normalize(signal, reference_method='max', domain='time',
             input_data = np.abs(signal.time)
         else:
             input_data = np.abs(signal.freq)
-    # get values for normalization max or mean
+        # create masked array if data includes NaNs and nan_policy is omit
+        if nan_policy == 'omit' and True in np.isnan(input_data):
+            input_data = np.ma.masked_array(input_data, np.isnan(input_data))
+        # get values for normalization max or mean
         if reference_method == 'max':
             reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
         elif reference_method == 'mean':
