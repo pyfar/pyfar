@@ -50,8 +50,10 @@ def broadcast_cshapes(signals, cshape=None, ignore_caxis=None):
         ``numpy.broadcast_shapes``. The default is ``None``.
     ignore_caxis : int, optional
         Channel axis (:py:mod:`caxis <pyfar._concepts.audio_classes>`) which
-        will be ignore during broadcasting. Must be ``None``, if `cshape` is
-        not ``None``. The default is ``None``, which broadcasts all caxis.
+        will be ignored during broadcasting. Must be ``None``, if `cshape` is
+        not ``None``. Note that caxis refers to the channel axis after
+        :py:func:~broadcast.cdims is applied. The default is ``None``, which
+        broadcasts all caxis.
 
     Returns
     -------
@@ -67,25 +69,25 @@ def broadcast_cshapes(signals, cshape=None, ignore_caxis=None):
                          f" {cshape}.")
     if cshape is None:
         if ignore_caxis is not None:
-            # Adjust cshapes to largest dimention
-            data_shapes = [s.cshape for s in signals]
-            max_dim = np.max([len(sh) for sh in data_shapes], axis=0)
-            for i, sh in enumerate(data_shapes):
-                for _ in range(max_dim-len(sh)):
-                    data_shapes[i] = (1,) + data_shapes[i]
+            # Adjust cshapes to largest dimension
+            cshapes = [s.cshape for s in signals]
+            max_cdim = np.max([len(sh) for sh in cshapes])
+            for i, sh in enumerate(cshapes):
+                for _ in range(max_cdim-len(sh)):
+                    cshapes[i] = (1,) + cshapes[i]
             # Finds broadcast cshape without the axis to ignore
-            cshape = np.broadcast_shapes(*np.delete(data_shapes, ignore_caxis,
+            cshape = np.broadcast_shapes(*np.delete(cshapes, ignore_caxis,
                                          axis=-1))
             broad_signals = []
             for i, s in enumerate(signals):
                 # Appends the axis to ignore back into cshape to broadcast to.
                 if ignore_caxis in (-1, len(cshape)):
                     # Use append if ignore_axis is defined for last dimension
-                    cs = np.append(cshape, data_shapes[i][ignore_caxis])
+                    cs = np.append(cshape, cshapes[i][ignore_caxis])
                 else:
                     # Use insert if ignore_axis is not defined for last dim
                     axis = ignore_caxis+1 if ignore_caxis < 0 else ignore_caxis
-                    cs = np.insert(cshape, axis, data_shapes[i][ignore_caxis])
+                    cs = np.insert(cshape, axis, cshapes[i][ignore_caxis])
                 broad_signals.append(broadcast_cshape(s, tuple(cs)))
             return broad_signals
         else:
