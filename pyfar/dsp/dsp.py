@@ -1893,7 +1893,8 @@ def rms(signal):
     return np.sqrt(power(signal))
 
 
-def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
+def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
+            nan_policy='raise'):
     """
     Average multi-channel signals.
 
@@ -1935,6 +1936,24 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
         If this is ``True``, the axes which are reduced during the averaging
         are kept as a dimension with size one. Otherwise, singular dimensions
         will be squeezed after averaging. The default is ``False``.
+    nan_policy: string, optional
+        Define how to handle NaNs in input signal.
+
+        ``'propagate'``
+           If the input signal includes NaNs, the corresponding averaged output
+           signal value will be NaN.
+        ``'omit'``
+           NaNs will be omitted while averaging. For each NaN value, the number
+           of values used for the average operation is also reduced by one. If
+           a signal contains only NaN values in a specific dimensions, the
+           output will be zero. For example if the second sample of a multi
+           channel signal is always NaN, the average will be zero at the
+           second sample.
+        ``'raise'``
+            A ``'ValueError'`` will be raised, if the input signal includes
+            NaNs.
+
+        The default is ``'raise'``.
 
     Returns
     --------
@@ -1961,7 +1980,9 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
-
+    if nan_policy not in ('propagate', 'omit', 'raise'):
+        raise ValueError("nan_policy has to be 'propagate', 'omit', or"
+                         "'raise'.")
     # check for caxis
     if caxis and np.max(caxis) > len(signal.cshape):
         raise ValueError(('The maximum of caxis needs to be smaller than '
@@ -1997,7 +2018,12 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
             """mode must be 'linear', 'magnitude_zerophase', 'power',
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
-
+    # check if data includes NaNs and raise error or create masked array
+    if nan_policy == 'raise' and np.any(np.isnan(data)):
+        raise ValueError("The signal includes NaNs. Change 'nan_policy' to "
+                         "'propagate' or 'omit'.")
+    elif nan_policy == 'omit' and np.any(np.isnan(data)):
+        data = np.ma.masked_array(data, np.isnan(data))
     # set weights default
     if weights is not None:
         weights = np.broadcast_to(np.array(weights)[..., None],
@@ -2009,7 +2035,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
         data = data[0] * np.exp(1j * data[1])
     else:
         data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
-
     # reconstruct frequency data
     if mode == 'power':
         data = np.sqrt(data)
