@@ -44,7 +44,7 @@ def test_domains_normalization():
     time = pf.dsp.normalize(signal, domain="time")
     freq = pf.dsp.normalize(signal, domain="freq")
 
-    npt.assert_almost_equal(np.max(np.abs(time.time)), 1)
+    assert np.max(np.abs(time.time)) == 1
     assert np.max(np.abs(time.freq)) != 1
 
     assert np.max(np.abs(freq.time)) != 1
