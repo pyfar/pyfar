@@ -80,9 +80,10 @@ class Coordinates():
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
             to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         domain : string
-            ``'domain'``, ``'unit'`` and ``'convention'`` initialization parameters will be
-            deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
-            are no longer supported. The unit is meter for distances and radians for angles.
+            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+            parameters will be deprecated in pyfar 0.8.0 in favor of
+            ``from_*``.  Different units are no longer supported. The unit is
+            meter for distances and radians for angles.
             domain of the coordinate system
 
             ``'cart'``
@@ -94,19 +95,21 @@ class Coordinates():
 
             The default is ``'cart'``.
         convention: string
-            ``'domain'``, ``'unit'`` and ``'convention'`` function will be
-            deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
-            are no longer supported. Default angle unit is radiant.
-            
+            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+            parameters will be deprecated in pyfar 0.8.0 in favor of
+            ``from_*``.  Different units are no longer supported.
+            Default angle unit is radiant.
+
             Coordinate convention (see above)
             The default is ``'right'`` if domain is ``'cart'``,
             ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
             ``'cyl'``.
         unit: string
-            ``'domain'``, ``'unit'`` and ``'convention'`` function will be
-            deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
-            are no longer supported. Default angle unit is radiant.
-            
+            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+            parameters will be deprecated in pyfar 0.8.0 in favor of
+            ``from_*``. Different units are no longer supported. Default
+            angle unit is radiant.
+
             Unit of the coordinate system. By default the first available unit
             is used, which is meters (``'met'``) for ``domain = 'cart'`` and
             radians (``'rad'``) in all other cases (See above).
@@ -117,7 +120,7 @@ class Coordinates():
         sh_order : int, optional
             This property will be deprecated in pyfar 0.8.0 in favor
             of :py:func:`SamplingSphere`.
-            
+
             Maximum spherical harmonic order of the sampling grid.
             The default is ``None``.
         comment : str, optional
@@ -455,7 +458,7 @@ class Coordinates():
             convention='top_colat', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the new setter such as :py:func:`spherical_elevation`
+        of the ``spherical_*`` properties.
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -491,7 +494,7 @@ class Coordinates():
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of the new setter such as .spherical_elevation"),
+            "of the spherical_... properties"),
                 PyfarDeprecationWarning)
 
         # make array
@@ -555,7 +558,7 @@ class Coordinates():
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the new setter such as :py:func:`from_spherical_elevation`
+        of the `spherical_...` properties.
         Get coordinate points in spherical coordinate systems.
 
         The points that are returned are defined by the `domain`,
@@ -600,7 +603,7 @@ class Coordinates():
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of the new setter such as .sph_top_elev"),
+            "of the `spherical_*` properties."),
                 PyfarDeprecationWarning)
 
         if convention == 'top_colat':
@@ -922,7 +925,7 @@ class Coordinates():
         positive y-direction. The elevation denotes the angle upwards and
         downwards from the x/y-plane with pi/2 pointing at positive
         z-direction and -pi/2 pointing in negative z-direction. The azimuth
-        and elevation can be in radians or degrees, the radius is always in
+        and elevation are in radians, the radius is always in
         meters."""
         azimuth, elevation, radius = cart2sph(self.x, self.y, self.z)
         elevation = np.pi / 2 - elevation
@@ -943,7 +946,7 @@ class Coordinates():
         positive x-direction and pi/2 in positive y-direction. The colatitude
         denotes the angle downwards from the z-axis with 0 pointing in positive
         z-direction and pi in negative z-direction. The azimuth and colatitude
-        can be in radians or degrees, the radius is always in meters."""
+        are in radians, the radius is always in meters."""
         azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
             np.array([azimuth, colatitude, radius]), 0, -1))
@@ -961,7 +964,7 @@ class Coordinates():
         y-direction. The polar angle denotes the angle in the x/z-plane with
         -pi/2 pointing in negative z-direction, 0 in positive x-direction,
         pi/2 in positive z-direction, pi in negative x-direction. The polar
-        and lateral angle can be in radians and degree, the radius is
+        and lateral angle are in radians, the radius is
         always in meters."""
         polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
         lateral = lateral - np.pi / 2
@@ -982,8 +985,8 @@ class Coordinates():
         pointing in positive y-direction, pi/2 in positive z-direction, pi
         in negative y-direction, and 3*pi/2 in negative z-direction. Theta
         denotes the angle measured from the x-axis with 0 pointing in positive
-        x-direction and pi in negative x-direction. Phi and theta can be in
-        radians and degrees, the radius is always in meters."""
+        x-direction and pi in negative x-direction. Phi and theta are in
+        radians, the radius is always in meters."""
 
         phi, theta, radius = cart2sph(self.y, self.z, self.x)
         return np.atleast_2d(np.moveaxis(

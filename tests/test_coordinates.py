@@ -155,8 +155,6 @@ def test_coordinates_init_val():
     # test input: 2 element vectors
     c2 = [1, 2]                        # list
     c3 = np.asarray(c2)                # flat np.array
-    c4 = np.atleast_2d(c2)             # row vector np.array
-    c5 = np.transpose(c4)              # column vector np.array
     # test input: 3 element vector
     c6 = [1, 2, 3]
     # test input: 2D matrix
@@ -309,8 +307,6 @@ def test_setter_and_getter_with_conversion(domain_in, domain_out, point):
             #     c.cartesian.flatten(), p_in, atol=1e-15)
             npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
             # check if system was converted
-            # assert c._system["domain"] == domain_in
-            # assert c._system["convention"] == convention_in
             # --- test with conversion ---
             p = eval(f"c.get_{domain_out}('{convention_out}', \
                         convert=True)")
