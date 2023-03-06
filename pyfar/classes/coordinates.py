@@ -41,7 +41,7 @@ class Coordinates():
         get cartesian coordinates. If you want to initialize in an other
         domain use :py:func:`from_spherical_colatitude`,
         :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
-        :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`.
+        :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
         instead.
 
         Create :py:func:`Coordinates` object with or without coordinate points.
@@ -80,9 +80,9 @@ class Coordinates():
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
             to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         domain : string
-            ``'domain'``, ``'unit'`` and ``'convention'`` function will be
+            ``'domain'``, ``'unit'`` and ``'convention'`` initialization parameters will be
             deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
-            are no longer supported. Default angle unit is radiant.
+            are no longer supported. The unit is meter for distances and radians for angles.
             domain of the coordinate system
 
             ``'cart'``
@@ -97,7 +97,8 @@ class Coordinates():
             ``'domain'``, ``'unit'`` and ``'convention'`` function will be
             deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
             are no longer supported. Default angle unit is radiant.
-            coordinate convention (see above)
+            
+            Coordinate convention (see above)
             The default is ``'right'`` if domain is ``'cart'``,
             ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
             ``'cyl'``.
@@ -105,7 +106,8 @@ class Coordinates():
             ``'domain'``, ``'unit'`` and ``'convention'`` function will be
             deprecated in pyfar 0.8.0 in favor of ``from_*``.  Different units
             are no longer supported. Default angle unit is radiant.
-            unit of the coordinate system. By default the first available unit
+            
+            Unit of the coordinate system. By default the first available unit
             is used, which is meters (``'met'``) for ``domain = 'cart'`` and
             radians (``'rad'``) in all other cases (See above).
         weights: array like, number, optional
@@ -113,9 +115,10 @@ class Coordinates():
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         sh_order : int, optional
-            This function will be deprecated in pyfar 0.8.0 in favor
+            This property will be deprecated in pyfar 0.8.0 in favor
             of :py:func:`SamplingSphere`.
-            maximum spherical harmonic order of the sampling grid.
+            
+            Maximum spherical harmonic order of the sampling grid.
             The default is ``None``.
         comment : str, optional
             comment about the stored coordinate points. The default is
@@ -665,7 +668,7 @@ class Coordinates():
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the new setter such as :py:func:`cylindrical`
+        of the :py:func:`cylindrical` property.
         Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -695,7 +698,7 @@ class Coordinates():
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of the new setter such as .cyl"),
+            "of the cylindrical property."),
                 PyfarDeprecationWarning)
         self._set_cyl(azimuth, z, radius_z, convention)
 
@@ -742,7 +745,7 @@ class Coordinates():
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the new setter such as :py:func:`cylindrical`
+        of the `cylindrical` property.
         Get coordinate points in cylindrical coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -781,7 +784,7 @@ class Coordinates():
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of the new setter such as .cyl"),
+            "of the cylindrical property."),
                 PyfarDeprecationWarning)
         points = self.cylindrical
 
@@ -911,8 +914,8 @@ class Coordinates():
 
     @property
     def spherical_elevation(self):
-        """returns :py:func:`azimuth`, :py:func:`elevation`,
-        :py:func:`radius` in radiant. Conform with
+        """Returns :py:func:`azimuth`, :py:func:`elevation`,
+        :py:func:`radius`. Conform with
         AES69-2015: AES standard for file exchange - Spatial acoustic data
         file format (SOFA). The azimuth denotes the counter clockwise angle in
         the x/y-plane with 0 pointing in positive x-direction and pi/2 in
@@ -935,7 +938,7 @@ class Coordinates():
     @property
     def spherical_colatitude(self):
         """returns :py:func:`azimuth`, :py:func:`colatitude`,
-        :py:func:`radius` in radiant, where the azimuth
+        :py:func:`radius`, where the azimuth
         denotes the counter clockwise angle in the x/y-plane with 0 pointing in
         positive x-direction and pi/2 in positive y-direction. The colatitude
         denotes the angle downwards from the z-axis with 0 pointing in positive
@@ -952,8 +955,8 @@ class Coordinates():
 
     @property
     def spherical_side(self):
-        """returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius` in
-        radiant, where the lateral angle denotes the angle in the x/y-plane
+        """returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`,
+        where the lateral angle denotes the angle in the x/y-plane
         with pi/2 pointing in positive y-direction and -pi/2 in negative
         y-direction. The polar angle denotes the angle in the x/z-plane with
         -pi/2 pointing in negative z-direction, 0 in positive x-direction,

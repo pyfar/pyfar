@@ -25,7 +25,7 @@ coordinate systems are shown in the image below
 
 |coordinate_systems|
 
-The unit for length is always meter, while the unit for angles are in radians.
+The unit for length is always meter, while the unit for angles is radians.
 
 Samplings
 ---------

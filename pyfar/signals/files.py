@@ -389,7 +389,7 @@ def head_related_impulse_responses(
     elif position == "median":
         idx, _ = sources.find_slice('lateral', 'deg', 0)
         # sort positions according to polar angle
-        polar = sources.polar[idx].flatten() / np.pi * 180
+        polar = sources.polar[idx].flatten()
         idx = (idx[0][np.argsort(polar)], )
     else:
         idx = []

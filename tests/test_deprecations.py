@@ -197,7 +197,7 @@ def test_pad_zero_modi():
         ("pf.Coordinates(0, 0, 0, domain='sph', unit='deg')"),
         ("pf.Coordinates(0, 0, 0, domain='sph', convention='top_colat')"),
     ])
-def test_get_nearest_deprecations_0_7_0(statement):
+def test_deprecations_0_8_0(statement):
     coords = pf.Coordinates.from_spherical_colatitude(np.arange(6), 0, 0)
     coords.y = 1
 
@@ -217,7 +217,7 @@ def test_get_nearest_deprecations_0_7_0(statement):
             eval(statement)
 
 
-def test_get_nearest_deprecations_0_8_0_set_sh_order():
+def test_deprecations_0_8_0_set_sh_order():
     coords = pf.Coordinates(np.arange(6), 0, 0)
     # sh_order setter
     with pytest.warns(PyfarDeprecationWarning,

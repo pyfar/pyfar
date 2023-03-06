@@ -172,7 +172,6 @@ def _sofa_pos(pos_type, coordinates):
         )
     else:
         raise ValueError("Position:Type {pos_type} is not supported.")
-    return Coordinates()
 
 
 def read(filename):
