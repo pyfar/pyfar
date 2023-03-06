@@ -434,7 +434,7 @@ def test_coordinates_init_from_spherical_colatitude_with(
     coords.weights == weights
 
 
-@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('elevation', [0, np.pi, -np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
@@ -453,7 +453,7 @@ def test_coordinates_init_from_spherical_elevation_with(
     coords.weights == weights
 
 
-@pytest.mark.parametrize('lateral', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('lateral', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('polar', [0, np.pi, -np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
@@ -472,7 +472,7 @@ def test_coordinates_init_from_spherical_side_with(
     coords.weights == weights
 
 
-@pytest.mark.parametrize('phi', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('phi', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('theta', [0, np.pi, -np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
@@ -491,7 +491,7 @@ def test_coordinates_init_from_spherical_front_with(
     coords.weights == weights
 
 
-@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('z', [0, 1, -1.])
 @pytest.mark.parametrize('rho', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
@@ -510,7 +510,7 @@ def test_coordinates_init_from_cylindrical_with(
     coords.weights == weights
 
 
-@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('elevation', [0, np.pi, -np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 def test_coordinates_init_from_spherical_elevation(azimuth, elevation, radius):
@@ -523,7 +523,7 @@ def test_coordinates_init_from_spherical_elevation(azimuth, elevation, radius):
     npt.assert_allclose(coords._z, z, atol=1e-15)
 
 
-@pytest.mark.parametrize('lateral', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('lateral', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('polar', [0, np.pi, -np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 def test_coordinates_init_from_spherical_side(lateral, polar, radius):
@@ -536,7 +536,7 @@ def test_coordinates_init_from_spherical_side(lateral, polar, radius):
     npt.assert_allclose(coords._z, z, atol=1e-15)
 
 
-@pytest.mark.parametrize('phi', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('phi', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('theta', [0, np.pi, -np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 def test_coordinates_init_from_spherical_front(phi, theta, radius):
@@ -549,7 +549,7 @@ def test_coordinates_init_from_spherical_front(phi, theta, radius):
     npt.assert_allclose(coords._z, z, atol=1e-15)
 
 
-@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('z', [0, 1, -1.])
 @pytest.mark.parametrize('radius_z', [0, 1, -1.])
 def test_coordinates_init_from_cylindrical(azimuth, z, radius_z):
