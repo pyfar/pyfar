@@ -48,7 +48,7 @@ def test_domains_normalization():
     assert np.max(np.abs(time.freq)) != 1
 
     assert np.max(np.abs(freq.time)) != 1
-    npt.assert_almost_equal(np.max(np.abs(freq.freq)), 1)
+    assert np.max(np.abs(freq.freq)) == 1
 
 
 @pytest.mark.parametrize('unit, limit1, limit2', (
