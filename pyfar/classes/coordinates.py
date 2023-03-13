@@ -172,7 +172,9 @@ class Coordinates():
     def from_cartesian(
             cls, x, y, z, weights: np.array = None, comment: str = ""):
         """Create a Coordinates class object from a set of points in the
-        right-handed cartesian coordinate system.
+        right-handed cartesian coordinate system. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information.
 
         Parameters
         ----------
@@ -197,7 +199,9 @@ class Coordinates():
             cls, azimuth, elevation, radius, weights: np.array = None,
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
-        spherical coordinate system.
+        spherical coordinate system. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information.
 
         Parameters
         ----------
@@ -227,7 +231,9 @@ class Coordinates():
             cls, azimuth, colatitude, radius, weights: np.array = None,
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
-        spherical coordinate system.
+        spherical coordinate system. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information.
 
         Parameters
         ----------
@@ -257,7 +263,9 @@ class Coordinates():
             cls, lateral, polar, radius, weights: np.array = None,
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
-        spherical coordinate system.
+        spherical coordinate system. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information.
 
         Parameters
         ----------
@@ -286,7 +294,9 @@ class Coordinates():
             cls, phi, theta, radius, weights: np.array = None,
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
-        spherical coordinate system.
+        spherical coordinate system. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information.
 
         Parameters
         ----------
@@ -315,7 +325,9 @@ class Coordinates():
             cls, azimuth, z, rho, weights: np.array = None,
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
-        cylindrical coordinate system.
+        cylindrical coordinate system. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information.
 
         Parameters
         ----------
@@ -906,8 +918,10 @@ class Coordinates():
 
     @property
     def cartesian(self):
-        """Right handed cartesian coordinate system. Returns :py:func:`x`,
-        :py:func:`y`, :py:func:`z`"""
+        """Returns :py:func:`x`, :py:func:`y`, :py:func:`z`.
+        Right handed cartesian coordinate system. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information."""
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
 
@@ -918,15 +932,9 @@ class Coordinates():
     @property
     def spherical_elevation(self):
         """Returns :py:func:`azimuth`, :py:func:`elevation`,
-        :py:func:`radius`. Conform with
-        AES69-2015: AES standard for file exchange - Spatial acoustic data
-        file format (SOFA). The azimuth denotes the counter clockwise angle in
-        the x/y-plane with 0 pointing in positive x-direction and pi/2 in
-        positive y-direction. The elevation denotes the angle upwards and
-        downwards from the x/y-plane with pi/2 pointing at positive
-        z-direction and -pi/2 pointing in negative z-direction. The azimuth
-        and elevation are in radians, the radius is always in
-        meters."""
+        :py:func:`radius`. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information."""
         azimuth, elevation, radius = cart2sph(self.x, self.y, self.z)
         elevation = np.pi / 2 - elevation
         return np.atleast_2d(np.moveaxis(
@@ -942,12 +950,9 @@ class Coordinates():
     @property
     def spherical_colatitude(self):
         """returns :py:func:`azimuth`, :py:func:`colatitude`,
-        :py:func:`radius`, where the azimuth
-        denotes the counter clockwise angle in the x/y-plane with 0 pointing in
-        positive x-direction and pi/2 in positive y-direction. The colatitude
-        denotes the angle downwards from the z-axis with 0 pointing in positive
-        z-direction and pi in negative z-direction. The azimuth and colatitude
-        are in radians, the radius is always in meters."""
+        :py:func:`radius`. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information."""
         azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
             np.array([azimuth, colatitude, radius]), 0, -1))
@@ -960,14 +965,9 @@ class Coordinates():
 
     @property
     def spherical_side(self):
-        """returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`,
-        where the lateral angle denotes the angle in the x/y-plane
-        with pi/2 pointing in positive y-direction and -pi/2 in negative
-        y-direction. The polar angle denotes the angle in the x/z-plane with
-        -pi/2 pointing in negative z-direction, 0 in positive x-direction,
-        pi/2 in positive z-direction, pi in negative x-direction. The polar
-        and lateral angle are in radians, the radius is
-        always in meters."""
+        """returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information."""
         polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
         lateral = lateral - np.pi / 2
         polar = np.mod(polar + np.pi / 2, 2 * np.pi) - np.pi / 2
@@ -983,13 +983,9 @@ class Coordinates():
 
     @property
     def spherical_front(self):
-        """returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius` in
-        radiant, where  phi denotes the angle in the y/z-plane with 0
-        pointing in positive y-direction, pi/2 in positive z-direction, pi
-        in negative y-direction, and 3*pi/2 in negative z-direction. Theta
-        denotes the angle measured from the x-axis with 0 pointing in positive
-        x-direction and pi in negative x-direction. Phi and theta are in
-        radians, the radius is always in meters."""
+        """returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius`. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information."""
 
         phi, theta, radius = cart2sph(self.y, self.z, self.x)
         return np.atleast_2d(np.moveaxis(
@@ -1003,11 +999,9 @@ class Coordinates():
 
     @property
     def cylindrical(self):
-        """returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho` in
-        radiant, where the azimuth denotes the counter clockwise angle in
-        the x/y-plane with 0 pointing in positive x-direction and pi/2 in
-        positive y-direction. The height is given by z, and radius_z denotes
-        the radius measured orthogonal to the z-axis."""
+        """returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
+        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        more information."""
         azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
             np.array([azimuth, z, rho]), 0, -1))
@@ -1019,8 +1013,8 @@ class Coordinates():
 
     @property
     def x(self):
-        """The x-axis coordinates for each point in a right handed cartesian
-        coordinate system."""
+        r"""x coordinate of a right handed Cartesian coordinate system in meter
+        (-\infty < x < \infty)."""
         self._check_empty()
         return self._x
 
@@ -1030,8 +1024,8 @@ class Coordinates():
 
     @property
     def y(self):
-        """The y-axis coordinates for each point in a right handed cartesian
-        coordinate system."""
+        r"""y coordinate of a right handed Cartesian coordinate system in meter
+        (-\infty < y < \infty)."""
         self._check_empty()
         return self._y
 
@@ -1041,8 +1035,8 @@ class Coordinates():
 
     @property
     def z(self):
-        """The z-axis coordinates for each point in a right handed cartesian
-        coordinate system."""
+        r"""z coordinate of a right handed Cartesian coordinate system in meter
+        (-\infty < z < \infty)."""
         self._check_empty()
         return self._z
 
@@ -1052,8 +1046,8 @@ class Coordinates():
 
     @property
     def rho(self):
-        """distance to origin for each point in the x-y-plane. Used for
-        cylindrical coordinate systems."""
+        r"""Distance perpendicular to the the z-axis of the right handed
+        Cartesian coordinate system (0 \leq radius < \infty)."""
         return self.cylindrical[..., 2]
 
     @rho.setter
@@ -1064,8 +1058,8 @@ class Coordinates():
 
     @property
     def radius(self):
-        """distance to origin for each point. Used for spherical coordinate
-        systems."""
+        r"""Distance to the origin of the right handed Cartesian coordinate
+        system in meters (0 \leq radius < \infty)."""
         return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     @radius.setter
@@ -1076,9 +1070,10 @@ class Coordinates():
 
     @property
     def azimuth(self):
-        """angle in radiant of rotation from the x-y-plane facing towards
-        positive x direction. Used for spherical and cylindrical coordinate
-        systems."""
+        r"""Counter clock-wise angle in the x-y plane of the right handed
+        Cartesian coordinate system in radians. 0 radians are defined in
+        positive x-direction, pi/2 radians in positive y-direction and so on
+        (-\infty < azimuth < \infty, 2pi-cyclic)."""
         return self.spherical_colatitude[..., 0]
 
     @azimuth.setter
@@ -1089,8 +1084,11 @@ class Coordinates():
 
     @property
     def elevation(self):
-        """angle in radiant with respect to horizontal plane (x-z-axe).
-        Used for spherical coordinate systems."""
+        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        system in radians. 0 radians elevation are defined in positive
+        x-direction, pi/2 radians in positive z-direction, and -pi/2 in
+        negative z-direction (0 \leq azimuth \leq pi). The elevation is a
+        variation of the colatitude."""
         return self.spherical_elevation[..., 1]
 
     @elevation.setter
@@ -1101,8 +1099,11 @@ class Coordinates():
 
     @property
     def colatitude(self):
-        """angle in radiant with respect to polar axis (z-axe). Used for
-        spherical coordinate systems."""
+        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        system in radians. 0 radians elevation are defined in positive
+        z-direction, pi/2 radians in positive x-direction, and pi in negative
+        z-direction (pi/2 \leq azimuth \leq pi/2). The colatitude is a
+        variation of the elevation angle."""
         return self.spherical_colatitude[..., 1]
 
     @colatitude.setter
@@ -1113,8 +1114,10 @@ class Coordinates():
 
     @property
     def phi(self):
-        """angle in radiant of rotation from the y-z-plane facing towards
-        positive y direction. Used for spherical coordinate systems."""
+        r"""Angle in the y-z plane of the right handed Cartesian coordinate
+        system in radians. 0 radians elevation are defined in positive
+        y-direction, pi/2 radians in positive z-direction, pi in negative
+        y-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
         return self.spherical_front[..., 0]
 
     @phi.setter
@@ -1125,8 +1128,10 @@ class Coordinates():
 
     @property
     def theta(self):
-        """angle in radiant with respect to polar axis (x-axe). Used for
-        spherical coordinate systems."""
+        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        system in radians. 0 radians elevation are defined in positive
+        x-direction, pi/2 radians in positive z-direction, and pi in negative
+        x-direction (0 \leq azimuth \leq pi)."""
         return self.spherical_front[..., 1]
 
     @theta.setter
@@ -1137,8 +1142,10 @@ class Coordinates():
 
     @property
     def lateral(self):
-        """angle in radiant with respect to horizontal plane (x-y-axe).
-        Used for spherical coordinate systems."""
+        r"""Counter clock-wise angle in the x-y plane of the right handed
+        Cartesian coordinate system in radians. 0 radians are defined in
+        positive x-direction, pi/2 radians in positive y-direction and -pi/2
+        in negative y-direction (-pi/2 \leq lateral \leq pi/2)."""
         return self.spherical_side[..., 0]
 
     @lateral.setter
@@ -1149,8 +1156,10 @@ class Coordinates():
 
     @property
     def polar(self):
-        """angle in radiant of rotation from the x-z-plane facing towards
-        positive x direction. Used for spherical coordinate systems."""
+        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        system in radians. 0 radians elevation are defined in positive
+        x-direction, pi/2 radians in positive z-direction, pi in negative
+        x-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
         return self.spherical_side[..., 1]
 
     @polar.setter
