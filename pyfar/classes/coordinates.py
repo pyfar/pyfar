@@ -934,6 +934,7 @@ class Coordinates():
 
     @spherical_elevation.setter
     def spherical_elevation(self, value):
+        value[..., 1] = _check_range_angle(value[..., 1], -np.pi/2, np.pi/2)
         x, y, z = sph2cart(
             value[..., 0], np.pi / 2 - value[..., 1], value[..., 2])
         self._set_points(x, y, z)
@@ -953,6 +954,7 @@ class Coordinates():
 
     @spherical_colatitude.setter
     def spherical_colatitude(self, value):
+        value[..., 1] = _check_range_angle(value[..., 1], 0, np.pi)
         x, y, z = sph2cart(value[..., 0], value[..., 1], value[..., 2])
         self._set_points(x, y, z)
 
@@ -974,6 +976,7 @@ class Coordinates():
 
     @spherical_side.setter
     def spherical_side(self, value):
+        value[..., 0] = _check_range_angle(value[..., 0], -np.pi/2, np.pi/2)
         x, z, y = sph2cart(
             value[..., 1], np.pi / 2 - value[..., 0], value[..., 2])
         self._set_points(x, y, z)
@@ -994,6 +997,7 @@ class Coordinates():
 
     @spherical_front.setter
     def spherical_front(self, value):
+        value[..., 1] = _check_range_angle(value[..., 1], 0, np.pi)
         y, z, x = sph2cart(value[..., 0], value[..., 1], value[..., 2])
         self._set_points(x, y, z)
 
@@ -2455,3 +2459,38 @@ def cyl2cart(azimuth, height, radius):
     z[np.abs(z) < np.finfo(x.dtype).eps] = 0
 
     return x, y, z
+
+
+def _check_range_angle(angles, lower_limit, upper_limit):
+    """colatitude will be clipped to its range if deviations are below 2 eps
+    for 32 bit float numbers otherwise Error is raised.
+
+    Parameters
+    ----------
+    angles : np.ndarray
+        input array angle
+    lower_limit : float
+        lower limit for angle definition
+    upper_limit : float
+        upper limit for angle definition
+
+    Returns
+    -------
+    angles : np.ndarray
+        clipped input angles
+    """
+    if any(angles < lower_limit):
+        mask = angles < lower_limit
+        eps = np.finfo(float).eps
+        if any(angles[mask]+2*eps < lower_limit):
+            raise ValueError(
+                f'one or more angles are below {lower_limit} including 2 eps')
+        angles[mask] = lower_limit
+    if any(angles > upper_limit):
+        mask = angles > upper_limit
+        eps = np.finfo(float).eps
+        if any(angles[mask] + 2*eps > upper_limit):
+            raise ValueError(
+                f'one or more angles are above {upper_limit} including 2 eps')
+        angles[mask] = upper_limit
+    return angles

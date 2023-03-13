@@ -352,6 +352,22 @@ def test_angle_limits_cyclic(coordinate, min, max):
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('phi', 0, 2*np.pi),
+        ('radius', 0, np.inf),
+        ('rho', 0, np.inf),
+    ])
+def test_angle_cyclic_limits(coordinate, min, max):
+    """Test different queries for find slice."""
+    # spherical grid
+    d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
+    c = Coordinates(d, 0, 1)
+    c.__setattr__(coordinate, d)
+    attr = c.__getattribute__(coordinate)
+    assert all(attr <= max)
+    assert all(attr >= min)
+
+
+@pytest.mark.parametrize(
+    'coordinate, min, max', [
         ('colatitude', 0, np.pi),
         ('theta', 0, np.pi),
         ('elevation', -np.pi/2, np.pi/2),
@@ -359,10 +375,25 @@ def test_angle_limits_cyclic(coordinate, min, max):
         ('radius', 0, np.inf),
         ('rho', 0, np.inf),
     ])
-def test_angle_limits(coordinate, min, max):
+@pytest.mark.parametrize(
+    'eps_min', [
+        (0),
+        (np.finfo(float).eps),
+    ])
+@pytest.mark.parametrize(
+    'eps_max', [
+        (0),
+        (np.finfo(float).eps),
+    ])
+def test_angle_limits_rounded_by_2eps(coordinate, min, max, eps_min, eps_max):
     """Test different queries for find slice."""
     # spherical grid
-    d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
+    if max == np.inf:
+        d = np.arange(min, np.pi/4, 4*np.pi)
+    else:
+        d = np.arange(min, np.pi/4, max)
+    d[0] -= eps_min
+    d[-1] += eps_max
     c = Coordinates(d, 0, 1)
     c.__setattr__(coordinate, d)
     attr = c.__getattribute__(coordinate)
@@ -435,7 +466,7 @@ def test_coordinates_init_from_spherical_colatitude_with(
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('elevation', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('elevation', [0, np.pi/2, -np.pi/2])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
 @pytest.mark.parametrize('comment', ['0'])
@@ -453,8 +484,8 @@ def test_coordinates_init_from_spherical_elevation_with(
     coords.weights == weights
 
 
-@pytest.mark.parametrize('lateral', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('polar', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('lateral', [0, np.pi/2, -np.pi/2])
+@pytest.mark.parametrize('polar', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
 @pytest.mark.parametrize('comment', ['0'])
@@ -473,7 +504,7 @@ def test_coordinates_init_from_spherical_side_with(
 
 
 @pytest.mark.parametrize('phi', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('theta', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('theta', [0, np.pi/2, np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
 @pytest.mark.parametrize('comment', ['0'])
@@ -511,7 +542,7 @@ def test_coordinates_init_from_cylindrical_with(
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('elevation', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('elevation', [0, np.pi/2, -np.pi/2])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 def test_coordinates_init_from_spherical_elevation(azimuth, elevation, radius):
     coords = Coordinates.from_spherical_elevation(azimuth, elevation, radius)
@@ -523,8 +554,8 @@ def test_coordinates_init_from_spherical_elevation(azimuth, elevation, radius):
     npt.assert_allclose(coords._z, z, atol=1e-15)
 
 
-@pytest.mark.parametrize('lateral', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('polar', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('lateral', [0, np.pi/2, -np.pi/2])
+@pytest.mark.parametrize('polar', [0, np.pi, -np.pi, 3*np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 def test_coordinates_init_from_spherical_side(lateral, polar, radius):
     coords = Coordinates.from_spherical_side(lateral, polar, radius)
@@ -537,7 +568,7 @@ def test_coordinates_init_from_spherical_side(lateral, polar, radius):
 
 
 @pytest.mark.parametrize('phi', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('theta', [0, np.pi, -np.pi])
+@pytest.mark.parametrize('theta', [0, np.pi/2, np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 def test_coordinates_init_from_spherical_front(phi, theta, radius):
     coords = Coordinates.from_spherical_front(phi, theta, radius)
