@@ -20,7 +20,7 @@ executors:
         default: "latest"
         type: string
     docker:
-      - image: mberz/cci-testi:0.0.3
+      - image: mberz/cci-testi:0.0.4
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
