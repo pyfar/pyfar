@@ -100,8 +100,8 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     # set and format ticks
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
-    ax.xaxis.set_minor_formatter(NullFormatter())
 
     return ax
 
