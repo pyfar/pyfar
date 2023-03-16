@@ -7,6 +7,9 @@ from .ticker import (
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
+from matplotlib.ticker import (
+    NullFormatter
+)
 
 
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
@@ -98,6 +101,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
+    ax.xaxis.set_minor_formatter(NullFormatter())
 
     return ax
 
