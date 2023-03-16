@@ -960,7 +960,7 @@ class Coordinates():
 
         Returns
         -------
-        index : numpy array of ints
+        index : tuple of numpy arrays
             The indices of the selected points as a tuple of arrays. The length
             of the tuple matches :py:func:`~cdim`. The length of each array
             matches the number of selected points.
@@ -1028,7 +1028,7 @@ class Coordinates():
         if show:
             self.show(mask)
 
-        index = np.asarray(mask).nonzero()
+        index = np.where(mask)
 
         return index, mask
 
