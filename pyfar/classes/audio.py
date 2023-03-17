@@ -645,6 +645,16 @@ class Signal(FrequencyData, TimeData):
 
         return super().time
 
+    @time.setter
+    def time(self, data):
+
+        # check data type
+        data = np.atleast_2d(np.asarray(data))
+        self._check_input(data)
+
+        # call setter from parent class
+        TimeData.time.fset(self, data)
+
     @FrequencyData.freq.getter
     def freq(self):
         """Return the normalized frequency domain data.
