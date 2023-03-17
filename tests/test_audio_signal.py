@@ -531,6 +531,16 @@ def test_setter_freq_raw_dtype():
     signal.freq_raw = [1+1j, 2+2j, 3+3j]
     assert signal.freq_raw.dtype.kind == "c"
 
-    # object array
-    with pytest.raises(ValueError, match="frequency data is"):
-        signal.freq_raw = ["1", "2", "3"]
+
+def test_setter_assertions():
+    """
+    Test assertions for the freq setter. Other cases are already checked in
+    ``test_signal_init_assertions``."""
+
+    signal = Signal([1, 2, 3], 44100)
+
+    with pytest.raises(ValueError, match="The input data contains at least"):
+        signal.freq = [1, 2, "3"]
+
+    with pytest.raises(ValueError, match="The input data contains at least"):
+        signal.freq_raw = [1, 2, "3"]

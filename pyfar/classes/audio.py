@@ -601,13 +601,9 @@ class Signal(FrequencyData, TimeData):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but "
                               f"found '{fft_norm}'"))
-        # time / normalized frequency data (depending on domain)
-        data = np.atleast_2d(data)
         # check input
-        if data.dtype.kind not in ["u", "i", "f", "c"] or \
-                np.any(np.isnan(data)) or np.any(np.isinf(data)):
-            raise ValueError(("The input data contains at least one non-"
-                              "numerical value (NaN, inf, string, etc.)"))
+        data = np.atleast_2d(data)
+        self._check_input(data)
 
         # initialize domain specific parameters
         if domain == 'time':
@@ -632,6 +628,14 @@ class Signal(FrequencyData, TimeData):
             delattr(self, '_frequencies')
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
+
+    @staticmethod
+    def _check_input(data: np.ndarray):
+        """Check if input data is numeric."""
+        if data.dtype.kind not in ["u", "i", "f", "c"] or \
+                np.any(np.isnan(data)) or np.any(np.isinf(data)):
+            raise ValueError(("The input data contains at least one non-"
+                              "numerical value (NaN, inf, string, etc.)"))
 
     @TimeData.time.getter
     def time(self):
@@ -679,10 +683,12 @@ class Signal(FrequencyData, TimeData):
         """Set the frequency domain data without normalization."""
         self._freq(value, raw=True)
 
-    def _freq(self, value, raw):
+    def _freq(self, data, raw):
         """Set the frequency domain data."""
         # check data type
-        data = np.atleast_2d(np.asarray(value))
+        data = np.atleast_2d(np.asarray(data))
+        self._check_input(data)
+
         if data.dtype.kind not in ["i", "f", "c"]:
             raise ValueError((f"frequency data is {data.dtype} must be int, "
                               "float, or complex"))
