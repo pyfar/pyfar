@@ -458,7 +458,7 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
 
     A notch filter is a band-stop filter with a narrow bandwidth
     (high quality factor). It rejects a narrow frequency band around the
-    center frequency with a gain of 0 (:math:`-\infty` dB) at the center
+    center frequency with a gain of 0 (:math:`-\\infty` dB) at the center
     frequency and leaves the rest of the spectrum little changed
     with gains close to 1 (0 dB). Wrapper for ``scipy.signal.iirnotch``.
 
