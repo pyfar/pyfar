@@ -456,9 +456,11 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     """
     Create and apply a second order IIR notch filter.
 
-    A notch filter has a magnitude of 0 (-infinity dB) at the center frequency
-    and a magnitude of 1 (0 dB) at almost all other frequencies. This is a
-    wrapper for ``scipy.signal.iirnotch``.
+    A notch filter is a band-stop filter with a narrow bandwidth
+    (high quality factor). It rejects a narrow frequency band around the
+    center frequency with a gain of 0 (:math:`-\infty` dB) at the center
+    frequency and leaves the rest of the spectrum little changed
+    with gains close to 1 (0 dB). Wrapper for ``scipy.signal.iirnotch``.
 
     Parameters
     ----------
@@ -469,19 +471,18 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
         Frequency in Hz at which the magnitude response will be 0
         (-infinity dB).
     quality : number
-        The quality is defined at the -3 dB points around the
-        `center_frequency` and is the inverse band width in octaves relative
-        to the `center_frequency`.
+        The quality characterizes notch filter -3 dB bandwidth relative to its
+        center frequency (both in Hz), i.e,
+        ``quality = center_frequency/bandwidth``.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if `signal` is ``None``. The
         default is ``None``.
 
     Returns
     -------
-    signal : Signal
-        The filtered signal. Only returned if ``sampling_rate = None``.
-    filter : FilterIIR
-        Filter object. Only returned if ``signal = None``.
+    output : Signal, FilterIIR
+        The function returns a filtered version of the input signal if
+        ``sampling_rate = None`` or the filter itself if ``signal = None``.
 
     References
     ----------
@@ -492,15 +493,13 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
-        raise ValueError('Either signal or sampling_rate must be none.')
+        raise ValueError('Either signal or sampling_rate must be None.')
 
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
     # get filter coefficients
     b, a = spsignal.iirnotch(center_frequency, quality, fs)
-    ba = np.zeros((2, 3))
-    ba[0] = b
-    ba[1] = a
+    ba = np.vstack((b, a))
 
     # generate filter object
     filt = pf.FilterIIR(ba, fs)
@@ -513,5 +512,4 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
         return filt
     else:
         # return the filtered signal
-        signal_filt = filt.process(signal)
-        return signal_filt
+        return filt.process(signal)
