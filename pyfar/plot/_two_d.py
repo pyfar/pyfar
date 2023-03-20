@@ -8,9 +8,7 @@ from .ticker import (
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
-from matplotlib.ticker import (
-    NullFormatter
-)
+from matplotlib.ticker import NullFormatter
 
 
 def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,

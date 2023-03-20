@@ -7,9 +7,7 @@ from .ticker import (
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
-from matplotlib.ticker import (
-    NullFormatter
-)
+from matplotlib.ticker import NullFormatter
 
 
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
