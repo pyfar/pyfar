@@ -93,7 +93,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
@@ -226,7 +226,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
@@ -353,7 +353,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
@@ -488,7 +488,7 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
@@ -638,7 +638,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
@@ -776,7 +776,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
@@ -921,7 +921,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
@@ -1053,7 +1053,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         ``matplotlib.style.available``. Pass a dictonary to set specific plot
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the current active plotstyle.
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
     yscale : str
 
