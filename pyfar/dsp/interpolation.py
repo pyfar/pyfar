@@ -750,8 +750,7 @@ class InterpolateSpectrum():
 
     """
 
-    def __init__(self, data, method, kind, fscale='linear',
-                 clip=False):
+    def __init__(self, data, method, kind, fscale='linear', clip=False):
 
         # check input ---------------------------------------------------------
         # ... data
