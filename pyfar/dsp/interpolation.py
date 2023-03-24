@@ -714,34 +714,39 @@ class InterpolateSpectrum():
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>> import numpy as np
+        >>>
+        >>> pf.plot.use()
+        >>> _, ax = plt.subplots(2, 3)
+        >>>
         >>> # generate data
         >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
-        >>> interpolator = pf.dsp.InterpolateSpectrum(
-        ...     data, 'magnitude', ('nearest', 'linear', 'nearest'))
-        >>> # interpolate 64 samples at a sampling rate of 44100
-        >>> signal = interpolator(64, 44100)
-        >>> # add linear phase
-        >>> signal = pf.dsp.linear_phase(signal, 32)
-        >>> # plot input and output data
-        >>> with pf.plot.context():
-        >>>     _, ax = plt.subplots(2, 2)
+        >>>
+        >>> # interpolate and plot
+        >>> for ff, fscale in enumerate(["linear", "log"]):
+        >>>     interpolator = pf.dsp.InterpolateSpectrum(
+        ...         data, 'magnitude', ('nearest', 'linear', 'nearest'),
+        ...         fscale)
+        >>>
+        >>>     # interpolate to 64 samples linear phase impulse response
+        >>>     signal = interpolator(64, 44100)
+        >>>     signal = pf.dsp.linear_phase(signal, 32)
+        >>>
         >>>     # time signal (linear and logarithmic amplitude)
-        >>>     pf.plot.time(signal, ax=ax[0, 0], unit='ms')
-        >>>     pf.plot.time(signal, ax=ax[1, 0], unit='ms', dB=True)
+        >>>     pf.plot.time(signal, ax=ax[ff, 0], unit='ms', dB=True)
         >>>     # frequency plot (linear x-axis)
-        >>>     pf.plot.freq(signal, dB=False, freq_scale="linear",
-        ...                  ax=ax[0, 1])
+        >>>     pf.plot.freq(
+        ...         signal, dB=False, freq_scale="linear", ax=ax[ff, 1])
         >>>     pf.plot.freq(data, dB=False, freq_scale="linear",
-        ...                  ax=ax[0, 1], c='r', ls='', marker='.')
-        >>>     ax[0, 1].set_xlim(0, signal.sampling_rate/2)
+        ...                  ax=ax[ff, 1], c='r', ls='', marker='.')
+        >>>     ax[ff, 1].set_xlim(0, signal.sampling_rate/2)
+        >>>     ax[ff, 1].set_title(
+        ...         f"Interpolated on {fscale} frequency scale")
         >>>     # frequency plot (log x-axis)
-        >>>     pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
-        >>>     pf.plot.freq(data, dB=False, ax=ax[1, 1],
+        >>>     pf.plot.freq(signal, dB=False, ax=ax[ff, 2], label='input')
+        >>>     pf.plot.freq(data, dB=False, ax=ax[ff, 2],
         ...                  c='r', ls='', marker='.', label='output')
-        >>>     min_freq = np.min([signal.sampling_rate / signal.n_samples,
-        ...                        data.frequencies[0]])
-        >>>     ax[1, 1].set_xlim(min_freq, signal.sampling_rate/2)
-        >>>     ax[1, 1].legend(loc='best')
+        >>>     ax[ff, 2].set_xlim(2e3, signal.sampling_rate/2)
+        >>>     ax[ff, 2].legend(loc='best')
 
     """
 
