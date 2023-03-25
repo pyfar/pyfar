@@ -579,15 +579,14 @@ class Signal(FrequencyData, TimeData):
         data : ndarray, float, complex
             Raw data of the signal in the time or frequency domain. The memory
             layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
-            3 x 2 channels with 1024 samples or frequency bins each. According
-            to the complex flag, time data is converted to ``float``, in case
-            of real-valued time signal, or to ``complex``, in case of
-            complex-valued time data. Frequency is converted to ``complex``.
-            If it results from real-valued time data, it must be
-            provided as single sided spectra, i.e., for all frequencies
-            between 0 Hz and half the sampling rate. If it results from
-            complex-valued time-data, it must be provided as double sided
-            spectra.
+            3 x 2 channels with 1024 samples or frequency bins each, depending
+            on the specified ``domain``. Integer arrays will be converted to
+            floating point precision. Note that providing complex valued time 
+            domain data is only possible when the parameter ``complex`` 
+            is ``True``. If the specified ``domain`` is ``freq`` and ``complex``
+            is ``True``the data needs to represent a two-sided spectrum, 
+            otherwise the single-sided spectrum for positive frequencies needs
+            to be provided. 
         sampling_rate : double
             Sampling rate in Hz
         n_samples : int, optional
