@@ -576,7 +576,7 @@ class Signal(FrequencyData, TimeData):
 
         Parameters
         ----------
-        data : ndarray, double
+        data : ndarray, float, complex
             Raw data of the signal in the time or frequency domain. The memory
             layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
             3 x 2 channels with 1024 samples or frequency bins each. According
