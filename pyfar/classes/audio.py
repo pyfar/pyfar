@@ -605,11 +605,10 @@ class Signal(FrequencyData, TimeData):
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
         complex : bool
-            In case of time domain raw data, the complex flag indicates
-            if the data are complex or real-valued data.
-            In case of frequency domain raw data, the complex flag indicates
-            if the data are the Fourier spectrum of a real or complex-valued
-            time signal. The default is ``False``.
+            Specifies if the returned Signal's time domain data are complex
+            or real-valued. This is independent of the `dtype` of the provided
+            ``data`` array. If ``True`` and ``domain`` is ``time``, the  `dtype`
+            of ``data`` will be converted accordingly. The default is ``False``.
 
         References
         ----------
