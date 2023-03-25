@@ -210,7 +210,8 @@ def ifft(spec, n_samples, sampling_rate, fft_norm):
                          inverse=True, single_sided=False)
     # Inverse DFT
     data = sfft.ifft(
-        spec, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
+        sfft.ifftshift(spec, axes=-1),
+        n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
 
     return data
 
