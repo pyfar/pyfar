@@ -129,7 +129,7 @@ def fftfreq(n_samples, sampling_rate):
     Returns
     -------
     frequencies : array, double
-        The positive discrete frequencies in Hz for which the FFT is
+        The discrete frequencies in Hz for which the FFT is
         calculated.
     """
     return sfft.fftshift(sfft.fftfreq(n_samples, d=1/sampling_rate))
