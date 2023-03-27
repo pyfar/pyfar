@@ -165,7 +165,7 @@ def fft(data, n_samples, sampling_rate, fft_norm):
     """
 
     # DFT
-    spec =  sfft.fftshift(sfft.fft(
+    spec = sfft.fftshift(sfft.fft(
         data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count()),
         axes=-1)
     # Normalization
