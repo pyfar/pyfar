@@ -29,7 +29,7 @@ def test_n_bins_complex():
 
 def test_n_samples():
     n_bins = 6
-    truth = int(n_bins * 2 + 1)
+    truth = int(n_bins-1) * 2
     n_samples = fft._calc_n_samples_from_frequency_data(n_bins)
     assert n_samples == truth
 
@@ -37,7 +37,7 @@ def test_n_samples():
 def test_n_samples_complex():
     n_bins = 7
     truth = n_bins
-    n_samples = fft._calc_n_samples_from_frequency_data(n_bins)
+    n_samples = fft._calc_n_samples_from_frequency_data(n_bins, complex=True)
     assert n_samples == truth
 
 
