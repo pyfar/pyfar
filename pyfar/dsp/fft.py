@@ -397,7 +397,7 @@ def _is_odd(num):
     return bool(num & 0x1)
 
 
-def _n_bins(n_samples, complex=False):
+def _calc_n_bins_from_time_data(n_samples, complex=False):
     """
     Helper function to calculate the number of bins resulting from a FFT
     with n_samples
@@ -421,3 +421,28 @@ def _n_bins(n_samples, complex=False):
         n_bins = n_samples // 2 + 1
 
     return int(n_bins)
+
+
+def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
+    """
+    Helper function to calculate the number of samples resulting from
+    an inverse FFT of a spectrum with n_freq_bins
+
+    Paramters
+    ---------
+    num_freq_bins : int
+        Number of frequency bins
+    complex : bool
+        Flag which indicates if the frequency data are a one or two-sided
+        spectrum.
+
+    Returns
+    -------
+    n_bins : int
+        Resulting number of frequency bins
+
+    """
+    if complex:
+        return num_freq_bins
+    else:
+        return max(1, (num_freq_bins - 1) * 2)

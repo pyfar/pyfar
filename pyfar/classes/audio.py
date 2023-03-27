@@ -581,12 +581,12 @@ class Signal(FrequencyData, TimeData):
             layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
             3 x 2 channels with 1024 samples or frequency bins each, depending
             on the specified ``domain``. Integer arrays will be converted to
-            floating point precision. Note that providing complex valued time 
-            domain data is only possible when the parameter ``complex`` 
+            floating point precision. Note that providing complex valued time
+            domain data is only possible when the parameter ``complex``
             is ``True``. If the specified ``domain`` is ``freq`` and ``complex``
-            is ``True``the data needs to represent a two-sided spectrum, 
+            is ``True``the data needs to represent a two-sided spectrum,
             otherwise the single-sided spectrum for positive frequencies needs
-            to be provided. 
+            to be provided.
         sampling_rate : double
             Sampling rate in Hz
         n_samples : int, optional
@@ -653,8 +653,8 @@ class Signal(FrequencyData, TimeData):
         elif domain == 'freq':
             # check and set n_samples
             if n_samples is None:
-                n_samples = self._get_n_samples_from_frequency_data(
-                    data.shape[-1])
+                n_samples = fft._calc_n_samples_from_frequency_data(
+                    data.shape[-1], complex=complex)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
                     f"samples from {data.shape[-1]} frequency bins.")
@@ -734,8 +734,8 @@ class Signal(FrequencyData, TimeData):
                               "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
-            self._n_samples = self._get_n_samples_from_frequency_data(
-                data.shape[-1])
+            self._n_samples = fft._calc_n_samples_from_frequency_data(
+                data.shape[-1], self.complex)
             warnings.warn(
                 f"Number of samples not given, assuming {self.n_samples} "
                 f"samples from {data.shape[-1]} frequency bins.")
@@ -824,7 +824,7 @@ class Signal(FrequencyData, TimeData):
     @property
     def n_bins(self):
         """Number of frequency bins."""
-        return fft._n_bins(self.n_samples, self.complex)
+        return fft._calc_n_bins_from_time_data(self.n_samples, self.complex)
 
     @property
     def fft_norm(self):
@@ -923,12 +923,6 @@ class Signal(FrequencyData, TimeData):
         >>>     signal[idx] = channel
         """
         return _SignalIterator(self._data.__iter__(), self)
-
-    def _get_n_samples_from_frequency_data(self, num_freq_bins):
-        if self.complex:
-            return num_freq_bins
-        else:
-            return max(1, (num_freq_bins - 1) * 2)
 
 
 class _SignalIterator(object):
