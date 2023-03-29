@@ -39,7 +39,7 @@ to overwrite the currently used plot style or
         # everything inside the with statement
         # uses the pyfar plot style
 
-If you want do not want to use the pyfar plot style, you can pass an empty
+If you do not want to use the pyfar plot style, you can pass an empty
 dictionary to the plot functions
 
 ::
