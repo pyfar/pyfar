@@ -104,7 +104,7 @@ def test_broadcast_cdims_assertions():
     (np.random.randn(512)),
     (np.random.randn(2, 512))])
 def test_concatenate(data_second):
-    # Parametrized concatenation test for singel and multichannel signal
+    # Parametrized concatenation test for single- and multichannel signal
     sr = 48e3
 
     # Get random data with 512 samples
