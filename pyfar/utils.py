@@ -127,3 +127,87 @@ def broadcast_cdims(signals, cdim=None):
     if cdim is None:
         cdim = np.max([len(s.cshape) for s in signals])
     return [broadcast_cdim(s, cdim) for s in signals]
+
+
+def concatenate(signals, caxis=0, broadcasting=False, comment=""):
+    """
+    Merge multiple Signal objects along a given axis. The signals are copied,
+    if needed broadcasted in largest dimenson and to a common cshape and a new
+    object is returned.
+
+    The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
+    broadcasted following the `numpy broadcasting rules
+    <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+
+    Parameters
+    ----------
+    signals : tuple of Signal
+        The signals to concatenate. Must either have the same cshape or be
+        broadcastable to the same cshape, except in the dimension corresponding
+        to axis (the first, by default). If this is the case, set
+        ``broadcasting=True``.
+    axis : int
+        The axis along which the signals are concatenated. The default is 0.
+    broadcasting: bool
+        If this is ``True``, the signals will be broadcasted into largest
+        dimension and into a common cshape, except of the axis along which the
+        signals are concatenated. The default is ``False``.
+    comment: string
+        A comment related to the merged `data`. The default is ``""``, which
+        initializes an empty string. Comments of the input signals will also
+        be returned in the new Signal object. These comments are marked with
+        their corresponding signal position in the input tuple.
+    Returns
+    -------
+    merged : Signal
+        The merged signal object.
+    """
+    # check input
+    for signal in signals:
+        if not isinstance(signal, pf.Signal):
+            raise TypeError("All input data must be of type pf.Signal")
+    if not isinstance(comment, str):
+        raise TypeError("'comment' needs to be a string.")
+    if not isinstance(broadcasting, bool):
+        raise TypeError("'broadcasting' needs to be False or True.")
+    # check matching meta data of input signals.
+    [signals[0]._assert_matching_meta_data(s) for s in signals]
+    # broadcast signals into largest dimension and common cshapes
+    if broadcasting is True:
+        # broadcast signals into common cshape
+        # signals = pf.utils.broadcast_cshapes(signals, ignore_axis=caxis)
+        cshapes = [s.cshape for s in signals]
+        max_cdim = np.max([len(sh) for sh in cshapes])
+        for i, sh in enumerate(cshapes):
+            for _ in range(max_cdim-len(sh)):
+                cshapes[i] = (1,) + cshapes[i]
+        # Finds broadcast cshape without the caxis to ignore
+        cshape = np.broadcast_shapes(*np.delete(cshapes, caxis,
+                                     axis=-1))
+        broad_signals = []
+        for i, s in enumerate(signals):
+            # Appends the axis to ignore back into cshape to broadcast to.
+            if caxis in (-1, len(cshape)):
+                # Use append if ignore_axis is defined for last dimension
+                cs = np.append(cshape, cshapes[i][caxis])
+            else:
+                # Use insert if ignore_axis is not defined for last dim
+                axis = caxis+1 if caxis < 0 else caxis
+                cs = np.insert(cshape, axis, cshapes[i][caxis])
+            broad_signals.append(broadcast_cshape(s, tuple(cs)))
+        signals = broad_signals
+    # merge the signals along axis
+    axis = caxis-1 if caxis < 0 else caxis
+    data = np.concatenate([s._data for s in signals], axis=axis)
+    # append comments in signals to comment to return
+    if comment != "":
+        comment = comment + '\n'
+    for idx, s in enumerate(signals):
+        if s.comment != "":
+            comment += str(idx+1) + ". " + s.comment + '\n'
+    # return merged Signal
+    return pf.Signal(data, signals[0].sampling_rate,
+                     n_samples=signals[0].n_samples,
+                     domain=signals[0].domain,
+                     fft_norm=signals[0].fft_norm,
+                     comment=comment)

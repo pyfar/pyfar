@@ -1,5 +1,7 @@
 import pyfar as pf
 import pytest
+import numpy as np
+import numpy.testing as npt
 
 
 @pytest.mark.parametrize("signal", [
@@ -96,3 +98,57 @@ def test_broadcast_cdims_assertions():
     # invalid input type
     with pytest.raises(TypeError, match="All input data must be pyfar"):
         pf.utils.broadcast_cdims([1, 2, 3])
+
+
+@pytest.mark.parametrize("data_second", [
+    (np.random.randn(512)),
+    (np.random.randn(2, 512))])
+def test_concatenate(data_second):
+    # Parametrized concatenation test for singel and multichannel signal
+    sr = 48e3
+
+    # Get random data with 512 samples
+    data_first = np.random.randn(512)
+    signals = (pf.Signal(data_first, sr), pf.Signal(data_second, sr))
+
+    res = pf.utils.concatenate(signals, caxis=0)
+    ideal = np.concatenate(
+        (np.atleast_2d(data_first), np.atleast_2d(data_second)), axis=0)
+
+    npt.assert_allclose(res._data, ideal)
+
+
+def test_broadcasting_in_concatenate():
+    # Test broadcasting into largest dimension and shape, while ignoring caxis.
+    sr = 48e3
+    n_samples = 512
+    signals = (pf.Signal(np.ones((1, 2, 3) + (n_samples, )), sr),
+               pf.Signal(np.ones((2,) + (n_samples, )), sr),
+               pf.Signal(np.ones((1, 1, 2) + (n_samples, )), sr))
+    conc = pf.utils.concatenate(signals, caxis=-1, broadcasting=True)
+    assert conc.cshape == (1, 2, 7)
+
+
+def test_concatenate_comments():
+    # Test for comment concatenation
+    sr = 48e3
+    n_samples = 512
+    signals = (pf.Signal(np.ones((1, 2) + (n_samples, )), sr, comment="one"),
+               pf.Signal(np.ones((1, 2) + (n_samples, )), sr),
+               pf.Signal(np.ones((1, 2) + (n_samples, )), sr, comment="three"))
+    conc = pf.utils.concatenate(signals, caxis=-1, comment="Conc Signal")
+    assert conc.comment == "Conc Signal\n"\
+                           "1. one\n"\
+                           "3. three\n"
+
+
+def test_concatenate_assertions():
+    """Test assertions"""
+    with pytest.raises(TypeError, match="All input data must be"):
+        pf.utils.concatenate(([1, 2], [3, 4]))
+    signals = (pf.Signal(np.ones((1, 2, 512)), 44100),
+               pf.Signal(np.ones((1, 1, 512)), 44100))
+    with pytest.raises(TypeError, match="'comment' needs to be a string."):
+        pf.utils.concatenate(signals, caxis=-1, comment=1)
+    with pytest.raises(TypeError, match="'broadcasting' needs to be"):
+        pf.utils.concatenate(signals, caxis=-1, broadcasting=1)
