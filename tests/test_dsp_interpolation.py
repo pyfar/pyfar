@@ -325,37 +325,33 @@ def test_interpolate_spectrum_clip():
            np.all(np.abs(signal_clip.freq) <= 2)
 
 
-def test_interpolate_spectrum_fscale():
+@pytest.mark.parametrize(
+    'fscale,n_samples,sampling_rate,f_in,f_base,f_query',
+    [('linear', 10, 40, [0, 10, 20], [0, 10, 20],
+     pf.dsp.fft.rfftfreq(10, 40)),
+     ('log', 10, 40, [0, 10, 20], [0, .544, .778],
+      [0, .301, .477, .602, .699, .778])])
+def test_interpolate_spectrum_fscale(
+        fscale, n_samples, sampling_rate, f_in, f_base, f_query):
     """
     Test frequency vectors for linear and logarithmic frequency interpolation.
     """
 
-    # test parametres and data
-    f_in_lin = [0, 10, 20]
-    f_in_log = np.log([10, 10, 20])
-    n_samples = 10
-    sampling_rate = 40
-    f_query_lin = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
-    f_query_log = f_query_lin.copy()
-    f_query_log[0] = f_query_log[1]
-    f_query_log = np.log(f_query_log)
-    data = pf.FrequencyData([1, 1, 1], f_in_lin)
+    # test data
+    data = pf.FrequencyData([1, 1, 1], f_in)
 
-    # generate interpolator with linear frequency
-    interpolator_lin = InterpolateSpectrum(
-        data, "magnitude", ("linear", "linear", "linear"), fscale="linear")
-    _ = interpolator_lin(n_samples, sampling_rate)
-    # generate interpolator with logarithmic frequency
-    interpolator_log = InterpolateSpectrum(
-        data, "magnitude", ("linear", "linear", "linear"), fscale="log")
-    _ = interpolator_log(n_samples, sampling_rate)
+    # generate interpolator
+    interpolator = InterpolateSpectrum(
+        data, "magnitude", ("linear", "linear", "linear"), fscale=fscale)
+    signal = interpolator(n_samples, sampling_rate)
 
-    # test frequency vectors
-    npt.assert_allclose(interpolator_lin._f_in, f_in_lin)
-    npt.assert_allclose(interpolator_lin._f_query, f_query_lin)
-
-    npt.assert_allclose(interpolator_log._f_in, f_in_log)
-    npt.assert_allclose(interpolator_log._f_query, f_query_log)
+    # test time and frequency vectors
+    npt.assert_allclose(signal.time, pf.signals.impulse(n_samples).time)
+    npt.assert_almost_equal(interpolator._f_in, f_in)
+    npt.assert_almost_equal(interpolator._f_base, f_base, 3)
+    npt.assert_almost_equal(interpolator._f_query, f_query, 3)
+    npt.assert_almost_equal(interpolator._f_query[[0, -1]],
+                            interpolator._f_base[[0, -1]])
 
 
 def test_interpolate_spectrum_show():
