@@ -280,17 +280,18 @@ def _encode(obj, zip_path, zipfile):
         (2) A pair of ndarray-hint and reference/zip_path:
             [str, str] e.g. ['ndarray', 'my_coordinates/_points']
     """
+    obj_new = {}
     if isinstance(obj, dict):
         for key in obj.keys():
-            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile)
+            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile, obj_new)
     elif isinstance(obj, (list, tuple, set, frozenset)):
         for i in range(0, len(obj)):
-            _inner_encode(obj, i, f'{zip_path}/{i}', zipfile)
+            _inner_encode(obj, i, f'{zip_path}/{i}', zipfile, obj_new)
 
-    return obj
+    return obj_new
 
 
-def _inner_encode(obj, key, zip_path, zipfile):
+def _inner_encode(obj, key, zip_path, zipfile, obj_new):
     """
     This function is exclusively used by `_codec._encode` and casts the obj
     in case it is not JSON-serializable into a proper format for the zipfile
@@ -314,21 +315,23 @@ def _inner_encode(obj, key, zip_path, zipfile):
     zipfile: zipfile
     """
     if _is_dtype(obj[key]):
-        obj[key] = ['$dtype', obj[key].__name__]
+        obj_new[key] = ['$dtype', obj[key].__name__]
     elif isinstance(obj[key], np.ndarray):
         zipfile.writestr(zip_path, _encode_ndarray(obj[key]))
-        obj[key] = ['$ndarray', zip_path]
+        obj_new[key] = ['$ndarray', zip_path]
     elif _is_pyfar_type(obj[key]):
-        obj[key] = [f'${type(obj[key]).__name__}', obj[key]._encode()]
-        _encode(obj[key][1], zip_path, zipfile)
+        obj_new[key] = [f'${type(obj[key]).__name__}', obj[key]._encode()]
+        _encode(obj_new[key][1], zip_path, zipfile)
     elif _is_numpy_scalar(obj[key]):
-        obj[key] = [f'${type(obj[key]).__name__}', obj[key].item()]
+        obj_new[key] = [f'${type(obj[key]).__name__}', obj[key].item()]
     elif isinstance(obj[key], complex):
-        obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
+        obj_new[key] = ['$complex', [obj[key].real, obj[key].imag]]
     elif isinstance(obj[key], (tuple, set, frozenset)):
-        obj[key] = [f'${type(obj[key]).__name__ }', list(obj[key])]
+        obj_new[key] = [f'${type(obj[key]).__name__ }', list(obj[key])]
     elif isinstance(obj[key], bytes):
-        obj[key] = [f'${type(obj[key]).__name__ }', obj[key].hex()]
+        obj_new[key] = [f'${type(obj[key]).__name__ }', obj[key].hex()]
+    elif not isinstance(obj[key], (dict, list)):
+        obj_new[key] = obj[key]
     else:
         _encode(obj[key], zip_path, zipfile)
 

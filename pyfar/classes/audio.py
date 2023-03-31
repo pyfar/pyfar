@@ -145,6 +145,7 @@ class _Audio():
 
     def _encode(self):
         """Return dictionary for the encoding."""
+        return self.__dict__
         class_dict = self.copy().__dict__
         return class_dict
 
