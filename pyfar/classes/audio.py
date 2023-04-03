@@ -605,7 +605,7 @@ class Signal(FrequencyData, TimeData):
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
         complex : bool
-            Specifies if the returned Signal's time domain data are complex
+            Specifies if the returned Signals time domain data are complex
             or real-valued. This is independent of the `dtype` of the provided
             ``data`` array. If ``True`` and ``domain`` is ``time``, the
             `dtype` of ``data`` will be converted accordingly. The default
