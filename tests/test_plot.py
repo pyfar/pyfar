@@ -569,8 +569,10 @@ def test_title_style(style, handsome_signal):
     (plot.freq), (plot.phase), (plot.group_delay)])
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_log_tick_labels(function, limits, noise):
-    """Test that only major tick labels are shown for logarithmic frequency
-    axis in line plots."""
+    """
+    Test that only major tick labels are shown for logarithmic frequency
+    axis in line plots.
+    """
     create_figure()
     ax = function(noise)
 
@@ -590,8 +592,10 @@ def test_log_tick_labels(function, limits, noise):
 )
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_2d_log_tick_labels(function, limits, handsome_signal_2d):
-    """Test that only major tick labels are shown for logarithmic frequency
-    axis in 2d plots."""
+    """
+    Test that only major tick labels are shown for logarithmic frequency
+    axis in 2d plots.
+    """
     create_figure()
     axs = function(handsome_signal_2d, freq_scale="log")
     ax = axs[0][0]
@@ -609,8 +613,10 @@ def test_2d_log_tick_labels(function, limits, handsome_signal_2d):
 
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_spectrogram_log_tick_labels(limits, noise):
-    """Test that only major tick labels are shown for logarithmic frequency
-    axis in spectrograms."""
+    """
+    Test that only major tick labels are shown for logarithmic frequency
+    axis in spectrograms.
+    """
     create_figure()
     axs = plot.spectrogram(noise, freq_scale="log")
     ax = axs[0][0]
