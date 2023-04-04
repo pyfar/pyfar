@@ -640,7 +640,7 @@ class InterpolateSpectrum():
     Parameters
     ----------
     data : FrequencyData
-        Input data to be interpolated. `data.fft_norm` must be `'none'`.
+        Input data to be interpolated.
     method : string
         Specifies the input data for the interpolation
 
@@ -678,10 +678,7 @@ class InterpolateSpectrum():
         ``'linear'``
             Interpolate on a linear frequency axis.
         ``'log'``
-            Interpolate on a logarithmic frequency axis. Note that 0 Hz can
-            not be interpolated on a logarithmic scale because the logarithm
-            of 0 does not exist. Frequencies of 0 Hz are thus replaced by the
-            next highest frequency before interpolation.
+            Interpolate on a logarithmic frequency axis.
 
         The default is ``'linear'``.
     clip : bool, tuple
@@ -717,39 +714,43 @@ class InterpolateSpectrum():
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>> import numpy as np
+        >>>
+        >>> pf.plot.use()
+        >>> _, ax = plt.subplots(2, 3)
+        >>>
         >>> # generate data
         >>> data = pf.FrequencyData([1, 0], [5e3, 20e3])
-        >>> interpolator = pf.dsp.InterpolateSpectrum(
-        ...     data, 'magnitude', ('nearest', 'linear', 'nearest'))
-        >>> # interpolate 64 samples at a sampling rate of 44100
-        >>> signal = interpolator(64, 44100)
-        >>> # add linear phase
-        >>> signal = pf.dsp.linear_phase(signal, 32)
-        >>> # plot input and output data
-        >>> with pf.plot.context():
-        >>>     _, ax = plt.subplots(2, 2)
+        >>>
+        >>> # interpolate and plot
+        >>> for ff, fscale in enumerate(["linear", "log"]):
+        >>>     interpolator = pf.dsp.InterpolateSpectrum(
+        ...         data, 'magnitude', ('nearest', 'linear', 'nearest'),
+        ...         fscale)
+        >>>
+        >>>     # interpolate to 64 samples linear phase impulse response
+        >>>     signal = interpolator(64, 44100)
+        >>>     signal = pf.dsp.linear_phase(signal, 32)
+        >>>
         >>>     # time signal (linear and logarithmic amplitude)
-        >>>     pf.plot.time(signal, ax=ax[0, 0], unit='ms')
-        >>>     pf.plot.time(signal, ax=ax[1, 0], unit='ms', dB=True)
+        >>>     pf.plot.time(signal, ax=ax[ff, 0], unit='ms', dB=True)
         >>>     # frequency plot (linear x-axis)
-        >>>     pf.plot.freq(signal, dB=False, freq_scale="linear",
-        ...                  ax=ax[0, 1])
+        >>>     pf.plot.freq(
+        ...         signal, dB=False, freq_scale="linear", ax=ax[ff, 1])
         >>>     pf.plot.freq(data, dB=False, freq_scale="linear",
-        ...                  ax=ax[0, 1], c='r', ls='', marker='.')
-        >>>     ax[0, 1].set_xlim(0, signal.sampling_rate/2)
+        ...                  ax=ax[ff, 1], c='r', ls='', marker='.')
+        >>>     ax[ff, 1].set_xlim(0, signal.sampling_rate/2)
+        >>>     ax[ff, 1].set_title(
+        ...         f"Interpolated on {fscale} frequency scale")
         >>>     # frequency plot (log x-axis)
-        >>>     pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
-        >>>     pf.plot.freq(data, dB=False, ax=ax[1, 1],
+        >>>     pf.plot.freq(signal, dB=False, ax=ax[ff, 2], label='input')
+        >>>     pf.plot.freq(data, dB=False, ax=ax[ff, 2],
         ...                  c='r', ls='', marker='.', label='output')
-        >>>     min_freq = np.min([signal.sampling_rate / signal.n_samples,
-        ...                        data.frequencies[0]])
-        >>>     ax[1, 1].set_xlim(min_freq, signal.sampling_rate/2)
-        >>>     ax[1, 1].legend(loc='best')
+        >>>     ax[ff, 2].set_xlim(2e3, signal.sampling_rate/2)
+        >>>     ax[ff, 2].legend(loc='best')
 
     """
 
-    def __init__(self, data, method, kind, fscale='linear',
-                 clip=False, group_delay=None, unit='samples'):
+    def __init__(self, data, method, kind, fscale='linear', clip=False):
 
         # check input ---------------------------------------------------------
         # ... data
@@ -789,6 +790,7 @@ class InterpolateSpectrum():
         self._method = method
         self._clip = clip
         self._fscale = fscale
+        self._kind = kind
 
         # flatten input data to work with scipy interpolators
         self._cshape = data.cshape
@@ -805,22 +807,7 @@ class InterpolateSpectrum():
             self._data = [np.abs(data.freq)]
 
         # frequencies for interpolation (store for testing)
-        self._f_in = self._get_frequencies(data.frequencies.copy())
-
-        # frequency range
-        self._freq_range = [self._f_in[0], self._f_in[-1]]
-
-        # get the interpolators
-        self._interpolators = []
-        for d in self._data:
-            interpolators = []
-            for idx, k in enumerate(kind):
-                if idx == 1:
-                    interpolators.append(interp1d(self._f_in, d, k))
-                else:
-                    interpolators.append(interp1d(
-                        self._f_in, d, k, fill_value="extrapolate"))
-            self._interpolators.append(interpolators)
+        self._f_in = data.frequencies.copy()
 
     def __call__(self, n_samples, sampling_rate, show=False):
         """
@@ -828,9 +815,33 @@ class InterpolateSpectrum():
         (see class docstring) for more information.
         """
 
-        # get the query frequencies (store for testing)
-        self._f_query = self._get_frequencies(
-            pf.dsp.fft.rfftfreq(n_samples, sampling_rate))
+        # length of half sided spectrum and highest frequency
+        n_fft = n_samples//2 + 1
+        f_max = sampling_rate / n_samples * (n_fft - 1)
+        # get the frequency values
+        if self._fscale == "linear":
+            # linearly spaced frequencies
+            self._f_query = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
+            self._f_base = self._f_in
+        else:
+            # logarithmically scaled frequencies between 0 and log10(n_fft)
+            self._f_query = np.log10(np.arange(1, n_fft+1))
+            self._f_base = np.log10(self._f_in / f_max * (n_fft - 1) + 1)
+
+        # frequency range
+        self._freq_range = [self._f_base[0], self._f_base[-1]]
+
+        # get the interpolators
+        self._interpolators = []
+        for d in self._data:
+            interpolators = []
+            for idx, k in enumerate(self._kind):
+                if idx == 1:
+                    interpolators.append(interp1d(self._f_base, d, k))
+                else:
+                    interpolators.append(interp1d(
+                        self._f_base, d, k, fill_value="extrapolate"))
+            self._interpolators.append(interpolators)
 
         # get interpolation ranges
         id_below = self._f_query < self._freq_range[0]
@@ -890,17 +901,3 @@ class InterpolateSpectrum():
                 ax[1, 1].legend(loc='best')
 
         return signal
-
-    def _get_frequencies(self, frequencies):
-        """
-        Return frequencies for creating or quering interpolation objects.
-
-        In case logfrequencies are requested, 0 Hz entries are replaced by
-        the next highest frequency, because the logarithm of 0 does not exist.
-        """
-        if self._fscale == "log":
-            if frequencies[0] == 0:
-                frequencies[0] = frequencies[1]
-            frequencies = np.log(frequencies)
-
-        return frequencies

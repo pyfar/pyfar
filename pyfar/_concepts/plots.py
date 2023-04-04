@@ -19,6 +19,40 @@ the axis limits using the Matplotlib axis object:
     >>> ax = pf.plot.freq(noise, color=(.3, .3, .3))
     >>> ax.set_ylim(-60, -20)
 
+
+Plot styles
+-----------
+
+Pyfar contains a `light` and `dark` plot style and applies the `light` plot
+style by default in its :py:mod:`plot functions <pyfar.plot>`. If you want to
+apply the style to code outside these functions you can use
+
+::
+
+    pyfar.plot.use()
+
+to overwrite the currently used plot style or
+
+::
+
+    with pyfar.plot.context():
+        # everything inside the with statement
+        # uses the pyfar plot style
+
+If you do not want to use the pyfar plot style, you can pass an empty
+dictionary to the plot functions
+
+::
+
+    pyfar.plot.time(signal, style={})
+
+This can also be used to overwrite specific parameters of the pyfar plot styles
+
+::
+
+    pyfar.plot.time(signal, style={axes.facecolor='black'})
+
+
 Interactive plots
 -----------------
 

@@ -2,6 +2,13 @@
 History
 =======
 
+0.5.3 (2023-03-30)
+------------------
+
+* Bugfix: Spectrum interpolation on logarithmically spaced frequency bins including zero frequency. (PR #453)
+* Bugfix: Include signal domain and fft norm when writing Signals to far-files. (PR #443)
+* Bugfix: Return the HRIRs contained in the sample file in the correct order. (PR #448)
+
 0.5.2 (2023-01-20)
 ------------------
 

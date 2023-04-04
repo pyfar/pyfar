@@ -2,6 +2,7 @@ import os
 import pytest
 from pytest import raises
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import pyfar as pf
 import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
@@ -623,3 +624,28 @@ def test_spectrogram_log_tick_labels(limits, noise):
 
     assert all(major_label_test)
     assert not any(minor_label_test)
+
+
+@pytest.mark.parametrize('rcParams, value', [
+    ['lines.linestyle', ':'],
+    ['axes.facecolor', 'black'],
+    ['axes.grid', False]])
+def test_pyfar_plot_with_empty_style(rcParams, value):
+    """
+    Test passing an empty style to a pyfar plot function to check if the
+    currently active plot stlye remains active.
+    """
+    with pf.plot.context({rcParams: value}):
+        pf.plot.time(pf.TimeData([0, 1, 0, -1], range(4)), style={})
+        assert plt.rcParams[rcParams] == value
+    plt.close('all')
+
+
+def test_set_specific_plot_parameters():
+    # Test pass a dictonary to set specific plot parameters
+    with pf.plot.context("light"):
+        pf.plot.time(pf.TimeData([0, 1, 0, -1], range(4)),
+                     style={'axes.facecolor': '#000000'})
+        facecolor = mcolors.to_hex(plt.gca().patch.get_facecolor())
+        assert facecolor == '#000000'  # #000000 is hex for black
+    plt.close('all')
