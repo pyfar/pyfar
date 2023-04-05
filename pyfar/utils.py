@@ -201,7 +201,8 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     data = np.concatenate([s._data for s in signals], axis=axis)
     # append comments in signals to comment to return
     if comment != "":
-        comment = comment + '\n' + f'Signals concatenated in caxis={caxis}.\n'
+        comment = comment + '\n'
+    comment = comment + f'Signals concatenated in caxis={caxis}.\n'
     sig_channel = 0
     for s in signals:
         if s.comment != "":
