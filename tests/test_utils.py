@@ -138,8 +138,9 @@ def test_concatenate_comments():
                pf.Signal(np.ones((1, 2) + (n_samples, )), sr, comment="three"))
     conc = pf.utils.concatenate(signals, caxis=-1, comment="Conc Signal")
     assert conc.comment == "Conc Signal\n"\
-                           "1. one\n"\
-                           "3. three\n"
+                           "Signals concatenated in caxis=-1.\n"\
+                           "Channel 1-2: one\n"\
+                           "Channel 5-6: three\n"
 
 
 def test_concatenate_assertions():

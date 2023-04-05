@@ -201,10 +201,14 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     data = np.concatenate([s._data for s in signals], axis=axis)
     # append comments in signals to comment to return
     if comment != "":
-        comment = comment + '\n'
-    for idx, s in enumerate(signals):
+        comment = comment + '\n' + f'Signals concatenated in caxis={caxis}.\n'
+    sig_channel = 0
+    for s in signals:
         if s.comment != "":
-            comment += str(idx+1) + ". " + s.comment + '\n'
+            comment += f"Channel {sig_channel+1}-"\
+                       f"{sig_channel + s.cshape[caxis]}: "\
+                       + s.comment + '\n'
+        sig_channel += s.cshape[caxis]
     # return merged Signal
     return pf.Signal(data, signals[0].sampling_rate,
                      n_samples=signals[0].n_samples,
