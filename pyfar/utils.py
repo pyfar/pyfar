@@ -146,11 +146,12 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
         broadcastable to the same cshape, except in the dimension corresponding
         to axis (the first, by default). If this is the case, set
         ``broadcasting=True``.
-    axis : int
-        The axis along which the signals are concatenated. The default is 0.
+    caxis : int
+        The axis along which the signals are concatenated.
+        The default is ``0``.
     broadcasting: bool
         If this is ``True``, the signals will be broadcasted into largest
-        dimension and into a common cshape, except of the axis along which the
+        dimension and into a common cshape, except of the caxis along which the
         signals are concatenated. The default is ``False``.
     comment: string
         A comment related to the merged `data`. The default is ``""``, which
@@ -175,7 +176,6 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     # broadcast signals into largest dimension and common cshapes
     if broadcasting is True:
         # broadcast signals into common cshape
-        # signals = pf.utils.broadcast_cshapes(signals, ignore_axis=caxis)
         cshapes = [s.cshape for s in signals]
         max_cdim = np.max([len(sh) for sh in cshapes])
         for i, sh in enumerate(cshapes):
@@ -188,10 +188,10 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
         for i, s in enumerate(signals):
             # Appends the axis to ignore back into cshape to broadcast to.
             if caxis in (-1, len(cshape)):
-                # Use append if ignore_axis is defined for last dimension
+                # Use append if caxis is defined for last dimension
                 cs = np.append(cshape, cshapes[i][caxis])
             else:
-                # Use insert if ignore_axis is not defined for last dim
+                # Use insert if caxis is not defined for last dim
                 axis = caxis+1 if caxis < 0 else caxis
                 cs = np.insert(cshape, axis, cshapes[i][caxis])
             broad_signals.append(broadcast_cshape(s, tuple(cs)))
