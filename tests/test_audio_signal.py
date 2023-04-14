@@ -42,6 +42,7 @@ def test_signal_init_assertions():
     with pytest.raises(ValueError, match="n_samples can not be larger"):
         Signal(1, 44100, domain="freq", complex=True, n_samples=10)
 
+
 def test_signal_init_time_dtype():
     """
     Test casting and assertions of dtype (also test time setter because

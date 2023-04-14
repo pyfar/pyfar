@@ -218,7 +218,7 @@ class TimeData(_Audio):
         _Audio.__init__(self, 'time', comment)
 
         if not isinstance(complex, bool):
-            raise TypeError(f"``complex`` flag is {complex.dtype}"
+            raise TypeError(f"``complex`` flag is {type(complex).__name__}"
                             f"but must be a boolean")
 
         self._complex = complex
@@ -624,7 +624,7 @@ class Signal(FrequencyData, TimeData):
         self._sampling_rate = sampling_rate
 
         if not isinstance(complex, bool):
-            raise TypeError(f"``complex`` flag is {complex.dtype}"
+            raise TypeError(f"``complex`` flag is {type(complex).__name__}"
                             f"but must be a boolean")
 
         self._complex = complex
