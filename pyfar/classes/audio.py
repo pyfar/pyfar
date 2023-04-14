@@ -584,7 +584,7 @@ class Signal(FrequencyData, TimeData):
             floating point precision. Note that providing complex valued time
             domain data is only possible when the parameter ``complex`` is
             ``True``. If the specified ``domain`` is ``freq`` and
-            ``complex`` is ``True``the data needs to represent a two-sided
+            ``complex`` is ``True`` the data needs to represent a two-sided
             spectrum, otherwise the single-sided spectrum for positive
             frequencies needs to be provided.
         sampling_rate : double
@@ -605,7 +605,7 @@ class Signal(FrequencyData, TimeData):
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
         complex : bool
-            Specifies if the returned Signals time domain data are complex
+            Specifies if the returned Signal's time domain data are complex
             or real-valued. This is independent of the `dtype` of the provided
             ``data`` array. If ``True`` and ``domain`` is ``time``, the
             `dtype` of ``data`` will be converted accordingly. The default
