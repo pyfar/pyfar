@@ -14,7 +14,7 @@ from pyfar import Signal, TimeData, FrequencyData
 from pyfar.io import _codec
 
 
-def signal_stub(time, freq, sampling_rate, fft_norm):
+def signal_stub(time, freq, sampling_rate, fft_norm, complex=False):
     """Function to generate stub of pyfar Signal class based on MagicMock.
     The properties of the signal are set without any further check.
 
@@ -61,11 +61,12 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
         return bin
 
     signal = mock.MagicMock(
-        spec_set=Signal(time, sampling_rate, domain='time'))
+        spec_set=Signal(time, sampling_rate, domain='time', complex=complex))
     signal.time = np.atleast_2d(time)
     signal.freq = np.atleast_2d(freq)
     signal.sampling_rate = sampling_rate
     signal.fft_norm = fft_norm
+    signal._complex = complex
     signal.n_samples = signal.time.shape[-1]
     signal.n_bins = signal.freq.shape[-1]
     signal.cshape = signal.time.shape[:-1]
@@ -110,6 +111,7 @@ def time_data_stub(time, times):
     time_data.time = np.atleast_2d(time)
     time_data.times = np.atleast_1d(times)
     time_data.domain = 'time'
+    time_data._complex = False
     time_data.n_samples = time_data.time.shape[-1]
     time_data.cshape = time_data.time.shape[:-1]
     time_data.__getitem__.side_effect = getitem

@@ -23,7 +23,6 @@ def test_signal_init_default_parameter():
     assert signal.domain == 'time'
     assert signal.fft_norm == 'none'
     assert signal.comment == ''
-    assert signal.fft_norm == 'none'
     assert not signal.complex
 
 
@@ -185,6 +184,15 @@ def test_signal_init_freq():
 def test_n_samples():
     """Test for number of samples."""
     signal = Signal([1, 2, 3], 44100, domain='time')
+    assert signal.n_samples == 3
+
+    signal = Signal([1, 2, 3], 44100, domain='time', complex=True)
+    assert signal.n_samples == 3
+
+    signal = Signal([1, 2, 3], 44100, domain='freq')
+    assert signal.n_samples == 4
+
+    signal = Signal([1, 2, 3], 44100, domain='freq', complex=True)
     assert signal.n_samples == 3
 
 

@@ -31,6 +31,29 @@ def test_butterworth(impulse):
         x = pfilt.butterworth(None, 2, 1000, 'lowpass')
 
 
+def test_butterworth_complex(impulse_complex):
+    # Uses scipy function. We thus only test the functionality not the results
+    # Filter object
+    f_obj = pfilt.butterworth(None, 2, 1000, 'lowpass', 44100)
+    assert isinstance(f_obj, pclass.FilterSOS)
+    assert f_obj.comment == ("Butterworth lowpass of order 2. "
+                             "Cut-off frequency 1000 Hz.")
+
+    # Filter
+    x = pfilt.butterworth(impulse_complex, 2, 1000, 'lowpass')
+    y = f_obj.process(impulse_complex)
+    assert isinstance(x, Signal)
+    npt.assert_allclose(x.time, y.time)
+
+    # ValueError
+    with pytest.raises(ValueError):
+        # pass signal and sampling rate
+        x = pfilt.butterworth(impulse_complex, 2, 1000, 'lowpass', 44100)
+    with pytest.raises(ValueError):
+        # pass no signal and no sampling rate
+        x = pfilt.butterworth(None, 2, 1000, 'lowpass')
+
+
 def test_chebyshev1(impulse):
     # Uses scipy function. We thus only test the functionality not the results
     # Filter object
@@ -55,6 +78,30 @@ def test_chebyshev1(impulse):
         x = pfilt.chebyshev1(None, 2, 1, 1000, 'lowpass')
 
 
+def test_chebyshev1_complex(impulse_complex):
+    # Uses scipy function. We thus only test the functionality not the results
+    # Filter object
+    f_obj = pfilt.chebyshev1(None, 2, 1, 1000, 'lowpass', 44100)
+    assert isinstance(f_obj, pclass.FilterSOS)
+    assert f_obj.comment == ("Chebychev Type I lowpass of order 2. "
+                             "Cut-off frequency 1000 Hz. "
+                             "Pass band ripple 1 dB.")
+
+    # Filter
+    x = pfilt.chebyshev1(impulse_complex, 2, 1, 1000, 'lowpass')
+    y = f_obj.process(impulse_complex)
+    assert isinstance(x, Signal)
+    npt.assert_allclose(x.time, y.time)
+
+    # ValueError
+    with pytest.raises(ValueError):
+        # pass signal and sampling rate
+        x = pfilt.chebyshev1(impulse_complex, 2, 1, 1000, 'lowpass', 44100)
+    with pytest.raises(ValueError):
+        # pass no signal and no sampling rate
+        x = pfilt.chebyshev1(None, 2, 1, 1000, 'lowpass')
+
+
 def test_chebyshev2(impulse):
     # Uses scipy function. We thus only test the functionality not the results
     # Filter object
@@ -74,6 +121,30 @@ def test_chebyshev2(impulse):
     with pytest.raises(ValueError):
         # pass signal and sampling rate
         x = pfilt.chebyshev2(impulse, 2, 40, 1000, 'lowpass', 44100)
+    with pytest.raises(ValueError):
+        # pass no signal and no sampling rate
+        x = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass')
+
+
+def test_chebyshev2_complex(impulse_complex):
+    # Uses scipy function. We thus only test the functionality not the results
+    # Filter object
+    f_obj = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass', 44100)
+    assert isinstance(f_obj, pclass.FilterSOS)
+    assert f_obj.comment == ("Chebychev Type II lowpass of order 2. "
+                             "Cut-off frequency 1000 Hz. "
+                             "Stop band attenuation 40 dB.")
+
+    # Filter
+    x = pfilt.chebyshev2(impulse_complex, 2, 40, 1000, 'lowpass')
+    y = f_obj.process(impulse_complex)
+    assert isinstance(x, Signal)
+    npt.assert_allclose(x.time, y.time)
+
+    # ValueError
+    with pytest.raises(ValueError):
+        # pass signal and sampling rate
+        x = pfilt.chebyshev2(impulse_complex, 2, 40, 1000, 'lowpass', 44100)
     with pytest.raises(ValueError):
         # pass no signal and no sampling rate
         x = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass')
