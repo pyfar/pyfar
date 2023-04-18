@@ -892,9 +892,9 @@ class InterpolateSpectrum():
                              ax=ax[0, 1], c='r', ls='', marker='.')
                 ax[0, 1].set_xlim(0, sampling_rate/2)
                 # frequency plot (log x-axis)
-                pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='input')
+                pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='output')
                 pf.plot.freq(self._input, dB=False, ax=ax[1, 1],
-                             c='r', ls='', marker='.', label='output')
+                             c='r', ls='', marker='.', label='intput')
                 min_freq = np.min([sampling_rate / n_samples,
                                    self._input.frequencies[0]])
                 ax[1, 1].set_xlim(min_freq, sampling_rate/2)
