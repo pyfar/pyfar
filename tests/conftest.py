@@ -41,6 +41,33 @@ def sine_stub():
 
 
 @pytest.fixture
+def sine_stub_complex():
+    """Sine signal stub.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 10000
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
+
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm, complex=True)
+
+    return signal
+
+
+@pytest.fixture
 def sine_stub_odd():
     """Sine signal stub, odd number of samples
     To be used in cases, when a dependence on the Signal class is prohibited,
@@ -204,6 +231,29 @@ def impulse():
         n_samples, delay=delay, amplitude=amplitude,
         sampling_rate=sampling_rate)
 
+    return signal
+
+
+@pytest.fixture
+def impulse_complex():
+    """Delta impulse signal.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    """
+    n_samples = 10000
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+
+    signal = pyfar.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
+                          complex=True)
     return signal
 
 
@@ -387,6 +437,25 @@ def handsome_signal_v2():
     signal = pf.signals.sine(2000, 4410)
     signal = pf.dsp.time_window(signal, (500, 1000, 2000, 2500))
     signal.fft_norm = 'none'
+    return signal
+
+
+@pytest.fixture
+def handsome_complex_signal():
+    """
+    Windows 200 Hz sine signal, with complex valued data for testing plots
+
+    Returns
+    -------
+    signal : Signal
+        Windowed sine
+    """
+
+    signal = pf.signals.sine(200, 4410)
+    signal = pf.dsp.time_window(signal, (1500, 2000, 3000, 3500))
+    signal = pf.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
+                       complex=True)
+
     return signal
 
 
