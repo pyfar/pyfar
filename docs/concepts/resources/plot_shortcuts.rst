@@ -23,7 +23,7 @@
    * - 8, ctrl+shift+g
      - :py:func:`~pyfar.plot.freq_group_delay`
 
-Note that not all plots are available for TimeData and FrequencyData objects as detailed in the :py:mod:`plots module <pyfar.plot>` documentation.
+Note that not all plots are available for TimeData and FrequencyData objects as detailed in the :py:mod:`plot module <pyfar.plot>` documentation.
 
 **Use these shortcuts to control the plot**
 
