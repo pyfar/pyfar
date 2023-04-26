@@ -668,19 +668,19 @@ class FractionalOctaveBands(pft.FilterSOS):
     @property
     def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
-         octave filters in Hz"""
+         octave bands in Hz"""
         return self._nominal_frequencies
 
     @property
     def center_frequencies(self):
         """Get the exact center frequencies of the (fractional)
-        octave filters in Hz"""
+        octave bands in Hz"""
         return self._center_frequencies
 
     @property
     def cutoff_frequencies(self):
         """Get the cutoff frequencies of the (fractional)
-        octave filters in Hz"""
+        octave bands in Hz"""
         return self._cutoff_frequencies
 
     @property
@@ -946,19 +946,19 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     @property
     def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
-         octave filters in Hz"""
+         octave bands in Hz"""
         return self._nominal_frequencies
 
     @property
     def center_frequencies(self):
         """Get the exact center frequencies of the (fractional)
-        octave filters in Hz"""
+        octave bands in Hz"""
         return self._center_frequencies
 
     @property
     def cutoff_frequencies(self):
         """Get the cutoff frequencies of the (fractional)
-        octave filters in Hz"""
+        octave bands in Hz"""
         return self._cutoff_frequencies
 
     @property
