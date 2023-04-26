@@ -6,6 +6,7 @@ from deepdiff import DeepDiff
 import pyfar as pf
 import pyfar.classes.filter as pft
 
+
 def fractional_octave_frequencies(
         num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
     """Return the octave center frequencies according to the IEC 61260:1:2014
@@ -1120,8 +1121,3 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         obj.__dict__.update(obj_dict)
 
         return obj
-
-
-
-
-
