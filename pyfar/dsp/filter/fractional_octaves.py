@@ -621,7 +621,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         self._sampling_rate = sampling_rate
 
         self._nominal_frequencies,\
-            self._exact_frequencies,\
+            self._center_frequencies,\
             self._cutoff_frequencies = fractional_octave_frequencies(
                 self._num_fractions, self._frequency_range, True)
 
@@ -672,10 +672,10 @@ class FractionalOctaveBands(pft.FilterSOS):
         return self._nominal_frequencies
 
     @property
-    def exact_frequencies(self):
+    def center_frequencies(self):
         """Get the exact center frequencies of the (fractional)
         octave filters in Hz"""
-        return self._exact_frequencies
+        return self._center_frequencies
 
     @property
     def cutoff_frequencies(self):
@@ -686,7 +686,7 @@ class FractionalOctaveBands(pft.FilterSOS):
     @property
     def n_bands(self):
         """Get the number of bands in the filter bank"""
-        return len(self._exact_frequencies)
+        return len(self._center_frequencies)
 
     @property
     def sampling_rate(self):
@@ -899,7 +899,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         self._sampling_rate = sampling_rate
 
         self._nominal_frequencies,\
-            self._exact_frequencies,\
+            self._center_frequencies,\
             self._cutoff_frequencies = fractional_octave_frequencies(
                 self._num_fractions, self._frequency_range, True)
 
@@ -950,10 +950,10 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         return self._nominal_frequencies
 
     @property
-    def exact_frequencies(self):
+    def center_frequencies(self):
         """Get the exact center frequencies of the (fractional)
         octave filters in Hz"""
-        return self._exact_frequencies
+        return self._center_frequencies
 
     @property
     def cutoff_frequencies(self):
@@ -964,7 +964,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
     @property
     def n_bands(self):
         """Get the number of bands in the filter bank"""
-        return len(self._exact_frequencies)
+        return len(self._center_frequencies)
 
     @property
     def sampling_rate(self):
