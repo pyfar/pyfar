@@ -2074,17 +2074,6 @@ def normalize(signal, reference_method='max', domain='time',
     ----------
     signal: Signal, TimeData, FrequencyData
         Input signal.
-    domain: string
-        Determines which data is used to compute the `reference` value.
-
-        ``'time'``
-           Use the absolute of the time domain data ``np.abs(signal.time)``.
-        ``'freq'``
-          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
-          normalized magnitude spectrum used
-          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
-
-        The default is ``'time'``.
     reference_method: string, optional
         Reference method to compute the channel-wise `reference` value using
         the data according to `domain`.
@@ -2101,6 +2090,17 @@ def normalize(signal, reference_method='max', domain='time',
             Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
 
         The default is ``'max'``.
+    domain: string
+        Determines which data is used to compute the `reference` value.
+
+        ``'time'``
+           Use the absolute of the time domain data ``np.abs(signal.time)``.
+        ``'freq'``
+          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
+          normalized magnitude spectrum used
+          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
+
+        The default is ``'time'``.
     channel_handling: string, optional
         Define how channel-wise `reference` values are handeled for multi-
         channel signals. This parameter does not affect single-channel signals.
