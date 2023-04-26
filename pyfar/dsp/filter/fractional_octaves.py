@@ -661,11 +661,6 @@ class FractionalOctaveBands(pft.FilterSOS):
         return self._frequency_range
 
     @property
-    def order(self):
-        """Get the filter order"""
-        return self._order
-
-    @property
     def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
          octave bands in Hz"""
@@ -687,11 +682,6 @@ class FractionalOctaveBands(pft.FilterSOS):
     def n_bands(self):
         """Get the number of bands in the filter bank"""
         return len(self._center_frequencies)
-
-    @property
-    def sampling_rate(self):
-        """Get the sampling rate of the filter bank in Hz"""
-        return self._sampling_rate
 
     def _get_coefficients(
             self,
