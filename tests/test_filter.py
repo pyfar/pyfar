@@ -248,7 +248,7 @@ def test_reconstructing_fractional_octave_bands():
     # test frequencies
     FOFB_ = pfilt.fractional_octaves.ReconstructingFractionalOctaveBands(
         frequency_range=(63, 16000))
-    npt.assert_allclose(FOFB.norm_frequencies, FOFB_.norm_frequencies)
+    npt.assert_allclose(FOFB.nominal_frequencies, FOFB_.nominal_frequencies)
 
     # test filtering
     x = pf.signals.impulse(2**12)
