@@ -1,10 +1,162 @@
 import warnings
 import numpy as np
-import scipy.signal as sgn
+import scipy.signal as spsignal
 from copy import deepcopy
 from deepdiff import DeepDiff
 import pyfar as pf
 import pyfar.classes.filter as pft
+
+def fractional_octave_frequencies(
+        num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
+    """Return the octave center frequencies according to the IEC 61260:1:2014
+    standard.
+
+    For numbers of fractions other than ``1`` and ``3``, only the
+    exact center frequencies are returned, since nominal frequencies are not
+    specified by corresponding standards.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., ``1`` refers to
+        octave bands and ``3`` to third octave bands. The default is ``1``.
+    frequency_range : array, tuple
+        The lower and upper frequency limits, the default is
+        ``frequency_range=(20, 20e3)``.
+    return_cutoff : bool, optional
+        Specifies if the cutoff frequencies aka ``fu`` and ``fo`` should be
+        returned as well.
+
+    Returns
+    -------
+    nominal : array, float
+        The nominal center frequencies in Hz specified in the standard.
+        Nominal frequencies are only returned for octave bands and third octave
+        bands.
+    exact : array, float
+        The exact center frequencies in Hz, resulting in a uniform distribution
+        of frequency bands over the frequency range.
+    cutoff_freq : tuple, array, float
+        The lower and upper critical frequencies in Hz of the bandpass filters
+        for each band as a tuple corresponding to ``(f_lower, f_upper)``.
+    """
+    nominal = None
+
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "You need to specify a lower and upper limit frequency.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The second frequency needs to be higher than the first.")
+
+    if num_fractions in [1, 3]:
+        nominal, exact = _center_frequencies_fractional_octaves_iec(
+            nominal, num_fractions)
+
+        mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
+        nominal = nominal[mask]
+        exact = exact[mask]
+
+    else:
+        exact = _exact_center_frequencies_fractional_octaves(
+            num_fractions, f_lims)
+
+    if return_cutoff:
+        octave_ratio = 10**(3/10)
+        freqs_upper = exact * octave_ratio**(1/2/num_fractions)
+        freqs_lower = exact * octave_ratio**(-1/2/num_fractions)
+        f_crit = (freqs_lower, freqs_upper)
+        return nominal, exact, f_crit
+    else:
+        return nominal, exact
+
+
+def _exact_center_frequencies_fractional_octaves(
+        num_fractions, frequency_range):
+    """Calculate the center frequencies of arbitrary fractional octave bands.
+
+    Parameters
+    ----------
+    num_fractions : int
+        The number of fractions
+    frequency_range
+        The upper and lower frequency limits
+
+    Returns
+    -------
+    exact : array, float
+        An array containing the center frequencies of the respective fractional
+        octave bands
+
+    """
+    ref_freq = 1e3
+    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
+    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
+
+    indices = np.arange(-Nmin, Nmax+1)
+    exact = ref_freq * 2**(indices / num_fractions)
+
+    return exact
+
+
+def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
+    """
+    Returns the exact center frequencies for fractional octave bands
+    according to the IEC 61260:1:2014 standard.
+    octave ratio
+    .. G = 10^{3/10}
+    center frequencies
+    .. f_m = f_r G^{x/b}
+    .. f_m = f_e G^{(2x+1)/(2b)}
+    where b is the number of octave fractions, f_r is the reference frequency
+    chosen as 1000Hz and x is the index of the frequency band.
+
+    Parameters
+    ----------
+    num_fractions : 1, 3
+        The number of octave fractions. 1 returns octave center frequencies,
+        3 returns third octave center frequencies.
+
+    Returns
+    -------
+    nominal : array, float
+        The nominal (rounded) center frequencies specified in the standard.
+        Nominal frequencies are only returned for octave bands and third octave
+        bands
+    exact : array, float
+        The exact center frequencies, resulting in a uniform distribution of
+        frequency bands over the frequency range.
+    """
+    if num_fractions == 1:
+        nominal = np.array([
+            31.5, 63, 125, 250, 500, 1e3,
+            2e3, 4e3, 8e3, 16e3], dtype=float)
+    elif num_fractions == 3:
+        nominal = np.array([
+            25, 31.5, 40, 50, 63, 80, 100, 125, 160,
+            200, 250, 315, 400, 500, 630, 800, 1000,
+            1250, 1600, 2000, 2500, 3150, 4000, 5000,
+            6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
+
+    reference_freq = 1e3
+    octave_ratio = 10**(3/10)
+
+    iseven = np.mod(num_fractions, 2) == 0
+    if ~iseven:
+        indices = np.around(
+            num_fractions * np.log(nominal/reference_freq)
+            / np.log(octave_ratio))
+        exponent = (indices/num_fractions)
+    else:
+        indices = np.around(
+            2.0*num_fractions *
+            np.log(nominal/reference_freq) / np.log(octave_ratio) - 1)/2
+        exponent = ((2*indices + 1) / num_fractions / 2)
+
+    exact = reference_freq * octave_ratio**exponent
+
+    return nominal, exact
 
 
 def fractional_octave_bands(
@@ -171,12 +323,12 @@ def _coefficients_fractional_octave_bands(
                 bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
             Wn = Wn[0]
             btype = 'highpass'
-            sos_hp = sgn.butter(order, Wn, btype=btype, output='sos')
+            sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
             sos_coeff = pf.classes.filter._extend_sos_coefficients(
                 sos_hp, order)
         else:
             btype = 'bandpass'
-            sos_coeff = sgn.butter(
+            sos_coeff = spsignal.butter(
                 order, Wn, btype=btype, output='sos')
         sos[idx, :, :] = sos_coeff
     return sos
@@ -360,7 +512,7 @@ def reconstructing_fractional_octave_bands(
     time = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
 
     # window
-    time *= sgn.windows.hann(time.shape[-1])
+    time *= spsignal.windows.hann(time.shape[-1])
 
     # create filter object
     filt = pf.FilterFIR(time, sampling_rate)
@@ -468,7 +620,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         self._order = order
         self._sampling_rate = sampling_rate
 
-        self._norm_frequencies,\
+        self._nominal_frequencies,\
             self._exact_frequencies,\
             self._cutoff_frequencies = fractional_octave_frequencies(
                 self._num_fractions, self._frequency_range, True)
@@ -514,10 +666,10 @@ class FractionalOctaveBands(pft.FilterSOS):
         return self._order
 
     @property
-    def norm_frequencies(self):
+    def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
          octave filters in Hz"""
-        return self._norm_frequencies
+        return self._nominal_frequencies
 
     @property
     def exact_frequencies(self):
@@ -600,12 +752,12 @@ class FractionalOctaveBands(pft.FilterSOS):
                     bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
                 Wn = Wn[0]
                 btype = 'highpass'
-                sos_hp = sgn.butter(order, Wn, btype=btype, output='sos')
+                sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
                 sos_coeff = pf.classes.filter._extend_sos_coefficients(
                     sos_hp, order)
             else:
                 btype = 'bandpass'
-                sos_coeff = sgn.butter(
+                sos_coeff = spsignal.butter(
                     order, Wn, btype=btype, output='sos')
             sos[idx, :, :] = sos_coeff
         return sos
@@ -746,7 +898,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         self._n_samples = n_samples
         self._sampling_rate = sampling_rate
 
-        self._norm_frequencies,\
+        self._nominal_frequencies,\
             self._exact_frequencies,\
             self._cutoff_frequencies = fractional_octave_frequencies(
                 self._num_fractions, self._frequency_range, True)
@@ -792,10 +944,10 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         return self._frequency_range
 
     @property
-    def norm_frequencies(self):
+    def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
          octave filters in Hz"""
-        return self._norm_frequencies
+        return self._nominal_frequencies
 
     @property
     def exact_frequencies(self):
@@ -943,7 +1095,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         time = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
 
         # window
-        time *= sgn.windows.hann(time.shape[-1])
+        time *= spsignal.windows.hann(time.shape[-1])
         return time
 
     def copy(self):
@@ -980,154 +1132,6 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         return obj
 
 
-def fractional_octave_frequencies(
-        num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
-    """Return the octave center frequencies according to the IEC 61260:1:2014
-    standard.
-
-    For numbers of fractions other than ``1`` and ``3``, only the
-    exact center frequencies are returned, since nominal frequencies are not
-    specified by corresponding standards.
-
-    Parameters
-    ----------
-    num_fractions : int, optional
-        The number of bands an octave is divided into. Eg., ``1`` refers to
-        octave bands and ``3`` to third octave bands. The default is ``1``.
-    frequency_range : array, tuple
-        The lower and upper frequency limits, the default is
-        ``frequency_range=(20, 20e3)``.
-    return_cutoff : bool, optional
-        Specifies if the cutoff frequencies aka ``fu`` and ``fo`` should be
-        returned as well.
-
-    Returns
-    -------
-    nominal : array, float
-        The nominal center frequencies in Hz specified in the standard.
-        Nominal frequencies are only returned for octave bands and third octave
-        bands.
-    exact : array, float
-        The exact center frequencies in Hz, resulting in a uniform distribution
-        of frequency bands over the frequency range.
-    cutoff_freq : tuple, array, float
-        The lower and upper critical frequencies in Hz of the bandpass filters
-        for each band as a tuple corresponding to ``(f_lower, f_upper)``.
-    """
-    nominal = None
-
-    f_lims = np.asarray(frequency_range)
-    if f_lims.size != 2:
-        raise ValueError(
-            "You need to specify a lower and upper limit frequency.")
-    if f_lims[0] > f_lims[1]:
-        raise ValueError(
-            "The second frequency needs to be higher than the first.")
-
-    if num_fractions in [1, 3]:
-        nominal, exact = _center_frequencies_fractional_octaves_iec(
-            nominal, num_fractions)
-
-        mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
-        nominal = nominal[mask]
-        exact = exact[mask]
-
-    else:
-        exact = _exact_center_frequencies_fractional_octaves(
-            num_fractions, f_lims)
-
-    if return_cutoff:
-        octave_ratio = 10**(3/10)
-        freqs_upper = exact * octave_ratio**(1/2/num_fractions)
-        freqs_lower = exact * octave_ratio**(-1/2/num_fractions)
-        f_crit = (freqs_lower, freqs_upper)
-        return nominal, exact, f_crit
-    else:
-        return nominal, exact
 
 
-def _exact_center_frequencies_fractional_octaves(
-        num_fractions, frequency_range):
-    """Calculate the center frequencies of arbitrary fractional octave bands.
 
-    Parameters
-    ----------
-    num_fractions : int
-        The number of fractions
-    frequency_range
-        The upper and lower frequency limits
-
-    Returns
-    -------
-    exact : array, float
-        An array containing the center frequencies of the respective fractional
-        octave bands
-
-    """
-    ref_freq = 1e3
-    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
-    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
-
-    indices = np.arange(-Nmin, Nmax+1)
-    exact = ref_freq * 2**(indices / num_fractions)
-
-    return exact
-
-
-def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
-    """
-    Returns the exact center frequencies for fractional octave bands
-    according to the IEC 61260:1:2014 standard.
-    octave ratio
-    .. G = 10^{3/10}
-    center frequencies
-    .. f_m = f_r G^{x/b}
-    .. f_m = f_e G^{(2x+1)/(2b)}
-    where b is the number of octave fractions, f_r is the reference frequency
-    chosen as 1000Hz and x is the index of the frequency band.
-
-    Parameters
-    ----------
-    num_fractions : 1, 3
-        The number of octave fractions. 1 returns octave center frequencies,
-        3 returns third octave center frequencies.
-
-    Returns
-    -------
-    nominal : array, float
-        The nominal (rounded) center frequencies specified in the standard.
-        Nominal frequencies are only returned for octave bands and third octave
-        bands
-    exact : array, float
-        The exact center frequencies, resulting in a uniform distribution of
-        frequency bands over the frequency range.
-    """
-    if num_fractions == 1:
-        nominal = np.array([
-            31.5, 63, 125, 250, 500, 1e3,
-            2e3, 4e3, 8e3, 16e3], dtype=float)
-    elif num_fractions == 3:
-        nominal = np.array([
-            25, 31.5, 40, 50, 63, 80, 100, 125, 160,
-            200, 250, 315, 400, 500, 630, 800, 1000,
-            1250, 1600, 2000, 2500, 3150, 4000, 5000,
-            6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
-
-    reference_freq = 1e3
-    octave_ratio = 10**(3/10)
-
-    iseven = np.mod(num_fractions, 2) == 0
-    if ~iseven:
-        indices = np.around(
-            num_fractions * np.log(nominal/reference_freq)
-            / np.log(octave_ratio))
-        exponent = (indices/num_fractions)
-    else:
-        indices = np.around(
-            2.0*num_fractions *
-            np.log(nominal/reference_freq) / np.log(octave_ratio) - 1)/2
-        exponent = ((2*indices + 1) / num_fractions / 2)
-
-    exact = reference_freq * octave_ratio**exponent
-
-    return nominal, exact
