@@ -31,3 +31,18 @@ def test_multichannel_signals():
     assert np.all(pf.dsp.energy(signal) == np.ones((2, 3, 3))*100)
     assert np.all(pf.dsp.power(signal) == np.ones((2, 3, 3)))
     assert np.all(pf.dsp.rms(signal) == np.sqrt(np.ones((2, 3, 3))))
+
+
+def test_complex_signal():
+    signal = pf.Signal(np.ones((2, 3, 3, 100)), 44100, complex=True)
+    with pytest.raises(ValueError, match='The energy of complex signals is not'
+                                         ' defined'):
+        pf.dsp.energy(signal)
+
+    with pytest.raises(ValueError, match='The power of complex signals is not'
+                                         ' defined'):
+        pf.dsp.power(signal)
+
+    with pytest.raises(ValueError, match='The rms of complex signals is not'
+                                         ' defined'):
+        pf.dsp.rms(signal)

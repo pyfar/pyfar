@@ -1803,7 +1803,8 @@ def energy(signal):
     Due to the calculation based on the time data, the returned energy is
     independent of the signal's ``fft_norm``.
     :py:func:`~pyfar.dsp.power` and :py:func:`~pyfar.dsp.rms` can be used
-    to compute the power and the rms of a signal.
+    to compute the power and the rms of a signal. The energy of complex-valued
+    signals is not defined.
 
     References
     -----------
@@ -1814,6 +1815,9 @@ def energy(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+    if signal.complex:
+        raise ValueError("The energy of complex signals is not defined")
+
     # return and compute data
     return np.sum(signal.time**2, axis=-1)
 
@@ -1846,12 +1850,16 @@ def power(signal):
     independent of the signal's ``fft_norm``.
     The power equals the squared RMS of a signal. :py:func:`~pyfar.dsp.energy`
     and :py:func:`~pyfar.dsp.rms` can be used to compute the energy and the
-    RMS.
+    RMS. The power of complex-valued signals is not defined.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
+    if signal.complex:
+        raise ValueError("The power of complex signals is not defined")
+
     # return and compute data
     return np.sum(signal.time**2, axis=-1)/signal.n_samples
 
@@ -1882,12 +1890,16 @@ def rms(signal):
     -----
     The RMS equals the square root of the signal's power.
     :py:func:`~pyfar.dsp.energy` and :py:func:`~pyfar.dsp.power` can be used
-    to compute the energy and the power.
+    to compute the energy and the power. The RMS of complex-valued signals is
+    not defined.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
+    if signal.complex:
+        raise ValueError("The rms of complex signals is not defined")
 
     # return and compute data
     return np.sqrt(power(signal))
