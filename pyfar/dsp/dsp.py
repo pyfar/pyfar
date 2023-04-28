@@ -2031,7 +2031,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
                             signal.domain, signal.fft_norm, signal.comment,
                             signal.complex)
     elif isinstance(signal, pyfar.TimeData):
-        return pyfar.TimeData(data, signal.times, signal.comment, signal.complex)
+        return pyfar.TimeData(data, signal.times, signal.comment,
+                              signal.complex)
     else:
         return pyfar.FrequencyData(data, signal.frequencies, signal.comment)
 
