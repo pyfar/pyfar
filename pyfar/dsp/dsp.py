@@ -1656,8 +1656,14 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         res[..., :n_min-1] += res[..., -n_min+1:]
         res = res[..., :n_max]
 
+    if res.dtype.kind == 'c':
+        is_result_complex = True
+    else:
+        is_result_complex = False
+
     return pyfar.Signal(
-        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm,
+        complex=is_result_complex)
 
 
 def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
