@@ -138,7 +138,6 @@ def test_pyfar_object_types(signals):
     # Test concatenation for all pyfar object types
     conc = pf.utils.concatenate(signals)
     ideal = [[1, 2, 3], [4, 5, 6]]
-    # assert conc._data == ideal
     npt.assert_equal(conc._data, ideal)
 
 
