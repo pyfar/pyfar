@@ -131,13 +131,7 @@ def broadcast_cdims(signals, cdim=None):
 
 def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     """
-    Merge multiple Signal objects along a given axis. The signals are copied,
-    if needed broadcasted in largest dimenson and to a common cshape and a new
-    object is returned.
-
-    The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
-    broadcasted following the `numpy broadcasting rules
-    <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    Merge multiple Signal objects along a given caxis.
 
     Parameters
     ----------
@@ -147,12 +141,18 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
         to axis (the first, by default). If this is the case, set
         ``broadcasting=True``.
     caxis : int
-        The axis along which the signals are concatenated.
+        The caxis along which the signals are concatenated. More details and
+        background about caxis is given in the concepts of
+        :py:mod:`Audio classes <pyfar._concepts.audio_classes>`.
         The default is ``0``.
     broadcasting: bool
-        If this is ``True``, the signals will be broadcasted into largest
-        dimension and into a common cshape, except of the caxis along which the
-        signals are concatenated. The default is ``False``.
+        If this is ``True``, the signals will be broadcasted to common
+        cshape, except for the caxis along which the signals are
+        concatenated.
+        The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
+        broadcasted following the `numpy broadcasting rules
+        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+        The default is ``False``.
     comment: string
         A comment related to the merged `data`. The default is ``""``, which
         initializes an empty string. Comments of the input signals will also
@@ -182,19 +182,19 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
             for _ in range(max_cdim-len(sh)):
                 cshapes[i] = (1,) + cshapes[i]
         # Finds broadcast cshape without the caxis to ignore
-        cshape = np.broadcast_shapes(*np.delete(cshapes, caxis,
-                                     axis=-1))
+        cshape_bc = np.broadcast_shapes(*np.delete(cshapes, caxis,
+                                        axis=-1))
         broad_signals = []
-        for i, s in enumerate(signals):
-            # Appends the axis to ignore back into cshape to broadcast to.
-            if caxis in (-1, len(cshape)):
+        for signal, cshape in zip(signals, cshapes):
+            # Appends the caxis to ignore back into cshape to broadcast to.
+            if caxis in (-1, len(cshape_bc)):
                 # Use append if caxis is defined for last dimension
-                cs = np.append(cshape, cshapes[i][caxis])
+                cs = np.append(cshape_bc, cshape[caxis])
             else:
                 # Use insert if caxis is not defined for last dim
                 axis = caxis+1 if caxis < 0 else caxis
-                cs = np.insert(cshape, axis, cshapes[i][caxis])
-            broad_signals.append(broadcast_cshape(s, tuple(cs)))
+                cs = np.insert(cshape_bc, axis, cshape[caxis])
+            broad_signals.append(broadcast_cshape(signal, tuple(cs)))
         signals = broad_signals
     # merge the signals along axis
     axis = caxis-1 if caxis < 0 else caxis
