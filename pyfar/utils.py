@@ -131,15 +131,16 @@ def broadcast_cdims(signals, cdim=None):
 
 def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     """
-    Merge multiple Signal objects along a given caxis.
+    Merge multiple Signal, Timedata or Frequencydata objects along a given
+    caxis.
 
     Parameters
     ----------
-    signals : tuple of Signal
-        The signals to concatenate. Must either have the same cshape or be
-        broadcastable to the same cshape, except in the dimension corresponding
-        to axis (the first, by default). If this is the case, set
-        ``broadcasting=True``.
+    signals : tuple of Signal, TimeData or FrequencyData
+        The signals to concatenate. All signals must be of the same object type
+        and either have the same cshape or be broadcastable to the same cshape,
+        except in the dimension corresponding to axis (the first, by default).
+        If this is the case, set ``broadcasting=True``.
     caxis : int
         The caxis along which the signals are concatenated. More details and
         background about caxis is given in the concepts of
@@ -165,8 +166,9 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     """
     # check input
     for signal in signals:
-        if not isinstance(signal, pf.Signal):
-            raise TypeError("All input data must be of type pf.Signal")
+        if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
+            raise TypeError("All input data must be of type pf.Signal, "
+                            "pf.TimeData or pf.FrequencyData.")
     if not isinstance(comment, str):
         raise TypeError("'comment' needs to be a string.")
     if not isinstance(broadcasting, bool):
@@ -211,8 +213,13 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
                        + s.comment + '\n'
         sig_channel += s.cshape[caxis]
     # return merged Signal
-    return pf.Signal(data, signals[0].sampling_rate,
-                     n_samples=signals[0].n_samples,
-                     domain=signals[0].domain,
-                     fft_norm=signals[0].fft_norm,
-                     comment=comment)
+    if isinstance(signals[0], pf.Signal):
+        return pf.Signal(data, signals[0].sampling_rate,
+                         n_samples=signals[0].n_samples,
+                         domain=signals[0].domain,
+                         fft_norm=signals[0].fft_norm,
+                         comment=comment)
+    elif isinstance(signals[0], pf.TimeData):
+        return pf.TimeData(data, signals[0].times, comment)
+    else:
+        return pf.FrequencyData(data, signals[0].frequencies, comment)

@@ -129,6 +129,19 @@ def test_broadcasting_in_concatenate():
     assert conc.cshape == (1, 2, 7)
 
 
+@pytest.mark.parametrize("signals", [
+    (pf.Signal([1, 2, 3], 44100), pf.Signal([4, 5, 6], 44100)),
+    (pf.FrequencyData([1, 2, 3], [1, 2, 3]),
+     pf.FrequencyData([4, 5, 6], [1, 2, 3])),
+    (pf.TimeData([1, 2, 3], [1, 2, 3]), pf.TimeData([4, 5, 6], [1, 2, 3]))])
+def test_pyfar_object_types(signals):
+    # Test concatenation for all pyfar object types
+    conc = pf.utils.concatenate(signals)
+    ideal = [[1, 2, 3], [4, 5, 6]]
+    # assert conc._data == ideal
+    npt.assert_equal(conc._data, ideal)
+
+
 def test_concatenate_comments():
     # Test for comment concatenation
     sr = 48e3
@@ -153,3 +166,7 @@ def test_concatenate_assertions():
         pf.utils.concatenate(signals, caxis=-1, comment=1)
     with pytest.raises(TypeError, match="'broadcasting' needs to be"):
         pf.utils.concatenate(signals, caxis=-1, broadcasting=1)
+    signals = (pf.Signal([1, 2, 3], 44100),
+               pf.TimeData([1, 2, 3], [1, 2, 3]))
+    with pytest.raises(ValueError, match="Comparison only valid against"):
+        pf.utils.concatenate(signals)
