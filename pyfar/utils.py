@@ -139,7 +139,7 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     signals : tuple of Signal, TimeData or FrequencyData
         The signals to concatenate. All signals must be of the same object type
         and either have the same cshape or be broadcastable to the same cshape,
-        except in the dimension corresponding to axis (the first, by default).
+        except in the dimension corresponding to caxis (the first, by default).
         If this is the case, set ``broadcasting=True``.
     caxis : int
         The caxis along which the signals are concatenated. More details and
