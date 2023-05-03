@@ -260,6 +260,32 @@ def test_time_shift_cyclic(shift_samples, unit):
     npt.assert_allclose(shifted.time, ref.time)
 
 
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+@pytest.mark.parametrize("unit", ["samples", "s"])
+def test_time_shift_cyclic_complex(shift_samples, unit):
+    """Test cyclic time shift using samples and seconds"""
+    # generate test signal
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = pf.Signal(impulse(n_samples,
+                                    delay=delay,
+                                    sampling_rate=sampling_rate).time,
+                            sampling_rate=sampling_rate, complex=True)
+
+    # apply shift
+    shift = shift_samples if unit == "samples" else shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift, unit=unit)
+
+    # compare to reference
+    ref = pf.Signal(impulse(n_samples,
+                            delay=delay+shift_samples,
+                            sampling_rate=sampling_rate).time,
+                    sampling_rate=sampling_rate, complex=True)
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
 @pytest.mark.parametrize("shift", [2, -2, 0])
 @pytest.mark.parametrize("pad_value", [0, np.nan])
 def test_time_shift_linear(shift, pad_value):
@@ -329,6 +355,14 @@ def test_time_window_default():
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
     time_win = np.atleast_2d(sgn.windows.hann(10, sym=True))
+    npt.assert_allclose(sig_win.time, time_win)
+
+
+def test_time_window_complex():
+    """ Test time_window function with default values."""
+    sig = pyfar.Signal(np.ones(10), 2, complex=True)
+    sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
+    time_win = np.atleast_2d(sgn.windows.hann(10, sym=True)).astype(complex)
     npt.assert_allclose(sig_win.time, time_win)
 
 
