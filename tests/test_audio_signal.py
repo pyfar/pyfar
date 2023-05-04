@@ -41,6 +41,12 @@ def test_signal_init_assertions():
     with pytest.raises(ValueError, match="n_samples can not be larger"):
         Signal(1, 44100, domain="freq", complex=True, n_samples=10)
 
+    # pass complex data but dont set complex flag
+    with pytest.raises(ValueError, match="time data is complex, "
+                                         "set complex flag or pass "
+                                         "real-valued data."):
+        Signal([1+1j, 2+2j, 3+3j], 44100)
+
 
 def test_signal_init_time_dtype():
     """
@@ -66,12 +72,6 @@ def test_signal_init_time_dtype():
     # pass complex-valued data and set complex flag
     signal = Signal([1+1j, 2+2j, 3+3j], 44100, complex=True)
     assert signal.time.dtype.kind == "c"
-
-    # pass complex data but dont set complex flag
-    with pytest.raises(ValueError, match="time data is complex, "
-                                         "set complex flag or pass "
-                                         "real-valued data."):
-        Signal([1+1j, 2+2j, 3+3j], 44100)
 
 
 def test_data_frequency_init_dtype():

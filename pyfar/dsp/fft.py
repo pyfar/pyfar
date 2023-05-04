@@ -113,11 +113,9 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
 
 def fftfreq(n_samples, sampling_rate):
     """
-    Returns the positive discrete frequencies for which the FFT is calculated.
-
-    If the number of samples
-    :math:`N` is even the number of frequency bins will be :math:`2/N+1`, if
-    :math:`N` is odd, the number of bins will be :math:`(N+1)/2`.
+    Returns the negative and positive discrete frequencies for which the FFT
+    is calculated. The number of frequency bins equals n_samples. The zero
+    frequency is shifted to the center.
 
     Parameters
     ----------
@@ -137,7 +135,7 @@ def fftfreq(n_samples, sampling_rate):
 
 def fft(data, n_samples, sampling_rate, fft_norm):
     """
-    Calculate the FFT of a complex-valued time-signal.
+    Calculate the double-sided FFT of a time signal.
 
     The function returns the double sided spectrum. The normalization is
     considered according to ``'fft_norm'`` as described in
