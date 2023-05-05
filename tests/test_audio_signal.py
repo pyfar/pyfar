@@ -567,3 +567,32 @@ def test_setter_freq_raw_dtype():
     # object array
     with pytest.raises(ValueError, match="frequency data is"):
         signal.freq_raw = ["1", "2", "3"]
+
+
+def test_frequencies():
+    """
+    Test computing the discrete frequencies of the rfft/fft
+    """
+    # test frequencies from a real-valued signals
+    # with odd number of samples
+    sampling_rate = 48000
+    signal = Signal([0, 1, 2], sampling_rate=sampling_rate)
+    desired = np.array([0, 16000])
+    npt.assert_allclose(signal.frequencies, desired)
+    # test frequencies from a real-valued signals
+    # with even number of samples
+    signal = Signal([0, 1, 2, 4], sampling_rate=sampling_rate)
+    desired = np.array([0, 12000, 24000])
+    npt.assert_allclose(signal.frequencies, desired)
+
+    # test frequencies from a complex-valued signals
+    # with odd number of samples
+    signal = Signal([0, 1, 2], sampling_rate=sampling_rate, complex=True)
+    desired = np.array([-16000, 0, 16000])
+    npt.assert_allclose(signal.frequencies, desired)
+
+    # test frequencies from a complex-valued signals
+    # with even number of samples
+    signal = Signal([0, 1, 2, 4], sampling_rate=sampling_rate, complex=True)
+    desired = np.array([-24000, -12000, 0, 12000])
+    npt.assert_allclose(signal.frequencies, desired)
