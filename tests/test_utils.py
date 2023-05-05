@@ -141,28 +141,12 @@ def test_pyfar_object_types(signals):
     npt.assert_equal(conc._data, ideal)
 
 
-def test_concatenate_comments():
-    # Test for comment concatenation
-    sr = 48e3
-    n_samples = 512
-    signals = (pf.Signal(np.ones((1, 2) + (n_samples, )), sr, comment="one"),
-               pf.Signal(np.ones((1, 2) + (n_samples, )), sr),
-               pf.Signal(np.ones((1, 2) + (n_samples, )), sr, comment="three"))
-    conc = pf.utils.concatenate(signals, caxis=-1, comment="Conc Signal")
-    assert conc.comment == "Conc Signal\n"\
-                           "Signals concatenated in caxis=-1.\n"\
-                           "Channel 1-2: one\n"\
-                           "Channel 5-6: three\n"
-
-
 def test_concatenate_assertions():
     """Test assertions"""
     with pytest.raises(TypeError, match="All input data must be"):
         pf.utils.concatenate(([1, 2], [3, 4]))
     signals = (pf.Signal(np.ones((1, 2, 512)), 44100),
                pf.Signal(np.ones((1, 1, 512)), 44100))
-    with pytest.raises(TypeError, match="'comment' needs to be a string."):
-        pf.utils.concatenate(signals, caxis=-1, comment=1)
     with pytest.raises(TypeError, match="'broadcasting' needs to be"):
         pf.utils.concatenate(signals, caxis=-1, broadcasting=1)
     signals = (pf.Signal([1, 2, 3], 44100),

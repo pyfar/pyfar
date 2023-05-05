@@ -129,7 +129,7 @@ def broadcast_cdims(signals, cdim=None):
     return [broadcast_cdim(s, cdim) for s in signals]
 
 
-def concatenate(signals, caxis=0, broadcasting=False, comment=""):
+def concatenate(signals, caxis=0, broadcasting=False):
     """
     Merge multiple Signal, Timedata or Frequencydata objects along a given
     caxis.
@@ -154,11 +154,6 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
         broadcasted following the `numpy broadcasting rules
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
         The default is ``False``.
-    comment: string
-        A comment related to the merged `data`. The default is ``""``, which
-        initializes an empty string. Comments of the input signals will also
-        be returned in the new Signal object. These comments are marked with
-        their corresponding signal position in the input tuple.
     Returns
     -------
     merged : Signal
@@ -169,8 +164,6 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
             raise TypeError("All input data must be of type pf.Signal, "
                             "pf.TimeData or pf.FrequencyData.")
-    if not isinstance(comment, str):
-        raise TypeError("'comment' needs to be a string.")
     if not isinstance(broadcasting, bool):
         raise TypeError("'broadcasting' needs to be False or True.")
     # check matching meta data of input signals.
@@ -201,25 +194,13 @@ def concatenate(signals, caxis=0, broadcasting=False, comment=""):
     # merge the signals along axis
     axis = caxis-1 if caxis < 0 else caxis
     data = np.concatenate([s._data for s in signals], axis=axis)
-    # append comments in signals to comment to return
-    if comment != "":
-        comment = comment + '\n'
-    comment = comment + f'Signals concatenated in caxis={caxis}.\n'
-    sig_channel = 0
-    for s in signals:
-        if s.comment != "":
-            comment += f"Channel {sig_channel+1}-"\
-                       f"{sig_channel + s.cshape[caxis]}: "\
-                       + s.comment + '\n'
-        sig_channel += s.cshape[caxis]
     # return merged Signal
     if isinstance(signals[0], pf.Signal):
         return pf.Signal(data, signals[0].sampling_rate,
                          n_samples=signals[0].n_samples,
                          domain=signals[0].domain,
-                         fft_norm=signals[0].fft_norm,
-                         comment=comment)
+                         fft_norm=signals[0].fft_norm)
     elif isinstance(signals[0], pf.TimeData):
-        return pf.TimeData(data, signals[0].times, comment)
+        return pf.TimeData(data, signals[0].times)
     else:
-        return pf.FrequencyData(data, signals[0].frequencies, comment)
+        return pf.FrequencyData(data, signals[0].frequencies)
