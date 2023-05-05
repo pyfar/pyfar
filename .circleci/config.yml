@@ -44,9 +44,12 @@ jobs:
           pkg-manager: pip
           # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
           pip-dependency-file: requirements_dev.txt
+      - run: mkdir -p test-results
       - run:
           name: Run tests
-          command: pytest
+          command: pytest --junitxml=test-results/junit.xml -o junit_family=legacy
+      - store_test_results:
+          path: test-results
 
   flake:
     parameters:
