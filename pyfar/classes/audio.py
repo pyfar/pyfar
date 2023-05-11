@@ -1337,7 +1337,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     division = True if operation == _divide else False
     matmul = True if operation == _matrix_multiplication else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type, \
-        cshape = \
+        cshape, complex = \
         _assert_match_for_arithmetic(data, domain, division, matmul)
 
     # apply arithmetic operation
@@ -1355,11 +1355,12 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     if audio_type == Signal:
         # Set unnormalized spectrum
         result = Signal(
-            result, sampling_rate, n_samples, domain, fft_norm='none')
+            result, sampling_rate, n_samples, domain, fft_norm='none',
+            complex=complex)
         # Set fft norm
         result.fft_norm = fft_norm
     elif audio_type == TimeData:
-        result = TimeData(result, times)
+        result = TimeData(result, times, complex=complex)
     elif audio_type == FrequencyData:
         result = FrequencyData(result, frequencies)
 
@@ -1372,7 +1373,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
 
     Check if sampling rate and number of samples agree if multiple signals are
     provided. Check if arrays are numeric. Check if a power signal is contained
-    in the input. Extract cshape of result.
+    in the input. Extract cshape of result. Check if input data is a
+    complex-valued Signal or complex-valued TimeData.
 
     Input:
     data : tuple
@@ -1404,7 +1406,9 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     cshape : tuple, None
         Largest channel shape of the audio classes if contained in data.
         Otherwise empty tuple.
-
+    complex: bool, False
+        Indicates if input data is a complex-valued Signal or complex-valued
+        TimeData.
     """
 
     # we need at least two signals
@@ -1423,11 +1427,15 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     frequencies = None
     audio_type = type(None)
     cshape = ()
+    complex = False
 
     # check input types and meta data
     found_audio_data = False
     for n, d in enumerate(data):
         if isinstance(d, (Signal, TimeData, FrequencyData)):
+            if isinstance(d, (Signal, TimeData)):
+                if d.complex:
+                    complex = True
             # store meta data upon first appearance
             if not found_audio_data:
                 if isinstance(d, Signal):
@@ -1483,12 +1491,14 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
             if np.asarray(d).dtype.kind not in ["i", "f", "c"]:
                 raise ValueError(
                     "Input must be of type Signal, int, float, or complex")
-            if np.asarray(d).dtype.kind == "c" and domain == 'time':
-                raise ValueError(
-                    "Complex input can not be applied in the time domain.")
+            if audio_type == (Signal or TimeData):
+                # if the first data was a Signal or TimeData set
+                # complex flag if the non signal input is complex-valued
+                if np.asarray(d).dtype.kind == "c":
+                    complex = True
 
     return (sampling_rate, n_samples, fft_norm, times, frequencies, audio_type,
-            cshape)
+            cshape, complex)
 
 
 def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
