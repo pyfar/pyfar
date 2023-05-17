@@ -40,6 +40,27 @@ def test_add_two_signals_time_complex():
     npt.assert_allclose(y.time, np.atleast_2d([2 + 0j, 0, 0]), atol=1e-15)
 
 
+# test adding two complex time signals
+def test_add_two_signal_time_real_and_complex():
+    # generate test signal
+    x = Signal([1, 0, 0], 44100, complex=True)
+    y = Signal([1, 0, 0], 44100, complex=False)
+
+    # time domain
+    z = pf.add((x, y), 'time')
+
+    # check if old signals did not change
+    npt.assert_allclose(x.time, np.atleast_2d([1+0j, 0+0j, 0+0j]), atol=1e-15)
+    npt.assert_allclose(y.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
+
+    # check result
+    assert isinstance(z, Signal)
+    assert z.complex
+    assert z.domain == 'time'
+    npt.assert_allclose(z.time, np.atleast_2d([2 + 0j, 0 + 0j, 0 + 0j]),
+                        atol=1e-15)
+
+
 # test adding two Signals
 def test_add_two_signals_freq():
     # generate test signal
@@ -53,6 +74,46 @@ def test_add_two_signals_freq():
     assert isinstance(y, Signal)
     assert y.domain == 'freq'
     npt.assert_allclose(y.freq, np.atleast_2d([2, 2]), atol=1e-15)
+
+
+# test adding two Signals
+def test_add_two_signals_freq_complex():
+    # generate test signal
+    x = Signal([1, 0, 0], 44100, complex=True)
+
+    # frequency domain
+    y = pf.add((x, x), 'freq')
+    # check if old signal did not change
+    npt.assert_allclose(x.time, np.atleast_2d([1 + 0j, 0 + 0j, 0 + 0j]),
+                        atol=1e-15)
+
+    # check result
+    assert isinstance(y, Signal)
+    assert y.domain == 'freq'
+    assert y.complex
+    npt.assert_allclose(y.freq, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]),
+                        atol=1e-15)
+
+
+# test adding two Signals
+def test_add_two_signals_freq_real_and_complex():
+    # generate test signal
+    x = Signal([1, 0, 0], 44100, complex=True)
+    y = Signal([1, 0, 0], 44100, complex=False)
+
+    # frequency domain
+    z = pf.add((x, x), 'freq')
+    # check if old signal did not change
+    npt.assert_allclose(x.time, np.atleast_2d([1 + 0j, 0 + 0j, 0 + 0j]),
+                        atol=1e-15)
+    npt.assert_allclose(y.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
+
+    # check result
+    assert isinstance(z, Signal)
+    assert z.domain == 'freq'
+    assert z.complex
+    npt.assert_allclose(z.freq, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]),
+                        atol=1e-15)
 
 
 # test adding three signals
@@ -131,6 +192,23 @@ def test_add_number_and_complex_signal():
     assert y.domain == 'time'
     assert y.complex
     npt.assert_allclose(y.time, np.atleast_2d([2 + 0j, 1 + 0j, 1 + 0j]),
+                        atol=1e-15)
+
+
+# test add number and complex signal
+def test_add_number_and_complex_signal_freq():
+    # generate and add signals
+    x = Signal([1, 0, 0], 44100, complex=True)
+    y = pf.add((1, x), 'freq')
+
+    # check if old signal did not change
+    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
+
+    # check result
+    assert isinstance(y, Signal)
+    assert y.domain == 'freq'
+    assert y.complex
+    npt.assert_allclose(y.freq, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]),
                         atol=1e-15)
 
 
@@ -564,7 +642,7 @@ def test_assert_match_for_arithmetic():
 def test_get_arithmetic_data_with_array():
     data_in = np.asarray(1)
     data_out = signal._get_arithmetic_data(
-        data_in, None, (1,), False, type(None))
+        data_in, None, (1,), False, type(None), complex=False)
     npt.assert_allclose(data_in, data_out)
 
 
@@ -597,7 +675,7 @@ def test_get_arithmetic_data_with_signal():
             # get output data
             data_out = signal._get_arithmetic_data(
                 s_in, domain=domain, cshape=(1,), matmul=False,
-                audio_type=Signal)
+                audio_type=Signal, complex=False)
             if domain == 'time':
                 npt.assert_allclose(s_ref.time, data_out, atol=1e-15)
             elif domain == 'freq':
@@ -628,7 +706,7 @@ def test_assert_match_for_arithmetic_data_wrong_cshape():
 def test_get_arithmetic_data_wrong_domain():
     with raises(ValueError):
         signal._get_arithmetic_data(
-            Signal(1, 44100), 'space', (1,), False, Signal)
+            Signal(1, 44100), 'space', (1,), False, Signal, complex=False)
 
 
 def test_array_broadcasting_errors():

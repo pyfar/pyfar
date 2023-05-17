@@ -1419,14 +1419,16 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
         _assert_match_for_arithmetic(data, domain, division, matmul)
 
     # apply arithmetic operation
-    result = _get_arithmetic_data(data[0], domain, cshape, matmul, audio_type)
+    result = _get_arithmetic_data(data[0], domain, cshape, matmul, audio_type,
+                                  complex)
 
     for d in range(1, len(data)):
         if matmul:
             kwargs['audio_type'] = audio_type
         result = operation(
             result,
-            _get_arithmetic_data(data[d], domain, cshape, matmul, audio_type),
+            _get_arithmetic_data(data[d], domain, cshape, matmul, audio_type,
+                                 complex),
             **kwargs)
 
     # check if to return an audio object
@@ -1579,7 +1581,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
             cshape, complex)
 
 
-def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
+def _get_arithmetic_data(data, domain, cshape, matmul, audio_type, complex):
     """
     Return data in desired domain without any fft normalization.
 
@@ -1596,6 +1598,8 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
         ``True`` if a  matrix multiplication is performed, ``False`` otherwise
     audio_type : type, None
         Type of the audio class of the operation's result.
+    complex : bool
+        Flag which indicates if the operation is performed on complex data
 
     Returns
     -------
@@ -1604,14 +1608,19 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
         Signal. `np.asarray(data)` otherwise.
     """
     if isinstance(data, (Signal, TimeData, FrequencyData)):
+        data_ = data.copy()
+        # check if complex casting of any input signal is necessarry
+        if complex:
+            if isinstance(data_, (Signal, TimeData)) and not data_.complex:
+                data_.complex = True
         # get signal in correct domain
         if domain == "time":
-            data_out = data.time.copy()
+            data_out = data_.time
         elif domain == "freq":
-            if isinstance(data, Signal):
-                data_out = data.freq_raw.copy()
+            if isinstance(data_, Signal):
+                data_out = data_.freq_raw
             else:
-                data_out = data.freq.copy()
+                data_out = data_.freq
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")
