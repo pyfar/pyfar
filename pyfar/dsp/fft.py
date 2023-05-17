@@ -444,3 +444,55 @@ def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
         return num_freq_bins
     else:
         return max(1, (num_freq_bins - 1) * 2)
+
+
+def _add_mirror_spectrum(data_single_sided, even):
+    """
+    Helper function that adds a mirror spectrum to single-sided
+    frequency data and applies fftshift, such that it matches the
+    output of `fft`.
+
+    Paramters
+    ---------
+    data : numpy array
+        array of single-sided frequency bins
+    even : flag which indicates if time data were even
+
+    Returns
+    -------
+    data : numpy array
+        array of double-sided frequency bins
+
+    """
+    if even:
+        mirror_spec = data_single_sided[..., 1:-1]
+    else:
+        mirror_spec = data_single_sided[..., 1:]
+
+    mirror_spec = np.conj(np.flip(mirror_spec, axis=-1))
+    data = np.concatenate((data_single_sided, mirror_spec), axis=-1)
+    data[..., 0] = np.real(data[..., 0])  # ansure DC bin is real valued
+    return sfft.fftshift(data, axes=-1)
+
+
+def _remove_mirror_spectrum(data_double_sided):
+    """
+    Helper function that removes the redundand mirror spectrum
+    of double-sided frequency data, such that it matches the
+    output of `rfft`.
+
+    Paramters
+    ---------
+    data : numpy array
+        array of double-sided frequency bins
+
+    Returns
+    -------
+    data : numpy array
+        array of single-sided frequency bins
+
+    """
+    N = data_double_sided.shape[-1]
+    idx = N/2
+    data_double_sided = sfft.ifftshift(data_double_sided)
+    return data_double_sided[..., :int(idx)+1]

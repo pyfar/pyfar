@@ -264,6 +264,21 @@ class TimeData(_Audio):
     def complex(self):
         return self._complex
 
+    @complex.setter
+    def complex(self, value):
+        # set from complex=True to complex=False
+        if self._complex and not value:
+            if np.all(np.abs(np.imag(self._data))) < 1e-15:
+                self._complex = value
+                self._data = self._data.astype(float)
+            else:
+                raise ValueError("Signal has complex-valued time data"
+                                 "complex flag connot be `False`.")
+        # from complex=False to complex=True
+        if not self._complex and value:
+            self._complex = value
+            self._data = self._data.astype(complex)
+
     @property
     def n_samples(self):
         """The number of samples."""
@@ -797,6 +812,45 @@ class Signal(FrequencyData, TimeData):
         self._sampling_rate = value
 
     @property
+    def complex(self):
+        return self._complex
+
+    @complex.setter
+    def complex(self, value):
+        # from complex=True to complex=False
+        if self._complex and not value:
+            if self._domain == 'time':
+                if np.all(np.abs(np.imag(self._data))) < 1e-15:
+                    self._complex = value
+                    self._data = self._data.astype(float)
+                else:
+                    raise ValueError("Signal has complex-valued time data"
+                                     "complex flag connot be `False`.")
+            if self._domain == 'freq':
+                # check for conjugate symmetry
+                if self._check_conjugate_symmetry():
+                    # and remove rendundant part of the spectrum
+                    self._data = fft._remove_mirror_spectrum(self._data)
+                    self._complex = value
+                else:
+                    raise ValueError("Signals frequency data are not"
+                                     "conjugate symmetric, complex flag"
+                                     "connot be `False`.")
+        # from complex=False to complex=True
+        if not self._complex and value:
+            if self._domain == 'time':
+                self._complex = value
+                self._data = self._data.astype(complex)
+            elif self._domain == 'freq':
+                # add mirror spectrum according to the "old" time data
+                self._data = fft._add_mirror_spectrum(self._data,
+                                                      fft._is_odd(
+                                                       self.n_samples))
+                self._complex = value
+                self._n_samples = fft._calc_n_samples_from_frequency_data(
+                    self._data.shape[-1], self.complex)
+
+    @property
     def times(self):
         """Time instances the signal is sampled at."""
         return np.atleast_1d(np.arange(0, self.n_samples) / self.sampling_rate)
@@ -916,6 +970,30 @@ class Signal(FrequencyData, TimeData):
         >>>     signal[idx] = channel
         """
         return _SignalIterator(self._data.__iter__(), self)
+
+    def _check_conjugate_symmetry(self):
+        """Check if the frequency bins are conjugate symmetric
+        around 0 Hz.
+
+        Returns
+        -------
+        results : bool
+            return `True` if fequency data are conjugate symmetric around
+            0 Hz, return `False` if not.
+
+        """
+        idx = self.find_nearest_frequency(0)
+
+        if fft._is_odd(self._n_samples):
+            mirror_spec = np.conj(np.flip(self._data[..., :idx], axis=-1))
+        else:
+            mirror_spec = np.conj(np.flip(self._data[..., 1:idx], axis=-1))
+
+        if mirror_spec.shape[-1] > 0 and np.allclose(
+                self._data[..., idx+1:], mirror_spec, rtol=1e-15):
+            return True
+        else:
+            return False
 
 
 class _SignalIterator(object):

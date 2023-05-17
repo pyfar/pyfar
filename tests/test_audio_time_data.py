@@ -77,6 +77,24 @@ def test_data_time_setter_complex_casting():
     assert time.time.dtype.kind == "c"
 
 
+def test_setter_complex():
+    # test setting complex flag from False to True
+    time = TimeData(data=[1, 0, -1], times=[0, .1, .3])
+    time.complex = True
+    assert time.time.dtype.kind == "c"
+
+    # test setting complex flag from True to False
+    time = TimeData(data=[1, 0, -1], times=[0, .1, .3], complex=True)
+    time.complex = False
+    assert time.time.dtype.kind == "f"
+
+    time = TimeData(data=[1 + 1j, 0 + 1j, -1 + 2j], times=[0, .1, .3],
+                    complex=True)
+    with pytest.raises(ValueError, match="Signal has complex-valued time data"
+                                         "complex flag connot be `False`."):
+        time.complex = False
+
+
 def test_reshape():
 
     # test reshape with tuple

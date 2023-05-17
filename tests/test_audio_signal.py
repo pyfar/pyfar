@@ -569,6 +569,47 @@ def test_setter_freq_raw_dtype():
         signal.freq_raw = ["1", "2", "3"]
 
 
+def test_setter_complex():
+    """ test setting complex flag of time and frequency domain signals"""
+    # test setting complex from False to True
+    # for time domain signals
+    signal = Signal([0, 1, 2], 44100, 4, "time")
+    signal.complex = True
+    assert signal.time.dtype.kind == "c"
+
+    # test setting complex from True to False
+    # for time domain signals
+    signal = Signal([0, 1, 2], 44100, 4, "time", complex=True)
+    signal.complex = False
+    assert signal.time.dtype.kind == "f"
+
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
+    with pytest.raises(ValueError, match="Signal has complex-valued time data"
+                                         "complex flag connot be `False`."):
+        signal.complex = False
+
+    # test setting complex from False to True
+    # for frequency domain signals
+    signal = Signal([0, 1, 2], 44100, 4, "time")
+    signal.domain = "freq"
+    signal.complex = True
+    assert signal.time.dtype.kind == "c"
+
+    # test setting complex from True to False
+    # for frequency domain signals
+    signal = Signal([0, 1, 2], 44100, 4, "time", complex=True)
+    signal.domain = "freq"
+    signal.complex = False
+    assert signal.time.dtype.kind == "f"
+
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
+    signal.domain = "freq"
+    with pytest.raises(ValueError, match="Signals frequency data are not"
+                                         "conjugate symmetric, complex flag"
+                                         "connot be `False`."):
+        signal.complex = False
+
+
 def test_frequencies():
     """
     Test computing the discrete frequencies of the rfft/fft
@@ -596,3 +637,22 @@ def test_frequencies():
     signal = Signal([0, 1, 2, 4], sampling_rate=sampling_rate, complex=True)
     desired = np.array([-24000, -12000, 0, 12000])
     npt.assert_allclose(signal.frequencies, desired)
+
+
+def test_check_conjugate_symmetry():
+    """test checking for conjugate symmetry"""
+    signal = pf.Signal([[1., 2., 3., 4., 5.], [1., 2., 3., 6., 6.]],
+                       sampling_rate=48000)
+    signal.domain = "freq"
+    assert not signal._check_conjugate_symmetry()
+
+    signal = pf.Signal([[1., 2., 3., 4., 5.], [1., 2., 3., 6., 6.]],
+                       sampling_rate=48000, complex=True)
+    signal.domain = "freq"
+    assert signal._check_conjugate_symmetry()
+
+    signal = pf.Signal([[1., 2., 3., 4., 5., 6., 7., 8.],
+                        [1., 2., 3., 6., 6., 7., 9., 9.]],
+                       sampling_rate=48000, complex=True)
+    signal.domain = "freq"
+    assert signal._check_conjugate_symmetry()
