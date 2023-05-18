@@ -626,11 +626,7 @@ class FractionalOctaveBands(pft.FilterSOS):
             self._cutoff_frequencies = fractional_octave_frequencies(
                 self._num_fractions, self._frequency_range, True)
 
-        coefficients = self._get_coefficients(
-                sampling_rate=self._sampling_rate,
-                num_fractions=self._num_fractions,
-                frequency_range=self._frequency_range,
-                order=self._order)
+        coefficients = self._get_coefficients()
 
         # initialize superclass
         super().__init__(coefficients, self._sampling_rate)
@@ -667,6 +663,11 @@ class FractionalOctaveBands(pft.FilterSOS):
         return self._order
 
     @property
+    def sampling_rate(self):
+        """Get the intended sampling rate of the filterbank"""
+        return self._sampling_rate
+
+    @property
     def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
          octave bands in Hz"""
@@ -689,27 +690,9 @@ class FractionalOctaveBands(pft.FilterSOS):
         """Get the number of bands in the filter bank"""
         return len(self._center_frequencies)
 
-    def _get_coefficients(
-            self,
-            sampling_rate,
-            num_fractions,
-            frequency_range,
-            order):
+    def _get_coefficients(self):
         """Calculate the second order section filter
         coefficients of a fractional octave band filter bank.
-
-        Parameters
-        ----------
-        sampling_rate : int
-            The sampling rate in Hz.
-        num_fractions : int
-            The number of bands an octave is divided into. Eg.,
-            1 refers to octave bands and 3 to third octave bands.
-        frequency_range : array, tuple
-            The lower and upper frequency limits.
-        order : integer, optional
-            Order of the Butterworth filter.
-
 
         Returns
         -------
@@ -730,7 +713,7 @@ class FractionalOctaveBands(pft.FilterSOS):
         freqs_lower = f_crit[0]
 
         # normalize interval such that the Nyquist frequency is 1
-        Wns = np.vstack((freqs_lower, freqs_upper)).T / sampling_rate * 2
+        Wns = np.vstack((freqs_lower, freqs_upper)).T / self.sampling_rate*2
 
         mask_skip = Wns[:, 0] >= 1
         if np.any(mask_skip):
@@ -903,13 +886,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
             self._cutoff_frequencies = fractional_octave_frequencies(
                 self._num_fractions, self._frequency_range, True)
 
-        self._coefficients = self._get_coefficients(
-                num_fractions=self._num_fractions,
-                frequency_range=self._frequency_range,
-                overlap=self._overlap,
-                slope=self._slope,
-                n_samples=self._n_samples,
-                sampling_rate=self._sampling_rate)
+        self._coefficients = self._get_coefficients()
 
         # initialize superclass
         super().__init__(self._coefficients, self._sampling_rate)
@@ -986,14 +963,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         """Get the number of samples per filter"""
         return self._n_samples
 
-    def _get_coefficients(
-            self,
-            num_fractions,
-            frequency_range,
-            overlap,
-            slope,
-            n_samples,
-            sampling_rate):
+    def _get_coefficients(self):
 
         """Calculate the filter coefficients of a fractional octave
         band filter bank.
@@ -1025,29 +995,29 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         """
 
         # number of frequency bins
-        n_bins = int(n_samples // 2 + 1)
+        n_bins = int(self.n_samples // 2 + 1)
 
         # fractional octave frequencies
         _, f_m, f_cut_off = fractional_octave_frequencies(
-            num_fractions, frequency_range, return_cutoff=True)
+            self.num_fractions, self.frequency_range, return_cutoff=True)
 
         # discard fractional octaves, if the center frequency exceeds
         # half the sampling rate
-        f_id = f_m < sampling_rate / 2
+        f_id = f_m < self.sampling_rate / 2
         if not np.all(f_id):
             warnings.warn("Skipping bands above the Nyquist frequency")
 
         # DFT lines of the lower cut-off and center frequency as in
         # Antoni, Eq. (14)
-        k_1 = np.round(n_samples *
-                       f_cut_off[0][f_id] / sampling_rate).astype(int)
-        k_m = np.round(n_samples *
-                       f_m[f_id] / sampling_rate).astype(int)
-        k_2 = np.round(n_samples *
-                       f_cut_off[1][f_id] / sampling_rate).astype(int)
+        k_1 = np.round(self.n_samples *
+                       f_cut_off[0][f_id] / self.sampling_rate).astype(int)
+        k_m = np.round(self.n_samples *
+                       f_m[f_id] / self.sampling_rate).astype(int)
+        k_2 = np.round(self.n_samples *
+                       f_cut_off[1][f_id] / self.sampling_rate).astype(int)
 
         # overlap in samples (symmetrical around the cut-off frequencies)
-        P = np.round(overlap / 2 * (k_2 - k_m)).astype(int)
+        P = np.round(self.overlap / 2 * (k_2 - k_m)).astype(int)
         # initialize array for magnitude values
         g = np.ones((len(k_m), n_bins))
 
@@ -1064,7 +1034,7 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
                 # in the original paper)
                 phi = p / P[b_idx]
                 # recursion if slope>0 as in Antoni, Eq. (20)
-                for _ in range(slope):
+                for _ in range(self.slope):
                     phi = np.sin(np.pi / 2 * phi)
                 # shift range to [0, 1]
                 phi = .5 * (phi + 1)
@@ -1086,13 +1056,17 @@ class ReconstructingFractionalOctaveBands(pft.FilterFIR):
         g = g**2
 
         # generate linear phase
-        frequencies = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
-        group_delay = n_samples / 2 / sampling_rate
+        frequencies = pf.dsp.fft.rfftfreq(self.n_samples,
+                                          self.sampling_rate)
+        group_delay = self.n_samples / 2 / self.sampling_rate
         g = g.astype(complex) * \
             np.exp(-1j * 2 * np.pi * frequencies * group_delay)
 
         # get impulse responses
-        time = pf.dsp.fft.irfft(g, n_samples, sampling_rate, 'none')
+        time = pf.dsp.fft.irfft(g,
+                                self.n_samples,
+                                self.sampling_rate,
+                                'none')
 
         # window
         time *= spsignal.windows.hann(time.shape[-1])
