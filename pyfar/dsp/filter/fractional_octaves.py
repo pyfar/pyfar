@@ -717,8 +717,9 @@ class FractionalOctaveBands(pft.FilterSOS):
         increased numeric accuracy and stability.
         """
 
-        f_crit = fractional_octave_frequencies(
-            num_fractions, frequency_range, return_cutoff=True)[2]
+        f_crit = fractional_octave_frequencies(self.num_fractions,
+                                               self.frequency_range,
+                                               return_cutoff=True)[2]
 
         freqs_upper = f_crit[1]
         freqs_lower = f_crit[0]
