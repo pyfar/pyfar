@@ -662,6 +662,11 @@ class FractionalOctaveBands(pft.FilterSOS):
         return self._frequency_range
 
     @property
+    def order(self):
+        """Get the order of the filterbank's filters"""
+        return self._order
+
+    @property
     def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
          octave bands in Hz"""
@@ -733,7 +738,7 @@ class FractionalOctaveBands(pft.FilterSOS):
             warnings.warn("Skipping bands above the Nyquist frequency")
 
         num_bands = np.sum(~mask_skip)
-        sos = np.zeros((num_bands, order, 6), np.double)
+        sos = np.zeros((num_bands, self.order, 6), np.double)
 
         for idx, Wn in enumerate(Wns):
             # in case the upper frequency limit is above Nyquist,
@@ -744,13 +749,16 @@ class FractionalOctaveBands(pft.FilterSOS):
                     bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
                 Wn = Wn[0]
                 btype = 'highpass'
-                sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
+                sos_hp = spsignal.butter(self.order,
+                                         Wn,
+                                         btype=btype,
+                                         output='sos')
                 sos_coeff = pf.classes.filter._extend_sos_coefficients(
-                    sos_hp, order)
+                    sos_hp, self.order)
             else:
                 btype = 'bandpass'
                 sos_coeff = spsignal.butter(
-                    order, Wn, btype=btype, output='sos')
+                    self.order, Wn, btype=btype, output='sos')
             sos[idx, :, :] = sos_coeff
         return sos
 
