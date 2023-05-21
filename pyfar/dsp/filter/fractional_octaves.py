@@ -621,15 +621,8 @@ class FractionalOctaveBands(pft.FilterSOS):
         self._order = order
         self._sampling_rate = sampling_rate
 
-        self._nominal_frequencies,\
-            self._center_frequencies,\
-            self._cutoff_frequencies = fractional_octave_frequencies(
-                self._num_fractions, self._frequency_range, True)
-
-        coefficients = self._get_coefficients()
-
         # initialize superclass
-        super().__init__(coefficients, self._sampling_rate)
+        super().__init__(self.coefficients, self._sampling_rate)
         self.comment = (
             f"Second order section 1/{num_fractions} fractional octave band"
             "filter of order {order}")
@@ -637,7 +630,7 @@ class FractionalOctaveBands(pft.FilterSOS):
     def __repr__(self):
         """Nice string representation of class instances"""
         return (f"Energy-preserving fractional "
-                f"octave filter bank with {self.n_bands} "
+                f"octave filter bank with {self.n_channels} "
                 f"bands between {self.frequency_range[0]} and "
                 f"{self.frequency_range[1]} Hz with "
                 f"{self.sampling_rate} Hz sampling rate and "
@@ -671,26 +664,25 @@ class FractionalOctaveBands(pft.FilterSOS):
     def nominal_frequencies(self):
         """Get the IEC center frequencies of the (fractional)
          octave bands in Hz"""
-        return self._nominal_frequencies
+        return fractional_octave_frequencies(
+                self._num_fractions, self._frequency_range)[0]
 
     @property
     def center_frequencies(self):
         """Get the exact center frequencies of the (fractional)
         octave bands in Hz"""
-        return self._center_frequencies
+        return fractional_octave_frequencies(
+                self._num_fractions, self._frequency_range)[1]
 
     @property
     def cutoff_frequencies(self):
         """Get the cutoff frequencies of the (fractional)
         octave bands in Hz"""
-        return self._cutoff_frequencies
+        return fractional_octave_frequencies(
+                self._num_fractions, self._frequency_range, True)[2]
 
     @property
-    def n_bands(self):
-        """Get the number of bands in the filter bank"""
-        return len(self._center_frequencies)
-
-    def _get_coefficients(self):
+    def coefficients(self):
         """Calculate the second order section filter
         coefficients of a fractional octave band filter bank.
 
