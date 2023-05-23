@@ -59,12 +59,6 @@ For more details see the table below.
        coordinate system in radians. 0 radians are defined in positive
        x-direction, pi/2 radians in positive y-direction and -pi/2 in negative
        y-direction (-:math:`\pi`/2 \leq lateral \leq :math:`\pi`/2).
-   * - :py:func:`azimuth`
-     - Angle in the x-z plane of the right handed Cartesian coordinate system
-       in radians. 0 radians elevation are defined in positive x-direction,
-       pi/2 radians in positive z-direction, pi in negative x-direction and
-       so on
-       (-:math:`\infty` < azimuth < :math:`\infty`, 2 :math:`\pi`-cyclic).
    * - :py:func:`phi`
      - Angle in the y-z plane of the right handed Cartesian coordinate system
        in radians. 0 radians elevation are defined in positive y-direction,

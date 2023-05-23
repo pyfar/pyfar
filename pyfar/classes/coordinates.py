@@ -210,7 +210,7 @@ class Coordinates():
             positive x direction. Used for spherical and cylindrical coordinate
             systems.
         elevation : ndarray, double
-            angle in radiant with respect to horizontal plane (x-z-axe).
+            angle in radiant with respect to horizontal plane (x-z-plane).
             Used for spherical coordinate systems.
         radius : ndarray, double
             distance to origin for each point. Used for spherical coordinate
@@ -242,7 +242,7 @@ class Coordinates():
             positive x direction. Used for spherical and cylindrical coordinate
             systems.
         colatitude : ndarray, double
-            angle in radiant with respect to polar axis (z-axe). Used for
+            angle in radiant with respect to polar axis (z-axis). Used for
             spherical coordinate systems.
         radius : ndarray, double
             distance to origin for each point. Used for spherical coordinate
@@ -270,7 +270,7 @@ class Coordinates():
         Parameters
         ----------
         lateral : ndarray, double
-            angle in radiant with respect to horizontal plane (x-y-axe).
+            angle in radiant with respect to horizontal plane (x-y-plane).
             Used for spherical coordinate systems.
         polar : ndarray, double
             angle in radiant of rotation from the x-z-plane facing towards
@@ -301,10 +301,10 @@ class Coordinates():
         Parameters
         ----------
         phi : ndarray, double
-            Tangle in radiant of rotation from the y-z-plane facing towards
+            angle in radiant of rotation from the y-z-plane facing towards
             positive y direction. Used for spherical coordinate systems.
         theta : ndarray, double
-            angle in radiant with respect to polar axis (x-axe). Used for
+            Angle in radiant with respect to polar axis (x-axis). Used for
             spherical coordinate systems.
         radius : ndarray, double
             distance to origin for each point. Used for spherical coordinate
@@ -826,7 +826,7 @@ class Coordinates():
         # convert to degrees
         if unit == 'deg':
             azimuth = azimuth / np.pi * 180
-        elif not unit == 'rad':
+        elif unit != 'rad':
             raise ValueError(
                 f"unit for {unit} is not implemented.")
 
@@ -983,7 +983,8 @@ class Coordinates():
 
     @property
     def spherical_front(self):
-        """returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius`. See
+        """Spherical coordinates according to the frontal pole coordinate system.
+        Returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
 
@@ -999,7 +1000,8 @@ class Coordinates():
 
     @property
     def cylindrical(self):
-        """returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
+        """Cylindrical coordinates.
+        Returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
         azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
@@ -1013,7 +1015,7 @@ class Coordinates():
 
     @property
     def x(self):
-        r"""x coordinate of a right handed Cartesian coordinate system in meter
+        r"""x coordinate of a right handed Cartesian coordinate system in meters
         (-\infty < x < \infty)."""
         self._check_empty()
         return self._x
@@ -1024,7 +1026,7 @@ class Coordinates():
 
     @property
     def y(self):
-        r"""y coordinate of a right handed Cartesian coordinate system in meter
+        r"""y coordinate of a right handed Cartesian coordinate system in meters
         (-\infty < y < \infty)."""
         self._check_empty()
         return self._y
@@ -1035,7 +1037,7 @@ class Coordinates():
 
     @property
     def z(self):
-        r"""z coordinate of a right handed Cartesian coordinate system in meter
+        r"""z coordinate of a right handed Cartesian coordinate system in meters
         (-\infty < z < \infty)."""
         self._check_empty()
         return self._z
@@ -1046,8 +1048,8 @@ class Coordinates():
 
     @property
     def rho(self):
-        r"""Distance perpendicular to the the z-axis of the right handed
-        Cartesian coordinate system (0 \leq radius < \infty)."""
+        r"""Radial distance to the the z-axis of the right handed
+        Cartesian coordinate system in meters (0 \leq radius < \infty)."""
         return self.cylindrical[..., 2]
 
     @rho.setter
