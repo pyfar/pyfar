@@ -68,15 +68,15 @@ class Coordinates():
         Parameters
         ----------
         points_1 : array like, number
-            points for the first coordinate.
+            Points for the first coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
             to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         points_2 : array like, number
-            points for the second coordinate.
+            Points for the second coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
             to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         points_3 : array like, number
-            points for the third coordinate.
+            Points for the third coordinate.
             ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
             to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
         domain : string
@@ -114,7 +114,7 @@ class Coordinates():
             is used, which is meters (``'met'``) for ``domain = 'cart'`` and
             radians (``'rad'``) in all other cases (See above).
         weights: array like, number, optional
-            weighting factors for coordinate points. The `shape` of the array
+            Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         sh_order : int, optional
@@ -124,7 +124,7 @@ class Coordinates():
             Maximum spherical harmonic order of the sampling grid.
             The default is ``None``.
         comment : str, optional
-            comment about the stored coordinate points. The default is
+            Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
 
@@ -185,11 +185,11 @@ class Coordinates():
         z : ndarray, double
             z-coordinate
         weights: array like, number, optional
-            weighting factors for coordinate points. The `shape` of the array
+            Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         comment : str, optional
-            comment about the stored coordinate points. The default is
+            Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
         return cls(x, y, z, weights=weights, comment=comment)
@@ -206,21 +206,21 @@ class Coordinates():
         Parameters
         ----------
         azimuth : ndarray, double
-            angle in radiant of rotation from the x-y-plane facing towards
+            Angle in radiant of rotation from the x-y-plane facing towards
             positive x direction. Used for spherical and cylindrical coordinate
             systems.
         elevation : ndarray, double
-            angle in radiant with respect to horizontal plane (x-z-plane).
+            Angle in radiant with respect to horizontal plane (x-z-plane).
             Used for spherical coordinate systems.
         radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
+            Distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, float, None, optional
-            weighting factors for coordinate points. The `shape` of the array
+            Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         comment : str, optional
-            comment about the stored coordinate points. The default is
+            Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
         x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
@@ -238,21 +238,21 @@ class Coordinates():
         Parameters
         ----------
         azimuth : ndarray, double
-            angle in radiant of rotation from the x-y-plane facing towards
+            Angle in radiant of rotation from the x-y-plane facing towards
             positive x direction. Used for spherical and cylindrical coordinate
             systems.
         colatitude : ndarray, double
-            angle in radiant with respect to polar axis (z-axis). Used for
+            Angle in radiant with respect to polar axis (z-axis). Used for
             spherical coordinate systems.
         radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
+            Distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, number, optional
-            weighting factors for coordinate points. The `shape` of the array
+            Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         comment : str, optional
-            comment about the stored coordinate points. The default is
+            Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
         x, y, z = sph2cart(azimuth, colatitude, radius)
@@ -270,20 +270,20 @@ class Coordinates():
         Parameters
         ----------
         lateral : ndarray, double
-            angle in radiant with respect to horizontal plane (x-y-plane).
+            Angle in radiant with respect to horizontal plane (x-y-plane).
             Used for spherical coordinate systems.
         polar : ndarray, double
-            angle in radiant of rotation from the x-z-plane facing towards
+            Angle in radiant of rotation from the x-z-plane facing towards
             positive x direction. Used for spherical coordinate systems.
         radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
+            Distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, number, optional
-            weighting factors for coordinate points. The `shape` of the array
+            Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         comment : str, optional
-            comment about the stored coordinate points. The default is
+            Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
         x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
@@ -301,20 +301,20 @@ class Coordinates():
         Parameters
         ----------
         phi : ndarray, double
-            angle in radiant of rotation from the y-z-plane facing towards
+            Angle in radiant of rotation from the y-z-plane facing towards
             positive y direction. Used for spherical coordinate systems.
         theta : ndarray, double
             Angle in radiant with respect to polar axis (x-axis). Used for
             spherical coordinate systems.
         radius : ndarray, double
-            distance to origin for each point. Used for spherical coordinate
+            Distance to origin for each point. Used for spherical coordinate
             systems.
         weights: array like, number, optional
-            weighting factors for coordinate points. The `shape` of the array
+            Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         comment : str, optional
-            comment about the stored coordinate points. The default is
+            Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
         y, z, x = sph2cart(phi, theta, radius)
@@ -332,20 +332,20 @@ class Coordinates():
         Parameters
         ----------
         azimuth : ndarray, double
-            angle in radiant of rotation from the x-y-plane facing towards
+            Angle in radiant of rotation from the x-y-plane facing towards
             positive x direction. Used for spherical and cylindrical coordinate
             systems.
         z : ndarray, double
             The z coordinate
         rho : ndarray, double
-            distance to origin for each point in the x-y-plane. Used for
+            Distance to origin for each point in the x-y-plane. Used for
             cylindrical coordinate systems.
         weights: array like, number, optional
-            weighting factors for coordinate points. The `shape` of the array
+            Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         comment : str, optional
-            comment about the stored coordinate points. The default is
+            Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
         """
         x, y, z = cyl2cart(azimuth, z, rho)
@@ -374,12 +374,12 @@ class Coordinates():
         Parameters
         ----------
         x, y, z: array like, float
-            points for the first, second, and third coordinate
+            Points for the first, second, and third coordinate
         convention : string, optional
-            convention in which the coordinate points are stored. The default
+            Convention in which the coordinate points are stored. The default
             is ``'right'``.
         unit : string, optional
-            unit in which the coordinate points are stored. The default is
+            Unit in which the coordinate points are stored. The default is
             ``'met'`` for meters.
         """
 
@@ -440,20 +440,20 @@ class Coordinates():
         Parameters
         ----------
         convention : string, optional
-            convention in which the coordinate points are stored. The default
+            Convention in which the coordinate points are stored. The default
             is ``'right'``.
         unit : string, optional
-            unit in which the coordinate points are stored. The default is
+            Unit in which the coordinate points are stored. The default is
            ``'met'``.
         convert : boolean, optional
-            if True, the internal representation of the samplings points will
+            If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
             ``False``, i.e., the internal presentation remains as it is.
 
         Returns
         -------
         points : numpy array
-            coordinate points. ``points[...,0]`` holds the points for the first
+            Coordinate points. ``points[...,0]`` holds the points for the first
             coordinate, ``points[...,1]`` the points for the second, and
             ``points[...,2]`` the points for the third coordinate.
         """
@@ -496,12 +496,12 @@ class Coordinates():
         Parameters
         ----------
         points_i: array like, number
-            points for the first, second, and third coordinate
+            Points for the first, second, and third coordinate
         convention : string, optional
-            convention in which the coordinate points are stored. The default
+            Convention in which the coordinate points are stored. The default
             is ``'top_colat'``.
         unit : string, optional
-            unit in which the coordinate points are stored. The default is
+            Unit in which the coordinate points are stored. The default is
             ``'rad'``.
         """
         warnings.warn((
@@ -596,20 +596,20 @@ class Coordinates():
         Parameters
         ----------
         convention : string, optional
-            convention in which the coordinate points are stored. The default
+            Convention in which the coordinate points are stored. The default
             is ``'top_colat'``.
         unit : string, optional
-            unit in which the coordinate points are stored. The default is
+            Unit in which the coordinate points are stored. The default is
             ``'rad'``.
         convert : boolean, optional
-            if True, the internal representation of the samplings points will
+            If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
             ``False``, i.e., the internal presentation remains as it is.
 
         Returns
         -------
         points : numpy array
-            coordinate points. ``points[...,0]`` holds the points for the first
+            Coordinate points. ``points[...,0]`` holds the points for the first
             coordinate, ``points[...,1]`` the points for the second, and
             ``points[...,2]`` the points for the third coordinate.
         """
@@ -703,12 +703,12 @@ class Coordinates():
         Parameters
         ----------
         points_i: array like, number
-            points for the first, second, and third coordinate
+            Points for the first, second, and third coordinate
         convention : string, optional
-            convention in which the coordinate points are stored. The default
+            Convention in which the coordinate points are stored. The default
             is ``'top'``.
         unit : string, optional
-            unit in which the coordinate points are stored. The default is
+            Unit in which the coordinate points are stored. The default is
             ``'rad'``.
         """
         warnings.warn((
@@ -780,20 +780,20 @@ class Coordinates():
         Parameters
         ----------
         convention : string, optional
-            convention in which the coordinate points are stored. The default
+            Convention in which the coordinate points are stored. The default
             is ``'right'``.
         unit : string, optional
-            unit in which the coordinate points are stored. The default is
+            Unit in which the coordinate points are stored. The default is
             ``'met'``.
         convert : boolean, optional
-            if True, the internal representation of the samplings points will
+            If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
             False, i.e., the internal presentation remains as it is.
 
         Returns
         -------
         points : numpy array
-            coordinate points. ``points[...,0]`` holds the points for the first
+            Coordinate points. ``points[...,0]`` holds the points for the first
             coordinate, ``points[...,1]`` the points for the second, and
             ``points[...,2]`` the points for the third coordinate.
         """
@@ -918,7 +918,8 @@ class Coordinates():
 
     @property
     def cartesian(self):
-        """Returns :py:func:`x`, :py:func:`y`, :py:func:`z`.
+        """
+        Returns :py:func:`x`, :py:func:`y`, :py:func:`z`.
         Right handed cartesian coordinate system. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
@@ -949,7 +950,8 @@ class Coordinates():
 
     @property
     def spherical_colatitude(self):
-        """returns :py:func:`azimuth`, :py:func:`colatitude`,
+        """
+        Returns :py:func:`azimuth`, :py:func:`colatitude`,
         :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
@@ -965,7 +967,8 @@ class Coordinates():
 
     @property
     def spherical_side(self):
-        """returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
+        """
+        Returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
         polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
@@ -983,7 +986,8 @@ class Coordinates():
 
     @property
     def spherical_front(self):
-        """Spherical coordinates according to the frontal pole coordinate system.
+        """
+        Spherical coordinates according to the frontal pole coordinate system.
         Returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
@@ -1000,7 +1004,8 @@ class Coordinates():
 
     @property
     def cylindrical(self):
-        """Cylindrical coordinates.
+        """
+        Cylindrical coordinates.
         Returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
@@ -1015,7 +1020,8 @@ class Coordinates():
 
     @property
     def x(self):
-        r"""x coordinate of a right handed Cartesian coordinate system in meters
+        r"""
+        X coordinate of a right handed Cartesian coordinate system in meters
         (-\infty < x < \infty)."""
         self._check_empty()
         return self._x
@@ -1026,7 +1032,8 @@ class Coordinates():
 
     @property
     def y(self):
-        r"""y coordinate of a right handed Cartesian coordinate system in meters
+        r"""
+        Y coordinate of a right handed Cartesian coordinate system in meters
         (-\infty < y < \infty)."""
         self._check_empty()
         return self._y
@@ -1037,7 +1044,8 @@ class Coordinates():
 
     @property
     def z(self):
-        r"""z coordinate of a right handed Cartesian coordinate system in meters
+        r"""
+        Z coordinate of a right handed Cartesian coordinate system in meters
         (-\infty < z < \infty)."""
         self._check_empty()
         return self._z
@@ -1048,7 +1056,8 @@ class Coordinates():
 
     @property
     def rho(self):
-        r"""Radial distance to the the z-axis of the right handed
+        r"""
+        Radial distance to the the z-axis of the right handed
         Cartesian coordinate system in meters (0 \leq radius < \infty)."""
         return self.cylindrical[..., 2]
 
@@ -1060,7 +1069,8 @@ class Coordinates():
 
     @property
     def radius(self):
-        r"""Radial distance to the origin of the coordinate
+        r"""
+        Radial distance to the origin of the coordinate
         system in meters (0 \leq radius < \infty)."""
         return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
@@ -1072,7 +1082,8 @@ class Coordinates():
 
     @property
     def azimuth(self):
-        r"""Counter clock-wise angle in the x-y plane of the right handed
+        r"""
+        Counter clock-wise angle in the x-y plane of the right handed
         Cartesian coordinate system in radians. 0 radians are defined in
         positive x-direction, pi/2 radians in positive y-direction and so on
         (-\infty < azimuth < \infty, 2pi-cyclic)."""
@@ -1086,7 +1097,8 @@ class Coordinates():
 
     @property
     def elevation(self):
-        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        r"""
+        Angle in the x-z plane of the right handed Cartesian coordinate
         system in radians. 0 radians elevation are defined in positive
         x-direction, pi/2 radians in positive z-direction, and -pi/2 in
         negative z-direction (0 \leq azimuth \leq pi). The elevation is a
@@ -1101,7 +1113,8 @@ class Coordinates():
 
     @property
     def colatitude(self):
-        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        r"""
+        Angle in the x-z plane of the right handed Cartesian coordinate
         system in radians. 0 radians elevation are defined in positive
         z-direction, pi/2 radians in positive x-direction, and pi in negative
         z-direction (pi/2 \leq azimuth \leq pi/2). The colatitude is a
@@ -1116,7 +1129,8 @@ class Coordinates():
 
     @property
     def phi(self):
-        r"""Angle in the y-z plane of the right handed Cartesian coordinate
+        r"""
+        Angle in the y-z plane of the right handed Cartesian coordinate
         system in radians. 0 radians elevation are defined in positive
         y-direction, pi/2 radians in positive z-direction, pi in negative
         y-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
@@ -1130,7 +1144,8 @@ class Coordinates():
 
     @property
     def theta(self):
-        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        r"""
+        Angle in the x-z plane of the right handed Cartesian coordinate
         system in radians. 0 radians elevation are defined in positive
         x-direction, pi/2 radians in positive z-direction, and pi in negative
         x-direction (0 \leq azimuth \leq pi)."""
@@ -1144,7 +1159,8 @@ class Coordinates():
 
     @property
     def lateral(self):
-        r"""Counter clock-wise angle in the x-y plane of the right handed
+        r"""
+        Counter clock-wise angle in the x-y plane of the right handed
         Cartesian coordinate system in radians. 0 radians are defined in
         positive x-direction, pi/2 radians in positive y-direction and -pi/2
         in negative y-direction (-pi/2 \leq lateral \leq pi/2)."""
@@ -1158,7 +1174,8 @@ class Coordinates():
 
     @property
     def polar(self):
-        r"""Angle in the x-z plane of the right handed Cartesian coordinate
+        r"""
+        Angle in the x-z plane of the right handed Cartesian coordinate
         system in radians. 0 radians elevation are defined in positive
         x-direction, pi/2 radians in positive z-direction, pi in negative
         x-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
@@ -1272,7 +1289,7 @@ class Coordinates():
             Plot points in red if ``mask==True``. The default is ``None``,
             which the same color for all points.
         kwargs : optional
-            keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
+            Keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
             If a mask is provided and the key `c` is contained in kwargs, it
             will be overwritten.
 
@@ -1301,18 +1318,18 @@ class Coordinates():
         Parameters
         ----------
         points_i : array like, number
-            first, second and third coordinate of the points to which the
+            First, second and third coordinate of the points to which the
             nearest neighbors are searched.
         k : int, optional
             Number of points to return. k must be > 0. The default is ``1``.
         domain : string, optional
-            domain of the points. The default is ``'cart'``.
+            Domain of the points. The default is ``'cart'``.
         convention: string, optional
-            convention of points. The default is ``'right'``.
+            Convention of points. The default is ``'right'``.
         unit : string, optional
-            unit of the points. The default is ``'met'`` for meters.
+            Unit of the points. The default is ``'met'`` for meters.
         show : bool, optional
-            show a plot of the coordinate points. The default is ``False``.
+            Show a plot of the coordinate points. The default is ``False``.
 
         Returns
         -------
@@ -1322,7 +1339,7 @@ class Coordinates():
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
-            mask that contains ``True`` at the positions of the selected points
+            Mask that contains ``True`` at the positions of the selected points
             and ``False`` otherwise. Mask is of shape ``cshape``.
 
         Notes
@@ -1368,21 +1385,21 @@ class Coordinates():
         Parameters
         ----------
         points_i : array like, number
-            first, second and third coordinate of the points to which the
+            First, second and third coordinate of the points to which the
             nearest neighbors are searched.
         distance : number
             Euclidean distance in meters in which the nearest points are
             searched. Must be >= 0.
         domain : string, optional
-            domain of the points. The default is ``'cart'``.
+            Domain of the points. The default is ``'cart'``.
         convention: string, optional
-            convention of points. The default is ``'right'``.
+            Convention of points. The default is ``'right'``.
         unit : string, optional
-            unit of the points. The default is ``'met'`` for meters.
+            Unit of the points. The default is ``'met'`` for meters.
         show : bool, optional
-            show a plot of the coordinate points. The default is ``False``.
+            Show a plot of the coordinate points. The default is ``False``.
         atol : float, optional
-            a tolerance that is added to `distance`. The default is`` 1e-15``.
+            A tolerance that is added to `distance`. The default is`` 1e-15``.
 
         Returns
         -------
@@ -1392,7 +1409,7 @@ class Coordinates():
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
-            mask that contains ``True`` at the positions of the selected points
+            Mask that contains ``True`` at the positions of the selected points
             and ``False`` otherwise. Mask is of shape ``cshape``.
 
         Notes
@@ -1438,21 +1455,21 @@ class Coordinates():
         Parameters
         ----------
         points_i : array like, number
-            first, second and third coordinate of the points to which the
+            First, second and third coordinate of the points to which the
             nearest neighbors are searched.
         distance : number
             Great circle distance in degrees in which the nearest points are
             searched. Must be >= 0 and <= 180.
         domain : string, optional
-            domain of the input points. The default is ``'sph'``.
+            Domain of the input points. The default is ``'sph'``.
         convention: string, optional
-            convention of the input points. The default is ``'top_colat'``.
+            Convention of the input points. The default is ``'top_colat'``.
         unit: string, optional
-            unit of the input points. The default is ``'rad'``.
+            Unit of the input points. The default is ``'rad'``.
         show : bool, optional
-            show a plot of the coordinate points. The default is ``False``.
+            Show a plot of the coordinate points. The default is ``False``.
         atol : float, optional
-            a tolerance that is added to `distance`. The default is ``1e-15``.
+            A tolerance that is added to `distance`. The default is ``1e-15``.
 
         Returns
         -------
@@ -1462,7 +1479,7 @@ class Coordinates():
             Missing neighbors are indicated with ``csize``. Also see Notes
             below.
         mask : boolean numpy array
-            mask that contains ``True`` at the positions of the selected points
+            Mask that contains ``True`` at the positions of the selected points
             and ``False`` otherwise. Mask is of shape ``cshape``.
 
         Notes
@@ -1516,18 +1533,18 @@ class Coordinates():
         Parameters
         ----------
         coordinate : str
-            coordinate for slicing.
+            Coordinate for slicing.
         unit : str
-            unit in which the value is passed
+            Unit in which the value is passed
         value : number
-            value of the coordinate around which the points are sliced.
+            Value of the coordinate around which the points are sliced.
         tol : number, optional
-           tolerance for slicing. Points are sliced within the range
-           ``[value-tol, value+tol]``. The default is ``0``.
+            Tolerance for slicing. Points are sliced within the range
+            ``[value-tol, value+tol]``. The default is ``0``.
         show : bool, optional
-            show a plot of the coordinate points. The default is ``False``.
+            Show a plot of the coordinate points. The default is ``False``.
         atol : number, optional
-            a tolerance that is added to `tol`. The default is ``1e-15``.
+            A tolerance that is added to `tol`. The default is ``1e-15``.
 
         Returns
         -------
@@ -1536,7 +1553,7 @@ class Coordinates():
             of the tuple matches :py:func:`~cdim`. The length of each array
             matches the number of selected points.
         mask : boolean numpy array
-            mask that contains True at the positions of the selected points and
+            Mask that contains True at the positions of the selected points and
             False otherwise. Mask is of shape self.cshape.
 
         Notes
@@ -1613,13 +1630,13 @@ class Coordinates():
         ----------
         rotation : str
             ``'quat'``
-                rotation given by quaternions.
+                Rotation given by quaternions.
             ``'matrix'``
-                rotation given by matrixes.
+                Rotation given by matrixes.
             ``'rotvec'``
-                rotation using rotation vectors.
+                Rotation using rotation vectors.
             ``'xyz'``
-                rotation using euler angles. Up to three letters. E.g., ``'x'``
+                Rotation using euler angles. Up to three letters. E.g., ``'x'``
                 will rotate about the x-axis only, while ``'xz'`` will rotate
                 about the x-axis and then about the z-axis. Use lower letters
                 for extrinsic rotations (rotations about the axes of the
@@ -1629,10 +1646,10 @@ class Coordinates():
                 body, which changes its orientation after each elemental
                 rotation).
         value : number, array like
-            amount of rotation in the format specified by `rotation` (see
+            Amount of rotation in the format specified by `rotation` (see
             above).
         degrees : bool, optional
-            pass angles in degrees if using ``'rotvec'`` or euler angles
+            Pass angles in degrees if using ``'rotvec'`` or euler angles
             (``'xyz'``). The default is ``True``. Use False to pass angles in
             radians.
         inverse : bool, optional
@@ -1750,7 +1767,6 @@ class Coordinates():
             Key 2j - 'down' : negative z (for debugging, meters and radians)
             Key 2k,l,m - coordinate_1,2,3 : [type, [lower_lim, upper_lim]]
                          type can be 'unbound', 'bound', or 'cyclic'
-
         """
 
         # define coordinate systems
@@ -2263,20 +2279,20 @@ def cart2sph(x, y, z):
     Parameters
     ----------
     x : numpy array, number
-        x values
+        X values
     y : numpy array, number
-        y values
+        Y values
     z : numpy array, number
-        z values
+        Z values
 
     Returns
     -------
     azimuth : numpy array, number
-        azimuth values
+        Azimuth values
     colatitude : numpy array, number
-        colatitude values
+        Colatitude values
     radius : numpy array, number
-        radii
+        Radii
 
     Notes
     -----
@@ -2321,20 +2337,20 @@ def sph2cart(azimuth, colatitude, radius):
     Parameters
     ----------
     azimuth : numpy array, number
-        azimuth values
+        Azimuth values
     colatitude : numpy array, number
-        colatitude values
+        Colatitude values
     radius : numpy array, number
-        radii
+        Radii
 
     Returns
     -------
     x : numpy array, number
-        x values
+        X values
     y : numpy array, number
-        y values
+        Y values
     z : numpy array, number
-        z vales
+        Z vales
     """
     azimuth = np.atleast_1d(azimuth)
     colatitude = np.atleast_1d(colatitude)
@@ -2378,20 +2394,20 @@ def cart2cyl(x, y, z):
     Parameters
     ----------
     x : numpy array, number
-        x values
+        X values
     y : numpy array, number
-        y values
+        Y values
     z : numpy array, number
-        z values
+        Z values
 
     Returns
     -------
     azimuth : numpy array, number
-        azimuth values
+        Azimuth values
     height : numpy array, number
-        height values
+        Height values
     radius : numpy array, number
-        radii
+        Radii
 
     Notes
     -----
@@ -2434,20 +2450,20 @@ def cyl2cart(azimuth, height, radius):
     Parameters
     ----------
     azimuth : numpy array, number
-        azimuth values
+        Azimuth values
     height : numpy array, number
-        height values
+        Height values
     radius : numpy array, number
-        radii
+        Radii
 
     Returns
     -------
     x : numpy array, number
-        x values
+        X values
     y : numpy array, number
-        y values
+        Y values
     z : numpy array, number
-        z values
+        Z values
 
     Notes
     -----
@@ -2479,16 +2495,16 @@ def _check_range_angle(angles, lower_limit, upper_limit):
     Parameters
     ----------
     angles : np.ndarray
-        input array angle
+        Input array angle
     lower_limit : float
-        lower limit for angle definition
+        Lower limit for angle definition
     upper_limit : float
-        upper limit for angle definition
+        Upper limit for angle definition
 
     Returns
     -------
     angles : np.ndarray
-        clipped input angles
+        Clipped input angles
     """
     if any(angles < lower_limit):
         mask = angles < lower_limit
