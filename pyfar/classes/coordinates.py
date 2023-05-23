@@ -118,8 +118,8 @@ class Coordinates():
             must match the `shape` of the individual coordinate arrays.
             The default is ``None``.
         sh_order : int, optional
-            This property will be deprecated in pyfar 0.8.0 in favor
-            of :py:func:`SamplingSphere`.
+            This property will be deprecated in pyfar 0.8.0 in favor of
+            :py:class:`spharpy.samplings.SamplingSphere`
 
             Maximum spherical harmonic order of the sampling grid.
             The default is ``None``.
@@ -165,7 +165,7 @@ class Coordinates():
         if sh_order is not None:
             warnings.warn((
                 "This function will be deprecated in pyfar 0.8.0 in favor "
-                "of SamplingSphere."),
+                "of spharpy.samplings.SamplingSphere."),
                     PyfarDeprecationWarning)
 
     @classmethod
@@ -846,11 +846,11 @@ class Coordinates():
     @property
     def sh_order(self):
         """This function will be deprecated in pyfar 0.8.0 in favor
-            of :py:func:`SamplingSphere`.
+            of :py:class:`spharpy.samplings.SamplingSphere`.
             Get the maximum spherical harmonic order."""
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of SamplingSphere."),
+            "of spharpy.samplings.SamplingSphere."),
                 PyfarDeprecationWarning)
 
         return self._sh_order
@@ -858,11 +858,11 @@ class Coordinates():
     @sh_order.setter
     def sh_order(self, value):
         """This function will be deprecated in pyfar 0.8.0 in favor
-            of :py:func:`SamplingSphere`.
+            of :py:class:`spharpy.samplings.SamplingSphere`.
             Set the maximum spherical harmonic order."""
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of SamplingSphere."),
+            "of spharpy.samplings.SamplingSphere."),
                 PyfarDeprecationWarning)
 
         self._sh_order = int(value)
