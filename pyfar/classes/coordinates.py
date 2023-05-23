@@ -191,6 +191,19 @@ class Coordinates():
         comment : str, optional
             Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
+
+        Examples
+        --------
+
+        Create a coordinates object
+
+        >>> import pyfar as pf
+        >>> coordinates = pf.Coordinates.from_cartesian(0, 0, 1)
+
+        Or the using init
+
+        >>> import pyfar as pf
+        >>> coordinates = pf.Coordinates(0, 0, 1)
         """
         return cls(x, y, z, weights=weights, comment=comment)
 
@@ -222,7 +235,16 @@ class Coordinates():
         comment : str, optional
             Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
+
+        Examples
+        --------
+
+        Create a coordinates object
+
+        >>> import pyfar as pf
+        >>> coordinates = pf.Coordinates.from_spherical_elevation(0, 0, 1)
         """
+
         x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
         return cls(x, y, z, weights=weights, comment=comment)
 
@@ -254,7 +276,16 @@ class Coordinates():
         comment : str, optional
             Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
+
+        Examples
+        --------
+
+        Create a coordinates object
+
+        >>> import pyfar as pf
+        >>> coordinates = pf.Coordinates.from_spherical_colatitude(0, 0, 1)
         """
+
         x, y, z = sph2cart(azimuth, colatitude, radius)
         return cls(x, y, z, weights=weights, comment=comment)
 
@@ -285,7 +316,16 @@ class Coordinates():
         comment : str, optional
             Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
+
+        Examples
+        --------
+
+        Create a coordinates object
+
+        >>> import pyfar as pf
+        >>> coordinates = pf.Coordinates.from_spherical_side(0, 0, 1)
         """
+
         x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
         return cls(x, y, z, weights=weights, comment=comment)
 
@@ -316,7 +356,16 @@ class Coordinates():
         comment : str, optional
             Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
+
+        Examples
+        --------
+
+        Create a coordinates object
+
+        >>> import pyfar as pf
+        >>> coordinates = pf.Coordinates.from_spherical_front(0, 0, 1)
         """
+
         y, z, x = sph2cart(phi, theta, radius)
         return cls(x, y, z, weights=weights, comment=comment)
 
@@ -347,7 +396,16 @@ class Coordinates():
         comment : str, optional
             Comment about the stored coordinate points. The default is
             ``""``, which initializes an empty string.
+
+        Examples
+        --------
+
+        Create a coordinates object
+
+        >>> import pyfar as pf
+        >>> coordinates = pf.Coordinates.from_cylindrical(0, 0, 1)
         """
+
         x, y, z = cyl2cart(azimuth, z, rho)
         return cls(x, y, z, weights=weights, comment=comment)
 
