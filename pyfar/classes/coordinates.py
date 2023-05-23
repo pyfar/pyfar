@@ -675,7 +675,7 @@ class Coordinates():
             angles_2 = angles_2 / np.pi * 180
         elif not unit == 'rad':
             raise ValueError(
-                f"unit for {unit} is not implemented.")
+                f"{unit} is not implemented.")
 
         # return points
         return angles_1, angles_2, radius
@@ -740,7 +740,7 @@ class Coordinates():
             azimuth = azimuth / 180 * np.pi
         elif not unit == 'rad':
             raise ValueError(
-                f"unit for {unit} is not implemented.")
+                f"{unit} is not implemented.")
 
         # ... from cylindrical coordinate systems
         if convention == 'top':
@@ -932,7 +932,9 @@ class Coordinates():
 
     @property
     def spherical_elevation(self):
-        """Returns :py:func:`azimuth`, :py:func:`elevation`,
+        """
+        Spherical coordinates according to the top pole elevation coordinate
+        system. :py:func:`azimuth`, :py:func:`elevation`,
         :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
@@ -943,7 +945,8 @@ class Coordinates():
 
     @spherical_elevation.setter
     def spherical_elevation(self, value):
-        value[..., 1] = _check_range_angle(value[..., 1], -np.pi/2, np.pi/2)
+        value[..., 1] = _check_array_limits(
+            value[..., 1], -np.pi/2, np.pi/2, 'elevation angle')
         x, y, z = sph2cart(
             value[..., 0], np.pi / 2 - value[..., 1], value[..., 2])
         self._set_points(x, y, z)
@@ -951,6 +954,8 @@ class Coordinates():
     @property
     def spherical_colatitude(self):
         """
+        Spherical coordinates according to the top pole colatitude coordinate
+        system.
         Returns :py:func:`azimuth`, :py:func:`colatitude`,
         :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
@@ -961,13 +966,15 @@ class Coordinates():
 
     @spherical_colatitude.setter
     def spherical_colatitude(self, value):
-        value[..., 1] = _check_range_angle(value[..., 1], 0, np.pi)
+        value[..., 1] = _check_array_limits(
+            value[..., 1], 0, np.pi, 'colatitude angle')
         x, y, z = sph2cart(value[..., 0], value[..., 1], value[..., 2])
         self._set_points(x, y, z)
 
     @property
     def spherical_side(self):
         """
+        Spherical coordinates according to the side pole coordinate system.
         Returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
@@ -979,7 +986,8 @@ class Coordinates():
 
     @spherical_side.setter
     def spherical_side(self, value):
-        value[..., 0] = _check_range_angle(value[..., 0], -np.pi/2, np.pi/2)
+        value[..., 0] = _check_array_limits(
+            value[..., 0], -np.pi/2, np.pi/2, 'polar angle')
         x, z, y = sph2cart(
             value[..., 1], np.pi / 2 - value[..., 0], value[..., 2])
         self._set_points(x, y, z)
@@ -998,7 +1006,8 @@ class Coordinates():
 
     @spherical_front.setter
     def spherical_front(self, value):
-        value[..., 1] = _check_range_angle(value[..., 1], 0, np.pi)
+        value[..., 1] = _check_array_limits(
+            value[..., 1], 0, np.pi, 'phi angle')
         y, z, x = sph2cart(value[..., 0], value[..., 1], value[..., 2])
         self._set_points(x, y, z)
 
@@ -2488,36 +2497,47 @@ def cyl2cart(azimuth, height, radius):
     return x, y, z
 
 
-def _check_range_angle(angles, lower_limit, upper_limit):
-    """colatitude will be clipped to its range if deviations are below 2 eps
+def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
+    """
+    Values will be clipped to its range if deviations are below 2 eps
     for 32 bit float numbers otherwise Error is raised.
+
+    Notes
+    -----
+    This is mostly used for the colatitude angle.
 
     Parameters
     ----------
-    angles : np.ndarray
+    values : np.ndarray
         Input array angle
     lower_limit : float
         Lower limit for angle definition
     upper_limit : float
         Upper limit for angle definition
+    variable_name : string
+        Name of variable, just relevant for error message. 'value' by default.
 
     Returns
     -------
-    angles : np.ndarray
-        Clipped input angles
+    values : np.ndarray
+        Clipped input values
     """
-    if any(angles < lower_limit):
-        mask = angles < lower_limit
+    if variable_name is None:
+        variable_name = 'value'
+    if any(values < lower_limit):
+        mask = values < lower_limit
         eps = np.finfo(float).eps
-        if any(angles[mask]+2*eps < lower_limit):
+        if any(values[mask]+2*eps < lower_limit):
             raise ValueError(
-                f'one or more angles are below {lower_limit} including 2 eps')
-        angles[mask] = lower_limit
-    if any(angles > upper_limit):
-        mask = angles > upper_limit
+                f'one or more {variable_name} are below '
+                f'{lower_limit} including 2 eps')
+        values[mask] = lower_limit
+    if any(values > upper_limit):
+        mask = values > upper_limit
         eps = np.finfo(float).eps
-        if any(angles[mask] + 2*eps > upper_limit):
+        if any(values[mask] + 2*eps > upper_limit):
             raise ValueError(
-                f'one or more angles are above {upper_limit} including 2 eps')
-        angles[mask] = upper_limit
-    return angles
+                f'one or more {variable_name} are above '
+                f'{upper_limit} including 2 eps')
+        values[mask] = upper_limit
+    return values
