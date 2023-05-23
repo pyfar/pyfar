@@ -171,19 +171,23 @@ class Coordinates():
     @classmethod
     def from_cartesian(
             cls, x, y, z, weights: np.array = None, comment: str = ""):
-        """Create a Coordinates class object from a set of points in the
+        r"""
+        Create a Coordinates class object from a set of points in the
         right-handed cartesian coordinate system. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information.
 
         Parameters
         ----------
-        x : ndarray, double
-            x-coordinate
-        y : ndarray, double
-            y-coordinate
-        z : ndarray, double
-            z-coordinate
+        x : ndarray, number
+            X coordinate of a right handed Cartesian coordinate system in
+            meters (-\infty < x < \infty).
+        y : ndarray, number
+            Y coordinate of a right handed Cartesian coordinate system in
+            meters (-\infty < y < \infty).
+        z : ndarray, number
+            Z coordinate of a right handed Cartesian coordinate system in
+            meters (-\infty < z < \infty).
         weights: array like, number, optional
             Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
