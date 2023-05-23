@@ -1058,7 +1058,7 @@ class Coordinates():
 
     @property
     def radius(self):
-        r"""Distance to the origin of the right handed Cartesian coordinate
+        r"""Radial distance to the origin of the coordinate
         system in meters (0 \leq radius < \infty)."""
         return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
