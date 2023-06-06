@@ -820,17 +820,13 @@ class Signal(FrequencyData, TimeData):
         # from complex=True to complex=False
         if self._complex and not value:
             if self._domain == 'time':
-                if np.all(np.abs(np.imag(self._data))) < 1e-15:
-                    self._complex = value
-                    self._data = self._data.astype(float)
-                else:
-                    raise ValueError("Signal has complex-valued time data"
-                                     "complex flag connot be `False`.")
+                # call complex setter of timeData
+                super(Signal, self.__class__).complex.fset(self, value)
             if self._domain == 'freq':
                 # check for conjugate symmetry
                 if self._check_conjugate_symmetry():
                     # and remove rendundant part of the spectrum
-                    self._data = fft._remove_mirror_spectrum(self._data)
+                    self._data = fft.remove_mirror_spectrum(self._data)
                     self._complex = value
                 else:
                     raise ValueError("Signals frequency data are not"
@@ -839,16 +835,14 @@ class Signal(FrequencyData, TimeData):
         # from complex=False to complex=True
         if not self._complex and value:
             if self._domain == 'time':
-                self._complex = value
-                self._data = self._data.astype(complex)
+                # call complex setter of timeData
+                super(Signal, self.__class__).complex.fset(self, value)
             elif self._domain == 'freq':
                 # add mirror spectrum according to the "old" time data
-                self._data = fft._add_mirror_spectrum(self._data,
-                                                      fft._is_odd(
-                                                       self.n_samples))
+                self._data = fft.add_mirror_spectrum(self._data,
+                                                     fft._is_odd(
+                                                      self.n_samples))
                 self._complex = value
-                self._n_samples = fft._calc_n_samples_from_frequency_data(
-                    self._data.shape[-1], self.complex)
 
     @property
     def times(self):
