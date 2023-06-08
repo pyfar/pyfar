@@ -457,7 +457,9 @@ def add_mirror_spectrum(data_single_sided, even):
     data : numpy array
         M-dimensional array of single-sided spectrum of shape (..., N)
         containing N frequency bins.
-    even : flag which indicates if time data were even
+    even : bool
+        flag which indicates if the number of sampels of the time
+        data were even.
 
     Returns
     -------
@@ -473,7 +475,7 @@ def add_mirror_spectrum(data_single_sided, even):
 
     mirror_spec = np.conj(np.flip(mirror_spec, axis=-1))
     data = np.concatenate((data_single_sided, mirror_spec), axis=-1)
-    data[..., 0] = np.real(data[..., 0])  # ansure DC bin is real valued
+    data[..., 0] = np.real(data[..., 0])  # ensure DC bin is real valued
     return sfft.fftshift(data, axes=-1)
 
 
