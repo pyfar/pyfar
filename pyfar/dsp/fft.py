@@ -452,7 +452,6 @@ def add_mirror_spectrum(data_single_sided, even):
     and applies fftshift. The output is a double-sided
     spectrum that matches the format of :py:func:`~fft`.
 
-
     Paramters
     ---------
     data : numpy array
