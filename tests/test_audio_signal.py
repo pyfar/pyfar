@@ -569,6 +569,35 @@ def test_setter_freq_raw_dtype():
         signal.freq_raw = ["1", "2", "3"]
 
 
+@pytest.mark.parametrize("domain", ["time", "freq"])
+@pytest.mark.parametrize("complex, kind", [(True, "c"), (False, "f")])
+def test_setter_complex_(domain, complex, kind):
+    """ test setting complex flag of time and frequency domain signals"""
+    # test setting complex from False to True
+    # for time domain signals
+
+    signal = Signal([0, 1, 2], 44100, 4, "time")
+    signal.domain = domain
+
+    signal.complex = complex
+    assert signal.time.dtype.kind == kind
+
+
+def test_setter_complex_assert():
+    """ test setting complex flag of time and frequency domain signals"""
+
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
+    with pytest.raises(ValueError, match="Signal has complex-valued time data"
+                                         "complex flag connot be `False`."):
+        signal.complex = False
+
+    signal.domain = "freq"
+    with pytest.raises(ValueError, match="Signals frequency data are not"
+                                         "conjugate symmetric, complex flag"
+                                         "connot be `False`."):
+        signal.complex = False
+
+
 def test_setter_complex():
     """ test setting complex flag of time and frequency domain signals"""
     # test setting complex from False to True

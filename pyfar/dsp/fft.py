@@ -436,8 +436,8 @@ def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
 
     Returns
     -------
-    n_bins : int
-        Resulting number of frequency bins
+    n_samples : int
+        Resulting number of time samples.
 
     """
     if complex:
@@ -446,22 +446,26 @@ def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
         return max(1, (num_freq_bins - 1) * 2)
 
 
-def _add_mirror_spectrum(data_single_sided, even):
+def add_mirror_spectrum(data_single_sided, even):
     """
-    Helper function that adds a mirror spectrum to single-sided
-    frequency data and applies fftshift, such that it matches the
-    output of `fft`.
+    Adds mirror spectrum to single-sided frequency data
+    and applies fftshift. The output is a double-sided
+    spectrum that matches the format of :py:func:`~fft`.
 
     Paramters
     ---------
     data : numpy array
-        array of single-sided frequency bins
-    even : flag which indicates if time data were even
+        M-dimensional array of single-sided spectrum of shape (..., N)
+        containing N frequency bins.
+    even : bool
+        flag which indicates if the number of sampels of the time
+        data were even.
 
     Returns
     -------
     data : numpy array
-        array of double-sided frequency bins
+        M-dimensional array of double-sided spectrum of shape (..., N)
+        containing N frequency bins.
 
     """
     if even:
@@ -471,25 +475,27 @@ def _add_mirror_spectrum(data_single_sided, even):
 
     mirror_spec = np.conj(np.flip(mirror_spec, axis=-1))
     data = np.concatenate((data_single_sided, mirror_spec), axis=-1)
-    data[..., 0] = np.real(data[..., 0])  # ansure DC bin is real valued
+    data[..., 0] = np.real(data[..., 0])  # ensure DC bin is real valued
     return sfft.fftshift(data, axes=-1)
 
 
-def _remove_mirror_spectrum(data_double_sided):
+def remove_mirror_spectrum(data_double_sided):
     """
-    Helper function that removes the redundand mirror spectrum
-    of double-sided frequency data, such that it matches the
-    output of `rfft`.
+    Removes the redundand mirror spectrum
+    of double-sided frequency data. The output is a single-sided
+    spectrum that matches the format of :py:func:`~rfft`.
 
     Paramters
     ---------
-    data : numpy array
-        array of double-sided frequency bins
+    data_double_sided : numpy array
+        M-dimensional array of double-sided spectrum of shape (..., N)
+        containing N frequency bins.
 
     Returns
     -------
     data : numpy array
-        array of single-sided frequency bins
+        M-dimensional array of single-sided spectrum of shape (..., N)
+        containing N frequency bins.
 
     """
     N = data_double_sided.shape[-1]
