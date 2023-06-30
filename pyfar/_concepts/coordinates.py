@@ -63,7 +63,8 @@ For more details see the table below.
      - Angle in the y-z plane of the right handed Cartesian coordinate system
        in radians. 0 radians elevation are defined in positive y-direction,
        pi/2 radians in positive z-direction, pi in negative y-direction and
-       so on (-:math:`\infty` < frontal < :math:`\infty`, 2 :math:`\pi`-cyclic).
+       so on
+       (-:math:`\infty` < frontal < :math:`\infty`, 2 :math:`\pi`-cyclic).
    * - :py:func:`upper`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. 0 radians elevation are defined in positive x-direction,
