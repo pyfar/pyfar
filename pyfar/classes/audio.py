@@ -209,7 +209,7 @@ class TimeData(_Audio):
         comment : str, optional
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
-        complex : bool
+        complex : bool, optional
             A flag which indicates if the raw data are real or complex-valued.
             The default is ``False``.
 
