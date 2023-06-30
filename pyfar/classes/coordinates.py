@@ -335,7 +335,7 @@ class Coordinates():
 
     @classmethod
     def from_spherical_front(
-            cls, phi, theta, radius, weights: np.array = None,
+            cls, frontal, upper, radius, weights: np.array = None,
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
@@ -344,10 +344,10 @@ class Coordinates():
 
         Parameters
         ----------
-        phi : ndarray, double
+        frontal : ndarray, double
             Angle in radiant of rotation from the y-z-plane facing towards
             positive y direction. Used for spherical coordinate systems.
-        theta : ndarray, double
+        upper : ndarray, double
             Angle in radiant with respect to polar axis (x-axis). Used for
             spherical coordinate systems.
         radius : ndarray, double
@@ -370,7 +370,7 @@ class Coordinates():
         >>> coordinates = pf.Coordinates.from_spherical_front(0, 0, 1)
         """
 
-        y, z, x = sph2cart(phi, theta, radius)
+        y, z, x = sph2cart(frontal, upper, radius)
         return cls(x, y, z, weights=weights, comment=comment)
 
     @classmethod
@@ -1058,18 +1058,18 @@ class Coordinates():
     def spherical_front(self):
         """
         Spherical coordinates according to the frontal pole coordinate system.
-        Returns :py:func:`phi`, :py:func:`theta`, :py:func:`radius`. See
+        Returns :py:func:`frontal`, :py:func:`upper`, :py:func:`radius`. See
         :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
         more information."""
 
-        phi, theta, radius = cart2sph(self.y, self.z, self.x)
+        frontal, upper, radius = cart2sph(self.y, self.z, self.x)
         return np.atleast_2d(np.moveaxis(
-            np.array([phi, theta, radius]), 0, -1))
+            np.array([frontal, upper, radius]), 0, -1))
 
     @spherical_front.setter
     def spherical_front(self, value):
         value[..., 1] = _check_array_limits(
-            value[..., 1], 0, np.pi, 'phi angle')
+            value[..., 1], 0, np.pi, 'frontal angle')
         y, z, x = sph2cart(value[..., 0], value[..., 1], value[..., 2])
         self._set_points(x, y, z)
 
@@ -1199,7 +1199,7 @@ class Coordinates():
         self.spherical_colatitude = spherical_colatitude
 
     @property
-    def phi(self):
+    def frontal(self):
         r"""
         Angle in the y-z plane of the right handed Cartesian coordinate
         system in radians. 0 radians elevation are defined in positive
@@ -1207,14 +1207,14 @@ class Coordinates():
         y-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
         return self.spherical_front[..., 0]
 
-    @phi.setter
-    def phi(self, phi):
+    @frontal.setter
+    def frontal(self, frontal):
         spherical_front = self.spherical_front
-        spherical_front[..., 0] = phi
+        spherical_front[..., 0] = frontal
         self.spherical_front = spherical_front
 
     @property
-    def theta(self):
+    def upper(self):
         r"""
         Angle in the x-z plane of the right handed Cartesian coordinate
         system in radians. 0 radians elevation are defined in positive
@@ -1222,10 +1222,10 @@ class Coordinates():
         x-direction (0 \leq azimuth \leq pi)."""
         return self.spherical_front[..., 1]
 
-    @theta.setter
-    def theta(self, theta):
+    @upper.setter
+    def upper(self, upper):
         spherical_front = self.spherical_front
-        spherical_front[..., 1] = theta
+        spherical_front[..., 1] = upper
         self.spherical_front = spherical_front
 
     @property

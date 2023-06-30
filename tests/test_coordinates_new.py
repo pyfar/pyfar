@@ -59,7 +59,7 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
 
 
 @pytest.mark.parametrize(
-    'x, y, z, phi, theta', [
+    'x, y, z, frontal, upper', [
         (0, 1, 0, 0, np.pi/2),
         (0, -1, 0, np.pi, np.pi/2),
         (0, 0, 1, np.pi/2, np.pi/2),
@@ -67,15 +67,15 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
         (1, 0, 0, 0, 0),
         (-1, 0, 0, 0, np.pi),
     ])
-def test_getter_sph_front_from_cart(x, y, z, phi, theta):
+def test_getter_sph_front_from_cart(x, y, z, frontal, upper):
     coords = Coordinates(x, y, z)
-    np.testing.assert_allclose(coords.phi, phi, atol=1e-15)
-    np.testing.assert_allclose(coords.theta, theta, atol=1e-15)
+    np.testing.assert_allclose(coords.frontal, frontal, atol=1e-15)
+    np.testing.assert_allclose(coords.upper, upper, atol=1e-15)
     np.testing.assert_allclose(
-        coords.spherical_front, np.atleast_2d([phi, theta, 1]), atol=1e-15)
+        coords.spherical_front, np.atleast_2d([frontal, upper, 1]), atol=1e-15)
     coords = Coordinates(0, 5, 0)
-    coords.phi = phi
-    coords.theta = theta
+    coords.frontal = frontal
+    coords.upper = upper
     coords.radius = 1
     np.testing.assert_allclose(coords.x, x, atol=1e-15)
     np.testing.assert_allclose(coords.y, y, atol=1e-15)
@@ -334,7 +334,7 @@ def test_find_slice_error():
     'coordinate, min, max', [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
-        ('phi', 0, 2*np.pi),
+        ('frontal', 0, 2*np.pi),
     ])
 def test_angle_limits_cyclic(coordinate, min, max):
     """Test different queries for find slice."""
@@ -351,7 +351,7 @@ def test_angle_limits_cyclic(coordinate, min, max):
     'coordinate, min, max', [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
-        ('phi', 0, 2*np.pi),
+        ('frontal', 0, 2*np.pi),
         ('radius', 0, np.inf),
         ('rho', 0, np.inf),
     ])
@@ -369,7 +369,7 @@ def test_angle_cyclic_limits(coordinate, min, max):
 @pytest.mark.parametrize(
     'coordinate, min, max', [
         ('colatitude', 0, np.pi),
-        ('theta', 0, np.pi),
+        ('upper', 0, np.pi),
         ('elevation', -np.pi/2, np.pi/2),
         ('lateral', -np.pi/2, np.pi/2),
         ('radius', 0, np.inf),
@@ -437,8 +437,8 @@ def test_coordinates_init_from_cartesian_with(x, y, z, weights, comment):
 @pytest.mark.parametrize('y', [0, 1, -1.])
 @pytest.mark.parametrize('z', [0, 1, -1.])
 def test_coordinates_init_from_spherical_colatitude(x, y, z):
-    theta, phi, rad = cart2sph(x, y, z)
-    coords = Coordinates.from_spherical_colatitude(theta, phi, rad)
+    upper, frontal, rad = cart2sph(x, y, z)
+    coords = Coordinates.from_spherical_colatitude(upper, frontal, rad)
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     npt.assert_allclose(coords._x, x, atol=1e-15)
@@ -453,9 +453,9 @@ def test_coordinates_init_from_spherical_colatitude(x, y, z):
 @pytest.mark.parametrize('comment', ['0'])
 def test_coordinates_init_from_spherical_colatitude_with(
         x, y, z, weights, comment):
-    theta, phi, rad = cart2sph(x, y, z)
+    upper, frontal, rad = cart2sph(x, y, z)
     coords = Coordinates.from_spherical_colatitude(
-        theta, phi, rad, weights, comment)
+        upper, frontal, rad, weights, comment)
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     npt.assert_allclose(coords._x, x, atol=1e-15)
@@ -503,18 +503,18 @@ def test_coordinates_init_from_spherical_side_with(
     coords.weights == weights
 
 
-@pytest.mark.parametrize('phi', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('theta', [0, np.pi/2, np.pi])
+@pytest.mark.parametrize('frontal', [0, np.pi, -np.pi, 3*np.pi])
+@pytest.mark.parametrize('upper', [0, np.pi/2, np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
 @pytest.mark.parametrize('weights', [1])
 @pytest.mark.parametrize('comment', ['0'])
 def test_coordinates_init_from_spherical_front_with(
-        phi, theta, radius, weights, comment):
+        frontal, upper, radius, weights, comment):
     coords = Coordinates.from_spherical_front(
-        phi, theta, radius, weights, comment)
+        frontal, upper, radius, weights, comment)
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
-    y, z, x = sph2cart(phi, theta, radius)
+    y, z, x = sph2cart(frontal, upper, radius)
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
@@ -567,14 +567,14 @@ def test_coordinates_init_from_spherical_side(lateral, polar, radius):
     npt.assert_allclose(coords._z, z, atol=1e-15)
 
 
-@pytest.mark.parametrize('phi', [0, np.pi, -np.pi, 3*np.pi])
-@pytest.mark.parametrize('theta', [0, np.pi/2, np.pi])
+@pytest.mark.parametrize('frontal', [0, np.pi, -np.pi, 3*np.pi])
+@pytest.mark.parametrize('upper', [0, np.pi/2, np.pi])
 @pytest.mark.parametrize('radius', [0, 1, -1.])
-def test_coordinates_init_from_spherical_front(phi, theta, radius):
-    coords = Coordinates.from_spherical_front(phi, theta, radius)
+def test_coordinates_init_from_spherical_front(frontal, upper, radius):
+    coords = Coordinates.from_spherical_front(frontal, upper, radius)
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
-    y, z, x = sph2cart(phi, theta, radius)
+    y, z, x = sph2cart(frontal, upper, radius)
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)

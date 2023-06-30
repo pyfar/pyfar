@@ -59,16 +59,16 @@ For more details see the table below.
        coordinate system in radians. 0 radians are defined in positive
        x-direction, pi/2 radians in positive y-direction and -pi/2 in negative
        y-direction (-:math:`\pi`/2 \leq lateral \leq :math:`\pi`/2).
-   * - :py:func:`phi`
+   * - :py:func:`frontal`
      - Angle in the y-z plane of the right handed Cartesian coordinate system
        in radians. 0 radians elevation are defined in positive y-direction,
        pi/2 radians in positive z-direction, pi in negative y-direction and
-       so on (-:math:`\infty` < phi < :math:`\infty`, 2 :math:`\pi`-cyclic).
-   * - :py:func:`theta`
+       so on (-:math:`\infty` < frontal < :math:`\infty`, 2 :math:`\pi`-cyclic).
+   * - :py:func:`upper`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. 0 radians elevation are defined in positive x-direction,
        pi/2 radians in positive z-direction, and pi in negative x-direction
-       (0 \leq theta \leq :math:`\pi`).
+       (0 \leq upper \leq :math:`\pi`).
    * - :py:func:`radius`
      - Distance to the origin of the right handed Cartesian coordinate system
        in meters (0 \leq radius < :math:`\infty`).
