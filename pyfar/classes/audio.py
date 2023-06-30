@@ -616,7 +616,7 @@ class Signal(FrequencyData, TimeData):
             or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
             for more information. The default is ``'none'``, which is typically
             used for energy signals, such as impulse responses.
-        comment : str
+        comment : str, optional
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
         complex : bool
