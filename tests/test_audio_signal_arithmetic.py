@@ -381,6 +381,25 @@ def test_multiplication():
 def test_complex_multiplication():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100, complex=True)
+    y = Signal([0, 1, 0], 44100, complex=True)
+    z = pf.multiply((x, y), 'time')
+
+    # check result
+    npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
+                        atol=1e-15)
+
+
+def test_complex_real_multiplication():
+    # only test one case - everything else is tested below
+    x = Signal([1, 0, 0], 44100)
+    y = Signal([0, 1, 0], 44100, complex=True)
+    z = pf.multiply((x, y), 'time')
+
+    # check result
+    npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
+                        atol=1e-15)
+
+    x = Signal([1, 0, 0], 44100, complex=True)
     y = Signal([0, 1, 0], 44100)
     z = pf.multiply((x, y), 'time')
 
