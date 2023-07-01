@@ -22,7 +22,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import pyfar
+import pyfar  # noqa
 
 # -- General configuration ---------------------------------------------
 
@@ -38,8 +38,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'matplotlib.sphinxext.plot_directive',
-    'sphinx.ext.imgmath',
-    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
     'autodocsumm']
 
 # show tocs for classes and functions of modules using the autodocsumm
@@ -49,8 +48,6 @@ autodoc_default_options = {'autosummary': True}
 # show the code of plots that follows the command .. plot:: based on the
 # package matplotlib.sphinxext.plot_directive
 plot_include_source = True
-
-imgmath_latex_preamble = r'\usepackage{array}'
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ['_templates']
@@ -190,3 +187,12 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+# -- pyfar specifics -----------------------------------------------------
+
+# write shortcuts to sphinx readable format
+_, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
+shortcuts_path = os.path.join("concepts", "resources", "plot_shortcuts.rst")
+with open(shortcuts_path, "w") as f_id:
+    f_id.writelines(shortcuts)

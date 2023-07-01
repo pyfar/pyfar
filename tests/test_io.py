@@ -9,6 +9,7 @@ from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 import os.path
 import pathlib
 import soundfile
+import re
 
 from pyfar import io
 from pyfar import Signal
@@ -30,6 +31,18 @@ def test_read_sofa_GeneralTF(
     """Test for sofa datatype GeneralTF"""
     signal = io.read_sofa(generate_sofa_GeneralTF)[0]
     npt.assert_allclose(signal.freq, noise_two_by_three_channel.freq)
+
+
+def test_read_sofa_GeneralFIR_E(generate_sofa_GeneralFIR_E):
+    "Test order of axis for emitter dependent FIR data"
+    signal = io.read_sofa(generate_sofa_GeneralFIR_E)[0]
+    assert signal.cshape == (3, 4, 2)
+
+
+def test_read_sofa_GeneralTF_E(generate_sofa_GeneralTF_E):
+    "Test order of axis for emitter dependent TF data"
+    signal = io.read_sofa(generate_sofa_GeneralTF_E)[0]
+    assert signal.cshape == (3, 4, 2)
 
 
 def test_read_sofa_coordinates(
@@ -56,6 +69,23 @@ def test_read_sofa_position_type_spherical(
         sofa_reference_coordinates[1][..., :2])
     npt.assert_allclose(
         r_coords.radius, sofa_reference_coordinates[1][:, 2])
+
+
+@pytest.mark.parametrize('file,version', [
+    ('erroneous_data_with_version_string.far', '0.5.2'),
+    ('erroneous_data_without_version_string.far', '<0.5.3')])
+def test_read_erroneous_data(file, version):
+    """
+    Test exception for reading outdated or erroneous objects. Files contain a
+    signal object but the mandatory field '_data' was manually removed. The
+    files can thus not be read.
+    """
+
+    file = os.path.join('tests', 'test_io_data', file)
+    message = re.escape(
+        f"'signal' object in {file} was written with pyfar {version}")
+    with pytest.raises(TypeError, match=message):
+        io.read(file)
 
 
 def test_convert_sofa_assertion():
@@ -179,14 +209,18 @@ def test_write_read_coordinates(coordinates, tmpdir):
     assert actual == coordinates
 
 
-def test_write_read_signal(sine, tmpdir):
+@pytest.mark.parametrize("domain", ["time", "freq"])
+def test_write_read_signal(domain, sine, tmpdir):
     """ Signal
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'signal.far')
+    sine.domain = domain
     io.write(filename, signal=sine)
     actual = io.read(filename)['signal']
     assert isinstance(actual, Signal)
+    # io.write encodes in domain = 'time'
+    sine.domain = "time"
     assert actual == sine
 
 
@@ -560,6 +594,26 @@ def test_write_audio_clip(sf_write_mock):
     with pytest.warns(Warning, match='clipped'):
         pyfar.io.write_audio(
             signal=signal, filename='test.wav', subtype='PCM_16')
+
+
+def test_write_audio_sampling_rate_type(tmpdir):
+    """Test sampling_rates of type float"""
+
+    # test with integer value as float
+    signal = pyfar.signals.impulse(1024)
+    signal.sampling_rate = 44100.0
+    pyfar.io.write_audio(
+        signal, os.path.join(tmpdir, 'test_sampling_rate_float_1.wav'))
+
+    # test with non-integer value
+    signal.sampling_rate = 44100.5
+    error_message = re.escape((
+        "The sampling rate is 44100.5 but must have an "
+        "integer value, e.g., 44100 "
+        "or 44101 (See pyfar.dsp.resample for help)"))
+    with pytest.raises(ValueError, match=error_message):
+        pyfar.io.write_audio(
+            signal, os.path.join(tmpdir, 'test_sampling_rate_float_2.wav'))
 
 
 @pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())

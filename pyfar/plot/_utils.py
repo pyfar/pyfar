@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar import (Signal, FrequencyData)
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 
 
@@ -171,7 +172,7 @@ def _check_time_unit(unit):
         warnings.warn((
             "unit=None will be deprecated in pyfar This function will be "
             "deprecated in pyfar 0.6.0. Use unit='auto' instead."),
-            PendingDeprecationWarning)
+            PyfarDeprecationWarning)
     if unit is not None and unit not in units:
         raise ValueError(
             f"Unit is {unit} but must be {', '.join(units)}, or None.")

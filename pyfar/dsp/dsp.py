@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 
 
@@ -428,7 +429,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         >>> for shape in ['symmetric', 'symmetric_zero', 'left', 'right']:
         >>>     signal_windowed = pf.dsp.time_window(
         ...         signal, interval=[25,45], shape=shape)
-        >>>     ax = pf.plot.time(signal_windowed, label=shape)
+        >>>     ax = pf.plot.time(signal_windowed, label=shape, unit='ms')
         >>> ax.legend(loc='right')
 
     Window with fade-in and fade-out defined by four values in `interval`.
@@ -440,7 +441,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         >>> signal = pf.Signal(np.ones(100), 44100)
         >>> signal_windowed = pf.dsp.time_window(
         ...         signal, interval=[25, 40, 60, 90], window='hann')
-        >>> pf.plot.time(signal_windowed)
+        >>> pf.plot.time(signal_windowed, unit='ms')
 
 
     """
@@ -918,9 +919,10 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         >>> # create minimum phase impulse responses
         >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
         >>> # plot the result
+        >>> pf.plot.use()
         >>> fig, axs = plt.subplots(3, figsize=(8, 6))
-        >>> pf.plot.time(h_linear, ax=axs[0])
-        >>> pf.plot.time(h_min, ax=axs[0])
+        >>> pf.plot.time(h_linear, ax=axs[0], unit='ms')
+        >>> pf.plot.time(h_min, ax=axs[0], unit='ms')
         >>> axs[0].grid(True)
         >>> pf.plot.freq(h_linear, ax=axs[1])
         >>> pf.plot.group_delay(h_linear, ax=axs[2], unit="ms")
@@ -1005,7 +1007,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     if mode in ['before', 'after']:
         warnings.warn(('Mode "before" and "after" will be renamed into '
                        '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), DeprecationWarning)
+                       'Pyfar 0.8.0.'), PyfarDeprecationWarning)
 
         mode = 'beginning' if mode == 'before' else 'end'
 
@@ -1109,8 +1111,8 @@ def time_shift(
         >>> # time domain plot
         >>> pf.plot.use('light')
         >>> _, axs = plt.subplots(2, 1)
-        >>> pf.plot.time(impulse, ax=axs[0])
-        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> pf.plot.time(impulse, ax=axs[0], unit='samples')
+        >>> pf.plot.time(shifted, ax=axs[1], unit='samples')
         >>> axs[0].set_title('Original signals')
         >>> axs[1].set_title('Shifted signals')
 
@@ -1129,8 +1131,8 @@ def time_shift(
         >>> # time domain plot
         >>> pf.plot.use('light')
         >>> _, axs = plt.subplots(2, 1)
-        >>> pf.plot.time(impulse, ax=axs[0])
-        >>> pf.plot.time(shifted, ax=axs[1])
+        >>> pf.plot.time(impulse, ax=axs[0], unit='samples')
+        >>> pf.plot.time(shifted, ax=axs[1], unit='samples')
         >>> axs[0].set_title('Original signals')
         >>> axs[1].set_title('Shifted signals')
 
@@ -1604,13 +1606,18 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         >>> # Plot input and output
         >>> with pf.plot.context():
         >>>     fig, ax = plt.subplots(2, 1, sharex=True)
-        >>>     pf.plot.time(s1, ax=ax[0], label='Signal 1', marker='o')
-        >>>     pf.plot.time(s2, ax=ax[0], label='Signal 2', marker='o')
+        >>>     pf.plot.time(s1, ax=ax[0], label='Signal 1', marker='o',
+        ...                  unit='samples')
+        >>>     pf.plot.time(s2, ax=ax[0], label='Signal 2', marker='o',
+        ...                  unit='samples')
         >>>     ax[0].set_title('Input Signals')
         >>>     ax[0].legend()
-        >>>     pf.plot.time(full, ax=ax[1], label='full', marker='o')
-        >>>     pf.plot.time(cut, ax=ax[1], label='cut', ls='--',  marker='o')
-        >>>     pf.plot.time(cyc, ax=ax[1], label='cyclic', ls=':', marker='o')
+        >>>     pf.plot.time(full, ax=ax[1], label='full', marker='o',
+        ...                  unit='samples')
+        >>>     pf.plot.time(cut, ax=ax[1], label='cut', ls='--',  marker='o',
+        ...                  unit='samples')
+        >>>     pf.plot.time(cyc, ax=ax[1], label='cyclic', ls=':', marker='o',
+        ...                  unit='samples')
         >>>     ax[1].set_title('Convolution Result')
         >>>     ax[1].set_ylim(-1.1, 1.1)
         >>>     ax[1].legend()
@@ -1886,7 +1893,8 @@ def rms(signal):
     return np.sqrt(power(signal))
 
 
-def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
+def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
+            nan_policy='raise'):
     """
     Average multi-channel signals.
 
@@ -1928,6 +1936,24 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
         If this is ``True``, the axes which are reduced during the averaging
         are kept as a dimension with size one. Otherwise, singular dimensions
         will be squeezed after averaging. The default is ``False``.
+    nan_policy: string, optional
+        Define how to handle NaNs in input signal.
+
+        ``'propagate'``
+           If the input signal includes NaNs, the corresponding averaged output
+           signal value will be NaN.
+        ``'omit'``
+           NaNs will be omitted while averaging. For each NaN value, the number
+           of values used for the average operation is also reduced by one. If
+           a signal contains only NaN values in a specific dimensions, the
+           output will be zero. For example if the second sample of a multi
+           channel signal is always NaN, the average will be zero at the
+           second sample.
+        ``'raise'``
+            A ``'ValueError'`` will be raised, if the input signal includes
+            NaNs.
+
+        The default is ``'raise'``.
 
     Returns
     --------
@@ -1954,7 +1980,9 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
-
+    if nan_policy not in ('propagate', 'omit', 'raise'):
+        raise ValueError("nan_policy has to be 'propagate', 'omit', or"
+                         "'raise'.")
     # check for caxis
     if caxis and np.max(caxis) > len(signal.cshape):
         raise ValueError(('The maximum of caxis needs to be smaller than '
@@ -1990,7 +2018,12 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
             """mode must be 'linear', 'magnitude_zerophase', 'power',
             'magnitude_phase' or 'log_magnitude_zerophase'."""
             )
-
+    # check if data includes NaNs and raise error or create masked array
+    if nan_policy == 'raise' and np.any(np.isnan(data)):
+        raise ValueError("The signal includes NaNs. Change 'nan_policy' to "
+                         "'propagate' or 'omit'.")
+    elif nan_policy == 'omit' and np.any(np.isnan(data)):
+        data = np.ma.masked_array(data, np.isnan(data))
     # set weights default
     if weights is not None:
         weights = np.broadcast_to(np.array(weights)[..., None],
@@ -2002,7 +2035,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
         data = data[0] * np.exp(1j * data[1])
     else:
         data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
-
     # reconstruct frequency data
     if mode == 'power':
         data = np.sqrt(data)
@@ -2021,7 +2053,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False):
 
 def normalize(signal, reference_method='max', domain='time',
               channel_handling='individual', target=1, limits=(None, None),
-              unit=None, return_reference=False):
+              unit=None, return_reference=False, nan_policy='raise'):
     """
     Apply a normalization.
 
@@ -2042,17 +2074,6 @@ def normalize(signal, reference_method='max', domain='time',
     ----------
     signal: Signal, TimeData, FrequencyData
         Input signal.
-    domain: string
-        Determines which data is used to compute the `reference` value.
-
-        ``'time'``
-           Use the absolute of the time domain data ``np.abs(signal.time)``.
-        ``'freq'``
-          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
-          normalized magnitude spectrum used
-          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
-
-        The default is ``'time'``.
     reference_method: string, optional
         Reference method to compute the channel-wise `reference` value using
         the data according to `domain`.
@@ -2069,6 +2090,17 @@ def normalize(signal, reference_method='max', domain='time',
             Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
 
         The default is ``'max'``.
+    domain: string
+        Determines which data is used to compute the `reference` value.
+
+        ``'time'``
+           Use the absolute of the time domain data ``np.abs(signal.time)``.
+        ``'freq'``
+          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
+          normalized magnitude spectrum used
+          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
+
+        The default is ``'time'``.
     channel_handling: string, optional
         Define how channel-wise `reference` values are handeled for multi-
         channel signals. This parameter does not affect single-channel signals.
@@ -2112,6 +2144,21 @@ def normalize(signal, reference_method='max', domain='time',
     return_reference: bool
         If ``return_reference=True``, the function also returns the `reference`
         values for the channels. The default is ``False``.
+    nan_policy: string, optional
+        Define how to handle NaNs in input signal.
+
+        ``'propagate'``
+           If the input signal includes NaNs within the time or frequency range
+           , NaN will be used as normalization reference. The resulting output
+           signal values are NaN.
+        ``'omit'``
+           NaNs will be omitted in the normalization. Cshape will still remain,
+           as the normalized signal still includes the NaNs.
+        ``'raise'``
+            A ``'ValueError'`` will be raised, if the input signal includes
+            NaNs.
+
+        The default is 'raise'.
 
     Returns
     -------
@@ -2131,8 +2178,8 @@ def normalize(signal, reference_method='max', domain='time',
         >>> signal = pf.signals.sine(1e3, 441, amplitude=2)
         >>> signal_norm = pf.dsp.normalize(signal)
         >>> # Plot input and normalized Signal
-        >>> ax = pf.plot.time(signal, label='Original Signal')
-        >>> pf.plot.time(signal_norm, label='Normalized Signal')
+        >>> ax = pf.plot.time(signal, label='Original Signal', unit='ms')
+        >>> pf.plot.time(signal_norm, label='Normalized Signal', unit='ms')
         >>> ax.legend()
 
     Frequency normalization with a restricted frequency range and targed in dB
@@ -2148,8 +2195,9 @@ def normalize(signal, reference_method='max', domain='time',
         >>> signal_norm = pf.dsp.normalize(signal, target=10**(target_dB/20),
         ...     domain="freq", limits=(400, 600), unit="Hz")
         >>> # Plot input and normalized Signal
-        >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal')
-        >>> pf.plot.time_freq(signal, label='Original Signal')
+        >>> ax = pf.plot.time_freq(signal_norm, label='Normalized Signal',
+        ...                        unit='ms')
+        >>> pf.plot.time_freq(signal, label='Original Signal', unit='ms')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
     """
@@ -2179,6 +2227,14 @@ def normalize(signal, reference_method='max', domain='time',
     if (domain == "time" and unit not in ("s", None)) or \
             (domain == "freq" and unit not in ("Hz", None)):
         raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
+    if nan_policy not in ('propagate', 'omit', 'raise'):
+        raise ValueError("nan_policy has to be 'propagate', 'omit', or"
+                         "'raise'.")
+    # raise error if input includes NaNs.
+    check_nans = signal.time if domain == 'time' else signal.freq
+    if nan_policy == 'raise' and True in np.isnan(check_nans):
+        raise ValueError("The signal includes NaNs. Change 'nan_policy' to "
+                         "'propagate' or 'omit'.")
 
     # get and check the limits
     if domain == 'time':
@@ -2205,7 +2261,10 @@ def normalize(signal, reference_method='max', domain='time',
             input_data = np.abs(signal.time)
         else:
             input_data = np.abs(signal.freq)
-    # get values for normalization max or mean
+        # create masked array if data includes NaNs and nan_policy is omit
+        if nan_policy == 'omit' and True in np.isnan(input_data):
+            input_data = np.ma.masked_array(input_data, np.isnan(input_data))
+        # get values for normalization max or mean
         if reference_method == 'max':
             reference = np.max(input_data[..., limits[0]:limits[1]], axis=-1)
         elif reference_method == 'mean':

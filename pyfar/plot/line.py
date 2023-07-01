@@ -1,6 +1,7 @@
 from pyfar.plot.utils import context
 from . import _line
 from . import _interaction as ia
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 
 
@@ -46,7 +47,10 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -62,7 +66,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
         >>> import pyfar as pf
         >>> sine = pf.signals.sine(100, 4410)
-        >>> pf.plot.time(sine)
+        >>> pf.plot.time(sine, unit='ms')
 
     """
 
@@ -114,7 +118,10 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     xscale : str
 
         .. deprecated:: 0.4.0
@@ -147,7 +154,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     if xscale is not None:
         warnings.warn(('The xscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = xscale
 
     with context(style):
@@ -192,7 +199,10 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     xscale : str
 
         .. deprecated:: 0.4.0
@@ -225,7 +235,7 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     if xscale is not None:
         warnings.warn(('The xscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = xscale
 
     with context(style):
@@ -277,7 +287,10 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     xscale : str
 
         .. deprecated:: 0.4.0
@@ -310,7 +323,7 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
     if xscale is not None:
         warnings.warn(('The xscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = xscale
 
     with context(style):
@@ -382,7 +395,10 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     xscale : str
 
         .. deprecated:: 0.4.0
@@ -408,14 +424,14 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
         >>> import pyfar as pf
         >>> sine = pf.signals.sine(100, 4410)
-        >>> pf.plot.time_freq(sine)
+        >>> pf.plot.time_freq(sine, unit='ms')
     """
 
     # xscale deprecation
     if xscale is not None:
         warnings.warn(('The xscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = xscale
 
     with context(style):
@@ -472,8 +488,11 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         Array or list with two axes to plot on. The default is ``None``, which
         uses the current axis or creates a new figure if none exists.
     style : str
-        ``light`` or ``dark`` to use the pyfar plot styles or style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     xscale : str
 
         .. deprecated:: 0.4.0
@@ -506,7 +525,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
     if xscale is not None:
         warnings.warn(('The xscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = xscale
 
     with context(style):
@@ -571,7 +590,10 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     xscale : str
 
         .. deprecated:: 0.4.0
@@ -604,7 +626,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     if xscale is not None:
         warnings.warn(('The xscale parameter will be removed in'
                        'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
+                      PyfarDeprecationWarning)
         freq_scale = xscale
 
     with context(style):
@@ -644,7 +666,10 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 

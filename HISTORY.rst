@@ -2,6 +2,22 @@
 History
 =======
 
+0.5.3 (2023-03-30)
+------------------
+
+* Bugfix: Spectrum interpolation on logarithmically spaced frequency bins including zero frequency. (PR #453)
+* Bugfix: Include signal domain and fft norm when writing Signals to far-files. (PR #443)
+* Bugfix: Return the HRIRs contained in the sample file in the correct order. (PR #448)
+
+0.5.2 (2023-01-20)
+------------------
+
+* Bugfix: Remove deprecated usage of `np.int`. (PR #409)
+* Bugfix: Switch to MathJax to fix equation rendering issues in the documentation. (PR #420)
+* Bugfix: `read_comsol` now allow for `*`, `(`, and `)` in expressions and units. (PR #417, originally #393)
+* Bugfix: `read_sofa` now support reading files of conventions `FIR-E` and `TF-E`. (PR  #415)
+* General: Update information on PyPI. (PR #427, originally #377)
+
 0.5.1 (2022-10-28)
 ------------------
 * Bugfix: Allow setting of the sampling rate in GammatoneBands (PR #374)

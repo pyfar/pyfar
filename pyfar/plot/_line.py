@@ -7,6 +7,7 @@ from .ticker import (
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
+from matplotlib.ticker import NullFormatter
 
 
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
@@ -97,6 +98,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     # set and format ticks
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
@@ -152,6 +154,7 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     # set and format ticks
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
@@ -197,6 +200,7 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
     # set and format ticks
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
