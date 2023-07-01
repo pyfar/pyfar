@@ -235,6 +235,8 @@ def test_deprecations_0_8_0_set_sh_order():
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(AttributeError):
             coords.sh_order = 1
+
+
 def test_signal_len():
     with pytest.warns(PyfarDeprecationWarning,
                       match=re.escape("len(Signal) will be deprecated")):
