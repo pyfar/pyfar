@@ -189,7 +189,7 @@ def fractional_octave_bands(
     sampling_rate : None, int
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
-    frequency_range : array, tuple, optional
+    freq_range : array, tuple, optional
         The lower and upper frequency limits. The default is
         ``frequency_range=(20, 20e3)``.
     order : int, optional
