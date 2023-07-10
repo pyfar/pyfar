@@ -972,7 +972,7 @@ class Signal(FrequencyData, TimeData):
         Returns
         -------
         results : bool
-            return `True` if fequency data are conjugate symmetric around
+            return `True` if frequency data are conjugate symmetric around
             0 Hz, return `False` if not.
 
         """
