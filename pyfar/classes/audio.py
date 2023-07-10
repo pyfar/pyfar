@@ -825,7 +825,7 @@ class Signal(FrequencyData, TimeData):
             if self._domain == 'freq':
                 # check for conjugate symmetry
                 if self._check_conjugate_symmetry():
-                    # and remove rendundant part of the spectrum
+                    # and remove redundant part of the spectrum
                     self._data = fft.remove_mirror_spectrum(self._data)
                     self._complex = value
                 else:
