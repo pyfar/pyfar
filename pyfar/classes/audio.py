@@ -622,7 +622,7 @@ class Signal(FrequencyData, TimeData):
         complex : bool
             Specifies if the underlying time domain data are complex
             or real-valued. If ``True`` and `domain` is ``'time'``, the
-            input data will be castet to complex. The default is ``False``.
+            input data will be casted to complex. The default is ``False``.
 
         References
         ----------
