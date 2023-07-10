@@ -831,7 +831,7 @@ class Signal(FrequencyData, TimeData):
                 else:
                     raise ValueError("Signals frequency data are not"
                                      "conjugate symmetric, complex flag"
-                                     "connot be `False`.")
+                                     "cannot be `False`.")
         # from complex=False to complex=True
         if not self._complex and value:
             if self._domain == 'time':
