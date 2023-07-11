@@ -91,7 +91,7 @@ def test_setter_complex():
     time = TimeData(data=[1 + 1j, 0 + 1j, -1 + 2j], times=[0, .1, .3],
                     complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         "complex flag connot be `False`."):
+                                         " complex flag cannot be `False`."):
         time.complex = False
 
 

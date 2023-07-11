@@ -588,13 +588,13 @@ def test_setter_complex_assert():
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         "complex flag connot be `False`."):
+                                         " complex flag cannot be `False`."):
         signal.complex = False
 
     signal.domain = "freq"
     with pytest.raises(ValueError, match="Signals frequency data are not"
-                                         "conjugate symmetric, complex flag"
-                                         "connot be `False`."):
+                                         " conjugate symmetric, complex flag"
+                                         " cannot be `False`."):
         signal.complex = False
 
 
@@ -614,7 +614,7 @@ def test_setter_complex():
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         "complex flag connot be `False`."):
+                                         " complex flag cannot be `False`."):
         signal.complex = False
 
     # test setting complex from False to True
@@ -634,8 +634,8 @@ def test_setter_complex():
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
     signal.domain = "freq"
     with pytest.raises(ValueError, match="Signals frequency data are not"
-                                         "conjugate symmetric, complex flag"
-                                         "connot be `False`."):
+                                         " conjugate symmetric, complex flag"
+                                         " cannot be `False`."):
         signal.complex = False
 
 

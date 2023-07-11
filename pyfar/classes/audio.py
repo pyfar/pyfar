@@ -210,7 +210,7 @@ class TimeData(_Audio):
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
         complex : bool, optional
-            A flag which indicates if the raw data are real or complex-valued.
+            A flag which indicates if the time data are real or complex-valued.
             The default is ``False``.
 
         """
@@ -273,7 +273,7 @@ class TimeData(_Audio):
                 self._data = self._data.astype(float)
             else:
                 raise ValueError("Signal has complex-valued time data"
-                                 "complex flag connot be `False`.")
+                                 " complex flag cannot be `False`.")
         # from complex=False to complex=True
         if not self._complex and value:
             self._complex = value
@@ -830,8 +830,8 @@ class Signal(FrequencyData, TimeData):
                     self._complex = value
                 else:
                     raise ValueError("Signals frequency data are not"
-                                     "conjugate symmetric, complex flag"
-                                     "cannot be `False`.")
+                                     " conjugate symmetric, complex flag"
+                                     " cannot be `False`.")
         # from complex=False to complex=True
         if not self._complex and value:
             if self._domain == 'time':
@@ -984,7 +984,7 @@ class Signal(FrequencyData, TimeData):
             mirror_spec = np.conj(np.flip(self._data[..., 1:idx], axis=-1))
 
         if mirror_spec.shape[-1] > 0 and np.allclose(
-                self._data[..., idx+1:], mirror_spec, rtol=1e-15):
+                self._data[..., idx+1:], mirror_spec, atol=1e-15):
             return True
         else:
             return False
