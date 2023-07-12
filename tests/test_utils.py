@@ -103,7 +103,7 @@ def test_broadcast_cdims_assertions():
 @pytest.mark.parametrize("data_second", [
     (np.random.randn(512)),
     (np.random.randn(2, 512))])
-def test_concatenate(data_second):
+def test_concatenate_channels(data_second):
     # Parametrized concatenation test for single- and multichannel signal
     sr = 48e3
 
@@ -111,21 +111,21 @@ def test_concatenate(data_second):
     data_first = np.random.randn(512)
     signals = (pf.Signal(data_first, sr), pf.Signal(data_second, sr))
 
-    res = pf.utils.concatenate(signals, caxis=0)
+    res = pf.utils.concatenate_channels(signals, caxis=0)
     ideal = np.concatenate(
         (np.atleast_2d(data_first), np.atleast_2d(data_second)), axis=0)
 
     npt.assert_allclose(res._data, ideal)
 
 
-def test_broadcasting_in_concatenate():
+def test_broadcasting_in_concatenate_channels():
     # Test broadcasting into largest dimension and shape, while ignoring caxis.
     sr = 48e3
     n_samples = 512
     signals = (pf.Signal(np.ones((1, 2, 3) + (n_samples, )), sr),
                pf.Signal(np.ones((2,) + (n_samples, )), sr),
                pf.Signal(np.ones((1, 1, 2) + (n_samples, )), sr))
-    conc = pf.utils.concatenate(signals, caxis=-1, broadcasting=True)
+    conc = pf.utils.concatenate_channels(signals, caxis=-1, broadcasting=True)
     assert conc.cshape == (1, 2, 7)
 
 
@@ -136,7 +136,7 @@ def test_broadcasting_in_concatenate():
     (pf.TimeData([1, 2, 3], [1, 2, 3]), pf.TimeData([4, 5, 6], [1, 2, 3]))])
 def test_pyfar_object_types(signals):
     # Test concatenation for all pyfar object types
-    conc = pf.utils.concatenate(signals)
+    conc = pf.utils.concatenate_channels(signals)
     ideal = [[1, 2, 3], [4, 5, 6]]
     npt.assert_equal(conc._data, ideal)
 
@@ -144,12 +144,12 @@ def test_pyfar_object_types(signals):
 def test_concatenate_assertions():
     """Test assertions"""
     with pytest.raises(TypeError, match="All input data must be"):
-        pf.utils.concatenate(([1, 2], [3, 4]))
+        pf.utils.concatenate_channels(([1, 2], [3, 4]))
     signals = (pf.Signal(np.ones((1, 2, 512)), 44100),
                pf.Signal(np.ones((1, 1, 512)), 44100))
     with pytest.raises(TypeError, match="'broadcasting' needs to be"):
-        pf.utils.concatenate(signals, caxis=-1, broadcasting=1)
+        pf.utils.concatenate_channels(signals, caxis=-1, broadcasting=1)
     signals = (pf.Signal([1, 2, 3], 44100),
                pf.TimeData([1, 2, 3], [1, 2, 3]))
     with pytest.raises(ValueError, match="Comparison only valid against"):
-        pf.utils.concatenate(signals)
+        pf.utils.concatenate_channels(signals)

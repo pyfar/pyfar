@@ -129,7 +129,7 @@ def broadcast_cdims(signals, cdim=None):
     return [broadcast_cdim(s, cdim) for s in signals]
 
 
-def concatenate(signals, caxis=0, broadcasting=False):
+def concatenate_channels(signals, caxis=0, broadcasting=False):
     """
     Merge multiple Signal, Timedata or Frequencydata objects along a given
     caxis.
@@ -156,7 +156,7 @@ def concatenate(signals, caxis=0, broadcasting=False):
         The default is ``False``.
     Returns
     -------
-    merged : Signal
+    merged : Signal, TimeData, FrequencyData
         The merged signal object.
     """
     # check input
