@@ -1481,8 +1481,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
         Largest channel shape of the audio classes if contained in data.
         Otherwise empty tuple.
     complex: bool, False
-        Indicates if input data is a complex-valued Signal or complex-valued
-        TimeData.
+        Indicates if input data contains a complex-valued Signal or
+        complex-valued TimeData.
     """
 
     # we need at least two signals
@@ -1565,11 +1565,9 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
             if np.asarray(d).dtype.kind not in ["i", "f", "c"]:
                 raise ValueError(
                     "Input must be of type Signal, int, float, or complex")
-            if audio_type == (Signal or TimeData):
-                # if the first data was a Signal or TimeData set
-                # complex flag if the non signal input is complex-valued
-                if np.asarray(d).dtype.kind == "c":
-                    complex = True
+            if (audio_type == (Signal or TimeData)
+                    and domain == 'time' and np.asarray(d).dtype.kind == "c"):
+                complex = True
 
     return (sampling_rate, n_samples, fft_norm, times, frequencies, audio_type,
             cshape, complex)
@@ -1593,7 +1591,8 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type, complex):
     audio_type : type, None
         Type of the audio class of the operation's result.
     complex : bool
-        Flag which indicates if the operation is performed on complex data
+        Flag which indicates if the operation involves complex-valued pyfar
+        audio objects
 
     Returns
     -------

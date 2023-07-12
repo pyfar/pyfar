@@ -616,6 +616,12 @@ def test_assert_match_for_arithmetic():
         (s5, s5), 'time', division=False, matmul=False)
     assert out[7]
 
+    # check if complex flag is not set with two real-valued
+    # signals
+    out = signal._assert_match_for_arithmetic(
+        (s, s), 'time', division=False, matmul=False)
+    assert not out[7]
+
     # check if complex flag is set with one complex and
     # one real-valued signal
     out = signal._assert_match_for_arithmetic(
@@ -629,13 +635,53 @@ def test_assert_match_for_arithmetic():
     assert out[7]
 
     # check if complex flag is set with one real-valued
-    # signal and one complex-valued number
+    # signal and one complex-valued number passed at position
+    # position 1
+    out = signal._assert_match_for_arithmetic(
+        (1 + 1j, s5), 'time', division=False, matmul=False)
+    assert out[7]
+
+    # check if complex flag is set with one real-valued
+    # signal and one complex-valued number passed at position
+    # position 2
     out = signal._assert_match_for_arithmetic(
         (s5, 1 + 1j), 'time', division=False, matmul=False)
     assert out[7]
 
+    # check if complex flag is not set with one real-valued
+    # signal and one real-valued number passed at position
+    # position 1
+    out = signal._assert_match_for_arithmetic(
+        (1, s), 'time', division=False, matmul=False)
+    assert not out[7]
+
+    # check if complex flag is not set with one real-valued
+    # signal and one real-valued number passed at position
+    # position 2
+    out = signal._assert_match_for_arithmetic(
+        (s, 1), 'time', division=False, matmul=False)
+    assert not out[7]
+
     # check if complex flag is not set with one frequencyData
-    # and one complex-valued number
+    # and one real-valued number passed at position 1
+    out = signal._assert_match_for_arithmetic(
+        (1, s6), 'freq', division=False, matmul=False)
+    assert not out[7]
+
+    # check if complex flag is not set with one frequencyData
+    # and one complex-valued number passed at position 2
+    out = signal._assert_match_for_arithmetic(
+        (s6, 1), 'freq', division=False, matmul=False)
+    assert not out[7]
+
+    # check if complex flag is not set with one frequencyData
+    # and one complex-valued number passed at position 1
+    out = signal._assert_match_for_arithmetic(
+        (1 + 1j, s6), 'freq', division=False, matmul=False)
+    assert not out[7]
+
+    # check if complex flag is not set with one frequencyData
+    # and one complex-valued number passed at position 2
     out = signal._assert_match_for_arithmetic(
         (s6, 1 + 1j), 'freq', division=False, matmul=False)
     assert not out[7]
