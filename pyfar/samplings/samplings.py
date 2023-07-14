@@ -754,7 +754,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
                              Valid orders are: {}.".format(
                              ', '.join(str_orders)))
 
-        n_points = int(degrees[orders == sh_order])
+        n_points = int(np.squeeze(degrees[orders == sh_order]))
 
     # check if n_points is available
     if n_points not in degrees:
@@ -763,7 +763,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
                          are: {}.".format(', '.join(str_degrees)))
 
     # calculate sh_order
-    sh_order = int(orders[degrees == n_points])
+    sh_order = int(np.squeeze(orders[degrees == n_points]))
 
     # get the samlpling
     leb = external.lebedev_sphere(n_points)
@@ -910,7 +910,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
                               ', '.join(str_orders)))
 
         # assign n_points
-        n_points = int(points[orders == sh_order])
+        n_points = int(np.squeeze(points[orders == sh_order]))
     else:
         # check if n_points is available
         if n_points not in points:
@@ -919,7 +919,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
                             are: {}.".format(', '.join(str_points)))
 
         # assign sh_order
-        sh_order = int(orders[points == n_points])
+        sh_order = int(np.squeeze(orders[points == n_points]))
 
     # get the sampling points
     fliege = sio.loadmat(os.path.join(
