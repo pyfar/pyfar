@@ -168,41 +168,31 @@ def convert_sofa(sofa):
             f"DataType {sofa.GLOBAL_DataType} is not supported.")
 
     # Source
-    s_values = sofa.SourcePosition
-    s_domain, s_convention, s_unit = _sofa_pos(sofa.SourcePosition_Type)
-    source_coordinates = Coordinates(
-        s_values[:, 0],
-        s_values[:, 1],
-        s_values[:, 2],
-        domain=s_domain,
-        convention=s_convention,
-        unit=s_unit)
+    source_coordinates = _sofa_pos(
+        sofa.SourcePosition_Type, sofa.SourcePosition)
+
     # Receiver
-    r_values = sofa.ReceiverPosition
-    r_domain, r_convention, r_unit = _sofa_pos(sofa.ReceiverPosition_Type)
-    receiver_coordinates = Coordinates(
-        r_values[:, 0],
-        r_values[:, 1],
-        r_values[:, 2],
-        domain=r_domain,
-        convention=r_convention,
-        unit=r_unit)
+    receiver_coordinates = _sofa_pos(
+        sofa.ReceiverPosition_Type, sofa.ReceiverPosition)
 
     return signal, source_coordinates, receiver_coordinates
 
 
-def _sofa_pos(pos_type):
+def _sofa_pos(pos_type, coordinates):
     if pos_type == 'spherical':
-        domain = 'sph'
-        convention = 'top_elev'
-        unit = 'deg'
+        return Coordinates.from_spherical_elevation(
+            coordinates[:, 0] * np.pi / 180,
+            coordinates[:, 1] * np.pi / 180,
+            coordinates[:, 2]
+        )
     elif pos_type == 'cartesian':
-        domain = 'cart'
-        convention = 'right'
-        unit = 'met'
+        return Coordinates(
+            coordinates[:, 0],
+            coordinates[:, 1],
+            coordinates[:, 2]
+        )
     else:
         raise ValueError("Position:Type {pos_type} is not supported.")
-    return domain, convention, unit
 
 
 def read(filename):
