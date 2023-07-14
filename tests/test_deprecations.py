@@ -40,16 +40,11 @@ def test_xscale_deprecation(function, handsome_signal):
 def test_spectrogram_yscale_deprecation(sine):
     """Deprecate yscale parameter in plot functions"""
 
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="The yscale parameter will be removed"):
-        create_figure()
-        pf.plot.spectrogram(sine, yscale='linear')
-
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.6.0!
+            # remove yscale from pyfar 0.6.0!
             create_figure()
-            pf.plot.spectrogram(sine)
+            pf.plot.spectrogram(sine, yscale='linear')
 
 
 def test__check_time_unit():
