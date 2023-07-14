@@ -1285,7 +1285,7 @@ def find_impulse_response_delay(impulse_response, N=1):
             start_sample = np.nan
             warnings.warn(f"Starting sample not found for channel {ch}")
 
-        start_samples[ch] = start_sample
+        start_samples[ch] = np.squeeze(start_sample)
 
     return start_samples
 
