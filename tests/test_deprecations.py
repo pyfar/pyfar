@@ -30,16 +30,11 @@ from pyfar.testing.plot_utils import create_figure
 def test_xscale_deprecation(function, handsome_signal):
     """Deprecate xscale parameter in plot functions"""
 
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="The xscale parameter will be removed"):
-        create_figure()
-        function(handsome_signal, xscale='linear')
-
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove xscale from pyfar 0.6.0!
             create_figure()
-            function(handsome_signal)
+            function(handsome_signal, xscale='linear')
 
 
 def test_spectrogram_yscale_deprecation(sine):
