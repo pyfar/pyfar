@@ -50,11 +50,6 @@ def test_spectrogram_yscale_deprecation(sine):
 def test__check_time_unit():
     """Deprecate unit=None in plots showing the time or group delay"""
 
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="unit=None will be deprecated"):
-        create_figure()
-        pf.plot._utils._check_time_unit(None)
-
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(ValueError):
             # remove xscale from pyfar 0.6.0!
