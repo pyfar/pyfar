@@ -707,7 +707,7 @@ def test_assert_match_for_arithmetic():
 def test_get_arithmetic_data_with_array():
     data_in = np.asarray(1)
     data_out = signal._get_arithmetic_data(
-        data_in, None, (1,), False, type(None), complex=False)
+        data_in, None, (1,), False, type(None), contains_complex=False)
     npt.assert_allclose(data_in, data_out)
 
 
@@ -740,7 +740,7 @@ def test_get_arithmetic_data_with_signal():
             # get output data
             data_out = signal._get_arithmetic_data(
                 s_in, domain=domain, cshape=(1,), matmul=False,
-                audio_type=Signal, complex=False)
+                audio_type=Signal, contains_complex=False)
             if domain == 'time':
                 npt.assert_allclose(s_ref.time, data_out, atol=1e-15)
             elif domain == 'freq':
@@ -771,7 +771,8 @@ def test_assert_match_for_arithmetic_data_wrong_cshape():
 def test_get_arithmetic_data_wrong_domain():
     with raises(ValueError):
         signal._get_arithmetic_data(
-            Signal(1, 44100), 'space', (1,), False, Signal, complex=False)
+            Signal(1, 44100), 'space', (1,), False, Signal,
+            contains_complex=False)
 
 
 def test_array_broadcasting_errors():

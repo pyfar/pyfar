@@ -1409,12 +1409,12 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     division = True if operation == _divide else False
     matmul = True if operation == _matrix_multiplication else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type, \
-        cshape, complex = \
-        _assert_match_for_arithmetic(data, domain, division, matmul)
+        cshape, contains_complex = _assert_match_for_arithmetic(
+            data, domain, division, matmul)
 
     # apply arithmetic operation
-    result = _get_arithmetic_data(data[0], domain, cshape, matmul, audio_type,
-                                  complex)
+    result = _get_arithmetic_data(
+        data[0], domain, cshape, matmul, audio_type, contains_complex)
 
     for d in range(1, len(data)):
         if matmul:
@@ -1422,7 +1422,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
         result = operation(
             result,
             _get_arithmetic_data(data[d], domain, cshape, matmul, audio_type,
-                                 complex),
+                                 contains_complex),
             **kwargs)
 
     # check if to return an audio object
@@ -1430,11 +1430,11 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
         # Set unnormalized spectrum
         result = Signal(
             result, sampling_rate, n_samples, domain, fft_norm='none',
-            complex=complex)
+            complex=contains_complex)
         # Set fft norm
         result.fft_norm = fft_norm
     elif audio_type == TimeData:
-        result = TimeData(result, times, complex=complex)
+        result = TimeData(result, times, complex=contains_complex)
     elif audio_type == FrequencyData:
         result = FrequencyData(result, frequencies)
 
@@ -1480,7 +1480,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     cshape : tuple, None
         Largest channel shape of the audio classes if contained in data.
         Otherwise empty tuple.
-    complex: bool, False
+    contains_complex: bool, False
         Indicates if input data contains a complex-valued Signal or
         complex-valued TimeData.
     """
@@ -1501,7 +1501,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     frequencies = None
     audio_type = type(None)
     cshape = ()
-    complex = False
+    contains_complex = False
 
     # check input types and meta data
     found_audio_data = False
@@ -1509,7 +1509,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
         if isinstance(d, (Signal, TimeData, FrequencyData)):
             if isinstance(d, (Signal, TimeData)):
                 if d.complex:
-                    complex = True
+                    contains_complex = True
             # store meta data upon first appearance
             if not found_audio_data:
                 if isinstance(d, Signal):
@@ -1567,13 +1567,14 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                     "Input must be of type Signal, int, float, or complex")
             if (audio_type == (Signal or TimeData)
                     and domain == 'time' and np.asarray(d).dtype.kind == "c"):
-                complex = True
+                contains_complex = True
 
     return (sampling_rate, n_samples, fft_norm, times, frequencies, audio_type,
-            cshape, complex)
+            cshape, contains_complex)
 
 
-def _get_arithmetic_data(data, domain, cshape, matmul, audio_type, complex):
+def _get_arithmetic_data(data, domain, cshape, matmul, audio_type,
+                         contains_complex):
     """
     Return data in desired domain without any fft normalization.
 
@@ -1590,7 +1591,7 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type, complex):
         ``True`` if a  matrix multiplication is performed, ``False`` otherwise
     audio_type : type, None
         Type of the audio class of the operation's result.
-    complex : bool
+    contains_complex : bool
         Flag which indicates if the operation involves complex-valued pyfar
         audio objects
 
@@ -1602,10 +1603,12 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type, complex):
     """
     if isinstance(data, (Signal, TimeData, FrequencyData)):
         data_ = data.copy()
-        # check if complex casting of any input signal is necessarry
-        if complex:
-            if isinstance(data_, (Signal, TimeData)) and not data_.complex:
-                data_.complex = True
+        # check if complex casting of any input signal is necessary
+        # if contains_complex:
+        #    if isinstance(data_, (Signal, TimeData)) and not data_.complex:
+        #        data_.complex = True
+        if not isinstance(data_, FrequencyData):
+            data_.complex = contains_complex
         # get signal in correct domain
         if domain == "time":
             data_out = data_.time
