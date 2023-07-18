@@ -1435,7 +1435,7 @@ class Coordinates():
             raise ValueError("k must be an integer > 0 and <= self.csize.")
         if not isinstance(coords, Coordinates):
             raise ValueError("coords must be an pf.Coordinates object.")
-        if not distance_measure in ['euclidean', 'spherical']:
+        if distance_measure not in ['euclidean', 'spherical']:
             raise ValueError(
                 "distance_measure needs to be 'euclidean' or 'spherical' and "
                 f"it is {distance_measure}")
@@ -1528,10 +1528,9 @@ class Coordinates():
             "k must be an integer > 0 and <= self.csize."
 
         # get the points
-        coords = Coordinates(points_1, points_2, points_3,
-                             domain, convention, unit)
-        _, index, mask = self._find_nearest(coords, show, k, 'k')
-
+        _, index, mask = self._find_nearest(
+            points_1, points_2, points_3,
+            domain, convention, unit, show, k, 'k')
         return index, mask
 
     def find_nearest_cart(self, points_1, points_2, points_3, distance,
@@ -1598,10 +1597,9 @@ class Coordinates():
         assert distance >= 0, "distance must be >= 0"
 
         # get the points
-        coords = Coordinates(points_1, points_2, points_3,
-                             domain, convention, unit)
         distance, index, mask = self._find_nearest(
-            coords, show, distance, 'cart', atol)
+            points_1, points_2, points_3,
+            domain, convention, unit, show, distance, 'cart', atol)
 
         return index, mask
 
@@ -2334,14 +2332,17 @@ class Coordinates():
         # set class variable
         self._weights = weights
 
-    def _find_nearest(
-            self, coords, show, value, measure, atol=1e-15, radius=None):
-
-        # get target point in cartesian coordinates
-        points = coords.cartesian
+    def _find_nearest(self, points_1, points_2, points_3,
+                      domain, convention, unit, show,
+                      value, measure, atol=1e-15, radius=None):
 
         # get KDTree
         kdtree = self._make_kdtree()
+
+        # get target point in cartesian coordinates
+        coords = Coordinates(points_1, points_2, points_3,
+                             domain, convention, unit)
+        points = coords.cartesian
 
         # query nearest neighbors
         points = points.flatten() if coords.csize == 1 else points
