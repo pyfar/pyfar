@@ -1749,76 +1749,12 @@ class Coordinates():
 
         return index, mask
 
-    def find_nearest_spherical(
-            self, coords, distance, show=False, atol=1e-15):
-        """
-        Find coordinates within certain angular distance to the query points.
-
-        Parameters
-        ----------
-        coords : Coordinates
-            First, second and third coordinate of the points to which the
-            nearest neighbors are searched.
-        distance : number
-            Great circle distance in degrees in which the nearest points are
-            searched. Must be >= 0 and <= 180.
-        show : bool, optional
-            Show a plot of the coordinate points. The default is ``False``.
-        atol : float, optional
-            A tolerance that is added to `distance`. The default is ``1e-15``.
-
-        Returns
-        -------
-        index : numpy array of ints
-            The locations of the neighbors in the getter methods (e.g.,
-            ``cartesian``). Dimension as in :py:func:`~find_nearest_k`.
-            Missing neighbors are indicated with ``csize``. Also see Notes
-            below.
-
-        Notes
-        -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
-        (N, 3) array. The coordinate points in self are thus reshaped to
-        (`csize`, 3) before they are passed to ``cKDTree``. The index that
-        is returned refers to the reshaped coordinate points. To access the
-        points for example use
-
-        ``points_reshaped = points.cartesian.reshape((points.csize, 3))``
-        ``points_reshaped[index]``
-
-        Examples
-        --------
-
-        Find top points within a distance of 45 degrees
-
-        .. plot::
-
-            >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
-        """
-
-        # check the input
-        assert distance >= 0 and distance <= 180, \
-            "distance must be >= 0 and <= 180."
-
-        # get radius and check for equality
-        radius = self.radius
-        delta_radius = np.max(radius) - np.min(radius)
-        if delta_radius > 1e-15:
-            raise ValueError(
-                "find_nearest_sph only works if all points have the same \
-                radius. Differences are larger than 1e-15")
-
-        # get the points
-        distance, index, mask = self._find_nearest(
-            coords, show, distance, 'sph', atol, np.max(radius))
-
-        return index
-
     def find_slice(self, coordinate: str, unit: str, value, tol=0,
                    show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.8.0. Use properties and
+        slicing instead, e.g. ``coords = coords[coords.azimuth>=np.pi]``.
+
         Find a slice of the coordinates points.
 
         Parameters
@@ -1865,6 +1801,10 @@ class Coordinates():
             >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
 
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0. Use properties"
+            " and slicing instead."),
+                PyfarDeprecationWarning)
 
         # check if the coordinate and unit exist
         domain, convention, index = self._exist_coordinate(coordinate, unit)

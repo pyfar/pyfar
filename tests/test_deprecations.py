@@ -255,3 +255,12 @@ def test_deprecations_find_nearest_k():
             PyfarDeprecationWarning,
             match="This function will be deprecated in pyfar 0.8.0 in favor"):
         coords.find_nearest_k(1, 0, 0)
+
+
+def test_deprecations_find_slice():
+    coords = pf.samplings.sph_lebedev(sh_order=10)
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="This function will be deprecated in pyfar 0.8.0. Use "):
+        coords.find_slice('elevation', 'deg', 0, 5)
