@@ -1380,47 +1380,36 @@ class Coordinates():
             colors[mask] = pf.plot.color('r')
             pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
-    def find_nearest(self, coords, k, distance_measure):
+    def find_nearest(self, coords, k=1, distance_measure='euclidean'):
         """
         Find the k nearest coordinates points.
 
         Parameters
         ----------
-        coords : array like, number
-            First, second and third coordinate of the points to which the
-            nearest neighbors are searched.
+        coords : pf.Coordinates
+            Coordinates to which the nearest neighbors are searched.
         k : int, optional
             Number of points to return. k must be > 0. The default is ``1``.
-        domain : string, optional
-            Domain of the points. The default is ``'cart'``.
-        convention: string, optional
-            Convention of points. The default is ``'right'``.
-        unit : string, optional
-            Unit of the points. The default is ``'met'`` for meters.
-        show : bool, optional
-            Show a plot of the coordinate points. The default is ``False``.
+        distance_measure : string, optional
+            ``'euclidean'``
+                distance is determined by the euclidean distance between
+                the points. This is default.
+            ``'spherical'``
+                distance is determined by the great-circle distance between
+                the points.
 
         Returns
         -------
         index : numpy array of ints
-            The locations of the neighbors in the getter methods (e.g.,
-            ``self.cartesian``). Dimension according to `distance` (see below).
-            Missing neighbors are indicated with ``csize``. Also see Notes
-            below.
+            The locations of the neighbors. Dimension according to
+            (self.cshape, coords.cshape, k)
         distance : numpy array of floats
-            Mask that contains ``True`` at the positions of the selected points
-            and ``False`` otherwise. Mask is of shape ``cshape``.
+            distance between the points, after the given ``distance_measure``.
+            Shape as ``index``.
 
         Notes
         -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
-        (N, 3) array. The coordinate points in self are thus reshaped to
-        (`csize`, 3) before they are passed to ``cKDTree``. The index that
-        is returned refers to the reshaped coordinate points. To access the
-        points for example use
-
-        >>> points_reshaped = self.cartesian.reshape((self.csize, 3))
-        >>> points_reshaped[index]
+        This is a wrapper for ``scipy.spatial.cKDTree``.
 
         Examples
         --------
@@ -1430,16 +1419,49 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
+            >>> import numpy as np
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_k(1, 0, 0, show=True)
+            >>> find = pf.Coordinates(1, 0, 0)
+            >>> index, distance = coords.find_nearest(find)
+            >>> mask = np.zeros(coords.cshape, dtype=bool)
+            >>> mask[index] = True
+            >>> coords.show(mask)
+            >>> distance
+            >>> 0.0
         """
 
         # check the input
         assert isinstance(k, int) and k > 0 and k <= self.csize,\
             "k must be an integer > 0 and <= self.csize."
 
-        # get the points
-        distance, index, mask = self._find_nearest(coords, False, k, 'k')
+        # get target point in cartesian coordinates
+        points = coords.cartesian
+
+        # get KDTree
+        kdtree = self._make_kdtree()
+
+        # query nearest neighbors
+        points = points.flatten() if coords.csize == 1 else points
+
+        # nearest points
+        distance, index = kdtree.query(points, k=k)
+
+        if distance_measure == 'spherical':
+            # determine validate radius
+            radius = self.radius
+            delta_radius = np.max(radius) - np.min(radius)
+            if delta_radius > 1e-15:
+                raise ValueError(
+                    "find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than 1e-15")
+            radius = np.max(radius)
+
+            # convert cartesian coordinates to length on the great circle
+            distance = 2 * radius * np.arcsin(distance/(2*radius))
+        elif not distance_measure == 'euclidean':
+            raise ValueError(
+                "distance_measure needs to be 'euclidean' or 'spherical' and "
+                f"it is {distance_measure}")
 
         return index, distance
 
@@ -2331,6 +2353,22 @@ class Coordinates():
             index = kdtree.query_ball_point(points, value + atol)
             distance = None
         elif measure == 'sph':
+            # get radius and check for equality
+            radius = self.radius
+            delta_radius = np.max(radius) - np.min(radius)
+            if delta_radius > 1e-15:
+                raise ValueError(
+                    "find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than 1e-15")
+            radius = np.max(radius)
+
+            # convert great circle to euclidean distance
+            x, y, z = sph2cart([0, value / 180 * np.pi],
+                               [np.pi / 2, np.pi / 2],
+                               [radius, radius])
+            value = np.sqrt((x[0] - x[1])**2
+                            + (y[0] - y[1])**2
+                            + (z[0] - z[1])**2)
             # points within great circle distance
             index = kdtree.query_ball_point(points, value + atol)
             distance = None
