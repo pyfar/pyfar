@@ -1431,8 +1431,14 @@ class Coordinates():
         """
 
         # check the input
-        assert isinstance(k, int) and k > 0 and k <= self.csize,\
-            "k must be an integer > 0 and <= self.csize."
+        if not isinstance(k, int) or k <= 0 or k > self.csize:
+            raise ValueError("k must be an integer > 0 and <= self.csize.")
+        if not isinstance(coords, Coordinates):
+            raise ValueError("coords must be an pf.Coordinates object.")
+        if not distance_measure in ['euclidean', 'spherical']:
+            raise ValueError(
+                "distance_measure needs to be 'euclidean' or 'spherical' and "
+                f"it is {distance_measure}")
 
         # get target point in cartesian coordinates
         points = coords.cartesian
@@ -1458,10 +1464,6 @@ class Coordinates():
 
             # convert cartesian coordinates to length on the great circle
             distance = 2 * radius * np.arcsin(distance/(2*radius))
-        elif not distance_measure == 'euclidean':
-            raise ValueError(
-                "distance_measure needs to be 'euclidean' or 'spherical' and "
-                f"it is {distance_measure}")
 
         return index, distance
 
