@@ -87,3 +87,23 @@ def test_find_nearest_error():
     # test wrong type for distance measure
     with pytest.raises(ValueError):
         coords.find_nearest(find, 1, 5)
+
+
+def test_find_within_simple():
+    x = np.arange(6)
+    coords = pf.Coordinates(x, 0, 0)
+    find = pf.Coordinates(2, 0, 0)
+    index = coords.find_within(find, 1)
+    assert len(index) == 3
+    npt.assert_equal(index, [1, 2, 3])
+
+
+def test_find_within_multiple_points():
+    x = np.arange(6)
+    coords = pf.Coordinates(x, 0, 0)
+    find = pf.Coordinates([2, 3], 0, 0)
+    index = coords.find_within(find, 1)
+    assert len(index) == find.csize
+    for i in range(find.csize):
+        index_desired = coords.find_within(find[i], 1)
+        npt.assert_equal(index[i], index_desired)
