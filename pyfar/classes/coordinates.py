@@ -1531,6 +1531,7 @@ class Coordinates():
         _, index, mask = self._find_nearest(
             points_1, points_2, points_3,
             domain, convention, unit, show, k, 'k')
+
         return index, mask
 
     def find_nearest_cart(self, points_1, points_2, points_3, distance,
@@ -1675,10 +1676,10 @@ class Coordinates():
                 radius. Differences are larger than 1e-15")
 
         # get the points
-        coords = Coordinates(points_1, points_2, points_3,
-                             domain, convention, unit)
         distance, index, mask = self._find_nearest(
-            coords, show, distance, 'sph', atol, np.max(radius))
+            points_1, points_2, points_3,
+            domain, convention, unit, show, distance, 'sph', atol,
+            np.max(radius))
 
         return index, mask
 
