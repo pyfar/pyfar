@@ -246,3 +246,12 @@ def test_signal_len():
         with pytest.raises(TypeError, match=re.escape("had no len()")):
             # remove Signal.__len__ from pyfar 0.8.0!
             len(pf.Signal([1, 2, 3], 44100))
+
+
+def test_deprecations_find_nearest_k():
+    coords = pf.Coordinates(np.arange(6), 0, 0)
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="This function will be deprecated in pyfar 0.8.0 in favor"):
+        coords.find_nearest_k(1, 0, 0)

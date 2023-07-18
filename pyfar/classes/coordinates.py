@@ -1401,15 +1401,17 @@ class Coordinates():
         Returns
         -------
         index : numpy array of ints
-            The locations of the neighbors. Dimension according to
-            (self.cshape, coords.cshape, k)
+            The indexes of the neighbors. tuple of length ``self.cdim``,
+            with each entry a array of shape (k, coords.cshape). For k=1, its
+            dimension is omitted.
         distance : numpy array of floats
             distance between the points, after the given ``distance_measure``.
-            Shape as ``index``.
+            It's of shape (coords.cshape, k).
 
         Notes
         -----
-        This is a wrapper for ``scipy.spatial.cKDTree``.
+        This is a wrapper for ``scipy.spatial.cKDTree``. Other than previous
+        implementations, it supports self.ndim>1 as well.
 
         Examples
         --------
@@ -1428,6 +1430,43 @@ class Coordinates():
             >>> coords.show(mask)
             >>> distance
             >>> 0.0
+
+        Find multidimensional points in multidimensional coordinates with k=1
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> coords = pf.Coordinates(np.arange(9).reshape((3, 3)), 0, 1)
+        >>> find = pf.Coordinates(
+        >>>     np.array([[0, 1], [2, 3]]), 0, 1)
+        >>> i, d = coords.find_nearest(find)
+        >>> coords[i] == find
+        True
+        >>> i
+        (array([[0, 0],
+                [0, 1]], dtype=int64),
+         array([[0, 1],
+                [2, 0]], dtype=int64))
+        >>> d
+        array([[0., 0.],
+               [0., 0.]])
+
+        Find multidimensional points in multidimensional coordinates with k=3
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> coords = pf.Coordinates(np.arange(9).reshape((3, 3)), 0, 1)
+        >>> find = pf.Coordinates(
+        >>>     np.array([[0, 1], [2, 3]]), 0, 1)
+        >>> i, d = coords.find_nearest(find, 3)
+        >>> # the k-th dimension is at the end
+        >>> i[0].shape
+        (3, 2, 2)
+        >>> # now just access the k=0 dimension
+        >>> coords[i][0].cartesian
+        array([[[0., 0., 1.],
+                [1., 0., 1.]],
+               [[2., 0., 1.],
+                [3., 0., 1.]]])
         """
 
         # check the input
@@ -1465,12 +1504,35 @@ class Coordinates():
             # convert cartesian coordinates to length on the great circle
             distance = 2 * radius * np.arcsin(distance/(2*radius))
 
+        if self.cdim == 1:
+            if k > 1:
+                index = np.moveaxis(index, -1, 0)
+            index = tuple([index], )
+        else:
+            index_array = np.arange(self.csize).reshape(self.cshape)
+            index_multi = []
+            for dim in range(self.cdim):
+                index_multi.append([])
+                for i in index.flatten():
+                    index_multi[dim].append(np.where(i == index_array)[dim][0])
+                index_multi[dim] = np.asarray(
+                    index_multi[dim]).reshape(index.shape)
+                if k > 1:
+                    index_multi[dim] = np.moveaxis(index_multi[dim], -1, 0)
+            index = tuple(index_multi)
+
+        if k > 1:
+            distance = np.moveaxis(distance, -1, 0)
+
         return index, distance
 
     def find_nearest_k(self, points_1, points_2, points_3, k=1,
                        domain='cart', convention='right', unit='met',
                        show=False):
         """
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of the ``find_nearest`` properties.
+
         Find the k nearest coordinates points.
 
         Parameters
@@ -1522,6 +1584,10 @@ class Coordinates():
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> result = coords.find_nearest_k(1, 0, 0, show=True)
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of find_nearest method."),
+                PyfarDeprecationWarning)
 
         # check the input
         assert isinstance(k, int) and k > 0 and k <= self.csize,\
