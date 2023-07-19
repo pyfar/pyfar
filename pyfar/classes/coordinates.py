@@ -1374,9 +1374,9 @@ class Coordinates():
             pf.plot.scatter(self, **kwargs)
         else:
             mask = np.asarray(mask)
-            assert mask.shape == self.cshape,\
-                "'mask.shape' must be self.cshape"
-            colors = np.full(mask.shape, pf.plot.color('b'))
+            # assert mask.shape == self.cshape,\
+            #     "'mask.shape' must be self.cshape"
+            colors = np.full(self.cshape, pf.plot.color('b'))
             colors[mask] = pf.plot.color('r')
             pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
@@ -1565,9 +1565,10 @@ class Coordinates():
         Returns
         -------
         index : numpy array of ints
-            The indexes of the neighbors. tuple of length ``self.cdim``,
-            with each entry a array of shape (k, coords.cshape). For k=1, its
-            dimension is omitted.
+            The indexes of the neighbors. If ``coords.csize>1`` for each
+            dimension, if not, dimension is skipped. Then tuple for
+            the support of multidimensional self, this contains the
+            coordinates with the shape of ``coords.cshape``.
 
         Notes
         -----
@@ -1586,11 +1587,9 @@ class Coordinates():
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> find = pf.Coordinates(1, 0, 0)
             >>> index, distance = coords.find_nearest(find)
-            >>> mask = np.zeros(coords.cshape, dtype=bool)
-            >>> mask[index] = True
-            >>> coords.show(mask)
+            >>> coords.show(index)
             >>> distance
-            >>> 0.0
+            0.0
 
         Find multidimensional points in multidimensional coordinates with k=1
 
@@ -1620,10 +1619,10 @@ class Coordinates():
         >>>     np.array([[0, 1], [2, 3]]), 0, 1)
         >>> i, d = coords.find_nearest(find, 3)
         >>> # the k-th dimension is at the end
-        >>> i[0].shape
-        (3, 2, 2)
+        >>> len(i)
+        3
         >>> # now just access the k=0 dimension
-        >>> coords[i][0].cartesian
+        >>> coords[i[0]].cartesian
         array([[[0., 0., 1.],
                 [1., 0., 1.]],
                [[2., 0., 1.],
@@ -1698,7 +1697,8 @@ class Coordinates():
                     for j in index:
                         index_multi.append(np.where(j == index_array))
 
-                index_multi = np.moveaxis(np.squeeze(np.asarray(index_multi)), -1, 0)
+                index_multi = np.moveaxis(np.squeeze(
+                    np.asarray(index_multi)), -1, 0)
                 if coords.csize > 1:
                     index_new[i] = tuple(index_multi)
                 else:
