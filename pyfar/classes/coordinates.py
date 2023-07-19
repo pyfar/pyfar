@@ -1506,8 +1506,12 @@ class Coordinates():
 
         if self.cdim == 1:
             if k > 1:
-                index = np.moveaxis(index, -1, 0)
-            index = tuple([index], )
+                index_multi = np.moveaxis(index, -1, 0)
+                index = np.empty((k), dtype=tuple)
+                for kk in range(k):
+                    index[kk] = tuple([index_multi[kk]], )
+            else:
+                index = tuple([index], )
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
             index_multi = []
@@ -1517,9 +1521,13 @@ class Coordinates():
                     index_multi[dim].append(np.where(i == index_array)[dim][0])
                 index_multi[dim] = np.asarray(
                     index_multi[dim]).reshape(index.shape)
-                if k > 1:
-                    index_multi[dim] = np.moveaxis(index_multi[dim], -1, 0)
-            index = tuple(index_multi)
+            if k > 1:
+                index_multi = np.moveaxis(index_multi, -1, 0)
+                index = np.empty((k), dtype=tuple)
+                for kk in range(k):
+                    index[kk] = tuple(index_multi[kk])
+            else:
+                index = tuple(index_multi)
 
         if k > 1:
             distance = np.moveaxis(distance, -1, 0)
@@ -1623,10 +1631,14 @@ class Coordinates():
         """
 
         # check the input
-        if distance < 0:
+        if float(distance) < 0:
             raise ValueError("distance must be a non negative number.")
+        if not isinstance(atol, float) or atol < 0:
+            raise ValueError("atol must be a non negative number.")
         if not isinstance(coords, Coordinates):
             raise ValueError("coords must be an pf.Coordinates object.")
+        if not isinstance(return_sorted, bool):
+            raise ValueError("return_sorted must be a bool.")
         allowed_measures = ['euclidean', 'spherical', 'angular']
         if distance_measure not in allowed_measures:
             raise ValueError(
@@ -1667,6 +1679,33 @@ class Coordinates():
             index = kdtree.query_ball_point(
                 points, distance + atol, return_sorted=return_sorted)
 
+        if self.cdim == 1:
+            if coords.csize > 1:
+                for i in range(len(index)):
+                    index[i] = tuple([index[i]], )
+            else:
+                index = tuple([index], )
+
+        else:
+            index_array = np.arange(self.csize).reshape(self.cshape)
+            index_new = np.empty((coords.csize), dtype=tuple)
+            for i in range(coords.csize):
+                index_multi = []
+                if coords.csize > 1:
+                    for j in index[i]:
+                        index_multi.append(np.where(j == index_array))
+                else:
+                    for j in index:
+                        index_multi.append(np.where(j == index_array))
+
+                index_multi = np.moveaxis(np.squeeze(np.asarray(index_multi)), -1, 0)
+                if coords.csize > 1:
+                    index_new[i] = tuple(index_multi)
+                else:
+                    index_new = tuple(index_multi)
+
+            index = index_new
+
         return index
 
     def find_nearest_k(self, points_1, points_2, points_3, k=1,
@@ -1674,7 +1713,7 @@ class Coordinates():
                        show=False):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the ``find_nearest`` properties.
+        of the ``find_nearest`` method.
 
         Find the k nearest coordinates points.
 
@@ -1747,6 +1786,8 @@ class Coordinates():
                           domain='cart', convention='right', unit='met',
                           show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of the ``find_within`` method.
         Find coordinates within a certain distance in meters to query points.
 
         Parameters
@@ -1802,6 +1843,10 @@ class Coordinates():
             >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of find_within method."),
+                PyfarDeprecationWarning)
 
         # check the input
         assert distance >= 0, "distance must be >= 0"
@@ -1817,6 +1862,8 @@ class Coordinates():
                          domain='sph', convention='top_colat', unit='rad',
                          show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of the ``find_within`` method.
         Find coordinates within certain angular distance to the query points.
 
         Parameters
@@ -1871,6 +1918,10 @@ class Coordinates():
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of find_within method."),
+                PyfarDeprecationWarning)
 
         # check the input
         assert distance >= 0 and distance <= 180, \
