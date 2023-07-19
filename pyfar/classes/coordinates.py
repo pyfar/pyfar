@@ -1357,8 +1357,8 @@ class Coordinates():
         Parameters
         ----------
         mask : boolean numpy array, None, optional
-            Plot points in red if ``mask==True``. The default is ``None``,
-            which the same color for all points.
+            Mask or indexes to plot. Plot points in red if ``mask==True``.
+            The default is ``None``, which the same color for all points.
         kwargs : optional
             Keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
             If a mask is provided and the key `c` is contained in kwargs, it
@@ -1392,10 +1392,10 @@ class Coordinates():
             Number of points to return. k must be > 0. The default is ``1``.
         distance_measure : string, optional
             ``'euclidean'``
-                distance is determined by the euclidean distance between
+                Distance is determined by the euclidean distance between
                 the points. This is default.
             ``'spherical'``
-                distance is determined by the great-circle distance between
+                Distance is determined by the great-circle distance between
                 the points.
 
         Returns
@@ -1405,7 +1405,7 @@ class Coordinates():
             with each entry a array of shape (k, coords.cshape). For k=1, its
             dimension is omitted.
         distance : numpy array of floats
-            distance between the points, after the given ``distance_measure``.
+            Distance between the points, after the given ``distance_measure``.
             It's of shape (coords.cshape, k).
 
         Notes
@@ -1545,7 +1545,7 @@ class Coordinates():
         coords : pf.Coordinates
             Coordinates to which the nearest neighbors are searched.
         distance : number, optional
-            maximum allowed distance to the given points ``coords``.
+            Maximum allowed distance to the given points ``coords``.
             Distance must be >= 0. For just exact matches use ``0``.
             The default is ``0``.
         distance_measure : string, optional
