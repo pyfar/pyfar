@@ -429,3 +429,38 @@ def test_fft_remove_mirror_spec():
     npt.assert_allclose(
         fr_even_single, fr_even_desired,
         rtol=1e-12)
+
+
+def test_check_conjugate_symmetry():
+    """test checking for conjugate symmetry"""
+
+    sampling_rate = 48000
+    fft_norm = 'none'
+
+    # test _check_conjugate_symmetry with conjugate
+    # symmetric frequency data with even number of samples
+    n_samples = 4
+    data = np.array([1, 2, 3, 4])
+    assert fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))
+
+    # test _check_conjugate_symmetry with conjugate
+    # symmetric frequency data with odd number of samples
+    n_samples = 5
+    data = np.array([1, 2, 3, 4, 5])
+    assert fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))
+
+    # test _check_conjugate_symmetry with non conjugate
+    # symmetric frequency data with even number of samples
+    n_samples = 4
+    data = np.array([1+1j, 2+2j, 3+3j, 4+4j])
+    assert not fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))
+
+    # test _check_conjugate_symmetry with non conjugate
+    # symmetric frequency data with odd number of samples
+    n_samples = 5
+    data = np.array([1+1j, 2+2j, 3+3j, 4+4j, 5+5j])
+    assert not fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))

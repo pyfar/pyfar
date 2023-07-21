@@ -823,15 +823,10 @@ class Signal(FrequencyData, TimeData):
                 # call complex setter of timeData
                 super(Signal, self.__class__).complex.fset(self, value)
             if self._domain == 'freq':
-                # check for conjugate symmetry
-                if self._check_conjugate_symmetry():
-                    # and remove redundant part of the spectrum
-                    self._data = fft.remove_mirror_spectrum(self._data)
-                    self._complex = value
-                else:
-                    raise ValueError("Signals frequency data are not"
-                                     " conjugate symmetric, complex flag"
-                                     " cannot be `False`.")
+                # and remove redundant part of the spectrum
+                # if data are conjuagte symmetric data
+                self._data = fft.remove_mirror_spectrum(self._data)
+                self._complex = value
         # from complex=False to complex=True
         if not self._complex and value:
             if self._domain == 'time':

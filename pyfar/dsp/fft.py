@@ -446,6 +446,31 @@ def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
         return max(1, (num_freq_bins - 1) * 2)
 
 
+def _check_conjugate_symmetry(data):
+    """Check if the frequency bins are conjugate symmetric
+    around 0 Hz. Assuming the 0 Hz bin is always at index
+    `data.shape[-1] // 2`
+
+    Returns
+    -------
+    results : bool
+        return `True` if fequency data are conjugate symmetric around
+        0 Hz, return `False` if not.
+
+    """
+    dc_idx = data.shape[-1] // 2
+    if _is_odd(data.shape[-1]):
+        mirror_spec = np.conj(np.flip(data[..., :dc_idx], axis=-1))
+    else:
+        mirror_spec = np.conj(np.flip(data[..., 1:dc_idx], axis=-1))
+
+    if mirror_spec.shape[-1] > 0 and np.allclose(
+            data[..., dc_idx+1:], mirror_spec, rtol=1e-15):
+        return True
+    else:
+        return False
+
+
 def add_mirror_spectrum(data_single_sided, even):
     """
     Adds mirror spectrum to single-sided frequency data
@@ -481,8 +506,9 @@ def add_mirror_spectrum(data_single_sided, even):
 
 def remove_mirror_spectrum(data_double_sided):
     """
-    Removes the redundand mirror spectrum
-    of double-sided frequency data. The output is a single-sided
+    Checks if the data are conjugate symmetric and
+    removes the redundand mirror spectrum of double-sided
+    frequency data. The output is a single-sided
     spectrum that matches the format of :py:func:`~rfft`.
 
     Paramters
@@ -498,7 +524,12 @@ def remove_mirror_spectrum(data_double_sided):
         containing N frequency bins.
 
     """
-    N = data_double_sided.shape[-1]
-    idx = N/2
-    data_double_sided = sfft.ifftshift(data_double_sided)
-    return data_double_sided[..., :int(idx)+1]
+    if _check_conjugate_symmetry(data_double_sided):
+        N = data_double_sided.shape[-1]
+        idx = N/2
+        data_double_sided = sfft.ifftshift(data_double_sided)
+        return data_double_sided[..., :int(idx)+1]
+    else:
+        raise ValueError("Signals frequency data are not"
+                         " conjugate symmetric, complex flag"
+                         " cannot be `False`.")
