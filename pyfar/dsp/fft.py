@@ -448,8 +448,14 @@ def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
 
 def _check_conjugate_symmetry(data):
     """Check if the frequency bins are conjugate symmetric
-    around 0 Hz. Assuming the 0 Hz bin is always at index
-    `data.shape[-1] // 2`
+    around 0 Hz.
+
+    Paramters
+    -------
+    data : numpy array
+        M-dimensional array of double-sided spectrum of shape (..., N)
+        containing N frequency bins. The 0 Hz bin must always be at index
+        `data.shape[-1] // 2`.
 
     Returns
     -------
@@ -515,20 +521,20 @@ def remove_mirror_spectrum(data_double_sided):
     ---------
     data_double_sided : numpy array
         M-dimensional array of double-sided spectrum of shape (..., N)
-        containing N frequency bins.
+        containing N frequency bins. The 0 Hz bin must always be at index
+        `data.shape[-1] // 2`.
 
     Returns
     -------
     data : numpy array
-        M-dimensional array of single-sided spectrum of shape (..., N)
-        containing N frequency bins.
+        M-dimensional array of single-sided spectrum of shape (..., N//2+1)
+        containing N//2+1 frequency bins.
 
     """
     if _check_conjugate_symmetry(data_double_sided):
         N = data_double_sided.shape[-1]
-        idx = N/2
         data_double_sided = sfft.ifftshift(data_double_sided)
-        return data_double_sided[..., :int(idx)+1]
+        return data_double_sided[..., :N // 2 + 1]
     else:
         raise ValueError("Signals frequency data are not"
                          " conjugate symmetric, complex flag"
