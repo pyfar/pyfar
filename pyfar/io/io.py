@@ -18,6 +18,7 @@ import zipfile
 import io
 import numpy as np
 import re
+import scipy.io as spio
 
 try:
     import soundfile
@@ -925,3 +926,67 @@ def _read_comsol_get_headerline(filename):
     is_complex = 'i' in line
     delimiter = ',' if ',' in line else None
     return header, is_complex, delimiter
+
+
+def read_ita(fname, data_type='data'):
+    """Read a *.ita file.
+
+    Parameters
+    ----------
+    fname : str
+        The filename.
+    type : str, optional
+        The return type of data. Can be 'data' or 'signal'. Default is 'data'.
+
+    Returns
+    -------
+    data : pyfar.Signal or pyfar.TimeData, pyfar.FrequencyData
+        The data contained in the *.ita file.
+    metadata : dict
+        Additional metadata contained in the *.ita file.
+    """
+    matfile = spio.loadmat(
+        os.path.join(fname),
+        struct_as_record=False, squeeze_me=True, appendmat=False)
+    mfiledata = matfile['ITA_TOOLBOX_AUDIO_OBJECT']
+
+    if data_type == 'signal':
+        fft_norm = 'none' if mfiledata.signalType == 'energy' else 'rms'
+        data = pf.Signal(
+            np.ascontiguousarray(mfiledata.data.T), mfiledata.samplingRate,
+            domain=mfiledata.domain, fft_norm=fft_norm,
+            comment=mfiledata.comment)
+    elif data_type == 'data':
+        domain = mfiledata.domain
+        if domain == 'time':
+            times = np.arange(mfiledata.data.shape[0])/mfiledata.samplingRate
+            data = pf.TimeData(
+                np.ascontiguousarray(mfiledata.data.T), times,
+                comment=mfiledata.comment)
+        elif domain == 'freq':
+            freqs = np.linspace(
+                0, mfiledata.samplingRate/2, mfiledata.data.shape[0])
+            data = pf.FrequencyData(
+                np.ascontiguousarray(mfiledata.data.T), freqs,
+                comment=mfiledata.comment)
+
+    if hasattr(mfiledata, 'userData'):
+        metadata = _todict(mfiledata.userData)
+    else:
+        metadata = {}
+
+    metadata['samplingRate'] = mfiledata.samplingRate
+
+    return data, metadata
+
+
+def _todict(mat_obj):
+    """Recursively transform MATLAB struct objects to nested dictionaries."""
+    mat_dict = {}
+    for fieldname in mat_obj._fieldnames:
+        elem = mat_obj.__dict__[fieldname]
+        if isinstance(elem, spio.matlab.mio5_params.mat_struct):
+            mat_dict[fieldname] = _todict(elem)
+        else:
+            mat_dict[fieldname] = elem
+    return mat_dict
