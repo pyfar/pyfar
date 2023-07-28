@@ -100,6 +100,27 @@ class _Audio():
 
         return reshaped
 
+    def transpose(self, *axes):
+        """Return a transposed copy of the audio object.
+
+        Parameters
+        ----------
+        axes : None, iterable of ints, or n ints
+            `None`: will reverse the order of `self.caxes`.
+            iterable of ints: `i` in the `j`-th place of the interable means
+            that `self._data`'s `i`-th axis becomes the transposed datas `j`-th axis.
+            n ints: same as 'iterable of ints'.
+        """
+        axes = tuple(range(len(self.cshape)))[::-1] if len(axes) == 0 else tuple(axes)
+        assert all([isinstance(ax, int) for ax in axes]), "axes must be defined as integers"
+        assert len(axes) == len(set(axes)), "axes have to be unique"
+        assert len(axes) == max(axes) + 1 == len(self.cshape), "axes have to match caxes"
+
+        transposed = deepcopy(self)
+        transposed._data = transposed._data.transpose(*axes, len(self.cshape))
+
+        return transposed
+
     def flatten(self):
         """Return flattened copy of the audio object.
 
