@@ -207,11 +207,11 @@ def ifft(spec, n_samples, sampling_rate, fft_norm):
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=False)
     # Inverse DFT
-    data = sfft.ifft(
+    return sfft.ifft(
         sfft.ifftshift(spec, axes=-1),
-        n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
-
-    return data
+        n=n_samples,
+        axis=-1,
+        workers=multiprocessing.cpu_count())
 
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
@@ -395,7 +395,7 @@ def _is_odd(num):
     return bool(num & 0x1)
 
 
-def _calc_n_bins_from_time_data(n_samples, complex=False):
+def _n_bins_from_n_samples(n_samples, complex_time=False):
     """
     Helper function to calculate the number of bins resulting from a FFT
     with n_samples
@@ -413,7 +413,7 @@ def _calc_n_bins_from_time_data(n_samples, complex=False):
         Resulting number of frequency bins
 
     """
-    if complex:
+    if complex_time:
         n_bins = n_samples
     else:
         n_bins = n_samples // 2 + 1
@@ -421,13 +421,13 @@ def _calc_n_bins_from_time_data(n_samples, complex=False):
     return int(n_bins)
 
 
-def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
+def _n_samples_from_n_bins(num_freq_bins, is_complex=False):
     """
     Helper function to calculate the number of samples resulting from
     an inverse FFT of a spectrum with n_freq_bins
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     num_freq_bins : int
         Number of frequency bins
     complex : bool
@@ -440,7 +440,7 @@ def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
         Resulting number of time samples.
 
     """
-    if complex:
+    if is_complex:
         return num_freq_bins
     else:
         return max(1, (num_freq_bins - 1) * 2)

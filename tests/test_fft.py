@@ -9,35 +9,35 @@ from pyfar.dsp import fft
 def test_n_bins_even():
     n_samples = 6
     truth = int(n_samples/2 + 1)
-    n_bins = fft._calc_n_bins_from_time_data(n_samples)
+    n_bins = fft._n_bins_from_n_samples(n_samples)
     assert n_bins == truth
 
 
 def test_n_bins_odd():
     n_samples = 7
     truth = int((n_samples + 1)/2)
-    n_bins = fft._calc_n_bins_from_time_data(n_samples)
+    n_bins = fft._n_bins_from_n_samples(n_samples)
     assert n_bins == truth
 
 
 def test_n_bins_complex():
     n_samples = 6
     truth = n_samples
-    n_bins = fft._calc_n_bins_from_time_data(n_samples, complex=True)
+    n_bins = fft._n_bins_from_n_samples(n_samples, complex_time=True)
     assert n_bins == truth
 
 
 def test_n_samples():
     n_bins = 6
     truth = int(n_bins-1) * 2
-    n_samples = fft._calc_n_samples_from_frequency_data(n_bins)
+    n_samples = fft._n_samples_from_n_bins(n_bins)
     assert n_samples == truth
 
 
 def test_n_samples_complex():
     n_bins = 7
     truth = n_bins
-    n_samples = fft._calc_n_samples_from_frequency_data(n_bins, complex=True)
+    n_samples = fft._n_samples_from_n_bins(n_bins, is_complex=True)
     assert n_samples == truth
 
 

@@ -667,8 +667,8 @@ class Signal(FrequencyData, TimeData):
         elif domain == 'freq':
             # check and set n_samples
             if n_samples is None:
-                n_samples = fft._calc_n_samples_from_frequency_data(
-                    data.shape[-1], complex=complex)
+                n_samples = fft._n_samples_from_n_bins(
+                    data.shape[-1], is_complex=complex)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
                     f"samples from {data.shape[-1]} frequency bins.")
@@ -746,7 +746,7 @@ class Signal(FrequencyData, TimeData):
                               "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
-            self._n_samples = fft._calc_n_samples_from_frequency_data(
+            self._n_samples = fft._n_samples_from_n_bins(
                 data.shape[-1], self.complex)
             warnings.warn(
                 f"Number of samples not given, assuming {self.n_samples} "
@@ -860,7 +860,7 @@ class Signal(FrequencyData, TimeData):
     @property
     def n_bins(self):
         """Number of frequency bins."""
-        return fft._calc_n_bins_from_time_data(self.n_samples, self.complex)
+        return fft._n_bins_from_n_samples(self.n_samples, self.complex)
 
     @property
     def fft_norm(self):
