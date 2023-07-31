@@ -1380,38 +1380,38 @@ class Coordinates():
             colors[mask] = pf.plot.color('r')
             pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
-    def find_nearest(self, coords, k=1, distance_measure='euclidean'):
+    def find_nearest(self, find, k=1, distance_measure='euclidean'):
         """
         Find the k nearest coordinates points.
 
         Parameters
         ----------
-        coords : pf.Coordinates
+        find : pf.Coordinates
             Coordinates to which the nearest neighbors are searched.
         k : int, optional
             Number of points to return. k must be > 0. The default is ``1``.
         distance_measure : string, optional
             ``'euclidean'``
-                Distance is determined by the euclidean distance between
-                the points. This is default.
+                Distance is determined by the euclidean distance i meters
+                between the points. This is default.
             ``'spherical'``
-                Distance is determined by the great-circle distance between
-                the points.
+                Distance is determined by the great-circle distance in meters
+                between the points.
+            ``'angular'``
+                distance is determined by the angles in radiant.
 
         Returns
         -------
-        index : numpy array of ints
-            The indexes of the neighbors. tuple of length ``self.cdim``,
-            with each entry a array of shape (k, coords.cshape). For k=1, its
-            dimension is omitted.
+        index : tuple of arrays
+            Indices of the neighbors. Arrays of shape (k, find.cshape) if k>1
+            else (find.cshape).
         distance : numpy array of floats
             Distance between the points, after the given ``distance_measure``.
-            It's of shape (coords.cshape, k).
+            It's of shape (k, find.cshape).
 
         Notes
         -----
-        This is a wrapper for ``scipy.spatial.cKDTree``. Other than previous
-        implementations, it supports self.ndim>1 as well.
+        This is a wrapper for ``scipy.spatial.cKDTree``.
 
         Examples
         --------
@@ -1421,13 +1421,10 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> import numpy as np
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> find = pf.Coordinates(1, 0, 0)
             >>> index, distance = coords.find_nearest(find)
-            >>> mask = np.zeros(coords.cshape, dtype=bool)
-            >>> mask[index] = True
-            >>> coords.show(mask)
+            >>> coords.show(index)
             >>> distance
             >>> 0.0
 
@@ -1472,34 +1469,39 @@ class Coordinates():
         # check the input
         if not isinstance(k, int) or k <= 0 or k > self.csize:
             raise ValueError("k must be an integer > 0 and <= self.csize.")
-        if not isinstance(coords, Coordinates):
-            raise ValueError("coords must be an pf.Coordinates object.")
-        if distance_measure not in ['euclidean', 'spherical']:
+        if not isinstance(find, Coordinates):
+            raise ValueError("find must be an pf.Coordinates object.")
+        if distance_measure not in ['euclidean', 'spherical', 'angular']:
             raise ValueError(
                 "distance_measure needs to be 'euclidean' or 'spherical' and "
                 f"it is {distance_measure}")
 
         # get target point in cartesian coordinates
-        points = coords.cartesian
+        points = find.cartesian
 
         # get KDTree
         kdtree = self._make_kdtree()
 
         # query nearest neighbors
-        points = points.flatten() if coords.csize == 1 else points
+        points = points.flatten() if find.csize == 1 else points
 
         # nearest points
         distance, index = kdtree.query(points, k=k)
 
-        if distance_measure == 'spherical':
+        if distance_measure in ['spherical', 'angular']:
             # determine validate radius
-            radius = self.radius
+            radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
             if delta_radius > 1e-15:
                 raise ValueError(
                     "find_nearest_sph only works if all points have the same \
                     radius. Differences are larger than 1e-15")
             radius = np.max(radius)
+
+            if distance_measure == 'angular':
+                # convert angle in radiant to distance on the sphere
+                # d = 2r*pi*d/(2*pi) = r*d
+                distance = radius * distance
 
             # convert cartesian coordinates to length on the great circle
             distance = 2 * radius * np.arcsin(distance/(2*radius))
@@ -1535,17 +1537,17 @@ class Coordinates():
         return index, distance
 
     def find_within(
-            self, coords, distance=0., distance_measure='euclidean',
+            self, find, distance=0., distance_measure='euclidean',
             atol=1e-15, return_sorted=False):
         """
-        Find coordinates within certain distance to the query points.
+        Find coordinates within a certain distance to the query points.
 
         Parameters
         ----------
-        coords : pf.Coordinates
+        find : pf.Coordinates
             Coordinates to which the nearest neighbors are searched.
         distance : number, optional
-            Maximum allowed distance to the given points ``coords``.
+            Maximum allowed distance to the given points ``find``.
             Distance must be >= 0. For just exact matches use ``0``.
             The default is ``0``.
         distance_measure : string, optional
@@ -1557,18 +1559,13 @@ class Coordinates():
             ``'angular'``
                 distance is determined by the angles in radiant.
         return_sorted : bool, optional
-            Sorts returned indicies if True and does not sort them if False.
-            If None, does not sort single point queries, but does sort
-            multi-point queries which was the behavior before this
-            option was added.
+            Sorts returned indices if True and does not sort them if False.
 
         Returns
         -------
-        index : numpy array of ints
-            The indexes of the neighbors. If ``coords.csize>1`` for each
-            dimension, if not, dimension is skipped. Then tuple for
-            the support of multidimensional self, this contains the
-            coordinates with the shape of ``coords.cshape``.
+        index : tuple of array
+            Indices of the containing coordinates. Arrays of shape
+            (find.cshape).
 
         Notes
         -----
@@ -1578,55 +1575,23 @@ class Coordinates():
         Examples
         --------
 
-        Find frontal point from a spherical coordinate system
+        Find all point with 1m distance from the frontal point
 
         .. plot::
 
             >>> import pyfar as pf
-            >>> import numpy as np
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
             >>> find = pf.Coordinates(1, 0, 0)
-            >>> index, distance = coords.find_nearest(find)
+            >>> index = coords.find_within(find, 1)
             >>> coords.show(index)
-            >>> distance
-            0.0
 
-        Find multidimensional points in multidimensional coordinates with k=1
+        Find all point with 1m distance from two points
 
-        >>> import pyfar as pf
-        >>> import numpy as np
-        >>> coords = pf.Coordinates(np.arange(9).reshape((3, 3)), 0, 1)
-        >>> find = pf.Coordinates(
-        >>>     np.array([[0, 1], [2, 3]]), 0, 1)
-        >>> i, d = coords.find_nearest(find)
-        >>> coords[i] == find
-        True
-        >>> i
-        (array([[0, 0],
-                [0, 1]], dtype=int64),
-         array([[0, 1],
-                [2, 0]], dtype=int64))
-        >>> d
-        array([[0., 0.],
-               [0., 0.]])
-
-        Find multidimensional points in multidimensional coordinates with k=3
-
-        >>> import pyfar as pf
-        >>> import numpy as np
-        >>> coords = pf.Coordinates(np.arange(9).reshape((3, 3)), 0, 1)
-        >>> find = pf.Coordinates(
-        >>>     np.array([[0, 1], [2, 3]]), 0, 1)
-        >>> i, d = coords.find_nearest(find, 3)
-        >>> # the k-th dimension is at the end
-        >>> len(i)
-        3
-        >>> # now just access the k=0 dimension
-        >>> coords[i[0]].cartesian
-        array([[[0., 0., 1.],
-                [1., 0., 1.]],
-               [[2., 0., 1.],
-                [3., 0., 1.]]])
+        .. plot::
+            >>> coords = pf.Coordinates(np.arange(6), 0, 0)
+            >>> find = pf.Coordinates([2, 3], 0, 0)
+            >>> index = coords.find_within(find, 1)
+            >>> coords.show(index[0])
         """
 
         # check the input
@@ -1634,7 +1599,7 @@ class Coordinates():
             raise ValueError("distance must be a non negative number.")
         if not isinstance(atol, float) or atol < 0:
             raise ValueError("atol must be a non negative number.")
-        if not isinstance(coords, Coordinates):
+        if not isinstance(find, Coordinates):
             raise ValueError("coords must be an pf.Coordinates object.")
         if not isinstance(return_sorted, bool):
             raise ValueError("return_sorted must be a bool.")
@@ -1645,13 +1610,13 @@ class Coordinates():
                 f"it is {distance_measure}")
 
         # get target point in cartesian coordinates
-        points = coords.cartesian
+        points = find.cartesian
 
         # get KDTree
         kdtree = self._make_kdtree()
 
         # query nearest neighbors
-        points = points.flatten() if coords.csize == 1 else points
+        points = points.flatten() if find.csize == 1 else points
 
         # nearest points
         if distance_measure == 'euclidean':
@@ -1679,7 +1644,7 @@ class Coordinates():
                 points, distance + atol, return_sorted=return_sorted)
 
         if self.cdim == 1:
-            if coords.csize > 1:
+            if find.csize > 1:
                 for i in range(len(index)):
                     index[i] = tuple([index[i]], )
             else:
@@ -1687,10 +1652,10 @@ class Coordinates():
 
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
-            index_new = np.empty((coords.csize), dtype=tuple)
-            for i in range(coords.csize):
+            index_new = np.empty((find.csize), dtype=tuple)
+            for i in range(find.csize):
                 index_multi = []
-                if coords.csize > 1:
+                if find.csize > 1:
                     for j in index[i]:
                         index_multi.append(np.where(j == index_array))
                 else:
@@ -1699,7 +1664,7 @@ class Coordinates():
 
                 index_multi = np.moveaxis(np.squeeze(
                     np.asarray(index_multi)), -1, 0)
-                if coords.csize > 1:
+                if find.csize > 1:
                     index_new[i] = tuple(index_multi)
                 else:
                     index_new = tuple(index_multi)

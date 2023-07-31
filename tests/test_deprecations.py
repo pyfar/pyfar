@@ -256,6 +256,10 @@ def test_deprecations_find_nearest_k():
             match="This function will be deprecated in pyfar 0.8.0 in favor"):
         coords.find_nearest_k(1, 0, 0)
 
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+        with pytest.raises(TypeError):
+            coords.find_nearest_k(1, 0, 0)
+
 
 def test_deprecations_find_slice():
     coords = pf.samplings.sph_lebedev(sh_order=10)
@@ -264,6 +268,10 @@ def test_deprecations_find_slice():
             PyfarDeprecationWarning,
             match="This function will be deprecated in pyfar 0.8.0. Use "):
         coords.find_slice('elevation', 'deg', 0, 5)
+
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+        with pytest.raises(TypeError):
+            coords.find_slice('elevation', 'deg', 0, 5)
 
 
 def test_deprecations_find_nearest_cart():
@@ -274,6 +282,10 @@ def test_deprecations_find_nearest_cart():
             match="This function will be deprecated in pyfar 0.8.0 in favor "):
         coords.find_nearest_cart(1, 1, 1, 1)
 
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+        with pytest.raises(TypeError):
+            coords.find_nearest_cart(1, 1, 1, 1)
+
 
 def test_deprecations_find_nearest_sph():
     coords = pf.samplings.sph_lebedev(sh_order=10)
@@ -282,3 +294,7 @@ def test_deprecations_find_nearest_sph():
             PyfarDeprecationWarning,
             match="This function will be deprecated in pyfar 0.8.0 in favor "):
         coords.find_nearest_sph(1, 1, 1, 1)
+
+    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+        with pytest.raises(TypeError):
+            coords.find_nearest_sph(1, 1, 1, 1)
