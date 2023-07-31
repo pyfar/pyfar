@@ -1538,7 +1538,7 @@ class Coordinates():
 
     def find_within(
             self, find, distance=0., distance_measure='euclidean',
-            atol=1e-15, return_sorted=False):
+            atol=1e-15, return_sorted=True):
         """
         Find coordinates within a certain distance to the query points.
 
@@ -1560,6 +1560,7 @@ class Coordinates():
                 distance is determined by the angles in radiant.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
+            The default is True.
 
         Returns
         -------
