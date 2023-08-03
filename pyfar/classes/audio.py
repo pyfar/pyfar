@@ -12,7 +12,7 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
-from .warnings import PyfarDeprecationWarning
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class _Audio():
@@ -100,19 +100,22 @@ class _Audio():
 
         return reshaped
 
-    def transpose(self, axes=None):
+    def transpose(self, *axes):
         """Transpose time/frequency data and return copy of the audio object.
 
         Parameters
         ----------
-        axes : `None`, iterable of ints, or n ints
-            `None`(default): reverses the order of `self.caxes`.
+        axes : empty, `None`, iterable of ints, or n ints
+            empty (default) or `None`: reverses the order of `self.caxes`.
             iterable of ints: `i` in the `j`-th place of the interable means
             that the `i`-th axis becomes transposed object's `j`-th axis.
             n ints: same as 'iterable of ints'.
         """
-        axes = tuple(range(len(self.cshape)))[::-1] if axes is None else tuple([a-1 if a<0 else a for a in axes])
-        np.empty(np.ones(len(self._data.shape))).transpose(axes, -1) # throw exception before deepcopy
+        if axes is None or len(axes) == 0:
+            axes = tuple(range(len(self.cshape)))[::-1]
+        else:
+            tuple([a-1 if a<0 else a for a in axes])
+        np.empty(np.ones(len(self.cshape), dtype=int)).transpose(axes) # throw exception before deepcopy
         transposed = deepcopy(self)
         transposed._data = transposed._data.transpose(*axes, len(self.cshape))
 
