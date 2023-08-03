@@ -101,7 +101,7 @@ class _Audio():
         return reshaped
 
     def transpose(self, axes=None):
-        """Return a transposed copy of the audio object.
+        """Transpose time/frequency data and return copy of the audio object.
 
         Parameters
         ----------
