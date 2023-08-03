@@ -106,10 +106,9 @@ class _Audio():
         Parameters
         ----------
         axes : `None`, iterable of ints, or n ints
-            leaving the argument empty will reverse the order of `self.caxes`.
+            `None`(default): reverses the order of `self.caxes`.
             iterable of ints: `i` in the `j`-th place of the interable means
-            that `self._data`'s `i`-th axis becomes the transposed datas `j`-th
-            axis. Defaults to `None`.
+            that the `i`-th axis becomes transposed object's `j`-th axis.
             n ints: same as 'iterable of ints'.
         """
         axes = tuple(range(len(self.cshape)))[::-1] if axes is None else tuple([a-1 if a<0 else a for a in axes])
