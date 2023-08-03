@@ -112,7 +112,7 @@ class _Audio():
             n ints: same as 'iterable of ints'.
         """
         axes = tuple(range(len(self.cshape)))[::-1] if axes is None else tuple([a-1 if a<0 else a for a in axes])
-        np.empty(np.ones(len(self.cshape))).transpose(axes, -1) # throw exception before deepcopy
+        np.empty(np.ones(len(self._data.shape))).transpose(axes, -1) # throw exception before deepcopy
         transposed = deepcopy(self)
         transposed._data = transposed._data.transpose(*axes, len(self.cshape))
 
