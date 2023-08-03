@@ -112,11 +112,8 @@ class _Audio():
             axis. Defaults to `None`.
             n ints: same as 'iterable of ints'.
         """
-        axes = tuple(range(len(self.cshape)))[::-1] if len(axes) == 0 else tuple(axes)
-        assert all([isinstance(ax, int) for ax in axes]), "axes must be defined as integers"
-        assert len(axes) == len(set(axes)), "axes have to be unique"
-        assert len(axes) == max(axes) + 1 == len(self.cshape), "axes have to match caxes"
-
+        axes = tuple(range(len(self.cshape)))[::-1] if axes is None else tuple([a-1 if a<0 else a for a in axes])
+        np.empty(np.ones(len(self.cshape))).transpose(axes, -1) # throw exception before deepcopy
         transposed = deepcopy(self)
         transposed._data = transposed._data.transpose(*axes, len(self.cshape))
 
