@@ -1357,8 +1357,8 @@ class Coordinates():
         Parameters
         ----------
         mask : boolean numpy array, None, optional
-            Mask or indexes to plot. Plot points in red if ``mask==True``.
-            The default is ``None``, which the same color for all points.
+            Plot points in red if ``mask==True``. The default is ``None``,
+            which the same color for all points.
         kwargs : optional
             Keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
             If a mask is provided and the key `c` is contained in kwargs, it
@@ -1374,9 +1374,9 @@ class Coordinates():
             pf.plot.scatter(self, **kwargs)
         else:
             mask = np.asarray(mask)
-            # assert mask.shape == self.cshape,\
-            #     "'mask.shape' must be self.cshape"
-            colors = np.full(self.cshape, pf.plot.color('b'))
+            assert mask.shape == self.cshape,\
+                "'mask.shape' must be self.cshape"
+            colors = np.full(mask.shape, pf.plot.color('b'))
             colors[mask] = pf.plot.color('r')
             pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
