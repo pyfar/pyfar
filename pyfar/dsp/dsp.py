@@ -1975,7 +1975,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                          "or 'FrequencyData'."))
     if type(signal) is pyfar.TimeData and mode in (
             'log_magnitude_zerophase', 'magnitude_zerophase',
-            'magnitude_phase', 'power',):
+            'magnitude_phase', 'power'):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
