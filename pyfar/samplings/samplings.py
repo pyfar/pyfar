@@ -222,8 +222,8 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     w = w / np.sum(w)
 
     # make Coordinates object
-    sampling = pyfar.Coordinates(
-        phi.reshape(-1), theta.reshape(-1), rad, 'sph', 'top_colat',
+    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+        phi.reshape(-1), theta.reshape(-1), rad,
         comment='equiangular spherical sampling grid',
         weights=w, sh_order=n_max)
 
@@ -301,8 +301,8 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     weights = weights / np.sum(weights)
 
     # make Coordinates object
-    sampling = pyfar.Coordinates(
-        phi.reshape(-1), theta.reshape(-1), rad, 'sph', 'top_colat',
+    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
+        phi.reshape(-1), theta.reshape(-1), rad,
         comment='gaussian spherical sampling grid',
         weights=weights, sh_order=n_max)
 
@@ -392,7 +392,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     weights = file_data[:, 3] / 4 / np.pi
 
     # generate Coordinates object
-    sampling = pyfar.Coordinates(
+    sampling = pyfar.SamplingSphere(
         file_data[:, 0] * radius,
         file_data[:, 1] * radius,
         file_data[:, 2] * radius,
@@ -523,7 +523,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
         sep=' ').reshape((n_points, 3))
 
     # generate Coordinates object
-    sampling = pyfar.Coordinates(
+    sampling = pyfar.SamplingSphere(
         points[..., 0] * radius,
         points[..., 1] * radius,
         points[..., 2] * radius,
@@ -772,7 +772,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     weights = leb["w"] / (4 * np.pi)
 
     # generate Coordinates object
-    sampling = pyfar.Coordinates(
+    sampling = pyfar.SamplingSphere(
         leb["x"] * radius,
         leb["y"] * radius,
         leb["z"] * radius,
@@ -928,11 +928,10 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     fliege = fliege[f"Fliege_{int(n_points)}"]
 
     # generate Coordinates object
-    sampling = pyfar.Coordinates(
+    sampling = pyfar.SamplingSphere.from_spherical_colatitude(
         fliege[:, 0],
         fliege[:, 1],
         radius,
-        'sph', 'top_colat',
         sh_order=sh_order, weights=fliege[:, 2],
         comment='spherical Fliege sampling grid')
 
