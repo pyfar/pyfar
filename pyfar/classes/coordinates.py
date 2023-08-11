@@ -2630,6 +2630,7 @@ class SamplingSphere(Coordinates):
     @sh_order.setter
     def sh_order(self, value):
         """Set the maximum spherical harmonic order."""
+        assert value > 0
         if value is None:
             self._sh_order = None
         else:

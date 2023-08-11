@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from pyfar import Coordinates
+from pyfar import Coordinates, SamplingSphere
 from pyfar.classes.coordinates import sph2cart, cart2sph, cyl2cart
 
 
@@ -591,3 +591,20 @@ def test_coordinates_init_from_cylindrical(azimuth, z, radius_z):
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
+
+
+def test_samplingsSphere():
+    sampling = SamplingSphere([1, 2], 0, 0, sh_order=5)
+    assert isinstance(sampling, SamplingSphere)
+    new_sampling = sampling[0]
+    assert isinstance(new_sampling, SamplingSphere)
+    assert sampling.sh_order == 5
+    assert new_sampling.sh_order == 5
+    new_sampling.sh_order = 6
+    assert sampling.sh_order == 5
+    assert new_sampling.sh_order == 6
+
+
+def test_samplingsSphere_fail():
+    with pytest.raises(AssertionError):
+        SamplingSphere([1, 2], 0, 0, sh_order=-5)
