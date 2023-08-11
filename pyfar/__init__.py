@@ -10,7 +10,7 @@ __version__ = '0.5.3'
 from .classes.audio import Signal, TimeData, FrequencyData
 from .classes.audio import (add, subtract, multiply, divide, power,
                             matrix_multiplication)
-from .classes.coordinates import Coordinates
+from .classes.coordinates import Coordinates, SamplingSphere
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 
