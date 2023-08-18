@@ -2,7 +2,7 @@
 The following documents the pyfar coordinates class and functions for
 coordinate conversion. More background information is given in
 :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
-Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
+Available sampling schemes are listed at :py:mod:`~spharpy.samplings`.
 """
 
 import numpy as np
@@ -1432,7 +1432,7 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> coords = pf.Coordinates(np.arange(-5, 5)
             >>> result = coords.find_nearest_k(1, 0, 0, show=True)
         """
 
@@ -1502,7 +1502,7 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
             >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
 
         """
@@ -1572,7 +1572,7 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
             >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
         """
 
@@ -1641,7 +1641,7 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> coords = pf.Coordinates(np.arange(-5, 5)
             >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
 
         """
@@ -1737,7 +1737,7 @@ class Coordinates():
         Get a coordinates object
 
         >>> import pyfar as pf
-        >>> coordinates = pf.samplings.sph_gaussian(sh_order=3)
+        >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
 
         Rotate 45 degrees about the y-axis using
 
