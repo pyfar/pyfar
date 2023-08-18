@@ -1427,13 +1427,13 @@ class Coordinates():
         Examples
         --------
 
-        Find frontal point from a spherical coordinate system
+        Find the nearest point in a line
 
         .. plot::
 
             >>> import pyfar as pf
             >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
-            >>> result = coords.find_nearest_k(1, 0, 0, show=True)
+            >>> result = coords.find_nearest_k(0, 0, 0, show=True)
         """
 
         # check the input
@@ -1502,8 +1502,8 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
-            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
+            >>> coords = pf.Coordinates(np.arange(0, 5), 0, 0)
+            >>> result = coords.find_nearest_cart(2, 0, 0, 0.5, show=True)
 
         """
 
@@ -1573,9 +1573,10 @@ class Coordinates():
 
             >>> import pyfar as pf
             >>> import numpy as np
-            >>> coords = pf.Coordinates.from_spherical_colatitude(
-            >>>     np.arange(-10, 10)*np.pi/180, 0, 0)
-            >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     0, np.arange(-90, 91, 10)*np.pi/180, 1)
+            >>> result = coords.find_nearest_sph(0, np.pi/2, 1, 45, show=True)
+
         """
 
         # check the input
@@ -1643,8 +1644,10 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
-            >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_colatitude(
+            >>>     np.arange(-10, 10)*np.pi/180, 0, 1)
+            >>> result = coords.find_slice('azimuth', 'deg', 0, 5, show=True)
 
         """
 
