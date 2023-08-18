@@ -198,6 +198,18 @@ def test_pad_zero_modi():
         ("pf.Coordinates(0, 0, 0, domain='sph')"),
         ("pf.Coordinates(0, 0, 0, domain='sph', unit='deg')"),
         ("pf.Coordinates(0, 0, 0, domain='sph', convention='top_colat')"),
+        ("pf.samplings.cart_equidistant_cube(2)"),
+        ("pf.samplings.sph_dodecahedron()"),
+        ("pf.samplings.sph_icosahedron()"),
+        ("pf.samplings.sph_equiangular(sh_order=5)"),
+        ("pf.samplings.sph_gaussian(sh_order=5)"),
+        ("pf.samplings.sph_extremal(sh_order=5)"),
+        ("pf.samplings.sph_t_design(sh_order=5)"),
+        ("pf.samplings.sph_equal_angle(5)"),
+        ("pf.samplings.sph_great_circle()"),
+        ("pf.samplings.sph_lebedev(sh_order=5)"),
+        ("pf.samplings.sph_fliege(sh_order=5)"),
+        ("pf.samplings.sph_equal_area(5)"),
     ])
 def test_deprecations_0_8_0(statement):
     coords = pf.Coordinates.from_spherical_colatitude(np.arange(6), 0, 0)

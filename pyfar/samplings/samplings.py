@@ -5,6 +5,7 @@ import warnings
 import os
 import scipy.io as sio
 import pyfar
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 from . import external
 
@@ -12,6 +13,9 @@ from . import external
 def cart_equidistant_cube(n_points):
     """
     Create a cuboid sampling with equidistant spacings in x, y, and z.
+
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.cube_equidistant`.
 
     The cube will have dimensions 1 x 1 x 1.
 
@@ -29,6 +33,11 @@ def cart_equidistant_cube(n_points):
         Sampling positions. Does not contain sampling weights.
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.cube_equidistant."),
+            PyfarDeprecationWarning)
+
     if np.size(n_points) == 1:
         n_x = n_points
         n_y = n_points
@@ -61,6 +70,9 @@ def sph_dodecahedron(radius=1.):
     Generate a sampling based on the center points of the twelve
     dodecahedron faces.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.dodecahedron`.
+
     Parameters
     ----------
     radius : number, optional
@@ -71,8 +83,11 @@ def sph_dodecahedron(radius=1.):
     sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
-
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.dodecahedron."),
+            PyfarDeprecationWarning)
 
     dihedral = 2 * np.arcsin(np.cos(np.pi / 3) / np.sin(np.pi / 5))
     R = np.tan(np.pi / 3) * np.tan(dihedral / 2)
@@ -116,6 +131,9 @@ def sph_icosahedron(radius=1.):
     """
     Generate a sampling from the center points of the twenty icosahedron faces.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.icosahedron`.
+
     Parameters
     ----------
     radius : number, optional
@@ -128,6 +146,11 @@ def sph_icosahedron(radius=1.):
         :py:func:`calculate_sph_voronoi_weights`.
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.icosahedron."),
+            PyfarDeprecationWarning)
+
     gamma_R_r = np.arccos(np.cos(np.pi / 3) / np.sin(np.pi / 5))
     gamma_R_rho = np.arccos(1 / (np.tan(np.pi / 5) * np.tan(np.pi / 3)))
 
@@ -149,6 +172,9 @@ def sph_icosahedron(radius=1.):
 def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     """
     Generate an equiangular sampling of the sphere.
+
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.equiangular`.
 
     For detailed information, see [#]_, Chapter 3.2.
     This sampling does not contain points at the North and South Pole and is
@@ -179,6 +205,11 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.equiangular."),
+            PyfarDeprecationWarning)
+
     if (n_points is None) and (sh_order is None):
         raise ValueError(
             "Either the n_points or sh_order needs to be specified.")
@@ -234,6 +265,9 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     """
     Generate sampling of the sphere based on the Gaussian quadrature.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.gaussian`.
+
     For detailed information, see [#]_ (Section 3.3).
     This sampling does not contain points at the North and South Pole and is
     typically used for spherical harmonics processing. See
@@ -263,6 +297,11 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
            Berlin, Heidelberg, Germany: Springer, 2015.
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.gaussian."),
+            PyfarDeprecationWarning)
+
     if (n_points is None) and (sh_order is None):
         raise ValueError(
             "Either the n_points or sh_order needs to be specified.")
@@ -313,6 +352,9 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     """
     Return a Hyperinterpolation sampling grid.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.hyperinterpolation`.
+
     After Sloan and Womersley [#]_. The samplings are available for
     1 <= `sh_order` <= 200 (``n_points = (sh_order + 1)^2``).
 
@@ -348,6 +390,10 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     .. [#]  https://web.maths.unsw.edu.au/~rsw/Sphere/MaxDet/
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.hyperinterpolation."),
+            PyfarDeprecationWarning)
 
     if (n_points is None) and (sh_order is None):
         for o in range(1, 100):
@@ -407,6 +453,9 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     """
     Return spherical t-design sampling grid.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.spherical_t_design`.
+
     For detailed information, see [#]_.
     For a spherical harmonic order :math:`n_{sh}`, a t-Design of degree
     :math:`t=2n_{sh}` for constant energy or :math:`t=2n_{sh}+1` additionally
@@ -464,6 +513,10 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     .. [#]  http://web.maths.unsw.edu.au/~rsw/Sphere/EffSphDes/sf.html
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.spherical_t_design."),
+            PyfarDeprecationWarning)
 
     # check input
     if (degree is None) and (sh_order is None):
@@ -537,6 +590,9 @@ def sph_equal_angle(delta_angles, radius=1.):
     """
     Generate sampling of the sphere with equally spaced angles.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.equal_angle`.
+
     This sampling contain points at the North and South Pole. See
     :py:func:`sph_equiangular`, :py:func:`sph_gaussian`, and
     :py:func:`sph_great_circle` for samplings that do not contain points at the
@@ -559,6 +615,10 @@ def sph_equal_angle(delta_angles, radius=1.):
         :py:func:`calculate_sph_voronoi_weights`.
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.equal_angle."),
+            PyfarDeprecationWarning)
 
     # get the angles
     delta_angles = np.asarray(delta_angles)
@@ -601,6 +661,9 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     """
     Spherical sampling grid according to the great circle distance criterion.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.great_circle`.
+
     Sampling grid where neighboring points of the same elevation have approx.
     the same great circle distance across elevations [#]_.
 
@@ -637,8 +700,11 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
             the head-related transfer functions of an artificial head with a
             high directional resolution,” 109th AES Convention, Los Angeles,
             USA, Sep. 2000.
-
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.great_circle."),
+            PyfarDeprecationWarning)
 
     # check input
     assert 1 / azimuth_res % 1 == 0, "1/azimuth_res must be an integer."
@@ -689,8 +755,11 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     """
     Return Lebedev spherical sampling grid.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.lebedev`.
+
     For detailed information, see [#]_. For a list of available values
-    for `n_points` and `sh_order` call :py:func:`sph_lebedev`.
+    for `n_points` and `sh_order` call :py:func:`lebedev`.
 
     Parameters
     ----------
@@ -724,6 +793,10 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
         getlebedevsphere
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.hyperinterpolation."),
+            PyfarDeprecationWarning)
 
     # possible degrees
     degrees = np.array([6, 14, 26, 38, 50, 74, 86, 110, 146, 170, 194, 230,
@@ -785,6 +858,9 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
 def sph_fliege(n_points=None, sh_order=None, radius=1.):
     """
     Return Fliege-Maier spherical sampling grid.
+
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.fliege`.
 
     For detailed information, see [#]_. Call :py:func:`sph_fliege`
     for a list of possible values for `n_points` and `sh_order`.
@@ -880,8 +956,11 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
            and corresponding cubature formulae,” IMA J. Numerical Analysis,
            Vol. 19, pp. 317–334, Apr. 1999, doi: 10.1093/imanum/19.2.317.
     .. [#] https://audiogroup.web.th-koeln.de/SOFiA_wiki/DOWNLOAD.html
-
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.fliege."),
+            PyfarDeprecationWarning)
 
     # possible values for n_points and sh_order
     points = np.array([4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
@@ -950,6 +1029,9 @@ def sph_equal_area(n_points, radius=1.):
     """
     Sampling based on partitioning into faces with equal area.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.equal_area`.
+
     For detailed information, see [#]_.
 
     Parameters
@@ -971,8 +1053,11 @@ def sph_equal_area(n_points, radius=1.):
     .. [#]  P. Leopardi, “A partition of the unit sphere into regions of equal
             area and small diameter,” Electronic Transactions on Numerical
             Analysis, vol. 25, no. 12, pp. 309–327, 2006.
-
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.equal_area."),
+            PyfarDeprecationWarning)
 
     point_set = external.eq_point_set(2, n_points)
     sampling = pyfar.Coordinates(
