@@ -1432,7 +1432,7 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.Coordinates(np.arange(-5, 5)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
             >>> result = coords.find_nearest_k(1, 0, 0, show=True)
         """
 
@@ -1572,7 +1572,9 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_colatitude(
+            >>>     np.arange(-10, 10)*np.pi/180, 0, 0)
             >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
         """
 
@@ -1641,7 +1643,7 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.Coordinates(np.arange(-5, 5)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
             >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
 
         """
