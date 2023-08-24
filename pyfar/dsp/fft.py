@@ -400,8 +400,8 @@ def _n_bins_from_n_samples(n_samples, complex_time=False):
     Helper function to calculate the number of bins resulting from a FFT
     with n_samples
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     n_samples : int
         Number of samples
     complex : bool
@@ -477,7 +477,7 @@ def _check_conjugate_symmetry(data):
         return False
 
 
-def add_mirror_spectrum(data_single_sided, even):
+def add_mirror_spectrum(data_single_sided, even_samples):
     """
     Adds mirror spectrum to single-sided frequency data
     and applies fftshift. The output is a double-sided
@@ -499,7 +499,7 @@ def add_mirror_spectrum(data_single_sided, even):
         containing N frequency bins.
 
     """
-    if even:
+    if even_samples:
         mirror_spec = data_single_sided[..., 1:-1]
     else:
         mirror_spec = data_single_sided[..., 1:]
@@ -517,8 +517,8 @@ def remove_mirror_spectrum(data_double_sided):
     frequency data. The output is a single-sided
     spectrum that matches the format of :py:func:`~rfft`.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     data_double_sided : numpy array
         M-dimensional array of double-sided spectrum of shape (..., N)
         containing N frequency bins. The 0 Hz bin must always be at index
@@ -537,5 +537,5 @@ def remove_mirror_spectrum(data_double_sided):
         return data_double_sided[..., :N // 2 + 1]
     else:
         raise ValueError("Signals frequency data are not"
-                         " conjugate symmetric, complex flag"
+                         " conjugate symmetric, is_complex flag"
                          " cannot be `False`.")

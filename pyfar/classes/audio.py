@@ -192,7 +192,7 @@ class TimeData(_Audio):
     to frequency domain, i.e., non-equidistant samples.
 
     """
-    def __init__(self, data, times, comment="", complex=False):
+    def __init__(self, data, times, comment="", is_complex=False):
 
         """Create TimeData object with data, and times.
 
@@ -209,7 +209,7 @@ class TimeData(_Audio):
         comment : str, optional
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
-        complex : bool, optional
+        is_complex : bool, optional
             A flag which indicates if the time data are real or complex-valued.
             The default is ``False``.
 
@@ -217,11 +217,12 @@ class TimeData(_Audio):
 
         _Audio.__init__(self, 'time', comment)
 
-        if not isinstance(complex, bool):
-            raise TypeError(f"``complex`` flag is {type(complex).__name__}"
-                            f"but must be a boolean")
+        if not isinstance(is_complex, bool):
+            raise TypeError("``is_complex`` flag is "
+                            f"{type(is_complex).__name__}"
+                            "but must be a boolean")
 
-        self._complex = complex
+        self._complex = is_complex
         self.time = data
 
         self._times = np.atleast_1d(np.asarray(times).flatten())
@@ -247,7 +248,7 @@ class TimeData(_Audio):
             if data.dtype.kind == "i":
                 data = np.atleast_2d(np.asarray(value, dtype=float))
             elif data.dtype.kind == "c":
-                raise ValueError("time data is complex, set complex "
+                raise ValueError("time data is complex, set is_complex "
                                  "flag or pass real-valued data.")
             elif data.dtype.kind != "f":
                 raise ValueError(
@@ -268,12 +269,11 @@ class TimeData(_Audio):
     def complex(self, value):
         # set from complex=True to complex=False
         if self._complex and not value:
-            if np.all(np.abs(np.imag(self._data))) < 1e-15:
-                self._complex = value
-                self._data = self._data.astype(float)
-            else:
+            if np.all(np.abs(np.imag(self._data))) >= 1e-14:
                 raise ValueError("Signal has complex-valued time data"
-                                 " complex flag cannot be `False`.")
+                                 " is_complex flag cannot be `False`.")
+            self._complex = value
+            self._data = self._data.astype(float)
         # from complex=False to complex=True
         if not self._complex and value:
             self._complex = value
@@ -585,7 +585,7 @@ class Signal(FrequencyData, TimeData):
             domain='time',
             fft_norm='none',
             comment="",
-            complex=False):
+            is_complex=False):
 
         """Create Signal with data, and sampling rate.
 
@@ -619,7 +619,7 @@ class Signal(FrequencyData, TimeData):
         comment : str, optional
             A comment related to `data`. The default is ``""``, which
             initializes an empty string.
-        complex : bool
+        is_complex : bool
             Specifies if the underlying time domain data are complex
             or real-valued. If ``True`` and `domain` is ``'time'``, the
             input data will be casted to complex. The default is ``False``.
@@ -636,11 +636,11 @@ class Signal(FrequencyData, TimeData):
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
 
-        if not isinstance(complex, bool):
-            raise TypeError(f"``complex`` flag is {type(complex).__name__}"
+        if not isinstance(is_complex, bool):
+            raise TypeError(f"``is_complex`` flag is {type(is_complex).__name__}"
                             f"but must be a boolean")
 
-        self._complex = complex
+        self._complex = is_complex
         self._VALID_FFT_NORMS = [
             "none", "unitary", "amplitude", "rms", "power", "psd"]
 
@@ -663,12 +663,12 @@ class Signal(FrequencyData, TimeData):
             self._n_samples = data.shape[-1]
             times = np.atleast_1d(
                 np.arange(0, self._n_samples) / sampling_rate)
-            TimeData.__init__(self, data, times, comment, complex)
+            TimeData.__init__(self, data, times, comment, is_complex)
         elif domain == 'freq':
             # check and set n_samples
             if n_samples is None:
                 n_samples = fft._n_samples_from_n_bins(
-                    data.shape[-1], is_complex=complex)
+                    data.shape[-1], is_complex=is_complex)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
                     f"samples from {data.shape[-1]} frequency bins.")

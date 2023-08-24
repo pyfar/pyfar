@@ -61,7 +61,7 @@ def signal_stub(time, freq, sampling_rate, fft_norm, complex=False):
         return bin
 
     signal = mock.MagicMock(
-        spec_set=Signal(time, sampling_rate, domain='time', complex=complex))
+        spec_set=Signal(time, sampling_rate, domain='time', is_complex=complex))
     signal.time = np.atleast_2d(time)
     signal.freq = np.atleast_2d(freq)
     signal.sampling_rate = sampling_rate

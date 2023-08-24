@@ -387,7 +387,7 @@ def test_fft_add_mirror_spec():
     data_odd = [1, 2, 3, 4, 5, 6, 7]
     fr_odd = fft.rfft(data_odd, n_samples=7, sampling_rate=48000,
                       fft_norm='none')
-    fr_odd_both = fft.add_mirror_spectrum(fr_odd, even=False)
+    fr_odd_both = fft.add_mirror_spectrum(fr_odd, even_samples=False)
     fr_odd_desired = fft.fft(data_odd, n_samples=7, sampling_rate=48000,
                              fft_norm='none')
 
@@ -398,7 +398,7 @@ def test_fft_add_mirror_spec():
     data_even = [1, 2, 3, 4, 5, 6]
     fr_even = fft.rfft(data_even, n_samples=6, sampling_rate=48000,
                        fft_norm='none')
-    fr_even_both = fft.add_mirror_spectrum(fr_even, even=True)
+    fr_even_both = fft.add_mirror_spectrum(fr_even, even_samples=True)
     fr_even_desired = fft.fft(data_even, n_samples=6, sampling_rate=48000,
                               fft_norm='none')
     npt.assert_allclose(
