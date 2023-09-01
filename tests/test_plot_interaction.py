@@ -317,7 +317,7 @@ def test_move_and_zoom_linear():
             ax, *_ = pf.plot.spectrogram(signal, dB=False)
             ax = ax[0]
             for cm in ax.get_children():
-                if type(cm) == mpl.collections.QuadMesh:
+                if isinstance(cm, mpl.collections.QuadMesh):
                     break
             getter = cm.get_clim
 
