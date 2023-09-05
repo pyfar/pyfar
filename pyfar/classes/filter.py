@@ -491,9 +491,11 @@ class FilterSOS(Filter):
 
         self._coefficients = coeff
 
+    @property
     def order(self):
-        """The order of the filter. This is always 2 for SOS filter."""
-        return 2
+        """The order of the filter.
+        This is always twice the number of sections."""
+        return 2*self.n_sections
 
     @property
     def n_sections(self):
