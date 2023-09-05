@@ -1519,7 +1519,7 @@ class Coordinates():
 
             # check bounds (cyclic values could be wraped but this is safer)
             if c_type in ['bound', 'cyclic']:
-                assert ((p >= c_range[0]) & (p <= c_range[1])).all(),\
+                assert ((p >= c_range[0]) & (p <= c_range[1])).all(), \
                        f"Values of points_{nn+1} must be in the range \
                        {c_range}"
 
