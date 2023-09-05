@@ -264,7 +264,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         `Numpy broadcasting
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
     unit : str, optional
-        The unit of the shift. Either 'samples' or 'seconds'/'s'. Defaults to 'samples'.
+        The unit of the shift. Either 'samples' or 's'. Defaults to 'samples'.
     order : int, optional
         The order of the fractional shift (sinc) filter. The precision of the
         filter increases with the order. High frequency errors decrease with
@@ -364,7 +364,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         raise ValueError((f"The order is {order} but must not exceed "
                           f"{signal.n_samples-1} (signal.n_samples-1)"))
 
-    if unit in ('s', 'seconds'):
+    if unit == 's':
         shift = shift*signal.sampling_rate
     elif unit != 'samples':
         raise ValueError(
