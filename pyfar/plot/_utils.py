@@ -220,7 +220,7 @@ def _get_quad_mesh_from_axis(ax):
     """
     quad_mesh_found = False
     for qm in ax.get_children():
-        if isinstance(qm, mpl.collections.QuadMesh):
+        if type(qm) is mpl.collections.QuadMesh:
             quad_mesh_found = True
             break
 
