@@ -1739,7 +1739,7 @@ class Coordinates():
                 PyfarDeprecationWarning)
 
         # check the input
-        assert isinstance(k, int) and k > 0 and k <= self.csize,\
+        assert isinstance(k, int) and k > 0 and k <= self.csize, \
             "k must be an integer > 0 and <= self.csize."
 
         # get the points
@@ -1979,7 +1979,7 @@ class Coordinates():
 
         # check if  value is within the range of coordinate
         if c_info[0] in ["bound", "cyclic"]:
-            assert c_info[1][0] <= value <= c_info[1][1],\
+            assert c_info[1][0] <= value <= c_info[1][1], \
                 f"'value' is {value} but must be in the range {c_info[1]}."
 
         # get the search range
@@ -2355,7 +2355,7 @@ class Coordinates():
 
         # check if convention exists in domain
         if convention is not None:
-            assert convention in systems[domain] or convention is None,\
+            assert convention in systems[domain] or convention is None, \
                 f"{convention} does not exist in {domain}. Convention must "\
                 f"be one of the following: {', '.join(list(systems[domain]))}."
 
@@ -2493,7 +2493,7 @@ class Coordinates():
         weights = np.asarray(weights, dtype=np.float64)
 
         # reshape according to self._points
-        assert weights.size == self.csize,\
+        assert weights.size == self.csize, \
             "weights must have same size as self.csize"
         weights = weights.reshape(self.cshape)
 
