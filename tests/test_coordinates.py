@@ -257,11 +257,12 @@ def test_show():
     coords.show()
     # show with mask as list
     coords.show([1, 0, 1])
+    # show with index as list
+    coords.show([0, 1])
     # show with mask as ndarray
     coords.show(np.array([1, 0, 1], dtype=bool))
-    # test assertion
-    with raises(AssertionError):
-        coords.show(np.array([1, 0], dtype=bool))
+    # show with index as ndarray
+    coords.show(np.array([0, 1], dtype=int))
 
     plt.close("all")
 
