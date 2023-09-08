@@ -24,10 +24,9 @@ import pyfar as pf
 
 # disable warning about non-certified connection
 disable_warnings(InsecureRequestWarning)
+
 # path for saving/reading files
 file_dir = os.path.join(os.path.dirname(__file__), 'files')
-if not os.path.isdir(file_dir):
-    os.mkdir(file_dir)
 
 
 def castanets(sampling_rate=44100):
@@ -485,6 +484,10 @@ def room_impulse_response(sampling_rate=48000):
 
 def _load_files(data):
     """Download files from Audio Communication Server if they do not exist."""
+
+    # create directory if required
+    if not os.path.isdir(file_dir):
+        os.mkdir(file_dir)
 
     # set the filenames
     if data in ['binaural_room_impulse_response', 'castanets', 'drums',
