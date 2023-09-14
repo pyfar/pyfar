@@ -28,6 +28,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm, is_complex=False):
         Sampling rate
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentation of pyfar.fft.normalization.
+    is_complex : bool
+        Specifies if the underlying time domain data are complex
+        real-valued.
 
     Returns
     -------
