@@ -413,12 +413,8 @@ def _n_bins_from_n_samples(n_samples, complex_time=False):
         Resulting number of frequency bins
 
     """
-    if complex_time:
-        n_bins = n_samples
-    else:
-        n_bins = n_samples // 2 + 1
 
-    return int(n_bins)
+    return int(n_samples) if complex_time else n_samples // 2 + 1
 
 
 def _n_samples_from_n_bins(num_freq_bins, is_complex=False):
@@ -490,7 +486,7 @@ def add_mirror_spectrum(data_single_sided, even_samples):
         M-dimensional array of single-sided spectrum of shape (..., N)
         containing N frequency bins.
     even : bool
-        flag which indicates if the number of sampels of the time
+        flag which indicates if the number of samples of the time
         data were even.
 
     Returns

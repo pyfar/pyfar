@@ -637,8 +637,9 @@ class Signal(FrequencyData, TimeData):
         self._sampling_rate = sampling_rate
 
         if not isinstance(is_complex, bool):
-            raise TypeError(f"``is_complex`` flag is {type(is_complex).__name__}"
-                            f"but must be a boolean")
+            raise TypeError("``is_complex`` flag is "
+                            f"{type(is_complex).__name__} "
+                            "but must be a boolean")
 
         self._complex = is_complex
         self._VALID_FFT_NORMS = [
