@@ -719,3 +719,8 @@ def test__sofa_pos_error():
         "Position: Type 'bla' is not supported")
     with pytest.raises(ValueError, match=error_message):
         io.io._sofa_pos('bla', np.array([1, 2, 3]))
+
+@pytest.mark.parametrize("fname", "dirac_itaAudio.ita")
+def test_read_ita(tmpdir, fname):
+    filename = pathlib.Path(tmpdir, '')
+    pass
