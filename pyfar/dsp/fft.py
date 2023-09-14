@@ -447,10 +447,11 @@ def _n_samples_from_n_bins(num_freq_bins, is_complex=False):
 
 
 def _check_conjugate_symmetry(data):
-    """Check if the frequency bins are conjugate symmetric
+    """
+    Check if the frequency bins are conjugate symmetric
     around 0 Hz.
 
-    Paramters
+    Parameters
     -------
     data : numpy array
         M-dimensional array of double-sided spectrum of shape (..., N)
@@ -483,7 +484,7 @@ def add_mirror_spectrum(data_single_sided, even_samples):
     and applies fftshift. The output is a double-sided
     spectrum that matches the format of :py:func:`~fft`.
 
-    Paramters
+    Parameters
     ---------
     data : numpy array
         M-dimensional array of single-sided spectrum of shape (..., N)
