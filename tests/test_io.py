@@ -691,3 +691,8 @@ def test_default_audio_subtype(default_audio_subtype_mock):
     subtype_return = pyfar.io.default_audio_subtype(format=audio_format)
     assert subtype_return == 'bla'
     default_audio_subtype_mock.assert_called_with(audio_format)
+
+@pytest.mark.parametrize("fname", "dirac_itaAudio.ita")
+def test_read_ita(tmpdir, fname):
+    filename = pathlib.Path(tmpdir, '')
+    pass
