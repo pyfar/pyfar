@@ -950,32 +950,46 @@ def read_ita(fname, data_type='data'):
         struct_as_record=False, squeeze_me=True, appendmat=False)
     mfiledata = matfile['ITA_TOOLBOX_AUDIO_OBJECT']
 
-    if data_type == 'signal':
-        fft_norm = 'none' if mfiledata.signalType == 'energy' else 'rms'
-        data = pf.Signal(
-            np.ascontiguousarray(mfiledata.data.T), mfiledata.samplingRate,
-            domain=mfiledata.domain, fft_norm=fft_norm,
-            comment=mfiledata.comment)
-    elif data_type == 'data':
-        domain = mfiledata.domain
-        if domain == 'time':
-            times = np.arange(mfiledata.data.shape[0])/mfiledata.samplingRate
-            data = pf.TimeData(
-                np.ascontiguousarray(mfiledata.data.T), times,
-                comment=mfiledata.comment)
-        elif domain == 'freq':
-            freqs = np.linspace(
-                0, mfiledata.samplingRate/2, mfiledata.data.shape[0])
-            data = pf.FrequencyData(
-                np.ascontiguousarray(mfiledata.data.T), freqs,
-                comment=mfiledata.comment)
-
-    if hasattr(mfiledata, 'userData'):
-        metadata = _todict(mfiledata.userData)
+    if (type(mfiledata.comment) != str):
+        comment=""
     else:
-        metadata = {}
+        comment = mfiledata.comment
 
-    metadata['samplingRate'] = mfiledata.samplingRate
+    domain=mfiledata.domain
+    data_in = np.ascontiguousarray((mfiledata.data.T).astype(float))
+
+    # checks if *.ita object is itaAudio or itaResult
+    if (hasattr(mfiledata,'signalType')): # itaAudio
+        if data_type == 'signal':
+            fft_norm = 'none' if mfiledata.signalType == 'energy' else 'rms'
+            data = pf.Signal(data_in, mfiledata.samplingRate, domain, 
+                             fft_norm=fft_norm, comment = comment)
+
+        elif data_type == 'data':
+            if domain == 'time':
+                data = pf.TimeData(data_in, 
+                    np.arange(mfiledata.data.shape[0])/mfiledata.samplingRate,
+                    comment=comment)
+            elif domain == 'freq':
+                data = pf.FrequencyData(
+                                data_in, 
+                                np.linspace( 0, mfiledata.samplingRate/2, 
+                                mfiledata.data.shape[0]),
+                                comment=comment)
+                
+    else: # itaResult
+        if data_type == 'signal':
+            raise Exception('The itaResult object can\'t contain a signal.')
+
+        elif data_type == 'data':
+            if domain == 'time':
+                data = pf.TimeData(data_in, mfiledata.abscissa, 
+                                   comment=comment)
+            elif domain == 'freq':
+                data = pf.FrequencyData(data_in, mfiledata.abscissa, 
+                                        comment=comment)
+                
+    metadata = _todict(mfiledata)
 
     return data, metadata
 

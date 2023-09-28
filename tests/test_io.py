@@ -4,6 +4,7 @@ import numpy.testing as npt
 import pytest
 from unittest.mock import patch
 import pyfar
+from pyfar.io.io import read_ita
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
@@ -692,7 +693,23 @@ def test_default_audio_subtype(default_audio_subtype_mock):
     assert subtype_return == 'bla'
     default_audio_subtype_mock.assert_called_with(audio_format)
 
-@pytest.mark.parametrize("fname", "dirac_itaAudio.ita")
-def test_read_ita(tmpdir, fname):
-    filename = pathlib.Path(tmpdir, '')
-    pass
+@pytest.mark.parametrize('file,data_type', [
+    ('dirac_itaAudio.ita','signal'),
+    ('dirac_itaAudio_mult.ita','signal'),
+    ('dirac_itaAudio_mult.ita','data'),
+    ('dirac_itaAudio_energy.ita','signal'),
+    ('freq_itaResult.ita','data'),
+    ('freq_itaResult.ita','signal'),
+    ('freq_itaResult_mult.ita','data'),
+    ('time_itaResult.ita','data'),
+    ('time_itaResult_mult.ita','data')])
+def test_read_ita(file, data_type):
+    if(file == 'freq_itaResult.ita' and data_type == 'signal'):
+        file = os.path.join('tests', 'test_io_data', file)
+        message = "The itaResult object can't contain a signal."
+        with pytest.raises(Exception, match=message):
+            read_ita(file, data_type=data_type)
+        pass
+    else:
+        file = os.path.join('tests', 'test_io_data', file)
+        read_ita(file, data_type=data_type)
