@@ -1973,10 +1973,9 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                                pyfar.TimeData)):
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
-    if type(signal) == pyfar.TimeData and mode in ('log_magnitude_zerophase',
-                                                   'magnitude_zerophase',
-                                                   'magnitude_phase',
-                                                   'power',):
+    if type(signal) is pyfar.TimeData and mode in (
+            'log_magnitude_zerophase', 'magnitude_zerophase',
+            'magnitude_phase', 'power',):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
@@ -2209,11 +2208,11 @@ def normalize(signal, reference_method='max', domain='time',
 
     if domain not in ('time', 'freq'):
         raise ValueError("domain must be 'time' or 'freq'.")
-    if type(signal) == pyfar.FrequencyData and domain == 'time':
+    if (type(signal) is pyfar.FrequencyData) and domain == 'time':
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'TimeData'."))
-    if type(signal) == pyfar.TimeData and domain == 'freq':
+    if (type(signal) is pyfar.TimeData) and domain == 'freq':
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))

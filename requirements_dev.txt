@@ -3,7 +3,6 @@ bump2version
 wheel
 watchdog
 flake8
-tox
 coverage
 Sphinx
 twine
@@ -16,8 +15,7 @@ matplotlib
 urllib3
 deepdiff
 insipid-sphinx-theme
-tox-wheel
 autodocsumm
 soundfile>=0.11.0
-sofar>=0.1.2
+sofar>=1.1.1
 nbmake>=0.7.0

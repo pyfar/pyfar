@@ -15,7 +15,7 @@ requirements = [
     'numpy>=1.23.0',
     'scipy>=1.5.0',
     'matplotlib',
-    'sofar>=0.1.2',
+    'sofar>=1.1.1',
     'urllib3',
     'deepdiff',
     'soundfile>=0.11.0'
@@ -29,7 +29,6 @@ test_requirements = [
     'wheel',
     'watchdog',
     'flake8',
-    'tox',
     'coverage',
     'Sphinx',
     'twine'
@@ -46,7 +45,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10'
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11'
     ],
     description="Project for data formats in acoustics.",
     install_requires=requirements,
