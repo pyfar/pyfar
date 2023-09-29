@@ -15,7 +15,7 @@ requirements = [
     'numpy>=1.23.0',
     'scipy>=1.5.0',
     'matplotlib',
-    'sofar>=0.1.2',
+    'sofar>=1.1.1',
     'urllib3',
     'deepdiff',
     'soundfile>=0.11.0'
