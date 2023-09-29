@@ -436,10 +436,7 @@ def _n_samples_from_n_bins(num_freq_bins, is_complex=False):
         Resulting number of time samples.
 
     """
-    if is_complex:
-        return num_freq_bins
-    else:
-        return max(1, (num_freq_bins - 1) * 2)
+    return num_freq_bins if is_complex else max(1, (num_freq_bins - 1) * 2)
 
 
 def _check_conjugate_symmetry(data):
@@ -457,7 +454,7 @@ def _check_conjugate_symmetry(data):
     Returns
     -------
     results : bool
-        return `True` if fequency data are conjugate symmetric around
+        return `True` if the fequency data are conjugate symmetric around
         0 Hz, return `False` if not.
 
     """
@@ -467,11 +464,8 @@ def _check_conjugate_symmetry(data):
     else:
         mirror_spec = np.conj(np.flip(data[..., 1:dc_idx], axis=-1))
 
-    if mirror_spec.shape[-1] > 0 and np.allclose(
-            data[..., dc_idx+1:], mirror_spec, rtol=1e-15):
-        return True
-    else:
-        return False
+    return bool(mirror_spec.shape[-1] > 0 and np.allclose(
+            data[..., dc_idx+1:], mirror_spec, rtol=1e-15))
 
 
 def add_mirror_spectrum(data_single_sided, even_samples):
