@@ -2559,6 +2559,41 @@ def cyl2cart(azimuth, height, radius):
     return x, y, z
 
 
+def rad2deg(rad, skip=2):
+    """
+    Convert radians to degree
+
+    Parameters
+    ----------
+    rad : numpy array
+        N-dimensional coordinates array of shape `(..., M)`. For example four
+        coordinate points of a spherical sampling grid with the ``M=3``
+        coordinates `azimuth`, `elevation`, and `radius` would be stored in an
+        array of shape ``(4, 3)``.
+    skip : int, list, optional
+        Integer or list of integers of coordinates that are not converted. The
+        default ``2`` assumes that the radius of spherical or cylindrical
+        coordinate points should not be converted and is located at
+        ``rad[..., 2]``.
+
+    Returns
+    -------
+    deg : numpy array
+        The converted coordinates in degree
+    """
+
+    # make list for being able to ignore multiple coordinates
+    if not isinstance(skip, list):
+        skip = [skip]
+
+    mask = [False if aa in skip else True for aa in range(rad.shape[-1])]
+
+    deg = rad.copy()
+    deg[..., mask] = deg[..., mask] / np.pi * 180
+
+    return deg, mask
+
+
 def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
     """
     Values will be clipped to its range if deviations are below 2 eps
