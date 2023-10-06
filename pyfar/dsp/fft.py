@@ -465,7 +465,8 @@ def _check_conjugate_symmetry(data):
         mirror_spec = np.conj(np.flip(data[..., 1:dc_idx], axis=-1))
 
     return bool(mirror_spec.shape[-1] > 0 and np.allclose(
-            data[..., dc_idx+1:], mirror_spec, rtol=1e-15))
+            data[..., dc_idx+1:], mirror_spec,
+            rtol=5*np.finfo(data.dtype).eps))
 
 
 def add_mirror_spectrum(data_single_sided, even_samples):
@@ -527,6 +528,6 @@ def remove_mirror_spectrum(data_double_sided):
         data_double_sided = sfft.ifftshift(data_double_sided)
         return data_double_sided[..., :N // 2 + 1]
     else:
-        raise ValueError("Signals frequency data are not"
+        raise ValueError("Signals frequency spectrum is not"
                          " conjugate symmetric, is_complex flag"
                          " cannot be `False`.")

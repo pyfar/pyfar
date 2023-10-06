@@ -588,7 +588,7 @@ def test_setter_complex_assert():
         signal.complex = False
 
     signal.domain = "freq"
-    with pytest.raises(ValueError, match="Signals frequency data are not"
+    with pytest.raises(ValueError, match="Signals frequency spectrum is not"
                                          " conjugate symmetric, is_complex "
                                          "flag cannot be `False`."):
         signal.complex = False
@@ -632,7 +632,7 @@ def test_setter_complex():
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
                     is_complex=True)
     signal.domain = "freq"
-    with pytest.raises(ValueError, match="Signals frequency data are not"
+    with pytest.raises(ValueError, match="Signals frequency spectrum is not"
                                          " conjugate symmetric, "
                                          "is_complex flag cannot be `False`."):
         signal.complex = False
@@ -665,22 +665,3 @@ def test_frequencies():
     signal = Signal([0, 1, 2, 4], sampling_rate=sampling_rate, is_complex=True)
     desired = np.array([-24000, -12000, 0, 12000])
     npt.assert_allclose(signal.frequencies, desired)
-
-
-def test_check_conjugate_symmetry():
-    """test checking for conjugate symmetry"""
-    signal = pf.Signal([[1., 2., 3., 4., 5.], [1., 2., 3., 6., 6.]],
-                       sampling_rate=48000)
-    signal.domain = "freq"
-    assert not signal._check_conjugate_symmetry()
-
-    signal = pf.Signal([[1., 2., 3., 4., 5.], [1., 2., 3., 6., 6.]],
-                       sampling_rate=48000, is_complex=True)
-    signal.domain = "freq"
-    assert signal._check_conjugate_symmetry()
-
-    signal = pf.Signal([[1., 2., 3., 4., 5., 6., 7., 8.],
-                        [1., 2., 3., 6., 6., 7., 9., 9.]],
-                       sampling_rate=48000, is_complex=True)
-    signal.domain = "freq"
-    assert signal._check_conjugate_symmetry()

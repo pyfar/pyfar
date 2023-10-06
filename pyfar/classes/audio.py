@@ -622,7 +622,7 @@ class Signal(FrequencyData, TimeData):
         is_complex : bool
             Specifies if the underlying time domain data are complex
             or real-valued. If ``True`` and `domain` is ``'time'``, the
-            input data will be casted to complex. The default is ``False``.
+            input data will be cast to complex. The default is ``False``.
 
         References
         ----------
@@ -850,7 +850,6 @@ class Signal(FrequencyData, TimeData):
         if self.complex:
             # assume the time domain data were complex-valued
             # such that we need a two-sided Fourier spectrum
-
             return np.atleast_1d(fft.fftfreq(self.n_samples,
                                              self.sampling_rate))
         else:
@@ -966,30 +965,6 @@ class Signal(FrequencyData, TimeData):
         >>>     signal[idx] = channel
         """
         return _SignalIterator(self._data.__iter__(), self)
-
-    def _check_conjugate_symmetry(self):
-        """Check if the frequency bins are conjugate symmetric
-        around 0 Hz.
-
-        Returns
-        -------
-        results : bool
-            return `True` if frequency data are conjugate symmetric around
-            0 Hz, return `False` if not.
-
-        """
-        idx = self.find_nearest_frequency(0)
-
-        if fft._is_odd(self._n_samples):
-            mirror_spec = np.conj(np.flip(self._data[..., :idx], axis=-1))
-        else:
-            mirror_spec = np.conj(np.flip(self._data[..., 1:idx], axis=-1))
-
-        if mirror_spec.shape[-1] > 0 and np.allclose(
-                self._data[..., idx+1:], mirror_spec, atol=1e-15):
-            return True
-        else:
-            return False
 
 
 class _SignalIterator(object):
