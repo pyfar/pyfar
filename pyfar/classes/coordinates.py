@@ -2,7 +2,8 @@
 The following documents the pyfar coordinates class and functions for
 coordinate conversion. More background information is given in
 :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
-Available sampling schemes are listed at :py:mod:`~spharpy.samplings`.
+Available sampling schemes are listed at
+:py:mod:`spharpy.samplings <spharpy.samplings>`.
 """
 
 import numpy as np

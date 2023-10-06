@@ -15,7 +15,7 @@ def cart_equidistant_cube(n_points):
     Create a cuboid sampling with equidistant spacings in x, y, and z.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.cube_equidistant`.
+    of :py:func:`spharpy.samplings.cube_equidistant`.
 
     The cube will have dimensions 1 x 1 x 1.
 
@@ -71,7 +71,7 @@ def sph_dodecahedron(radius=1.):
     dodecahedron faces.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.dodecahedron`.
+    of :py:func:`spharpy.samplings.dodecahedron`.
 
     Parameters
     ----------
@@ -132,7 +132,7 @@ def sph_icosahedron(radius=1.):
     Generate a sampling from the center points of the twenty icosahedron faces.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.icosahedron`.
+    of :py:func:`spharpy.samplings.icosahedron`.
 
     Parameters
     ----------
@@ -174,7 +174,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     Generate an equiangular sampling of the sphere.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.equiangular`.
+    of :py:func:`spharpy.samplings.equiangular`.
 
     For detailed information, see [#]_, Chapter 3.2.
     This sampling does not contain points at the North and South Pole and is
@@ -266,7 +266,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     Generate sampling of the sphere based on the Gaussian quadrature.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.gaussian`.
+    of :py:func:`spharpy.samplings.gaussian`.
 
     For detailed information, see [#]_ (Section 3.3).
     This sampling does not contain points at the North and South Pole and is
@@ -353,7 +353,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     Return a Hyperinterpolation sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.hyperinterpolation`.
+    of :py:func:`spharpy.samplings.hyperinterpolation`.
 
     After Sloan and Womersley [#]_. The samplings are available for
     1 <= `sh_order` <= 200 (``n_points = (sh_order + 1)^2``).
@@ -454,7 +454,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     Return spherical t-design sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.spherical_t_design`.
+    of :py:func:`spharpy.samplings.spherical_t_design`.
 
     For detailed information, see [#]_.
     For a spherical harmonic order :math:`n_{sh}`, a t-Design of degree
@@ -591,7 +591,7 @@ def sph_equal_angle(delta_angles, radius=1.):
     Generate sampling of the sphere with equally spaced angles.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.equal_angle`.
+    of :py:func:`spharpy.samplings.equal_angle`.
 
     This sampling contain points at the North and South Pole. See
     :py:func:`sph_equiangular`, :py:func:`sph_gaussian`, and
@@ -662,7 +662,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     Spherical sampling grid according to the great circle distance criterion.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.great_circle`.
+    of :py:func:`spharpy.samplings.great_circle`.
 
     Sampling grid where neighboring points of the same elevation have approx.
     the same great circle distance across elevations [#]_.
@@ -756,7 +756,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     Return Lebedev spherical sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.lebedev`.
+    of :py:func:`spharpy.samplings.lebedev`.
 
     For detailed information, see [#]_. For a list of available values
     for `n_points` and `sh_order` call :py:func:`lebedev`.
@@ -860,7 +860,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     Return Fliege-Maier spherical sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.fliege`.
+    of :py:func:`spharpy.samplings.fliege`.
 
     For detailed information, see [#]_. Call :py:func:`sph_fliege`
     for a list of possible values for `n_points` and `sh_order`.
@@ -1030,7 +1030,7 @@ def sph_equal_area(n_points, radius=1.):
     Sampling based on partitioning into faces with equal area.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.equal_area`.
+    of :py:func:`spharpy.samplings.equal_area`.
 
     For detailed information, see [#]_.
 
