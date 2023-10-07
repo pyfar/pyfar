@@ -12,6 +12,7 @@ import os.path
 import pathlib
 
 import warnings
+import pyfar as pf
 import sofar as sf
 import zipfile
 import io
@@ -105,10 +106,16 @@ def convert_sofa(sofa):
 
         - :py:class:`~pyfar.classes.audio.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
-            ``'FIR-E'``, or ``'FIRE'``.
+            ``'FIR-E'``, or ``'FIRE'``. In case of ``'FIR-E'``, the time data
+            is returned with the `cshape` EMRN (samples are in the last
+            dimension) and not MRNE as in the SOFA standard (emitters are in
+            the last dimension).
         - :py:class:`~pyfar.classes.audio.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
-            ``'TF-E'``, or ``'TFE'``.
+            ``'TF-E'``, or ``'TFE'``. In case of ``'TF-E'``, the frequency data
+            is returned with the `cshape` EMRN (frequencies are in the last
+            dimension) and not MRNE as in the SOFA standard (emitters are in
+            the last dimension).
 
         The `cshape` of the object is is ``(M, R)`` with `M` being the number
         of measurements and `R` being the number of receivers from the SOFA
@@ -135,53 +142,57 @@ def convert_sofa(sofa):
 
     # Check for DataType
     if sofa.GLOBAL_DataType in ['FIR', 'FIR-E', 'FIRE']:
+        # order axis according to pyfar convention
+        # (samples go in last dimension)
+        if sofa.GLOBAL_DataType == 'FIR-E':
+            time = np.moveaxis(sofa.Data_IR, -1, 0)
+        else:
+            time = sofa.Data_IR
+
         # make a Signal
-        signal = Signal(sofa.Data_IR, sofa.Data_SamplingRate)
+        signal = Signal(time, sofa.Data_SamplingRate)
 
     elif sofa.GLOBAL_DataType in ['TF', 'TF-E', 'TFE']:
+        # order axis according to pyfar convention
+        # frequencies go in last dimension)
+        if sofa.GLOBAL_DataType == 'TF-E':
+            freq = np.moveaxis(sofa.Data_Real, -1, 0) + \
+                1j * np.moveaxis(sofa.Data_Imag, -1, 0)
+        else:
+            freq = sofa.Data_Real + 1j * sofa.Data_Imag
+
         # make FrequencyData
-        signal = FrequencyData(
-            sofa.Data_Real + 1j * sofa.Data_Imag, sofa.N)
+        signal = FrequencyData(freq, sofa.N)
     else:
         raise ValueError(
-            "DataType {sofa.GLOBAL_DataType} is not supported.")
+            f"DataType {sofa.GLOBAL_DataType} is not supported.")
 
     # Source
-    s_values = sofa.SourcePosition
-    s_domain, s_convention, s_unit = _sofa_pos(sofa.SourcePosition_Type)
-    source_coordinates = Coordinates(
-        s_values[:, 0],
-        s_values[:, 1],
-        s_values[:, 2],
-        domain=s_domain,
-        convention=s_convention,
-        unit=s_unit)
+    source_coordinates = _sofa_pos(
+        sofa.SourcePosition_Type, sofa.SourcePosition)
+
     # Receiver
-    r_values = sofa.ReceiverPosition
-    r_domain, r_convention, r_unit = _sofa_pos(sofa.ReceiverPosition_Type)
-    receiver_coordinates = Coordinates(
-        r_values[:, 0],
-        r_values[:, 1],
-        r_values[:, 2],
-        domain=r_domain,
-        convention=r_convention,
-        unit=r_unit)
+    receiver_coordinates = _sofa_pos(
+        sofa.ReceiverPosition_Type, sofa.ReceiverPosition)
 
     return signal, source_coordinates, receiver_coordinates
 
 
-def _sofa_pos(pos_type):
+def _sofa_pos(pos_type, coordinates):
     if pos_type == 'spherical':
-        domain = 'sph'
-        convention = 'top_elev'
-        unit = 'deg'
+        return Coordinates.from_spherical_elevation(
+            coordinates[:, 0] * np.pi / 180,
+            coordinates[:, 1] * np.pi / 180,
+            coordinates[:, 2]
+        )
     elif pos_type == 'cartesian':
-        domain = 'cart'
-        convention = 'right'
-        unit = 'met'
+        return Coordinates(
+            coordinates[:, 0],
+            coordinates[:, 1],
+            coordinates[:, 2]
+        )
     else:
         raise ValueError("Position:Type {pos_type} is not supported.")
-    return domain, convention, unit
 
 
 def read(filename):
@@ -211,6 +222,7 @@ def read(filename):
     filename = pathlib.Path(filename).with_suffix('.far')
 
     collection = {}
+    pyfar_version = None
     with open(filename, 'rb') as f:
         zip_buffer = io.BytesIO()
         zip_buffer.write(f.read())
@@ -218,17 +230,48 @@ def read(filename):
             zip_paths = zip_file.namelist()
             obj_names_hints = [
                 path.split('/')[:2] for path in zip_paths if '/$' in path]
+
+            # read build in data and look for pyfar version
             for name, hint in obj_names_hints:
-                if codec._is_pyfar_type(hint[1:]):
-                    obj = codec._decode_object_json_aided(name, hint, zip_file)
-                elif hint == '$ndarray':
-                    obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
-                else:
-                    raise TypeError(
-                        '.far-file contains unknown types.'
-                        'This might occur when writing and reading files with'
-                        'different versions of Pyfar.')
-                collection[name] = obj
+                if hint[1:] != 'BuiltinsWrapper':
+                    continue
+                obj = codec._decode_object_json_aided(name, hint, zip_file)
+                if 'pyfar.__version__' in obj:
+                    pyfar_version = obj['pyfar.__version__']
+                    del obj['pyfar.__version__']
+                if obj:
+                    collection[name] = obj
+
+            # check version (writing the version was introduced in 0.5.3)
+            if pyfar_version is None:
+                pyfar_version = "<0.5.3"
+
+            # read remaining data (pyfar objects and numpy arrays)
+            for name, hint in obj_names_hints:
+                if hint[1:] == 'BuiltinsWrapper':
+                    continue
+                try:
+                    if codec._is_pyfar_type(hint[1:]):
+                        obj = codec._decode_object_json_aided(
+                            name, hint, zip_file)
+                    elif hint == '$ndarray':
+                        obj = codec._decode_ndarray(f'{name}/{hint}', zip_file)
+                    else:
+                        raise TypeError((
+                            '.far-file contains unknown types. This might '
+                            'occur when writing and reading files with '
+                            'different versions of Pyfar.'))
+                    collection[name] = obj
+                except Exception as e:  # noqa
+                    # check for more specific pyfar errors that could be raised
+                    if "You must implement" in str(e) and \
+                            ("encode" in str(e) or "decode" in str(e)):
+                        raise e
+                    # raise general error with version hint
+                    raise TypeError((
+                        f"'{name}' object in {filename} was written with "
+                        f"pyfar {pyfar_version} and could not be read with "
+                        f"pyfar {pf.__version__}."))
 
         if 'builtin_wrapper' in collection:
             for key, value in collection['builtin_wrapper'].items():
@@ -277,6 +320,9 @@ def write(filename, compress=False, **objs):
     zip_buffer = io.BytesIO()
     builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
+        # write pyfar version
+        builtin_wrapper["pyfar.__version__"] = pf.__version__
+        # write requested data
         for name, obj in objs.items():
             if codec._is_pyfar_type(obj):
                 codec._encode_object_json_aided(obj, name, zip_file)
@@ -378,6 +424,7 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     * This function is based on :py:func:`soundfile.write`.
     * Except for the subtypes ``'FLOAT'``, ``'DOUBLE'`` and ``'VORBIS'`` ´
       amplitudes larger than +/- 1 are clipped.
+    * Only integer values are allowed for ``signal.sampling_rate``.
 
     """
     if not soundfile_imported:
@@ -386,6 +433,16 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
 
     sampling_rate = signal.sampling_rate
     data = signal.time
+
+    # check sampling rate (libsoundfile only support ints)
+    if not isinstance(sampling_rate, int):
+        if sampling_rate % 1:
+            raise ValueError((
+                f"The sampling rate is {sampling_rate} but must have an "
+                f"integer value, e.g., {int(sampling_rate)} or "
+                f"{int(sampling_rate + 1)} (See pyfar.dsp.resample for help)"))
+        else:
+            sampling_rate = int(sampling_rate)
 
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])

@@ -2,6 +2,30 @@
 History
 =======
 
+0.5.4 (2023-09-29)
+------------------
+* Dependencies: Constrain matplotlib to versions <= 3.7, due to deprecations of the tight_layout function in matplotlib 3.8 (PR #497).
+* Bugfix: Fix order `order` property for `pyfar.FilterSOS` (PR #487).
+* Bugfix: Fix broken tests for filter class copy methods (PR #488).
+* Improvements to the documentation (PR #470).
+* Flake8 fixes.
+
+0.5.3 (2023-03-30)
+------------------
+
+* Bugfix: Spectrum interpolation on logarithmically spaced frequency bins including zero frequency. (PR #453)
+* Bugfix: Include signal domain and fft norm when writing Signals to far-files. (PR #443)
+* Bugfix: Return the HRIRs contained in the sample file in the correct order. (PR #448)
+
+0.5.2 (2023-01-20)
+------------------
+
+* Bugfix: Remove deprecated usage of `np.int`. (PR #409)
+* Bugfix: Switch to MathJax to fix equation rendering issues in the documentation. (PR #420)
+* Bugfix: `read_comsol` now allow for `*`, `(`, and `)` in expressions and units. (PR #417, originally #393)
+* Bugfix: `read_sofa` now support reading files of conventions `FIR-E` and `TF-E`. (PR  #415)
+* General: Update information on PyPI. (PR #427, originally #377)
+
 0.5.1 (2022-10-28)
 ------------------
 * Bugfix: Allow setting of the sampling rate in GammatoneBands (PR #374)

@@ -2,6 +2,7 @@ import os
 import pytest
 from pytest import raises
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import pyfar as pf
 import pyfar.plot as plot
 from pyfar.testing.plot_utils import create_figure, save_and_compare
@@ -309,9 +310,9 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
         fig.clear()
         _, ax = plt.subplots(1, 2, num=fig.number)
         if function == plot.spectrogram:
-            function(signal[0], colorbar=False)
+            function(signal[0], ax=ax)
         else:
-            function(signal, colorbar=False)
+            function(signal, ax=ax)
     save_and_compare(create_baseline, baseline_path, output_path,
                      filename, file_type, compare_output)
 
@@ -508,7 +509,7 @@ def test_use():
 
         filename = 'use_' + style
         plot.utils.use(style)
-        create_figure()
+        create_figure(style=style)
         plt.plot([1, 2, 3], [1, 2, 3])
         save_and_compare(create_baseline, baseline_path, output_path, filename,
                          file_type, compare_output)
@@ -553,13 +554,104 @@ def test_time_freq_fft_norm_dB(noise):
 def test_title_style(style, handsome_signal):
     """Test correct titles settings in the plot styles."""
     filename = 'title_' + style
-    fig = create_figure()
+    fig = create_figure(style=style)
     # Apparently, the style needs to be set twice for tests
     pf.plot.use(style)
     ax = pf.plot.freq(handsome_signal, style=style)
     fig.suptitle('Fig-Title')
     ax.set_title('Ax-Title')
-    fig.tight_layout()
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
+    plt.close('all')
+
+
+@pytest.mark.parametrize("function", [
+    (plot.freq), (plot.phase), (plot.group_delay)])
+@pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
+def test_log_tick_labels(function, limits, noise):
+    """
+    Test that only major tick labels are shown for logarithmic frequency
+    axis in line plots.
+    """
+    create_figure()
+    ax = function(noise)
+
+    ax.set_xlim(limits)
+
+    major_label_test = [
+        bool(r.get_text()) for r in ax.get_xticklabels(which="major")]
+    minor_label_test = [
+        bool(r.get_text()) for r in ax.get_xticklabels(which="minor")]
+
+    assert all(major_label_test)
+    assert not any(minor_label_test)
+
+
+@pytest.mark.parametrize(
+    "function", [(plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)]
+)
+@pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
+def test_2d_log_tick_labels(function, limits, handsome_signal_2d):
+    """
+    Test that only major tick labels are shown for logarithmic frequency
+    axis in 2d plots.
+    """
+    create_figure()
+    axs = function(handsome_signal_2d, freq_scale="log")
+    ax = axs[0][0]
+
+    ax.set_ylim(limits)
+
+    major_label_test = [
+        bool(r.get_text()) for r in ax.get_yticklabels(which="major")]
+    minor_label_test = [
+        bool(r.get_text()) for r in ax.get_yticklabels(which="minor")]
+
+    assert all(major_label_test)
+    assert not any(minor_label_test)
+
+
+@pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
+def test_spectrogram_log_tick_labels(limits, noise):
+    """
+    Test that only major tick labels are shown for logarithmic frequency
+    axis in spectrograms.
+    """
+    create_figure()
+    axs = plot.spectrogram(noise, freq_scale="log")
+    ax = axs[0][0]
+
+    ax.set_ylim(limits)
+
+    major_label_test = [
+        bool(r.get_text()) for r in ax.get_yticklabels(which="major")]
+    minor_label_test = [
+        bool(r.get_text()) for r in ax.get_yticklabels(which="minor")]
+
+    assert all(major_label_test)
+    assert not any(minor_label_test)
+
+
+@pytest.mark.parametrize('rcParams, value', [
+    ['lines.linestyle', ':'],
+    ['axes.facecolor', 'black'],
+    ['axes.grid', False]])
+def test_pyfar_plot_with_empty_style(rcParams, value):
+    """
+    Test passing an empty style to a pyfar plot function to check if the
+    currently active plot stlye remains active.
+    """
+    with pf.plot.context({rcParams: value}):
+        pf.plot.time(pf.TimeData([0, 1, 0, -1], range(4)), style={})
+        assert plt.rcParams[rcParams] == value
+    plt.close('all')
+
+
+def test_set_specific_plot_parameters():
+    # Test pass a dictonary to set specific plot parameters
+    with pf.plot.context("light"):
+        pf.plot.time(pf.TimeData([0, 1, 0, -1], range(4)),
+                     style={'axes.facecolor': '#000000'})
+        facecolor = mcolors.to_hex(plt.gca().patch.get_facecolor())
+        assert facecolor == '#000000'  # #000000 is hex for black
     plt.close('all')

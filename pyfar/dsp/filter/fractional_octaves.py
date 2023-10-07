@@ -189,7 +189,7 @@ def fractional_octave_bands(
     sampling_rate : None, int
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
-    frequency_range : array, tuple, optional
+    freq_range : array, tuple, optional
         The lower and upper frequency limits. The default is
         ``frequency_range=(20, 20e3)``.
     order : int, optional
@@ -223,7 +223,6 @@ def fractional_octave_bands(
         >>> ax = pf.plot.freq(y_sum, color='k', log_prefix=10, linestyle='--')
         >>> ax.set_title(
         ...     "Filter bands and the sum of their squared magnitudes")
-        >>> plt.tight_layout()
 
     """
     # check input
@@ -401,16 +400,15 @@ def reconstructing_fractional_octave_bands(
         >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
         >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
         >>> # time domain plot
-        >>> ax = pf.plot.time_freq(y_sum, color='k')
-        >>> pf.plot.time(x, ax=ax[0])
-        >>> ax[0].set_xlim(-5, 2**12/44100 * 1e3 + 5)
+        >>> ax = pf.plot.time_freq(y_sum, color='k', unit='ms')
+        >>> pf.plot.time(x, ax=ax[0], unit='ms')
+        >>> ax[0].set_xlim(-20, 250)
         >>> ax[0].set_title("Original (blue) and reconstructed pulse (black)")
         >>> # frequency domain plot
         >>> pf.plot.freq(y_sum, color='k', ax=ax[1])
         >>> pf.plot.freq(y, ax=ax[1])
         >>> ax[1].set_title(
         ...     "Reconstructed (black) and filtered impulse (colored)")
-        >>> plt.tight_layout()
     """
 
     # check input
