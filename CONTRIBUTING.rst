@@ -253,7 +253,7 @@ Switch to main and run::
 $ bumpversion patch # possible: major / minor / patch
 $ git push --follow-tags
 
-Travis will then deploy to PyPI if tests pass.
+The testing platform will then deploy to PyPI if tests pass.
 
 - merge main back into develop
 - check `binder`_

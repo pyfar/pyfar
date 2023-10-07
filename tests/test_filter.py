@@ -277,7 +277,7 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
             os.path.dirname(__file__), "references",
             f"filter.reconstructing_octaves_{overlap}_{slope}.csv"))
         # restricting rtol was not needed locally. It was added for tests to
-        # pass on travis ci
+        # pass on the testing platform
         npt.assert_allclose(
             y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
 
