@@ -95,7 +95,7 @@ class _Audio():
                 newshape + (length_last_dimension, ))
         except ValueError:
             if np.prod(newshape) != np.prod(self.cshape):
-                raise ValueError((f"Can not reshape audio object of cshape "
+                raise ValueError((f"Cannot reshape audio object of cshape "
                                   f"{self.cshape} to {newshape}"))
 
         return reshaped
