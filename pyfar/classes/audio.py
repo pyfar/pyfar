@@ -111,6 +111,8 @@ class _Audio():
             that the `i`-th axis becomes transposed object's `j`-th axis.
             n ints: same as 'iterable of ints'.
         """
+        if hasattr(axes, '__iter__'):
+            axes = axes[0] if len(axes) == 1 else axes
         if axes is None or len(axes) == 0:
             axes = tuple(range(len(self.cshape)))[::-1]
         else:
