@@ -122,6 +122,11 @@ class _Audio():
 
         return transposed
 
+    @property
+    def T(self):
+        """Shorthand for `Signal.transpose()`."""
+        return self.transpose()
+
     def flatten(self):
         """Return flattened copy of the audio object.
 
