@@ -1391,7 +1391,7 @@ class Coordinates():
             Number of points to return. k must be > 0. The default is ``1``.
         distance_measure : string, optional
             ``'euclidean'``
-                Distance is determined by the euclidean distance i meters
+                Distance is determined by the euclidean distance in meters
                 between the points. This is default.
             ``'spherical'``
                 Distance is determined by the great-circle distance in meters
