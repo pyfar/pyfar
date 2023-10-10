@@ -1421,8 +1421,8 @@ class Coordinates():
 
             >>> import pyfar as pf
             >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> find = pf.Coordinates(1, 0, 0)
-            >>> index, distance = coords.find_nearest(find)
+            >>> to_find = pf.Coordinates(1, 0, 0)
+            >>> index, distance = coords.find_nearest(to_find)
             >>> coords.show(index)
             >>> distance
             >>> 0.0
