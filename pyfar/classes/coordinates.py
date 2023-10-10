@@ -1425,16 +1425,16 @@ class Coordinates():
             >>> index, distance = coords.find_nearest(to_find)
             >>> coords.show(index)
             >>> distance
-            >>> 0.0
+            0.0
 
         Find multidimensional points in multidimensional coordinates with k=1
 
         >>> import pyfar as pf
         >>> import numpy as np
         >>> coords = pf.Coordinates(np.arange(9).reshape((3, 3)), 0, 1)
-        >>> find = pf.Coordinates(
+        >>> to_find = pf.Coordinates(
         >>>     np.array([[0, 1], [2, 3]]), 0, 1)
-        >>> i, d = coords.find_nearest(find)
+        >>> i, d = coords.find_nearest(to_find)
         >>> coords[i] == find
         True
         >>> i
