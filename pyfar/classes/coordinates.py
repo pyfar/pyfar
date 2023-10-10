@@ -1402,8 +1402,8 @@ class Coordinates():
         Returns
         -------
         index : tuple of arrays
-            Indices of the neighbors. Arrays of shape (k, find.cshape) if k>1
-            else (find.cshape).
+            Indices of the neighbors. Arrays of shape ``(k, find.cshape)`` if k>1
+            else ``(find.cshape, )``.
         distance : numpy array of floats
             Distance between the points, after the given ``distance_measure``.
             It's of shape (k, find.cshape).
