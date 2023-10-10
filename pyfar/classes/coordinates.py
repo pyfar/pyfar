@@ -1569,7 +1569,7 @@ class Coordinates():
 
         Notes
         -----
-        This is a wrapper for ``scipy.spatial.cKDTree``. Other than previous
+        This is a wrapper for ``scipy.spatial.cKDTree``. Compared to previous
         implementations, it supports self.ndim>1 as well.
 
         Examples
