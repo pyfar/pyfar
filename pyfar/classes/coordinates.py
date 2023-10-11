@@ -2559,39 +2559,91 @@ def cyl2cart(azimuth, height, radius):
     return x, y, z
 
 
-def rad2deg(rad, skip=2):
+def rad2deg(coordinates, domain='spherical'):
     """
-    Convert radians to degree
+    Convert coordinates in radians to degree
 
     Parameters
     ----------
-    rad : numpy array
-        N-dimensional coordinates array of shape `(..., M)`. For example four
-        coordinate points of a spherical sampling grid with the ``M=3``
-        coordinates `azimuth`, `elevation`, and `radius` would be stored in an
-        array of shape ``(4, 3)``.
-    skip : int, list, optional
-        Integer or list of integers of coordinates that are not converted. The
-        default ``2`` assumes that the radius of spherical or cylindrical
-        coordinate points should not be converted and is located at
-        ``rad[..., 2]``.
+    coordinates : array like
+        N-dimensional array of shape `(..., 3)`.
+    domain : str, optional
+        Specifies what data are contained in `coordinates`
+
+        ``'spherical'``
+            Spherical coordinates with angles contained in
+            ``coordinates[..., 0:2]`` and a radii in coordinates[..., 2].
+            The radii are ignored during the conversion.
+        ``'cylindrical'``
+            Cylindrical coordinates with angles contained in
+            ``coordinates[..., 0]``, the heights contained in
+            ``coordinates[..., 1]``, and a radii in coordinates[..., 2]. The
+            heights and radii are ignored during the conversion.
+
 
     Returns
     -------
-    deg : numpy array
-        The converted coordinates in degree
+    coordinates : numpy array
+        The converted coordinates of the same shape as the input data.
     """
+    return _convert_angles(coordinates, domain, kind='rad2deg')
 
-    # make list for being able to ignore multiple coordinates
-    if not isinstance(skip, list):
-        skip = [skip]
 
-    mask = [False if aa in skip else True for aa in range(rad.shape[-1])]
+def deg2rad(coordinates, domain='spherical'):
+    """
+    Convert coordinates in degree to radians
 
-    deg = rad.copy()
-    deg[..., mask] = deg[..., mask] / np.pi * 180
+    Parameters
+    ----------
+    coordinates : array like
+        N-dimensional array of shape `(..., 3)`.
+    domain : str, optional
+        Specifies what data are contained in `coordinates`
 
-    return deg, mask
+        ``'spherical'``
+            Spherical coordinates with angles contained in
+            ``coordinates[..., 0:2]`` and a radii in coordinates[..., 2].
+            The radii are ignored during the conversion.
+        ``'cylindrical'``
+            Cylindrical coordinates with angles contained in
+            ``coordinates[..., 0]``, the heights contained in
+            ``coordinates[..., 1]``, and a radii in coordinates[..., 2]. The
+            heights and radii are ignored during the conversion.
+
+
+    Returns
+    -------
+    coordinates : numpy array
+        The converted coordinates of the same shape as the input data.
+    """
+    return _convert_angles(coordinates, domain, kind='deg2rad')
+
+
+def _convert_angles(coordinates, domain, kind='rad2deg'):
+
+    # check coordinates
+    coordinates = np.atleast_2d(coordinates).astype(float)
+    if coordinates.shape[-1] != 3:
+        raise ValueError(('coordinates must be of shape (..., 3) but are of '
+                          f'shape {coordinates.shape}'))
+
+    # check domain and create mask
+    if domain == 'spherical':
+        mask = [True, True, False]
+    elif domain == 'cylindrical':
+        mask = [True, False, False]
+    else:
+        raise ValueError(("domain must be  'spherical' or 'cylindrical' but "
+                          f"is {domain}"))
+
+    # convert data
+    converted = coordinates.copy()
+    if kind == 'rad2deg':
+        converted[..., mask] = converted[..., mask] / np.pi * 180
+    else:
+        converted[..., mask] = converted[..., mask] * np.pi / 180
+
+    return converted
 
 
 def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
