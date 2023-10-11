@@ -2586,7 +2586,7 @@ def rad2deg(coordinates, domain='spherical'):
     coordinates : numpy array
         The converted coordinates of the same shape as the input data.
     """
-    return _convert_angles(coordinates, domain, kind='rad2deg')
+    return _convert_angles(coordinates, domain, 180/np.pi)
 
 
 def deg2rad(coordinates, domain='spherical'):
@@ -2616,10 +2616,11 @@ def deg2rad(coordinates, domain='spherical'):
     coordinates : numpy array
         The converted coordinates of the same shape as the input data.
     """
-    return _convert_angles(coordinates, domain, kind='deg2rad')
+    return _convert_angles(coordinates, domain, np.pi/180)
 
 
-def _convert_angles(coordinates, domain, kind='rad2deg'):
+def _convert_angles(coordinates, domain, factor):
+    """Private function called by rad2deg and deg2rad"""
 
     # check coordinates
     coordinates = np.atleast_2d(coordinates).astype(float)
@@ -2638,10 +2639,7 @@ def _convert_angles(coordinates, domain, kind='rad2deg'):
 
     # convert data
     converted = coordinates.copy()
-    if kind == 'rad2deg':
-        converted[..., mask] = converted[..., mask] / np.pi * 180
-    else:
-        converted[..., mask] = converted[..., mask] * np.pi / 180
+    converted[..., mask] = converted[..., mask] * factor
 
     return converted
 
