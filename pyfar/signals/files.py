@@ -487,7 +487,15 @@ def _load_files(data):
 
     # create directory if required
     if not os.path.isdir(file_dir):
-        os.mkdir(file_dir)
+        # provide verbose error for read-only file systems
+        try:
+            os.mkdir(file_dir)
+        except OSError as error:
+            if 'Read-only' in str(error):
+                raise OSError((f'{data} can not be loaded because the file '
+                               'system is read-only.'))
+            else:
+                raise error
 
     # set the filenames
     if data in ['binaural_room_impulse_response', 'castanets', 'drums',
