@@ -2561,7 +2561,7 @@ def cyl2cart(azimuth, height, radius):
 
 def rad2deg(coordinates, domain='spherical'):
     """
-    Convert coordinates in radians to degree
+    Convert a copy of coordinates in radians to degree
 
     Parameters
     ----------
@@ -2591,7 +2591,7 @@ def rad2deg(coordinates, domain='spherical'):
 
 def deg2rad(coordinates, domain='spherical'):
     """
-    Convert coordinates in degree to radians
+    Convert a copy of coordinates in degree to radians
 
     Parameters
     ----------
