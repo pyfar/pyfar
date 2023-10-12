@@ -2,6 +2,14 @@
 History
 =======
 
+0.5.4 (2023-09-29)
+------------------
+* Dependencies: Constrain matplotlib to versions <= 3.7, due to deprecations of the tight_layout function in matplotlib 3.8 (PR #497).
+* Bugfix: Fix order `order` property for `pyfar.FilterSOS` (PR #487).
+* Bugfix: Fix broken tests for filter class copy methods (PR #488).
+* Improvements to the documentation (PR #470).
+* Flake8 fixes.
+
 0.5.3 (2023-03-30)
 ------------------
 

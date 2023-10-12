@@ -19,6 +19,22 @@ import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData
 
 
+@pytest.mark.parametrize('input_type', ('filename', 'path_object'))
+def test_read_sofa_filename_and_path_object(
+        input_type, generate_sofa_GeneralFIR, noise_two_by_three_channel):
+    """Test read_sofa with filename and path object as input"""
+
+    if input_type == 'filename':
+        file = generate_sofa_GeneralFIR
+        assert isinstance(file, str)
+    elif input_type == 'path_object':
+        file = pathlib.Path(generate_sofa_GeneralFIR)
+        assert isinstance(file, pathlib.Path)
+
+    signal = io.read_sofa(file)[0]
+    npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
+
+
 def test_read_sofa_GeneralFIR(
         generate_sofa_GeneralFIR, noise_two_by_three_channel):
     """Test for sofa datatype GeneralFIR"""
@@ -50,9 +66,9 @@ def test_read_sofa_coordinates(
     """Test for reading coordinates in sofa file"""
     _, s_coords, r_coords, = io.read_sofa(generate_sofa_GeneralFIR)
     npt.assert_allclose(
-        s_coords.get_cart(), sofa_reference_coordinates[0])
+        s_coords.cartesian, sofa_reference_coordinates[0])
     npt.assert_allclose(
-        r_coords.get_cart(), sofa_reference_coordinates[1])
+        r_coords.cartesian, sofa_reference_coordinates[1])
 
 
 def test_read_sofa_position_type_spherical(
@@ -60,11 +76,15 @@ def test_read_sofa_position_type_spherical(
     """Test to verify correct position type of sofa file"""
     _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
     npt.assert_allclose(
-        s_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[0])
+        s_coords.spherical_elevation[..., :2] / np.pi * 180,
+        sofa_reference_coordinates[0][..., :2])
     npt.assert_allclose(
-        r_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[1])
+        s_coords.radius, sofa_reference_coordinates[0][:, 2])
+    npt.assert_allclose(
+        r_coords.spherical_elevation[..., :2] / np.pi * 180,
+        sofa_reference_coordinates[1][..., :2])
+    npt.assert_allclose(
+        r_coords.radius, sofa_reference_coordinates[1][:, 2])
 
 
 @pytest.mark.parametrize('file,version', [

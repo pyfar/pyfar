@@ -14,7 +14,7 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'numpy>=1.23.0',
     'scipy>=1.5.0',
-    'matplotlib',
+    'matplotlib<=3.7',
     'sofar>=0.1.2',
     'urllib3',
     'deepdiff',
@@ -29,7 +29,6 @@ test_requirements = [
     'wheel',
     'watchdog',
     'flake8',
-    'tox',
     'coverage',
     'Sphinx',
     'twine'
@@ -46,7 +45,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10'
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11'
     ],
     description="Project for data formats in acoustics.",
     install_requires=requirements,
@@ -66,7 +66,7 @@ setup(
         "Documentation": "https://pyfar.readthedocs.io/",
         "Source Code": "https://github.com/pyfar/pyfar",
     },
-    version='0.5.3',
+    version='0.5.4',
     zip_safe=False,
     python_requires='>=3.8'
 )
