@@ -20,6 +20,7 @@ def test_data_time_init_with_defaults():
     assert time.signal_length == .3
     assert time.n_samples == 3
     assert time.domain == 'time'
+    assert not time.complex
 
 
 def test_data_time_init_wrong_dtype():
@@ -29,6 +30,17 @@ def test_data_time_init_wrong_dtype():
     """
     with pytest.raises(ValueError, match="time data is complex"):
         TimeData(np.arange(2).astype(complex), [0, 1])
+
+
+def test_time_init_complex_flag():
+    """
+    Test assertion from non boolean complex flag
+    """
+    complex_flag = 1
+    with pytest.raises(TypeError, match="``is_complex`` flag is "
+                                        f"{type(complex_flag).__name__}"
+                                        f"but must be a boolean"):
+        TimeData(np.arange(2).astype(complex), [0, 1], is_complex=complex_flag)
 
 
 def test_data_time_init_wrong_number_of_times():
@@ -58,6 +70,29 @@ def test_data_time_setter_time():
     time = TimeData(data_a, times)
     time.time = data_b
     npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data_b)))
+
+
+def test_data_time_setter_complex_casting():
+    time = TimeData(data=[1, 0, -1], times=[0, .1, .3], is_complex=True)
+    assert time.time.dtype.kind == "c"
+
+
+def test_setter_complex():
+    # test setting complex flag from False to True
+    time = TimeData(data=[1, 0, -1], times=[0, .1, .3])
+    time.complex = True
+    assert time.time.dtype.kind == "c"
+
+    # test setting complex flag from True to False
+    time = TimeData(data=[1, 0, -1], times=[0, .1, .3], is_complex=True)
+    time.complex = False
+    assert time.time.dtype.kind == "f"
+
+    time = TimeData(data=[1 + 1j, 0 + 1j, -1 + 2j], times=[0, .1, .3],
+                    is_complex=True)
+    with pytest.raises(ValueError, match="Signal has complex-valued time data"
+                                         " is_complex flag cannot be `False`."):
+        time.complex = False
 
 
 def test_reshape():
