@@ -263,6 +263,8 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         `signal`. In this case it must broadcast to `signal.cshape` (see
         `Numpy broadcasting
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
+    unit : str, optional
+        The unit of the shift. Either 'samples' or 's'. Defaults to 'samples'.
     order : int, optional
         The order of the fractional shift (sinc) filter. The precision of the
         filter increases with the order. High frequency errors decrease with

@@ -20,6 +20,22 @@ import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData
 
 
+@pytest.mark.parametrize('input_type', ('filename', 'path_object'))
+def test_read_sofa_filename_and_path_object(
+        input_type, generate_sofa_GeneralFIR, noise_two_by_three_channel):
+    """Test read_sofa with filename and path object as input"""
+
+    if input_type == 'filename':
+        file = generate_sofa_GeneralFIR
+        assert isinstance(file, str)
+    elif input_type == 'path_object':
+        file = pathlib.Path(generate_sofa_GeneralFIR)
+        assert isinstance(file, pathlib.Path)
+
+    signal = io.read_sofa(file)[0]
+    npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
+
+
 def test_read_sofa_GeneralFIR(
         generate_sofa_GeneralFIR, noise_two_by_three_channel):
     """Test for sofa datatype GeneralFIR"""

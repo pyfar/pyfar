@@ -3,8 +3,6 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar import (Signal, FrequencyData)
-from pyfar.classes.warnings import PyfarDeprecationWarning
-import warnings
 
 
 def _prepare_plot(ax=None, subplots=None):
@@ -168,14 +166,9 @@ def _default_color_dict():
 def _check_time_unit(unit):
     """Check if a valid time unit is passed."""
     units = ['s', 'ms', 'mus', 'samples', 'auto']
-    if unit is None:
-        warnings.warn((
-            "unit=None will be deprecated in pyfar This function will be "
-            "deprecated in pyfar 0.6.0. Use unit='auto' instead."),
-            PyfarDeprecationWarning)
-    if unit is not None and unit not in units:
+    if unit not in units:
         raise ValueError(
-            f"Unit is {unit} but must be {', '.join(units)}, or None.")
+            f"Unit is {unit} but must be {', '.join(units)}.")
 
 
 def _check_axis_scale(scale, axis='x'):
@@ -198,7 +191,7 @@ def _get_quad_mesh_from_axis(ax):
     """
     quad_mesh_found = False
     for qm in ax.get_children():
-        if type(qm) == mpl.collections.QuadMesh:
+        if type(qm) is mpl.collections.QuadMesh:
             quad_mesh_found = True
             break
 
