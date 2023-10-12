@@ -96,5 +96,5 @@ def test_error_raises():
         pf.dsp.average(pf.Signal(np.zeros((5, 2)), 44100),
                        nan_policy='invalid')
     with raises(ValueError, match=("The signal includes NaNs.")):
-        pf.dsp.average(pf.Signal([[0, np.nan], [1, 2]], 44100),
+        pf.dsp.average(pf.TimeData([[0, np.nan], [1, 2]], [0, 1]),
                        nan_policy='raise')
