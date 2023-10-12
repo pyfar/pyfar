@@ -9,35 +9,35 @@ from pyfar.dsp import fft
 def test_n_bins_even():
     n_samples = 6
     truth = int(n_samples/2 + 1)
-    n_bins = fft._calc_n_bins_from_time_data(n_samples)
+    n_bins = fft._n_bins_from_n_samples(n_samples)
     assert n_bins == truth
 
 
 def test_n_bins_odd():
     n_samples = 7
     truth = int((n_samples + 1)/2)
-    n_bins = fft._calc_n_bins_from_time_data(n_samples)
+    n_bins = fft._n_bins_from_n_samples(n_samples)
     assert n_bins == truth
 
 
 def test_n_bins_complex():
     n_samples = 6
     truth = n_samples
-    n_bins = fft._calc_n_bins_from_time_data(n_samples, complex=True)
+    n_bins = fft._n_bins_from_n_samples(n_samples, complex_time=True)
     assert n_bins == truth
 
 
 def test_n_samples():
     n_bins = 6
     truth = int(n_bins-1) * 2
-    n_samples = fft._calc_n_samples_from_frequency_data(n_bins)
+    n_samples = fft._n_samples_from_n_bins(n_bins)
     assert n_samples == truth
 
 
 def test_n_samples_complex():
     n_bins = 7
     truth = n_bins
-    n_samples = fft._calc_n_samples_from_frequency_data(n_bins, complex=True)
+    n_samples = fft._n_samples_from_n_bins(n_bins, is_complex=True)
     assert n_samples == truth
 
 
@@ -387,7 +387,7 @@ def test_fft_add_mirror_spec():
     data_odd = [1, 2, 3, 4, 5, 6, 7]
     fr_odd = fft.rfft(data_odd, n_samples=7, sampling_rate=48000,
                       fft_norm='none')
-    fr_odd_both = fft.add_mirror_spectrum(fr_odd, even=False)
+    fr_odd_both = fft.add_mirror_spectrum(fr_odd, even_samples=False)
     fr_odd_desired = fft.fft(data_odd, n_samples=7, sampling_rate=48000,
                              fft_norm='none')
 
@@ -398,7 +398,7 @@ def test_fft_add_mirror_spec():
     data_even = [1, 2, 3, 4, 5, 6]
     fr_even = fft.rfft(data_even, n_samples=6, sampling_rate=48000,
                        fft_norm='none')
-    fr_even_both = fft.add_mirror_spectrum(fr_even, even=True)
+    fr_even_both = fft.add_mirror_spectrum(fr_even, even_samples=True)
     fr_even_desired = fft.fft(data_even, n_samples=6, sampling_rate=48000,
                               fft_norm='none')
     npt.assert_allclose(
@@ -429,3 +429,38 @@ def test_fft_remove_mirror_spec():
     npt.assert_allclose(
         fr_even_single, fr_even_desired,
         rtol=1e-12)
+
+
+def test_check_conjugate_symmetry():
+    """test checking for conjugate symmetry"""
+
+    sampling_rate = 48000
+    fft_norm = 'none'
+
+    # test _check_conjugate_symmetry with conjugate
+    # symmetric frequency data with even number of samples
+    n_samples = 4
+    data = np.array([1, 2, 3, 4])
+    assert fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))
+
+    # test _check_conjugate_symmetry with conjugate
+    # symmetric frequency data with odd number of samples
+    n_samples = 5
+    data = np.array([1, 2, 3, 4, 5])
+    assert fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))
+
+    # test _check_conjugate_symmetry with non conjugate
+    # symmetric frequency data with even number of samples
+    n_samples = 4
+    data = np.array([1+1j, 2+2j, 3+3j, 4+4j])
+    assert not fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))
+
+    # test _check_conjugate_symmetry with non conjugate
+    # symmetric frequency data with odd number of samples
+    n_samples = 5
+    data = np.array([1+1j, 2+2j, 3+3j, 4+4j, 5+5j])
+    assert not fft._check_conjugate_symmetry(
+        fft.fft(data, n_samples, sampling_rate, fft_norm))

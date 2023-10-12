@@ -39,11 +39,11 @@ def test_signal_init_assertions():
         Signal(1, 44100, domain="space")
 
     with pytest.raises(ValueError, match="n_samples can not be larger"):
-        Signal(1, 44100, domain="freq", complex=True, n_samples=10)
+        Signal(1, 44100, domain="freq", is_complex=True, n_samples=10)
 
     # pass complex data but dont set complex flag
     with pytest.raises(ValueError, match="time data is complex, "
-                                         "set complex flag or pass "
+                                         "set is_complex flag or pass "
                                          "real-valued data."):
         Signal([1+1j, 2+2j, 3+3j], 44100)
 
@@ -58,7 +58,7 @@ def test_signal_init_time_dtype():
     assert signal.time.dtype.kind == "f"
 
     # pass real-valued int data and set complex flag, expect complex casting
-    signal = Signal([1, 2, 3], 44100, complex=True)
+    signal = Signal([1, 2, 3], 44100, is_complex=True)
     assert signal.time.dtype.kind == "c"
 
     # pass float data
@@ -66,11 +66,11 @@ def test_signal_init_time_dtype():
     assert signal.time.dtype.kind == "f"
 
     # pass real-valued float data and set complex flag
-    signal = Signal([1., 2., 3.], 44100, complex=True)
+    signal = Signal([1., 2., 3.], 44100, is_complex=True)
     assert signal.time.dtype.kind == "c"
 
     # pass complex-valued data and set complex flag
-    signal = Signal([1+1j, 2+2j, 3+3j], 44100, complex=True)
+    signal = Signal([1+1j, 2+2j, 3+3j], 44100, is_complex=True)
     assert signal.time.dtype.kind == "c"
 
 
@@ -186,13 +186,13 @@ def test_n_samples():
     signal = Signal([1, 2, 3], 44100, domain='time')
     assert signal.n_samples == 3
 
-    signal = Signal([1, 2, 3], 44100, domain='time', complex=True)
+    signal = Signal([1, 2, 3], 44100, domain='time', is_complex=True)
     assert signal.n_samples == 3
 
     signal = Signal([1, 2, 3], 44100, domain='freq')
     assert signal.n_samples == 4
 
-    signal = Signal([1, 2, 3], 44100, domain='freq', complex=True)
+    signal = Signal([1, 2, 3], 44100, domain='freq', is_complex=True)
     assert signal.n_samples == 3
 
 
@@ -202,9 +202,9 @@ def test_n_bins():
     assert signal.n_bins == 2
     signal = Signal([1, 2, 3, 4], 44100, domain='time')
     assert signal.n_bins == 3
-    signal = Signal([1, 2, 3], 44100, domain='time', complex=True)
+    signal = Signal([1, 2, 3], 44100, domain='time', is_complex=True)
     assert signal.n_bins == 3
-    signal = Signal([1, 2, 3, 4], 44100, domain='time', complex=True)
+    signal = Signal([1, 2, 3, 4], 44100, domain='time', is_complex=True)
     assert signal.n_bins == 4
 
 
@@ -318,10 +318,10 @@ def test_setter_fft_norm():
 
 def test_fft_selection():
     """Test if appropriate FFT is computed"""
-    signal = Signal([1, 2, 3], 44100, complex=False)
+    signal = Signal([1, 2, 3], 44100, is_complex=False)
     assert signal.freq.shape[1] == 2
 
-    signal = Signal([1, 2, 3], 44100, complex=True)
+    signal = Signal([1, 2, 3], 44100, is_complex=True)
     assert signal.freq.shape[1] == 3
 
 
@@ -580,15 +580,17 @@ def test_setter_complex_(domain, complex, kind):
 def test_setter_complex_assert():
     """ test setting complex flag of time and frequency domain signals"""
 
-    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
+                    is_complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         "complex flag connot be `False`."):
+                                         " is_complex flag cannot be "
+                                         "`False`."):
         signal.complex = False
 
     signal.domain = "freq"
-    with pytest.raises(ValueError, match="Signals frequency data are not"
-                                         "conjugate symmetric, complex flag"
-                                         "connot be `False`."):
+    with pytest.raises(ValueError, match="Signals frequency spectrum is not"
+                                         " conjugate symmetric, is_complex "
+                                         "flag cannot be `False`."):
         signal.complex = False
 
 
@@ -602,13 +604,15 @@ def test_setter_complex():
 
     # test setting complex from True to False
     # for time domain signals
-    signal = Signal([0, 1, 2], 44100, 4, "time", complex=True)
+    signal = Signal([0, 1, 2], 44100, 4, "time", is_complex=True)
     signal.complex = False
     assert signal.time.dtype.kind == "f"
 
-    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
+                    is_complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         "complex flag connot be `False`."):
+                                         " is_complex flag cannot be "
+                                         "`False`."):
         signal.complex = False
 
     # test setting complex from False to True
@@ -620,16 +624,17 @@ def test_setter_complex():
 
     # test setting complex from True to False
     # for frequency domain signals
-    signal = Signal([0, 1, 2], 44100, 4, "time", complex=True)
+    signal = Signal([0, 1, 2], 44100, 4, "time", is_complex=True)
     signal.domain = "freq"
     signal.complex = False
     assert signal.time.dtype.kind == "f"
 
-    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time", complex=True)
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
+                    is_complex=True)
     signal.domain = "freq"
-    with pytest.raises(ValueError, match="Signals frequency data are not"
-                                         "conjugate symmetric, complex flag"
-                                         "connot be `False`."):
+    with pytest.raises(ValueError, match="Signals frequency spectrum is not"
+                                         " conjugate symmetric, "
+                                         "is_complex flag cannot be `False`."):
         signal.complex = False
 
 
@@ -651,31 +656,12 @@ def test_frequencies():
 
     # test frequencies from a complex-valued signals
     # with odd number of samples
-    signal = Signal([0, 1, 2], sampling_rate=sampling_rate, complex=True)
+    signal = Signal([0, 1, 2], sampling_rate=sampling_rate, is_complex=True)
     desired = np.array([-16000, 0, 16000])
     npt.assert_allclose(signal.frequencies, desired)
 
     # test frequencies from a complex-valued signals
     # with even number of samples
-    signal = Signal([0, 1, 2, 4], sampling_rate=sampling_rate, complex=True)
+    signal = Signal([0, 1, 2, 4], sampling_rate=sampling_rate, is_complex=True)
     desired = np.array([-24000, -12000, 0, 12000])
     npt.assert_allclose(signal.frequencies, desired)
-
-
-def test_check_conjugate_symmetry():
-    """test checking for conjugate symmetry"""
-    signal = pf.Signal([[1., 2., 3., 4., 5.], [1., 2., 3., 6., 6.]],
-                       sampling_rate=48000)
-    signal.domain = "freq"
-    assert not signal._check_conjugate_symmetry()
-
-    signal = pf.Signal([[1., 2., 3., 4., 5.], [1., 2., 3., 6., 6.]],
-                       sampling_rate=48000, complex=True)
-    signal.domain = "freq"
-    assert signal._check_conjugate_symmetry()
-
-    signal = pf.Signal([[1., 2., 3., 4., 5., 6., 7., 8.],
-                        [1., 2., 3., 6., 6., 7., 9., 9.]],
-                       sampling_rate=48000, complex=True)
-    signal.domain = "freq"
-    assert signal._check_conjugate_symmetry()

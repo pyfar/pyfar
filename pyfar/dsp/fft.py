@@ -207,11 +207,11 @@ def ifft(spec, n_samples, sampling_rate, fft_norm):
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=False)
     # Inverse DFT
-    data = sfft.ifft(
+    return sfft.ifft(
         sfft.ifftshift(spec, axes=-1),
-        n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
-
-    return data
+        n=n_samples,
+        axis=-1,
+        workers=multiprocessing.cpu_count())
 
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
@@ -395,13 +395,13 @@ def _is_odd(num):
     return bool(num & 0x1)
 
 
-def _calc_n_bins_from_time_data(n_samples, complex=False):
+def _n_bins_from_n_samples(n_samples, complex_time=False):
     """
     Helper function to calculate the number of bins resulting from a FFT
     with n_samples
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     n_samples : int
         Number of samples
     complex : bool
@@ -413,21 +413,17 @@ def _calc_n_bins_from_time_data(n_samples, complex=False):
         Resulting number of frequency bins
 
     """
-    if complex:
-        n_bins = n_samples
-    else:
-        n_bins = n_samples // 2 + 1
 
-    return int(n_bins)
+    return int(n_samples) if complex_time else n_samples // 2 + 1
 
 
-def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
+def _n_samples_from_n_bins(num_freq_bins, is_complex=False):
     """
     Helper function to calculate the number of samples resulting from
     an inverse FFT of a spectrum with n_freq_bins
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     num_freq_bins : int
         Number of frequency bins
     complex : bool
@@ -440,25 +436,52 @@ def _calc_n_samples_from_frequency_data(num_freq_bins, complex=False):
         Resulting number of time samples.
 
     """
-    if complex:
-        return num_freq_bins
+    return num_freq_bins if is_complex else max(1, (num_freq_bins - 1) * 2)
+
+
+def _check_conjugate_symmetry(data):
+    """
+    Check if the frequency bins are conjugate symmetric
+    around 0 Hz.
+
+    Parameters
+    -------
+    data : numpy array
+        M-dimensional array of double-sided spectrum of shape (..., N)
+        containing N frequency bins. The 0 Hz bin must always be at index
+        `data.shape[-1] // 2`.
+
+    Returns
+    -------
+    results : bool
+        return `True` if the fequency data are conjugate symmetric around
+        0 Hz, return `False` if not.
+
+    """
+    dc_idx = data.shape[-1] // 2
+    if _is_odd(data.shape[-1]):
+        mirror_spec = np.conj(np.flip(data[..., :dc_idx], axis=-1))
     else:
-        return max(1, (num_freq_bins - 1) * 2)
+        mirror_spec = np.conj(np.flip(data[..., 1:dc_idx], axis=-1))
+
+    return bool(mirror_spec.shape[-1] > 0 and np.allclose(
+            data[..., dc_idx+1:], mirror_spec,
+            rtol=5*np.finfo(data.dtype).eps))
 
 
-def add_mirror_spectrum(data_single_sided, even):
+def add_mirror_spectrum(data_single_sided, even_samples):
     """
     Adds mirror spectrum to single-sided frequency data
     and applies fftshift. The output is a double-sided
     spectrum that matches the format of :py:func:`~fft`.
 
-    Paramters
+    Parameters
     ---------
     data : numpy array
         M-dimensional array of single-sided spectrum of shape (..., N)
         containing N frequency bins.
     even : bool
-        flag which indicates if the number of sampels of the time
+        flag which indicates if the number of samples of the time
         data were even.
 
     Returns
@@ -468,7 +491,7 @@ def add_mirror_spectrum(data_single_sided, even):
         containing N frequency bins.
 
     """
-    if even:
+    if even_samples:
         mirror_spec = data_single_sided[..., 1:-1]
     else:
         mirror_spec = data_single_sided[..., 1:]
@@ -481,24 +504,30 @@ def add_mirror_spectrum(data_single_sided, even):
 
 def remove_mirror_spectrum(data_double_sided):
     """
-    Removes the redundand mirror spectrum
-    of double-sided frequency data. The output is a single-sided
+    Checks if the data are conjugate symmetric and
+    removes the redundand mirror spectrum of double-sided
+    frequency data. The output is a single-sided
     spectrum that matches the format of :py:func:`~rfft`.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     data_double_sided : numpy array
         M-dimensional array of double-sided spectrum of shape (..., N)
-        containing N frequency bins.
+        containing N frequency bins. The 0 Hz bin must always be at index
+        `data.shape[-1] // 2`.
 
     Returns
     -------
     data : numpy array
-        M-dimensional array of single-sided spectrum of shape (..., N)
-        containing N frequency bins.
+        M-dimensional array of single-sided spectrum of shape (..., N//2+1)
+        containing N//2+1 frequency bins.
 
     """
-    N = data_double_sided.shape[-1]
-    idx = N/2
-    data_double_sided = sfft.ifftshift(data_double_sided)
-    return data_double_sided[..., :int(idx)+1]
+    if _check_conjugate_symmetry(data_double_sided):
+        N = data_double_sided.shape[-1]
+        data_double_sided = sfft.ifftshift(data_double_sided)
+        return data_double_sided[..., :N // 2 + 1]
+    else:
+        raise ValueError("Signals frequency spectrum is not"
+                         " conjugate symmetric, is_complex flag"
+                         " cannot be `False`.")
