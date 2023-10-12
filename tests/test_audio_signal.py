@@ -73,6 +73,14 @@ def test_signal_init_time_dtype():
     signal = Signal([1+1j, 2+2j, 3+3j], 44100, is_complex=True)
     assert signal.time.dtype.kind == "c"
 
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        Signal(['1', '2', '3'], 44100)
+
+    # pass array with invalid value
+    with pytest.raises(ValueError, match="input values must be numeric"):
+        Signal(np.array([1, 2, np.nan]), 44100)
+
 
 def test_data_frequency_init_dtype():
     """
@@ -95,6 +103,14 @@ def test_data_frequency_init_dtype():
     # object array
     with pytest.raises(TypeError, match="int, uint, float, or complex"):
         Signal(["1", "2", "3"], 44100, 4, "freq")
+
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        Signal(['1', '2', '3'], 44100, 4, "freq")
+
+    # pass array with invalid value
+    with pytest.raises(ValueError, match="input values must be numeric"):
+        Signal(np.array([1, 2, np.nan]), 44100, 4, "freq")
 
 
 def test_signal_comment():
