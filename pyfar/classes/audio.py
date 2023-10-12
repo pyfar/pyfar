@@ -681,7 +681,6 @@ class Signal(FrequencyData, TimeData):
                                   "data.shape[-1] when passing double-"
                                   "sided Fourier spectrum"))
             self._n_samples = n_samples
-            self._n_bins = data.shape[-1]
             # Init remaining parameters
             FrequencyData.__init__(self, data, self.frequencies, comment)
             delattr(self, '_frequencies')
@@ -908,6 +907,13 @@ class Signal(FrequencyData, TimeData):
                       n_samples=self.n_samples, domain=self.domain,
                       fft_norm=self.fft_norm, comment=self.comment)
         return item
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        selfcopy = self.copy()
+        selfcopy.domain = "time"
+        class_dict = selfcopy.__dict__
+        return class_dict
 
     @classmethod
     def _decode(cls, obj_dict):
