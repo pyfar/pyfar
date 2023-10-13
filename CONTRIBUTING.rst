@@ -83,13 +83,13 @@ Function and Class Guidelines
 
 Functions and classes should
 
-* have a single clear purpose and a functionality limited to that purpose. Conditional arguments are fine in some cases but are an indicator that a function or class does not have a clear purpose. Conditional arguments are
+* have a single clear purpose and a functionality limited to that purpose. Conditional parameters are fine in some cases but are an indicator that a function or class does not have a clear purpose. Conditional parameters are
 
-  - arguments that are obsolete if another argument is provided
-  - arguments that or necessary only if another argument is provided
-  - arguments that must have a specific value depending on other arguments
+  - parameters that are obsolete if another parameter is provided
+  - parameters that are necessary only if another parameter is provided
+  - parameters that must have a specific value depending on other parameters
 
-* be split into multiple functions or classes if their purpose is not clear or the functionality not well limited.
+* be split into multiple functions or classes if the functionality not well limited.
 * contain documentation for all input and output parameters.
 * contain examples in the documentation if they are non-trivial to use.
 * contain comments in the code that explain decisions and parts that are not trivial to read from the code. As a rule of thumb, too much comments are better than to little comments.
@@ -152,7 +152,7 @@ Pytest provides several, sophisticated functionalities which could reduce the ef
 
 Fixtures
 ~~~~~~~~
-"Software test fixtures initialize test functions. They provide a fixed baseline so that tests execute reliably and produce consistent, repeatable, results. Initialization may setup services, state, or other operating environments. These are accessed by test functions through arguments; for each fixture used by a test function there is typically a parameter (named after the fixture) in the test function’s definition." (from https://docs.pytest.org/en/stable/fixture.html)
+"Software test fixtures initialize test functions. They provide a fixed baseline so that tests execute reliably and produce consistent, repeatable, results. Initialization may setup services, state, or other operating environments. These are accessed by test functions through parameters; for each fixture used by a test function there is typically a parameter (named after the fixture) in the test function’s definition." (from https://docs.pytest.org/en/stable/fixture.html)
 
 - All fixtures are implemented in *conftest.py*, which makes them automatically available to all tests. This prevents from implementing redundant, unreliable code in several test files.
 - Typical fixtures are pyfar objects with varying properties, stubs as well as functions need for initiliazing tests.
