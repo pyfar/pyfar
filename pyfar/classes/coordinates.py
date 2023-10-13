@@ -2,7 +2,8 @@
 The following documents the pyfar coordinates class and functions for
 coordinate conversion. More background information is given in
 :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
-Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
+Available sampling schemes are listed at
+:py:mod:`spharpy.samplings <spharpy.samplings>`.
 """
 
 import numpy as np
@@ -1427,13 +1428,13 @@ class Coordinates():
         Examples
         --------
 
-        Find frontal point from a spherical coordinate system
+        Find the nearest point in a line
 
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_k(1, 0, 0, show=True)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
+            >>> result = coords.find_nearest_k(0, 0, 0, show=True)
         """
 
         # check the input
@@ -1502,8 +1503,8 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
+            >>> result = coords.find_nearest_cart(2, 0, 0, 0.5, show=True)
 
         """
 
@@ -1572,8 +1573,11 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     0, np.arange(-90, 91, 10)*np.pi/180, 1)
+            >>> result = coords.find_nearest_sph(0, np.pi/2, 1, 45, show=True)
+
         """
 
         # check the input
@@ -1641,8 +1645,10 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     np.arange(-30, 30, 5)*np.pi/180, 0, 1)
+            >>> result = coords.find_slice('azimuth', 'deg', 0, 5, show=True)
 
         """
 
@@ -1737,7 +1743,7 @@ class Coordinates():
         Get a coordinates object
 
         >>> import pyfar as pf
-        >>> coordinates = pf.samplings.sph_gaussian(sh_order=3)
+        >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
 
         Rotate 45 degrees about the y-axis using
 
