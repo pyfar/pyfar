@@ -1391,13 +1391,14 @@ class Coordinates():
             Number of points to return. k must be > 0. The default is ``1``.
         distance_measure : string, optional
             ``'euclidean'``
-                Distance is determined by the euclidean distance in meters
-                between the points. This is default.
-            ``'spherical'``
-                Distance is determined by the great-circle distance in meters
-                between the points.
-            ``'angular'``
-                distance is determined by the angles in radiant.
+                distance is determined by the euclidean distance.
+                This is default.
+            ``'spherical_radiance'``
+                distance is determined by the great-circle distance
+                expressed in radians.
+            ``'spherical_meter'``
+                distance is determined by the great-circle distance
+                expressed in meters.
 
         Returns
         -------
@@ -1470,9 +1471,11 @@ class Coordinates():
             raise ValueError("k must be an integer > 0 and <= self.csize.")
         if not isinstance(find, Coordinates):
             raise ValueError("find must be an pf.Coordinates object.")
-        if distance_measure not in ['euclidean', 'spherical', 'angular']:
+        allowed_measures = [
+                'euclidean', 'spherical_degree', 'spherical_meter']
+        if distance_measure not in allowed_measures:
             raise ValueError(
-                "distance_measure needs to be 'euclidean' or 'spherical' and "
+                f"distance_measure needs to be in {allowed_measures} and "
                 f"it is {distance_measure}")
 
         # get target point in cartesian coordinates
@@ -1487,7 +1490,7 @@ class Coordinates():
         # nearest points
         distance, index = kdtree.query(points, k=k)
 
-        if distance_measure in ['spherical', 'angular']:
+        if distance_measure in ['spherical_radiance', 'spherical_meter']:
             # determine validate radius
             radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
@@ -1497,7 +1500,7 @@ class Coordinates():
                     radius. Differences are larger than 1e-15")
             radius = np.max(radius)
 
-            if distance_measure == 'angular':
+            if distance_measure == 'spherical_meter':
                 # convert angle in radiant to distance on the sphere
                 # d = 2r*pi*d/(2*pi) = r*d
                 distance = radius * distance
@@ -1553,10 +1556,12 @@ class Coordinates():
             ``'euclidean'``
                 distance is determined by the euclidean distance.
                 This is default.
-            ``'spherical'``
-                distance is determined by the great-circle distance.
-            ``'angular'``
-                distance is determined by the angles in radiant.
+            ``'spherical_radiance'``
+                distance is determined by the great-circle distance
+                expressed in radians.
+            ``'spherical_meter'``
+                distance is determined by the great-circle distance
+                expressed in meters.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
@@ -1605,7 +1610,8 @@ class Coordinates():
             raise ValueError("coords must be an pf.Coordinates object.")
         if not isinstance(return_sorted, bool):
             raise ValueError("return_sorted must be a bool.")
-        allowed_measures = ['euclidean', 'spherical', 'angular']
+        allowed_measures = [
+            'euclidean', 'spherical_radiance', 'spherical_meter']
         if distance_measure not in allowed_measures:
             raise ValueError(
                 f"distance_measure needs to be in {allowed_measures} and "
@@ -1624,7 +1630,7 @@ class Coordinates():
         if distance_measure == 'euclidean':
             index = kdtree.query_ball_point(
                 points, distance + atol, return_sorted=return_sorted)
-        if distance_measure == ['spherical', 'angular']:
+        if distance_measure == ['spherical_radiance', 'spherical_meter']:
             # determine validate radius
             radius = self.radius
             delta_radius = np.max(radius) - np.min(radius)
@@ -1634,7 +1640,7 @@ class Coordinates():
                     radius. Differences are larger than 1e-15")
             radius = np.max(radius)
 
-            if distance_measure == 'angular':
+            if distance_measure == 'spherical_meter':
                 # convert angle in radiant to distance on the sphere
                 # d = 2r*pi*d/(2*pi) = r*d
                 distance = radius * distance
