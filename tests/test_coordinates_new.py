@@ -3,8 +3,8 @@ import numpy.testing as npt
 import pytest
 
 from pyfar import Coordinates
-from pyfar.classes.coordinates import (sph2cart, cart2sph, cyl2cart,
-                                       deg2rad, rad2deg)
+from pyfar.classes.coordinates import (sph2cart, cart2sph, cyl2cart)
+from pyfar import (deg2rad, rad2deg)
 
 
 def test___eq___copy():
