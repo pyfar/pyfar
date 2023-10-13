@@ -2572,13 +2572,13 @@ def rad2deg(coordinates, domain='spherical'):
 
         ``'spherical'``
             Spherical coordinates with angles contained in
-            ``coordinates[..., 0:2]`` and a radii in coordinates[..., 2].
+            ``coordinates[..., 0:2]`` and radii in ``coordinates[..., 2]``.
             The radii are ignored during the conversion.
         ``'cylindrical'``
             Cylindrical coordinates with angles contained in
-            ``coordinates[..., 0]``, the heights contained in
-            ``coordinates[..., 1]``, and a radii in coordinates[..., 2]. The
-            heights and radii are ignored during the conversion.
+            ``coordinates[..., 0]``, heights contained in
+            ``coordinates[..., 1]``, and radii in ``coordinates[..., 2]``.
+            The heights and radii are ignored during the conversion.
 
 
     Returns
@@ -2602,13 +2602,13 @@ def deg2rad(coordinates, domain='spherical'):
 
         ``'spherical'``
             Spherical coordinates with angles contained in
-            ``coordinates[..., 0:2]`` and a radii in coordinates[..., 2].
+            ``coordinates[..., 0:2]`` and radii in ``coordinates[..., 2]``.
             The radii are ignored during the conversion.
         ``'cylindrical'``
             Cylindrical coordinates with angles contained in
-            ``coordinates[..., 0]``, the heights contained in
-            ``coordinates[..., 1]``, and a radii in coordinates[..., 2]. The
-            heights and radii are ignored during the conversion.
+            ``coordinates[..., 0]``, heights contained in
+            ``coordinates[..., 1]``, and radii in ``coordinates[..., 2]``.
+            The heights and radii are ignored during the conversion.
 
 
     Returns
