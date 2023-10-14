@@ -253,7 +253,7 @@ def impulse_complex():
         sampling_rate=sampling_rate)
 
     signal = pyfar.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
-                          complex=True)
+                          is_complex=True)
     return signal
 
 
@@ -454,7 +454,7 @@ def handsome_complex_signal():
     signal = pf.signals.sine(200, 4410)
     signal = pf.dsp.time_window(signal, (1500, 2000, 3000, 3500))
     signal = pf.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
-                       complex=True)
+                       is_complex=True)
 
     return signal
 

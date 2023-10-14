@@ -17,9 +17,9 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
     spectrum : str, optional
         ``white`` to generate noise with constant energy across frequency.
         ``pink`` to generate noise with constant energy across filters with
-        constant relative bandwith. The default is ``white``.
+        constant relative bandwidth. The default is ``white``.
     rms : double, array like, optional
-        The route mean square (RMS) value of the noise signal. A multi channel
+        The root mean square (RMS) value of the noise signal. A multi channel
         noise signal is generated if an array of RMS values is passed.
         The default is ``1``.
     sampling_rate : int, optional

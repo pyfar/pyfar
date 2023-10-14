@@ -2,6 +2,7 @@ import pyfar as pf
 import pytest
 import numpy as np
 import numpy.testing as npt
+from pytest import raises
 
 
 @pytest.mark.parametrize('signal, mode, answer', (
@@ -77,27 +78,39 @@ def test_keepdims_parameters():
     assert len(signal.cshape) == len(ave2.cshape)
 
 
+@pytest.mark.parametrize('data', (
+                        pf.TimeData([[1, np.nan], [1, 2]], [1, 2]),
+                        pf.FrequencyData([[1, np.nan], [1, 2]], [1, 2])))
+def test_nan_value_averaging(data):
+    # Test average with data including NaNs.
+    norm_prop = pf.dsp.average(data, nan_policy='propagate')
+    npt.assert_equal(getattr(norm_prop, data.domain)[0], [1, np.nan])
+    norm_omit = pf.dsp.average(data, nan_policy='omit')
+    npt.assert_equal(getattr(norm_omit, data.domain)[0], [1, 2])
+
+
 def test_error_raises():
     # test wrong signal type
-    with pytest.raises(TypeError, match='Input data has to be of type'):
+    with raises(TypeError, match='Input data has to be of type'):
         pf.dsp.average([1, 2, 3])
     # test wrong mode for signal types
     signal = pf.TimeData([1, 2, 3], [1, 2, 3])
-    with pytest.raises(ValueError,
-                       match="mode is 'magnitude_phase' and signal is type"):
+    with raises(ValueError,
+                match="mode is 'magnitude_phase' and signal is type"):
         pf.dsp.average(signal, 'magnitude_phase')
     # test wrong caxis input
     signal = pf.Signal(np.ones((2, 3, 4)), 44100)
-    with pytest.raises(ValueError,
-                       match="The maximum of caxis needs to be smaller"):
+    with raises(ValueError,
+                match="The maximum of caxis needs to be smaller"):
         pf.dsp.average(signal, caxis=(0, 3))
     # test invalid mode input
-    with pytest.raises(ValueError,
-                       match="mode must be 'linear', 'magnitude_zerophase',"):
+    with raises(ValueError,
+                match="mode must be 'linear', 'magnitude_zerophase',"):
         pf.dsp.average(signal, mode='invalid_mode')
     with pytest.warns(UserWarning,
                       match="Averaging one dimensional caxis"):
         pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), caxis=(1, 2))
+
     # test invalid modes for complex signals
     with pytest.raises(ValueError,
                        match="mode 'log_magnitude_zerophase' is not defined"
@@ -119,3 +132,10 @@ def test_error_raises():
                              " for complex signals."):
         pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, complex=True),
                        mode="power")
+    with raises(ValueError, match=("nan_policy has to be 'propagate',")):
+        pf.dsp.average(pf.Signal(np.zeros((5, 2)), 44100),
+                       nan_policy='invalid')
+    with raises(ValueError, match=("The signal includes NaNs.")):
+        pf.dsp.average(pf.Signal([[0, np.nan], [1, 2]], 44100),
+                       nan_policy='raise')
+
