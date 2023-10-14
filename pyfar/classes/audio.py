@@ -1407,11 +1407,11 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
         # Set unnormalized spectrum
         result = Signal(
             result, sampling_rate, n_samples, domain, fft_norm='none',
-            complex=contains_complex)
+            is_complex=contains_complex)
         # Set fft norm
         result.fft_norm = fft_norm
     elif audio_type == TimeData:
-        result = TimeData(result, times, complex=contains_complex)
+        result = TimeData(result, times, is_complex=contains_complex)
     elif audio_type == FrequencyData:
         result = FrequencyData(result, frequencies)
 

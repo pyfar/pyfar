@@ -26,7 +26,7 @@ def test_add_two_signals_time():
 # test adding two complex time signals
 def test_add_two_signals_time_complex():
     # generate test signal
-    x = Signal([1, 0, 0], 44100, complex=True)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
 
     # time domain
     y = pf.add((x, x), 'time')
@@ -43,8 +43,8 @@ def test_add_two_signals_time_complex():
 # test adding two complex time signals
 def test_add_two_signal_time_real_and_complex():
     # generate test signal
-    x = Signal([1, 0, 0], 44100, complex=True)
-    y = Signal([1, 0, 0], 44100, complex=False)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
+    y = Signal([1, 0, 0], 44100, is_complex=False)
 
     # time domain
     z = pf.add((x, y), 'time')
@@ -79,7 +79,7 @@ def test_add_two_signals_freq():
 # test adding two Signals
 def test_add_two_signals_freq_complex():
     # generate test signal
-    x = Signal([1, 0, 0], 44100, complex=True)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
 
     # frequency domain
     y = pf.add((x, x), 'freq')
@@ -98,8 +98,8 @@ def test_add_two_signals_freq_complex():
 # test adding two Signals
 def test_add_two_signals_freq_real_and_complex():
     # generate test signal
-    x = Signal([1, 0, 0], 44100, complex=True)
-    y = Signal([1, 0, 0], 44100, complex=False)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
+    y = Signal([1, 0, 0], 44100, is_complex=False)
 
     # frequency domain
     z = pf.add((x, x), 'freq')
@@ -181,7 +181,7 @@ def test_add_number_and_signal():
 # test add number and complex signal
 def test_add_number_and_complex_signal():
     # generate and add signals
-    x = Signal([1, 0, 0], 44100, complex=True)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
     y = pf.add((1, x), 'time')
 
     # check if old signal did not change
@@ -198,7 +198,7 @@ def test_add_number_and_complex_signal():
 # test add number and complex signal
 def test_add_number_and_complex_signal_freq():
     # generate and add signals
-    x = Signal([1, 0, 0], 44100, complex=True)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
     y = pf.add((1, x), 'freq')
 
     # check if old signal did not change
@@ -380,8 +380,8 @@ def test_multiplication():
 
 def test_complex_multiplication():
     # only test one case - everything else is tested below
-    x = Signal([1, 0, 0], 44100, complex=True)
-    y = Signal([0, 1, 0], 44100, complex=True)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
+    y = Signal([0, 1, 0], 44100, is_complex=True)
     z = pf.multiply((x, y), 'time')
 
     # check result
@@ -392,14 +392,14 @@ def test_complex_multiplication():
 def test_complex_real_multiplication():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
-    y = Signal([0, 1, 0], 44100, complex=True)
+    y = Signal([0, 1, 0], 44100, is_complex=True)
     z = pf.multiply((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
                         atol=1e-15)
 
-    x = Signal([1, 0, 0], 44100, complex=True)
+    x = Signal([1, 0, 0], 44100, is_complex=True)
     y = Signal([0, 1, 0], 44100)
     z = pf.multiply((x, y), 'time')
 
@@ -421,7 +421,7 @@ def test_division():
 def test_complex_division():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
-    y = Signal([2, 2, 2], 44100, complex=True)
+    y = Signal([2, 2, 2], 44100, is_complex=True)
     z = pf.divide((x, y), 'time')
 
     # check result
@@ -584,7 +584,7 @@ def test_assert_match_for_arithmetic():
     s1 = Signal([1, 2, 3, 4], 48000)
     s2 = Signal([1, 2, 3], 44100)
     s4 = Signal([1, 2, 3, 4], 44100, fft_norm="rms")
-    s5 = Signal([1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j], 48000, complex=True)
+    s5 = Signal([1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j], 48000, is_complex=True)
     s6 = FrequencyData([1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j],
                        [10, 200, 1000, 20000])
 
