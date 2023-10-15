@@ -49,18 +49,23 @@ The corresponding center frequencies are accessible via
 Parametric equalizer
 -----------------------------------------------------
 The :py:func:`~pyfar.dsp.filter.high_shelve`,
-:py:func:`~pyfar.dsp.filter.low_shelve`, and :py:func:`~pyfar.dsp.filter.bell`
+:py:func:`~pyfar.dsp.filter.low_shelve`, :py:func:`~pyfar.dsp.filter.bell`, and
+:py:func:`~pyfar.dsp.filter.notch`
 filters shown on the left are specific filters for digital audio signal
 processing and are often used for audio effects and loudspeaker or room
 compensation. Bell filters manipulate the magnitude response around a
 center-frequency. Low- and high-shelve filters manipulate the magnitude
-response below and above a characteristic frequency. The cascaded shelving
+response below and above a characteristic frequency.
+
+|audio_filter_1|
+
+The cascaded shelving
 filters :py:func:`~pyfar.dsp.filter.low_shelve_cascade` and
 :py:func:`~pyfar.dsp.filter.high_shelve_cascade` shown on the right can be used
 to generate filters with a user definable slope given in dB per octaves within
 a certain frequency region.
 
-|eqs|
+|audio_filter_2|
 
 
 .. |standard_filter| image:: resources/filter_types_standard.png
@@ -75,7 +80,11 @@ a certain frequency region.
    :width: 50%
    :alt: Cross-over contained in pyfar
 
-.. |eqs| image:: resources/filter_types_parametric-eq.png
-   :width: 100%
-   :alt: Parametric equalizer contained in pyfar
+.. |audio_filter_1| image:: resources/filter_types_audio_filter_1.png
+   :width: 66%
+   :alt: Bell, Shelve, and Notch filter contained in pyfar
+
+.. |audio_filter_2| image:: resources/filter_types_audio_filter_2.png
+   :width: 66%
+   :alt: Cascaded Shelve filter contained in pyfar
 """

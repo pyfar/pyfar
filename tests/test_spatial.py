@@ -31,9 +31,8 @@ def test_sph_voronoi():
              phi2 + np.pi / 3, phi3 + np.pi / 3]), 2)
     rad = np.ones(np.size(theta))
 
-    s = Coordinates(
-        phi, theta, rad,
-        domain='sph', convention='top_colat')
+    s = Coordinates.from_spherical_colatitude(
+        phi, theta, rad)
 
     verts = np.array([
         [8.72677996e-01, -3.56822090e-01,  3.33333333e-01],
@@ -67,8 +66,7 @@ def test_sph_voronoi():
 
 def test_weights_from_voronoi():
     s = Coordinates(
-        [0, 0, 1, -1, 0, 0], [0, 0, 0, 0, -1, 1], [-1, 1, 0, 0, 0, 0],
-        domain='cart', convention='right')
+        [0, 0, 1, -1, 0, 0], [0, 0, 0, 0, -1, 1], [-1, 1, 0, 0, 0, 0])
 
     # test with normalization
     weights = samplings.calculate_sph_voronoi_weights(s, normalize=True)
