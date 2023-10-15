@@ -1979,9 +1979,21 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
+
+    if ((type(signal) is pyfar.TimeData or type(signal) is pyfar.Signal)
+        and signal.complex and mode in (
+                                        'log_magnitude_zerophase',
+                                        'magnitude_zerophase',
+                                        'magnitude_phase',
+                                        'power',)):
+
+        raise ValueError((
+            f"mode '{mode}' is not defined for complex signals."))
+
     if nan_policy not in ('propagate', 'omit', 'raise'):
         raise ValueError("nan_policy has to be 'propagate', 'omit', or"
                          "'raise'.")
+
     # check for caxis
     if caxis and np.max(caxis) > len(signal.cshape):
         raise ValueError(('The maximum of caxis needs to be smaller than '
@@ -2043,9 +2055,11 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     # return average data as pyfar object, depending on input signal type
     if isinstance(signal, pyfar.Signal):
         return pyfar.Signal(data, signal.sampling_rate, signal.n_samples,
-                            signal.domain, signal.fft_norm, signal.comment)
+                            signal.domain, signal.fft_norm, signal.comment,
+                            signal.complex)
     elif isinstance(signal, pyfar.TimeData):
-        return pyfar.TimeData(data, signal.times, signal.comment)
+        return pyfar.TimeData(data, signal.times, signal.comment,
+                              signal.complex)
     else:
         return pyfar.FrequencyData(data, signal.frequencies, signal.comment)
 
