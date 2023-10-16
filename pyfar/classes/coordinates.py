@@ -43,7 +43,7 @@ class Coordinates():
         :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
         :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
         instead. For conversions from or into degree
-        use :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
 
         Create :py:func:`Coordinates` object with or without coordinate points.
         The points that enter the Coordinates object are defined by the
@@ -111,8 +111,7 @@ class Coordinates():
             ``from_*``. Different units are no longer supported. Default
             angle unit is radiant.
             The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
-            of the :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
-
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
 
             Unit of the coordinate system. By default the first available unit
             is used, which is meters (``'met'``) for ``domain = 'cart'`` and
@@ -537,7 +536,7 @@ class Coordinates():
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of the ``spherical_*`` properties. For conversions from or into degree
-        use :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -571,7 +570,7 @@ class Coordinates():
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
             The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
-            of the :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -609,7 +608,7 @@ class Coordinates():
         if unit == 'deg':
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
-                "of the 'pf.deg2rad' and 'pf.rad2deg"),
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
                     PyfarDeprecationWarning)
             angles_1 = angles_1 / 180 * np.pi
             angles_2 = angles_2 / 180 * np.pi
@@ -644,7 +643,7 @@ class Coordinates():
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of the `spherical_...` properties. For conversions from or into degree
-        use :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in spherical coordinate systems.
 
         The points that are returned are defined by the `domain`,
@@ -676,7 +675,7 @@ class Coordinates():
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
             The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
-            of the :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         convert : boolean, optional
             If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
@@ -749,7 +748,7 @@ class Coordinates():
         if unit == 'deg':
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
-                "of the 'pf.deg2rad' and 'pf.rad2deg"),
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
                     PyfarDeprecationWarning)
             angles_1 = angles_1 / np.pi * 180
             angles_2 = angles_2 / np.pi * 180
@@ -764,7 +763,7 @@ class Coordinates():
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of the :py:func:`cylindrical` property. For conversions from or
-        into degree use :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+        into degree use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -820,7 +819,7 @@ class Coordinates():
         if unit == 'deg':
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
-                "of the 'pf.deg2rad' and 'pf.rad2deg"),
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
                     PyfarDeprecationWarning)
             azimuth = azimuth / 180 * np.pi
         elif not unit == 'rad':
@@ -846,7 +845,7 @@ class Coordinates():
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of the `cylindrical` property. For conversions from or into degree
-        use :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in cylindrical coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -872,7 +871,7 @@ class Coordinates():
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
             The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
-            of the :py:func:`pf.deg2rad` and :py:func:`pf.rad2deg`.
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
 
         convert : boolean, optional
             If True, the internal representation of the samplings points will
@@ -916,7 +915,7 @@ class Coordinates():
         if unit == 'deg':
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
-                "of the 'pf.deg2rad' and 'pf.rad2deg"),
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
                     PyfarDeprecationWarning)
             azimuth = azimuth / np.pi * 180
         elif unit != 'rad':
