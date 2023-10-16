@@ -51,7 +51,6 @@ def cart_equidistant_cube(n_points):
         x_grid.flatten(),
         y_grid.flatten(),
         z_grid.flatten(),
-        domain='cart',
         comment='equidistant cuboid sampling grid')
 
     return sampling
@@ -107,8 +106,8 @@ def sph_dodecahedron(radius=1.):
         phi3 + np.pi / 3]), 2)
     rad = radius * np.ones(np.size(theta))
 
-    sampling = pyfar.Coordinates(
-        phi, theta, rad, domain='sph', convention='top_colat',
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
+        phi, theta, rad,
         comment='dodecahedral sampling grid')
     return sampling
 
@@ -141,9 +140,8 @@ def sph_icosahedron(radius=1.):
     phi = np.concatenate((np.tile(phi, 2), np.tile(phi + np.pi / 5, 2)))
 
     rad = radius * np.ones(20)
-    sampling = pyfar.Coordinates(
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
         phi, theta, rad,
-        domain='sph', convention='top_colat',
         comment='icosahedral spherical sampling grid')
     return sampling
 
@@ -225,8 +223,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
 
     # make Coordinates object
     sampling = pyfar.Coordinates(
-        phi.reshape(-1), theta.reshape(-1), rad,
-        domain='sph', convention='top_colat',
+        phi.reshape(-1), theta.reshape(-1), rad, 'sph', 'top_colat',
         comment='equiangular spherical sampling grid',
         weights=w, sh_order=n_max)
 
@@ -305,8 +302,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
 
     # make Coordinates object
     sampling = pyfar.Coordinates(
-        phi.reshape(-1), theta.reshape(-1), rad,
-        domain='sph', convention='top_colat',
+        phi.reshape(-1), theta.reshape(-1), rad, 'sph', 'top_colat',
         comment='gaussian spherical sampling grid',
         weights=weights, sh_order=n_max)
 
@@ -593,9 +589,8 @@ def sph_equal_angle(delta_angles, radius=1.):
     theta = np.concatenate(([0], theta, [180]))
 
     # make Coordinates object
-    sampling = pyfar.Coordinates(
-        phi, theta, radius,
-        domain='sph', convention='top_colat', unit='deg',
+    sampling = pyfar.Coordinates.from_spherical_colatitude(
+        phi/180*np.pi, theta/180*np.pi, radius,
         comment='equal angle spherical sampling grid')
 
     return sampling
@@ -683,8 +678,8 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     azim = np.round(azim/azimuth_res) * azimuth_res
 
     # make Coordinates object
-    sampling = pyfar.Coordinates(
-        azim, elev, radius, 'sph', 'top_elev', 'deg',
+    sampling = pyfar.Coordinates.from_spherical_elevation(
+        azim/180*np.pi, elev/180*np.pi, radius,
         comment='spherical great circle sampling grid')
 
     return sampling
@@ -937,14 +932,16 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
         fliege[:, 0],
         fliege[:, 1],
         radius,
-        domain='sph', convention='top_colat', unit='rad',
+        'sph', 'top_colat',
         sh_order=sh_order, weights=fliege[:, 2],
         comment='spherical Fliege sampling grid')
 
-    # switch and invert coordinates in Cartesian representation to be
+    # switch and invert Coordinates in Cartesian representation to be
     # consistent with [1]
-    xyz = sampling.get_cart(convention='right')
-    sampling.set_cart(xyz[:, 1], xyz[:, 0], -xyz[:, 2])
+    xyz = sampling.cartesian
+    sampling.x = xyz[:, 1]
+    sampling.y = xyz[:, 0]
+    sampling.z = -xyz[:, 2]
 
     return sampling
 
@@ -980,7 +977,6 @@ def sph_equal_area(n_points, radius=1.):
     point_set = external.eq_point_set(2, n_points)
     sampling = pyfar.Coordinates(
         point_set[0] * radius, point_set[1] * radius, point_set[2] * radius,
-        domain='cart', convention='right',
         comment='Equal area partitioning of the sphere.')
 
     return sampling
