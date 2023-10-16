@@ -34,7 +34,7 @@ def test_multichannel_signals():
 
 
 def test_complex_signal():
-    signal = pf.Signal(np.ones((2, 3, 3, 100)), 44100, complex=True)
+    signal = pf.Signal(np.ones((2, 3, 3, 100)), 44100, is_complex=True)
     with pytest.raises(ValueError, match='The energy of complex signals is not'
                                          ' defined'):
         pf.dsp.energy(signal)
