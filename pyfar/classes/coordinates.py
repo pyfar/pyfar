@@ -2892,6 +2892,91 @@ def cyl2cart(azimuth, height, radius):
     return x, y, z
 
 
+def rad2deg(coordinates, domain='spherical'):
+    """
+    Convert a copy of coordinates in radians to degree
+
+    Parameters
+    ----------
+    coordinates : array like
+        N-dimensional array of shape `(..., 3)`.
+    domain : str, optional
+        Specifies what data are contained in `coordinates`
+
+        ``'spherical'``
+            Spherical coordinates with angles contained in
+            ``coordinates[..., 0:2]`` and radii in ``coordinates[..., 2]``.
+            The radii are ignored during the conversion.
+        ``'cylindrical'``
+            Cylindrical coordinates with angles contained in
+            ``coordinates[..., 0]``, heights contained in
+            ``coordinates[..., 1]``, and radii in ``coordinates[..., 2]``.
+            The heights and radii are ignored during the conversion.
+
+
+    Returns
+    -------
+    coordinates : numpy array
+        The converted coordinates of the same shape as the input data.
+    """
+    return _convert_angles(coordinates, domain, 180/np.pi)
+
+
+def deg2rad(coordinates, domain='spherical'):
+    """
+    Convert a copy of coordinates in degree to radians
+
+    Parameters
+    ----------
+    coordinates : array like
+        N-dimensional array of shape `(..., 3)`.
+    domain : str, optional
+        Specifies what data are contained in `coordinates`
+
+        ``'spherical'``
+            Spherical coordinates with angles contained in
+            ``coordinates[..., 0:2]`` and radii in ``coordinates[..., 2]``.
+            The radii are ignored during the conversion.
+        ``'cylindrical'``
+            Cylindrical coordinates with angles contained in
+            ``coordinates[..., 0]``, heights contained in
+            ``coordinates[..., 1]``, and radii in ``coordinates[..., 2]``.
+            The heights and radii are ignored during the conversion.
+
+
+    Returns
+    -------
+    coordinates : numpy array
+        The converted coordinates of the same shape as the input data.
+    """
+    return _convert_angles(coordinates, domain, np.pi/180)
+
+
+def _convert_angles(coordinates, domain, factor):
+    """Private function called by rad2deg and deg2rad"""
+
+    # check coordinates
+    coordinates = np.atleast_2d(coordinates).astype(float)
+    if coordinates.shape[-1] != 3:
+        raise ValueError(('coordinates must be of shape (..., 3) but are of '
+                          f'shape {coordinates.shape}'))
+
+    # check domain and create mask
+    if domain == 'spherical':
+        mask = [True, True, False]
+    elif domain == 'cylindrical':
+        mask = [True, False, False]
+    else:
+        raise ValueError(("domain must be  'spherical' or 'cylindrical' but "
+                          f"is {domain}"))
+
+    # convert data
+    converted = coordinates.copy()
+    converted[..., mask] = converted[..., mask] * factor
+
+    return converted
+
+
 def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
     """
     Values will be clipped to its range if deviations are below 2 eps
