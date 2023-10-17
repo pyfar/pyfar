@@ -1581,10 +1581,7 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type,
     if isinstance(data, (Signal, TimeData, FrequencyData)):
         data_ = data.copy()
         # check if complex casting of any input signal is necessary
-        # if contains_complex:
-        #    if isinstance(data_, (Signal, TimeData)) and not data_.complex:
-        #        data_.complex = True
-        if not isinstance(data_, FrequencyData):
+        if not type(data_) is FrequencyData:
             data_.complex = contains_complex
         # get signal in correct domain
         if domain == "time":

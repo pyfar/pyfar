@@ -408,6 +408,27 @@ def test_complex_real_multiplication():
                         atol=1e-15)
 
 
+def test_complex_real_multiplication_freq():
+    # only test one case - everything else is tested below
+    x = Signal([1, 0, 0], 44100)
+    y = Signal([0, 1, 0], 44100, is_complex=True)
+    z = pf.multiply((x, y), 'freq')
+
+    # check result
+    x.complex = True
+    ref = x.freq * y.freq
+    npt.assert_allclose(z.freq, ref, atol=1e-15)
+
+    x = Signal([1, 0, 0], 44100, is_complex=True)
+    y = Signal([0, 1, 0], 44100)
+    z = pf.multiply((x, y), 'freq')
+
+    # check result
+    y.complex = True
+    ref = x.freq * y.freq
+    npt.assert_allclose(z.freq, ref, atol=1e-15)
+
+
 def test_division():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
@@ -745,6 +766,23 @@ def test_get_arithmetic_data_with_signal():
                 npt.assert_allclose(s_ref.time, data_out, atol=1e-15)
             elif domain == 'freq':
                 npt.assert_allclose(s_ref.freq, data_out, atol=1e-15)
+
+
+#def test_get_arithmetic_data_with_array_complex_casting():
+#    data_in = np.asarray(1)
+#    data_out = signal._get_arithmetic_data(
+#        data_in, None, (1,), False, type(None), contains_complex=True)
+#
+#    assert data_out.dtype == 'complex'
+
+
+def test_get_arithmetic_data_with_signal_complex_casting():
+    s_in = Signal([1, 0, 0], 44100, is_complex=False)
+
+    data_out = signal._get_arithmetic_data(
+        s_in, 'time', (1,), False, type(None), contains_complex=True)
+
+    assert data_out.dtype == 'complex'
 
 
 def test_assert_match_for_arithmetic_data_different_audio_classes():
