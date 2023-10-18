@@ -360,29 +360,29 @@ def _sweep_synthesis_freq(
             `start_margin`, `stop_margin`, `frequency_range` and `double` are
             not required in this case.
 
-    start_margin : int, optional
+    start_margin : int, float
         The time in samples, at which the sweep starts. The start margin is
         required because the frequency domain sweep synthesis has pre-ringing
         in the time domain. Set to ``0`` if `magnitude` is ``'perfect_linear'``.
-    stop_margin : int, optional
+    stop_margin : int, float
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
         ends at sample ``n_samples-10``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
         Set to ``0`` if `magnitude` is ``'perfect_linear'``.
-    frequency_range : array like, optional
+    frequency_range : array like
         Frequency range of the sweep given by the lower and upper cut-off
         frequency in Hz. The restriction of the frequency range is realized
         by appling a Butterworth band-pass with the specified frequencies.
         Ignored if `magnitude` is ``'perfect_linear'`` or `signal`.
-    butterworth_order : int, optional
+    butterworth_order : int, None
         The order of the Butterworth filters that are applied to limit the
-        frequency range. Must be ``None`` if `magnitude` is
-        ``'perfect_linear'``.
-    double : bool, optional
+        frequency range by a high-pass if ``frequency_range[0] > 0`` and/or by
+        a low-pass if ``frequency_range[1] < sampling_rate / 2``.
+    double : bool
         Double `n_samples` during the sweep calculation (recommended). Set to
         ``False`` if `magnitude` is ``'perfect_linear'``.
-    sampling_rate : int, optional
+    sampling_rate : int
         The sampling rate in Hz.
 
     Returns
@@ -431,7 +431,7 @@ def _sweep_synthesis_freq(
 
     TODO rename variable h_sweep to sweep_abs
 
-    TODO rename SWEEP to sweep
+    TODO make group delay a FrequencyData object
     """
 
     # check input
@@ -449,10 +449,20 @@ def _sweep_synthesis_freq(
         raise ValueError(
             "Upper frequency limit is larger than half the sampling rate.")
     if frequency_range[0] == 0 and magnitude == "exponential":
-        raise ValueError("The exponential sweep can not start at 0 Hz.")
+        Warning((
+            "The exponential sweep has a 1/frequency magnitude spectrum. "
+            "The magnitude is set to 0 at 0 Hz to avoid division by zero."))
+    if magnitude == 'perfect_linear' and \
+            (start_margin != 0 or stop_margin != 0 or double or
+             frequency_range[0] != 0 or
+             frequency_range[1] != sampling_rate / 2):
+        # internal warning. Users will not call this function directly
+        # and can not cause this error.
+        raise ValueError(('Found conflicting parameters'))
 
     # double n_samples
     if double and magnitude != 'perfect_linear':
+        stop_margin += n_samples
         n_samples *= 2
 
     # spacing between frequency bins of FFT
@@ -471,26 +481,31 @@ def _sweep_synthesis_freq(
             raise ValueError((f'magnitue can has {magnitude.n_samples} samples'
                               f' but must not be longer than {n_samples}'))
         h_sweep = np.abs(magnitude.freq_raw)
-    elif magnitude == 'linear':
+    elif magnitude in ['linear', 'perfect_linear']:
+        # constant spectrum
         h_sweep = np.ones(n_bins)
     elif magnitude == 'exponential':
+        # 1/f spectrum
         h_sweep = np.zeros(n_bins)
-        f_min = df
-        f_max = sampling_rate / 2
-        h_sweep[1:] = 1 / np.sqrt(2 * np.pi * np.arange(f_min, f_max, df))
-    elif magnitude == 'perfect_linear':
-        if start_margin != 0 or stop_margin != 0 or double or \
-                butterworth_order is not None or \
-                np.array(frequency_range) != np.array([0, sampling_rate / 2]):
-            # internal warning. Users will not call this function directly
-            # and can not cause this error.
-            raise ValueError(('Found conflicting parameters'))
+        h_sweep[1:] = 1 / np.sqrt(2 * np.pi * np.arange(1, n_bins) * df)
 
     # apply band limit to magnitude
     if magnitude in ['linear', 'exponential']:
-        bandpass = pyfar.dsp.filter.butterworth(
-            pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate))
-        h_sweep *= np.abs(bandpass.freq.flatten())
+        if frequency_range[0] > 0 and frequency_range[1] < sampling_rate / 2:
+            band_limit = pyfar.dsp.filter.butterworth(
+                pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
+                butterworth_order, frequency_range, 'bandpass')
+        elif frequency_range[0] > 0:
+            band_limit = pyfar.dsp.filter.butterworth(
+                pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
+                butterworth_order, frequency_range[0], 'highpass')
+        elif frequency_range[1] < sampling_rate / 2:
+            band_limit = pyfar.dsp.filter.butterworth(
+                pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
+                butterworth_order, frequency_range[1], 'lowpass')
+        else:
+            band_limit = np.ones_like(h_sweep)
+        h_sweep *= np.abs(band_limit.freq.flatten())
 
     # initialize group delay in seconds at 0 Hz, df and Nyquist
     tg = np.zeros(n_bins)
@@ -507,33 +522,34 @@ def _sweep_synthesis_freq(
 
     sweep_ang = -1 * np.cumsum(tg) * 2 * np.pi * df
 
-    # TODO: add correct phase similar to AKtools AKsweepFD
-    """
-    # correct phase
-    if sweep_ang[-1] != 0:
+    # wrap and correct phase to be real 0 at Nyquist
+    sweep_ang = pyfar.dsp.wrap_to_2pi(sweep_ang)
+    sweep_ang[sweep_ang > np.pi] -= 2*np.pi
 
-        length = len(sweep_ang)
-        phi_end = sweep_ang[-1]
-        df_phase = sampling_rate / (length)
+    if sweep_ang[-1] != 0 and not n_samples % 2:
 
-        temp = np.ones(length)
-        temp = np.cumsum(temp) - 1
-        offset = df_phase * phi_end / (sampling_rate / 2)
-        correct = temp * offset
-
-        sweep_ang = sweep_ang - correct
-    """
+        factor = np.cumsum(np.ones_like(sweep_ang)) - 1
+        offset = df * sweep_ang[-1] / (sampling_rate / 2)
+        sweep_ang -= factor * offset
+        sweep_ang[-1] = np.abs(sweep_ang[-1])
 
     # combine magnitude and phase of sweep
-    SWEEP = h_sweep * np.exp(1j * sweep_ang)
-    SWEEP[0] = np.abs(SWEEP[0])
+    sweep = h_sweep * np.exp(1j * sweep_ang)
 
     # put sweep in pyfar.Signal an transform to time domain
-    sweep = pyfar.Signal(SWEEP,
-                         sampling_rate,
-                         n_samples=n_samples,
-                         domain='freq')
-    sweep.domain = 'time'
+    sweep = pyfar.Signal(sweep, sampling_rate, n_samples, 'freq', 'rms')
+
+    # cut to originally desired length
+    if double:
+        n_samples = n_samples // 2
+        stop_margin -= n_samples
+        sweep.time = sweep.time[..., :n_samples]
+
+    # TODO fade-in/out
+
+    # normalize to time domain amplitude of almost one
+    # (to avoid clipping if written to fixed point wav file)
+    sweep = pyfar.dsp.normalize(sweep) * (1 - 2**-15)
 
     return sweep, tg
 
