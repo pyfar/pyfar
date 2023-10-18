@@ -2,30 +2,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.tight_layout import get_subplotspec_list
 from pyfar import (Signal, FrequencyData)
-
-
-def _tight_layout(fig=None):
-    """
-    Apply Matplotlibs tight_layout only when it is likely to work.
-
-    Tight layout messes up the Figure for irregular subplot layouts. The
-    if-case to check if tight layout is applied was taken directly from
-    Matplotlib. However, Matplotlib only raises a warning but still applies
-    the tight layout.
-
-    Parameters
-    ----------
-    fig : Matplotlib Figure, optional
-        The default is ``None`` which uses ``plt.gcf()``
-    """
-    if fig is None:
-        fig = plt.gcf()
-
-    subplotspec_list = get_subplotspec_list(fig.get_axes())
-    if None not in subplotspec_list:
-        plt.tight_layout()
 
 
 def _prepare_plot(ax=None, subplots=None):
@@ -188,10 +165,10 @@ def _default_color_dict():
 
 def _check_time_unit(unit):
     """Check if a valid time unit is passed."""
-    units = ['s', 'ms', 'mus', 'samples']
-    if unit is not None and unit not in units:
+    units = ['s', 'ms', 'mus', 'samples', 'auto']
+    if unit not in units:
         raise ValueError(
-            f"Unit is {unit} but must be {', '.join(units)}, or None.")
+            f"Unit is {unit} but must be {', '.join(units)}.")
 
 
 def _check_axis_scale(scale, axis='x'):
@@ -214,7 +191,7 @@ def _get_quad_mesh_from_axis(ax):
     """
     quad_mesh_found = False
     for qm in ax.get_children():
-        if type(qm) == mpl.collections.QuadMesh:
+        if type(qm) is mpl.collections.QuadMesh:
             quad_mesh_found = True
             break
 

@@ -1,6 +1,17 @@
-======
-Readme
-======
+=====
+pyfar
+=====
+
+.. image:: https://badge.fury.io/py/pyfar.svg
+    :target: https://badge.fury.io/py/pyfar
+.. image:: https://readthedocs.org/projects/pyfar/badge/?version=latest
+    :target: https://pyfar.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+.. image:: https://circleci.com/gh/pyfar/pyfar.svg?style=shield
+    :target: https://circleci.com/gh/pyfar/pyfar
+.. image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
+
 
 The python package for acoustics research (pyfar) offers classes to store
 audio data, filters, coordinates, and orientations. It also contains common
@@ -22,7 +33,7 @@ Use pip to install pyfar
 
     $ pip install pyfar
 
-(Requires Python 3.7, 3.8 or 3.9)
+(Requires Python 3.8 or higher)
 
 Audio file reading/writing is supported through `SoundFile`_, which is based on `libsndfile`_. On Windows and OS X, it will be installed automatically. On Linux, you need to install libsndfile using your distribution’s package manager, for example ``sudo apt-get install libsndfile1``.
 

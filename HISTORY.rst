@@ -2,6 +2,99 @@
 History
 =======
 
+0.5.4 (2023-09-29)
+------------------
+* Dependencies: Constrain matplotlib to versions <= 3.7, due to deprecations of the tight_layout function in matplotlib 3.8 (PR #497).
+* Bugfix: Fix order `order` property for `pyfar.FilterSOS` (PR #487).
+* Bugfix: Fix broken tests for filter class copy methods (PR #488).
+* Improvements to the documentation (PR #470).
+* Flake8 fixes.
+
+0.5.3 (2023-03-30)
+------------------
+
+* Bugfix: Spectrum interpolation on logarithmically spaced frequency bins including zero frequency. (PR #453)
+* Bugfix: Include signal domain and fft norm when writing Signals to far-files. (PR #443)
+* Bugfix: Return the HRIRs contained in the sample file in the correct order. (PR #448)
+
+0.5.2 (2023-01-20)
+------------------
+
+* Bugfix: Remove deprecated usage of `np.int`. (PR #409)
+* Bugfix: Switch to MathJax to fix equation rendering issues in the documentation. (PR #420)
+* Bugfix: `read_comsol` now allow for `*`, `(`, and `)` in expressions and units. (PR #417, originally #393)
+* Bugfix: `read_sofa` now support reading files of conventions `FIR-E` and `TF-E`. (PR  #415)
+* General: Update information on PyPI. (PR #427, originally #377)
+
+0.5.1 (2022-10-28)
+------------------
+* Bugfix: Allow setting of the sampling rate in GammatoneBands (PR #374)
+* Bugfix: Added GammatoneBands filter bank to concepts (PR #372)
+
+
+0.5.0 (2022-10-13)
+------------------
+* General
+
+  * End support for Python 3.7 because it was deprecated in numpy functionality also used by pyfar (PR #350)
+  * Deprecate `read_wav` and `write_wav` from the `pyfar.io` module in favor or `read_audio` and `write_audio` (PR# 310)
+  * Deprecate the `get_nearst_*` functions from the `Coordinates` class in favor of `find_nearest_*` functions (PR #310)
+  * Deprecate `linear_sweep` and `exponential_sweep` from the `pyfar.signals` module in favor or `linear_sweep_time` and `exponential_sweep_time` (PR #310)
+  * Deprecate cryptic names in `pyfar.dsp.filter` module for more verbose names, e.g., `butter` was deprecated in favor of `butterworth` (PR #310)
+  * Improved Documentation and bugfixes (PR #324, #354, #355)
+
+* Audio classes (`Signal`, `TimeData`, and `FrequencyData`)
+
+  * Added matrix multiplication to arithmetic operations (PR #277)
+  * Improved broadcasting and documentation for arithmetic operations (PR #318)
+  * The data type is now automatically derived from the input. The parameter `dtype` was removed and the class structure improved (PR #344)
+
+* `pyfar.dsp`
+
+  * Improved algorithm of `minimum_phase` for arbitrary impulse responses (PR #303)
+  * Added `resample` function for sample rate conversions (PR #297, #321, #333)
+  * Added `find_impulse_response_start` and `find_impulse_response_delay` to detect the time of arrival in impulse responses (PR # 203)
+  * Added `normalize` function for time and frequency domain normalization (PR #323)
+  * Added `energy`, `power`, and `rms` for computing energy measures in the time domain (PR #338)
+  * Added `time_shift` function for applying linear and cyclic integer delays (PR #312)
+  * Added `fractional_time_shift` function for applying linear and cyclic fractional delays (PR # 292)
+  * Added `fractional_octave_smoothing` function (PR #297)
+  * Added `decibel` function (PR #305, #322)
+  * Added new mandatory parameter `freq_range` to `deconvolve` (PR #370)
+  * Added `average` function for averaging channels (PR #330)
+
+* `pyfar.dsp.filter`
+
+  * Added reconstructing auditory `GammatoneBands` filter bank (PR #327)
+
+* `pyfar.signals`
+
+  * Improved flexibility and broadcasting of parameters for `impulse` and `sine` signals (PR #313)
+
+* `pyfar.io`
+
+  * Added `read_comsol` and `read_comsol_header` to import data from COMSOL (PR #339)
+  * Include updates incl. MP3 support from `soundfile v0.11.0 <https://python-soundfile.readthedocs.io/en/0.11.0/#news>`_ for `write_audio` and `read_audio` (PR #365)
+
+* `pyfar.plot`
+
+  * Time domain plots now always use seconds as the default unit. The previous default `'auto'` caused unexpected behavior by changing the unit of already existing plots depending on the lengths of the Signal that was plotted last (PR #308)
+
+* Other
+
+  * Test building the documentation using CI (PR #319, #348)
+  * Fixed broken mybinder.org examples (PR #341)
+  * Internal refactoring, documentation, and bug fixes (PR #326, #331, #352)
+
+0.4.3 (2022-08-08)
+------------------
+* Make python-soundfile an optional requirement due to unsupported architectures. Note that without python-soundfile common audio file format are no longer supported via `pyfar.io` (PR #334, #340).
+* Developer: Switch to CircleCI for continuous testing (PR #336).
+
+0.4.2 (2022-05-20)
+------------------
+* Bugfix: Sweep functions marked for deprecation had no return value.
+
 0.4.1 (2022-04-08)
 ------------------
 * Bugfix: do not allow 'flat' shading parameter in 2D plot functions (PR #291)

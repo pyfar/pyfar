@@ -22,7 +22,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import pyfar
+import pyfar  # noqa
 
 # -- General configuration ---------------------------------------------
 
@@ -38,7 +38,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'matplotlib.sphinxext.plot_directive',
-    'sphinx.ext.imgmath',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.intersphinx',
     'autodocsumm']
 
 # show tocs for classes and functions of modules using the autodocsumm
@@ -48,8 +49,6 @@ autodoc_default_options = {'autosummary': True}
 # show the code of plots that follows the command .. plot:: based on the
 # package matplotlib.sphinxext.plot_directive
 plot_include_source = True
-
-imgmath_latex_preamble = r'\usepackage{array}'
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ['_templates']
@@ -82,7 +81,7 @@ release = pyfar.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -101,6 +100,14 @@ todo_include_todos = False
 
 # default language for highlighting in source code
 highlight_language = "python3"
+
+# intersphinx mapping
+intersphinx_mapping = {
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
+    'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None)
+    }
 
 # -- Options for HTML output -------------------------------------------
 
@@ -181,3 +188,12 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+# -- pyfar specifics -----------------------------------------------------
+
+# write shortcuts to sphinx readable format
+_, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
+shortcuts_path = os.path.join("concepts", "resources", "plot_shortcuts.rst")
+with open(shortcuts_path, "w") as f_id:
+    f_id.writelines(shortcuts)

@@ -8,6 +8,7 @@ from .ticker import (
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
+from matplotlib.ticker import NullFormatter
 
 
 def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
@@ -20,18 +21,15 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
-    data = signal.time.T if orientation == "vertical" else signal.time
     if dB:
-        if log_prefix is None:
-            log_prefix = _utils._log_prefix(signal)
-        # avoid any zero-values because they result in -inf in dB data
-        eps = np.finfo(float).eps
-        data = log_prefix * np.log10(np.abs(data) / log_reference + eps)
+        data = dsp.decibel(signal, 'time', log_prefix, log_reference)
         ymax = np.nanmax(data) + 10
         ymin = ymax - 100
-
+    else:
+        data = signal.time
+    data = data.T if orientation == "vertical" else data
     # auto detect the time unit
-    if unit is None:
+    if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(signal.times[..., -1])
     # set the unit
     if unit == 'samples':
@@ -80,18 +78,14 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
-    data = signal.freq.T if orientation == "vertical" else signal.freq
     if dB:
-        if log_prefix is None:
-            log_prefix = _utils._log_prefix(signal)
-        eps = np.finfo(float).eps
-        data = log_prefix*np.log10(np.abs(data)/log_reference + eps)
+        data = dsp.decibel(signal, 'freq', log_prefix, log_reference)
         ymax = np.nanmax(data)
         ymin = ymax - 90
         ymax = ymax + 10
     else:
-        data = np.abs(data)
-
+        data = np.abs(signal.freq)
+    data = data.T if orientation == "vertical" else data
     # setup axis label and data
     axis = [ax[0].yaxis, ax[0].xaxis]
     ax_lim = [ax[0].set_ylim, ax[0].set_xlim]
@@ -108,6 +102,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
     ax_scale[0](freq_scale)
     if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
+        axis[0].set_minor_formatter(NullFormatter())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # color limits
@@ -169,6 +164,7 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
     ax_scale[0](freq_scale)
     if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
+        axis[0].set_minor_formatter(NullFormatter())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # colorbar
@@ -224,6 +220,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
     ax_scale[0](freq_scale)
     if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
+        axis[0].set_minor_formatter(NullFormatter())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
     # color limits
@@ -304,7 +301,7 @@ def _freq_group_delay_2d(
 
 
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
-                 freq_scale='linear', unit=None, window='hann',
+                 freq_scale='linear', unit="s", window='hann',
                  window_length=1024, window_overlap_fct=0.5,
                  colorbar=True, ax=None, **kwargs):
     """Plot the magnitude spectrum versus time.
@@ -348,7 +345,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
             np.abs(spectrogram) / log_reference + eps)
 
     # auto detect the time unit
-    if unit is None:
+    if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(times[..., -1])
     # set the unit
     if unit == 'samples':
@@ -358,6 +355,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         times = times * factor
 
     # plot the data
+    ax[0].grid(False)
     qm = ax[0].pcolormesh(times, frequencies, spectrogram, **kwargs)
 
     # Adjust axes:
@@ -377,6 +375,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     if freq_scale == 'log':
         ax[0].set_yscale('symlog')
         ax[0].yaxis.set_major_locator(LogLocatorITAToolbox())
+        ax[0].yaxis.set_minor_formatter(NullFormatter())
     ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
     ax[0].grid(ls='dotted', color='white')
 
@@ -401,5 +400,6 @@ def _plot_2d(x, y, data, method, ax, **kwargs):
                     kwargs["vmin"], kwargs["vmax"], kwargs["levels"])
         qm = ax.contourf(x, y, data, **kwargs)
     else:
+        ax.grid(False)
         qm = ax.pcolormesh(x, y, data, **kwargs)
     return qm

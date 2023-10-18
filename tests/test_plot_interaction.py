@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import pyfar as pf
 import pyfar.plot._interaction as ia
 from pyfar.plot._utils import _get_quad_mesh_from_axis
+from pyfar.testing.plot_utils import create_figure
 
 # use non showing backend for speed
 mpl.use("Agg")
@@ -44,7 +45,7 @@ plots = {
     # line plots
     'time': {
         'shortcut': sc_plot["time"]["key"][0],
-        'xlabel': ['Time in ms'],
+        'xlabel': ['Time in s'],
         'ylabel': ['Amplitude'],
         'cblabel': [None]},
     'freq': {
@@ -60,11 +61,11 @@ plots = {
     'group_delay': {
         'shortcut': sc_plot["group_delay"]["key"][0],
         'xlabel': ['Frequency in Hz'],
-        'ylabel': ['Group delay in ms'],
+        'ylabel': ['Group delay in s'],
         'cblabel': [None]},
     'time_freq': {
         'shortcut': sc_plot["time_freq"]["key"][0],
-        'xlabel': ['Time in ms', 'Frequency in Hz'],
+        'xlabel': ['Time in s', 'Frequency in Hz'],
         'ylabel': ['Amplitude', 'Magnitude in dB'],
         'cblabel': [None]},
     'freq_phase': {
@@ -75,13 +76,13 @@ plots = {
     'freq_group_delay': {
         'shortcut': sc_plot["freq_group_delay"]["key"][0],
         'xlabel': ['Frequency in Hz', 'Frequency in Hz'],
-        'ylabel': ['Magnitude in dB', 'Group delay in ms'],
+        'ylabel': ['Magnitude in dB', 'Group delay in s'],
         'cblabel': [None]},
     # 2D plots
     'time_2d': {
         'shortcut': sc_plot["time"]["key"][0],
         'xlabel': ['Indices'],
-        'ylabel': ['Time in ms'],
+        'ylabel': ['Time in s'],
         'cblabel': ['Amplitude']},
     'freq_2d': {
         'shortcut': sc_plot["freq"]["key"][0],
@@ -97,7 +98,7 @@ plots = {
         'shortcut': sc_plot["group_delay"]["key"][0],
         'xlabel': ['Indices'],
         'ylabel': ['Frequency in Hz'],
-        'cblabel': ['Group delay in ms']},
+        'cblabel': ['Group delay in s']},
     'spectrogram': {
         'shortcut': sc_plot["spectrogram"]["key"][0],
         'xlabel': ['Time in s'],
@@ -106,7 +107,7 @@ plots = {
     'time_freq_2d': {
         'shortcut': sc_plot["time_freq"]["key"][0],
         'xlabel': ['Indices', 'Indices'],
-        'ylabel': ['Time in ms', 'Frequency in Hz'],
+        'ylabel': ['Time in s', 'Frequency in Hz'],
         'cblabel': ['Amplitude', 'Magnitude in dB']},
     'freq_phase_2d': {
         'shortcut': sc_plot["freq_phase"]["key"][0],
@@ -117,7 +118,7 @@ plots = {
         'shortcut': sc_plot["freq_group_delay"]["key"][0],
         'xlabel': ['Indices', 'Indices'],
         'ylabel': ['Frequency in Hz', 'Frequency in Hz'],
-        'cblabel': ['Magnitude in dB', 'Group delay in ms']}
+        'cblabel': ['Magnitude in dB', 'Group delay in s']}
     }
 
 
@@ -139,9 +140,14 @@ def test_interaction_attached():
     does not have an interaction. This is intended behavior.
     """
 
-    # dummy signal (needs to as longe as the default spectrogram block size
-    # with at least two channels)
-    signal = pf.signals.impulse(1024, [0, 0])
+    # dummy signal
+    # - long enough to avoid warning due to identical xlims in spectrogram
+    # - with delay to avoid warning due to identical ylims in group delay
+    # - at least to channels to work for 2D plots
+    signal = pf.signals.impulse(2048, [10, 10])
+
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # loop functions
     for function in getmembers(pf.plot.line, isfunction) + \
@@ -149,8 +155,10 @@ def test_interaction_attached():
         # exclude functions that do not support interaction
         if function[0] in ["context", "custom_subplots"]:
             continue
-
-        ax = function[1](signal)
+        if function[1] == pf.plot.spectrogram:
+            ax = function[1](signal[0])
+        else:
+            ax = function[1](signal)
         # axis is first return parameter if function returns multiple
         ax = ax[0] if isinstance(ax, (tuple)) else ax
         # interaction axis is first axis if functions returns multiple
@@ -167,9 +175,14 @@ def test_interaction_attached():
 def test_toggle_plots(plot_type, initial_function, function_list):
     """Test toggling plots by checking labels after toggling."""
 
-    # dummy signal (needs to as longe as the default spectrogram block size
-    # with at least two channels)
-    signal = pf.signals.impulse(1024, [0, 1000])
+    # dummy signal
+    # - long enough to avoid warning due to identical xlims in spectrogram
+    # - with delay to avoid warning due to identical ylims in group delay
+    # - at least to channels to work for 2D plots
+    signal = pf.signals.impulse(2048, [0, 1000])
+
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # initital plot
     ax = initial_function(signal)
@@ -229,6 +242,8 @@ def test_interaction_not_allowed(plot, signal, shortcut):
     Test interactions that are not allowed are caught.
     Can be extended if required in the future.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # plot signal
     ax = plot(signal)
@@ -255,6 +270,8 @@ def test_interaction_not_allowed(plot, signal, shortcut):
 def test_get_new_axis_limits(ax_type, operation, direction,
                              limits, new_limits):
     """Test calculation of new axis limits for all parameter combinations."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     test_limits = ia.get_new_axis_limits(
         limits, ax_type, operation, direction)
@@ -272,9 +289,12 @@ def test_move_and_zoom_linear():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # initialize the plot
-    signal = pf.signals.impulse(1024)
+    # - long enough to avoid warning due to identical xlims in spectrogram
+    signal = pf.signals.impulse(2048)
 
     for axes in ['x', 'y', 'cm']:
         if axes == 'x':
@@ -297,7 +317,7 @@ def test_move_and_zoom_linear():
             ax, *_ = pf.plot.spectrogram(signal, dB=False)
             ax = ax[0]
             for cm in ax.get_children():
-                if type(cm) == mpl.collections.QuadMesh:
+                if type(cm) is mpl.collections.QuadMesh:
                     break
             getter = cm.get_clim
 
@@ -314,7 +334,7 @@ def test_move_and_zoom_linear():
         ax.interaction.select_action(ia.EventEmu(move[0]))
         npt.assert_allclose(getter(), (lim[0] + shift, lim[1] + shift))
         ax.interaction.select_action(ia.EventEmu(move[1]))
-        npt.assert_allclose(getter(), lim)
+        npt.assert_allclose(getter(), lim, atol=1e-12)
 
         # zoom in and out
         ax.interaction.select_action(ia.EventEmu(zoom[0]))
@@ -335,6 +355,8 @@ def test_toggle_x_axis():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init the plot
     ax = pf.plot.freq(pf.Signal([1, 2, 3, 4, 5], 44100))
@@ -356,6 +378,8 @@ def test_toggle_y_axis():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init the plot
     ax = pf.plot.freq(pf.Signal([1, 2, 3, 4, 5], 44100))
@@ -377,9 +401,11 @@ def test_toggle_colormap():
     if the pyfar.plot._interaction.PlotParameter are set correctly in
     pyfar.plot.function.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init the plot
-    ax, *_ = pf.plot.spectrogram(pf.signals.impulse(1024))
+    ax, *_ = pf.plot.spectrogram(pf.signals.impulse(2048))
     assert ax[1].get_ylabel() == "Magnitude in dB"
     # toggle x-axis
     ax[0].interaction.select_action(ia.EventEmu(sc_ctr["toggle_cm"]["key"][0]))
@@ -396,6 +422,8 @@ def test_toggle_orientation_2d_plots():
     Test if the orientation is toggled by comparing the axis labels before
     and after toggling.
     """
+    # Use create figure to specify the plot backend
+    create_figure()
 
     signal = pf.signals.impulse(1024, [0, 1000])
     key = sc_ctr["toggle_orientation"]["key"][0]
@@ -446,6 +474,8 @@ def test_toggle_orientation_2d_plots():
 
 def test_cycle_and_toggle_lines_1d_signal():
     """Test toggling and cycling channels of a one-dimensional Signal."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init and check start conditions
     signal = pf.Signal([[1, 0], [2, 0]], 44100)
@@ -479,6 +509,8 @@ def test_cycle_and_toggle_lines_1d_signal():
 
 def test_cycle_and_toggle_lines_2d_signal():
     """Test toggling and cycling channels of a two-dimensional Signal."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init and check start conditions
     signal = pf.signals.impulse(10, [[1, 2], [3, 4]])
@@ -515,10 +547,13 @@ def test_cycle_and_toggle_lines_2d_signal():
 
 def test_cycle_and_toggle_signals():
     """Test toggling and cycling Signal slices."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # init and check start conditions
-    signal = pf.signals.impulse(1024, amplitude=[1, 2])
-    ax, *_ = pf.plot.spectrogram(signal)
+    signal = pf.signals.impulse(2048, amplitude=[1, 2])
+    with pytest.warns(UserWarning, match="Using only the first channel"):
+        ax, *_ = pf.plot.spectrogram(signal)
 
     assert ax[0].interaction.txt is None
     # use the clim because the image data is identical
@@ -543,6 +578,8 @@ def test_cycle_and_toggle_signals():
 
 def test_cycle_plot_styles():
     """Test cycle the plot styles between line and 2d plots."""
+    # Use create figure to specify the plot backend
+    create_figure()
 
     # dummy signal (needs to as longe as the default spectrogram block size
     # with at least two channels)
