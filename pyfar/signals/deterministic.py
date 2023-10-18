@@ -308,15 +308,14 @@ def perfect_linear_sweep(
         n_samples, sampling_rate=44100):
 
     signal, group_delay = _sweep_synthesis_freq(
-        n_samples, "perfect", None, None, None, None, False, sampling_rate)
+        n_samples, "perfect_linear", None, None, None, None, False, sampling_rate)
 
     return signal, group_delay
 
 
 def _sweep_synthesis_freq(
-        n_samples, magnitude, start_margin=None, stop_margin=None,
-        frequency_range=None, buterworth_order=8, double=True,
-        sampling_rate=44100):
+        n_samples, magnitude, start_margin, stop_margin, frequency_range,
+        buterworth_order, double, sampling_rate):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
 
@@ -355,34 +354,34 @@ def _sweep_synthesis_freq(
             Design a sweep with exponentially increasing frequency. The
             magnitude decreases by 3 dB per frequency doubling and has constant
             energy in fiters of relative constant bandwidth (e.g. octaves).
-        ``'perfect'``
-            Perfect sweep according to [#]_. Note that the parameters
+        ``'perfect_linear'``
+            Perfect linear sweep according to [#]_. Note that the parameters
             `start_margin`, `stop_margin`, `frequency_range` and `double` are
             not required in this case.
 
     start_margin : int, optional
         The time in samples, at which the sweep starts. The start margin is
         required because the frequency domain sweep synthesis has pre-ringing
-        in the time domain. Not required if `spectrum` is ``'perfect'``.
+        in the time domain. Set to ``0`` if `spectrum` is ``'perfect_linear'``.
     stop_margin : int, optional
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
         ends at sample ``n_samples-10``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
-        Not required if `spectrum` is ``'perfect'``.
+        Set to ``0`` if `spectrum` is ``'perfect_linear'``.
     frequency_range : array like, optional
         Frequency range of the sweep given by the lower and upper cut-off
         frequency in Hz. The restriction of the frequency range is realized
         by appling a Butterworth band-pass with the specified frequencies.
-        Not required if `spectrum` is ``'perfect'`` or `signal`.
+        Ignored if `spectrum` is ``'perfect_linear'`` or `signal`.
     butterworth_order : int, optional
         The order of the Butterworth filters that are applied to limit the
-        frequency range. The default is ``8``.
+        frequency range.
     double : bool, optional
-        Double `n_samples` during the sweep calculation (recommended). The
-        default is  ``True``. Not required if `spectrum` is ``'perfect'``.
+        Double `n_samples` during the sweep calculation (recommended). Set to
+        ``False`` if `spectrum` is ``'perfect_linear'``.
     sampling_rate : int, optional
-        The sampling rate in Hz. The default is ``44100``.
+        The sampling rate in Hz.
 
     Returns
     -------
@@ -426,25 +425,17 @@ def _sweep_synthesis_freq(
 
     TODO Examples with spectrum="exponential"
 
-    TODO Examples with spectrum="perfect"
+    TODO Examples with spectrum="perfect_linear"
     """
-
-    # spacing between frequency bins of FFT
-    df = sampling_rate / n_samples
-
-    # calculate min and max frequency range limits for default frequency_range
-    if frequency_range is None:
-        f_max = sampling_rate / 2 - df
-        frequency_range = [df, f_max]
 
     # check input
     if not isinstance(magnitude, (pyfar.Signal, str)):
         raise TypeError("Magnitude must be type Signal or str.")
     if isinstance(magnitude, str) and magnitude not in ['linear',
                                                         'exponential',
-                                                        'perfect']:
+                                                        'perfect_linear']:
         raise ValueError("Magnitude must be 'linear', 'exponential' or",
-                         "'perfect', when its type is str.")
+                         "'perfect_linear', when its type is str.")
     if np.atleast_1d(frequency_range).size != 2:
         raise ValueError(
             "Frequency_range must be an array like with two elements.")
@@ -454,15 +445,12 @@ def _sweep_synthesis_freq(
     if frequency_range[0] == 0 and magnitude == "exponential":
         raise ValueError("The exponential sweep can not start at 0 Hz.")
 
-    # define start_margin and stop_margin if not given
-    if start_margin is None:
-        start_margin = 0
-    if stop_margin is None:
-        stop_margin = 0
-
     # double n_samples
-    if double and magnitude != 'perfect':
+    if double and magnitude != 'perfect_linear':
         n_samples *= 2
+
+    # spacing between frequency bins of FFT
+    df = sampling_rate / n_samples
 
     # get number of bins (works for even and odd n_samples)
     n_bins = n_samples // 2 + 1
@@ -470,8 +458,11 @@ def _sweep_synthesis_freq(
     # zero pad magnitude Signal, if needed
     if isinstance(magnitude, pyfar.Signal):
         if n_samples > magnitude.n_samples:
-            magnitude = pyfar.dsp.pad_zeros(magnitude,
-                                            n_samples - magnitude.n_samples)
+            magnitude = pyfar.dsp.pad_zeros(
+                magnitude, n_samples - magnitude.n_samples)
+        elif magnitude.n_samples > n_samples:
+            raise ValueError((f'magnitue can has {magnitude.n_samples} samples'
+                              f' but must not be longer than {n_samples}'))
 
     # magnitude coloration
     if magnitude == 'linear':
