@@ -1587,7 +1587,7 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type,
         if domain == "time":
             data_out = data_.time
         elif domain == "freq":
-            if isinstance(data_, Signal):
+            if type(data_) is Signal:
                 data_out = data_.freq_raw
             else:
                 data_out = data_.freq
