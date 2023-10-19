@@ -315,8 +315,8 @@ def perfect_linear_sweep(
 
 
 def _sweep_synthesis_freq(
-        n_samples, magnitude, start_margin, stop_margin, frequency_range,
-        butterworth_order, double, sampling_rate):
+        n_samples, magnitude, frequency_range, butterworth_order, double,
+        start_margin, stop_margin, fade_in, fade_out, sampling_rate):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
 
@@ -558,13 +558,32 @@ def _sweep_synthesis_freq(
         stop_margin -= n_samples
         sweep.time = sweep.time[..., :n_samples]
 
-    # TODO fade-in/out
+    # apply window
+    if fade_in and fade_out:
+        fade = [start_margin,
+                start_margin + fade_in,
+                n_samples - stop_margin - fade_out,
+                n_samples - stop_margin]
+        shape = 'symmetric'
+    elif fade_in:
+        fade = [start_margin,
+                start_margin + fade_in]
+        shape = 'left'
+    elif fade_out:
+        fade = [n_samples - stop_margin - fade_out,
+                n_samples - stop_margin]
+        shape = 'right'
+    else:
+        fade = None
+
+    if fade is not None:
+        sweep = pyfar.dsp.time_window(sweep, fade, shape=shape)
 
     # normalize to time domain amplitude of almost one
     # (to avoid clipping if written to fixed point wav file)
     sweep = pyfar.dsp.normalize(sweep) * (1 - 2**-15)
 
-    return sweep, sweep_gd
+    return sweep, sweep_gd, sweep_abs
 
 
 def _time_domain_sweep(n_samples, frequency_range, n_fade_out, amplitude,
