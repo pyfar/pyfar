@@ -363,7 +363,8 @@ def _sweep_synthesis_freq(
     start_margin : int, float
         The time in samples, at which the sweep starts. The start margin is
         required because the frequency domain sweep synthesis has pre-ringing
-        in the time domain. Set to ``0`` if `magnitude` is ``'perfect_linear'``.
+        in the time domain. Set to ``0`` if `magnitude` is
+        ``'perfect_linear'``.
     stop_margin : int, float
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
@@ -373,7 +374,7 @@ def _sweep_synthesis_freq(
     frequency_range : array like
         Frequency range of the sweep given by the lower and upper cut-off
         frequency in Hz. The restriction of the frequency range is realized
-        by appling a Butterworth band-pass with the specified frequencies.
+        by applying a Butterworth band-pass with the specified frequencies.
         Ignored if `magnitude` is ``'perfect_linear'`` or `signal`.
     butterworth_order : int, None
         The order of the Butterworth filters that are applied to limit the
@@ -449,8 +450,8 @@ def _sweep_synthesis_freq(
             "The exponential sweep has a 1/frequency magnitude spectrum. "
             "The magnitude is set to 0 at 0 Hz to avoid division by zero."))
     if magnitude == 'perfect_linear' and \
-            (start_margin != 0 or stop_margin != 0 or double or \
-             frequency_range[0] != 0 or \
+            (start_margin != 0 or stop_margin != 0 or double or
+             frequency_range[0] != 0 or
              frequency_range[1] != sampling_rate / 2):
         # internal warning. Users will not call this function directly
         # and can not cause this error.
