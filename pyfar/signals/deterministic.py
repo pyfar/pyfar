@@ -547,6 +547,10 @@ def _sweep_synthesis_freq(
     # put sweep in pyfar.Signal an transform to time domain
     sweep = pyfar.Signal(sweep, sampling_rate, n_samples, 'freq', 'rms')
 
+    # put group delay on pyfar FrequencyData
+    sweep_gd = pyfar.FrequencyData(
+        sweep_gd, pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate))
+
     # cut to originally desired length
     if double:
         n_samples = n_samples // 2
