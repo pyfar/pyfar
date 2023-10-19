@@ -363,8 +363,7 @@ def _sweep_synthesis_freq(
     start_margin : int, float
         The time in samples, at which the sweep starts. The start margin is
         required because the frequency domain sweep synthesis has pre-ringing
-        in the time domain. Set to ``0`` if `magnitude` is
-        ``'perfect_linear'``.
+        in the time domain. Set to ``0`` if `magnitude` is ``'perfect_linear'``.
     stop_margin : int, float
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
@@ -429,13 +428,9 @@ def _sweep_synthesis_freq(
     TODO Examples with magnitude="exponential"
 
     TODO Examples with magnitude="perfect_linear"
-
-    TODO rename variable h_sweep to sweep_abs
-
-    TODO make group delay a FrequencyData object
     """
 
-    # check input
+    # check input -------------------------------------------------------------
     if not isinstance(magnitude, (pyfar.Signal, str)):
         raise TypeError("Magnitude must be type Signal or str.")
     if isinstance(magnitude, str) and magnitude not in ['linear',
@@ -454,13 +449,14 @@ def _sweep_synthesis_freq(
             "The exponential sweep has a 1/frequency magnitude spectrum. "
             "The magnitude is set to 0 at 0 Hz to avoid division by zero."))
     if magnitude == 'perfect_linear' and \
-            (start_margin != 0 or stop_margin != 0 or double or
-             frequency_range[0] != 0 or
+            (start_margin != 0 or stop_margin != 0 or double or \
+             frequency_range[0] != 0 or \
              frequency_range[1] != sampling_rate / 2):
         # internal warning. Users will not call this function directly
         # and can not cause this error.
         raise ValueError(('Found conflicting parameters'))
 
+    # initialize basic parameters ---------------------------------------------
     # double n_samples
     if double and magnitude != 'perfect_linear':
         stop_margin += n_samples
@@ -472,7 +468,7 @@ def _sweep_synthesis_freq(
     # get number of bins (works for even and odd n_samples)
     n_bins = n_samples // 2 + 1
 
-    # handle magnitude parameter
+    # compute magnitude spectrum ----------------------------------------------
     if isinstance(magnitude, pyfar.Signal):
         # zero pad magnitude Signal or raise error if needed
         if n_samples > magnitude.n_samples:
@@ -481,16 +477,16 @@ def _sweep_synthesis_freq(
         elif magnitude.n_samples > n_samples:
             raise ValueError((f'magnitue can has {magnitude.n_samples} samples'
                               f' but must not be longer than {n_samples}'))
-        h_sweep = np.abs(magnitude.freq_raw)
+        sweep_abs = np.abs(magnitude.freq_raw)
     elif magnitude in ['linear', 'perfect_linear']:
         # constant spectrum
-        h_sweep = np.ones(n_bins)
+        sweep_abs = np.ones(n_bins)
     elif magnitude == 'exponential':
         # 1/f spectrum
-        h_sweep = np.zeros(n_bins)
-        h_sweep[1:] = 1 / np.sqrt(2 * np.pi * np.arange(1, n_bins) * df)
+        sweep_abs = np.zeros(n_bins)
+        sweep_abs[1:] = 1 / np.sqrt(2 * np.pi * np.arange(1, n_bins) * df)
 
-    # apply band limit to magnitude
+    # band limit to magnitude spectrum
     if magnitude in ['linear', 'exponential']:
         if frequency_range[0] > 0 and frequency_range[1] < sampling_rate / 2:
             band_limit = pyfar.dsp.filter.butterworth(
@@ -505,37 +501,48 @@ def _sweep_synthesis_freq(
                 pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
                 butterworth_order, frequency_range[1], 'lowpass')
         else:
-            band_limit = np.ones_like(h_sweep)
-        h_sweep *= np.abs(band_limit.freq.flatten())
+            band_limit = pyfar.Signal(np.ones_like(sweep_abs), sampling_rate,
+                                      n_samples, 'freq')
+        sweep_abs *= np.abs(band_limit.freq.flatten())
 
-    # initialize group delay in seconds at 0 Hz, df and Nyquist
-    tg = np.zeros(n_bins)
-    tg[1] = start_margin / sampling_rate
-    tg[-1] = (n_samples - stop_margin) / sampling_rate
+    # compute group delay -----------------------------------------------------
+    # group delay at 0 Hz must be 0
+    sweep_gd = np.zeros(n_bins)
+    # group delay at df equals starting time unless it's 0
+    if start_margin > 0:
+        sweep_gd[1] = start_margin / sampling_rate
+        tg_start = 2
+    else:
+        tg_start = 1
+    # group delay at Nyquist equals stopping time
+    sweep_gd[-1] = (n_samples - stop_margin) / sampling_rate
 
     # FORMULA (11, p.40 )
-    sweep_power = np.sum(np.abs(h_sweep**2))
-    C = (tg[-1] - tg[1]) / sweep_power
+    sweep_power = np.sum(np.abs(sweep_abs**2))
+    C = (sweep_gd[-1] - sweep_gd[1]) / sweep_power
 
     # FORMULA (10, p.40 )
-    for k in range(2, n_bins):  # index 2 to nyq
-        tg[k] = tg[k-1] + C * np.abs(h_sweep[k])**2
+    for k in range(tg_start, n_bins):  # index 2 to nyq
+        sweep_gd[k] = sweep_gd[k-1] + C * np.abs(sweep_abs[k])**2
 
-    sweep_ang = -1 * np.cumsum(tg) * 2 * np.pi * df
+    # compute phase from group delay ------------------------------------------
+    sweep_ang = -1 * np.cumsum(sweep_gd) * 2 * np.pi * df
 
     # wrap and correct phase to be real 0 at Nyquist
     sweep_ang = pyfar.dsp.wrap_to_2pi(sweep_ang)
     sweep_ang[sweep_ang > np.pi] -= 2*np.pi
 
-    if sweep_ang[-1] != 0 and not n_samples % 2:
-
+    if magnitude == 'perfect_linear':
+        sweep_ang[-1] = 0
+    elif sweep_ang[-1] != 0 and not n_samples % 2:
         factor = np.cumsum(np.ones_like(sweep_ang)) - 1
         offset = df * sweep_ang[-1] / (sampling_rate / 2)
         sweep_ang -= factor * offset
         sweep_ang[-1] = np.abs(sweep_ang[-1])
 
+    # compute and finalize return data ----------------------------------------
     # combine magnitude and phase of sweep
-    sweep = h_sweep * np.exp(1j * sweep_ang)
+    sweep = sweep_abs * np.exp(1j * sweep_ang)
 
     # put sweep in pyfar.Signal an transform to time domain
     sweep = pyfar.Signal(sweep, sampling_rate, n_samples, 'freq', 'rms')
@@ -552,7 +559,7 @@ def _sweep_synthesis_freq(
     # (to avoid clipping if written to fixed point wav file)
     sweep = pyfar.dsp.normalize(sweep) * (1 - 2**-15)
 
-    return sweep, tg
+    return sweep, sweep_gd
 
 
 def _time_domain_sweep(n_samples, frequency_range, n_fade_out, amplitude,
