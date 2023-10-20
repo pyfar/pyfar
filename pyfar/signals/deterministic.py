@@ -206,7 +206,7 @@ def linear_sweep_freq(
         n_samples, start_margin=None, stop_margin=None, frequency_range=None,
         butterworth_order=8, double=True, sampling_rate=44100):
 
-    signal, group_delay = _sweep_synthesis_freq(
+    signal, group_delay = _frequency_domain_sweep(
         n_samples, "linear", start_margin, stop_margin,
         frequency_range, butterworth_order, double, sampling_rate)
 
@@ -286,7 +286,7 @@ def exponential_sweep_freq(
         n_samples, start_margin=None, stop_margin=None, frequency_range=None,
         butterworth_order=8, double=True, sampling_rate=44100):
 
-    signal, group_delay = _sweep_synthesis_freq(
+    signal, group_delay = _frequency_domain_sweep(
         n_samples, "exponential", start_margin, stop_margin,
         frequency_range, butterworth_order, double, sampling_rate)
 
@@ -297,7 +297,7 @@ def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude, start_margin=None, stop_margin=None,
         double=True, sampling_rate=44100):
 
-    signal, group_delay = _sweep_synthesis_freq(
+    signal, group_delay = _frequency_domain_sweep(
         n_samples, magnitude, start_margin, stop_margin,
         None, None, double, sampling_rate)
 
@@ -307,14 +307,14 @@ def magnitude_spectrum_weighted_sweep(
 def perfect_linear_sweep(
         n_samples, sampling_rate=44100):
 
-    signal, group_delay = _sweep_synthesis_freq(
+    signal, group_delay = _frequency_domain_sweep(
         n_samples, "perfect_linear", None, None, None, None, False,
         sampling_rate)
 
     return signal, group_delay
 
 
-def _sweep_synthesis_freq(
+def _frequency_domain_sweep(
         n_samples, magnitude, frequency_range, butterworth_order, double,
         start_margin, stop_margin, fade_in, fade_out, sampling_rate):
     """
