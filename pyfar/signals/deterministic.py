@@ -203,12 +203,20 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
 
 def linear_sweep_freq(
-        n_samples, start_margin=None, stop_margin=None, frequency_range=None,
-        butterworth_order=8, double=True, sampling_rate=44100):
+        n_samples, frequency_range, start_margin, stop_margin, fade_in=0,
+        fade_out=0, butterworth_order=8, double=True, sampling_rate=44100):
 
     signal, group_delay = _frequency_domain_sweep(
-        n_samples, "linear", start_margin, stop_margin,
-        frequency_range, butterworth_order, double, sampling_rate)
+        n_samples=n_samples,
+        sweep_type='linear',
+        frequency_range=frequency_range,
+        butterworth_order=butterworth_order,
+        double=double,
+        start_margin=start_margin,
+        stop_margin=stop_margin,
+        fade_in=fade_in,
+        fade_out=fade_out,
+        sampling_rate=sampling_rate)
 
     return signal, group_delay
 
@@ -283,39 +291,62 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
 
 def exponential_sweep_freq(
-        n_samples, start_margin=None, stop_margin=None, frequency_range=None,
-        butterworth_order=8, double=True, sampling_rate=44100):
+        n_samples, frequency_range, start_margin, stop_margin, fade_in=0,
+        fade_out=0, butterworth_order=8, double=True, sampling_rate=44100):
 
     signal, group_delay = _frequency_domain_sweep(
-        n_samples, "exponential", start_margin, stop_margin,
-        frequency_range, butterworth_order, double, sampling_rate)
+        n_samples=n_samples,
+        sweep_type='exponential',
+        frequency_range=frequency_range,
+        butterworth_order=butterworth_order,
+        double=double,
+        start_margin=start_margin,
+        stop_margin=stop_margin,
+        fade_in=fade_in,
+        fade_out=fade_out,
+        sampling_rate=sampling_rate)
 
     return signal, group_delay
 
 
 def magnitude_spectrum_weighted_sweep(
-        n_samples, magnitude, start_margin=None, stop_margin=None,
+        n_samples, magnitude_spectrum, start_margin, stop_margin,
         double=True, sampling_rate=44100):
 
     signal, group_delay = _frequency_domain_sweep(
-        n_samples, magnitude, start_margin, stop_margin,
-        None, None, double, sampling_rate)
+        n_samples=n_samples,
+        sweep_type=magnitude_spectrum,
+        frequency_range=[0, sampling_rate / 2],
+        butterworth_order=0,
+        double=double,
+        start_margin=start_margin,
+        stop_margin=stop_margin,
+        fade_in=0,
+        fade_out=0,
+        sampling_rate=sampling_rate)
 
     return signal, group_delay
 
 
-def perfect_linear_sweep(
-        n_samples, sampling_rate=44100):
+def perfect_linear_sweep(n_samples, sampling_rate=44100):
 
     signal, group_delay = _frequency_domain_sweep(
-        n_samples, "perfect_linear", None, None, None, None, False,
-        sampling_rate)
+        n_samples=n_samples,
+        sweep_type='perfect_linear',
+        frequency_range=[0, sampling_rate / 2],
+        butterworth_order=0,
+        double=False,
+        start_margin=0,
+        stop_margin=0,
+        fade_in=0,
+        fade_out=0,
+        sampling_rate=sampling_rate)
 
     return signal, group_delay
 
 
 def _frequency_domain_sweep(
-        n_samples, magnitude, frequency_range, butterworth_order, double,
+        n_samples, sweep_type, frequency_range, butterworth_order, double,
         start_margin, stop_margin, fade_in, fade_out, sampling_rate):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
@@ -340,7 +371,7 @@ def _frequency_domain_sweep(
     ----------
     n_samples : int
         The length of the sweep in samples.
-    magnitude : Signal, string
+    sweep_type : Signal, string
         Specify the magnitude response of the sweep.
 
         signal
@@ -363,26 +394,26 @@ def _frequency_domain_sweep(
     start_margin : int, float
         The time in samples, at which the sweep starts. The start margin is
         required because the frequency domain sweep synthesis has pre-ringing
-        in the time domain. Set to ``0`` if `magnitude` is
+        in the time domain. Set to ``0`` if `sweep_type` is
         ``'perfect_linear'``.
     stop_margin : int, float
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
         ends at sample ``n_samples-10``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
-        Set to ``0`` if `magnitude` is ``'perfect_linear'``.
+        Set to ``0`` if `sweep_type` is ``'perfect_linear'``.
     frequency_range : array like
         Frequency range of the sweep given by the lower and upper cut-off
         frequency in Hz. The restriction of the frequency range is realized
         by applying a Butterworth band-pass with the specified frequencies.
-        Ignored if `magnitude` is ``'perfect_linear'`` or `signal`.
+        Ignored if `sweep_type` is ``'perfect_linear'`` or `signal`.
     butterworth_order : int, None
         The order of the Butterworth filters that are applied to limit the
         frequency range by a high-pass if ``frequency_range[0] > 0`` and/or by
         a low-pass if ``frequency_range[1] < sampling_rate / 2``.
     double : bool
         Double `n_samples` during the sweep calculation (recommended). Set to
-        ``False`` if `magnitude` is ``'perfect_linear'``.
+        ``False`` if `sweep_type` is ``'perfect_linear'``.
     sampling_rate : int
         The sampling rate in Hz.
 
@@ -406,7 +437,7 @@ def _frequency_domain_sweep(
     -----
     The envelope of the sweep time signal should be constant, appart from
     slight overshoots at the beginning and end. If this is not the case, try to
-    provide a smoother spectrum (if `magnitude` is `signal`) or increase
+    provide a smoother spectrum (if `sweep_type` is `signal`) or increase
     `n_samples`.
 
     References
@@ -421,36 +452,38 @@ def _frequency_domain_sweep(
 
     Examples
     --------
-    TODO Example with magnitude=singal
+    TODO Example with sweep_type=singal
           (e.g., Bass emphasis by means of low shelve filter)
 
-    TODO Examples with magnitude="linear"
+    TODO Examples with sweep_type="linear"
 
-    TODO Examples with magnitude="exponential"
+    TODO Examples with sweep_type="exponential"
 
-    TODO Examples with magnitude="perfect_linear"
+    TODO Examples with sweep_type="perfect_linear"
     """
 
     # check input -------------------------------------------------------------
-    if not isinstance(magnitude, (pyfar.Signal, str)):
-        raise TypeError("Magnitude must be type Signal or str.")
-    if isinstance(magnitude, str) and magnitude not in ['linear',
-                                                        'exponential',
-                                                        'perfect_linear']:
-        raise ValueError("Magnitude must be 'linear', 'exponential' or",
-                         "'perfect_linear', when its type is str.")
+    if not isinstance(sweep_type, (pyfar.Signal, str)):
+        raise TypeError("sweep_type must be type Signal or str.")
+    if isinstance(sweep_type, pyfar.Signal):
+        magnitude = sweep_type
+        sweep_type = 'signal'
+    if sweep_type not in ['linear', 'exponential', 'perfect_linear', 'signal']:
+        raise ValueError("sweep_type must be 'linear', 'exponential' or",
+                         "'perfect_linear', when it is a str.")
     if np.atleast_1d(frequency_range).size != 2:
         raise ValueError(
             "Frequency_range must be an array like with two elements.")
     if frequency_range[1] > sampling_rate/2:
         raise ValueError(
             "Upper frequency limit is larger than half the sampling rate.")
-    if frequency_range[0] == 0 and magnitude == "exponential":
+    if frequency_range[0] == 0 and sweep_type == "exponential":
         Warning((
             "The exponential sweep has a 1/frequency magnitude spectrum. "
             "The magnitude is set to 0 at 0 Hz to avoid division by zero."))
-    if magnitude == 'perfect_linear' and \
+    if sweep_type == 'perfect_linear' and \
             (start_margin != 0 or stop_margin != 0 or double or
+             fade_in != 0 or fade_out != 0 or
              frequency_range[0] != 0 or
              frequency_range[1] != sampling_rate / 2):
         # internal warning. Users will not call this function directly
@@ -459,7 +492,7 @@ def _frequency_domain_sweep(
 
     # initialize basic parameters ---------------------------------------------
     # double n_samples
-    if double and magnitude != 'perfect_linear':
+    if double and sweep_type != 'perfect_linear':
         stop_margin += n_samples
         n_samples *= 2
 
@@ -470,25 +503,26 @@ def _frequency_domain_sweep(
     n_bins = n_samples // 2 + 1
 
     # compute magnitude spectrum ----------------------------------------------
-    if isinstance(magnitude, pyfar.Signal):
+    if sweep_type == 'signal':
         # zero pad magnitude Signal or raise error if needed
         if n_samples > magnitude.n_samples:
             magnitude = pyfar.dsp.pad_zeros(
                 magnitude, n_samples - magnitude.n_samples)
         elif magnitude.n_samples > n_samples:
-            raise ValueError((f'magnitue can has {magnitude.n_samples} samples'
-                              f' but must not be longer than {n_samples}'))
-        sweep_abs = np.abs(magnitude.freq_raw)
-    elif magnitude in ['linear', 'perfect_linear']:
+            raise ValueError(
+                (f'magnitude_spectrum has {magnitude.n_samples} samples '
+                 f'but must not be longer than {n_samples}'))
+        sweep_abs = np.abs(magnitude.freq_raw.flatten())
+    elif sweep_type in ['linear', 'perfect_linear']:
         # constant spectrum
         sweep_abs = np.ones(n_bins)
-    elif magnitude == 'exponential':
+    elif sweep_type == 'exponential':
         # 1/f spectrum
         sweep_abs = np.zeros(n_bins)
         sweep_abs[1:] = 1 / np.sqrt(2 * np.pi * np.arange(1, n_bins) * df)
 
     # band limit to magnitude spectrum
-    if magnitude in ['linear', 'exponential']:
+    if sweep_type in ['linear', 'exponential']:
         if frequency_range[0] > 0 and frequency_range[1] < sampling_rate / 2:
             band_limit = pyfar.dsp.filter.butterworth(
                 pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
@@ -533,7 +567,7 @@ def _frequency_domain_sweep(
     sweep_ang = pyfar.dsp.wrap_to_2pi(sweep_ang)
     sweep_ang[sweep_ang > np.pi] -= 2*np.pi
 
-    if magnitude == 'perfect_linear':
+    if sweep_type == 'perfect_linear':
         sweep_ang[-1] = 0
     elif sweep_ang[-1] != 0 and not n_samples % 2:
         factor = np.cumsum(np.ones_like(sweep_ang)) - 1
@@ -583,7 +617,7 @@ def _frequency_domain_sweep(
     # (to avoid clipping if written to fixed point wav file)
     sweep = pyfar.dsp.normalize(sweep) * (1 - 2**-15)
 
-    return sweep, sweep_gd, sweep_abs
+    return sweep, sweep_gd
 
 
 def _time_domain_sweep(n_samples, frequency_range, n_fade_out, amplitude,
