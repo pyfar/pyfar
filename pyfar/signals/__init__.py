@@ -24,5 +24,5 @@ __all__ = [
     'sine', 'impulse', 'noise', 'pulsed_noise',
     'linear_sweep_time', 'exponential_sweep_time',
     'linear_sweep_freq', 'exponential_sweep_freq',
-    'perfect_linear_sweep', 'magnitude_spectrum_weighted_sweep,'
+    'perfect_linear_sweep', 'magnitude_spectrum_weighted_sweep',
     'files']
