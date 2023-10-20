@@ -53,5 +53,5 @@ for idx, (fft_norm, unit, log_prefix, ylim) in \
     if idx < 4:
         ax.set_xlabel('')
     ax.set_title('\''+fft_norm+'\'')
-fig.tight_layout()
+
 plt.savefig('fft_norms_examples.png', dpi=150)

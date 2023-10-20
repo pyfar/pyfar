@@ -15,7 +15,7 @@ such as the sampling rate or number of channels, and almost all functions in
 pyfar take audio classes as their main input. See
 :py:class:`audio classes <pyfar.classes.audio>` for a complete documentation.
 
-**Data inside audio classes:** ``cshape`` **and** ``caxis``
+**Data inside audio classes:** ``cshape`` **,** ``cdim`` **and** ``caxis``
 
 All audio classes can store multi-dimensional data. For example 3 by 4
 channel audio data with 128 samples of data per channel would be stored in an
@@ -31,6 +31,9 @@ of size 3, and ``caxis = -1`` refers to the last dimension of size 4 and `not`
 to the last axis of the data array of size 128. Note that ``caxis`` can also be
 provided as a tuple or list, e.g., ``caxis = (0, 1)`` refers to both channel
 axes of size 3 and 4.
+
+Lastly the channel dimension - or ``cdim`` in short - is the length of the
+``cshape``.
 
 **Signal Types**
 

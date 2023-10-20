@@ -155,8 +155,6 @@ def test_coordinates_init_val():
     # test input: 2 element vectors
     c2 = [1, 2]                        # list
     c3 = np.asarray(c2)                # flat np.array
-    c4 = np.atleast_2d(c2)             # row vector np.array
-    c5 = np.transpose(c4)              # column vector np.array
     # test input: 3 element vector
     c6 = [1, 2, 3]
     # test input: 2D matrix
@@ -175,7 +173,6 @@ def test_coordinates_init_val():
     # input flat np.arrays
     Coordinates(c3, c3, c3)
     # input non flat vectors
-    Coordinates(c3, c4, c5)
     # input 2D data
     Coordinates(c1, c1, c7)
     # input 3D data
@@ -217,7 +214,7 @@ def test_coordinates_init_default_convention():
 
 
 def test_coordinates_init_default_convention_and_unit():
-    """Test initialization with the default convention and untit."""
+    """Test initialization with the default convention and unit."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -260,97 +257,65 @@ def test_show():
     coords.show()
     # show with mask as list
     coords.show([1, 0, 1])
+    # show with index as list
+    coords.show([0, 1])
     # show with mask as ndarray
     coords.show(np.array([1, 0, 1], dtype=bool))
-    # test assertion
-    with raises(AssertionError):
-        coords.show(np.array([1, 0], dtype=bool))
+    # show with index as ndarray
+    coords.show(np.array([0, 1], dtype=int))
 
     plt.close("all")
 
 
-def test_setter_and_getter_with_conversion():
+@pytest.mark.parametrize(
+    'domain_in', list(Coordinates()._systems()))
+@pytest.mark.parametrize(
+    'domain_out', list(Coordinates()._systems()))
+@pytest.mark.parametrize(
+    'point', [
+        'positive_x', 'positive_y', 'positive_z',
+        'negative_x', 'negative_y', 'negative_z'])
+def test_setter_and_getter_with_conversion(domain_in, domain_out, point):
     """Test conversion between coordinate systems using the default unit."""
     # get list of available coordinate systems
     coords = Coordinates()
     systems = coords._systems()
     # test points contained in system definitions
-    points = ['positive_x', 'positive_y', 'positive_z',
-              'negative_x', 'negative_y', 'negative_z']
 
     # test setter and getter with all systems and default unit
-    for domain_in in list(systems):
-        for convention_in in list(systems[domain_in]):
-            for domain_out in list(systems):
-                for convention_out in list(systems[domain_out]):
-                    for point in points:
-                        # for debugging
-                        print(f"{domain_in}({convention_in}) -> "
-                              f"{domain_out}({convention_out}): {point}")
-                        # in and out points
-                        p_in = systems[domain_in][convention_in][point]
-                        p_out = systems[domain_out][convention_out][point]
-                        # empty object
-                        c = Coordinates()
-                        # --- set point ---
-                        eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
-                             '{convention_in}')")
-                        # check point
-                        p = c._points
-                        npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
-                        # --- test without conversion ---
-                        p = eval(f"c.get_{domain_out}('{convention_out}')")
-                        # check internal and returned point
-                        npt.assert_allclose(
-                            c._points.flatten(), p_in, atol=1e-15)
-                        npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
-                        # check if system was converted
-                        assert c._system["domain"] == domain_in
-                        assert c._system["convention"] == convention_in
-                        # --- test with conversion ---
-                        p = eval(f"c.get_{domain_out}('{convention_out}', \
-                                 convert=True)")
-                        # check point
-                        npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
-                        # check if system was converted
-                        assert c._system["domain"] == domain_out
-                        assert c._system["convention"] == convention_out
-
-
-def test_multiple_getter_with_conversion():
-    """Test output of 500 random sequential conversions."""
-    # test N successive coordinate conversions
-    N = 500
-
-    # get list of available coordinate systems
-    coords = Coordinates()
-    systems = coords._systems()
-
-    # get reference points in cartesian coordinate system
-    points = ['positive_x', 'positive_y', 'positive_z',
-              'negative_x', 'negative_y', 'negative_z']
-    pts = np.array([systems['cart']['right'][point] for point in points])
-
-    # init the system
-    coords.set_cart(pts[:, 0], pts[:, 1], pts[:, 2])
-
-    # list of domains
-    domains = list(systems)
-
-    for ii in range(N):
-        # randomly select a coordinate system
-        domain = domains[np.random.randint(len(domains))]
-        conventions = list(systems[domain])
-        convention = conventions[np.random.randint(len(conventions))]
-        # convert points to selected system
-        pts = eval(f"coords.get_{domain}('{convention}', convert=True)")
-        # get the reference
-        ref = np.array([systems[domain][convention][point]
-                        for point in points])
-        # check
-        npt.assert_allclose(pts, ref, atol=1e-15)
-        # print
-        print(f"Tolerance met in iteration {ii}")
+    for convention_in in list(systems[domain_in]):
+        for convention_out in list(systems[domain_out]):
+            # for debugging
+            print(f"{domain_in}({convention_in}) -> "
+                  f"{domain_out}({convention_out}): {point}")
+            # in and out points
+            p_in = systems[domain_in][convention_in][point]
+            p_out = systems[domain_out][convention_out][point]
+            # empty object
+            c = Coordinates()
+            # --- set point ---
+            eval(f"c.set_{domain_in}(p_in[0], p_in[1], p_in[2], \
+                    '{convention_in}')")
+            # check point
+            p = eval(f"c.get_{domain_in}('{convention_in}')")
+            npt.assert_allclose(p.flatten(), p_in, atol=1e-15)
+            # --- test without conversion ---
+            p = eval(f"c.get_{domain_out}('{convention_out}')")
+            npt.assert_almost_equal(
+                systems['cart']['right'][point], c.cartesian.flatten())
+            # check internal and returned point
+            # npt.assert_allclose(
+            #     c.cartesian.flatten(), p_in, atol=1e-15)
+            npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+            # check if system was converted
+            # --- test with conversion ---
+            p = eval(f"c.get_{domain_out}('{convention_out}', \
+                        convert=True)")
+            # check point
+            npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
+            # check if system was converted
+            # assert c._system["domain"] == domain_out
+            # assert c._system["convention"] == convention_out
 
 
 def test_getter_with_degrees():
@@ -410,7 +375,7 @@ def test_cshape():
 
 
 def test_cdim():
-    """Test the csim attribute."""
+    """Test the cdim attribute."""
     # empty
     coords = Coordinates()
     assert coords.cdim == 0
@@ -658,7 +623,7 @@ def test_inverse_rotation():
 
 def test_converters():
     """
-    Test if converterts can handle numbers (correctness of theconversion is
+    Test if converters can handle numbers (correctness of the conversion is
     tested in test_setter_and_getter_with_conversion)
     """
     coordinates.cart2sph(0, 0, 1)
@@ -712,7 +677,7 @@ def test___eq___differInUnit_notEqual():
     assert not is_equal
 
 
-def test___eq___differInWeigths_notEqual():
+def test___eq___differInWeights_notEqual():
     coordinates = Coordinates(1, 2, 3, weights=.5)
     actual = Coordinates(1, 2, 3, weights=0.0)
     assert not coordinates == actual

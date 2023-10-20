@@ -277,7 +277,7 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
             os.path.dirname(__file__), "references",
             f"filter.reconstructing_octaves_{overlap}_{slope}.csv"))
         # restricting rtol was not needed locally. It was added for tests to
-        # pass on travis ci
+        # pass on the testing platform
         npt.assert_allclose(
             y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
 
@@ -287,3 +287,48 @@ def test_reconstructing_fractional_octave_bands_warning():
     with pytest.warns(UserWarning):
         x = pf.signals.impulse(2**12, sampling_rate=16e3)
         y, f = pfilt.reconstructing_fractional_octave_bands(x)
+
+
+def test_notch(impulse):
+    """Test notch filter behavior"""
+    f_obj = pfilt.notch(None, 1e3, 1, 44100)
+    assert isinstance(f_obj, pclass.FilterIIR)
+    assert f_obj.comment == ("Second order notch filter at "
+                             "1000.0 Hz (Quality = 1).")
+
+    # Filter
+    x = pfilt.notch(impulse, 1e3, 1)
+    y = f_obj.process(impulse)
+    assert isinstance(x, Signal)
+    npt.assert_allclose(x.time, y.time)
+
+    # ValueError
+    with pytest.raises(ValueError):
+        # pass signal and sampling rate
+        x = pfilt.notch(impulse, 1e3, 1, 44100)
+    with pytest.raises(ValueError):
+        # pass no signal and no sampling rate
+        x = pfilt.notch(None, 1e3, 1)
+
+
+@pytest.mark.parametrize("f", [1e3, 4e3])
+@pytest.mark.parametrize("Q", [1, 10])
+def test_notch_result(f, Q):
+    """Test the frequency response of the notch filter"""
+    # generate and apply notch filter
+    notch = pf.dsp.filter.notch(pf.signals.impulse(44100), f, Q)
+
+    # test characteristic points of frequency response
+    npt.assert_almost_equal(np.abs(notch.freq_raw[0, int(f)]), 0, 12)
+    npt.assert_almost_equal(np.abs(notch.freq_raw[0, 0]), 1, 12)
+    npt.assert_almost_equal(np.abs(notch.freq_raw[0, -1]), 1, 12)
+
+    # estimate and test actual quality
+    mask = pf.dsp.decibel(notch) <= -3
+    mask = mask.flatten()
+    bandwidth = np.max(notch.frequencies[mask]) - \
+        np.min(notch.frequencies[mask])
+    bandwidth /= f
+    Q_act = 1 / bandwidth
+    # precision could be increased by increasing the impulse length
+    npt.assert_allclose(Q_act, Q, rtol=.01, atol=.2)

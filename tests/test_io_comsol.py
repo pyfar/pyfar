@@ -185,7 +185,7 @@ def test_read_comsol_data_shapes(filename, nodes, type):
 def test_read_comsol_coordinates(filename, type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     _, coordinates = io.read_comsol(path + type)
-    xyz = coordinates.get_cart()
+    xyz = coordinates.cartesian
     assert all(xyz[0] == [-.5, -.5, -.5])
     assert all(xyz[1] == [0.5, -0.5, -0.5])
     assert all(xyz[2] == [-0.5, 0.5, -0.5])

@@ -10,9 +10,10 @@ import matplotlib
 import matplotlib.testing as mpt
 import matplotlib.pyplot as plt
 from matplotlib.testing.compare import compare_images
+import pyfar as pf
 
 
-def create_figure(width=6, height=4.8, dpi=100):
+def create_figure(width=6, height=4.8, dpi=100, style="light"):
     """
     Create figure with defined parameters for reproducible testing.
 
@@ -34,8 +35,11 @@ def create_figure(width=6, height=4.8, dpi=100):
     plt.close('all')
     matplotlib.use('Agg')
     mpt.set_reproducibility_for_testing()
-    # force size/dpi for testing
-    return plt.figure(1, (width, height), dpi)
+    # force size, dpi, and pyfar plot style for testing (using the plot style
+    # is required because it tells Matplotlib to use the constrained layout)
+    with pf.plot.context(style):
+        fig = plt.figure(1, (width, height), dpi)
+    return fig
 
 
 def save_and_compare(create_baseline, baseline_path, test_path, filename,

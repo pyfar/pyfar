@@ -97,7 +97,7 @@ def test_low_shelve_cascade():
             os.path.dirname(__file__), "references",
             "filter.shelve_cascade_low.csv"))
     # restricting rtol was not needed locally. It was added for tests to
-    # pass on travis ci
+    # pass on the testing platform
     npt.assert_allclose(
         y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
     # test N and ideal
@@ -128,7 +128,7 @@ def test_high_shelve_cascade():
             os.path.dirname(__file__), "references",
             "filter.shelve_cascade_high.csv"))
     # restricting rtol was not needed locally. It was added for tests to
-    # pass on travis ci
+    # pass on the testing platform
     npt.assert_allclose(
         y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
     # test N and ideal
@@ -147,14 +147,15 @@ def test_high_shelve_cascade():
     npt.assert_equal(ideal.frequencies, [0, 250, 500, 22050])
 
     # high shelve cascade (upper characteristic frequency exceeds Nyquist)
-    y, N, ideal = pf.dsp.filter.high_shelve_cascade(
-        x, 22050/2, "lower", -20, None, 2)
+    with pytest.warns(UserWarning, match="The upper frequency exceeded"):
+        y, N, ideal = pf.dsp.filter.high_shelve_cascade(
+            x, 22050/2, "lower", -20, None, 2)
     # test reference
     reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             "filter.shelve_cascade_high_exceed_nyquist.csv"))
     # restricting rtol was not needed locally. It was added for tests to
-    # pass on travis ci
+    # pass on the testing platform
     npt.assert_allclose(
         y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
     # test N and ideal
