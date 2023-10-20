@@ -33,7 +33,7 @@ History
   * Added `pyfar.dsp.concatenate` function for pyfar audio objects (PR #452)
   * Added `pyfar.dsp.filter.notch` function (PR #441)
   * Added the possibility to cast signals with different channel dimensions in `pyfar.dsp.convolve` (PR #404)
-  * Allowed NaN values in `pyfar.dsp.average` and `pyfar.dsp.normalize`(PR #425, #399)
+  * Allowed NaN values in `pyfar.dsp.average` and `pyfar.dsp.normalize` (PR #425, #399)
   * Added more verbose names for the `mode` parameter of `pyfar.dsp.pad_zeros` (PR #381)
 
 * `pyfar.plot`
