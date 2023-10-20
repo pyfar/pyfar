@@ -9,6 +9,7 @@ from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 import os.path
 import pathlib
 import soundfile
+import re
 
 from pyfar import io
 from pyfar import Signal
@@ -16,6 +17,22 @@ from pyfar import Coordinates
 from pyfar.samplings import SphericalVoronoi
 import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData
+
+
+@pytest.mark.parametrize('input_type', ('filename', 'path_object'))
+def test_read_sofa_filename_and_path_object(
+        input_type, generate_sofa_GeneralFIR, noise_two_by_three_channel):
+    """Test read_sofa with filename and path object as input"""
+
+    if input_type == 'filename':
+        file = generate_sofa_GeneralFIR
+        assert isinstance(file, str)
+    elif input_type == 'path_object':
+        file = pathlib.Path(generate_sofa_GeneralFIR)
+        assert isinstance(file, pathlib.Path)
+
+    signal = io.read_sofa(file)[0]
+    npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
 
 
 def test_read_sofa_GeneralFIR(
@@ -49,9 +66,9 @@ def test_read_sofa_coordinates(
     """Test for reading coordinates in sofa file"""
     _, s_coords, r_coords, = io.read_sofa(generate_sofa_GeneralFIR)
     npt.assert_allclose(
-        s_coords.get_cart(), sofa_reference_coordinates[0])
+        s_coords.cartesian, sofa_reference_coordinates[0])
     npt.assert_allclose(
-        r_coords.get_cart(), sofa_reference_coordinates[1])
+        r_coords.cartesian, sofa_reference_coordinates[1])
 
 
 def test_read_sofa_position_type_spherical(
@@ -59,11 +76,32 @@ def test_read_sofa_position_type_spherical(
     """Test to verify correct position type of sofa file"""
     _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
     npt.assert_allclose(
-        s_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[0])
+        s_coords.spherical_elevation[..., :2] / np.pi * 180,
+        sofa_reference_coordinates[0][..., :2])
     npt.assert_allclose(
-        r_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[1])
+        s_coords.radius, sofa_reference_coordinates[0][:, 2])
+    npt.assert_allclose(
+        r_coords.spherical_elevation[..., :2] / np.pi * 180,
+        sofa_reference_coordinates[1][..., :2])
+    npt.assert_allclose(
+        r_coords.radius, sofa_reference_coordinates[1][:, 2])
+
+
+@pytest.mark.parametrize('file,version', [
+    ('erroneous_data_with_version_string.far', '0.5.2'),
+    ('erroneous_data_without_version_string.far', '<0.5.3')])
+def test_read_erroneous_data(file, version):
+    """
+    Test exception for reading outdated or erroneous objects. Files contain a
+    signal object but the mandatory field '_data' was manually removed. The
+    files can thus not be read.
+    """
+
+    file = os.path.join('tests', 'test_io_data', file)
+    message = re.escape(
+        f"'signal' object in {file} was written with pyfar {version}")
+    with pytest.raises(TypeError, match=message):
+        io.read(file)
 
 
 def test_convert_sofa_assertion():
@@ -572,6 +610,26 @@ def test_write_audio_clip(sf_write_mock):
     with pytest.warns(Warning, match='clipped'):
         pyfar.io.write_audio(
             signal=signal, filename='test.wav', subtype='PCM_16')
+
+
+def test_write_audio_sampling_rate_type(tmpdir):
+    """Test sampling_rates of type float"""
+
+    # test with integer value as float
+    signal = pyfar.signals.impulse(1024)
+    signal.sampling_rate = 44100.0
+    pyfar.io.write_audio(
+        signal, os.path.join(tmpdir, 'test_sampling_rate_float_1.wav'))
+
+    # test with non-integer value
+    signal.sampling_rate = 44100.5
+    error_message = re.escape((
+        "The sampling rate is 44100.5 but must have an "
+        "integer value, e.g., 44100 "
+        "or 44101 (See pyfar.dsp.resample for help)"))
+    with pytest.raises(ValueError, match=error_message):
+        pyfar.io.write_audio(
+            signal, os.path.join(tmpdir, 'test_sampling_rate_float_2.wav'))
 
 
 @pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())

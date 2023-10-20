@@ -450,3 +450,66 @@ def crossover(signal, N, frequency, sampling_rate=None):
         # return the filtered signal
         signal_filt = filt.process(signal)
         return signal_filt
+
+
+def notch(signal, center_frequency, quality, sampling_rate=None):
+    """
+    Create and apply or return a second order IIR notch filter.
+
+    A notch filter is a band-stop filter with a narrow bandwidth
+    (high quality factor). It rejects a narrow frequency band around the
+    center frequency with a gain of 0 (:math:`-\\infty` dB) at the center
+    frequency and leaves the rest of the spectrum little changed
+    with gains close to 1 (0 dB). Wrapper for ``scipy.signal.iirnotch``.
+
+    Parameters
+    ----------
+    signal : Signal, None
+        The Signal to be filtered. Pass ``None`` to create the filter without
+        applying it.
+    center_frequency : number
+        Frequency in Hz at which the magnitude response will be 0
+        (:math:`-\\infty` dB).
+    quality : number
+        The quality characterizes notch filter -3 dB bandwidth relative to its
+        center frequency (both in Hz), i.e,
+        ``quality = center_frequency/bandwidth``.
+    sampling_rate : None, number
+        The sampling rate in Hz. Only required if `signal` is ``None``. The
+        default is ``None``.
+
+    Returns
+    -------
+    output : Signal, FilterIIR
+        The function returns a filtered version of the input signal if
+        ``sampling_rate = None`` or the filter itself if ``signal = None``.
+
+    References
+    ----------
+    .. [#]  S. J. Orfanidis, “Introduction To Signal Processing”,
+            Prentice-Hall, 1996
+    """
+
+    # check input
+    if (signal is None and sampling_rate is None) \
+            or (signal is not None and sampling_rate is not None):
+        raise ValueError('Either signal or sampling_rate must be None.')
+
+    fs = signal.sampling_rate if sampling_rate is None else sampling_rate
+
+    # get filter coefficients
+    b, a = spsignal.iirnotch(center_frequency, quality, fs)
+    ba = np.vstack((b, a))
+
+    # generate filter object
+    filt = pf.FilterIIR(ba, fs)
+    filt.comment = ("Second order notch filter at "
+                    f"{center_frequency} Hz (Quality = {quality}).")
+
+    # return the filter object
+    if signal is None:
+        # return the filter object
+        return filt
+    else:
+        # return the filtered signal
+        return filt.process(signal)

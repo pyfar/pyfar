@@ -4,7 +4,8 @@ from .band_filter import (
     chebyshev2,
     elliptic,
     bessel,
-    crossover
+    crossover,
+    notch
 )
 
 from .audiofilter import (
@@ -34,6 +35,7 @@ __all__ = [
     'elliptic',
     'bessel',
     'crossover',
+    'notch',
     'bell',
     'high_shelve',
     'low_shelve',

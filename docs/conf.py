@@ -22,7 +22,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import pyfar
+import pyfar  # noqa
 
 # -- General configuration ---------------------------------------------
 
@@ -39,6 +39,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.mathjax',
+    'sphinx.ext.intersphinx',
     'autodocsumm']
 
 # show tocs for classes and functions of modules using the autodocsumm
@@ -99,6 +100,14 @@ todo_include_todos = False
 
 # default language for highlighting in source code
 highlight_language = "python3"
+
+# intersphinx mapping
+intersphinx_mapping = {
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
+    'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None)
+    }
 
 # -- Options for HTML output -------------------------------------------
 
@@ -179,3 +188,12 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+# -- pyfar specifics -----------------------------------------------------
+
+# write shortcuts to sphinx readable format
+_, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
+shortcuts_path = os.path.join("concepts", "resources", "plot_shortcuts.rst")
+with open(shortcuts_path, "w") as f_id:
+    f_id.writelines(shortcuts)

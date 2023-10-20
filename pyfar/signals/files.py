@@ -15,19 +15,11 @@ Quick listening is, e.g., possible with `sounddevice
 """
 import os
 import numpy as np
-
 import urllib3
-from urllib3.exceptions import InsecureRequestWarning
-from urllib3 import disable_warnings
-
 import pyfar as pf
 
-# disable warning about non-certified connection
-disable_warnings(InsecureRequestWarning)
 # path for saving/reading files
 file_dir = os.path.join(os.path.dirname(__file__), 'files')
-if not os.path.isdir(file_dir):
-    os.mkdir(file_dir)
 
 
 def castanets(sampling_rate=44100):
@@ -395,7 +387,7 @@ def head_related_impulse_responses(
     elif position == "median":
         idx, _ = sources.find_slice('lateral', 'deg', 0)
         # sort positions according to polar angle
-        polar = sources.get_sph("side", "deg")[idx, 1].flatten()
+        polar = sources.polar[idx].flatten()
         idx = (idx[0][np.argsort(polar)], )
     else:
         idx = []
@@ -486,6 +478,18 @@ def room_impulse_response(sampling_rate=48000):
 def _load_files(data):
     """Download files from Audio Communication Server if they do not exist."""
 
+    # create directory if required
+    if not os.path.isdir(file_dir):
+        # provide verbose error for read-only file systems
+        try:
+            os.mkdir(file_dir)
+        except OSError as error:
+            if 'Read-only' in str(error):
+                raise OSError((f'{data} can not be loaded because the file '
+                               'system is read-only.'))
+            else:
+                raise error
+
     # set the filenames
     if data in ['binaural_room_impulse_response', 'castanets', 'drums',
                 'guitar', 'room_impulse_response']:
@@ -516,7 +520,7 @@ def _load_files(data):
     # download files
     print(f"Loading {data} data. This is only done once.")
 
-    http = urllib3.PoolManager(cert_reqs=False)
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
     url = 'https://pyfar.org/wp-content/uploads/pyfar_files/'
 
     for file in files:

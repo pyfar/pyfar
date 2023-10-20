@@ -460,13 +460,16 @@ def stub_str_to_type():
     """ Stubs `_codec.str_to_type` for tests that use general data structures.
     """
     def side_effect(type_str):
-        return {
-            'AnyClass': type(AnyClass()),
-            'NoEncodeClass': type(NoEncodeClass()),
-            'NoDecodeClass': type(NoDecodeClass()),
-            'FlatData': type(FlatData()),
-            'NestedData': type(NestedData.create())
-            }.get(type_str)
+        if type_str == "BuiltinsWrapper":
+            return _codec.BuiltinsWrapper
+        else:
+            return {
+                'AnyClass': type(AnyClass()),
+                'NoEncodeClass': type(NoEncodeClass()),
+                'NoDecodeClass': type(NoDecodeClass()),
+                'FlatData': type(FlatData()),
+                'NestedData': type(NestedData.create())
+                }.get(type_str)
     return mock.MagicMock(side_effect=side_effect)
 
 
