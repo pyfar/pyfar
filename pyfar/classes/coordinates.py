@@ -2,7 +2,8 @@
 The following documents the pyfar coordinates class and functions for
 coordinate conversion. More background information is given in
 :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
-Available sampling schemes are listed at :py:mod:`~pyfar.samplings`.
+Available sampling schemes are listed at
+:py:mod:`spharpy.samplings <spharpy.samplings>`.
 """
 
 import numpy as np
@@ -18,15 +19,13 @@ import pyfar as pf
 
 class Coordinates():
     """
-    Container class for storing, converting, rotating, querying, and plotting
-    3D coordinate systems.
-
-    This class will be changed in pyfar 0.8.0 and will just be able to
+    This function will be changed in pyfar 0.8.0 and will just be able to
     get cartesian coordinates. If you want to initialize in an other
     domain use :py:func:`from_spherical_colatitude`,
     :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
     :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
-    instead.
+    instead. For conversions from or into degree
+    use :py:func:`deg2rad` and :py:func:`rad2deg`.
 
     Create :py:func:`Coordinates` object with or without coordinate points.
     The points that enter the Coordinates object are defined by the
@@ -93,6 +92,8 @@ class Coordinates():
         parameters will be deprecated in pyfar 0.8.0 in favor of
         ``from_*``. Different units are no longer supported. Default
         angle unit is radiant.
+        The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of the :py:func:`deg2rad` and :py:func:`rad2deg`.
 
         Unit of the coordinate system. By default the first available unit
         is used, which is meters (``'met'``) for ``domain = 'cart'`` and
@@ -531,7 +532,8 @@ class Coordinates():
             convention='top_colat', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the ``spherical_*`` properties.
+        of the ``spherical_*`` properties. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -564,6 +566,8 @@ class Coordinates():
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -599,6 +603,10 @@ class Coordinates():
 
         # convert to radians
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             angles_1 = angles_1 / 180 * np.pi
             angles_2 = angles_2 / 180 * np.pi
 
@@ -631,7 +639,8 @@ class Coordinates():
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the `spherical_...` properties.
+        of the `spherical_...` properties. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in spherical coordinate systems.
 
         The points that are returned are defined by the `domain`,
@@ -662,6 +671,8 @@ class Coordinates():
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         convert : boolean, optional
             If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
@@ -732,6 +743,10 @@ class Coordinates():
 
         # convert to degrees
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             angles_1 = angles_1 / np.pi * 180
             angles_2 = angles_2 / np.pi * 180
         elif not unit == 'rad':
@@ -744,7 +759,8 @@ class Coordinates():
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the :py:func:`cylindrical` property.
+        of the :py:func:`cylindrical` property. For conversions from or
+        into degree use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -798,6 +814,10 @@ class Coordinates():
 
         # convert to radians
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             azimuth = azimuth / 180 * np.pi
         elif not unit == 'rad':
             raise ValueError(
@@ -821,7 +841,8 @@ class Coordinates():
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the `cylindrical` property.
+        of the `cylindrical` property. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in cylindrical coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -845,7 +866,10 @@ class Coordinates():
             is ``'right'``.
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
-            ``'met'``.
+            ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
+
         convert : boolean, optional
             If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
@@ -886,6 +910,10 @@ class Coordinates():
 
         # convert to degrees
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             azimuth = azimuth / np.pi * 180
         elif unit != 'rad':
             raise ValueError(
@@ -1356,8 +1384,9 @@ class Coordinates():
         Parameters
         ----------
         mask : boolean numpy array, None, optional
-            Plot points in red if ``mask==True``. The default is ``None``,
-            which the same color for all points.
+            Mask or indexes to highlight. Highlight points in red if
+            ``mask==True``.
+            The default is ``None``, which plots all points in the same color.
         kwargs : optional
             Keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
             If a mask is provided and the key `c` is contained in kwargs, it
@@ -1373,16 +1402,319 @@ class Coordinates():
             pf.plot.scatter(self, **kwargs)
         else:
             mask = np.asarray(mask)
-            assert mask.shape == self.cshape, \
-                "'mask.shape' must be self.cshape"
-            colors = np.full(mask.shape, pf.plot.color('b'))
+            colors = np.full(self.cshape, pf.plot.color('b'))
             colors[mask] = pf.plot.color('r')
             pf.plot.scatter(self, c=colors.flatten(), **kwargs)
+
+    def find_nearest(self, find, k=1, distance_measure='euclidean'):
+        """
+        Find the k nearest coordinates points.
+
+        Parameters
+        ----------
+        find : pf.Coordinates
+            Coordinates to which the nearest neighbors are searched.
+        k : int, optional
+            Number of points to return. k must be > 0. The default is ``1``.
+        distance_measure : string, optional
+            ``'euclidean'``
+                distance is determined by the euclidean distance.
+                This is default.
+            ``'spherical_radiance'``
+                distance is determined by the great-circle distance
+                expressed in radians.
+            ``'spherical_meter'``
+                distance is determined by the great-circle distance
+                expressed in meters.
+
+        Returns
+        -------
+        index : tuple of arrays
+            Indices of the neighbors. Arrays of shape ``(k, find.cshape)``
+            if k>1 else ``(find.cshape, )``.
+        distance : numpy array of floats
+            Distance between the points, after the given ``distance_measure``.
+            It's of shape (k, find.cshape).
+
+        Notes
+        -----
+        This is a wrapper for ``scipy.spatial.cKDTree``.
+
+        Examples
+        --------
+
+        Find frontal point from a spherical coordinate system
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> to_find = pf.Coordinates(1, 0, 0)
+            >>> index, distance = coords.find_nearest(to_find)
+            >>> coords.show(index)
+            >>> distance
+            0.0
+
+        Find multidimensional points in multidimensional coordinates with k=1
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> coords = pf.Coordinates(np.arange(9).reshape((3, 3)), 0, 1)
+        >>> to_find = pf.Coordinates(
+        >>>     np.array([[0, 1], [2, 3]]), 0, 1)
+        >>> i, d = coords.find_nearest(to_find)
+        >>> coords[i] == find
+        True
+        >>> i
+        (array([[0, 0],
+                [0, 1]], dtype=int64),
+         array([[0, 1],
+                [2, 0]], dtype=int64))
+        >>> d
+        array([[0., 0.],
+               [0., 0.]])
+
+        Find multidimensional points in multidimensional coordinates with k=3
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> coords = pf.Coordinates(np.arange(9).reshape((3, 3)), 0, 1)
+        >>> find = pf.Coordinates(
+        >>>     np.array([[0, 1], [2, 3]]), 0, 1)
+        >>> i, d = coords.find_nearest(find, 3)
+        >>> # the k-th dimension is at the end
+        >>> i[0].shape
+        (3, 2, 2)
+        >>> # now just access the k=0 dimension
+        >>> coords[i][0].cartesian
+        array([[[0., 0., 1.],
+                [1., 0., 1.]],
+               [[2., 0., 1.],
+                [3., 0., 1.]]])
+        """
+
+        # check the input
+        if not isinstance(k, int) or k <= 0 or k > self.csize:
+            raise ValueError("k must be an integer > 0 and <= self.csize.")
+        if not isinstance(find, Coordinates):
+            raise ValueError("find must be an pf.Coordinates object.")
+        allowed_measures = [
+                'euclidean', 'spherical_degree', 'spherical_meter']
+        if distance_measure not in allowed_measures:
+            raise ValueError(
+                f"distance_measure needs to be in {allowed_measures} and "
+                f"it is {distance_measure}")
+
+        # get target point in cartesian coordinates
+        points = find.cartesian
+
+        # get KDTree
+        kdtree = self._make_kdtree()
+
+        # query nearest neighbors
+        points = points.flatten() if find.csize == 1 else points
+
+        # nearest points
+        distance, index = kdtree.query(points, k=k)
+
+        if distance_measure in ['spherical_radiance', 'spherical_meter']:
+            # determine validate radius
+            radius = np.concatenate((self.radius, find.radius))
+            delta_radius = np.max(radius) - np.min(radius)
+            if delta_radius > 1e-15:
+                raise ValueError(
+                    "find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than 1e-15")
+            radius = np.max(radius)
+
+            if distance_measure == 'spherical_meter':
+                # convert angle in radiant to distance on the sphere
+                # d = 2r*pi*d/(2*pi) = r*d
+                distance = radius * distance
+
+            # convert cartesian coordinates to length on the great circle
+            distance = 2 * radius * np.arcsin(distance/(2*radius))
+
+        if self.cdim == 1:
+            if k > 1:
+                index_multi = np.moveaxis(index, -1, 0)
+                index = np.empty((k), dtype=tuple)
+                for kk in range(k):
+                    index[kk] = tuple([index_multi[kk]], )
+            else:
+                index = tuple([index], )
+        else:
+            index_array = np.arange(self.csize).reshape(self.cshape)
+            index_multi = []
+            for dim in range(self.cdim):
+                index_multi.append([])
+                for i in index.flatten():
+                    index_multi[dim].append(np.where(i == index_array)[dim][0])
+                index_multi[dim] = np.asarray(
+                    index_multi[dim]).reshape(index.shape)
+            if k > 1:
+                index_multi = np.moveaxis(index_multi, -1, 0)
+                index = np.empty((k), dtype=tuple)
+                for kk in range(k):
+                    index[kk] = tuple(index_multi[kk])
+            else:
+                index = tuple(index_multi)
+
+        if k > 1:
+            distance = np.moveaxis(distance, -1, 0)
+
+        return index, distance
+
+    def find_within(
+            self, find, distance=0., distance_measure='euclidean',
+            atol=1e-15, return_sorted=True):
+        """
+        Find coordinates within a certain distance to the query points.
+
+        Parameters
+        ----------
+        find : pf.Coordinates
+            Coordinates to which the nearest neighbors are searched.
+        distance : number, optional
+            Maximum allowed distance to the given points ``find``.
+            Distance must be >= 0. For just exact matches use ``0``.
+            The default is ``0``.
+        distance_measure : string, optional
+            ``'euclidean'``
+                distance is determined by the euclidean distance.
+                This is default.
+            ``'spherical_radiance'``
+                distance is determined by the great-circle distance
+                expressed in radians.
+            ``'spherical_meter'``
+                distance is determined by the great-circle distance
+                expressed in meters.
+        return_sorted : bool, optional
+            Sorts returned indices if True and does not sort them if False.
+            The default is True.
+
+        Returns
+        -------
+        index : tuple of array
+            Indices of the containing coordinates. Arrays of shape
+            (find.cshape).
+
+        Notes
+        -----
+        This is a wrapper for ``scipy.spatial.cKDTree``. Compared to previous
+        implementations, it supports self.ndim>1 as well.
+
+        Examples
+        --------
+
+        Find all point with 1m distance from the frontal point
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> find = pf.Coordinates(1, 0, 0)
+            >>> index = coords.find_within(find, 1)
+            >>> coords.show(index)
+
+        Find all point with 1m distance from two points
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> coords = pf.Coordinates(np.arange(6), 0, 0)
+            >>> find = pf.Coordinates([2, 3], 0, 0)
+            >>> index = coords.find_within(find, 1)
+            >>> coords.show(index[0])
+        """
+
+        # check the input
+        if float(distance) < 0:
+            raise ValueError("distance must be a non negative number.")
+        if not isinstance(atol, float) or atol < 0:
+            raise ValueError("atol must be a non negative number.")
+        if not isinstance(find, Coordinates):
+            raise ValueError("coords must be an pf.Coordinates object.")
+        if not isinstance(return_sorted, bool):
+            raise ValueError("return_sorted must be a bool.")
+        allowed_measures = [
+            'euclidean', 'spherical_radiance', 'spherical_meter']
+        if distance_measure not in allowed_measures:
+            raise ValueError(
+                f"distance_measure needs to be in {allowed_measures} and "
+                f"it is {distance_measure}")
+
+        # get target point in cartesian coordinates
+        points = find.cartesian
+
+        # get KDTree
+        kdtree = self._make_kdtree()
+
+        # query nearest neighbors
+        points = points.flatten() if find.csize == 1 else points
+
+        # nearest points
+        if distance_measure == 'euclidean':
+            index = kdtree.query_ball_point(
+                points, distance + atol, return_sorted=return_sorted)
+        if distance_measure == ['spherical_radiance', 'spherical_meter']:
+            # determine validate radius
+            radius = self.radius
+            delta_radius = np.max(radius) - np.min(radius)
+            if delta_radius > 1e-15:
+                raise ValueError(
+                    "find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than 1e-15")
+            radius = np.max(radius)
+
+            if distance_measure == 'spherical_meter':
+                # convert angle in radiant to distance on the sphere
+                # d = 2r*pi*d/(2*pi) = r*d
+                distance = radius * distance
+
+            # convert length on the great circle to in cartesian coordinates
+            distance = 2 * radius * np.sin(distance / (2 * radius))
+
+            index = kdtree.query_ball_point(
+                points, distance + atol, return_sorted=return_sorted)
+
+        if self.cdim == 1:
+            if find.csize > 1:
+                for i in range(len(index)):
+                    index[i] = tuple([index[i]], )
+            else:
+                index = tuple([index], )
+
+        else:
+            index_array = np.arange(self.csize).reshape(self.cshape)
+            index_new = np.empty((find.csize), dtype=tuple)
+            for i in range(find.csize):
+                index_multi = []
+                if find.csize > 1:
+                    for j in index[i]:
+                        index_multi.append(np.where(j == index_array))
+                else:
+                    for j in index:
+                        index_multi.append(np.where(j == index_array))
+
+                index_multi = np.moveaxis(np.squeeze(
+                    np.asarray(index_multi)), -1, 0)
+                if find.csize > 1:
+                    index_new[i] = tuple(index_multi)
+                else:
+                    index_new = tuple(index_multi)
+
+            index = index_new
+
+        return index
 
     def find_nearest_k(self, points_1, points_2, points_3, k=1,
                        domain='cart', convention='right', unit='met',
                        show=False):
         """
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of the ``find_nearest`` method.
+
         Find the k nearest coordinates points.
 
         Parameters
@@ -1426,14 +1758,18 @@ class Coordinates():
         Examples
         --------
 
-        Find frontal point from a spherical coordinate system
+        Find the nearest point in a line
 
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_k(1, 0, 0, show=True)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
+            >>> result = coords.find_nearest_k(0, 0, 0, show=True)
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of find_nearest method."),
+                PyfarDeprecationWarning)
 
         # check the input
         assert isinstance(k, int) and k > 0 and k <= self.csize, \
@@ -1450,6 +1786,8 @@ class Coordinates():
                           domain='cart', convention='right', unit='met',
                           show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of the ``find_within`` method.
         Find coordinates within a certain distance in meters to query points.
 
         Parameters
@@ -1501,10 +1839,14 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_cart(1, 0, 0, 0.5, show=True)
+            >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
+            >>> result = coords.find_nearest_cart(2, 0, 0, 0.5, show=True)
 
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of find_within method."),
+                PyfarDeprecationWarning)
 
         # check the input
         assert distance >= 0, "distance must be >= 0"
@@ -1520,6 +1862,8 @@ class Coordinates():
                          domain='sph', convention='top_colat', unit='rad',
                          show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of the ``find_within`` method.
         Find coordinates within certain angular distance to the query points.
 
         Parameters
@@ -1571,9 +1915,16 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_nearest_sph(0, 0, 1, 45, show=True)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     0, np.arange(-90, 91, 10)*np.pi/180, 1)
+            >>> result = coords.find_nearest_sph(0, np.pi/2, 1, 45, show=True)
+
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of find_within method."),
+                PyfarDeprecationWarning)
 
         # check the input
         assert distance >= 0 and distance <= 180, \
@@ -1598,6 +1949,9 @@ class Coordinates():
     def find_slice(self, coordinate: str, unit: str, value, tol=0,
                    show=False, atol=1e-15):
         """
+        This function will be deprecated in pyfar 0.8.0. Use properties and
+        slicing instead, e.g. ``coords = coords[coords.azimuth>=np.pi]``.
+
         Find a slice of the coordinates points.
 
         Parameters
@@ -1640,10 +1994,16 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> result = coords.find_slice('elevation', 'deg', 0, 5, show=True)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     np.arange(-30, 30, 5)*np.pi/180, 0, 1)
+            >>> result = coords.find_slice('azimuth', 'deg', 0, 5, show=True)
 
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0. Use properties"
+            " and slicing instead."),
+                PyfarDeprecationWarning)
 
         # check if the coordinate and unit exist
         domain, convention, index = self._exist_coordinate(coordinate, unit)
@@ -1736,7 +2096,7 @@ class Coordinates():
         Get a coordinates object
 
         >>> import pyfar as pf
-        >>> coordinates = pf.samplings.sph_gaussian(sh_order=3)
+        >>> coords = pf.Coordinates(np.arange(-5, 5), 0, 0)
 
         Rotate 45 degrees about the y-axis using
 
@@ -2556,6 +2916,91 @@ def cyl2cart(azimuth, height, radius):
     z[np.abs(z) < np.finfo(x.dtype).eps] = 0
 
     return x, y, z
+
+
+def rad2deg(coordinates, domain='spherical'):
+    """
+    Convert a copy of coordinates in radians to degree
+
+    Parameters
+    ----------
+    coordinates : array like
+        N-dimensional array of shape `(..., 3)`.
+    domain : str, optional
+        Specifies what data are contained in `coordinates`
+
+        ``'spherical'``
+            Spherical coordinates with angles contained in
+            ``coordinates[..., 0:2]`` and radii in ``coordinates[..., 2]``.
+            The radii are ignored during the conversion.
+        ``'cylindrical'``
+            Cylindrical coordinates with angles contained in
+            ``coordinates[..., 0]``, heights contained in
+            ``coordinates[..., 1]``, and radii in ``coordinates[..., 2]``.
+            The heights and radii are ignored during the conversion.
+
+
+    Returns
+    -------
+    coordinates : numpy array
+        The converted coordinates of the same shape as the input data.
+    """
+    return _convert_angles(coordinates, domain, 180/np.pi)
+
+
+def deg2rad(coordinates, domain='spherical'):
+    """
+    Convert a copy of coordinates in degree to radians
+
+    Parameters
+    ----------
+    coordinates : array like
+        N-dimensional array of shape `(..., 3)`.
+    domain : str, optional
+        Specifies what data are contained in `coordinates`
+
+        ``'spherical'``
+            Spherical coordinates with angles contained in
+            ``coordinates[..., 0:2]`` and radii in ``coordinates[..., 2]``.
+            The radii are ignored during the conversion.
+        ``'cylindrical'``
+            Cylindrical coordinates with angles contained in
+            ``coordinates[..., 0]``, heights contained in
+            ``coordinates[..., 1]``, and radii in ``coordinates[..., 2]``.
+            The heights and radii are ignored during the conversion.
+
+
+    Returns
+    -------
+    coordinates : numpy array
+        The converted coordinates of the same shape as the input data.
+    """
+    return _convert_angles(coordinates, domain, np.pi/180)
+
+
+def _convert_angles(coordinates, domain, factor):
+    """Private function called by rad2deg and deg2rad"""
+
+    # check coordinates
+    coordinates = np.atleast_2d(coordinates).astype(float)
+    if coordinates.shape[-1] != 3:
+        raise ValueError(('coordinates must be of shape (..., 3) but are of '
+                          f'shape {coordinates.shape}'))
+
+    # check domain and create mask
+    if domain == 'spherical':
+        mask = [True, True, False]
+    elif domain == 'cylindrical':
+        mask = [True, False, False]
+    else:
+        raise ValueError(("domain must be  'spherical' or 'cylindrical' but "
+                          f"is {domain}"))
+
+    # convert data
+    converted = coordinates.copy()
+    converted[..., mask] = converted[..., mask] * factor
+
+    return converted
 
 
 def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
