@@ -312,7 +312,7 @@ def test_time_shift_linear(shift, pad_value):
         ref.time[0, -2:] = pad_value
 
     npt.assert_allclose(shifted.time, ref.time)
-    assert type(shifted) == type(ref)
+    assert type(shifted) is type(ref)
 
 
 @pytest.mark.parametrize("shift_samples", [(
