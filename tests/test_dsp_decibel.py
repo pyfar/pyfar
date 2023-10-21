@@ -62,7 +62,7 @@ def test_return_prefix():
 
 def test_decibel_complex():
     test_signal = [0.01, 0.1, 1, 10, 100]
-    test_Signal = pf.Signal(test_signal, 44100, complex=True)
+    test_Signal = pf.Signal(test_signal, 44100, is_complex=True)
     # Test right calculation
     # and default values log_prefix = 20 & log_reference = 1
     npt.assert_equal(pf.dsp.decibel(test_Signal, domain='time'),

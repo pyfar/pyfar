@@ -1171,7 +1171,8 @@ def time_shift(
 
     if np.any(np.isnan(shifted.time)):
         shifted = pyfar.TimeData(
-            shifted.time, shifted.times, comment=shifted.comment)
+            shifted.time, shifted.times, comment=shifted.comment,
+            is_complex=signal.complex)
 
     return shifted
 

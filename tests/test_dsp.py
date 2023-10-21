@@ -268,20 +268,17 @@ def test_time_shift_cyclic_complex(shift_samples, unit):
     sampling_rate = 100
     delay = 2
     n_samples = 10
-    test_signal = pf.Signal(impulse(n_samples,
-                                    delay=delay,
-                                    sampling_rate=sampling_rate).time,
-                            sampling_rate=sampling_rate, complex=True)
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+    test_signal.complex = True
 
     # apply shift
     shift = shift_samples if unit == "samples" else shift_samples/sampling_rate
     shifted = dsp.time_shift(test_signal, shift, unit=unit)
 
     # compare to reference
-    ref = pf.Signal(impulse(n_samples,
-                            delay=delay+shift_samples,
-                            sampling_rate=sampling_rate).time,
-                    sampling_rate=sampling_rate, complex=True)
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+    ref.complex = True
 
     npt.assert_allclose(shifted.time, ref.time)
 
@@ -306,6 +303,37 @@ def test_time_shift_linear(shift, pad_value):
 
     if pad_value != 0 and shift != 0:
         ref = pf.TimeData(ref.time, ref.times)
+    if shift == 2:
+        ref.time[0, :2] = pad_value
+    elif shift == -2:
+        ref.time[0, -2:] = pad_value
+
+    npt.assert_allclose(shifted.time, ref.time)
+    assert type(shifted) is type(ref)
+
+
+@pytest.mark.parametrize("shift", [2, -2, 0])
+@pytest.mark.parametrize("pad_value", [0, np.nan])
+def test_time_shift_linear_complex(shift, pad_value):
+    """Test linear time shift with different pad values"""
+    # generate test signal
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+    test_signal.complex = True
+
+    # apply shift
+    shifted = dsp.time_shift(
+        test_signal, shift, "linear", "samples", pad_value)
+
+    # compare to reference
+    ref = impulse(
+        n_samples, delay=delay+shift, sampling_rate=sampling_rate)
+    ref.complex = True
+
+    if pad_value != 0 and shift != 0:
+        ref = pf.TimeData(ref.time, ref.times, is_complex=True)
     if shift == 2:
         ref.time[0, :2] = pad_value
     elif shift == -2:
@@ -360,7 +388,7 @@ def test_time_window_default():
 
 def test_time_window_complex():
     """ Test time_window function with default values."""
-    sig = pyfar.Signal(np.ones(10), 2, complex=True)
+    sig = pyfar.Signal(np.ones(10), 2, is_complex=True)
     sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
     time_win = np.atleast_2d(sgn.windows.hann(10, sym=True)).astype(complex)
     npt.assert_allclose(sig_win.time, time_win)
