@@ -391,6 +391,7 @@ def test_time_window_complex():
     sig = pyfar.Signal(np.ones(10), 2, is_complex=True)
     sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
     time_win = np.atleast_2d(sgn.windows.hann(10, sym=True)).astype(complex)
+    assert sig_win.complex is True
     npt.assert_allclose(sig_win.time, time_win)
 
 
