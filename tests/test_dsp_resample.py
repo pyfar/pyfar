@@ -28,8 +28,8 @@ def test_resampling_complex(L):
     fs_1 = 48000
     fs_2 = L*fs_1
     signal = pf.signals.noise(1024, sampling_rate=fs_1)
+    signal.fft_norm = "none"
     signal.complex = True
-    signal.fft_norm = "none"  # just temporary
 
     resampled_sig = pf.dsp.resample(signal, fs_2, post_filter=False)
     # check if result is stil complex
