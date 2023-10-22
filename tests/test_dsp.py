@@ -37,6 +37,34 @@ def test_phase_deg_unwrap(sine_plus_impulse):
     npt.assert_allclose(phase, truth, rtol=1e-10)
 
 
+def test_phase_rad_complex(sine_plus_impulse_complex):
+    """Test the function returning the phase of a signal in radians."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=False, unwrap=False)
+    truth = np.angle(sine_plus_impulse_complex.freq)
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
+def test_phase_deg_complex(sine_plus_impulse_complex):
+    """Test the function returning the phase of a signal in degrees."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=True, unwrap=False)
+    truth = np.degrees(np.angle(sine_plus_impulse_complex.freq))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
+def test_phase_unwrap_complex(sine_plus_impulse_complex):
+    """Test the function returning the unwrapped phase of a signal."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=False, unwrap=True)
+    truth = np.unwrap(np.angle(sine_plus_impulse_complex.freq))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
+def test_phase_deg_unwrap_complex(sine_plus_impulse_complex):
+    """Test the function returning the unwrapped phase of a signal in deg."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=True, unwrap=True)
+    truth = np.degrees(np.unwrap(np.angle(sine_plus_impulse_complex.freq)))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
 def test_group_delay_single_channel(impulse_group_delay):
     """Test the function returning the group delay of a signal,
     single channel."""
