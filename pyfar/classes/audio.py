@@ -829,6 +829,9 @@ class Signal(FrequencyData, TimeData):
                 self._complex = value
         # from complex=False to complex=True
         if not self._complex and value:
+            if self._fft_norm == "rms":
+                raise ValueError(("'rms' normalization is not valid for "
+                                  "complex time signals"))
             if self._domain == 'time':
                 # call complex setter of timeData
                 super(Signal, self.__class__).complex.fset(self, value)
