@@ -886,6 +886,9 @@ class Signal(FrequencyData, TimeData):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
+        if self._complex and value is "rms":
+            raise ValueError(("'rms' normalization is not valid for "
+                                  "complex time signals"))
         self._fft_norm = value
 
     def _assert_matching_meta_data(self, other):

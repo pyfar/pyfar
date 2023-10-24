@@ -315,6 +315,14 @@ def test_setter_fft_norm():
     with pytest.raises(ValueError):
         signal.fft_norm = 'bullshit'
 
+    # setting fft_norm for complex time signals
+    signal = pf.Signal([1, 2, 3], 44100,
+                       fft_norm='power', is_complex=True)
+    with pytest.raises(ValueError,
+                       match="'rms' normalization is not valid for "
+                             "complex time signals"):
+        signal.fft_norm = "rms"
+
 
 def test_fft_selection():
     """Test if appropriate FFT is computed"""
