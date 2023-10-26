@@ -158,7 +158,7 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     .. note::
         The linear sweep can also be generated in the frequency domain
-        (see :py:func:`~general_sweep_synthesis`). Time domain synthesis
+        (see :py:func:`~exponential_sweep_freq`). Time domain synthesis
         exhibits a constant temporal envelope in trade of slight ripples in the
         magnitude response. Frequency domain synthesis exhibits smooth
         magnitude spectra and in trade of a slightly irregular temporal
@@ -205,6 +205,82 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 def linear_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=0,
         fade_out=0, butterworth_order=8, double=True, sampling_rate=44100):
+    """
+    Generate single channel sine sweep with linearlly increasing frequency.
+
+    Sweep sweep synthesis according to [#]_
+
+    .. note::
+        The linear sweep can also be generated in the time domain
+        (:py:func:`~linear_sweep_time`). Frequency domain synthesis exhibits
+        smooth magnitude spectra in trade of a slightly irregular temporal
+        envelope. Time domain synthesis exhibits a constant temporal envelope
+        in trade of slight ripples in the magnitude response.
+
+    Parameters
+    ----------
+    n_samples : int
+        The length of the sweep in samples.
+    frequency_range : array like
+        Frequency range of the sweep given by the lower and upper cut-off
+        frequency in Hz. The restriction of the frequency range is realized
+        by applying a Butterworth band-pass with the specified frequencies.
+    start_margin : int, float
+        The time in samples, at which the sweep starts. The start margin is
+        required because the frequency domain sweep synthesis has pre-ringing
+        in the time domain.
+    stop_margin : int, float
+        Time in samples, at which the sweep stops. This is relative to
+        `n_samples`, e.g., a stop margin of 100 samples means that the sweep
+        ends at sample ``n_samples-10``. This is required, because the
+        frequency domain sweep synthesis has post-ringing in the time domain.
+    fade_in : int
+        Duration of a squared sine fade-in in samples. The fade starts at the
+        first sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal. The default ``0`` does not apply
+        a fade-in.
+    fade_out : int
+        Duration of a squared cosine fade-out in samples. The fade ends at the
+        last sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal. The default ``0`` does not apply
+        a fade-out.
+    butterworth_order : int, None
+        The order of the Butterworth filters that are applied to limit the
+        frequency range by a high-pass if ``frequency_range[0] > 0`` and/or by
+        a low-pass if ``frequency_range[1] < sampling_rate / 2``. The default
+        is ``8``.
+    double : bool
+        Double `n_samples` during the sweep calculation. The default is
+        ``True``.
+    sampling_rate : int
+        The sampling rate in Hz. The default is ``44100``.
+
+    Returns
+    -------
+    sweep : Signal
+        The sweep signal. The Signal is in the time domain, has a maximum
+        absolute amplitude of 1 and the ``rms`` FFT normalization
+        (see :py:func:`~pyfar.dsp.fft.normalization`).
+    group_delay_sweep : FrequencyData
+        The group delay of the sweep in seconds as a single sided spectrum.
+
+    Notes
+    -----
+    The envelope of the sweep time signal should be constant, apart from
+    slight overshoots at the beginning and end. If this is not the case, try
+    to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in` or
+    `fade_out`.
+
+    References
+    ----------
+    .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
+           Directors Cut Including Previously Unreleased Material and some
+           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443–471.
+
+    Examples
+    --------
+    TODO
+    """
 
     signal, group_delay = _frequency_domain_sweep(
         n_samples=n_samples,
@@ -242,7 +318,7 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
     .. note::
         The exponential sweep can also be generated in the frequency domain
-        (see :py:func:`~general_sweep_synthesis`). Time domain synthesis
+        (see :py:func:`~exponential_sweep.freq`). Time domain synthesis
         exhibits a constant temporal envelope in trade of slight ripples in the
         magnitude response. Frequency domain synthesis exhibits smooth
         magnitude spectra and in trade of a slightly irregular temporal
@@ -293,6 +369,82 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 def exponential_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=0,
         fade_out=0, butterworth_order=8, double=True, sampling_rate=44100):
+    """
+    Generate single channel sine sweep with exponentially increasing frequency.
+
+    Sweep sweep synthesis according to [#]_
+
+    .. note::
+        The exponential sweep can also be generated in the time domain
+        (:py:func:`~exponential_sweep_time`). Frequency domain synthesis
+        exhibits smooth magnitude spectra in trade of a slightly irregular
+        temporal envelope. Time domain synthesis exhibits a constant temporal
+        envelope in trade of slight ripples in the magnitude response.
+
+    Parameters
+    ----------
+    n_samples : int
+        The length of the sweep in samples.
+    frequency_range : array like
+        Frequency range of the sweep given by the lower and upper cut-off
+        frequency in Hz. The restriction of the frequency range is realized
+        by applying a Butterworth band-pass with the specified frequencies.
+    start_margin : int, float
+        The time in samples, at which the sweep starts. The start margin is
+        required because the frequency domain sweep synthesis has pre-ringing
+        in the time domain.
+    stop_margin : int, float
+        Time in samples, at which the sweep stops. This is relative to
+        `n_samples`, e.g., a stop margin of 100 samples means that the sweep
+        ends at sample ``n_samples-10``. This is required, because the
+        frequency domain sweep synthesis has post-ringing in the time domain.
+    fade_in : int
+        Duration of a squared sine fade-in in samples. The fade starts at the
+        first sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal. The default ``0`` does not apply
+        a fade-in.
+    fade_out : int
+        Duration of a squared cosine fade-out in samples. The fade ends at the
+        last sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal. The default ``0`` does not apply
+        a fade-out.
+    butterworth_order : int, None
+        The order of the Butterworth filters that are applied to limit the
+        frequency range by a high-pass if ``frequency_range[0] > 0`` and/or by
+        a low-pass if ``frequency_range[1] < sampling_rate / 2``. The default
+        is ``8``.
+    double : bool
+        Double `n_samples` during the sweep calculation. The default is
+        ``True``.
+    sampling_rate : int
+        The sampling rate in Hz. The default is ``44100``.
+
+    Returns
+    -------
+    sweep : Signal
+        The sweep signal. The Signal is in the time domain, has a maximum
+        absolute amplitude of 1 and the ``rms`` FFT normalization
+        (see :py:func:`~pyfar.dsp.fft.normalization`).
+    group_delay_sweep : FrequencyData
+        The group delay of the sweep in seconds as a single sided spectrum.
+
+    Notes
+    -----
+    The envelope of the sweep time signal should be constant, apart from
+    slight overshoots at the beginning and end. If this is not the case, try
+    to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in` or
+    `fade_out`.
+
+    References
+    ----------
+    .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
+           Directors Cut Including Previously Unreleased Material and some
+           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443–471.
+
+    Examples
+    --------
+    TODO
+    """
 
     signal, group_delay = _frequency_domain_sweep(
         n_samples=n_samples,
@@ -311,7 +463,77 @@ def exponential_sweep_freq(
 
 def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude_spectrum, start_margin, stop_margin,
-        double=True, sampling_rate=44100):
+        fade_in, fade_out, double=True, sampling_rate=44100):
+    """
+    Generate single channel sine sweep with arbitrary magnitude spectrum.
+
+    Sweep sweep synthesis according to [#]_
+
+    .. note::
+        The linear sweep can also be generated in the time domain
+        (:py:func:`~linear_sweep_time`). Frequency domain synthesis exhibits
+        smooth magnitude spectra in trade of a slightly irregular temporal
+        envelope. Time domain synthesis exhibits a constant temporal envelope
+        in trade of slight ripples in the magnitude response.
+
+    Parameters
+    ----------
+    n_samples : int
+        The length of the sweep in samples.
+    magnitude_spectrum : Signal
+        The magnitude spectrum as a Signal object. Must be at least `n_samples`
+        long and is zero-padded to `n_samples` otherwise.
+    start_margin : int, float
+        The time in samples, at which the sweep starts. The start margin is
+        required because the frequency domain sweep synthesis has pre-ringing
+        in the time domain.
+    stop_margin : int, float
+        Time in samples, at which the sweep stops. This is relative to
+        `n_samples`, e.g., a stop margin of 100 samples means that the sweep
+        ends at sample ``n_samples-10``. This is required, because the
+        frequency domain sweep synthesis has post-ringing in the time domain.
+    fade_in : int
+        Duration of a squared sine fade-in in samples. The fade starts at the
+        first sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal. The default ``0`` does not apply
+        a fade-in.
+    fade_out : int
+        Duration of a squared cosine fade-out in samples. The fade ends at the
+        last sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal. The default ``0`` does not apply
+        a fade-out.
+    double : bool
+        Double `n_samples` during the sweep calculation. The default is
+        ``True``.
+    sampling_rate : int
+        The sampling rate in Hz. The default is ``44100``.
+
+    Returns
+    -------
+    sweep : Signal
+        The sweep signal. The Signal is in the time domain, has a maximum
+        absolute amplitude of 1 and the ``rms`` FFT normalization
+        (see :py:func:`~pyfar.dsp.fft.normalization`).
+    group_delay_sweep : FrequencyData
+        The group delay of the sweep in seconds as a single sided spectrum.
+
+    Notes
+    -----
+    The envelope of the sweep time signal should be constant, apart from
+    slight overshoots at the beginning and end. If this is not the case,
+    provide a smother spectrum in `magnitude_spectrum` or try to increase
+    `n_samples`, `start_margin`, `stop_margin`, `fade_in` or `fade_out`.
+
+    References
+    ----------
+    .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
+           Directors Cut Including Previously Unreleased Material and some
+           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443–471.
+
+    Examples
+    --------
+    TODO
+    """
 
     signal, group_delay = _frequency_domain_sweep(
         n_samples=n_samples,
@@ -321,14 +543,45 @@ def magnitude_spectrum_weighted_sweep(
         double=double,
         start_margin=start_margin,
         stop_margin=stop_margin,
-        fade_in=0,
-        fade_out=0,
+        fade_in=fade_in,
+        fade_out=fade_out,
         sampling_rate=sampling_rate)
 
     return signal, group_delay
 
 
-def perfect_linear_sweep(n_samples, sampling_rate=44100):
+def linear_perfect_sweep(n_samples, sampling_rate=44100):
+    """
+    Generate a perfect linear sweep.
+
+    The perfect sweep is generated according to [#]_ and is used for adaptive
+    system identification. It is orthogonal to delayed versions of itself and
+    can be played back in a loop.
+
+    Parameters
+    ----------
+    n_samples : int
+        The length of the sweep in samples.
+    sampling_rate : int
+        The sampling rate in Hz. The default is ``44100``.
+
+    Returns
+    -------
+    sweep : Signal
+        The sweep signal. The Signal is in the time domain, has a maximum
+        absolute amplitude of 1 and the ``rms`` FFT normalization
+        (see :py:func:`~pyfar.dsp.fft.normalization`).
+    group_delay_sweep : FrequencyData
+        The group delay of the sweep in seconds as a single sided spectrum.
+
+    References
+    ----------
+    [#] C. Antweiler, A. Telle, P. Vary, and G. Enzner, “Perfect-sweep NLMS for
+        time-variant acoustic system identification,” in IEEE International
+        Conference on Acoustics, Speech and Signal Processing (ICASSP), Prague,
+        Czech Republic, May 2011. doi: 10.1109/ICASSP.2012.6287930.
+
+    """
 
     signal, group_delay = _frequency_domain_sweep(
         n_samples=n_samples,
@@ -350,22 +603,6 @@ def _frequency_domain_sweep(
         start_margin, stop_margin, fade_in, fade_out, sampling_rate):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
-
-    TODO Link to fractional octave smoothing in Notes
-
-    TODO Implement calculation of group delay of impulse responses
-
-    TODO Examples
-
-    Sweep sweep synthesis according to [#]_
-
-    .. note::
-        The linear and exponential sweep can also be generated in the time
-        domain (see :py:func:`~linear_sweep`, :py:func:`~exponential_sweep`).
-        Frequency domain synthesis exhibits smooth magnitude spectra and in
-        trade of a slightly irregular temporal envelope. Time domain synthesis
-        exhibits a constant temporal envelope in trade of slight ripples in the
-        magnitude response.
 
     Parameters
     ----------
@@ -426,40 +663,6 @@ def _frequency_domain_sweep(
     group_delay_sweep : FrequencyData
         The group delay of the sweep as a single sided spectrum between 0 Hz
         and ``sampling_rate/2``.
-
-        TODO add this after implementation is complete:
-
-        This can be used to calculate the group delay of the impulse responses
-        of linear and harmonic distortion products after deconvoloution (see
-        :py:func:`~pyfar.dsp...`).
-
-    Notes
-    -----
-    The envelope of the sweep time signal should be constant, appart from
-    slight overshoots at the beginning and end. If this is not the case, try to
-    provide a smoother spectrum (if `sweep_type` is `signal`) or increase
-    `n_samples`.
-
-    References
-    ----------
-    .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
-           Directors Cut Including Previously Unreleased Material and some
-           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443–471.
-    .. [#] C. Antweiler, A. Telle, P. Vary, G. Enzner. 'Perfect-Sweep NLMS for
-           Time-Variant Acoustic System Identification,' IEEE Int. Conf.
-           Acoustics, Speech and Signal Processing (ICASSP),
-           Prague, Czech Republic, 2011. doi: 10.1109/ICASSP.2012.6287930.
-
-    Examples
-    --------
-    TODO Example with sweep_type=singal
-          (e.g., Bass emphasis by means of low shelve filter)
-
-    TODO Examples with sweep_type="linear"
-
-    TODO Examples with sweep_type="exponential"
-
-    TODO Examples with sweep_type="perfect_linear"
     """
 
     # check input -------------------------------------------------------------
