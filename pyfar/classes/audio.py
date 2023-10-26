@@ -105,11 +105,20 @@ class _Audio():
 
         Parameters
         ----------
-        axes : empty, `None`, iterable of ints, or n ints
-            empty (default) or `None`: reverses the order of `self.caxes`.
-            iterable of ints: `i` in the `j`-th place of the interable means
-            that the `i`-th axis becomes transposed object's `j`-th axis.
-            n ints: same as 'iterable of ints'.
+        caxes : empty, ``None``, iterable of ints, or n ints
+            Define how the :py:mod:` caxes <pyfar._concepts.audio_classes>`
+            are ordered in the transposed audio object.
+            Note that the last dimension of the data in the audio object
+            always contains the time samples or frequency bins and can not
+            be transposed.
+            
+            empty (default) or ``None``
+                reverses the order of ``self.caxes``.
+            iterable of ints
+                `i` in the `j`-th place of the interable means
+                that the `i`-th caxis becomes transposed object's `j`-th caxis.
+            n ints
+                same as 'iterable of ints'.
         """
         if hasattr(axes, '__iter__'):
             axes = axes[0] if len(axes) == 1 else axes
