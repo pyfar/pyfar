@@ -576,6 +576,10 @@ def _frequency_domain_sweep(
         sweep_ang[-1] = np.abs(sweep_ang[-1])
 
     # compute and finalize return data ----------------------------------------
+    # put group delay on pyfar FrequencyData
+    sweep_gd = pyfar.FrequencyData(
+        sweep_gd, pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate))
+
     # combine magnitude and phase of sweep
     sweep = sweep_abs * np.exp(1j * sweep_ang)
 
@@ -583,34 +587,36 @@ def _frequency_domain_sweep(
     sweep = pyfar.Signal(sweep, sampling_rate, n_samples, 'freq', 'none')
     sweep.fft_norm = 'rms'
 
-    # put group delay on pyfar FrequencyData
-    sweep_gd = pyfar.FrequencyData(
-        sweep_gd, pyfar.dsp.fft.rfftfreq(n_samples, sampling_rate))
-
     # cut to originally desired length
     if double:
         n_samples = n_samples // 2
         stop_margin -= n_samples
         sweep.time = sweep.time[..., :n_samples]
 
-    # apply window
+    # find windowing end points heuristically. The start and stop margin are
+    # not reliable, because freq. domain synthesis causes pre/post-ringing
+    if fade_in or fade_out:
+        threshold = 10**(-60/20) * np.max(np.abs(sweep.time))
+        fade_start = np.argmax(np.abs(sweep.time) > threshold)
+        fade_end = n_samples - \
+            np.argmax(np.abs(sweep.time.flatten()[::-1]) > threshold)
+        print([fade_start, fade_end])
+
+    # generate windows for fade in and/or out
     if fade_in and fade_out:
-        fade = [start_margin,
-                start_margin + fade_in,
-                n_samples - stop_margin - fade_out,
-                n_samples - stop_margin]
+        fade = [fade_start, fade_start + fade_in,
+                fade_end - fade_out, fade_end]
         shape = 'symmetric'
     elif fade_in:
-        fade = [start_margin,
-                start_margin + fade_in]
+        fade = [fade_start, fade_start + fade_in]
         shape = 'left'
     elif fade_out:
-        fade = [n_samples - stop_margin - fade_out,
-                n_samples - stop_margin]
+        fade = [fade_end - fade_out, fade_end]
         shape = 'right'
     else:
         fade = None
 
+    # apply window
     if fade is not None:
         sweep = pyfar.dsp.time_window(sweep, fade, shape=shape)
 
