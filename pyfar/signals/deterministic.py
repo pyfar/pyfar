@@ -389,6 +389,8 @@ def exponential_sweep_freq(
         Frequency range of the sweep given by the lower and upper cut-off
         frequency in Hz. The restriction of the frequency range is realized
         by applying a Butterworth band-pass with the specified frequencies.
+        Note that the exponential sweep can not start at 0 Hz, because its
+        magnitude is defined by 1/frequency.
     start_margin : int, float
         The time in samples, at which the sweep starts. The start margin is
         required because the frequency domain sweep synthesis has pre-ringing
