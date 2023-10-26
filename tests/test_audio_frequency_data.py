@@ -110,10 +110,14 @@ def test_reshape_exceptions():
 
 def test_transpose():
     signal_in = FrequencyData(np.random.rand(6, 2, 5, 256), range(256))
-    npt.assert_allclose(signal_in.transpose()._data, signal_in.T._data)
     signal_out = signal_in.transpose()
+    npt.assert_allclose(signal_in.T._data, signal_out._data)
     npt.assert_allclose(signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
-    taxis = (2, 0, 1)
+
+
+@pytest.mark.parametrize('taxis', [(2, 0, 1), (-2, 0, -1)])
+def test_transpose_args(taxis):
+    signal_in = FrequencyData(np.random.rand(6, 2, 5, 256), range(256))
     signal_out = signal_in.transpose(taxis)
     npt.assert_allclose(signal_in._data.transpose(*taxis, 3), signal_out._data)
     signal_out = signal_in.transpose(*taxis)
