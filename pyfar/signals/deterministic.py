@@ -580,7 +580,8 @@ def _frequency_domain_sweep(
     sweep = sweep_abs * np.exp(1j * sweep_ang)
 
     # put sweep in pyfar.Signal an transform to time domain
-    sweep = pyfar.Signal(sweep, sampling_rate, n_samples, 'freq', 'rms')
+    sweep = pyfar.Signal(sweep, sampling_rate, n_samples, 'freq', 'none')
+    sweep.fft_norm = 'rms'
 
     # put group delay on pyfar FrequencyData
     sweep_gd = pyfar.FrequencyData(
