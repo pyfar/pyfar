@@ -19,8 +19,98 @@ import pyfar as pf
 
 class Coordinates():
     """
-    Container class for storing, converting, rotating, querying, and plotting
-    3D coordinate systems.
+    This function will be changed in pyfar 0.8.0 and will just be able to
+    get cartesian coordinates. If you want to initialize in an other
+    domain use :py:func:`from_spherical_colatitude`,
+    :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
+    :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
+    instead. For conversions from or into degree
+    use :py:func:`deg2rad` and :py:func:`rad2deg`.
+
+    Create :py:func:`Coordinates` object with or without coordinate points.
+    The points that enter the Coordinates object are defined by the
+    `domain`, `convention`, and `unit` as illustrated in the
+    :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
+
+    +--------------------+----------+------------+----------+----------+
+    | domain, convention | points_1 | points_2   | points_3 | unit     |
+    +====================+==========+============+==========+==========+
+    | cart, right        | x        | y          | z        | met      |
+    +--------------------+----------+------------+----------+----------+
+    | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | sph, side          | lateral  | polar      | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | sph, front         | phi      | theta      | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | cyl, top           | azimuth  | z          | radius_z | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+
+    Parameters
+    ----------
+    points_1 : array like, number
+        Points for the first coordinate.
+        ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+        to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+    points_2 : array like, number
+        Points for the second coordinate.
+        ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+        to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+    points_3 : array like, number
+        Points for the third coordinate.
+        ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+        to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+    domain : string
+        ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+        parameters will be deprecated in pyfar 0.8.0 in favor of
+        ``from_*``.  Different units are no longer supported. The unit is
+        meter for distances and radians for angles.
+        domain of the coordinate system
+
+        ``'cart'``
+            Cartesian
+        ``'sph'``
+            Spherical
+        ``'cyl'``
+            Cylindrical
+
+        The default is ``'cart'``.
+    convention: string
+        ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+        parameters will be deprecated in pyfar 0.8.0 in favor of
+        ``from_*``.  Different units are no longer supported.
+        Default angle unit is radiant.
+
+        Coordinate convention (see above)
+        The default is ``'right'`` if domain is ``'cart'``,
+        ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
+        ``'cyl'``.
+    unit: string
+        ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+        parameters will be deprecated in pyfar 0.8.0 in favor of
+        ``from_*``. Different units are no longer supported. Default
+        angle unit is radiant.
+        The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of the :py:func:`deg2rad` and :py:func:`rad2deg`.
+
+        Unit of the coordinate system. By default the first available unit
+        is used, which is meters (``'met'``) for ``domain = 'cart'`` and
+        radians (``'rad'``) in all other cases (See above).
+    weights: array like, number, optional
+        Weighting factors for coordinate points. The `shape` of the array
+        must match the `shape` of the individual coordinate arrays.
+        The default is ``None``.
+    sh_order : int, optional
+        This property will be deprecated in pyfar 0.8.0 in favor of
+        :py:class:`spharpy.samplings.SamplingSphere`
+
+        Maximum spherical harmonic order of the sampling grid.
+        The default is ``None``.
+    comment : str, optional
+        Comment about the stored coordinate points. The default is
+        ``""``, which initializes an empty string.
     """
     _x: np.array = np.empty
     _y: np.array = np.empty
@@ -37,97 +127,6 @@ class Coordinates():
             domain: str = 'cart', convention: str = None, unit: str = None,
             weights: np.array = None, sh_order=None,
             comment: str = "") -> None:
-        """
-        This function will be changed in pyfar 0.8.0 and will just be able to
-        get cartesian coordinates. If you want to initialize in an other
-        domain use :py:func:`from_spherical_colatitude`,
-        :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
-        :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
-        instead.
-
-        Create :py:func:`Coordinates` object with or without coordinate points.
-        The points that enter the Coordinates object are defined by the
-        `domain`, `convention`, and `unit` as illustrated in the
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
-
-        +--------------------+----------+------------+----------+----------+
-        | domain, convention | points_1 | points_2   | points_3 | unit     |
-        +====================+==========+============+==========+==========+
-        | cart, right        | x        | y          | z        | met      |
-        +--------------------+----------+------------+----------+----------+
-        | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | sph, side          | lateral  | polar      | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | sph, front         | phi      | theta      | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | cyl, top           | azimuth  | z          | radius_z | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-
-        Parameters
-        ----------
-        points_1 : array like, number
-            Points for the first coordinate.
-            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
-        points_2 : array like, number
-            Points for the second coordinate.
-            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
-        points_3 : array like, number
-            Points for the third coordinate.
-            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
-        domain : string
-            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
-            parameters will be deprecated in pyfar 0.8.0 in favor of
-            ``from_*``.  Different units are no longer supported. The unit is
-            meter for distances and radians for angles.
-            domain of the coordinate system
-
-            ``'cart'``
-                Cartesian
-            ``'sph'``
-                Spherical
-            ``'cyl'``
-                Cylindrical
-
-            The default is ``'cart'``.
-        convention: string
-            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
-            parameters will be deprecated in pyfar 0.8.0 in favor of
-            ``from_*``.  Different units are no longer supported.
-            Default angle unit is radiant.
-
-            Coordinate convention (see above)
-            The default is ``'right'`` if domain is ``'cart'``,
-            ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
-            ``'cyl'``.
-        unit: string
-            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
-            parameters will be deprecated in pyfar 0.8.0 in favor of
-            ``from_*``. Different units are no longer supported. Default
-            angle unit is radiant.
-
-            Unit of the coordinate system. By default the first available unit
-            is used, which is meters (``'met'``) for ``domain = 'cart'`` and
-            radians (``'rad'``) in all other cases (See above).
-        weights: array like, number, optional
-            Weighting factors for coordinate points. The `shape` of the array
-            must match the `shape` of the individual coordinate arrays.
-            The default is ``None``.
-        sh_order : int, optional
-            This property will be deprecated in pyfar 0.8.0 in favor of
-            :py:class:`spharpy.samplings.SamplingSphere`
-
-            Maximum spherical harmonic order of the sampling grid.
-            The default is ``None``.
-        comment : str, optional
-            Comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
 
         # init empty object
         super(Coordinates, self).__init__()
@@ -533,7 +532,8 @@ class Coordinates():
             convention='top_colat', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the ``spherical_*`` properties.
+        of the ``spherical_*`` properties. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -566,6 +566,8 @@ class Coordinates():
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -601,6 +603,10 @@ class Coordinates():
 
         # convert to radians
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             angles_1 = angles_1 / 180 * np.pi
             angles_2 = angles_2 / 180 * np.pi
 
@@ -633,7 +639,8 @@ class Coordinates():
     def get_sph(self, convention='top_colat', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the `spherical_...` properties.
+        of the `spherical_...` properties. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in spherical coordinate systems.
 
         The points that are returned are defined by the `domain`,
@@ -664,6 +671,8 @@ class Coordinates():
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         convert : boolean, optional
             If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
@@ -734,6 +743,10 @@ class Coordinates():
 
         # convert to degrees
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             angles_1 = angles_1 / np.pi * 180
             angles_2 = angles_2 / np.pi * 180
         elif not unit == 'rad':
@@ -746,7 +759,8 @@ class Coordinates():
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the :py:func:`cylindrical` property.
+        of the :py:func:`cylindrical` property. For conversions from or
+        into degree use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -800,6 +814,10 @@ class Coordinates():
 
         # convert to radians
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             azimuth = azimuth / 180 * np.pi
         elif not unit == 'rad':
             raise ValueError(
@@ -823,7 +841,8 @@ class Coordinates():
     def get_cyl(self, convention='top', unit='rad', convert=False):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the `cylindrical` property.
+        of the `cylindrical` property. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in cylindrical coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -847,7 +866,10 @@ class Coordinates():
             is ``'right'``.
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
-            ``'met'``.
+            ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
+
         convert : boolean, optional
             If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
@@ -888,6 +910,10 @@ class Coordinates():
 
         # convert to degrees
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             azimuth = azimuth / np.pi * 180
         elif unit != 'rad':
             raise ValueError(
