@@ -193,6 +193,16 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     .. [#]  Farina, Angelo (2000): "Simultaneous measurement of impulse
             response and distortion with a swept-sine technique." 108th AES
             Convention, Paris: France.
+
+    Examples
+    --------
+    Linear sweep between 0 and 22050 Hz
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> sweep = pf.signals.linear_sweep_time(2**16, [0, 22050])
+        >>> pf.plot.time_freq(sweep)
     """
 
     signal = _time_domain_sweep(
@@ -203,8 +213,8 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
 
 def linear_sweep_freq(
-        n_samples, frequency_range, start_margin, stop_margin, fade_in=0,
-        fade_out=0, butterworth_order=8, double=True, sampling_rate=44100):
+        n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
+        fade_out=None, butterworth_order=8, double=True, sampling_rate=44100):
     """
     Generate single channel sine sweep with linearlly increasing frequency.
 
@@ -275,11 +285,18 @@ def linear_sweep_freq(
     ----------
     .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
            Directors Cut Including Previously Unreleased Material and some
-           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443–471.
+           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471.
 
     Examples
     --------
-    TODO
+    Linear sweep between 0 and 22050 Hz
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> sweep, _ = pf.signals.linear_sweep_freq(
+        ...     2**16, [0, 22050], 1000, 1000)
+        >>> pf.plot.time_freq(sweep)
     """
 
     signal, group_delay = _frequency_domain_sweep(
@@ -357,6 +374,17 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
     .. [#]  Farina, Angelo (2000): "Simultaneous measurement of impulse
             response and distortion with a swept-sine technique." 108th AES
             Convention, Paris: France.
+
+    Examples
+    --------
+
+    Exponential sweep between 50 and 22050 Hz
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> sweep = pf.signals.exponential_sweep_time(2**16, [50, 22050])
+        >>> pf.plot.time_freq(sweep)
     """
 
     signal = _time_domain_sweep(
@@ -367,8 +395,8 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
 
 def exponential_sweep_freq(
-        n_samples, frequency_range, start_margin, stop_margin, fade_in=0,
-        fade_out=0, butterworth_order=8, double=True, sampling_rate=44100):
+        n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
+        fade_out=None, butterworth_order=8, double=True, sampling_rate=44100):
     """
     Generate single channel sine sweep with exponentially increasing frequency.
 
@@ -441,11 +469,19 @@ def exponential_sweep_freq(
     ----------
     .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
            Directors Cut Including Previously Unreleased Material and some
-           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443–471.
+           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471.
 
     Examples
     --------
-    TODO
+
+    Exponential sweep between 50 and 22050 Hz
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> sweep, _ = pf.signals.exponential_sweep_freq(
+        ...     2**16, [50, 22050], 5000, 1000)
+        >>> pf.plot.time_freq(sweep)
     """
 
     signal, group_delay = _frequency_domain_sweep(
@@ -465,7 +501,7 @@ def exponential_sweep_freq(
 
 def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude_spectrum, start_margin, stop_margin,
-        fade_in, fade_out, double=True, sampling_rate=44100):
+        fade_in=None, fade_out=None, double=True, sampling_rate=44100):
     """
     Generate single channel sine sweep with arbitrary magnitude spectrum.
 
@@ -530,11 +566,20 @@ def magnitude_spectrum_weighted_sweep(
     ----------
     .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
            Directors Cut Including Previously Unreleased Material and some
-           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443–471.
+           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471.
 
     Examples
     --------
-    TODO
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> magnitude = pf.dsp.filter.low_shelve(
+        ...     pf.signals.impulse(2**16), 500, 20, 2)
+        >>> magnitude = pf.dsp.filter.butterworth(magnitude, 8, 50, 'highpass')
+        >>> sweep, _ = pf.signals.magnitude_spectrum_weighted_sweep(
+        ...     2**16, magnitude, 5000, 1000)
+        >>> pf.plot.time_freq(sweep)
     """
 
     signal, group_delay = _frequency_domain_sweep(
@@ -578,11 +623,50 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100):
 
     References
     ----------
-    [#] C. Antweiler, A. Telle, P. Vary, and G. Enzner, “Perfect-sweep NLMS for
-        time-variant acoustic system identification,” in IEEE International
-        Conference on Acoustics, Speech and Signal Processing (ICASSP), Prague,
-        Czech Republic, May 2011. doi: 10.1109/ICASSP.2012.6287930.
+    .. [#] C. Antweiler, A. Telle, P. Vary, and G. Enzner, “Perfect-sweep NLMS
+           for time-variant acoustic system identification,” in IEEE
+           Int. Conf. Acoustics, Speech and Signal Processing (ICASSP), Prague,
+           Czech Republic, May 2011. doi: 10.1109/ICASSP.2012.6287930.
 
+    Examples
+    --------
+    Plot a shifted perfect sweep to show that it can be looped
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> sweep, _ = pf.signals.linear_perfect_sweep(2**8)
+        >>> sweep_shifted = pf.dsp.time_shift(sweep, 2**7)
+        >>> ax = pf.plot.time_freq(sweep_shifted, unit='samples')
+        >>> ax[0].axvline(2**7, ls='--', c='r', label='start/end')
+        >>> ax[0].legend(loc=4)
+
+    Show that the sweep is orthogonal to all shifted version of itself. This
+    property is important for adaptive system identification.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> sweep, _ = pf.signals.linear_perfect_sweep(2**8)
+        >>>
+        >>> # compute auto-correlation
+        >>> auto_correlation = np.empty(2**8)
+        >>> for idx, shift in enumerate(range(-2**7, 2**7)):
+        >>>     auto_correlation[idx] = np.dot(
+        ...         sweep.time.flatten(),
+        ...         np.roll(sweep.time.flatten(), shift))
+        >>>
+        >>> auto_correlation /= pf.dsp.energy(sweep)
+        >>>
+        >>> # plot auto-correlation
+        >>> with pf.plot.context():
+        >>>     plt.plot(np.arange(-2**7, 2**7), auto_correlation)
+        >>>     plt.gca().set_xlim(-2**7, 2**7)
+        >>>     plt.gca().set_xlabel('time lag in samples')
+        >>>     plt.gca().set_ylabel('auto correlation')
     """
 
     signal, group_delay = _frequency_domain_sweep(
@@ -593,8 +677,8 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100):
         double=False,
         start_margin=0,
         stop_margin=0,
-        fade_in=0,
-        fade_out=0,
+        fade_in=None,
+        fade_out=None,
         sampling_rate=sampling_rate)
 
     return signal, group_delay
@@ -626,9 +710,9 @@ def _frequency_domain_sweep(
             magnitude decreases by 3 dB per frequency doubling and has constant
             energy in fiters of relative constant bandwidth (e.g. octaves).
         ``'perfect_linear'``
-            Perfect linear sweep according to [#]_. Note that the parameters
-            `start_margin`, `stop_margin`, `frequency_range` and `double` are
-            not required in this case.
+            Perfect linear sweep. Note that the parameters `start_margin`,
+            `stop_margin`, `frequency_range` and `double` are not required in
+            this case.
 
     start_margin : int, float
         The time in samples, at which the sweep starts. The start margin is
@@ -688,7 +772,7 @@ def _frequency_domain_sweep(
             "The magnitude is set to 0 at 0 Hz to avoid division by zero."))
     if sweep_type == 'perfect_linear' and \
             (start_margin != 0 or stop_margin != 0 or double or
-             fade_in != 0 or fade_out != 0 or
+             fade_in is not None or fade_out is not None or
              frequency_range[0] != 0 or
              frequency_range[1] != sampling_rate / 2):
         # internal warning. Users will not call this function directly

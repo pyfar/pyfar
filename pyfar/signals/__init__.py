@@ -13,7 +13,7 @@ For example:
 from .deterministic import (
     sine, impulse, linear_sweep_time, exponential_sweep_time,
     linear_sweep_freq, exponential_sweep_freq,
-    perfect_linear_sweep, magnitude_spectrum_weighted_sweep)
+    linear_perfect_sweep, magnitude_spectrum_weighted_sweep)
 
 from .stochastic import (
     noise, pulsed_noise)
@@ -24,5 +24,5 @@ __all__ = [
     'sine', 'impulse', 'noise', 'pulsed_noise',
     'linear_sweep_time', 'exponential_sweep_time',
     'linear_sweep_freq', 'exponential_sweep_freq',
-    'perfect_linear_sweep', 'magnitude_spectrum_weighted_sweep',
+    'linear_perfect_sweep', 'magnitude_spectrum_weighted_sweep',
     'files']
