@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import os
-from pyfar import Signal
+import pyfar as pf
 import pyfar.dsp.filter as pff
 import pyfar.signals as pfs
 from pyfar.signals.deterministic import _match_shape
@@ -14,7 +14,7 @@ def test_sine_with_defaults():
     signal = pfs.sine(99, 441)
     sin = np.sin(np.arange(441) / 44100 * 2 * np.pi * 99)
 
-    assert isinstance(signal, Signal)
+    assert isinstance(signal, pf.Signal)
     assert signal.comment == ("Sine signal (f = [99] Hz, amplitude = [1], "
                               "phase = [0] rad)")
     assert signal.sampling_rate == 44100
@@ -70,7 +70,7 @@ def test_sine_assertions():
 def test_impulse_with_defaults():
     """Test impulse with default parameters"""
     signal = pfs.impulse(3)
-    assert isinstance(signal, Signal)
+    assert isinstance(signal, pf.Signal)
     npt.assert_allclose(signal.time, np.atleast_2d([1, 0, 0]))
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == 'none'
@@ -113,7 +113,7 @@ def test_noise_with_defaults():
     """Test noise with default parameters."""
     signal = pfs.noise(100)
 
-    assert isinstance(signal, Signal)
+    assert isinstance(signal, pf.Signal)
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
     assert signal.comment == "white noise signal (rms = [1])"
@@ -178,7 +178,7 @@ def test_pulsed_noise_with_defaults():
     """Test pulsed noise signal generation with default values."""
     signal = pfs.pulsed_noise(n_pulse=200, n_pause=100)
 
-    assert isinstance(signal, Signal)
+    assert isinstance(signal, pf.Signal)
     assert signal.sampling_rate == 44100
     assert signal.fft_norm == "rms"
     assert signal.n_samples == 5 * 200 + 4 * 100
@@ -352,3 +352,33 @@ def test_match_shape():
     assert cshape == (2, 3)
     npt.assert_allclose(np.ones(cshape), a_match)
     npt.assert_allclose(b, b_match)
+
+
+@pytest.mark.parametrize('n_samples', [2**8, 2**8 + 1])
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
+def test_linear_perfect_sweep(n_samples, sampling_rate):
+    '''Test the perfect sweep generation'''
+
+    sweep, group_delay = pfs.linear_perfect_sweep(n_samples, sampling_rate)
+
+    # basic checks
+    assert type(sweep) is pf.Signal
+    assert sweep.n_samples == n_samples
+    assert sweep.sampling_rate == sampling_rate
+    assert type(group_delay) is pf.FrequencyData
+
+    # assert magnitude response
+    npt.assert_almost_equal(np.abs(sweep.freq_raw),
+                            np.mean(np.abs(sweep.freq_raw)))
+
+    # compute normalized auto-correlation
+    auto_correlation = np.empty(n_samples-1)
+    for shift in range(1, n_samples):
+        auto_correlation[shift - 1] = np.dot(
+            sweep.time.flatten(),
+            np.roll(sweep.time.flatten(), shift))
+    auto_correlation /= pf.dsp.energy(sweep)
+
+    # must be 0 - sweep is orthogonal to shifted versions of itself
+    assert np.all(
+        np.abs(auto_correlation) < 5 * np.finfo(sweep.time.dtype).eps)
