@@ -357,7 +357,10 @@ def test_match_shape():
 @pytest.mark.parametrize('n_samples', [2**8, 2**8 + 1])
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_linear_perfect_sweep(n_samples, sampling_rate):
-    '''Test the perfect sweep generation'''
+    '''
+    Test the perfect sweep generation. Test only specifics general tests
+    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    '''
 
     sweep, group_delay = pfs.linear_perfect_sweep(n_samples, sampling_rate)
 
@@ -365,6 +368,7 @@ def test_linear_perfect_sweep(n_samples, sampling_rate):
     assert type(sweep) is pf.Signal
     assert sweep.n_samples == n_samples
     assert sweep.sampling_rate == sampling_rate
+    assert sweep.fft_norm == 'rms'
     assert type(group_delay) is pf.FrequencyData
 
     # assert magnitude response
@@ -382,3 +386,87 @@ def test_linear_perfect_sweep(n_samples, sampling_rate):
     # must be 0 - sweep is orthogonal to shifted versions of itself
     assert np.all(
         np.abs(auto_correlation) < 5 * np.finfo(sweep.time.dtype).eps)
+
+
+@pytest.mark.parametrize('n_samples', [2**16, 2**16 + 1])
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
+def test_linear_sweep_freq(n_samples, sampling_rate):
+    '''
+    Test the linear sweep generation. Test only specifics general tests
+    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    '''
+
+    sweep, group_delay = pfs.linear_sweep_freq(
+        n_samples, [200, 16e3], 5000, 5000, sampling_rate=sampling_rate)
+
+    # basic checks
+    assert type(sweep) is pf.Signal
+    assert sweep.n_samples == n_samples
+    assert sweep.sampling_rate == sampling_rate
+    assert sweep.fft_norm == 'rms'
+    assert type(group_delay) is pf.FrequencyData
+
+    # assert constant magnitude response within frequency range
+    idx = sweep.find_nearest_frequency([300, 15000])
+    freq_db = pf.dsp.decibel(sweep).flatten()[idx[0]:idx[1]]
+    npt.assert_allclose(freq_db[idx[0]:idx[1]],
+                        np.mean(freq_db[idx[0]:idx[1]]),
+                        atol=.4)
+
+
+@pytest.mark.parametrize('n_samples', [2**16, 2**16 + 1])
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
+def test_exponential_sweep_freq(n_samples, sampling_rate):
+    '''
+    Test the exponential sweep generation. Test only specifics general tests
+    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    '''
+
+    sweep, group_delay = pfs.exponential_sweep_freq(
+        n_samples, [200, 16e3], 5000, 5000, sampling_rate=sampling_rate)
+
+    # basic checks
+    assert type(sweep) is pf.Signal
+    assert sweep.n_samples == n_samples
+    assert sweep.sampling_rate == sampling_rate
+    assert sweep.fft_norm == 'rms'
+    assert type(group_delay) is pf.FrequencyData
+
+    # assert 1/sqrt(f) magnitude response within frequency range
+    idx = sweep.find_nearest_frequency([300, 15000])
+    freq_db = np.abs(sweep.freq_raw).flatten()
+    freq_db *= np.sqrt(sweep.frequencies)
+    freq_db = 20 * np.log10(freq_db[idx[0]:idx[1]])
+    npt.assert_allclose(freq_db, np.mean(freq_db), atol=.4)
+
+
+@pytest.mark.parametrize('n_samples', [2**16, 2**16 + 1])
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
+def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
+    '''
+    Test the magnitude weighted sweep. Test only specifics general tests
+    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    '''
+
+    # magnitude spectrum
+    magnitude = pf.dsp.filter.low_shelve(
+        pf.signals.impulse(n_samples, sampling_rate=sampling_rate), 500, 20, 2)
+    magnitude = pf.dsp.filter.butterworth(magnitude, 8, 50, 'highpass')
+    # sweep
+    sweep, group_delay = pf.signals.magnitude_spectrum_weighted_sweep(
+        n_samples, magnitude, 5000, 1000, sampling_rate=sampling_rate)
+
+    # basic checks
+    assert type(sweep) is pf.Signal
+    assert sweep.n_samples == n_samples
+    assert sweep.sampling_rate == sampling_rate
+    assert sweep.fft_norm == 'rms'
+    assert type(group_delay) is pf.FrequencyData
+
+    # assert magnitude response against reference within sweep frequency range
+    idx = sweep.find_nearest_frequency([50, sampling_rate / 2])
+    freq_db = pf.dsp.decibel(sweep).flatten()[idx[0]:idx[1]]
+    freq_db -= np.mean(freq_db)
+    ref_db = pf.dsp.decibel(magnitude).flatten()[idx[0]:idx[1]]
+    ref_db -= np.mean(ref_db)
+    npt.assert_allclose(freq_db, ref_db, atol=.1)

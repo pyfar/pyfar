@@ -214,7 +214,7 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
 def linear_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
-        fade_out=None, butterworth_order=8, double=True, sampling_rate=44100):
+        fade_out=None, butterworth_order=8, sampling_rate=44100):
     """
     Generate single channel sine sweep with linearlly increasing frequency.
 
@@ -259,9 +259,6 @@ def linear_sweep_freq(
         frequency range by a high-pass if ``frequency_range[0] > 0`` and/or by
         a low-pass if ``frequency_range[1] < sampling_rate / 2``. The default
         is ``8``.
-    double : bool
-        Double `n_samples` during the sweep calculation. The default is
-        ``True``.
     sampling_rate : int
         The sampling rate in Hz. The default is ``44100``.
 
@@ -304,7 +301,7 @@ def linear_sweep_freq(
         sweep_type='linear',
         frequency_range=frequency_range,
         butterworth_order=butterworth_order,
-        double=double,
+        double=False,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
@@ -396,7 +393,7 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
 def exponential_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
-        fade_out=None, butterworth_order=8, double=True, sampling_rate=44100):
+        fade_out=None, butterworth_order=8, sampling_rate=44100):
     """
     Generate single channel sine sweep with exponentially increasing frequency.
 
@@ -443,9 +440,6 @@ def exponential_sweep_freq(
         frequency range by a high-pass if ``frequency_range[0] > 0`` and/or by
         a low-pass if ``frequency_range[1] < sampling_rate / 2``. The default
         is ``8``.
-    double : bool
-        Double `n_samples` during the sweep calculation. The default is
-        ``True``.
     sampling_rate : int
         The sampling rate in Hz. The default is ``44100``.
 
@@ -489,7 +483,7 @@ def exponential_sweep_freq(
         sweep_type='exponential',
         frequency_range=frequency_range,
         butterworth_order=butterworth_order,
-        double=double,
+        double=False,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
@@ -501,7 +495,7 @@ def exponential_sweep_freq(
 
 def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude_spectrum, start_margin, stop_margin,
-        fade_in=None, fade_out=None, double=True, sampling_rate=44100):
+        fade_in=None, fade_out=None, sampling_rate=44100):
     """
     Generate single channel sine sweep with arbitrary magnitude spectrum.
 
@@ -540,9 +534,6 @@ def magnitude_spectrum_weighted_sweep(
         last sample of the sweep that is closer than 60 dB to the absolute
         maximum of the sweep time signal. The default ``0`` does not apply
         a fade-out.
-    double : bool
-        Double `n_samples` during the sweep calculation. The default is
-        ``True``.
     sampling_rate : int
         The sampling rate in Hz. The default is ``44100``.
 
@@ -587,7 +578,7 @@ def magnitude_spectrum_weighted_sweep(
         sweep_type=magnitude_spectrum,
         frequency_range=[0, sampling_rate / 2],
         butterworth_order=0,
-        double=double,
+        double=False,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
@@ -690,10 +681,12 @@ def _frequency_domain_sweep(
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
 
+    Non-unique parameters are documented in ``linear_sweep_freq``,
+    ``exponential_sweep_freq``, ``linear_perfect_sweep``, and
+    ``magnitude_spectrum_weighted_sweep``.
+
     Parameters
     ----------
-    n_samples : int
-        The length of the sweep in samples.
     sweep_type : Signal, string
         Specify the magnitude response of the sweep.
 
@@ -708,37 +701,17 @@ def _frequency_domain_sweep(
         ``'exponential'``
             Design a sweep with exponentially increasing frequency. The
             magnitude decreases by 3 dB per frequency doubling and has constant
-            energy in fiters of relative constant bandwidth (e.g. octaves).
+            energy in filters of relative constant bandwidth (e.g. octaves).
         ``'perfect_linear'``
             Perfect linear sweep. Note that the parameters `start_margin`,
             `stop_margin`, `frequency_range` and `double` are not required in
             this case.
-
-    start_margin : int, float
-        The time in samples, at which the sweep starts. The start margin is
-        required because the frequency domain sweep synthesis has pre-ringing
-        in the time domain. Set to ``0`` if `sweep_type` is
-        ``'perfect_linear'``.
-    stop_margin : int, float
-        Time in samples, at which the sweep stops. This is relative to
-        `n_samples`, e.g., a stop margin of 100 samples means that the sweep
-        ends at sample ``n_samples-10``. This is required, because the
-        frequency domain sweep synthesis has post-ringing in the time domain.
-        Set to ``0`` if `sweep_type` is ``'perfect_linear'``.
-    frequency_range : array like
-        Frequency range of the sweep given by the lower and upper cut-off
-        frequency in Hz. The restriction of the frequency range is realized
-        by applying a Butterworth band-pass with the specified frequencies.
-        Ignored if `sweep_type` is ``'perfect_linear'`` or `signal`.
-    butterworth_order : int, None
-        The order of the Butterworth filters that are applied to limit the
-        frequency range by a high-pass if ``frequency_range[0] > 0`` and/or by
-        a low-pass if ``frequency_range[1] < sampling_rate / 2``.
     double : bool
-        Double `n_samples` during the sweep calculation (recommended). Set to
-        ``False`` if `sweep_type` is ``'perfect_linear'``.
-    sampling_rate : int
-        The sampling rate in Hz.
+        Double `n_samples` during the sweep calculation. This parameter seems
+        not to be required in the current implementation. It was kept if cases
+        come up, where it could help. It is contained in the AKtools version
+        from which this function was ported. Must be ``False`` if `sweep_type`
+        is ``'perfect_linear'``.
 
     Returns
     -------
@@ -806,7 +779,7 @@ def _frequency_domain_sweep(
         # constant spectrum
         sweep_abs = np.ones(n_bins)
     elif sweep_type == 'exponential':
-        # 1/f spectrum
+        # 1/sqrt(f) spectrum
         sweep_abs = np.zeros(n_bins)
         sweep_abs[1:] = 1 / np.sqrt(2 * np.pi * np.arange(1, n_bins) * df)
 
