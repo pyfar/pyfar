@@ -724,33 +724,23 @@ def _frequency_domain_sweep(
         and ``sampling_rate/2``.
     """
 
-    # check input -------------------------------------------------------------
-    if not isinstance(sweep_type, (pyfar.Signal, str)):
-        raise TypeError("sweep_type must be type Signal or str.")
+    # check input (only checks for user input, no checks for calling the
+    # private function from the public functions)
     if isinstance(sweep_type, pyfar.Signal):
         magnitude = sweep_type
         sweep_type = 'signal'
-    if sweep_type not in ['linear', 'exponential', 'perfect_linear', 'signal']:
-        raise ValueError("sweep_type must be 'linear', 'exponential' or",
-                         "'perfect_linear', when it is a str.")
+
     if np.atleast_1d(frequency_range).size != 2:
         raise ValueError(
             "Frequency_range must be an array like with two elements.")
-    if frequency_range[1] > sampling_rate/2:
+    if frequency_range[0] < 0 or frequency_range[1] > sampling_rate/2:
         raise ValueError(
-            "Upper frequency limit is larger than half the sampling rate.")
+            ("Lower frequency limit must be at least 0 Hz and upper frequency "
+             "limit must be below half the sampling rate."))
     if frequency_range[0] == 0 and sweep_type == "exponential":
-        Warning((
-            "The exponential sweep has a 1/frequency magnitude spectrum. "
-            "The magnitude is set to 0 at 0 Hz to avoid division by zero."))
-    if sweep_type == 'perfect_linear' and \
-            (start_margin != 0 or stop_margin != 0 or double or
-             fade_in is not None or fade_out is not None or
-             frequency_range[0] != 0 or
-             frequency_range[1] != sampling_rate / 2):
-        # internal warning. Users will not call this function directly
-        # and can not cause this error.
-        raise ValueError(('Found conflicting parameters'))
+        Warning(UserWarning, (
+            "The exponential sweep has a 1/sqrt(frequency) magnitude spectrum."
+            " The magnitude is set to 0 at 0 Hz to avoid division by zero."))
 
     # initialize basic parameters ---------------------------------------------
     # double n_samples

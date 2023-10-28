@@ -358,8 +358,8 @@ def test_match_shape():
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_linear_perfect_sweep(n_samples, sampling_rate):
     '''
-    Test the perfect sweep generation. Test only specifics general tests
-    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    Test the perfect sweep generation. General tests for frequency domain sweep
+    synthesis in test_frequency_domain_sweep.
     '''
 
     sweep, group_delay = pfs.linear_perfect_sweep(n_samples, sampling_rate)
@@ -392,8 +392,8 @@ def test_linear_perfect_sweep(n_samples, sampling_rate):
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_linear_sweep_freq(n_samples, sampling_rate):
     '''
-    Test the linear sweep generation. Test only specifics general tests
-    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    Test the linear sweep generation. General tests for frequency domain sweep
+    synthesis in test_frequency_domain_sweep.
     '''
 
     sweep, group_delay = pfs.linear_sweep_freq(
@@ -418,8 +418,8 @@ def test_linear_sweep_freq(n_samples, sampling_rate):
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_exponential_sweep_freq(n_samples, sampling_rate):
     '''
-    Test the exponential sweep generation. Test only specifics general tests
-    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    Test the exponential sweep generation. General tests for frequency domain
+    sweep synthesis in test_frequency_domain_sweep.
     '''
 
     sweep, group_delay = pfs.exponential_sweep_freq(
@@ -444,8 +444,8 @@ def test_exponential_sweep_freq(n_samples, sampling_rate):
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
     '''
-    Test the magnitude weighted sweep. Test only specifics general tests
-    for frequency domain sweep synthesis in test_frequency_domain_sweep.
+    Test the magnitude weighted sweep. General tests for frequency domain sweep
+    synthesis in test_frequency_domain_sweep.
     '''
 
     # magnitude spectrum
@@ -453,7 +453,7 @@ def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
         pf.signals.impulse(n_samples, sampling_rate=sampling_rate), 500, 20, 2)
     magnitude = pf.dsp.filter.butterworth(magnitude, 8, 50, 'highpass')
     # sweep
-    sweep, group_delay = pf.signals.magnitude_spectrum_weighted_sweep(
+    sweep, group_delay = pfs.magnitude_spectrum_weighted_sweep(
         n_samples, magnitude, 5000, 1000, sampling_rate=sampling_rate)
 
     # basic checks
@@ -470,3 +470,90 @@ def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
     ref_db = pf.dsp.decibel(magnitude).flatten()[idx[0]:idx[1]]
     ref_db -= np.mean(ref_db)
     npt.assert_allclose(freq_db, ref_db, atol=.1)
+
+
+def test_magnitude_spectrum_weigthed_sweep_input_length():
+    '''
+    Test length of input magnitude spectrum. General tests for frequency domain
+    sweep synthesis in test_frequency_domain_sweep.'''
+
+    # sorter signal will be zero padded
+    sweep_a, _ = pfs.magnitude_spectrum_weighted_sweep(
+        2**10, pfs.impulse(2**9), 100, 100)
+    sweep_b, _ = pfs.magnitude_spectrum_weighted_sweep(
+        2**10, pfs.impulse(2**10), 100, 100)
+    assert sweep_a == sweep_b
+
+    with pytest.raises(ValueError, match='magnitude_spectrum has'):
+        pfs.magnitude_spectrum_weighted_sweep(
+            2**9, pfs.impulse(2**10), 100, 100)
+
+
+def test_frequency_domain_sweep():
+    '''
+    Test general frequency domain sweep synthesis. Specific tests for public
+    functions are contained in ``test_linear_perfect_sweep``,
+    ``test_linear_sweep_freq``, ``test_exponential_sweep_freq``, and
+    ``test_magnitude_spectrum_weighted_sweep``,
+    '''
+
+    # test frequency range - sweep with smaller range contains less energy
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [500, 15e3], 5000, 5000)
+    idx = sweep_a.find_nearest_frequency([200, 20e3])
+    assert np.abs(sweep_a.freq[0, idx[0]]) > np.abs(sweep_b.freq[0, idx[0]])
+    assert np.abs(sweep_a.freq[0, idx[1]]) > np.abs(sweep_b.freq[0, idx[1]])
+
+    # test single sided restriction of frequency range
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [0, 22050], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [200, 20050], 5000, 5000)
+    assert np.abs(sweep_a.freq[0, idx[0]]) > np.abs(sweep_b.freq[0, idx[0]])
+
+    # test single sided restriction of frequency range
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [0, 22050], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [0, 20000], 5000, 5000)
+    assert np.abs(sweep_a.freq[0, idx[1]]) > np.abs(sweep_b.freq[0, idx[1]])
+
+    # test single sided restriction of frequency range
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [0, 22050], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [200, 22050], 5000, 5000)
+    assert np.abs(sweep_a.freq[0, idx[0]]) > np.abs(sweep_b.freq[0, idx[0]])
+
+    # test butterworth order - sweep with steeper filters contains less energy
+    sweep_a, _ = pfs.linear_sweep_freq(
+        2**14, [400, 10e3], 5000, 5000, butterworth_order=4)
+    sweep_b, _ = pfs.linear_sweep_freq(
+        2**14, [400, 10e3], 5000, 5000, butterworth_order=8)
+    assert np.abs(sweep_a.freq[0, idx[0]]) > np.abs(sweep_b.freq[0, idx[0]])
+    assert np.abs(sweep_a.freq[0, idx[1]]) > np.abs(sweep_b.freq[0, idx[1]])
+
+    # test start and stop margin - shorter sweep contains less energy
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 7000, 7000)
+    assert pf.dsp.energy(sweep_a)[0] > pf.dsp.energy(sweep_b)[0]
+
+    # test fade in and out - sweep with fades starts/ends with exact zeros
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000, 20, 20)
+    assert np.abs(sweep_a.time[0, 0]) > np.abs(sweep_b.time[0, 0])
+    assert np.abs(sweep_a.time[0, -1]) > np.abs(sweep_b.time[0, -1])
+
+    # test fade in only - sweep with fades starts/ends with exact zeros
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000, 20, 0)
+    assert np.abs(sweep_a.time[0, 0]) > np.abs(sweep_b.time[0, 0])
+
+    # test fade out only - sweep with fades starts/ends with exact zeros
+    sweep_a, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000)
+    sweep_b, _ = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000, 0, 20)
+    assert np.abs(sweep_a.time[0, -1]) > np.abs(sweep_b.time[0, -1])
+
+    # assertions for invalid frequency ranges
+    with pytest.raises(ValueError, match='with two elements'):
+        pfs.linear_sweep_freq(2**10, [0, 1, 2], 100, 100)
+
+    with pytest.raises(ValueError, match='at least 0 Hz'):
+        pfs.linear_sweep_freq(2**10, [-1, 1], 100, 100)
+
+    with pytest.raises(ValueError, match='below half the sampling rate'):
+        pfs.linear_sweep_freq(2**10, [0, 40000], 100, 100)
