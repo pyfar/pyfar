@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 import pyfar
 
 
@@ -301,7 +302,6 @@ def linear_sweep_freq(
         sweep_type='linear',
         frequency_range=frequency_range,
         butterworth_order=butterworth_order,
-        double=False,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
@@ -483,7 +483,6 @@ def exponential_sweep_freq(
         sweep_type='exponential',
         frequency_range=frequency_range,
         butterworth_order=butterworth_order,
-        double=False,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
@@ -578,7 +577,6 @@ def magnitude_spectrum_weighted_sweep(
         sweep_type=magnitude_spectrum,
         frequency_range=[0, sampling_rate / 2],
         butterworth_order=0,
-        double=False,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
@@ -665,7 +663,6 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100):
         sweep_type='perfect_linear',
         frequency_range=[0, sampling_rate / 2],
         butterworth_order=0,
-        double=False,
         start_margin=0,
         stop_margin=0,
         fade_in=None,
@@ -676,7 +673,7 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100):
 
 
 def _frequency_domain_sweep(
-        n_samples, sweep_type, frequency_range, butterworth_order, double,
+        n_samples, sweep_type, frequency_range, butterworth_order,
         start_margin, stop_margin, fade_in, fade_out, sampling_rate):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response.
@@ -704,14 +701,7 @@ def _frequency_domain_sweep(
             energy in filters of relative constant bandwidth (e.g. octaves).
         ``'perfect_linear'``
             Perfect linear sweep. Note that the parameters `start_margin`,
-            `stop_margin`, `frequency_range` and `double` are not required in
-            this case.
-    double : bool
-        Double `n_samples` during the sweep calculation. This parameter seems
-        not to be required in the current implementation. It was kept if cases
-        come up, where it could help. It is contained in the AKtools version
-        from which this function was ported. Must be ``False`` if `sweep_type`
-        is ``'perfect_linear'``.
+            `stop_margin`, and `frequency_range` are not required in this case.
 
     Returns
     -------
@@ -738,15 +728,11 @@ def _frequency_domain_sweep(
             ("Lower frequency limit must be at least 0 Hz and upper frequency "
              "limit must be below half the sampling rate."))
     if frequency_range[0] == 0 and sweep_type == "exponential":
-        Warning(UserWarning, (
+        warnings.warn((
             "The exponential sweep has a 1/sqrt(frequency) magnitude spectrum."
-            " The magnitude is set to 0 at 0 Hz to avoid division by zero."))
+            " The magnitude is set to 0 at 0 Hz to avoid a division by zero."))
 
     # initialize basic parameters ---------------------------------------------
-    # double n_samples
-    if double and sweep_type != 'perfect_linear':
-        stop_margin += n_samples
-        n_samples *= 2
 
     # spacing between frequency bins of FFT
     df = sampling_rate / n_samples
@@ -838,12 +824,6 @@ def _frequency_domain_sweep(
     # put sweep in pyfar.Signal an transform to time domain
     sweep = pyfar.Signal(sweep, sampling_rate, n_samples, 'freq', 'none')
     sweep.fft_norm = 'rms'
-
-    # cut to originally desired length
-    if double:
-        n_samples = n_samples // 2
-        stop_margin -= n_samples
-        sweep.time = sweep.time[..., :n_samples]
 
     # find windowing end points heuristically. The start and stop margin are
     # not reliable, because freq. domain synthesis causes pre/post-ringing

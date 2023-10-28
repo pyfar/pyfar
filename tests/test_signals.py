@@ -557,3 +557,6 @@ def test_frequency_domain_sweep():
 
     with pytest.raises(ValueError, match='below half the sampling rate'):
         pfs.linear_sweep_freq(2**10, [0, 40000], 100, 100)
+
+    with pytest.warns(UserWarning, match='avoid a division by zero'):
+        pfs.exponential_sweep_freq(2*10, [0, 22050], 32, 32)
