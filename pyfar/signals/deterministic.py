@@ -159,7 +159,7 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     .. note::
         The linear sweep can also be generated in the frequency domain
-        (see :py:func:`~exponential_sweep_freq`). Time domain synthesis
+        (see :py:func:`~linear_sweep_freq`). Time domain synthesis
         exhibits a constant temporal envelope in trade of slight ripples in the
         magnitude response. Frequency domain synthesis exhibits smooth
         magnitude spectra and in trade of a slightly irregular temporal
