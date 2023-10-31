@@ -125,7 +125,9 @@ class _Audio():
         if axes is None or len(axes) == 0:
             axes = tuple(range(len(self.cshape)))[::-1]
         else:
-            tuple([a-1 if a < 0 else a for a in axes])
+            assert all([a > -len(self.cshape) - 1 for a in axes]), "Negative axes index out of bounds."
+            axes = tuple([a % len(self.cshape) if a < 0 else a for a in axes])
+
         # throw exception before deepcopy
         np.empty(np.ones(len(self.cshape), dtype=int)).transpose(axes)
         transposed = deepcopy(self)
