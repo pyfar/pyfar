@@ -111,7 +111,7 @@ class _Audio():
             Note that the last dimension of the data in the audio object
             always contains the time samples or frequency bins and can not
             be transposed.
-            
+
             empty (default) or ``None``
                 reverses the order of ``self.caxes``.
             iterable of ints
@@ -125,7 +125,8 @@ class _Audio():
         if axes is None or len(axes) == 0:
             axes = tuple(range(len(self.cshape)))[::-1]
         else:
-            assert all([a > -len(self.cshape) - 1 for a in axes]), "Negative axes index out of bounds."
+            assert all([a > -len(self.cshape) - 1 for a in axes]), \
+                "Negative axes index out of bounds."
             axes = tuple([a % len(self.cshape) if a < 0 else a for a in axes])
 
         # throw exception before deepcopy
