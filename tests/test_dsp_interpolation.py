@@ -179,8 +179,11 @@ def test_fractional_time_shift_unit():
 
     impulse = pf.signals.impulse(128, 64)
     delayed_samples = fractional_time_shift(impulse, 1, 'samples')
-    delayed_seconds = fractional_time_shift(impulse, 1/44100, 's')
+    delayed_seconds = fractional_time_shift(impulse, 1/44100, 'seconds')
 
+    npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
+
+    delayed_seconds = fractional_time_shift(impulse, 1/44100, 's')
     npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
 
 

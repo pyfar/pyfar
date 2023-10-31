@@ -196,3 +196,67 @@ def test_deprecations_find_nearest_sph():
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             coords.find_nearest_sph(1, 1, 1, 1)
+
+
+# deprecate in 0.9.0 ----------------------------------------------------------
+def test_deprecations_dsp_normalize():
+    signal = np.append(np.ones(1000), np.zeros(1000)+0.1)
+    signal = pf.Signal(signal, 2000)
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="The 's' parameter will be deprecated in pyfar 0.9.0 in"):
+        pf.dsp.normalize(
+            signal, domain='time', target=2, limits=(0, 0.5), unit='s')
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pf.dsp.normalize(
+                signal, domain='time', target=2, limits=(0, 0.5), unit='s')
+
+
+def test_deprecations_dsp_linear_phase():
+    # test signal
+    N = 64
+    fs = 44100
+    x = pf.signals.impulse(N, sampling_rate=fs)
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="The 's' parameter will be deprecated in pyfar 0.9.0 in"):
+        pf.dsp.linear_phase(x, N / 2 / fs, unit="s")
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pf.dsp.linear_phase(x, N / 2 / fs, unit="s")
+
+
+def test_deprecations_dsp_time_window():
+    sig = pf.Signal(np.ones(10), 2)
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="The 's' parameter will be deprecated in pyfar 0.9.0 in"):
+        pf.dsp.time_window(
+            sig, interval=[0.5, 1.5], shape='symmetric', unit='s',
+            crop='end')
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pf.dsp.time_window(
+                sig, interval=[0.5, 1.5], shape='symmetric', unit='s',
+                crop='end')
+
+
+def test_deprecations_dsp_fractional_time_shift():
+    impulse = pf.signals.impulse(128, 64)
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="The 's' parameter will be deprecated in pyfar 0.9.0 in"):
+        pf.dsp.interpolation.fractional_time_shift(impulse, 1/44100, 'seconds')
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pf.dsp.interpolation.fractional_time_shift(
+                impulse, 1/44100, 'seconds')

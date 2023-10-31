@@ -143,7 +143,7 @@ def wrap_to_2pi(x):
 
 
 def linear_phase(signal, group_delay, unit="samples"):
-    """
+    r"""
     Set the phase to a linear phase with a specified group delay.
 
     The linear phase signal is computed as
@@ -165,25 +165,33 @@ def linear_phase(signal, group_delay, unit="samples"):
         group delay is a list or array it must broadcast with the channel
         layout of the signal (``signal.cshape``).
     unit : string, optional
-        Unit of the group delay. Can be ``'samples'`` or ``'s'`` for seconds.
-        The default is ``'samples'``.
+        The ``'s'`` parameter will be deprecated in pyfar 0.9.0 in favor
+        of ``'seconds'``.
+        Unit of the group delay. Can be ``'samples'`` or ``'seconds'``
+        for seconds. The default is ``'samples'``.
 
     Returns
     -------
     signal: Signal
         linear phase copy of the input data
     """
-
     if not isinstance(signal, pyfar.Signal):
         raise TypeError("signal must be a pyfar Signal object.")
 
+    # test Deprecation warning
+    if unit == "s":
+        warnings.warn((
+            "The 's' parameter will be deprecated in pyfar 0.9.0 in favor"
+            "of 'seconds'."),
+                PyfarDeprecationWarning, stacklevel=2)
+        tau = np.asarray(group_delay)
     # group delay in seconds
-    if unit == "samples":
+    elif unit == "samples":
         tau = np.asarray(group_delay) / signal.sampling_rate
-    elif unit == "s":
+    elif unit == "seconds":
         tau = np.asarray(group_delay)
     else:
-        raise ValueError(f"unit is {unit} but must be 'samples' or 's'.")
+        raise ValueError(f"unit is {unit} but must be 'samples' or 'seconds'.")
 
     # linear phase
     phase = 2 * np.pi * signal.frequencies * tau[..., np.newaxis]
@@ -354,7 +362,9 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
         The default is ``'symmetric'``.
     unit : string, optional
-        Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
+        The ``'s'`` parameter will be deprecated in pyfar 0.9.0 in favor
+        of ``'seconds'``.
+        Unit of `interval`. Can be set to ``'samples'`` or ``'seconds'``.
         Time values are rounded to the nearest sample. The default is
         ``'samples'``.
     crop : string, optional
@@ -465,13 +475,22 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     interval = np.array(interval)
     if not np.array_equal(interval, np.sort(interval)):
         raise ValueError("Values in interval need to be in ascending order.")
+
+    # test Deprecation warning
+    if unit == "s":
+        warnings.warn((
+            "The 's' parameter will be deprecated in pyfar 0.9.0 in favor"
+            "of 'seconds'."),
+                PyfarDeprecationWarning, stacklevel=2)
+        interval = np.round(interval*signal.sampling_rate).astype(int)
     # Convert to samples
-    if unit == 's':
+    elif unit == 'seconds':
         interval = np.round(interval*signal.sampling_rate).astype(int)
     elif unit == 'samples':
         interval = interval.astype(int)
     else:
-        raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
+        raise ValueError(
+            f"unit is {unit} but has to be 'samples' or 'seconds'.")
     # Check window size
     if interval[-1] > signal.n_samples:
         raise ValueError(
@@ -1075,6 +1094,8 @@ def time_shift(
 
         The default is ``"cyclic"``
     unit : str, optional
+        The ``'s'`` parameter will be deprecated in pyfar 0.9.0 in favor
+        of ``'seconds'``.
         Unit of the shift variable, this can be either ``'samples'`` or ``'s'``
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
@@ -1141,13 +1162,20 @@ def time_shift(
         raise ValueError(f"mode is '{mode}' but mist be 'linear' or cyclic'")
 
     shift = np.broadcast_to(shift, signal.cshape)
+    # test Deprecation warning
     if unit == 's':
+        warnings.warn((
+            "The 's' parameter will be deprecated in pyfar 0.9.0 in favor"
+            "of 'seconds'."),
+                PyfarDeprecationWarning, stacklevel=2)
+        shift_samples = np.round(shift*signal.sampling_rate).astype(int)
+    elif unit == 'seconds':
         shift_samples = np.round(shift*signal.sampling_rate).astype(int)
     elif unit == 'samples':
         shift_samples = shift.astype(int)
     else:
         raise ValueError(
-            f"unit is '{unit}' but must be 'samples' or 's'.")
+            f"unit is '{unit}' but must be 'samples' or 'seconds'.")
 
     if np.any(np.abs(shift_samples) > signal.n_samples) and mode == "linear":
         raise ValueError(("Can not shift by more samples than signal.n_samples"
@@ -2128,9 +2156,11 @@ def normalize(signal, reference_method='max', domain='time',
         Also note that `limits` need to be ``(None, None)`` if
         `reference_method` is ``rms``, ``power`` or ``energy``.
     unit: string, optional
+        The ``'s'`` parameter will be deprecated in pyfar 0.9.0 in favor
+        of ``'seconds'``.
         Unit of `limits`.
 
-        ``'s'``
+        ``'seconds'``
             Set limits in seconds in case of time domain normalization. Uses
             :py:class:`~signal.find_nearest_time` to find the limits.
         ``'Hz'``
@@ -2241,8 +2271,14 @@ def normalize(signal, reference_method='max', domain='time',
     else:
         find = signal.find_nearest_frequency
 
-    if unit in ("Hz", "s"):
+    if unit in ('Hz', 's', 'seconds'):
         limits = [None if lim is None else find(lim) for lim in limits]
+        # test Deprecation warning
+        if unit == 's':
+            warnings.warn((
+                "The 's' parameter will be deprecated in pyfar 0.9.0 in favor"
+                "of 'seconds'."),
+                    PyfarDeprecationWarning, stacklevel=2)
 
     if limits[0] == limits[1] and None not in limits:
         raise ValueError(("Upper and lower limit are identical. Use a "

@@ -8,6 +8,7 @@ from scipy.ndimage import generic_filter1d
 from fractions import Fraction
 from decimal import Decimal
 import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def _weighted_moving_average(input, output, weights):
@@ -264,7 +265,10 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         `Numpy broadcasting
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
     unit : str, optional
-        The unit of the shift. Either 'samples' or 's'. Defaults to 'samples'.
+        The ``'s'`` parameter will be deprecated in pyfar 0.9.0 in favor
+        of ``'seconds'``.
+        The unit of the shift. Either 'samples' or 'seconds'.
+        Defaults to 'samples'.
     order : int, optional
         The order of the fractional shift (sinc) filter. The precision of the
         filter increases with the order. High frequency errors decrease with
@@ -365,10 +369,16 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
                           f"{signal.n_samples-1} (signal.n_samples-1)"))
 
     if unit == 's':
+        warnings.warn((
+            "The 's' parameter will be deprecated in pyfar 0.9.0 in favor"
+            "of 'seconds'."),
+                PyfarDeprecationWarning, stacklevel=2)
+        shift = shift*signal.sampling_rate
+    elif unit == 'seconds':
         shift = shift*signal.sampling_rate
     elif unit != 'samples':
         raise ValueError(
-            f"Unit is '{unit}' but has to be 'samples' or 's'.")
+            f"Unit is '{unit}' but has to be 'samples' or 'seconds'.")
 
     # separate integer and fractional shift -----------------------------------
     delay_int = np.atleast_1d(shift).astype(int)

@@ -129,6 +129,10 @@ def test_linear_phase():
     y = dsp.linear_phase(x, N / 2 / fs, unit="s")
     npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
 
+    # test group delay in seconds
+    y = dsp.linear_phase(x, N / 2 / fs, unit="seconds")
+    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
         dsp.linear_phase(1, 0)
@@ -394,6 +398,10 @@ def test_time_window_crop_interval():
         crop='window')
     assert sig_win.n_samples == 3
     sig_win = dsp.time_window(
+        sig, interval=[0.5, 1.5], shape='symmetric', unit='seconds',
+        crop='window')
+    assert sig_win.n_samples == 3
+    sig_win = dsp.time_window(
         sig, interval=[0.5, 1.5], shape='symmetric', unit='s',
         crop='window')
     assert sig_win.n_samples == 3
@@ -410,6 +418,10 @@ def test_time_window_crop_end():
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
         sig, interval=[1, 3], shape='symmetric', unit='samples',
+        crop='end')
+    assert sig_win.n_samples == 4
+    sig_win = dsp.time_window(
+        sig, interval=[0.5, 1.5], shape='symmetric', unit='seconds',
         crop='end')
     assert sig_win.n_samples == 4
     sig_win = dsp.time_window(
