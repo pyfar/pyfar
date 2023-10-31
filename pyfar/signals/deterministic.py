@@ -227,9 +227,10 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
     amplitude : double, optional
         The amplitude of the signal. The default is ``1``.
     sweep_rate : double, optional
-        Rate at which the sine frequency increases over time. If this is given,
-        `n_samples` is calculated according to the sweep rate. The default is
-        ``None``, which uses `n_samples` without modifications.
+        Rate at which the sine frequency increases over time in octaves per
+        second. If this is given, `n_samples` is calculated according to the
+        `sweep_rate` and `frequency_range`. The default is ``None``, which uses
+        `n_samples` without modifications.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
 
