@@ -254,9 +254,9 @@ def test_deprecations_dsp_fractional_time_shift():
     with pytest.warns(
             PyfarDeprecationWarning,
             match="The 's' parameter will be deprecated in pyfar 0.9.0 in"):
-        pf.dsp.interpolation.fractional_time_shift(impulse, 1/44100, 'seconds')
+        pf.dsp.interpolation.fractional_time_shift(impulse, 1/44100, 's')
 
     if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
             pf.dsp.interpolation.fractional_time_shift(
-                impulse, 1/44100, 'seconds')
+                impulse, 1/44100, 's')

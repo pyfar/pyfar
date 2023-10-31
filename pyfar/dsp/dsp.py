@@ -2253,8 +2253,8 @@ def normalize(signal, reference_method='max', domain='time',
         raise ValueError(
             "limits must be (None, None) if reference_method  is "
             f"{reference_method}")
-    if (domain == "time" and unit not in ("s", None)) or \
-            (domain == "freq" and unit not in ("Hz", None)):
+    if (domain == "time" and unit not in ('seconds', 's', None)) or \
+            (domain == "freq" and unit not in ('Hz', None)):
         raise ValueError(f"'{unit}' is an invalid unit for domain {domain}")
     if nan_policy not in ('propagate', 'omit', 'raise'):
         raise ValueError("nan_policy has to be 'propagate', 'omit', or"
