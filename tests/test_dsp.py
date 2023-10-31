@@ -232,6 +232,19 @@ def test_regularized_spectrum_inversion(impulse):
     npt.assert_allclose(res.freq[:, -1], [0.25])
 
 
+def test_regularized_spectrum_inversion_complex(impulse_complex):
+    """Test regularized_spectrum_inversion for complex input signals"""
+    res = dsp.regularized_spectrum_inversion(impulse_complex * 2, [200, 10e3])
+
+    ind = impulse_complex.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5)
+
+    npt.assert_allclose(res.freq[:, 0], [0.25])
+    npt.assert_allclose(res.freq[:, -1], [0.25])
+
+
 def test_regularized_spectrum_inversion_assertions(impulse):
     """Test regularized_spectrum_inversion errors"""
     with pytest.raises(
