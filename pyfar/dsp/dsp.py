@@ -1280,7 +1280,7 @@ def find_impulse_response_delay(impulse_response, N=1):
         # Use only real-valued roots
         if np.all(np.isreal(roots)):
             root = roots[np.abs(roots) == np.min(np.abs(roots))]
-            start_sample = lags[argmax] + root
+            start_sample = np.squeeze(lags[argmax] + root)
         else:
             start_sample = np.nan
             warnings.warn(f"Starting sample not found for channel {ch}")
