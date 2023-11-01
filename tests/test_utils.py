@@ -141,6 +141,17 @@ def test_pyfar_object_types(signals):
     npt.assert_equal(conc._data, ideal)
 
 
+def test_concatenate_channels_complex_signals():
+    # Test concanation for complex signals
+    s = pf.Signal([1, 2, 3], 44100)
+    s_complex = pf.Signal([1, 2, 3], 44100, is_complex=True)
+
+    s_conc = pf.utils.concatenate_channels((s, s_complex))
+    assert s_conc.complex
+    desired = [[1 + 0j, 2 + 0j, 3 + 0j], [1 + 0j, 2 + 0j, 3 + 0j]]
+    npt.assert_equal(s_conc._data, desired)
+
+
 def test_concatenate_assertions():
     """Test assertions"""
     with pytest.raises(TypeError, match="All input data must be"):
