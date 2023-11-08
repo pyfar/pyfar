@@ -257,7 +257,6 @@ def test_filter_fir_process_multi_dim_filt(impulse):
 
 def test_filter_sos_process(impulse):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = fo.FilterSOS(sos, impulse.sampling_rate)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
@@ -275,7 +274,6 @@ def test_filter_sos_process(impulse):
 
 def test_filter_sos_process_complex(impulse_complex):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = fo.FilterSOS(sos, impulse_complex.sampling_rate)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterSOS(sos, impulse_complex.sampling_rate)
     res = filt.process(impulse_complex)
