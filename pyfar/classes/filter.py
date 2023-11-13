@@ -43,7 +43,7 @@ def _pop_state_from_kwargs(**kwargs):
     kwargs.pop('zi', None)
     warnings.warn(
         "This filter function does not support saving the filter state",
-        stacklevel=3)
+        stacklevel=2)
     return kwargs
 
 
