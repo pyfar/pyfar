@@ -616,7 +616,8 @@ class Signal(FrequencyData, TimeData):
                 n_samples = max(1, (data.shape[-1] - 1)*2)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
-                    f"samples from {data.shape[-1]} frequency bins.")
+                    f"samples from {data.shape[-1]} frequency bins.",
+                    stacklevel=3)
             elif n_samples > 2 * data.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
@@ -685,7 +686,7 @@ class Signal(FrequencyData, TimeData):
             self._n_samples = max(1, (data.shape[-1] - 1)*2)
             warnings.warn(
                 f"Number of samples not given, assuming {self.n_samples} "
-                f"samples from {data.shape[-1]} frequency bins.")
+                f"samples from {data.shape[-1]} frequency bins.", stacklevel=3)
         # set domain
         self._domain = 'freq'
         if not raw:
@@ -826,7 +827,8 @@ class Signal(FrequencyData, TimeData):
         """
         warnings.warn(
             ("len(Signal) will be deprecated in pyfar 0.8.0 "
-             "Use Signal.n_samples instead"), PyfarDeprecationWarning)
+             "Use Signal.n_samples instead"), PyfarDeprecationWarning,
+            stacklevel=3)
         return self.n_samples
 
     def __iter__(self):

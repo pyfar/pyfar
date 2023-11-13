@@ -327,7 +327,8 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 
     if np.prod(signal.cshape) > 1:
         warnings.warn(("Using only the first channel of "
-                       f"{np.prod(signal.cshape)}-channel signal."))
+                       f"{np.prod(signal.cshape)}-channel signal."),
+                       stacklevel=3)
 
     # take only the first channel of time data
     first_channel = tuple(np.zeros(len(signal.cshape), dtype='int'))

@@ -44,7 +44,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.spherical_voronoi."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         points = sampling.cartesian
         radius = sampling.radius
@@ -115,7 +115,7 @@ def calculate_sph_voronoi_weights(
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.calculate_sampling_weights."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=3)
 
     # get Voronoi diagram
     if sampling.csize <= 3:

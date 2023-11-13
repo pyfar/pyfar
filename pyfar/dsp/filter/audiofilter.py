@@ -496,7 +496,7 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
         warnings.warn((
             f"The bandwidth is {bandwidth} octaves but should be at least 1 "
             "to obtain an good approximation of the desired frequency response"
-        ))
+        ), stacklevel=3)
 
     # get sampling rate
     sampling_rate = sampling_rate if signal is None else signal.sampling_rate
@@ -527,7 +527,8 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
                        f"It was set to {sampling_rate/2} Hz, which equals "
                        f"a restriction of the bandwidth to {bandwidth} "
                        f"octaves and a reduction of the gain to {gain} dB to "
-                       f"maintain the intended slope of {slope} dB/octave."))
+                       f"maintain the intended slope of {slope} dB/octave."),
+                       stacklevel=3)
 
     # determine number of shelve filters per octave ---------------------------
 
@@ -542,7 +543,7 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
     if N < N_min:
         warnings.warn((
             f"N is {N} but should be at least {N_min} to obtain an good "
-            "approximation of the desired frequency response"))
+            "approximation of the desired frequency response"), stacklevel=3)
 
     # used shelve filters per octave
     N_octave = N / bandwidth

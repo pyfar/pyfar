@@ -382,7 +382,7 @@ def read_audio(filename, dtype='float64', **kwargs):
       you will read ``np.array([43], dtype='int32')`` for ``dtype='int32'``.
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=3)
         return
 
     data, sampling_rate = soundfile.read(
@@ -428,7 +428,7 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=3)
         return
 
     sampling_rate = signal.sampling_rate
@@ -447,7 +447,8 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
     if len(signal.cshape) != 1:
-        warnings.warn(f"Signal flattened to {data.shape[0]} channels.")
+        warnings.warn(
+            f"Signal flattened to {data.shape[0]} channels.", stacklevel=3)
 
     # Check if file exists and for overwrite
     if overwrite is False and os.path.isfile(filename):
@@ -463,7 +464,8 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
         if (np.any(data > 1.) and
                 subtype.upper() not in ['FLOAT', 'DOUBLE', 'VORBIS']):
             warnings.warn(
-                f'{format}-files of subtype {subtype} are clipped to +/- 1.')
+                f'{format}-files of subtype {subtype} are clipped to +/- 1.',
+                stacklevel=3)
         soundfile.write(
             file=filename, data=data.T, samplerate=sampling_rate,
             subtype=subtype, **kwargs)
@@ -491,7 +493,7 @@ def audio_formats():
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=3)
         return
 
     return soundfile.available_formats()
@@ -519,7 +521,7 @@ def audio_subtypes(format=None):
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=3)
         return
 
     return soundfile.available_subtypes(format=format)
@@ -542,7 +544,7 @@ def default_audio_subtype(format):
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=3)
         return
 
     return soundfile.default_subtype(format)
@@ -661,7 +663,8 @@ def read_comsol(filename, expressions=None, parameters=None):
         warnings.warn(
             r'The data contains values in dB. Consider to use de-logarithmize '
             r'data, such as sound pressure, if possible. otherwise any '
-            r'further processing of the data might lead to erroneous results.')
+            r'further processing of the data might lead to erroneous results.',
+            stacklevel=3)
     header, is_complex, delimiter = _read_comsol_get_headerline(filename)
 
     # set default variables
@@ -738,7 +741,7 @@ def read_comsol(filename, expressions=None, parameters=None):
                         warnings.warn(
                             r'Specific combinations is set in the Parametric '
                             r'Sweep in Comsol. Missing data is filled with '
-                            r'nans.')
+                            r'nans.', stacklevel=3)
 
     # reshape data to final shape
     data_out = np.reshape(data_out, final_shape)

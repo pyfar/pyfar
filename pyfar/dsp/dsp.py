@@ -1007,7 +1007,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     if mode in ['before', 'after']:
         warnings.warn(('Mode "before" and "after" will be renamed into '
                        '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), PyfarDeprecationWarning)
+                       'Pyfar 0.8.0.'), PyfarDeprecationWarning, stacklevel=3)
 
         mode = 'beginning' if mode == 'before' else 'end'
 
@@ -1283,7 +1283,8 @@ def find_impulse_response_delay(impulse_response, N=1):
             start_sample = np.squeeze(lags[argmax] + root)
         else:
             start_sample = np.nan
-            warnings.warn(f"Starting sample not found for channel {ch}")
+            warnings.warn(
+                f"Starting sample not found for channel {ch}", stacklevel=3)
 
         start_samples[ch] = start_sample
 
@@ -1393,7 +1394,8 @@ def find_impulse_response_start(
             np.any(max_sample > mask_start):
         warnings.warn(
             "The SNR seems lower than the specified threshold value. Check "
-            "if this is a valid impulse response with sufficient SNR.")
+            "if this is a valid impulse response with sufficient SNR.",
+            stacklevel=3)
 
     start_sample = max_sample.copy()
 
@@ -1413,7 +1415,7 @@ def find_impulse_response_start(
                 start_sample[ch] = 0
                 warnings.warn(
                     f'No values below threshold found found for channel {ch}',
-                    'defaulting to 0')
+                    'defaulting to 0', stacklevel=3)
 
     return np.squeeze(start_sample)
 
@@ -1994,7 +1996,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     if 1 in signal.cshape:
         for ax in caxis:
             if signal.cshape[ax] == 1:
-                warnings.warn(f"Averaging one dimensional caxis={caxis}.")
+                warnings.warn(
+                    f"Averaging one dimensional caxis={caxis}.", stacklevel=3)
     if not isinstance(caxis, int):
         axis = tuple([cax-1 if cax < 0 else cax for cax in caxis])
     else:

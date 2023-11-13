@@ -136,7 +136,7 @@ class Coordinates():
             warnings.warn((
                 "This function will be changed in pyfar 0.8.0 to "
                 "init(x, y, z)."),
-                    PyfarDeprecationWarning)
+                    PyfarDeprecationWarning, stacklevel=3)
 
         # set the coordinate system
         system = self._make_system(domain, convention, unit)
@@ -166,7 +166,7 @@ class Coordinates():
             warnings.warn((
                 "This function will be deprecated in pyfar 0.8.0 in favor "
                 "of spharpy.samplings.SamplingSphere."),
-                    PyfarDeprecationWarning)
+                    PyfarDeprecationWarning, stacklevel=3)
 
     @classmethod
     def from_cartesian(
@@ -448,7 +448,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of .cart, .x, .y or .z."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         # set the coordinate system
         self._system = self._make_system('cart', convention, unit)
@@ -522,7 +522,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of .cartesian"),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         self._system = self._make_system('cart', convention, unit)
         return self.cartesian
@@ -572,7 +572,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the spherical_... properties"),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         # make array
         angles_1 = np.atleast_1d(np.asarray(angles_1, dtype=np.float64))
@@ -606,7 +606,7 @@ class Coordinates():
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
                 "of the pyfar.deg2rad and pyfar.rad2deg"),
-                    PyfarDeprecationWarning)
+                    PyfarDeprecationWarning, stacklevel=3)
             angles_1 = angles_1 / 180 * np.pi
             angles_2 = angles_2 / 180 * np.pi
 
@@ -688,7 +688,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the `spherical_*` properties."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         if convention == 'top_colat':
             points = self.spherical_colatitude
@@ -746,7 +746,7 @@ class Coordinates():
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
                 "of the pyfar.deg2rad and pyfar.rad2deg"),
-                    PyfarDeprecationWarning)
+                    PyfarDeprecationWarning, stacklevel=3)
             angles_1 = angles_1 / np.pi * 180
             angles_2 = angles_2 / np.pi * 180
         elif not unit == 'rad':
@@ -791,7 +791,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the cylindrical property."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
         self._set_cyl(azimuth, z, radius_z, convention)
 
     def _set_cyl(self, azimuth, z, rho, convention='top', unit='rad'):
@@ -817,7 +817,7 @@ class Coordinates():
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
                 "of the pyfar.deg2rad and pyfar.rad2deg"),
-                    PyfarDeprecationWarning)
+                    PyfarDeprecationWarning, stacklevel=3)
             azimuth = azimuth / 180 * np.pi
         elif not unit == 'rad':
             raise ValueError(
@@ -885,7 +885,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the cylindrical property."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
         points = self.cylindrical
 
         conversion_factor = 1 if unit == 'rad' else 180 / np.pi
@@ -913,7 +913,7 @@ class Coordinates():
             warnings.warn((
                 "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
                 "of the pyfar.deg2rad and pyfar.rad2deg"),
-                    PyfarDeprecationWarning)
+                    PyfarDeprecationWarning, stacklevel=3)
             azimuth = azimuth / np.pi * 180
         elif unit != 'rad':
             raise ValueError(
@@ -940,7 +940,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         return self._sh_order
 
@@ -952,7 +952,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         self._sh_order = int(value)
 
@@ -1314,7 +1314,7 @@ class Coordinates():
 
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         if show == 'current':
             domain = self._system['domain']
@@ -1769,7 +1769,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of find_nearest method."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         # check the input
         assert isinstance(k, int) and k > 0 and k <= self.csize, \
@@ -1846,7 +1846,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of find_within method."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         # check the input
         assert distance >= 0, "distance must be >= 0"
@@ -1924,7 +1924,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of find_within method."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         # check the input
         assert distance >= 0 and distance <= 180, \
@@ -2003,7 +2003,7 @@ class Coordinates():
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0. Use properties"
             " and slicing instead."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=3)
 
         # check if the coordinate and unit exist
         domain, convention, index = self._exist_coordinate(coordinate, unit)

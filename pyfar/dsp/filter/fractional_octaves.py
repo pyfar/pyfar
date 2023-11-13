@@ -294,7 +294,8 @@ def _coefficients_fractional_octave_bands(
     mask_skip = Wns[:, 0] >= 1
     if np.any(mask_skip):
         Wns = Wns[~mask_skip]
-        warnings.warn("Skipping bands above the Nyquist frequency")
+        warnings.warn(
+            "Skipping bands above the Nyquist frequency", stacklevel=3)
 
     num_bands = np.sum(~mask_skip)
     sos = np.zeros((num_bands, order, 6), np.double)
@@ -304,7 +305,8 @@ def _coefficients_fractional_octave_bands(
         if Wn[-1] > 1:
             warnings.warn('The upper frequency limit {} Hz is above the \
                 Nyquist frequency. Using a highpass filter instead of a \
-                bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
+                bandpass'.format(np.round(freqs_upper[idx], decimals=1)),
+                stacklevel=3)
             Wn = Wn[0]
             btype = 'highpass'
             sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
@@ -437,7 +439,8 @@ def reconstructing_fractional_octave_bands(
     # half the sampling rate
     f_id = f_m < sampling_rate / 2
     if not np.all(f_id):
-        warnings.warn("Skipping bands above the Nyquist frequency")
+        warnings.warn(
+            "Skipping bands above the Nyquist frequency", stacklevel=3)
 
     # DFT lines of the lower cut-off and center frequency as in
     # Antoni, Eq. (14)
