@@ -1420,7 +1420,7 @@ class Coordinates():
             ``'euclidean'``
                 distance is determined by the euclidean distance.
                 This is default.
-            ``'spherical_radiance'``
+            ``'spherical_radians'``
                 distance is determined by the great-circle distance
                 expressed in radians.
             ``'spherical_meter'``
@@ -1499,7 +1499,7 @@ class Coordinates():
         if not isinstance(find, Coordinates):
             raise ValueError("find must be an pf.Coordinates object.")
         allowed_measures = [
-                'euclidean', 'spherical_degree', 'spherical_meter']
+                'euclidean', 'spherical_radians', 'spherical_meter']
         if distance_measure not in allowed_measures:
             raise ValueError(
                 f"distance_measure needs to be in {allowed_measures} and "
@@ -1517,7 +1517,7 @@ class Coordinates():
         # nearest points
         distance, index = kdtree.query(points, k=k)
 
-        if distance_measure in ['spherical_radiance', 'spherical_meter']:
+        if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
             radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
@@ -1527,13 +1527,14 @@ class Coordinates():
                     radius. Differences are larger than 1e-15")
             radius = np.max(radius)
 
+            # convert cartesian coordinates to length on the great circle using
+            # the Haversine formula
+            distance = 2 * np.arcsin(distance / (2 * radius))
+
             if distance_measure == 'spherical_meter':
                 # convert angle in radiant to distance on the sphere
-                # d = 2r*pi*d/(2*pi) = r*d
-                distance = radius * distance
-
-            # convert cartesian coordinates to length on the great circle
-            distance = 2 * radius * np.arcsin(distance/(2*radius))
+                # distance = 2*radius*pi*distance/(2*pi) = radius*distance
+                distance *= radius
 
         if self.cdim == 1:
             if k > 1:
@@ -1583,7 +1584,7 @@ class Coordinates():
             ``'euclidean'``
                 distance is determined by the euclidean distance.
                 This is default.
-            ``'spherical_radiance'``
+            ``'spherical_radians'``
                 distance is determined by the great-circle distance
                 expressed in radians.
             ``'spherical_meter'``
@@ -1638,7 +1639,7 @@ class Coordinates():
         if not isinstance(return_sorted, bool):
             raise ValueError("return_sorted must be a bool.")
         allowed_measures = [
-            'euclidean', 'spherical_radiance', 'spherical_meter']
+            'euclidean', 'spherical_radians', 'spherical_meter']
         if distance_measure not in allowed_measures:
             raise ValueError(
                 f"distance_measure needs to be in {allowed_measures} and "
@@ -1657,7 +1658,7 @@ class Coordinates():
         if distance_measure == 'euclidean':
             index = kdtree.query_ball_point(
                 points, distance + atol, return_sorted=return_sorted)
-        if distance_measure == ['spherical_radiance', 'spherical_meter']:
+        if distance_measure == ['spherical_radians', 'spherical_meter']:
             # determine validate radius
             radius = self.radius
             delta_radius = np.max(radius) - np.min(radius)
