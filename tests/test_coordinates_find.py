@@ -17,6 +17,23 @@ def test_find_nearest_simple():
     assert d == 0
 
 
+@pytest.mark.parametrize('azimuth,distance_measure,distance', [
+    (0, 'spherical_radians', 0),                        # radians match
+    (np.pi / 16, 'spherical_radians', np.pi / 16),      # radians no match
+    (0, 'spherical_meter', 0),                          # meters match
+    (np.pi / 16, 'spherical_meter', np.pi / 16 * 1.1)   # meters no match
+])
+def test_find_nearest_simple_spherical_distance(
+        azimuth, distance_measure, distance):
+    """Test spherical distance measures for find nearest"""
+    # 1D spherical coordinates points in front and to the left
+    coords = pf.Coordinates().from_spherical_elevation([0, np.pi/2], 0, 1.1)
+    find = pf.Coordinates().from_spherical_elevation(azimuth, 0, 1.1)
+    i, d = coords.find_nearest(find, distance_measure=distance_measure)
+    assert i[0] == 0
+    assert np.abs(d - distance) < 1e-15
+
+
 def test_find_nearest_1d_2d():
     # 1D spherical, nearest point
     coords = pf.Coordinates(np.arange(10), 0, 1)
