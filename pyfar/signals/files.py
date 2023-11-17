@@ -400,7 +400,7 @@ def head_related_impulse_responses(
     else:
         idx = []
         for pos in position:
-            find = pf.Coordinates().from_spherical_elevation(
+            find = pf.Coordinates.from_spherical_elevation(
                 pos[0] / 180 * np.pi, pos[1] / 180 * np.pi, 1.7)
             idx_current, distance = sources.find_nearest(
                 find, distance_measure='spherical_radians')
