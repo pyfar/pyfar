@@ -2,6 +2,11 @@
 History
 =======
 
+0.6.1 (2023-11-17)
+------------------
+* Bugfix in `pyfar.Coordinates.find_nearest`: Correct name of parameter 'spherical_radians' in docstring and fix computation of spherical distance between query points and actual points (PR #519)
+* Improve `pyfar.signals.files.head_related_impulse_responses`: Use new structure of `pyfar.Coordinates` to find the requested head-related impulse responses (PR #520)
+
 0.6.0 (2023-10-20)
 ------------------
 * Refactored `pyfar.Coordinates` class and module
