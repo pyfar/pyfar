@@ -217,9 +217,9 @@ def linear_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
         fade_out=None, butterworth_order=8, sampling_rate=44100):
     """
-    Generate single channel sine sweep with linearlly increasing frequency.
+    Generate single channel sine sweep with linearly increasing frequency.
 
-    Sweep sweep synthesis according to [#]_
+    Sine sweep sweep synthesis according to [#]_.
 
     .. note::
         The linear sweep can also be generated in the time domain
@@ -243,7 +243,7 @@ def linear_sweep_freq(
     stop_margin : int, float
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
-        ends at sample ``n_samples-10``. This is required, because the
+        ends at sample ``n_samples-100``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
     fade_in : int
         Duration of a squared sine fade-in in samples. The fade starts at the
@@ -397,7 +397,7 @@ def exponential_sweep_freq(
     """
     Generate single channel sine sweep with exponentially increasing frequency.
 
-    Sweep sweep synthesis according to [#]_
+    Sweep sweep synthesis according to [#]_.
 
     .. note::
         The exponential sweep can also be generated in the time domain
@@ -423,7 +423,7 @@ def exponential_sweep_freq(
     stop_margin : int, float
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
-        ends at sample ``n_samples-10``. This is required, because the
+        ends at sample ``n_samples-100``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
     fade_in : int
         Duration of a squared sine fade-in in samples. The fade starts at the
@@ -498,14 +498,14 @@ def magnitude_spectrum_weighted_sweep(
     """
     Generate single channel sine sweep with arbitrary magnitude spectrum.
 
-    Sweep sweep synthesis according to [#]_
+    Sine sweep sweep synthesis according to [#]_.
 
     .. note::
-        The linear sweep can also be generated in the time domain
-        (:py:func:`~linear_sweep_time`). Frequency domain synthesis exhibits
-        smooth magnitude spectra in trade of a slightly irregular temporal
-        envelope. Time domain synthesis exhibits a constant temporal envelope
-        in trade of slight ripples in the magnitude response.
+        Frequency domain synthesis exhibits smooth magnitude spectra in trade
+        of a slightly irregular temporal envelope. Time domain synthesis
+        exhibits a constant temporal envelope in trade of slight ripples in the
+        magnitude response. But there is currently no method to design sine
+        sweeps with arbitrary magnitude response in the time domain.
 
     Parameters
     ----------
@@ -521,7 +521,7 @@ def magnitude_spectrum_weighted_sweep(
     stop_margin : int, float
         Time in samples, at which the sweep stops. This is relative to
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
-        ends at sample ``n_samples-10``. This is required, because the
+        ends at sample ``n_samples-100``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
     fade_in : int
         Duration of a squared sine fade-in in samples. The fade starts at the
@@ -706,12 +706,19 @@ def _frequency_domain_sweep(
     Returns
     -------
     sweep : Signal
-        The sweep signal. The Signal is in the time domain and has the ``none``
+        The sweep signal. The Signal is in the time domain and has the ``rms``
         FFT normalization (see :py:func:`~pyfar.dsp.fft.normalization`). The
         sweep parameters are written to `comment`.
     group_delay_sweep : FrequencyData
         The group delay of the sweep as a single sided spectrum between 0 Hz
         and ``sampling_rate/2``.
+
+    References
+    ----------
+    S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
+    Directors Cut Including Previously Unreleased Material and some
+    Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471 (all equations
+    referenced in the code refer to this).
     """
 
     # check input (only checks for user input, no checks for calling the
@@ -790,11 +797,11 @@ def _frequency_domain_sweep(
     # group delay at Nyquist equals stopping time
     sweep_gd[-1] = (n_samples - stop_margin) / sampling_rate
 
-    # FORMULA (11, p.40 )
+    # FORMULA (11, p.40, in Müller and Massarani 2001)
     sweep_power = np.sum(np.abs(sweep_abs**2))
     C = (sweep_gd[-1] - sweep_gd[1]) / sweep_power
 
-    # FORMULA (10, p.40 )
+    # FORMULA (10, p.40, in Müller and Massarani 2001)
     for k in range(tg_start, n_bins):  # index 2 to nyq
         sweep_gd[k] = sweep_gd[k-1] + C * np.abs(sweep_abs[k])**2
 
