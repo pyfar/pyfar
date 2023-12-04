@@ -287,13 +287,13 @@ def linear_sweep_freq(
 
     Examples
     --------
-    Linear sweep between 0 and 22050 Hz
+    Linear sweep between 50 and 22050 Hz
 
     .. plot::
 
         >>> import pyfar as pf
         >>> sweep, _ = pf.signals.linear_sweep_freq(
-        ...     2**16, [0, 22050], 1000, 1000)
+        ...     2**16, [50, 22050], 1000, 1000)
         >>> pf.plot.time_freq(sweep)
     """
 
