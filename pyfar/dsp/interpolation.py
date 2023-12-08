@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import iv as bessel_first_mod
-from scipy.interpolate import interp1d
+from scipy.interpolate import (interp1d, PchipInterpolator, CubicSpline,
+                               UnivariateSpline)
 import scipy.signal as sgn
 import matplotlib.pyplot as plt
 import pyfar as pf
@@ -659,7 +660,21 @@ class InterpolateSpectrum():
             :py:func:`~pyfar.dsp.minimum_phase` and
             :py:func:`~pyfar.dsp.linear_phase`.
 
-    kind : tuple
+    kind : str, optional
+        Specifies the method used for interpolation
+
+        ``'monotonic'``
+            Monotonic cubic spline interpolation.
+        ``'non-monotonic```
+            Non-monotonic cubic spline interpolation. In case of sparse or
+            non-smooth input data, these methods may be overshooting, i.e., the
+            interpolated values may lie outside the range of values of the
+            input data.
+
+        The default is ``'monotonic'``.
+
+        The old syntax for pyfar < 0.7.0 will be deprecated in pyfar 0.9.0:
+
         Three element tuple ``('first', 'second', 'third')`` that specifies the
         kind of inter/extrapolation below the lowest frequency (first), between
         the lowest and highest frequency (second), and above the highest
@@ -684,7 +699,7 @@ class InterpolateSpectrum():
             Interpolate on a logarithmic frequency axis.
 
         The default is ``'linear'``.
-    clip : bool, tuple
+    clip : bool, tuple, optional
         The interpolated magnitude response is clipped to the range specified
         by this two element tuple. E.g., ``clip=(0, 1)`` will assure that no
         values smaller than 0 and larger than 1 occur in the interpolated
@@ -702,6 +717,16 @@ class InterpolateSpectrum():
             Length of the interpolated time signal in samples
         `sampling_rate`: int
             Sampling rate of the output signal in Hz
+        `extrapolate`: bool, optional
+            Specify how frequencies outside the range of values given in `data` are
+            computed.
+
+            ``False``
+                Apply nearest neighbor interpolation.
+            ``True``
+                Extrapolate using the method specified in `kind`
+        `smooth`: string, optional
+            ToDo
         `show` : bool, optional
             Show a plot of the input and output data. The default is ``False``.
 
@@ -753,7 +778,8 @@ class InterpolateSpectrum():
 
     """
 
-    def __init__(self, data, method, kind, fscale='linear', clip=False):
+    def __init__(self, data, method, kind='monotonic', fscale='linear',
+                 clip=False):
 
         # check input ---------------------------------------------------------
         # ... data
@@ -769,7 +795,14 @@ class InterpolateSpectrum():
                               f"following: {', '.join(methods)}"))
 
         # ... kind
-        if isinstance(kind, tuple) and len(kind) == 3:
+        if isinstance(kind, str):
+            kinds = ['monotonic', 'non-monotonic', 'linear', 'nearest']
+            if kind not in kinds:
+                raise ValueError(
+                    f'kind is {kind} but must be {", ".join(kinds)}')
+            pass
+        elif isinstance(kind, tuple) and len(kind) == 3:
+            # remove elif case in pyfar 0.9.0
             warnings.warn((
                 "Passing a tuple for the parameter 'kind' will be deprecated "
                 "in  pyfar 0.9.0."), PyfarDeprecationWarning)
@@ -781,8 +814,6 @@ class InterpolateSpectrum():
                     raise ValueError((
                         f"kind contains '{k}' but must only contain "
                         f"the following: {', '.join(kinds)}"))
-        elif isinstance(kind, str):
-            pass
         else:
             raise ValueError("kind must a string")
 
@@ -795,6 +826,8 @@ class InterpolateSpectrum():
         if clip:
             if not isinstance(clip, tuple) or len(clip) != 2:
                 raise ValueError("clip must be a tuple of length 2")
+        else:
+            raise TypeError('extrapolate must be boolean')
 
         # initialize the interpolators ----------------------------------------
         # store required parameters
@@ -802,6 +835,7 @@ class InterpolateSpectrum():
         self._clip = clip
         self._fscale = fscale
         self._kind = kind
+        self._interpolator = None
 
         # flatten input data to work with scipy interpolators
         self._cshape = data.cshape
@@ -809,18 +843,29 @@ class InterpolateSpectrum():
         self._input = data
 
         # get the required data for interpolation
-        if method == 'complex':
-            self._data = [np.real(data.freq), np.imag(data.freq)]
-        elif method == 'magnitude_phase':
-            self._data = [np.abs(data.freq),
-                          pf.dsp.phase(data, unwrap=True)]
+        if isinstance(kind, tuple):
+            # deprecate in pyfar 0.9.0
+            if method == 'complex':
+                self._data = [np.real(data.freq), np.imag(data.freq)]
+            elif method == 'magnitude_phase':
+                self._data = [np.abs(data.freq),
+                            pf.dsp.phase(data, unwrap=True)]
+            else:
+                self._data = [np.abs(data.freq)]
         else:
-            self._data = [np.abs(data.freq)]
+            if method == 'complex':
+                self._data = data.freq
+            elif method == 'magnitude_phase':
+                self._data = np.abs(data.freq) + \
+                    1j * pf.dsp.phase(data, unwrap=True)
+            else:
+                self._data = np.abs(data.freq)
 
         # frequencies for interpolation (store for testing)
         self._f_in = data.frequencies.copy()
 
-    def __call__(self, n_samples, sampling_rate, show=False):
+    def __call__(
+            self, n_samples, sampling_rate, extrapolate=False, show=False):
         """
         Interpolate a Signal with n_samples length.
         (see class docstring) for more information.
@@ -828,7 +873,99 @@ class InterpolateSpectrum():
 
         # deprecate if case in pyfar 0.9.0
         if isinstance(self._kind, tuple):
-            return self._call_deprecated(n_samples, sampling_rate, show)
+            return self._call_deprecated(n_samples, sampling_rate, extrapolate)
+
+        # length of half sided spectrum and highest frequency
+        n_fft = n_samples//2 + 1
+        f_max = sampling_rate / n_samples * (n_fft - 1)
+        # get the frequency values
+        if self._fscale == "linear":
+            # linearly spaced frequencies
+            self._f_query = pf.dsp.fft.rfftfreq(n_samples, sampling_rate)
+            self._f_base = self._f_in
+        else:
+            # logarithmically scaled frequencies between 0 and log10(n_fft)
+            self._f_query = np.log10(np.arange(1, n_fft+1))
+            self._f_base = np.log10(self._f_in / f_max * (n_fft - 1) + 1)
+
+        # frequency range
+        self._freq_range = [self._f_base[0], self._f_base[-1]]
+
+        # interpolate the data
+        if self._kind == 'monotonic':
+            # construct interpolator once
+            if self._interpolator is None:
+                self._interpolator = PchipInterpolator(
+                    self._f_base, self._data, -1)
+            # interpolate
+            interpolated = self._interpolator(
+                self._f_query, extrapolate=extrapolate)
+        elif self._kind == 'non-monotonic':
+            # construct interpolator once
+            if self._interpolator is None:
+                self._interpolator = CubicSpline(
+                    self._f_base, self._data, -1)
+            # interpolate
+            interpolated = self._interpolator(
+                self._f_query, extrapolate=extrapolate)
+        elif self._kind in ['linear', 'nearest']:
+            # construct interpolator every time
+            # (call does not allow to pass extrapolate parameter)
+            fill_value = 'extrapolate' if extrapolate else np.nan
+            self._interpolator = interp1d(self._f_base, self._data, self._kind,
+                                          -1, fill_value=fill_value)
+            # interpolate
+            interpolated = self._interpolator(self._f_query)
+
+        # fill out of range values with nearest neighbors
+        interpolated[self._f_query < self._freq_range[0]] = self._data[0]
+        interpolated[self._f_query > self._freq_range[1]] = self._data[-1]
+
+        # get half sided spectrum
+        if self._method == "complex":
+            # 0 Hz bin must be real
+            interpolated[0] = np.abs(interpolated[0])
+            # Nyquist bin must be real
+            if not n_samples % 2:
+                interpolated[-1] = np.abs(interpolated[-1])
+        elif self._method == 'magnitude_phase':
+            interpolated = \
+                np.real(interpolated) * np.exp(-1j * np.imag(interpolated))
+
+        # get initial signal
+        signal = pf.Signal(interpolated, sampling_rate, n_samples, "freq")
+
+        # clip the magnitude
+        if self._clip:
+            signal.freq = np.clip(
+                np.abs(signal.freq),
+                self._clip[0],
+                self._clip[1]) * np.exp(-1j * pf.dsp.phase(signal))
+
+        if show:
+            # plot input and output data
+            with pf.plot.context():
+                _, ax = plt.subplots(2, 2)
+                # time signal (linear amplitude)
+                pf.plot.time(signal, ax=ax[0, 0])
+                # time signal (log amplitude)
+                pf.plot.time(signal, ax=ax[1, 0], dB=True)
+                # frequency plot (linear x-axis)
+                pf.plot.freq(signal, dB=False, freq_scale="linear",
+                             ax=ax[0, 1])
+                pf.plot.freq(self._input, dB=False, freq_scale="linear",
+                             ax=ax[0, 1], c='r', ls='', marker='.')
+                ax[0, 1].set_xlim(0, sampling_rate/2)
+                # frequency plot (log x-axis)
+                pf.plot.freq(signal, dB=False, ax=ax[1, 1], label='output')
+                pf.plot.freq(self._input, dB=False, ax=ax[1, 1],
+                             c='r', ls='', marker='.', label='intput')
+                min_freq = np.min([sampling_rate / n_samples,
+                                   self._input.frequencies[0]])
+                ax[1, 1].set_xlim(min_freq, sampling_rate/2)
+                ax[1, 1].legend(loc='best')
+
+        return signal
 
     def _call_deprecated(self, n_samples, sampling_rate, show):
         # to be removed in pyfar 0.9.0
