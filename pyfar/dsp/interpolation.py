@@ -8,6 +8,7 @@ from scipy.ndimage import generic_filter1d
 from fractions import Fraction
 from decimal import Decimal
 import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def _weighted_moving_average(input, output, weights):
@@ -768,14 +769,22 @@ class InterpolateSpectrum():
                               f"following: {', '.join(methods)}"))
 
         # ... kind
-        if not isinstance(kind, tuple) or len(kind) != 3:
-            raise ValueError("kind must be a tuple of length 3")
-        kinds = ['linear', 'nearest', 'nearest-up', 'zero', 'slinear',
-                 'quadratic', 'cubic', 'previous', 'next']
-        for k in kind:
-            if k not in kinds:
-                raise ValueError((f"kind contains '{k}' but must only contain "
-                                  f"the following: {', '.join(kinds)}"))
+        if isinstance(kind, tuple) and len(kind) == 3:
+            warnings.warn((
+                "Passing a tuple for the parameter 'kind' will be deprecated "
+                "in  pyfar 0.9.0."), PyfarDeprecationWarning)
+
+            kinds = ['linear', 'nearest', 'nearest-up', 'zero', 'slinear',
+                     'quadratic', 'cubic', 'previous', 'next']
+            for k in kind:
+                if k not in kinds:
+                    raise ValueError((
+                        f"kind contains '{k}' but must only contain "
+                        f"the following: {', '.join(kinds)}"))
+        elif isinstance(kind, str):
+            pass
+        else:
+            raise ValueError("kind must a string")
 
         # ... fscale
         if fscale not in ["linear", "log"]:
@@ -816,6 +825,13 @@ class InterpolateSpectrum():
         Interpolate a Signal with n_samples length.
         (see class docstring) for more information.
         """
+
+        # deprecate if case in pyfar 0.9.0
+        if isinstance(self._kind, tuple):
+            return self._call_deprecated(n_samples, sampling_rate, show)
+
+    def _call_deprecated(self, n_samples, sampling_rate, show):
+        # to be removed in pyfar 0.9.0
 
         # length of half sided spectrum and highest frequency
         n_fft = n_samples//2 + 1

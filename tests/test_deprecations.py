@@ -196,3 +196,19 @@ def test_deprecations_find_nearest_sph():
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             coords.find_nearest_sph(1, 1, 1, 1)
+
+
+# deprecate in 0.9.0 ----------------------------------------------------------
+def test_interpolate_spectrum():
+    with pytest.warns(PyfarDeprecationWarning,
+                      match='Passing a tuple'):
+        pf.dsp.InterpolateSpectrum(
+            pf.FrequencyData([0, 1], [0, 22050]), 'magnitude',
+            ('zero', 'zero', 'zero'))
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(ValueError):
+            # remove passing tuple for 'kind' from pyfar 0.9.0!
+            pf.dsp.InterpolateSpectrum(
+                pf.FrequencyData([0, 1], [0, 22050]), 'magnitude',
+                ('zero', 'zero', 'zero'))
