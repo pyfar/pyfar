@@ -201,7 +201,7 @@ def test_deprecations_find_nearest_sph():
 # deprecate in 0.9.0 ----------------------------------------------------------
 def test_interpolate_spectrum():
     with pytest.warns(PyfarDeprecationWarning,
-                      match='Passing a tuple'):
+                      match='0.9.0'):
         pf.dsp.InterpolateSpectrum(
             pf.FrequencyData([0, 1], [0, 22050]), 'magnitude',
             ('zero', 'zero', 'zero'))
