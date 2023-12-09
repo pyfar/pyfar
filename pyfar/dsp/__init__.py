@@ -27,7 +27,8 @@ from .interpolation import (
     smooth_fractional_octave,
     fractional_time_shift,
     resample,
-    InterpolateSpectrum
+    InterpolateSpectrum,
+    InterpolateSpectra
 )
 
 from . import filter
@@ -58,6 +59,7 @@ __all__ = [
     'power',
     'rms',
     'InterpolateSpectrum',
+    'InterpolateSpectra',
     'smooth_fractional_octave',
     'resample',
     'average',
