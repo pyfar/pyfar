@@ -1568,7 +1568,7 @@ class Coordinates():
 
     def find_within(
             self, find, distance=0., distance_measure='euclidean',
-            atol=1e-15, return_sorted=True):
+            atol=1e-15, radius_tol=1e-15, return_sorted=True):
         """
         Find coordinates within a certain distance to the query points.
 
@@ -1590,6 +1590,11 @@ class Coordinates():
             ``'spherical_meter'``
                 distance is determined by the great-circle distance
                 expressed in meters.
+        atol : float
+            Absolute tolerance for distance. The default is 1e-15.
+        radius_tol : float
+            Maximum allowed difference within radii for spherical distance
+            measures. The default is 1e-15.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
@@ -1634,6 +1639,8 @@ class Coordinates():
             raise ValueError("distance must be a non negative number.")
         if not isinstance(atol, float) or atol < 0:
             raise ValueError("atol must be a non negative number.")
+        if not isinstance(radius_tol, float) or radius_tol < 0:
+            raise ValueError("radius_tol must be a non negative number.")
         if not isinstance(find, Coordinates):
             raise ValueError("coords must be an pf.Coordinates object.")
         if not isinstance(return_sorted, bool):
@@ -1658,14 +1665,14 @@ class Coordinates():
         if distance_measure == 'euclidean':
             index = kdtree.query_ball_point(
                 points, distance + atol, return_sorted=return_sorted)
-        if distance_measure == ['spherical_radians', 'spherical_meter']:
+        if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
             radius = self.radius
             delta_radius = np.max(radius) - np.min(radius)
-            if delta_radius > 1e-15:
+            if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same \
-                    radius. Differences are larger than 1e-15")
+                    "find_nearest_sph only works if all points have the same "
+                    f"radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
             if distance_measure == 'spherical_meter':
