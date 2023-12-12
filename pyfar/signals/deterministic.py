@@ -157,13 +157,11 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     seconds, and the frequency limits :math:`f_\\mathrm{low}` and
     :math:`f_\\mathrm{high}`.
 
-    .. note::
-        The linear sweep can also be generated in the frequency domain
-        (see :py:func:`~linear_sweep_freq`). Time domain synthesis
-        exhibits a constant temporal envelope in trade of slight ripples in the
-        magnitude response. Frequency domain synthesis exhibits smooth
-        magnitude spectra and in trade of a slightly irregular temporal
-        envelope.
+    he linear sweep can also be generated in the frequency domain (see
+    :py:func:`~linear_sweep_freq`). Time domain synthesis exhibits a constant
+    temporal envelope in trade of slight ripples in the magnitude response.
+    Frequency domain synthesis exhibits smooth magnitude spectra and in trade
+    of a slightly irregular temporal envelope.
 
     Parameters
     ----------
@@ -221,12 +219,17 @@ def linear_sweep_freq(
 
     Sine sweep sweep synthesis according to [#]_.
 
+    The linear sweep can also be generated in the time domain
+    (:py:func:`~linear_sweep_time`). Frequency domain synthesis exhibits
+    smooth magnitude spectra in trade of a slightly irregular temporal
+    envelope. Time domain synthesis exhibits a constant temporal envelope in
+    trade of slight ripples in the magnitude response.
+
     .. note::
-        The linear sweep can also be generated in the time domain
-        (:py:func:`~linear_sweep_time`). Frequency domain synthesis exhibits
-        smooth magnitude spectra in trade of a slightly irregular temporal
-        envelope. Time domain synthesis exhibits a constant temporal envelope
-        in trade of slight ripples in the magnitude response.
+        The envelope of the sweep time signal should be constant, apart from
+        slight overshoots at the beginning and end. If this is not the case,
+        try to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in`
+        or `fade_out`.
 
     Parameters
     ----------
@@ -330,13 +333,11 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
     seconds, and the frequency limits :math:`f_\\mathrm{low}` and
     :math:`f_\\mathrm{high}`.
 
-    .. note::
-        The exponential sweep can also be generated in the frequency domain
-        (see :py:func:`~exponential_sweep.freq`). Time domain synthesis
-        exhibits a constant temporal envelope in trade of slight ripples in the
-        magnitude response. Frequency domain synthesis exhibits smooth
-        magnitude spectra and in trade of a slightly irregular temporal
-        envelope.
+    The exponential sweep can also be generated in the frequency domain (see
+    see :py:func:`~exponential_sweep.freq`). Time domain synthesis exhibits a
+    constant temporal envelope in trade of slight ripples in the magnitude
+    response. Frequency domain synthesis exhibits smooth magnitude spectra and
+    in trade of a slightly irregular temporal envelope.
 
     Parameters
     ----------
@@ -399,12 +400,17 @@ def exponential_sweep_freq(
 
     Sweep sweep synthesis according to [#]_.
 
+    The exponential sweep can also be generated in the time domain
+    (:py:func:`~exponential_sweep_time`). Frequency domain synthesis
+    exhibits smooth magnitude spectra in trade of a slightly irregular
+    temporal envelope. Time domain synthesis exhibits a constant temporal
+    envelope in trade of slight ripples in the magnitude response.
+
     .. note::
-        The exponential sweep can also be generated in the time domain
-        (:py:func:`~exponential_sweep_time`). Frequency domain synthesis
-        exhibits smooth magnitude spectra in trade of a slightly irregular
-        temporal envelope. Time domain synthesis exhibits a constant temporal
-        envelope in trade of slight ripples in the magnitude response.
+        The envelope of the sweep time signal should be constant, apart from
+        slight overshoots at the beginning and end. If this is not the case,
+        try to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in`
+        or `fade_out`.
 
     Parameters
     ----------
@@ -452,13 +458,6 @@ def exponential_sweep_freq(
     group_delay_sweep : FrequencyData
         The group delay of the sweep in seconds as a single sided spectrum.
 
-    Notes
-    -----
-    The envelope of the sweep time signal should be constant, apart from
-    slight overshoots at the beginning and end. If this is not the case, try
-    to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in` or
-    `fade_out`.
-
     References
     ----------
     .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
@@ -498,14 +497,18 @@ def magnitude_spectrum_weighted_sweep(
     """
     Generate single channel sine sweep with arbitrary magnitude spectrum.
 
-    Sine sweep sweep synthesis according to [#]_.
+    Sine sweep sweep synthesis according to [#]_. Frequency domain synthesis
+    exhibits smooth magnitude spectra in trade of a slightly irregular temporal
+    envelope. Time domain synthesis exhibits a constant temporal envelope in
+    trade of slight ripples in the magnitude response. But there is currently
+    no method to design sine sweeps with arbitrary magnitude response in the
+    time domain.
 
     .. note::
-        Frequency domain synthesis exhibits smooth magnitude spectra in trade
-        of a slightly irregular temporal envelope. Time domain synthesis
-        exhibits a constant temporal envelope in trade of slight ripples in the
-        magnitude response. But there is currently no method to design sine
-        sweeps with arbitrary magnitude response in the time domain.
+        The envelope of the sweep time signal should be constant, apart from
+        slight overshoots at the beginning and end. If this is not the case,
+        try to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in`
+        or `fade_out`, or provide a more smooth magnitude spectrum.
 
     Parameters
     ----------
