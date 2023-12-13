@@ -157,7 +157,7 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     seconds, and the frequency limits :math:`f_\\mathrm{low}` and
     :math:`f_\\mathrm{high}`.
 
-    he linear sweep can also be generated in the frequency domain (see
+    The linear sweep can also be generated in the frequency domain (see
     :py:func:`~linear_sweep_freq`). Time domain synthesis exhibits a constant
     temporal envelope in trade of slight ripples in the magnitude response.
     Frequency domain synthesis exhibits smooth magnitude spectra and in trade
@@ -274,13 +274,6 @@ def linear_sweep_freq(
         (see :py:func:`~pyfar.dsp.fft.normalization`).
     group_delay_sweep : FrequencyData
         The group delay of the sweep in seconds as a single sided spectrum.
-
-    Notes
-    -----
-    The envelope of the sweep time signal should be constant, apart from
-    slight overshoots at the beginning and end. If this is not the case, try
-    to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in` or
-    `fade_out`.
 
     References
     ----------
@@ -547,13 +540,6 @@ def magnitude_spectrum_weighted_sweep(
         (see :py:func:`~pyfar.dsp.fft.normalization`).
     group_delay_sweep : FrequencyData
         The group delay of the sweep in seconds as a single sided spectrum.
-
-    Notes
-    -----
-    The envelope of the sweep time signal should be constant, apart from
-    slight overshoots at the beginning and end. If this is not the case,
-    provide a smother spectrum in `magnitude_spectrum` or try to increase
-    `n_samples`, `start_margin`, `stop_margin`, `fade_in` or `fade_out`.
 
     References
     ----------
