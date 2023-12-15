@@ -79,7 +79,6 @@ def test_chebyshev2(impulse):
         x = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass')
 
 
-
 def test_elliptic(impulse):
     # Uses scipy function. We thus only test the functionality not the results
     # Filter object
