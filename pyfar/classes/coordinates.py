@@ -1601,7 +1601,7 @@ class Coordinates():
             a sphere, so the radius must be constant. This parameter defines
             the maximum allowed difference within the radii. Note that too
             large tolerances can lead to wrong results. The default is 2*eps,
-            see ``atol'' for more details.
+            see ``atol`` for more details.
 
         Returns
         -------
