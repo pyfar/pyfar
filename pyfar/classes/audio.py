@@ -1612,21 +1612,18 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type,
         Signal. `np.asarray(data)` otherwise.
     """
     if isinstance(data, (Signal, TimeData, FrequencyData)):
-        data_ = data.copy()
+        data = data.copy()
         # check if complex casting of any input signal is necessary
-        # if contains_complex:
-        #    if isinstance(data_, (Signal, TimeData)) and not data_.complex:
-        #        data_.complex = True
-        if not isinstance(data_, FrequencyData):
-            data_.complex = contains_complex
+        if not type(data) is FrequencyData:
+            data.complex = contains_complex
         # get signal in correct domain
         if domain == "time":
-            data_out = data_.time
+            data_out = data.time
         elif domain == "freq":
-            if isinstance(data_, Signal):
-                data_out = data_.freq_raw
+            if type(data) is Signal:
+                data_out = data.freq_raw
             else:
-                data_out = data_.freq
+                data_out = data.freq
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")
