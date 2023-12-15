@@ -1568,7 +1568,7 @@ class Coordinates():
 
     def find_within(
             self, find, distance=0., distance_measure='euclidean',
-            atol=1e-15, radius_tol=1e-15, return_sorted=True):
+            atol=None, return_sorted=True, radius_tol=None):
         """
         Find coordinates within a certain distance to the query points.
 
@@ -1590,14 +1590,18 @@ class Coordinates():
             ``'spherical_meter'``
                 distance is determined by the great-circle distance
                 expressed in meters.
-        atol : float
-            Absolute tolerance for distance. The default is 1e-15.
-        radius_tol : float
-            Maximum allowed difference within radii for spherical distance
-            measures. The default is 1e-15.
+        atol : float, None
+            Absolute tolerance for distance. The default is 2*eps, where eps
+            is the resolution of the data type of the coordinates.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
+        radius_tol : float, None
+            For all spherical distance measures, the coordinates must be on
+            a sphere, so the radius must be constant. This parameter defines
+            the maximum allowed difference within the radii. Note that too
+            large tolerances can lead to wrong results. The default is 2*eps,
+            see ``atol'' for more details.
 
         Returns
         -------
@@ -1635,6 +1639,10 @@ class Coordinates():
         """
 
         # check the input
+        if radius_tol is None:
+            radius_tol = 2 * np.finfo(self.x.dtype).resolution
+        if atol is None:
+            atol = 2 * np.finfo(self.x.dtype).resolution
         if float(distance) < 0:
             raise ValueError("distance must be a non negative number.")
         if not isinstance(atol, float) or atol < 0:
