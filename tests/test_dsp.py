@@ -814,6 +814,19 @@ def test_convolve_mode_and_method_complex(method, mode, desired):
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
 
 
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize("mode, desired", [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
+def test_convolve_mode_and_method_real_complex(method, mode, desired):
+    '''Test dsp.convolve with complex signals with various methods and modes'''
+    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=False)
+    y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
+    res = dsp.convolve(x, y, mode=mode, method=method)
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
 def test_convolve_mismatching_cdims():
     """
     Test if convolve works with broadcastable signals with different cdims
