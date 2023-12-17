@@ -862,6 +862,9 @@ class Signal(FrequencyData, TimeData):
                 self._complex = value
         # from complex=False to complex=True
         if not self._complex and value:
+            if self._fft_norm == "rms":
+                raise ValueError(("'rms' normalization is not valid for "
+                                  "complex time signals"))
             if self._domain == 'time':
                 # call complex setter of timeData
                 super(Signal, self.__class__).complex.fset(self, value)
@@ -916,6 +919,9 @@ class Signal(FrequencyData, TimeData):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
+        if self._complex and value == "rms":
+            raise ValueError(("'rms' normalization is not valid for "
+                              "complex time signals"))
         self._fft_norm = value
 
     def _assert_matching_meta_data(self, other):
