@@ -1591,8 +1591,7 @@ class Coordinates():
                 distance is determined by the great-circle distance
                 expressed in meters.
         atol : float, None
-            Absolute tolerance for distance. The default is 2*eps, where eps
-            is the resolution of the data type of the coordinates.
+            Absolute tolerance for distance. The default ``None`` uses a tolerance of two times the decimal resolution, which is determined from the data type of the coordinate points using ``numpy.finfo``.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
