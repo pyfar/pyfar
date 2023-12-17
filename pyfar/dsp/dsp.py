@@ -1899,7 +1899,7 @@ def rms(signal):
                          " but must be of type 'Signal'.")
 
     if signal.complex:
-        raise ValueError("The rms of complex signals is not defined")
+        raise ValueError("The rms of complex signals is not implemented.")
 
     # return and compute data
     return np.sqrt(power(signal))
