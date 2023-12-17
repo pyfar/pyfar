@@ -1591,16 +1591,23 @@ class Coordinates():
                 distance is determined by the great-circle distance
                 expressed in meters.
         atol : float, None
-            Absolute tolerance for distance. The default ``None`` uses a tolerance of two times the decimal resolution, which is determined from the data type of the coordinate points using ``numpy.finfo``.
+            Absolute tolerance for distance. The default ``None`` uses a
+            tolerance of two times the decimal resolution, which is
+            determined from the data type of the coordinate points
+            using ``numpy.finfo``.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
         radius_tol : float, None
             For all spherical distance measures, the coordinates must be on
             a sphere, so the radius must be constant. This parameter defines
-            the maximum allowed difference within the radii. Note that too
-            large tolerances can lead to wrong results. The default is 2*eps,
-            see ``atol`` for more details.
+            the maximum allowed difference within the radii. Note that
+            increasing the tolerance decreases the accuracy of the search,
+            i.e., points that are within the search distance might not be
+            found or points outside the search distance may be returned.
+            The default ``None`` uses a tolerance of two times the decimal
+            resolution, which is determined from the data type of the
+            coordinate points using ``numpy.finfo``.
 
         Returns
         -------
