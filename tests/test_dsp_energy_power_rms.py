@@ -36,13 +36,13 @@ def test_multichannel_signals():
 def test_complex_signal():
     signal = pf.Signal(np.ones((2, 3, 3, 100)), 44100, is_complex=True)
     with pytest.raises(ValueError, match='The energy of complex signals is not'
-                                         ' defined'):
+                                         ' implemented.'):
         pf.dsp.energy(signal)
 
     with pytest.raises(ValueError, match='The power of complex signals is not'
-                                         ' defined'):
+                                         ' implemented.'):
         pf.dsp.power(signal)
 
     with pytest.raises(ValueError, match='The rms of complex signals is not'
-                                         ' defined'):
+                                         ' implemented.'):
         pf.dsp.rms(signal)

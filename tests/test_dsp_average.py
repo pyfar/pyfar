@@ -113,22 +113,22 @@ def test_error_raises():
 
     # test invalid modes for complex signals
     with pytest.raises(ValueError,
-                       match="mode 'log_magnitude_zerophase' is not defined"
-                             " for complex signals."):
+                       match="mode 'log_magnitude_zerophase' is not"
+                             " implemented for complex signals."):
         pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
                        mode="log_magnitude_zerophase")
     with pytest.raises(ValueError,
-                       match="mode 'magnitude_zerophase' is not defined"
+                       match="mode 'magnitude_zerophase' is not implemented"
                              " for complex signals."):
         pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
                        mode="magnitude_zerophase")
     with pytest.raises(ValueError,
-                       match="mode 'magnitude_phase' is not defined"
+                       match="mode 'magnitude_phase' is not implemented"
                              " for complex signals."):
         pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
                        mode="magnitude_phase")
     with pytest.raises(ValueError,
-                       match="mode 'power' is not defined"
+                       match="mode 'power' is not implemented"
                              " for complex signals."):
         pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
                        mode="power")

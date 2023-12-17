@@ -1804,7 +1804,7 @@ def energy(signal):
     independent of the signal's ``fft_norm``.
     :py:func:`~pyfar.dsp.power` and :py:func:`~pyfar.dsp.rms` can be used
     to compute the power and the rms of a signal. The energy of complex-valued
-    signals is not defined.
+    signals is not implemented.
 
     References
     -----------
@@ -1816,7 +1816,7 @@ def energy(signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     if signal.complex:
-        raise ValueError("The energy of complex signals is not defined")
+        raise ValueError("The energy of complex signals is not implemented.")
 
     # return and compute data
     return np.sum(signal.time**2, axis=-1)
@@ -1858,7 +1858,7 @@ def power(signal):
                          " but must be of type 'Signal'.")
 
     if signal.complex:
-        raise ValueError("The power of complex signals is not defined")
+        raise ValueError("The power of complex signals is not implemented.")
 
     # return and compute data
     return np.sum(signal.time**2, axis=-1)/signal.n_samples
@@ -2000,7 +2000,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                                         'power',)):
 
         raise ValueError((
-            f"mode '{mode}' is not defined for complex signals."))
+            f"mode '{mode}' is not implemented for complex signals."))
 
     if nan_policy not in ('propagate', 'omit', 'raise'):
         raise ValueError("nan_policy has to be 'propagate', 'omit', or"
