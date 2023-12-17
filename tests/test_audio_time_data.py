@@ -31,6 +31,10 @@ def test_data_time_init_wrong_dtype():
     with pytest.raises(ValueError, match="time data is complex"):
         TimeData(np.arange(2).astype(complex), [0, 1])
 
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        TimeData(['1', '2'], [0, 1])
+
 
 def test_time_init_complex_flag():
     """
@@ -91,7 +95,7 @@ def test_setter_complex():
     time = TimeData(data=[1 + 1j, 0 + 1j, -1 + 2j], times=[0, .1, .3],
                     is_complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be `False`."):
+                                         " is_complex flag cannot be `False`"):
         time.complex = False
 
 

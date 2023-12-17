@@ -97,7 +97,7 @@ def test_low_shelve_cascade():
             os.path.dirname(__file__), "references",
             "filter.shelve_cascade_low.csv"))
     # restricting rtol was not needed locally. It was added for tests to
-    # pass on travis ci
+    # pass on the testing platform
     npt.assert_allclose(
         y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
     # test N and ideal
@@ -128,7 +128,7 @@ def test_high_shelve_cascade():
             os.path.dirname(__file__), "references",
             "filter.shelve_cascade_high.csv"))
     # restricting rtol was not needed locally. It was added for tests to
-    # pass on travis ci
+    # pass on the testing platform
     npt.assert_allclose(
         y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
     # test N and ideal
@@ -155,7 +155,7 @@ def test_high_shelve_cascade():
             os.path.dirname(__file__), "references",
             "filter.shelve_cascade_high_exceed_nyquist.csv"))
     # restricting rtol was not needed locally. It was added for tests to
-    # pass on travis ci
+    # pass on the testing platform
     npt.assert_allclose(
         y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
     # test N and ideal
