@@ -217,7 +217,7 @@ def linear_sweep_freq(
     """
     Generate single channel sine sweep with linearly increasing frequency.
 
-    Sine sweep sweep synthesis according to [#]_.
+    Sine sweep synthesis according to [#]_.
 
     The linear sweep can also be generated in the time domain
     (:py:func:`~linear_sweep_time`). Frequency domain synthesis exhibits
