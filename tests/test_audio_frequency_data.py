@@ -112,16 +112,19 @@ def test_transpose():
     signal_in = FrequencyData(np.random.rand(6, 2, 5, 256), range(256))
     signal_out = signal_in.transpose()
     npt.assert_allclose(signal_in.T._data, signal_out._data)
-    npt.assert_allclose(signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
 
 
 @pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
 def test_transpose_args(taxis):
     signal_in = FrequencyData(np.random.rand(6, 2, 5, 256), range(256))
     signal_out = signal_in.transpose(taxis)
-    npt.assert_allclose(signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
     signal_out = signal_in.transpose(*taxis)
-    npt.assert_allclose(signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
 
 
 def test_flatten():
