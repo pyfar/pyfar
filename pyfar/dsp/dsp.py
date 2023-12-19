@@ -1986,9 +1986,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         and signal.complex and mode in (
                                         'log_magnitude_zerophase',
                                         'magnitude_zerophase',
-                                        'magnitude_phase',
-                                        'power',)):
-
+                                        'magnitude_phase')):
         raise ValueError((
             f"mode '{mode}' is not defined for complex signals."))
 
