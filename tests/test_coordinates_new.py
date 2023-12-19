@@ -3,7 +3,8 @@ import numpy.testing as npt
 import pytest
 
 from pyfar import Coordinates
-from pyfar.classes.coordinates import sph2cart, cart2sph, cyl2cart
+from pyfar.classes.coordinates import (sph2cart, cart2sph, cyl2cart)
+from pyfar import (deg2rad, rad2deg)
 
 
 def test___eq___copy():
@@ -591,3 +592,69 @@ def test_coordinates_init_from_cylindrical(azimuth, z, radius_z):
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
+
+
+def test_angle_conversion_wrong_input():
+    '''Test input checks when converting from deg to rad and vice versa'''
+
+    # test input checks (common functionality, needs to be tested for
+    # only one function)
+    # 1. input data has the wrong shape
+    with pytest.raises(ValueError, match='coordinates must be of shape'):
+        deg2rad(np.ones((2, 4)))
+    # 2. invalid domain
+    with pytest.raises(ValueError, match='domain must be'):
+        deg2rad(np.ones((2, 3)), 'wrong')
+
+
+@pytest.mark.parametrize('rad,deg', (
+        # flat array
+        [np.array([0, np.pi, 1]), np.array([0, 180, 1])],
+        # 2D array
+        [np.array([[0, np.pi, 1], [np.pi, 0, 2]]),
+         np.array([[0, 180, 1], [180, 0, 2]])],
+        # list
+        [[0, np.pi, 1], np.array([0, 180, 1])]))
+def test_angle_conversion_rad2deg_spherical(rad, deg):
+    '''Test angle conversion from rad to deg and spherical coordinates'''
+
+    # copy input
+    rad_copy = rad.copy()
+    # convert
+    deg_actual = rad2deg(rad)
+    # check that input did not change
+    npt.assert_equal(rad_copy, rad)
+    # check output values
+    npt.assert_allclose(deg_actual, np.atleast_2d(deg))
+    # check type and shape
+    assert isinstance(deg_actual, np.ndarray)
+    assert deg_actual.ndim >= 2
+    assert deg_actual.shape[-1] == 3
+
+
+def test_angle_conversion_rad2deg_cylindrical():
+    '''
+    Test angle conversion from rad to deg and cylindrical coordinates. Only
+    the result is checked. Everything else is tested above.
+    '''
+
+    # copy input
+    rad = np.array([np.pi, 1, 2])
+    # convert
+    deg = rad2deg(rad, 'cylindrical')
+    # check output values
+    npt.assert_allclose(deg, np.atleast_2d([180, 1, 2]))
+
+
+def test_angle_conversion_deg2rad():
+    '''
+    Test angle conversion from rad to deg. Only spherical coordinates are used
+    and the result is checked. Everything else is tested above.
+    '''
+
+    # copy input
+    deg = np.array([180, 360, 1])
+    # convert
+    rad = deg2rad(deg)
+    # check output values
+    npt.assert_allclose(rad, np.atleast_2d([np.pi, 2*np.pi, 1]))

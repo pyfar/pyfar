@@ -73,6 +73,14 @@ def test_signal_init_time_dtype():
     signal = Signal([1+1j, 2+2j, 3+3j], 44100, is_complex=True)
     assert signal.time.dtype.kind == "c"
 
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        Signal(['1', '2', '3'], 44100)
+
+    # pass array with invalid value
+    with pytest.raises(ValueError, match="input values must be numeric"):
+        Signal(np.array([1, 2, np.nan]), 44100)
+
 
 def test_data_frequency_init_dtype():
     """
@@ -93,8 +101,16 @@ def test_data_frequency_init_dtype():
     assert signal.freq.dtype.kind == "c"
 
     # object array
-    with pytest.raises(ValueError, match="frequency data is"):
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
         Signal(["1", "2", "3"], 44100, 4, "freq")
+
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        Signal(['1', '2', '3'], 44100, 4, "freq")
+
+    # pass array with invalid value
+    with pytest.raises(ValueError, match="input values must be numeric"):
+        Signal(np.array([1, 2, np.nan]), 44100, 4, "freq")
 
 
 def test_signal_comment():
@@ -314,6 +330,14 @@ def test_setter_fft_norm():
     # setting an invalid fft_norm
     with pytest.raises(ValueError):
         signal.fft_norm = 'bullshit'
+
+    # setting fft_norm for complex time signals
+    signal = pf.Signal([1, 2, 3], 44100,
+                       fft_norm='power', is_complex=True)
+    with pytest.raises(ValueError,
+                       match="'rms' normalization is not valid for "
+                             "complex time signals"):
+        signal.fft_norm = "rms"
 
 
 def test_fft_selection():
@@ -559,7 +583,7 @@ def test_setter_freq_raw_dtype():
     assert signal.freq_raw.dtype.kind == "c"
 
     # object array
-    with pytest.raises(ValueError, match="frequency data is"):
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
         signal.freq_raw = ["1", "2", "3"]
 
 
@@ -636,6 +660,16 @@ def test_setter_complex():
                                          " conjugate symmetric, "
                                          "is_complex flag cannot be `False`."):
         signal.complex = False
+
+
+def test_setter_complex_invalid_fft_norm():
+    # test setting complex from False to True
+    # for frequency domain signals
+    signal = Signal([0, 1, 2], 44100, 4, "time", fft_norm="rms")
+    with pytest.raises(ValueError,
+                       match="'rms' normalization is not valid for "
+                             "complex time signals"):
+        signal.complex = True
 
 
 def test_frequencies():

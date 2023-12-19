@@ -184,6 +184,29 @@ class _Audio():
         self._assert_matching_meta_data(value)
         self._data[key] = value._data
 
+    @staticmethod
+    def _check_input_type_is_numeric(data: np.ndarray):
+        """
+        Check if input data is numeric and raise TypeError if not.
+        """
+        # check if data type is numeric
+        if data.dtype.kind not in ["u", "i", "f", "c"]:
+            raise TypeError((f"The input data is {data.dtype} must be int, "
+                             "uint, float, or complex"))
+
+    @staticmethod
+    def _check_input_values_are_numeric(data: np.ndarray):
+        """
+        Check if input data contains only numeric values and raise TypeError
+        if not. This is only required for Signal objects but is kept here
+        to improve readability.
+        """
+        # check for non-numeric values
+        if np.any(np.isnan(data)) or np.any(np.isinf(data)):
+            raise ValueError((
+                "The input values must be numeric but contain at "
+                "least one non-numerical value (inf or NaN)"))
+
 
 class TimeData(_Audio):
     """Class for time data.
@@ -234,26 +257,23 @@ class TimeData(_Audio):
 
     @property
     def time(self):
-        """Return the data in the time domain."""
+        """Return or set the data in the time domain."""
         return self._data
 
     @time.setter
     def time(self, value):
-        """Set the time data."""
+        """Return or set the time data."""
         # check and set the data and meta data
         data = np.atleast_2d(np.asarray(value))
+        self._check_input_type_is_numeric(data)
         if self.complex:
             data = np.atleast_2d(np.asarray(value, dtype=complex))
         else:
-            if data.dtype.kind == "i":
+            if data.dtype.kind in ["i", "u"]:
                 data = np.atleast_2d(np.asarray(value, dtype=float))
             elif data.dtype.kind == "c":
                 raise ValueError("time data is complex, set is_complex "
                                  "flag or pass real-valued data.")
-            elif data.dtype.kind != "f":
-                raise ValueError(
-                    f"time data is {data.dtype} must be int, float, or "
-                    f"complex")
 
         self._data = data
         self._n_samples = data.shape[-1]
@@ -443,20 +463,18 @@ class FrequencyData(_Audio):
 
     @property
     def freq(self):
-        """Return the data in the frequency domain."""
+        """Return or set the data in the frequency domain."""
         return self._data
 
     @freq.setter
     def freq(self, value):
-        """Set the frequency data."""
+        """Return or set the data in the frequency domain."""
 
         # check data type
         data = np.atleast_2d(np.asarray(value))
-        if data.dtype.kind == "i":
+        self._check_input_type_is_numeric(data)
+        if data.dtype.kind in ["i", "u"]:
             data = data.astype("float")
-        elif data.dtype.kind not in ["f", "c"]:
-            raise ValueError((f"frequency data is {data.dtype} must be int, "
-                              "float, or complex"))
 
         # match shape of frequencies
         if self.frequencies.size != data.shape[-1]:
@@ -688,13 +706,29 @@ class Signal(FrequencyData, TimeData):
         else:
             raise ValueError("Invalid domain. Has to be 'time' or 'freq'.")
 
-    @TimeData.time.getter
+        # additional input data check required for Signal objects and not done
+        # in FrequencyData and TimeData __init__ methods
+        self._check_input_values_are_numeric(data)
+
+    @property
     def time(self):
-        """Return the data in the time domain."""
+        """Return or set the data in the time domain."""
+        # this overrides the setter TimeData.time
+
         # converts the data from 'freq' to 'time'
         self.domain = 'time'
 
         return super().time
+
+    @time.setter
+    def time(self, value):
+        """Return or set the data in the time domain."""
+        # this overrides the setter TimeData.time
+
+        # set data using parent class
+        TimeData.time.fset(self, value)
+        # additional check required for signal objects
+        self._check_input_values_are_numeric(self.time)
 
     @FrequencyData.freq.getter
     def freq(self):
@@ -716,12 +750,12 @@ class Signal(FrequencyData, TimeData):
 
     @freq.setter
     def freq(self, value):
-        """Set the normalized frequency domain data."""
+        """Return or set the normalized frequency domain data."""
         self._freq(value, raw=False)
 
     @property
     def freq_raw(self):
-        """Return the frequency domain data without normalization.
+        """Return or set the frequency domain data without normalization.
 
         Most processing operations, e.g., frequency
         domain convolution, require the non-normalized data.
@@ -734,16 +768,15 @@ class Signal(FrequencyData, TimeData):
 
     @freq_raw.setter
     def freq_raw(self, value):
-        """Set the frequency domain data without normalization."""
+        """Return or set the frequency domain data without normalization."""
         self._freq(value, raw=True)
 
     def _freq(self, value, raw):
         """Set the frequency domain data."""
         # check data type
         data = np.atleast_2d(np.asarray(value))
-        if data.dtype.kind not in ["i", "f", "c"]:
-            raise ValueError((f"frequency data is {data.dtype} must be int, "
-                              "float, or complex"))
+        self._check_input_type_is_numeric(data)
+        self._check_input_values_are_numeric(data)
         # Check n_samples
         if data.shape[-1] != self.n_bins:
             self._n_samples = fft._n_samples_from_n_bins(
@@ -829,6 +862,9 @@ class Signal(FrequencyData, TimeData):
                 self._complex = value
         # from complex=False to complex=True
         if not self._complex and value:
+            if self._fft_norm == "rms":
+                raise ValueError(("'rms' normalization is not valid for "
+                                  "complex time signals"))
             if self._domain == 'time':
                 # call complex setter of timeData
                 super(Signal, self.__class__).complex.fset(self, value)
@@ -883,6 +919,9 @@ class Signal(FrequencyData, TimeData):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
+        if self._complex and value == "rms":
+            raise ValueError(("'rms' normalization is not valid for "
+                              "complex time signals"))
         self._fft_norm = value
 
     def _assert_matching_meta_data(self, other):
@@ -1386,29 +1425,32 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     division = True if operation == _divide else False
     matmul = True if operation == _matrix_multiplication else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type, \
-        cshape = \
-        _assert_match_for_arithmetic(data, domain, division, matmul)
+        cshape, contains_complex = _assert_match_for_arithmetic(
+            data, domain, division, matmul)
 
     # apply arithmetic operation
-    result = _get_arithmetic_data(data[0], domain, cshape, matmul, audio_type)
+    result = _get_arithmetic_data(
+        data[0], domain, cshape, matmul, audio_type, contains_complex)
 
     for d in range(1, len(data)):
         if matmul:
             kwargs['audio_type'] = audio_type
         result = operation(
             result,
-            _get_arithmetic_data(data[d], domain, cshape, matmul, audio_type),
+            _get_arithmetic_data(data[d], domain, cshape, matmul, audio_type,
+                                 contains_complex),
             **kwargs)
 
     # check if to return an audio object
     if audio_type == Signal:
         # Set unnormalized spectrum
         result = Signal(
-            result, sampling_rate, n_samples, domain, fft_norm='none')
+            result, sampling_rate, n_samples, domain, fft_norm='none',
+            is_complex=contains_complex)
         # Set fft norm
         result.fft_norm = fft_norm
     elif audio_type == TimeData:
-        result = TimeData(result, times)
+        result = TimeData(result, times, is_complex=contains_complex)
     elif audio_type == FrequencyData:
         result = FrequencyData(result, frequencies)
 
@@ -1421,7 +1463,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
 
     Check if sampling rate and number of samples agree if multiple signals are
     provided. Check if arrays are numeric. Check if a power signal is contained
-    in the input. Extract cshape of result.
+    in the input. Extract cshape of result. Check if input data is a
+    complex-valued Signal or complex-valued TimeData.
 
     Input:
     data : tuple
@@ -1453,7 +1496,9 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     cshape : tuple, None
         Largest channel shape of the audio classes if contained in data.
         Otherwise empty tuple.
-
+    contains_complex: bool, False
+        Indicates if input data contains a complex-valued Signal or
+        complex-valued TimeData.
     """
 
     # we need at least two signals
@@ -1472,11 +1517,15 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     frequencies = None
     audio_type = type(None)
     cshape = ()
+    contains_complex = False
 
     # check input types and meta data
     found_audio_data = False
     for n, d in enumerate(data):
         if isinstance(d, (Signal, TimeData, FrequencyData)):
+            if isinstance(d, (Signal, TimeData)):
+                if d.complex:
+                    contains_complex = True
             # store meta data upon first appearance
             if not found_audio_data:
                 if isinstance(d, Signal):
@@ -1532,15 +1581,16 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
             if np.asarray(d).dtype.kind not in ["i", "f", "c"]:
                 raise ValueError(
                     "Input must be of type Signal, int, float, or complex")
-            if np.asarray(d).dtype.kind == "c" and domain == 'time':
-                raise ValueError(
-                    "Complex input can not be applied in the time domain.")
+            if (audio_type == (Signal or TimeData)
+                    and domain == 'time' and np.asarray(d).dtype.kind == "c"):
+                contains_complex = True
 
     return (sampling_rate, n_samples, fft_norm, times, frequencies, audio_type,
-            cshape)
+            cshape, contains_complex)
 
 
-def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
+def _get_arithmetic_data(data, domain, cshape, matmul, audio_type,
+                         contains_complex):
     """
     Return data in desired domain without any fft normalization.
 
@@ -1557,6 +1607,9 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
         ``True`` if a  matrix multiplication is performed, ``False`` otherwise
     audio_type : type, None
         Type of the audio class of the operation's result.
+    contains_complex : bool
+        Flag which indicates if the operation involves complex-valued pyfar
+        audio objects
 
     Returns
     -------
@@ -1565,14 +1618,18 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
         Signal. `np.asarray(data)` otherwise.
     """
     if isinstance(data, (Signal, TimeData, FrequencyData)):
+        data = data.copy()
+        # check if complex casting of any input signal is necessary
+        if not type(data) is FrequencyData:
+            data.complex = contains_complex
         # get signal in correct domain
         if domain == "time":
-            data_out = data.time.copy()
+            data_out = data.time
         elif domain == "freq":
-            if isinstance(data, Signal):
-                data_out = data.freq_raw.copy()
+            if type(data) is Signal:
+                data_out = data.freq_raw
             else:
-                data_out = data.freq.copy()
+                data_out = data.freq
         else:
             raise ValueError(
                 f"domain must be 'time' or 'freq' but found {domain}")

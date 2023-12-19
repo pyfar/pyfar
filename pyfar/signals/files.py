@@ -20,8 +20,6 @@ import pyfar as pf
 
 # path for saving/reading files
 file_dir = os.path.join(os.path.dirname(__file__), 'files')
-if not os.path.isdir(file_dir):
-    os.mkdir(file_dir)
 
 
 def castanets(sampling_rate=44100):
@@ -479,6 +477,18 @@ def room_impulse_response(sampling_rate=48000):
 
 def _load_files(data):
     """Download files from Audio Communication Server if they do not exist."""
+
+    # create directory if required
+    if not os.path.isdir(file_dir):
+        # provide verbose error for read-only file systems
+        try:
+            os.mkdir(file_dir)
+        except OSError as error:
+            if 'Read-only' in str(error):
+                raise OSError((f'{data} can not be loaded because the file '
+                               'system is read-only.'))
+            else:
+                raise error
 
     # set the filenames
     if data in ['binaural_room_impulse_response', 'castanets', 'drums',

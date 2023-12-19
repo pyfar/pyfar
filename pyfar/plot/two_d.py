@@ -3,8 +3,6 @@ from pyfar.plot.utils import context
 from .. import Signal
 from . import _two_d
 from . import _interaction as ia
-from pyfar.classes.warnings import PyfarDeprecationWarning
-import warnings
 
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
@@ -983,7 +981,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 freq_scale='linear', unit='s', window='hann',
                 window_length=1024, window_overlap_fct=0.5,
-                colorbar=True, ax=None, style='light', yscale=None, **kwargs):
+                colorbar=True, ax=None, style='light', **kwargs):
     """Plot blocks of the magnitude spectrum versus time.
 
     Parameters
@@ -1055,16 +1053,6 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
         empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
-    yscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -1100,17 +1088,10 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    # xscale deprecation
-    if yscale is not None:
-        warnings.warn(('The yscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PyfarDeprecationWarning)
-        freq_scale = yscale
-
     with context(style):
         ax, qm, cb = _two_d._spectrogram(
             signal.flatten(), dB, log_prefix, log_reference, freq_scale, unit,
-            window, window_length, window_overlap_fct, colorbar, ax)
+            window, window_length, window_overlap_fct, colorbar, ax, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
