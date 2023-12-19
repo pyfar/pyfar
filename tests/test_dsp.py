@@ -763,6 +763,16 @@ def test_convolve_default():
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
 
 
+def test_convolve_complex():
+    '''Test dsp.convolve with complex signals with default parameters'''
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100, is_complex=True)
+    y = pf.Signal([1, -1, 0], 44100, is_complex=True)
+
+    res = dsp.convolve(x, y)
+    desired = np.array([[1, -0.5, -0.25, -0.25, 0, 0]], dtype='complex')
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
 def test_convolve_sampling_rate_error():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, 0.5, 0.25, 0], 48000)
@@ -787,6 +797,32 @@ def test_convolve_fft_norm_error():
 def test_convolve_mode_and_method(method, mode, desired):
     x = pf.Signal([1, 0.5, 0.5, 0.1], 44100)
     y = pf.Signal([1, -1, 0.1], 44100)
+    res = dsp.convolve(x, y, mode=mode, method=method)
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize("mode, desired", [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
+def test_convolve_mode_and_method_complex(method, mode, desired):
+    '''Test dsp.convolve with complex signals with various methods and modes'''
+    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=True)
+    y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
+    res = dsp.convolve(x, y, mode=mode, method=method)
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize("mode, desired", [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
+def test_convolve_mode_and_method_real_complex(method, mode, desired):
+    '''Test dsp.convolve with complex signals with various methods and modes'''
+    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=False)
+    y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
     res = dsp.convolve(x, y, mode=mode, method=method)
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
 
