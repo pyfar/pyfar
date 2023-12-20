@@ -1803,7 +1803,7 @@ def energy(signal):
     Due to the calculation based on the time data, the returned energy is
     independent of the signal's ``fft_norm``.
     :py:func:`~pyfar.dsp.power` and :py:func:`~pyfar.dsp.rms` can be used
-    to compute the power and the rms of a signal. 
+    to compute the power and the rms of a signal.
 
     References
     -----------
