@@ -1803,8 +1803,7 @@ def energy(signal):
     Due to the calculation based on the time data, the returned energy is
     independent of the signal's ``fft_norm``.
     :py:func:`~pyfar.dsp.power` and :py:func:`~pyfar.dsp.rms` can be used
-    to compute the power and the rms of a signal. The energy of complex-valued
-    signals is not implemented.
+    to compute the power and the rms of a signal. 
 
     References
     -----------
@@ -1848,7 +1847,7 @@ def power(signal):
     independent of the signal's ``fft_norm``.
     The power equals the squared RMS of a signal. :py:func:`~pyfar.dsp.energy`
     and :py:func:`~pyfar.dsp.rms` can be used to compute the energy and the
-    RMS. The power of complex-valued signals is not defined.
+    RMS.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
@@ -1885,8 +1884,7 @@ def rms(signal):
     -----
     The RMS equals the square root of the signal's power.
     :py:func:`~pyfar.dsp.energy` and :py:func:`~pyfar.dsp.power` can be used
-    to compute the energy and the power. The RMS of complex-valued signals is
-    not defined.
+    to compute the energy and the power.
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
