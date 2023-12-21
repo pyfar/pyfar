@@ -391,7 +391,7 @@ def exponential_sweep_freq(
     """
     Generate single channel sine sweep with exponentially increasing frequency.
 
-    Sweep sweep synthesis according to [#]_.
+    Sweep synthesis according to [#]_.
 
     The exponential sweep can also be generated in the time domain
     (:py:func:`~exponential_sweep_time`). Frequency domain synthesis
@@ -490,7 +490,7 @@ def magnitude_spectrum_weighted_sweep(
     """
     Generate single channel sine sweep with arbitrary magnitude spectrum.
 
-    Sine sweep sweep synthesis according to [#]_. Frequency domain synthesis
+    Sine sweep synthesis according to [#]_. Frequency domain synthesis
     exhibits smooth magnitude spectra in trade of a slightly irregular temporal
     envelope. Time domain synthesis exhibits a constant temporal envelope in
     trade of slight ripples in the magnitude response. But there is currently
