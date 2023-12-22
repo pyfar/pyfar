@@ -1982,16 +1982,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
 
-    if ((type(signal) is pyfar.TimeData or type(signal) is pyfar.Signal)
-        and signal.complex and mode in (
-                                        'log_magnitude_zerophase',
-                                        'magnitude_zerophase',
-                                        'magnitude_phase',
-                                        'power',)):
-
-        raise ValueError((
-            f"mode '{mode}' is not implemented for complex signals."))
-
     if nan_policy not in ('propagate', 'omit', 'raise'):
         raise ValueError("nan_policy has to be 'propagate', 'omit', or"
                          "'raise'.")
