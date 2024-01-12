@@ -1568,7 +1568,7 @@ class Coordinates():
 
     def find_within(
             self, find, distance=0., distance_measure='euclidean',
-            atol=1e-15, return_sorted=True):
+            atol=None, return_sorted=True, radius_tol=None):
         """
         Find coordinates within a certain distance to the query points.
 
@@ -1590,9 +1590,24 @@ class Coordinates():
             ``'spherical_meter'``
                 distance is determined by the great-circle distance
                 expressed in meters.
+        atol : float, None
+            Absolute tolerance for distance. The default ``None`` uses a
+            tolerance of two times the decimal resolution, which is
+            determined from the data type of the coordinate points
+            using ``numpy.finfo``.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
+        radius_tol : float, None
+            For all spherical distance measures, the coordinates must be on
+            a sphere, so the radius must be constant. This parameter defines
+            the maximum allowed difference within the radii. Note that
+            increasing the tolerance decreases the accuracy of the search,
+            i.e., points that are within the search distance might not be
+            found or points outside the search distance may be returned.
+            The default ``None`` uses a tolerance of two times the decimal
+            resolution, which is determined from the data type of the
+            coordinate points using ``numpy.finfo``.
 
         Returns
         -------
@@ -1630,10 +1645,16 @@ class Coordinates():
         """
 
         # check the input
+        if radius_tol is None:
+            radius_tol = 2 * np.finfo(self.x.dtype).resolution
+        if atol is None:
+            atol = 2 * np.finfo(self.x.dtype).resolution
         if float(distance) < 0:
             raise ValueError("distance must be a non negative number.")
         if not isinstance(atol, float) or atol < 0:
             raise ValueError("atol must be a non negative number.")
+        if not isinstance(radius_tol, float) or radius_tol < 0:
+            raise ValueError("radius_tol must be a non negative number.")
         if not isinstance(find, Coordinates):
             raise ValueError("coords must be an pf.Coordinates object.")
         if not isinstance(return_sorted, bool):
@@ -1658,14 +1679,14 @@ class Coordinates():
         if distance_measure == 'euclidean':
             index = kdtree.query_ball_point(
                 points, distance + atol, return_sorted=return_sorted)
-        if distance_measure == ['spherical_radians', 'spherical_meter']:
+        if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
             radius = self.radius
             delta_radius = np.max(radius) - np.min(radius)
-            if delta_radius > 1e-15:
+            if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same \
-                    radius. Differences are larger than 1e-15")
+                    "find_nearest_sph only works if all points have the same "
+                    f"radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
             if distance_measure == 'spherical_meter':
