@@ -2,6 +2,10 @@
 History
 =======
 
+0.6.2 (2023-11-17)
+------------------
+* Bugfix in `pyfar.Coordinates.find_within`: Fix for spherical distance measures and improved flexibility and documentation (PR #524)
+
 0.6.1 (2023-11-17)
 ------------------
 * Bugfix in `pyfar.Coordinates.find_nearest`: Correct name of parameter 'spherical_radians' in docstring and fix computation of spherical distance between query points and actual points (PR #519)
