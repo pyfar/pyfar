@@ -40,7 +40,10 @@ extensions = [
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx',
-    'autodocsumm']
+    'autodocsumm',
+    'nbsphinx',
+    'nbsphinx_link',
+    ]
 
 # show tocs for classes and functions of modules using the autodocsumm
 # package

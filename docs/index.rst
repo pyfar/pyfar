@@ -13,6 +13,15 @@ Getting Started
 
    readme
 
+Examples
+========
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Notebook sections:
+
+    pyfar_demo
+
 Documentation
 =============
 
