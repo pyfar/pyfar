@@ -17,7 +17,7 @@ Examples
 ========
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: Notebook sections:
 
     pyfar_demo
