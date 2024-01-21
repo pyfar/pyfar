@@ -21,6 +21,7 @@ Examples
     :caption: Notebook sections:
 
     pyfar_demo
+    coordinates
 
 Documentation
 =============
