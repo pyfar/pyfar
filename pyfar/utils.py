@@ -169,14 +169,6 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
     # check matching meta data of input signals.
     [signals[0]._assert_matching_meta_data(s) for s in signals]
 
-    # force time domain for Signal objects:
-    # - shapes of data would not match in mixed domain concatenation
-    # - fft_norm may cause wrong time domain amplitudes in frequency domain
-    #   concatenation
-    if isinstance(signal, pf.Signal):
-        for signal in signals:
-            signal.domain = 'time'
-
     # broadcast signals into largest dimension and common cshapes
     if broadcasting is True:
         # broadcast signals into common cshape
@@ -202,7 +194,14 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         signals = broad_signals
     # merge the signals along axis
     axis = caxis-1 if caxis < 0 else caxis
-    data = np.concatenate([s._data for s in signals], axis=axis)
+    # distinct by type using s._data does not work
+    # - shapes of data would not match in mixed domain concatenation
+    # - fft_norm may cause wrong time domain amplitudes in frequency domain
+    #   concatenation
+    if type(signal) is pf.FrequencyData:
+        data = np.concatenate([s.freq for s in signals], axis=axis)
+    else:
+        data = np.concatenate([s.time for s in signals], axis=axis)
     # return merged Signal
     if isinstance(signals[0], pf.Signal):
         return pf.Signal(data, signals[0].sampling_rate,
