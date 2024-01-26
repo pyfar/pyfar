@@ -2,7 +2,11 @@
 History
 =======
 
-0.6.2 (2023-11-17)
+0.6.3 (2024-01-26)
+------------------
+* Bugfix in `pyfar.utils.concatenate_channels`: Amplitude of time domain Signals was wrong when concatenating in the frequency domain and concatenation failed for a mixture of Signals in the time and frequency domain (PR #532)
+
+0.6.2 (2024-01-12)
 ------------------
 * Bugfix in `pyfar.Coordinates.find_within`: Fix for spherical distance measures and improved flexibility and documentation (PR #524)
 
