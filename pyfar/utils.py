@@ -168,6 +168,15 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         raise TypeError("'broadcasting' needs to be False or True.")
     # check matching meta data of input signals.
     [signals[0]._assert_matching_meta_data(s) for s in signals]
+
+    # force time domain for Signal objects:
+    # - shapes of data would not match in mixed domain concatenation
+    # - fft_norm may cause wrong time domain amplitudes in frequency domain
+    #   concatenation
+    if isinstance(signal, pf.Signal):
+        for signal in signals:
+            signal.domain = 'time'
+
     # broadcast signals into largest dimension and common cshapes
     if broadcasting is True:
         # broadcast signals into common cshape
