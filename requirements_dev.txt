@@ -2,7 +2,7 @@ pip
 bump2version
 wheel
 watchdog
-ruff==0.0.287
+ruff==0.1.15
 tox
 coverage
 Sphinx
