@@ -2,7 +2,8 @@ pip
 bump2version
 wheel
 watchdog
-flake8
+ruff==0.0.287
+tox
 coverage
 Sphinx
 twine
