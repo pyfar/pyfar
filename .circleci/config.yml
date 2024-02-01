@@ -159,7 +159,7 @@ workflows:
                 - "3.9"
                 - "3.10"
                 - "3.11"
-      - flake:
+      - ruff:
           matrix:
             parameters:
               version:
@@ -203,7 +203,7 @@ workflows:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
-      - flake:
+      - ruff:
           matrix:
             parameters:
               version:
@@ -252,7 +252,7 @@ workflows:
                 - "3.9"
           requires:
             - build_and_test
-            - flake
+            - ruff
             - test_examples
             - test_documentation_build
           filters:
