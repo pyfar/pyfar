@@ -686,7 +686,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
 
     # Define pattern for regular expressions, see test files for examples
-    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
+    exp_pattern = r'([\w\/\^\*\(\)\[\]\-_.]+) \('
     domain_pattern = domain_str + r'=([0-9.]+)'
     value_pattern = r'=([0-9.]+)'
 
@@ -839,8 +839,8 @@ def read_comsol_header(filename):
     header, _, _ = _read_comsol_get_headerline(filename)
 
     # Define pattern for regular expressions, see test files for examples
-    exp_unit_pattern = r'([\w\(\)\/\^\*. ]+) @'
-    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
+    exp_unit_pattern = r'([\w\(\)\/\^\*\[\]\-. ]+) @'
+    exp_pattern = r'([\w\/\^\*\(\)\[\]\-_.]+) \('
     unit_pattern = r'\(([\w\/\^\* .]+)\) @'
     domain_pattern = r'@ ([a-zA-Z]+)='
     value_pattern = r'=([0-9.]+)'
