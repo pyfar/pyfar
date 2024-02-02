@@ -838,13 +838,24 @@ def read_comsol_header(filename):
     # read header
     header, _, _ = _read_comsol_get_headerline(filename)
 
-    # Define pattern for regular expressions, see test files for examples
+    # Define pattern for regular expressions
+    # the general structure is of the headers is a repetition of
+    # expression (unit) @ domain=value, parameter_name=parameter_value,...,
+    # see test files for examples
+
+    # expression (unit) is the first term before @, contains arbitrary
+    # characters
     exp_unit_pattern = r'([\w\(\)\/\^\*\[\]\-. ]+) @'
+    # separate expression and unit at whitespace and (
     exp_pattern = r'([\w\/\^\*\(\)\[\]\-_.]+) \('
     unit_pattern = r'\(([\w\/\^\* .]+)\) @'
+    # domain (e.g., time or freq) is the first term after @
     domain_pattern = r'@ ([a-zA-Z]+)='
+    # values are numeric characters, after =
     value_pattern = r'=([0-9.]+)'
+    # parameters contain arbitrary characters, before =
     param_pattern = r'([\w\/\^_.]+)='
+    # parameter values are numeric, sometimes given with their units
     param_unit_pattern = r'=[0-9.]+([a-zA-Z]+)'
 
     # read expressions
