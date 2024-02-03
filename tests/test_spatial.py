@@ -4,6 +4,7 @@ import pyfar.samplings as samplings
 import pytest
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_sph_voronoi():
     dihedral = 2*np.arcsin(np.cos(np.pi/3)/np.sin(np.pi/5))
     R = np.tan(np.pi/3)*np.tan(dihedral/2)
@@ -64,6 +65,7 @@ def test_sph_voronoi():
         rtol=1e-6)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_weights_from_voronoi():
     s = Coordinates(
         [0, 0, 1, -1, 0, 0], [0, 0, 0, 0, -1, 1], [-1, 1, 0, 0, 0, 0])
@@ -80,6 +82,7 @@ def test_weights_from_voronoi():
     np.testing.assert_allclose(np.sum(weights), 4 * np.pi)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_voronoi_error_not_enough_points():
     points = np.random.randn(3, 3)
     points = points/np.linalg.norm(points, axis=0)
@@ -88,11 +91,13 @@ def test_voronoi_error_not_enough_points():
         samplings.calculate_sph_voronoi_weights(s)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test___eq___equal(sphericalvoronoi):
     actual = sphericalvoronoi.copy()
     assert sphericalvoronoi == actual
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test___eq___notEqual(sphericalvoronoi):
     actual = sphericalvoronoi.copy()
     actual.center = 42
