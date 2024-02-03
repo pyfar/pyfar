@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from pyfar import Coordinates
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test__systems():
     """Test completeness of internal representation of coordinate systems."""
 
@@ -49,6 +50,7 @@ def test__systems():
                     "'bound', or 'cyclic'."
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_coordinate_names():
     """Test if units agree across coordinates that appear more than once"""
 
@@ -97,6 +99,7 @@ def test_coordinate_names():
                 f"({coords[coord]['convention'][cc]})"
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_exist_systems():
     """Test internal function for checking if a coordinate system exists."""
     # get class instance
@@ -123,6 +126,7 @@ def test_exist_systems():
         coords._exist_system(None, None, 'met')
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_systems():
     """Test if all possible function calls of Coordinates.systems() pass."""
     # get class instance
@@ -140,6 +144,7 @@ def test_systems():
         coords.systems('what')
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_coordinates_init_val_and_system():
     """Test initialization with all available coordinate systems."""
     # get list of available coordinate systems
@@ -153,6 +158,7 @@ def test_coordinates_init_val_and_system():
                 Coordinates(0, 0, 0, domain, convention, unit[0][0:3])
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_coordinates_init_default_convention():
     """Test initialization with the default convention."""
     # get list of available coordinate systems
@@ -166,6 +172,7 @@ def test_coordinates_init_default_convention():
             Coordinates(0, 0, 0, domain, unit=unit[0][0:3])
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_coordinates_init_default_convention_and_unit():
     """Test initialization with the default convention and unit."""
     # get list of available coordinate systems
@@ -177,6 +184,7 @@ def test_coordinates_init_default_convention_and_unit():
         Coordinates(0, 0, 0, domain)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_coordinates_init_sh_order():
     """Test initialization with spherical harmonics order."""
     coords = Coordinates(sh_order=5)
@@ -184,6 +192,7 @@ def test_coordinates_init_sh_order():
     assert coords.sh_order == 5
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 @pytest.mark.parametrize(
     'domain_in', list(Coordinates()._systems()))
 @pytest.mark.parametrize(
@@ -235,6 +244,7 @@ def test_setter_and_getter_with_conversion(domain_in, domain_out, point):
             # assert c._system["convention"] == convention_out
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_getter_with_degrees():
     """Test if getter return correct values also in degrees"""
     coords = Coordinates(0, 1, 0)
@@ -246,6 +256,7 @@ def test_getter_with_degrees():
     npt.assert_allclose(cyl, np.atleast_2d([90, 0, 1]))
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_assertion_for_getter():
     """Test assertion for empty Coordinates objects"""
     coords = Coordinates()
@@ -257,6 +268,7 @@ def test_assertion_for_getter():
         coords.get_cyl()
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_setter_sh_order():
     """Test setting the SH order."""
     coords = Coordinates()
@@ -264,6 +276,7 @@ def test_setter_sh_order():
     assert coords.sh_order == 10
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_getitem():
     """Test getitem with different parameters."""
     # test without weights
@@ -293,6 +306,7 @@ def test_getitem():
     npt.assert_allclose(coords.get_cart()[0], np.array([0, 0, 0]))
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_find_nearest_k():
     """Test returns of find_nearest_k"""
     # 1D cartesian, nearest point
@@ -338,6 +352,7 @@ def test_find_nearest_k():
     plt.close("all")
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_find_nearest_cart():
     """Tests returns of find_nearest_cart."""
     # test only 1D case since most of the code from self.find_nearest_k is used
@@ -357,6 +372,7 @@ def test_find_nearest_cart():
         coords.find_nearest_cart(1, 0, 0, -1)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_find_nearest_sph():
     """Tests returns of find_nearest_sph."""
     # test only 1D case since most of the code from self.find_nearest_k is used
@@ -383,6 +399,7 @@ def test_find_nearest_sph():
         coords.find_nearest_sph(0, 0, 1, 1)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_find_slice():
     """Test different queries for find slice."""
     # test only for self.cdim = 1.
@@ -443,6 +460,7 @@ def test_find_slice():
     plt.close("all")
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 @pytest.mark.parametrize("coordinates,desired", [
     (Coordinates([0, 1], 2, 3), [0, 2, 3]),
     (Coordinates([[0, 1], [1, 0]], 2, 3), [[0, 2, 3], [0, 2, 3]])])
@@ -454,6 +472,7 @@ def test_find_slice_slicing(coordinates, desired):
     npt.assert_equal(coordinates[index].get_cart(), np.atleast_2d(desired))
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 @pytest.mark.parametrize("rot_type,rot", [
     ('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)]),
     ('matrix',  [[0, -1, 0], [1, 0, 0], [0, 0, 1]]),
@@ -466,6 +485,7 @@ def test_rotation(rot_type, rot):
     npt.assert_allclose(c.get_cart(), np.atleast_2d([0, 1, 0]), atol=1e-15)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_inverse_rotation():
     """Test the inverse rotation."""
     xyz = np.concatenate((np.ones((2, 4, 1)),
@@ -477,6 +497,7 @@ def test_inverse_rotation():
     npt.assert_allclose(c.get_cart(), xyz, atol=1e-15)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test___eq___ForwardAndBackwardsDomainTransform_Equal():
     coordinates = Coordinates(1, 2, 3, domain='cart')
     actual = coordinates.copy()
@@ -485,18 +506,21 @@ def test___eq___ForwardAndBackwardsDomainTransform_Equal():
     assert coordinates == actual
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test___eq___differInDomain_notEqual():
     coordinates = Coordinates(1, 2, 3, domain='sph', convention='side')
     actual = Coordinates(1, 2, 3, domain='sph', convention='front')
     assert not coordinates == actual
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test___eq___differInConvention_notEqual():
     coordinates = Coordinates(domain='sph', convention='top_elev')
     actual = Coordinates(domain='sph', convention='front')
     assert not coordinates == actual
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test___eq___differInUnit_notEqual():
     coordinates = Coordinates(
         [1, 1], [1, 1], [1, 1],
@@ -508,6 +532,7 @@ def test___eq___differInUnit_notEqual():
     assert not is_equal
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_find_slice_error():
     d = np.array([358, 359, 0, 1, 2]) * np.pi / 180
     c = Coordinates.from_spherical_elevation(d, 0, 1)
@@ -521,6 +546,7 @@ def test_find_slice_error():
         c.find_slice('Ola', 'red', 1, 1)
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test___eq___differInShOrder_notEqual():
     coordinates = Coordinates(1, 2, 3, sh_order=2)
     actual = Coordinates(1, 2, 3, sh_order=8)
