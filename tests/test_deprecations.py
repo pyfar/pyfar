@@ -70,6 +70,8 @@ def test_pad_zero_modi():
 
 
 # deprecate in 0.8.0 ----------------------------------------------------------
+# this is required because the multiple PyfarDeprecationWarning are raised.
+@pytest.mark.filterwarnings('ignore::Warning')
 @pytest.mark.parametrize(
     'statement', [
         ('coords.get_cart()'),
@@ -146,6 +148,8 @@ def test_signal_len():
             len(pf.Signal([1, 2, 3], 44100))
 
 
+# this is required because the multiple PyfarDeprecationWarning are raised.
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_deprecations_find_nearest_k():
     coords = pf.Coordinates(np.arange(6), 0, 0)
 
@@ -159,6 +163,8 @@ def test_deprecations_find_nearest_k():
             coords.find_nearest_k(1, 0, 0)
 
 
+# this is required because the multiple PyfarDeprecationWarning are raised.
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_deprecations_find_slice():
     coords = pf.samplings.sph_lebedev(sh_order=10)
 
@@ -172,6 +178,8 @@ def test_deprecations_find_slice():
             coords.find_slice('elevation', 'deg', 0, 5)
 
 
+# this is required because the multiple PyfarDeprecationWarning are raised.
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_deprecations_find_nearest_cart():
     coords = pf.samplings.sph_lebedev(sh_order=10)
 
@@ -185,6 +193,8 @@ def test_deprecations_find_nearest_cart():
             coords.find_nearest_cart(1, 1, 1, 1)
 
 
+# this is required because the multiple PyfarDeprecationWarning are raised.
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_deprecations_find_nearest_sph():
     coords = pf.samplings.sph_lebedev(sh_order=10)
 
