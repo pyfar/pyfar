@@ -58,41 +58,39 @@ def test_find_nearest_2d_2d_k5():
     npt.assert_equal(i[0][0].shape, (2, 2))
 
 
-def test_find_nearest_2d_k3():
+def test_find_nearest_2d_k3(gaussian_47):
     # 1D spherical, nearest point
-    coords = pf.samplings.sph_gaussian(sh_order=47)
     k = 5
     find = pf.Coordinates.from_spherical_elevation(
         np.array([[0, np.pi/2], [np.pi, 3*np.pi/2]]), 0, 1)
-    i, d = coords.find_nearest(find, k=k)
+    i, d = gaussian_47.find_nearest(find, k=k)
     npt.assert_equal(i[0][0].shape, (2, 2))
     npt.assert_equal(len(i), k)
     npt.assert_equal(d.shape, (k, 2, 2))
     for kk in range(k):
         actual_distance = np.sqrt(np.sum(
-            (coords[i[kk]].cartesian - find.cartesian)**2, axis=-1))
+            (gaussian_47[i[kk]].cartesian - find.cartesian)**2, axis=-1))
         npt.assert_equal(actual_distance, d[kk])
 
 
-def test_find_nearest_error():
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+def test_find_nearest_error(gaussian_47):
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
     with pytest.raises(ValueError):
-        coords.find_nearest(find, -1)
+        gaussian_47.find_nearest(find, -1)
 
     # test Coordinate object as input
     with pytest.raises(ValueError):
-        coords.find_nearest(5, 1)
+        gaussian_47.find_nearest(5, 1)
 
     # test wrong string for distance measure
     with pytest.raises(ValueError):
-        coords.find_nearest(find, 1, 'bla')
+        gaussian_47.find_nearest(find, 1, 'bla')
 
     # test wrong type for distance measure
     with pytest.raises(ValueError):
-        coords.find_nearest(find, 1, 5)
+        gaussian_47.find_nearest(find, 1, 5)
 
 
 def test_find_within_simple():
@@ -126,31 +124,30 @@ def test_find_within_multiple_dim_points():
         assert coords[index[i]] == coords[index_desired]
 
 
-def test_find_within_error():
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+def test_find_within_error(gaussian_47):
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
     with pytest.raises(ValueError):
-        coords.find_within(find, -1, 'euclidean')
+        gaussian_47.find_within(find, -1, 'euclidean')
 
     # test Coordinate object as input
     with pytest.raises(ValueError):
-        coords.find_within(5, 1)
+        gaussian_47.find_within(5, 1)
 
     # test wrong string for distance measure
     with pytest.raises(ValueError):
-        coords.find_within(find, 1, 'bla')
+        gaussian_47.find_within(find, 1, 'bla')
 
     # test wrong type for distance measure
     with pytest.raises(ValueError):
-        coords.find_within(find, 1, 5)
+        gaussian_47.find_within(find, 1, 5)
 
     with pytest.raises(ValueError):
-        coords.find_within(find, 1, atol=-1)
+        gaussian_47.find_within(find, 1, atol=-1)
 
     with pytest.raises(ValueError):
-        coords.find_within(find, 1, atol='h')
+        gaussian_47.find_within(find, 1, atol='h')
 
     with pytest.raises(ValueError):
-        coords.find_within(find, 1, return_sorted=-1)
+        gaussian_47.find_within(find, 1, return_sorted=-1)

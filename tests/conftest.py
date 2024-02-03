@@ -686,3 +686,23 @@ def dict_of_builtins():
     """ Dictionary that contains builtins with support for writing and reading.
     """
     return stub_utils.dict_of_builtins()
+
+
+@pytest.fixture
+def gaussian_47():
+    """Gaussian sampling of order 47 in coordinates object."""
+    theta_angles = np.array([
+        3.09200950, 3.02777863, 2.96316844, 2.89847256, 2.83374417,
+        2.76900006, 2.70424717, 2.63948889, 2.57472706, 2.50996278,
+        2.44519674, 2.38042940, 2.31566107, 2.25089198, 2.18612229,
+        2.12135212, 2.05658157, 1.99181073, 1.92703964, 1.86226837,
+        1.79749694, 1.73272541, 1.66795381, 1.60318216, 1.53841049,
+        1.47363885, 1.40886724, 1.34409571, 1.27932429, 1.21455301,
+        1.14978193, 1.08501108, 1.02024053, 0.95547037, 0.89070068,
+        0.82593158, 0.76116325, 0.69639591, 0.63162987, 0.56686560,
+        0.50210377, 0.43734549, 0.37259260, 0.30784849, 0.24312010,
+        0.17842421, 0.11381403, 0.04958315])
+    phi_angles = np.arange(0, 2 * np.pi, 2 * np.pi / 96)
+    theta, phi = np.meshgrid(theta_angles, phi_angles)
+    return pyfar.Coordinates.from_spherical_colatitude(
+        phi.reshape(-1), theta.reshape(-1), 1)
