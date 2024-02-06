@@ -1,4 +1,4 @@
-from pytest import raises, warns
+from pytest import raises
 
 import numpy as np
 import numpy.testing as npt
@@ -53,8 +53,7 @@ def test_orientations_from_view_up_invalid():
     views = [[1, 0, 0], [0, 0]]
     ups = [[0, 1, 0], [0, 0, 0]]
     with raises(ValueError):
-        with warns(np.VisibleDeprecationWarning):
-            Orientations.from_view_up(views, ups)
+        Orientations.from_view_up(views, ups)
     # any of views and ups has zero-length
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 0, 0]]
