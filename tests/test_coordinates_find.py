@@ -17,6 +17,23 @@ def test_find_nearest_simple():
     assert d == 0
 
 
+@pytest.mark.parametrize('azimuth,distance_measure,distance', [
+    (0, 'spherical_radians', 0),                        # radians match
+    (np.pi / 16, 'spherical_radians', np.pi / 16),      # radians no match
+    (0, 'spherical_meter', 0),                          # meters match
+    (np.pi / 16, 'spherical_meter', np.pi / 16 * 1.1)   # meters no match
+])
+def test_find_nearest_simple_spherical_distance(
+        azimuth, distance_measure, distance):
+    """Test spherical distance measures for find nearest"""
+    # 1D spherical coordinates points in front and to the left
+    coords = pf.Coordinates().from_spherical_elevation([0, np.pi/2], 0, 1.1)
+    find = pf.Coordinates().from_spherical_elevation(azimuth, 0, 1.1)
+    i, d = coords.find_nearest(find, distance_measure=distance_measure)
+    assert i[0] == 0
+    assert np.abs(d - distance) < 1e-15
+
+
 def test_find_nearest_1d_2d():
     # 1D spherical, nearest point
     coords = pf.Coordinates(np.arange(10), 0, 1)
@@ -153,4 +170,55 @@ def test_find_within_error():
         coords.find_within(find, 1, atol='h')
 
     with pytest.raises(ValueError):
+        coords.find_within(find, 1, radius_tol='h')
+
+    with pytest.raises(ValueError):
         coords.find_within(find, 1, return_sorted=-1)
+
+
+@pytest.mark.parametrize('distance_measure', [
+     'spherical_radians', 'spherical_meter'
+])
+def test_find_within_spherical(distance_measure):
+    coords = pf.Coordinates.from_spherical_front(
+        np.arange(0, 360, 10)*np.pi/180, 1, 1)
+    find = pf.Coordinates(0, 0, 1)
+    spatial_mask = coords.find_within(
+        find,
+        distance=np.pi/2,
+        distance_measure=distance_measure)
+    npt.assert_array_equal(coords[spatial_mask], coords[coords.z >= 0])
+
+
+def test_find_within_atol():
+    coords = pf.Coordinates(
+        np.arange(0, 1, 0.1), 0, 0)
+    find = pf.Coordinates(0.5, 0, 0)
+    spatial_mask = coords.find_within(
+        find,
+        distance=0.1,
+        distance_measure='euclidean',
+        atol=0.11)
+    npt.assert_array_equal(coords[spatial_mask].csize, 5)
+
+    spatial_mask = coords.find_within(
+        find,
+        distance=0.1,
+        distance_measure='euclidean',
+        atol=0.05)
+    npt.assert_array_equal(coords[spatial_mask].csize, 3)
+
+
+def test_find_within_tol_radius():
+    coords = pf.Coordinates.from_spherical_front(
+        np.arange(0, 360, 10)*np.pi/180, 1, 1)
+    radius = coords.radius
+    radius[0] = 1.01
+    coords.radius = radius
+    find = pf.Coordinates(0, 0, 1)
+    spatial_mask = coords.find_within(
+        find,
+        distance=np.pi/2,
+        distance_measure='spherical_meter',
+        radius_tol=0.011)
+    npt.assert_array_equal(coords[spatial_mask], coords[coords.z >= 0])
