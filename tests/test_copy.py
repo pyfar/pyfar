@@ -1,6 +1,6 @@
 import pyfar
 import pytest
-from pyfar.classes.warnings import PyfarDeprecationWarning
+
 
 def test_copy(
         time_data, frequency_data,
