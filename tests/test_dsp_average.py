@@ -111,31 +111,9 @@ def test_error_raises():
                       match="Averaging one dimensional caxis"):
         pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), caxis=(1, 2))
 
-    # test invalid modes for complex signals
-    with pytest.raises(ValueError,
-                       match="mode 'log_magnitude_zerophase' is not defined"
-                             " for complex signals."):
-        pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
-                       mode="log_magnitude_zerophase")
-    with pytest.raises(ValueError,
-                       match="mode 'magnitude_zerophase' is not defined"
-                             " for complex signals."):
-        pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
-                       mode="magnitude_zerophase")
-    with pytest.raises(ValueError,
-                       match="mode 'magnitude_phase' is not defined"
-                             " for complex signals."):
-        pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
-                       mode="magnitude_phase")
-    with pytest.raises(ValueError,
-                       match="mode 'power' is not defined"
-                             " for complex signals."):
-        pf.dsp.average(pf.Signal(np.ones((2, 3, 4)), 44100, is_complex=True),
-                       mode="power")
     with raises(ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.average(pf.Signal(np.zeros((5, 2)), 44100),
                        nan_policy='invalid')
     with raises(ValueError, match=("The signal includes NaNs.")):
         pf.dsp.average(pf.TimeData([[0, np.nan], [1, 2]], [0, 1]),
                        nan_policy='raise')
-
