@@ -721,18 +721,19 @@ def test__sofa_pos_error():
     with pytest.raises(ValueError, match=error_message):
         io.io._sofa_pos('bla', np.array([1, 2, 3]))
 
+
 @pytest.mark.parametrize('file,data_type', [
-    ('dirac_itaAudio.ita','signal'),
-    ('dirac_itaAudio_mult.ita','signal'),
-    ('dirac_itaAudio_mult.ita','data'),
-    ('dirac_itaAudio_energy.ita','signal'),
-    ('freq_itaResult.ita','data'),
-    ('freq_itaResult.ita','signal'),
-    ('freq_itaResult_mult.ita','data'),
-    ('time_itaResult.ita','data'),
-    ('time_itaResult_mult.ita','data')])
+    ('dirac_itaAudio.ita', 'signal'),
+    ('dirac_itaAudio_mult.ita', 'signal'),
+    ('dirac_itaAudio_mult.ita', 'data'),
+    ('dirac_itaAudio_energy.ita', 'signal'),
+    ('freq_itaResult.ita', 'data'),
+    ('freq_itaResult.ita', 'signal'),
+    ('freq_itaResult_mult.ita', 'data'),
+    ('time_itaResult.ita', 'data'),
+    ('time_itaResult_mult.ita', 'data')])
 def test_read_ita(file, data_type):
-    if(file == 'freq_itaResult.ita' and data_type == 'signal'):
+    if (file == 'freq_itaResult.ita' and data_type == 'signal'):
         file = os.path.join('tests', 'test_io_data', file)
         message = "The itaResult object can't contain a signal."
         with pytest.raises(Exception, match=message):
