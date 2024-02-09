@@ -2,6 +2,19 @@
 History
 =======
 
+0.6.3 (2024-01-26)
+------------------
+* Bugfix in `pyfar.utils.concatenate_channels`: Amplitude of time domain Signals was wrong when concatenating in the frequency domain and concatenation failed for a mixture of Signals in the time and frequency domain (PR #532)
+
+0.6.2 (2024-01-12)
+------------------
+* Bugfix in `pyfar.Coordinates.find_within`: Fix for spherical distance measures and improved flexibility and documentation (PR #524)
+
+0.6.1 (2023-11-17)
+------------------
+* Bugfix in `pyfar.Coordinates.find_nearest`: Correct name of parameter 'spherical_radians' in docstring and fix computation of spherical distance between query points and actual points (PR #519)
+* Improve `pyfar.signals.files.head_related_impulse_responses`: Use new structure of `pyfar.Coordinates` to find the requested head-related impulse responses (PR #520)
+
 0.6.0 (2023-10-20)
 ------------------
 * Refactored `pyfar.Coordinates` class and module
