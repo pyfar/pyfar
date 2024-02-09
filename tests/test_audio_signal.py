@@ -662,16 +662,6 @@ def test_setter_complex():
         signal.complex = False
 
 
-def test_setter_complex_invalid_fft_norm():
-    # test setting complex from False to True
-    # for frequency domain signals
-    signal = Signal([0, 1, 2], 44100, 4, "time", fft_norm="rms")
-    with pytest.raises(ValueError,
-                       match="'rms' normalization is not valid for "
-                             "complex time signals"):
-        signal.complex = True
-
-
 def test_frequencies():
     """
     Test computing the discrete frequencies of the rfft/fft

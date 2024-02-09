@@ -1819,8 +1819,9 @@ def energy(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
     # return and compute data
-    return np.sum(signal.time**2, axis=-1)
+    return np.sum(np.abs(signal.time)**2, axis=-1)
 
 
 def power(signal):
@@ -1857,8 +1858,9 @@ def power(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
     # return and compute data
-    return np.sum(signal.time**2, axis=-1)/signal.n_samples
+    return np.sum(np.abs(signal.time)**2, axis=-1)/signal.n_samples
 
 
 def rms(signal):

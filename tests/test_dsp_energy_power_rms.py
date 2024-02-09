@@ -7,12 +7,14 @@ import numpy.testing as npt
 @pytest.mark.parametrize('freq, amplitude', ([1, 1],
                                              [44100/20, 2],
                                              [44100/50, 3]))
-def test_sinewave(freq, amplitude):
+@pytest.mark.parametrize('is_complex', [True, False])
+def test_sinewave(freq, amplitude, is_complex):
     """
     Test the energy, power and rms of different full period Sinewaves.
     """
     n_samples = 44100
     signal = pf.signals.sine(freq, n_samples, amplitude)
+    signal.complex = is_complex
     energy = pf.dsp.energy(signal)
     answer_e = n_samples/2 * amplitude**2
     power = pf.dsp.power(signal)
