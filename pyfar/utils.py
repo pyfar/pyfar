@@ -216,56 +216,38 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
 
 def concatenate_bins(signals):
     """
-    Merge multiple Signal, TimeData or FrequencyData objects along the time or
-    frequency axe.
+    Merge multiple FrequencyData objects along the frequency axe.
 
     Parameters
     ----------
-    signals : tuple of Signal, TimeData or FrequencyData
+    signals : tuple of FrequencyData
         The signals to concatenate. All signals must be of the same object type
         and either have the same cshape.
 
     Returns
     -------
-    merged : Signal, TimeData, FrequencyData
+    merged : FrequencyData
         The merged signal object.
     """
     # check input
     for signal in signals:
-        if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
-            raise TypeError("All input data must be of type pf.Signal, "
-                            "pf.TimeData or pf.FrequencyData.")
+        if not isinstance(signal, (pf.FrequencyData)):
+            raise TypeError("All input data must be of type pf.FrequencyData.")
 
     # check matching meta data of input signals.
     [signals[0]._assert_matching_meta_data(s) for s in signals]
 
-    if type(signal) is pf.FrequencyData:
-        data = np.concatenate([s.freq for s in signals], axis=-1)
-        frequencies = np.concatenate([s.frequencies for s in signals], axis=-1)
-        # Sort and remove double entries
-        idx = np.argsort(frequencies)
-        idx_double = np.where(np.diff(frequencies[idx])==0)
-        if len(idx_double[0]) > 0:
-            idx = idx[idx!=idx_double[0]]
-        frequencies = frequencies[idx]
-        data = data[..., idx]
-    else:
-        data = np.concatenate([s.time for s in signals], axis=-1)
+    # concatenate data
+    data = np.concatenate([s.freq for s in signals], axis=-1)
+    frequencies = np.concatenate([s.frequencies for s in signals], axis=-1)
+
+    # Sort and remove double entries
+    idx = np.argsort(frequencies)
+    idx_double = np.where(np.diff(frequencies[idx])==0)
+    if len(idx_double[0]) > 0:
+        idx = idx[idx!=idx_double[0]]
+    frequencies = frequencies[idx]
+    data = data[..., idx]
 
     # return merged Signal
-    if isinstance(signals[0], pf.Signal):
-        n_samples = np.sum([s.n_samples for s in signals])
-        return pf.Signal(data, signals[0].sampling_rate,
-                         n_samples=n_samples,
-                         domain=signals[0].domain,
-                         fft_norm=signals[0].fft_norm)
-    elif isinstance(signals[0], pf.TimeData):
-        times = []
-        last_time = 0
-        for s in signals:
-            times.append(s.times + last_time)
-            last_time = s.times[-1]
-        times = np.array(times).flatten()
-        return pf.TimeData(data, times)
-    else:
-        return pf.FrequencyData(data, frequencies)
+    return pf.FrequencyData(data, frequencies)
