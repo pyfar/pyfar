@@ -194,15 +194,6 @@ def test_concatenate_bins_frequencydata_with_sort():
     npt.assert_array_equal(merged.freq, np.arange(1, 7).reshape((1, 6)))
 
 
-def test_concatenate_bins_assertions():
-    """Test assertions"""
-    # invalid input type
-    with pytest.raises(
-            TypeError,
-            match="All input data must be of type pf.FrequencyData."):
-        pf.utils.concatenate_bins([1, 2, 3])
-
-
 def test_concatenate_bins_multidim():
     """Test concatenate_bins function with multidimensional input"""
     signals = (
@@ -219,12 +210,12 @@ def test_concatenate_bins_multidim_with_double():
     """Test concatenate_bins function with multidimensional input and duplicate frequencies"""
     signals = (
         pf.FrequencyData(np.array([[1, 2, 3], [4, 5, 6]]), [1, 2, 3]),
-        pf.FrequencyData(np.array([[7, 8, 9], [10, 11, 12]]), [3, 4, 5]))
+        pf.FrequencyData(np.array([[3, 8, 9], [6, 11, 12]]), [3, 4, 5]))
     merged = pf.utils.concatenate_bins(signals)
     assert isinstance(merged, pf.FrequencyData)
     npt.assert_array_equal(merged.frequencies, np.arange(1, 6))
     npt.assert_array_equal(merged.freq, np.array(
-        [[1, 2, 7, 8, 9], [4, 5, 10, 11, 12]]))
+        [[1, 2, 3, 8, 9], [4, 5, 6, 11, 12]]))
 
 
 def test_concatenate_bins_multidim_with_sort():
@@ -238,3 +229,26 @@ def test_concatenate_bins_multidim_with_sort():
     npt.assert_array_equal(merged.frequencies, np.arange(1, 7))
     npt.assert_array_equal(merged.freq, np.array(
         [[1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12]]))
+
+
+def test_concatenate_bins_assertions():
+    """Test assertions"""
+    # invalid input type
+    with pytest.raises(
+            TypeError,
+            match="All input data must be of type pf.FrequencyData."):
+        pf.utils.concatenate_bins([1, 2, 3])
+
+
+def test_input_type():
+    # Create some FrequencyData objects for testing
+    signal1 = pf.FrequencyData(np.random.rand(10), np.arange(10))
+    signal3 = "not a FrequencyData object"
+
+    # Test that a TypeError is raised if the input is not a tuple
+    with pytest.raises(TypeError):
+        pf.utils.concatenate_bins(signal1)
+
+    # Test that a TypeError is raised if the input is not a tuple of FrequencyData objects
+    with pytest.raises(TypeError):
+        pf.utils.concatenate_bins((signal1, signal3))

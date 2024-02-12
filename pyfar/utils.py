@@ -221,8 +221,9 @@ def concatenate_bins(signals):
     Parameters
     ----------
     signals : tuple of FrequencyData
-        The signals to concatenate. All signals must be of the same object type
-        and either have the same cshape.
+        The signals to concatenate. All signals must have the same cshape.
+        the frequency bins get sorted and doubles are removed, the first
+        entry is used.
 
     Returns
     -------
@@ -230,9 +231,14 @@ def concatenate_bins(signals):
         The merged signal object.
     """
     # check input
+    if not isinstance(signals, (tuple, list)):
+        raise TypeError(
+            "Input must be a tuple or list of pf.FrequencyData objects.")
+
     for signal in signals:
         if not isinstance(signal, (pf.FrequencyData)):
-            raise TypeError("All input data must be of type pf.FrequencyData.")
+            raise TypeError(
+                "All input data must be of type pf.FrequencyData.")
 
     # check matching meta data of input signals.
     [signals[0]._assert_matching_meta_data(s) for s in signals]
@@ -242,11 +248,7 @@ def concatenate_bins(signals):
     frequencies = np.concatenate([s.frequencies for s in signals], axis=-1)
 
     # Sort and remove double entries
-    idx = np.argsort(frequencies)
-    idx_double = np.where(np.diff(frequencies[idx])==0)
-    if len(idx_double[0]) > 0:
-        idx = idx[idx!=idx_double[0]]
-    frequencies = frequencies[idx]
+    frequencies, idx = np.unique(frequencies, return_index=True)
     data = data[..., idx]
 
     # return merged Signal
