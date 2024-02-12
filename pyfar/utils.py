@@ -212,3 +212,47 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         return pf.TimeData(data, signals[0].times)
     else:
         return pf.FrequencyData(data, signals[0].frequencies)
+
+
+def concatenate_bins(signals):
+    """
+    Merge multiple Signal, Timedata or Frequencydata objects along the time or
+    frequency axe.
+
+    Parameters
+    ----------
+    signals : tuple of Signal, TimeData or FrequencyData
+        The signals to concatenate. All signals must be of the same object type
+        and either have the same cshape or be broadcastable to the same cshape,
+        except in the dimension corresponding to caxis (the first, by default).
+        If this is the case, set ``broadcasting=True``.
+
+    Returns
+    -------
+    merged : Signal, TimeData, FrequencyData
+        The merged signal object.
+    """
+    # check input
+    for signal in signals:
+        if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
+            raise TypeError("All input data must be of type pf.Signal, "
+                            "pf.TimeData or pf.FrequencyData.")
+
+    # check matching meta data of input signals.
+    [signals[0]._assert_matching_meta_data(s) for s in signals]
+
+    if type(signal) is pf.FrequencyData:
+        data = np.concatenate([s.freq for s in signals], axis=-1)
+    else:
+        data = np.concatenate([s.time for s in signals], axis=-1)
+
+    # return merged Signal
+    if isinstance(signals[0], pf.Signal):
+        return pf.Signal(data, signals[0].sampling_rate,
+                         n_samples=signals[0].n_samples,
+                         domain=signals[0].domain,
+                         fft_norm=signals[0].fft_norm)
+    elif isinstance(signals[0], pf.TimeData):
+        return pf.TimeData(data, signals[0].times)
+    else:
+        return pf.FrequencyData(data, signals[0].frequencies)
