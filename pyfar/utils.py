@@ -247,8 +247,9 @@ def concatenate_bins(signals):
     data = np.concatenate([s.freq for s in signals], axis=-1)
     frequencies = np.concatenate([s.frequencies for s in signals], axis=-1)
 
-    # Sort and remove double entries
-    frequencies, idx = np.unique(frequencies, return_index=True)
+    # Sort frequency entries
+    idx = np.argsort(frequencies)
+    frequencies = frequencies[idx]
     data = data[..., idx]
 
     # return merged Signal

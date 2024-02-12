@@ -172,17 +172,6 @@ def test_concatenate_bins_frequencydata():
     npt.assert_array_equal(merged.frequencies, np.arange(1, 7))
 
 
-def test_concatenate_bins_frequencydata_with_double():
-    """Test concatenate_bins function with FrequencyData objects"""
-    signals = (
-        pf.FrequencyData([1, 2, 3], [1, 2, 3]),
-        pf.FrequencyData([3, 4, 5], [3, 4, 5]))
-    merged = pf.utils.concatenate_bins(signals)
-    assert isinstance(merged, pf.FrequencyData)
-    npt.assert_array_equal(merged.frequencies, np.arange(1, 6))
-    npt.assert_array_equal(merged.freq, np.arange(1, 6).reshape((1, 5)))
-
-
 def test_concatenate_bins_frequencydata_with_sort():
     """Test concatenate_bins function with FrequencyData objects"""
     signals = (
@@ -204,18 +193,6 @@ def test_concatenate_bins_multidim():
     npt.assert_array_equal(merged.frequencies, np.arange(1, 7))
     npt.assert_array_equal(merged.freq, np.array(
         [[1, 2, 3, 7, 8, 9], [4, 5, 6, 10, 11, 12]]))
-
-
-def test_concatenate_bins_multidim_with_double():
-    """Test concatenate_bins function with multidimensional input and duplicate frequencies"""
-    signals = (
-        pf.FrequencyData(np.array([[1, 2, 3], [4, 5, 6]]), [1, 2, 3]),
-        pf.FrequencyData(np.array([[3, 8, 9], [6, 11, 12]]), [3, 4, 5]))
-    merged = pf.utils.concatenate_bins(signals)
-    assert isinstance(merged, pf.FrequencyData)
-    npt.assert_array_equal(merged.frequencies, np.arange(1, 6))
-    npt.assert_array_equal(merged.freq, np.array(
-        [[1, 2, 3, 8, 9], [4, 5, 6, 11, 12]]))
 
 
 def test_concatenate_bins_multidim_with_sort():
@@ -249,6 +226,7 @@ def test_input_type():
     with pytest.raises(TypeError):
         pf.utils.concatenate_bins(signal1)
 
-    # Test that a TypeError is raised if the input is not a tuple of FrequencyData objects
+    # Test that a TypeError is raised if the input is not a
+    # tuple of FrequencyData objects
     with pytest.raises(TypeError):
         pf.utils.concatenate_bins((signal1, signal3))
