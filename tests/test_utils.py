@@ -160,3 +160,56 @@ def test_concatenate_assertions():
                pf.TimeData([1, 2, 3], [1, 2, 3]))
     with pytest.raises(ValueError, match="Comparison only valid against"):
         pf.utils.concatenate_channels(signals)
+
+
+def test_concatenate_bins_signal():
+    """Test concatenate_bins function with Signal objects"""
+    signals = (pf.Signal([1, 2, 3], 44100), pf.Signal([4, 5, 6], 44100))
+    merged = pf.utils.concatenate_bins(signals)
+    assert isinstance(merged, pf.Signal)
+    assert merged.n_samples == sum(signal.n_samples for signal in signals)
+    assert merged.sampling_rate == signals[0].sampling_rate
+    assert merged.domain == signals[0].domain
+    assert merged.fft_norm == signals[0].fft_norm
+
+
+def test_concatenate_bins_timedata():
+    """Test concatenate_bins function with TimeData objects"""
+    signals = (
+        pf.TimeData([1, 2, 3], [1, 2, 3]),
+        pf.TimeData([4, 5, 6], [1, 2, 3]))
+    merged = pf.utils.concatenate_bins(signals)
+    assert isinstance(merged, pf.TimeData)
+    npt.assert_array_equal(merged.times, np.arange(1, 6))
+    npt.assert_array_equal(merged.time, np.arange(1, 6).reshape((1, 5)))
+
+
+def test_concatenate_bins_frequencydata():
+    """Test concatenate_bins function with FrequencyData objects"""
+    signals = (
+        pf.FrequencyData([1, 2, 3], [1, 2, 3]),
+        pf.FrequencyData([4, 5, 6], [4, 5, 6]))
+    merged = pf.utils.concatenate_bins(signals)
+    assert isinstance(merged, pf.FrequencyData)
+    npt.assert_array_equal(merged.frequencies, np.arange(1, 7))
+
+
+def test_concatenate_bins_frequencydata_with_double():
+    """Test concatenate_bins function with FrequencyData objects"""
+    signals = (
+        pf.FrequencyData([1, 2, 3], [1, 2, 3]),
+        pf.FrequencyData([3, 4, 5], [3, 4, 5]))
+    merged = pf.utils.concatenate_bins(signals)
+    assert isinstance(merged, pf.FrequencyData)
+    npt.assert_array_equal(merged.frequencies, np.arange(1, 6))
+    npt.assert_array_equal(merged.freq, np.arange(1, 6).reshape((1, 5)))
+
+
+def test_concatenate_bins_assertions():
+    """Test assertions"""
+    # invalid input type
+    with pytest.raises(
+            TypeError,
+            match="All input data must be of type pf.Signal, "
+            "pf.TimeData or pf.FrequencyData."):
+        pf.utils.concatenate_bins([1, 2, 3])
