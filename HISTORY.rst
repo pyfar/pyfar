@@ -2,6 +2,12 @@
 History
 =======
 
+0.6.4 (2024-02-16)
+------------------
+* Bugfix in `pyfar.io.read_comsol_header`: Fix for reading expressions containing the characters '-', '[', and ']' (PR #535)
+* Bugfix in `pyfar.dsp.fft.normalization`: Correct the normalization factor for the case `fft_norm=='psd'`. (PR #541)
+* Maintenance: Remove tests for deprecated numpy functionality (PR #537)
+
 0.6.3 (2024-01-26)
 ------------------
 * Bugfix in `pyfar.utils.concatenate_channels`: Amplitude of time domain Signals was wrong when concatenating in the frequency domain and concatenation failed for a mixture of Signals in the time and frequency domain (PR #532)
