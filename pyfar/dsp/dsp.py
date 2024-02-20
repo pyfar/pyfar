@@ -5,6 +5,7 @@ import pyfar
 from pyfar.dsp import fft
 from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
+import scipy.fft as sfft
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -276,7 +277,9 @@ def spectrogram(signal, window='hann', window_length=1024,
     Returns
     -------
     frequencies : numpy array
-        Frequencies in Hz at which the magnitude spectrum was computed
+        Frequencies in Hz at which the magnitude spectrum was computed. For
+        complex valued signals, frequencies and spectrogram is arranged such
+        that 0 Hz bin is centered.
     times : numpy array
         Times in seconds at which the magnitude spectrum was computed
     spectrogram : numpy array
@@ -309,6 +312,11 @@ def spectrogram(signal, window='hann', window_length=1024,
         spectrogram = fft.normalization(
             spectrogram, window_length, signal.sampling_rate,
             signal.fft_norm, window=window)
+        
+    # rearrange spectrogram and frequencies to center 0 Hz bin
+    if signal.complex:
+        frequencies = sfft.fftshift(frequencies)
+        spectrogram = sfft.fftshift(spectrogram, axes=0)
 
     # scipy.signal takes the center of the DFT blocks as time stamp we take the
     # beginning (looks nicer in plots, both conventions are used)

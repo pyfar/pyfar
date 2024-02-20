@@ -46,7 +46,7 @@ def test_return_values_complex():
 
     # check frequencies and times
     npt.assert_allclose(freqs,
-                        np.concatenate((np.arange(512), np.arange(-512, 0))))
+                    np.concatenate((np.arange(-512, 0), np.arange(0, 512))))
     npt.assert_allclose(times, [0, 512/1024, 1])
 
     # check middle slice
