@@ -310,8 +310,9 @@ def spectrogram(signal, window='hann', window_length=1024,
     # apply normalization from signal
     if normalize:
         spectrogram = fft.normalization(
-            spectrogram, window_length, signal.sampling_rate,
-            signal.fft_norm, window=window)
+                spectrogram, window_length, signal.sampling_rate,
+                signal.fft_norm, window=window)
+
     # rearrange spectrogram and frequencies to center 0 Hz bin
     if signal.complex:
         frequencies = sfft.fftshift(frequencies)
