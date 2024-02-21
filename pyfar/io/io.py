@@ -980,7 +980,6 @@ def read_ita(fname, data_type='data'):
                 pf.Coordinates(mfiledata.objectCoordinates.cart[0],
                                mfiledata.objectCoordinates.cart[1],
                                mfiledata.objectCoordinates.cart[2])
-            
         else:
             objectCoordinates = \
                 pf.Coordinates(mfiledata.objectCoordinates.cart[:, 0],
