@@ -31,7 +31,8 @@ test_requirements = [
     'flake8',
     'coverage',
     'Sphinx',
-    'twine'
+    'twine',
+    'pydata-sphinx-theme'
 ]
 
 setup(
