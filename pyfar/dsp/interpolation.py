@@ -606,7 +606,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
     # resample data with scipy resampe_poly function
     data = sgn.resample_poly(signal.time, up, down, axis=-1)
     data = pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
-                     comment=signal.comment)
+                     comment=signal.comment, is_complex=signal.complex)
 
     if post_filter and L > 1:
 

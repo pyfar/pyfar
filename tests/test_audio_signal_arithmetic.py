@@ -768,14 +768,6 @@ def test_get_arithmetic_data_with_signal():
                 npt.assert_allclose(s_ref.freq, data_out, atol=1e-15)
 
 
-#def test_get_arithmetic_data_with_array_complex_casting():
-#    data_in = np.asarray(1)
-#    data_out = signal._get_arithmetic_data(
-#        data_in, None, (1,), False, type(None), contains_complex=True)
-#
-#    assert data_out.dtype == 'complex'
-
-
 def test_get_arithmetic_data_with_signal_complex_casting():
     s_in = Signal([1, 0, 0], 44100, is_complex=False)
 
