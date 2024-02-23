@@ -19,9 +19,9 @@ conversions.
 Coordinate Systems
 ------------------
 
-Coordinate systems are defined by their domain and if required
-their convention if more then one definition of the domain exists, e.g.
-in spherical coordinates. The available coordinate systems are shown
+Coordinate systems are defined by their domain (cartesian, spherical,
+cylindrical), and, if multiple definitions of the domain exist, also by
+their convention. The available coordinate systems are shown
 in the image below
 
 |coordinate_systems|
