@@ -282,6 +282,31 @@ def impulse_group_delay():
 
 
 @pytest.fixture
+def impulse_complex_group_delay():
+    """Delayed delta impulse signal with analytical group delay.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    group_delay : ndarray
+        Group delay of impulse signal
+    """
+    n_samples = 10000
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    signal.complex = True
+    group_delay = delay * np.ones_like(signal.freq, dtype=float)
+
+    return signal, group_delay
+
+
+@pytest.fixture
 def impulse_group_delay_two_channel():
     """Delayed 2 channel delta impulse signal with analytical group delay.
 
