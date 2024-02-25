@@ -5,6 +5,7 @@ import pyfar
 from pyfar.dsp import fft
 from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
+import scipy.fft as sfft
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -276,7 +277,9 @@ def spectrogram(signal, window='hann', window_length=1024,
     Returns
     -------
     frequencies : numpy array
-        Frequencies in Hz at which the magnitude spectrum was computed
+        Frequencies in Hz at which the magnitude spectrum was computed. For
+        complex valued signals, frequencies and spectrogram is arranged such
+        that 0 Hz bin is centered.
     times : numpy array
         Times in seconds at which the magnitude spectrum was computed
     spectrogram : numpy array
@@ -298,7 +301,8 @@ def spectrogram(signal, window='hann', window_length=1024,
 
     frequencies, times, spectrogram = sgn.spectrogram(
         x=signal.time.squeeze(), fs=signal.sampling_rate, window=window,
-        noverlap=window_overlap, mode='magnitude', scaling='spectrum')
+        noverlap=window_overlap, mode='magnitude', scaling='spectrum',
+        return_onesided=not signal.complex)
 
     # remove normalization from scipy.signal.spectrogram
     spectrogram /= np.sqrt(1 / window.sum()**2)
@@ -306,8 +310,13 @@ def spectrogram(signal, window='hann', window_length=1024,
     # apply normalization from signal
     if normalize:
         spectrogram = fft.normalization(
-            spectrogram, window_length, signal.sampling_rate,
-            signal.fft_norm, window=window)
+                spectrogram, window_length, signal.sampling_rate,
+                signal.fft_norm, window=window)
+
+    # rearrange spectrogram and frequencies to center 0 Hz bin
+    if signal.complex:
+        frequencies = sfft.fftshift(frequencies)
+        spectrogram = sfft.fftshift(spectrogram, axes=0)
 
     # scipy.signal takes the center of the DFT blocks as time stamp we take the
     # beginning (looks nicer in plots, both conventions are used)
@@ -1171,7 +1180,8 @@ def time_shift(
 
     if np.any(np.isnan(shifted.time)):
         shifted = pyfar.TimeData(
-            shifted.time, shifted.times, comment=shifted.comment)
+            shifted.time, shifted.times, comment=shifted.comment,
+            is_complex=signal.complex)
 
     return shifted
 
@@ -1656,8 +1666,11 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         res[..., :n_min-1] += res[..., -n_min+1:]
         res = res[..., :n_max]
 
+    is_result_complex = True if res.dtype.kind == 'c' else False
+
     return pyfar.Signal(
-        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm,
+        is_complex=is_result_complex)
 
 
 def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
@@ -1814,8 +1827,9 @@ def energy(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
     # return and compute data
-    return np.sum(signal.time**2, axis=-1)
+    return np.sum(np.abs(signal.time)**2, axis=-1)
 
 
 def power(signal):
@@ -1852,8 +1866,9 @@ def power(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
     # return and compute data
-    return np.sum(signal.time**2, axis=-1)/signal.n_samples
+    return np.sum(np.abs(signal.time)**2, axis=-1)/signal.n_samples
 
 
 def rms(signal):
@@ -1979,16 +1994,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
-
-    if ((type(signal) is pyfar.TimeData or type(signal) is pyfar.Signal)
-        and signal.complex and mode in (
-                                        'log_magnitude_zerophase',
-                                        'magnitude_zerophase',
-                                        'magnitude_phase',
-                                        'power',)):
-
-        raise ValueError((
-            f"mode '{mode}' is not defined for complex signals."))
 
     if nan_policy not in ('propagate', 'omit', 'raise'):
         raise ValueError("nan_policy has to be 'propagate', 'omit', or"

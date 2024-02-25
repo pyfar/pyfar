@@ -360,6 +360,35 @@ def sine_plus_impulse():
 
 
 @pytest.fixture
+def sine_plus_impulse_complex():
+    """Added sine and delta impulse signals.
+
+    Returns
+    -------
+    signal : Signal
+        Combined signal
+    """
+    frequency = 441
+    delay = 100
+    n_samples = 10000
+    sampling_rate = 44100
+    amplitude = 1
+
+    sine_signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    sine_signal.fft_norm = 'none'
+
+    impulse_signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    signal = sine_signal + impulse_signal
+    signal.complex = True
+
+    return signal
+
+
+@pytest.fixture
 def noise():
     """Gaussian white noise signal.
 

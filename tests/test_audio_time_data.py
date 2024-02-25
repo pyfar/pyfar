@@ -31,6 +31,10 @@ def test_data_time_init_wrong_dtype():
     with pytest.raises(ValueError, match="time data is complex"):
         TimeData(np.arange(2).astype(complex), [0, 1])
 
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        TimeData(['1', '2'], [0, 1])
+
 
 def test_time_init_complex_flag():
     """
@@ -91,7 +95,7 @@ def test_setter_complex():
     time = TimeData(data=[1 + 1j, 0 + 1j, -1 + 2j], times=[0, .1, .3],
                     is_complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be `False`."):
+                                         " is_complex flag cannot be `False`"):
         time.complex = False
 
 
@@ -123,8 +127,27 @@ def test_reshape_exceptions():
         data_out = data_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape audio object'):
+    with pytest.raises(ValueError, match='Cannot reshape audio object'):
         data_out = data_in.reshape((3, 4))
+
+
+def test_transpose():
+    signal_in = TimeData(np.random.rand(6, 2, 5, 256), range(256))
+    signal_out = signal_in.transpose()
+    npt.assert_allclose(signal_in.T._data, signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
+
+
+@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
+def test_transpose_args(taxis):
+    signal_in = TimeData(np.random.rand(6, 2, 5, 256), range(256))
+    signal_out = signal_in.transpose(taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
+    signal_out = signal_in.transpose(*taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
 
 
 def test_flatten():

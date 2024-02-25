@@ -73,6 +73,14 @@ def test_signal_init_time_dtype():
     signal = Signal([1+1j, 2+2j, 3+3j], 44100, is_complex=True)
     assert signal.time.dtype.kind == "c"
 
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        Signal(['1', '2', '3'], 44100)
+
+    # pass array with invalid value
+    with pytest.raises(ValueError, match="input values must be numeric"):
+        Signal(np.array([1, 2, np.nan]), 44100)
+
 
 def test_data_frequency_init_dtype():
     """
@@ -93,8 +101,16 @@ def test_data_frequency_init_dtype():
     assert signal.freq.dtype.kind == "c"
 
     # object array
-    with pytest.raises(ValueError, match="frequency data is"):
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
         Signal(["1", "2", "3"], 44100, 4, "freq")
+
+    # pass array of invalid type
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        Signal(['1', '2', '3'], 44100, 4, "freq")
+
+    # pass array with invalid value
+    with pytest.raises(ValueError, match="input values must be numeric"):
+        Signal(np.array([1, 2, np.nan]), 44100, 4, "freq")
 
 
 def test_signal_comment():
@@ -315,6 +331,14 @@ def test_setter_fft_norm():
     with pytest.raises(ValueError):
         signal.fft_norm = 'bullshit'
 
+    # setting fft_norm for complex time signals
+    signal = pf.Signal([1, 2, 3], 44100,
+                       fft_norm='power', is_complex=True)
+    with pytest.raises(ValueError,
+                       match="'rms' normalization is not valid for "
+                             "complex time signals"):
+        signal.fft_norm = "rms"
+
 
 def test_fft_selection():
     """Test if appropriate FFT is computed"""
@@ -458,8 +482,27 @@ def test_reshape_exceptions():
         signal_out = signal_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape audio object'):
+    with pytest.raises(ValueError, match='Cannot reshape audio object'):
         signal_out = signal_in.reshape((3, 4))
+
+
+def test_transpose():
+    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    signal_out = signal_in.transpose()
+    npt.assert_allclose(signal_in.T._data, signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
+
+
+@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
+def test_transpose_args(taxis):
+    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    signal_out = signal_in.transpose(taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
+    signal_out = signal_in.transpose(*taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
 
 
 def test_flatten():
@@ -559,7 +602,7 @@ def test_setter_freq_raw_dtype():
     assert signal.freq_raw.dtype.kind == "c"
 
     # object array
-    with pytest.raises(ValueError, match="frequency data is"):
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
         signal.freq_raw = ["1", "2", "3"]
 
 
