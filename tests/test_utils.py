@@ -158,6 +158,11 @@ def test_concatenate_channels_complex_signals():
     desired = [[1 + 0j, 2 + 0j, 3 + 0j], [1 + 0j, 2 + 0j, 3 + 0j]]
     npt.assert_equal(s_conc._data, desired)
 
+    s_conc = pf.utils.concatenate_channels((s_complex, s))
+    assert s_conc.complex
+    desired = [[1 + 0j, 2 + 0j, 3 + 0j], [1 + 0j, 2 + 0j, 3 + 0j]]
+    npt.assert_equal(s_conc._data, desired)
+
 
 def test_concatenate_assertions():
     """Test assertions"""

@@ -174,7 +174,6 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
     for s in signals:
         if (type(s) is not pf.FrequencyData) and s.complex:
             is_result_complex = True
-    
     # broadcast signals into largest dimension and common cshapes
     if broadcasting is True:
         # broadcast signals into common cshape
