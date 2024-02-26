@@ -214,6 +214,15 @@ See the `Sphinx homepage <https://www.sphinx-doc.org>`_ for more information.
 Building the Documentation
 --------------------------
 
+Building the documentation locally requires pandoc in addition to the dependencies listed in `requirements_dev.txt`.
+Pandoc can either be installed via conda forge by executing
+
+.. code-block:: console
+
+    $ conda install -c conda-forge pandoc
+
+Or by downloading the installer from the `pandoc homepage <https://pandoc.org/installing.html>`_.
+
 You can build the documentation of your branch using Sphinx by executing the make script inside the docs folder.
 
 .. code-block:: console
