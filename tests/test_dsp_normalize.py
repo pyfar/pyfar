@@ -27,11 +27,13 @@ import numpy as np
     ['energy', 'individual', [1/1**2, 5/5**2]],
     ['energy', 'min', [1/1**2, 5/1**2]],
     ['energy', 'mean', [1/((1**2+5**2)/2), 5/((1**2+5**2)/2)]]))
-def test_normalization(reference_method, channel_handling, truth):
+@pytest.mark.parametrize('is_complex', [False, True])
+def test_normalization(reference_method, channel_handling, truth, is_complex):
     """Parametrized test for all combinations of reference_method and
     channel_handling parameters using an impulse.
     """
     signal = pf.signals.impulse(3, amplitude=[1, 5])
+    signal.complex = is_complex
     answer = pf.dsp.normalize(signal, domain='time',
                               reference_method=reference_method,
                               channel_handling=channel_handling)
