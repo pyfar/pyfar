@@ -59,7 +59,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
     $ flake8 pyfar tests
     $ pytest
 
-   flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust the your flake8 and linting configuration in your IDE accordingly.
+   flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust your flake8 and linting configuration in your IDE accordingly.
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -207,7 +207,7 @@ Here are a few tips to make things run smoothly
 - Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
 - Do not use footnotes in the short summary. Only use footnotes in the extended summary if there is a short summary. Otherwise, it messes with the auto-footnotes.
 - If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
-- Plots can be included in by using the prefix ``.. plot::`` followed by an empty line and an indented block containing the code for the plot. See `pyfar.plot.line.time.py` for examples.
+- Plots can be included in the documentation by using the prefix ``.. plot::`` followed by an empty line and an indented block containing the code for the plot. See `pyfar.plot.line.time.py` for examples.
 
 See the `Sphinx homepage <https://www.sphinx-doc.org>`_ for more information.
 
