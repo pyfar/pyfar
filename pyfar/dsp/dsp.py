@@ -103,9 +103,14 @@ def group_delay(signal, frequencies=None, method='fft'):
         group_delay = group_delay.reshape(signal.cshape + (-1, ))
 
     elif method == 'fft':
-        freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
-                          signal.n_samples, signal.sampling_rate,
-                          fft_norm='none')
+        if signal.complex:
+            freq_k = fft.fft(signal.time * np.arange(signal.n_samples),
+                             signal.n_samples, signal.sampling_rate,
+                             fft_norm='none')
+        else:
+            freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
+                              signal.n_samples, signal.sampling_rate,
+                              fft_norm='none')
 
         group_delay = np.real(freq_k / signal.freq_raw)
 
