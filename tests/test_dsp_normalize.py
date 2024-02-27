@@ -40,9 +40,11 @@ def test_normalization(reference_method, channel_handling, truth, is_complex):
     npt.assert_allclose(answer.time[..., 0], truth, rtol=1e-14)
 
 
-def test_domains_normalization():
+@pytest.mark.parametrize('is_complex', [False, True])
+def test_domains_normalization(is_complex):
     """Test for normalization in time and frequency domain."""
     signal = pf.signals.noise(128, seed=7)
+    signal.complex = is_complex
     time = pf.dsp.normalize(signal, domain="time")
     freq = pf.dsp.normalize(signal, domain="freq")
 
