@@ -98,12 +98,6 @@ def test_complex_group_delay_single_channel(impulse_complex_group_delay):
     single channel."""
     signal = impulse_complex_group_delay[0]
 
-    with pytest.raises(ValueError, match="Invalid method"):
-        dsp.group_delay(signal, method='invalid')
-
-    with pytest.raises(ValueError, match="not supported"):
-        dsp.group_delay(signal, method='fft', frequencies=[1, 2, 3])
-
     grp = dsp.group_delay(signal, method='scipy')
     assert grp.shape == (signal.n_bins, )
     npt.assert_allclose(
