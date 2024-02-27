@@ -86,12 +86,6 @@ def test_group_delay_single_channel(impulse_group_delay):
     npt.assert_allclose(
         grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
-    grp = dsp.group_delay(
-        signal, method='fft')
-    assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(
-        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
-
 
 def test_complex_group_delay_single_channel(impulse_complex_group_delay):
     """Test the function returning the group delay of a signal,
@@ -104,12 +98,6 @@ def test_complex_group_delay_single_channel(impulse_complex_group_delay):
         grp, impulse_complex_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(signal, method='fft')
-    assert grp.shape == (signal.n_bins, )
-    npt.assert_allclose(
-        grp, impulse_complex_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
-
-    grp = dsp.group_delay(
-        signal, method='fft')
     assert grp.shape == (signal.n_bins, )
     npt.assert_allclose(
         grp, impulse_complex_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
