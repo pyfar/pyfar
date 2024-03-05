@@ -1399,12 +1399,12 @@ class Coordinates():
 
         """
         if mask is None:
-            pf.plot.scatter(self, **kwargs)
+            return pf.plot.scatter(self, **kwargs)
         else:
             mask = np.asarray(mask)
             colors = np.full(self.cshape, pf.plot.color('b'))
             colors[mask] = pf.plot.color('r')
-            pf.plot.scatter(self, c=colors.flatten(), **kwargs)
+            return pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
     def find_nearest(self, find, k=1, distance_measure='euclidean'):
         """
