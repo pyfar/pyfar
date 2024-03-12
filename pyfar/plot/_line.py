@@ -126,16 +126,33 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
 
     # y-axis formatting
     y_margin = 5 if deg else np.radians(5)
-    if not deg and (not unwrap or unwrap == "360"):
-        # nice tick formatting is not done for unwrap=True. In this case
-        # it can create 1000 or more ticks.
-        ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
-        ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 4))
-        ax.yaxis.set_major_formatter(MultipleFractionFormatter(
-            nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
-
     ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
     ymax = np.nanmax(phase_data) + y_margin
+
+    if not deg:
+        if unwrap is False or unwrap == "360":
+            # major ticks at mulitples of pi/2
+            ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
+            ax.yaxis.set_major_formatter(MultipleFractionFormatter(
+                nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
+            # minor ticks at multiples of pi/4
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 4))
+        else:
+            # major ticks
+            if ymax-ymin < 20*np.pi:
+                # at multiples of 2 pi, if the range is smaller than 20 pi
+                n = 2
+            else:
+                # otherwise: at multiples of x*10*pi
+                # with x determined to maximum 10 intervals
+                n = np.ceil((ymax-ymin)/np.pi/9/10)*10
+            ax.yaxis.set_major_locator(MultipleFractionLocator(n, 1, np.pi))
+            ax.yaxis.set_major_formatter(
+                MultipleFractionFormatter(n, 1, np.pi, r'\pi'))
+            # minor ticks at half of major ticks,
+            # but rounded to multiples of 10*pi
+            n = np.round(n/2/10)*10
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(n/2, 1, np.pi))
 
     # prepare figure
     ax.set_xlabel("Frequency in Hz")

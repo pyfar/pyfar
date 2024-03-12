@@ -25,7 +25,7 @@ IMPORTANT: IN THE REPOSITORY, BOTH `CREATE_BASELINE` AND `COMPARE_OUTPUT` NEED
 TO BE SET TO FALSE, SO THE TRAVIS-CI CHECKS DO NOT FAIL.
 """
 # global parameters -----------------------------------------------------------
-create_baseline = False
+create_baseline = True
 
 # file type used for saving the plots
 file_type = "png"
