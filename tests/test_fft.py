@@ -173,7 +173,11 @@ def test_normalization_single_sided_single_channel_even_samples():
         print(f"Assesing normalization: '{normalization}' (inverse)")
         spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True)
-        npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
+        if normalization in ['power', 'psd']:
+            # Inverse only resembles magnitude for power norms
+            npt.assert_allclose(spec_out_inv, np.abs(spec_single), atol=1e-15)
+        else:
+            npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
 def test_normalization_single_sided_single_channel_odd_samples():
