@@ -130,7 +130,7 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         # nice tick formatting is not done for unwrap=True. In this case
         # it can create 1000 or more ticks.
         ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
-        ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
+        ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 4))
         ax.yaxis.set_major_formatter(MultipleFractionFormatter(
             nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
 
