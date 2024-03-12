@@ -77,7 +77,9 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
 @pytest.mark.parametrize('param', [
     ['phase_deg', True, False],
     ['phase_unwrap', False, True],
-    ['phase_deg_unwrap', True, True]])
+    ['phase_deg_unwrap', True, True],
+    ['phase_360', False, '360'],
+    ['phase_deg_360', True, '360']])
 def test_line_phase_options(param, handsome_signal):
     """Test parameters that are unique to the phase plot."""
     print(f"Testing: {param[0]}")
