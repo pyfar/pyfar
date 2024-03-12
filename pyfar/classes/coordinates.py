@@ -1399,12 +1399,20 @@ class Coordinates():
 
         """
         if mask is None:
-            pf.plot.scatter(self, **kwargs)
+            ax = pf.plot.scatter(self, **kwargs)
         else:
             mask = np.asarray(mask)
             colors = np.full(self.cshape, pf.plot.color('b'))
             colors[mask] = pf.plot.color('r')
-            pf.plot.scatter(self, c=colors.flatten(), **kwargs)
+            ax = pf.plot.scatter(self, c=colors.flatten(), **kwargs)
+
+        ax.set_box_aspect([
+            np.ptp(self.x),
+            np.ptp(self.y),
+            np.ptp(self.z)])
+        ax.set_aspect('equal')
+
+        return ax
 
     def find_nearest(self, find, k=1, distance_measure='euclidean'):
         """
