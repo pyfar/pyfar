@@ -19,9 +19,10 @@ conversions.
 Coordinate Systems
 ------------------
 
-Coordinate systems are defined by their `domain` (e.g. ``'spherical'``),
-`convention` (e.g. ``'top_elev'``), and `unit` (e.g. ``'deg'``). The available
-coordinate systems are shown in the image below
+Coordinate systems are defined by their domain (cartesian, spherical,
+cylindrical), and, if multiple definitions of the domain exist, also by
+their convention. The available coordinate systems are shown
+in the image below
 
 |coordinate_systems|
 
