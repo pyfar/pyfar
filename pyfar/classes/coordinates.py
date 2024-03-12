@@ -2659,17 +2659,8 @@ class Coordinates():
         else:
             obj = "Empty Coordinates object"
 
-        # coordinate convention
-        conv = "domain: {}, convention: {}, unit: {}".format(
-            self._system['domain'], self._system['convention'],
-            self._system['unit'])
-
-        # coordinates and units
-        coords = ["{} in {}".format(c, u) for c, u in
-                  zip(self._system['coordinates'], self._system['units'])]
-
         # join information
-        _repr = obj + "\n" + conv + "\n" + "coordinates: " + ", ".join(coords)
+        _repr = obj + "\n"
 
         # check for sampling weights
         if self._weights is None:
