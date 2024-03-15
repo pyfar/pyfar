@@ -187,7 +187,7 @@ Mocks are similar to stubs but used for **behavioral verification**. For example
 Writing the Documentation
 -------------------------
 
-Pyfar follows the `numpy style guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_ for the docstring. A docstring has to consist at least of
+Pyfar follows the `numpy style guide <https://numpydoc.readthedocs.io/en/stable/format.html>`_ for the docstring. A docstring has to consist at least of
 
 - A short and/or extended summary,
 - the Parameters section, and

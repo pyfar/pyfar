@@ -4,8 +4,8 @@ pyfar
 
 .. image:: https://badge.fury.io/py/pyfar.svg
     :target: https://badge.fury.io/py/pyfar
-.. image:: https://readthedocs.org/projects/pyfar/badge/?version=latest
-    :target: https://pyfar.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/pyfar/badge/?version=stable
+    :target: https://pyfar.readthedocs.io/en/stable/?badge=stable
     :alt: Documentation Status
 .. image:: https://circleci.com/gh/pyfar/pyfar.svg?style=shield
     :target: https://circleci.com/gh/pyfar/pyfar
@@ -46,6 +46,6 @@ Refer to the `contribution guidelines`_ for more information.
 .. _contribution guidelines: https://github.com/pyfar/pyfar/blob/develop/CONTRIBUTING.rst
 .. _examples notebook: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
 .. _pyfar.org: https://pyfar.org
-.. _read the docs: https://pyfar.readthedocs.io/en/latest
-.. _SoundFile: https://pysoundfile.readthedocs.io/en/latest/
+.. _read the docs: https://pyfar.readthedocs.io/en/stable
+.. _SoundFile: https://pysoundfile.readthedocs.io/en/stable/
 .. _libsndfile: http://www.mega-nerd.com/libsndfile/
