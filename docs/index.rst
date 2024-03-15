@@ -2,9 +2,6 @@
    :width: 150
    :alt: Alternative text
 
-|pyfar_logo|
-
-
 Getting Started
 ===============
 
