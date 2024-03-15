@@ -116,7 +116,7 @@ html_favicon = '_static/favicon.ico'
 
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
-    "navbar_end": ["navbar-icon-links"],
+    "navbar_end": ["navbar-icon-links", "theme-switcher"],
     "navbar_align": "content",
     "icon_links": [
         {
