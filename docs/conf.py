@@ -105,8 +105,9 @@ html_theme_options = {
 
   # Configure secondary (right) side bar
   "show_toc_level": 3,                     # Show all subsections of notebooks
-  "secondary_sidebar_items": ["page-toc"]  # Omit 'show source' link that that
+  "secondary_sidebar_items": ["page-toc"],  # Omit 'show source' link that that
                                            # shows notebook in json format
+  "navigation_with_keys": True,
 }
 
 html_context = {
