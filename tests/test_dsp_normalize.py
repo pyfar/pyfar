@@ -154,4 +154,5 @@ def test_error_raises():
     with raises(ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), nan_policy='invalid')
     with raises(ValueError, match=("The signal includes NaNs.")):
-        pf.dsp.normalize(pf.Signal([0, np.nan, 0], 44100), nan_policy='raise')
+        pf.dsp.normalize(pf.TimeData([0, np.nan, 0], [0, 1, 3]),
+                         nan_policy='raise')
