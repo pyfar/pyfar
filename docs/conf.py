@@ -126,6 +126,7 @@ html_theme_options = {
 html_context = {
    "default_mode": "light"
 }
+
 # -- download navbar from gallery ---------------------------------------------
 branch = "static-nav-bar"
 link = f'https://github.com/pyfar/gallery/raw/{branch}/docs/'
@@ -144,7 +145,7 @@ for file in folders_in:
     with c.request('GET', url, preload_content=False) as res, open(filename, 'wb') as out_file:
         shutil.copyfileobj(res, out_file)
 
-# rename
+# rename navbar-nav
 shutil.move(
     '_templates/navbar-nav-static.html',
     '_templates/navbar-nav.html')
