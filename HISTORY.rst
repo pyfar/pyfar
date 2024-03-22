@@ -2,6 +2,13 @@
 History
 =======
 
+0.6.5 (2024-03-15)
+------------------
+* `Coordinates.show` now plots on equally scaled axis (PR #554)
+* Update documentation to pydata theme (PR #560)
+* Improve documentation (PR #544, #548, #549, #556)
+* Add testing for Python 3.12 (PR #561)
+
 0.6.4 (2024-02-16)
 ------------------
 * Bugfix in `pyfar.io.read_comsol_header`: Fix for reading expressions containing the characters '-', '[', and ']' (PR #535)
