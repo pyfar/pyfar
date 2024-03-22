@@ -8,6 +8,8 @@
 
 import os
 import sys
+import urllib3
+import shutil
 sys.path.insert(0, os.path.abspath('..'))
 
 import pyfar  # noqa
@@ -124,6 +126,28 @@ html_theme_options = {
 html_context = {
    "default_mode": "light"
 }
+# -- download navbar from gallery ---------------------------------------------
+branch = "static-nav-bar"
+link = f'https://github.com/pyfar/gallery/raw/{branch}/docs/'
+folders_in = [
+    '_static/css/custom.css',
+    '_static/favicon.ico',
+    '_templates/navbar-nav-static.html',
+    'resources/logos/pyfar_logos_fixed_size_pyfar.png'
+    ]
+c = urllib3.PoolManager()
+for file in folders_in:
+    url = link + file
+    filename = file
+    print(url)
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with c.request('GET', url, preload_content=False) as res, open(filename, 'wb') as out_file:
+        shutil.copyfileobj(res, out_file)
+
+# rename
+shutil.move(
+    '_templates/navbar-nav-static.html',
+    '_templates/navbar-nav.html')
 
 # -- pyfar specifics -----------------------------------------------------
 
