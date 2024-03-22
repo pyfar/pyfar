@@ -262,6 +262,7 @@ def test_write_read_frequencydata(frequency_data, tmpdir):
     assert actual == frequency_data
 
 
+@pytest.mark.filterwarnings('ignore::Warning')
 def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     """ SphericalVoronoi
     Make sure `read` understands the bits written by `write`
@@ -400,6 +401,124 @@ def test_write_read_multiplePyfarObjects(
         filterSOS,
         coordinates,
         orientations,
+        # sphericalvoronoi,
+        time_data,
+        frequency_data,
+        sine,
+        dict_of_builtins,
+        tmpdir):
+    """ Check if multiple different PyFar-objects can be written to disk
+    and read back.
+    """
+    filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
+    io.write(
+        filename,
+        filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
+        coordinates=coordinates,
+        orientations=orientations,
+        # sphericalvoronoi=sphericalvoronoi,
+        timedata=time_data,
+        frequencydata=frequency_data,
+        signal=sine,
+        matrix_2d_int=matrix_2d_int,
+        **dict_of_builtins)
+    actual = io.read(filename)
+    assert isinstance(actual['filter'], fo.Filter)
+    assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
+    assert isinstance(actual['coordinates'], Coordinates)
+    assert actual['coordinates'] == coordinates
+    assert isinstance(actual['orientations'], Orientations)
+    assert actual['orientations'] == orientations
+    # assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
+    # assert actual['sphericalvoronoi'] == sphericalvoronoi
+    assert isinstance(actual['timedata'], TimeData)
+    assert actual['timedata'] == time_data
+    assert isinstance(actual['frequencydata'], FrequencyData)
+    assert actual['frequencydata'] == frequency_data
+    assert isinstance(actual['signal'], Signal)
+    assert actual['signal'] == sine
+    assert isinstance(actual['matrix_2d_int'], np.ndarray)
+    assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
+    assert dict_of_builtins.items() <= actual.items()
+
+
+def test_write_read_multiplePyfarObjectsWithCompression(
+        filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
+        coordinates,
+        orientations,
+        # sphericalvoronoi,
+        time_data,
+        frequency_data,
+        sine,
+        dict_of_builtins,
+        tmpdir):
+    """ Check if multiple different PyFar-objects can be written to disk
+    and read back with zip compression.
+    """
+    filename = os.path.join(tmpdir, 'multiplePyfarObjects.far')
+    matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
+    io.write(
+        filename,
+        compress=True,
+        filter=filter,
+        filterFIR=filterFIR,
+        filterIIR=filterIIR,
+        filterSOS=filterSOS,
+        coordinates=coordinates,
+        orientations=orientations,
+        # sphericalvoronoi=sphericalvoronoi,
+        timedata=time_data,
+        frequencydata=frequency_data,
+        signal=sine,
+        matrix_2d_int=matrix_2d_int,
+        **dict_of_builtins)
+    actual = io.read(filename)
+    assert isinstance(actual['filter'], fo.Filter)
+    assert actual['filter'] == filter
+    assert isinstance(actual['filterFIR'], fo.FilterFIR)
+    assert actual['filterFIR'] == filterFIR
+    assert isinstance(actual['filterIIR'], fo.FilterIIR)
+    assert actual['filterIIR'] == filterIIR
+    assert isinstance(actual['filterSOS'], fo.FilterSOS)
+    assert actual['filterSOS'] == filterSOS
+    assert isinstance(actual['coordinates'], Coordinates)
+    assert actual['coordinates'] == coordinates
+    assert isinstance(actual['orientations'], Orientations)
+    assert actual['orientations'] == orientations
+    # assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
+    # assert actual['sphericalvoronoi'] == sphericalvoronoi
+    assert isinstance(actual['timedata'], TimeData)
+    assert actual['timedata'] == time_data
+    assert isinstance(actual['frequencydata'], FrequencyData)
+    assert actual['frequencydata'] == frequency_data
+    assert isinstance(actual['signal'], Signal)
+    assert actual['signal'] == sine
+    assert isinstance(actual['matrix_2d_int'], np.ndarray)
+    assert np.allclose(actual['matrix_2d_int'], matrix_2d_int)
+    assert dict_of_builtins.items() <= actual.items()
+
+
+@pytest.mark.filterwarnings('ignore::Warning')
+def test_write_read_multiplePyfarObjects_withDep(
+        filter,
+        filterFIR,
+        filterIIR,
+        filterSOS,
+        coordinates,
+        orientations,
         sphericalvoronoi,
         time_data,
         frequency_data,
@@ -451,7 +570,8 @@ def test_write_read_multiplePyfarObjects(
     assert dict_of_builtins.items() <= actual.items()
 
 
-def test_write_read_multiplePyfarObjectsWithCompression(
+@pytest.mark.filterwarnings('ignore::Warning')
+def test_write_read_multiplePyfarObjectsWithCompression_withDep(
         filter,
         filterFIR,
         filterIIR,
