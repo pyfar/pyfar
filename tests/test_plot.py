@@ -74,17 +74,20 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('signal', ['handsome_signal', 'impulse'])
 @pytest.mark.parametrize('param', [
     ['phase_deg', True, False],
     ['phase_unwrap', False, True],
-    ['phase_deg_unwrap', True, True]])
-def test_line_phase_options(param, handsome_signal):
+    ['phase_deg_unwrap', True, True],
+    ['phase_360', False, '360'],
+    ['phase_deg_360', True, '360']])
+def test_line_phase_options(param, signal, request):
     """Test parameters that are unique to the phase plot."""
-    print(f"Testing: {param[0]}")
-
-    filename = param[0]
+    filename = param[0] + '_' + signal
+    print(f"Testing: {param[0] + '_' + signal}")
+    signal = request.getfixturevalue(signal)
     create_figure()
-    plot.phase(handsome_signal, deg=param[1], unwrap=param[2])
+    plot.phase(signal, deg=param[1], unwrap=param[2])
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
