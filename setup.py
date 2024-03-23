@@ -14,7 +14,7 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'numpy>=1.23.0',
     'scipy>=1.5.0',
-    'matplotlib<=3.7',
+    'matplotlib',
     'sofar>=0.1.2',
     'urllib3',
     'deepdiff',
