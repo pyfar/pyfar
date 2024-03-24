@@ -28,6 +28,7 @@ extensions = [
     'autodocsumm',
     'sphinx_design',
     'sphinx_favicon',
+    'sphinx_reredirects',
 ]
 
 # show tocs for classes and functions of modules using the autodocsumm
@@ -126,6 +127,11 @@ html_theme_options = {
 
 html_context = {
    "default_mode": "light"
+}
+
+# redirect index to pyfar.html
+redirects = {
+     "index": "pyfar.html"
 }
 
 # -- download navbar and style files from gallery -----------------------------

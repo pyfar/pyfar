@@ -3,5 +3,3 @@
    :alt: Alternative text
 
 .. include:: header.rst
-
-
