@@ -6,14 +6,14 @@ pyfar
 =====
 
 .. toctree::
-   :caption: Readme
+   :caption: Getting Started
    :maxdepth: 2
 
    readme
 
 
 .. toctree::
-   :caption: Getting Started
+   :caption: Documentation
    :maxdepth: 2
 
    concepts
