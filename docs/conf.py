@@ -140,7 +140,6 @@ c = urllib3.PoolManager()
 for file in folders_in:
     url = link + file
     filename = file
-    print(url)
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with c.request('GET', url, preload_content=False) as res, open(filename, 'wb') as out_file:
         shutil.copyfileobj(res, out_file)
