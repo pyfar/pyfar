@@ -2,6 +2,8 @@
    :width: 150
    :alt: Alternative text
 
+pyfar
+=====
 
 .. toctree::
    :caption: Readme
