@@ -109,6 +109,7 @@ html_theme_options = {
     "navbar_start": ["navbar-logo"],
     "navbar_end": ["navbar-icon-links", "theme-switcher"],
     "navbar_align": "content",
+    "header_links_before_dropdown": 8,
     "icon_links": [
         {
           "name": "GitHub",
@@ -128,12 +129,12 @@ html_context = {
 }
 
 # -- download navbar and style files from gallery -----------------------------
-branch = 'static-nav-bar'
+branch = 'fix_header'
 link = f'https://github.com/pyfar/gallery/raw/{branch}/docs/'
 folders_in = [
     '_static/css/custom.css',
     '_static/favicon.ico',
-    '_templates/navbar-nav-static.html',
+    '_static/header.rst',
     'resources/logos/pyfar_logos_fixed_size_pyfar.png'
     ]
 c = urllib3.PoolManager()
@@ -144,10 +145,11 @@ for file in folders_in:
     with c.request('GET', url, preload_content=False) as res, open(filename, 'wb') as out_file:
         shutil.copyfileobj(res, out_file)
 
-# rename navbar-nav
-shutil.move(
-    '_templates/navbar-nav-static.html',
-    '_templates/navbar-nav.html')
+# replace pyfar hard link to internal link
+with open("_static/header.rst", "rt") as fin:
+    with open("header.rst", "wt") as fout:
+        for line in fin:
+            fout.write(line.replace(f'https://{project}.readthedocs.io', project))
 
 # -- pyfar specifics -----------------------------------------------------
 
