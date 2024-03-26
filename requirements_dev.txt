@@ -21,3 +21,4 @@ nbmake>=0.7.0
 pydata-sphinx-theme
 sphinx-design
 sphinx-favicon
+sphinx-reredirects
