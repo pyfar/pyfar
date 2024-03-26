@@ -18,6 +18,7 @@ import zipfile
 import io
 import numpy as np
 import re
+import scipy.io as spio
 
 try:
     import soundfile
@@ -936,3 +937,127 @@ def _read_comsol_get_headerline(filename):
     is_complex = 'i' in line
     delimiter = ',' if ',' in line else None
     return header, is_complex, delimiter
+
+
+def read_ita(fname, data_type='data'):
+    """Read a *.ita file.
+
+    Parameters
+    ----------
+    fname : str
+        The filename.
+    type : str, optional
+        The return type of data. Can be 'data' or 'signal'. Default is 'data'.
+
+    Returns
+    -------
+    data : pyfar.Signal or pyfar.TimeData, pyfar.FrequencyData
+        The data contained in the *.ita file.
+    objectCoordinates : pyfar.Coordinates
+        The object coordinates of the *.ita file.
+    channelCoordinates : pyfar.Coordinates
+        The channel coordinates of the *.ita file.
+    metadata : dict
+        Additional metadata contained in the *.ita file.
+    """
+    matfile = spio.loadmat(
+        os.path.join(fname),
+        struct_as_record=False, squeeze_me=True, appendmat=False)
+    mfiledata = matfile['ITA_TOOLBOX_AUDIO_OBJECT']
+
+    if (type(mfiledata.comment) is not str):
+        comment = ""
+    else:
+        comment = mfiledata.comment
+
+    domain = mfiledata.domain
+    if mfiledata.channelCoordinates.cart.shape != (0,):
+        if mfiledata.channelCoordinates.cart.ndim == 1:
+            channelCoordinates = \
+                pf.Coordinates(mfiledata.channelCoordinates.cart[0],
+                               mfiledata.channelCoordinates.cart[1],
+                               mfiledata.channelCoordinates.cart[2])
+        else:
+            channelCoordinates = \
+                pf.Coordinates(mfiledata.channelCoordinates.cart[:, 0],
+                               mfiledata.channelCoordinates.cart[:, 1],
+                               mfiledata.channelCoordinates.cart[:, 2])
+    else:
+        channelCoordinates = pf.Coordinates()
+
+    if mfiledata.objectCoordinates.cart.shape != (0,):
+        if mfiledata.objectCoordinates.cart.ndim == 1:
+            objectCoordinates = \
+                pf.Coordinates(mfiledata.objectCoordinates.cart[0],
+                               mfiledata.objectCoordinates.cart[1],
+                               mfiledata.objectCoordinates.cart[2])
+        else:
+            objectCoordinates = \
+                pf.Coordinates(mfiledata.objectCoordinates.cart[:, 0],
+                               mfiledata.objectCoordinates.cart[:, 1],
+                               mfiledata.objectCoordinates.cart[:, 2])
+    else:
+        objectCoordinates = pf.Coordinates()
+
+    if len(mfiledata.channelCoordinates.weights) == channelCoordinates.csize:
+        channelCoordinates.weights = mfiledata.channelCoordinates.weights
+    elif len(mfiledata.channelCoordinates.weights) != 0:
+        raise Exception('channelCoordinates.weights must have the same size as\
+                         channelCoordinates.csize.')
+
+    if len(mfiledata.objectCoordinates.weights) == objectCoordinates.csize:
+        objectCoordinates.weights = mfiledata.objectCoordinates.weights
+    elif len(mfiledata.channelCoordinates.weights) != 0:
+        raise Exception('objectCoordinates.weights must have the same size as\
+                         objectCoordinates.csize.')
+
+    data_in = np.ascontiguousarray((mfiledata.data.T).astype(float))
+
+    # checks if *.ita object is itaAudio or itaResult
+    if (hasattr(mfiledata, 'signalType')):  # itaAudio
+        if data_type == 'signal':
+            fft_norm = 'none' if mfiledata.signalType == 'energy' else 'rms'
+            data = pf.Signal(data_in, mfiledata.samplingRate, domain,
+                             fft_norm=fft_norm, comment=comment)
+
+        elif data_type == 'data':
+            if domain == 'time':
+                data = \
+                    pf.TimeData(data_in,
+                                np.arange(mfiledata.data.shape[0]) /
+                                mfiledata.samplingRate,
+                                comment=comment)
+            elif domain == 'freq':
+                data = \
+                    pf.FrequencyData(data_in,
+                                     np.linspace(0, mfiledata.samplingRate/2,
+                                                 mfiledata.data.shape[0]),
+                                     comment=comment)
+
+    else:  # itaResult
+        if data_type == 'signal':
+            raise Exception('The itaResult object can\'t contain a signal.')
+
+        elif data_type == 'data':
+            if domain == 'time':
+                data = pf.TimeData(data_in, mfiledata.abscissa,
+                                   comment=comment)
+            elif domain == 'freq':
+                data = pf.FrequencyData(data_in, mfiledata.abscissa,
+                                        comment=comment)
+
+    metadata = _todict(mfiledata)
+
+    return data, objectCoordinates, channelCoordinates, metadata
+
+
+def _todict(mat_obj):
+    """Recursively transform MATLAB struct objects to nested dictionaries."""
+    mat_dict = {}
+    for fieldname in mat_obj._fieldnames:
+        elem = mat_obj.__dict__[fieldname]
+        if isinstance(elem, spio.matlab.mio5_params.mat_struct):
+            mat_dict[fieldname] = _todict(elem)
+        else:
+            mat_dict[fieldname] = elem
+    return mat_dict
