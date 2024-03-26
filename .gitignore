@@ -125,7 +125,7 @@ pyfar/signals/files/*
 tests/*/__init__.py
 tests/private/
 
-# ingore doc stuff donloaded from pyfar gallery
+# ignore downloads from pyfar gallery
 docs/header.rst
 docs/_static/favicon.ico
 docs/_static/header.rst
