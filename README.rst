@@ -10,7 +10,7 @@ pyfar
 .. image:: https://circleci.com/gh/pyfar/pyfar.svg?style=shield
     :target: https://circleci.com/gh/pyfar/pyfar
 .. image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
+    :target: https://mybinder.org/v2/gh/pyfar/gallery/main?filepath=docs/gallery
 
 
 The python package for acoustics research (pyfar) offers classes to store
@@ -20,9 +20,9 @@ functions for digital audio signal processing.
 Getting Started
 ===============
 
-Check out the `examples notebook`_ for a tour of the most important pyfar
-functionality and `read the docs`_ for the complete documentation. Packages
-related to pyfar are listed at `pyfar.org`_.
+Check out the `pyfar.org`_ for a tour trought the pyfar
+universe, including complete documentation of this package and
+the other packages.
 
 Installation
 ============
@@ -44,7 +44,6 @@ Refer to the `contribution guidelines`_ for more information.
 
 
 .. _contribution guidelines: https://github.com/pyfar/pyfar/blob/develop/CONTRIBUTING.rst
-.. _examples notebook: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
 .. _pyfar.org: https://pyfar.org
 .. _read the docs: https://pyfar.readthedocs.io/en/latest
 .. _SoundFile: https://pysoundfile.readthedocs.io/en/latest/
