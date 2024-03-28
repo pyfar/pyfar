@@ -244,7 +244,7 @@ A reminder for the maintainers on how to deploy.
 
 - Commit all changes to develop
 - Update HISTORY.rst in develop
-- Check if examples/pyfar_demo.ipynb needs to be updated
+- Check if gallery needs to be updated
 - Merge develop into main
 
 Switch to main and run::
@@ -255,6 +255,6 @@ $ git push --follow-tags
 The testing platform will then deploy to PyPI if tests pass.
 
 - merge main back into develop
-- check `binder`_
+- check gallery in `binder`_
 
-.. _binder: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
+.. _binder: https://mybinder.org/v2/gh/pyfar/gallery/main?filepath=docs/gallery
