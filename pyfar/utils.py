@@ -169,6 +169,11 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
     # check matching meta data of input signals.
     [signals[0]._assert_matching_meta_data(s) for s in signals]
 
+    # check if any signal is complex valued
+    is_result_complex = False
+    for s in signals:
+        if (type(s) is not pf.FrequencyData) and s.complex:
+            is_result_complex = True
     # broadcast signals into largest dimension and common cshapes
     if broadcasting is True:
         # broadcast signals into common cshape
@@ -207,8 +212,10 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         return pf.Signal(data, signals[0].sampling_rate,
                          n_samples=signals[0].n_samples,
                          domain=signals[0].domain,
-                         fft_norm=signals[0].fft_norm)
+                         fft_norm=signals[0].fft_norm,
+                         is_complex=is_result_complex)
     elif isinstance(signals[0], pf.TimeData):
-        return pf.TimeData(data, signals[0].times)
+        return pf.TimeData(data, signals[0].times,
+                           is_complex=is_result_complex)
     else:
         return pf.FrequencyData(data, signals[0].frequencies)
