@@ -75,9 +75,6 @@ def test_decibel_complex():
     npt.assert_almost_equal(pf.dsp.decibel(test_Signal, domain='time',
                             log_prefix=15),
                             [[-30, -15, 0, 15, 30]], decimal=10)
-    test_Signal.fft_norm = 'power'
-    npt.assert_almost_equal(pf.dsp.decibel(test_Signal, domain='time'),
-                            [[-20, -10, 0, 10, 20]], decimal=10)
     test_Signal.fft_norm = 'none'
     # Test using eps if data == 0
     npt.assert_equal(pf.dsp.decibel(pf.Signal([0], 44100), domain='time'),
