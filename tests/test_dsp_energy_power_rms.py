@@ -7,14 +7,12 @@ import numpy.testing as npt
 @pytest.mark.parametrize('freq, amplitude', ([1, 1],
                                              [44100/20, 2],
                                              [44100/50, 3]))
-@pytest.mark.parametrize('is_complex', [True, False])
-def test_sinewave(freq, amplitude, is_complex):
+def test_sinewave(freq, amplitude):
     """
     Test the energy, power and rms of different full period Sinewaves.
     """
     n_samples = 44100
     signal = pf.signals.sine(freq, n_samples, amplitude)
-    signal.complex = is_complex
     energy = pf.dsp.energy(signal)
     answer_e = n_samples/2 * amplitude**2
     power = pf.dsp.power(signal)
@@ -33,3 +31,22 @@ def test_multichannel_signals():
     assert np.all(pf.dsp.energy(signal) == np.ones((2, 3, 3))*100)
     assert np.all(pf.dsp.power(signal) == np.ones((2, 3, 3)))
     assert np.all(pf.dsp.rms(signal) == np.sqrt(np.ones((2, 3, 3))))
+
+
+def test_invalid_mode_complex():
+    signal = pf.signals.sine(1, 5)
+    signal.complex = True
+    with pytest.raises(ValueError,
+                       match="'energy' is not implemented for complex time "
+                             "signals."):
+        pf.dsp.energy(signal)
+
+    with pytest.raises(ValueError,
+                       match="'power' is not implemented for complex time "
+                             "signals."):
+        pf.dsp.power(signal)
+
+    with pytest.raises(ValueError,
+                       match="'rms' is not implemented for complex time "
+                             "signals."):
+        pf.dsp.rms(signal)
