@@ -1993,6 +1993,12 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                                pyfar.TimeData)):
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
+
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex and mode == 'power':
+            raise ValueError((
+                "'power' is not implemented for complex time signals."))
+
     if type(signal) is pyfar.TimeData and mode in (
             'log_magnitude_zerophase', 'magnitude_zerophase',
             'magnitude_phase', 'power',):

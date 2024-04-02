@@ -117,3 +117,8 @@ def test_error_raises():
     with raises(ValueError, match=("The signal includes NaNs.")):
         pf.dsp.average(pf.TimeData([[0, np.nan], [1, 2]], [0, 1]),
                        nan_policy='raise')
+    # test invalid mode for complex time signal
+    signal.complex = True
+    with raises(ValueError,
+                match="'power' is not implemented for complex time signals."):
+        pf.dsp.average(signal, 'power')
