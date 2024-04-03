@@ -1837,7 +1837,7 @@ def energy(signal):
         if signal.complex:
             raise ValueError((
                 "'energy' is not implemented for complex time signals."))
-        
+
     # return and compute data
     return np.sum(np.abs(signal.time)**2, axis=-1)
 
