@@ -42,6 +42,7 @@ def test_normalization(reference_method, channel_handling, truth):
 def test_domains_normalization(is_complex):
     """Test for normalization in time and frequency domain."""
     signal = pf.signals.noise(128, seed=7)
+    signal.fft_norm = "none"
     signal.complex = is_complex
     time = pf.dsp.normalize(signal, domain="time")
     freq = pf.dsp.normalize(signal, domain="freq")
