@@ -12,7 +12,7 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
-from .warnings import PyfarDeprecationWarning
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class _Audio():
@@ -95,10 +95,51 @@ class _Audio():
                 newshape + (length_last_dimension, ))
         except ValueError:
             if np.prod(newshape) != np.prod(self.cshape):
-                raise ValueError((f"Can not reshape audio object of cshape "
+                raise ValueError((f"Cannot reshape audio object of cshape "
                                   f"{self.cshape} to {newshape}"))
 
         return reshaped
+
+    def transpose(self, *axes):
+        """Transpose time/frequency data and return copy of the audio object.
+
+        Parameters
+        ----------
+        caxes : empty, ``None``, iterable of ints, or n ints
+            Define how the :py:mod:` caxes <pyfar._concepts.audio_classes>`
+            are ordered in the transposed audio object.
+            Note that the last dimension of the data in the audio object
+            always contains the time samples or frequency bins and can not
+            be transposed.
+
+            empty (default) or ``None``
+                reverses the order of ``self.caxes``.
+            iterable of ints
+                `i` in the `j`-th place of the interable means
+                that the `i`-th caxis becomes transposed object's `j`-th caxis.
+            n ints
+                same as 'iterable of ints'.
+        """
+        if hasattr(axes, '__iter__'):
+            axes = axes[0] if len(axes) == 1 else axes
+        if axes is None or len(axes) == 0:
+            axes = tuple(range(len(self.cshape)))[::-1]
+        else:
+            assert all([a > -len(self.cshape) - 1 for a in axes]), \
+                "Negative axes index out of bounds."
+            axes = tuple([a % len(self.cshape) if a < 0 else a for a in axes])
+
+        # throw exception before deepcopy
+        np.empty(np.ones(len(self.cshape), dtype=int)).transpose(axes)
+        transposed = deepcopy(self)
+        transposed._data = transposed._data.transpose(*axes, len(self.cshape))
+
+        return transposed
+
+    @property
+    def T(self):
+        """Shorthand for `Signal.transpose()`."""
+        return self.transpose()
 
     def flatten(self):
         """Return flattened copy of the audio object.

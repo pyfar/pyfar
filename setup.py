@@ -46,7 +46,8 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11'
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12'
     ],
     description="Project for data formats in acoustics.",
     install_requires=requirements,
@@ -66,7 +67,7 @@ setup(
         "Documentation": "https://pyfar.readthedocs.io/",
         "Source Code": "https://github.com/pyfar/pyfar",
     },
-    version='0.6.0',
+    version='0.6.5',
     zip_safe=False,
     python_requires='>=3.8'
 )

@@ -240,7 +240,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             norm /= (n_samples * sampling_rate)
         else:
             # Equation 13 in Ahrens et al. 2020
-            norm /= (np.sum(window)**2 * sampling_rate)
+            norm /= (np.sum(np.asarray(window)**2) * sampling_rate)
         # the phase is kept for being able to switch between normalizations
         # altoug the power spectrum does usually not have phase information,
         # i.e., spec = np.abs(spec)**2
