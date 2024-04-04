@@ -145,7 +145,8 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
 def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
                       sampling_rate=44100):
-    """Generate single channel sine sweep with linearly increasing frequency.
+    """
+    Generate sine sweep with linearly increasing frequency in the time domain.
 
     Time domain sweep generation according to [#]_:
 
@@ -215,7 +216,8 @@ def linear_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
         fade_out=None, butterworth_order=8, sampling_rate=44100):
     """
-    Generate single channel sine sweep with linearly increasing frequency.
+    Generate sine sweep with linearly increasing frequency in the frequency
+    domain.
 
     Sine sweep synthesis according to [#]_.
 
@@ -310,7 +312,8 @@ def linear_sweep_freq(
 def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
                            amplitude=1, sweep_rate=None, sampling_rate=44100):
     """
-    Generate single channel sine sweep with exponentially increasing frequency.
+    Generate sine sweep with exponentially increasing frequency in the time
+    domain.
 
     Time domain sweep generation according to [#]_:
 
@@ -327,7 +330,7 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
     :math:`f_\\mathrm{high}`.
 
     The exponential sweep can also be generated in the frequency domain (see
-    see :py:func:`~exponential_sweep.freq`). Time domain synthesis exhibits a
+    see :py:func:`~exponential_sweep_freq`). Time domain synthesis exhibits a
     constant temporal envelope in trade of slight ripples in the magnitude
     response. Frequency domain synthesis exhibits smooth magnitude spectra and
     in trade of a slightly irregular temporal envelope.
@@ -389,7 +392,8 @@ def exponential_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
         fade_out=None, butterworth_order=8, sampling_rate=44100):
     """
-    Generate single channel sine sweep with exponentially increasing frequency.
+    Generate sine sweep with exponentially increasing frequency in the
+    frequency domain.
 
     Sweep synthesis according to [#]_.
 
@@ -488,7 +492,8 @@ def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude_spectrum, start_margin, stop_margin,
         fade_in=None, fade_out=None, sampling_rate=44100):
     """
-    Generate single channel sine sweep with arbitrary magnitude spectrum.
+    Generate sine sweep with arbitrary magnitude spectrum in the frequency
+    domain.
 
     Sine sweep synthesis according to [#]_. Frequency domain synthesis
     exhibits smooth magnitude spectra in trade of a slightly irregular temporal
@@ -577,7 +582,7 @@ def magnitude_spectrum_weighted_sweep(
 
 def linear_perfect_sweep(n_samples, sampling_rate=44100):
     """
-    Generate a perfect linear sweep.
+    Generate a perfect linear sweep in the frequency domain.
 
     The perfect sweep is generated according to [#]_ and is used for adaptive
     system identification. It is orthogonal to delayed versions of itself and
