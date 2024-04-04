@@ -163,7 +163,7 @@ def test_error_raises():
 
 @pytest.mark.parametrize('reference_method', ['energy', 'power', 'rms'])
 @pytest.mark.parametrize('input_signal', [pf.TimeData([1, 1, 1],
-                                                      [0, 1, 2], 
+                                                      [0, 1, 2],
                                                       is_complex=True),
                                           pf.Signal([1, 0, 1],
                                                     sampling_rate=48000,
