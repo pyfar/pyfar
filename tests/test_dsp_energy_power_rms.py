@@ -31,3 +31,22 @@ def test_multichannel_signals():
     assert np.all(pf.dsp.energy(signal) == np.ones((2, 3, 3))*100)
     assert np.all(pf.dsp.power(signal) == np.ones((2, 3, 3)))
     assert np.all(pf.dsp.rms(signal) == np.sqrt(np.ones((2, 3, 3))))
+
+
+def test_invalid_mode_complex():
+    signal = pf.signals.sine(1, 5)
+    signal.complex = True
+    with pytest.raises(ValueError,
+                       match="'energy' is not implemented for complex time "
+                             "signals."):
+        pf.dsp.energy(signal)
+
+    with pytest.raises(ValueError,
+                       match="'power' is not implemented for complex time "
+                             "signals."):
+        pf.dsp.power(signal)
+
+    with pytest.raises(ValueError,
+                       match="'rms' is not implemented for complex time "
+                             "signals."):
+        pf.dsp.rms(signal)

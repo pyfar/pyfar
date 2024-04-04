@@ -1833,6 +1833,11 @@ def energy(signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
 
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex:
+            raise ValueError((
+                "'energy' is not implemented for complex time signals."))
+
     # return and compute data
     return np.sum(np.abs(signal.time)**2, axis=-1)
 
@@ -1872,6 +1877,11 @@ def power(signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
 
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex:
+            raise ValueError((
+                "'power' is not implemented for complex time signals."))
+
     # return and compute data
     return np.sum(np.abs(signal.time)**2, axis=-1)/signal.n_samples
 
@@ -1908,6 +1918,11 @@ def rms(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex:
+            raise ValueError((
+                "'rms' is not implemented for complex time signals."))
 
     # return and compute data
     return np.sqrt(power(signal))
@@ -1993,6 +2008,12 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                                pyfar.TimeData)):
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
+
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex and mode == 'power':
+            raise ValueError((
+                "'power' is not implemented for complex time signals."))
+
     if type(signal) is pyfar.TimeData and mode in (
             'log_magnitude_zerophase', 'magnitude_zerophase',
             'magnitude_phase', 'power',):
