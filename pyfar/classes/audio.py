@@ -706,9 +706,9 @@ class Signal(FrequencyData, TimeData):
 
         # check fft norm
         if fft_norm in self._VALID_FFT_NORMS:
-            if self._complex and fft_norm == "rms":
-                raise ValueError(("'rms' normalization is not valid for "
-                                  "complex time signals"))
+            if self._complex and fft_norm in ["rms", "power"]:
+                raise ValueError((f"'{fft_norm} normalization is not valid "
+                                  "for complex time signals"))
             else:
                 self._fft_norm = fft_norm
         else:
@@ -912,6 +912,11 @@ class Signal(FrequencyData, TimeData):
                                                      fft._is_odd(
                                                       self.n_samples))
                 self._complex = value
+        # check fft norm if complex flag was set
+        if self._complex:
+            if self.fft_norm in ["rms", "power"]:
+                raise ValueError((f"'{self.fft_norm}' normalization is not "
+                                  "valid for complex time signals"))
 
     @property
     def times(self):
@@ -957,8 +962,8 @@ class Signal(FrequencyData, TimeData):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
-        if self._complex and value == "rms":
-            raise ValueError(("'rms' normalization is not valid for "
+        if self._complex and value in ["rms", "power"]:
+            raise ValueError((f"'{value}' normalization is not valid for "
                               "complex time signals"))
         self._fft_norm = value
 
