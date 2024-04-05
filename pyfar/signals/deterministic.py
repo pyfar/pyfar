@@ -296,7 +296,7 @@ def linear_sweep_freq(
         >>> pf.plot.time_freq(sweep)
     """
 
-    signal, group_delay = _frequency_domain_sweep(
+    return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='linear',
         frequency_range=frequency_range,
@@ -306,8 +306,6 @@ def linear_sweep_freq(
         fade_in=fade_in,
         fade_out=fade_out,
         sampling_rate=sampling_rate)
-
-    return signal, group_delay
 
 
 def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
@@ -477,7 +475,7 @@ def exponential_sweep_freq(
         >>> pf.plot.time_freq(sweep)
     """
 
-    signal, group_delay = _frequency_domain_sweep(
+    return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='exponential',
         frequency_range=frequency_range,
@@ -487,8 +485,6 @@ def exponential_sweep_freq(
         fade_in=fade_in,
         fade_out=fade_out,
         sampling_rate=sampling_rate)
-
-    return signal, group_delay
 
 
 def magnitude_spectrum_weighted_sweep(
@@ -568,7 +564,7 @@ def magnitude_spectrum_weighted_sweep(
         >>> pf.plot.time_freq(sweep)
     """
 
-    signal, group_delay = _frequency_domain_sweep(
+    return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type=magnitude_spectrum,
         frequency_range=[0, sampling_rate / 2],
@@ -578,8 +574,6 @@ def magnitude_spectrum_weighted_sweep(
         fade_in=fade_in,
         fade_out=fade_out,
         sampling_rate=sampling_rate)
-
-    return signal, group_delay
 
 
 def linear_perfect_sweep(n_samples, sampling_rate=44100):
@@ -656,7 +650,7 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100):
         >>>     plt.gca().set_ylabel('auto correlation')
     """
 
-    signal, group_delay = _frequency_domain_sweep(
+    return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='perfect_linear',
         frequency_range=[0, sampling_rate / 2],
@@ -666,8 +660,6 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100):
         fade_in=None,
         fade_out=None,
         sampling_rate=sampling_rate)
-
-    return signal, group_delay
 
 
 def _frequency_domain_sweep(
