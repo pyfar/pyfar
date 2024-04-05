@@ -342,6 +342,10 @@ def test_setter_fft_norm():
                        match="'power' normalization is not valid for "
                              "complex time signals"):
         signal.fft_norm = "power"
+    with pytest.raises(ValueError,
+                       match="'psd' normalization is not valid for "
+                             "complex time signals"):
+        signal.fft_norm = "psd"
 
 
 def test_fft_selection():

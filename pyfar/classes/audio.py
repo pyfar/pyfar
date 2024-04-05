@@ -706,7 +706,7 @@ class Signal(FrequencyData, TimeData):
 
         # check fft norm
         if fft_norm in self._VALID_FFT_NORMS:
-            if self._complex and fft_norm in ["rms", "power"]:
+            if self._complex and fft_norm in ["rms", "power", "psd"]:
                 raise ValueError((f"'{fft_norm} normalization is not valid "
                                   "for complex time signals"))
             else:
@@ -914,7 +914,7 @@ class Signal(FrequencyData, TimeData):
                 self._complex = value
         # check fft norm if complex flag was set
         if self._complex:
-            if self.fft_norm in ["rms", "power"]:
+            if self.fft_norm in ["rms", "power", "psd"]:
                 raise ValueError((f"'{self.fft_norm}' normalization is not "
                                   "valid for complex time signals"))
 
@@ -962,7 +962,7 @@ class Signal(FrequencyData, TimeData):
             raise ValueError(("Invalid FFT normalization. Has to be "
                               f"{', '.join(self._VALID_FFT_NORMS)}, but found "
                               f"'{value}'"))
-        if self._complex and value in ["rms", "power"]:
+        if self._complex and value in ["rms", "power", "psd"]:
             raise ValueError((f"'{value}' normalization is not valid for "
                               "complex time signals"))
         self._fft_norm = value
