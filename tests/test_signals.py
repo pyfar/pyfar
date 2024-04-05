@@ -368,7 +368,7 @@ def test_linear_perfect_sweep(n_samples, sampling_rate):
     assert type(sweep) is pf.Signal
     assert sweep.n_samples == n_samples
     assert sweep.sampling_rate == sampling_rate
-    assert sweep.fft_norm == 'rms'
+    assert sweep.fft_norm == 'none'
     assert type(group_delay) is pf.FrequencyData
 
     # assert magnitude response
@@ -403,7 +403,7 @@ def test_linear_sweep_freq(n_samples, sampling_rate):
     assert type(sweep) is pf.Signal
     assert sweep.n_samples == n_samples
     assert sweep.sampling_rate == sampling_rate
-    assert sweep.fft_norm == 'rms'
+    assert sweep.fft_norm == 'none'
     assert type(group_delay) is pf.FrequencyData
 
     # assert constant magnitude response within frequency range
@@ -429,7 +429,7 @@ def test_exponential_sweep_freq(n_samples, sampling_rate):
     assert type(sweep) is pf.Signal
     assert sweep.n_samples == n_samples
     assert sweep.sampling_rate == sampling_rate
-    assert sweep.fft_norm == 'rms'
+    assert sweep.fft_norm == 'none'
     assert type(group_delay) is pf.FrequencyData
 
     # assert 1/sqrt(f) magnitude response within frequency range
@@ -460,7 +460,7 @@ def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
     assert type(sweep) is pf.Signal
     assert sweep.n_samples == n_samples
     assert sweep.sampling_rate == sampling_rate
-    assert sweep.fft_norm == 'rms'
+    assert sweep.fft_norm == 'none'
     assert type(group_delay) is pf.FrequencyData
 
     # assert magnitude response against reference within sweep frequency range
