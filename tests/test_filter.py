@@ -127,6 +127,44 @@ def test_bessel(impulse):
         x = pfilt.bessel(None, 2, 1000, 'lowpass', 'phase')
 
 
+def test_allpass(impulse):
+    # Uses third party code.
+    # We thus only test the functionality not the results
+
+    fc = 1000
+    orders = [1, 2]
+    kinds = ['First', 'Second']
+
+    for (order, kind) in zip(orders, kinds):
+        f_obj = pfilt.allpass(None, fc, order, sampling_rate=44100)
+        assert isinstance(f_obj, pclass.FilterIIR)
+        assert f_obj.comment == (
+            f"{kind} order allpass-filter with cutoff frequency {fc} Hz.")
+
+        # Filter
+        x = pfilt.allpass(impulse, fc, order)
+        y = f_obj.process(impulse)
+        assert isinstance(x, Signal)
+        npt.assert_allclose(x.time, y.time)
+
+    # test ValueError
+    with pytest.raises(ValueError):
+        # pass signal and sampling rate
+        x = pfilt.allpass(impulse, fc, 1, sampling_rate=44100)
+    with pytest.raises(ValueError):
+        # pass no signal and no sampling rate
+        x = pfilt.allpass(None, fc, 1)
+    with pytest.raises(ValueError):
+        # pass wrong order
+        x = pfilt.allpass(impulse, fc, 3)
+    with pytest.raises(ValueError):
+        # pass wrong combination of coefficients and order
+        x = pfilt.allpass(impulse, fc, 1, [1, 2])
+    with pytest.raises(ValueError):
+        # pass wrong combination of coefficients and order
+        x = pfilt.allpass(impulse, fc, 2, 1)
+
+
 def test_bell(impulse):
     # Uses third party code.
     # We thus only test the functionality not the results
