@@ -21,5 +21,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           filename: .github/COOKIECUTTER_ISSUE_TEMPLATE.md
+      - uses: lando/transfer-issue-action@v2
+        with:
+          token: ${{ steps.create-issue.outputs.number }}
+          router: pyfar:cookiecutter-pypackage
     - run: 'echo Created issue number ${{ steps.create-issue.outputs.number }}'
     - run: 'echo Created ${{ steps.create-issue.outputs.url }}'
