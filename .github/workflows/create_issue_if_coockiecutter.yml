@@ -18,3 +18,5 @@ jobs:
         with:
           title: test
           token: ${{ github.token }}
+          owner: pyfar
+          repo: cookiecutter-pypackage
