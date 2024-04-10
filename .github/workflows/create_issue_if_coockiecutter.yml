@@ -23,4 +23,4 @@ jobs:
           owner: pyfar
           repo: cookiecutter-pypackage
           body: |
-            apply changes from https://github.com/pyfar/pyfar/pull/${{ github.run_number }}
+            apply changes from https://github.com/${{ github.repository }}/pull/${{ github.event.number }}
