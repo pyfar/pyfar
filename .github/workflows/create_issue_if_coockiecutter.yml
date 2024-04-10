@@ -28,5 +28,4 @@ jobs:
           owner: pyfar
           repo: cookiecutter-pypackage
           body: |
-            apply changes from ${{ steps.PR.outputs.pr_url }}`
-      - run: echo "PR ${prNumber} ${prTitle} at ${prUrl} is ${prJSON}"
+            apply changes from ${{ steps.PR.outputs.pr_url }}
