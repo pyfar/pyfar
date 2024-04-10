@@ -1,0 +1,21 @@
+# on:
+#   push:
+#     branches:
+#       - master
+#       - develop
+name: Create issue if pr is merged with cookiecutter label
+permissions:
+  contents: read
+  issues: write
+jobs:
+  stuff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'pyfar/cookiecutter-pypackage'
+      - uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          filename: .github/cookiecutter_issue_template.md
