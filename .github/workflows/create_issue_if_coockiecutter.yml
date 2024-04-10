@@ -12,17 +12,15 @@ jobs:
     if: github.event.label.name == 'cookiecutter'
     runs-on: ubuntu-latest
     steps:
-      - uses: 8BitJonny/gh-get-current-pr@3.0.0
-        id: PR
       - uses: actions/checkout@v4
         with:
           repository: 'pyfar/cookiecutter-pypackage'
           ref: 'auto_issue'
       - uses: dacbd/create-issue-action@v2
         with:
-          title: ${{ steps.PR.outputs.pr_title }}
+          title: ${{ github.event.pull_request.title  }}
           token: ${{ secrets.cookiecutter_PAT }}
           owner: pyfar
           repo: cookiecutter-pypackage
           body: |
-            apply changes from ${{ steps.PR.outputs.pr_url }}
+            apply changes from ${{ github.base_ref }}
