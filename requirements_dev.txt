@@ -18,4 +18,3 @@ insipid-sphinx-theme
 autodocsumm
 soundfile>=0.11.0
 sofar>=1.1.1
-nbmake>=0.7.0
