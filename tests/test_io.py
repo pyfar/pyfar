@@ -727,14 +727,14 @@ def test_read_ita(file, data_type):
         file = os.path.join('tests', 'test_io_data', file)
         message = "The itaResult object can't contain a signal."
         with pytest.raises(Exception, match=message):
-            read_ita(file, data_type=data_type)
+            read_ita(file)
         pass
     elif (file == 'freq_itaResult_mult_ww.ita'):
         file = os.path.join('tests', 'test_io_data', file)
         message = "channelCoordinates.weights must have the same size as\
                    channelCoordinates.csize."
         with pytest.raises(Exception, match=message):
-            read_ita(file, data_type=data_type)
+            read_ita(file)
     else:
         file = os.path.join('tests', 'test_io_data', file)
-        read_ita(file, data_type=data_type)
+        read_ita(file)
