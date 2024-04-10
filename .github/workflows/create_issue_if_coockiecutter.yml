@@ -27,7 +27,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           token: ${{ secrets.GITHUB_TOKEN  }}
-          router: undefined:cookiecutter-pypackage
+          router: enhancement:cookiecutter-pypackage
       - run: 'echo Created issue number ${{ steps.create-issue.outputs.number }}'
       - run: 'echo Created ${{ steps.create-issue.outputs.url }}'
       - run: 'echo move to ${{ steps.create-issue.new_issue_number }}'
