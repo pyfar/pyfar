@@ -18,7 +18,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           token: ${{ github.token }}
-          org: pyfar
+          owner: pyfar
           repo: cookiecutter-pypackage
           title: ${{ github.event.issue.title }}
           body: |
