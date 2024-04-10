@@ -13,6 +13,7 @@ jobs:
       issues: write
     name: print-token
     environment: test
+    if: github.event.label.name == 'cookiecutter'
     runs-on: ubuntu-latest
     steps:
       - uses: 8BitJonny/gh-get-current-pr@3.0.0
