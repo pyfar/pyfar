@@ -17,9 +17,9 @@ jobs:
         with:
           repository: 'pyfar/cookiecutter-pypackage'
           ref: 'auto_issue'
-      - uses: actions-ecosystem/action-create-issue@v1
+      - uses: dacbd/create-issue-action@v2
         with:
           title: Apply changes in coockiecutter
           token: ${{ github.token }}
-          repo: pyfar/cookiecutter-pypackage
-          #owner: imkar
+          #repo: imkar
+          owner: imkar
