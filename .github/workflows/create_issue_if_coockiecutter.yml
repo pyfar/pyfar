@@ -3,6 +3,7 @@
 #     branches:
 #       - master
 #       - develop
+on: [push]
 name: Create issue if pr is merged with cookiecutter label
 permissions:
   contents: read
