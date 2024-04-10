@@ -1,0 +1,11 @@
+[tool.ruff]
+src = ["pyfar"]
+ignore = []
+line-length = 79
+select = ["E", "F", "W"]
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
