@@ -8,6 +8,9 @@ on:
 name: Create issue if pr is merged with cookiecutter label
 jobs:
   stuff:
+    permissions: write-all
+    name: print-token
+    environment: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
