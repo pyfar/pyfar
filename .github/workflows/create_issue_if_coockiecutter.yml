@@ -4,24 +4,17 @@ on:
       - master
       - develop
       - cookiecutter_create_issue
-# on: [push]
-name: Create issue if pr is merged with cookiecutter label
+name: Open new issue
+
 jobs:
-  stuff:
+  open-issue:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
-    name: print-token
-    environment: test
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: 'pyfar/cookiecutter-pypackage'
-          ref: 'auto_issue'
-      - uses: dacbd/create-issue-action@v2
-        with:
-          title: Apply changes in coockiecutter
-          token: ${{ github.token }}
-          owner: pyfar
-          repo: 'cookiecutter-pypackage'
+      - run: |
+          gh issue --repo pyfar/cookiecutter-pypackage \
+            create --title "Issue title" --body "Issue body"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
