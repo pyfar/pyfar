@@ -17,6 +17,6 @@ jobs:
       - uses: dacbd/create-issue-action@v2
         with:
           ACTIONS_RUNNER_DEBUG: true
-          title: test
+          title: Apply changes in coockiecutter
           token: ${{ github.token }}
-          repo: pyfar/cookiecutter-pypackage
+         # repo: cookiecutter-pypackage
