@@ -1,0 +1,8 @@
+
+html[data-theme="light"] {
+    --pst-color-primary: #18609d; /* pyfar blue as primary color */
+}
+
+html[data-theme="dark"] {
+    --pst-color-primary: #18609d; /* pyfar blue as primary color */
+}
