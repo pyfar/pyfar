@@ -285,7 +285,7 @@ def biquad_bs2nd(fm, q, fs, q_warp_method="cos"):
     return B, A, b, a
 
 
-def biquad_ap1st(fc, fs, ai):
+def biquad_ap1st(fc, fs, ai=1.):
     """Calc coeff for allpass 1st order.
 
     input:
@@ -310,7 +310,7 @@ def biquad_ap1st(fc, fs, ai):
     return B, A, b, a
 
 
-def biquad_ap2nd(fc, fs, bi, ai):
+def biquad_ap2nd(fc, fs, bi=1., ai=np.sqrt(2)):
     """Calc coeff for allpass 2nd order.
 
     input:

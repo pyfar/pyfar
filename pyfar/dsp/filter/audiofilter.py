@@ -7,11 +7,18 @@ from . import _audiofilter as iir
 def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
     """
     Create and apply first or second order allpass filter.
-    Transfer function based on Tietze et al. [#]_:
 
-    .. math:: A(s_n) = \\frac{1-\\frac{a_i}{\\omega_c} s_n+\\frac{b_i}
-                {\\omega_c^2} s_n^2}{1+\\frac{a_i}{\\omega_c} s_n
-                +\\frac{b_i}{\\omega_c^2} s_n^2}
+    Allpass filters have an almost constant group delay below their cut-off
+    frequency and are often used in analogue loudspeaker design.
+    The filter transfer function is based on Tietze et al. [#]_:
+
+    .. math:: A(s) = \\frac{1-\\frac{a_i}{\\omega_c} s+\\frac{b_i}
+                {\\omega_c^2} s^2}{1+\\frac{a_i}{\\omega_c} s
+                +\\frac{b_i}{\\omega_c^2} s^2},
+
+
+    where :math:`\\omega_c = 2 \\pi f_c` with the cut-off frequency :math:`f_c`
+    and :math:`s=\\sigma + \\mathrm{i} \\omega`.
 
     By definition the ``bi`` coefficient of a first order allpass is ``0``.
 
@@ -29,8 +36,11 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
     coefficients:  number, list, optional
         Filter characteristic coefficients ``bi`` and ``ai``.
 
-        - For 1st order allpass provide ai-coefficient as single value.
-        - For 2nd order allpass provide coefficients as list ``[bi, ai]``.
+        -   For 1st order allpass provide ai-coefficient as single value.\n
+            The default is ``ai = 0.6436``.
+
+        -   For 2nd order allpass provide coefficients as list ``[bi, ai]``.\n
+            The default is ``bi = 1.6278``, ``ai = 0.8832``.
 
         Defaults are chosen according to Tietze et al. (Fig. 12.66)
         for maximum flat group delay.
@@ -71,9 +81,10 @@ blob/master/filter_design/audiofilter.py
         for (order, label) in zip(orders, labels):
             # create and apply allpass filter
             sig_filt = pf.dsp.filter.allpass(impulse, 1000, order)
-            pf.plot.group_delay(sig_filt, label=label, ax=ax1)
+            pf.plot.group_delay(sig_filt, unit='samples', label=label, ax=ax1)
             pf.plot.phase(sig_filt, label=label, ax=ax2, unwrap = True)
 
+        ax1.set_title('1. and 2. order allpass filter with fc = 1000 Hz')
         ax2.legend()
     """
 
@@ -85,47 +96,32 @@ blob/master/filter_design/audiofilter.py
     # check if coefficients match filter order
     if coefficients is not None and (
             (order == 1 and np.isscalar(coefficients) is False)
-            or (order == 2 and (
-                type(coefficients) is not list or len(coefficients) != 2))):
+            or (order == 2 and (isinstance(coefficients, (list, np.ndarray))
+                                is False or len(coefficients) != 2))):
         print(type(coefficients), order)
-        raise ValueError('Coefficients must match order')
+        raise ValueError('Coefficients must match the allpass order')
 
     # sampling frequency in Hz
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
-    if coefficients is None:
-        # Set default coefficients, see Tietze/ Schenk fig. 12.66
-        coeffs_ap1 = 0.6436
-        coeffs_ap2 = [0.8832, 1.6278]
-    elif np.isscalar(coefficients) is True:
-        # custom coefficients for first order allpass
-        coeffs_ap1 = coefficients
-    elif len(coefficients) == 2:
-        # custom coefficients for second order allpass
-        coeffs_ap2 = coefficients
-
     if order == 1:
+        if coefficients is None:
+            coefficients = 0.6436
         # get filter coefficients for first order allpass
-        _, _, b, a = iir.biquad_ap1st(frequency, fs, ai=coeffs_ap1)
-        filter_coeffs = np.stack((b, a), axis=0)
-
-        # filter object
-        filt = pf.FilterIIR(filter_coeffs, fs)
-        filt.comment = ("First order allpass-filter with cutoff frequency"
-                        f" {frequency} Hz.")
-
+        _, _, b, a = iir.biquad_ap1st(frequency, fs, ai=coefficients)
     elif order == 2:
+        if coefficients is None:
+            coefficients = [0.8832, 1.6278]
         # get filter coefficients for second order allpass
-        _, _, b, a = iir.biquad_ap2nd(frequency, fs, bi=coeffs_ap2[0],
-                                      ai=coeffs_ap2[1])
-        filter_coeffs = np.stack((b, a), axis=0)
-
-        # filter object
-        filt = pf.FilterIIR(filter_coeffs, fs)
-        filt.comment = ("Second order allpass-filter with cutoff frequency"
-                        f" {frequency} Hz.")
+        _, _, b, a = iir.biquad_ap2nd(frequency, fs, bi=coefficients[0],
+                                      ai=coefficients[1])
     else:
         raise ValueError('Order must be 1 or 2')
+
+    filter_coeffs = np.stack((b, a), axis=0)
+    filt = pf.FilterIIR(filter_coeffs, fs)
+    filt.comment = (f"Allpass of order {order} with cutoff frequency "
+                    f"{frequency} Hz.")
 
     if signal is None:
         # return filter-object
