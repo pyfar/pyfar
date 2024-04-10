@@ -23,5 +23,5 @@ jobs:
         with:
           title: Apply changes in coockiecutter
           token: ${{ secrets.cookiecutter_PAT }}
-          owner: 'pyfar'
-          repo: 'cookiecutter-pypackage'
+          owner: pyfar
+          repo: cookiecutter-pypackage
