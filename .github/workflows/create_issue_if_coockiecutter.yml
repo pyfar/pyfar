@@ -19,5 +19,4 @@ jobs:
           ACTIONS_RUNNER_DEBUG: true
           title: test
           token: ${{ github.token }}
-          owner: pyfar
           repo: cookiecutter-pypackage
