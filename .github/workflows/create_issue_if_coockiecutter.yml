@@ -6,9 +6,6 @@ on:
       - cookiecutter_create_issue
 # on: [push]
 name: Create issue if pr is merged with cookiecutter label
-permissions:
-  contents: read
-  issues: write
 jobs:
   stuff:
     runs-on: ubuntu-latest
