@@ -25,11 +25,6 @@ jobs:
           repo: cookiecutter-pypackage
           body: |
             ### Context
-            [Failed Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            [Codebase](https://github.com/${{ github.repository }}/tree/${{ github.sha }})
-            Workflow name - `${{ github.workflow }}`
-            Job -           `${{ github.job }}`
-            status -        `${{ job.status }}`
       - run: |
           echo "${{ steps.new-issue.outputs.json }}" | jq
           echo "${{ steps.new-issue.outputs.json }}" | jq .state
