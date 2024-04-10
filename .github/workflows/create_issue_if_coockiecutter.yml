@@ -1,0 +1,26 @@
+on:
+  pull_request:
+    types:
+      - closed
+name: Create issue if pr is merged with cookiecutter label
+jobs:
+  stuff:
+    permissions:
+      contents: read
+      issues: write
+    name: create issue
+    environment: test
+    if: github.event.pull_request.merged == true && github.event.label.name == 'cookiecutter'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'pyfar/cookiecutter-pypackage'
+      - uses: dacbd/create-issue-action@v2
+        with:
+          title: ${{ github.event.pull_request.title  }}
+          token: ${{ secrets.cookiecutter_PAT }}
+          owner: pyfar
+          repo: cookiecutter-pypackage
+          body: |
+            apply changes from https://github.com/${{ github.repository }}/pull/${{ github.event.number }}
