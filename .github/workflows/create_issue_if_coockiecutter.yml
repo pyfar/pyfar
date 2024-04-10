@@ -20,6 +20,6 @@ jobs:
       - uses: actions-ecosystem/action-create-issue@v1
         with:
           title: Apply changes in coockiecutter
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.github_token }}
           repo: pyfar/cookiecutter-pypackage
           #owner: imkar
