@@ -20,9 +20,9 @@ jobs:
       - uses: dacbd/create-issue-action@main
         with:
           token: ${{ github.token }}
+          title: ${{ github.event.issue.title }}
           owner: pyfar
           repo: cookiecutter-pypackage
-          title: ${{ github.event.issue.title }}
           body: |
             ### Context
             [Failed Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
