@@ -1205,7 +1205,9 @@ def find_impulse_response_delay(impulse_response, N=1):
     2.  By default a first order polynomial is used, as the slope of the
         analytic signal should in theory be linear.
 
-    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_start`.
+    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_start`. For
+    complex-valued time signals, the delay is calculated separately for the 
+    real and complex part, and its minimum value returned.
 
     Parameters
     ----------
@@ -1253,54 +1255,65 @@ def find_impulse_response_delay(impulse_response, N=1):
     n = int(np.ceil((N+2)/2))
 
     start_samples = np.zeros(impulse_response.cshape)
+    modes = ['real', 'complex'] if impulse_response.complex else ['real']
+    start_sample = np.zeros((len(modes), 1), dtype=float)
+
     for ch in np.ndindex(impulse_response.cshape):
         # Calculate the correlation between the impulse response and its
         # minimum phase equivalent. This requires a minimum phase equivalent
         # in the strict sense, instead of the appriximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
+        for idx, mode in zip(range(0, len(modes)), modes):
+            ir = impulse_response.time[ch]
+            ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
-        # minimum phase warns if the input signal is not symmetric, which is
-        # not critical for this application
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore", message="h does not appear to by symmetric",
-                category=RuntimeWarning)
-            ir_minphase = sgn.minimum_phase(
-                impulse_response.time[ch], n_fft=4*n_samples)
+            if np.max(ir) > 1e-16:
+                # minimum phase warns if the input signal is not symmetric, 
+                # which is not critical for this application
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore", message="h does not appear to by symmetric",
+                        category=RuntimeWarning)
+                    ir_minphase = sgn.minimum_phase(
+                        ir, n_fft=4*n_samples)
 
-        correlation = sgn.correlate(
-            impulse_response.time[ch],
-            np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
-            mode='full')
-        lags = np.arange(-n_samples + 1, n_samples)
+                correlation = sgn.correlate(
+                    ir,
+                    np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
+                    mode='full')
+                lags = np.arange(-n_samples + 1, n_samples)
 
-        # calculate the analytic signal of the correlation function
-        correlation_analytic = sgn.hilbert(correlation)
+                # calculate the analytic signal of the correlation function
+                correlation_analytic = sgn.hilbert(correlation)
 
-        # find the maximum of the analytic part of the correlation function
-        # and define the search range around the maximum
-        argmax = np.argmax(np.abs(correlation_analytic))
-        search_region_range = np.arange(argmax-n, argmax+n)
-        search_region = np.imag(correlation_analytic[search_region_range])
+                # find the maximum of the analytic part of the correlation 
+                # function and define the search range around the maximum
+                argmax = np.argmax(np.abs(correlation_analytic))
+                search_region_range = np.arange(argmax-n, argmax+n)
+                search_region = np.imag(
+                    correlation_analytic[search_region_range])
 
-        # mask values with a negative gradient
-        mask = np.gradient(search_region, search_region_range) > 0
+                # mask values with a negative gradient
+                mask = np.gradient(search_region, search_region_range) > 0
 
-        # fit a polygon and estimate its roots
-        search_region_poly = np.polyfit(
-            search_region_range[mask]-argmax, search_region[mask], N)
-        roots = np.roots(search_region_poly)
+                # fit a polygon and estimate its roots
+                search_region_poly = np.polyfit(
+                    search_region_range[mask]-argmax, search_region[mask], N)
+                roots = np.roots(search_region_poly)
 
-        # Use only real-valued roots
-        if np.all(np.isreal(roots)):
-            root = roots[np.abs(roots) == np.min(np.abs(roots))]
-            start_sample = np.squeeze(lags[argmax] + root)
-        else:
-            start_sample = np.nan
-            warnings.warn(f"Starting sample not found for channel {ch}")
+                # Use only real-valued roots
+                if np.all(np.isreal(roots)):
+                    root = roots[np.abs(roots) == np.min(np.abs(roots))]
+                    start_sample[idx] = np.squeeze(lags[argmax] + root)
+                else:
+                    start_sample[idx] = np.nan
+                    warnings.warn('Starting sample not found for channel '
+                                  f'{ch}')
+            else:
+                start_sample[idx] = np.nan
 
-        start_samples[ch] = start_sample
+        start_samples[ch] = np.nanmin(start_sample)
 
     return start_samples
 
