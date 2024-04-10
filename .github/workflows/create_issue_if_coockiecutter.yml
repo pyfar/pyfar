@@ -17,12 +17,3 @@ jobs:
       - uses: dacbd/create-issue-action@v2
         with:
           title: test
-          token: ${{ github.token }}
-          owner: pyfar
-          repo: cookiecutter-pypackage
-          body: |
-            ### Context
-      - run: |
-          echo "${{ steps.new-issue.outputs.json }}" | jq
-          echo "${{ steps.new-issue.outputs.json }}" | jq .state
-          echo "${{ steps.new-issue.outputs.json }}" | jq .labels[].name
