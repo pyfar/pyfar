@@ -20,4 +20,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          filename: .github/COOKIECUTTER_ISSUE_TEMPLATE.md.md
+          filename: .github/COOKIECUTTER_ISSUE_TEMPLATE.md
