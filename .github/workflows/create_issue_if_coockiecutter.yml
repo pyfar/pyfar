@@ -19,8 +19,8 @@ jobs:
           ref: 'auto_issue'
       - uses: dacbd/create-issue-action@main
         with:
-          token: ${{ github.token }}
           title: ${{ github.event.issue.title }}
+          token: ${{ github.token }}
           owner: pyfar
           repo: cookiecutter-pypackage
           body: |
