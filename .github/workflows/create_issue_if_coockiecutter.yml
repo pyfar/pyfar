@@ -1,10 +1,6 @@
 on:
-  push:
-    branches:
-      - master
-      - develop
-      - cookiecutter_create_issue
-# on: [push]
+  pull_request:
+    types: [labeled]
 name: Create issue if pr is merged with cookiecutter label
 jobs:
   stuff:
