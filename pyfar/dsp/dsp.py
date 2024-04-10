@@ -1206,7 +1206,7 @@ def find_impulse_response_delay(impulse_response, N=1):
         analytic signal should in theory be linear.
 
     Alternatively see :py:func:`pyfar.dsp.find_impulse_response_start`. For
-    complex-valued time signals, the delay is calculated separately for the 
+    complex-valued time signals, the delay is calculated separately for the
     real and complex part, and its minimum value returned.
 
     Parameters
@@ -1269,7 +1269,7 @@ def find_impulse_response_delay(impulse_response, N=1):
             ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
             if np.max(ir) > 1e-16:
-                # minimum phase warns if the input signal is not symmetric, 
+                # minimum phase warns if the input signal is not symmetric,
                 # which is not critical for this application
                 with warnings.catch_warnings():
                     warnings.filterwarnings(
@@ -1287,7 +1287,7 @@ def find_impulse_response_delay(impulse_response, N=1):
                 # calculate the analytic signal of the correlation function
                 correlation_analytic = sgn.hilbert(correlation)
 
-                # find the maximum of the analytic part of the correlation 
+                # find the maximum of the analytic part of the correlation
                 # function and define the search range around the maximum
                 argmax = np.argmax(np.abs(correlation_analytic))
                 search_region_range = np.arange(argmax-n, argmax+n)
