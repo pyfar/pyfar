@@ -20,7 +20,7 @@ functions for digital audio signal processing.
 Getting Started
 ===============
 
-Check out the `pyfar.org`_ for a tour trought the pyfar
+Check out `pyfar.org`_ for a tour through the pyfar
 universe, including complete documentation of this package and
 the other packages.
 
