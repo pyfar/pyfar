@@ -4,6 +4,7 @@ on:
       - master
       - develop
       - cookiecutter_create_issue
+# on: [push]
 name: Create issue if pr is merged with cookiecutter label
 permissions:
   contents: read
@@ -25,5 +26,5 @@ jobs:
         with:
           token: ${{ steps.create-issue.outputs.number }}
           router: pyfar:cookiecutter-pypackage
-    - run: 'echo Created issue number ${{ steps.create-issue.outputs.number }}'
-    - run: 'echo Created ${{ steps.create-issue.outputs.url }}'
+      - run: 'echo Created issue number ${{ steps.create-issue.outputs.number }}'
+      - run: 'echo Created ${{ steps.create-issue.outputs.url }}'
