@@ -13,22 +13,22 @@ jobs:
   stuff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: 'pyfar/cookiecutter-pypackage'
-          ref: 'auto_issue'
-      - uses: JasonEtco/create-an-issue@v2
+      - uses: dacbd/create-issue-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          filename: .github/COOKIECUTTER_ISSUE_TEMPLATE.md
-      - uses: lando/transfer-issue-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          token: ${{ secrets.GITHUB_TOKEN  }}
-          router: enhancement:cookiecutter-pypackage
-      - run: 'echo Created issue number ${{ steps.create-issue.outputs.number }}'
-      - run: 'echo Created ${{ steps.create-issue.outputs.url }}'
-      - run: 'echo move to ${{ steps.create-issue.new_issue_number }}'
-
+          token: ${{ github.token }}
+          org: pyfar
+          repo: cookiecutter-pypackage
+          title: ${{ github.event.issue.title }}
+          body: |
+            ### Context
+            [Failed Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            [Codebase](https://github.com/${{ github.repository }}/tree/${{ github.sha }})
+            Workflow name - `${{ github.workflow }}`
+            Job -           `${{ github.job }}`
+            status -        `${{ job.status }}`
+      - run: |
+          echo "${{ steps.new-issue.outputs.json }}" | jq
+          echo "${{ steps.new-issue.outputs.json }}" | jq .state
+          echo "${{ steps.new-issue.outputs.json }}" | jq .labels[].name
