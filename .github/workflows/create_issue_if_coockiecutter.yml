@@ -22,6 +22,6 @@ jobs:
       - uses: dacbd/create-issue-action@v2
         with:
           title: Apply changes in coockiecutter
-          token: ${{ github.token }}
+          token: ${{ secrets.cookiecutter_PAT }}
           owner: 'pyfar'
           repo: 'cookiecutter-pypackage'
