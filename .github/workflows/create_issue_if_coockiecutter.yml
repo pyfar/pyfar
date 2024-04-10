@@ -16,7 +16,6 @@ jobs:
           ref: 'auto_issue'
       - uses: dacbd/create-issue-action@v2
         with:
-          ACTIONS_RUNNER_DEBUG: true
           title: Apply changes in coockiecutter
           token: ${{ github.token }}
           repo: imkar
