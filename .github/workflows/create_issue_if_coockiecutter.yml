@@ -19,4 +19,4 @@ jobs:
           ACTIONS_RUNNER_DEBUG: true
           title: Apply changes in coockiecutter
           token: ${{ github.token }}
-          repo: pyfar
+          repo: imkar
