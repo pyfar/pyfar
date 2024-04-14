@@ -40,19 +40,21 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
             The default is ``ai = 0.6436``.
 
         -   For 2nd order allpass provide coefficients as list ``[bi, ai]``.\n
-            The default is ``bi = 1.6278``, ``ai = 0.8832``.
+            The default is ``bi = 0.8832``, ``ai = 1.6278``.
 
         Defaults are chosen according to Tietze et al. (Fig. 12.66)
         for maximum flat group delay.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
+
     Returns
     -------
     signal : Signal
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterIIR
         Filter object. Only returned if ``signal = None``.
+
     References
     ----------
     .. [#] Tietze, U., Schenk, C. & Gamm, E. (2019). Halbleiter-
@@ -68,7 +70,6 @@ blob/master/filter_design/audiofilter.py
 
         import pyfar as pf
         import matplotlib.pyplot as plt
-        import numpy as np
 
         # impulse to be filtered
         impulse = pf.signals.impulse(256)
