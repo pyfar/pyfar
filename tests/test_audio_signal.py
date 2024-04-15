@@ -332,16 +332,20 @@ def test_setter_fft_norm():
         signal.fft_norm = 'bullshit'
 
     # setting fft_norm for complex time signals
-    signal.complex = True
+    signal = pf.Signal([1, 2, 3], 44100,
+                       fft_norm='none', is_complex=True)
     with pytest.raises(ValueError,
-                       match="'power' normalization is not valid for "
-                             "complex time signals"):
-        signal.fft_norm = "power"
-
-    with pytest.raises(ValueError,
-                       match="'rms' normalization is not valid for "
-                             "complex time signals"):
+                       match="'rms', 'power', and 'psd' FFT normalization is "
+                             "not valid for complex time signals"):
         signal.fft_norm = "rms"
+    with pytest.raises(ValueError,
+                       match="'rms', 'power', and 'psd' FFT normalization is "
+                             "not valid for complex time signals"):
+        signal.fft_norm = "power"
+    with pytest.raises(ValueError,
+                       match="'rms', 'power', and 'psd' FFT normalization is "
+                             "not valid for complex time signals"):
+        signal.fft_norm = "psd"
 
 
 def test_fft_selection():
