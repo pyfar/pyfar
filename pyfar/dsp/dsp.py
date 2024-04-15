@@ -718,9 +718,9 @@ def _time_window_symmetric_interval_four(interval, window):
 
 
 def regularized_spectrum_inversion(
-        signal, freq_range,
+        signal, frequency_range=None,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
-        normalized=True):
+        normalized=True, *, freq_range=None):
     r"""Invert the spectrum of a signal applying frequency dependent
     regularization.
 
@@ -747,7 +747,10 @@ def regularized_spectrum_inversion(
     ----------
     signal : Signal
         The signals which spectra are to be inverted.
-    freq_range : tuple, array_like, double
+    frequency_range : tuple, array_like, double
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
+
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied.
     regu_outside : float, optional
@@ -780,6 +783,12 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
+    # Deprecation warning for freq_range parameter
+    warnings.warn((
+        'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
+        ' frequency_range'),
+            PyfarDeprecationWarning)
+
     if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 
@@ -791,9 +800,15 @@ def regularized_spectrum_inversion(
     else:
         data = signal.freq_raw
 
-    freq_range = np.asarray(freq_range)
+    # Check frequency range parameter
+    if frequency_range is None and freq_range is None:
+        raise ValueError("Frequency range must be provided")
+    if freq_range is not None:
+        frequency_range = freq_range
 
-    if freq_range.size < 2:
+    frequency_range = np.asarray(frequency_range)
+
+    if frequency_range.size < 2:
         raise ValueError(
             "The frequency range needs to specify lower and upper limits.")
 
@@ -802,14 +817,15 @@ def regularized_spectrum_inversion(
         regu_outside = np.ones(signal.n_bins, dtype=np.double) * regu_outside
 
         idx_xfade_lower = signal.find_nearest_frequency(
-            [freq_range[0]/np.sqrt(2), freq_range[0]])
+            [frequency_range[0]/np.sqrt(2), frequency_range[0]])
 
         regu_final = _cross_fade(regu_outside, regu_inside, idx_xfade_lower)
 
-        if freq_range[1] < signal.sampling_rate/2:
+        if frequency_range[1] < signal.sampling_rate/2:
             idx_xfade_upper = signal.find_nearest_frequency([
-                freq_range[1],
-                np.min([freq_range[1]*np.sqrt(2), signal.sampling_rate/2])])
+                frequency_range[1],
+                np.min([frequency_range[1]*np.sqrt(2),
+                        signal.sampling_rate/2])])
 
             regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
 
@@ -1418,8 +1434,8 @@ def find_impulse_response_start(
     return np.squeeze(start_sample)
 
 
-def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
-               **kwargs):
+def deconvolve(system_output, system_input, fft_length=None,
+               frequency_range=None, *, freq_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
     The transfer function :math:`H(\omega)` is calculated by spectral
@@ -1453,7 +1469,10 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
         The system input signal (e.g., used to perform a measurement).
         The system input signal is zero padded, if it is shorter than the
         system output signal.
-    freq_range : tuple, array_like, double
+    frequency_range : tuple, array_like, double
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
+
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied. The default ``None``
         bypasses the regularization, which might cause numerical
@@ -1482,6 +1501,11 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
     """
+    # Deprecation warning for freq_range parameter
+    warnings.warn((
+        'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
+        ' frequency_range'),
+            PyfarDeprecationWarning)
 
     # Check if system_output and system_input are both type Signal
     if not isinstance(system_output, pyfar.Signal):
@@ -1493,8 +1517,11 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
 
-    if freq_range is None:
-        freq_range = (0, system_input.sampling_rate/2)
+    # Check frequency range parameter
+    if frequency_range is None and freq_range is None:
+        frequency_range = (0, system_input.sampling_rate/2)
+    if freq_range is not None:
+        frequency_range = freq_range
 
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value
@@ -1518,7 +1545,7 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
     inverse_input = regularized_spectrum_inversion(
-            system_input, freq_range, **kwargs)
+            system_input, frequency_range, **kwargs)
     system_response = system_output * inverse_input
 
     # Check if the signals have any comments,

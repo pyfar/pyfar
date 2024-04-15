@@ -17,6 +17,7 @@ import re
 import pytest
 
 import pyfar as pf
+import pyfar.signals as pfs
 from pyfar.classes.warnings import PyfarDeprecationWarning
 
 # This defines the plot size and the backend
@@ -196,3 +197,43 @@ def test_deprecations_find_nearest_sph():
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             coords.find_nearest_sph(1, 1, 1, 1)
+
+
+def test_deprecations_freq_range_parameter():
+    sweep = pfs.exponential_sweep_time(256, (100, 10000))
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor frequency_range"):
+        pf.dsp.deconvolve(sweep, sweep, 256, freq_range=(20, 20e3))
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor frequency_range"):
+        pf.dsp.regularized_spectrum_inversion(sweep, freq_range=(20, 20e3))
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor frequency_range"):
+        gt = pf.dsp.filter.GammatoneBands((20, 20e3))
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor frequency_range"):
+        gt.freq_range
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor frequency_range"):
+        pf.dsp.filter.erb_frequencies((10, 20e3))
+
+    with pytest.warns(
+            PyfarDeprecationWarning,
+            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor frequency_range"):
+        pf.dsp.filter.fractional_octave_bands(sweep, 8)

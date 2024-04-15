@@ -218,6 +218,10 @@ def test_regularized_spectrum_inversion_assertions(impulse):
             TypeError, match="The normalized parameter"):
         dsp.regularized_spectrum_inversion(impulse, [200, 10e3], normalized=1)
 
+    with pytest.raises(
+            ValueError, match="Frequency range must be provided"):
+        dsp.regularized_spectrum_inversion(impulse)
+
 
 def test_regularized_spectrum_inversion_normalized(impulse):
     """Test normalized parameter of regularized_spectrum_inversion"""
