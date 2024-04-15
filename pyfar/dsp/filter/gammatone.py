@@ -558,6 +558,8 @@ def erb_frequencies(frequency_range=None, resolution=1,
     frequency_range : array_like
         ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
         of ``'frequency_range'``.
+        The upper and lower frequency limits in Hz between which the frequency
+        vector is computed.
     resolution : number, optional
         The frequency resolution in ERB units. The default of ``1`` returns
         frequencies that are spaced by 1 ERB unit, a value of ``0.5`` would
@@ -593,6 +595,12 @@ def erb_frequencies(frequency_range=None, resolution=1,
         ' of frequency_range'),
             PyfarDeprecationWarning)
 
+    # Check frequency range parameter
+    if frequency_range is None and freq_range is None:
+        raise ValueError("Frequency range must be provided")
+    if freq_range is not None:
+        frequency_range = freq_range
+
     # check input
     if not isinstance(frequency_range, (list, tuple, np.ndarray)) \
             or len(frequency_range) != 2:
@@ -602,10 +610,6 @@ def erb_frequencies(frequency_range=None, resolution=1,
                           "than the second value"))
     if resolution <= 0:
         raise ValueError("Resolution must be larger than zero")
-
-    # Check frequency range parameter
-    if freq_range is not None:
-        frequency_range = freq_range
 
     # convert the frequency range and reference to ERB scale
     # (Hohmann 2002, Eq. 16)

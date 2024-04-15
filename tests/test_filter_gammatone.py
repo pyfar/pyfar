@@ -195,3 +195,8 @@ def test_erb_frequencies_assertions():
     # resolution must be > 0
     with pytest.raises(ValueError, match="Resolution must be larger"):
         filter.erb_frequencies([0, 1], 0)
+    # freq range mus be provided
+    with pytest.raises(
+            ValueError, match="Frequency range must be provided"):
+        filter.erb_frequencies()
+
