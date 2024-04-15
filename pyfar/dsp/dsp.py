@@ -2261,6 +2261,10 @@ def normalize(signal, reference_method='max', domain='time',
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
+    if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
+        if signal.complex and reference_method in ['energy', 'power', 'rms']:
+            raise ValueError("'energy', 'power', and 'rms' reference method "
+                             "is not implemented for complex time signals.")
     if isinstance(limits, (int, float)) or len(limits) != 2:
         raise ValueError("limits must be an array like of length 2.")
     if tuple(limits) != (None, None) and \

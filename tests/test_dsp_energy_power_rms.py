@@ -35,6 +35,7 @@ def test_multichannel_signals():
 
 def test_invalid_mode_complex():
     signal = pf.signals.sine(1, 5)
+    signal.fft_norm = "none"
     signal.complex = True
     with pytest.raises(ValueError,
                        match="'energy' is not implemented for complex time "
