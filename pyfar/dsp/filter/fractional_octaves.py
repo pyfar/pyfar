@@ -233,7 +233,7 @@ def fractional_octave_bands(
     # Deprecation warning for freq_range parameter
     warnings.warn((
         'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' frequency_range'),
+        ' of frequency_range'),
             PyfarDeprecationWarning)
 
     # Check frequency range parameter

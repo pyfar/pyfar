@@ -786,7 +786,7 @@ def regularized_spectrum_inversion(
     # Deprecation warning for freq_range parameter
     warnings.warn((
         'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' frequency_range'),
+        ' of frequency_range'),
             PyfarDeprecationWarning)
 
     if not isinstance(signal, pyfar.Signal):
@@ -1504,7 +1504,7 @@ def deconvolve(system_output, system_input, fft_length=None,
     # Deprecation warning for freq_range parameter
     warnings.warn((
         'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' frequency_range'),
+        ' of frequency_range'),
             PyfarDeprecationWarning)
 
     # Check if system_output and system_input are both type Signal

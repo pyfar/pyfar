@@ -127,7 +127,7 @@ class GammatoneBands():
         # Deprecation warning for freq_range parameter
         warnings.warn((
             'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' frequency_range'),
+            ' of frequency_range'),
                 PyfarDeprecationWarning)
 
         # Check frequency range parameter
@@ -186,7 +186,7 @@ class GammatoneBands():
         # Deprecation warning for freq_range parameter
         warnings.warn((
             'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' frequency_range'),
+            ' of frequency_range'),
                 PyfarDeprecationWarning)
         return self._frequency_range
 
@@ -590,7 +590,7 @@ def erb_frequencies(frequency_range=None, resolution=1,
     # Deprecation warning for freq_range parameter
     warnings.warn((
         'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' frequency_range'),
+        ' of frequency_range'),
             PyfarDeprecationWarning)
 
     # check input
