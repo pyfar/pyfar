@@ -75,12 +75,24 @@ def test_output_length():
     assert res.n_samples == 7
 
 
-def test_output_sweep():
+@pytest.mark.parametrize("is_complex_sig1", [True, False])
+@pytest.mark.parametrize("is_complex_sig2", [True, False])
+def test_output_sweep(is_complex_sig1, is_complex_sig2):
     """test of flat output frequency response resulting from deconvolving
-    a sweep with the same sweep"""
-    sweep = pfs.exponential_sweep_time(44100, (100, 10000))
-    res = pf.dsp.dsp.deconvolve(sweep,
-                                sweep,
+       a sweep with the same sweep"""
+    sweep_1 = pfs.exponential_sweep_time(44100, (100, 10000))
+    sweep_2 = pfs.exponential_sweep_time(44100, (100, 10000))
+
+    if is_complex_sig1:
+        sweep_1.fft_norm = 'none'
+        sweep_1.complex = is_complex_sig1
+
+    if is_complex_sig2:
+        sweep_2.fft_norm = 'none'
+        sweep_2.complex = is_complex_sig2
+
+    res = pf.dsp.dsp.deconvolve(sweep_1,
+                                sweep_2,
                                 freq_range=(1, 44100)).freq[0, 1000:-12500]
     npt.assert_allclose(np.ones_like(res), res, atol=1e-9)
 
