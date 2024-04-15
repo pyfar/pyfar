@@ -1264,7 +1264,7 @@ def find_impulse_response_delay(impulse_response, N=1):
         # in the strict sense, instead of the appriximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
-        for idx, mode in zip(range(0, len(modes)), modes):
+        for idx, mode in enumerate(modes):
             ir = impulse_response.time[ch]
             ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
