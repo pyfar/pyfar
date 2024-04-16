@@ -29,9 +29,6 @@ class GammatoneBands():
     Parameters
     ----------
     frequency_range : array_like
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-
         The upper and lower frequency in Hz between which the filter bank is
         constructed. Values must be larger than 0 and not exceed half the
         sampling rate.
@@ -51,7 +48,12 @@ class GammatoneBands():
     sampling_rate : number
         The sampling rate of the filter bank in Hz. The default is ``44100``
         Hz.
-
+    freq_range: array_like
+        The upper and lower frequency in Hz between which the filter bank is
+        constructed. Values must be larger than 0 and not exceed half the
+        sampling rate.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
     Examples
     --------
@@ -124,15 +126,16 @@ class GammatoneBands():
                  reference_frequency=1000, delay=0.004, sampling_rate=44100,
                  *, freq_range=None):
 
-        # Deprecation warning for freq_range parameter
-        warnings.warn((
-            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' of frequency_range'),
-                PyfarDeprecationWarning)
-
         # Check frequency range parameter
+        if frequency_range is None and freq_range is None:
+            raise ValueError("Frequency range must be provided")
         if freq_range is not None:
             frequency_range = freq_range
+            # Deprecation warning for freq_range parameter
+            warnings.warn((
+                'freq_range parameter will be deprecated in pyfar 0.8.0 in '
+                'favor of frequency_range'),
+                    PyfarDeprecationWarning)
 
         # check input (remaining checks done in erb_frequencies)
         frequency_range = np.asarray(frequency_range)
@@ -556,8 +559,6 @@ def erb_frequencies(frequency_range=None, resolution=1,
     Parameters
     ----------
     frequency_range : array_like
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
         The upper and lower frequency limits in Hz between which the frequency
         vector is computed.
     resolution : number, optional
@@ -567,6 +568,11 @@ def erb_frequencies(frequency_range=None, resolution=1,
     reference_frequency : number, optional
         The reference frequency in Hz relative to which the frequency vector
         is constructed. The default is ``1000``.
+    freq_range: array_like
+        The upper and lower frequency limits in Hz between which the frequency
+        vector is computed.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
     Returns
     -------
@@ -588,18 +594,16 @@ def erb_frequencies(frequency_range=None, resolution=1,
 
 
     """
-
-    # Deprecation warning for freq_range parameter
-    warnings.warn((
-        'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' of frequency_range'),
-            PyfarDeprecationWarning)
-
     # Check frequency range parameter
     if frequency_range is None and freq_range is None:
         raise ValueError("Frequency range must be provided")
     if freq_range is not None:
         frequency_range = freq_range
+        # Deprecation warning for freq_range parameter
+        warnings.warn((
+            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
+            ' of frequency_range'),
+                PyfarDeprecationWarning)
 
     # check input
     if not isinstance(frequency_range, (list, tuple, np.ndarray)) \

@@ -748,9 +748,6 @@ def regularized_spectrum_inversion(
     signal : Signal
         The signals which spectra are to be inverted.
     frequency_range : tuple, array_like, double
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied.
     regu_outside : float, optional
@@ -766,6 +763,11 @@ def regularized_spectrum_inversion(
     normalized : bool
         Flag to indicate if the normalized spectrum (according to
         `signal.fft_norm`) should be inverted. The default is ``True``.
+    freq_range: tuple, array_like, double
+        The upper and lower frequency limits outside of which the
+        regularization factor is to be applied.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
 
     Returns
@@ -783,11 +785,16 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
-    # Deprecation warning for freq_range parameter
-    warnings.warn((
-        'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' of frequency_range'),
-            PyfarDeprecationWarning)
+    # Check frequency range parameter
+    if frequency_range is None and freq_range is None:
+        raise ValueError("Frequency range must be provided")
+    if freq_range is not None:
+        frequency_range = freq_range
+        # Deprecation warning for freq_range parameter
+        warnings.warn((
+            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
+            ' of frequency_range'),
+                PyfarDeprecationWarning)
 
     if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
@@ -799,12 +806,6 @@ def regularized_spectrum_inversion(
         data = signal.freq
     else:
         data = signal.freq_raw
-
-    # Check frequency range parameter
-    if frequency_range is None and freq_range is None:
-        raise ValueError("Frequency range must be provided")
-    if freq_range is not None:
-        frequency_range = freq_range
 
     frequency_range = np.asarray(frequency_range)
 
@@ -1470,9 +1471,6 @@ def deconvolve(system_output, system_input, fft_length=None,
         The system input signal is zero padded, if it is shorter than the
         system output signal.
     frequency_range : tuple, array_like, double
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied. The default ``None``
         bypasses the regularization, which might cause numerical
@@ -1486,6 +1484,14 @@ def deconvolve(system_output, system_input, fft_length=None,
     kwargs : key value arguments
         Key value arguments to control the inversion of :math:`H(\omega)` are
         passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+    freq_range: tuple, array_like, double
+        The upper and lower frequency limits outside of which the
+        regularization factor is to be applied. The default ``None``
+        bypasses the regularization, which might cause numerical
+        instabilities in case of band-limited `system_input`. Also see
+        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
 
     Returns
@@ -1501,27 +1507,26 @@ def deconvolve(system_output, system_input, fft_length=None,
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
     """
-    # Deprecation warning for freq_range parameter
-    warnings.warn((
-        'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' of frequency_range'),
-            PyfarDeprecationWarning)
-
     # Check if system_output and system_input are both type Signal
     if not isinstance(system_output, pyfar.Signal):
         raise TypeError('system_output has to be of type pyfar.Signal')
     if not isinstance(system_input, pyfar.Signal):
         raise TypeError('system_input has to be of type pyfar.Signal')
 
-    # Check if both signals have the same sampling rate
-    if not system_output.sampling_rate == system_input.sampling_rate:
-        raise ValueError("The two signals have different sampling rates!")
-
     # Check frequency range parameter
     if frequency_range is None and freq_range is None:
         frequency_range = (0, system_input.sampling_rate/2)
     if freq_range is not None:
         frequency_range = freq_range
+        # Deprecation warning for freq_range parameter
+        warnings.warn((
+            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
+            ' of frequency_range'),
+                PyfarDeprecationWarning)
+
+    # Check if both signals have the same sampling rate
+    if not system_output.sampling_rate == system_input.sampling_rate:
+        raise ValueError("The two signals have different sampling rates!")
 
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value

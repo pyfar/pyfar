@@ -218,7 +218,7 @@ def test_deprecations_freq_range_parameter():
             PyfarDeprecationWarning,
             match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
             "favor of frequency_range"):
-        gt = pf.dsp.filter.GammatoneBands((20, 20e3))
+        gt = pf.dsp.filter.GammatoneBands(freq_range=(20, 20e3))
 
     with pytest.warns(
             PyfarDeprecationWarning,
@@ -230,10 +230,10 @@ def test_deprecations_freq_range_parameter():
             PyfarDeprecationWarning,
             match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
             "favor of frequency_range"):
-        pf.dsp.filter.erb_frequencies((10, 20e3))
+        pf.dsp.filter.erb_frequencies(freq_range=(20, 20e3))
 
     with pytest.warns(
             PyfarDeprecationWarning,
             match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
             "favor of frequency_range"):
-        pf.dsp.filter.fractional_octave_bands(sweep, 8)
+        pf.dsp.filter.fractional_octave_bands(sweep, 8, freq_range=(20, 20e3))

@@ -192,13 +192,16 @@ def fractional_octave_bands(
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
     frequency_range : array, tuple, optional
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-
         The lower and upper frequency limits. The default is
         ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
+    freq_range: array, tuple, optional
+        The lower and upper frequency limits. The default is
+        ``frequency_range=(20, 20e3)``.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
+
 
     Returns
     -------
@@ -230,15 +233,14 @@ def fractional_octave_bands(
         ...     "Filter bands and the sum of their squared magnitudes")
 
     """
-    # Deprecation warning for freq_range parameter
-    warnings.warn((
-        'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-        ' of frequency_range'),
-            PyfarDeprecationWarning)
-
     # Check frequency range parameter
     if freq_range is not None:
         frequency_range = freq_range
+        # Deprecation warning for freq_range parameter
+        warnings.warn((
+            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
+            ' of frequency_range'),
+                PyfarDeprecationWarning)
 
     # check input
     if (signal is None and sampling_rate is None) \
