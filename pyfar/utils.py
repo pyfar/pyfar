@@ -12,8 +12,8 @@ def _rename_arg(arg_map):
             for kwarg, value in kwargs.items():
                 if kwarg in arg_map:
                     warnings.warn((
-                        'freq_range parameter will be deprecated in pyfar '
-                        '0.8.0 in favor of frequency_range'),
+                        f'{kwarg} parameter will be deprecated in pyfar '
+                        f'0.8.0 in favor of {arg_map[kwarg]}'),
                         PyfarDeprecationWarning)
                 new_kwargs[arg_map.get(kwarg, kwarg)] = value
             return func(*args, **new_kwargs)
