@@ -5,6 +5,7 @@ from deepdiff import DeepDiff
 import pyfar as pf
 import warnings
 from pyfar.classes.warnings import PyfarDeprecationWarning
+from pyfar.utils import _rename_arg
 
 
 class GammatoneBands():
@@ -122,20 +123,9 @@ class GammatoneBands():
     .. [#] https://amtoolbox.org/
     """
 
-    def __init__(self, frequency_range=None, resolution=1,
-                 reference_frequency=1000, delay=0.004, sampling_rate=44100,
-                 *, freq_range=None):
-
-        # Check frequency range parameter
-        if frequency_range is None and freq_range is None:
-            raise ValueError("Frequency range must be provided")
-        if freq_range is not None:
-            frequency_range = freq_range
-            # Deprecation warning for freq_range parameter
-            warnings.warn((
-                'freq_range parameter will be deprecated in pyfar 0.8.0 in '
-                'favor of frequency_range'),
-                    PyfarDeprecationWarning)
+    @_rename_arg({"freq_range": "frequency_range"})
+    def __init__(self, frequency_range, resolution=1,
+                 reference_frequency=1000, delay=0.004, sampling_rate=44100):
 
         # check input (remaining checks done in erb_frequencies)
         frequency_range = np.asarray(frequency_range)
@@ -540,8 +530,8 @@ class GammatoneBands():
         return obj
 
 
-def erb_frequencies(frequency_range=None, resolution=1,
-                    reference_frequency=1000, *, freq_range=None):
+@_rename_arg({"freq_range": "frequency_range"})
+def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
     """
     Get frequencies that are linearly spaced on the ERB frequency scale.
 
@@ -594,16 +584,6 @@ def erb_frequencies(frequency_range=None, resolution=1,
 
 
     """
-    # Check frequency range parameter
-    if frequency_range is None and freq_range is None:
-        raise ValueError("Frequency range must be provided")
-    if freq_range is not None:
-        frequency_range = freq_range
-        # Deprecation warning for freq_range parameter
-        warnings.warn((
-            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' of frequency_range'),
-                PyfarDeprecationWarning)
 
     # check input
     if not isinstance(frequency_range, (list, tuple, np.ndarray)) \

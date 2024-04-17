@@ -4,6 +4,7 @@ from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
 from pyfar.classes.warnings import PyfarDeprecationWarning
+from pyfar.utils import _rename_arg
 import warnings
 
 
@@ -717,10 +718,11 @@ def _time_window_symmetric_interval_four(interval, window):
     return win, win_start, win_stop
 
 
+@_rename_arg({"freq_range": "frequency_range"})
 def regularized_spectrum_inversion(
-        signal, frequency_range=None,
+        signal, frequency_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
-        normalized=True, *, freq_range=None):
+        normalized=True):
     r"""Invert the spectrum of a signal applying frequency dependent
     regularization.
 
@@ -785,17 +787,6 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
-    # Check frequency range parameter
-    if frequency_range is None and freq_range is None:
-        raise ValueError("Frequency range must be provided")
-    if freq_range is not None:
-        frequency_range = freq_range
-        # Deprecation warning for freq_range parameter
-        warnings.warn((
-            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' of frequency_range'),
-                PyfarDeprecationWarning)
-
     if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 
@@ -1435,8 +1426,9 @@ def find_impulse_response_start(
     return np.squeeze(start_sample)
 
 
+@_rename_arg({"freq_range": "frequency_range"})
 def deconvolve(system_output, system_input, fft_length=None,
-               frequency_range=None, *, freq_range=None, **kwargs):
+               frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
     The transfer function :math:`H(\omega)` is calculated by spectral
@@ -1513,20 +1505,12 @@ def deconvolve(system_output, system_input, fft_length=None,
     if not isinstance(system_input, pyfar.Signal):
         raise TypeError('system_input has to be of type pyfar.Signal')
 
-    # Check frequency range parameter
-    if frequency_range is None and freq_range is None:
-        frequency_range = (0, system_input.sampling_rate/2)
-    if freq_range is not None:
-        frequency_range = freq_range
-        # Deprecation warning for freq_range parameter
-        warnings.warn((
-            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' of frequency_range'),
-                PyfarDeprecationWarning)
-
     # Check if both signals have the same sampling rate
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
+
+    if frequency_range is None:
+        frequency_range = (0, system_input.sampling_rate/2)
 
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value

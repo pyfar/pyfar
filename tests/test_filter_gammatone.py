@@ -146,10 +146,6 @@ def test_gammatone_bands_assertions():
     with pytest.raises(ValueError, match="The resolution must be larger than"):
         filter.GammatoneBands([0, 22050], resolution=0)
 
-    # no frequency range
-    with pytest.raises(ValueError, match="Frequency range must be provided"):
-        filter.GammatoneBands()
-
     # mismatching type for filter
     GFB = filter.GammatoneBands([0, 22050])
     with pytest.raises(TypeError, match="signal must be"):
@@ -199,7 +195,3 @@ def test_erb_frequencies_assertions():
     # resolution must be > 0
     with pytest.raises(ValueError, match="Resolution must be larger"):
         filter.erb_frequencies([0, 1], 0)
-    # freq range mus be provided
-    with pytest.raises(
-            ValueError, match="Frequency range must be provided"):
-        filter.erb_frequencies()

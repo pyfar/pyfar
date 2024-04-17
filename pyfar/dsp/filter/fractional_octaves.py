@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
-from pyfar.classes.warnings import PyfarDeprecationWarning
+from pyfar.utils import _rename_arg
 
 
 def fractional_octave_frequencies(
@@ -154,13 +154,13 @@ def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     return nominal, exact
 
 
+@_rename_arg({"freq_range": "frequency_range"})
 def fractional_octave_bands(
         signal,
         num_fractions,
         sampling_rate=None,
         frequency_range=(20.0, 20e3),
-        order=14,
-        *, freq_range=None):
+        order=14):
     """Create and/or apply an energy preserving fractional octave filter bank.
 
     The filters are designed using second order sections of Butterworth
@@ -233,14 +233,6 @@ def fractional_octave_bands(
         ...     "Filter bands and the sum of their squared magnitudes")
 
     """
-    # Check frequency range parameter
-    if freq_range is not None:
-        frequency_range = freq_range
-        # Deprecation warning for freq_range parameter
-        warnings.warn((
-            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' of frequency_range'),
-                PyfarDeprecationWarning)
 
     # check input
     if (signal is None and sampling_rate is None) \

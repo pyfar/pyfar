@@ -1,5 +1,24 @@
 import pyfar as pf
 import numpy as np
+from pyfar.classes.warnings import PyfarDeprecationWarning
+import warnings
+
+
+# Decorator function to rename parameters to be deprecated
+def _rename_arg(arg_map):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            new_kwargs = {}
+            for kwarg, value in kwargs.items():
+                if kwarg in arg_map:
+                    warnings.warn((
+                        'freq_range parameter will be deprecated in pyfar '
+                        '0.8.0 in favor of frequency_range'),
+                        PyfarDeprecationWarning)
+                new_kwargs[arg_map.get(kwarg, kwarg)] = value
+            return func(*args, **new_kwargs)
+        return wrapper
+    return decorator
 
 
 def broadcast_cshape(signal, cshape):
