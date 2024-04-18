@@ -5,7 +5,7 @@ from deepdiff import DeepDiff
 import pyfar as pf
 import warnings
 from pyfar.classes.warnings import PyfarDeprecationWarning
-from pyfar.utils import _rename_arg
+from pyfar._utils import rename_arg
 
 
 class GammatoneBands():
@@ -123,7 +123,9 @@ class GammatoneBands():
     .. [#] https://amtoolbox.org/
     """
 
-    @_rename_arg({"freq_range": "frequency_range"})
+    @rename_arg({"freq_range": "frequency_range"},
+                "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+                "favor of frequency_range")
     def __init__(self, frequency_range, resolution=1,
                  reference_frequency=1000, delay=0.004, sampling_rate=44100):
 
@@ -530,7 +532,9 @@ class GammatoneBands():
         return obj
 
 
-@_rename_arg({"freq_range": "frequency_range"})
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
 def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
     """
     Get frequencies that are linearly spaced on the ERB frequency scale.

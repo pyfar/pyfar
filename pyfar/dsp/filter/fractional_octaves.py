@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
-from pyfar.utils import _rename_arg
+from pyfar._utils import rename_arg
 
 
 def fractional_octave_frequencies(
@@ -154,7 +154,9 @@ def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     return nominal, exact
 
 
-@_rename_arg({"freq_range": "frequency_range"})
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
 def fractional_octave_bands(
         signal,
         num_fractions,

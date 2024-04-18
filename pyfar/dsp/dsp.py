@@ -4,7 +4,7 @@ from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
 from pyfar.classes.warnings import PyfarDeprecationWarning
-from pyfar.utils import _rename_arg
+from pyfar._utils import rename_arg
 import warnings
 
 
@@ -718,7 +718,9 @@ def _time_window_symmetric_interval_four(interval, window):
     return win, win_start, win_stop
 
 
-@_rename_arg({"freq_range": "frequency_range"})
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
 def regularized_spectrum_inversion(
         signal, frequency_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
@@ -1426,7 +1428,9 @@ def find_impulse_response_start(
     return np.squeeze(start_sample)
 
 
-@_rename_arg({"freq_range": "frequency_range"})
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
 def deconvolve(system_output, system_input, fft_length=None,
                frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
