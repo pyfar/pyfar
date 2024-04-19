@@ -1,8 +1,7 @@
 on:
   pull_request:
-    types:
-      - closed
-name: Create issue if pr is merged with cookiecutter label
+    types: [ labeled ]
+name: Create issue if pr gets a cookiecutter label
 jobs:
   stuff:
     permissions:
@@ -10,7 +9,7 @@ jobs:
       issues: write
     name: create issue
     environment: test
-    if: github.event.pull_request.merged == true && github.event.label.name == 'cookiecutter'
+    if: github.event.label.name == 'cookiecutter'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
