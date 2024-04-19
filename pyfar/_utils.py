@@ -6,8 +6,9 @@ import warnings
 def rename_arg(arg_map, warning_message):
     """
     Function for deprecating or renaming arguments.
-    Intercepts input if a deprecated argument is passed and replaces it with
-    a new argument.
+
+    Intercepts input if a deprecated argument is passed, replaces it with
+    a new argument and raises a PyfarDeprecationWarning.
 
     Parameters
     -----------
@@ -24,13 +25,13 @@ def rename_arg(arg_map, warning_message):
 
     Examples
     ---------
-    Following examples shows how a deprecated argument can be replaced by a
-    new argument while throwing a deprecation warning
+    Following example shows how a deprecated argument can be replaced by a
+    new argument while throwing a deprecation warning:
 
         >>> from pyfar._utils import rename_arg
         >>>
         >>> @rename_arg({"old_arg": "new_arg"}, "old-arg will be deprecated in"
-        >>>             " favor of new_arg")
+        >>>             " version x.x.x in favor of new_arg")
         >>> def function(arg1, arg2, new_arg):
         >>>     return arg1, arg2, new_arg
         >>>
