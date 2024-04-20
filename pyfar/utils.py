@@ -6,7 +6,9 @@ def broadcast_cshape(signal, cshape):
     """
     Broadcast a signal to a certain cshape.
 
-    The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal is
+    The `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
+    of the signal is
     broadcasted following the `numpy broadcasting rules
     <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
 
@@ -36,7 +38,9 @@ def broadcast_cshapes(signals, cshape=None):
     """
     Broadcast multiple signals to a common cshape.
 
-    The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
+    The `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
+    of the signals are
     broadcasted following the `numpy broadcasting rules
     <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
 
@@ -69,7 +73,9 @@ def broadcast_cdim(signal, cdim):
     Broadcast a signal to a certain cdim.
 
     The channel dimension (cdim) is the length of the
-    :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal. The signal
+    `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
+    of the signal. The signal
     is broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
     dimensions.
 
@@ -103,7 +109,9 @@ def broadcast_cdims(signals, cdim=None):
     Broadcast multiple signals to a common cdim.
 
     The channel dimension (cdim) is the length of the
-    :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal. The signals
+    `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
+    of the signal. The signals
     are broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
     dimensions.
 
@@ -142,15 +150,17 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         except in the dimension corresponding to caxis (the first, by default).
         If this is the case, set ``broadcasting=True``.
     caxis : int
-        The caxis along which the signals are concatenated. More details and
-        background about caxis is given in the concepts of
-        :py:mod:`Audio classes <pyfar._concepts.audio_classes>`.
-        The default is ``0``.
+        The `caxis <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+        interactive/pyfar_audio_objects.html
+        #Signal-cshape,-length,-and-caxis>`_ along which the signals are
+        concatenated. The default is ``0``.
     broadcasting: bool
         If this is ``True``, the signals will be broadcasted to common
         cshape, except for the caxis along which the signals are
         concatenated.
-        The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
+        The `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+        interactive/pyfar_audio_objects.html
+        #Signal-cshape,-length,-and-caxis>`_ of the signals are
         broadcasted following the `numpy broadcasting rules
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
         The default is ``False``.

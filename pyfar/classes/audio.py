@@ -1,7 +1,8 @@
 """
 The following documents the audio classes and arithmethic operations for
-audio data. More details and background is given in the concepts (
-:py:mod:`audio classes <pyfar._concepts.audio_classes>`,
+audio data. More details and background is given in the gallery (
+`audio objects <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+interactive/pyfar_audio_objects.html>`_,
 :py:mod:`Fourier transform <pyfar._concepts.fft>`,
 :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`).
 """
@@ -1128,10 +1129,11 @@ def matrix_multiplication(
         data (third tuple).
 
         In case of pyfar audio objects, the indices refer to the channel
-        dimensions and ignore the last dimension of the underlying data that
-        contains the samples or frequency bins (see
-        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
-        information). For example, a signal with 4 times 2 channels and 120
+        dimensions (`cdim <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_audio_objects.html
+        #Signal-cshape,-length,-and-caxis>`_) and ignore the last dimension of
+        the underlying data that contains the samples or frequency bins. For
+        example, a signal with 4 times 2 channels and 120
         frequency bins has a cshape of ``(4, 2)``, while the shape of the
         underlying frequency data is  ``(4, 2, 120)``. The default tuple
         ``(-2, -1)`` would result in 120 matrices of shape ``(4, 2)`` used

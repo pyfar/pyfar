@@ -1544,7 +1544,9 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
+        The second signal. The `cshape <https://pyfar-gallery.readthedocs.io/
+        en/latest/gallery/interactive/pyfar_audio_objects.html
+        #Signal-cshape,-length,-and-caxis>`_
         of this signal must be `broadcastable
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
         cshape of the first signal.
@@ -1581,7 +1583,9 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     -------
     signal : Signal
         The result of the convolution. The
-        :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
+        `cdim <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+        interactive/pyfar_audio_objects.html
+        #Signal-cshape,-length,-and-caxis>`_ matches the bigger cdim
         of the two input signals.
 
     Notes
@@ -1924,10 +1928,10 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 
         The default is ``'linear'``
     caxis: None, int, or tuple of ints, optional
-        Channel axes along which the averaging is done. The default ``None``
-        averages across all channels. See
-        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
-        information.
+        Channel axes (`caxis <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_audio_objects.html
+        #Signal-cshape,-length,-and-caxis>`_) along which the averaging is
+        done. The default ``None`` averages across all channels.
     weights: array like
         Array with channel weights for averaging the data. Must be
         broadcastable to ``signal.cshape``. The default is ``None``, which
