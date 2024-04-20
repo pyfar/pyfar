@@ -4,7 +4,8 @@ audio data. More details and background is given in the gallery (
 `audio objects <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
 interactive/pyfar_audio_objects.html>`_,
 :py:mod:`Fourier transform <pyfar._concepts.fft>`,
-:py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`).
+`arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+interactive/pyfar_arithmetics.html>`__).
 """
 
 from copy import deepcopy
@@ -885,7 +886,9 @@ def add(data: tuple, domain='freq'):
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        `arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_arithmetics.html
+        #DFT-normalization-and-arithmetic-operations>`__
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -930,7 +933,9 @@ def subtract(data: tuple, domain='freq'):
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        `arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_arithmetics.html
+        #DFT-normalization-and-arithmetic-operations>`__
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -975,7 +980,9 @@ def multiply(data: tuple, domain='freq'):
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        `arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_arithmetics.html
+        #DFT-normalization-and-arithmetic-operations>`__
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1019,7 +1026,9 @@ def divide(data: tuple, domain='freq'):
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        `arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_arithmetics.html
+        #DFT-normalization-and-arithmetic-operations>`__
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1063,7 +1072,9 @@ def power(data: tuple, domain='freq'):
         objects, array likes, and scalars. Pyfar audio objects can not be
         mixed, e.g., :py:func:`TimeData` and :py:func:`FrequencyData` objects
         do not work together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        `arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_arithmetics.html
+        #DFT-normalization-and-arithmetic-operations>`__
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1110,7 +1121,9 @@ def matrix_multiplication(
         Data to be multiplied. Can contain pyfar audio objects and array likes.
         If multiple audio objects are passed they must be of the same type and
         their FFT normalizations must allow the multiplication (see
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        `arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/
+        gallery/interactive/pyfar_arithmetics.html
+        #DFT-normalization-and-arithmetic-operations>`__
         and notes below).
         If audio objects and arrays are included, the arrays' shape need
         to match the audio objects' cshape (not the shape of the underlying
