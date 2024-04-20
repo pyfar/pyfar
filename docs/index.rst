@@ -16,11 +16,6 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
-   concepts
-
-.. toctree::
-   :maxdepth: 2
-
    classes
 
 .. toctree::

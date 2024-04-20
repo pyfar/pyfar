@@ -129,6 +129,6 @@ html_context = {
 
 # write shortcuts to sphinx readable format
 _, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
-shortcuts_path = os.path.join("concepts", "resources", "plot_shortcuts.rst")
+shortcuts_path = os.path.join("resources", "plot_shortcuts.rst")
 with open(shortcuts_path, "w") as f_id:
     f_id.writelines(shortcuts)
