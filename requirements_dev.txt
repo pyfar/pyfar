@@ -3,7 +3,6 @@ bump2version
 wheel
 watchdog
 ruff==0.1.15
-tox
 coverage
 Sphinx
 twine
