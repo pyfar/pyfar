@@ -2100,8 +2100,10 @@ def normalize(signal, reference_method='max', domain='time',
            Use the absolute of the time domain data ``np.abs(signal.time)``.
         ``'freq'``
           Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
-          normalized magnitude spectrum used
-          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
+          normalized magnitude spectrum is used
+          (cf. `FFT normalization <https://pyfar-gallery.readthedocs.io/en/
+          latest/gallery/interactive/fast_fourier_transform.html
+          #FFT-normalizations>`_).
 
         The default is ``'time'``.
     channel_handling: string, optional

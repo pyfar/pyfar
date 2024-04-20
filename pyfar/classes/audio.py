@@ -3,7 +3,8 @@ The following documents the audio classes and arithmethic operations for
 audio data. More details and background is given in the gallery (
 `audio objects <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
 interactive/pyfar_audio_objects.html>`_,
-:py:mod:`Fourier transform <pyfar._concepts.fft>`,
+`Fourier transform <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+interactive/fast_fourier_transform.html>`_,
 `arithmetic operations <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
 interactive/pyfar_arithmetics.html>`__).
 """
@@ -750,7 +751,9 @@ class Signal(FrequencyData, TimeData):
         The normalization for the Discrete Fourier Transform (DFT).
 
         See :py:func:`~pyfar.dsp.fft.normalization` and
-        :py:mod:`FFT concepts <pyfar._concepts.fft>` for more information.
+        `pyfar gallery <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+        interactive/fast_fourier_transform.html#FFT-normalizations>`_
+        for more information.
         """
         return self._fft_norm
 

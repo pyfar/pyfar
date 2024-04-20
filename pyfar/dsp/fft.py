@@ -1,6 +1,7 @@
 """
 The following documents the FFT functionality. More details and background is
-given in the :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+given in the `pyfar examples gallery <https://pyfar-gallery.readthedocs.io/en/
+latest/gallery/interactive/fast_fourier_transform.html>`_.
 """
 import multiprocessing
 
@@ -38,8 +39,9 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
 
     The function returns only the right-hand side of the axis-symmetric
     spectrum. The normalization is considered according to
-    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
-    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+    ``'fft_norm'`` (`see pyfar examples <https://
+    pyfar-gallery.readthedocs.io/en/latest/gallery/interactive/
+    fast_fourier_transform.html#FFT-normalizations>`__).
 
     Parameters
     ----------
@@ -77,8 +79,9 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
 
     The function takes only the right-hand side of the spectrum and returns a
     real-valued time signal. The normalization is considered according to
-    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
-    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+    ``'fft_norm'`` (`see pyfar examples <https://
+    pyfar-gallery.readthedocs.io/en/latest/gallery/interactive/
+    fast_fourier_transform.html#FFT-normalizations>`__).
 
     Parameters
     ----------
@@ -121,8 +124,9 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     the squared absolute values for ``'power'`` and ``'psd'``, the complex
     spectra are multiplied with their absolute values to ensure a correct
     renormalization.
-    For detailed information and explanations, refer to
-    :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+    For detailed information and explanations, refer to the `FFT normalization
+    <https://pyfar-gallery.readthedocs.io/en/latest/gallery/interactive/
+    fast_fourier_transform.html#FFT-normalizations>`__.
 
     Parameters
     ----------
