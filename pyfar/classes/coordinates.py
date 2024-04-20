@@ -1,9 +1,101 @@
-"""
-The following documents the pyfar coordinates class and functions for
-coordinate conversion. More background information is given in
-:py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
-Available sampling schemes are listed at
-:py:mod:`spharpy.samplings <spharpy.samplings>`.
+r"""
+The following introduces the the
+:py:func:`Coordinates class <pyfar.classes.coordinates.Coordinates>`
+and the coordinate systems that are available in pyfar. Available sampling
+schemes are listed at :py:mod:`spharpy.samplings <spharpy.samplings>`.
+
+Different coordinate systems are frequently used in acoustics research and
+handling sampling points and different systems can be cumbersome. The
+Coordinates class was designed with this in mind. It can convert between
+coordinate systems and rotate, query and plot coordinates points. Functions for
+converting coordinates not stored in a Coordinates object are available for
+convenience. However, it is strongly recommended to use the Coordinates class
+for all conversions.
+
+.. _coordinate_systems:
+
+Coordinate Systems
+------------------
+
+Each coordinate system has a unique name, e.g., `spherical_elevation`, and is
+defined by three coordinates, in this case `azimuth`, `elevation`, and
+`radius`. The available coordinate systems are shown in the image below.
+
+|coordinate_systems|
+
+.. _coordinates:
+
+Coordinates
+-----------
+
+The unit for length for the coordinates is always meter, while the unit for
+angles is radians. Each coordinate is unique, but can appear in multiple
+coordinate systems, e.g., the `azimuth` angle is contained in two coordinate
+systems (`spherical_colatitude` and `spherical elevation`). The table below
+lists all coordinates.
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Coordinate
+     - Descriptions
+   * - :py:func:`x`, :py:func:`y`, :py:func:`z`
+     - x, y, z coordinate of a right handed Cartesian coordinate system in
+       meter (:math:`-\infty` < x,y,z < :math:`\infty`).
+   * - :py:func:`azimuth`
+     - Counter clock-wise angle in the x-y plane of the right handed Cartesian
+       coordinate system in radians. :math:`0` radians are defined in positive
+       x-direction, :math:`\pi/2` radians in positive y-direction and so on
+       (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic).
+   * - :py:func:`elevation`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians elevation are defined in positive
+       z-direction, :math:`\pi/2` radians in positive x-direction, and
+       :math:`\pi` in negative z-direction
+       (:math:`\pi/2` < elevation < :math:`\pi/2`). The elevation is a
+       variation of the elevation angle.
+   * - :py:func:`colatitude`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians colatitude are defined in positive
+       x-direction, :math:`\pi/2` radians in positive z-direction, and
+       :math:`-\pi/2` in negative z-direction
+       (:math:`0` < colatitude < :math:`\pi`). The colatitude is a
+       variation of the colatitude.
+   * - :py:func:`lateral`
+     - Counter clock-wise angle in the x-y plane of the right handed Cartesian
+       coordinate system in radians. :math:`0` radians are defined in positive
+       x-direction, :math:`\pi/2` radians in positive y-direction and
+       :math:`-\pi/2` in negative y-direction
+       (:math:`-\pi/2` < lateral < :math:`\pi/2`).
+   * - :py:func:`polar`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians elevation are defined in positive
+       x-direction, :math:`\pi/2` radians in positive z-direction,
+       :math:`\pi` in negative x-direction and so on
+       (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic).
+   * - :py:func:`frontal`
+     - Angle in the y-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians elevation are defined in positive
+       y-direction, :math:`\pi/2` radians in positive z-direction,
+       :math:`\pi` in negative y-direction and so on
+       (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic).
+   * - :py:func:`upper`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians elevation are defined in positive
+       x-direction, :math:`\pi/2` radians in positive z-direction, and
+       :math:`\pi` in negative x-direction
+       (:math:`0` < upper < :math:`\pi`).
+   * - :py:func:`radius`
+     - Distance to the origin of the right handed Cartesian coordinate system
+       in meters (:math:`0` < radius < :math:`\infty`).
+   * - :py:func:`rho`
+     - Distance perpendicular to the the z-axis of the right handed Cartesian
+       coordinate system (:math:`0` < rho < :math:`\infty`).
+
+.. |coordinate_systems| image:: resources/coordinate_systems.png
+   :width: 100%
+   :alt: pyfar coordinate systems
 """
 
 import numpy as np
@@ -28,9 +120,10 @@ class Coordinates():
     use :py:func:`deg2rad` and :py:func:`rad2deg`.
 
     Create :py:func:`Coordinates` object with or without coordinate points.
-    The points that enter the Coordinates object are defined by the
-    `domain`, `convention`, and `unit` as illustrated in the
-    :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
+    The points that enter the Coordinates object are defined by the `name`
+    (`domain`, `convention`, and `unit`. The `unit` will be deprecated in pyfar
+    v0.8.0 in favor of fixed default units, see :ref:`coordinate_systems` and
+    :ref:`coordinates`)
 
     +--------------------+----------+------------+----------+----------+
     | domain, convention | points_1 | points_2   | points_3 | unit     |
@@ -174,7 +267,7 @@ class Coordinates():
         r"""
         Create a Coordinates class object from a set of points in the
         right-handed cartesian coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -217,7 +310,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -258,7 +351,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -299,7 +392,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -339,7 +432,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -379,7 +472,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         cylindrical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -1010,7 +1103,7 @@ class Coordinates():
         """
         Returns :py:func:`x`, :py:func:`y`, :py:func:`z`.
         Right handed cartesian coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
@@ -1025,7 +1118,7 @@ class Coordinates():
         Spherical coordinates according to the top pole elevation coordinate
         system. :py:func:`azimuth`, :py:func:`elevation`,
         :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         azimuth, elevation, radius = cart2sph(self.x, self.y, self.z)
         elevation = np.pi / 2 - elevation
@@ -1047,7 +1140,7 @@ class Coordinates():
         system.
         Returns :py:func:`azimuth`, :py:func:`colatitude`,
         :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
@@ -1065,7 +1158,7 @@ class Coordinates():
         """
         Spherical coordinates according to the side pole coordinate system.
         Returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
         lateral = lateral - np.pi / 2
@@ -1086,7 +1179,7 @@ class Coordinates():
         """
         Spherical coordinates according to the frontal pole coordinate system.
         Returns :py:func:`frontal`, :py:func:`upper`, :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
 
         frontal, upper, radius = cart2sph(self.y, self.z, self.x)
@@ -1105,7 +1198,7 @@ class Coordinates():
         """
         Cylindrical coordinates.
         Returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
