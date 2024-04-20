@@ -631,7 +631,7 @@ class Signal(FrequencyData, TimeData):
         """
         # unpack array
         if hasattr(sampling_rate, '__iter__'):
-            assert len(sampling_rate) == 0
+            assert len(sampling_rate) == 1
             sampling_rate = sampling_rate[0]
 
         # initialize signal specific parameters
