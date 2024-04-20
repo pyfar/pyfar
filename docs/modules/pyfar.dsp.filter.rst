@@ -1,8 +1,9 @@
 pyfar.dsp.filter
 ================
 
-The following documents the pyfar filters. Visit
-:py:mod:`filter types <pyfar._concepts.filter_types>` for an introduction of
+The following documents the pyfar filters. Visit the
+`filter types <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
+interactive/pyfar_filter_types.html>`_ for an overview of
 the different filters and the
 `filtering examples <https://pyfar-gallery.readthedocs.io/en/latest/
 gallery/interactive/pyfar_filtering.html>`_ for more information

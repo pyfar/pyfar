@@ -9,5 +9,4 @@ through these concepts.
 .. toctree::
    :maxdepth: 1
 
-   concepts/pyfar.filter_types.rst
    concepts/pyfar.plot.rst
