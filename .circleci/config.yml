@@ -66,7 +66,7 @@ jobs:
           pip-dependency-file: requirements_dev.txt
       - run:
           name: Ruff
-          command: ruff pyfar
+          command: ruff pyfar tests
 
   test_examples:
     parameters:
