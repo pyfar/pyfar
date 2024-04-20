@@ -45,7 +45,6 @@ Contributing
 
 Check out the `contributing guidelines`_ if you want to become part of pyfar.
 
-
 .. _pyfar workshop: https://mybinder.org/v2/gh/pyfar/gallery/main?labpath=docs/gallery/interactive/pyfar_introduction.ipynb
 .. _pyfar example gallery: https://pyfar-gallery.readthedocs.io/en/latest/examples_gallery.html
 .. _pyfar documentation: https://pyfar.readthedocs.io/en/stable
