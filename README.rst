@@ -47,9 +47,9 @@ Check out the `contributing guidelines`_ if you want to become part of pyfar.
 
 .. _pyfar workshop: https://mybinder.org/v2/gh/pyfar/gallery/main?labpath=docs/gallery/interactive/pyfar_introduction.ipynb
 .. _pyfar example gallery: https://pyfar-gallery.readthedocs.io/en/latest/examples_gallery.html
-.. _pyfar documentation: https://pyfar.readthedocs.io/en/stable
+.. _pyfar documentation: https://pyfar.readthedocs.io
 .. _pyfar.org: https://pyfar.org
-.. _SoundFile: https://pysoundfile.readthedocs.io/en/stable
+.. _SoundFile: https://pysoundfile.readthedocs.io
 .. _libsndfile: http://www.mega-nerd.com/libsndfile/
 .. _help section: https://pyfar-gallery.readthedocs.io/en/latest/help.html
 .. _contributing guidelines: https://pyfar.readthedocs.io/en/stable/contributing.html
