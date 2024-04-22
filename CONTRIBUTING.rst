@@ -59,7 +59,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
     $ ruff pyfar tests
     $ pytest
 
-   ruff must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Ruff ignores a couple of PEP Errors (see `./pyproject.toml`). If necessary, your linting configuration in your IDE accordingly.
+   ruff must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Ruff ignores a couple of PEP Errors (see `./pyproject.toml`). If necessary, adjust your linting configuration in your IDE accordingly.
 
 6. Commit your changes and push your branch to GitHub::
 
