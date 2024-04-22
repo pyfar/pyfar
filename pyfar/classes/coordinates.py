@@ -1,5 +1,5 @@
 r"""
-The following introduces the the
+The following introduces the
 :py:func:`Coordinates class <pyfar.classes.coordinates.Coordinates>`
 and the coordinate systems that are available in pyfar. Available sampling
 schemes are listed at :py:mod:`spharpy.samplings <spharpy.samplings>`.
@@ -31,7 +31,7 @@ Coordinates
 The unit for length for the coordinates is always meter, while the unit for
 angles is radians. Each coordinate is unique, but can appear in multiple
 coordinate systems, e.g., the `azimuth` angle is contained in two coordinate
-systems (`spherical_colatitude` and `spherical elevation`). The table below
+systems (`spherical_colatitude` and `spherical_elevation`). The table below
 lists all coordinates.
 
 .. list-table::
