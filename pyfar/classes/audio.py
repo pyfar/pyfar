@@ -192,6 +192,7 @@ class TimeData(_Audio):
     to frequency domain, i.e., non-equidistant samples.
 
     """
+
     def __init__(self, data, times, comment=""):
         """Create TimeData object with data, and times.
 
@@ -359,6 +360,7 @@ class FrequencyData(_Audio):
     incomplete spectra.
 
     """
+
     def __init__(self, data, frequencies, comment=""):
         """Create FrequencyData with data, and frequencies.
 
@@ -542,6 +544,7 @@ class Signal(FrequencyData, TimeData):
     frequency domain.
 
     """
+
     def __init__(
             self,
             data,
@@ -613,7 +616,7 @@ class Signal(FrequencyData, TimeData):
         elif domain == 'freq':
             # check and set n_samples
             if n_samples is None:
-                n_samples = max(1, (data.shape[-1] - 1)*2)
+                n_samples = max(1, (data.shape[-1] - 1) * 2)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
                     f"samples from {data.shape[-1]} frequency bins.")
@@ -646,8 +649,8 @@ class Signal(FrequencyData, TimeData):
         ``freq_raw``.
         """
         data = fft.normalization(
-                self.freq_raw, self.n_samples, self.sampling_rate,
-                self.fft_norm, inverse=False)
+            self.freq_raw, self.n_samples, self.sampling_rate,
+            self.fft_norm, inverse=False)
         return data
 
     @freq.setter
@@ -682,7 +685,7 @@ class Signal(FrequencyData, TimeData):
                               "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
-            self._n_samples = max(1, (data.shape[-1] - 1)*2)
+            self._n_samples = max(1, (data.shape[-1] - 1) * 2)
             warnings.warn(
                 f"Number of samples not given, assuming {self.n_samples} "
                 f"samples from {data.shape[-1]} frequency bins.")
@@ -691,8 +694,8 @@ class Signal(FrequencyData, TimeData):
         if not raw:
             # remove normalization
             data = fft.normalization(
-                    data, self._n_samples, self._sampling_rate,
-                    self._fft_norm, inverse=True)
+                data, self._n_samples, self._sampling_rate,
+                self._fft_norm, inverse=True)
         self._data = data.astype(complex)
 
     @_Audio.domain.setter
@@ -851,6 +854,7 @@ class Signal(FrequencyData, TimeData):
 class _SignalIterator(object):
     """Iterator for :py:func:`Signal`
     """
+
     def __init__(self, array_iterator, signal):
         self._array_iterator = array_iterator
         self._signal = signal
@@ -1296,45 +1300,41 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     return result
 
 
-def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
-                                 matmul: bool):
-    """Check if type and meta data of input is fine for arithmetic operations.
+def _assert_match_for_arithmetic(data, domain, division, matmul):
+    """
+    Validates that the type and metadata of input data
+        are appropriate for performing arithmetic operations.
 
-    Check if sampling rate and number of samples agree if multiple signals are
-    provided. Check if arrays are numeric. Check if a power signal is contained
-    in the input. Extract cshape of result.
-
-    Input:
+    Parameters
+    ----------
     data : tuple
-        Can contain Signal, TimeData, FrequencyData, and array like data
+        A tuple containing data elements, which can be instances of
+        Signal, TimeData, FrequencyData, or array-like objects.
     domain : str
-        Domain in which the arithmetic operation should be performed. 'time' or
-        'freq'.
+        The domain in which the arithmetic operation is to be performed.
+        Either 'time' or 'freq'.
     division : bool
-        ``True`` if a division is performed, ``False`` otherwise
-    matmul: bool
-        ``True`` if a  matrix multiplication is performed, ``False`` otherwise
+        Indicates if the operation is a division.
+    matmul : bool
+        Indicates if the operation is a matrix multiplication.
 
     Returns
     -------
-    sampling_rate : number, None
-        Sampling rate of the signals. None, if no signal is contained in `data`
-    n_samples : number, None
-        Number of samples of the signals. None, if no signal is contained in
-        `data`
-    fft_norm : str, None
-        FFT norm of the first signal in `data`, if all FFT norms are None.
-        Otherwise the first FFT norm that is not None is taken.
-    times : numpy array, None
-        The times if a TimeData object was passed. None otherwise.
-    frequencies : numpy array, None
-        The frequencies if a FrequencyData object was passed. None otherwise.
-    audio_type : type, None
-        Type of the audio class if contained in data. Otherwise None.
-    cshape : tuple, None
-        Largest channel shape of the audio classes if contained in data.
-        Otherwise empty tuple.
+    tuple
+        A tuple containing validated meta information such as
+        sampling rate, number of samples, FFT norm, etc.
 
+    Raises
+    ------
+    ValueError
+        If the data elements do not conform to expectations
+        based on their type or properties.
+
+    Example
+    --------
+    >>> data = (Signal(...), Signal(...))
+    >>> _assert_match_for_arithmetic(data, 'freq', False, False)
+    (44100, 1024, 'unitary', None, None, Signal, ())
     """
 
     # we need at least two signals
@@ -1342,17 +1342,20 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
         raise ValueError("Input argument 'data' must be a tuple.")
 
     # check validity of domain
-    if domain not in ['time', 'freq']:
+    if domain not in ["time", "freq"]:
         raise ValueError(f"domain must be time or freq but is {domain}.")
 
     # properties that must match
     sampling_rate = None
     n_samples = None
-    fft_norm = 'none'
+    fft_norm = "none"
     times = None
     frequencies = None
     audio_type = type(None)
     cshape = ()
+
+    # determine operation type based on division flag
+    operation_type = "divide" if division else "multiply"
 
     # check input types and meta data
     found_audio_data = False
@@ -1363,11 +1366,13 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
                     n_samples = d.n_samples
-                    # if a signal comes first (n==0) its fft_norm is taken
-                    # directly. If a signal does not come first, (n>0, e.g.
-                    # 1/signal), the fft norm is matched
-                    fft_norm = d.fft_norm if n == 0 else \
-                        _match_fft_norm(fft_norm, d.fft_norm, division)
+                    fft_norm = (
+                        d.fft_norm
+                        if n == 0
+                        else _match_fft_norm(
+                            fft_norm, d.fft_norm, operation_type
+                        )
+                    )
                 elif isinstance(d, TimeData):
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
@@ -1390,35 +1395,45 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                         raise ValueError("The sampling rates do not match.")
                     if n_samples != d.n_samples:
                         raise ValueError(
-                            "The number of samples does not match.")
-                    fft_norm = _match_fft_norm(fft_norm, d.fft_norm, division)
+                            "The number of samples does not match."
+                        )
+                    fft_norm = _match_fft_norm(
+                        fft_norm, d.fft_norm, operation_type
+                    )
                 elif isinstance(d, TimeData):
                     if not np.allclose(times, d.times, atol=1e-15):
-                        raise ValueError(
-                            "The times does not match.")
+                        raise ValueError("The times do not match.")
                 elif isinstance(d, FrequencyData):
                     if not np.allclose(
-                            frequencies, d.frequencies, atol=1e-15):
-                        raise ValueError(
-                            "The frequencies do not match.")
+                        frequencies, d.frequencies, atol=1e-15
+                    ):
+                        raise ValueError("The frequencies do not match.")
                 if not matmul:
                     try:
                         cshape = np.broadcast_shapes(cshape, d.cshape)
                     except ValueError:
-                        raise ValueError(
-                            "The cshapes do not match.")
+                        raise ValueError("The cshapes do not match.")
 
         # check type of non signal input
         else:
             if np.asarray(d).dtype.kind not in ["i", "f", "c"]:
                 raise ValueError(
-                    "Input must be of type Signal, int, float, or complex")
-            if np.asarray(d).dtype.kind == "c" and domain == 'time':
+                    "Input must be of type Signal, int, float, or complex"
+                )
+            if np.asarray(d).dtype.kind == "c" and domain == "time":
                 raise ValueError(
-                    "Complex input can not be applied in the time domain.")
+                    "Complex input can not be applied in the time domain."
+                )
 
-    return (sampling_rate, n_samples, fft_norm, times, frequencies, audio_type,
-            cshape)
+    return (
+        sampling_rate,
+        n_samples,
+        fft_norm,
+        times,
+        frequencies,
+        audio_type,
+        cshape,
+    )
 
 
 def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
@@ -1497,87 +1512,82 @@ def _matrix_multiplication(a, b, axes, audio_type):
         a = np.expand_dims(a, 0) if a.ndim == 2 else a
         b = np.expand_dims(b, 1) if b.ndim == 2 else b
         # note: axes is implicitly copied
-        axes = [tuple([ax-1 if ax < 0 else ax for ax in t]) for t in axes]
+        axes = [tuple([ax - 1 if ax < 0 else ax for ax in t]) for t in axes]
     return np.matmul(a, b, axes=axes)
 
 
-def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
+def _match_fft_norm(fft_norm1, fft_norm2, operation, norm_override=None):
     """
-    Helper function to determine the fft_norm resulting from an
-    arithmetic operation of two audio objects.
-
-    For addition, subtraction and multiplication:
-    Either: one signal has fft_norm ``'none'`` , the results gets the other
-    norm.
-    Or: both have the same fft_norm, the results gets the same norm.
-    Other combinations raise an error.
-
-    For division:
-    Either: the denominator (fft_norm_2) is ``'none'``, the result gets the
-    fft_norm of the numerator (fft_norm_1).
-    Or: both have the same fft_norm, the results gets the fft_norm ``'none'``.
-    Other combinations raise an error.
+    Determine the appropriate FFT normalization after an arithmetic operation
+    based on the provided norms of the two input signals.
 
     Parameters
     ----------
-    fft_norm_1 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
-    ``'power'`` or ``'psd'``
-        First fft_norm for matching.
-    fft_norm_2 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
-    ``'power'`` or ``'psd'``
-        Second fft_norm for matching.
-    division : bool
-        ``False`` if arithmetic operation is addition, subtraction or
-        multiplication;
-        ``True`` if arithmetic operation is division.
-
+    fft_norm1 : str
+        The FFT normalization of the first signal. Must be one of 'none',
+        'unitary', 'amplitude', 'rms', 'power', or 'psd'.
+    fft_norm2 : str
+        The FFT normalization of the second signal. Must adhere to the same
+        constraints as `fft_norm1`.
+    operation : str
+        The arithmetic operation to be performed. Supported operations are
+        'multiply', 'divide', 'add', or 'subtract'.
+    norm_override : str, optional
+        A specific normalization to override any default behavior. Must be one
+        of the valid norms if specified.
     Returns
     -------
-    fft_norm_result : str, ``'none'``, ``'unitary'``, ``'amplitude'``,
-    ``'rms'``, ``'power'`` or ``'psd'``
-        The fft_norm resulting from arithmetic operation.
+    str
+        The resulting FFT normalization after considering the operations and
+        input norms.
+    Raises
+    ------
+    UserWarning
+        Warns about the use of an invalid norm, unsupported operations,
+        mismatched norms without override, or specific concerns
+        about operations involving 'none' normalization.
+
+    Examples
+    --------
+    >>> _match_fft_norm('unitary', 'amplitude', 'multiply')
+    'amplitude'
+    >>> _match_fft_norm('none', 'power', 'divide')
+    'none'  # Warning about division involving 'none'
     """
 
-    # check if fft_norms are valid
-    valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
-    if fft_norm_1 not in valid_fft_norms:
-        raise ValueError((f"fft_norm_1 is {fft_norm_1} but must be in "
-                          f"{', '.join(valid_fft_norms)}"))
-    if fft_norm_2 not in valid_fft_norms:
-        raise ValueError((f"fft_norm_2 is {fft_norm_2} but must be in "
-                          f"{', '.join(valid_fft_norms)}"))
+    valid_norms = {"none", "unitary", "amplitude", "rms", "power", "psd"}
 
-    # check if parameter division is type bool
-    if not isinstance(division, bool):
-        raise TypeError("Parameter division must be type bool.")
+    print(f"Input norms: {fft_norm1}, {fft_norm2} | Operation: {operation} |",)
+    print(f"Override: {norm_override}")
 
-    if not division:
+    if fft_norm1 not in valid_norms or fft_norm2 not in valid_norms:
+        warnings.warn("Invalid FFT norm provided. Defaulting to 'none'.")
+        return "none"
 
-        if fft_norm_1 == fft_norm_2:
-            fft_norm_result = fft_norm_1
+    if operation not in ["multiply", "divide", "add", "subtract"]:
+        warnings.warn(
+            "Unsupported operation specified. Defaulting to 'multiply'.")
+        operation = "multiply"
 
-        elif fft_norm_1 == 'none':
-            fft_norm_result = fft_norm_2
+    if norm_override and norm_override in valid_norms:
+        return norm_override
 
-        elif fft_norm_2 == 'none':
-            fft_norm_result = fft_norm_1
+    if operation == "divide" and "none" in (fft_norm1, fft_norm2):
+        warnings.warn(
+            "Division involving 'none' may lead to unintended results.",
+            UserWarning,)
+        return "none"
 
-        else:
-            raise ValueError(("Either one fft_norm has to be 'none' or both "
-                              "fft_norms must be the same, but they are ",
-                              f"{fft_norm_1} and {fft_norm_2}."))
+    if fft_norm1 != fft_norm2 and not norm_override:
+        warnings.warn(
+            "Mismatched norms without override, defaulting to 'none'",
+            UserWarning,)
+        return "none"
 
-    else:
+    if fft_norm1 == fft_norm2:
+        return fft_norm1
 
-        if fft_norm_2 == 'none':
-            fft_norm_result = fft_norm_1
-
-        elif fft_norm_1 == fft_norm_2:
-            fft_norm_result = 'none'
-
-        else:
-            raise ValueError(("Either fft_norm_2 (denominator) has to be "
-                              "'none' or both fft_norms must be the same, but "
-                              f"they are {fft_norm_1} and {fft_norm_2}."))
-
-    return fft_norm_result
+    priority = {"power": 4, "rms": 3, "amplitude": 2, "unitary": 1, "none": 0}
+    result = (fft_norm1 if priority[fft_norm1] > priority[fft_norm2]
+              else fft_norm2)
+    return result

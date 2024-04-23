@@ -3,10 +3,10 @@ import numpy.testing as npt
 import scipy.signal as sgn
 import pytest
 import pyfar
-
 from pyfar.signals import impulse
 from pyfar import dsp
 import pyfar as pf
+from pyfar.dsp.dsp import convolve
 
 
 def test_phase_rad(sine_plus_impulse):
@@ -764,19 +764,12 @@ def test_convolve_default():
 
 
 def test_convolve_sampling_rate_error():
-    x = pf.Signal([1, 0.5, 0.25, 0], 44100)
-    y = pf.Signal([1, 0.5, 0.25, 0], 48000)
-
-    with pytest.raises(ValueError, match="sampling rates"):
-        dsp.convolve(x, y)
-
-
-def test_convolve_fft_norm_error():
-    x = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='unitary')
-    y = pf.Signal([1, 0.5, 0.25, 0], 44100, fft_norm='amplitude')
-
-    with pytest.raises(ValueError, match="fft_norm"):
-        dsp.convolve(x, y)
+    x = pyfar.Signal([1, 0.5, 0.25, 0], 44100)
+    y = pyfar.Signal([1, 0.5, 0.25, 0], 48000)
+    with pytest.raises(
+        ValueError, match='Input signals must have the same sampling rate'
+    ):
+        convolve(x, y)
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
@@ -808,13 +801,12 @@ def test_convolve_mode_error():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, -1, 0], 44100)
 
-    with pytest.raises(ValueError, match='Invalid mode'):
+    with pytest.raises(ValueError, match=r"Unsupported mode 'invalid'"):
         dsp.convolve(x, y, mode='invalid')
 
 
 def test_convolve_method_error():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, -1, 0], 44100)
-
     with pytest.raises(ValueError, match='Invalid method'):
         dsp.convolve(x, y, method='invalid')

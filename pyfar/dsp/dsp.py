@@ -137,8 +137,8 @@ def wrap_to_2pi(x):
     """
     positive_input = (x > 0)
     zero_check = np.logical_and(positive_input, (x == 0))
-    x = np.mod(x, 2*np.pi)
-    x[zero_check] = 2*np.pi
+    x = np.mod(x, 2 * np.pi)
+    x[zero_check] = 2 * np.pi
     return x
 
 
@@ -467,7 +467,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         raise ValueError("Values in interval need to be in ascending order.")
     # Convert to samples
     if unit == 's':
-        interval = np.round(interval*signal.sampling_rate).astype(int)
+        interval = np.round(interval * signal.sampling_rate).astype(int)
     elif unit == 'samples':
         interval = interval.astype(int)
     else:
@@ -502,22 +502,23 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     # Apply window
     signal_win = signal.copy()
     if crop == 'window':
-        signal_win.time = signal_win.time[..., win_start:win_stop+1]*win
+        signal_win.time = signal_win.time[..., win_start:win_stop + 1] * win
         if return_window:
             window_fin = pyfar.Signal(win, signal_win.sampling_rate)
     if crop == 'end':
         # Add zeros before window
-        window_zeropadded = np.zeros(win_stop+1)
-        window_zeropadded[win_start:win_stop+1] = win
-        signal_win.time = signal_win.time[..., :win_stop+1]*window_zeropadded
+        window_zeropadded = np.zeros(win_stop + 1)
+        window_zeropadded[win_start:win_stop + 1] = win
+        signal_win.time = signal_win.time[...,
+                                          :win_stop + 1] * window_zeropadded
         if return_window:
             window_fin = pyfar.Signal(
                 window_zeropadded, signal_win.sampling_rate)
     elif crop == 'none':
         # Create zeropadded window
         window_zeropadded = np.zeros(signal.n_samples)
-        window_zeropadded[win_start:win_stop+1] = win
-        signal_win.time = signal_win.time*window_zeropadded
+        window_zeropadded[win_start:win_stop + 1] = win
+        signal_win.time = signal_win.time * window_zeropadded
         if return_window:
             window_fin = pyfar.Signal(
                 window_zeropadded, signal_win.sampling_rate)
@@ -584,7 +585,7 @@ def _time_window_symmetric_interval_two(interval, window):
     win_stop : int
         Index of last sample of window
     """
-    win_samples = interval[1]-interval[0]+1
+    win_samples = interval[1] - interval[0] + 1
     win = sgn.windows.get_window(window, win_samples, fftbins=False)
     win_start = interval[0]
     win_stop = interval[1]
@@ -612,12 +613,12 @@ def _time_window_left(n_samples, interval, window):
     win_stop : int
         Index of last sample of window
     """
-    fade_samples = int(2*(interval[1]-interval[0]))
+    fade_samples = int(2 * (interval[1] - interval[0]))
     fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
-    win = np.ones(n_samples-interval[0])
-    win[0:interval[1]-interval[0]] = fade[:int(fade_samples/2)]
+    win = np.ones(n_samples - interval[0])
+    win[0:interval[1] - interval[0]] = fade[:int(fade_samples / 2)]
     win_start = interval[0]
-    win_stop = n_samples-1
+    win_stop = n_samples - 1
     return win, win_start, win_stop
 
 
@@ -640,10 +641,10 @@ def _time_window_right(interval, window):
     win_stop : int
         Index of last sample of window
     """
-    fade_samples = int(2*(interval[1]-interval[0]))
+    fade_samples = int(2 * (interval[1] - interval[0]))
     fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
-    win = np.ones(interval[1]+1)
-    win[interval[0]+1:] = fade[int(fade_samples/2):]
+    win = np.ones(interval[1] + 1)
+    win[interval[0] + 1:] = fade[int(fade_samples / 2):]
     win_start = 0
     win_stop = interval[1]
     return win, win_start, win_stop
@@ -670,13 +671,13 @@ def _time_window_symmetric_zero(n_samples, interval, window):
     win_stop : int
         Index of last sample of window
     """
-    fade_samples = int(2*(interval[1]-interval[0]))
+    fade_samples = int(2 * (interval[1] - interval[0]))
     fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
     win = np.zeros(n_samples)
-    win[:interval[0]+1] = 1
-    win[interval[0]+1:interval[1]+1] = fade[int(fade_samples/2):]
+    win[:interval[0] + 1] = 1
+    win[interval[0] + 1:interval[1] + 1] = fade[int(fade_samples / 2):]
     win[-interval[0]:] = 1
-    win[-interval[1]:-interval[0]] = fade[:int(fade_samples/2)]
+    win[-interval[1]:-interval[0]] = fade[:int(fade_samples / 2)]
     win_start = 0
     win_stop = n_samples
     return win, win_start, win_stop
@@ -701,17 +702,17 @@ def _time_window_symmetric_interval_four(interval, window):
     win_stop : int
         Index of last sample of window
     """
-    fade_in_samples = int(2*(interval[1]-interval[0]))
+    fade_in_samples = int(2 * (interval[1] - interval[0]))
     fade_in = sgn.windows.get_window(
         window, fade_in_samples, fftbins=False)
-    fade_in = fade_in[:int(fade_in_samples/2)]
-    fade_out_samples = int(2*(interval[3]-interval[2]))
+    fade_in = fade_in[:int(fade_in_samples / 2)]
+    fade_out_samples = int(2 * (interval[3] - interval[2]))
     fade_out = sgn.windows.get_window(
         window, fade_out_samples, fftbins=False)
-    fade_out = fade_out[int(fade_out_samples/2):]
-    win = np.ones(interval[-1]-interval[0]+1)
-    win[0:interval[1]-interval[0]] = fade_in
-    win[interval[2]-interval[0]+1:interval[3]-interval[0]+1] = fade_out
+    fade_out = fade_out[int(fade_out_samples / 2):]
+    win = np.ones(interval[-1] - interval[0] + 1)
+    win[0:interval[1] - interval[0]] = fade_in
+    win[interval[2] - interval[0] + 1:interval[3] - interval[0] + 1] = fade_out
     win_start = interval[0]
     win_stop = interval[3]
     return win, win_start, win_stop
@@ -848,14 +849,18 @@ def _cross_fade(first, second, indices):
         raise IndexError("Index is out of range.")
 
     len_xfade = np.squeeze(np.abs(np.diff(indices)))
-    window = sgn.windows.hann(len_xfade*2 + 1, sym=True)
+    window = sgn.windows.hann(len_xfade * 2 + 1, sym=True)
     window_rising = window[:len_xfade]
-    window_falling = window[len_xfade+1:]
+    window_falling = window[len_xfade + 1:]
 
     window_first = np.concatenate(
-        (np.ones(indices[0]), window_falling, np.zeros(len_arrays-indices[1])))
+        (np.ones(
+            indices[0]), window_falling, np.zeros(
+            len_arrays - indices[1])))
     window_second = np.concatenate(
-        (np.zeros(indices[0]), window_rising, np.ones(len_arrays-indices[1])))
+        (np.zeros(
+            indices[0]), window_rising, np.ones(
+            len_arrays - indices[1])))
 
     result = first * window_first + second * window_second
 
@@ -953,7 +958,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
 
     # calculate the minimum phase using the Hilbert transform
     phase = -np.imag(sgn.hilbert(np.log(H), N=n_fft, axis=-1))
-    data = ifft(H*np.exp(1j*phase), axis=-1, workers=workers).real
+    data = ifft(H * np.exp(1j * phase), axis=-1, workers=workers).real
 
     # cut to length
     if truncate:
@@ -1021,7 +1026,7 @@ def pad_zeros(signal, pad_width, mode='end'):
         raise ValueError("Unknown padding mode.")
 
     if mode == 'center':
-        shift_samples = int(np.round(signal.n_samples/2))
+        shift_samples = int(np.round(signal.n_samples / 2))
         padded_signal.time = np.roll(
             padded_signal.time, shift_samples, axis=-1)
 
@@ -1142,7 +1147,7 @@ def time_shift(
 
     shift = np.broadcast_to(shift, signal.cshape)
     if unit == 's':
-        shift_samples = np.round(shift*signal.sampling_rate).astype(int)
+        shift_samples = np.round(shift * signal.sampling_rate).astype(int)
     elif unit == 'samples':
         shift_samples = shift.astype(int)
     else:
@@ -1150,8 +1155,9 @@ def time_shift(
             f"unit is '{unit}' but must be 'samples' or 's'.")
 
     if np.any(np.abs(shift_samples) > signal.n_samples) and mode == "linear":
-        raise ValueError(("Can not shift by more samples than signal.n_samples"
-                          " if mode is 'linear'"))
+        raise ValueError(
+            ("Can not shift by more samples than signal.n_samples"
+             " if mode is 'linear'"))
 
     shifted = signal.copy()
     for ch in np.ndindex(signal.cshape):
@@ -1235,7 +1241,7 @@ def find_impulse_response_delay(impulse_response, N=1):
         >>> ax.legend()
 
     """
-    n = int(np.ceil((N+2)/2))
+    n = int(np.ceil((N + 2) / 2))
 
     start_samples = np.zeros(impulse_response.cshape)
     for ch in np.ndindex(impulse_response.cshape):
@@ -1252,11 +1258,11 @@ def find_impulse_response_delay(impulse_response, N=1):
                 "ignore", message="h does not appear to by symmetric",
                 category=RuntimeWarning)
             ir_minphase = sgn.minimum_phase(
-                impulse_response.time[ch], n_fft=4*n_samples)
+                impulse_response.time[ch], n_fft=4 * n_samples)
 
         correlation = sgn.correlate(
             impulse_response.time[ch],
-            np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
+            np.pad(ir_minphase, (0, n_samples - (n_samples + 1) // 2)),
             mode='full')
         lags = np.arange(-n_samples + 1, n_samples)
 
@@ -1266,7 +1272,7 @@ def find_impulse_response_delay(impulse_response, N=1):
         # find the maximum of the analytic part of the correlation function
         # and define the search range around the maximum
         argmax = np.argmax(np.abs(correlation_analytic))
-        search_region_range = np.arange(argmax-n, argmax+n)
+        search_region_range = np.arange(argmax - n, argmax + n)
         search_region = np.imag(correlation_analytic[search_region_range])
 
         # mask values with a negative gradient
@@ -1274,7 +1280,7 @@ def find_impulse_response_delay(impulse_response, N=1):
 
         # fit a polygon and estimate its roots
         search_region_poly = np.polyfit(
-            search_region_range[mask]-argmax, search_region[mask], N)
+            search_region_range[mask] - argmax, search_region[mask], N)
         roots = np.roots(search_region_poly)
 
         # Use only real-valued roots
@@ -1381,7 +1387,7 @@ def find_impulse_response_start(
     """
     ir_squared = np.abs(impulse_response.time)**2
 
-    mask_start = int(0.9*impulse_response.n_samples)
+    mask_start = int(0.9 * impulse_response.n_samples)
 
     mask = np.arange(mask_start, ir_squared.shape[-1])
     noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
@@ -1389,7 +1395,7 @@ def find_impulse_response_start(
     max_sample = np.argmax(ir_squared, axis=-1)
     max_value = np.max(ir_squared, axis=-1)
 
-    if np.any(max_value < 10**(threshold/10) * noise) or \
+    if np.any(max_value < 10**(threshold / 10) * noise) or \
             np.any(max_sample > mask_start):
         warnings.warn(
             "The SNR seems lower than the specified threshold value. Check "
@@ -1402,10 +1408,10 @@ def find_impulse_response_start(
         if start_sample[ch] > 0:
             # Check samples before maximum
             ir_before_max = np.squeeze(
-                ir_squared[ch][:max_sample[ch]+1] / max_value[ch])
+                ir_squared[ch][:max_sample[ch] + 1] / max_value[ch])
             # First sample above or at the threshold level
             idx_first_above_thresh = np.where(
-                ir_before_max >= 10**(-threshold/10))[0]
+                ir_before_max >= 10**(-threshold / 10))[0]
             if idx_first_above_thresh.size > 0:
                 # The start sample is the last sample below the threshold
                 start_sample[ch] = np.min(idx_first_above_thresh) - 1
@@ -1469,195 +1475,176 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
         passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
 
 
-    Returns
-    -------
-    system_response : Signal
-        The resulting signal after deconvolution, representing the system
-        response (the transfer function).
-        The ``fft_norm`` of is set to ``'none'``.
+    Raises
+    ------
+    TypeError
+        If either `system_output` or
+        `system_input` is not an instance of pyfar.Signal.
+    ValueError
+        If `system_output` and `system_input`
+        do not have the same sampling rate or
+        if `fft_length` is set too short for the given signals.
+
 
     References
-    -----------
-    .. [#] S. Mueller and P. Masserani "Transfer function measurement with
-           sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
-           (2001, June).
+    ----------
+    .. [#] S. Mueller and P. Masserani, "Transfer function measurement with
+           sweeps. Directors cut." J. Audio Eng. Soc., vol. 49, no. 6,
+           pp. 443-471, June 2001.
+
+    Examples
+    --------
+    >>> system_input = pyfar.Signal(np.random.normal(0, 1, 512), 44100)
+    >>> system_output = pyfar.Signal(np.random.normal(0, 1, 512), 44100)
+    >>> system_response = deconvolve(system_output, system_input,
+                                     fft_length=1024, freq_range=(20, 20000))
     """
 
-    # Check if system_output and system_input are both type Signal
     if not isinstance(system_output, pyfar.Signal):
-        raise TypeError('system_output has to be of type pyfar.Signal')
+        raise TypeError("system_output must be of type pyfar.Signal")
     if not isinstance(system_input, pyfar.Signal):
-        raise TypeError('system_input has to be of type pyfar.Signal')
+        raise TypeError("system_input must be of type pyfar.Signal")
 
-    # Check if both signals have the same sampling rate
-    if not system_output.sampling_rate == system_input.sampling_rate:
+    if system_output.sampling_rate != system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
 
     if freq_range is None:
-        freq_range = (0, system_input.sampling_rate/2)
+        freq_range = (0, system_input.sampling_rate / 2)
 
-    # Set fft_length to the max n_samples of both signals,
-    # if it is not explicitly set to a value
     if fft_length is None:
-        fft_length = np.max([system_output.n_samples, system_input.n_samples])
-    # Check if both signals length are shorter or the same as fft_length
-    if fft_length < system_output.n_samples:
-        raise ValueError("The fft_length can not be shorter than" +
-                         "system_output.n_samples.")
-    if fft_length < system_input.n_samples:
-        raise ValueError("The fft_length can not be shorter than" +
-                         "system_input.n_samples.")
+        fft_length = max(system_output.n_samples, system_input.n_samples)
+    else:
+        if fft_length < system_output.n_samples:
+            raise ValueError(
+                "fft_length cannot be shorter than system_output.n_samples.")
+        if fft_length < system_input.n_samples:
+            raise ValueError(
+                "fft_length cannot be shorter than system_input.n_samples.")
 
-    # Check if both signals have the same length as ftt_length,
-    # if not: bring them to the same length by padding with zeros
-    system_output = pyfar.dsp.pad_zeros(system_output,
-                                        (fft_length - system_output.n_samples))
-    system_input = pyfar.dsp.pad_zeros(system_input,
-                                       (fft_length - system_input.n_samples))
+    system_output = pyfar.dsp.pad_zeros(
+        system_output, (fft_length - system_output.n_samples))
+    system_input = pyfar.dsp.pad_zeros(
+        system_input, (fft_length - system_input.n_samples))
 
-    # multiply system_output signal with regularized inversed system_input
-    # signal to get the system response
     inverse_input = regularized_spectrum_inversion(
-            system_input, freq_range, **kwargs)
+        system_input, freq_range, **kwargs)
     system_response = system_output * inverse_input
 
-    # Check if the signals have any comments,
-    # if yes: concatenate the comments for the system_response
-    system_response.comment = "Calculated with pyfar.dsp.deconvolve."
-    if system_output.comment != '':
-        system_response.comment += f" system input: {system_output.comment}."
-    if system_input.comment != '':
-        system_response.comment += f" system output: {system_input.comment}."
+    system_response.fft_norm = "none"
 
-    # return the impulse resonse
-    system_response.fft_norm = pyfar.classes.audio._match_fft_norm(
-        system_output.fft_norm, system_input.fft_norm, division=True)
+    system_response.comment = "Calculated with pyfar.dsp.deconvolve."
+    if system_output.comment:
+        system_response.comment += f" System input: {system_output.comment}"
+    if system_input.comment:
+        system_response.comment += f" System output: {system_input.comment}"
 
     return system_response
 
 
-def convolve(signal1, signal2, mode='full', method='overlap_add'):
-    """Convolve two signals.
+def convolve(
+        signal1,
+        signal2,
+        mode="full",
+        method="overlap_add",
+        operation="multiply"):
+    """
+    Convolve two signals considering their FFT normalizations and operation
+    specifics.
 
     Parameters
     ----------
     signal1 : Signal
-        The first signal
+        The first input signal.
+
     signal2 : Signal
-        The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
-        of this signal must be `broadcastable
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
-        cshape of the first signal.
-    mode : string, optional
-        A string indicating the size of the output:
+        The second input signal.
+        Must be broadcastable to the cshape of the first signal.
 
-        ``'full'``
-            Compute the full discrete linear convolution of
-            the input signals. The output has the length
-            ``'signal1.n_samples + signal2.n_samples - 1'`` (Default).
-        ``'cut'``
-            Compute the complete convolution with ``full`` and truncate the
-            result to the length of the longer signal.
-        ``'cyclic'``
-            The output is the cyclic convolution of the signals, where the
-            shorter signal is zero-padded to fit the length of the longer
-            one. This is done by computing the complete convolution with
-            ``'full'``, adding the tail (i.e., the part that is truncated
-            for ``mode='cut'`` to the beginning of the result) and
-            truncating the result to the length of the longer signal.
+    mode : str, optional
+        Specifies the size of the output:
+        'full' - The output is the full discrete linear convolution
+        of the input signals.
+        'cut' - The output is the same as 'full' but truncated to
+        the length of the longer input signal.
+        'cyclic' - The output is the cyclic convolution of the signals,
+        where the result is wrapped to the length of the longer input signal.
 
-    method : str {'overlap_add', 'fft'}, optional
-        A string indicating which method to use to calculate the convolution:
+    method : str, optional
+        Specifies the algorithm used for convolution:
 
-        ``'overlap_add'``
-            Convolve using  the overlap-add algorithm based
-            on ``scipy.signal.oaconvolve``. (Default)
-        ``'fft'``
-            Convolve using FFT based on ``scipy.signal.fftconvolve``.
+        'overlap_add' - Uses the overlap-add method to compute the convolution.
+        'fft' - Uses the fast Fourier transform (FFT) method to compute the
+                convolution.
 
-        See Notes for more details.
+    operation : str, optional
+        The arithmetic operation considered for normalization purposes:
+        'multiply' - Assumes multiplication of FFTs (default).
+        'divide' - Assumes division of FFTs.
+        'add', 'subtract' - Handles addition or subtraction of FFTs.
+        This parameter influences the normalization of
+        the resulting signal based on the normalization of the input signals.
 
     Returns
     -------
-    signal : Signal
-        The result of the convolution. The
-        :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
-        of the two input signals.
+    result_signal : Signal
+        The resulting signal after convolution.
+        The number of channels (cdim) matches the larger cdim
+        of the input signals.
 
-    Notes
-    -----
-    The overlap-add method is generally much faster than fft convolution when
-    one signal is much larger than the other, but can be slower when only a few
-    output values are needed or when the signals have a very similar length.
-    For ``method='overlap_add'``, integer data will be cast to float.
-
-    Examples
-    --------
-    Illustrate the different modes.
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> s1 = pf.Signal([1, 0.5, 0.5], 1000)
-        >>> s2 = pf.Signal([1,-1], 1000)
-        >>> full = pf.dsp.convolve(s1, s2, mode='full')
-        >>> cut = pf.dsp.convolve(s1, s2, mode='cut')
-        >>> cyc = pf.dsp.convolve(s1, s2, mode='cyclic')
-        >>> # Plot input and output
-        >>> with pf.plot.context():
-        >>>     fig, ax = plt.subplots(2, 1, sharex=True)
-        >>>     pf.plot.time(s1, ax=ax[0], label='Signal 1', marker='o',
-        ...                  unit='samples')
-        >>>     pf.plot.time(s2, ax=ax[0], label='Signal 2', marker='o',
-        ...                  unit='samples')
-        >>>     ax[0].set_title('Input Signals')
-        >>>     ax[0].legend()
-        >>>     pf.plot.time(full, ax=ax[1], label='full', marker='o',
-        ...                  unit='samples')
-        >>>     pf.plot.time(cut, ax=ax[1], label='cut', ls='--',  marker='o',
-        ...                  unit='samples')
-        >>>     pf.plot.time(cyc, ax=ax[1], label='cyclic', ls=':', marker='o',
-        ...                  unit='samples')
-        >>>     ax[1].set_title('Convolution Result')
-        >>>     ax[1].set_ylim(-1.1, 1.1)
-        >>>     ax[1].legend()
-
-
+    Raises
+    ------
+    ValueError
+        If the sampling rates of the input signals do not match or
+        if an unsupported mode, method, or operation is specified.
     """
     # check input
     if not signal1.sampling_rate == signal2.sampling_rate:
-        raise ValueError("The sampling rates do not match")
+        raise ValueError("Input signals must have the same sampling rate.")
+
     fft_norm = pyfar.classes.audio._match_fft_norm(
-        signal1.fft_norm, signal2.fft_norm)
-    if mode not in ['full', 'cut', 'cyclic']:
-        raise ValueError(
-            f"Invalid mode {mode}, needs to be "
-            "'full', 'cut' or 'cyclic'.")
+        signal1.fft_norm, signal2.fft_norm, operation
+    )
+
+    # warning if either signal has 'none' norm and operation is division
+    if operation == "divide" and (
+        signal1.fft_norm == "none" or signal2.fft_norm == "none"
+    ):
+        warnings.warn(
+            "Division involving 'none' may lead to unintended results.",
+            UserWarning,
+        )
+
+    if mode not in ["full", "cut", "cyclic"]:
+        raise ValueError(f"Unsupported mode '{mode}'")
 
     # check cdims
     if len(signal1.cshape) != len(signal2.cshape):
         signal1, signal2 = pyfar.utils.broadcast_cdims((signal1, signal2))
 
-    # convolve
-    if method == 'overlap_add':
-        res = sgn.oaconvolve(signal1.time, signal2.time, mode='full', axes=-1)
-    elif method == 'fft':
-        res = sgn.fftconvolve(signal1.time, signal2.time, mode='full', axes=-1)
+    # convolve using specified method
+    if method == "overlap_add":
+        res = sgn.oaconvolve(signal1.time, signal2.time, mode="full", axes=-1)
+    elif method == "fft":
+        res = sgn.fftconvolve(
+            signal1.time, signal2.time, mode="full", axes=-1
+        )
     else:
         raise ValueError(
-            f"Invalid method {method}, needs to be 'overlap_add' or 'fft'.")
+            f"Invalid method {method}, needs to be 'overlap_add' or 'fft'."
+        )
 
-    # make convolution truncated or cyclic
-    if mode == 'cut':
-        res = res[..., :np.max((signal1.n_samples, signal2.n_samples))]
-    elif mode == 'cyclic':
-        n_min = np.min((signal1.n_samples, signal2.n_samples))
-        n_max = np.max((signal1.n_samples, signal2.n_samples))
-        res[..., :n_min-1] += res[..., -n_min+1:]
+    # handle mode options
+    if mode == "cut":
+        res = res[..., : max(signal1.n_samples, signal2.n_samples)]
+    elif mode == "cyclic":
+        n_min = min(signal1.n_samples, signal2.n_samples)
+        n_max = max(signal1.n_samples, signal2.n_samples)
+        res[..., : n_min - 1] += res[..., -n_min + 1:]
         res = res[..., :n_max]
 
     return pyfar.Signal(
-        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+        res, signal1.sampling_rate, domain="time", fft_norm=fft_norm
+    )
 
 
 def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
@@ -1853,7 +1840,7 @@ def power(signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
     # return and compute data
-    return np.sum(signal.time**2, axis=-1)/signal.n_samples
+    return np.sum(signal.time**2, axis=-1) / signal.n_samples
 
 
 def rms(signal):
@@ -1996,9 +1983,9 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
             if signal.cshape[ax] == 1:
                 warnings.warn(f"Averaging one dimensional caxis={caxis}.")
     if not isinstance(caxis, int):
-        axis = tuple([cax-1 if cax < 0 else cax for cax in caxis])
+        axis = tuple([cax - 1 if cax < 0 else cax for cax in caxis])
     else:
-        axis = caxis-1 if caxis < 0 else caxis
+        axis = caxis - 1 if caxis < 0 else caxis
 
     # convert data to desired domain
     if mode == 'linear':
@@ -2016,7 +2003,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         raise ValueError(
             """mode must be 'linear', 'magnitude_zerophase', 'power',
             'magnitude_phase' or 'log_magnitude_zerophase'."""
-            )
+        )
     # check if data includes NaNs and raise error or create masked array
     if nan_policy == 'raise' and np.any(np.isnan(data)):
         raise ValueError("The signal includes NaNs. Change 'nan_policy' to "
@@ -2038,7 +2025,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     if mode == 'power':
         data = np.sqrt(data)
     elif mode == 'log_magnitude_zerophase':
-        data = 10**(data/log_prefix)
+        data = 10**(data / log_prefix)
 
     # return average data as pyfar object, depending on input signal type
     if isinstance(signal, pyfar.Signal):

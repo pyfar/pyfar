@@ -12,12 +12,14 @@ from pyfar.dsp.dsp import deconvolve
 
 def test_input_type_error():
     """Test assertions by passing non Signal-Type"""
-    with pytest.raises(TypeError,
-                       match='system_output has to be of type pyfar.Signal'):
-        deconvolve('error', impulse(3))
-    with pytest.raises(TypeError,
-                       match='system_input has to be of type pyfar.Signal'):
-        deconvolve(impulse(3), 'error')
+    with pytest.raises(
+        TypeError, match="system_output must be of type pyfar.Signal"
+    ):
+        deconvolve("error", impulse(3))
+    with pytest.raises(
+        TypeError, match="system_input must be of type pyfar.Signal"
+    ):
+        deconvolve(impulse(3), "error")
 
 
 def test_input_sampling_freq_error():
@@ -29,20 +31,26 @@ def test_input_sampling_freq_error():
 
 
 def test_fft_length_error():
-    """Test assertion by passing fft_length shorter than n_samples of
-    given Signals"""
-    with pytest.raises(ValueError,
-                       match="The fft_length can not be shorter than" +
-                             "system_output.n_samples."):
-        deconvolve(impulse(6, sampling_rate=44100),
-                   impulse(5, sampling_rate=44100),
-                   fft_length=5)
-    with pytest.raises(ValueError,
-                       match="The fft_length can not be shorter than" +
-                             "system_input.n_samples."):
-        deconvolve(impulse(5, sampling_rate=44100),
-                   impulse(6, sampling_rate=44100),
-                   fft_length=5)
+    """Test assertion by passing
+    fft_length shorter than n_samples of given Signals"""
+    with pytest.raises(
+        ValueError,
+        match="fft_length cannot be shorter than system_output.n_samples.",
+    ):
+        deconvolve(
+            impulse(6, sampling_rate=44100),
+            impulse(5, sampling_rate=44100),
+            fft_length=5,
+        )
+    with pytest.raises(
+        ValueError,
+        match="fft_length cannot be shorter than system_input.n_samples.",
+    ):
+        deconvolve(
+            impulse(5, sampling_rate=44100),
+            impulse(6, sampling_rate=44100),
+            fft_length=5,
+        )
 
 
 def test_default():
@@ -86,14 +94,19 @@ def test_output_sweep():
 
 
 def test_fft_norm():
-    """Test the correct call of _match_fft_norm with parameter division=True
-    for two example inputs."""
-    sig1 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
-    res = pf.dsp.dsp.deconvolve(sig1, sig1, freq_range=(1, 44100))
-    assert res.fft_norm == 'none'
-    sig2 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='none')
-    sig3 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
-    with pytest.raises(ValueError, match="Either fft_norm_2 "):
+    """Test the correct handling of FFT normalization after deconvolution."""
+    sig1 = pf.Signal([1, 0, 0, 0], 44100, fft_norm="amplitude")
+    res = pf.dsp.deconvolve(sig1, sig1, freq_range=(1, 44100))
+    assert (
+        res.fft_norm == "none"
+    ), "FFT normalization should be set to 'none' after deconvolution."
+
+    sig2 = pf.Signal([1, 0, 0, 0], 44100, fft_norm="none")
+    sig3 = pf.Signal([1, 0, 0, 0], 44100, fft_norm="amplitude")
+    with pytest.warns(
+        UserWarning,
+        match="Mismatched norms without override, defaulting to 'none'",
+    ):
         deconvolve(sig2, sig3, freq_range=(1, 44100))
 
 

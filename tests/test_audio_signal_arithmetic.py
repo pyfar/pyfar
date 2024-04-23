@@ -217,16 +217,15 @@ def test_add_arrays():
 def test_signal_inversion():
     """Test signal inversion with different FFT norms"""
 
-    # 'none' norm
-    signal = pf.Signal([2, 0, 0], 44100, fft_norm='none')
-    signal_inv = 1 / signal
-    npt.assert_allclose(signal.time.flatten(), [2, 0, 0])
-    npt.assert_allclose(signal_inv.time.flatten(), [.5, 0, 0])
+    signal = pf.Signal([2, 0, 0], 44100, fft_norm="none")
+    with pytest.warns(
+        UserWarning,
+        match="Division involving 'none' may lead to unintended results."
+    ):
+        signal_inv = 1 / signal
 
-    # 'rms' norm
-    signal.fft_norm = 'rms'
-    with raises(ValueError, match="Either fft_norm_2"):
-        1 / signal
+    npt.assert_allclose(signal.time.flatten(), [2, 0, 0])
+    npt.assert_allclose(signal_inv.time.flatten(), [0.5, 0, 0])
 
 
 def test_subtraction():
@@ -417,45 +416,45 @@ def test_assert_match_for_arithmetic():
 
     # check with two signals
     signal._assert_match_for_arithmetic(
-        (s, s), 'time', division=False, matmul=False)
+        (s, s), "time", division=False, matmul=False)
     # check with one signal and one array like
     signal._assert_match_for_arithmetic(
-        (s, [1, 2]), 'time', division=False, matmul=False)
+        (s, [1, 2]), "time", division=False, matmul=False)
     # check with more than two inputs
     signal._assert_match_for_arithmetic(
-        (s, s, s), 'time', division=False, matmul=False)
+        (s, s, s), "time", division=False, matmul=False)
 
     # check output
     out = signal._assert_match_for_arithmetic(
-        (s, s), 'time', division=False, matmul=False)
+        (s, s), "time", division=False, matmul=False)
     assert out[0] == 44100
     assert out[1] == 4
-    assert out[2] == 'none'
+    assert out[2] == "none"  # expecting 'none' due to norm mismatch handling
     assert out[-1] == (1,)
     out = signal._assert_match_for_arithmetic(
-        (s, s4), 'time', division=False, matmul=False)
-    assert out[2] == 'rms'
+        (s, s4), "time", division=False, matmul=False)
+    assert out[2] == "none"
 
     # check with non-tuple input for first argument
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            s, 'time', division=False, matmul=False)
+            s, "time", division=False, matmul=False)
     # check with invalid data type in first argument
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (s, ['str', 'ing']), 'time', division=False, matmul=False)
+            (s, ["str", "ing"]), "time", division=False, matmul=False)
     # check with complex data and time domain operation
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (s, np.array([1 + 1j])), 'time', division=False, matmul=False)
+            (s, np.array([1 + 1j])), "time", division=False, matmul=False)
     # test signals with different sampling rates
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (s, s1), 'time', division=False, matmul=False)
+            (s, s1), "time", division=False, matmul=False)
     # test signals with different n_samples
     with raises(ValueError):
         signal._assert_match_for_arithmetic(
-            (s, s2), 'time', division=False, matmul=False)
+            (s, s2), "time", division=False, matmul=False)
 
 
 def test_get_arithmetic_data_with_array():
