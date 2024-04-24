@@ -94,9 +94,9 @@ def test_output_sweep(is_complex_sig1, is_complex_sig2):
         sweep_2.complex = is_complex_sig2
         eval_range_start = int(fs/2)
 
-    res = pf.dsp.dsp.deconvolve(sweep_1,
-                                sweep_2,
-                                freq_range=(1, 44100)).freq[0, eval_range_start+10:-12500]
+    res = pf.dsp.dsp.deconvolve(
+        sweep_1, sweep_2,
+        freq_range=(1, 44100)).freq[0, eval_range_start+10:-12500]
     npt.assert_allclose(np.ones_like(res), res, atol=1e-9)
 
 
