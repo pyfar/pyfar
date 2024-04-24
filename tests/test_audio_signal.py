@@ -645,21 +645,24 @@ def test_setter_complex_assert():
         signal.complex = False
 
 
-def test_setter_complex():
-    """ test setting complex flag of time and frequency domain signals"""
+def test_setter_complex_even():
+    """ test setting complex flag of time and frequency domain signals
+        with even number of samples """
     # test setting complex from False to True
     # for time domain signals
-    signal = Signal([0, 1, 2], 44100, 4, "time")
+    signal = Signal([0, 1, 2, 3], 44100, 4, "time")
     signal.complex = True
     assert signal.time.dtype.kind == "c"
+    assert signal.freq.shape[1] == 4
 
     # test setting complex from True to False
     # for time domain signals
-    signal = Signal([0, 1, 2], 44100, 4, "time", is_complex=True)
+    signal = Signal([0, 1, 2, 3], 44100, 4, "time", is_complex=True)
     signal.complex = False
     assert signal.time.dtype.kind == "f"
+    assert signal.freq.shape[1] == 3
 
-    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j], 44100, 4, "time",
                     is_complex=True)
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
                                          " is_complex flag cannot be "
@@ -668,19 +671,70 @@ def test_setter_complex():
 
     # test setting complex from False to True
     # for frequency domain signals
-    signal = Signal([0, 1, 2], 44100, 4, "time")
+    signal = Signal([0, 1, 2, 3], 44100, 4, "time")
     signal.domain = "freq"
     signal.complex = True
     assert signal.time.dtype.kind == "c"
+    assert signal.freq.shape[1] == 4
 
     # test setting complex from True to False
     # for frequency domain signals
-    signal = Signal([0, 1, 2], 44100, 4, "time", is_complex=True)
+    signal = Signal([0, 1, 2, 3], 44100, 4, "time", is_complex=True)
     signal.domain = "freq"
     signal.complex = False
     assert signal.time.dtype.kind == "f"
+    assert signal.freq.shape[1] == 3
 
-    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j], 44100, 4, "time",
+                    is_complex=True)
+    signal.domain = "freq"
+    with pytest.raises(ValueError, match="Signals frequency spectrum is not"
+                                         " conjugate symmetric, "
+                                         "is_complex flag cannot be `False`."):
+        signal.complex = False
+
+
+def test_setter_complex_odd():
+    """ test setting complex flag of time and frequency domain signals
+        with odd number of samples """
+    # test setting complex from False to True
+    # for time domain signals
+    signal = Signal([0, 1, 2, 3, 4], 44100, 5, "time")
+    signal.complex = True
+    assert signal.time.dtype.kind == "c"
+    assert signal.freq.shape[1] == 5
+
+    # test setting complex from True to False
+    # for time domain signals
+    signal = Signal([0, 1, 2, 3, 4], 44100, 5, "time", is_complex=True)
+    signal.complex = False
+    assert signal.time.dtype.kind == "f"
+    assert signal.freq.shape[1] == 3
+
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j], 44100, 5, "time",
+                    is_complex=True)
+    with pytest.raises(ValueError, match="Signal has complex-valued time data"
+                                         " is_complex flag cannot be "
+                                         "`False`."):
+        signal.complex = False
+
+    # test setting complex from False to True
+    # for frequency domain signals
+    signal = Signal([0, 1, 2, 3, 4], 44100, 5, "time")
+    signal.domain = "freq"
+    signal.complex = True
+    assert signal.time.dtype.kind == "c"
+    assert signal.freq.shape[1] == 5
+
+    # test setting complex from True to False
+    # for frequency domain signals
+    signal = Signal([0, 1, 2, 3, 4], 44100, 5, "time", is_complex=True)
+    signal.domain = "freq"
+    signal.complex = False
+    assert signal.time.dtype.kind == "f"
+    assert signal.freq.shape[1] == 3
+
+    signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j], 44100, 5, "time",
                     is_complex=True)
     signal.domain = "freq"
     with pytest.raises(ValueError, match="Signals frequency spectrum is not"

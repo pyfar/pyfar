@@ -909,7 +909,7 @@ class Signal(FrequencyData, TimeData):
             elif self._domain == 'freq':
                 # add mirror spectrum according to the "old" time data
                 self._data = fft.add_mirror_spectrum(self._data,
-                                                     fft._is_odd(
+                                                     not fft._is_odd(
                                                       self.n_samples))
                 self._complex = value
         # check fft norm if complex flag was set
