@@ -160,8 +160,8 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
     The linear sweep can also be generated in the frequency domain (see
     :py:func:`~linear_sweep_freq`). Time domain synthesis exhibits a constant
-    temporal envelope in trade of slight ripples in the magnitude response.
-    Frequency domain synthesis exhibits smooth magnitude spectra in trade
+    temporal envelope at the cost of slight ripples in the magnitude response.
+    Frequency domain synthesis exhibits smooth magnitude spectra at the cost
     of a slightly irregular temporal envelope.
 
     Parameters
@@ -214,8 +214,8 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
 def linear_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
-        fade_out=None, butterworth_order=8, sampling_rate=44100,
-        group_delay=False):
+        fade_out=None, bandpass_order=8, sampling_rate=44100,
+        return_group_delay=False):
     """
     Generate sine sweep with linearly increasing frequency in the frequency
     domain.
@@ -224,7 +224,7 @@ def linear_sweep_freq(
 
     The linear sweep can also be generated in the time domain
     (:py:func:`~linear_sweep_time`). Frequency domain synthesis exhibits
-    smooth magnitude spectra in trade of a slightly irregular temporal
+    smooth magnitude spectra at the cost of a slightly irregular temporal
     envelope. Time domain synthesis exhibits a constant temporal envelope in
     trade of slight ripples in the magnitude response.
 
@@ -262,12 +262,12 @@ def linear_sweep_freq(
         last sample of the sweep that is closer than 60 dB to the absolute
         maximum of the sweep time signal. The default ``None`` does not apply
         a fade-out.
-    butterworth_order : int, optional
+    bandpass_order : int, optional
         The order of the Butterworth filters that are applied to limit the
         frequency range (see above). The default is ``8``.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
-    group_delay : boolean, optional
+    return_group_delay : boolean, optional
         Return the analytical group delay of the sweep. This can be used to
         compute the times at which distortion products appear. The default is
         ``False``.
@@ -280,13 +280,13 @@ def linear_sweep_freq(
         (see :py:func:`~pyfar.dsp.fft.normalization`).
     group_delay_sweep : FrequencyData
         The analytical group delay of the sweep in seconds as a single sided
-        spectrum. Only returned if `group_delay` is ``True``.
+        spectrum. Only returned if `return_group_delay` is ``True``.
 
     References
     ----------
     .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
            Directors Cut Including Previously Unreleased Material and some
-           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471.
+           Corrections.' J. Audio Eng. Soc. 2001, 49 (6), 443-471.
 
     Examples
     --------
@@ -304,13 +304,13 @@ def linear_sweep_freq(
         n_samples=n_samples,
         sweep_type='linear',
         frequency_range=frequency_range,
-        butterworth_order=butterworth_order,
+        bandpass_order=bandpass_order,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
         fade_out=fade_out,
         sampling_rate=sampling_rate,
-        group_delay=group_delay)
+        return_group_delay=return_group_delay)
 
 
 def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
@@ -335,9 +335,9 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
     The exponential sweep can also be generated in the frequency domain (see
     see :py:func:`~exponential_sweep_freq`). Time domain synthesis exhibits a
-    constant temporal envelope in trade of slight ripples in the magnitude
+    constant temporal envelope at the cost of slight ripples in the magnitude
     response. Frequency domain synthesis exhibits smooth magnitude spectra
-    in trade of a slightly irregular temporal envelope.
+    at the cost of a slightly irregular temporal envelope.
 
     Parameters
     ----------
@@ -395,8 +395,8 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
 def exponential_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
-        fade_out=None, butterworth_order=8, sampling_rate=44100,
-        group_delay=False):
+        fade_out=None, bandpass_order=8, sampling_rate=44100,
+        return_group_delay=False):
     """
     Generate sine sweep with exponentially increasing frequency in the
     frequency domain.
@@ -405,9 +405,9 @@ def exponential_sweep_freq(
 
     The exponential sweep can also be generated in the time domain
     (:py:func:`~exponential_sweep_time`). Frequency domain synthesis
-    exhibits smooth magnitude spectra in trade of a slightly irregular
+    exhibits smooth magnitude spectra at the cost of a slightly irregular
     temporal envelope. Time domain synthesis exhibits a constant temporal
-    envelope in trade of slight ripples in the magnitude response.
+    envelope at the cost of slight ripples in the magnitude response.
 
     .. note::
         The envelope of the sweep time signal should be constant, apart from
@@ -445,12 +445,12 @@ def exponential_sweep_freq(
         last sample of the sweep that is closer than 60 dB to the absolute
         maximum of the sweep time signal. The default ``None`` does not apply
         a fade-out.
-    butterworth_order : int, optional
+    bandpass_order : int, optional
         The order of the Butterworth filters that are applied to limit the
         frequency range (see above). The default is ``8``.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
-    group_delay : boolean, optional
+    return_group_delay : boolean, optional
         Return the analytical group delay of the sweep. This can be used to
         compute the times at which distortion products appear. The default is
         ``False``.
@@ -463,13 +463,13 @@ def exponential_sweep_freq(
         (see :py:func:`~pyfar.dsp.fft.normalization`).
     group_delay_sweep : FrequencyData
         The analytical group delay of the sweep in seconds as a single sided
-        spectrum. Only returned if `group_delay` is ``True``.
+        spectrum. Only returned if `return_group_delay` is ``True``.
 
     References
     ----------
     .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
            Directors Cut Including Previously Unreleased Material and some
-           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471.
+           Corrections.' J. Audio Eng. Soc. 2001, 49 (6), 443-471.
 
     Examples
     --------
@@ -488,19 +488,19 @@ def exponential_sweep_freq(
         n_samples=n_samples,
         sweep_type='exponential',
         frequency_range=frequency_range,
-        butterworth_order=butterworth_order,
+        bandpass_order=bandpass_order,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
         fade_out=fade_out,
         sampling_rate=sampling_rate,
-        group_delay=group_delay)
+        return_group_delay=return_group_delay)
 
 
 def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude_spectrum, start_margin, stop_margin,
         fade_in=None, fade_out=None, sampling_rate=44100,
-        group_delay=False):
+        return_group_delay=False):
     """
     Generate sine sweep with arbitrary magnitude spectrum in the frequency
     domain.
@@ -543,7 +543,7 @@ def magnitude_spectrum_weighted_sweep(
         a fade-out.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
-    group_delay : boolean, optional
+    return_group_delay : boolean, optional
         Return the analytical group delay of the sweep. This can be used to
         compute the times at which distortion products appear. The default is
         ``False``.
@@ -556,13 +556,13 @@ def magnitude_spectrum_weighted_sweep(
         (see :py:func:`~pyfar.dsp.fft.normalization`).
     group_delay_sweep : FrequencyData
         The analytical group delay of the sweep in seconds as a single sided
-        spectrum. Only returned if `group_delay` is ``True``.
+        spectrum. Only returned if `return_group_delay` is ``True``.
 
     References
     ----------
     .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
            Directors Cut Including Previously Unreleased Material and some
-           Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471.
+           Corrections.' J. Audio Eng. Soc. 2001, 49 (6), 443-471.
 
     Examples
     --------
@@ -582,22 +582,22 @@ def magnitude_spectrum_weighted_sweep(
         n_samples=n_samples,
         sweep_type=magnitude_spectrum,
         frequency_range=[0, sampling_rate / 2],
-        butterworth_order=0,
+        bandpass_order=0,
         start_margin=start_margin,
         stop_margin=stop_margin,
         fade_in=fade_in,
         fade_out=fade_out,
         sampling_rate=sampling_rate,
-        group_delay=group_delay)
+        return_group_delay=return_group_delay)
 
 
-def linear_perfect_sweep(n_samples, sampling_rate=44100, group_delay=False):
+def linear_perfect_sweep(
+        n_samples, sampling_rate=44100, return_group_delay=False):
     """
     Generate a perfect linear sweep in the frequency domain.
 
     The perfect sweep is generated according to [#]_ and is used for adaptive
-    system identification. It is orthogonal to delayed versions of itself and
-    can be played back in a loop.
+    system identification. It is orthogonal to delayed versions of itself.
 
     Parameters
     ----------
@@ -605,7 +605,7 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100, group_delay=False):
         The length of the sweep in samples.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
-    group_delay : boolean, optional
+    return_group_delay : boolean, optional
         Return the analytical group delay of the sweep. This can be used to
         compute the times at which distortion products appear. The default is
         ``False``.
@@ -618,7 +618,7 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100, group_delay=False):
         (see :py:func:`~pyfar.dsp.fft.normalization`).
     group_delay_sweep : FrequencyData
         The analytical group delay of the sweep in seconds as a single sided
-        spectrum. Only returned if `group_delay` is ``True``.
+        spectrum. Only returned if `return_group_delay` is ``True``.
 
     References
     ----------
@@ -672,21 +672,21 @@ def linear_perfect_sweep(n_samples, sampling_rate=44100, group_delay=False):
         n_samples=n_samples,
         sweep_type='perfect_linear',
         frequency_range=[0, sampling_rate / 2],
-        butterworth_order=0,
+        bandpass_order=0,
         start_margin=0,
         stop_margin=0,
         fade_in=None,
         fade_out=None,
         sampling_rate=sampling_rate,
-        group_delay=group_delay)
+        return_group_delay=return_group_delay)
 
 
 def _frequency_domain_sweep(
-        n_samples, sweep_type, frequency_range, butterworth_order,
+        n_samples, sweep_type, frequency_range, bandpass_order,
         start_margin, stop_margin, fade_in, fade_out, sampling_rate,
-        group_delay):
+        return_group_delay):
     """
-    Frequency domain sweep synthesis with arbitrary magnitude response.
+    Frequency domain sweep synthesis with arbitrary magnitude response [#]_.
 
     Non-unique parameters are documented in ``linear_sweep_freq``,
     ``exponential_sweep_freq``, ``linear_perfect_sweep``, and
@@ -721,14 +721,14 @@ def _frequency_domain_sweep(
         sweep parameters are written to `comment`.
     group_delay_sweep : FrequencyData
         The analytical group delay of the sweep in seconds as a single sided
-        spectrum. Only returned if `group_delay` is ``True``.
+        spectrum. Only returned if `return_group_delay` is ``True``.
 
     References
     ----------
-    S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
-    Directors Cut Including Previously Unreleased Material and some
-    Corrections. J. Audio Eng. Soc. 2001, 49 (6), 443-471 (all equations
-    referenced in the code refer to this).
+    .. [#] S. Müller, P. Massarani. 'Transfer Function Measurement with Sweeps.
+           Directors Cut Including Previously Unreleased Material and some
+           Corrections.' J. Audio Eng. Soc. 2001, 49 (6), 443-471. (all
+           equations referenced in the code refer to this).
     """
 
     # check input (only checks for user input, no checks for calling the
@@ -781,15 +781,15 @@ def _frequency_domain_sweep(
         if frequency_range[0] > 0 and frequency_range[1] < sampling_rate / 2:
             band_limit = pyfar.dsp.filter.butterworth(
                 pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
-                butterworth_order, frequency_range, 'bandpass')
+                bandpass_order, frequency_range, 'bandpass')
         elif frequency_range[0] > 0:
             band_limit = pyfar.dsp.filter.butterworth(
                 pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
-                butterworth_order, frequency_range[0], 'highpass')
+                bandpass_order, frequency_range[0], 'highpass')
         elif frequency_range[1] < sampling_rate / 2:
             band_limit = pyfar.dsp.filter.butterworth(
                 pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate),
-                butterworth_order, frequency_range[1], 'lowpass')
+                bandpass_order, frequency_range[1], 'lowpass')
         else:
             band_limit = pyfar.Signal(np.ones_like(sweep_abs), sampling_rate,
                                       n_samples, 'freq')
@@ -868,11 +868,10 @@ def _frequency_domain_sweep(
     if fade is not None:
         sweep = pyfar.dsp.time_window(sweep, fade, shape=shape)
 
-    # normalize to time domain amplitude of almost one
-    # (to avoid clipping if written to fixed point wav file)
-    sweep = pyfar.dsp.normalize(sweep) * (1 - 2**-15)
+    # normalize to time domain amplitude
+    sweep = pyfar.dsp.normalize(sweep)
 
-    if group_delay:
+    if return_group_delay:
         return sweep, sweep_gd
     else:
         return sweep

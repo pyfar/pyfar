@@ -376,7 +376,7 @@ def test_linear_perfect_sweep(n_samples, sampling_rate):
 
     # test returning the group delay
     sweep_2, group_delay = pfs.linear_perfect_sweep(
-        n_samples, sampling_rate, group_delay=True)
+        n_samples, sampling_rate, return_group_delay=True)
 
     assert type(group_delay) is pf.FrequencyData
     assert sweep_2 == sweep
@@ -421,7 +421,7 @@ def test_linear_sweep_freq(n_samples, sampling_rate):
     # test returning the group delay
     sweep_2, group_delay = pfs.linear_sweep_freq(
         n_samples, [200, 16e3], 5000, 5000, sampling_rate=sampling_rate,
-        group_delay=True)
+        return_group_delay=True)
 
     assert type(group_delay) is pf.FrequencyData
     assert sweep == sweep_2
@@ -454,7 +454,7 @@ def test_exponential_sweep_freq(n_samples, sampling_rate):
     # test returning the group delay
     sweep_2, group_delay = pfs.exponential_sweep_freq(
         n_samples, [200, 16e3], 5000, 5000, sampling_rate=sampling_rate,
-        group_delay=True)
+        return_group_delay=True)
 
     assert type(group_delay) is pf.FrequencyData
     assert sweep == sweep_2
@@ -493,7 +493,7 @@ def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
     # test returning the group delay
     sweep_2, group_delay = pfs.magnitude_spectrum_weighted_sweep(
         n_samples, magnitude, 5000, 1000, sampling_rate=sampling_rate,
-        group_delay=True)
+        return_group_delay=True)
 
     assert type(group_delay) is pf.FrequencyData
     assert sweep == sweep_2
@@ -548,9 +548,9 @@ def test_frequency_domain_sweep():
 
     # test butterworth order - sweep with steeper filters contains less energy
     sweep_a = pfs.linear_sweep_freq(
-        2**14, [400, 10e3], 5000, 5000, butterworth_order=4)
+        2**14, [400, 10e3], 5000, 5000, bandpass_order=4)
     sweep_b = pfs.linear_sweep_freq(
-        2**14, [400, 10e3], 5000, 5000, butterworth_order=8)
+        2**14, [400, 10e3], 5000, 5000, bandpass_order=8)
     assert np.abs(sweep_a.freq[0, idx[0]]) > np.abs(sweep_b.freq[0, idx[0]])
     assert np.abs(sweep_a.freq[0, idx[1]]) > np.abs(sweep_b.freq[0, idx[1]])
 
