@@ -213,8 +213,8 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
 
 
 def linear_sweep_freq(
-        n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
-        fade_out=None, bandpass_order=8, sampling_rate=44100,
+        n_samples, frequency_range, start_margin, stop_margin, n_fade_in=0,
+        n_fade_out=0, bandpass_order=8, sampling_rate=44100,
         return_group_delay=False):
     """
     Generate sine sweep with linearly increasing frequency in the frequency
@@ -231,8 +231,8 @@ def linear_sweep_freq(
     .. note::
         The envelope of the sweep time signal should be constant, apart from
         slight overshoots at the beginning and end. If this is not the case,
-        try to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in`
-        or `fade_out`.
+        try to increase `n_samples`, `start_margin`, `stop_margin`, `n_fade_in`
+        or `n_fade_out`.
 
     Parameters
     ----------
@@ -252,15 +252,15 @@ def linear_sweep_freq(
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
         ends at sample ``n_samples-100``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
-    fade_in : int, optional
+    n_fade_in : int, optional
         Duration of a squared sine fade-in in samples. The fade starts at the
         first sample of the sweep that is closer than 60 dB to the absolute
-        maximum of the sweep time signal. The default ``None`` does not apply
+        maximum of the sweep time signal. The default ``0`` does not apply
         a fade-in.
-    fade_out : int, optional
+    n_fade_out : int, optional
         Duration of a squared cosine fade-out in samples. The fade ends at the
         last sample of the sweep that is closer than 60 dB to the absolute
-        maximum of the sweep time signal. The default ``None`` does not apply
+        maximum of the sweep time signal. The default ``0`` does not apply
         a fade-out.
     bandpass_order : int, optional
         The order of the Butterworth filters that are applied to limit the
@@ -307,8 +307,8 @@ def linear_sweep_freq(
         bandpass_order=bandpass_order,
         start_margin=start_margin,
         stop_margin=stop_margin,
-        fade_in=fade_in,
-        fade_out=fade_out,
+        n_fade_in=n_fade_in,
+        n_fade_out=n_fade_out,
         sampling_rate=sampling_rate,
         return_group_delay=return_group_delay)
 
@@ -394,8 +394,8 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
 
 def exponential_sweep_freq(
-        n_samples, frequency_range, start_margin, stop_margin, fade_in=None,
-        fade_out=None, bandpass_order=8, sampling_rate=44100,
+        n_samples, frequency_range, start_margin, stop_margin, n_fade_in=0,
+        n_fade_out=0, bandpass_order=8, sampling_rate=44100,
         return_group_delay=False):
     """
     Generate sine sweep with exponentially increasing frequency in the
@@ -412,8 +412,8 @@ def exponential_sweep_freq(
     .. note::
         The envelope of the sweep time signal should be constant, apart from
         slight overshoots at the beginning and end. If this is not the case,
-        try to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in`
-        or `fade_out`.
+        try to increase `n_samples`, `start_margin`, `stop_margin`, `n_fade_in`
+        or `n_fade_out`.
 
     Parameters
     ----------
@@ -435,15 +435,15 @@ def exponential_sweep_freq(
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
         ends at sample ``n_samples-100``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
-    fade_in : int, optional
+    n_fade_in : int, optional
         Duration of a squared sine fade-in in samples. The fade starts at the
         first sample of the sweep that is closer than 60 dB to the absolute
-        maximum of the sweep time signal. The default ``None`` does not apply
+        maximum of the sweep time signal. The default ``0`` does not apply
         a fade-in.
-    fade_out : int, optional
+    n_fade_out : int, optional
         Duration of a squared cosine fade-out in samples. The fade ends at the
         last sample of the sweep that is closer than 60 dB to the absolute
-        maximum of the sweep time signal. The default ``None`` does not apply
+        maximum of the sweep time signal. The default ``0`` does not apply
         a fade-out.
     bandpass_order : int, optional
         The order of the Butterworth filters that are applied to limit the
@@ -491,15 +491,15 @@ def exponential_sweep_freq(
         bandpass_order=bandpass_order,
         start_margin=start_margin,
         stop_margin=stop_margin,
-        fade_in=fade_in,
-        fade_out=fade_out,
+        n_fade_in=n_fade_in,
+        n_fade_out=n_fade_out,
         sampling_rate=sampling_rate,
         return_group_delay=return_group_delay)
 
 
 def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude_spectrum, start_margin, stop_margin,
-        fade_in=None, fade_out=None, sampling_rate=44100,
+        n_fade_in=0, n_fade_out=0, sampling_rate=44100,
         return_group_delay=False):
     """
     Generate sine sweep with arbitrary magnitude spectrum in the frequency
@@ -512,8 +512,8 @@ def magnitude_spectrum_weighted_sweep(
     .. note::
         The envelope of the sweep time signal should be constant, apart from
         slight overshoots at the beginning and end. If this is not the case,
-        try to increase `n_samples`, `start_margin`, `stop_margin`, `fade_in`
-        or `fade_out`, or provide a more smooth magnitude spectrum.
+        try to increase `n_samples`, `start_margin`, `stop_margin`, `n_fade_in`
+        or `n_fade_out`, or provide a more smooth magnitude spectrum.
 
     Parameters
     ----------
@@ -531,15 +531,15 @@ def magnitude_spectrum_weighted_sweep(
         `n_samples`, e.g., a stop margin of 100 samples means that the sweep
         ends at sample ``n_samples-100``. This is required, because the
         frequency domain sweep synthesis has post-ringing in the time domain.
-    fade_in : int, optional
+    n_fade_in : int, optional
         Duration of a squared sine fade-in in samples. The fade starts at the
         first sample of the sweep that is closer than 60 dB to the absolute
-        maximum of the sweep time signal. The default ``None`` does not apply
+        maximum of the sweep time signal. The default ``0`` does not apply
         a fade-in.
-    fade_out : int, optional
+    n_fade_out : int, optional
         Duration of a squared cosine fade-out in samples. The fade ends at the
         last sample of the sweep that is closer than 60 dB to the absolute
-        maximum of the sweep time signal. The default ``None`` does not apply
+        maximum of the sweep time signal. The default ``0`` does not apply
         a fade-out.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
@@ -585,8 +585,8 @@ def magnitude_spectrum_weighted_sweep(
         bandpass_order=0,
         start_margin=start_margin,
         stop_margin=stop_margin,
-        fade_in=fade_in,
-        fade_out=fade_out,
+        n_fade_in=n_fade_in,
+        n_fade_out=n_fade_out,
         sampling_rate=sampling_rate,
         return_group_delay=return_group_delay)
 
@@ -675,15 +675,15 @@ def linear_perfect_sweep(
         bandpass_order=0,
         start_margin=0,
         stop_margin=0,
-        fade_in=None,
-        fade_out=None,
+        n_fade_in=0,
+        n_fade_out=0,
         sampling_rate=sampling_rate,
         return_group_delay=return_group_delay)
 
 
 def _frequency_domain_sweep(
         n_samples, sweep_type, frequency_range, bandpass_order,
-        start_margin, stop_margin, fade_in, fade_out, sampling_rate,
+        start_margin, stop_margin, n_fade_in, n_fade_out, sampling_rate,
         return_group_delay):
     """
     Frequency domain sweep synthesis with arbitrary magnitude response [#]_.
@@ -843,7 +843,7 @@ def _frequency_domain_sweep(
 
     # find windowing end points heuristically. The start and stop margin are
     # not reliable, because freq. domain synthesis causes pre/post-ringing
-    if fade_in or fade_out:
+    if n_fade_in or n_fade_out:
         threshold = 10**(-60/20) * np.max(np.abs(sweep.time))
         fade_start = np.argmax(np.abs(sweep.time) > threshold)
         fade_end = n_samples - \
@@ -851,15 +851,15 @@ def _frequency_domain_sweep(
         print([fade_start, fade_end])
 
     # generate windows for fade in and/or out
-    if fade_in and fade_out:
-        fade = [fade_start, fade_start + fade_in,
-                fade_end - fade_out, fade_end]
+    if n_fade_in and n_fade_out:
+        fade = [fade_start, fade_start + n_fade_in,
+                fade_end - n_fade_out, fade_end]
         shape = 'symmetric'
-    elif fade_in:
-        fade = [fade_start, fade_start + fade_in]
+    elif n_fade_in:
+        fade = [fade_start, fade_start + n_fade_in]
         shape = 'left'
-    elif fade_out:
-        fade = [fade_end - fade_out, fade_end]
+    elif n_fade_out:
+        fade = [fade_end - n_fade_out, fade_end]
         shape = 'right'
     else:
         fade = None
