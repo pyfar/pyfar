@@ -317,6 +317,42 @@ def test_write_filterSOS(filterSOS, tmpdir):
     assert actual == filterSOS
 
 
+def test_write_fractionaloctave_bands(tmpdir):
+    """ dsp.filter.FractionalOctaveBands
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'fractionaloctave_bands.far')
+    fractionaloctave_bands = pyfar.dsp.filter.FractionalOctaveBands(
+        frequency_range=(20, 10000))
+    fractionaloctave_bands.init_state((1, ))
+    fractionaloctave_bands.process(pyfar.signals.sine(1000, 441), True)
+    io.write(filename, fractionaloctave_bands=fractionaloctave_bands)
+    actual = io.read(filename)["fractionaloctave_bands"]
+    assert isinstance(actual, pyfar.dsp.filter.FractionalOctaveBands)
+    assert actual == fractionaloctave_bands
+
+
+def test_write_reconstructingfractionaloctave_bands(tmpdir):
+    """ dsp.filter.ReconstructingFractionalOctaveBands
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(
+        tmpdir,
+        'reconstructingfractionaloctave_bands.far')
+    rfractionaloctave_bands =\
+        pyfar.dsp.filter.ReconstructingFractionalOctaveBands(
+            frequency_range=(20, 10000),
+            overlap=1)
+    rfractionaloctave_bands.init_state((1, ))
+    rfractionaloctave_bands.process(pyfar.signals.sine(1000, 441), True)
+    io.write(filename, rfractionaloctave_bands=rfractionaloctave_bands)
+    actual = io.read(filename)["rfractionaloctave_bands"]
+    assert isinstance(
+        actual,
+        pyfar.dsp.filter.ReconstructingFractionalOctaveBands)
+    assert actual == rfractionaloctave_bands
+
+
 def test_write_gammatone_bands(tmpdir):
     """ dsp.filter.GammatoneBands
     Make sure `read` understands the bits written by `write`
