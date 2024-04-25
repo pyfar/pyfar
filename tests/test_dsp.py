@@ -286,7 +286,7 @@ def test_time_shift_linear(shift, pad_value):
         ref.time[0, -2:] = pad_value
 
     npt.assert_allclose(shifted.time, ref.time)
-    assert type(shifted) == type(ref)
+    assert type(shifted) is type(ref)
 
 
 @pytest.mark.parametrize("shift_samples", [(
@@ -789,6 +789,19 @@ def test_convolve_mode_and_method(method, mode, desired):
     y = pf.Signal([1, -1, 0.1], 44100)
     res = dsp.convolve(x, y, mode=mode, method=method)
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+def test_convolve_mismatching_cdims():
+    """
+    Test if convolve works with broadcastable signals with different cdims
+    """
+    # generate and convolve signals
+    signal_a = pf.signals.impulse(1, amplitude=np.atleast_2d([1, 2]))
+    signal_b = pf.Signal([1, -1], 44100)
+    result = pf.dsp.convolve(signal_a, signal_b)
+    # check the result
+    npt.assert_almost_equal(result.time[0, 0].flatten(), [1, -1])
+    npt.assert_almost_equal(result.time[0, 1].flatten(), [2, -2])
 
 
 def test_convolve_mode_error():

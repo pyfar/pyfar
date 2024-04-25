@@ -12,6 +12,7 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class _Audio():
@@ -94,10 +95,51 @@ class _Audio():
                 newshape + (length_last_dimension, ))
         except ValueError:
             if np.prod(newshape) != np.prod(self.cshape):
-                raise ValueError((f"Can not reshape audio object of cshape "
+                raise ValueError((f"Cannot reshape audio object of cshape "
                                   f"{self.cshape} to {newshape}"))
 
         return reshaped
+
+    def transpose(self, *axes):
+        """Transpose time/frequency data and return copy of the audio object.
+
+        Parameters
+        ----------
+        caxes : empty, ``None``, iterable of ints, or n ints
+            Define how the :py:mod:` caxes <pyfar._concepts.audio_classes>`
+            are ordered in the transposed audio object.
+            Note that the last dimension of the data in the audio object
+            always contains the time samples or frequency bins and can not
+            be transposed.
+
+            empty (default) or ``None``
+                reverses the order of ``self.caxes``.
+            iterable of ints
+                `i` in the `j`-th place of the interable means
+                that the `i`-th caxis becomes transposed object's `j`-th caxis.
+            n ints
+                same as 'iterable of ints'.
+        """
+        if hasattr(axes, '__iter__'):
+            axes = axes[0] if len(axes) == 1 else axes
+        if axes is None or len(axes) == 0:
+            axes = tuple(range(len(self.cshape)))[::-1]
+        else:
+            assert all([a > -len(self.cshape) - 1 for a in axes]), \
+                "Negative axes index out of bounds."
+            axes = tuple([a % len(self.cshape) if a < 0 else a for a in axes])
+
+        # throw exception before deepcopy
+        np.empty(np.ones(len(self.cshape), dtype=int)).transpose(axes)
+        transposed = deepcopy(self)
+        transposed._data = transposed._data.transpose(*axes, len(self.cshape))
+
+        return transposed
+
+    @property
+    def T(self):
+        """Shorthand for `Signal.transpose()`."""
+        return self.transpose()
 
     def flatten(self):
         """Return flattened copy of the audio object.
@@ -612,15 +654,14 @@ class Signal(FrequencyData, TimeData):
         elif domain == 'freq':
             # check and set n_samples
             if n_samples is None:
+                n_samples = max(1, (data.shape[-1] - 1)*2)
                 warnings.warn(
-                    "Number of time samples not given, assuming an even "
-                    "number of samples from the number of frequency bins.")
-                n_samples = (data.shape[-1] - 1)*2
+                    f"Number of samples not given, assuming {n_samples} "
+                    f"samples from {data.shape[-1]} frequency bins.")
             elif n_samples > 2 * data.shape[-1] - 1:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"))
             self._n_samples = n_samples
-            self._n_bins = data.shape[-1]
             # Init remaining parameters
             FrequencyData.__init__(self, data, self.frequencies, comment)
             delattr(self, '_frequencies')
@@ -653,24 +694,7 @@ class Signal(FrequencyData, TimeData):
     @freq.setter
     def freq(self, value):
         """Set the normalized frequency domain data."""
-        # check data type
-        data = np.atleast_2d(np.asarray(value))
-        if data.dtype.kind not in ["i", "f", "c"]:
-            raise ValueError((f"frequency data is {data.dtype} must be int, "
-                              "float, or complex"))
-        # Check n_samples
-        if data.shape[-1] != self.n_bins:
-            warnings.warn(UserWarning((
-                "Number of frequency bins changed, assuming an even "
-                "number of samples from the number of frequency bins.")))
-            self._n_samples = (data.shape[-1] - 1)*2
-        # set domain
-        self._domain = 'freq'
-        # remove normalization
-        data_denorm = fft.normalization(
-                data, self._n_samples, self._sampling_rate,
-                self._fft_norm, inverse=True)
-        self._data = data_denorm.astype(complex)
+        self._freq(value, raw=False)
 
     @property
     def freq_raw(self):
@@ -688,17 +712,28 @@ class Signal(FrequencyData, TimeData):
     @freq_raw.setter
     def freq_raw(self, value):
         """Set the frequency domain data without normalization."""
+        self._freq(value, raw=True)
+
+    def _freq(self, value, raw):
+        """Set the frequency domain data."""
+        # check data type
         data = np.atleast_2d(np.asarray(value))
         if data.dtype.kind not in ["i", "f", "c"]:
             raise ValueError((f"frequency data is {data.dtype} must be int, "
                               "float, or complex"))
         # Check n_samples
         if data.shape[-1] != self.n_bins:
-            warnings.warn(UserWarning((
-                "Number of frequency bins changed, assuming an even "
-                "number of samples from the number of frequency bins.")))
-            self._n_samples = (data.shape[-1] - 1)*2
+            self._n_samples = max(1, (data.shape[-1] - 1)*2)
+            warnings.warn(
+                f"Number of samples not given, assuming {self.n_samples} "
+                f"samples from {data.shape[-1]} frequency bins.")
+        # set domain
         self._domain = 'freq'
+        if not raw:
+            # remove normalization
+            data = fft.normalization(
+                    data, self._n_samples, self._sampling_rate,
+                    self._fft_norm, inverse=True)
         self._data = data.astype(complex)
 
     @_Audio.domain.setter
@@ -790,6 +825,13 @@ class Signal(FrequencyData, TimeData):
                       fft_norm=self.fft_norm, comment=self.comment)
         return item
 
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        selfcopy = self.copy()
+        selfcopy.domain = "time"
+        class_dict = selfcopy.__dict__
+        return class_dict
+
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
@@ -823,6 +865,9 @@ class Signal(FrequencyData, TimeData):
     def __len__(self):
         """Length of the object which is the number of samples stored.
         """
+        warnings.warn(
+            ("len(Signal) will be deprecated in pyfar 0.8.0 "
+             "Use Signal.n_samples instead"), PyfarDeprecationWarning)
         return self.n_samples
 
     def __iter__(self):

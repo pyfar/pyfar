@@ -229,23 +229,17 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
         else:
             # Equation 12 in Ahrens et al. 2020
             norm /= np.sum(window)**2
-        # the phase is kept for being able to switch between normalizations
-        # altoug the power spectrum does usually not have phase information,
-        # i.e., spec = np.abs(spec)**2
         if not inverse:
-            spec *= np.abs(spec)
+            spec = np.abs(spec)**2
     elif fft_norm == 'psd':
         if window is None:
             # Equation 6 in Ahrens et al. 2020
             norm /= (n_samples * sampling_rate)
         else:
             # Equation 13 in Ahrens et al. 2020
-            norm /= (np.sum(window)**2 * sampling_rate)
-        # the phase is kept for being able to switch between normalizations
-        # altoug the power spectrum does usually not have phase information,
-        # i.e., spec = np.abs(spec)**2
+            norm /= (np.sum(np.asarray(window)**2) * sampling_rate)
         if not inverse:
-            spec *= np.abs(spec)
+            spec = np.abs(spec)**2
     elif fft_norm != 'unitary':
         raise ValueError(("norm type must be 'unitary', 'amplitude', 'rms', "
                           f"'power', or 'psd' but is '{fft_norm}'"))

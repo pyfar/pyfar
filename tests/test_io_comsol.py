@@ -45,6 +45,7 @@ def test_read_comsol_error_wrong_domain():
     ('pressure_only', ['pabe.p_t']),
     ('pressure_parametric', ['pabe.p_t']),
     ('intensity_product', ['pabe.p_t*pabe.v_inst*2/sqrt(2)']),
+    ('character_collection', ['1e-3[m/s]*(1e3)']),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_expressions(filename, expressions, type):
@@ -63,6 +64,7 @@ def test_read_comsol_header_expressions(filename, expressions, type):
     ('pressure_only', ['Pa']),
     ('pressure_parametric', ['Pa']),
     ('intensity_product', ['Pa*m/s']),
+    ('character_collection', ['m/s']),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_expressions_unit(filename, expressions_unit, type):
@@ -103,6 +105,7 @@ def test_read_comsol_header_parameters(filename, parameters, type):
     ('pressure_only', 'freq'),
     ('pressure_parametric', 'freq'),
     ('intensity_product', 'freq'),
+    ('character_collection', 'freq'),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_domain(filename, domain, type):
@@ -120,6 +123,7 @@ def test_read_comsol_header_domain(filename, domain, type):
     ("pressure_only", [100, 500]),
     ("pressure_parametric", [100, 500]),
     ('intensity_product', [100, 500]),
+    ('intensity_product', [100, 500]),
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_header_domain_data(filename, domain_data, type):
@@ -136,6 +140,7 @@ def test_read_comsol_header_domain_data(filename, domain_data, type):
     'pressure_only',
     'pressure_parametric',
     'intensity_product',
+    'character_collection'
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_data_domain(filename, type):
@@ -185,7 +190,7 @@ def test_read_comsol_data_shapes(filename, nodes, type):
 def test_read_comsol_coordinates(filename, type):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     _, coordinates = io.read_comsol(path + type)
-    xyz = coordinates.get_cart()
+    xyz = coordinates.cartesian
     assert all(xyz[0] == [-.5, -.5, -.5])
     assert all(xyz[1] == [0.5, -0.5, -0.5])
     assert all(xyz[2] == [-0.5, 0.5, -0.5])
@@ -272,7 +277,8 @@ def test_read_comsol_parameters_another_value_data(filename, p1, type):
     'pressure_acceleration_parametric_time',
     'pressure_only',
     'pressure_parametric',
-    'intensity_product'
+    'intensity_product',
+    'character_collection'
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_expressions(filename, type):

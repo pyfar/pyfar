@@ -59,7 +59,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
     $ flake8 pyfar tests
     $ pytest
 
-   flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust the your flake8 and linting configuration in your IDE accordingly.
+   flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust your flake8 and linting configuration in your IDE accordingly.
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -76,7 +76,37 @@ Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put your new functionality into a function with a docstring.
-3. If checks to not pass, have a look at https://travis-ci.com/pyfar/pyfar/pull_requests for more information.
+3. If checks do not pass, have a look at https://app.circleci.com/pipelines/github/pyfar/pyfar for more information.
+
+Function and Class Guidelines
+-----------------------------
+
+Functions and classes should
+
+* have a single clear purpose and a functionality limited to that purpose. Conditional parameters are fine in some cases but are an indicator that a function or class does not have a clear purpose. Conditional parameters are
+
+  - parameters that are obsolete if another parameter is provided
+  - parameters that are necessary only if another parameter is provided
+  - parameters that must have a specific value depending on other parameters
+
+* be split into multiple functions or classes if the functionality not well limited.
+* contain documentation for all input and output parameters.
+* contain examples in the documentation if they are non-trivial to use.
+* contain comments in the code that explain decisions and parts that are not trivial to read from the code. As a rule of thumb, too much comments are better than to little comments.
+* use clear names for all variables
+
+It is also a good idea to follow `the Zen of Python <https://peps.python.org/pep-0020/>`_
+
+Errors should be raised if
+
+* Audio objects do not have the correct type (e.g. a TimeData instance is passed but a Signal instance is required)
+* String input that specifies a function option has an invalid value (e.g. 'linea' was passed but 'linear' was required)
+* Invalid parameter combinations are used
+
+Warnings should be raised if
+
+* Results might be wrong or unexpected
+* Possibly bad parameter combinations are used
 
 
 Testing Guidelines
@@ -88,6 +118,17 @@ In the following, you'll find a guideline. Note: these instructions are not gene
 - All tests are located in the *tests/* folder.
 - Make sure that all important parts of pyfar are covered by the tests. This can be checked using *coverage* (see below).
 - In case of pyfar, mainly **state verification** is applied in the tests. This means that the outcome of a function is compared to a desired value (``assert ...``). For more information, it is refered to `Martin Fowler's article <https://martinfowler.com/articles/mocksArentStubs.html.>`_.
+
+Required Tests
+~~~~~~~~~~~~~~
+
+The testing should include
+
+- Test all errors and warnings (see also function and class guidelines above)
+- Test all parameters
+- Test specific parameter combinations if required
+- Test with single and multi-dimensional input data such Signal objects and array likes
+- Test with audio objects with complex time data and NaN values (if applicable)
 
 Tips
 ~~~~~~~~~~~
@@ -101,7 +142,7 @@ Pytest provides several, sophisticated functionalities which could reduce the ef
 
 - Exclude tests (for example the time consuming test of plot) with
 
-    $ pytest -k 'not plot'
+    $ pytest -k 'not plot and not interaction'
 
 - Create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ with
 
@@ -111,7 +152,7 @@ Pytest provides several, sophisticated functionalities which could reduce the ef
 
 Fixtures
 ~~~~~~~~
-"Software test fixtures initialize test functions. They provide a fixed baseline so that tests execute reliably and produce consistent, repeatable, results. Initialization may setup services, state, or other operating environments. These are accessed by test functions through arguments; for each fixture used by a test function there is typically a parameter (named after the fixture) in the test function’s definition." (from https://docs.pytest.org/en/stable/fixture.html)
+"Software test fixtures initialize test functions. They provide a fixed baseline so that tests execute reliably and produce consistent, repeatable, results. Initialization may setup services, state, or other operating environments. These are accessed by test functions through parameters; for each fixture used by a test function there is typically a parameter (named after the fixture) in the test function’s definition." (from https://docs.pytest.org/en/stable/fixture.html)
 
 - All fixtures are implemented in *conftest.py*, which makes them automatically available to all tests. This prevents from implementing redundant, unreliable code in several test files.
 - Typical fixtures are pyfar objects with varying properties, stubs as well as functions need for initiliazing tests.
@@ -166,7 +207,7 @@ Here are a few tips to make things run smoothly
 - Use ``[#]_`` and ``.. [#]`` to get automatically numbered footnotes.
 - Do not use footnotes in the short summary. Only use footnotes in the extended summary if there is a short summary. Otherwise, it messes with the auto-footnotes.
 - If a method or class takes or returns pyfar objects for example write ``parameter_name : Signal``. This will create a link to the ``pyfar.Signal`` class.
-- Plots can be included in by using the prefix ``.. plot::`` followed by an empty line and an indented block containing the code for the plot. See `pyfar.plot.line.time.py` for examples.
+- Plots can be included in the documentation by using the prefix ``.. plot::`` followed by an empty line and an indented block containing the code for the plot. See `pyfar.plot.line.time.py` for examples.
 
 See the `Sphinx homepage <https://www.sphinx-doc.org>`_ for more information.
 
@@ -203,8 +244,7 @@ A reminder for the maintainers on how to deploy.
 
 - Commit all changes to develop
 - Update HISTORY.rst in develop
-- Check if new contributors should be added to AUTHORS.rst
-- Check if examples/pyfar_demo.ipynb needs to be updated
+- Check if gallery needs to be updated
 - Merge develop into main
 
 Switch to main and run::
@@ -212,9 +252,9 @@ Switch to main and run::
 $ bumpversion patch # possible: major / minor / patch
 $ git push --follow-tags
 
-Travis will then deploy to PyPI if tests pass.
+The testing platform will then deploy to PyPI if tests pass.
 
 - merge main back into develop
-- check `binder`_
+- check gallery in `binder`_
 
-.. _binder: https://mybinder.org/v2/gh/pyfar/pyfar/main?filepath=examples%2Fpyfar_demo.ipynb
+.. _binder: https://mybinder.org/v2/gh/pyfar/gallery/main?filepath=docs/gallery

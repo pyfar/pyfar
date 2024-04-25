@@ -1,9 +1,8 @@
 import numpy as np
 from pyfar.plot.utils import context
 from .. import Signal
-from . import (_two_d, _utils)
+from . import _two_d
 from . import _interaction as ia
-import warnings
 
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
@@ -90,7 +89,10 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -124,14 +126,13 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         >>> import numpy as np
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
-        >>> pf.plot.time_2d(impulses)
+        >>> pf.plot.time_2d(impulses, unit='ms')
     """
 
     with context(style):
         ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
             indices, orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
@@ -221,7 +222,10 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -261,7 +265,6 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, freq_scale, indices,
             orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -346,7 +349,10 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -386,7 +392,6 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ax, qm, cb = _two_d._phase_2d(
             signal, deg, unwrap, freq_scale, indices, orientation, method,
             colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -479,7 +484,10 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -519,7 +527,6 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         ax, qm, cb = _two_d._group_delay_2d(
             signal, unit, freq_scale, indices, orientation, method,
             colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -627,7 +634,10 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -661,7 +671,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         >>> import numpy as np
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
-        >>> pf.plot.time_freq_2d(impulses, dB_freq=False)
+        >>> pf.plot.time_freq_2d(impulses, dB_freq=False, unit='ms')
     """
 
     with context(style):
@@ -669,7 +679,6 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
             log_reference, freq_scale, unit, indices, orientation, method,
             colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -763,7 +772,10 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -805,7 +817,6 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
             indices, orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -906,7 +917,10 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -947,7 +961,6 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
             orientation, method, colorbar, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -968,7 +981,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 freq_scale='linear', unit='s', window='hann',
                 window_length=1024, window_overlap_fct=0.5,
-                colorbar=True, ax=None, style='light', yscale=None, **kwargs):
+                colorbar=True, ax=None, style='light', **kwargs):
     """Plot blocks of the magnitude spectrum versus time.
 
     Parameters
@@ -1036,17 +1049,10 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-    yscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to
         ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
@@ -1077,23 +1083,15 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 
         >>> import pyfar as pf
         >>> sweep = pf.signals.linear_sweep_time(2**14, [0, 22050])
-        >>> pf.plot.spectrogram(sweep)
+        >>> pf.plot.spectrogram(sweep, unit='ms')
     """
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    # xscale deprecation
-    if yscale is not None:
-        warnings.warn(('The yscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
-        freq_scale = yscale
-
     with context(style):
         ax, qm, cb = _two_d._spectrogram(
             signal.flatten(), dB, log_prefix, log_reference, freq_scale, unit,
-            window, window_length, window_overlap_fct, colorbar, ax)
-    _utils._tight_layout()
+            window, window_length, window_overlap_fct, colorbar, ax, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(

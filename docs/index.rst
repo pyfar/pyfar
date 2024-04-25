@@ -2,9 +2,6 @@
    :width: 150
    :alt: Alternative text
 
-|pyfar_logo|
-
-
 Getting Started
 ===============
 
@@ -35,7 +32,7 @@ Contributing
 ===============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    contributing
 
@@ -44,7 +41,6 @@ Other
 .. toctree::
    :maxdepth: 1
 
-   authors
    history
 
 ..

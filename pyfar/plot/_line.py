@@ -7,6 +7,7 @@ from .ticker import (
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
+from matplotlib.ticker import NullFormatter
 
 
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
@@ -97,6 +98,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     # set and format ticks
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
@@ -124,16 +126,50 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
 
     # y-axis formatting
     y_margin = 5 if deg else np.radians(5)
-    if not deg and (not unwrap or unwrap == "360"):
-        # nice tick formatting is not done for unwrap=True. In this case
-        # it can create 1000 or more ticks.
-        ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
-        ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
-        ax.yaxis.set_major_formatter(MultipleFractionFormatter(
-            nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
-
     ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
     ymax = np.nanmax(phase_data) + y_margin
+    if unwrap == '360':
+        ymin = -y_margin
+        ymax = 360+y_margin if deg else 2*np.pi+y_margin
+
+    if not deg:
+        if ymax-ymin < np.pi:
+            # set yrange to +/- pi/2
+            ymin = np.pi/2+y_margin
+            ymax = -np.pi/2-y_margin
+            # major ticks at multiples of pi/4
+            ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 4))
+            ax.yaxis.set_major_formatter(MultipleFractionFormatter(
+                nominator=1, denominator=4, base=np.pi, base_str=r'\pi'))
+            # minor ticks at multiples of pi/8
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 8))
+        elif unwrap is True:
+            if ymax-ymin < 20*np.pi:
+                # ticks at at multiples of 2 pi / pi
+                # if yrange is smaller than 20 pi
+                nmaj = 2
+                nmin = 1
+            else:
+                # major ticks at multiples of x*20*pi
+                # with x determined to maximum 10 intervals
+                nmaj = np.ceil((ymax-ymin)/np.pi/9/20)*20
+                # minor ticks at half of major ticks,
+                # but rounded to multiples of 10*pi
+                nmin = np.round(nmaj/2/10)*10
+            ax.yaxis.set_major_locator(
+                MultipleFractionLocator(nmaj, 1, np.pi))
+            ax.yaxis.set_major_formatter(
+                MultipleFractionFormatter(nmaj, 1, np.pi, r'\pi'))
+            ax.yaxis.set_minor_locator(
+                MultipleFractionLocator(nmin/2, 1, np.pi))
+        else:
+            # unwrap is False or "360"
+            # major ticks at multiples of pi/2
+            ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
+            ax.yaxis.set_major_formatter(MultipleFractionFormatter(
+                nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
+            # minor ticks at multiples of pi/4
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 4))
 
     # prepare figure
     ax.set_xlabel("Frequency in Hz")
@@ -152,6 +188,7 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     # set and format ticks
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax
@@ -197,6 +234,7 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
     # set and format ticks
     if freq_scale == 'log':
         ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(LogFormatterITAToolbox())
 
     return ax

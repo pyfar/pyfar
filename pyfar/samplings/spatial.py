@@ -3,6 +3,8 @@ import numpy as np
 from scipy import spatial as spat
 from pyfar import Coordinates
 from copy import deepcopy
+import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class SphericalVoronoi(spat.SphericalVoronoi):
@@ -15,6 +17,9 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         """
         Calculate a Voronoi diagram on the sphere for the given samplings
         points.
+
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of :py:class:`spharpy.samplings.spherical_voronoi`.
 
         Parameters
         ----------
@@ -36,8 +41,13 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         :py:func:`calculate_sph_voronoi_weights`
 
         """
-        points = sampling.get_cart()
-        radius = sampling.get_sph()[:, -1]
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of spharpy.samplings.spherical_voronoi."),
+                PyfarDeprecationWarning)
+
+        points = sampling.cartesian
+        radius = sampling.radius
         radius_round = np.unique(np.round(radius, decimals=round_decimals))
         if len(radius_round) > 1:
             raise ValueError("All sampling points need to be on the \
@@ -74,6 +84,9 @@ def calculate_sph_voronoi_weights(
     """
     Calculate sampling weights for numeric integration.
 
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:class:`spharpy.samplings.calculate_sampling_weights`.
+
     Uses the class method ``calculate_areas`` from :py:class:`SphericalVoronoi`
     to calculate the weights. It requires a spherical sampling grid with a
     single radius and uses ``scipy.spatial.SphericalVoronoi`` in the
@@ -99,6 +112,11 @@ def calculate_sph_voronoi_weights(
         Sampling weights of size `samplings.csize`.
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.calculate_sampling_weights."),
+            PyfarDeprecationWarning)
+
     # get Voronoi diagram
     if sampling.csize <= 3:
         raise ValueError(

@@ -134,7 +134,7 @@ def test_domain_setter_time_when_time():
 
 
 def test_domain_setter_time_when_freq():
-    with pytest.warns(UserWarning, match="Number of time samples"):
+    with pytest.warns(UserWarning, match="Number of samples"):
         signal = Signal([1, 2, 3, 4], 44100, domain='freq', fft_norm='rms')
     domain = 'time'
     signal.domain = domain
@@ -150,12 +150,18 @@ def test_signal_init_val():
 
 def test_signal_init_freq():
     """Test to init Signal with spectrum."""
+    # full parameters
     signal = Signal(
         [1, 2, 3], 44100, n_samples=4, domain='freq', fft_norm='amplitude')
     assert isinstance(signal, Signal)
     npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]), atol=1e-15)
     desired = np.array([[1., 2./2, 3.]]) * 4
     npt.assert_allclose(signal._data, desired, atol=1e-15)
+
+    # minimal parameters single frequency data
+    with pytest.warns(UserWarning, match="Number of samples not given"):
+        signal = Signal([1], 44100, domain='freq')
+    npt.assert_allclose(signal._data, np.array([[1]]), atol=1e-15)
 
 
 def test_n_samples():
@@ -207,12 +213,23 @@ def test_setter_freq():
     """Test if attribute freq is set correctly and for the warning for
     estimating the number of samples from n_bins."""
     signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
-    with pytest.warns(UserWarning, match="Number of frequency bins"):
+    with pytest.warns(UserWarning, match="Number of samples not given"):
         signal.freq = np.array([[1., 2., 3.]])
     assert signal.domain == 'freq'
     desired = signal.n_samples * np.array([[1., 2./2, 3.]])
     npt.assert_allclose(signal._data, desired)
     npt.assert_allclose(signal.freq, np.array([[1., 2., 3.]]))
+
+
+def test_setter_freq_single_frequency():
+    """Test if attribute freq is set correctly for single frequency data."""
+    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
+    with pytest.warns(UserWarning, match="Number of samples not given"):
+        signal.freq = np.array([[1.]])
+    assert signal.domain == 'freq'
+    desired = signal.n_samples * np.array([[1.]])
+    npt.assert_allclose(signal._data, desired)
+    npt.assert_allclose(signal.freq, np.array([[1.]]))
 
 
 def test_getter_sampling_rate():
@@ -350,12 +367,6 @@ def test_magic_setitem_wrong_type(audio):
         signal[0] = audio
 
 
-def test_magic_len():
-    """Test the magic function __len__."""
-    signal = Signal([1, 2, 3], 44100)
-    assert len(signal) == 3
-
-
 def test_find_nearest_time():
     sampling_rate = 100
     signal = Signal(np.zeros(100), sampling_rate)
@@ -408,8 +419,27 @@ def test_reshape_exceptions():
         signal_out = signal_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape audio object'):
+    with pytest.raises(ValueError, match='Cannot reshape audio object'):
         signal_out = signal_in.reshape((3, 4))
+
+
+def test_transpose():
+    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    signal_out = signal_in.transpose()
+    npt.assert_allclose(signal_in.T._data, signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
+
+
+@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
+def test_transpose_args(taxis):
+    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    signal_out = signal_in.transpose(taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
+    signal_out = signal_in.transpose(*taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
 
 
 def test_flatten():
@@ -471,10 +501,21 @@ def test_freq_raw():
 def test_setter_freq_raw():
     """Test if attribute freq_raw is set correctly."""
     signal = Signal([1, 2, 3], 44100, fft_norm='amplitude', n_samples=4)
-    with pytest.warns(UserWarning, match="Number of frequency bins"):
+    with pytest.warns(UserWarning, match="Number of samples not given"):
         signal.freq_raw = np.array([[1., 2., 3.]])
     assert signal.domain == 'freq'
     npt.assert_allclose(signal._data, np.array([[1., 2., 3.]]))
+
+
+def test_setter_freq_raw_single_frequency():
+    """
+    Test if attribute freq_raw is set correctly for single frequency data.
+    """
+    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
+    with pytest.warns(UserWarning, match="Number of samples not given"):
+        signal.freq_raw = np.array([[1.]])
+    assert signal.domain == 'freq'
+    npt.assert_allclose(signal._data, np.array([[1.]]))
 
 
 def test_setter_freq_raw_dtype():
