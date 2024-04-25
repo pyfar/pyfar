@@ -141,8 +141,7 @@ def test_allpass(impulse, order):
     # definition of group delay at fc (Tietze et al.)
     T_fc_desired = T_gr_0 * (1 / np.sqrt(2))
     # id of frequency bin closest to fc
-    freqs = sig_filt.frequencies
-    idx = np.argmin(abs(freqs - fc))
+    idx = sig_filt.find_nearest_frequency(fc)
     # group delay below fc and at fc
     T_below = gd[:idx]
     T_fc = gd[idx]
@@ -170,21 +169,26 @@ def test_allpass(impulse, order):
 
 def test_allpass_warnings(impulse, fc=1000):
     # test ValueError
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError,
+                       match='Either signal or sampling_rate must be none.'):
         # pass signal and sampling rate
-        _ = pfilt.allpass(impulse, fc, 1, sampling_rate=44100)
-    with pytest.raises(ValueError):
+        pfilt.allpass(impulse, fc, 1, sampling_rate=44100)
+    with pytest.raises(ValueError,
+                       match='Either signal or sampling_rate must be none.'):
         # pass no signal and no sampling rate
-        _ = pfilt.allpass(None, fc, 1)
-    with pytest.raises(ValueError):
+        pfilt.allpass(None, fc, 1)
+    with pytest.raises(ValueError,
+                       match='Order must be 1 or 2'):
         # pass wrong order
-        _ = pfilt.allpass(impulse, fc, 3)
-    with pytest.raises(ValueError):
+        pfilt.allpass(impulse, fc, 3)
+    with pytest.raises(ValueError,
+                       match='Coefficients must match the allpass order'):
         # pass wrong combination of coefficients and order
-        _ = pfilt.allpass(impulse, fc, 1, [1, 2])
-    with pytest.raises(ValueError):
+        pfilt.allpass(impulse, fc, 1, [1, 2])
+    with pytest.raises(ValueError,
+                       match='Coefficients must match the allpass order'):
         # pass wrong combination of coefficients and order
-        _ = pfilt.allpass(impulse, fc, 2, 1)
+        pfilt.allpass(impulse, fc, 2, 1)
 
 
 def test_bell(impulse):

@@ -96,9 +96,10 @@ blob/master/filter_design/audiofilter.py
 
     # check if coefficients match filter order
     if coefficients is not None and (
-            (order == 1 and np.isscalar(coefficients) is False)
-            or (order == 2 and (isinstance(coefficients, (list, np.ndarray))
-                                is False or len(coefficients) != 2))):
+            (order == 1 and np.isscalar(coefficients) is False) or
+            (order == 2 and (
+                not isinstance(coefficients, (list, np.ndarray)) or
+                len(coefficients) != 2))):
         print(type(coefficients), order)
         raise ValueError('Coefficients must match the allpass order')
 
