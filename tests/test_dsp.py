@@ -718,7 +718,8 @@ def test_minimum_phase_multidim():
     npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
 
 
-def test_impulse_response_delay():
+@pytest.mark.parametrize("is_complex", [False, True])
+def test_impulse_response_delay(is_complex):
     """Test delay of an ideal impulse"""
     n_samples = 2**10
     snr = 60
@@ -726,6 +727,10 @@ def test_impulse_response_delay():
 
     ir = pf.signals.impulse(n_samples, delay=start_sample)
     noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
+    if is_complex:
+        ir.fft_norm = 'none'
+        noise.fft_norm = 'none'
+        ir.complex = is_complex
 
     start_sample_est = dsp.find_impulse_response_delay(ir)
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-6)
