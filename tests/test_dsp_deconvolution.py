@@ -84,15 +84,15 @@ def test_output_sweep(is_complex_sig1, is_complex_sig2):
     sweep_1 = pfs.exponential_sweep_time(fs, (100, 10000))
     sweep_2 = pfs.exponential_sweep_time(fs, (100, 10000))
 
-    eval_range_start = 0
+    eval_range_start = sweep_1.find_nearest_frequency(0)
     if is_complex_sig1:
         sweep_1.fft_norm = 'none'
         sweep_1.complex = is_complex_sig1
-        eval_range_start = int(fs/2)
+        eval_range_start = sweep_1.find_nearest_frequency(0)
     if is_complex_sig2:
         sweep_2.fft_norm = 'none'
         sweep_2.complex = is_complex_sig2
-        eval_range_start = int(fs/2)
+        eval_range_start = sweep_2.find_nearest_frequency(0)
 
     res = pf.dsp.dsp.deconvolve(
         sweep_1, sweep_2,
