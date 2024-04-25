@@ -629,6 +629,12 @@ class Signal(FrequencyData, TimeData):
                Austria, May 2020, p. e-Brief 600.
 
         """
+        # unpack array
+        if hasattr(sampling_rate, '__iter__'):
+            assert len(sampling_rate) != 0
+            if len(sampling_rate) != 1:
+                raise ValueError("Multirate signals are not supported.")
+            sampling_rate = sampling_rate[0]
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
