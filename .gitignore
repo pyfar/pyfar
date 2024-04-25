@@ -124,3 +124,8 @@ pyfar/signals/files/*
 # workaround for failing test discovery in vscode
 tests/*/__init__.py
 tests/private/
+
+# files set up by native python venv
+Scripts
+share
+pyvenv.cfg

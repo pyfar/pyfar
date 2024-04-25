@@ -58,19 +58,22 @@ def test_fractional_coeff_oct_filter_iec():
          [1.00000000e+00, -2.00000000e+00,  1.00000000e+00,
           1.00000000e+00, -1.67171842e+00,  8.18664740e-01]]])
 
-    actual = filter.fractional_octaves._coefficients_fractional_octave_bands(
-        sr, 1, freq_range=(1e3, 4e3), order=order)
-    np.testing.assert_allclose(actual, expected)
+    FOFB = filter.fractional_octaves.FractionalOctaveBands(
+        1, frequency_range=(1e3, 4e3), order=order, sampling_rate=sr)
+    np.testing.assert_allclose(FOFB.coefficients, expected)
 
     sr = 16e3
     order = 6
+
+    FOFB = filter.fractional_octaves.FractionalOctaveBands(
+        1, frequency_range=(5e3, 20e3), order=order, sampling_rate=sr)
 
     with pytest.warns(UserWarning, match="Skipping bands"):
         actual = filter.fractional_octaves. \
                     _coefficients_fractional_octave_bands(
                         sr, 1, freq_range=(5e3, 20e3), order=order)
 
-    assert actual.shape == (1, order, 6)
+    assert FOFB.coefficients.shape == (1, order, 6)
 
 
 def test_fract_oct_filter_iec():
@@ -81,15 +84,17 @@ def test_fract_oct_filter_iec():
     n_samples = 2**10
     impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
-    f_obj = filter.fractional_octave_bands(
-        None, 3, sampling_rate=sr, order=order)
-    assert isinstance(f_obj, FilterSOS)
+    FOFB = filter.fractional_octaves.FractionalOctaveBands(
+        num_fractions=3, order=order, sampling_rate=sr)
+    assert isinstance(FOFB, FilterSOS)
 
-    sig = filter.fractional_octave_bands(impulse, 3, order=order)
+    sig = FOFB.process(impulse)
     assert isinstance(sig, Signal)
 
-    ir_actual = filter.fractional_octave_bands(
-        impulse, 1, freq_range=(1e3, 4e3), order=order)
+    FOFB = filter.fractional_octaves.FractionalOctaveBands(
+        num_fractions=1, frequency_range=(1e3, 4e3),
+        order=order, sampling_rate=sr)
+    ir_actual = FOFB.process(impulse)
 
     assert ir_actual.time.shape[0] == 3
 
@@ -122,13 +127,14 @@ def test_sum_bands_din():
     two bands.
     """
     n_samples = 2**17
-    sampling_rate = 48e3
-    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate)
+    sr = 48e3
+    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
     ideal = np.squeeze(np.abs(impulse.freq)**2)
 
-    bp_imp = filter.fractional_octave_bands(
-        impulse, num_fractions=3, order=14)
+    FOFB = filter.fractional_octaves.FractionalOctaveBands(
+        num_fractions=3, order=14, sampling_rate=sr)
+    bp_imp = FOFB.process(impulse)
 
     sum_bands = np.sum(np.abs(bp_imp.freq)**2, axis=0)
     diff = ideal / sum_bands
