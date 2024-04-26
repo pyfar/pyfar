@@ -110,13 +110,13 @@ blob/master/filter_design/audiofilter.py
         if coefficients is None:
             coefficients = 0.6436
         # get filter coefficients for first order allpass
-        b, a = iir.biquad_ap1st(frequency, fs, ai=coefficients)[2, 3]
+        _, _, b, a = iir.biquad_ap1st(frequency, fs, ai=coefficients)
     elif order == 2:
         if coefficients is None:
             coefficients = [0.8832, 1.6278]
         # get filter coefficients for second order allpass
-        b, a = iir.biquad_ap2nd(
-            frequency, fs, bi=coefficients[0], ai=coefficients[1])[2, 3]
+        _, _, b, a = iir.biquad_ap2nd(
+            frequency, fs, bi=coefficients[0], ai=coefficients[1])
     else:
         raise ValueError('Order must be 1 or 2')
 
