@@ -20,3 +20,4 @@ sofar>=1.1.1
 pydata-sphinx-theme
 sphinx-design
 sphinx-favicon
+sphinx-reredirects

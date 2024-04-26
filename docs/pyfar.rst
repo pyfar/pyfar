@@ -1,37 +1,31 @@
-Getting Started
-===============
+pyfar
+=====
 
 .. toctree::
+   :caption: Getting Started
    :maxdepth: 2
 
    readme
 
-Documentation
-=============
 
 .. toctree::
+   :caption: Documentation
    :maxdepth: 2
 
+   concepts
    classes
-
-.. toctree::
-   :maxdepth: 2
-
    modules
 
-Contributing
-===============
 
 .. toctree::
+   :caption: Contributing
    :maxdepth: 1
 
    contributing
 
-Other
-=====
+
 .. toctree::
+   :caption: Other
    :maxdepth: 1
 
    history
-
-.. include:: header.rst

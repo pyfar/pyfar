@@ -8,6 +8,8 @@
 
 import os
 import sys
+import urllib3
+import shutil
 sys.path.insert(0, os.path.abspath('..'))
 
 import pyfar  # noqa
@@ -26,6 +28,7 @@ extensions = [
     'autodocsumm',
     'sphinx_design',
     'sphinx_favicon',
+    'sphinx_reredirects',
 ]
 
 # show tocs for classes and functions of modules using the autodocsumm
@@ -107,6 +110,7 @@ html_theme_options = {
     "navbar_start": ["navbar-logo"],
     "navbar_end": ["navbar-icon-links", "theme-switcher"],
     "navbar_align": "content",
+    "header_links_before_dropdown": 8,
     "icon_links": [
         {
           "name": "GitHub",
@@ -124,6 +128,34 @@ html_theme_options = {
 html_context = {
    "default_mode": "light"
 }
+
+# redirect index to pyfar.html
+redirects = {
+     "index": "pyfar.html"
+}
+
+# -- download navbar and style files from gallery -----------------------------
+branch = 'main'
+link = f'https://github.com/pyfar/gallery/raw/{branch}/docs/'
+folders_in = [
+    '_static/css/custom.css',
+    '_static/favicon.ico',
+    '_static/header.rst',
+    'resources/logos/pyfar_logos_fixed_size_pyfar.png'
+    ]
+c = urllib3.PoolManager()
+for file in folders_in:
+    url = link + file
+    filename = file
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with c.request('GET', url, preload_content=False) as res, open(filename, 'wb') as out_file:
+        shutil.copyfileobj(res, out_file)
+
+# replace pyfar hard link to internal link
+with open("_static/header.rst", "rt") as fin:
+    with open("header.rst", "wt") as fout:
+        for line in fin:
+            fout.write(line.replace(f'https://{project}.readthedocs.io', project))
 
 # -- pyfar specifics -----------------------------------------------------
 
