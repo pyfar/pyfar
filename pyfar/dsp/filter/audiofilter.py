@@ -18,7 +18,7 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
 
 
     where :math:`\\omega_c = 2 \\pi f_c` with the cut-off frequency :math:`f_c`
-    and :math:`s=\\sigma + \\mathrm{i} \\omega`.
+    and :math:`s=\\mathrm{i} \\omega`.
 
     By definition the ``bi`` coefficient of a first order allpass is ``0``.
 
