@@ -40,56 +40,58 @@ lists all coordinates.
 
    * - Coordinate
      - Descriptions
-   * - :py:func:`x`, :py:func:`y`, :py:func:`z`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.x`,
+       :py:func:`~pyfar.classes.coordinates.Coordinates.y`,
+       :py:func:`~pyfar.classes.coordinates.Coordinates.z`
      - x, y, z coordinate of a right handed Cartesian coordinate system in
        meter (:math:`-\infty` < x,y,z < :math:`\infty`).
-   * - :py:func:`azimuth`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.azimuth`
      - Counter clock-wise angle in the x-y plane of the right handed Cartesian
        coordinate system in radians. :math:`0` radians are defined in positive
        x-direction, :math:`\pi/2` radians in positive y-direction and so on
        (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic).
-   * - :py:func:`elevation`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.elevation`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians elevation are defined in positive
        z-direction, :math:`\pi/2` radians in positive x-direction, and
        :math:`\pi` in negative z-direction
        (:math:`\pi/2` < elevation < :math:`\pi/2`). The elevation is a
        variation of the elevation angle.
-   * - :py:func:`colatitude`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.colatitude`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians colatitude are defined in positive
        x-direction, :math:`\pi/2` radians in positive z-direction, and
        :math:`-\pi/2` in negative z-direction
        (:math:`0` < colatitude < :math:`\pi`). The colatitude is a
        variation of the colatitude.
-   * - :py:func:`lateral`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.lateral`
      - Counter clock-wise angle in the x-y plane of the right handed Cartesian
        coordinate system in radians. :math:`0` radians are defined in positive
        x-direction, :math:`\pi/2` radians in positive y-direction and
        :math:`-\pi/2` in negative y-direction
        (:math:`-\pi/2` < lateral < :math:`\pi/2`).
-   * - :py:func:`polar`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.polar`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians elevation are defined in positive
        x-direction, :math:`\pi/2` radians in positive z-direction,
        :math:`\pi` in negative x-direction and so on
        (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic).
-   * - :py:func:`frontal`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.frontal`
      - Angle in the y-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians elevation are defined in positive
        y-direction, :math:`\pi/2` radians in positive z-direction,
        :math:`\pi` in negative y-direction and so on
        (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic).
-   * - :py:func:`upper`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.upper`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians elevation are defined in positive
        x-direction, :math:`\pi/2` radians in positive z-direction, and
        :math:`\pi` in negative x-direction
        (:math:`0` < upper < :math:`\pi`).
-   * - :py:func:`radius`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.radius`
      - Distance to the origin of the right handed Cartesian coordinate system
        in meters (:math:`0` < radius < :math:`\infty`).
-   * - :py:func:`rho`
+   * - :py:func:`~pyfar.classes.coordinates.Coordinates.rho`
      - Distance perpendicular to the the z-axis of the right handed Cartesian
        coordinate system (:math:`0` < rho < :math:`\infty`).
 
