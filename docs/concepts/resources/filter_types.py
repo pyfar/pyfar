@@ -118,7 +118,8 @@ _, ax = plt.subplots(3, 1, figsize=(20/2.54, 30/2.54), sharey=True)
 
 # DIN Filterbank
 axis = ax[0]
-y = pf.dsp.filter.fractional_octave_bands(impulse, 1, freq_range=(60, 12e3))
+y = pf.dsp.filter.fractional_octave_bands(impulse, 1,
+                                          frequency_range=(60, 12e3))
 pf.plot.freq(y, ax=axis)
 axis.set_title('Fractional octave bands (room acoustics)')
 axis.set_xlim(20, 20e3)

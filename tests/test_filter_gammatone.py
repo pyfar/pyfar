@@ -15,7 +15,7 @@ def test_gammatone_bands_init_and_getter():
     GFB = filter.GammatoneBands([0, 22050], resolution=.5)
 
     # test the getter
-    npt.assert_array_equal(GFB.freq_range, [0, 22050])
+    npt.assert_array_equal(GFB.frequency_range, [0, 22050])
     assert GFB.resolution == .5
     assert GFB.reference_frequency == 1000
     assert GFB.frequencies.shape == (85, )
@@ -133,9 +133,9 @@ def test_gammatone_bands_assertions():
     """Test all assertions"""
 
     # wrong values in freq_range
-    with pytest.raises(ValueError, match="Values in freq_range must be"):
+    with pytest.raises(ValueError, match="Values in frequency_range must be"):
         filter.GammatoneBands([-1, 22050])
-    with pytest.raises(ValueError, match="Values in freq_range must be"):
+    with pytest.raises(ValueError, match="Values in frequency_range must be"):
         filter.GammatoneBands([0, 24e3])
 
     # wrong value for delay
@@ -185,12 +185,12 @@ def test_erb_frequencies_assertions():
     """Test assertions for erb_frequencies"""
 
     # freq_range must be an array of length 2
-    with pytest.raises(ValueError, match="freq_range must be an array"):
+    with pytest.raises(ValueError, match="frequency_range must be an array"):
         filter.erb_frequencies(1)
-    with pytest.raises(ValueError, match="freq_range must be an array"):
+    with pytest.raises(ValueError, match="frequency_range must be an array"):
         filter.erb_frequencies([1])
     # values freq_range must be increasing
-    with pytest.raises(ValueError, match="The first value of freq_range"):
+    with pytest.raises(ValueError, match="The first value of frequency_range"):
         filter.erb_frequencies([1, 0])
     # resolution must be > 0
     with pytest.raises(ValueError, match="Resolution must be larger"):
