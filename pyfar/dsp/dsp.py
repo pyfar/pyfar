@@ -1407,43 +1407,50 @@ def find_impulse_response_start(
         >>> ax.legend()
 
     """
-    ir_squared = np.abs(impulse_response.time)**2
+    modes = ['real', 'complex'] if impulse_response.complex else ['real']
+    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape))
+    for idx, mode in enumerate(modes):
+        ir = impulse_response.time
+        ir_squared = np.real(ir)**2 if mode == 'real' else np.imag(ir)**2
 
-    mask_start = int(0.9*impulse_response.n_samples)
+        mask_start = int(0.9*impulse_response.n_samples)
 
-    mask = np.arange(mask_start, ir_squared.shape[-1])
-    noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
+        mask = np.arange(mask_start, ir_squared.shape[-1])
+        noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
 
-    max_sample = np.argmax(ir_squared, axis=-1)
-    max_value = np.max(ir_squared, axis=-1)
+        max_sample = np.argmax(ir_squared, axis=-1)
+        max_value = np.max(ir_squared, axis=-1)
 
-    if np.any(max_value < 10**(threshold/10) * noise) or \
-            np.any(max_sample > mask_start):
-        warnings.warn(
-            "The SNR seems lower than the specified threshold value. Check "
-            "if this is a valid impulse response with sufficient SNR.")
+        if np.any(max_value < 10**(threshold/10) * noise) or \
+                np.any(max_sample > mask_start):
+            warnings.warn(
+                "The SNR seems lower than the specified threshold value. "
+                "Check if this is a valid impulse response with sufficient "
+                "SNR.")
 
-    start_sample = max_sample.copy()
+        start_sample = max_sample.copy()
 
-    for ch in np.ndindex(impulse_response.cshape):
-        # Only look for the start sample if the maximum index is bigger than 0
-        if start_sample[ch] > 0:
-            # Check samples before maximum
-            ir_before_max = np.squeeze(
-                ir_squared[ch][:max_sample[ch]+1] / max_value[ch])
-            # First sample above or at the threshold level
-            idx_first_above_thresh = np.where(
-                ir_before_max >= 10**(-threshold/10))[0]
-            if idx_first_above_thresh.size > 0:
-                # The start sample is the last sample below the threshold
-                start_sample[ch] = np.min(idx_first_above_thresh) - 1
-            else:
-                start_sample[ch] = 0
-                warnings.warn(
-                    f'No values below threshold found found for channel {ch}',
-                    'defaulting to 0')
+        for ch in np.ndindex(impulse_response.cshape):
+            # Only look for the start sample if the maximum index is bigger
+            # than 0
+            if start_sample[ch] > 0:
+                # Check samples before maximum
+                ir_before_max = np.squeeze(
+                    ir_squared[ch][:max_sample[ch]+1] / max_value[ch])
+                # First sample above or at the threshold level
+                idx_first_above_thresh = np.where(
+                    ir_before_max >= 10**(-threshold/10))[0]
+                if idx_first_above_thresh.size > 0:
+                    # The start sample is the last sample below the threshold
+                    start_sample[ch] = np.min(idx_first_above_thresh) - 1
+                else:
+                    start_sample[ch] = 0
+                    warnings.warn(
+                        'No values below threshold found found for channel '
+                        f'{ch} defaulting to 0')
 
-    return np.squeeze(start_sample)
+        ir_start[idx, :] = np.squeeze(start_sample)
+    return np.squeeze(ir_start)
 
 
 def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
