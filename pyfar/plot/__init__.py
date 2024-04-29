@@ -2,10 +2,10 @@
 
 """
 The following documents the pyfar plot functions. Make sure to have a look at
-the `plotting <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-interactive/pyfar_plotting.html>`_  and `interactive plotting
-<https://pyfar-gallery.readthedocs.io/en/latest/gallery/interactive/
-pyfar_interactive_plots.html>`_ examples. The latter make use of the pyfar
+the
+:doc:`plotting<gallery:gallery/interactive/pyfar_plotting>` and
+:doc:`interactive plotting<gallery:gallery/interactive/pyfar_interactive_plots>`
+examples. The latter make use of the pyfar
 :py:func:`~pyfar.plot.shortcuts` to quickly explore acoustic signals.
 """
 

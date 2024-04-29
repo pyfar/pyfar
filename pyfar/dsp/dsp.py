@@ -1564,9 +1564,8 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal. The `cshape <https://pyfar-gallery.readthedocs.io/
-        en/latest/gallery/interactive/pyfar_audio_objects.html
-        #Signal-cshape,-length,-and-caxis>`_
+        The second signal. The
+        :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
         of this signal must be `broadcastable
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
         cshape of the first signal.
@@ -1603,9 +1602,8 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     -------
     signal : Signal
         The result of the convolution. The
-        `cdim <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-        interactive/pyfar_audio_objects.html
-        #Signal-cshape,-length,-and-caxis>`_ matches the bigger cdim
+        :ref:`cdim<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
+        matches the bigger cdim
         of the two input signals.
 
     Notes
@@ -1948,9 +1946,9 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 
         The default is ``'linear'``
     caxis: None, int, or tuple of ints, optional
-        Channel axes (`caxis <https://pyfar-gallery.readthedocs.io/en/latest/
-        gallery/interactive/pyfar_audio_objects.html
-        #Signal-cshape,-length,-and-caxis>`_) along which the averaging is
+        Channel axes
+        (:ref:`caxis<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`)
+        along which the averaging is
         done. The default ``None`` averages across all channels.
     weights: array like
         Array with channel weights for averaging the data. Must be
@@ -2121,9 +2119,8 @@ def normalize(signal, reference_method='max', domain='time',
         ``'freq'``
           Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
           normalized magnitude spectrum is used
-          (cf. `FFT normalization <https://pyfar-gallery.readthedocs.io/en/
-          latest/gallery/interactive/fast_fourier_transform.html
-          #FFT-normalizations>`_).
+          pyfar examples gallery
+          (cf. :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`).
 
         The default is ``'time'``.
     channel_handling: string, optional
@@ -2225,7 +2222,7 @@ def normalize(signal, reference_method='max', domain='time',
         >>> pf.plot.time_freq(signal, label='Original Signal', unit='ms')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
-    """
+    """  # noqa: E501
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
                                pyfar.TimeData)):

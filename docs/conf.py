@@ -90,7 +90,8 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
-    'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None)
+    'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None),
+    'gallery': ('https://pyfar-gallery.readthedocs.io/en/latest/', None),
     }
 
 # -- Options for HTML output -------------------------------------------------

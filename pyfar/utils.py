@@ -6,11 +6,10 @@ def broadcast_cshape(signal, cshape):
     """
     Broadcast a signal to a certain cshape.
 
-    The `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
-    of the signal is
-    broadcasted following the `numpy broadcasting rules
-    <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    The
+    :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
+    of the signal is broadcasted following the
+    :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
     ----------
@@ -38,11 +37,10 @@ def broadcast_cshapes(signals, cshape=None):
     """
     Broadcast multiple signals to a common cshape.
 
-    The `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
+    The :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
     of the signals are
-    broadcasted following the `numpy broadcasting rules
-    <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    broadcasted following the
+    :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`
 
     Parameters
     ----------
@@ -51,7 +49,7 @@ def broadcast_cshapes(signals, cshape=None):
     cshape : tuple, optional
         The cshape to which the signals are broadcasted. If `cshape` is
         ``None`` it is determined from the cshapes of the input signals using
-        ``numpy.broadcast_shapes``. The default is ``None``.
+        :py:func:`numpy:numpy.broadcast_shapes`. The default is ``None``.
 
     Returns
     -------
@@ -73,8 +71,7 @@ def broadcast_cdim(signal, cdim):
     Broadcast a signal to a certain cdim.
 
     The channel dimension (cdim) is the length of the
-    `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
+    :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
     of the signal. The signal
     is broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
     dimensions.
@@ -109,8 +106,7 @@ def broadcast_cdims(signals, cdim=None):
     Broadcast multiple signals to a common cdim.
 
     The channel dimension (cdim) is the length of the
-    `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-    interactive/pyfar_audio_objects.html#Signal-cshape,-length,-and-caxis>`_
+    :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
     of the signal. The signals
     are broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
     dimensions.
@@ -150,19 +146,18 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         except in the dimension corresponding to caxis (the first, by default).
         If this is the case, set ``broadcasting=True``.
     caxis : int
-        The `caxis <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-        interactive/pyfar_audio_objects.html
+        The
+        :ref:`caxis<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
         #Signal-cshape,-length,-and-caxis>`_ along which the signals are
         concatenated. The default is ``0``.
     broadcasting: bool
         If this is ``True``, the signals will be broadcasted to common
         cshape, except for the caxis along which the signals are
         concatenated.
-        The `cshape <https://pyfar-gallery.readthedocs.io/en/latest/gallery/
-        interactive/pyfar_audio_objects.html
-        #Signal-cshape,-length,-and-caxis>`_ of the signals are
-        broadcasted following the `numpy broadcasting rules
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+        The :doc:`cshape<gallery:Signal-cshape,-length,-and-caxis>`
+        of the signals are
+        broadcasted following the
+        :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`
         The default is ``False``.
     Returns
     -------

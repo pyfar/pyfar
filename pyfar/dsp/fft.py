@@ -1,7 +1,7 @@
 """
 The following documents the FFT functionality. More details and background is
-given in the `pyfar examples gallery <https://pyfar-gallery.readthedocs.io/en/
-latest/gallery/interactive/fast_fourier_transform.html>`_.
+given in the
+:doc:`pyfar examples gallery<gallery:gallery/interactive/fast_fourier_transform>`.
 """
 import multiprocessing
 
@@ -124,9 +124,8 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     the squared absolute values for ``'power'`` and ``'psd'``, the complex
     spectra are multiplied with their absolute values to ensure a correct
     renormalization.
-    For detailed information and explanations, refer to the `FFT normalization
-    <https://pyfar-gallery.readthedocs.io/en/latest/gallery/interactive/
-    fast_fourier_transform.html#FFT-normalizations>`__.
+    For detailed information and explanations, refer to the
+    :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`.
 
     Parameters
     ----------
@@ -187,7 +186,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             Scaling of the Discrete Fourier Transform and the Implied Physical
             Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
             May 2020, p. e-Brief 600.
-    """
+    """  # noqa: E501
 
     # check if normalization should be applied
     if fft_norm == 'none':

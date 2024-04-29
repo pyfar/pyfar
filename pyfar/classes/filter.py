@@ -1,9 +1,9 @@
 """
 The following documents the pyfar filter classes. Examples for working with
-filter objects are part of the `examples gallery <https://pyfar-gallery.
-readthedocs.io/en/latest/gallery/interactive/pyfar_filtering.html>`_. Available
-filters are shown in the `filter types examples <https://pyfar-gallery.
-readthedocs.io/en/latest/gallery/interactive/pyfar_filter_types.html>`_ and
+filter objects are part of the
+:doc:`examples gallery<gallery:gallery/interactive/pyfar_filtering>`.
+Available filters are shown in the
+:doc:`filter types examples<gallery:gallery/interactive/pyfar_filter_types>` and
 documented in :py:mod:`pyfar.dsp.filter`.
 """
 import deepdiff
