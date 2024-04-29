@@ -33,7 +33,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     Notes
     -----
     The parameters `frequency`, `amplitude`, and `phase` are
-    `broadcasted <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    Numpy broadcasting :doc:`broadcasted<numpy:user/basics.broadcasting>`
     to the parameter that contains the most elements. For example `frequency`
     could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)``, and `phase`
     could be a scalar. In this case all parameters would be broadcasted to a
@@ -114,7 +114,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     Notes
     -----
     The parameters `delay` and `amplitude` are
-    `broadcasted <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    :doc:`broadcasted<numpy:user/basics.broadcasting>`
     to the parameter that contains the most elements. For example `delay`
     could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)`` or a scalar.
     In this case all parameters would be broadcasted to a shape of ``(2, 4)``.

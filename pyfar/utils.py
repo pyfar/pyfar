@@ -7,8 +7,8 @@ def broadcast_cshape(signal, cshape):
     Broadcast a signal to a certain cshape.
 
     The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal is
-    broadcasted following the `numpy broadcasting rules
-    <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    broadcasted following the
+    :doc:`numpy broadcasting rules<numpy:user/basics.broadcasting>`.
 
     Parameters
     ----------
@@ -37,8 +37,8 @@ def broadcast_cshapes(signals, cshape=None):
     Broadcast multiple signals to a common cshape.
 
     The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
-    broadcasted following the `numpy broadcasting rules
-    <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+    broadcasted following the
+    :doc:`numpy broadcasting rules<numpy:user/basics.broadcasting>`.
 
     Parameters
     ----------
@@ -151,8 +151,8 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         cshape, except for the caxis along which the signals are
         concatenated.
         The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
-        broadcasted following the `numpy broadcasting rules
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_
+        broadcasted following the
+        :doc:`numpy broadcasting rules<numpy:user/basics.broadcasting>`
         The default is ``False``.
     Returns
     -------
