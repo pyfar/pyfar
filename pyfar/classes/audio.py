@@ -1090,7 +1090,7 @@ def power(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _power)
 
 
@@ -1258,7 +1258,7 @@ def matrix_multiplication(
     >>> pf.matrix_multiplication((a, b)).cshape
     (2, 3, 1)
 
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _matrix_multiplication, axes=axes)
 
 

@@ -2,7 +2,7 @@
 The following documents the FFT functionality. More details and background is
 given in the
 :doc:`pyfar examples gallery<gallery:gallery/interactive/fast_fourier_transform>`.
-"""
+"""  # noqa: E501
 import multiprocessing
 
 import numpy as np

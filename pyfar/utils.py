@@ -55,7 +55,7 @@ def broadcast_cshapes(signals, cshape=None):
     -------
     signals : tuple of Signal, TimeData, FrequencyData
         The broadcasted copies of the input signals in a tuple.
-    """
+    """  # noqa: E501
 
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
@@ -154,7 +154,7 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         If this is ``True``, the signals will be broadcasted to common
         cshape, except for the caxis along which the signals are
         concatenated.
-        The :doc:`cshape<gallery:Signal-cshape,-length,-and-caxis>`
+        The :ref:`caxis<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
         of the signals are
         broadcasted following the
         :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`
@@ -163,7 +163,7 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
     -------
     merged : Signal, TimeData, FrequencyData
         The merged signal object.
-    """
+    """  # noqa: E501
     # check input
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):

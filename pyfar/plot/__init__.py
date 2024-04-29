@@ -7,7 +7,7 @@ the
 :doc:`interactive plotting<gallery:gallery/interactive/pyfar_interactive_plots>`
 examples. The latter make use of the pyfar
 :py:func:`~pyfar.plot.shortcuts` to quickly explore acoustic signals.
-"""
+"""  # noqa: E501
 
 from .line import (
     freq,
