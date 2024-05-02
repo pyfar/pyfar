@@ -184,6 +184,22 @@ def test_fractional_time_shift_unit():
     npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
 
 
+def test_fractional_time_shift_complex():
+    """Test simple integer time shift for complex-valued time signals"""
+
+    impulse = pf.signals.impulse(128, 64)
+    impulse.fft_norm = 'none'
+    impulse.complex = True
+
+    impulse = fractional_time_shift(impulse, 12, 'samples')
+
+    impulse_desired = pf.signals.impulse(128, 64+12)
+    impulse_desired.fft_norm = 'none'
+    impulse_desired.complex = True
+
+    npt.assert_almost_equal(impulse.time, impulse_desired.time)
+
+
 @pytest.mark.parametrize("order", [2, 3])
 def test_fractional_delay_order(order):
     """Test if the order parameter behaves as intended"""
