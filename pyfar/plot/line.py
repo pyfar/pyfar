@@ -4,7 +4,7 @@ from . import _interaction as ia
 
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
-         ax=None, style='light', **kwargs):
+         ax=None, style='light', show_real_imag_abs='real', **kwargs):
     """Plot the time signal.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
@@ -70,7 +70,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
     with context(style):
         ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
-                         ax, **kwargs)
+                         ax, show_real_imag_abs=show_real_imag_abs, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -84,7 +84,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
 
 def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
-         ax=None, style='light', **kwargs):
+         ax=None, style='light', side='right', **kwargs):
     """
     Plot the magnitude spectrum.
 

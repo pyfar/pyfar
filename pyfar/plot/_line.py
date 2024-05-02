@@ -11,7 +11,7 @@ from matplotlib.ticker import NullFormatter
 
 
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
-          ax=None, **kwargs):
+          ax=None, show_real_imag_abs='real', **kwargs):
     """Plot the time data of a signal."""
 
     # check input
