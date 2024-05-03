@@ -1155,7 +1155,7 @@ class Coordinates():
     @property
     def rho(self):
         r"""
-        Distance perpendicular to the the z-axis of the right handed Cartesian
+        Radial distance to the the z-axis of the right handed Cartesian
         coordinate system (:math:`0` < rho < :math:`\infty`)."""
         return self.cylindrical[..., 2]
 
