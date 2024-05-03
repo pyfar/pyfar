@@ -1211,8 +1211,8 @@ def matrix_multiplication(
       dimension. For example a cshape of ``(10,)`` becomes ``(10, 1)``
 
     The shapes of array likes and cshapes of audio objects must be
-    `broadcastable <https://numpy.org/doc/stable/user/basics.broadcasting.
-    html>`_ except for the axes specified by the `axes` parameter.
+    :doc:`broadcastable<numpy:user/basics.broadcasting>`
+    except for the axes specified by the `axes` parameter.
 
     The `fft_norm` of the result is as follows
 

@@ -1565,8 +1565,8 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         The first signal
     signal2 : Signal
         The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
-        of this signal must be `broadcastable
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
+        of this signal must be
+        :doc:`broadcastable<numpy:user/basics.broadcasting>` to the
         cshape of the first signal.
     mode : string, optional
         A string indicating the size of the output:
