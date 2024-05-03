@@ -1564,11 +1564,12 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal. The
-        :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-        of this signal must be `broadcastable
+        The second signal. The channel shape (`cshape`) of this signal must be
+        `broadcastable
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
-        cshape of the first signal.
+        cshape of the first signal. The cshape gives the shape of the data
+        inside an audio object but ignores the number of samples or frequency
+        bins.
     mode : string, optional
         A string indicating the size of the output:
 
@@ -1601,10 +1602,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     Returns
     -------
     signal : Signal
-        The result of the convolution. The
-        :ref:`cdim<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-        matches the bigger cdim
-        of the two input signals.
+        The result of the convolution. The channel dimension (`cdim`) matches
+        the bigger cdim of the two input signals. The cdim is the length of the
+        channel shape (`cshape`), which gives the shape of the data inside an
+        audio object but ignores the number of samples or frequency bins.
 
     Notes
     -----
@@ -1946,10 +1947,10 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 
         The default is ``'linear'``
     caxis: None, int, or tuple of ints, optional
-        Channel axes
-        (:ref:`caxis<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`)
-        along which the averaging is
-        done. The default ``None`` averages across all channels.
+        Channel axes (`caxis`) along which the averaging is done. The caxis
+        denotes an axis of the data inside an audio object but ignores the last
+        axis that contains the time samples or frequency bins. The default
+        ``None`` averages across all channels.
     weights: array like
         Array with channel weights for averaging the data. Must be
         broadcastable to ``signal.cshape``. The default is ``None``, which

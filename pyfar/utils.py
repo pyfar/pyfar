@@ -6,9 +6,9 @@ def broadcast_cshape(signal, cshape):
     """
     Broadcast a signal to a certain cshape.
 
-    The
-    :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-    of the signal is broadcasted following the
+    The The channel shape (`cshape`) gives the shape of the data inside an
+    audio object but ignores the number of samples or frequency bins. The
+    broadcasting follows the
     :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
@@ -37,10 +37,10 @@ def broadcast_cshapes(signals, cshape=None):
     """
     Broadcast multiple signals to a common cshape.
 
-    The :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-    of the signals are
-    broadcasted following the
-    :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`
+    The The channel shape (`cshape`) gives the shape of the data inside an
+    audio object but ignores the number of samples or frequency bins. The
+    broadcasting follows the
+    :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
     ----------
@@ -70,11 +70,10 @@ def broadcast_cdim(signal, cdim):
     """
     Broadcast a signal to a certain cdim.
 
-    The channel dimension (cdim) is the length of the
-    :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-    of the signal. The signal
-    is broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
-    dimensions.
+    The channel dimension (`cdim`) is the length of the `cshape`, which gives
+    the shape of the data inside an audio object but ignores the number of
+    samples or frequency bins. The signal is broadcasted to `cdim` by
+    prepending ``cdim - len(signal.cshape)`` dimensions.
 
     Parameters
     ----------
@@ -105,11 +104,10 @@ def broadcast_cdims(signals, cdim=None):
     """
     Broadcast multiple signals to a common cdim.
 
-    The channel dimension (cdim) is the length of the
-    :ref:`cshape<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-    of the signal. The signals
-    are broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
-    dimensions.
+    The channel dimension (`cdim`) is the length of the `cshape`, which gives
+    the shape of the data inside an audio object but ignores the number of
+    samples or frequency bins. The signals are broadcasted to `cdim` by
+    prepending ``cdim - len(signal.cshape)`` dimensions.
 
     Parameters
     ----------
@@ -146,17 +144,15 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         except in the dimension corresponding to caxis (the first, by default).
         If this is the case, set ``broadcasting=True``.
     caxis : int
-        The
-        :ref:`caxis<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-        #Signal-cshape,-length,-and-caxis>`_ along which the signals are
-        concatenated. The default is ``0``.
+        The channel axis along which the signals are concatenated. The channel
+        axis denotes an axis of the data inside an audio object but ignores the
+        last axis that contains the time samples or frequency bins. The default
+        is ``0``.
     broadcasting: bool
         If this is ``True``, the signals will be broadcasted to common
         cshape, except for the caxis along which the signals are
         concatenated.
-        The :ref:`caxis<gallery:/gallery/interactive/pyfar_audio_objects.ipynb#Signal-cshape,-length,-and-caxis>`
-        of the signals are
-        broadcasted following the
+        The caxis of the signals are broadcasted following the
         :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`
         The default is ``False``.
     Returns
