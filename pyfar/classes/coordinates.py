@@ -159,7 +159,7 @@ class Coordinates():
 
         # save meta data
         self._set_weights(weights)
-        self._sh_order = sh_order
+        self.sh_order = sh_order
         self._comment = comment
 
         if sh_order is not None:
@@ -954,7 +954,7 @@ class Coordinates():
             "of spharpy.samplings.SamplingSphere."),
                 PyfarDeprecationWarning)
 
-        self._sh_order = int(value)
+        self._sh_order = int(value) if value is not None else None
 
     @property
     def comment(self):
