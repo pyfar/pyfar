@@ -1,6 +1,3 @@
-.. |pyfar_logo| image:: resources/pyfar.png
-   :width: 150
-   :alt: Alternative text
 
 Getting Started
 ===============
@@ -43,10 +40,4 @@ Other
 
    history
 
-..
-   (removed because it is contained in the new spinx style)
-   Indices and tables
-   ==================
-   * :ref:`genindex`
-   * :ref:`modindex`
-   * :ref:`search`
+.. include:: header.rst
