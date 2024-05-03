@@ -92,7 +92,7 @@ lists all coordinates.
      - Distance to the origin of the right handed Cartesian coordinate system
        in meters (:math:`0` < radius < :math:`\infty`).
    * - :py:func:`~pyfar.classes.coordinates.Coordinates.rho`
-     - Distance perpendicular to the the z-axis of the right handed Cartesian
+     - Radial distance to the the z-axis of the right handed Cartesian
        coordinate system (:math:`0` < rho < :math:`\infty`).
 
 .. |coordinate_systems| image:: resources/coordinate_systems.png
