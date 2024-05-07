@@ -9,6 +9,7 @@ from .band_filter import (
 )
 
 from .audiofilter import (
+    allpass,
     bell,
     high_shelve,
     low_shelve,
@@ -29,6 +30,7 @@ from .gammatone import (
 
 
 __all__ = [
+    'allpass',
     'butterworth',
     'chebyshev1',
     'chebyshev2',

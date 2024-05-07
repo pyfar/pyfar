@@ -629,6 +629,12 @@ class Signal(FrequencyData, TimeData):
                Austria, May 2020, p. e-Brief 600.
 
         """
+        # unpack array
+        if hasattr(sampling_rate, '__iter__'):
+            assert len(sampling_rate) != 0
+            if len(sampling_rate) != 1:
+                raise ValueError("Multirate signals are not supported.")
+            sampling_rate = sampling_rate[0]
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate
@@ -1205,8 +1211,8 @@ def matrix_multiplication(
       dimension. For example a cshape of ``(10,)`` becomes ``(10, 1)``
 
     The shapes of array likes and cshapes of audio objects must be
-    `broadcastable <https://numpy.org/doc/stable/user/basics.broadcasting.
-    html>`_ except for the axes specified by the `axes` parameter.
+    :doc:`broadcastable<numpy:user/basics.broadcasting>`
+    except for the axes specified by the `axes` parameter.
 
     The `fft_norm` of the result is as follows
 

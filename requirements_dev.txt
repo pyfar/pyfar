@@ -11,13 +11,13 @@ pytest-runner
 pytest-cov
 numpy>=1.23.0
 scipy>=1.5.0
-matplotlib<=3.7
+matplotlib
 urllib3
 deepdiff
 autodocsumm
 soundfile>=0.11.0
 sofar>=1.1.1
-nbmake>=0.7.0
 pydata-sphinx-theme
 sphinx-design
 sphinx-favicon
+sphinx-reredirects
