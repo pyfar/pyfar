@@ -207,7 +207,6 @@ workflows:
           requires:
             - build_and_test
             - ruff
-            - test_examples
             - test_documentation_build
           filters:
             branches:
