@@ -1,9 +1,11 @@
 from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
+import functools
 
 
 # Decorator function to rename parameters to be deprecated
 def rename_arg(arg_map, warning_message):
+
     """
     Function for deprecating or renaming arguments.
 
@@ -39,6 +41,7 @@ def rename_arg(arg_map, warning_message):
     """
 
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             new_kwargs = {}
             for kwarg, value in kwargs.items():
