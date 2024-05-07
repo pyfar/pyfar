@@ -5,7 +5,6 @@ import functools
 
 # Decorator function to rename parameters to be deprecated
 def rename_arg(arg_map, warning_message):
-
     """
     Function for deprecating or renaming arguments.
 
