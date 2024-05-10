@@ -9,7 +9,8 @@ from scipy import fft
 
 
 def rfftfreq(n_samples, sampling_rate):
-    """Returns the positive discrete frequencies for which the FFT is calculated.
+    """
+    Returns the positive discrete frequencies for which the FFT is calculated.
 
     If the number of samples
     :math:`N` is even the number of frequency bins will be :math:`2/N+1`, if
@@ -239,7 +240,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             norm /= (n_samples * sampling_rate)
         else:
             # Equation 13 in Ahrens et al. 2020
-            norm /= (np.sum(window)**2 * sampling_rate)
+            norm /= (np.sum(np.asarray(window)**2) * sampling_rate)
         # the phase is kept for being able to switch between normalizations
         # altoug the power spectrum does usually not have phase information,
         # i.e., spec = np.abs(spec)**2

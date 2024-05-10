@@ -1,7 +1,6 @@
 from pyfar.plot.utils import context
-from . import (_line, _utils)
+from . import _line
 from . import _interaction as ia
-import warnings
 
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
@@ -46,7 +45,10 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -62,14 +64,13 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
         >>> import pyfar as pf
         >>> sine = pf.signals.sine(100, 4410)
-        >>> pf.plot.time(sine)
+        >>> pf.plot.time(sine, unit='ms')
 
     """
 
     with context(style):
         ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -83,7 +84,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
 
 def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
-         ax=None, style='light', xscale=None, **kwargs):
+         ax=None, style='light', **kwargs):
     """
     Plot the magnitude spectrum.
 
@@ -115,17 +116,10 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-    xscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -144,17 +138,9 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         >>> pf.plot.freq(sine)
     """
 
-    # xscale deprecation
-    if xscale is not None:
-        warnings.warn(('The xscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
-        freq_scale = xscale
-
     with context(style):
         ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
                          freq_scale, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -168,7 +154,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 
 
 def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
-          style='light', xscale=None, **kwargs):
+          style='light', **kwargs):
     """Plot the phase of the spectrum.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
@@ -194,17 +180,10 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-    xscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -223,17 +202,9 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         >>> pf.plot.phase(impulse, unwrap=True)
     """
 
-    # xscale deprecation
-    if xscale is not None:
-        warnings.warn(('The xscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
-        freq_scale = xscale
-
     with context(style):
         ax = _line._phase(
             signal.flatten(), deg, unwrap, freq_scale, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -246,7 +217,7 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
 
 
 def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
-                xscale=None, **kwargs):
+                **kwargs):
     """Plot the group delay.
 
     Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
@@ -280,17 +251,10 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-    xscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -309,17 +273,9 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
         >>> pf.plot.group_delay(impulse, unit='samples')
     """
 
-    # xscale deprecation
-    if xscale is not None:
-        warnings.warn(('The xscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
-        freq_scale = xscale
-
     with context(style):
         ax = _line._group_delay(
             signal.flatten(), unit, freq_scale, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -333,7 +289,7 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
 
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
               log_prefix_freq=None, log_reference=1, freq_scale='log',
-              unit="s", ax=None, style='light', xscale=None, **kwargs):
+              unit="s", ax=None, style='light', **kwargs):
     """
     Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
@@ -386,17 +342,10 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-    xscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -412,21 +361,13 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
         >>> import pyfar as pf
         >>> sine = pf.signals.sine(100, 4410)
-        >>> pf.plot.time_freq(sine)
+        >>> pf.plot.time_freq(sine, unit='ms')
     """
-
-    # xscale deprecation
-    if xscale is not None:
-        warnings.warn(('The xscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
-        freq_scale = xscale
 
     with context(style):
         ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
                               log_prefix_time, log_prefix_freq,
                               log_reference, freq_scale, unit, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -442,7 +383,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
                freq_scale='log', deg=False, unwrap=False, ax=None,
-               style='light', xscale=None, **kwargs):
+               style='light', **kwargs):
     """Plot the magnitude and phase spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
@@ -477,18 +418,11 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         Array or list with two axes to plot on. The default is ``None``, which
         uses the current axis or creates a new figure if none exists.
     style : str
-        ``light`` or ``dark`` to use the pyfar plot styles or style from
-        ``matplotlib.style.available``. The default is ``light``.
-    xscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are forwarded to matplotlib.pyplot.plot
 
@@ -507,17 +441,9 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         >>> pf.plot.freq_phase(impulse, unwrap=True)
     """
 
-    # xscale deprecation
-    if xscale is not None:
-        warnings.warn(('The xscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
-        freq_scale = xscale
-
     with context(style):
         ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
                                freq_scale, deg, unwrap, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -533,7 +459,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
 def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      unit="s", freq_scale='log', ax=None, style='light',
-                     xscale=None, **kwargs):
+                     **kwargs):
     """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
@@ -577,17 +503,10 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
-    xscale : str
-
-        .. deprecated:: 0.4.0
-
-        This parameter was replaced by the more explicit ``freq_scale``,
-        which has the same functionality.
-        If not ``None``, it overwrites ``freq_scale``.
-        It is kept for backwards compatibility until pyfar version 0.6.0.
-
-        The default is ``None``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -606,18 +525,10 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         >>> pf.plot.freq_group_delay(impulse, unit='samples')
     """
 
-    # xscale deprecation
-    if xscale is not None:
-        warnings.warn(('The xscale parameter will be removed in'
-                       'pyfar 0.6.0. in favor of freq_scale'),
-                      PendingDeprecationWarning)
-        freq_scale = xscale
-
     with context(style):
         ax = _line._freq_group_delay(
             signal.flatten(), dB, log_prefix, log_reference,
             unit, freq_scale, ax, **kwargs)
-    _utils._tight_layout()
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -651,7 +562,10 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. The default is ``light``.
+        ``matplotlib.style.available``. Pass a dictonary to set specific plot
+        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
+        empty dictonary ``style = {}`` to use the currently active plotstyle.
+        The default is ``light``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -677,6 +591,5 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
 
     with context(style):
         ax = _line._custom_subplots(signal.flatten(), plots, ax, **kwargs)
-    _utils._tight_layout()
 
     return ax

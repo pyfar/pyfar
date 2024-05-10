@@ -3,8 +3,9 @@ Arithmetic operations can be applied in the time and frequency domain and
 are implemented in the methods :py:func:`~pyfar.classes.audio.add`,
 :py:func:`~pyfar.classes.audio.subtract`,
 :py:func:`~pyfar.classes.audio.multiply`,
-:py:func:`~pyfar.classes.audio.divide` and
-:py:func:`~pyfar.classes.audio.power`. For example, two
+:py:func:`~pyfar.classes.audio.divide`,
+:py:func:`~pyfar.classes.audio.power` and
+:py:func:`~pyfar.classes.audio.matrix_multiplication`. For example, two
 :py:func:`~pyfar.classes.audio.Signal`,
 :py:func:`~pyfar.classes.audio.TimeData`, or
 :py:func:`~pyfar.classes.audio.FrequencyData` instances can be added in the
@@ -42,7 +43,7 @@ or are broadcasted, e.g.,
 where ``y`` is a signal with ``y.cshape = (2, 3, 4)`` and a length of 10
 samples.
 
-The operators ``+``, ``-``, ``*``, ``/``, and ``**`` are overloaded for
+The operators ``+``, ``-``, ``*``, ``/``, ``**`` and ``@`` are overloaded for
 convenience. Note, however, that their behavior depends on the Audio object.
 Frequency domain operations are applied for
 :py:func:`~pyfar.classes.audio.Signal` and
@@ -83,10 +84,10 @@ addition and subtraction are equivalent in the time and frequency domain,
 this is not the case for multiplication and division. Nevertheless, **the same
 rules apply regardless of the domain** for convenience:
 
-Addition, subtraction and multiplication
-****************************************
+Addition, subtraction, multiplication, and power
+************************************************
 
-* If one signal has the FFT normalization ``'none'`` , the results gets the
+* If one signal has the FFT normalization ``'none'``, the results gets the
   normalization of the other signal.
 * If both signals have the same FFT normalization, the results gets the same
   normalization.

@@ -13,4 +13,6 @@ according to their modules.
    modules/pyfar.io
    modules/pyfar.plot
    modules/pyfar.signals
+   modules/pyfar.signals.files
    modules/pyfar.samplings
+   modules/pyfar.utils

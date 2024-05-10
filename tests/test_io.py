@@ -9,6 +9,7 @@ from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 import os.path
 import pathlib
 import soundfile
+import re
 
 from pyfar import io
 from pyfar import Signal
@@ -16,6 +17,22 @@ from pyfar import Coordinates
 from pyfar.samplings import SphericalVoronoi
 import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData
+
+
+@pytest.mark.parametrize('input_type', ('filename', 'path_object'))
+def test_read_sofa_filename_and_path_object(
+        input_type, generate_sofa_GeneralFIR, noise_two_by_three_channel):
+    """Test read_sofa with filename and path object as input"""
+
+    if input_type == 'filename':
+        file = generate_sofa_GeneralFIR
+        assert isinstance(file, str)
+    elif input_type == 'path_object':
+        file = pathlib.Path(generate_sofa_GeneralFIR)
+        assert isinstance(file, pathlib.Path)
+
+    signal = io.read_sofa(file)[0]
+    npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
 
 
 def test_read_sofa_GeneralFIR(
@@ -32,14 +49,26 @@ def test_read_sofa_GeneralTF(
     npt.assert_allclose(signal.freq, noise_two_by_three_channel.freq)
 
 
+def test_read_sofa_GeneralFIR_E(generate_sofa_GeneralFIR_E):
+    "Test order of axis for emitter dependent FIR data"
+    signal = io.read_sofa(generate_sofa_GeneralFIR_E)[0]
+    assert signal.cshape == (3, 4, 2)
+
+
+def test_read_sofa_GeneralTF_E(generate_sofa_GeneralTF_E):
+    "Test order of axis for emitter dependent TF data"
+    signal = io.read_sofa(generate_sofa_GeneralTF_E)[0]
+    assert signal.cshape == (3, 4, 2)
+
+
 def test_read_sofa_coordinates(
         generate_sofa_GeneralFIR, sofa_reference_coordinates):
     """Test for reading coordinates in sofa file"""
     _, s_coords, r_coords, = io.read_sofa(generate_sofa_GeneralFIR)
     npt.assert_allclose(
-        s_coords.get_cart(), sofa_reference_coordinates[0])
+        s_coords.cartesian, sofa_reference_coordinates[0])
     npt.assert_allclose(
-        r_coords.get_cart(), sofa_reference_coordinates[1])
+        r_coords.cartesian, sofa_reference_coordinates[1])
 
 
 def test_read_sofa_position_type_spherical(
@@ -47,11 +76,32 @@ def test_read_sofa_position_type_spherical(
     """Test to verify correct position type of sofa file"""
     _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
     npt.assert_allclose(
-        s_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[0])
+        s_coords.spherical_elevation[..., :2] / np.pi * 180,
+        sofa_reference_coordinates[0][..., :2])
     npt.assert_allclose(
-        r_coords.get_sph(convention='top_elev', unit='deg'),
-        sofa_reference_coordinates[1])
+        s_coords.radius, sofa_reference_coordinates[0][:, 2])
+    npt.assert_allclose(
+        r_coords.spherical_elevation[..., :2] / np.pi * 180,
+        sofa_reference_coordinates[1][..., :2])
+    npt.assert_allclose(
+        r_coords.radius, sofa_reference_coordinates[1][:, 2])
+
+
+@pytest.mark.parametrize('file,version', [
+    ('erroneous_data_with_version_string.far', '0.5.2'),
+    ('erroneous_data_without_version_string.far', '<0.5.3')])
+def test_read_erroneous_data(file, version):
+    """
+    Test exception for reading outdated or erroneous objects. Files contain a
+    signal object but the mandatory field '_data' was manually removed. The
+    files can thus not be read.
+    """
+
+    file = os.path.join('tests', 'test_io_data', file)
+    message = re.escape(
+        f"'signal' object in {file} was written with pyfar {version}")
+    with pytest.raises(TypeError, match=message):
+        io.read(file)
 
 
 def test_convert_sofa_assertion():
@@ -175,14 +225,18 @@ def test_write_read_coordinates(coordinates, tmpdir):
     assert actual == coordinates
 
 
-def test_write_read_signal(sine, tmpdir):
+@pytest.mark.parametrize("domain", ["time", "freq"])
+def test_write_read_signal(domain, sine, tmpdir):
     """ Signal
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'signal.far')
+    sine.domain = domain
     io.write(filename, signal=sine)
     actual = io.read(filename)['signal']
     assert isinstance(actual, Signal)
+    # io.write encodes in domain = 'time'
+    sine.domain = "time"
     assert actual == sine
 
 
@@ -261,6 +315,18 @@ def test_write_filterSOS(filterSOS, tmpdir):
     actual = io.read(filename)['filterSOS']
     assert isinstance(actual, fo.Filter)
     assert actual == filterSOS
+
+
+def test_write_gammatone_bands(tmpdir):
+    """ dsp.filter.GammatoneBands
+    Make sure `read` understands the bits written by `write`
+    """
+    filename = os.path.join(tmpdir, 'gammatone_bands.far')
+    gammatone_bands = pyfar.dsp.filter.GammatoneBands((0, 22050))
+    io.write(filename, gammatone_bands=gammatone_bands)
+    actual = io.read(filename)["gammatone_bands"]
+    assert isinstance(actual, pyfar.dsp.filter.GammatoneBands)
+    assert actual == gammatone_bands
 
 
 def test_write_read_numpy_ndarrays(tmpdir):
@@ -467,7 +533,6 @@ def test_read_audio_kwargs(read_mock):
     assert np.allclose(signal.time, np.array([1., 2., 3.]))
     assert signal.time.shape == (1, 3)
     assert signal.sampling_rate == 1000
-    assert signal.dtype == 'float32'
 
 
 @patch(
@@ -484,14 +549,19 @@ def test_read_audio_stereo(read_mock):
     assert signal.sampling_rate == 1000
 
 
-@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
 @pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())
+@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
 def test_write_audio(audio_format, subtype, tmpdir, noise):
     """Test all available audio formats and subtypes."""
     if soundfile.check_format(audio_format, subtype):
         filename = os.path.join(tmpdir, 'test_file.'+audio_format)
-        if audio_format == 'AIFF' and subtype == 'DWVW_12':
-            # This seems to be an error in soundfile/libsndfile?
+        # Catch Errors due to soundfile/libsndfile
+        libsndfile_errors = [('AIFF', 'DWVW_12'),
+                             ('MP3', 'MPEG_LAYER_I'),
+                             ('MP3', 'MPEG_LAYER_II'),
+                             ('OGG', 'OPUS'),
+                             ('WAV', 'MPEG_LAYER_III')]
+        if (audio_format, subtype) in libsndfile_errors:
             with pytest.raises(RuntimeError):
                 io.write_audio(noise, filename, subtype=subtype)
         else:
@@ -542,72 +612,67 @@ def test_write_audio_clip(sf_write_mock):
             signal=signal, filename='test.wav', subtype='PCM_16')
 
 
-@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
+def test_write_audio_sampling_rate_type(tmpdir):
+    """Test sampling_rates of type float"""
+
+    # test with integer value as float
+    signal = pyfar.signals.impulse(1024)
+    signal.sampling_rate = 44100.0
+    pyfar.io.write_audio(
+        signal, os.path.join(tmpdir, 'test_sampling_rate_float_1.wav'))
+
+    # test with non-integer value
+    signal.sampling_rate = 44100.5
+    error_message = re.escape((
+        "The sampling rate is 44100.5 but must have an "
+        "integer value, e.g., 44100 "
+        "or 44101 (See pyfar.dsp.resample for help)"))
+    with pytest.raises(ValueError, match=error_message):
+        pyfar.io.write_audio(
+            signal, os.path.join(tmpdir, 'test_sampling_rate_float_2.wav'))
+
+
 @pytest.mark.parametrize("subtype", soundfile.available_subtypes().keys())
+@pytest.mark.parametrize("audio_format", soundfile.available_formats().keys())
 def test_write_audio_read_audio(audio_format, subtype, tmpdir, noise):
     """Test all reading and writing of available audio formats and subtypes."""
     if soundfile.check_format(audio_format, subtype):
         filename = os.path.join(tmpdir, 'test_file.'+audio_format)
         # Write Audio file
-        # For exceptions see tests below
-        if audio_format == 'AIFF' and subtype == 'DWVW_12':
+        # Some combinations of formats and subtype cause libsndfile errors
+        libsndfile_errors = [('AIFF', 'DWVW_12'),
+                             ('MP3', 'MPEG_LAYER_I'),
+                             ('MP3', 'MPEG_LAYER_II'),
+                             ('OGG', 'OPUS'),
+                             ('WAV', 'MPEG_LAYER_III')]
+        if (audio_format, subtype) in libsndfile_errors:
             with pytest.raises(RuntimeError):
                 io.write_audio(noise, filename, subtype=subtype)
         else:
             io.write_audio(noise, filename, subtype=subtype)
-        # Read Audio file
-        # For exceptions see tests below
-        if audio_format == 'AIFF' and 'DWVW' in subtype:
-            # This seems to be an error in soundfile/libsndfile?
-            with pytest.raises(RuntimeError):
-                io.read_audio(filename)
-        elif audio_format == 'RAW':
-            if 'DWVW' in subtype:
+            # Read Audio file
+            # Some combinations of formats and subtype cause libsndfile errors
+            if audio_format == 'AIFF' and 'DWVW' in subtype:
                 with pytest.raises(RuntimeError):
+                    io.read_audio(filename)
+            elif audio_format == 'RAW':
+                if 'DWVW' in subtype:
+                    with pytest.raises(RuntimeError):
+                        io.read_audio(
+                            filename, samplerate=44100, channels=1,
+                            subtype=subtype)
+                else:
+                    # RAW files need to be read with additional parameters
                     io.read_audio(
                         filename, samplerate=44100, channels=1,
                         subtype=subtype)
             else:
-                # RAW files need to be read with additional parameters
-                io.read_audio(
-                    filename, samplerate=44100, channels=1, subtype=subtype)
-        else:
-            # A comparison between written and read signals is not implemented
-            # due to the difference caused by the coding
-            io.read_audio(filename)
+                # A comparison between written and read signals is not
+                # implemented due to the difference caused by the coding
+                io.read_audio(filename)
     # In some cases a file 'C._t' is created
     if os.path.exists('C._t'):
         os.remove('C._t')
-
-
-@pytest.mark.parametrize(
-    "subtype", soundfile.available_subtypes('AIFF').keys())
-def test_write_audio_read_audio_aiff(subtype, tmpdir, noise):
-    """Test for errors in soundfile/libsndfile for AIFF format"""
-    filename = os.path.join(tmpdir, 'test_file.aiff')
-    if subtype == 'DWVW_12':
-        with pytest.raises(RuntimeError):
-            io.write_audio(noise, filename, subtype=subtype)
-    else:
-        io.write_audio(noise, filename, subtype=subtype)
-    if 'DWVW' in subtype:
-        with pytest.raises(RuntimeError):
-            io.read_audio(filename)
-    else:
-        io.read_audio(filename)
-
-
-@pytest.mark.parametrize("subtype", soundfile.available_subtypes('RAW').keys())
-def test_write_audio_read_audio_raw(subtype, tmpdir, noise):
-    """Test for errors in soundfile/libsndfile for RAW format"""
-    filename = os.path.join(tmpdir, 'test_file.raw')
-    io.write_audio(noise, filename, subtype=subtype)
-    if 'DWVW' in subtype:
-        with pytest.raises(RuntimeError):
-            io.read_audio(
-                filename, samplerate=44100, channels=1, subtype=subtype)
-    else:
-        io.read_audio(filename, samplerate=44100, channels=1, subtype=subtype)
 
 
 def test_write_audio_pathlib(noise, tmpdir):

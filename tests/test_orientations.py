@@ -111,41 +111,6 @@ def test_orientations_show(views, ups, positions, orientations):
         orientations.show(positions)
 
 
-def test_orientations_from_view_up_show_coordinate_system_change(
-        views, ups, positions):
-    """
-    Create `Orientations` from view and up vectors in the spherical domain
-    as well as in the carteesian domain, and visualize both to compare them
-    manually by eye.
-    """
-    # Carteesian: Visualize to manually validate orientations
-    views = np.asarray(views)
-    ups = np.asarray(ups)
-    views = Coordinates(views[:, 0], views[:, 1], views[:, 2])
-    ups = Coordinates(ups[:, 0], ups[:, 1], ups[:, 2])
-
-    positions = np.asarray(positions)
-    positions = Coordinates(positions[:, 0], positions[:, 1], positions[:, 2])
-    orient_from_cart = Orientations.from_view_up(views, ups)
-    orient_from_cart.show(positions)
-
-    # Convert to spherical: And again visualize to manually validate
-    views.get_sph(convert=True)
-    ups.get_sph(convert=True)
-    positions.get_sph(convert=True)
-
-    orient_from_sph = Orientations.from_view_up(views, ups)
-    orient_from_sph.show(positions)
-
-    # Check if coordinate system has not been changed by orientations
-    assert views._system['domain'] == 'sph', (
-        "Coordinate system has been changed by Orientations.")
-    assert ups._system['domain'] == 'sph', (
-        "Coordinate system has been changed by Orientations.")
-    assert positions._system['domain'] == 'sph', (
-        "Coordinate system has been changed by Orientations.show().")
-
-
 def test_as_view_up_right(views, ups, orientations):
     """
     Output of this method must be the normed input vectors.

@@ -11,10 +11,17 @@ from .dsp import (
     time_shift,
     time_window,
     kaiser_window_beta,
+    find_impulse_response_delay,
+    find_impulse_response_start,
     deconvolve,
     convolve,
     decibel,
-    soft_limit_spectrum
+    soft_limit_spectrum,
+    energy,
+    power,
+    rms,
+    normalize,
+    average
 )
 
 from .interpolation import (
@@ -43,12 +50,19 @@ __all__ = [
     'time_shift',
     'time_window',
     'kaiser_window_beta',
+    'find_impulse_response_delay',
+    'find_impulse_response_start',
     'deconvolve',
     'convolve',
     'decibel',
     'soft_limit_spectrum',
+    'energy',
+    'power',
+    'rms',
     'InterpolateSpectrum',
     'smooth_fractional_octave',
     'resample',
+    'average',
+    'normalize',
     'fractional_time_shift'
 ]

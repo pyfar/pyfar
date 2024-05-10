@@ -37,7 +37,6 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
-.tox/
 .coverage
 .coverage.*
 .cache
@@ -119,6 +118,16 @@ pyfar/samplings/external/samplings_t_design*
 # saved plots from testing
 tests/test_plot_data/output/*.png
 
+# downloaded data in pyfar/signals/files
+pyfar/signals/files/*
+
 # workaround for failing test discovery in vscode
 tests/*/__init__.py
 tests/private/
+
+# ignore downloads from pyfar gallery
+docs/header.rst
+docs/_static/favicon.ico
+docs/_static/header.rst
+docs/_static/css/custom.css
+docs/resources/logos/pyfar_logos_fixed_size_pyfar.png

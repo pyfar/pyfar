@@ -67,6 +67,10 @@ figure.facecolor    : white    ## figure facecolor
 figure.edgecolor    : none     ## figure edgecolor
 figure.titleweight  : bold     ## weight of the figure title
 
+#### Figure layout
+#### (tight and constrained layout are not compatible. Only one can be used)
+figure.autolayout: False            ## use `tight_layout`
+figure.constrained_layout.use: True ## use `constrained_layout`
 
 #### SAVING FIGURES
 savefig.facecolor   : white    ## figure facecolor when saving

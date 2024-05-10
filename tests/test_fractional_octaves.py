@@ -58,15 +58,17 @@ def test_fractional_coeff_oct_filter_iec():
          [1.00000000e+00, -2.00000000e+00,  1.00000000e+00,
           1.00000000e+00, -1.67171842e+00,  8.18664740e-01]]])
 
-    actual = filter._coefficients_fractional_octave_bands(
-        sr, 1, freq_range=(1e3, 4e3), order=order)
+    actual = filter.fractional_octaves._coefficients_fractional_octave_bands(
+        sr, 1, frequency_range=(1e3, 4e3), order=order)
     np.testing.assert_allclose(actual, expected)
 
     sr = 16e3
     order = 6
 
-    actual = filter._coefficients_fractional_octave_bands(
-        sr, 1, freq_range=(5e3, 20e3), order=order)
+    with pytest.warns(UserWarning, match="Skipping bands"):
+        actual = filter.fractional_octaves. \
+                    _coefficients_fractional_octave_bands(
+                        sr, 1, frequency_range=(5e3, 20e3), order=order)
 
     assert actual.shape == (1, order, 6)
 
@@ -87,14 +89,14 @@ def test_fract_oct_filter_iec():
     assert isinstance(sig, Signal)
 
     ir_actual = filter.fractional_octave_bands(
-        impulse, 1, freq_range=(1e3, 4e3), order=order)
+        impulse, 1, frequency_range=(1e3, 4e3), order=order)
 
     assert ir_actual.time.shape[0] == 3
 
 
 def test_fract_oct_bands_non_iec():
-    exact = filter._exact_center_frequencies_fractional_octaves(
-        1, (2e3, 20e3))
+    exact = filter.fractional_octaves.\
+        _exact_center_frequencies_fractional_octaves(1, (2e3, 20e3))
     expected = np.array([2e3, 4e3, 8e3, 16e3])
 
     np.testing.assert_allclose(exact, expected)

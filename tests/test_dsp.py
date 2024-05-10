@@ -286,7 +286,7 @@ def test_time_shift_linear(shift, pad_value):
         ref.time[0, -2:] = pad_value
 
     npt.assert_allclose(shifted.time, ref.time)
-    assert type(shifted) == type(ref)
+    assert type(shifted) is type(ref)
 
 
 @pytest.mark.parametrize("shift_samples", [(
@@ -604,6 +604,156 @@ def test_minimum_phase_multidim():
     npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
 
 
+def test_impulse_response_delay():
+    """Test delay of an ideal impulse"""
+    n_samples = 2**10
+    snr = 60
+    start_sample = np.array([24])
+
+    ir = pf.signals.impulse(n_samples, delay=start_sample)
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
+
+    start_sample_est = dsp.find_impulse_response_delay(ir)
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-6)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_delay(ir_awgn)
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
+
+
+def test_impulse_response_delay_sinc():
+    """Test delay of a band-limited sinc function shifted by 1/2 samples"""
+    sr = 44100
+    n_samples = 128
+    samples = np.arange(n_samples)
+    delay_samples = n_samples // 2 + 1/2
+
+    sinc = np.sinc(samples - delay_samples)
+    win = sgn.get_window('hann', n_samples, fftbins=False)
+
+    ir = pf.Signal(sinc*win, sr)
+    start_samples = pf.dsp.find_impulse_response_delay(ir)
+    npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
+
+
+def test_impulse_response_delay_multidim():
+    """Ideal multi-dimensional Signal of ideal impulses"""
+    n_samples = 2**10
+    snr = 60
+
+    start_sample = [[14, 12, 16], [24, 5, 43]]
+    ir = pf.signals.impulse(n_samples, delay=start_sample)
+
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_delay(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
+
+
+def test_impulse_response_start_insufficient_snr():
+    n_samples = 2**9
+    snr = 15
+
+    ir = pf.signals.impulse(n_samples, 20)
+    noise = pf.signals.noise(n_samples, rms=10**(-snr/20))
+    ir_noise = ir + noise
+
+    with pytest.warns(UserWarning, match='The SNR'):
+        dsp.find_impulse_response_start(ir_noise)
+
+
+def test_impulse_response_start():
+    n_samples = 2**10
+    ir = np.zeros(n_samples)
+    snr = 60
+
+    noise = pf.Signal(np.random.randn(n_samples) * 10**(-snr/20), 44100)
+
+    start_sample = 24
+    ir[start_sample] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    start_sample_est = dsp.find_impulse_response_start(ir)
+    assert start_sample_est == start_sample - 1
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+    assert start_sample_est == start_sample - 1
+
+
+def test_impulse_response_theshold():
+    n_samples = 2**10
+    ir = np.zeros(n_samples)
+
+    start_sample = 24
+    ir[start_sample] = 1
+    ir[start_sample-4:start_sample] = 10**(-5/10)
+
+    ir = pf.Signal(ir, 44100)
+
+    start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
+    assert start_sample_est == start_sample - 4 - 1
+
+
+def test_impulse_response_train():
+    n_samples = 256
+    # The start_sample is the last first below the threshold
+    start_sample = 25
+    delays = np.array([14, 22, 26, 30, 33])
+    amplitudes = np.array([-40, -21, -6, 0, -9], dtype=float)
+
+    ir = pf.signals.impulse(n_samples, delays, 10**(amplitudes/20))
+    ir.time = np.sum(ir.time, axis=0)
+    awgn = pf.signals.noise(n_samples, rms=10**(-60/20))
+    ir += awgn
+
+    start_sample_est = dsp.find_impulse_response_start(ir, threshold=20)
+
+    assert start_sample_est == start_sample
+
+
+def test_impulse_response_start_multidim():
+    n_samples = 2**10
+    n_channels = 3
+    ir = np.zeros((n_channels, n_samples))
+
+    snr = 60
+
+    noise = pf.Signal(
+        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample = [24, 5, 43]
+    ir[[0, 1, 2], start_sample] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
+
+    ir = np.zeros((2, n_channels, n_samples))
+    noise = pf.Signal(
+        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample_1 = [24, 5, 43]
+    ir[0, [0, 1, 2], start_sample_1] = 1
+    start_sample_2 = [14, 12, 16]
+    ir[1, [0, 1, 2], start_sample_2] = 1
+
+    ir = pf.Signal(ir, 44100)
+
+    start_samples = np.vstack((start_sample_1, start_sample_2))
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est, start_samples - 1)
+
+
 def test_convolve_default():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, -1, 0], 44100)
@@ -639,6 +789,19 @@ def test_convolve_mode_and_method(method, mode, desired):
     y = pf.Signal([1, -1, 0.1], 44100)
     res = dsp.convolve(x, y, mode=mode, method=method)
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+def test_convolve_mismatching_cdims():
+    """
+    Test if convolve works with broadcastable signals with different cdims
+    """
+    # generate and convolve signals
+    signal_a = pf.signals.impulse(1, amplitude=np.atleast_2d([1, 2]))
+    signal_b = pf.Signal([1, -1], 44100)
+    result = pf.dsp.convolve(signal_a, signal_b)
+    # check the result
+    npt.assert_almost_equal(result.time[0, 0].flatten(), [1, -1])
+    npt.assert_almost_equal(result.time[0, 1].flatten(), [2, -2])
 
 
 def test_convolve_mode_error():

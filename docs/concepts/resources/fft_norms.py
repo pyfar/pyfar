@@ -11,9 +11,9 @@ order = 3
 impulse = pf.signals.impulse(
     n_samples, sampling_rate=sampling_rate)
 filter = pf.dsp.filter.fractional_octave_bands(
-    impulse, num_fractions=1, freq_range=(500, 700))
+    impulse, num_fractions=1, frequency_range=(500, 700))
 ir = pf.dsp.filter.fractional_octave_bands(
-    impulse, num_fractions=1, freq_range=(200, 400), order=3)*n_samples/2
+    impulse, num_fractions=1, frequency_range=(200, 400), order=3)*n_samples/2
 sine = pf.signals.sine(1e3, n_samples, sampling_rate=sampling_rate)
 noise = pf.signals.noise(
     n_samples, rms=1/np.sqrt(2), sampling_rate=sampling_rate)
@@ -53,5 +53,5 @@ for idx, (fft_norm, unit, log_prefix, ylim) in \
     if idx < 4:
         ax.set_xlabel('')
     ax.set_title('\''+fft_norm+'\'')
-fig.tight_layout()
+
 plt.savefig('fft_norms_examples.png', dpi=150)
