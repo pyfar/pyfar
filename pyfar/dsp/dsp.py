@@ -1798,19 +1798,19 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
-                        direction='above'):
+def soft_limit_spectrum(signal, limit, knee, freq_range=None,
+                        direction='above', log_prefix=None):
     """
-    Apply a frequency-wise soft limiting to a spectrum.
+    Apply a frequency-wise soft limiting to input spectra.
 
-    Soft limiting denotes
-    a smooth transition that is applied to limit discontinuities in the data
-    that would appear in hard clipping. The transition phase is termed `knee`,
-    and two different types of knees can be applied (see parameters and
-    examples below).
+    Soft limiting gradually increases the amount of limiting to avoid
+    discontinuities in the data that would appear in hard limiting. The
+    transition betwwen the magnitude where no limiting is applied to the
+    magnitude where the limiting reaches its full effect is termed `knee`
+    (see examples below).
 
     Note that the limiting is applied on `signal.freq`, i.e. the data after
-    the FFT normalization in case `signal` is a `pyfar.Signal` object.
+    the FFT normalization.
 
     Parameters
     ----------
@@ -1819,7 +1819,7 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
     limit : number, array like
         The gain in dB at which the limiting reaches its full effect. If this
         is a number, the same limit is applied to all frequencies. If this an
-        an array like, it must be broadcastable to `signal.freq.shape`.
+        audio object it must broadcastable to ``signal.cshape``.
     knee : number, string
         ``'arctan'``
             Apply an arcus tangens knee according to [#]_ Section 3.6.4. In
@@ -1829,11 +1829,6 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
             Apply a knee with a width of `number` dB according to [#]_ Eq. (4).
             This definition of the knee originates from the classic audio
             effects limiting, compression, and expansion.
-
-    ratio : number, optional
-        Defines the ratio between the input and output level for frequencies
-        whose values exceed the `limit`. The default of ``np.inf`` strictly
-        limits all values. See examples below.
     freq_range : array like, optional
         Frequency range in which the limiting is applied. This must be an array
         like containing the lower and upper limit in Hz. The default ``None``
@@ -1842,10 +1837,18 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
         Define how the limiting works
 
         ``'above'`` (default)
-            Apply soft limiting to values above `limit`.
+            Soft limiting `signal` to enforece an aboslute maximum value of
+            `limit`.
         ``'below'``
-            Apply soft limiting to values below `limit`. This is achieved by
-            using ``1/signal.freq`` for the limiting.
+            Soft limiting `signal` to enformce an absolute minimum value of
+            `limit`
+        log_prefix: float, int
+            The log predix is used to linearize the limit and knee, e.g.,
+            ``limit_linear = 10**(limit / log_prefix)``. The default ``None``
+            uses ``20`` if `signal` is a Freuquency data Object or `signal` is
+            a Signal object with the FFT norm ``'none'``, ``'unitary'``,
+            ``'amplitude'`` or ``'rms'``. Otherwise a `log_prefix` of 10 is
+            used.
 
     Returns
     -------
@@ -1854,6 +1857,28 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
 
     Examples
     --------
+
+    Use signal with linearly increasing log. magnitude to illustrate the effect
+    of different knees
+
+    .. plot ::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>>
+        >>> signal = pf.FrequencyData(
+        ...     10**(np.arange(-30, 31)/20), np.arange(0, 61))
+        >>>
+        >>> for knee in ['arctan', 10, 0]:
+        >>>     limited = pf.dsp.soft_limit_spectrum(signal, 0, knee)
+        >>>     pf.plot.freq(limited, freq_scale='linear', label=f'{knee=}')
+        >>>
+        >>> ax = pf.plot.freq(signal, freq_scale='linear',
+        ...                   linestyle='--', label='original')
+        >>>
+        >>> ax.legend(loc='lower right')
+        >>> ax.set_xlim(0, 60)
+        >>> ax.set_ylim(-30, 30)
 
     Apply limiting with knee (soft limiting) and without knee (hard limiting)
 
@@ -1869,29 +1894,6 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
         >>>
         >>> pf.plot.freq(soft, label='soft (knee > 0)')
         >>> pf.plot.freq(hard, label='hard (knee = 0)')
-        >>> ax = pf.plot.freq(signal, ls='--', label='original')
-        >>>
-        >>> ax.set_ylim(-5, 25)
-        >>> ax.legend()
-
-    Apply limiting with infinite ratio (strict limiting) and finite ratios
-    (compression)
-
-    .. plot ::
-
-        >>> import pyfar as pf
-        >>> import numpy as np
-        >>>
-        >>> signal = pf.signals.impulse(4096)
-        >>> signal = pf.dsp.filter.bell(signal, 1e3, 20, 1)
-        >>>
-        >>> ratio_a = pf.dsp.soft_limit_spectrum(
-        ...     signal, limit=10, knee=12, ratio=np.inf)
-        >>> ratio_b = pf.dsp.soft_limit_spectrum(
-        ...     signal, limit=10, knee=12, ratio=3)
-        >>>
-        >>> pf.plot.freq(ratio_a, label='ratio = infinity')
-        >>> pf.plot.freq(ratio_b, label='ratio = 3')
         >>> ax = pf.plot.freq(signal, ls='--', label='original')
         >>>
         >>> ax.set_ylim(-5, 25)
@@ -1940,28 +1942,20 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
                           "or 'below'"))
 
     if knee != "arctan" and knee < 0:
-        raise ValueError(f"knee is {knee} but must be >= 0")
+        raise ValueError(
+            f"knee is {knee} but must be 'arctan' or a number >= 0")
 
-    if ratio <= 0:
-        raise ValueError(f"ratio is {ratio} but must be > 0")
-
+    if isinstance(limit, pyfar.FrequencyData):
+        limit = limit.freq
     limit = np.broadcast_to(limit, signal.cshape + (signal.n_bins, ))
 
     # define frequency range
     if freq_range is None:
         freq_mask = np.full((signal.n_bins, ), True)
     else:
-        freq_range = np.sort(freq_range)
-
-        if np.any(freq_range < signal.frequencies[0]) or \
-                np.any(freq_range > signal.frequencies[-1]):
-            raise ValueError((
-                "freq_range contains values smaller than the minimum frequency"
-                " or larger than the maximum frequency of the signal."))
-
         freq_mask = np.full(signal.n_bins, False)
-        freq_mask[signal.find_nearest_frequency(freq_range[0]):
-                  signal.find_nearest_frequency(freq_range[1]) + 1] = True
+        freq_mask[signal.find_nearest_frequency(np.min(freq_range)):
+                  signal.find_nearest_frequency(np.max(freq_range)) + 1] = True
 
     # get spectral data
     signal_limited = signal.copy()
@@ -1975,8 +1969,14 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
         limit = -limit
 
     # de-logarithmize the limit
-    log_prefix = 10 if isinstance(signal, pyfar.Signal) and \
-        signal.fft_norm in ('power', 'psd') else 20
+    if log_prefix is None:
+        if (type(signal) is pyfar.Signal and
+                signal.fft_norm not in ('power', 'psd')) or \
+                type(signal) is pyfar.FrequencyData:
+            log_prefix = 20
+        else:
+            log_prefix = 10
+
     limit_lin = 10**(limit/log_prefix)
 
     # absolute spectrum
@@ -1993,30 +1993,20 @@ def soft_limit_spectrum(signal, limit, knee, ratio=np.inf, freq_range=None,
         # log spectrum
         freq_db = log_prefix * np.log10(freq_abs)
 
-        # apply limiting outside the knee (Giannoulis et al. Eq. (4)) ---------
-
-        # frequencies, where limiting is applied
+        # hard limiting outside the knee (Giannoulis et al. Eq. (4)) ----------
         hard = np.logical_and(2 * (freq_db - limit) > knee, freq_mask)
-        # gain factor
-        if ratio == np.inf:
-            gain_hard = limit_lin[..., hard]
-        else:
-            gain_hard = limit[..., hard] + \
-                (freq_db[..., hard] - limit[..., hard]) / ratio
-            gain_hard = 10**(gain_hard/log_prefix)
-        # apply limiting
+        gain_hard = limit_lin[..., hard]
         freq[..., hard] *= gain_hard / freq_abs[..., hard]
 
-        # apply limiting inside the knee (Giannoulis et al. Eq. (4)) ----------
+        # soft limiting inside the knee (Giannoulis et al. Eq. (4)) ----------
         if knee != 0:
 
             # frequencies, where limiting is applied
             soft = np.logical_and(
                 2 * np.abs(freq_db - limit) <= knee, freq_mask)
             # gain factor
-            gain_soft = (1 / ratio - 1) * (freq_db[..., soft] -
-                                           limit[..., soft] +
-                                           knee / 2)**2 / (2 * knee)
+            gain_soft = -(freq_db[..., soft] - limit[..., soft] + knee / 2)**2\
+                / (2 * knee)
             # apply limiting
             freq[..., soft] *= 10**(gain_soft / log_prefix)
 
