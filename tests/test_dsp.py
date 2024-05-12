@@ -894,8 +894,10 @@ def test_impulse_response_start_multidim_complex():
     ir_awgn = ir + noise
     start_sample_est = dsp.find_impulse_response_start(ir_awgn)
 
-    npt.assert_allclose(start_sample_est[0, :], np.array(start_sample_real) - 1)
-    npt.assert_allclose(start_sample_est[1, :], np.array(start_sample_imag) - 1)
+    npt.assert_allclose(start_sample_est[0, :],
+                        np.array(start_sample_real) - 1)
+    npt.assert_allclose(start_sample_est[1, :],
+                        np.array(start_sample_imag) - 1)
 
     ir = np.zeros((2, n_channels, n_samples), dtype=complex)
     noise = pf.Signal(
