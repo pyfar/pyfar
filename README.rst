@@ -29,7 +29,7 @@ Installation
 
 Use pip to install pyfar
 
-.. code-block:: console
+.. code-block:: bash
 
     pip install pyfar
 
