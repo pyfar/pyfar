@@ -36,36 +36,36 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
 1. `Fork <https://docs.github.com/en/get-started/quickstart/fork-a-repo/>`_ the `pyfar` repo on GitHub.
 2. Clone your fork locally and cd into the pyfar directory::
 
-    $ git clone https://github.com/YOUR_USERNAME/pyfar.git
-    $ cd pyfar
+    git clone https://github.com/YOUR_USERNAME/pyfar.git
+    cd pyfar
 
 3. Install your local copy into a virtualenv. Assuming you have Anaconda or Miniconda installed, this is how you set up your fork for local development::
 
-    $ conda create --name pyfar python
-    $ conda activate pyfar
-    $ conda install pip
-    $ pip install -e .
-    $ pip install -r requirements_dev.txt
+    conda create --name pyfar python
+    conda activate pyfar
+    conda install pip
+    pip install -e .
+    pip install -r requirements_dev.txt
 
 4. Create a branch for local development. Indicate the intention of your branch in its respective name (i.e. `feature/branch-name` or `bugfix/branch-name`)::
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+    git checkout -b name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
 
 5. When you're done making changes, check that your changes pass flake8 and the
    tests::
 
-    $ flake8 pyfar tests
-    $ pytest
+    flake8 pyfar tests
+    pytest
 
    flake8 test must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Flake8 ignores `E123/E133, E226` and `E241/E242` by default. If necessary adjust your flake8 and linting configuration in your IDE accordingly.
 
 6. Commit your changes and push your branch to GitHub::
 
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+    git add .
+    git commit -m "Your detailed description of your changes."
+    git push origin name-of-your-bugfix-or-feature
 
 7. Submit a pull request on the develop branch through the GitHub website.
 
@@ -138,15 +138,15 @@ Pytest provides several, sophisticated functionalities which could reduce the ef
 
 - Run a single test with
 
-    $ pytest tests/test_plot.py::test_line_plots
+    pytest tests/test_plot.py::test_line_plots
 
 - Exclude tests (for example the time consuming test of plot) with
 
-    $ pytest -k 'not plot and not interaction'
+    pytest -k 'not plot and not interaction'
 
 - Create an html report on the test `coverage <https://coverage.readthedocs.io/en/coverage-5.5/>`_ with
 
-    $ pytest --cov=. --cov-report=html
+    pytest --cov=. --cov-report=html
 
 - Feel free to add more recommendations on useful pytest functionalities here. Consider, that a trade-off between easy implemention and good readability of the tests needs to be found.
 
@@ -218,21 +218,21 @@ You can build the documentation of your branch using Sphinx by executing the mak
 
 .. code-block:: console
 
-    $ cd docs/
-    $ make html
+    cd docs/
+    make html
 
 After Sphinx finishes you can open the generated html using any browser
 
 .. code-block:: console
 
-    $ docs/_build/index.html
+    docs/_build/index.html
 
 Note that some warnings are only shown the first time you build the
 documentation. To show the warnings again use
 
 .. code-block:: console
 
-    $ make clean
+    make clean
 
 before building the documentation.
 
@@ -249,8 +249,8 @@ A reminder for the maintainers on how to deploy.
 
 Switch to main and run::
 
-$ bumpversion patch # possible: major / minor / patch
-$ git push --follow-tags
+    bumpversion patch # possible: major / minor / patch
+    git push --follow-tags
 
 The testing platform will then deploy to PyPI if tests pass.
 
