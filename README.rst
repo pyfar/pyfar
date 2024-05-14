@@ -31,7 +31,7 @@ Use pip to install pyfar
 
 .. code-block:: console
 
-    $ pip install pyfar
+    pip install pyfar
 
 (Requires Python 3.8 or higher)
 
