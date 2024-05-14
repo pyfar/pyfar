@@ -388,6 +388,3 @@ def test_interpolate_spectrum_show():
     _ = interpolator(10, 10, show=True)
 
     plt.close()
-
-
-test_fractional_time_shift_complex()
