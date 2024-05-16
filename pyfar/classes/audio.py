@@ -1366,10 +1366,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
                     n_samples = d.n_samples
-                    # The fft_norm is set by the first signal. For all
-                    # following signals, the fft norm is matched
-                    fft_norm = _match_fft_norm(
-                        fft_norm, d.fft_norm, division, n_audio_objects)
+                    fft_norm = d.fft_norm
                 elif isinstance(d, TimeData):
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
@@ -1393,7 +1390,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                         raise ValueError(
                             "The number of samples does not match.")
                     fft_norm = _match_fft_norm(
-                        fft_norm, d.fft_norm, division, n_audio_objects)
+                        fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if not np.allclose(times, d.times, atol=1e-15):
                         raise ValueError(
@@ -1503,7 +1500,7 @@ def _matrix_multiplication(a, b, axes, audio_type):
     return np.matmul(a, b, axes=axes)
 
 
-def _match_fft_norm(fft_norm_1, fft_norm_2, division=False, n_audio_objects=2):
+def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     """
     Helper function to determine the fft_norm resulting from an
     arithmetic operation of two audio objects.
@@ -1532,9 +1529,6 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False, n_audio_objects=2):
         ``False`` if arithmetic operation is addition, subtraction or
         multiplication;
         ``True`` if arithmetic operation is division.
-    n_audio_objects : int
-        The number of audio objects that are involved in the operation. If
-        only one audio object is involved no rules apply for the fft_norm.
 
     Returns
     -------
@@ -1545,22 +1539,17 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False, n_audio_objects=2):
 
     # check if fft_norms are valid
     valid_fft_norms = [
-        'none', 'unitary', 'amplitude', 'rms', 'power', 'psd', None]
+        'none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
     if fft_norm_1 not in valid_fft_norms:
         raise ValueError((f"fft_norm_1 is {fft_norm_1} but must be in "
-                          f"{', '.join(valid_fft_norms[:-1])}"))
+                          f"{', '.join(valid_fft_norms)}"))
     if fft_norm_2 not in valid_fft_norms:
         raise ValueError((f"fft_norm_2 is {fft_norm_2} but must be in "
-                          f"{', '.join(valid_fft_norms[:-1])}"))
+                          f"{', '.join(valid_fft_norms)}"))
 
     # check if parameter division is type bool
     if not isinstance(division, bool):
         raise TypeError("Parameter division must be type bool.")
-
-    # output same fft norm as input if only one audio object is involved in the
-    # arithmetic operation. In this case fft_norm_1 can be None
-    if n_audio_objects == 1:
-        return fft_norm_2
 
     if not division:
 
