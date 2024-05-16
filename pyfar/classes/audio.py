@@ -1389,8 +1389,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                     if n_samples != d.n_samples:
                         raise ValueError(
                             "The number of samples does not match.")
-                    fft_norm = _match_fft_norm(
-                        fft_norm, d.fft_norm, division)
+                    fft_norm = _match_fft_norm(fft_norm, d.fft_norm, division)
                 elif isinstance(d, TimeData):
                     if not np.allclose(times, d.times, atol=1e-15):
                         raise ValueError(
@@ -1538,8 +1537,7 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     """
 
     # check if fft_norms are valid
-    valid_fft_norms = [
-        'none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
+    valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
     if fft_norm_1 not in valid_fft_norms:
         raise ValueError((f"fft_norm_1 is {fft_norm_1} but must be in "
                           f"{', '.join(valid_fft_norms)}"))
