@@ -1358,7 +1358,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
 
     # check input types and meta data
     n_audio_objects = 0
-    for d in enumerate(data):
+    for d in data:
         if isinstance(d, (Signal, TimeData, FrequencyData)):
             n_audio_objects += 1
             # store meta data upon first appearance
