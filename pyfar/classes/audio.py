@@ -906,6 +906,8 @@ def add(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -951,6 +953,8 @@ def subtract(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -996,6 +1000,8 @@ def multiply(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1040,6 +1046,8 @@ def divide(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If the denominator signal has the FFT normalization ``'none'``, the
       result gets the normalization of the numerator signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1084,6 +1092,8 @@ def power(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1169,6 +1179,8 @@ def matrix_multiplication(
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
