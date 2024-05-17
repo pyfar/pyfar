@@ -28,6 +28,19 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         ymin = ymax - 100
     else:
         data = signal.time.T
+    # get data defined in 'show_real_imag_abs'
+    if show_real_imag_abs == 'real':
+        data = np.real(data)
+        y_label = 'Amplitude'
+    elif show_real_imag_abs == 'imag':
+        data = np.imag(data)
+        y_label = 'Amplitude (imaginary)'
+    elif show_real_imag_abs == 'abs':
+        data = np.abs(data)
+        y_label = 'Amplitude (absolute)'
+    else:
+        raise ValueError('`show_real_imag_abs` has to be `real`, `imag`, or '
+                         f'`abs`, but is {show_real_imag_abs}.')
     # auto detect the time unit
     if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(signal.times[..., -1])
@@ -42,10 +55,10 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
     _, ax = _utils._prepare_plot(ax)
     ax.set_xlabel(f"Time in {unit}")
     if dB:
-        ax.set_ylabel("Amplitude in dB")
+        ax.set_ylabel(y_label + ' in dB')
         _utils._set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
     else:
-        ax.set_ylabel("Amplitude")
+        ax.set_ylabel(y_label)
     _utils._set_axlim(ax, ax.set_xlim, times[0], times[-1],
                       ax.get_xlim())
 
@@ -56,7 +69,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
 
 def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
-          ax=None, **kwargs):
+          side='right', ax=None, **kwargs):
     """
     Plot the logarithmic absolute spectrum on the positive frequency axis.
     """

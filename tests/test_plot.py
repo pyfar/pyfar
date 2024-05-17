@@ -74,6 +74,30 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
                      file_type, compare_output)
 
 
+#@pytest.mark.parametrize('function', [
+#    (plot.time), (plot.freq), (plot.phase), (plot.group_delay),
+#    (plot.time_freq), (plot.freq_phase), (plot.freq_group_delay)])
+@pytest.mark.parametrize('function', [
+    (plot.time)])
+def test_complex_line_plots(function, handsome_complex_signal,
+                            handsome_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {function.__name__}")
+
+    # initial plot
+    filename = function.__name__ + '_default'
+    create_figure()
+    function(handsome_complex_signal, show_real_imag_abs='real')
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = function.__name__ + '_hold'
+    function(handsome_signal_v2)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
 @pytest.mark.parametrize('param', [
     ['phase_deg', True, False],
     ['phase_unwrap', False, True],
