@@ -144,7 +144,6 @@ def caps(dimension, N):
 
     Examples
     --------
-
     % > [s_cap,n_regions] = eq_caps(2,10)
     % s_cap =
     %     0.6435    1.5708    2.4981    3.1416
@@ -168,6 +167,10 @@ def caps(dimension, N):
 
     Returns
     -------
+    s_cap : array, double
+        The colatitude of the spherical caps.
+    n_regions : array, int
+        The number of regions in each cap.
 
     """
     if dimension == 1:
@@ -236,6 +239,7 @@ def ideal_region_list(dimension, N, c_polar, n_collars):
     c_polar :
     n_collars : int
         The number of collar elements
+
     Returns
     -------
     ideal_regions : double
@@ -276,6 +280,7 @@ def round_to_naturals(N, r_regions):
         The dimension
     r_regions : double
         The ideal number of regions per collar before rounding
+
     Returns
     -------
     n_regions : int
@@ -312,6 +317,7 @@ def cap_colats(dimension, N, c_polar, n_regions):
         Colatitude angles of the spherical caps
     n_regions: int
         Number of regions
+
     Returns
     -------
     c_caps : double
@@ -345,6 +351,7 @@ def num_collars(N, c_polar, a_ideal):
         The colatitude angle of the polar caps
     a_ideal : double
         The ideal collar angles.
+
     Returns
     -------
     n_collars : int
@@ -383,6 +390,7 @@ def circle_offset(n_top, n_bot, extra_twist=False):
         Number of points in the lower circle
     extra_twist : boolean
         Perform an additional rotation (see part 3)
+
     Returns
     -------
     offset : int
@@ -571,6 +579,7 @@ def polar2cart(points_polar):
         The points in polar coordinates, with shape (2, N)
 
     Returns:
+    -------
     points_cart : array, double
         The points in Cartesian coordinates with shape (3, N)
 

@@ -462,7 +462,7 @@ def _str_to_type(type_as_string, module='pyfar'):
         The default is 'pyfar'.
 
     Returns
-    ----------
+    -------
     PyfarType: type.
         A valid PyfarType.
     """

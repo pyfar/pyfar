@@ -301,7 +301,6 @@ def write(filename, compress=False, **objs):
 
     Examples
     --------
-
     Save Signal object, Orientations objects and numpy array to disk.
 
     >>> s = pyfar.Signal([1, 2, 3], 44100)

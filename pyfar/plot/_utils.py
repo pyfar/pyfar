@@ -209,7 +209,6 @@ def _time_auto_unit(time_max):
 
     Parameters
     ----------
-
     time_max : float
         Absolute maximum of the time data in seconds
     """

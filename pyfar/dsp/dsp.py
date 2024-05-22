@@ -419,7 +419,6 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     Examples
     --------
-
     Options for parameter `shape`.
 
     .. plot::
@@ -915,7 +914,6 @@ def minimum_phase(signal, n_fft=None, truncate=True):
 
     Examples
     --------
-
     Create a minimum phase equivalent of a linear phase FIR low-pass filter
 
     .. plot::
@@ -1218,7 +1216,6 @@ def find_impulse_response_delay(impulse_response, N=1):
 
     References
     ----------
-
     .. [#]  N. S. M. Tamim and F. Ghani, “Hilbert transform of FFT pruned
             cross correlation function for optimization in time delay
             estimation,” in Communications (MICC), 2009 IEEE 9th Malaysia
@@ -1498,7 +1495,7 @@ def deconvolve(system_output, system_input, fft_length=None,
         The ``fft_norm`` of is set to ``'none'``.
 
     References
-    -----------
+    ----------
     .. [#] S. Mueller and P. Masserani "Transfer function measurement with
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
@@ -1746,6 +1743,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         If return_prefix is ``True``, the function will also return the
         `log_prefix` value. This can be used to delogrithmize the data. The
         default is ``False``.
+
     Returns
     -------
     decibel : numpy.ndarray
@@ -1826,7 +1824,7 @@ def energy(signal):
     to compute the power and the rms of a signal.
 
     References
-    -----------
+    ----------
     .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
            (Upper Saddle et al., Pearson, 2010), Third edition.
     """
@@ -1976,7 +1974,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         The default is ``'raise'``.
 
     Returns
-    --------
+    -------
     averaged_signal: Signal, TimeData, FrequencyData
         Averaged input Signal.
 

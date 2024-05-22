@@ -154,6 +154,7 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         broadcasted following the
         :doc:`numpy broadcasting rules<numpy:user/basics.broadcasting>`
         The default is ``False``.
+
     Returns
     -------
     merged : Signal, TimeData, FrequencyData

@@ -198,7 +198,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -242,7 +241,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -283,7 +281,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -323,7 +320,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -363,7 +359,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -403,7 +398,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -1456,7 +1450,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find frontal point from a spherical coordinate system
 
         .. plot::
@@ -1636,7 +1629,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find all point with 1m distance from the frontal point
 
         .. plot::
@@ -1793,7 +1785,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find the nearest point in a line
 
         .. plot::
@@ -1869,7 +1860,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find frontal points within a distance of 0.5 meters
 
         .. plot::
@@ -1945,7 +1935,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find top points within a distance of 45 degrees
 
         .. plot::
@@ -2023,7 +2012,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find horizontal slice of spherical coordinate system within a ring of
         +/- 10 degrees
 
@@ -2128,7 +2116,6 @@ class Coordinates():
 
         Examples
         --------
-
         Get a coordinates object
 
         >>> import pyfar as pf

@@ -11,7 +11,7 @@ def rename_arg(arg_map, warning_message):
     a new argument and raises a PyfarDeprecationWarning.
 
     Parameters
-    -----------
+    ----------
     arg_map : dictionary
         Map with deprecated argument to intercept and new argument to
         replace it with: ``{"deprecated_argument": "new_argument"}``
@@ -19,12 +19,12 @@ def rename_arg(arg_map, warning_message):
         Message to be thrown with deprecation warning.
 
     Returns
-    ---------
+    -------
     function : function
         Modified function with replaced arguments.
 
     Examples
-    ---------
+    --------
     Following example shows how a deprecated argument can be replaced by a
     new argument while throwing a deprecation warning:
 

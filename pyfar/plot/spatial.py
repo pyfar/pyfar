@@ -29,6 +29,7 @@ def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
         Additional key value arguments are passed to matplotlib.pyplot.scatter.
 
     Returns
+    -------
     ax : matplotlib.axes
         The axis used for the plot.
 
@@ -70,6 +71,7 @@ def quiver(
         Additional key value arguments are passed to matplotlib.pyplot.quiver.
 
     Returns
+    -------
     ax : matplotlib.axes
         The axis used for the plot.
 
@@ -111,6 +113,7 @@ def _setup_axes(projection=Axes3D.name, ax=None,
         Additional key value arguments are passed to matplotlib.pyplot.scatter.
 
     Returns
+    -------
     ax : matplotlib.axes
         The axis used for the plot.
 

@@ -73,7 +73,6 @@ def context(style='light', after_reset=False):
 
     Examples
     --------
-
     Generate customizable subplots with the default pyfar plot style
 
     >>> import pyfar as pf
@@ -129,7 +128,6 @@ def use(style="light"):
 
     Examples
     --------
-
     Permanently use the pyfar default plot style
 
     >>> import pyfar as pf
