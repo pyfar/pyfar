@@ -19,7 +19,7 @@ import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData
 
 
-@pytest.mark.parametrize('input_type', ('filename', 'path_object'))
+@pytest.mark.parametrize('input_type', ['filename', 'path_object'])
 def test_read_sofa_filename_and_path_object(
         input_type, generate_sofa_GeneralFIR, noise_two_by_three_channel):
     """Test read_sofa with filename and path object as input"""
@@ -87,7 +87,7 @@ def test_read_sofa_position_type_spherical(
         r_coords.radius, sofa_reference_coordinates[1][:, 2])
 
 
-@pytest.mark.parametrize('file,version', [
+@pytest.mark.parametrize(('file', 'version'), [
     ('erroneous_data_with_version_string.far', '0.5.2'),
     ('erroneous_data_without_version_string.far', '<0.5.3')])
 def test_read_erroneous_data(file, version):

@@ -25,7 +25,7 @@ def test_broadcast_cshape_assertions():
         pf.utils.broadcast_cshape([1, 2, 3], (1, ))
 
 
-@pytest.mark.parametrize("cshape,reference", [
+@pytest.mark.parametrize(("cshape", "reference"), [
     (None, (2,)), ((2, 2), (2, 2))])
 def test_broadcast_cshapes(cshape, reference):
     """Test broadcasting multiple signals with all audio classes"""
@@ -76,7 +76,7 @@ def test_broadcast_cdim_assertions():
         pf.utils.broadcast_cdim(pf.Signal(1, 44100), 0)
 
 
-@pytest.mark.parametrize("cdim,reference", [
+@pytest.mark.parametrize(("cdim", "reference"), [
     (None, 2), (3, 3)])
 def test_broadcast_cdims(cdim, reference):
     """Test broadcasting multiple signals with all audio classes"""
