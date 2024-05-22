@@ -125,7 +125,7 @@ def test_default_colors():
 
 
 @pytest.mark.parametrize(
-    "fft_norm, expected",
+    ("fft_norm", "expected"),
     [('none', 20), ('unitary', 20), ('amplitude', 20),
      ('rms', 20), ('power', 10), ('psd', 10)])
 def test__log_prefix_norms(sine, fft_norm, expected):

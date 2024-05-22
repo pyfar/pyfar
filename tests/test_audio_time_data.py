@@ -187,8 +187,8 @@ def test_magic_setitem_wrong_n_samples():
         time_a[0] = time_b
 
 
-@pytest.mark.parametrize("audio", (
-    pf.FrequencyData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)))
+@pytest.mark.parametrize("audio", [
+    pf.FrequencyData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)])
 def test_magic_setitem_wrong_type(audio):
     time_data = TimeData([1, 2, 3, 4], [1, 2, 3, 4])
     with pytest.raises(ValueError, match="Comparison only valid"):

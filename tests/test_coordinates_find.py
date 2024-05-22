@@ -17,7 +17,7 @@ def test_find_nearest_simple():
     assert d == 0
 
 
-@pytest.mark.parametrize('azimuth,distance_measure,distance', [
+@pytest.mark.parametrize(('azimuth', 'distance_measure', 'distance'), [
     (0, 'spherical_radians', 0),                        # radians match
     (np.pi / 16, 'spherical_radians', np.pi / 16),      # radians no match
     (0, 'spherical_meter', 0),                          # meters match

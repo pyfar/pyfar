@@ -813,7 +813,7 @@ def test_convolve_fft_norm_error():
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-@pytest.mark.parametrize("mode, desired", [
+@pytest.mark.parametrize(("mode", "desired"), [
     ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]])),
     ('cut', np.array([[1, -0.5, 0.1, -0.35]])),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]]))])
