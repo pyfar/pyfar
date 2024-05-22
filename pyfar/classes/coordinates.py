@@ -929,8 +929,8 @@ class Coordinates():
     @property
     def sh_order(self):
         """This function will be deprecated in pyfar 0.8.0 in favor
-            of :py:class:`spharpy.samplings.SamplingSphere`.
-            Get the maximum spherical harmonic order."""
+        of :py:class:`spharpy.samplings.SamplingSphere`.
+        Get the maximum spherical harmonic order."""
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),
@@ -941,8 +941,8 @@ class Coordinates():
     @sh_order.setter
     def sh_order(self, value):
         """This function will be deprecated in pyfar 0.8.0 in favor
-            of :py:class:`spharpy.samplings.SamplingSphere`.
-            Set the maximum spherical harmonic order."""
+        of :py:class:`spharpy.samplings.SamplingSphere`.
+        Set the maximum spherical harmonic order."""
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),

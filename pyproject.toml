@@ -11,6 +11,8 @@ lint.select = [
     "E",
     "F",
     "W",
+    "D207", # Docstring is under-indented
+    "D208", # Docstring is over-indented
     "D407", # Missing section underline
     "D408", # Section underline should be in the line following the section's name
     "D409", # Section underline should match the length of its name

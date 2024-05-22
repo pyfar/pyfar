@@ -1092,7 +1092,7 @@ def divide(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       normalization ``'none'``.
     * Other combinations raise an error.
-   """
+    """
     return _arithmetic(data, domain, _divide)
 
 
