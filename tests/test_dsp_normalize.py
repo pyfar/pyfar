@@ -5,28 +5,28 @@ import numpy.testing as npt
 import numpy as np
 
 
-@pytest.mark.parametrize('reference_method,channel_handling,truth', (
-    ['max', 'max', [0.2, 1.0]],
-    ['max', 'individual', [1.0, 1.0]],
-    ['max', 'min', [1.0, 5.0]],
-    ['max', 'mean', [1/3, 5/3]],
-    ['mean', 'max', [0.6, 3.0]],
-    ['mean', 'individual', [3.0, 3.0]],
-    ['mean', 'min', [3.0, 15.0]],
-    ['mean', 'mean', [1.0, 5.0]],
-    ['rms', 'max', [1*np.sqrt(3/5**2), 5*np.sqrt(3/5**2)]],
-    ['rms', 'individual', [1*np.sqrt(3/1**2), 5*np.sqrt(3/5**2)]],
-    ['rms', 'min', [1*np.sqrt(3/1**2), 5*np.sqrt(3/1**2)]],
-    ['rms', 'mean', [2/(np.sqrt(1/3)+np.sqrt(25/3)),
-                     2*5/(np.sqrt(1/3)+np.sqrt(25/3))]],
-    ['power', 'max', [1*3/5**2, 5*3/5**2]],
-    ['power', 'individual', [1*3/1**2, 5*3/5**2]],
-    ['power', 'min', [1*3/1**2, 5*3/1**2]],
-    ['power', 'mean', [1*3/((1**2+5**2)/2), 5*3/((1**2+5**2)/2)]],
-    ['energy', 'max', [1/5**2, 5/5**2]],
-    ['energy', 'individual', [1/1**2, 5/5**2]],
-    ['energy', 'min', [1/1**2, 5/1**2]],
-    ['energy', 'mean', [1/((1**2+5**2)/2), 5/((1**2+5**2)/2)]]))
+@pytest.mark.parametrize(('reference_method', 'channel_handling', 'truth'), [
+    ('max', 'max', [0.2, 1.0]),
+    ('max', 'individual', [1.0, 1.0]),
+    ('max', 'min', [1.0, 5.0]),
+    ('max', 'mean', [1/3, 5/3]),
+    ('mean', 'max', [0.6, 3.0]),
+    ('mean', 'individual', [3.0, 3.0]),
+    ('mean', 'min', [3.0, 15.0]),
+    ('mean', 'mean', [1.0, 5.0]),
+    ('rms', 'max', [1*np.sqrt(3/5**2), 5*np.sqrt(3/5**2)]),
+    ('rms', 'individual', [1*np.sqrt(3/1**2), 5*np.sqrt(3/5**2)]),
+    ('rms', 'min', [1*np.sqrt(3/1**2), 5*np.sqrt(3/1**2)]),
+    ('rms', 'mean', [2/(np.sqrt(1/3)+np.sqrt(25/3)),
+                     2*5/(np.sqrt(1/3)+np.sqrt(25/3))]),
+    ('power', 'max', [1*3/5**2, 5*3/5**2]),
+    ('power', 'individual', [1*3/1**2, 5*3/5**2]),
+    ('power', 'min', [1*3/1**2, 5*3/1**2]),
+    ('power', 'mean', [1*3/((1**2+5**2)/2), 5*3/((1**2+5**2)/2)]),
+    ('energy', 'max', [1/5**2, 5/5**2]),
+    ('energy', 'individual', [1/1**2, 5/5**2]),
+    ('energy', 'min', [1/1**2, 5/1**2]),
+    ('energy', 'mean', [1/((1**2+5**2)/2), 5/((1**2+5**2)/2)])])
 def test_normalization(reference_method, channel_handling, truth):
     """Parametrized test for all combinations of reference_method and
     channel_handling parameters using an impulse.
@@ -51,9 +51,9 @@ def test_domains_normalization():
     npt.assert_allclose(np.max(np.abs(freq.freq)), 1)
 
 
-@pytest.mark.parametrize('unit, limit1, limit2', (
-                         [None, (0, 1000), (1000, 2000)],
-                         ['s', (0, 0.5), (0.5, 1)]))
+@pytest.mark.parametrize(('unit', 'limit1', 'limit2'), [
+                         (None, (0, 1000), (1000, 2000)),
+                         ('s', (0, 0.5), (0.5, 1))])
 def test_time_limiting(unit, limit1, limit2):
     # Test for normalization with setting limits in samples(None) and seconds.
     signal = np.append(np.ones(1000), np.zeros(1000)+0.1)
@@ -66,9 +66,9 @@ def test_time_limiting(unit, limit1, limit2):
     npt.assert_allclose(10*np.max(sig_norm1.time), np.max(sig_norm2.time))
 
 
-@pytest.mark.parametrize('unit, limit1, limit2', (
-                         [None, (20, 25), (5, 10)],
-                         ['Hz', (400, 600), (100, 200)]))
+@pytest.mark.parametrize(('unit', 'limit1', 'limit2'), [
+                         (None, (20, 25), (5, 10)),
+                         ('Hz', (400, 600), (100, 200))])
 def test_frequency_limiting(unit, limit1, limit2):
     """Test for normalization with setting limits in bins(None) and hertz."""
     signal = pf.signals.sine(500, 2000)
@@ -97,9 +97,9 @@ def test_value_return():
     assert values_norm == amplitude / n_samples
 
 
-@pytest.mark.parametrize('data', (
+@pytest.mark.parametrize('data', [
                         pf.TimeData([1, np.nan, 2], [1, 2, 3]),
-                        pf.FrequencyData([1, np.nan, 2], [1, 2, 3])))
+                        pf.FrequencyData([1, np.nan, 2], [1, 2, 3])])
 def test_nan_value_normalization(data):
     # Test normalization with data including NaNs.
     if data.domain == 'time':

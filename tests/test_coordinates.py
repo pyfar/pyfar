@@ -579,7 +579,7 @@ def test_find_slice():
     plt.close("all")
 
 
-@pytest.mark.parametrize("coordinates,desired", [
+@pytest.mark.parametrize(("coordinates", "desired"), [
     (Coordinates([0, 1], 2, 3), [0, 2, 3]),
     (Coordinates([[0, 1], [1, 0]], 2, 3), [[0, 2, 3], [0, 2, 3]])])
 def test_find_slice_slicing(coordinates, desired):
@@ -590,7 +590,7 @@ def test_find_slice_slicing(coordinates, desired):
     npt.assert_equal(coordinates[index].get_cart(), np.atleast_2d(desired))
 
 
-@pytest.mark.parametrize("rot_type,rot", [
+@pytest.mark.parametrize(("rot_type", "rot"), [
     ('quat', [0, 0, 1 / np.sqrt(2), 1 / np.sqrt(2)]),
     ('matrix',  [[0, -1, 0], [1, 0, 0], [0, 0, 1]]),
     ('rotvec', [0, 0, 90]),
@@ -633,7 +633,7 @@ def test_converters():
 
 
 @pytest.mark.parametrize(
-    'points_1, points_2, points_3, actual, expected', [
+    ("points_1", "points_2", "points_3", "actual", "expected"), [
         (1, 1, 1,                Coordinates(1, 1, -1),                 False),
         ([1, 1], [1, 1], [1, 1], Coordinates([1, 1], [1, 1], [1, 2]),   False),
         ([1, 1], [1, 1], [1, 1], Coordinates([1, 1.0], [1, 1.0], [1, 1]), True)

@@ -7,7 +7,7 @@ import pyfar.dsp.filter as pfilt
 from pyfar.dsp.filter.audiofilter import _shelving_cascade_slope_parameters
 
 
-@pytest.mark.parametrize("shelve_type,g_s_b", [
+@pytest.mark.parametrize(("shelve_type", "g_s_b"), [
     ("low", (20., -10., 2.)), ("high", (20., 10., 2.))])
 def test_shelving_cascade_slope_parameters(shelve_type, g_s_b):
     """
@@ -30,7 +30,7 @@ def test_shelving_cascade_slope_parameters(shelve_type, g_s_b):
     npt.assert_equal(g_s_b_test, g_s_b)
 
 
-@pytest.mark.parametrize("shelve_type,g_s_b,match", [
+@pytest.mark.parametrize(("shelve_type", "g_s_b", "match"), [
     ("low", (20., 0, None), "slope must be non-zero"),
     ("low", (20., 10, None), "gain and slope must have different signs"),
     ("high", (20., -10, None), "gain and slope must have the same signs"),

@@ -635,10 +635,10 @@ def test_spectrogram_log_tick_labels(limits, noise):
     assert not any(minor_label_test)
 
 
-@pytest.mark.parametrize('rcParams, value', [
-    ['lines.linestyle', ':'],
-    ['axes.facecolor', 'black'],
-    ['axes.grid', False]])
+@pytest.mark.parametrize(("rcParams", "value"), [
+    ('lines.linestyle', ':'),
+    ('axes.facecolor', 'black'),
+    ('axes.grid', False)])
 def test_pyfar_plot_with_empty_style(rcParams, value):
     """
     Test passing an empty style to a pyfar plot function to check if the

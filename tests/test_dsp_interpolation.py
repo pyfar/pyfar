@@ -26,8 +26,8 @@ def test_smooth_fractional_octave_assertions():
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
 
-@pytest.mark.parametrize("mode", (
-    "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
+@pytest.mark.parametrize("mode", [
+    "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"])
 def test_smooth_fractional_octave_mode(mode):
     """
     Test return signal for different smoothing modes against saved references
@@ -49,7 +49,7 @@ def test_smooth_fractional_octave_mode(mode):
     npt.assert_allclose(output.time.flatten(), reference)
 
 
-@pytest.mark.parametrize("num_fractions", (1, 5))
+@pytest.mark.parametrize("num_fractions", [1, 5])
 def test_smooth_fractional_octave_num_fractions(num_fractions):
     """
     Test return signal for different smoothing widths against saved references
@@ -85,11 +85,11 @@ def test_smooth_fractional_octave_window_parameter():
     assert isinstance(window_paraeter[1], float)
 
 
-@pytest.mark.parametrize("amplitudes", (
+@pytest.mark.parametrize("amplitudes", [
     1,                   # single channel signal
     [1, .9, .8, .7],     # flat multi-channel signal.
     [[1, .9], [.8, .7]]  # 2D multi-channel signal
-))
+])
 def test_smooth_fractional_octave_input_signal_shape(amplitudes):
     """
     - Test for different shapes of the input signal
@@ -136,7 +136,7 @@ def test_fractional_time_shift_assertions():
 
 
 @pytest.mark.parametrize("mode", ["linear", "cyclic"])
-@pytest.mark.parametrize("delays_impulse, fractional_delays", [
+@pytest.mark.parametrize(("delays_impulse", "fractional_delays"), [
     # single channel signals and delays
     # (positive/negative with fractions <0.5 and >0.5)
     (64, 10.4), (64, 10.6), (64, -10.4), (64, -10.6),
@@ -268,7 +268,7 @@ def test_interpolate_spectrum_init_assertions():
 
 
 @pytest.mark.parametrize(
-    "method, freq_in, frequencies, n_samples, sampling_rate, freq_out",
+    ("method", "freq_in", "frequencies", "n_samples", "sampling_rate", "freq_out"),
     [
      ("complex", [1+2j, 2+1j], [1, 2], 12, 6,
       [0+3j, 0.5+2.5j, 1+2j, 1.5+1.5j, 2+1j, 2.5+0.5j, 3+0j]),
@@ -319,14 +319,14 @@ def test_interpolate_spectrum_clip():
         data, "magnitude", ("linear", "linear", "linear"), clip=(1, 2))
     signal_clip = interpolator(6, 6)
 
-    assert np.any(np.abs(signal_no_clip.freq) < 1) and \
-           np.any(np.abs(signal_no_clip.freq) > 2)
-    assert np.all(np.abs(signal_clip.freq) >= 1) and \
-           np.all(np.abs(signal_clip.freq) <= 2)
+    assert np.any(np.abs(signal_no_clip.freq) < 1)
+    assert np.any(np.abs(signal_no_clip.freq) > 2)
+    assert np.all(np.abs(signal_clip.freq) >= 1)
+    assert np.all(np.abs(signal_clip.freq) <= 2)
 
 
 @pytest.mark.parametrize(
-    'fscale,n_samples,sampling_rate,f_in,f_base,f_query',
+    ("fscale", "n_samples", "sampling_rate", "f_in", "f_base", "f_query"),
     [('linear', 10, 40, [0, 10, 20], [0, 10, 20],
      pf.dsp.fft.rfftfreq(10, 40)),
      ('log', 10, 40, [0, 10, 20], [0, .544, .778],

@@ -694,12 +694,12 @@ def test_matrix_multiplication_axes():
     npt.assert_allclose(z.freq, des, atol=1e-15)
 
 
-@pytest.mark.parametrize("sx, sy, az, sz",
-                         [[(1, 3, 5), (3, 5, 4), 5, (3, 3, 4)],
-                          [(2,), (3, 2, 4), 2, (3, 1, 4)],
-                          [(1, 2), (3, 2, 4), 2, (3, 1, 4)],
-                          [(2, 3, 4), (4,), 4, (2, 3, 1)],
-                          [(2, 3, 4), (4, 1), 4, (2, 3, 1)]])
+@pytest.mark.parametrize(('sx', 'sy', 'az', 'sz'),
+                         [((1, 3, 5), (3, 5, 4), 5, (3, 3, 4)),
+                          ((2,), (3, 2, 4), 2, (3, 1, 4)),
+                          ((1, 2), (3, 2, 4), 2, (3, 1, 4)),
+                          ((2, 3, 4), (4,), 4, (2, 3, 1)),
+                          ((2, 3, 4), (4, 1), 4, (2, 3, 1))])
 def test_matrix_multiplication_broadcasting(sx, sy, az, sz):
     """Test broadcasting"""
     x = pf.signals.impulse(10, amplitude=np.ones(sx))
