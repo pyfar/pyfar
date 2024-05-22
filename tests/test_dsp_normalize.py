@@ -1,6 +1,5 @@
 import pyfar as pf
 import pytest
-from pytest import raises
 import numpy.testing as npt
 import numpy as np
 
@@ -117,41 +116,48 @@ def test_nan_value_normalization(data):
 
 def test_error_raises():
     """Test normalize function errors"""
-    with raises(TypeError, match=("Input data has to be of type 'Signal', "
-                                  "'TimeData' or 'FrequencyData'.")):
+    with pytest.raises(
+        TypeError, match=("Input data has to be of type 'Signal', "
+                          "'TimeData' or 'FrequencyData'.")):
         pf.dsp.normalize([0, 1, 0])
 
-    with raises(ValueError, match=("domain is 'time' and signal is type "
-                                   "'<class "
-                                   "'pyfar.classes.audio.FrequencyData'>'")):
+    with pytest.raises(
+            ValueError, match=("domain is 'time' and signal is type "
+                               "'<class "
+                               "'pyfar.classes.audio.FrequencyData'>'")):
         pf.dsp.normalize(pf.FrequencyData([1, 1, 1], [100, 200, 300]),
                          domain='time')
 
-    with raises(ValueError, match=("domain is 'freq' and signal is type "
-                                   "'<class "
-                                   "'pyfar.classes.audio.TimeData'>'")):
+    with pytest.raises(
+            ValueError, match=("domain is 'freq' and signal is type "
+                               "'<class "
+                               "'pyfar.classes.audio.TimeData'>'")):
         pf.dsp.normalize(pf.TimeData([1, 1, 1], [1, 2, 3]), domain='freq')
 
-    with raises(ValueError, match=("domain must be 'time' or 'freq'.")):
+    with pytest.raises(ValueError, match=("domain must be 'time' or 'freq'.")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='invalid_domain')
 
-    with raises(ValueError, match=("reference_method must be 'max', 'mean',")):
+    with pytest.raises(
+            ValueError, match=("reference_method must be 'max', 'mean',")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          reference_method='invalid_reference_method')
 
-    with raises(ValueError, match=("channel_handling must be 'individual', ")):
+    with pytest.raises(
+            ValueError, match=("channel_handling must be 'individual', ")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100),
                          channel_handling='invalid')
-    with raises(ValueError, match=("limits must be an array like")):
+    with pytest.raises(ValueError, match=("limits must be an array like")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=2)
-    with raises(ValueError, match=("limits must be")):
+    with pytest.raises(ValueError, match=("limits must be")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=(100, 200),
                          reference_method='energy')
-    with raises(ValueError, match=("'Hz' is an invalid unit")):
+    with pytest.raises(ValueError, match=("'Hz' is an invalid unit")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='time', unit='Hz')
-    with raises(ValueError, match=("Upper and lower limit are identical")):
+    with pytest.raises(
+            ValueError, match=("Upper and lower limit are identical")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), limits=(1, 1))
-    with raises(ValueError, match=("nan_policy has to be 'propagate',")):
+    with pytest.raises(
+            ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), nan_policy='invalid')
-    with raises(ValueError, match=("The signal includes NaNs.")):
+    with pytest.raises(ValueError, match=("The signal includes NaNs.")):
         pf.dsp.normalize(pf.Signal([0, np.nan, 0], 44100), nan_policy='raise')

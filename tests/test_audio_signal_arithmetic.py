@@ -1,7 +1,6 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest import raises
 
 import pyfar as pf
 import pyfar.classes.audio as signal
@@ -116,7 +115,7 @@ def test_add_time_data_and_time_data():
 def test_add_time_data_and_number_wrong_domain():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         pf.add((x, 1), 'freq')
 
 
@@ -124,7 +123,7 @@ def test_add_time_data_and_number_wrong_times():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
     y = TimeData([1, 0, 0], [0, .1, .4])
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         pf.add((x, y), 'time')
 
 
@@ -132,7 +131,7 @@ def test_add_frequency_data_and_number():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = pf.add((x, 1), 'freq')
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         pf.add((x, 1), 'time')
 
     # check if old signal did not change
@@ -163,7 +162,7 @@ def test_add_frequency_data_and_frequency_data():
 def test_add_frequency_data_and_number_wrong_domain():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         pf.add((x, 1), 'time')
 
 
@@ -171,7 +170,7 @@ def test_add_frequency_data_and_number_wrong_frequencies():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = FrequencyData([1, 0, 0], [0, .1, .4])
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         pf.add((x, y), 'freq')
 
 
@@ -225,7 +224,7 @@ def test_signal_inversion():
 
     # 'rms' norm
     signal.fft_norm = 'rms'
-    with raises(ValueError, match="Either fft_norm_2"):
+    with pytest.raises(ValueError, match="Either fft_norm_2"):
         1 / signal
 
 
@@ -437,23 +436,23 @@ def test_assert_match_for_arithmetic():
     assert out[2] == 'rms'
 
     # check with non-tuple input for first argument
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._assert_match_for_arithmetic(
             s, 'time', division=False, matmul=False)
     # check with invalid data type in first argument
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._assert_match_for_arithmetic(
             (s, ['str', 'ing']), 'time', division=False, matmul=False)
     # check with complex data and time domain operation
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._assert_match_for_arithmetic(
             (s, np.array([1 + 1j])), 'time', division=False, matmul=False)
     # test signals with different sampling rates
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._assert_match_for_arithmetic(
             (s, s1), 'time', division=False, matmul=False)
     # test signals with different n_samples
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._assert_match_for_arithmetic(
             (s, s2), 'time', division=False, matmul=False)
 
@@ -502,14 +501,14 @@ def test_get_arithmetic_data_with_signal():
 
 
 def test_assert_match_for_arithmetic_data_different_audio_classes():
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._assert_match_for_arithmetic(
             (Signal(1, 1), TimeData(1, 1)), 'time', division=False,
             matmul=False)
 
 
 def test_assert_match_for_arithmetic_data_wrong_domain():
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._assert_match_for_arithmetic(
             (1, 1), 'space', division=False, matmul=False)
 
@@ -517,13 +516,13 @@ def test_assert_match_for_arithmetic_data_wrong_domain():
 def test_assert_match_for_arithmetic_data_wrong_cshape():
     x = Signal(np.ones((2, 3, 4)), 44100)
     y = Signal(np.ones((5, 4)), 44100)
-    with raises(ValueError, match="The cshapes"):
+    with pytest.raises(ValueError, match="The cshapes"):
         signal._assert_match_for_arithmetic(
             (x, y), 'freq', division=False, matmul=False)
 
 
 def test_get_arithmetic_data_wrong_domain():
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         signal._get_arithmetic_data(
             Signal(1, 44100), 'space', (1,), False, Signal)
 
@@ -531,12 +530,12 @@ def test_get_arithmetic_data_wrong_domain():
 def test_array_broadcasting_errors():
     x = np.arange(2 * 3 * 4 * 10).reshape((2, 3, 4, 10))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    with raises(ValueError, match="array dimension"):
+    with pytest.raises(ValueError, match="array dimension"):
         pf.add((x, y), domain='time')
 
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         pf.add((x, y))
 
 
@@ -586,11 +585,11 @@ def test_matrix_multiplication_shape_mismatch():
     # Signals
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = pf.signals.impulse(10, amplitude=np.array([[1, 2], [3, 4]]))
-    with raises(ValueError, match="matmul: Input operand 1"):
+    with pytest.raises(ValueError, match="matmul: Input operand 1"):
         pf.matrix_multiplication((x, y))
     # Signal and array
     y = np.ones((2, 2, 6)) * np.array([[1, 2], [3, 4]])[..., None]
-    with raises(ValueError, match="matmul: Input operand 1"):
+    with pytest.raises(ValueError, match="matmul: Input operand 1"):
         pf.matrix_multiplication((x, y))
 
 
@@ -744,9 +743,9 @@ def test_matrix_multiplication_array_mismatch_errors():
     """Test errors for multiplication of signal with array"""
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = np.ones((3, 2, 1)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
-    with raises(ValueError, match='matmul'):
+    with pytest.raises(ValueError, match='matmul'):
         x @ y
-    with raises(ValueError, match='matmul'):
+    with pytest.raises(ValueError, match='matmul'):
         y @ x
 
 

@@ -1,6 +1,5 @@
 import os
 import pytest
-from pytest import raises
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import pyfar as pf
@@ -95,7 +94,7 @@ def test_line_phase_options(param, signal, request):
 def test_line_phase_unwrap_assertion(sine):
     """Test assertion for unwrap parameter."""
     create_figure()
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.phase(sine, unwrap='infinity')
 
 
@@ -146,7 +145,7 @@ def test_line_freq_scale_assertion(function, sine):
     """
 
     create_figure()
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         function(sine, freq_scale="warped")
 
     plt.close("all")
@@ -171,13 +170,13 @@ def test_time_unit_assertion(sine):
     """Test if all line plots raise an assertion for a wrong unit parameter."""
 
     create_figure()
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.time(sine, unit="pascal")
 
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.group_delay(sine, unit="pascal")
 
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.spectrogram(sine, unit="pascal")
 
     plt.close("all")
@@ -328,7 +327,7 @@ def test_2d_colorbar_assertion(function, handsome_signal_2d):
     Test assertion when passing an array of axes but not having a colorbar.
     """
     create_figure()
-    with raises(ValueError, match="A list of axes"):
+    with pytest.raises(ValueError, match="A list of axes"):
         function(handsome_signal_2d, colorbar=False,
                  ax=[plt.gca(), plt.gca()])
 
@@ -343,7 +342,7 @@ def test_2d_cshape_assertion(function):
     """
     error_str = r"signal.cshape must be \(m, \) with m\>=2 but is \(2, 2\)"
     create_figure()
-    with raises(ValueError, match=error_str):
+    with pytest.raises(ValueError, match=error_str):
         function(pf.signals.impulse(10, [[0, 0], [0, 0]]))
 
 
@@ -365,7 +364,7 @@ def test_2d_phase_options(param, handsome_signal_2d):
 def test_phase_2d_unwrap_assertion(handsome_signal_2d):
     """Test assertion for unwrap parameter."""
     create_figure()
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.phase_2d(handsome_signal_2d, unwrap='infinity')
 
 
@@ -414,13 +413,13 @@ def test_2d_freq_scale_assertion(handsome_signal_2d):
     """
 
     create_figure()
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.freq_2d(handsome_signal_2d, freq_scale="warped")
 
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.phase_2d(handsome_signal_2d, freq_scale="warped")
 
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.group_delay_2d(handsome_signal_2d, freq_scale="warped")
 
     plt.close("all")
@@ -445,10 +444,10 @@ def test_2d_time_unit_assertion(handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
 
     create_figure()
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.time_2d(handsome_signal_2d, unit="pascal")
 
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         plot.group_delay_2d(handsome_signal_2d, unit="pascal")
 
     plt.close("all")
@@ -501,7 +500,7 @@ def test_2d_contourf(function, handsome_signal_2d):
 def test_2d_method_assertion(function, handsome_signal_2d):
     """Test 2d plots method assertion ."""
     create_figure()
-    with raises(ValueError, match="method must be"):
+    with pytest.raises(ValueError, match="method must be"):
         function(handsome_signal_2d, method='pcontourmesh')
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.testing as npt
-from pytest import raises
+import pytest
 
 import pyfar
 from pyfar import Coordinates
@@ -42,7 +42,7 @@ def test_sph_icosahedron():
 
 def test_sph_equiangular():
     # test without parameters
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         samplings.sph_equiangular()
 
     # test with single number of points
@@ -71,7 +71,7 @@ def test_sph_equiangular():
 
 def test_sph_gaussian():
     # test without parameters
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         samplings.sph_gaussian()
 
     # test with single number of points
@@ -127,11 +127,11 @@ def test_sph_extremal():
     c = samplings.sph_extremal(sh_order=100)
 
     # test exceptions
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_extremal(4, 1)
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_extremal(5)
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_extremal(sh_order=0)
 
 
@@ -164,13 +164,13 @@ def test_sph_t_design():
     c = samplings.sph_t_design(100)
 
     # test exceptions
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_t_design(4, 1)
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_t_design(0)
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_t_design(sh_order=0)
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_t_design(2, criterion='const_thread')
 
 
@@ -187,9 +187,9 @@ def test_sph_equal_angle():
     npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
     # test assertions
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_equal_angle((11, 20))
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_equal_angle((20, 11))
 
 
@@ -215,13 +215,13 @@ def test_sph_great_circle():
     npt.assert_allclose(c.azimuth[1] * 180 / np.pi, 7.5, atol=1e-15)
 
     # test assertion: 1 / azimuth_res is not an integer
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         samplings.sph_great_circle(azimuth_res=.6)
     # test assertion: 360 / match is not an integer
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         samplings.sph_great_circle(match=270)
     # test assertion: match / azimuth_res is not an integer
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         samplings.sph_great_circle(azimuth_res=.5, match=11.25)
 
 
@@ -271,9 +271,9 @@ def test_sph_fliege():
     npt.assert_allclose(c.radius, 1.5, atol=1e-15)
 
     # test exceptions
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_fliege(9, 2)
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c = samplings.sph_fliege(30)
 
 

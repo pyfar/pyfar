@@ -1,7 +1,6 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest import raises
 import matplotlib.pyplot as plt
 
 from pyfar import Coordinates
@@ -116,17 +115,17 @@ def test_exist_systems():
     coords._exist_system('sph', unit='rad')
 
     # tests that have to fail
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         coords._exist_system()
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         coords._exist_system('shp')
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         coords._exist_system(None, 'side')
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         coords._exist_system('sph', 'tight')
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         coords._exist_system('sph', 'side', 'met')
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         coords._exist_system(None, None, 'met')
 
 
@@ -143,7 +142,7 @@ def test_systems():
     coords.systems('current')
     coords.systems('current', brief=True)
 
-    with raises(ValueError, match="show must be 'current' or 'all'."):
+    with pytest.raises(ValueError, match="show must be 'current' or 'all'."):
         coords.systems('what')
 
 
@@ -179,11 +178,11 @@ def test_coordinates_init_val():
     Coordinates(c1, c1, c8)
 
     # tests that have to fail
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         Coordinates(c2, c2, c6)
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         Coordinates(c6, c6, c7)
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         Coordinates(c2, c2, c8)
 
 
@@ -239,7 +238,7 @@ def test_coordinates_init_val_and_weights():
     npt.assert_allclose(coords.weights, [.5, .5])
 
     # incorrect number of weights
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         Coordinates([1, 2], 0, 0, weights=.5)
 
 
@@ -332,11 +331,11 @@ def test_getter_with_degrees():
 def test_assertion_for_getter():
     """Test assertion for empty Coordinates objects"""
     coords = Coordinates()
-    with raises(ValueError, match="Object is empty"):
+    with pytest.raises(ValueError, match="Object is empty"):
         coords.get_cart()
-    with raises(ValueError, match="Object is empty"):
+    with pytest.raises(ValueError, match="Object is empty"):
         coords.get_sph()
-    with raises(ValueError, match="Object is empty"):
+    with pytest.raises(ValueError, match="Object is empty"):
         coords.get_cyl()
 
 
@@ -468,7 +467,7 @@ def test_find_nearest_k():
     coords.find_nearest_k(1, 0, 0, show=True)
 
     # test out of range parameters
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         coords.find_nearest_k(1, 0, 0, -1)
 
     plt.close("all")
@@ -489,7 +488,7 @@ def test_find_nearest_cart():
     npt.assert_allclose(m, np.array([0, 0, 0, 0, 0, 0]))
 
     # test out of range parameters
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         coords.find_nearest_cart(1, 0, 0, -1)
 
 
@@ -508,14 +507,14 @@ def test_find_nearest_sph():
     npt.assert_allclose(m, np.array([0, 0, 0, 0, 0]))
 
     # test out of range parameters
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         coords.find_nearest_sph(1, 0, 0, -1)
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         coords.find_nearest_sph(1, 0, 0, 181)
 
     # test assertion for multiple radii
     coords = Coordinates([1, 2], 0, 0)
-    with raises(ValueError, match="find_nearest_sph only works if"):
+    with pytest.raises(ValueError, match="find_nearest_sph only works if"):
         coords.find_nearest_sph(0, 0, 1, 1)
 
 
@@ -565,10 +564,11 @@ def test_find_slice():
     npt.assert_allclose(index, (np.array([2, 3, 4]), ))
     npt.assert_allclose(mask, np.array([0, 0, 1, 1, 1]))
     # out of range query
-    with raises(AssertionError):
+    with pytest.raises(AssertionError):
         c.find_slice('azimuth', 'deg', -1, 1)
     # non existing coordinate query
-    with raises(ValueError, match="'elevation' in 'ged' does not exist"):
+    with pytest.raises(
+            ValueError, match="'elevation' in 'ged' does not exist"):
         c.find_slice('elevation', 'ged', 1, 1)
     # test with show
     c.find_slice('azimuth', 'deg', 1, 1, show=True)
@@ -606,7 +606,7 @@ def test_rotation_assertion():
     """Test rotation with unknown rotation type."""
     c = Coordinates(1, 0, 0)
     # test with unknown type
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         c.rotate('urgh', 90)
 
 
