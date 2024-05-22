@@ -1,4 +1,4 @@
-from pytest import raises
+import pytest
 
 import numpy as np
 import numpy.testing as npt
@@ -41,9 +41,9 @@ def test_orientations_from_view_up():
     ups = [[0, 1, 0], [0, 1, 0]]
     Orientations.from_view_up(views, ups)
     # number of views to ups M:N
-    with raises(ValueError):
-        views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
-        ups = [[0, 1, 0], [0, 1, 0]]
+    views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
+    ups = [[0, 1, 0], [0, 1, 0]]
+    with pytest.raises(ValueError):
         Orientations.from_view_up(views, ups)
 
 
@@ -52,22 +52,22 @@ def test_orientations_from_view_up_invalid():
     # mal-formed lists
     views = [[1, 0, 0], [0, 0]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         Orientations.from_view_up(views, ups)
     # any of views and ups has zero-length
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         Orientations.from_view_up(views, ups)
     # views' and ups' shape must be (N, 3) or (3,)
     views = [0, 1]
     ups = [0, 1]
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         Orientations.from_view_up(views, ups)
     # view and up vectors must be orthogonal
     views = [1.0, 0.5, 0.1]
     ups = [0, 0, 1]
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         Orientations.from_view_up(views, ups)
 
 
@@ -107,7 +107,7 @@ def test_orientations_show(views, ups, positions, orientations):
     orientations.show(positions)
     # with non-matching positions
     positions = Coordinates(0, 1, 0)
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         orientations.show(positions)
 
 
@@ -161,7 +161,7 @@ def test_orientations_indexing(orientations):
     """
     orientations[0]
     orientations[1]
-    with raises(IndexError):
+    with pytest.raises(IndexError):
         orientations[42]
 
     quats = orientations.as_quat()
@@ -180,9 +180,9 @@ def test_orientations_indexing_assignment(orientations):
     orientations[0] = Orientations.from_view_up([0, 0, 1], [1, 0, 0])
     orientations[0] = [0, 0, 0, 1]
     orientations[:] = [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0]]
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         orientations[0] = [0, 0, 3]
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         orientations[0] = orientations
 
 

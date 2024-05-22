@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import pytest
-from pytest import raises
 import pyfar.plot as plot
 import pyfar as pf
 
@@ -54,23 +53,24 @@ def test_prepare_plot_2d():
     kwargs = {"shading": "flat"}
 
     # assertion for data type
-    with raises(TypeError, match="Input data has to be of type"):
+    with pytest.raises(TypeError, match="Input data has to be of type"):
         plot._utils._prepare_2d_plot(
             data, (pf.FrequencyData, ), 1, [0], 'pcolormesh', plt.gca(), False)
 
     # assertion for shading
-    with raises(ValueError, match="shading is 'flat' but must be 'nearest'"):
+    with pytest.raises(
+            ValueError, match="shading is 'flat' but must be 'nearest'"):
         plot._utils._prepare_2d_plot(
             data, (pf.Signal, ), 1, [0], 'pcolormesh', plt.gca(), False,
             **kwargs)
 
     # assertion for indices
-    with raises(ValueError, match="length of indices must match"):
+    with pytest.raises(ValueError, match="length of indices must match"):
         plot._utils._prepare_2d_plot(
             data, (pf.Signal, ), 1, [0, 1], 'pcolormesh', plt.gca(), False)
 
     # assertion for method
-    with raises(ValueError, match="method must be"):
+    with pytest.raises(ValueError, match="method must be"):
         plot._utils._prepare_2d_plot(
             data, (pf.Signal, ), 1, [0], 'pcontourmesh', plt.gca(), False)
 
@@ -95,11 +95,12 @@ def test_lower_frequency_limit(
     assert low == 100
 
     # test only 0 Hz assertions
-    with raises(ValueError, match="Signals must have frequencies > 0 Hz"):
+    with pytest.raises(
+            ValueError, match="Signals must have frequencies > 0 Hz"):
         plot._utils._lower_frequency_limit(frequency_data_one_point)
 
     # test TimeData assertions
-    with raises(TypeError, match="Input data has to be of type"):
+    with pytest.raises(TypeError, match="Input data has to be of type"):
         plot._utils._lower_frequency_limit(time_data)
 
 

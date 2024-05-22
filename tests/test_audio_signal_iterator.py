@@ -31,6 +31,6 @@ def test_iter_domain_change():
     sig = Signal(data, 1)
     sig.domain = 'time'
 
-    with pytest.raises(RuntimeError, match='domain changes'):
-        for s in sig:
+    for s in sig:
+        with pytest.raises(RuntimeError, match='domain changes'):
             s.freq

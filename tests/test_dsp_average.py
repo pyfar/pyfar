@@ -2,7 +2,6 @@ import pyfar as pf
 import pytest
 import numpy as np
 import numpy.testing as npt
-from pytest import raises
 
 
 @pytest.mark.parametrize(('signal', 'mode', 'answer'), [
@@ -73,28 +72,29 @@ def test_nan_value_averaging(data):
 
 def test_error_raises():
     # test wrong signal type
-    with raises(TypeError, match='Input data has to be of type'):
+    with pytest.raises(TypeError, match='Input data has to be of type'):
         pf.dsp.average([1, 2, 3])
     # test wrong mode for signal types
     signal = pf.TimeData([1, 2, 3], [1, 2, 3])
-    with raises(ValueError,
+    with pytest.raises(ValueError,
                 match="mode is 'magnitude_phase' and signal is type"):
         pf.dsp.average(signal, 'magnitude_phase')
     # test wrong caxis input
     signal = pf.Signal(np.ones((2, 3, 4)), 44100)
-    with raises(ValueError,
+    with pytest.raises(ValueError,
                 match="The maximum of caxis needs to be smaller"):
         pf.dsp.average(signal, caxis=(0, 3))
     # test invalid mode input
-    with raises(ValueError,
+    with pytest.raises(ValueError,
                 match="mode must be 'linear', 'magnitude_zerophase',"):
         pf.dsp.average(signal, mode='invalid_mode')
     with pytest.warns(UserWarning,
                       match="Averaging one dimensional caxis"):
         pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), caxis=(1, 2))
-    with raises(ValueError, match=("nan_policy has to be 'propagate',")):
+    with pytest.raises(
+            ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.average(pf.Signal(np.zeros((5, 2)), 44100),
                        nan_policy='invalid')
-    with raises(ValueError, match=("The signal includes NaNs.")):
+    with pytest.raises(ValueError, match=("The signal includes NaNs.")):
         pf.dsp.average(pf.Signal([[0, np.nan], [1, 2]], 44100),
                        nan_policy='raise')
