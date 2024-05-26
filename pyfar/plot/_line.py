@@ -69,7 +69,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
 
 def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
-          side='right', ax=None, **kwargs):
+          ax=None, side='right', **kwargs):
     """
     Plot the logarithmic absolute spectrum on the positive frequency axis.
     """
@@ -90,6 +90,20 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     else:
         data = np.abs(signal.freq)
 
+    if not isinstance(signal, FrequencyData):
+        if signal.complex:
+            if side == 'right':
+                data = dsp.fft.remove_mirror_spectrum(data)
+                frequencies = np.atleast_1d(
+                    dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
+            elif side == 'left':
+                dc_idx = data.shape[-1] // 2
+                data = data[..., dc_idx]
+                frequencies = -1 * np.atleast_1d(
+                    dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
+    else:
+        frequencies = signal.frequencies
+
     # prepare figure
     _, ax = _utils._prepare_plot(ax)
     ax.grid(True, 'both')
@@ -100,13 +114,13 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         ax.set_ylabel("Magnitude")
     ax.set_xlabel("Frequency in Hz")
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
-                      signal.frequencies[-1], ax.get_xlim())
+                      frequencies[-1], ax.get_xlim())
 
     # plot data
     if freq_scale == 'log':
-        ax.semilogx(signal.frequencies, data.T, **kwargs)
+        ax.semilogx(frequencies, data.T, **kwargs)
     else:
-        ax.plot(signal.frequencies, data.T, **kwargs)
+        ax.plot(frequencies, data.T, **kwargs)
 
     # set and format ticks
     if freq_scale == 'log':
@@ -118,7 +132,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 
 
 def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
-           **kwargs):
+           side='right', **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis."""
 
     # check input
@@ -173,7 +187,8 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     return ax
 
 
-def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
+def _group_delay(signal, unit="s", freq_scale='log', ax=None, side='right',
+                 **kwargs):
     """Plot the group delay on the positive frequency axis."""
 
     # check input
@@ -221,7 +236,8 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
 
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                log_prefix_freq=None, log_reference=1, freq_scale='log',
-               unit="s", ax=None, **kwargs):
+               unit="s", ax=None, side='right', show_real_imag_abs='real',
+               **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
@@ -239,7 +255,8 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 
 def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
-                freq_scale='log', deg=False, unwrap=False, ax=None, **kwargs):
+                freq_scale='log', deg=False, unwrap=False, ax=None,
+                side='right', **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
@@ -254,7 +271,8 @@ def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
 
 def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
-                      unit="s", freq_scale='log', ax=None, **kwargs):
+                      unit="s", freq_scale='log', ax=None, side='right',
+                      **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """

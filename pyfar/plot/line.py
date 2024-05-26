@@ -70,7 +70,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
     with context(style):
         ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
-                         ax, show_real_imag_abs=show_real_imag_abs, **kwargs)
+                         ax, show_real_imag_abs, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -140,7 +140,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 
     with context(style):
         ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
-                         freq_scale, ax, **kwargs)
+                         freq_scale, ax, side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -154,7 +154,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 
 
 def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
-          style='light', **kwargs):
+          style='light', side='right', **kwargs):
     """Plot the phase of the spectrum.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
@@ -204,7 +204,7 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
 
     with context(style):
         ax = _line._phase(
-            signal.flatten(), deg, unwrap, freq_scale, ax, **kwargs)
+            signal.flatten(), deg, unwrap, freq_scale, ax, side=side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -217,7 +217,7 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
 
 
 def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
-                **kwargs):
+                side='right', **kwargs):
     """Plot the group delay.
 
     Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
@@ -275,7 +275,7 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
 
     with context(style):
         ax = _line._group_delay(
-            signal.flatten(), unit, freq_scale, ax, **kwargs)
+            signal.flatten(), unit, freq_scale, ax, side=side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -289,7 +289,8 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
 
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
               log_prefix_freq=None, log_reference=1, freq_scale='log',
-              unit="s", ax=None, style='light', **kwargs):
+              unit="s", ax=None, show_real_imag_abs='real',
+              side='right', style='light', **kwargs):
     """
     Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
@@ -367,7 +368,9 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     with context(style):
         ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
                               log_prefix_time, log_prefix_freq,
-                              log_reference, freq_scale, unit, ax, **kwargs)
+                              log_reference, freq_scale, unit, ax,
+                              show_real_imag_abs=show_real_imag_abs, side=side,
+                              **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -383,7 +386,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
                freq_scale='log', deg=False, unwrap=False, ax=None,
-               style='light', **kwargs):
+               style='light', side='right', **kwargs):
     """Plot the magnitude and phase spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
@@ -443,7 +446,8 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
     with context(style):
         ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
-                               freq_scale, deg, unwrap, ax, **kwargs)
+                               freq_scale, deg, unwrap, ax, side=side,
+                               **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -459,7 +463,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
 def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      unit="s", freq_scale='log', ax=None, style='light',
-                     **kwargs):
+                     side='right', **kwargs):
     """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
@@ -528,7 +532,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax = _line._freq_group_delay(
             signal.flatten(), dB, log_prefix, log_reference,
-            unit, freq_scale, ax, **kwargs)
+            unit, freq_scale, ax, side=side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(

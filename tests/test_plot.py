@@ -74,12 +74,37 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
                      file_type, compare_output)
 
 
-#@pytest.mark.parametrize('function', [
-#    (plot.time), (plot.freq), (plot.phase), (plot.group_delay),
-#    (plot.time_freq), (plot.freq_phase), (plot.freq_group_delay)])
+@pytest.mark.parametrize('show_real_imag_abs_flag', [
+    'real', 'imag', 'abs'])
+def test_complex_time_plots(show_real_imag_abs_flag,
+                            handsome_complex_signal,
+                            handsome_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {plot.time.__name__}, show_real_imag_abs "
+          f"= {show_real_imag_abs_flag}")
+
+    # initial plot
+    filename = plot.time.__name__ + '_default'
+    create_figure()
+    plot.time(handsome_complex_signal,
+              show_real_imag_abs=show_real_imag_abs_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = plot.time.__name__ + '_hold'
+    plot.time(handsome_signal_v2)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
 @pytest.mark.parametrize('function', [
-    (plot.time)])
-def test_complex_line_plots(function, handsome_complex_signal,
+    (plot.freq), (plot.phase), (plot.group_delay),
+    (plot.freq_phase), (plot.freq_group_delay)])
+@pytest.mark.parametrize('side_flag', [
+                         'left', 'right'])
+def test_complex_freq_plots(function, side_flag,
+                            handsome_complex_signal,
                             handsome_signal_v2):
     """Test all line plots with default arguments and hold functionality."""
     print(f"Testing: {function.__name__}")
@@ -87,7 +112,7 @@ def test_complex_line_plots(function, handsome_complex_signal,
     # initial plot
     filename = function.__name__ + '_default'
     create_figure()
-    function(handsome_complex_signal, show_real_imag_abs='real')
+    function(handsome_complex_signal, side=side_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
