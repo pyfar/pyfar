@@ -90,17 +90,18 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     else:
         data = np.abs(signal.freq)
 
-    if not isinstance(signal, FrequencyData):
-        if signal.complex:
-            if side == 'right':
-                data = dsp.fft.remove_mirror_spectrum(data)
-                frequencies = np.atleast_1d(
-                    dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
-            elif side == 'left':
-                dc_idx = data.shape[-1] // 2
-                data = data[..., dc_idx]
-                frequencies = -1 * np.atleast_1d(
-                    dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
+    if not type(signal) is FrequencyData and signal.complex:
+        if side == 'right':
+            data = dsp.fft.remove_mirror_spectrum(data, force=True)
+            frequencies = np.atleast_1d(
+                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
+        elif side == 'left':
+            dc_idx = data.shape[-1] // 2
+            data = data[..., dc_idx-1:]
+            frequencies = np.atleast_1d(
+                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
+        else:
+            ValueError('Invalid side parameter, pass left or right ...')
     else:
         frequencies = signal.frequencies
 

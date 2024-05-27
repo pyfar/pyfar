@@ -502,7 +502,7 @@ def add_mirror_spectrum(data_single_sided, even_samples):
     return sfft.fftshift(data, axes=-1)
 
 
-def remove_mirror_spectrum(data_double_sided):
+def remove_mirror_spectrum(data_double_sided, force=False):
     """
     Checks if the data are conjugate symmetric and
     removes the redundand mirror spectrum of double-sided
@@ -523,7 +523,7 @@ def remove_mirror_spectrum(data_double_sided):
         containing N//2+1 frequency bins.
 
     """
-    if _check_conjugate_symmetry(data_double_sided):
+    if _check_conjugate_symmetry(data_double_sided) or force:
         N = data_double_sided.shape[-1]
         data_double_sided = sfft.ifftshift(data_double_sided)
         return data_double_sided[..., :N // 2 + 1]

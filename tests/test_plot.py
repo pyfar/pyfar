@@ -78,7 +78,7 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
     'real', 'imag', 'abs'])
 def test_complex_time_plots(show_real_imag_abs_flag,
                             handsome_complex_signal,
-                            handsome_signal_v2):
+                            handsome_complex_signal_v2):
     """Test all line plots with default arguments and hold functionality."""
     print(f"Testing: {plot.time.__name__}, show_real_imag_abs "
           f"= {show_real_imag_abs_flag}")
@@ -93,7 +93,8 @@ def test_complex_time_plots(show_real_imag_abs_flag,
 
     # test hold functionality
     filename = plot.time.__name__ + '_hold'
-    plot.time(handsome_signal_v2)
+    plot.time(handsome_complex_signal_v2,
+              show_real_imag_abs=show_real_imag_abs_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -105,7 +106,7 @@ def test_complex_time_plots(show_real_imag_abs_flag,
                          'left', 'right'])
 def test_complex_freq_plots(function, side_flag,
                             handsome_complex_signal,
-                            handsome_signal_v2):
+                            handsome_complex_signal_v2):
     """Test all line plots with default arguments and hold functionality."""
     print(f"Testing: {function.__name__}")
 
@@ -118,7 +119,7 @@ def test_complex_freq_plots(function, side_flag,
 
     # test hold functionality
     filename = function.__name__ + '_hold'
-    function(handsome_signal_v2)
+    function(handsome_complex_signal_v2, side=side_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
