@@ -1,3 +1,4 @@
+"""This module contains the classes of the pyfar package."""
 from . import audio
 from . import coordinates
 from . import orientations

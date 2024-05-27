@@ -1,3 +1,4 @@
+"""Line plots for time and frequency domain signals."""
 from pyfar.plot.utils import context
 from . import _line
 from . import _interaction as ia

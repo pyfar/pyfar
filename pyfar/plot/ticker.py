@@ -1,3 +1,4 @@
+"""Custom tick locators and formatters for matplotlib."""
 import numpy as np
 from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
@@ -10,6 +11,7 @@ from matplotlib.ticker import (
 
 
 class FractionalOctaveFormatter(FixedFormatter):
+    """Formatter for fractional octave bands."""
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -29,6 +31,7 @@ class FractionalOctaveFormatter(FixedFormatter):
 
 
 class FractionalOctaveLocator(FixedLocator):
+    """Locator for fractional octave bands."""
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -46,6 +49,7 @@ class FractionalOctaveLocator(FixedLocator):
 
 
 class LogLocatorITAToolbox(LogLocator):
+    """Log-locator inspired by the tick labels used in the ITA-Toolbox."""
     def __init__(
         self,
         base=10.0,
@@ -139,6 +143,7 @@ class MultipleFractionFormatter(Formatter):
         return nom
 
     def __call__(self, x, pos=None):
+        """Return the format for tick val *x* at position *pos*."""
         den = self._denominator
         num = int(np.rint(den*x/self._base))
         com = self._gcd(num, den)

@@ -1,3 +1,4 @@
+"""Audio filter design and application."""
 import warnings
 import numpy as np
 import pyfar as pf

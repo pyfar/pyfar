@@ -354,40 +354,52 @@ class TimeData(_Audio):
         return obj
 
     def __add__(self, data):
+        """Add two TimeData objects."""
         return add((self, data), 'time')
 
     def __radd__(self, data):
+        """Add two TimeData objects."""
         return add((data, self), 'time')
 
     def __sub__(self, data):
+        """Subtract two TimeData objects."""
         return subtract((self, data), 'time')
 
     def __rsub__(self, data):
+        """Subtract two TimeData objects."""
         return subtract((data, self), 'time')
 
     def __mul__(self, data):
+        """Multiply two TimeData objects."""
         return multiply((self, data), 'time')
 
     def __rmul__(self, data):
+        """Multiply two TimeData objects."""
         return multiply((data, self), 'time')
 
     def __truediv__(self, data):
+        """Divide two TimeData objects."""
         return divide((self, data), 'time')
 
     def __rtruediv__(self, data):
+        """Divide two TimeData objects."""
         return divide((data, self), 'time')
 
     def __pow__(self, data):
+        """Raise two TimeData objects to the power."""
         return power((self, data), 'time')
 
     def __rpow__(self, data):
+        """Raise two TimeData objects to the power."""
         return power((data, self), 'time')
 
     def __matmul__(self, data):
+        """Matrix multiplication of two TimeData objects."""
         return matrix_multiplication(
             (self, data), 'time')
 
     def __rmatmul__(self, data):
+        """Matrix multiplication of two TimeData objects."""
         return matrix_multiplication(
             (data, self), 'time')
 
@@ -536,40 +548,52 @@ class FrequencyData(_Audio):
         return obj
 
     def __add__(self, data):
+        """Add two FrequencyData objects."""
         return add((self, data), 'freq')
 
     def __radd__(self, data):
+        """Add two FrequencyData objects."""
         return add((data, self), 'freq')
 
     def __sub__(self, data):
+        """Subtract two FrequencyData objects."""
         return subtract((self, data), 'freq')
 
     def __rsub__(self, data):
+        """Subtract two FrequencyData objects."""
         return subtract((data, self), 'freq')
 
     def __mul__(self, data):
+        """Multiply two FrequencyData objects."""
         return multiply((self, data), 'freq')
 
     def __rmul__(self, data):
+        """Multiply two FrequencyData objects."""
         return multiply((data, self), 'freq')
 
     def __truediv__(self, data):
+        """Divide two FrequencyData objects."""
         return divide((self, data), 'freq')
 
     def __rtruediv__(self, data):
+        """Divide two FrequencyData objects."""
         return divide((data, self), 'freq')
 
     def __pow__(self, data):
+        """Raise two FrequencyData objects to the power."""
         return power((self, data), 'freq')
 
     def __rpow__(self, data):
+        """Raise two FrequencyData objects to the power."""
         return power((data, self), 'freq')
 
     def __matmul__(self, data):
+        """Matrix multiplication of two FrequencyData objects."""
         return matrix_multiplication(
             (self, data), 'freq')
 
     def __rmatmul__(self, data):
+        """Matrix multiplication of two FrequencyData objects."""
         return matrix_multiplication(
             (data, self), 'freq')
 

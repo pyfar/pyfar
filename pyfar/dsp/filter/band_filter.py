@@ -1,3 +1,4 @@
+"""Module for creating and applying digital IIR filters."""
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf

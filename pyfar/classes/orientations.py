@@ -1,3 +1,4 @@
+"""This module contains the Orientations class. """
 from scipy.spatial.transform import Rotation
 import numpy as np
 import warnings

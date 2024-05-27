@@ -1,3 +1,4 @@
+"""Plotting functions for 2D data."""
 import numpy as np
 from pyfar.plot.utils import context
 from .. import Signal

@@ -1,3 +1,4 @@
+"""This module provides utility functions for pyfar audio objects."""
 import pyfar as pf
 import numpy as np
 
