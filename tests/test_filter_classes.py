@@ -94,6 +94,22 @@ def test_filter_iir_process(impulse):
     npt.assert_allclose(res.time, desired)
 
 
+def test_filter_iir_process_complex(impulse_complex):
+    coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
+    filt = fo.FilterIIR(coeff, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+
+    npt.assert_allclose(res.time[0, :3], coeff[0])
+
+    coeff = np.array([[1, 0, 0], [1, 1, 0]])
+    filt = fo.FilterIIR(coeff, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+    desired = np.ones((1, impulse_complex.n_samples))
+    desired[:, 1::2] *= -1
+
+    npt.assert_allclose(res.time, desired)
+
+
 def test_filter_iir_process_state(impulse):
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterIIR(coeff, impulse.sampling_rate, state=[0, 0])
@@ -143,6 +159,14 @@ def test_filter_fir_process(impulse):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, :3], coeff)
+
+
+def test_filter_fir_process_complex(impulse_complex):
+    coeff = np.array([1, 1/2, 0])
+    filt = fo.FilterFIR(coeff, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
 
     npt.assert_allclose(res.time[0, :3], coeff)
 
@@ -233,7 +257,6 @@ def test_filter_fir_process_multi_dim_filt(impulse):
 
 def test_filter_sos_process(impulse):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = fo.FilterSOS(sos, impulse.sampling_rate)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
@@ -244,6 +267,23 @@ def test_filter_sos_process(impulse):
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
     desired = np.ones(impulse.n_samples)
+    desired[1::2] *= -1
+
+    npt.assert_allclose(res.time, np.atleast_2d(desired))
+
+
+def test_filter_sos_process_complex(impulse_complex):
+    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
+    coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
+    filt = fo.FilterSOS(sos, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+
+    npt.assert_allclose(res.time[0, :3], coeff[0])
+
+    sos = np.array([[1, 0, 0, 1, 1, 0]])
+    filt = fo.FilterSOS(sos, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+    desired = np.ones(impulse_complex.n_samples)
     desired[1::2] *= -1
 
     npt.assert_allclose(res.time, np.atleast_2d(desired))

@@ -184,6 +184,27 @@ def test_fractional_time_shift_unit():
     npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
 
 
+def test_fractional_time_shift_complex():
+    """Test simple integer time shift for complex-valued time signals"""
+
+    frac_delay = 12.4
+    sampling_rate = 48000
+    impulse = pf.signals.impulse(128, 30, sampling_rate=sampling_rate)
+    impulse.fft_norm = 'none'
+    impulse.complex = True
+
+    impulse_delayed = fractional_time_shift(impulse, frac_delay, 'samples')
+
+    # frequency up to which group delay is tested
+    f_id = impulse_delayed.find_nearest_frequency(19e3)
+
+    # calculate group delays and set up array of desired delays
+    group_delays = pf.dsp.group_delay(impulse_delayed)[..., 10:f_id]
+    target_delay = np.ones_like(group_delays) * (30+frac_delay)
+
+    npt.assert_allclose(group_delays, target_delay, atol=.05)
+
+
 @pytest.mark.parametrize("order", [2, 3])
 def test_fractional_delay_order(order):
     """Test if the order parameter behaves as intended"""
