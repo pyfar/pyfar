@@ -1,3 +1,5 @@
+"""Filter design and analysis functions."""
+
 from .band_filter import (
     butterworth,
     chebyshev1,

@@ -1,3 +1,4 @@
+"""Gammatone filter bank for pyfar."""
 import numpy as np
 import scipy.signal as sgn
 from copy import deepcopy
