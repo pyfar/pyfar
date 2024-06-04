@@ -1,8 +1,10 @@
 """
-The following documents the FFT functionality. More details and background is
+The following documents the FFT functionality. More details and background
+including a complete list and explanation of available `FFT normalizations` is
 given in the
-:doc:`pyfar examples gallery<gallery:gallery/interactive/fast_fourier_transform>`.
-"""  # noqa: E501
+:ref:`FFT notebook <gallery:/gallery/interactive/fast_fourier_transform.ipynb>`
+of the pyfar gallery.
+"""
 import multiprocessing
 
 import numpy as np
@@ -38,10 +40,8 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     Calculate the FFT of a real-valued time-signal.
 
     The function returns only the right-hand side of the axis-symmetric
-    spectrum. The normalization is considered according to
-    ``'fft_norm'`` (`see pyfar examples <https://
-    pyfar-gallery.readthedocs.io/en/latest/gallery/interactive/
-    fast_fourier_transform.html#FFT-normalizations>`__).
+    spectrum. Details on the FFT normalization given by `fft_norm` are given
+    above.
 
     Parameters
     ----------
@@ -78,10 +78,8 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     Calculate the IFFT of a single-sided Fourier spectrum.
 
     The function takes only the right-hand side of the spectrum and returns a
-    real-valued time signal. The normalization is considered according to
-    ``'fft_norm'`` (`see pyfar examples <https://
-    pyfar-gallery.readthedocs.io/en/latest/gallery/interactive/
-    fast_fourier_transform.html#FFT-normalizations>`__).
+    real-valued time signal. Details on the FFT normalization given by
+    `fft_norm` are given found above.
 
     Parameters
     ----------
@@ -102,7 +100,7 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     data : array, double
         Array containing the time domain signal with dimensions
         (..., ``'n_samples'``)
-    """
+    """  # noqa: E501
 
     # Inverse normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
@@ -123,9 +121,8 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     Note that the phase is maintained in all cases, i.e., instead of taking
     the squared absolute values for ``'power'`` and ``'psd'``, the complex
     spectra are multiplied with their absolute values to ensure a correct
-    renormalization.
-    For detailed information and explanations, refer to the
-    :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`.
+    renormalization. Details on the FFT normalization given by `fft_norm` are
+    given above.
 
     Parameters
     ----------
@@ -186,7 +183,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             Scaling of the Discrete Fourier Transform and the Implied Physical
             Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
             May 2020, p. e-Brief 600.
-    """  # noqa: E501
+    """
 
     # check if normalization should be applied
     if fft_norm == 'none':

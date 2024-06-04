@@ -1,3 +1,10 @@
+"""
+The utilities contain functions that are helpful when working with multiple
+pyfar audio objects. The pyfar gallery gives background information to
+:ref:`work with audio objects </gallery/interactive/pyfar_audio_objects.ipynb>`
+including an introduction to the channel shape (`cshape`), channel axis
+(`caxis`), and channel dimension (`cdim`).
+"""
 import pyfar as pf
 import numpy as np
 
