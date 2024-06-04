@@ -261,8 +261,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         float, the same shift is applied to all channels of `signal`. If this
         is an array like different delays are applied to the channels of
         `signal`. In this case it must broadcast to `signal.cshape` (see
-        `Numpy broadcasting
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
+        :doc:`Numpy broadcasting<numpy:user/basics.broadcasting>`)
     unit : str, optional
         The unit of the shift. Either 'samples' or 's'. Defaults to 'samples'.
     order : int, optional

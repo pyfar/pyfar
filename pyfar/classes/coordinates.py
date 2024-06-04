@@ -254,7 +254,7 @@ class Coordinates():
 
         # save meta data
         self._set_weights(weights)
-        self._sh_order = sh_order
+        self.sh_order = sh_order
         self._comment = comment
 
         if sh_order is not None:
@@ -1049,7 +1049,7 @@ class Coordinates():
             "of spharpy.samplings.SamplingSphere."),
                 PyfarDeprecationWarning)
 
-        self._sh_order = int(value)
+        self._sh_order = int(value) if value is not None else None
 
     @property
     def comment(self):
@@ -1215,7 +1215,7 @@ class Coordinates():
     def x(self):
         r"""
         X coordinate of a right handed Cartesian coordinate system in meters
-        (-\infty < x < \infty)."""
+        (:math:`-\infty` < x < :math:`\infty`)."""
         self._check_empty()
         return self._x
 
@@ -1227,7 +1227,7 @@ class Coordinates():
     def y(self):
         r"""
         Y coordinate of a right handed Cartesian coordinate system in meters
-        (-\infty < y < \infty)."""
+        (:math:`-\infty` < y < :math:`\infty`)."""
         self._check_empty()
         return self._y
 
@@ -1239,7 +1239,7 @@ class Coordinates():
     def z(self):
         r"""
         Z coordinate of a right handed Cartesian coordinate system in meters
-        (-\infty < z < \infty)."""
+        (:math:`-\infty` < z < :math:`\infty`)."""
         self._check_empty()
         return self._z
 
@@ -1250,8 +1250,8 @@ class Coordinates():
     @property
     def rho(self):
         r"""
-        Radial distance to the the z-axis of the right handed
-        Cartesian coordinate system in meters (0 \leq radius < \infty)."""
+        Radial distance to the the z-axis of the right handed Cartesian
+        coordinate system (:math:`0` < rho < :math:`\infty`)."""
         return self.cylindrical[..., 2]
 
     @rho.setter
@@ -1263,8 +1263,8 @@ class Coordinates():
     @property
     def radius(self):
         r"""
-        Radial distance to the origin of the coordinate
-        system in meters (0 \leq radius < \infty)."""
+        Distance to the origin of the right handed Cartesian coordinate system
+        in meters (:math:`0` < radius < :math:`\infty`)."""
         return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     @radius.setter
@@ -1276,10 +1276,10 @@ class Coordinates():
     @property
     def azimuth(self):
         r"""
-        Counter clock-wise angle in the x-y plane of the right handed
-        Cartesian coordinate system in radians. 0 radians are defined in
-        positive x-direction, pi/2 radians in positive y-direction and so on
-        (-\infty < azimuth < \infty, 2pi-cyclic)."""
+        Counter clock-wise angle in the x-y plane of the right handed Cartesian
+        coordinate system in radians. :math:`0` radians are defined in positive
+        x-direction, :math:`\pi/2` radians in positive y-direction and so on
+        (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic)."""
         return self.spherical_colatitude[..., 0]
 
     @azimuth.setter
@@ -1291,10 +1291,11 @@ class Coordinates():
     @property
     def elevation(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        x-direction, pi/2 radians in positive z-direction, and -pi/2 in
-        negative z-direction (0 \leq azimuth \leq pi). The elevation is a
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians elevation are defined in positive
+        x-direction, :math:`\pi/2` radians in positive z-direction, and
+        :math:`-\pi/2` in negative z-direction
+        (:math:`-\pi/2\leq` elevation :math:`\leq\pi/2`). The elevation is a
         variation of the colatitude."""
         return self.spherical_elevation[..., 1]
 
@@ -1307,10 +1308,11 @@ class Coordinates():
     @property
     def colatitude(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        z-direction, pi/2 radians in positive x-direction, and pi in negative
-        z-direction (pi/2 \leq azimuth \leq pi/2). The colatitude is a
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians colatitude are defined in positive
+        z-direction, :math:`\pi/2` radians in positive x-direction, and
+        :math:`\pi` in negative z-direction
+        (:math:`0\leq` colatitude :math:`\leq\pi`). The colatitude is a
         variation of the elevation angle."""
         return self.spherical_colatitude[..., 1]
 
@@ -1323,10 +1325,11 @@ class Coordinates():
     @property
     def frontal(self):
         r"""
-        Angle in the y-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        y-direction, pi/2 radians in positive z-direction, pi in negative
-        y-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
+        Angle in the y-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians frontal angle are defined in positive
+        y-direction, :math:`\pi/2` radians in positive z-direction,
+        :math:`\pi` in negative y-direction and so on
+        (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic)."""
         return self.spherical_front[..., 0]
 
     @frontal.setter
@@ -1338,10 +1341,11 @@ class Coordinates():
     @property
     def upper(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        x-direction, pi/2 radians in positive z-direction, and pi in negative
-        x-direction (0 \leq azimuth \leq pi)."""
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians upper angle are defined in positive
+        x-direction, :math:`\pi/2` radians in positive z-direction, and
+        :math:`\pi` in negative x-direction
+        (:math:`0\leq` upper :math:`\leq\pi`)."""
         return self.spherical_front[..., 1]
 
     @upper.setter
@@ -1353,10 +1357,11 @@ class Coordinates():
     @property
     def lateral(self):
         r"""
-        Counter clock-wise angle in the x-y plane of the right handed
-        Cartesian coordinate system in radians. 0 radians are defined in
-        positive x-direction, pi/2 radians in positive y-direction and -pi/2
-        in negative y-direction (-pi/2 \leq lateral \leq pi/2)."""
+        Counter clock-wise angle in the x-y plane of the right handed Cartesian
+        coordinate system in radians. :math:`0` radians are defined in positive
+        x-direction, :math:`\pi/2` radians in positive y-direction and
+        :math:`-\pi/2` in negative y-direction
+        (:math:`-\pi/2\leq` lateral :math:`\leq\pi/2`)."""
         return self.spherical_side[..., 0]
 
     @lateral.setter
@@ -1368,10 +1373,11 @@ class Coordinates():
     @property
     def polar(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        x-direction, pi/2 radians in positive z-direction, pi in negative
-        x-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians polar angle are defined in positive
+        x-direction, :math:`\pi/2` radians in positive z-direction,
+        :math:`\pi` in negative x-direction and so on
+        (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic)."""
         return self.spherical_side[..., 1]
 
     @polar.setter
