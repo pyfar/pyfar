@@ -3,6 +3,8 @@ The following introduces the
 :py:func:`Coordinates class <pyfar.classes.coordinates.Coordinates>`
 and the coordinate systems that are available in pyfar. Available sampling
 schemes are listed at :py:mod:`spharpy.samplings <spharpy.samplings>`.
+:ref:`Examples <gallery:/gallery/interactive/pyfar_coordinates.ipynb>` for
+working with Coordinates objects are part of the pyfar galler.
 
 Different coordinate systems are frequently used in acoustics research and
 handling sampling points and different systems can be cumbersome. The
