@@ -23,8 +23,10 @@ Getting Started
 The `pyfar workshop`_ gives an overview of the most important pyfar
 functionality and is a good starting point. It is part of the
 `pyfar example gallery`_ that also contains more specific and in-depth
-examples. The  `pyfar documentation`_ gives a detailed and complete
-overview of pyfar. All these information are available from `pyfar.org`_.
+examples that can be executed interactively without a local installation by
+clicking the mybinder.org button on the respective example. The
+`pyfar documentation`_ gives a detailed and complete overview of pyfar. All
+these information are available from `pyfar.org`_.
 
 Installation
 ============
