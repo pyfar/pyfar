@@ -6,9 +6,9 @@ Contributing
 
 Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given. The following helps you to start
-contributing to pyfar. General guidelines for example regarding the style
-of code and documentation are part of our general guidelines in the
-`pyfar community`_.
+contributing specifically to pyfar. Please also consider the
+`general contributing guidelines`_ for example regarding the style
+of code and documentation and some helpful hints.
 
 Types of Contributions
 ----------------------
@@ -73,4 +73,4 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
 7. Submit a pull request on the develop branch through the GitHub website.
 
 
-.. _pyfar community: https://pyfar-gallery.readthedocs.io/en/latest/community
+.. _general contributing guidelines: https://pyfar-gallery.readthedocs.io/en/latest/contribute/index.html
