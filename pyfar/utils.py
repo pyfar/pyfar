@@ -13,9 +13,9 @@ def broadcast_cshape(signal, cshape):
     """
     Broadcast a signal to a certain cshape.
 
-    The The channel shape (`cshape`) gives the shape of the data inside an
-    audio object but ignores the number of samples or frequency bins. The
-    broadcasting follows the
+    The channel shape (`cshape`) gives the shape of the audio data excluding
+    the last dimension, which is ``n_samples`` for time domain objects and
+    ``n_bins`` for frequency domain objects. The broadcasting follows the
     :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
@@ -44,9 +44,9 @@ def broadcast_cshapes(signals, cshape=None):
     """
     Broadcast multiple signals to a common cshape.
 
-    The The channel shape (`cshape`) gives the shape of the data inside an
-    audio object but ignores the number of samples or frequency bins. The
-    broadcasting follows the
+    The channel shape (`cshape`) gives the shape of the audio data excluding
+    the last dimension, which is ``n_samples`` for time domain objects and
+    ``n_bins`` for frequency domain objects. The broadcasting follows the
     :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
@@ -62,7 +62,7 @@ def broadcast_cshapes(signals, cshape=None):
     -------
     signals : tuple of Signal, TimeData, FrequencyData
         The broadcasted copies of the input signals in a tuple.
-    """  # noqa: E501
+    """
 
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
@@ -77,10 +77,11 @@ def broadcast_cdim(signal, cdim):
     """
     Broadcast a signal to a certain cdim.
 
-    The channel dimension (`cdim`) is the length of the `cshape`, which gives
-    the shape of the data inside an audio object but ignores the number of
-    samples or frequency bins. The signal is broadcasted to `cdim` by
-    prepending ``cdim - len(signal.cshape)`` dimensions.
+    The channel dimension (`cdim`) gives the dimension of the audio data
+    excluding the last dimension, which is ``n_samples`` for time domain
+    objects and ``n_bins`` for frequency domain objects. The signal is
+    broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
+    dimensions.
 
     Parameters
     ----------
@@ -111,10 +112,11 @@ def broadcast_cdims(signals, cdim=None):
     """
     Broadcast multiple signals to a common cdim.
 
-    The channel dimension (`cdim`) is the length of the `cshape`, which gives
-    the shape of the data inside an audio object but ignores the number of
-    samples or frequency bins. The signals are broadcasted to `cdim` by
-    prepending ``cdim - len(signal.cshape)`` dimensions.
+    The channel dimension (`cdim`) gives the dimension of the audio data
+    excluding the last dimension, which is ``n_samples`` for time domain
+    objects and ``n_bins`` for frequency domain objects. The signals are
+    broadcasted to `cdim` by  prepending ``cdim - len(signal.cshape)``
+    dimensions.
 
     Parameters
     ----------
@@ -151,10 +153,10 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         except in the dimension corresponding to caxis (the first, by default).
         If this is the case, set ``broadcasting=True``.
     caxis : int
-        The channel axis along which the signals are concatenated. The channel
-        axis denotes an axis of the data inside an audio object but ignores the
-        last axis that contains the time samples or frequency bins. The default
-        is ``0``.
+        The channel axis (`caxis`) along which the signals are concatenated.
+        The channel axis gives the axe of the audio data excluding the last
+        dimension, which is ``n_samples`` for time domain objects and
+        ``n_bins`` for frequency domain objects. The default is ``0``.
     broadcasting: bool
         If this is ``True``, the signals will be broadcasted to common
         cshape, except for the caxis along which the signals are
@@ -166,7 +168,7 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
     -------
     merged : Signal, TimeData, FrequencyData
         The merged signal object.
-    """  # noqa: E501
+    """
     # check input
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):

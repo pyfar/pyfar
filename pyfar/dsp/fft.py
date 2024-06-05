@@ -100,7 +100,7 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     data : array, double
         Array containing the time domain signal with dimensions
         (..., ``'n_samples'``)
-    """  # noqa: E501
+    """
 
     # Inverse normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,

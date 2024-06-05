@@ -1603,9 +1603,10 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     -------
     signal : Signal
         The result of the convolution. The channel dimension (`cdim`) matches
-        the bigger cdim of the two input signals. The cdim is the length of the
-        channel shape (`cshape`), which gives the shape of the data inside an
-        audio object but ignores the number of samples or frequency bins.
+        the bigger cdim of the two input signals. The channel dimension gives
+        the number of dimensions of the audio data excluding the last
+        dimension, which is ``n_samples`` for time domain objects and
+        ``n_bins`` for frequency domain objects.
 
     Notes
     -----

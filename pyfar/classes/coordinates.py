@@ -8,11 +8,12 @@ working with Coordinates objects are part of the pyfar galler.
 
 Different coordinate systems are frequently used in acoustics research and
 handling sampling points and different systems can be cumbersome. The
-Coordinates class was designed with this in mind. It can convert between
-coordinate systems and rotate, query and plot coordinates points. Functions for
-converting coordinates not stored in a Coordinates object are available for
-convenience. However, it is strongly recommended to use the Coordinates class
-for all conversions.
+Coordinates class was designed with this in mind. It stores coordinates in
+cartesioan coordinates internally and can convert to all coordinate systems
+listed below. Additionally, the the class can  query and plot coordinates
+points. Functions for converting coordinates not stored in a Coordinates object
+are available for convenience. However, it is strongly recommended to use the
+Coordinates class for all conversions.
 
 .. _coordinate_systems:
 

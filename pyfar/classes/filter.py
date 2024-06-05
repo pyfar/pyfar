@@ -5,7 +5,7 @@ filter objects are part of the
 Available filters are shown in the
 :doc:`filter types examples<gallery:gallery/interactive/pyfar_filter_types>`
 and documented in :py:mod:`pyfar.dsp.filter`.
-"""  # noqa: E501
+"""
 import deepdiff
 import warnings
 
