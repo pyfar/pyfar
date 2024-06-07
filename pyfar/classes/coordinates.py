@@ -1801,12 +1801,12 @@ class Coordinates():
                     f"radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
-            if distance_measure == 'spherical_meter':
+            if distance_measure == 'spherical_radians':
                 # convert angle in radiant to distance on the sphere
                 # d = 2r*pi*d/(2*pi) = r*d
                 distance = radius * distance
 
-            # convert length on the great circle to in cartesian coordinates
+            # convert length on the great circle to euclidean distance
             distance = 2 * radius * np.sin(distance / (2 * radius))
 
             index = kdtree.query_ball_point(
