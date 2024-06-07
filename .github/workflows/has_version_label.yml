@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check for version label
         run: |
+          echo "Checking for version label on pull request..."
+          echo $(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/labels)
           LABELS_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/labels)
           VERSION_LABEL=$(echo "$LABELS_JSON" | jq -r '.[].name' | grep -P 'v\d+\.\d+\.\d+' || true)
           if [ -z "$VERSION_LABEL" ]; then
