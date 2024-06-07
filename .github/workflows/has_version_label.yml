@@ -16,7 +16,7 @@ jobs:
         run: |
           PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
           LABELS=$(gh pr view $PR_NUMBER --json labels -q '.labels.nodes[].name')
-          VERSION_LABEL=$(echo $LABELS | grep -P '\d+\.\d+\.\d+')
+          VERSION_LABEL=$(echo $LABELS | grep -P 'v\d+\.\d+\.\d+')
           if [ -z "$VERSION_LABEL" ]; then
             echo "Error: No version label found on this pull request. Please add a label in the format vX.Y.Z."
             exit 1
