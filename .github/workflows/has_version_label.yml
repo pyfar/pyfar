@@ -1,0 +1,25 @@
+name: PR Check Label for version Label
+
+on:
+  pull_request:
+    types:
+      - opened
+      - labeled
+      - unlabeled
+      - synchronize
+
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for version label
+        run: |
+          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+          LABELS=$(gh pr view $PR_NUMBER --json labels -q '.labels.nodes[].name')
+          VERSION_LABEL=$(echo $LABELS | grep -P 'v\d+\.\d+\.\d+')
+          if [ -z "$VERSION_LABEL" ]; then
+            echo "Error: No version label found on this pull request. Please add a label in the format vX.Y.Z."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
