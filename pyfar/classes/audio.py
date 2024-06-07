@@ -907,6 +907,8 @@ def add(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -952,6 +954,8 @@ def subtract(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -997,6 +1001,8 @@ def multiply(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1041,6 +1047,8 @@ def divide(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If the denominator signal has the FFT normalization ``'none'``, the
       result gets the normalization of the numerator signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1085,6 +1093,8 @@ def power(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1169,6 +1179,8 @@ def matrix_multiplication(
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1348,26 +1360,25 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     # properties that must match
     sampling_rate = None
     n_samples = None
-    fft_norm = 'none'
+    # None indicates that no audio object is yet involved in the operation
+    # it will change upon detection of the first audio object
+    fft_norm = None
     times = None
     frequencies = None
     audio_type = type(None)
     cshape = ()
 
     # check input types and meta data
-    found_audio_data = False
-    for n, d in enumerate(data):
+    n_audio_objects = 0
+    for d in data:
         if isinstance(d, (Signal, TimeData, FrequencyData)):
+            n_audio_objects += 1
             # store meta data upon first appearance
-            if not found_audio_data:
+            if n_audio_objects == 1:
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
                     n_samples = d.n_samples
-                    # if a signal comes first (n==0) its fft_norm is taken
-                    # directly. If a signal does not come first, (n>0, e.g.
-                    # 1/signal), the fft norm is matched
-                    fft_norm = d.fft_norm if n == 0 else \
-                        _match_fft_norm(fft_norm, d.fft_norm, division)
+                    fft_norm = d.fft_norm
                 elif isinstance(d, TimeData):
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
@@ -1378,7 +1389,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                     frequencies = d.frequencies
                 if not matmul:
                     cshape = d.cshape
-                found_audio_data = True
                 audio_type = type(d)
 
             # check if type and meta data matches after first appearance
