@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check for version label
+        if: contains(github.event.pull_request.labels.*.name, 'v\d+\.\d+\.\d+')
         run: |
           PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
           LABELS=$(gh pr view $PR_NUMBER --json labels -q '.labels.nodes[].name')
