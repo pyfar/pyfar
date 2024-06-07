@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """
-The following documents the pyfar plot functions. Refer to the
-:py:mod:`concepts <pyfar._concepts.plots>` for more background information.
-"""
+The following documents the pyfar plot functions. Make sure to have a look at
+the
+:doc:`plotting<gallery:gallery/interactive/pyfar_plotting>` and
+:doc:`interactive plotting<gallery:gallery/interactive/pyfar_interactive_plots>`
+examples. The latter make use of the pyfar
+:py:func:`~pyfar.plot.shortcuts` to quickly explore acoustic signals.
+"""  # noqa: E501
 
 from .line import (
     freq,

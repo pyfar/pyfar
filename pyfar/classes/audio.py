@@ -1,9 +1,9 @@
 """
-The following documents the audio classes and arithmethic operations for
-audio data. More details and background is given in the concepts (
-:py:mod:`audio classes <pyfar._concepts.audio_classes>`,
-:py:mod:`Fourier transform <pyfar._concepts.fft>`,
-:py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`).
+The following documents the audio classes and arithmetic operations for
+audio data. More details and background is given in the gallery
+(:doc:`audio objects<gallery:gallery/interactive/pyfar_audio_objects>`,
+:doc:`Fourier transform<gallery:gallery/interactive/fast_fourier_transform>`,
+:doc:`gallery:gallery/interactive/pyfar_arithmetics`).
 """
 
 from copy import deepcopy
@@ -748,8 +748,9 @@ class Signal(FrequencyData, TimeData):
         The normalization for the Discrete Fourier Transform (DFT).
 
         See :py:func:`~pyfar.dsp.fft.normalization` and
-        :py:mod:`FFT concepts <pyfar._concepts.fft>` for more information.
-        """
+        :ref:`arithmetic operations<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`
+        for more information.
+        """  # noqa: E501
         return self._fft_norm
 
     @fft_norm.setter
@@ -884,7 +885,7 @@ def add(data: tuple, domain='freq'):
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -911,7 +912,7 @@ def add(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _add)
 
 
@@ -929,7 +930,7 @@ def subtract(data: tuple, domain='freq'):
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -956,7 +957,7 @@ def subtract(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _subtract)
 
 
@@ -974,7 +975,7 @@ def multiply(data: tuple, domain='freq'):
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1001,7 +1002,7 @@ def multiply(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _multiply)
 
 
@@ -1018,7 +1019,7 @@ def divide(data: tuple, domain='freq'):
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1045,7 +1046,7 @@ def divide(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       normalization ``'none'``.
     * Other combinations raise an error.
-   """
+   """  # noqa: E501
     return _arithmetic(data, domain, _divide)
 
 
@@ -1062,7 +1063,7 @@ def power(data: tuple, domain='freq'):
         objects, array likes, and scalars. Pyfar audio objects can not be
         mixed, e.g., :py:func:`TimeData` and :py:func:`FrequencyData` objects
         do not work together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1089,7 +1090,7 @@ def power(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _power)
 
 
@@ -1109,7 +1110,7 @@ def matrix_multiplication(
         Data to be multiplied. Can contain pyfar audio objects and array likes.
         If multiple audio objects are passed they must be of the same type and
         their FFT normalizations must allow the multiplication (see
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         and notes below).
         If audio objects and arrays are included, the arrays' shape need
         to match the audio objects' cshape (not the shape of the underlying
@@ -1127,11 +1128,10 @@ def matrix_multiplication(
         second tuple) and writes the result to the last two axes of the output
         data (third tuple).
 
-        In case of pyfar audio objects, the indices refer to the channel
-        dimensions and ignore the last dimension of the underlying data that
-        contains the samples or frequency bins (see
-        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
-        information). For example, a signal with 4 times 2 channels and 120
+        In case of pyfar audio objects, the indices refer to the channel axis
+        (`caxis`). It denotes an axis of the data inside an audio object but
+        ignores the last axis that contains the time samples or frequency bins.
+        For example, a signal with 4 times 2 channels and 120
         frequency bins has a cshape of ``(4, 2)``, while the shape of the
         underlying frequency data is  ``(4, 2, 120)``. The default tuple
         ``(-2, -1)`` would result in 120 matrices of shape ``(4, 2)`` used
@@ -1256,7 +1256,7 @@ def matrix_multiplication(
     >>> pf.matrix_multiplication((a, b)).cshape
     (2, 3, 1)
 
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _matrix_multiplication, axes=axes)
 
 
