@@ -1420,7 +1420,8 @@ class Coordinates():
 
         return ax
 
-    def find_nearest(self, find, k=1, distance_measure='euclidean'):
+    def find_nearest(self, find, k=1, distance_measure='euclidean',
+                     radius_tol=None):
         """
         Find the k nearest coordinates points.
 
@@ -1440,6 +1441,14 @@ class Coordinates():
             ``'spherical_meter'``
                 distance is determined by the great-circle distance
                 expressed in meters.
+        radius_tol : float, None
+            For all spherical distance measures, the coordinates must be on
+            a sphere, so the radius must be constant. This parameter defines
+            the maximum allowed difference within the radii. Note that
+            increasing the tolerance decreases the accuracy of the search.
+            The default ``None`` uses a tolerance of two times the decimal
+            resolution, which is determined from the data type of the
+            coordinate points using ``numpy.finfo``.
 
         Returns
         -------
@@ -1508,6 +1517,10 @@ class Coordinates():
         """
 
         # check the input
+        if radius_tol is None:
+            radius_tol = 2 * np.finfo(self.x.dtype).resolution
+        if not isinstance(radius_tol, float) or radius_tol < 0:
+            raise ValueError("radius_tol must be a non negative number.")
         if not isinstance(k, int) or k <= 0 or k > self.csize:
             raise ValueError("k must be an integer > 0 and <= self.csize.")
         if not isinstance(find, Coordinates):
@@ -1535,10 +1548,10 @@ class Coordinates():
             # determine validate radius
             radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
-            if delta_radius > 1e-15:
+            if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same \
-                    radius. Differences are larger than 1e-15")
+                    f"find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
             # convert cartesian coordinates to length on the great circle using
