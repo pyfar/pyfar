@@ -13,11 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check for version label
-        if: contains(github.event.pull_request.labels.*.name, 'v\d+\.\d+\.\d+')
         run: |
-          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-          LABELS=$(gh pr view $PR_NUMBER --json labels -q '.labels.nodes[].name')
-          VERSION_LABEL=$(echo $LABELS | grep -P 'v\d+\.\d+\.\d+')
+          LABELS_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/labels)
+          VERSION_LABEL=$(echo "$LABELS_JSON" | jq -r '.[].name' | grep -P 'v\d+\.\d+\.\d+' || true)
           if [ -z "$VERSION_LABEL" ]; then
             echo "Error: No version label found on this pull request. Please add a label in the format vX.Y.Z."
             exit 1
