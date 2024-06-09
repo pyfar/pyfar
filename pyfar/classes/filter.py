@@ -1,9 +1,10 @@
 """
-The following documents the pyfar filter classes. More background information
-is given in the
-:py:mod:`filter concepts <pyfar._concepts.filter_classes>`. Available filters
-are shown in :py:mod:`filter types <pyfar._concepts.filter_types>` and
-documented in :py:mod:`pyfar.dsp.filter`.
+The following documents the pyfar filter classes. Examples for working with
+filter objects are part of the
+:doc:`examples gallery<gallery:gallery/interactive/pyfar_filtering>`.
+Available filters are shown in the
+:doc:`filter types examples<gallery:gallery/interactive/pyfar_filter_types>`
+and documented in :py:mod:`pyfar.dsp.filter`.
 """
 import deepdiff
 import warnings

@@ -2,6 +2,16 @@
 History
 =======
 
+0.6.6 (2024-06-07)
+------------------
+* Improve documentation (PR #569, #574, #590, #591, #597, #605)
+* Allow all arithmetic operations involving a single pyfar audio object (#606)
+* Fix bug in `Coordinates.find_within` where not all or too many points were returned (#617)
+* Allow `None` in `Coordinates.sh_order` property (#596)
+* Always use `frequency_range` as parameter and deprecate `freq_range` in pyfar 0.8.0 (#589)
+* Update dependencies (PR #564)
+* Improve CI (#570, #586, #605, #607)
+
 0.6.5 (2024-03-15)
 ------------------
 * `Coordinates.show` now plots on equally scaled axis (PR #554)

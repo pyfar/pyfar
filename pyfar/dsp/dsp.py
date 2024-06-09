@@ -1564,10 +1564,12 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
-        of this signal must be
-        :doc:`broadcastable<numpy:user/basics.broadcasting>` to the
-        cshape of the first signal.
+        The second signal. The channel shape (`cshape`) of this signal must be
+        `broadcastable
+        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
+        cshape of the first signal. The cshape gives the shape of the data
+        inside an audio object but ignores the number of samples or frequency
+        bins.
     mode : string, optional
         A string indicating the size of the output:
 
@@ -1600,9 +1602,11 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     Returns
     -------
     signal : Signal
-        The result of the convolution. The
-        :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
-        of the two input signals.
+        The result of the convolution. The channel dimension (`cdim`) matches
+        the bigger cdim of the two input signals. The channel dimension gives
+        the number of dimensions of the audio data excluding the last
+        dimension, which is ``n_samples`` for time domain objects and
+        ``n_bins`` for frequency domain objects.
 
     Notes
     -----
@@ -1944,10 +1948,10 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 
         The default is ``'linear'``
     caxis: None, int, or tuple of ints, optional
-        Channel axes along which the averaging is done. The default ``None``
-        averages across all channels. See
-        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
-        information.
+        Channel axes (`caxis`) along which the averaging is done. The caxis
+        denotes an axis of the data inside an audio object but ignores the last
+        axis that contains the time samples or frequency bins. The default
+        ``None`` averages across all channels.
     weights: array like
         Array with channel weights for averaging the data. Must be
         broadcastable to ``signal.cshape``. The default is ``None``, which
@@ -2116,8 +2120,9 @@ def normalize(signal, reference_method='max', domain='time',
            Use the absolute of the time domain data ``np.abs(signal.time)``.
         ``'freq'``
           Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
-          normalized magnitude spectrum used
-          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
+          normalized magnitude spectrum is used
+          pyfar examples gallery
+          (cf. :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`).
 
         The default is ``'time'``.
     channel_handling: string, optional
@@ -2219,7 +2224,7 @@ def normalize(signal, reference_method='max', domain='time',
         >>> pf.plot.time_freq(signal, label='Original Signal', unit='ms')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
-    """
+    """  # noqa: E501
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
                                pyfar.TimeData)):
