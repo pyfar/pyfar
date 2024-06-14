@@ -192,21 +192,24 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, side='right',
         factor, unit = _utils._deal_time_units(unit)
         data = data / signal.sampling_rate * factor
 
+    data, frequencies = _utils._assert_and_match_data_to_side(
+        data, signal, side)
+
     # prepare figure
     _, ax = _utils._prepare_plot(ax)
     ax.set_xlabel("Frequency in Hz")
     ax.set_ylabel(f"Group delay in {unit}")
     ax.grid(True, 'both')
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
-                      signal.frequencies[-1], ax.get_xlim())
+                      frequencies[-1], ax.get_xlim())
     _utils._set_axlim(ax, ax.set_ylim, .5 * np.nanmin(data),
                       1.5 * np.nanmax(data), ax.get_ylim())
 
     # plot data
     if freq_scale == 'log':
-        ax.semilogx(signal.frequencies, data.T, **kwargs)
+        ax.semilogx(frequencies, data.T, **kwargs)
     else:
-        ax.plot(signal.frequencies, data.T, **kwargs)
+        ax.plot(frequencies, data.T, **kwargs)
 
     # set and format ticks
     if freq_scale == 'log':
@@ -229,9 +232,9 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
     _time(signal, dB_time, log_prefix_time, log_reference, unit, ax[0],
-          **kwargs)
+          show_real_imag_abs, **kwargs)
     _freq(signal, dB_freq, log_prefix_freq, log_reference, freq_scale, ax[1],
-          **kwargs)
+          side, **kwargs)
     fig.align_ylabels()
 
     return ax
@@ -245,8 +248,9 @@ def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
-    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], **kwargs)
-    _phase(signal, deg, unwrap, freq_scale, ax[1], **kwargs)
+    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], side,
+          **kwargs)
+    _phase(signal, deg, unwrap, freq_scale, ax[1], side, **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
 
@@ -263,8 +267,9 @@ def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
-    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], **kwargs)
-    _group_delay(signal, unit, freq_scale, ax[1], **kwargs)
+    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], side,
+          **kwargs)
+    _group_delay(signal, unit, freq_scale, ax[1], side, **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
 
