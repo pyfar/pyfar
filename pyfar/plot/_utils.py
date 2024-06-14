@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from pyfar import (Signal, FrequencyData)
+from pyfar import (Signal, FrequencyData, dsp)
 
 
 def _prepare_plot(ax=None, subplots=None):
@@ -424,3 +424,37 @@ def _phase_label(unwrap, deg):
         raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
     return phase_label
+
+
+def _assert_and_match_data_to_side(data, signal, side):
+
+    if not type(signal) is FrequencyData and signal.complex:
+        if side == 'right':
+            data = dsp.fft.remove_mirror_spectrum(data, force=True)
+            frequencies = np.atleast_1d(
+                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
+        elif side == 'left':
+            dc_idx = data.shape[-1] // 2
+            data = data[..., dc_idx-1:]
+            frequencies = np.atleast_1d(
+                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
+        else:
+            ValueError('Invalid side parameter, pass left or right ...')
+    else:
+        frequencies = signal.frequencies
+
+    return data, frequencies
+
+
+def _assert_and_match_data_to_mode(data, mode):
+    """Extract data and y-label for plotting according to specified mode."""
+
+    if mode == 'real':
+        return np.real(data), 'Amplitude'
+    elif mode == 'imag':
+        return np.imag(data), 'Amplitude (imaginary)'
+    elif mode == 'abs':
+        return np.abs(data), 'Amplitude (absolute)'
+    else:
+        raise ValueError('`show_real_imag_abs` has to be `real`, `imag`, or '
+                         f'`abs`, but is {mode}.')

@@ -29,18 +29,9 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
     else:
         data = signal.time.T
     # get data defined in 'show_real_imag_abs'
-    if show_real_imag_abs == 'real':
-        data = np.real(data)
-        y_label = 'Amplitude'
-    elif show_real_imag_abs == 'imag':
-        data = np.imag(data)
-        y_label = 'Amplitude (imaginary)'
-    elif show_real_imag_abs == 'abs':
-        data = np.abs(data)
-        y_label = 'Amplitude (absolute)'
-    else:
-        raise ValueError('`show_real_imag_abs` has to be `real`, `imag`, or '
-                         f'`abs`, but is {show_real_imag_abs}.')
+    data, y_label = _utils._assert_and_match_data_to_mode(data,
+                                                          show_real_imag_abs)
+
     # auto detect the time unit
     if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(signal.times[..., -1])
@@ -90,20 +81,8 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     else:
         data = np.abs(signal.freq)
 
-    if not type(signal) is FrequencyData and signal.complex:
-        if side == 'right':
-            data = dsp.fft.remove_mirror_spectrum(data, force=True)
-            frequencies = np.atleast_1d(
-                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
-        elif side == 'left':
-            dc_idx = data.shape[-1] // 2
-            data = data[..., dc_idx-1:]
-            frequencies = np.atleast_1d(
-                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
-        else:
-            ValueError('Invalid side parameter, pass left or right ...')
-    else:
-        frequencies = signal.frequencies
+    data, frequencies = _utils._assert_and_match_data_to_side(
+        data, signal, side)
 
     # prepare figure
     _, ax = _utils._prepare_plot(ax)
