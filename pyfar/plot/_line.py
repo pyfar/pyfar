@@ -128,6 +128,9 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     phase_data = dsp.phase(signal, deg=deg, unwrap=unwrap)
 
+    phase_data, frequencies = _utils._assert_and_match_data_to_side(
+        phase_data, signal, side)
+
     # Construct the correct label string
     ylabel_string = _utils._phase_label(unwrap, deg)
 
@@ -149,14 +152,14 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     ax.set_ylabel(ylabel_string)
     ax.grid(True, 'both')
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
-                      signal.frequencies[-1], ax.get_xlim())
+                      frequencies[-1], ax.get_xlim())
     _utils._set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
 
     # plot data
     if freq_scale == 'log':
-        ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
+        ax.semilogx(frequencies, phase_data.T, **kwargs)
     else:
-        ax.plot(signal.frequencies, phase_data.T, **kwargs)
+        ax.plot(frequencies, phase_data.T, **kwargs)
 
     # set and format ticks
     if freq_scale == 'log':

@@ -427,7 +427,7 @@ def _phase_label(unwrap, deg):
 
 
 def _assert_and_match_data_to_side(data, signal, side):
-
+    """Adjust data and frequency vector for plotting as specified by side."""
     if not type(signal) is FrequencyData and signal.complex:
         if side == 'right':
             data = dsp.fft.remove_mirror_spectrum(data, force=True)
@@ -439,7 +439,8 @@ def _assert_and_match_data_to_side(data, signal, side):
             frequencies = np.atleast_1d(
                 dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
         else:
-            ValueError('Invalid side parameter, pass left or right ...')
+            ValueError('Invalid `side` parameter, pass either `left` or '
+                       '`right`.')
     else:
         frequencies = signal.frequencies
 
@@ -447,7 +448,7 @@ def _assert_and_match_data_to_side(data, signal, side):
 
 
 def _assert_and_match_data_to_mode(data, mode):
-    """Extract data and y-label for plotting according to specified mode."""
+    """Adjust data and y-label for plotting according to specified mode."""
 
     if mode == 'real':
         return np.real(data), 'Amplitude'
