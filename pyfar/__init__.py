@@ -13,6 +13,7 @@ from .classes.audio import (add, subtract, multiply, divide, power,
 from .classes.coordinates import Coordinates
 from .classes.coordinates import (deg2rad, rad2deg)
 from .classes.orientations import Orientations
+from .classes.constants import Constants
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 
 from . import plot
@@ -45,4 +46,6 @@ __all__ = [
     'io',
     'dsp',
     'signals',
-    'utils']
+    'utils',
+    'Constants',
+    ]
