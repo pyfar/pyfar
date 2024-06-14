@@ -58,6 +58,19 @@ class _Audio():
         """
         return self._data.shape[:-1]
 
+    @property
+    def cdim(self):
+        """
+        Return channel dimension.
+
+        The channel dimension (`cdim`) gives the number of dimensions of the
+        audio data excluding the last dimension, which is `n_samples` for
+        time domain objects and `n_bins` for frequency domain objects.
+        Therefore it is equivalent to the length of the channel shape
+        (`cshape`) (e.g. ``self.cshape = (2, 3)``; ``self.cdim = 2``).
+        """
+        return len(self.cshape)
+
     def reshape(self, newshape):
         """
         Return reshaped copy of the audio object.
