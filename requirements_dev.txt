@@ -9,7 +9,7 @@ twine
 pytest
 pytest-runner
 pytest-cov
-numpy==2.0.0rc2
+numpy>=1.23.0
 scipy>=1.5.0
 matplotlib
 urllib3
