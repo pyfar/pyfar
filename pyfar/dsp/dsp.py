@@ -524,7 +524,8 @@ def time_window(signal, interval, window='hann', shape='symmetric',
                 window_zeropadded, signal_win.sampling_rate)
 
     if return_window:
-        interval_str = f'({str(interval)[1:-1].replace(' ', ', ')})'
+        interval_str = str(interval)[1:-1]
+        interval_str = f'({interval_str.replace(' ', ', ')})'
         window_fin.comment = (
             f"Time window with parameters interval={interval_str},"
             f"window='{window}', shape='{shape}', unit='{unit}', "
