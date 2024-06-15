@@ -468,9 +468,9 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         raise ValueError("Values in interval need to be in ascending order.")
     # Convert to samples
     if unit == 's':
-        interval = np.round(interval*signal.sampling_rate).astype(int)
+        interval = np.array(np.round(interval*signal.sampling_rate))
     elif unit == 'samples':
-        interval = interval.astype(int)
+        interval = np.array(interval, dtype=int)
     else:
         raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
     # Check window size
@@ -524,8 +524,9 @@ def time_window(signal, interval, window='hann', shape='symmetric',
                 window_zeropadded, signal_win.sampling_rate)
 
     if return_window:
+        interval_str = f'({str(interval)[1:-1].replace(' ', ', ')})'
         window_fin.comment = (
-            f"Time window with parameters interval={tuple(interval)},"
+            f"Time window with parameters interval={interval_str},"
             f"window='{window}', shape='{shape}', unit='{unit}', "
             f"crop='{crop}'")
         return signal_win, window_fin
