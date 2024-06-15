@@ -1,4 +1,3 @@
-import re
 import multiprocessing
 import numpy as np
 from scipy import signal as sgn

@@ -3,11 +3,15 @@ import numpy as np
 import warnings
 
 import pyfar as pf
+if np.__version__ < '2.0.0':
+    from numpy import VisibleDeprecationWarning
+else:
+    from numpy.exceptions import VisibleDeprecationWarning
 
 # this warning needs to be caught and appears if numpy array are generated
 # from nested lists containing lists of unequal lengths, e.g.,
 #  [[1, 0, 0], [1, 0]]
-warnings.filterwarnings("error", category=np.exceptions.VisibleDeprecationWarning)
+warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 
 class Orientations(Rotation):
@@ -92,7 +96,7 @@ class Orientations(Rotation):
         try:
             views = np.atleast_2d(views).astype(np.float64)
             ups = np.atleast_2d(ups).astype(np.float64)
-        except np.exceptions.VisibleDeprecationWarning:
+        except VisibleDeprecationWarning:
             raise ValueError("Expected `views` and `ups` to have shape (N, 3)")
 
         # check views and ups
