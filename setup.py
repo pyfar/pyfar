@@ -12,7 +12,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'numpy>=1.23.0',
+    'numpy==2.0.0rc2',
     'scipy>=1.5.0',
     'matplotlib',
     'sofar>=0.1.2',
