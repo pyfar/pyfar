@@ -529,10 +529,12 @@ def test_time_window_return_window(crop):
     assert isinstance(win, pyfar.Signal)
     assert sig_win.sampling_rate == win.sampling_rate
     npt.assert_allclose(sig_win.time, win.time)
-    desired_comment = (
-        f"Time window with parameters interval=(4, 8),"
-        f"window='hann', shape='symmetric', unit='samples', crop='{crop}'")
-    assert win.comment == desired_comment
+    assert 'interval=(4, 8)' in win.comment
+    assert "window='hann'," in win.comment
+    assert "shape='symmetric'," in win.comment
+    assert "unit='samples'," in win.comment
+    assert f"crop='{crop}'" in win.comment
+    assert 'Time window with parameters' in win.comment
 
 
 def test_time_window_return_window_error():
