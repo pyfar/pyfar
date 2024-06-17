@@ -530,7 +530,7 @@ def test_time_window_return_window(crop):
     assert sig_win.sampling_rate == win.sampling_rate
     npt.assert_allclose(sig_win.time, win.time)
     desired_comment = (
-        f"Time window with parameters interval=(4, 8),"
+        f"Time window with parameters interval=(4, 8), "
         f"window='hann', shape='symmetric', unit='samples', crop='{crop}'")
     assert win.comment == desired_comment
 
