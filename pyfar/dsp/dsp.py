@@ -528,7 +528,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         if 'np' in interval_str:
             interval_str = f"({', '.join([str(i) for i in interval])})"
         window_fin.comment = (
-            f"Time window with parameters interval={interval_str},"
+            f"Time window with parameters interval={interval_str}, "
             f"window='{window}', shape='{shape}', unit='{unit}', "
             f"crop='{crop}'")
         return signal_win, window_fin
