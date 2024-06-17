@@ -428,21 +428,21 @@ def _phase_label(unwrap, deg):
 
 def _assert_and_match_data_to_side(data, signal, side):
     """Adjust data and frequency vector for plotting as specified by side."""
-    if not type(signal) is FrequencyData and signal.complex:
-        if side == 'right':
-            data = dsp.fft.remove_mirror_spectrum(data, force=True)
-            frequencies = np.atleast_1d(
-                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
-        elif side == 'left':
-            dc_idx = data.shape[-1] // 2
-            data = data[..., dc_idx-1:]
-            frequencies = np.atleast_1d(
-                dsp.fft.rfftfreq(signal.n_samples, signal.sampling_rate))
-        else:
-            ValueError('Invalid `side` parameter, pass either `left` or '
-                       '`right`.')
+
+    if side == 'left':
+        mask = signal.frequencies <= 0
+    elif side == 'right':
+        mask = signal.frequencies >= 0
     else:
-        frequencies = signal.frequencies
+        ValueError('Invalid `side` parameter, pass either `left` or '
+                   '`right`.')
+
+    if not np.any(mask):
+        ValueError(f'The {side} side of the spectrum is not defined.')
+
+    # get corresponding data
+    frequencies = np.abs(signal.frequencies[mask])
+    data = data[..., mask]
 
     return data, frequencies
 

@@ -43,11 +43,3 @@ def test_shortcuts_report():
 
     with pytest.raises(ValueError, match="layout is 'tex'"):
         utils.shortcuts(report=True, layout="tex")
-
-
-def test_assert_and_match_data_to_side():
-    pass
-
-
-def test_assert_and_match_data_to_mode():
-    pass

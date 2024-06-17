@@ -141,3 +141,19 @@ def test__deal_time_units_mus():
     """Test previous bugfix for unit micro seconds in labels."""
     s = pf.signals.impulse(10, sampling_rate=44100)
     pf.plot.time(s)
+
+
+def test_assert_and_match_data_to_side():
+    signal = pf.signals.sine(20, 128)
+    signal.fft_norm = 'none'
+    signal.complex = True
+
+    plot._utils._assert_and_match_data_to_side(signal.freq, signal,
+                                               side='left')
+
+
+def test_assert_and_match_data_to_mode():
+    pass
+
+
+test_assert_and_match_data_to_side()
