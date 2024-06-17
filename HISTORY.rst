@@ -6,7 +6,6 @@ History
 ------------------
 * Make compatibile for numpy 2.0 (PR #629)
 
-
 0.6.6 (2024-06-07)
 ------------------
 * Improve documentation (PR #569, #574, #590, #591, #597, #605)
