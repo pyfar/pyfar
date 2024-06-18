@@ -441,8 +441,12 @@ def _assert_and_match_data_to_side(data, signal, side):
         ValueError(f'The {side} side of the spectrum is not defined.')
 
     # get corresponding data
-    frequencies = np.abs(signal.frequencies[mask])
+    frequencies = signal.frequencies[mask]
     data = data[..., mask]
+
+    if side == 'left':
+        frequencies = np.flipud(np.abs(frequencies))
+        data = data[..., ::-1]
 
     return data, frequencies
 

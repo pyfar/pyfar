@@ -144,7 +144,7 @@ def test__deal_time_units_mus():
 
 
 def test_assert_and_match_data_to_side():
-    signal = pf.signals.sine(20, 128)
+    signal = pf.signals.sine(20, 32)
     signal.fft_norm = 'none'
     signal.complex = True
 
@@ -154,6 +154,3 @@ def test_assert_and_match_data_to_side():
 
 def test_assert_and_match_data_to_mode():
     pass
-
-
-test_assert_and_match_data_to_side()
