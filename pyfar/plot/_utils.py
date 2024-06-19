@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from pyfar import (Signal, FrequencyData, dsp)
+from pyfar import (Signal, FrequencyData)
 
 
 def _prepare_plot(ax=None, subplots=None):
@@ -434,11 +434,11 @@ def _assert_and_match_data_to_side(data, signal, side):
     elif side == 'right':
         mask = signal.frequencies >= 0
     else:
-        ValueError('Invalid `side` parameter, pass either `left` or '
-                   '`right`.')
+        raise ValueError('Invalid `side` parameter, pass either `left` or '
+                         '`right`.')
 
-    if not np.any(mask):
-        ValueError(f'The {side} side of the spectrum is not defined.')
+    if mask.sum() < 2:
+        raise ValueError(f'The {side} side of the spectrum is not defined.')
 
     # get corresponding data
     frequencies = signal.frequencies[mask]

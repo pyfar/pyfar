@@ -3,6 +3,7 @@ import pytest
 from pytest import raises
 import pyfar.plot as plot
 import pyfar as pf
+import numpy as np
 
 
 def test_prepare_plot():
@@ -143,13 +144,31 @@ def test__deal_time_units_mus():
     pf.plot.time(s)
 
 
+def test_assert_and_match_data_to_side_wrong_parameter():
+    signal = pf.signals.sine(20, 32)
+
+    with raises(ValueError, match='Invalid `side` parameter, pass either '
+                '`left` or `right`.'):
+        plot._utils._assert_and_match_data_to_side(
+            signal.freq, signal, side='quatsch')
+
+
 def test_assert_and_match_data_to_side():
     signal = pf.signals.sine(20, 32)
+
+    with raises(ValueError, match='The left side of the spectrum is not '
+                'defined.'):
+        plot._utils._assert_and_match_data_to_side(
+            signal.freq, signal, side='left')
+
     signal.fft_norm = 'none'
     signal.complex = True
 
-    plot._utils._assert_and_match_data_to_side(signal.freq, signal,
-                                               side='left')
+    data, frequencies = plot._utils._assert_and_match_data_to_side(
+        signal.freq, signal, side='left')
+
+    assert not np.any(frequencies < 0.0)
+    assert data.shape[-1] == frequencies.shape[0]
 
 
 def test_assert_and_match_data_to_mode():
