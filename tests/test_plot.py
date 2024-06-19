@@ -84,7 +84,7 @@ def test_complex_time_plots(show_real_imag_abs_flag,
           f"= {show_real_imag_abs_flag}")
 
     # initial plot
-    filename = plot.time.__name__ + '_default'
+    filename = f'{plot.time.__name__}_{show_real_imag_abs_flag}_default'
     create_figure()
     plot.time(handsome_complex_signal,
               show_real_imag_abs=show_real_imag_abs_flag)
@@ -92,7 +92,7 @@ def test_complex_time_plots(show_real_imag_abs_flag,
                      file_type, compare_output)
 
     # test hold functionality
-    filename = plot.time.__name__ + '_hold'
+    filename = f'{plot.time.__name__}_{show_real_imag_abs_flag}_hold'
     plot.time(handsome_complex_signal_v2,
               show_real_imag_abs=show_real_imag_abs_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
@@ -111,14 +111,14 @@ def test_complex_freq_plots(function, side_flag,
     print(f"Testing: {function.__name__}")
 
     # initial plot
-    filename = function.__name__ + '_default'
+    filename = f'{function.__name__}_{side_flag}_default'
     create_figure()
     function(handsome_complex_signal, side=side_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
     # test hold functionality
-    filename = function.__name__ + '_hold'
+    filename = f'{function.__name__}_{side_flag}_hold'
     function(handsome_complex_signal_v2, side=side_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)

@@ -289,8 +289,8 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
 
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
               log_prefix_freq=None, log_reference=1, freq_scale='log',
-              unit="s", ax=None, show_real_imag_abs='real',
-              side='right', style='light', **kwargs):
+              unit="s", ax=None, style='light',
+              show_real_imag_abs='real', side='right', **kwargs):
     """
     Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
