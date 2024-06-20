@@ -1327,7 +1327,8 @@ def find_impulse_response_start(
     ``threshold`` level relative to the maximum level of the impulse response.
     For room impulse responses, ISO 3382 [#]_ specifies a threshold of 20 dB.
     This function is primary intended to be used when processing room impulse
-    responses.
+    responses. For complex-valued time signals the onset is computed separately
+    for the real and imaginary part.
     Alternatively see :py:func:`pyfar.dsp.find_impulse_response_delay`.
 
 
