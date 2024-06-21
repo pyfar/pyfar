@@ -1957,7 +1957,8 @@ class Coordinates():
 
         Notes
         -----
-        :py:class:`scipy.spatial.cKDTree` is used for the search, which requires an
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (`csize`, 3) before they are passed to ``cKDTree``. The index that
         is returned refers to the reshaped coordinate points. To access the
@@ -2033,7 +2034,8 @@ class Coordinates():
 
         Notes
         -----
-        :py:class:`scipy.spatial.cKDTree` is used for the search, which requires an
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (`csize`, 3) before they are passed to ``cKDTree``. The index that
         is returned refers to the reshaped coordinate points. To access the
@@ -2188,8 +2190,8 @@ class Coordinates():
         """
         Rotate points stored in the object around the origin of coordinates.
 
-        This is a wrapper for :py:class:`scipy.spatial.transform.Rotation` (see this
-        class for more detailed information).
+        This is a wrapper for :py:class:`scipy.spatial.transform.Rotation`
+        (see this class for more detailed information).
 
         Parameters
         ----------
@@ -2852,8 +2854,8 @@ def cart2sph(x, y, z):
 
     Notes
     -----
-    To ensure proper handling of the azimuth angle, the :py:data:`numpy.arctan2`
-    implementation from numpy is used.
+    To ensure proper handling of the azimuth angle, the
+    :py:data:`numpy.arctan2` implementation from numpy is used.
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.divide(

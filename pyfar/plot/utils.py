@@ -16,7 +16,7 @@ def plotstyle(style='light'):
     Parameters
     ----------
     style : str
-        ``light``, or ``dark``
+        ``light`` or ``dark``
 
     Returns
     -------

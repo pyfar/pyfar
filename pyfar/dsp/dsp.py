@@ -252,7 +252,8 @@ def spectrogram(signal, window='hann', window_length=1024,
                 window_overlap_fct=0.5, normalize=True):
     """Compute the magnitude spectrum versus time.
 
-    This is a wrapper for :py:func:`scipy.signal.spectrogram` with two differences.
+    This is a wrapper for :py:func:`scipy.signal.spectrogram` with two
+    differences.
     First, the returned times refer to the start of the FFT blocks, i.e., the
     first time is always 0 whereas it is window_length/2 in scipy. Second, the
     returned spectrogram is normalized according to ``signal.fft_norm`` if the
@@ -263,8 +264,8 @@ def spectrogram(signal, window='hann', window_length=1024,
     signal : Signal
         Signal to compute spectrogram of.
     window : str
-        Specifies the window (see :py:mod:`scipy.signal.windows`). The default is
-        ``'hann'``.
+        Specifies the window (see :py:mod:`scipy.signal.windows`). The default
+        is ``'hann'``.
     window_length : integer
         Window length in samples, the default ist 1024.
     window_overlap_fct : double
@@ -388,8 +389,8 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     For a fade-out, the samples given in `interval` denote the last sample
     which is one and the last which is non-zero.
 
-    This function calls :py:func:`scipy.signal.windows.get_window` to create the
-    window.
+    This function calls :py:func:`scipy.signal.windows.get_window` to
+    create the window.
     Available window types:
 
     - ``boxcar``
@@ -1095,10 +1096,10 @@ def time_shift(
         next integer sample value to perform the shift.
     pad_type : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
-        Pad :py:data:`numpy.nan` to the respective channels if the rms value of the
-        signal is to be maintained for block-wise rms estimation of the noise
-        power of a signal. Note that if NaNs are padded, the returned data
-        will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
+        Pad :py:data:`numpy.nan` to the respective channels if the rms value
+        of the signal is to be maintained for block-wise rms estimation of the
+        noise power of a signal. Note that if NaNs are padded, the returned
+        data will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
         :py:class:`~pyfar.classes.audio.Signal` object.
 
     Returns
@@ -1199,7 +1200,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     the analytic signal is approximated using a polynomial of order ``N``.
     The algorithm is based on [#]_ with the following modifications:
 
-    1.  Values with negative gradient used for polynolmial fitting are
+    1.  Values with negative gradient used for polynomial fitting are
         rejected, allowing to use larger part of the signal for fitting.
     2.  By default a first order polynomial is used, as the slope of the
         analytic signal should in theory be linear.
