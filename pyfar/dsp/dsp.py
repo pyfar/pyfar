@@ -1095,7 +1095,7 @@ def time_shift(
         next integer sample value to perform the shift.
     pad_type : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
-        Pad :py:`numpy.nan` to the respective channels if the rms value of the
+        Pad :py:data:`numpy.nan` to the respective channels if the rms value of the
         signal is to be maintained for block-wise rms estimation of the noise
         power of a signal. Note that if NaNs are padded, the returned data
         will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
@@ -1107,7 +1107,7 @@ def time_shift(
         The time-shifted signal. This is a
         :py:class:`~pyfar.classes.audio.TimeData` object in case a linear shift
         was done and the signal was padded with Nans. In all other cases, a
-        :py:class:`~pyfar.classes.audio.Signal` object is returend.
+        :py:class:`~pyfar.classes.audio.Signal` object is returned.
 
     Examples
     --------
