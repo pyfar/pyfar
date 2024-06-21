@@ -14,6 +14,7 @@ from .classes.coordinates import Coordinates
 from .classes.coordinates import (deg2rad, rad2deg)
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
+from .classes.transmission_matrix import TransmissionMatrix
 
 from . import plot
 from . import samplings
@@ -40,6 +41,7 @@ __all__ = [
     'FilterFIR',
     'FilterIIR',
     'FilterSOS',
+    'TransmissionMatrix',
     'plot',
     'samplings',
     'io',
