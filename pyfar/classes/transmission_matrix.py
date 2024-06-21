@@ -118,21 +118,42 @@ class TransmissionMatrix(FrequencyData):
     def cascade(self, t_matrix: TransmissionMatrix):
         """Cascades two systems (T-matrices) by doing a matrix multiplication:
 
-        See Equation (2-3) in [1]: T = T1 * T2
+        Parameters
+        ----------
+        t_matrix : The other TransmissionMatrix to perform the matrix multiplication.
 
-        Note: An easier approach especially to cascade multiple systems is using the @-operator, e.g. :
+        Returns
+        -------
+        tmat_out : TransmissionMatrix
+            The index for the given frequency. If the input was an array like,
+            a numpy array of indices is returned.
+
+        Notes
+        -----
+        An easier approach, especially to cascade multiple systems, is using the
+        @-operator, e.g. :
             T = T1 @ T2 @ T3 ...
+
+        See also Equation (2-3) in reference [1]: T = T1 * T2
         """
         return self @ t_matrix
 
     @property
     def abcd_axes(self):
-        """The indices of the axes referring to the transmission matrix with respect to the full data set (including frequency-axis)"""
+        """The indices of the axes referring to the transmission matrix
+
+        This relates to the axes with respect to the full data set
+        (including the frequency-axis).
+        """
         return [-3, -2]
 
     @property
     def abcd_caxes(self):
-        """The indices of the axes referring to the transmission matrix with respect to channel-related data set (excluding frequency-axis)"""
+        """The indices of the channel axes referring to the transmission matrix
+
+        This relates to the axes with respect to channel-related data set
+        (excluding the frequency-axis).
+        """
         return [-2, -1]
 
     @property
@@ -174,6 +195,18 @@ class TransmissionMatrix(FrequencyData):
             Zin-->      x       x   Zl
                         x       x   |
                     o---xxxxxxxxx---o
+
+        Parameters
+        ----------
+        Zl : complex | FrequencyData
+            The load impedance data. The shape must match the entries of the T-matrix,
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+
+        Returns
+        -------
+        Zout : FrequencyData
+            A FrequencyData object with the resulting output impedance. The shape is
+            identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
         """
         if np.shape(self.data[0, 0]) != np.shape(Zl):
             raise ValueError("'Zl' must match the dimensions of the matrix entries,"
@@ -183,13 +216,25 @@ class TransmissionMatrix(FrequencyData):
     def output_impedance(self, Zl: complex | FrequencyData):
         """Calculates the output impedance given the load impedance Zl at the input.
 
-        See Equation (2-6) in reference [1]
+        See Equation (2-6) in reference [1].
 
                     o---xxxxxxxxx---o
                     |   x       x
                     Zl  x       x      <--Zout
                     |   x       x
                     o---xxxxxxxxx---o
+
+        Parameters
+        ----------
+        Zl : complex | FrequencyData
+            The load impedance data. The shape must match the entries of the T-matrix,
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+
+        Returns
+        -------
+        Zout : FrequencyData
+            A FrequencyData object with the resulting output impedance. The shape is
+            identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
         """
         if np.shape(self.data[0, 0]) != np.shape(Zl):
             raise ValueError("'Zl' must match the dimensions of the matrix entries,"
@@ -197,18 +242,44 @@ class TransmissionMatrix(FrequencyData):
         return (self.D * Zl + self.B) / (self.C * Zl + self.A)
 
     def transfer_function_quantity1(self, Zl: complex | FrequencyData):
-        """
-        Returns the transfer function of the first quantity (output/input) given the load at the output Zl
+        """Returns the transfer function of the first quantity (output/input).
+
+        The TF is calculated based on the load impedance at the output.
         The first quantity usually refers to voltage, force, pressure, etc.
-        See Equation (2-1) in [1]: Defined as e2/e1 using i2 = e2/Zl
+        See Equation (2-1) in reference [1]: Defined as e2/e1 using i2 = e2/Zl.
+
+        Parameters
+        ----------
+        Zl : complex | FrequencyData
+            The load impedance data. The shape must match the entries of the T-matrix,
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+
+        Returns
+        -------
+        TF : FrequencyData
+            A FrequencyData object with the resulting transfer function. The shape is
+            identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
         """
         return 1 / (self.A + self.B / Zl)
 
     def transfer_function_quantity2(self, Zl: complex | FrequencyData):
-        """
-        Returns the transfer function of the second quantity (output/input) given the load at the output Zl
-        The second quantity usually refers to some flow or movement, e.g. current, velocity,...
-        See Equation (2-1) in [1]: Defined as i2/i1 using e2 = i2*Zl
+        """Returns the transfer function of the second quantity (output/input).
+
+        The TF is calculated based on the load impedance at the output. The second
+        quantity usually refers to some flow or movement, e.g. current, velocity,...
+        See Equation (2-1) in reference [1]: Defined as i2/i1 using e2 = i2*Zl.
+
+        Parameters
+        ----------
+        Zl : complex | FrequencyData
+            The load impedance data. The shape must match the entries of the T-matrix,
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+
+        Returns
+        -------
+        TF : FrequencyData
+            A FrequencyData object with the resulting transfer function. The shape is
+            identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
         """
         return 1 / (self.C * Zl + self.D)
 
