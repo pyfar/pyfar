@@ -28,8 +28,7 @@ def _check_matrix_multiplication_result(
 ):
     tmat1 = _abcd_matrix_stack(abcd_mat1, shape_extra_dims, frequencies)
     tmat2 = _abcd_matrix_stack(abcd_mat2, shape_extra_dims, frequencies)
-    tmat_out = tmat1.copy()
-    tmat_out.freq = tmat1 @ tmat2
+    tmat_out = tmat1 @ tmat2
     npt.assert_allclose(tmat_out.A.freq, abcd_target[0], atol=1e-15)
     npt.assert_allclose(tmat_out.B.freq, abcd_target[1], atol=1e-15)
     npt.assert_allclose(tmat_out.C.freq, abcd_target[2], atol=1e-15)
