@@ -88,7 +88,7 @@ class Orientations(Rotation):
 
         Returns
         -------
-        orientations : `Orientations` instance
+        orientations : Orientations
             Object containing the orientations represented by quaternions.
         """
 
@@ -152,7 +152,7 @@ class Orientations(Rotation):
 
         Returns
         -------
-        ax : matplotlib.axes._subplots.Axes3DSubplot
+        ax : :py:class:`mpl_toolkits.mplot3d.axes3d.Axes3D`
             The axis used for the plot.
 
         """
@@ -191,9 +191,9 @@ class Orientations(Rotation):
         Returns
         ----------
         vector_triple: ndarray, shape (N, 3), normalized vectors
-            - views, see `Orientations.from_view_up.__doc__`
-            - ups, see `Orientations.from_view_up.__doc__`
-            - rights, see `Orientations.from_view_up.__doc__`
+            - views, see :py:func:`Orientations.from_view_up`
+            - ups, see :py:func:`Orientations.from_view_up`
+            - rights, see :py:func:`Orientations.from_view_up`
                 A single vector or a stack of vectors, pointing to the right of
                 the object, constructed as a cross product of ups and rights.
         """

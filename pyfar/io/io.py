@@ -530,7 +530,7 @@ def default_audio_subtype(format):
 
     Notes
     -----
-    This function is a wrapper of :py:func:`soundfile.default_audio_subtype()`.
+    This function is a wrapper of :py:func:`soundfile.default_subtype()`.
 
     Examples
     --------
