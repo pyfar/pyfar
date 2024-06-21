@@ -2077,7 +2077,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         return pyfar.FrequencyData(data, signal.frequencies, signal.comment)
 
 
-def normalize(signal, reference_method='max', domain='time',
+def normalize(signal, reference_method='max', domain='auto',
               channel_handling='individual', target=1, limits=(None, None),
               unit=None, return_reference=False, nan_policy='raise'):
     """
@@ -2126,8 +2126,15 @@ def normalize(signal, reference_method='max', domain='time',
           normalized magnitude spectrum is used
           pyfar examples gallery
           (cf. :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`).
+        ``'auto'``
+           Uses ``'time'`` domain normalization for
+           :py:class:`Signal <pyfar.classes.audio.Signal>` and
+           :py:class:`TimeData <pyfar.classes.audio.TimeData>` objects and
+           ``'freq'`` domain normalization for
+           :py:class:`FrequencyData <pyfar.classes.audio.FrequencyData>`
+           objects.
 
-        The default is ``'time'``.
+        The default is ``'auto'``.
     channel_handling: string, optional
         Define how channel-wise `reference` values are handeled for multi-
         channel signals. This parameter does not affect single-channel signals.
@@ -2234,8 +2241,14 @@ def normalize(signal, reference_method='max', domain='time',
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
 
-    if domain not in ('time', 'freq'):
-        raise ValueError("domain must be 'time' or 'freq'.")
+    if domain not in ('time', 'freq', 'auto'):
+        raise ValueError("domain must be 'time', 'freq' or 'auto.")
+    # get signal domain if domain = 'auto'
+    if domain == 'auto' and type(signal) == pyfar.FrequencyData:
+        domain = 'freq'
+    elif domain == 'auto' and (type(signal) == pyfar.TimeData
+                               or type(signal) == pyfar.Signal):
+        domain = 'time'
     if (type(signal) is pyfar.FrequencyData) and domain == 'time':
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
