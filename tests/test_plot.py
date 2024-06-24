@@ -74,27 +74,26 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
                      file_type, compare_output)
 
 
-@pytest.mark.parametrize('show_real_imag_abs_flag', [
+@pytest.mark.parametrize('mode', [
     'real', 'imag', 'abs'])
-def test_complex_time_plots(show_real_imag_abs_flag,
+def test_complex_time_plots(mode,
                             handsome_complex_signal,
                             handsome_complex_signal_v2):
     """Test all line plots with default arguments and hold functionality."""
-    print(f"Testing: {plot.time.__name__}, show_real_imag_abs "
-          f"= {show_real_imag_abs_flag}")
+    print(f"Testing: {plot.time.__name__}, mode "
+          f"= {mode}")
 
     # initial plot
-    filename = f'{plot.time.__name__}_{show_real_imag_abs_flag}_default'
+    filename = f'{plot.time.__name__}_{mode}_default'
     create_figure()
-    plot.time(handsome_complex_signal,
-              show_real_imag_abs=show_real_imag_abs_flag)
+    plot.time(handsome_complex_signal, mode=mode)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
     # test hold functionality
-    filename = f'{plot.time.__name__}_{show_real_imag_abs_flag}_hold'
+    filename = f'{plot.time.__name__}_{mode}_hold'
     plot.time(handsome_complex_signal_v2,
-              show_real_imag_abs=show_real_imag_abs_flag)
+              show_real_imag_abs=mode)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 

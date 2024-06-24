@@ -461,5 +461,5 @@ def _assert_and_match_data_to_mode(data, mode):
     elif mode == 'abs':
         return np.abs(data), 'Amplitude (absolute)'
     else:
-        raise ValueError('`show_real_imag_abs` has to be `real`, `imag`, or '
+        raise ValueError('`mode` has to be `real`, `imag`, or '
                          f'`abs`, but is {mode}.')

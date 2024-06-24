@@ -4,7 +4,7 @@ from . import _interaction as ia
 
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
-         ax=None, style='light', show_real_imag_abs='real', **kwargs):
+         ax=None, style='light', mode='real', **kwargs):
     """Plot the time signal.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
@@ -49,6 +49,10 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
         empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
+    mode : str
+        ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
+        part or absolute value of a complex-valued time domain signal is
+        plotted. The default is ``real``.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -70,7 +74,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
     with context(style):
         ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
-                         ax, show_real_imag_abs, **kwargs)
+                         ax, mode, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -120,6 +124,8 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
         empty dictonary ``style = {}`` to use the currently active plotstyle.
         The default is ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
 
@@ -290,7 +296,7 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
               log_prefix_freq=None, log_reference=1, freq_scale='log',
               unit="s", ax=None, style='light',
-              show_real_imag_abs='real', side='right', **kwargs):
+              mode='real', side='right', **kwargs):
     """
     Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
@@ -369,7 +375,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
                               log_prefix_time, log_prefix_freq,
                               log_reference, freq_scale, unit, ax,
-                              show_real_imag_abs=show_real_imag_abs, side=side,
+                              mode=mode, side=side,
                               **kwargs)
 
     # manage interaction

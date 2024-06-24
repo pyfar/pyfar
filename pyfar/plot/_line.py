@@ -11,7 +11,7 @@ from matplotlib.ticker import NullFormatter
 
 
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
-          ax=None, show_real_imag_abs='real', **kwargs):
+          ax=None, mode='real', **kwargs):
     """Plot the time data of a signal."""
 
     # check input
@@ -29,8 +29,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
     else:
         data = signal.time.T
     # get data defined in 'show_real_imag_abs'
-    data, y_label = _utils._assert_and_match_data_to_mode(data,
-                                                          show_real_imag_abs)
+    data, y_label = _utils._assert_and_match_data_to_mode(data, mode)
 
     # auto detect the time unit
     if unit in [None, "auto"]:
@@ -222,7 +221,7 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, side='right',
 
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                log_prefix_freq=None, log_reference=1, freq_scale='log',
-               unit="s", ax=None, side='right', show_real_imag_abs='real',
+               unit="s", ax=None, side='right', mode='real',
                **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
@@ -232,7 +231,7 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
     _time(signal, dB_time, log_prefix_time, log_reference, unit, ax[0],
-          show_real_imag_abs, **kwargs)
+          mode, **kwargs)
     _freq(signal, dB_freq, log_prefix_freq, log_reference, freq_scale, ax[1],
           side, **kwargs)
     fig.align_ylabels()
