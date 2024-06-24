@@ -291,6 +291,3 @@ class TransmissionMatrix(FrequencyData):
 
 # TODO: Add static create functions for special matrices Eq. (2-8) to (2-9)
 
-if __name__ == "__main__":
-    tmat = TransmissionMatrix([1, 1], [2, 2], [3, 3], [4, 4], [100, 200])
-    tmat.freq
