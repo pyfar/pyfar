@@ -93,7 +93,7 @@ def test_complex_time_plots(mode,
     # test hold functionality
     filename = f'{plot.time.__name__}_{mode}_hold'
     plot.time(handsome_complex_signal_v2,
-              show_real_imag_abs=mode)
+              mode=mode)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
