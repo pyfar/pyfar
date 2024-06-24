@@ -145,7 +145,8 @@ def test_error_raises():
                                    "'pyfar.classes.audio.TimeData'>'")):
         pf.dsp.normalize(pf.TimeData([1, 1, 1], [1, 2, 3]), domain='freq')
 
-    with raises(ValueError, match=("domain must be 'time', 'freq' or 'auto.")):
+    with raises(ValueError, match=("domain must be 'time', 'freq' or 'auto' "
+                                   "but is 'invalid_domain'.")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='invalid_domain')
 
     with raises(ValueError, match=("reference_method must be 'max', 'mean',")):
