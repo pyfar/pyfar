@@ -2244,7 +2244,8 @@ def normalize(signal, reference_method='max', domain='auto',
                          "or 'FrequencyData'."))
 
     if domain not in ('time', 'freq', 'auto'):
-        raise ValueError("domain must be 'time', 'freq' or 'auto.")
+        raise ValueError("domain must be 'time', 'freq' or 'auto' but is"
+                         f" '{domain}'.")
     # get signal domain if domain = 'auto'
     if domain == 'auto' and type(signal) == pyfar.FrequencyData:
         domain = 'freq'
