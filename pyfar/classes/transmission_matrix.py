@@ -295,6 +295,23 @@ class TransmissionMatrix(FrequencyData):
 
     @classmethod
     def create_identity(cls, frequencies, abcd_cshape = ()):
+        """Creates an object with identity matrix entries (bypass).
+
+        See Equation (2-7) in Table I of reference [1].
+
+        Parameters
+        ----------
+        frequencies : array_like
+            The frequency sampling points in Hz.
+        abcd_cshape : tuple | int, optional
+            Shape of additional dimensions besides (2,2,num_bins).
+            Per default, no additional dimensions are created.
+
+        Returns
+        -------
+        cls : TransmissionMatrix
+            A TransmissionMatrix object that contains 2x2 identity matrices.
+        """
         identity = np.array([[1,0],[0,1]])
         identity_3d = np.repeat(identity[:, :, np.newaxis], len(frequencies), axis = 2)
         return cls._create_abcd_matrix_broadcast(
@@ -302,6 +319,25 @@ class TransmissionMatrix(FrequencyData):
 
     @classmethod
     def create_series_impedance(cls, impedance : FrequencyData, abcd_cshape = ()):
+        """Creates a transmission matrix representing a series impedance.
+
+        This means the impedance is connected in series with a potential load impedance.
+        See Equation (2-8) in Table I of reference [1].
+
+        Parameters
+        ----------
+        impedance : FrequencyData
+            The impedance data of the series impedance.
+        abcd_cshape : tuple | int, optional
+            Shape of additional dimensions besides (2,2,num_bins).
+            Per default, no additional dimensions are created.
+
+        Returns
+        -------
+        cls : TransmissionMatrix
+            A TransmissionMatrix representing a series impedance.
+        """
+
         if impedance.cshape != (1,):
             raise ValueError("Number of channels for 'impedance' must be 1.")
         Z = impedance.freq[0]
@@ -311,6 +347,25 @@ class TransmissionMatrix(FrequencyData):
 
     @classmethod
     def create_shunt_admittance(cls, admittance : FrequencyData, abcd_cshape = ()):
+        """Creates a transmission matrix representing a shunt admittance (parallel connection).
+
+        In this case, the impedance (= 1 / admittance) is connected in parallel
+        with a potential load impedance.
+        See Equation (2-9) in Table I of reference [1].
+
+        Parameters
+        ----------
+        admittance : FrequencyData
+            The admittance data of the element connected in parallel.
+        abcd_cshape : tuple | int, optional
+            Shape of additional dimensions besides (2,2,num_bins).
+            Per default, no additional dimensions are created.
+
+        Returns
+        -------
+        cls : TransmissionMatrix
+            A TransmissionMatrix representing a parallel connection.
+        """ # noqa: E501
         if admittance.cshape != (1,):
             raise ValueError("Number of channels for 'admittance' must be 1.")
         Y = admittance.freq[0]
