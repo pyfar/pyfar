@@ -1,6 +1,5 @@
 """
-The following introduces the :py:func:`TransmissionMatrix class
-<pyfar.classes.transmission_matrix.TransmissionMatrix>` available in pyfar.
+The following introduces the :py:class:`~TransmissionMatrix` class available in pyfar.
 
 Transmission matrices (short T-matrices) are a convenient representation of
 `Two-ports` (or `Quadrupoles`). These can represent systems from various fields,
@@ -25,17 +24,18 @@ class TransmissionMatrix(FrequencyData):
 
     This class represents frequency-dependent matrix of a multi-dimensional form,
     i.e. A, B, C and D can be matrices as well. For this purpose, it is derived
-    from the :py:class:`~FrequencyData` class. In the easiest case, each matrix entry
-    (A,B,C,D) is a vector depending on frequency. However, additional dimensions
-    can be used to represent additional variables (e.g. multiple layouts of an
-    electrical circuit).
+    from the :py:class:`~pyfar.classes.audio.FrequencyData` class. In the easiest
+    case, each matrix entry (A,B,C,D) is a vector depending on frequency.
+    However, additional dimensions can be used to represent additional variables
+    (e.g. multiple layouts of an electrical circuit).
 
     Notes
     -----
-    This class is derived from :py:class:`~FrequencyData` but has a special constraint:
-    The frequency data must match a shape like [..., 2, 2, N]. The last axis refers to
-    the frequency, and the two axes before to the ABCD-Matrix (which is a 2x2 matrix).
-    For example, `obj.freq[...,0,0,:]` returns the data related to the A-entry.
+    This class is derived from the :py:class:`~pyfar.classes.audio.FrequencyData` but
+    has a special constraint: The frequency data must match a shape like [..., 2, 2, N].
+    The last axis refers to the frequency, and the two axes before to the ABCD-Matrix
+    (which is a 2x2 matrix). For example, `obj.freq[...,0,0,:]` returns the data related
+    to the A-entry.
 
     References
     ----------
@@ -54,10 +54,10 @@ class TransmissionMatrix(FrequencyData):
         ----------
         data : array, double
             Raw data in the frequency domain. The memory layout of Data is 'C'.
-            In contrast to the :py:class:`~FrequencyData` class, data must have a shape
-            of the form (..., 2, 2, N), e.g. (2, 2, 1024) or (3, 2, 2, 1024).
-            In those examples 1024 refers to the number of frequency bins and
-            the two dimensions before that to the (2x2) ABCD matrices.
+            In contrast to the :py:class:`~pyfar.classes.audio.FrequencyData` class,
+            data must have a shape of the form (..., 2, 2, N), e.g. (2, 2, 1024) or
+            (3, 2, 2, 1024). In those examples 1024 refers to the number of frequency
+            bins and the two dimensions before that to the (2x2) ABCD matrices.
             Supported data types are ``int``, ``float`` or ``complex``, where
             ``int`` is converted to ``float``.
         frequencies : array, double
