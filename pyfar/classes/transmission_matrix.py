@@ -157,7 +157,7 @@ class TransmissionMatrix(FrequencyData):
 
     @property
     def abcd_caxes(self):
-        """The indices of the channel axes referring to the transmissiofn matrix
+        """The indices of the channel axes referring to the transmission matrix
 
         This relates to the axes with respect to channel-related data set
         (excluding the frequency-axis).
@@ -176,22 +176,22 @@ class TransmissionMatrix(FrequencyData):
 
     @property
     def A(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) A entry of the t-matrix."""
+        """Returns the (potentially multi-dimensional) A entry of the T-matrix."""
         return self[..., 0, 0, :]
 
     @property
     def B(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) B entry of the t-matrix."""
+        """Returns the (potentially multi-dimensional) B entry of the T-matrix."""
         return self[..., 0, 1, :]
 
     @property
     def C(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) C entry of the t-matrix."""
+        """Returns the (potentially multi-dimensional) C entry of the T-matrix."""
         return self[..., 1, 0, :]
 
     @property
     def D(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) D entry of the t-matrix."""
+        """Returns the (potentially multi-dimensional) D entry of the T-matrix."""
         return self[..., 1, 1, :]
 
 
