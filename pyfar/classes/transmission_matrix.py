@@ -15,12 +15,14 @@ from pyfar.classes.audio import FrequencyData
 
 
 class TransmissionMatrix(FrequencyData):
-    """ Class representing a transmission matrix
+    """Class representing a transmission matrix
 
     This implementation is based on a paper by Lampton [#]_ and uses the ABCD-
-    representation. A single T-matrix is a (2x2)-matrix of the form:
+    representation. A single T-matrix is a (2x2)-matrix of the form::
+
         [A  B]
         [C  D]
+
     This class represents frequency-dependent matrix of a multi-dimensional form,
     i.e. A, B, C and D can be matrices as well. For this purpose, it is derived
     from the :py:class:`~FrequencyData` class. In the easiest case, each matrix entry
@@ -39,6 +41,7 @@ class TransmissionMatrix(FrequencyData):
     ----------
     .. [#] M. Lampton. “Transmission Matrices in Electroacoustics". Acustica. Vol. 39,
            pp. 239-251. 1978.
+
     """
 
     def __init__(self, data, frequencies, comment = ""):
@@ -63,6 +66,7 @@ class TransmissionMatrix(FrequencyData):
         comment : str, optional
             A comment related to the data. The default is ``""``, which
             initializes an empty string.
+
         """
         shape = np.shape(data)
         n_dim = len(shape)
@@ -84,6 +88,7 @@ class TransmissionMatrix(FrequencyData):
         frequencies : array, double, None
             Frequencies of the data in Hz. This is optional if using the FrequencyData
             type for A, B, C, D.
+
         """
         if (
             not isinstance(B, type(A))
@@ -116,7 +121,7 @@ class TransmissionMatrix(FrequencyData):
 
 
     def cascade(self, t_matrix: TransmissionMatrix):
-        """Cascades two systems (T-matrices) by doing a matrix multiplication:
+        """Cascades two systems (T-matrices) by doing a matrix multiplication
 
         Parameters
         ----------
@@ -131,10 +136,12 @@ class TransmissionMatrix(FrequencyData):
         Notes
         -----
         An easier approach, especially to cascade multiple systems, is using the
-        @-operator, e.g. :
+        @-operator, e.g.::
+
             T = T1 @ T2 @ T3 ...
 
-        See also Equation (2-3) in reference [1]: T = T1 * T2
+        See also Equation (2-3) in Reference [1]_.
+
         """
         return self @ t_matrix
 
@@ -144,23 +151,26 @@ class TransmissionMatrix(FrequencyData):
 
         This relates to the axes with respect to the full data set
         (including the frequency-axis).
+
         """
         return [-3, -2]
 
     @property
     def abcd_caxes(self):
-        """The indices of the channel axes referring to the transmission matrix
+        """The indices of the channel axes referring to the transmissiofn matrix
 
         This relates to the axes with respect to channel-related data set
         (excluding the frequency-axis).
+
         """
         return [-2, -1]
 
     @property
     def abcd_cshape(self):
-        """
-        The channel shape of the transmission matrix entries (A, B, C, D).
+        """The channel shape of the transmission matrix entries (A, B, C, D)
+
         This is the same as 'cshape' without the last two elements.
+
         """
         return self.cshape[:-2]
 
@@ -188,7 +198,7 @@ class TransmissionMatrix(FrequencyData):
     def input_impedance(self, Zl: complex | FrequencyData):
         """Calculates the input impedance given the load impedance Zl at the output.
 
-        See Equation (2-6) in reference [1]
+        Two-port representation::
 
                     o---xxxxxxxxx---o
                         x       x   |
@@ -196,6 +206,8 @@ class TransmissionMatrix(FrequencyData):
                         x       x   |
                     o---xxxxxxxxx---o
 
+        See Equation (2-6) in Reference [1]_.
+
         Parameters
         ----------
         Zl : complex | FrequencyData
@@ -207,13 +219,14 @@ class TransmissionMatrix(FrequencyData):
         Zout : FrequencyData
             A FrequencyData object with the resulting output impedance. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
+
         """
         return (self.A * Zl + self.B) / (self.C * Zl + self.D)
 
     def output_impedance(self, Zl: complex | FrequencyData):
         """Calculates the output impedance given the load impedance Zl at the input.
 
-        See Equation (2-6) in reference [1].
+        Two-port representation::
 
                     o---xxxxxxxxx---o
                     |   x       x
@@ -221,6 +234,8 @@ class TransmissionMatrix(FrequencyData):
                     |   x       x
                     o---xxxxxxxxx---o
 
+        See Equation (2-6) in Reference [1]_.
+
         Parameters
         ----------
         Zl : complex | FrequencyData
@@ -232,6 +247,7 @@ class TransmissionMatrix(FrequencyData):
         Zout : FrequencyData
             A FrequencyData object with the resulting output impedance. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
+
         """
         return (self.D * Zl + self.B) / (self.C * Zl + self.A)
 
@@ -240,7 +256,7 @@ class TransmissionMatrix(FrequencyData):
 
         The TF is calculated based on the load impedance at the output.
         The first quantity usually refers to voltage, force, pressure, etc.
-        See Equation (2-1) in reference [1]: Defined as e2/e1 using i2 = e2/Zl.
+        See Equation (2-1) in Reference [1]_: Defined as e2/e1 using i2 = e2/Zl.
 
         Parameters
         ----------
@@ -253,6 +269,7 @@ class TransmissionMatrix(FrequencyData):
         TF : FrequencyData
             A FrequencyData object with the resulting transfer function. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
+
         """
         return 1 / (self.A + self.B / Zl)
 
@@ -261,7 +278,7 @@ class TransmissionMatrix(FrequencyData):
 
         The TF is calculated based on the load impedance at the output. The second
         quantity usually refers to some flow or movement, e.g. current, velocity,...
-        See Equation (2-1) in reference [1]: Defined as i2/i1 using e2 = i2*Zl.
+        See Equation (2-1) in Reference [1]_: Defined as i2/i1 using e2 = i2*Zl.
 
         Parameters
         ----------
@@ -274,6 +291,7 @@ class TransmissionMatrix(FrequencyData):
         TF : FrequencyData
             A FrequencyData object with the resulting transfer function. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
+
         """
         return 1 / (self.C * Zl + self.D)
 
@@ -297,7 +315,7 @@ class TransmissionMatrix(FrequencyData):
     def create_identity(cls, frequencies, abcd_cshape = ()):
         """Creates an object with identity matrix entries (bypass).
 
-        See Equation (2-7) in Table I of reference [1].
+        See Equation (2-7) in Table I of Reference [1]_.
 
         Parameters
         ----------
@@ -311,6 +329,7 @@ class TransmissionMatrix(FrequencyData):
         -------
         cls : TransmissionMatrix
             A TransmissionMatrix object that contains 2x2 identity matrices.
+
         """
         identity = np.array([[1,0],[0,1]])
         identity_3d = np.repeat(identity[:, :, np.newaxis], len(frequencies), axis = 2)
@@ -322,7 +341,7 @@ class TransmissionMatrix(FrequencyData):
         """Creates a transmission matrix representing a series impedance.
 
         This means the impedance is connected in series with a potential load impedance.
-        See Equation (2-8) in Table I of reference [1].
+        See Equation (2-8) in Table I of Reference [1]_.
 
         Parameters
         ----------
@@ -336,6 +355,7 @@ class TransmissionMatrix(FrequencyData):
         -------
         cls : TransmissionMatrix
             A TransmissionMatrix representing a series impedance.
+
         """
 
         if impedance.cshape != (1,):
@@ -351,7 +371,7 @@ class TransmissionMatrix(FrequencyData):
 
         In this case, the impedance (= 1 / admittance) is connected in parallel
         with a potential load impedance.
-        See Equation (2-9) in Table I of reference [1].
+        See Equation (2-9) in Table I of Reference [1]_.
 
         Parameters
         ----------
@@ -365,6 +385,7 @@ class TransmissionMatrix(FrequencyData):
         -------
         cls : TransmissionMatrix
             A TransmissionMatrix representing a parallel connection.
+
         """ # noqa: E501
         if admittance.cshape != (1,):
             raise ValueError("Number of channels for 'admittance' must be 1.")
