@@ -208,9 +208,6 @@ class TransmissionMatrix(FrequencyData):
             A FrequencyData object with the resulting output impedance. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
         """
-        if np.shape(self.data[0, 0]) != np.shape(Zl):
-            raise ValueError("'Zl' must match the dimensions of the matrix entries,"
-                             "i.e. np.shape( self.freq[0,0] ) = np.shape(Zl)")
         return (self.A * Zl + self.B) / (self.C * Zl + self.D)
 
     def output_impedance(self, Zl: complex | FrequencyData):
@@ -236,9 +233,6 @@ class TransmissionMatrix(FrequencyData):
             A FrequencyData object with the resulting output impedance. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
         """
-        if np.shape(self.data[0, 0]) != np.shape(Zl):
-            raise ValueError("'Zl' must match the dimensions of the matrix entries,"
-                             "i.e. np.shape( self.freq[0,0] ) = np.shape(Zl)")
         return (self.D * Zl + self.B) / (self.C * Zl + self.A)
 
     def transfer_function_quantity1(self, Zl: complex | FrequencyData):
