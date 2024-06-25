@@ -5,7 +5,8 @@ from pyfar import TransmissionMatrix
 from pyfar import FrequencyData
 
 def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
-    error_msg = re.escape("'data' must have a shape like [..., 2, 2, N], e.g. [2, 2, 100].")
+    error_msg = re.escape("'data' must have a shape like [..., 2, 2, N], "
+                          "e.g. [2, 2, 100].")
     with pytest.raises(ValueError, match=error_msg):
         TransmissionMatrix(data, frequencies)
     with pytest.raises(ValueError, match=error_msg):
