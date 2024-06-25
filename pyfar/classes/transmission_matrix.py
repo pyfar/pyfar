@@ -153,7 +153,7 @@ class TransmissionMatrix(FrequencyData):
         (including the frequency-axis).
 
         """
-        return [-3, -2]
+        return (-3, -2)
 
     @property
     def abcd_caxes(self):
@@ -163,7 +163,7 @@ class TransmissionMatrix(FrequencyData):
         (excluding the frequency-axis).
 
         """
-        return [-2, -1]
+        return (-2, -1)
 
     @property
     def abcd_cshape(self):
