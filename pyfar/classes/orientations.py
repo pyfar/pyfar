@@ -49,19 +49,6 @@ class Orientations(Rotation):
     To create `Orientations` objects use ``from_...`` methods.
     ``Orientations(...)`` is not supposed to be instantiated directly.
 
-    Attributes
-    ----------
-        quat : array_like, shape (N, 4) or (4,)
-            Each row is a (possibly non-unit norm) quaternion in scalar-last
-            (x, y, z, w) format. The normalization is defined by
-            ``'normalize'``.
-        normalize : bool, optional
-            Whether each quaternion will be normalized to unit
-            norm. Default is True.
-        copy : bool, optional
-            Whether the quaternion array will be copied or not.
-            Default is True.
-
     """
 
     def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
