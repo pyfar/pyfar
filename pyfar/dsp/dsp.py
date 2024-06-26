@@ -928,7 +928,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         >>> from scipy.signal import remez
         >>> import matplotlib.pyplot as plt
         >>> freq = [0, 0.2, 0.3, 1.0]
-        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], Hz=2.), 44100)
+        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], fs=2.), 44100)
         >>> # create minimum phase impulse responses
         >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
         >>> # plot the result
