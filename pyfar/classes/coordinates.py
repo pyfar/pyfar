@@ -1499,7 +1499,7 @@ class Coordinates():
 
         Returns
         -------
-        ax : :py:class:`mpl_toolkits.mplot3d.axes3d.Axes3D`
+        ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
             The axis used for the plot.
 
         """

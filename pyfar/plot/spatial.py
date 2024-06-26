@@ -30,7 +30,7 @@ def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
         :py:func:`matplotlib.pyplot.scatter`.
 
     Returns
-    ax : :py:class:`mpl_toolkits.mplot3d.axes3d.Axes3D`
+    ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
         The axis used for the plot.
 
     """
