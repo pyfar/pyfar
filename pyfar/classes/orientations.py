@@ -55,12 +55,6 @@ class Orientations(Rotation):
             Each row is a (possibly non-unit norm) quaternion in scalar-last
             (x, y, z, w) format. The normalization is defined by
             ``'normalize'``.
-        normalize : bool, optional
-            Whether each quaternion will be normalized to unit
-            norm. Default is True.
-        copy : bool, optional
-            Whether the quaternion array will be copied or not.
-            Default is True.
 
     """
 
