@@ -53,15 +53,21 @@ class Orientations(Rotation):
     ----------
         quat : array_like, shape (N, 4) or (4,)
             Each row is a (possibly non-unit norm) quaternion in scalar-last
-            (x, y, z, w) format. Each quaternion will be normalized to unit
-            norm.
+            (x, y, z, w) format. The normalization is defined by
+            ``'normalize'``.
+        normalize : bool, optional
+            Whether each quaternion will be normalized to unit
+            norm. Default is True.
+        copy : bool, optional
+            Whether the quaternion array will be copied or not.
+            Default is True.
 
     """
 
-    def __init__(self, quat=None, normalize=True, copy=True):
+    def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, copy=copy)
+        super().__init__(quat, copy=copy, **kwargs)
 
     @classmethod
     def from_view_up(cls, views, ups):
