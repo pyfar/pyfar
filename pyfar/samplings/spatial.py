@@ -52,7 +52,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         if len(radius_round) > 1:
             raise ValueError("All sampling points need to be on the \
                     same radius.")
-        super().__init__(points, radius_round, center)
+        super().__init__(points, radius_round[0], center)
 
     def copy(self):
         """Return a copy of the Voronoi object."""
