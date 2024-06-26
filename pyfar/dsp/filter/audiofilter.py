@@ -63,7 +63,7 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
 blob/master/filter_design/audiofilter.py
 
     Examples
-    -----
+    --------
     First and second order allpass filter with ``fc = 1000`` Hz.
 
     .. plot::

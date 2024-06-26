@@ -19,7 +19,6 @@ def create_figure(width=6, height=4.8, dpi=100, style="light"):
 
     Parameters
     ----------
-
     width : float
         The width in inch. The default is 6
     height : float

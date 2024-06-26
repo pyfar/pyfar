@@ -185,7 +185,7 @@ class Orientations(Rotation):
         perpendicular to minimize rounding errors.
 
         Returns
-        ----------
+        -------
         vector_triple: ndarray, shape (N, 3), normalized vectors
             - views, see `Orientations.from_view_up.__doc__`
             - ups, see `Orientations.from_view_up.__doc__`
