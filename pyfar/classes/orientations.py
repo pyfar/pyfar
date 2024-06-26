@@ -53,8 +53,8 @@ class Orientations(Rotation):
     ----------
         quat : array_like, shape (N, 4) or (4,)
             Each row is a (possibly non-unit norm) quaternion in scalar-last
-            (x, y, z, w) format. The normalization is defined by
-            ``'normalize'``.
+            (x, y, z, w) format. Each quaternion will be normalized to unit
+            norm.
 
     """
 
