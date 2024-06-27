@@ -306,7 +306,7 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def transfer_function_quantity1(self, Zl: complex | FrequencyData):
+    def transfer_function_quantity1(self, Zl: complex | FrequencyData) -> FrequencyData:
         """Returns the transfer function of the first quantity (output/input).
 
         The TF is calculated based on the load impedance at the output.
@@ -328,7 +328,7 @@ class TransmissionMatrix(FrequencyData):
         """
         return 1 / (self.A + self.B / Zl)
 
-    def transfer_function_quantity2(self, Zl: complex | FrequencyData):
+    def transfer_function_quantity2(self, Zl: complex | FrequencyData) -> FrequencyData:
         """Returns the transfer function of the second quantity (output/input).
 
         The TF is calculated based on the load impedance at the output. The second
