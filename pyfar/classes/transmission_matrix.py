@@ -197,8 +197,29 @@ class TransmissionMatrix(FrequencyData):
         """Returns the (potentially multi-dimensional) D entry of the T-matrix."""
         return self[..., 1, 1, :]
 
+    @staticmethod
+    def _check_load_impedance_form(Zl: complex | np.ndarray | FrequencyData) -> bool:
+        """Checks whether load can be applied as impedance.
 
-    def input_impedance(self, Zl: complex | FrequencyData):
+        Checks Zl for zeros and inf values. Raises an error if both values occur.
+        If Zl does not include inf it can be applied as impedance and this function
+        returns True. Otherwise it returns False and the reciprocal value of the
+        impedance (admittance) must be applied.
+        """
+        if isinstance(Zl, FrequencyData):
+            Zl = Zl.freq
+        elif np.isscalar(Zl):
+            Zl = np.array(Zl)
+
+        contains_inf = np.any(Zl == np.inf)
+        contains_zero = np.any(Zl == 0)
+        if contains_zero and contains_inf:
+            raise ValueError("'Zl' contains values with zero and inf."
+                            " Cannot handle both at the same time")
+        return not contains_inf
+
+
+    def input_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
         """Calculates the input impedance given the load impedance Zl at the output.
 
         Two-port representation::
@@ -215,7 +236,8 @@ class TransmissionMatrix(FrequencyData):
         ----------
         Zl : complex | FrequencyData
             The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
+            zeros and np.inf values (see Notes).
 
         Returns
         -------
@@ -223,8 +245,28 @@ class TransmissionMatrix(FrequencyData):
             A FrequencyData object with the resulting output impedance. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
 
+        Notes
+        -----
+        In the default equation Zl is multiplied, which can lead to numerical problems
+        for Zl = inf. If this variable is true, Zl is applied in the form of 1/Zl
+        instead (as admittance) to avoid such problems. On the other hand, this does
+        not work for Zl = 0. Thus, Zl can only contain either of those values.
+
+        Nevertheless, there are additional cases where certain entries of the T-matrix
+        being zero might still lead to the main denominator becoming zero. For these
+        cases, the denominator is set to eps.
+
         """
-        return (self.A * Zl + self.B) / (self.C * Zl + self.D)
+        if self._check_load_impedance_form(Zl):
+            nominator = (self.A * Zl + self.B)
+            denominator = (self.C * Zl + self.D)
+        else: #admittance form
+            nominator = (self.A + self.B / Zl)
+            denominator = (self.C + self.D / Zl)
+        # Avoid cases where denominator is zero, examples
+        # Zl = inf & C = 0; Zl = 0 & D = 0
+        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        return nominator / denominator
 
     def output_impedance(self, Zl: complex | FrequencyData):
         """Calculates the output impedance given the load impedance Zl at the input.
