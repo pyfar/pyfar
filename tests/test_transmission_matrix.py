@@ -128,7 +128,7 @@ def test_create_abcd_matrix_broadcast(abcd_cshape):
     _compare_tmat_vs_abcd(tmat, a, b, c, d)
 
 @pytest.mark.parametrize("abcd_cshape", [(), (4,), (4, 5)])
-def test_tmatrix_create_indentity(abcd_cshape):
+def test_tmatrix_create_identity(abcd_cshape):
     frequencies = [100,200,300]
     identity_tmat = TransmissionMatrix.create_identity(frequencies, abcd_cshape)
     assert identity_tmat.abcd_cshape == abcd_cshape
@@ -160,12 +160,12 @@ def test_tmatrix_create_shunt_admittance(abcd_cshape = (4,5)):
 
 
 if __name__ == "__main__":
-    # test_tmatrix_from_abcd_optional_frequencies()
-    # test_tmatrix_from_abcd_input_types()
-    # test_tmatrix_abcd_cshape()
-    # test_tmatrix_abcd_entries()
+    test_tmatrix_from_abcd_optional_frequencies()
+    test_tmatrix_from_abcd_input_types()
+    test_tmatrix_abcd_cshape()
+    test_tmatrix_abcd_entries()
     test_create_abcd_matrix_broadcast_input_shape()
-    # test_create_abcd_matrix_broadcast((4,5))
-    # test_tmatrix_create_indentity((4,5))
-    # test_tmatrix_create_series_impedance((4,5))
-    # test_tmatrix_create_shunt_admittance((4,5))
+    test_create_abcd_matrix_broadcast((4,5))
+    test_tmatrix_create_identity((4,5))
+    test_tmatrix_create_series_impedance((4,5))
+    test_tmatrix_create_shunt_admittance((4,5))
