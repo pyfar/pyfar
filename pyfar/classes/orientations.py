@@ -17,10 +17,11 @@ warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 class Orientations(Rotation):
     """
     This class for Orientations in the three-dimensional space,
-    is a subclass of scipy.spatial.transform.Rotation and equally based on
-    quaternions of shape (N, 4). It inherits all methods of the Rotation class
-    and adds the creation from perpendicular view and up vectors and a
-    convenient plot function.
+    is a subclass of :py:class:`scipy:scipy.spatial.transform.Rotation` and
+    equally based on quaternions of shape (N, 4). It inherits all methods of
+    the Rotation class and adds the creation from perpendicular view and up
+    vectors through :py:func:`~from_view_up` and a convenient plot function
+    :py:func:`~show`.
 
     An orientation can be visualized with the triple of view, up and right
     vectors and it is tied to the object's local coordinate system.

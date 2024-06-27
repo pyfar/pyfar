@@ -4,6 +4,29 @@ audio data. More details and background is given in the gallery
 (:doc:`audio objects<gallery:gallery/interactive/pyfar_audio_objects>`,
 :doc:`Fourier transform<gallery:gallery/interactive/fast_fourier_transform>`,
 :doc:`gallery:gallery/interactive/pyfar_arithmetics`).
+
+All Audio objects support indexing, for example you can get a copy of the first
+channel of an audio object with
+
+>>> import pyfar as pf
+>>> signal = pf.signals.noise(10, rms=[1, 1])
+>>> first_channel = signal[0]
+
+and set the first channel with
+
+>>> signal[0] = pf.signals.noise(10, rms=2)
+
+For more information see the `NumPy documentation on indexing
+<https://numpy.org/doc/stable/user/basics.indexing.html>`_.
+
+In addition `Signal` objects support iteration across the first dimension.
+The actual iteration is handled through numpy's array iteration. The following
+iterates the channels of a `Signal` object
+
+>>> signal = pf.signals.impulse(2, amplitude=[1, 1, 1])
+>>> for idx, channel in enumerate(signal):
+>>>     channel.time *= idx
+>>>     signal[idx] = channel
 """
 
 from copy import deepcopy
@@ -240,30 +263,28 @@ class _Audio():
 
 
 class TimeData(_Audio):
-    """Class for time data.
+    """
+    Create audio object with time data and times.
 
     Objects of this class contain time data which is not directly convertible
     to frequency domain, i.e., non-equidistant samples.
 
+    Parameters
+    ----------
+    data : array, double
+        Raw data in the time domain. The memory layout of data is 'C'.
+        E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
+        1024 samples each. The data can be ``int`` or ``float`` and is
+        converted to ``float`` in any case.
+    times : array, double
+        Times in seconds at which the data is sampled. The number of times
+        must match the `size` of the last dimension of `data`.
+    comment : str
+        A comment related to `data`. The default is ``''``, which
+        initializes an empty string.
     """
     def __init__(self, data, times, comment=""):
-        """Create TimeData object with data, and times.
-
-        Parameters
-        ----------
-        data : array, double
-            Raw data in the time domain. The memory layout of data is 'C'.
-            E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
-            1024 samples each. The data can be ``int`` or ``float`` and is
-            converted to ``float`` in any case.
-        times : array, double
-            Times in seconds at which the data is sampled. The number of times
-            must match the `size` of the last dimension of `data`.
-        comment : str
-            A comment related to `data`. The default is ``''``, which
-            initializes an empty string.
-
-        """
+        """Create TimeData object with data, and times."""
 
         _Audio.__init__(self, 'time', comment)
 
@@ -406,45 +427,44 @@ class TimeData(_Audio):
 
 
 class FrequencyData(_Audio):
-    """Class for frequency data.
+    """
+    Create audio object with frequency data and frequencies.
 
     Objects of this class contain frequency data which is not directly
     convertible to the time domain, i.e., non-equidistantly spaced bins or
     incomplete spectra.
 
+    Parameters
+    ----------
+    data : array, double
+        Raw data in the frequency domain. The memory layout of Data is 'C'.
+        E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
+        frequency bins each. Data can be ``int``, ``float`` or ``complex``.
+        Data of type ``int`` is converted to ``float``.
+    frequencies : array, double
+        Frequencies of the data in Hz. The number of frequencies must match
+        the size of the last dimension of data.
+    comment : str, optional
+        A comment related to the data. The default is ``""``, which
+        initializes an empty string.
+
+
+    Notes
+    -----
+    FrequencyData objects do not support an FFT norm, because this requires
+    knowledge about the sampling rate or the number of samples of the time
+    signal [#]_.
+
+    References
+    ----------
+    .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+            Scaling of the Discrete Fourier Transform and the Implied
+            Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+            Austria, May 2020, p. e-Brief 600.
+
     """
     def __init__(self, data, frequencies, comment=""):
-        """Create FrequencyData with data, and frequencies.
-
-        Parameters
-        ----------
-        data : array, double
-            Raw data in the frequency domain. The memory layout of Data is 'C'.
-            E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
-            frequency bins each. Data can be ``int``, ``float`` or ``complex``.
-            Data of type ``int`` is converted to ``float``.
-        frequencies : array, double
-            Frequencies of the data in Hz. The number of frequencies must match
-            the size of the last dimension of data.
-        comment : str, optional
-            A comment related to the data. The default is ``""``, which
-            initializes an empty string.
-
-
-        Notes
-        -----
-        FrequencyData objects do not support an FFT norm, because this requires
-        knowledge about the sampling rate or the number of samples of the time
-        signal [#]_.
-
-        References
-        ----------
-        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
-               Scaling of the Discrete Fourier Transform and the Implied
-               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
-               Austria, May 2020, p. e-Brief 600.
-
-        """
+        """Create audio object with frequency data and frequencies."""
 
         _Audio.__init__(self, 'freq', comment)
 
@@ -588,13 +608,48 @@ class FrequencyData(_Audio):
 
 
 class Signal(FrequencyData, TimeData):
-    """Class for audio signals.
+    """
+    Create audio object with time or frequency data and sampling rate.
 
     Objects of this class contain data which is directly convertible between
     time and frequency domain (equally spaced samples and frequency bins). The
     data is always real valued in the time domain and complex valued in the
     frequency domain.
 
+    Parameters
+    ----------
+    data : ndarray, double
+        Raw data of the signal in the time or frequency domain. The memory
+        layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
+        3 x 2 channels with 1024 samples or frequency bins each. Time data
+        is converted to ``float``. Frequency is converted to ``complex``
+        and must be provided as single sided spectra, i.e., for all
+        frequencies between 0 Hz and half the sampling rate.
+    sampling_rate : double
+        Sampling rate in Hz
+    n_samples : int, optional
+        Number of samples of the time signal. Required if domain is
+        ``'freq'``. The default is ``None``, which assumes an even number
+        of samples if the data is provided in the frequency domain.
+    domain : ``'time'``, ``'freq'``, optional
+        Domain of data. The default is ``'time'``
+    fft_norm : str, optional
+        The normalization of the Discrete Fourier Transform (DFT). Can be
+        ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
+        or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
+        for more information. The default is ``'none'``, which is typically
+        used for energy signals, such as impulse responses.
+    comment : str
+        A comment related to `data`. The default is ``""``, which
+        initializes an empty string.
+
+
+    References
+    ----------
+    .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+            Scaling of the Discrete Fourier Transform and the Implied
+            Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+            Austria, May 2020, p. e-Brief 600.
     """
     def __init__(
             self,
@@ -604,43 +659,8 @@ class Signal(FrequencyData, TimeData):
             domain='time',
             fft_norm='none',
             comment=""):
-        """Create Signal with data, and sampling rate.
-
-        Parameters
-        ----------
-        data : ndarray, double
-            Raw data of the signal in the time or frequency domain. The memory
-            layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
-            3 x 2 channels with 1024 samples or frequency bins each. Time data
-            is converted to ``float``. Frequency is converted to ``complex``
-            and must be provided as single sided spectra, i.e., for all
-            frequencies between 0 Hz and half the sampling rate.
-        sampling_rate : double
-            Sampling rate in Hz
-        n_samples : int, optional
-            Number of samples of the time signal. Required if domain is
-            ``'freq'``. The default is ``None``, which assumes an even number
-            of samples if the data is provided in the frequency domain.
-        domain : ``'time'``, ``'freq'``, optional
-            Domain of data. The default is ``'time'``
-        fft_norm : str, optional
-            The normalization of the Discrete Fourier Transform (DFT). Can be
-            ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
-            or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
-            for more information. The default is ``'none'``, which is typically
-            used for energy signals, such as impulse responses.
-        comment : str
-            A comment related to `data`. The default is ``""``, which
-            initializes an empty string.
-
-
-        References
-        ----------
-        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
-               Scaling of the Discrete Fourier Transform and the Implied
-               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
-               Austria, May 2020, p. e-Brief 600.
-
+        """
+        Create audio Signal with time or frequency data and sampling rate.
         """
         # unpack array
         if hasattr(sampling_rate, '__iter__'):
