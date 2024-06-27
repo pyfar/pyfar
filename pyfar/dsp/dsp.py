@@ -252,7 +252,8 @@ def spectrogram(signal, window='hann', window_length=1024,
                 window_overlap_fct=0.5, normalize=True):
     """Compute the magnitude spectrum versus time.
 
-    This is a wrapper for ``scipy.signal.spectogram`` with two differences.
+    This is a wrapper for :py:func:`scipy.signal.spectrogram` with two
+    differences.
     First, the returned times refer to the start of the FFT blocks, i.e., the
     first time is always 0 whereas it is window_length/2 in scipy. Second, the
     returned spectrogram is normalized according to ``signal.fft_norm`` if the
@@ -263,8 +264,8 @@ def spectrogram(signal, window='hann', window_length=1024,
     signal : Signal
         Signal to compute spectrogram of.
     window : str
-        Specifies the window (see ``scipy.signal.windows``). The default is
-        ``'hann'``.
+        Specifies the window (see :py:mod:`scipy.signal.windows`). The default
+        is ``'hann'``.
     window_length : integer
         Window length in samples, the default ist 1024.
     window_overlap_fct : double
@@ -321,7 +322,8 @@ def time_window(signal, interval, window='hann', shape='symmetric',
                 unit='samples', crop='none', return_window=False):
     """Apply time window to signal.
 
-    This function uses the windows implemented in ``scipy.signal.windows``.
+    This function uses the windows implemented in
+    :py:mod:`scipy.signal.windows`.
 
     Parameters
     ----------
@@ -387,8 +389,8 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     For a fade-out, the samples given in `interval` denote the last sample
     which is one and the last which is non-zero.
 
-    This function calls `scipy.signal.windows.get_window` to create the
-    window.
+    This function calls :py:func:`scipy.signal.windows.get_window` to
+    create the window.
     Available window types:
 
     - ``boxcar``
@@ -928,7 +930,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         >>> from scipy.signal import remez
         >>> import matplotlib.pyplot as plt
         >>> freq = [0, 0.2, 0.3, 1.0]
-        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], Hz=2.), 44100)
+        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], fs=2.), 44100)
         >>> # create minimum phase impulse responses
         >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
         >>> # plot the result
@@ -1070,7 +1072,7 @@ def time_shift(
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
-        dimensions ``cshape``.
+        dimensions :py:func:`~pyfar.classes.audio.Signal.cshape`.
     mode : str, optional
         The shifting mode
 
@@ -1094,10 +1096,10 @@ def time_shift(
         next integer sample value to perform the shift.
     pad_type : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
-        Pad ``numpy.nan`` to the respective channels if the rms value of the
-        signal is to be maintained for block-wise rms estimation of the noise
-        power of a signal. Note that if NaNs are padded, the returned data
-        will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
+        Pad :py:data:`numpy.nan` to the respective channels if the rms value
+        of the signal is to be maintained for block-wise rms estimation of the
+        noise power of a signal. Note that if NaNs are padded, the returned
+        data will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
         :py:class:`~pyfar.classes.audio.Signal` object.
 
     Returns
@@ -1106,7 +1108,7 @@ def time_shift(
         The time-shifted signal. This is a
         :py:class:`~pyfar.classes.audio.TimeData` object in case a linear shift
         was done and the signal was padded with Nans. In all other cases, a
-        :py:class:`~pyfar.classes.audio.Signal` object is returend.
+        :py:class:`~pyfar.classes.audio.Signal` object is returned.
 
     Examples
     --------
@@ -1198,7 +1200,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     the analytic signal is approximated using a polynomial of order ``N``.
     The algorithm is based on [#]_ with the following modifications:
 
-    1.  Values with negative gradient used for polynolmial fitting are
+    1.  Values with negative gradient used for polynomial fitting are
         rejected, allowing to use larger part of the signal for fitting.
     2.  By default a first order polynomial is used, as the slope of the
         analytic signal should in theory be linear.
@@ -1216,8 +1218,8 @@ def find_impulse_response_delay(impulse_response, N=1):
     -------
     delay : numpy.ndarray, float
         Delay of the impulse response, as an array of shape
-        ``signal.cshape``. Can be floating point values in the case of
-        sub-sample values.
+        :py:func:`~pyfar.classes.audio.Signal.cshape`. Can be floating point
+        values in the case of sub-sample values.
 
     References
     ----------
@@ -1596,9 +1598,9 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
         ``'overlap_add'``
             Convolve using  the overlap-add algorithm based
-            on ``scipy.signal.oaconvolve``. (Default)
+            on :py:func:`scipy.signal.oaconvolve`.. (Default)
         ``'fft'``
-            Convolve using FFT based on ``scipy.signal.fftconvolve``.
+            Convolve using FFT based on :py:func:`scipy.signal.fftconvolve`.
 
         See Notes for more details.
 
@@ -1957,8 +1959,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         ``None`` averages across all channels.
     weights: array like
         Array with channel weights for averaging the data. Must be
-        broadcastable to ``signal.cshape``. The default is ``None``, which
-        applies equal weights to all channels.
+        broadcastable to :py:func:`~pyfar.classes.audio.Signal.cshape`.
+        The default is ``None``, which applies equal weights to all channels.
     keepdims: bool, optional
         If this is ``True``, the axes which are reduced during the averaging
         are kept as a dimension with size one. Otherwise, singular dimensions
@@ -2122,7 +2124,7 @@ def normalize(signal, reference_method='max', domain='time',
         ``'time'``
            Use the absolute of the time domain data ``np.abs(signal.time)``.
         ``'freq'``
-          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
+          Use the magnitude spectrum ``np.abs(signal.freq)``. Note that the
           normalized magnitude spectrum is used
           pyfar examples gallery
           (cf. :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`).
@@ -2145,7 +2147,7 @@ def normalize(signal, reference_method='max', domain='time',
     target: scalar, array
         The target to which the signal is normalized. Can be a scalar or an
         array. In the latter case the shape of `target` must be broadcastable
-        to ``signal.cshape``. The default is ``1``.
+        to :py:func:`~pyfar.classes.audio.Signal.cshape`. The default is ``1``.
     limits: tuple, array_like
         Restrict the time or frequency range that is used to compute the
         `reference` value. Two element tuple specifying upper and lower limit
@@ -2182,7 +2184,7 @@ def normalize(signal, reference_method='max', domain='time',
            NaNs will be omitted in the normalization. Cshape will still remain,
            as the normalized signal still includes the NaNs.
         ``'raise'``
-            A ``'ValueError'`` will be raised, if the input signal includes
+            A ``ValueError`` will be raised, if the input signal includes
             NaNs.
 
         The default is 'raise'.

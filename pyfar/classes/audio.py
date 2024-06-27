@@ -1169,7 +1169,7 @@ def matrix_multiplication(
     """Matrix multiplication of multidimensional pyfar audio objects and/or
     array likes.
 
-    The multiplication is based on ``numpy.matmul`` and acts on the channels
+    The multiplication is based on :py:data:`numpy.matmul` and acts on the channels
     of audio objects (:py:func:`Signal`, :py:func:`TimeData`, and
     :py:func:`FrequencyData`). Alternatively, the ``@`` operator can be used
     for frequency domain matrix multiplications with the default parameters.
