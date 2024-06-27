@@ -2,6 +2,14 @@
 History
 =======
 
+0.6.8 (2024-06-27)
+------------------
+* Make compatibile for scipy 1.14 (PR #638)
+* Fix previous page title on pyfar main page (#637)
+* Enhance user warning for writing clipped audio files (#624)
+* Improve documentation (#634)
+* Introduce radius_tol to Coordiantes.find_nearest (#621)
+
 0.6.7 (2024-06-17)
 ------------------
 * Make compatibile for numpy 2.0 (PR #629)
