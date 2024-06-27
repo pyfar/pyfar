@@ -268,7 +268,7 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def output_impedance(self, Zl: complex | FrequencyData):
+    def output_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
         """Calculates the output impedance given the load impedance Zl at the input.
 
         Two-port representation::
@@ -285,7 +285,8 @@ class TransmissionMatrix(FrequencyData):
         ----------
         Zl : complex | FrequencyData
             The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
+            zeros and np.inf values (see Notes of :py:func:`~input_impedance`).
 
         Returns
         -------
@@ -294,7 +295,16 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
 
         """
-        return (self.D * Zl + self.B) / (self.C * Zl + self.A)
+        if self._check_load_impedance_form(Zl):
+            nominator = (self.D * Zl + self.B)
+            denominator = (self.C * Zl + self.A)
+        else: #admittance form
+            nominator = (self.D + self.B / Zl)
+            denominator = (self.C + self.A / Zl)
+        # Avoid cases where denominator is zero, examples
+        # Zl = 0 & A = 0; Zl = inf & C = 0
+        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        return nominator / denominator
 
     def transfer_function_quantity1(self, Zl: complex | FrequencyData):
         """Returns the transfer function of the first quantity (output/input).
