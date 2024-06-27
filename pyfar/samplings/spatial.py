@@ -19,7 +19,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         points.
 
         This function will be deprecated in pyfar 0.8.0 in favor
-        of :py:class:`spharpy.samplings.spherical_voronoi`.
+        of :py:func:`spharpy.samplings.spherical_voronoi`.
 
         Parameters
         ----------
@@ -34,7 +34,8 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         Returns
         -------
         voronoi : SphericalVoronoi
-            Spherical voronoi diagram as implemented in ``scipy.spatial``.
+            Spherical voronoi diagram as implemented in
+            :py:mod:`scipy.spatial`.
 
         See also
         --------
@@ -85,11 +86,13 @@ def calculate_sph_voronoi_weights(
     Calculate sampling weights for numeric integration.
 
     This function will be deprecated in pyfar 0.8.0 in favor
-    of :py:class:`spharpy.samplings.calculate_sampling_weights`.
+    of :py:func:`spharpy.samplings.calculate_sampling_weights`.
 
-    Uses the class method ``calculate_areas`` from :py:class:`SphericalVoronoi`
+    Uses the class method
+    :py:meth:`~scipy.spatial.SphericalVoronoi.calculate_areas`
+    from :py:class:`SphericalVoronoi`
     to calculate the weights. It requires a spherical sampling grid with a
-    single radius and uses ``scipy.spatial.SphericalVoronoi`` in the
+    single radius and uses :py:class:`scipy.spatial.SphericalVoronoi` in the
     background.
 
     Parameters
