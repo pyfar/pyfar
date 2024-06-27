@@ -50,13 +50,11 @@ class LogLocatorITAToolbox(LogLocator):
         self,
         base=10.0,
         subs=(0.2, 0.4, 0.6, 1),
-        numdecs=4,
         numticks=None
     ):
         super().__init__(
             base=base,
             subs=subs,
-            numdecs=numdecs,
             numticks=numticks)
 
 
