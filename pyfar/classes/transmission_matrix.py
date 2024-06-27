@@ -14,28 +14,31 @@ from pyfar.classes.audio import FrequencyData
 
 
 class TransmissionMatrix(FrequencyData):
-    """Class representing a transmission matrix
+    r"""Class representing a transmission matrix
 
     This implementation is based on a paper by Lampton [#]_ and uses the ABCD-
-    representation. A single T-matrix is a (2x2)-matrix of the form::
+    representation. A single T-matrix is a (2x2)-matrix of the form:
 
-        [A  B]
-        [C  D]
+    .. math::
+        T = \begin{bmatrix}
+                A & B \\
+                C & D
+            \end{bmatrix}
 
     This class represents frequency-dependent matrix of a multi-dimensional form,
     i.e. A, B, C and D can be matrices as well. For this purpose, it is derived
     from the :py:class:`~pyfar.classes.audio.FrequencyData` class. In the easiest
-    case, each matrix entry (A,B,C,D) is a vector depending on frequency.
-    However, additional dimensions can be used to represent additional variables
-    (e.g. multiple layouts of an electrical circuit).
+    case, each matrix entry (A,B,C,D) is a single-channel FrequencyData object (i.e.
+    a vector depending on frequency). However, additional dimensions can be used to
+    represent additional variables (e.g. multiple layouts of an electrical circuit).
 
     Notes
     -----
     This class is derived from the :py:class:`~pyfar.classes.audio.FrequencyData` but
-    has a special constraint: The frequency data must match a shape like [..., 2, 2, N].
-    The last axis refers to the frequency, and the two axes before to the ABCD-Matrix
-    (which is a 2x2 matrix). For example, `obj.freq[...,0,0,:]` returns the data related
-    to the A-entry.
+    has a special constraint: The input data must match a shape like (..., 2, 2, N), so
+    the resulting cshape is (...,2,2). The last axis refers to the frequency, and the
+    two axes before to the ABCD-Matrix (which is a 2x2 matrix). For example,
+    `obj[...,0,0]` returns the A-entry as :py:class:`~pyfar.classes.audio.FrequencyData`.
 
     References
     ----------
