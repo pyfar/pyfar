@@ -38,7 +38,19 @@ class TransmissionMatrix(FrequencyData):
     has a special constraint: The input data must match a shape like (..., 2, 2, N), so
     the resulting cshape is (...,2,2). The last axis refers to the frequency, and the
     two axes before to the ABCD-Matrix (which is a 2x2 matrix). For example,
-    `obj[...,0,0]` returns the A-entry as :py:class:`~pyfar.classes.audio.FrequencyData`.
+    `obj[...,0,0]` returns the A-entry as
+    :py:class:`~pyfar.classes.audio.FrequencyData`.
+
+    Another point is the numerical handling when deriving input/output impedance or
+    transfer functions (see :py:func:`~input_impedance`, :py:func:`~output_impedance`,
+    :py:func:`~transfer_function_quantity1`, :py:func:`~transfer_function_quantity2`):
+    In the respective equations, the load impedance Zl is usually multiplied. This can
+    lead to numerical problems for Zl = inf. Thus, Zl is applied in the form of 1/Zl
+    (as admittance) in this case to avoid such problems. On the other hand, this does
+    not work for Zl = 0. Consequently, Zl can only contain either of those values.
+    Nevertheless, there are additional cases where certain entries of the T-matrix
+    being zero might still lead to the main denominator becoming zero. For these
+    cases, the denominator is set to eps.
 
     References
     ----------
@@ -237,24 +249,13 @@ class TransmissionMatrix(FrequencyData):
         Zl : complex | FrequencyData
             The load impedance data. The shape must match the entries of the T-matrix,
             i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
-            zeros and np.inf values (see Notes).
+            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
 
         Returns
         -------
         Zout : FrequencyData
             A FrequencyData object with the resulting output impedance. The shape is
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
-
-        Notes
-        -----
-        In the default equation Zl is multiplied, which can lead to numerical problems
-        for Zl = inf. If this variable is true, Zl is applied in the form of 1/Zl
-        instead (as admittance) to avoid such problems. On the other hand, this does
-        not work for Zl = 0. Thus, Zl can only contain either of those values.
-
-        Nevertheless, there are additional cases where certain entries of the T-matrix
-        being zero might still lead to the main denominator becoming zero. For these
-        cases, the denominator is set to eps.
 
         """
         if self._check_load_impedance_form(Zl):
@@ -286,7 +287,7 @@ class TransmissionMatrix(FrequencyData):
         Zl : complex | FrequencyData
             The load impedance data. The shape must match the entries of the T-matrix,
             i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
-            zeros and np.inf values (see Notes of :py:func:`~input_impedance`).
+            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
 
         Returns
         -------
@@ -317,7 +318,8 @@ class TransmissionMatrix(FrequencyData):
         ----------
         Zl : complex | FrequencyData
             The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
+            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
 
         Returns
         -------
@@ -348,7 +350,8 @@ class TransmissionMatrix(FrequencyData):
         ----------
         Zl : complex | FrequencyData
             The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable.
+            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
+            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
 
         Returns
         -------
