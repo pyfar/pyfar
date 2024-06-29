@@ -326,7 +326,16 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
 
         """
-        return 1 / (self.A + self.B / Zl)
+        if self._check_load_impedance_form(Zl):
+            nominator = Zl
+            denominator = (self.A * Zl + self.B)
+        else:
+            nominator = 1
+            denominator = (self.A + self.B / Zl)
+        # Avoid cases where denominator is zero, examples
+        # Zl = 0 & B = 0; Zl = inf & A = 0
+        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        return nominator / denominator
 
     def transfer_function_quantity2(self, Zl: complex | FrequencyData) -> FrequencyData:
         """Returns the transfer function of the second quantity (output/input).
@@ -348,7 +357,16 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
 
         """
-        return 1 / (self.C * Zl + self.D)
+        if self._check_load_impedance_form(Zl):
+            nominator = 1
+            denominator = (self.C * Zl + self.D)
+        else:
+            nominator = 1 / Zl
+            denominator = (self.C + self.D / Zl)
+        # Avoid cases where denominator is zero, examples
+        # Zl = 0 & D = 0; Zl = inf & C = 0
+        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        return nominator / denominator
 
     # def transfer_function_quantity1_to_quantity2(self, Zl):
     #     pass
