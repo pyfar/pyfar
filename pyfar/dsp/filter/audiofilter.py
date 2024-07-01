@@ -362,6 +362,11 @@ def high_shelve_cascade(
 
     ``slope = gain/bandwidth``
 
+    .. note::
+        The `bandwidth` must be at least 1 octave to obtain a good
+        approximation of the desired frequency response. Make sure to specify
+        the parameters `gain`, `slope`, and `bandwidth` accordingly.
+
     Parameters
     ----------
     signal : Signal, None
@@ -460,6 +465,12 @@ def low_shelve_cascade(
     ``bandwidth = abs(gain/slope)``
 
     ``slope = -gain/bandwidth``
+
+    .. note::
+
+        The `bandwidth` must be at least 1 octave to obtain a good
+        approximation of the desired frequency response. Make sure to specify
+        the parameters `gain`, `slope`, and `bandwidth` accordingly.
 
     Parameters
     ----------
@@ -625,7 +636,7 @@ def _shelve_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
     if bandwidth < 1:
         warnings.warn((
             f"The bandwidth is {bandwidth} octaves but should be at least 1 "
-            "to obtain an good approximation of the desired frequency response"
+            "to obtain a good approximation of the desired frequency response."
         ))
 
     # get sampling rate
