@@ -45,12 +45,10 @@ class TransmissionMatrix(FrequencyData):
     transfer functions (see :py:func:`~input_impedance`, :py:func:`~output_impedance`,
     :py:func:`~transfer_function_quantity1`, :py:func:`~transfer_function_quantity2`):
     In the respective equations, the load impedance Zl is usually multiplied. This can
-    lead to numerical problems for Zl = inf. Thus, Zl is applied in the form of 1/Zl
-    (as admittance) in this case to avoid such problems. On the other hand, this does
-    not work for Zl = 0. Consequently, Zl can only contain either of those values.
-    Nevertheless, there are additional cases where certain entries of the T-matrix
-    being zero might still lead to the main denominator becoming zero. For these
-    cases, the denominator is set to eps.
+    lead to numerical problems for Zl = inf. Thus, Zl is applied in the form of 1/Zl (as
+    admittance) in this case to avoid such problems. Nevertheless, there are additional
+    cases where certain entries of the T-matrix being zero might still lead to the main
+    denominator becoming zero. For these cases, the denominator is set to eps.
 
     References
     ----------
@@ -209,27 +207,32 @@ class TransmissionMatrix(FrequencyData):
         """Returns the (potentially multi-dimensional) D entry of the T-matrix."""
         return self[..., 1, 1, :]
 
-    @staticmethod
-    def _check_load_impedance_form(Zl: complex | np.ndarray | FrequencyData) -> bool:
-        """Checks whether load can be applied as impedance.
+    def _check_for_inf(self, Zl: complex | FrequencyData) -> bool:
+        """Check given load impedance for np.inf values
 
-        Checks Zl for zeros and inf values. Raises an error if both values occur.
-        If Zl does not include inf it can be applied as impedance and this function
-        returns True. Otherwise it returns False and the reciprocal value of the
-        impedance (admittance) must be applied.
+        Returns
+        -------
+        idx_inf : logical array
+            An np.ndarray of logicals pointing to elements referring to Zl = inf.
+            The shape is broadcasted to self.A.freq so that it can be applied to
+            the A-,B-,C-,D-entries.
+        idx_inf_Zl : logical array
+            An np.ndarray of logicals pointing to elements referring to Zl = inf.
+            The shape refers to an indexable version of given Zl.
+        Zl_indexable : An indexable version of Zl.
+
         """
         if isinstance(Zl, FrequencyData):
             Zl = Zl.freq
         elif np.isscalar(Zl):
-            Zl = np.array(Zl)
+            Zl = np.atleast_1d(Zl)
 
-        contains_inf = np.any(Zl == np.inf)
-        contains_zero = np.any(Zl == 0)
-        if contains_zero and contains_inf:
-            raise ValueError("'Zl' contains values with zero and inf."
-                            " Cannot handle both at the same time")
-        return not contains_inf
+        target_shape = list(self.abcd_cshape) + [self.n_bins]
+        idx_inf_Zl = Zl == np.inf
+        if target_shape is not None:
+            idx_inf = np.broadcast_to(idx_inf_Zl, target_shape)
 
+        return idx_inf, idx_inf_Zl, Zl
 
     def input_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
         """Calculates the input impedance given the load impedance Zl at the output.
@@ -246,10 +249,10 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        Zl : complex | FrequencyData
-            The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
-            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
+        Zl : scalar | FrequencyData
+            The load impedance data as scalar or FrequencyData. The shape must match
+            the entries of the T-matrix, i.e. shape(tmat.A.freq) == shape(Zl.freq) or
+            must be broadcastable.
 
         Returns
         -------
@@ -258,12 +261,14 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
 
         """
-        if self._check_load_impedance_form(Zl):
-            nominator = (self.A * Zl + self.B)
-            denominator = (self.C * Zl + self.D)
-        else: #admittance form
-            nominator = (self.A + self.B / Zl)
-            denominator = (self.C + self.D / Zl)
+        nominator = (self.A * Zl + self.B)
+        denominator = (self.C * Zl + self.D)
+
+        # Admittance form for Zl = inf
+        idx_inf, __, __ = self._check_for_inf(Zl)
+        nominator.freq[idx_inf] = (self.A + self.B / Zl).freq[idx_inf]
+        denominator.freq[idx_inf] = (self.C + self.D / Zl).freq[idx_inf]
+
         # Avoid cases where denominator is zero, examples
         # Zl = inf & C = 0; Zl = 0 & D = 0
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
@@ -284,10 +289,10 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        Zl : complex | FrequencyData
-            The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
-            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
+        Zl : scalar | FrequencyData
+            The load impedance data as scalar or FrequencyData. The shape must match
+            the entries of the T-matrix, i.e. shape(tmat.A.freq) == shape(Zl.freq) or
+            must be broadcastable.
 
         Returns
         -------
@@ -296,12 +301,14 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(Zout).
 
         """
-        if self._check_load_impedance_form(Zl):
-            nominator = (self.D * Zl + self.B)
-            denominator = (self.C * Zl + self.A)
-        else: #admittance form
-            nominator = (self.D + self.B / Zl)
-            denominator = (self.C + self.A / Zl)
+        nominator = (self.D * Zl + self.B)
+        denominator = (self.C * Zl + self.A)
+
+        # Admittance form for Zl = inf
+        idx_inf, __, __ = self._check_for_inf(Zl)
+        nominator.freq[idx_inf] = (self.D + self.B / Zl).freq[idx_inf]
+        denominator.freq[idx_inf] = (self.C + self.A / Zl).freq[idx_inf]
+
         # Avoid cases where denominator is zero, examples
         # Zl = 0 & A = 0; Zl = inf & C = 0
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
@@ -316,10 +323,10 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        Zl : complex | FrequencyData
-            The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
-            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
+        Zl : scalar | FrequencyData
+            The load impedance data as scalar or FrequencyData. The shape must match
+            the entries of the T-matrix, i.e. shape(tmat.A.freq) == shape(Zl.freq) or
+            must be broadcastable.
 
         Returns
         -------
@@ -328,12 +335,14 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
 
         """
-        if self._check_load_impedance_form(Zl):
-            nominator = Zl
-            denominator = (self.A * Zl + self.B)
-        else:
-            nominator = 1
-            denominator = (self.A + self.B / Zl)
+        idx_inf, __, __ = self._check_for_inf(Zl)
+        denominator = (self.A * Zl + self.B)
+        nominator = Zl*FrequencyData(np.ones_like(denominator.freq), self.frequencies)
+
+        # Admittance form for Zl = inf
+        nominator.freq[idx_inf] = 1
+        denominator.freq[idx_inf] = (self.A + self.B / Zl).freq[idx_inf]
+
         # Avoid cases where denominator is zero, examples
         # Zl = 0 & B = 0; Zl = inf & A = 0
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
@@ -348,10 +357,10 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        Zl : complex | FrequencyData
-            The load impedance data. The shape must match the entries of the T-matrix,
-            i.e. shape(tmat.A) == shape(Zl) or must be broadcastable. Must not contain
-            zeros and np.inf values (see Notes of :py:class:`~TransmissionMatrix`).
+        Zl : scalar | FrequencyData
+            The load impedance data as scalar or FrequencyData. The shape must match
+            the entries of the T-matrix, i.e. shape(tmat.A.freq) == shape(Zl.freq) or
+            must be broadcastable.
 
         Returns
         -------
@@ -360,12 +369,14 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
 
         """
-        if self._check_load_impedance_form(Zl):
-            nominator = 1
-            denominator = (self.C * Zl + self.D)
-        else:
-            nominator = 1 / Zl
-            denominator = (self.C + self.D / Zl)
+        denominator = (self.C * Zl + self.D)
+        nominator = FrequencyData(np.ones_like(denominator.freq), self.frequencies)
+
+        # Admittance form for Zl = inf
+        idx_inf_target, idx_inf_Zl, Zl_indexable = self._check_for_inf(Zl)
+        nominator.freq[idx_inf_target] = 1 / Zl_indexable[idx_inf_Zl]
+        denominator.freq[idx_inf_target] = (self.C + self.D / Zl).freq[idx_inf_target]
+
         # Avoid cases where denominator is zero, examples
         # Zl = 0 & D = 0; Zl = inf & C = 0
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
