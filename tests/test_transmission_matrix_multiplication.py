@@ -16,8 +16,6 @@ def _abcd_matrix_stack(abcd, shape_extra_dims=None, frequencies=[100, 200, 300])
     C = np.ones(shape, dtype=type(abcd[2])) * abcd[2]
     D = np.ones(shape, dtype=type(abcd[3])) * abcd[3]
     return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-def _identity_matrix_stack(shape_extra_dims=None, frequencies=[100, 200, 300]):
-    return _abcd_matrix_stack((1, 0, 0, 1), shape_extra_dims, frequencies)
 
 def _check_matrix_multiplication_result(
     abcd_mat1,
@@ -103,17 +101,3 @@ def test_tmatrix_multiplication_random(
     _check_matrix_multiplication_result(
         abcd_rng1, abcd_rng2, abcd_target, shape_extra_dims, frequencies
     )
-
-
-if __name__ == "__main__":
-    test_tmatrix_multiplication_identity(3)
-    test_tmatrix_multiplication_identity(3, [4, 5])
-
-    test_tmatrix_multiplication_negative_identity(3)
-    test_tmatrix_multiplication_negative_identity(3, [4, 5])
-
-    test_tmatrix_multiplication_bottom_row_zero(3)
-    test_tmatrix_multiplication_bottom_row_zero(3, [4, 5])
-
-    test_tmatrix_multiplication_random(3)
-    test_tmatrix_multiplication_random(3, [4, 5])
