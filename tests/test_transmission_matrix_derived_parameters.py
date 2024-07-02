@@ -70,7 +70,7 @@ def impedance_random(frequencies) -> FrequencyData:
     return FrequencyData(rng.random(len(frequencies)), frequencies)
 
 @pytest.fixture(scope="module",
-                params=["random_load", "inf_load", "zero_load"])
+                params=["random_load", "inf_load", "zero_load", "mixed_load"])
 def load_impedance(request, frequencies):
     if request.param == "random_load":
         rng = np.random.default_rng()
@@ -79,6 +79,8 @@ def load_impedance(request, frequencies):
         return FrequencyData(np.ones_like(frequencies)*np.inf, frequencies)
     elif request.param == "zero_load":
         return FrequencyData(np.zeros_like(frequencies), frequencies)
+    elif request.param == "mixed_load":
+        return FrequencyData([0, 2, np.inf], frequencies)
 
 def _special_twoport_tmatrix(twoport_type, Zl : FrequencyData, Z : FrequencyData):
     if twoport_type == "bypass":
@@ -99,63 +101,57 @@ def _twoport_type_list():
             "series_load_impedance", "parallel_load_impedance"]
 
 def _expected_impedance(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
-    nonphysical = (twoport_type == "series_load_impedance") & np.any(np.isinf(Zl.freq))
-    nonphysical |= (twoport_type == "parallel_load_impedance") & np.any(Zl.freq == 0)
-    if nonphysical:
-        return FrequencyData(np.ones_like(Zl.freq)*np.nan, Zl.frequencies)
     if twoport_type == "bypass":
-        return Zl
-    if twoport_type == "series_impedance":
-        return Zl + Z
-    if twoport_type == "parallel_impedance":
-        return 1/(1/Zl + 1/Z)
-    if twoport_type == "series_load_impedance":
-        return 2 * Zl
-    if twoport_type == "parallel_load_impedance":
-        return Zl / 2
+        Zexpected =  Zl
+    elif twoport_type == "series_impedance":
+        Zexpected =  Zl + Z
+    elif twoport_type == "parallel_impedance":
+        Zexpected =  1/(1/Zl + 1/Z)
+    elif twoport_type == "series_load_impedance":
+        Zexpected =  2 * Zl
+        Zexpected.freq[np.isinf(Zl.freq)] = np.nan #non-phyical case
+    elif twoport_type == "parallel_load_impedance":
+        Zexpected =  Zl / 2
+        Zexpected.freq[Zl.freq == 0] = np.nan #non-phyical case
     else:
         raise ValueError("Unexpected value for 'twoport_type'")
+    return Zexpected
 
 def _expected_voltage_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
-    if np.all(Zl.freq == 0):
-        return 0
-    if np.all(np.isinf(Zl.freq)):
-        if twoport_type == "series_load_impedance": #non-physical
-            return np.nan
-        return 1
-
-    if twoport_type == "bypass":
-        return 1
-    if twoport_type == "series_impedance":
-        return Zl / (Zl + Z)
-    if twoport_type == "parallel_impedance":
-        return 1
-    if twoport_type == "series_load_impedance":
-        return 1/2
-    if twoport_type == "parallel_load_impedance":
-        return 1
-    else:
+    if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
+
+    if twoport_type == "series_impedance":
+        TF = Zl / (Zl + Z)
+    else:
+        TF = FrequencyData(np.ones_like(Zl.freq), Zl.frequencies)
+
+    # Special TFs for zero of inf load
+    TF.freq[Zl.freq == 0] = 0
+    TF.freq[np.isinf(Zl.freq)] = 1
+
+    if twoport_type == "series_load_impedance":
+        TF = TF * (1/2)
+        TF.freq[np.isinf(Zl.freq)] = np.nan
+    return TF
+
 def _expected_current_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
-    if np.all(Zl.freq == 0):
-        if twoport_type == "parallel_load_impedance": #non-physical
-            return np.nan
-        return 1
-    if np.all(np.isinf(Zl.freq)):
-        return 0
-
-    if twoport_type == "bypass":
-        return 1
-    if twoport_type == "series_impedance":
-        return 1
-    if twoport_type == "parallel_impedance":
-        return Z / (Zl + Z)
-    if twoport_type == "series_load_impedance":
-        return 1
-    if twoport_type == "parallel_load_impedance":
-        return 1/2
-    else:
+    if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
+
+    if twoport_type == "parallel_impedance":
+        TF = Z / (Zl + Z)
+    else:
+        TF = FrequencyData(np.ones_like(Zl.freq), Zl.frequencies)
+
+    # Special TFs for zero of inf load
+    TF.freq[Zl.freq == 0] = 1
+    TF.freq[np.isinf(Zl.freq)] = 0
+
+    if twoport_type == "parallel_load_impedance":
+        TF = TF * (1/2)
+        TF.freq[Zl.freq == 0] = np.nan
+    return TF
 
 @pytest.mark.parametrize("impedance_type", ["input", "output"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
