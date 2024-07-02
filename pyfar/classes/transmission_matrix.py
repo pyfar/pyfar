@@ -184,10 +184,10 @@ class TransmissionMatrix(FrequencyData):
     def abcd_cshape(self):
         """The channel shape of the transmission matrix entries (A, B, C, D)
 
-        This is the same as 'cshape' without the last two elements.
+        This is the same as 'cshape' without the last two elements, but atleast (1,).
 
         """
-        return self.cshape[:-2]
+        return self.A.cshape
 
     @property
     def A(self) -> FrequencyData:
