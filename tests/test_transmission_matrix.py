@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.testing as npt
 import pytest
 import re
 from pyfar import TransmissionMatrix
@@ -168,3 +169,33 @@ def test_tmatrix_create_shunt_admittance(abcd_cshape = (4,5)):
     tmat = TransmissionMatrix.create_shunt_admittance(Y, abcd_cshape)
     assert tmat.abcd_cshape == abcd_cshape
     _compare_tmat_vs_abcd(tmat, 1, 0, Y.freq, 1)
+
+@pytest.mark.parametrize("transducer_contant", [2.5, (2.5)])
+def test_tmatrix_create_transformer(transducer_contant, frequencies):
+    error_msg = "'transducer_constant' must be a numerical scalar"
+    with pytest.raises(ValueError, match = error_msg):
+        TransmissionMatrix.create_transformer([1,1])
+
+    N = transducer_contant
+    tmat = TransmissionMatrix.create_transformer(N)
+
+    Zl = 100
+    Zin_expected = N*N * Zl
+    tmat_obj = TransmissionMatrix.create_identity(frequencies) @ tmat
+    Zin = tmat_obj.input_impedance(Zl)
+    npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
+
+@pytest.mark.parametrize("transducer_contant", [2.5, (2.5)])
+def test_tmatrix_create_gyrator(transducer_contant, frequencies):
+    error_msg = "'transducer_constant' must be a numerical scalar"
+    with pytest.raises(ValueError, match = error_msg):
+        TransmissionMatrix.create_gyrator([1,1])
+
+    N = transducer_contant
+    tmat = TransmissionMatrix.create_gyrator(N)
+
+    Zl = 100
+    Zin_expected = N*N / Zl
+    tmat_obj = TransmissionMatrix.create_identity(frequencies) @ tmat
+    Zin = tmat_obj.input_impedance(Zl)
+    npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)

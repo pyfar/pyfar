@@ -480,3 +480,55 @@ class TransmissionMatrix(FrequencyData):
         ones, zeros = np.ones_like(Y), np.zeros_like(Y)
         series_Z_abcd = FrequencyData([[ones, zeros],[Y, ones]], admittance.frequencies)
         return cls._create_abcd_matrix_broadcast(series_Z_abcd, abcd_cshape)
+
+    @staticmethod
+    def create_transformer(transducer_constant : complex) -> np.ndarray:
+        """Creates a frequency-independent transmission matrix representing a transformer.
+
+        See Equation (2-12) in Table I of Reference [1]_.
+
+        Parameters
+        ----------
+        transducer_constant : scalar
+            The transmission ratio with respect to voltage-like quantity, i.e. Uout/Uin.
+
+        Returns
+        -------
+        tmat : np.ndarray
+            A 2x2 array representing the transmission matrix of the transformer and can
+            be cascaded with TransmissionMatrix objects.
+
+        """ # noqa: E501
+        if not np.isscalar(transducer_constant):
+            raise ValueError("'transducer_constant' must be a numerical scalar.")
+        tmat = np.identity(2)
+        tmat[0,0] = transducer_constant
+        tmat[1,1] = 1/transducer_constant
+        return tmat
+
+    @staticmethod
+    def create_gyrator(transducer_constant : complex) -> np.ndarray:
+        """Creates a frequency-independent transmission matrix representing a gyrator.
+
+        See Equation (2-14) in Table I of Reference [1]_.
+
+        Parameters
+        ----------
+        transducer_constant : scalar
+            The transducer constant (M) connecting first input and second output
+            quantity, e.g.: Uout = Iin * M. The input impedance of this system is
+            Zin = M^2 / Zl.
+
+        Returns
+        -------
+        tmat : np.ndarray
+            A 2x2 array representing the transmission matrix of the gyrator and can
+            be cascaded with TransmissionMatrix objects.
+
+        """
+        if not np.isscalar(transducer_constant):
+            raise ValueError("'transducer_constant' must be a numerical scalar.")
+        tmat = np.zeros([2,2])
+        tmat[0,1] = transducer_constant
+        tmat[1,0] = 1/transducer_constant
+        return tmat
