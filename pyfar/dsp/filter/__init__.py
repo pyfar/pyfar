@@ -19,10 +19,14 @@ from .band_filter import (
 from .audiofilter import (
     allpass,
     bell,
+    high_shelf,
     high_shelve,
     low_shelve,
+    low_shelf,
     high_shelve_cascade,
-    low_shelve_cascade
+    high_shelf_cascade,
+    low_shelve_cascade,
+    low_shelf_cascade
 )
 
 from .fractional_octaves import (
@@ -48,9 +52,13 @@ __all__ = [
     'notch',
     'bell',
     'high_shelve',
+    'high_shelf',
     'low_shelve',
+    'low_shelf',
     'high_shelve_cascade',
+    'high_shelf_cascade',
     'low_shelve_cascade',
+    'low_shelf_cascade',
     'fractional_octave_bands',
     'reconstructing_fractional_octave_bands',
     'fractional_octave_frequencies',

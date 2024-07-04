@@ -570,7 +570,7 @@ def magnitude_spectrum_weighted_sweep(
     .. plot::
 
         >>> import pyfar as pf
-        >>> magnitude = pf.dsp.filter.low_shelve(
+        >>> magnitude = pf.dsp.filter.low_shelf(
         ...     pf.signals.impulse(2**16), 500, 20, 2)
         >>> magnitude = pf.dsp.filter.butterworth(magnitude, 8, 50, 'highpass')
         >>> sweep = pf.signals.magnitude_spectrum_weighted_sweep(
