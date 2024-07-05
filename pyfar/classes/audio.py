@@ -1618,11 +1618,12 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     n_audio_objects = 0
     for d in data:
         if isinstance(d, (Signal, TimeData, FrequencyData)):
-            n_audio_objects += 1
+            # check for complex valued time data
             if isinstance(d, (Signal, TimeData)):
                 if d.complex:
                     contains_complex = True
             # store meta data upon first appearance
+            n_audio_objects += 1
             if n_audio_objects == 1:
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
