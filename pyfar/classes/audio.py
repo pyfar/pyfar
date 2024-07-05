@@ -1712,7 +1712,7 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type,
     if isinstance(data, (Signal, TimeData, FrequencyData)):
         data = data.copy()
         # check if complex casting of any input signal is necessary
-        if not type(data) is FrequencyData:
+        if type(data) is not FrequencyData:
             data.complex = contains_complex
         # get signal in correct domain
         if domain == "time":
