@@ -233,6 +233,7 @@ def high_shelve_cascade(
     ``slope = gain/bandwidth``
 
     .. note::
+
         The `bandwidth` must be at least 1 octave to obtain a good
         approximation of the desired frequency response. Make sure to specify
         the parameters `gain`, `slope`, and `bandwidth` accordingly.
