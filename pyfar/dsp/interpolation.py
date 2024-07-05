@@ -903,3 +903,87 @@ class InterpolateSpectrum():
                 ax[1, 1].legend(loc='best')
 
         return signal
+
+
+def low_freq_extension(signal, freq_range_ref=[200, 400], fade=True,
+                       method='frequency'):
+    """
+    Apply low frequency extension
+
+    Parameters
+    ----------
+    signal : pyfar.Signal
+        Input data to be extrapolated at low frequencies.
+    freq_range_ref :
+    fade :
+    method : string
+        Specifies the input data for the interpolation
+
+        ``'frequency'``
+            Frequency domain lfe
+        ``'time'``
+            Time domain lfe
+
+    Returns
+    -------
+    signal : pyfar.Signal
+        LFE signal
+
+    Examples
+    --------
+    """
+    if method == 'frequency':
+        n_range = signal.find_nearest_frequency(freq_range_ref)
+
+        # mean level in target frequency range
+        abs_value = np.mean(np.abs(signal.freq[..., n_range[0]:n_range[1]]),
+                            axis=-1)
+
+        abs_value = abs_value[..., np.newaxis]
+        mag_alfe = np.tile(abs_value, n_range[1])
+
+        # combine estimated low frequency magnitudes with measured magnitudes
+        mag_final = np.copy(np.abs(signal.freq))
+        mag_final[..., :n_range[0]] = mag_alfe[..., :n_range[0]]  # concatenate
+
+        if fade:  # apply linear fader in the target frequency range
+            tmp = np.ones_like(mag_final[..., n_range[0]:n_range[1]])
+            fader = np.multiply(tmp, np.linspace(1, 0, n_range[1]-n_range[0]))
+            mag_final[..., n_range[0]:n_range[1]] = \
+                mag_alfe[..., n_range[0]:n_range[1]] * fader + \
+                signal.freq[..., n_range[0]:n_range[1]] * (1-fader)
+
+        # estimate phase at low frequency
+        phase_final = pf.dsp.phase(signal, unwrap=True)
+        phase = phase_final[..., n_range[0]:n_range[1]]
+        f = signal.frequencies[n_range[0]:n_range[1]]
+        f_target = signal.frequencies[:n_range[1]]
+        phase_alfe = np.zeros_like(phase_final[..., :n_range[1]])
+
+        if len(phase.shape) == 2:
+            for i in range(0, phase.shape[0]):
+                interpolator = interp1d(f, phase[i, :], "linear",
+                                        bounds_error=False,
+                                        fill_value="extrapolate")
+                p = interpolator(f_target)
+                phase_alfe[i, :] = p
+
+        elif len(phase.shape) == 3:
+            for i in range(0, phase.shape[0]):
+                for j in range(0, phase.shape[1]):
+                    interpolator = interp1d(f, phase[i, j, :], "linear",
+                                            bounds_error=False,
+                                            fill_value="extrapolate")
+                    p = interpolator(f_target)
+                    phase_alfe[i, j, :] = p
+
+        phase_final[..., :n_range[1]] = phase_alfe
+        data_final_fr = mag_final * np.exp(1j * phase_final)
+
+        data_final = pf.dsp.fft.irfft(data_final_fr, signal.n_samples,
+                                      signal.sampling_rate, signal.fft_norm)
+    else:
+        ValueError('Not implemented yet')
+
+    return pf.Signal(data_final, signal.sampling_rate,
+                     fft_norm=signal.fft_norm)
