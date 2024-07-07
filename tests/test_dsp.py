@@ -875,6 +875,57 @@ def test_impulse_response_start_multidim():
     npt.assert_allclose(start_sample_est, start_samples - 1)
 
 
+def test_impulse_response_start_multidim_complex():
+    n_samples = 2**10
+    n_channels = 3
+    ir = np.zeros((n_channels, n_samples), dtype=complex)
+
+    snr = 60
+
+    noise = pf.Signal(
+        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample_real = [24, 5, 43]
+    ir[[0, 1, 2], start_sample_real] = 1
+
+    start_sample_imag = [14, 3, 20]
+    ir[[0, 1, 2], start_sample_imag] = 1j
+
+    ir = pf.Signal(ir, 44100, is_complex=True)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est[0, :],
+                        np.array(start_sample_real) - 1)
+    npt.assert_allclose(start_sample_est[1, :],
+                        np.array(start_sample_imag) - 1)
+
+    ir = np.zeros((2, n_channels, n_samples), dtype=complex)
+    noise = pf.Signal(
+        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
+
+    start_sample_real_1 = [24, 5, 43]
+    start_sample_imag_1 = [14, 3, 20]
+    ir[0, [0, 1, 2], start_sample_real_1] = 1
+    ir[0, [0, 1, 2], start_sample_imag_1] = 1j
+    start_sample_real_2 = [14, 12, 16]
+    start_sample_imag_2 = [35, 7, 3]
+    ir[1, [0, 1, 2], start_sample_real_2] = 1
+    ir[1, [0, 1, 2], start_sample_imag_2] = 1j
+
+    ir = pf.Signal(ir, 44100, is_complex=True)
+
+    start_samples_real = np.vstack((start_sample_real_1, start_sample_real_2))
+    start_samples_imag = np.vstack((start_sample_imag_1, start_sample_imag_2))
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est[0, :, :], start_samples_real - 1)
+    npt.assert_allclose(start_sample_est[1, :, :], start_samples_imag - 1)
+
+
 def test_convolve_default():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, -1, 0], 44100)
