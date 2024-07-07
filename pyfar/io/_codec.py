@@ -326,9 +326,9 @@ def _inner_encode(obj, key, zip_path, zipfile):
     elif isinstance(obj[key], complex):
         obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
     elif isinstance(obj[key], (tuple, set, frozenset)):
-        obj[key] = [f'${type(obj[key]).__name__ }', list(obj[key])]
+        obj[key] = [f'${type(obj[key]).__name__}', list(obj[key])]
     elif isinstance(obj[key], bytes):
-        obj[key] = [f'${type(obj[key]).__name__ }', obj[key].hex()]
+        obj[key] = [f'${type(obj[key]).__name__}', obj[key].hex()]
     else:
         _encode(obj[key], zip_path, zipfile)
 

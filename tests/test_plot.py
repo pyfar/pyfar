@@ -123,17 +123,69 @@ def test_complex_freq_plots(function, side_flag,
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('mode', [
+    'real', 'imag', 'abs'])
+def test_complex_time_plots(mode,
+                            handsome_complex_signal,
+                            handsome_complex_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {plot.time.__name__}, mode "
+          f"= {mode}")
+
+    # initial plot
+    filename = f'{plot.time.__name__}_{mode}_default'
+    create_figure()
+    plot.time(handsome_complex_signal, mode=mode)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = f'{plot.time.__name__}_{mode}_hold'
+    plot.time(handsome_complex_signal_v2,
+              mode=mode)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.freq), (plot.phase), (plot.group_delay),
+    (plot.freq_phase), (plot.freq_group_delay)])
+@pytest.mark.parametrize('side_flag', [
+                         'left', 'right'])
+def test_complex_freq_plots(function, side_flag,
+                            handsome_complex_signal,
+                            handsome_complex_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {function.__name__}")
+
+    # initial plot
+    filename = f'{function.__name__}_{side_flag}_default'
+    create_figure()
+    function(handsome_complex_signal, side=side_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = f'{function.__name__}_{side_flag}_hold'
+    function(handsome_complex_signal_v2, side=side_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('signal', ['handsome_signal', 'impulse'])
 @pytest.mark.parametrize('param', [
     ['phase_deg', True, False],
     ['phase_unwrap', False, True],
-    ['phase_deg_unwrap', True, True]])
-def test_line_phase_options(param, handsome_signal):
+    ['phase_deg_unwrap', True, True],
+    ['phase_360', False, '360'],
+    ['phase_deg_360', True, '360']])
+def test_line_phase_options(param, signal, request):
     """Test parameters that are unique to the phase plot."""
-    print(f"Testing: {param[0]}")
-
-    filename = param[0]
+    filename = param[0] + '_' + signal
+    print(f"Testing: {param[0] + '_' + signal}")
+    signal = request.getfixturevalue(signal)
     create_figure()
-    plot.phase(handsome_signal, deg=param[1], unwrap=param[2])
+    plot.phase(signal, deg=param[1], unwrap=param[2])
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 

@@ -1,6 +1,9 @@
 """
-The following documents the FFT functionality. More details and background is
-given in the :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+The following documents the FFT functionality. More details and background
+including a complete list and explanation of available `FFT normalizations` is
+given in the
+:ref:`FFT notebook <gallery:/gallery/interactive/fast_fourier_transform.ipynb>`
+of the pyfar gallery.
 """
 import multiprocessing
 
@@ -37,9 +40,8 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
     Calculate the FFT of a real-valued time-signal.
 
     The function returns only the right-hand side of the axis-symmetric
-    spectrum. The normalization is considered according to
-    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
-    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+    spectrum. Details on the FFT normalization given by `fft_norm` are given
+    above.
 
     Parameters
     ----------
@@ -76,9 +78,8 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     Calculate the IFFT of a single-sided Fourier spectrum.
 
     The function takes only the right-hand side of the spectrum and returns a
-    real-valued time signal. The normalization is considered according to
-    ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
-    and :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+    real-valued time signal. Details on the FFT normalization given by
+    `fft_norm` are given found above.
 
     Parameters
     ----------
@@ -223,9 +224,8 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     Note that the phase is maintained in all cases, i.e., instead of taking
     the squared absolute values for ``'power'`` and ``'psd'``, the complex
     spectra are multiplied with their absolute values to ensure a correct
-    renormalization.
-    For detailed information and explanations, refer to
-    :py:mod:`FFT concepts <pyfar._concepts.fft>`.
+    renormalization. Details on the FFT normalization given by `fft_norm` are
+    given above.
 
     Parameters
     ----------
@@ -332,23 +332,17 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
         else:
             # Equation 12 in Ahrens et al. 2020
             norm /= np.sum(window)**2
-        # the phase is kept for being able to switch between normalizations
-        # altoug the power spectrum does usually not have phase information,
-        # i.e., spec = np.abs(spec)**2
         if not inverse:
-            spec *= np.abs(spec)
+            spec = np.abs(spec)**2
     elif fft_norm == 'psd':
         if window is None:
             # Equation 6 in Ahrens et al. 2020
             norm /= (n_samples * sampling_rate)
         else:
             # Equation 13 in Ahrens et al. 2020
-            norm /= (np.sum(window)**2 * sampling_rate)
-        # the phase is kept for being able to switch between normalizations
-        # altoug the power spectrum does usually not have phase information,
-        # i.e., spec = np.abs(spec)**2
+            norm /= (np.sum(np.asarray(window)**2) * sampling_rate)
         if not inverse:
-            spec *= np.abs(spec)
+            spec = np.abs(spec)**2
     elif fft_norm != 'unitary':
         raise ValueError(("norm type must be 'unitary', 'amplitude', 'rms', "
                           f"'power', or 'psd' but is '{fft_norm}'"))
