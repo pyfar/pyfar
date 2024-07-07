@@ -4,6 +4,7 @@ from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
 from pyfar.classes.warnings import PyfarDeprecationWarning
+from pyfar._utils import rename_arg
 import warnings
 import scipy.fft as sfft
 
@@ -257,7 +258,8 @@ def spectrogram(signal, window='hann', window_length=1024,
                 window_overlap_fct=0.5, normalize=True):
     """Compute the magnitude spectrum versus time.
 
-    This is a wrapper for ``scipy.signal.spectogram`` with two differences.
+    This is a wrapper for :py:func:`scipy.signal.spectrogram` with two
+    differences.
     First, the returned times refer to the start of the FFT blocks, i.e., the
     first time is always 0 whereas it is window_length/2 in scipy. Second, the
     returned spectrogram is normalized according to ``signal.fft_norm`` if the
@@ -268,8 +270,8 @@ def spectrogram(signal, window='hann', window_length=1024,
     signal : Signal
         Signal to compute spectrogram of.
     window : str
-        Specifies the window (see ``scipy.signal.windows``). The default is
-        ``'hann'``.
+        Specifies the window (see :py:mod:`scipy.signal.windows`). The default
+        is ``'hann'``.
     window_length : integer
         Window length in samples, the default ist 1024.
     window_overlap_fct : double
@@ -334,7 +336,8 @@ def time_window(signal, interval, window='hann', shape='symmetric',
                 unit='samples', crop='none', return_window=False):
     """Apply time window to signal.
 
-    This function uses the windows implemented in ``scipy.signal.windows``.
+    This function uses the windows implemented in
+    :py:mod:`scipy.signal.windows`.
 
     Parameters
     ----------
@@ -400,8 +403,8 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     For a fade-out, the samples given in `interval` denote the last sample
     which is one and the last which is non-zero.
 
-    This function calls `scipy.signal.windows.get_window` to create the
-    window.
+    This function calls :py:func:`scipy.signal.windows.get_window` to
+    create the window.
     Available window types:
 
     - ``boxcar``
@@ -537,8 +540,11 @@ def time_window(signal, interval, window='hann', shape='symmetric',
                 window_zeropadded, signal_win.sampling_rate)
 
     if return_window:
+        interval_str = str(tuple(interval))
+        if 'np' in interval_str:
+            interval_str = f"({', '.join([str(i) for i in interval])})"
         window_fin.comment = (
-            f"Time window with parameters interval={tuple(interval)},"
+            f"Time window with parameters interval={interval_str}, "
             f"window='{window}', shape='{shape}', unit='{unit}', "
             f"crop='{crop}'")
         return signal_win, window_fin
@@ -731,8 +737,11 @@ def _time_window_symmetric_interval_four(interval, window):
     return win, win_start, win_stop
 
 
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
 def regularized_spectrum_inversion(
-        signal, freq_range,
+        signal, frequency_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
         normalized=True):
     r"""Invert the spectrum of a signal applying frequency dependent
@@ -761,7 +770,7 @@ def regularized_spectrum_inversion(
     ----------
     signal : Signal
         The signals which spectra are to be inverted.
-    freq_range : tuple, array_like, double
+    frequency_range : tuple, array_like, double
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied.
     regu_outside : float, optional
@@ -777,6 +786,11 @@ def regularized_spectrum_inversion(
     normalized : bool
         Flag to indicate if the normalized spectrum (according to
         `signal.fft_norm`) should be inverted. The default is ``True``.
+    freq_range: tuple, array_like, double
+        The upper and lower frequency limits outside of which the
+        regularization factor is to be applied.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
 
     Returns
@@ -805,9 +819,9 @@ def regularized_spectrum_inversion(
     else:
         data = signal.freq_raw
 
-    freq_range = np.asarray(freq_range)
+    frequency_range = np.asarray(frequency_range)
 
-    if freq_range.size < 2:
+    if frequency_range.size < 2:
         raise ValueError(
             "The frequency range needs to specify lower and upper limits.")
 
@@ -816,14 +830,15 @@ def regularized_spectrum_inversion(
         regu_outside = np.ones(signal.n_bins, dtype=np.double) * regu_outside
 
         idx_xfade_lower = signal.find_nearest_frequency(
-            [freq_range[0]/np.sqrt(2), freq_range[0]])
+            [frequency_range[0]/np.sqrt(2), frequency_range[0]])
 
         regu_final = _cross_fade(regu_outside, regu_inside, idx_xfade_lower)
 
-        if freq_range[1] < signal.sampling_rate/2:
+        if frequency_range[1] < signal.sampling_rate/2:
             idx_xfade_upper = signal.find_nearest_frequency([
-                freq_range[1],
-                np.min([freq_range[1]*np.sqrt(2), signal.sampling_rate/2])])
+                frequency_range[1],
+                np.min([frequency_range[1]*np.sqrt(2),
+                        signal.sampling_rate/2])])
 
             regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
 
@@ -929,7 +944,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         >>> from scipy.signal import remez
         >>> import matplotlib.pyplot as plt
         >>> freq = [0, 0.2, 0.3, 1.0]
-        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], Hz=2.), 44100)
+        >>> h_linear = pf.Signal(remez(151, freq, [1, 0], fs=2.), 44100)
         >>> # create minimum phase impulse responses
         >>> h_min = pf.dsp.minimum_phase(h_linear, truncate=False)
         >>> # plot the result
@@ -1071,7 +1086,7 @@ def time_shift(
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
-        dimensions ``cshape``.
+        dimensions :py:func:`~pyfar.classes.audio.Signal.cshape`.
     mode : str, optional
         The shifting mode
 
@@ -1095,10 +1110,10 @@ def time_shift(
         next integer sample value to perform the shift.
     pad_type : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
-        Pad ``numpy.nan`` to the respective channels if the rms value of the
-        signal is to be maintained for block-wise rms estimation of the noise
-        power of a signal. Note that if NaNs are padded, the returned data
-        will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
+        Pad :py:data:`numpy.nan` to the respective channels if the rms value
+        of the signal is to be maintained for block-wise rms estimation of the
+        noise power of a signal. Note that if NaNs are padded, the returned
+        data will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
         :py:class:`~pyfar.classes.audio.Signal` object.
 
     Returns
@@ -1107,7 +1122,7 @@ def time_shift(
         The time-shifted signal. This is a
         :py:class:`~pyfar.classes.audio.TimeData` object in case a linear shift
         was done and the signal was padded with Nans. In all other cases, a
-        :py:class:`~pyfar.classes.audio.Signal` object is returend.
+        :py:class:`~pyfar.classes.audio.Signal` object is returned.
 
     Examples
     --------
@@ -1200,7 +1215,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     the analytic signal is approximated using a polynomial of order ``N``.
     The algorithm is based on [#]_ with the following modifications:
 
-    1.  Values with negative gradient used for polynolmial fitting are
+    1.  Values with negative gradient used for polynomial fitting are
         rejected, allowing to use larger part of the signal for fitting.
     2.  By default a first order polynomial is used, as the slope of the
         analytic signal should in theory be linear.
@@ -1220,8 +1235,8 @@ def find_impulse_response_delay(impulse_response, N=1):
     -------
     delay : numpy.ndarray, float
         Delay of the impulse response, as an array of shape
-        ``signal.cshape``. Can be floating point values in the case of
-        sub-sample values.
+        :py:func:`~pyfar.classes.audio.Signal.cshape`. Can be floating point
+        values in the case of sub-sample values.
 
     References
     ----------
@@ -1454,8 +1469,11 @@ def find_impulse_response_start(
     return np.squeeze(ir_start)
 
 
-def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
-               **kwargs):
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
+def deconvolve(system_output, system_input, fft_length=None,
+               frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
     The transfer function :math:`H(\omega)` is calculated by spectral
@@ -1489,7 +1507,7 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
         The system input signal (e.g., used to perform a measurement).
         The system input signal is zero padded, if it is shorter than the
         system output signal.
-    freq_range : tuple, array_like, double
+    frequency_range : tuple, array_like, double
         The upper and lower frequency limits outside of which the
         regularization factor is to be applied. The default ``None``
         bypasses the regularization, which might cause numerical
@@ -1503,6 +1521,14 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
     kwargs : key value arguments
         Key value arguments to control the inversion of :math:`H(\omega)` are
         passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+    freq_range: tuple, array_like, double
+        The upper and lower frequency limits outside of which the
+        regularization factor is to be applied. The default ``None``
+        bypasses the regularization, which might cause numerical
+        instabilities in case of band-limited `system_input`. Also see
+        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
 
     Returns
@@ -1518,7 +1544,6 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
     """
-
     # Check if system_output and system_input are both type Signal
     if not isinstance(system_output, pyfar.Signal):
         raise TypeError('system_output has to be of type pyfar.Signal')
@@ -1529,8 +1554,8 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
     if not system_output.sampling_rate == system_input.sampling_rate:
         raise ValueError("The two signals have different sampling rates!")
 
-    if freq_range is None:
-        freq_range = (0, system_input.sampling_rate/2)
+    if frequency_range is None:
+        frequency_range = (0, system_input.sampling_rate/2)
 
     # Set fft_length to the max n_samples of both signals,
     # if it is not explicitly set to a value
@@ -1554,7 +1579,7 @@ def deconvolve(system_output, system_input, fft_length=None, freq_range=None,
     # multiply system_output signal with regularized inversed system_input
     # signal to get the system response
     inverse_input = regularized_spectrum_inversion(
-            system_input, freq_range, **kwargs)
+            system_input, frequency_range, **kwargs)
     system_response = system_output * inverse_input
 
     # Check if the signals have any comments,
@@ -1580,10 +1605,12 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     signal1 : Signal
         The first signal
     signal2 : Signal
-        The second signal. The :py:mod:`cshape <pyfar._concepts.audio_classes>`
-        of this signal must be `broadcastable
+        The second signal. The channel shape (`cshape`) of this signal must be
+        `broadcastable
         <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_ to the
-        cshape of the first signal.
+        cshape of the first signal. The cshape gives the shape of the data
+        inside an audio object but ignores the number of samples or frequency
+        bins.
     mode : string, optional
         A string indicating the size of the output:
 
@@ -1607,18 +1634,20 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
 
         ``'overlap_add'``
             Convolve using  the overlap-add algorithm based
-            on ``scipy.signal.oaconvolve``. (Default)
+            on :py:func:`scipy.signal.oaconvolve`.. (Default)
         ``'fft'``
-            Convolve using FFT based on ``scipy.signal.fftconvolve``.
+            Convolve using FFT based on :py:func:`scipy.signal.fftconvolve`.
 
         See Notes for more details.
 
     Returns
     -------
     signal : Signal
-        The result of the convolution. The
-        :py:mod:`cdim <pyfar._concepts.audio_classes>` matches the bigger cdim
-        of the two input signals.
+        The result of the convolution. The channel dimension (`cdim`) matches
+        the bigger cdim of the two input signals. The channel dimension gives
+        the number of dimensions of the audio data excluding the last
+        dimension, which is ``n_samples`` for time domain objects and
+        ``n_bins`` for frequency domain objects.
 
     Notes
     -----
@@ -1980,14 +2009,14 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 
         The default is ``'linear'``
     caxis: None, int, or tuple of ints, optional
-        Channel axes along which the averaging is done. The default ``None``
-        averages across all channels. See
-        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
-        information.
+        Channel axes (`caxis`) along which the averaging is done. The caxis
+        denotes an axis of the data inside an audio object but ignores the last
+        axis that contains the time samples or frequency bins. The default
+        ``None`` averages across all channels.
     weights: array like
         Array with channel weights for averaging the data. Must be
-        broadcastable to ``signal.cshape``. The default is ``None``, which
-        applies equal weights to all channels.
+        broadcastable to :py:func:`~pyfar.classes.audio.Signal.cshape`.
+        The default is ``None``, which applies equal weights to all channels.
     keepdims: bool, optional
         If this is ``True``, the axes which are reduced during the averaging
         are kept as a dimension with size one. Otherwise, singular dimensions
@@ -2161,9 +2190,10 @@ def normalize(signal, reference_method='max', domain='time',
         ``'time'``
            Use the absolute of the time domain data ``np.abs(signal.time)``.
         ``'freq'``
-          Use the magnitude spectrum `np.abs(`signal.freq)``. Note that the
-          normalized magnitude spectrum used
-          (cf.:py:mod:`FFT concepts <pyfar._concepts.fft>`).
+          Use the magnitude spectrum ``np.abs(signal.freq)``. Note that the
+          normalized magnitude spectrum is used
+          pyfar examples gallery
+          (cf. :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`).
 
         The default is ``'time'``.
     channel_handling: string, optional
@@ -2183,7 +2213,7 @@ def normalize(signal, reference_method='max', domain='time',
     target: scalar, array
         The target to which the signal is normalized. Can be a scalar or an
         array. In the latter case the shape of `target` must be broadcastable
-        to ``signal.cshape``. The default is ``1``.
+        to :py:func:`~pyfar.classes.audio.Signal.cshape`. The default is ``1``.
     limits: tuple, array_like
         Restrict the time or frequency range that is used to compute the
         `reference` value. Two element tuple specifying upper and lower limit
@@ -2220,7 +2250,7 @@ def normalize(signal, reference_method='max', domain='time',
            NaNs will be omitted in the normalization. Cshape will still remain,
            as the normalized signal still includes the NaNs.
         ``'raise'``
-            A ``'ValueError'`` will be raised, if the input signal includes
+            A ``ValueError`` will be raised, if the input signal includes
             NaNs.
 
         The default is 'raise'.
@@ -2265,7 +2295,7 @@ def normalize(signal, reference_method='max', domain='time',
         >>> pf.plot.time_freq(signal, label='Original Signal', unit='ms')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
-    """
+    """  # noqa: E501
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
                                pyfar.TimeData)):

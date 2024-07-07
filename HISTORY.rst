@@ -2,6 +2,41 @@
 History
 =======
 
+0.6.8 (2024-06-27)
+------------------
+* Make compatibile for scipy 1.14 (PR #638)
+* Fix previous page title on pyfar main page (#637)
+* Enhance user warning for writing clipped audio files (#624)
+* Improve documentation (#634)
+* Introduce radius_tol to Coordiantes.find_nearest (#621)
+
+0.6.7 (2024-06-17)
+------------------
+* Make compatibile for numpy 2.0 (PR #629)
+
+0.6.6 (2024-06-07)
+------------------
+* Improve documentation (PR #569, #574, #590, #591, #597, #605)
+* Allow all arithmetic operations involving a single pyfar audio object (#606)
+* Fix bug in `Coordinates.find_within` where not all or too many points were returned (#617)
+* Allow `None` in `Coordinates.sh_order` property (#596)
+* Always use `frequency_range` as parameter and deprecate `freq_range` in pyfar 0.8.0 (#589)
+* Update dependencies (PR #564)
+* Improve CI (#570, #586, #605, #607)
+
+0.6.5 (2024-03-15)
+------------------
+* `Coordinates.show` now plots on equally scaled axis (PR #554)
+* Update documentation to pydata theme (PR #560)
+* Improve documentation (PR #544, #548, #549, #556)
+* Add testing for Python 3.12 (PR #561)
+
+0.6.4 (2024-02-16)
+------------------
+* Bugfix in `pyfar.io.read_comsol_header`: Fix for reading expressions containing the characters '-', '[', and ']' (PR #535)
+* Bugfix in `pyfar.dsp.fft.normalization`: Correct the normalization factor for the case `fft_norm=='psd'`. (PR #541)
+* Maintenance: Remove tests for deprecated numpy functionality (PR #537)
+
 0.6.3 (2024-01-26)
 ------------------
 * Bugfix in `pyfar.utils.concatenate_channels`: Amplitude of time domain Signals was wrong when concatenating in the frequency domain and concatenation failed for a mixture of Signals in the time and frequency domain (PR #532)
