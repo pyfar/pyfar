@@ -16,7 +16,7 @@ def plotstyle(style='light'):
     Parameters
     ----------
     style : str
-        ``light``, or ``dark``
+        ``light`` or ``dark``
 
     Returns
     -------
@@ -42,7 +42,7 @@ def context(style='light', after_reset=False):
     """Context manager for using plot styles temporarily.
 
     This context manager supports the two pyfar styles ``light`` and ``dark``.
-    It is a wrapper for ``matplotlib.pyplot.style.context()``.
+    It is a wrapper for :py:func:`matplotlib.style.context`.
 
     Parameters
     ----------
@@ -52,10 +52,10 @@ def context(style='light', after_reset=False):
         +------+-------------------------------------------------------------+
         | str  | The name of a style or a path/URL to a style file. For a    |
         |      | list of available style names, see                          |
-        |      | ``matplotlib.style.available``.                             |
+        |      | :py:data:`matplotlib.style.available`.                      |
         +------+-------------------------------------------------------------+
         | dict | Dictionary with valid key/value pairs for                   |
-        |      | ``matplotlib.rcParams``.                                    |
+        |      | :py:data:`matplotlib.rcParams`.                             |
         +------+-------------------------------------------------------------+
         | Path | A path-like object which is a path to a style file.         |
         +------+-------------------------------------------------------------+
@@ -96,8 +96,9 @@ def use(style="light"):
     Use plot style settings from a style specification.
 
     The style name of ``default`` is reserved for reverting back to
-    the default style settings. This is a wrapper for ``matplotlib.style.use``
-    that supports the pyfar plot styles ``light`` and ``dark``.
+    the default style settings. This is a wrapper for
+    :py:func:`matplotlib.style.use` that supports the pyfar plot styles
+    ``light`` and ``dark``.
 
     Parameters
     ----------
@@ -107,10 +108,10 @@ def use(style="light"):
         +------+-------------------------------------------------------------+
         | str  | The name of a style or a path/URL to a style file. For a    |
         |      | list of available style names, see                          |
-        |      | ``matplotlib.style.available``.                             |
+        |      | :py:data:`matplotlib.style.available`.                      |
         +------+-------------------------------------------------------------+
         | dict | Dictionary with valid key/value pairs for                   |
-        |      | ``matplotlib.rcParams``.                                    |
+        |      | :py:data:`matplotlib.rcParams`.                             |
         +------+-------------------------------------------------------------+
         | Path | A path-like object which is a path to a style file.         |
         +------+-------------------------------------------------------------+
@@ -201,7 +202,7 @@ def shortcuts(show=True, report=False, layout="console"):
     `Matplotlib backend
     <https://matplotlib.org/stable/users/explain/backends.html>`_
 
-    .. include:: ../../docs/concepts/resources/plot_shortcuts.rst
+    .. include:: ../../docs/resources/plot_shortcuts.rst
 
     Parameters
     ----------

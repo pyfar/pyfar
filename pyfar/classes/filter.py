@@ -1,9 +1,10 @@
 """
-The following documents the pyfar filter classes. More background information
-is given in the
-:py:mod:`filter concepts <pyfar._concepts.filter_classes>`. Available filters
-are shown in :py:mod:`filter types <pyfar._concepts.filter_types>` and
-documented in :py:mod:`pyfar.dsp.filter`.
+The following documents the pyfar filter classes. Examples for working with
+filter objects are part of the
+:doc:`examples gallery<gallery:gallery/interactive/pyfar_filtering>`.
+Available filters are shown in the
+:doc:`filter types examples<gallery:gallery/interactive/pyfar_filter_types>`
+and documented in :py:mod:`pyfar.dsp.filter`.
 """
 import deepdiff
 import warnings
@@ -163,7 +164,7 @@ class Filter(object):
         Get and set the coefficients of the filter.
 
         Refer to the
-        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
         cases.
         """
         return self._coefficients
@@ -305,7 +306,8 @@ class FilterFIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
             string.
@@ -330,7 +332,7 @@ class FilterFIR(Filter):
         Get and set the coefficients of the filter.
 
         Refer to the
-        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
         cases.
         """
         # property from Filter is overwritten, because FilterFIR internally
@@ -356,8 +358,8 @@ class FilterFIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
@@ -400,7 +402,8 @@ class FilterIIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
             string.
@@ -425,8 +428,8 @@ class FilterIIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
@@ -469,7 +472,8 @@ class FilterSOS(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an emptry
             string.
@@ -515,8 +519,8 @@ class FilterSOS(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial

@@ -1,0 +1,14 @@
+[tool.ruff]
+exclude = [
+    ".git",
+    "docs",
+    "setup.py",
+]
+line-length = 79
+lint.ignore = []
+lint.select = [
+    "E",
+    "F",
+    "W",
+]
+

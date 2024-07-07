@@ -463,7 +463,11 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
         if (np.any(data > 1.) and
                 subtype.upper() not in ['FLOAT', 'DOUBLE', 'VORBIS']):
             warnings.warn(
-                f'{format}-files of subtype {subtype} are clipped to +/- 1.')
+                (f'{format}-files of subtype {subtype} are clipped to +/- 1. '
+                 'Normalize your audio with pyfar.dsp.normalize to 1-LSB, with'
+                 ' LSB being the least significant bit (e.g. 2**-15 for '
+                 "16 bit) or use non-clipping subtypes 'FLOAT', 'DOUBLE', or "
+                 "'VORBIS' (see pyfar.io.audio_subtypes)"))
         soundfile.write(
             file=filename, data=data.T, samplerate=sampling_rate,
             subtype=subtype, **kwargs)
@@ -530,7 +534,7 @@ def default_audio_subtype(format):
 
     Notes
     -----
-    This function is a wrapper of :py:func:`soundfile.default_audio_subtype()`.
+    This function is a wrapper of :py:func:`soundfile.default_subtype()`.
 
     Examples
     --------
@@ -686,7 +690,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     raw_data = np.reshape(raw_data, (n_nodes, n_entries+n_dimension))
 
     # Define pattern for regular expressions, see test files for examples
-    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
+    exp_pattern = r'([\w\/\^\*\(\)\[\]\-_.]+) \('
     domain_pattern = domain_str + r'=([0-9.]+)'
     value_pattern = r'=([0-9.]+)'
 
@@ -838,13 +842,24 @@ def read_comsol_header(filename):
     # read header
     header, _, _ = _read_comsol_get_headerline(filename)
 
-    # Define pattern for regular expressions, see test files for examples
-    exp_unit_pattern = r'([\w\(\)\/\^\*. ]+) @'
-    exp_pattern = r'([\w\/\^\*\(\)_.]+) \('
+    # Define pattern for regular expressions
+    # the general structure is of the headers is a repetition of
+    # expression (unit) @ domain=value, parameter_name=parameter_value,...,
+    # see test files for examples
+
+    # expression (unit) is the first term before @, contains arbitrary
+    # characters
+    exp_unit_pattern = r'([\w\(\)\/\^\*\[\]\-. ]+) @'
+    # separate expression and unit at whitespace and (
+    exp_pattern = r'([\w\/\^\*\(\)\[\]\-_.]+) \('
     unit_pattern = r'\(([\w\/\^\* .]+)\) @'
+    # domain (e.g., time or freq) is the first term after @
     domain_pattern = r'@ ([a-zA-Z]+)='
+    # values are numeric characters, after =
     value_pattern = r'=([0-9.]+)'
+    # parameters contain arbitrary characters, before =
     param_pattern = r'([\w\/\^_.]+)='
+    # parameter values are numeric, sometimes given with their units
     param_unit_pattern = r'=[0-9.]+([a-zA-Z]+)'
 
     # read expressions

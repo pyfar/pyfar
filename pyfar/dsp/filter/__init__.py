@@ -1,3 +1,11 @@
+"""
+The following documents the pyfar filters. Visit the
+:doc:`gallery:gallery/interactive/pyfar_filter_types`
+for an overview of the different filters and the
+:doc:`gallery:gallery/interactive/pyfar_filtering`
+for more information on using pyfar filter objects.
+"""
+
 from .band_filter import (
     butterworth,
     chebyshev1,
@@ -9,6 +17,7 @@ from .band_filter import (
 )
 
 from .audiofilter import (
+    allpass,
     bell,
     high_shelve,
     low_shelve,
@@ -29,6 +38,7 @@ from .gammatone import (
 
 
 __all__ = [
+    'allpass',
     'butterworth',
     'chebyshev1',
     'chebyshev2',

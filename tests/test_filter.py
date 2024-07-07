@@ -127,6 +127,70 @@ def test_bessel(impulse):
         x = pfilt.bessel(None, 2, 1000, 'lowpass', 'phase')
 
 
+@pytest.mark.parametrize('order', [1, 2])
+def test_allpass(impulse, order):
+    # Uses third party code.
+    # We thus only test the functionality not the results
+    fc = 1033
+
+    sig_filt = pfilt.allpass(impulse, fc, order)
+    gd = pf.dsp.group_delay(sig_filt)
+
+    # Group delay at w = 0
+    T_gr_0 = gd[0]
+    # definition of group delay at fc (Tietze et al.)
+    T_fc_desired = T_gr_0 * (1 / np.sqrt(2))
+    # id of frequency bin closest to fc
+    idx = sig_filt.find_nearest_frequency(fc)
+    # group delay below fc and at fc
+    T_below = gd[:idx]
+    T_fc = gd[idx]
+
+    # tolerance for group delay below fc
+    tol = 1 - (T_fc / T_gr_0)
+
+    # Test if group delay at fc is correct
+    np.testing.assert_allclose(T_fc_desired, T_fc, rtol=0.01)
+    # Test group delay below fc
+    np.testing.assert_allclose(T_below, T_gr_0, rtol=tol)
+
+    f_obj = pfilt.allpass(None, fc, order, sampling_rate=44100)
+    assert isinstance(f_obj, pclass.FilterIIR)
+    assert f_obj.comment == (
+        f"Allpass of order {order} with cutoff frequency "
+        f"{fc} Hz.")
+
+    # Filter
+    x = pfilt.allpass(impulse, fc, order)
+    y = f_obj.process(impulse)
+    assert isinstance(x, Signal)
+    npt.assert_allclose(x.time, y.time)
+
+
+def test_allpass_warnings(impulse, fc=1000):
+    # test ValueError
+    with pytest.raises(ValueError,
+                       match='Either signal or sampling_rate must be none.'):
+        # pass signal and sampling rate
+        pfilt.allpass(impulse, fc, 1, sampling_rate=44100)
+    with pytest.raises(ValueError,
+                       match='Either signal or sampling_rate must be none.'):
+        # pass no signal and no sampling rate
+        pfilt.allpass(None, fc, 1)
+    with pytest.raises(ValueError,
+                       match='Order must be 1 or 2'):
+        # pass wrong order
+        pfilt.allpass(impulse, fc, 3)
+    with pytest.raises(ValueError,
+                       match='Coefficients must match the allpass order'):
+        # pass wrong combination of coefficients and order
+        pfilt.allpass(impulse, fc, 1, [1, 2])
+    with pytest.raises(ValueError,
+                       match='Coefficients must match the allpass order'):
+        # pass wrong combination of coefficients and order
+        pfilt.allpass(impulse, fc, 2, 1)
+
+
 def test_bell(impulse):
     # Uses third party code.
     # We thus only test the functionality not the results

@@ -28,10 +28,10 @@ def _weighted_moving_average(input, output, weights):
     Note
     ----
     This function is primarily intended to be used in combination with
-    ``scipy.ndimage.generic_filter1d``. The input is strided instead of
+    :py:func:`scipy.ndimage.generic_filter1d`. The input is strided instead of
     reshaped, leaving the memory layout unchanged. The function does also not
     return it's output but requires the output buffer as function input, which
-    is required by ``scipy.ndimage.generic_filter1d``.
+    is required by :py:func:`scipy.ndimage.generic_filter1d`.
 
     """
     strided = np.lib.stride_tricks.as_strided(
@@ -261,8 +261,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         float, the same shift is applied to all channels of `signal`. If this
         is an array like different delays are applied to the channels of
         `signal`. In this case it must broadcast to `signal.cshape` (see
-        `Numpy broadcasting
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
+        :doc:`Numpy broadcasting<numpy:user/basics.broadcasting>`)
     unit : str, optional
         The unit of the shift. Either 'samples' or 's'. Defaults to 'samples'.
     order : int, optional
@@ -453,7 +452,8 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
              post_filter=False):
     """Resample signal to new sampling rate.
 
-    The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
+    The SciPy function :py:func:`scipy.signal.resample_poly` is used for
+    resampling.
     The resampling ratio ``L = sampling_rate/signal.sampling_rate``
     is approximated by a fraction of two integer numbers `up/down` to first
     upsample the signal by `up` and then downsample by `down`. This way `up`
@@ -674,7 +674,7 @@ class InterpolateSpectrum():
             Differ when interpolating half-integers (e.g. 0.5, 1.5) in that
             ``'nearest-up'`` rounds up and ``'nearest'`` rounds down.
 
-        The interpolation is done using ``scipy.interpolate.interp1d``.
+        The interpolation is done using :py:class:`scipy.interpolate.interp1d`.
     fscale : string, optional
 
         ``'linear'``
