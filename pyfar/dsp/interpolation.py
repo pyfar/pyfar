@@ -932,13 +932,14 @@ def low_freq_extension(signal, freq_range_ref=[200, 400], fade=True,
     Examples
     --------
     """
+
+    n_range = signal.find_nearest_frequency(freq_range_ref)
+
+    # mean level in target frequency range
+    abs_value = np.mean(np.abs(signal.freq[..., n_range[0]:n_range[1]]),
+                        axis=-1)
+
     if method == 'frequency':
-        n_range = signal.find_nearest_frequency(freq_range_ref)
-
-        # mean level in target frequency range
-        abs_value = np.mean(np.abs(signal.freq[..., n_range[0]:n_range[1]]),
-                            axis=-1)
-
         abs_value = abs_value[..., np.newaxis]
         mag_alfe = np.tile(abs_value, n_range[1])
 
@@ -983,7 +984,11 @@ def low_freq_extension(signal, freq_range_ref=[200, 400], fade=True,
         data_final = pf.dsp.fft.irfft(data_final_fr, signal.n_samples,
                                       signal.sampling_rate, signal.fft_norm)
     else:
-        ValueError('Not implemented yet')
+        # calculate imnpulse which is added at low frequencies
+        delay = pf.dsp.find_impulse_response_start(signal)
+        lfe = np.zeros_like(signal.time)
+        lfe[..., delay] = abs_value
+        # calculate filter for fading
 
     return pf.Signal(data_final, signal.sampling_rate,
                      fft_norm=signal.fft_norm)
