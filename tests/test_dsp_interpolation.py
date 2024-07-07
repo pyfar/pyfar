@@ -185,7 +185,7 @@ def test_fractional_time_shift_unit():
 
 
 def test_fractional_time_shift_complex():
-    """Test simple integer time shift for complex-valued time signals"""
+    """Test time shift for complex-valued time signals"""
 
     frac_delay = 12.4
     sampling_rate = 48000
