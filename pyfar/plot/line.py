@@ -9,7 +9,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
     """Plot the time signal.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.plot()``.
+    :py:func:`matplotlib.pyplot.plot`.
 
     Parameters
     ----------
@@ -41,21 +41,22 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         ``'auto'``
             Use seconds, milliseconds, or microseconds depending on the length
             of the data.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on. The default is ``None``, which uses the current axis
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
-        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
+        Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes or array of axes containing the plot.
 
     Examples
@@ -90,7 +91,7 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     Plot the magnitude spectrum.
 
     Plots ``abs(signal.freq)`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.plot()``.
+    :py:func:`matplotlib.pyplot.plot`.
 
     Parameters
     ----------
@@ -112,21 +113,22 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on. The default is ``None``, which uses the current axis
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
-        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
+        Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes or array of axes containing the plot.
 
     Example
@@ -159,7 +161,7 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     """Plot the phase of the spectrum.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.plot()``.
+    :py:func:`matplotlib.pyplot.plot`.
 
     Parameters
     ----------
@@ -176,21 +178,22 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.axes.Axes
         Axes to plot on. The default is ``None``, which uses the current axis
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
-        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
+        Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes or array of axes containing the plot.
 
     Example
@@ -222,7 +225,7 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
     """Plot the group delay.
 
     Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
-    (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    (`kwargs`) to :py:func:`matplotlib.pyplot.plot`.
 
     Parameters
     ----------
@@ -247,21 +250,22 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
     freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on. The default is ``None``, which uses the current axis
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
-        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
+        Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes or array of axes containing the plot.
 
     Examples
@@ -295,7 +299,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
     Plots ``signal.time`` and ``abs(signal.freq)`` passes keyword arguments
-    (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    (`kwargs`) to :py:func:`matplotlib.pyplot.plot`.
 
     Parameters
     ----------
@@ -338,21 +342,22 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``'auto'``
             Use seconds, milliseconds, or microseconds depending on the length
             of the data.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Array or list with two axes to plot on. The default is ``None``, which
         uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
-        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
+        Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes or array of axes containing the plot.
 
     Examples
@@ -388,7 +393,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
     """Plot the magnitude and phase spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
-    arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    arguments (`kwargs`) to :py:func:`matplotlib.pyplot.plot`.
 
     Parameters
     ----------
@@ -415,21 +420,22 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
     freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Array or list with two axes to plot on. The default is ``None``, which
         uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are forwarded to matplotlib.pyplot.plot
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes or array of axes containing the plot.
 
     Examples
@@ -464,7 +470,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
-    passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.plot()``.
+    passes keyword arguments (`kwargs`) to :py:func:`matplotlib.pyplot.plot`.
 
     Parameters
     ----------
@@ -499,21 +505,22 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     freq_scale : str
         ``linear`` or ``log`` to plot on a linear or logarithmic frequency
         axis. The default is ``log``.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Array or list with two axes to plot on. The default is ``None``, which
         uses the current axis or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
-        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
+        Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes or array of axes containing the plot.
 
     Examples
@@ -558,21 +565,22 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
         in the order ``(0, 0)``, ``(0, 1)``, ``(1, 0)``, ``(1, 1)``.
     plots : list, nested list
         Function handles for plotting.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on. The default is ``None``, which uses the current axis
         or creates a new figure if none exists.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
-        Keyword arguments that are passed to ``matplotlib.pyplot.plot()``.
+        Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : list of matplotlib.axes.Axes
         List of axes handles
 
     Examples

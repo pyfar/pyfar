@@ -90,7 +90,9 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
-    'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None)
+    'soundfile': ('https://python-soundfile.readthedocs.io/en/latest/', None),
+    'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None),
+    'gallery': ('https://pyfar-gallery.readthedocs.io/en/latest/', None),
     }
 
 # -- Options for HTML output -------------------------------------------------
@@ -161,6 +163,6 @@ with open("_static/header.rst", "rt") as fin:
 
 # write shortcuts to sphinx readable format
 _, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
-shortcuts_path = os.path.join("concepts", "resources", "plot_shortcuts.rst")
+shortcuts_path = os.path.join("resources", "plot_shortcuts.rst")
 with open(shortcuts_path, "w") as f_id:
     f_id.writelines(shortcuts)

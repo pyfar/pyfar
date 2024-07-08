@@ -1,9 +1,32 @@
 """
-The following documents the audio classes and arithmethic operations for
-audio data. More details and background is given in the concepts (
-:py:mod:`audio classes <pyfar._concepts.audio_classes>`,
-:py:mod:`Fourier transform <pyfar._concepts.fft>`,
-:py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`).
+The following documents the audio classes and arithmetic operations for
+audio data. More details and background is given in the gallery
+(:doc:`audio objects<gallery:gallery/interactive/pyfar_audio_objects>`,
+:doc:`Fourier transform<gallery:gallery/interactive/fast_fourier_transform>`,
+:doc:`gallery:gallery/interactive/pyfar_arithmetics`).
+
+All Audio objects support indexing, for example you can get a copy of the first
+channel of an audio object with
+
+>>> import pyfar as pf
+>>> signal = pf.signals.noise(10, rms=[1, 1])
+>>> first_channel = signal[0]
+
+and set the first channel with
+
+>>> signal[0] = pf.signals.noise(10, rms=2)
+
+For more information see the `NumPy documentation on indexing
+<https://numpy.org/doc/stable/user/basics.indexing.html>`_.
+
+In addition `Signal` objects support iteration across the first dimension.
+The actual iteration is handled through numpy's array iteration. The following
+iterates the channels of a `Signal` object
+
+>>> signal = pf.signals.impulse(2, amplitude=[1, 1, 1])
+>>> for idx, channel in enumerate(signal):
+>>>     channel.time *= idx
+>>>     signal[idx] = channel
 """
 
 from copy import deepcopy
@@ -57,6 +80,19 @@ class _Audio():
         `n_bins` for frequency domain objects.
         """
         return self._data.shape[:-1]
+
+    @property
+    def cdim(self):
+        """
+        Return channel dimension.
+
+        The channel dimension (`cdim`) gives the number of dimensions of the
+        audio data excluding the last dimension, which is `n_samples` for
+        time domain objects and `n_bins` for frequency domain objects.
+        Therefore it is equivalent to the length of the channel shape
+        (`cshape`) (e.g. ``self.cshape = (2, 3)``; ``self.cdim = 2``).
+        """
+        return len(self.cshape)
 
     def reshape(self, newshape):
         """
@@ -227,30 +263,28 @@ class _Audio():
 
 
 class TimeData(_Audio):
-    """Class for time data.
+    """
+    Create audio object with time data and times.
 
     Objects of this class contain time data which is not directly convertible
     to frequency domain, i.e., non-equidistant samples.
 
+    Parameters
+    ----------
+    data : array, double
+        Raw data in the time domain. The memory layout of data is 'C'.
+        E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
+        1024 samples each. The data can be ``int`` or ``float`` and is
+        converted to ``float`` in any case.
+    times : array, double
+        Times in seconds at which the data is sampled. The number of times
+        must match the `size` of the last dimension of `data`.
+    comment : str
+        A comment related to `data`. The default is ``''``, which
+        initializes an empty string.
     """
     def __init__(self, data, times, comment=""):
-        """Create TimeData object with data, and times.
-
-        Parameters
-        ----------
-        data : array, double
-            Raw data in the time domain. The memory layout of data is 'C'.
-            E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
-            1024 samples each. The data can be ``int`` or ``float`` and is
-            converted to ``float`` in any case.
-        times : array, double
-            Times in seconds at which the data is sampled. The number of times
-            must match the `size` of the last dimension of `data`.
-        comment : str
-            A comment related to `data`. The default is ``''``, which
-            initializes an empty string.
-
-        """
+        """Create TimeData object with data, and times."""
 
         _Audio.__init__(self, 'time', comment)
 
@@ -405,45 +439,44 @@ class TimeData(_Audio):
 
 
 class FrequencyData(_Audio):
-    """Class for frequency data.
+    """
+    Create audio object with frequency data and frequencies.
 
     Objects of this class contain frequency data which is not directly
     convertible to the time domain, i.e., non-equidistantly spaced bins or
     incomplete spectra.
 
+    Parameters
+    ----------
+    data : array, double
+        Raw data in the frequency domain. The memory layout of Data is 'C'.
+        E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
+        frequency bins each. Data can be ``int``, ``float`` or ``complex``.
+        Data of type ``int`` is converted to ``float``.
+    frequencies : array, double
+        Frequencies of the data in Hz. The number of frequencies must match
+        the size of the last dimension of data.
+    comment : str, optional
+        A comment related to the data. The default is ``""``, which
+        initializes an empty string.
+
+
+    Notes
+    -----
+    FrequencyData objects do not support an FFT norm, because this requires
+    knowledge about the sampling rate or the number of samples of the time
+    signal [#]_.
+
+    References
+    ----------
+    .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+            Scaling of the Discrete Fourier Transform and the Implied
+            Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+            Austria, May 2020, p. e-Brief 600.
+
     """
     def __init__(self, data, frequencies, comment=""):
-        """Create FrequencyData with data, and frequencies.
-
-        Parameters
-        ----------
-        data : array, double
-            Raw data in the frequency domain. The memory layout of Data is 'C'.
-            E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
-            frequency bins each. Data can be ``int``, ``float`` or ``complex``.
-            Data of type ``int`` is converted to ``float``.
-        frequencies : array, double
-            Frequencies of the data in Hz. The number of frequencies must match
-            the size of the last dimension of data.
-        comment : str, optional
-            A comment related to the data. The default is ``""``, which
-            initializes an empty string.
-
-
-        Notes
-        -----
-        FrequencyData objects do not support an FFT norm, because this requires
-        knowledge about the sampling rate or the number of samples of the time
-        signal [#]_.
-
-        References
-        ----------
-        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
-               Scaling of the Discrete Fourier Transform and the Implied
-               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
-               Austria, May 2020, p. e-Brief 600.
-
-        """
+        """Create audio object with frequency data and frequencies."""
 
         _Audio.__init__(self, 'freq', comment)
 
@@ -599,13 +632,48 @@ class FrequencyData(_Audio):
 
 
 class Signal(FrequencyData, TimeData):
-    """Class for audio signals.
+    """
+    Create audio object with time or frequency data and sampling rate.
 
     Objects of this class contain data which is directly convertible between
     time and frequency domain (equally spaced samples and frequency bins). The
     data is always real valued in the time domain and complex valued in the
     frequency domain.
 
+    Parameters
+    ----------
+    data : ndarray, double
+        Raw data of the signal in the time or frequency domain. The memory
+        layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
+        3 x 2 channels with 1024 samples or frequency bins each. Time data
+        is converted to ``float``. Frequency is converted to ``complex``
+        and must be provided as single sided spectra, i.e., for all
+        frequencies between 0 Hz and half the sampling rate.
+    sampling_rate : double
+        Sampling rate in Hz
+    n_samples : int, optional
+        Number of samples of the time signal. Required if domain is
+        ``'freq'``. The default is ``None``, which assumes an even number
+        of samples if the data is provided in the frequency domain.
+    domain : ``'time'``, ``'freq'``, optional
+        Domain of data. The default is ``'time'``
+    fft_norm : str, optional
+        The normalization of the Discrete Fourier Transform (DFT). Can be
+        ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
+        or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
+        for more information. The default is ``'none'``, which is typically
+        used for energy signals, such as impulse responses.
+    comment : str
+        A comment related to `data`. The default is ``""``, which
+        initializes an empty string.
+
+
+    References
+    ----------
+    .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+            Scaling of the Discrete Fourier Transform and the Implied
+            Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+            Austria, May 2020, p. e-Brief 600.
     """
     def __init__(
             self,
@@ -615,43 +683,8 @@ class Signal(FrequencyData, TimeData):
             domain='time',
             fft_norm='none',
             comment=""):
-        """Create Signal with data, and sampling rate.
-
-        Parameters
-        ----------
-        data : ndarray, double
-            Raw data of the signal in the time or frequency domain. The memory
-            layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
-            3 x 2 channels with 1024 samples or frequency bins each. Time data
-            is converted to ``float``. Frequency is converted to ``complex``
-            and must be provided as single sided spectra, i.e., for all
-            frequencies between 0 Hz and half the sampling rate.
-        sampling_rate : double
-            Sampling rate in Hz
-        n_samples : int, optional
-            Number of samples of the time signal. Required if domain is
-            ``'freq'``. The default is ``None``, which assumes an even number
-            of samples if the data is provided in the frequency domain.
-        domain : ``'time'``, ``'freq'``, optional
-            Domain of data. The default is ``'time'``
-        fft_norm : str, optional
-            The normalization of the Discrete Fourier Transform (DFT). Can be
-            ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
-            or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
-            for more information. The default is ``'none'``, which is typically
-            used for energy signals, such as impulse responses.
-        comment : str
-            A comment related to `data`. The default is ``""``, which
-            initializes an empty string.
-
-
-        References
-        ----------
-        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
-               Scaling of the Discrete Fourier Transform and the Implied
-               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
-               Austria, May 2020, p. e-Brief 600.
-
+        """
+        Create audio Signal with time or frequency data and sampling rate.
         """
         # unpack array
         if hasattr(sampling_rate, '__iter__'):
@@ -819,8 +852,9 @@ class Signal(FrequencyData, TimeData):
         The normalization for the Discrete Fourier Transform (DFT).
 
         See :py:func:`~pyfar.dsp.fft.normalization` and
-        :py:mod:`FFT concepts <pyfar._concepts.fft>` for more information.
-        """
+        :ref:`arithmetic operations<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`
+        for more information.
+        """  # noqa: E501
         return self._fft_norm
 
     @fft_norm.setter
@@ -955,7 +989,7 @@ def add(data: tuple, domain='freq'):
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -977,12 +1011,14 @@ def add(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _add)
 
 
@@ -1000,7 +1036,7 @@ def subtract(data: tuple, domain='freq'):
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1022,12 +1058,14 @@ def subtract(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _subtract)
 
 
@@ -1045,7 +1083,7 @@ def multiply(data: tuple, domain='freq'):
         and scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1067,12 +1105,14 @@ def multiply(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _multiply)
 
 
@@ -1089,7 +1129,7 @@ def divide(data: tuple, domain='freq'):
         scalars. Pyfar audio objects can not be mixed, e.g.,
         :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
         together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1111,12 +1151,14 @@ def divide(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If the denominator signal has the FFT normalization ``'none'``, the
       result gets the normalization of the numerator signal.
     * If both signals have the same FFT normalization, the results gets the
       normalization ``'none'``.
     * Other combinations raise an error.
-   """
+   """  # noqa: E501
     return _arithmetic(data, domain, _divide)
 
 
@@ -1133,7 +1175,7 @@ def power(data: tuple, domain='freq'):
         objects, array likes, and scalars. Pyfar audio objects can not be
         mixed, e.g., :py:func:`TimeData` and :py:func:`FrequencyData` objects
         do not work together. See below or
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         for possible combinations of Signal FFT normalizations.
     domain : ``'time'``, ``'freq'``, optional
         Flag to indicate if the operation should be performed in the time or
@@ -1155,12 +1197,14 @@ def power(data: tuple, domain='freq'):
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _power)
 
 
@@ -1169,7 +1213,7 @@ def matrix_multiplication(
     """Matrix multiplication of multidimensional pyfar audio objects and/or
     array likes.
 
-    The multiplication is based on ``numpy.matmul`` and acts on the channels
+    The multiplication is based on :py:data:`numpy.matmul` and acts on the channels
     of audio objects (:py:func:`Signal`, :py:func:`TimeData`, and
     :py:func:`FrequencyData`). Alternatively, the ``@`` operator can be used
     for frequency domain matrix multiplications with the default parameters.
@@ -1180,7 +1224,7 @@ def matrix_multiplication(
         Data to be multiplied. Can contain pyfar audio objects and array likes.
         If multiple audio objects are passed they must be of the same type and
         their FFT normalizations must allow the multiplication (see
-        :py:mod:`arithmetic operations <pyfar._concepts.arithmetic_operations>`
+        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
         and notes below).
         If audio objects and arrays are included, the arrays' shape need
         to match the audio objects' cshape (not the shape of the underlying
@@ -1198,11 +1242,10 @@ def matrix_multiplication(
         second tuple) and writes the result to the last two axes of the output
         data (third tuple).
 
-        In case of pyfar audio objects, the indices refer to the channel
-        dimensions and ignore the last dimension of the underlying data that
-        contains the samples or frequency bins (see
-        :py:mod:`audio classes <pyfar._concepts.audio_classes>` for more
-        information). For example, a signal with 4 times 2 channels and 120
+        In case of pyfar audio objects, the indices refer to the channel axis
+        (`caxis`). It denotes an axis of the data inside an audio object but
+        ignores the last axis that contains the time samples or frequency bins.
+        For example, a signal with 4 times 2 channels and 120
         frequency bins has a cshape of ``(4, 2)``, while the shape of the
         underlying frequency data is  ``(4, 2, 120)``. The default tuple
         ``(-2, -1)`` would result in 120 matrices of shape ``(4, 2)`` used
@@ -1240,6 +1283,8 @@ def matrix_multiplication(
 
     The `fft_norm` of the result is as follows
 
+    * If only one signal is involved in the operation, the result gets the same
+      normalization.
     * If one signal has the FFT normalization ``'none'``, the results gets
       the normalization of the other signal.
     * If both signals have the same FFT normalization, the results gets the
@@ -1327,7 +1372,7 @@ def matrix_multiplication(
     >>> pf.matrix_multiplication((a, b)).cshape
     (2, 3, 1)
 
-    """
+    """  # noqa: E501
     return _arithmetic(data, domain, _matrix_multiplication, axes=axes)
 
 
@@ -1419,26 +1464,25 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     # properties that must match
     sampling_rate = None
     n_samples = None
-    fft_norm = 'none'
+    # None indicates that no audio object is yet involved in the operation
+    # it will change upon detection of the first audio object
+    fft_norm = None
     times = None
     frequencies = None
     audio_type = type(None)
     cshape = ()
 
     # check input types and meta data
-    found_audio_data = False
-    for n, d in enumerate(data):
+    n_audio_objects = 0
+    for d in data:
         if isinstance(d, (Signal, TimeData, FrequencyData)):
+            n_audio_objects += 1
             # store meta data upon first appearance
-            if not found_audio_data:
+            if n_audio_objects == 1:
                 if isinstance(d, Signal):
                     sampling_rate = d.sampling_rate
                     n_samples = d.n_samples
-                    # if a signal comes first (n==0) its fft_norm is taken
-                    # directly. If a signal does not come first, (n>0, e.g.
-                    # 1/signal), the fft norm is matched
-                    fft_norm = d.fft_norm if n == 0 else \
-                        _match_fft_norm(fft_norm, d.fft_norm, division)
+                    fft_norm = d.fft_norm
                 elif isinstance(d, TimeData):
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
@@ -1449,7 +1493,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                     frequencies = d.frequencies
                 if not matmul:
                     cshape = d.cshape
-                found_audio_data = True
                 audio_type = type(d)
 
             # check if type and meta data matches after first appearance

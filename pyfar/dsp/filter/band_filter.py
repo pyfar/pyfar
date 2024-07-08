@@ -8,7 +8,7 @@ def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
     """
     Create and apply a digital Butterworth IIR filter.
 
-    This is a wrapper for ``scipy.signal.butter``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.butter`. Which creates digital
     Butterworth filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -70,7 +70,7 @@ def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
     """
     Create and apply digital Chebyshev Type I IIR filter.
 
-    This is a wrapper for ``scipy.signal.cheby1``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.cheby1`. Which creates digital
     Chebyshev Type I filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -136,7 +136,7 @@ def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
     """
     Create and apply digital Chebyshev Type II IIR filter.
 
-    This is a wrapper for ``scipy.signal.cheby2``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.cheby2`. Which creates digital
     Chebyshev Type II filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -203,7 +203,7 @@ def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
     """
     Create and apply digital Elliptic (Cauer) IIR filter.
 
-    This is a wrapper for ``scipy.signal.ellip``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.ellip`. Which creates digital
     Elliptic (Cauer) filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -272,7 +272,7 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
     """
     Create and apply digital Bessel/Thomson IIR filter.
 
-    This is a wrapper for ``scipy.signal.bessel``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.bessel`. Which creates digital
     Bessel filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -461,7 +461,7 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     (high quality factor). It rejects a narrow frequency band around the
     center frequency with a gain of 0 (:math:`-\\infty` dB) at the center
     frequency and leaves the rest of the spectrum little changed
-    with gains close to 1 (0 dB). Wrapper for ``scipy.signal.iirnotch``.
+    with gains close to 1 (0 dB). Wrapper for :py:func:`scipy.signal.iirnotch`.
 
     Parameters
     ----------

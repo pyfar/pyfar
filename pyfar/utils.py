@@ -1,4 +1,10 @@
-"""This module provides utility functions for pyfar audio objects."""
+"""
+The utilities contain functions that are helpful when working with multiple
+pyfar audio objects. The pyfar gallery gives background information to
+:ref:`work with audio objects </gallery/interactive/pyfar_audio_objects.ipynb>`
+including an introduction to the channel shape (`cshape`), channel axis
+(`caxis`), and channel dimension (`cdim`).
+"""
 import pyfar as pf
 import numpy as np
 
@@ -7,9 +13,10 @@ def broadcast_cshape(signal, cshape):
     """
     Broadcast a signal to a certain cshape.
 
-    The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal is
-    broadcasted following the
-    :doc:`numpy broadcasting rules<numpy:user/basics.broadcasting>`.
+    The channel shape (`cshape`) gives the shape of the audio data excluding
+    the last dimension, which is ``n_samples`` for time domain objects and
+    ``n_bins`` for frequency domain objects. The broadcasting follows the
+    :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
     ----------
@@ -37,9 +44,10 @@ def broadcast_cshapes(signals, cshape=None):
     """
     Broadcast multiple signals to a common cshape.
 
-    The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
-    broadcasted following the
-    :doc:`numpy broadcasting rules<numpy:user/basics.broadcasting>`.
+    The channel shape (`cshape`) gives the shape of the audio data excluding
+    the last dimension, which is ``n_samples`` for time domain objects and
+    ``n_bins`` for frequency domain objects. The broadcasting follows the
+    :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
     ----------
@@ -48,7 +56,7 @@ def broadcast_cshapes(signals, cshape=None):
     cshape : tuple, optional
         The cshape to which the signals are broadcasted. If `cshape` is
         ``None`` it is determined from the cshapes of the input signals using
-        ``numpy.broadcast_shapes``. The default is ``None``.
+        :py:func:`numpy:numpy.broadcast_shapes`. The default is ``None``.
 
     Returns
     -------
@@ -69,9 +77,10 @@ def broadcast_cdim(signal, cdim):
     """
     Broadcast a signal to a certain cdim.
 
-    The channel dimension (cdim) is the length of the
-    :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal. The signal
-    is broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
+    The channel dimension (`cdim`) gives the dimension of the audio data
+    excluding the last dimension, which is ``n_samples`` for time domain
+    objects and ``n_bins`` for frequency domain objects. The signal is
+    broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
     dimensions.
 
     Parameters
@@ -103,9 +112,10 @@ def broadcast_cdims(signals, cdim=None):
     """
     Broadcast multiple signals to a common cdim.
 
-    The channel dimension (cdim) is the length of the
-    :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signal. The signals
-    are broadcasted to `cdim` by prepending ``cdim - len(signal.cshape)``
+    The channel dimension (`cdim`) gives the dimension of the audio data
+    excluding the last dimension, which is ``n_samples`` for time domain
+    objects and ``n_bins`` for frequency domain objects. The signals are
+    broadcasted to `cdim` by  prepending ``cdim - len(signal.cshape)``
     dimensions.
 
     Parameters
@@ -143,17 +153,16 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         except in the dimension corresponding to caxis (the first, by default).
         If this is the case, set ``broadcasting=True``.
     caxis : int
-        The caxis along which the signals are concatenated. More details and
-        background about caxis is given in the concepts of
-        :py:mod:`Audio classes <pyfar._concepts.audio_classes>`.
-        The default is ``0``.
+        The channel axis (`caxis`) along which the signals are concatenated.
+        The channel axis gives the axe of the audio data excluding the last
+        dimension, which is ``n_samples`` for time domain objects and
+        ``n_bins`` for frequency domain objects. The default is ``0``.
     broadcasting: bool
         If this is ``True``, the signals will be broadcasted to common
         cshape, except for the caxis along which the signals are
         concatenated.
-        The :py:mod:`cshape <pyfar._concepts.audio_classes>` of the signals are
-        broadcasted following the
-        :doc:`numpy broadcasting rules<numpy:user/basics.broadcasting>`
+        The caxis of the signals are broadcasted following the
+        :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`
         The default is ``False``.
     Returns
     -------
