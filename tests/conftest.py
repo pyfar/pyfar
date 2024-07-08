@@ -514,6 +514,24 @@ def handsome_complex_signal():
 
 
 @pytest.fixture
+def handsome_complex_signal_v2():
+    """
+    Windowed 1kHz sine signal for testing plots
+
+    Returns
+    -------
+    signal : Signal
+        Windowed sine
+    """
+
+    signal = pf.signals.sine(2000, 4410)
+    signal = pf.dsp.time_window(signal, (500, 1000, 2000, 2500))
+    signal = pf.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
+                       is_complex=True)
+    return signal
+
+
+@pytest.fixture
 def handsome_signal_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
