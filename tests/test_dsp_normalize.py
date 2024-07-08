@@ -63,9 +63,9 @@ def test_auto_domain_normalization():
                                                            domain='freq')
 
 
-@pytest.mark.parametrize('unit, limit1, limit2', (
-                         [None, (0, 1000), (1000, 2000)],
-                         ['s', (0, 0.5), (0.5, 1)]))
+@pytest.mark.parametrize(('unit', 'limit1', 'limit2'), [
+                         (None, (0, 1000), (1000, 2000)),
+                         ('s', (0, 0.5), (0.5, 1))])
 def test_time_limiting(unit, limit1, limit2):
     # Test for normalization with setting limits in samples(None) and seconds.
     signal = np.append(np.ones(1000), np.zeros(1000)+0.1)
