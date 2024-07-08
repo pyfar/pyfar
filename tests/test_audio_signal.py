@@ -306,6 +306,13 @@ def test_cshape():
     assert signal.cshape == (2, 3)
 
 
+def test_cdim():
+    """Test the attribute cdim."""
+    time = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    signal = Signal(time, 44100)
+    assert signal.cdim == 2
+
+
 def test_magic_getitem():
     """Test slicing operations by the magic function __getitem__."""
     time = np.arange(2 * 3 * 4).reshape((2, 3, 4))

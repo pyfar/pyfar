@@ -12,7 +12,6 @@ pyfar
    :caption: Documentation
    :maxdepth: 2
 
-   concepts
    classes
    modules
 

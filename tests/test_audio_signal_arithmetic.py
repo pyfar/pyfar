@@ -213,19 +213,14 @@ def test_add_arrays():
         z, x + y, atol=1e-15)
 
 
-def test_signal_inversion():
+@pytest.mark.parametrize('fft_norm', ['none', 'rms'])
+def test_signal_inversion(fft_norm):
     """Test signal inversion with different FFT norms"""
 
-    # 'none' norm
-    signal = pf.Signal([2, 0, 0], 44100, fft_norm='none')
+    signal = pf.Signal([2, 0, 0], 44100, fft_norm=fft_norm)
     signal_inv = 1 / signal
     npt.assert_allclose(signal.time.flatten(), [2, 0, 0])
     npt.assert_allclose(signal_inv.time.flatten(), [.5, 0, 0])
-
-    # 'rms' norm
-    signal.fft_norm = 'rms'
-    with pytest.raises(ValueError, match="Either fft_norm_2"):
-        1 / signal
 
 
 def test_subtraction():
@@ -755,3 +750,25 @@ def test_matrix_multiplication_undocumented():
     y = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
     pf.matrix_multiplication(
         (x, y), domain='time', axes=[(-2, -1), (-3, -2), (-2, -1)])
+
+
+@pytest.mark.parametrize('audio_object', [
+    pf.Signal([1, -1, 1], 1, fft_norm='none'),
+    pf.Signal([1, -1, 1], 1, fft_norm='rms'),
+    pf.FrequencyData([1, -1, 1], [0, 1, 3]),
+    pf.TimeData([1, -1, 1], [1, 2, 3])])
+@pytest.mark.parametrize('operation', [
+    pf.add, pf.subtract, pf.multiply, pf.divide, pf.power])
+def test_audio_object_and_number(audio_object, operation):
+    """
+    Test if arithmetic operations work regardless of the fft norm and
+    audio object type if only one audio object is involved.
+    """
+
+    domain = 'time' if type(audio_object) is pf.TimeData else 'freq'
+
+    result = operation((1, audio_object), domain=domain)
+    assert type(result) is type(audio_object)
+
+    result = operation((audio_object, 1), domain=domain)
+    assert type(result) is type(audio_object)

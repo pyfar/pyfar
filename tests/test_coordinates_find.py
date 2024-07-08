@@ -111,6 +111,26 @@ def test_find_nearest_error():
     with pytest.raises(ValueError):
         coords.find_nearest(find, 1, 5)
 
+    # test negative radius_tol
+    with pytest.raises(ValueError,
+                       match="radius_tol must be a non negative number."):
+        coords.find_nearest(find, 1, "spherical_radians", -1)
+
+
+def test_find_nearest_radius_tol():
+    coords = pf.Coordinates.from_spherical_elevation(
+        np.arange(0, 360, 10)*np.pi/180, 0, 1)
+    radius = coords.radius
+    radius[0] = 1.09
+    coords.radius = radius
+    coords2find = pf.Coordinates.from_spherical_elevation(0, 0, 1)
+    idx, _ = coords.find_nearest(
+        coords2find,
+        1,
+        "spherical_radians",
+        radius_tol=0.1)
+    assert coords[idx] == coords[0]
+
 
 def test_find_within_simple():
     x = np.arange(6)
@@ -179,14 +199,23 @@ def test_find_within_error():
 @pytest.mark.parametrize('distance_measure', [
      'spherical_radians', 'spherical_meter'
 ])
-def test_find_within_spherical(distance_measure):
+@pytest.mark.parametrize('radius', [.5, 1, 2])
+def test_find_within_spherical(distance_measure, radius):
+    '''Test spherical distance measures for different radii'''
+    # Sampling grid in the median plane
     coords = pf.Coordinates.from_spherical_front(
-        np.arange(0, 360, 10)*np.pi/180, 1, 1)
-    find = pf.Coordinates(0, 0, 1)
+        np.arange(0, 360, 10)*np.pi/180, np.pi/2, radius)
+    # query point at north pole
+    find = pf.Coordinates(0, 0, radius)
+    # search within 90 degrees
+    distance = np.pi / 2
+    if distance_measure == 'spherical_meter':
+        distance *= radius
     spatial_mask = coords.find_within(
         find,
-        distance=np.pi/2,
+        distance=distance,
         distance_measure=distance_measure)
+    # all points with positive z-coordinates must be found
     npt.assert_array_equal(coords[spatial_mask], coords[coords.z >= 0])
 
 
@@ -210,15 +239,20 @@ def test_find_within_atol():
 
 
 def test_find_within_tol_radius():
+    '''Test spherical distance measure with tolerance for radius'''
+    # Sampling grid in the median plane with varying radii
     coords = pf.Coordinates.from_spherical_front(
-        np.arange(0, 360, 10)*np.pi/180, 1, 1)
+        np.arange(0, 360, 10)*np.pi/180, np.pi/2, 1)
     radius = coords.radius
     radius[0] = 1.01
     coords.radius = radius
+    # query point at north pole
     find = pf.Coordinates(0, 0, 1)
+    # search within 90 degrees
     spatial_mask = coords.find_within(
         find,
         distance=np.pi/2,
-        distance_measure='spherical_meter',
+        distance_measure='spherical_radians',
         radius_tol=0.011)
+    # all points with positive z-coordinates must be found
     npt.assert_array_equal(coords[spatial_mask], coords[coords.z >= 0])
