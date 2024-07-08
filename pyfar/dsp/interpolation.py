@@ -947,7 +947,7 @@ def low_freq_extension(signal, freq_range_ref=[200, 400], fade=True,
         mag_final = np.copy(np.abs(signal.freq))
         mag_final[..., :n_range[0]] = mag_alfe[..., :n_range[0]]  # concatenate
 
-        if fade:  # apply linear fader in the target frequency range
+        if fade:  # apply linear fading in the target frequency range
             tmp = np.ones_like(mag_final[..., n_range[0]:n_range[1]])
             fader = np.multiply(tmp, np.linspace(1, 0, n_range[1]-n_range[0]))
             mag_final[..., n_range[0]:n_range[1]] = \
@@ -983,12 +983,20 @@ def low_freq_extension(signal, freq_range_ref=[200, 400], fade=True,
 
         data_final = pf.dsp.fft.irfft(data_final_fr, signal.n_samples,
                                       signal.sampling_rate, signal.fft_norm)
+        signal = pf.Signal(data_final, signal.sampling_rate,
+                           fft_norm=signal.fft_norm)
     else:
         # calculate imnpulse which is added at low frequencies
         delay = pf.dsp.find_impulse_response_start(signal)
         lfe = np.zeros_like(signal.time)
         lfe[..., delay] = abs_value
-        # calculate filter for fading
+        # calculate Linkwitz-Riley filter for fading
+        lfe = pf.dsp.filter.butterworth(
+            pf.Signal(lfe, sampling_rate=signal.sampling_rate),
+            2, frequency=freq_range_ref[0], btype='lowpass')
+        signal = pf.dsp.filter.butterworth(signal, 2,
+                                           frequency=freq_range_ref[0],
+                                           btype='highpass')
+        signal = signal + lfe
 
-    return pf.Signal(data_final, signal.sampling_rate,
-                     fft_norm=signal.fft_norm)
+    return signal
