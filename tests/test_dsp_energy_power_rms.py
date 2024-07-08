@@ -4,9 +4,9 @@ import pytest
 import numpy.testing as npt
 
 
-@pytest.mark.parametrize('freq, amplitude', ([1, 1],
-                                             [44100/20, 2],
-                                             [44100/50, 3]))
+@pytest.mark.parametrize(('freq', 'amplitude'), [(1, 1),
+                                             (44100/20, 2),
+                                             (44100/50, 3)])
 def test_sinewave(freq, amplitude):
     """
     Test the energy, power and rms of different full period Sinewaves.

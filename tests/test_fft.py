@@ -1,8 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 
-from pytest import raises
-
+import pytest
 from pyfar.dsp import fft
 
 
@@ -338,7 +337,7 @@ def test_normalization_with_window_value_error():
     wrong length.
     """
 
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         # n_samples=5, and len(window)=5
         fft.normalization(np.array([.5, 1, .5]), 4, 44100,
                           'amplitude', window=[1, 1, 1, 1, 1])
@@ -346,10 +345,10 @@ def test_normalization_with_window_value_error():
 
 def test_normalization_exceptions():
     # Call without numpy array
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         fft.normalization(1, 1, 44100, 'rms')
     # Invalid normalization
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         fft.normalization(np.array([1]), 1, 44100, 'goofy')
 
 

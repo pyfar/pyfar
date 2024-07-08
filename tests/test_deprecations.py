@@ -31,30 +31,30 @@ from pyfar.testing.plot_utils import create_figure
 def test_xscale_deprecation(function, handsome_signal):
     """Deprecate xscale parameter in plot functions"""
 
+    create_figure()
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove xscale from pyfar 0.6.0!
-            create_figure()
             function(handsome_signal, xscale='linear')
 
 
 def test_spectrogram_yscale_deprecation(sine):
     """Deprecate yscale parameter in plot functions"""
 
+    create_figure()
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove yscale from pyfar 0.6.0!
-            create_figure()
             pf.plot.spectrogram(sine, yscale='linear')
 
 
 def test__check_time_unit():
     """Deprecate unit=None in plots showing the time or group delay"""
 
+    create_figure()
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(ValueError):
             # remove xscale from pyfar 0.6.0!
-            create_figure()
             pf.plot._utils._check_time_unit(None)
 
 
