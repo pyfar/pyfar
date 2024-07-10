@@ -26,7 +26,7 @@ from .audiofilter import (
     high_shelve_cascade,
     high_shelf_cascade,
     low_shelve_cascade,
-    low_shelf_cascade
+    low_shelf_cascade,
 )
 
 from .fractional_octaves import (

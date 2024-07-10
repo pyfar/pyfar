@@ -226,17 +226,15 @@ blob/master/filter_design/audiofilter.py
         return signal_filt
 
 
-@rename_arg({"shelve_type": "shelf_type"}, "shelve_type will be deprecated in"
-            " version 0.8.0 in favor of shelf_type")
-def high_shelve(signal, frequency, gain, order, shelf_type='I',
+def high_shelve(signal, frequency, gain, order, shelve_type='I',
                 sampling_rate=None):
     """
     Create and/or apply first or second order high shelf filter.
 
     Uses the implementation of [#]_.
 
-    ``'high_shelve()'`` will be deprecated in pyfar 0.8.0 in favor of
-    ``'high_shelf()'``
+    :py:func:`~pyfar.dsp.filter.high_shelve` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf`.
 
     Parameters
     ----------
@@ -249,25 +247,6 @@ def high_shelve(signal, frequency, gain, order, shelf_type='I',
         Gain of the shelf in dB.
     order : number
         The shelf order. Must be ``1`` or ``2``.
-    shelf_type : str
-        Defines the characteristic frequency. The default is ``'I'``.
-
-        ``'I'``
-            Defines the characteristic frequency 3 dB below the `gain` value if
-            the `gain` is positive and 3 dB above the `gain` value if the
-            `gain` is negative.
-        ``'II'``
-            Defines the characteristic frequency at 3 dB if the `gain` is
-            positive and at -3 dB if the `gain` is negative.
-        ``'III'``
-            Defines the characteristic frequency at `gain`/2 dB.
-
-        For types ``I`` and ``II`` the absolute value of the `gain` must be
-        sufficiently large (> 9 dB) to set the characteristic
-        frequency according to the above rules with an error below 0.5 dB.
-        For smaller absolute `gain` values the gain at the characteristic
-        frequency becomes less accurate.
-        For type ``III`` the characteristic frequency is always set correctly.
     shelve_type : str
         Defines the characteristic frequency. The default is ``'I'``.
 
@@ -287,8 +266,6 @@ def high_shelve(signal, frequency, gain, order, shelf_type='I',
         For smaller absolute `gain` values the gain at the characteristic
         frequency becomes less accurate.
         For type ``III`` the characteristic frequency is always set correctly.
-        ``shelve_type`` will be deprecated in version 0.8.0 in favor of
-        ``shelf_type``.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -307,10 +284,10 @@ blob/master/filter_design/audiofilter.py
     """
 
     warnings.simplefilter('always', PyfarDeprecationWarning)
-    warnings.warn(("'high_shelve' will be deprecated in pyfar 0.8.0 in favor"
+    warnings.warn(("'high_shelve' will be deprecated in pyfar 0.9.0 in favor"
                    " of 'high_shelf'"), PyfarDeprecationWarning)
 
-    return high_shelf(signal, frequency, gain, order, shelf_type,
+    return high_shelf(signal, frequency, gain, order, shelve_type,
                       sampling_rate)
 
 
@@ -352,27 +329,6 @@ def high_shelf(signal, frequency, gain, order, shelf_type='I',
         For smaller absolute `gain` values the gain at the characteristic
         frequency becomes less accurate.
         For type ``III`` the characteristic frequency is always set correctly.
-    shelve_type : str
-        Defines the characteristic frequency. The default is ``'I'``.
-
-        ``'I'``
-            Defines the characteristic frequency 3 dB below the `gain` value if
-            the `gain` is positive and 3 dB above the `gain` value if the
-            `gain` is negative.
-        ``'II'``
-            Defines the characteristic frequency at 3 dB if the `gain` is
-            positive and at -3 dB if the `gain` is negative.
-        ``'III'``
-            Defines the characteristic frequency at `gain`/2 dB.
-
-        For types ``I`` and ``II`` the absolute value of the `gain` must be
-        sufficiently large (> 9 dB) to set the characteristic
-        frequency according to the above rules with an error below 0.5 dB.
-        For smaller absolute `gain` values the gain at the characteristic
-        frequency becomes less accurate.
-        For type ``III`` the characteristic frequency is always set correctly.
-        ``shelve_type`` will be deprecated in version 0.8.0 in favor of
-        ``shelf_type``.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -396,17 +352,15 @@ blob/master/filter_design/audiofilter.py
     return output
 
 
-@rename_arg({"shelve_type": "shelf_type"}, "shelve_type will be deprecated in"
-            " version 0.8.0 in favor of shelf_type")
-def low_shelve(signal, frequency, gain, order, shelf_type='I',
+def low_shelve(signal, frequency, gain, order, shelve_type='I',
                sampling_rate=None):
     """
     Create and apply first or second order low shelf filter.
 
     Uses the implementation of [#]_.
 
-    ``'low_shelve()'`` will be deprecated in pyfar 0.8.0 in favor of
-    ``'low_shelf()'``
+    :py:func:`~pyfar.dsp.filter.low_shelve` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf`.
 
     Parameters
     ----------
@@ -419,25 +373,6 @@ def low_shelve(signal, frequency, gain, order, shelf_type='I',
         Gain of the shelf in dB.
     order : number
         The shelf order. Must be ``1`` or ``2``.
-    shelf_type : str
-        Defines the characteristic frequency. The default is ``'I'``.
-
-        ``'I'``
-            Defines the characteristic frequency 3 dB below the `gain` value if
-            the `gain` is positive and 3 dB above the `gain` value if the
-            `gain` is negative.
-        ``'II'``
-            Defines the characteristic frequency at 3 dB if the `gain` is
-            positive and at -3 dB if the `gain` is negative.
-        ``'III'``
-            Defines the characteristic frequency at `gain`/2 dB.
-
-        For types ``I`` and ``II`` the absolute value of the `gain` must be
-        sufficiently large (> 9 dB) to set the characteristic
-        frequency according to the above rules with an error below 0.5 dB.
-        For smaller absolute `gain` values the gain at the characteristic
-        frequency becomes less accurate.
-        For type ``III`` the characteristic frequency is always set correctly.
     shelve_type : str
         Defines the characteristic frequency. The default is ``'I'``.
 
@@ -457,8 +392,6 @@ def low_shelve(signal, frequency, gain, order, shelf_type='I',
         For smaller absolute `gain` values the gain at the characteristic
         frequency becomes less accurate.
         For type ``III`` the characteristic frequency is always set correctly.
-        ``shelve_type`` will be deprecated in version 0.8.0 in favor of
-        ``shelf_type``.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -477,10 +410,10 @@ blob/master/filter_design/audiofilter.py
     """
 
     warnings.simplefilter('always', PyfarDeprecationWarning)
-    warnings.warn(("'low_shelve' will be deprecated in pyfar 0.8.0 in favor "
+    warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
                    "of 'low_shelf'"), PyfarDeprecationWarning)
 
-    return low_shelf(signal, frequency, gain, order, shelf_type, sampling_rate)
+    return low_shelf(signal, frequency, gain, order, shelve_type, sampling_rate)
 
 
 def low_shelf(signal, frequency, gain, order, shelf_type='I',
@@ -520,27 +453,6 @@ def low_shelf(signal, frequency, gain, order, shelf_type='I',
         For smaller absolute `gain` values the gain at the characteristic
         frequency becomes less accurate.
         For type ``III`` the characteristic frequency is always set correctly.
-    shelve_type : str
-        Defines the characteristic frequency. The default is ``'I'``.
-
-        ``'I'``
-            Defines the characteristic frequency 3 dB below the `gain` value if
-            the `gain` is positive and 3 dB above the `gain` value if the
-            `gain` is negative.
-        ``'II'``
-            Defines the characteristic frequency at 3 dB if the `gain` is
-            positive and at -3 dB if the `gain` is negative.
-        ``'III'``
-            Defines the characteristic frequency at `gain`/2 dB.
-
-        For types ``I`` and ``II`` the absolute value of the `gain` must be
-        sufficiently large (> 9 dB) to set the characteristic
-        frequency according to the above rules with an error below 0.5 dB.
-        For smaller absolute `gain` values the gain at the characteristic
-        frequency becomes less accurate.
-        For type ``III`` the characteristic frequency is always set correctly.
-        ``shelve_type`` will be deprecated in version 0.8.0 in favor of
-        ``shelf_type``.
     sampling_rate : None, number
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
@@ -581,8 +493,8 @@ def high_shelve_cascade(
 
     ``slope = gain/bandwidth``
 
-    ``'high_shelve_cascade()'`` will be deprecated in pyfar 0.8.0 in favor of
-    ``'high_shelf_cascade()'``
+    :py:func:`~pyfar.dsp.filter.high_shelve_cascade` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf_cascade`.
 
     Parameters
     ----------
@@ -660,7 +572,7 @@ def high_shelve_cascade(
         >>> plt.legend()
     """
     warnings.simplefilter('always', PyfarDeprecationWarning)
-    warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.8.0 "
+    warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'high_shelf_cascade'"),
                   PyfarDeprecationWarning)
 
@@ -784,8 +696,8 @@ def low_shelve_cascade(
 
     ``slope = -gain/bandwidth``
 
-    ``'low_shelve_cascade()'`` will be deprecated in pyfar 0.8.0 in favor of
-    ``'low_shelf_cascade()'``
+    :py:func:`~pyfar.dsp.filter.low_shelve_cascade` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf_cascade`.
 
     Parameters
     ----------
@@ -863,7 +775,7 @@ def low_shelve_cascade(
         >>> plt.legend()
     """
     warnings.simplefilter('always', PyfarDeprecationWarning)
-    warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.8.0 "
+    warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'low_shelf_cascade'"), PyfarDeprecationWarning)
 
     return low_shelf_cascade(signal, frequency, frequency_type, gain, slope,
@@ -969,8 +881,6 @@ def low_shelf_cascade(
     return signal, N, ideal_response
 
 
-@rename_arg({"shelve_type": "shelf_type"}, "shelve_type will be deprecated in"
-            " version 0.8.0 in favor of shelf_type")
 def _shelf(signal, frequency, gain, order, shelf_type, sampling_rate, kind):
     """
     First and second order high and low shelves.
@@ -1025,8 +935,6 @@ def _shelf(signal, frequency, gain, order, shelf_type, sampling_rate, kind):
         return signal_filt
 
 
-@rename_arg({"shelve_type": "shelf_type"}, "shelve_type will be deprecated in"
-            " version 0.8.0 in favor of shelf_type")
 def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
                    N, sampling_rate, shelf_type):
     """Design constant slope filter from shelf filter cascade.
@@ -1152,7 +1060,7 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
 
 
 @rename_arg({"shelve_type": "shelf_type"}, "shelve_type will be deprecated in"
-            " version 0.8.0 in favor of shelf_type")
+            " version 0.9.0 in favor of shelf_type")
 def _shelving_cascade_slope_parameters(gain, slope, bandwidth, shelf_type):
     """Compute the third parameter from the given two.
 
