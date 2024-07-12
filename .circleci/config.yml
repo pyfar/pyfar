@@ -168,8 +168,8 @@ workflows:
             - build_and_test
 
       - test_deprecation_warnings:
-          @REM requires:
-          @REM   - build_and_test
+          # requires:
+          #   - build_and_test
 
 
   test_and_publish:
