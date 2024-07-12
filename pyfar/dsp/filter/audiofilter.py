@@ -3,7 +3,6 @@ from pyfar.classes.warnings import PyfarDeprecationWarning
 import numpy as np
 import pyfar as pf
 from . import _audiofilter as iir
-from pyfar._utils import rename_arg
 
 
 def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
@@ -229,12 +228,11 @@ blob/master/filter_design/audiofilter.py
 def high_shelve(signal, frequency, gain, order, shelve_type='I',
                 sampling_rate=None):
     """
+    :py:func:`~pyfar.dsp.filter.high_shelve` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf`.
     Create and/or apply first or second order high shelf filter.
 
     Uses the implementation of [#]_.
-
-    :py:func:`~pyfar.dsp.filter.high_shelve` will be deprecated in
-    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf`.
 
     Parameters
     ----------
@@ -283,7 +281,6 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
 blob/master/filter_design/audiofilter.py
     """
 
-    warnings.simplefilter('always', PyfarDeprecationWarning)
     warnings.warn(("'high_shelve' will be deprecated in pyfar 0.9.0 in favor"
                    " of 'high_shelf'"), PyfarDeprecationWarning)
 
@@ -297,7 +294,6 @@ def high_shelf(signal, frequency, gain, order, shelf_type='I',
     Create and/or apply first or second order high shelf filter.
 
     Uses the implementation of [#]_.
-
 
     Parameters
     ----------
@@ -355,12 +351,11 @@ blob/master/filter_design/audiofilter.py
 def low_shelve(signal, frequency, gain, order, shelve_type='I',
                sampling_rate=None):
     """
+    :py:func:`~pyfar.dsp.filter.low_shelve` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf`.
     Create and apply first or second order low shelf filter.
 
     Uses the implementation of [#]_.
-
-    :py:func:`~pyfar.dsp.filter.low_shelve` will be deprecated in
-    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf`.
 
     Parameters
     ----------
@@ -409,7 +404,6 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 blob/master/filter_design/audiofilter.py
     """
 
-    warnings.simplefilter('always', PyfarDeprecationWarning)
     warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
                    "of 'low_shelf'"), PyfarDeprecationWarning)
 
@@ -480,7 +474,10 @@ def high_shelve_cascade(
         signal, frequency, frequency_type="lower", gain=None, slope=None,
         bandwidth=None, N=None, sampling_rate=None):
     """
-    Create and apply constant slope filter from cascaded 2nd order high shelfs.
+    :py:func:`~pyfar.dsp.filter.high_shelve_cascade` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf_cascade`.
+    Create and apply constant slope filter from cascaded 2nd order high
+    shelves.
 
     The filters - also known as High-Schultz filters (cf. [#]_) - are defined
     by their characteristic frequency, gain, slope, and bandwidth. Two out of
@@ -492,9 +489,6 @@ def high_shelve_cascade(
     ``bandwidth = abs(gain/slope)``
 
     ``slope = gain/bandwidth``
-
-    :py:func:`~pyfar.dsp.filter.high_shelve_cascade` will be deprecated in
-    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf_cascade`.
 
     Parameters
     ----------
@@ -570,8 +564,8 @@ def high_shelve_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-    """
-    warnings.simplefilter('always', PyfarDeprecationWarning)
+    """  # noqa: E501
+
     warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'high_shelf_cascade'"),
                   PyfarDeprecationWarning)
@@ -683,6 +677,8 @@ def low_shelve_cascade(
         signal, frequency, frequency_type="upper", gain=None, slope=None,
         bandwidth=None, N=None, sampling_rate=None):
     """
+    :py:func:`~pyfar.dsp.filter.low_shelve_cascade` will be deprecated in
+    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf_cascade`.
     Create and apply constant slope filter from cascaded 2nd order low shelves.
 
     The filters - also known as Low-Schultz filters (cf. [#]_) - are defined
@@ -696,8 +692,7 @@ def low_shelve_cascade(
 
     ``slope = -gain/bandwidth``
 
-    :py:func:`~pyfar.dsp.filter.low_shelve_cascade` will be deprecated in
-    pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf_cascade`.
+
 
     Parameters
     ----------
@@ -773,8 +768,8 @@ def low_shelve_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-    """
-    warnings.simplefilter('always', PyfarDeprecationWarning)
+    """  # noqa: E501
+
     warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'low_shelf_cascade'"), PyfarDeprecationWarning)
 
@@ -1059,8 +1054,6 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
         return filt.process(signal), N, ideal_response
 
 
-@rename_arg({"shelve_type": "shelf_type"}, "shelve_type will be deprecated in"
-            " version 0.9.0 in favor of shelf_type")
 def _shelving_cascade_slope_parameters(gain, slope, bandwidth, shelf_type):
     """Compute the third parameter from the given two.
 
