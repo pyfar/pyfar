@@ -224,9 +224,9 @@ class PlotParameter(object):
         # set the axis, color map, and cycle, parameter for each plot
         if plot == 'time':
             # x-axis
-            self._x_type = ['other', 'other', 'other', 'other']
+            self._x_type = ['other', 'other', 'other', 'other', 'other']
             self._x_param = 'unit_time'
-            self._x_values = ['s', 'ms', 'mus', 'samples']
+            self._x_values = ['s', 'ms', 'mus', 'samples', 'auto']
             self._x_id = self._x_values.index(getattr(self, self._x_param))
             # y-axis
             self._y_type = ['other', 'dB']
@@ -253,9 +253,9 @@ class PlotParameter(object):
             self._x_param = None
             self._x_values = None
             # y-axis
-            self._y_type = ['other', 'other', 'other', 'other']
+            self._y_type = ['other', 'other', 'other', 'other', 'other']
             self._y_param = 'unit_time'
-            self._y_values = ['s', 'ms', 'mus', 'samples']
+            self._y_values = ['s', 'ms', 'mus', 'samples', 'auto']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
             self._cm_type = ['other', 'dB']
@@ -383,7 +383,7 @@ class PlotParameter(object):
             # y-axis
             self._y_type = ['other', 'other', 'other', 'other']
             self._y_param = 'unit_gd'
-            self._y_values = ['s', 'ms', 'mus', 'samples']
+            self._y_values = ['s', 'ms', 'mus', 'samples', 'auto', 'other']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
             self._cm_type = None
@@ -412,7 +412,7 @@ class PlotParameter(object):
             # color map
             self._cm_type = ['other', 'other', 'other', 'other']
             self._cm_param = 'unit_gd'
-            self._cm_values = ['s', 'ms', 'mus', 'samples']
+            self._cm_values = ['s', 'ms', 'mus', 'samples', 'auto', 'other']
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
             # mode
             self._mode_param = None
