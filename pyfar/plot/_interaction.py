@@ -220,8 +220,10 @@ class PlotParameter(object):
         # set the axis, color map, and cycle, parameter for each plot
         if plot == 'time':
             # x-axis
-            self._x_type = ['other']
-            self._x_id = 0
+            self._x_type = ['other', 'other', 'other', 'other']
+            self._x_param = 'unit_time'
+            self._x_values = ['s', 'ms', 'mus', 'samples']
+            self._x_id = self._x_values.index(getattr(self, self._x_param))
             # y-axis
             self._y_type = ['other', 'dB']
             self._y_param = 'dB_time'
@@ -240,10 +242,10 @@ class PlotParameter(object):
             self._x_param = None
             self._x_values = None
             # y-axis
-            self._y_type = ['other']
-            self._y_id = 0
-            self._y_param = None
-            self._y_values = None
+            self._y_type = ['other', 'other', 'other', 'other']
+            self._y_param = 'unit_time'
+            self._y_values = ['s', 'ms', 'mus', 'samples']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
             self._cm_type = ['other', 'dB']
             self._cm_param = 'dB_time'
