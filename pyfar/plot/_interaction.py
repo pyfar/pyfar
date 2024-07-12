@@ -335,9 +335,9 @@ class PlotParameter(object):
             self._x_values = ['log', 'linear']
             self._x_id = self._x_values.index(getattr(self, self._x_param))
             # y-axis
-            self._y_type = ['other', 'other', 'other', 'other', 'other']
+            self._y_type = ['other', 'other', 'other', 'other']
             self._y_param = 'unit_gd'
-            self._y_values = ['auto', 's', 'ms', 'mus', 'samples']
+            self._y_values = ['s', 'ms', 'mus', 'samples']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
             self._cm_type = None
@@ -357,9 +357,9 @@ class PlotParameter(object):
             self._y_values = ['log', 'linear']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
-            self._cm_type = ['other', 'other', 'other', 'other', 'other']
+            self._cm_type = ['other', 'other', 'other', 'other']
             self._cm_param = 'unit_gd'
-            self._cm_values = ['auto', 's', 'ms', 'mus', 'samples']
+            self._cm_values = ['s', 'ms', 'mus', 'samples']
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
             # cycler type
             self._cycler_type = None
