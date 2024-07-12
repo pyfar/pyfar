@@ -469,7 +469,7 @@ def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
     '''
 
     # magnitude spectrum
-    magnitude = pf.dsp.filter.low_shelve(
+    magnitude = pf.dsp.filter.low_shelf(
         pf.signals.impulse(n_samples, sampling_rate=sampling_rate), 500, 20, 2)
     magnitude = pf.dsp.filter.butterworth(magnitude, 8, 50, 'highpass')
     # sweep
