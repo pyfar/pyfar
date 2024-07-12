@@ -96,7 +96,7 @@ jobs:
 
   test_deprecation_warnings:
     docker:
-      - image: cimg/python:latest
+      - image: cimg/python
 
     steps:
       - checkout
@@ -166,6 +166,7 @@ workflows:
                 - "3.12"
           requires:
             - build_and_test
+
       - test_deprecation_warnings:
           requires:
             - build_and_test
