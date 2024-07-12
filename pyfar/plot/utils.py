@@ -235,7 +235,6 @@ def shortcuts(show=True, report=False, layout="console"):
         # get list of plots that allow toggling axes and colormaps
         x_toggle = []
         y_toggle = []
-        cm_toggle = []
         for plot in short_cuts["plots"]:
             params = PlotParameter(plot)
             if params.x_type is not None:
@@ -244,9 +243,6 @@ def shortcuts(show=True, report=False, layout="console"):
             if params.y_type is not None:
                 if len(params.y_type) > 1:
                     y_toggle.append(plot)
-            if params.cm_type is not None:
-                if len(params.cm_type) > 1:
-                    cm_toggle.append(plot)
 
         # shortcuts for toggling between plots
         if layout == "console":
@@ -316,18 +312,22 @@ def shortcuts(show=True, report=False, layout="console"):
 
         x_toggle_str = [f":py:func:`~pyfar.plot.{x}`" for x in x_toggle]
         y_toggle_str = [f":py:func:`~pyfar.plot.{y}`" for y in y_toggle]
-        cm_toggle_str = [f":py:func:`~pyfar.plot.{c}`" for c in cm_toggle]
 
         sc_str += ("- Moving and zooming the x and y axes is supported by all "
                    "plots.\n"
                    "- Moving and zooming the colormap is only supported by "
                    "plots that have a colormap.\n"
-                   "- Toggling the x-axis is supported by: "
-                   f"{', '.join(x_toggle_str)}\n"
-                   "- Toggling the y-axis is supported by: "
-                   f"{', '.join(y_toggle_str)}\n"
-                   "- Toggling the colormap is supported by: "
-                   f"{', '.join(cm_toggle_str)}\n"
+                   "- Toggling the axis style (x-axis, y-axis, colormap) "
+                   " toggle between: linear and logarithmic frequency axes, "
+                   "linear and logarithmic amplitude/magnitude values, "
+                   "the unit of the axes (e.g., seconds or samples), or "
+                   "wrapped and unwrapped data (depending on the plot).\n"
+                   "- Toggling the x-axis style is supported by: "
+                   f"{', '.join(x_toggle_str)} (and their 2d versions)\n"
+                   "- Toggling the y-axis style is supported by: "
+                   f"{', '.join(y_toggle_str)} (and their 2d versions)\n"
+                   "- Toggling the colormap style is supported by all "
+                   "2d plots\n"
                    "- Toggling between line and 2D plots is not supported by:"
                    " spectrogram\n")
 

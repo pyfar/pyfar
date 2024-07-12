@@ -37,10 +37,7 @@ sc_ctr = pf.plot.shortcuts(show=False)["controls"]
 
 # Interaction is tested by comparing axis and colobar labels. These properties
 # must be defined here for each plot. Some test might fail if new plot
-# functions are added to pyfar with out added their properties below.
-# NOTE: Some labels depend on the lengths of the signals. The labels were
-#       generated for a signal with 1024 samples (minimum length for
-#       spectrogram) and a maximum group delay of 1000 samples @ 44.1 kHz
+# functions are added to pyfar with out adding their properties below.
 plots = {
     # line plots
     'time': {
