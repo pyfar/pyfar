@@ -95,14 +95,8 @@ jobs:
             make html SPHINXOPTS="-W"
 
   test_deprecation_warnings:
-    parameters:
-      version:
-        description: "version tag"
-        default: "latest"
-        type: string
-    executor:
-      name: python-docker
-      version: <<parameters.version>>
+    docker:
+      - image: circleci/python:latest
 
     steps:
       - checkout
@@ -174,10 +168,6 @@ workflows:
             - build_and_test
 
       - test_deprecation_warnings:
-          matrix:
-            parameters:
-              version:
-                - "default"
           requires:
             - build_and_test
 
@@ -231,10 +221,6 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
       - test_deprecation_warnings:
-          matrix:
-            parameters:
-              version:
-                - "default"
           requires:
             - build_and_test
           filters:
