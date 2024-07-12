@@ -96,7 +96,7 @@ jobs:
 
   test_deprecation_warnings:
     docker:
-      - image: cimg/python
+      - image: cimg/python:3.12
 
     steps:
       - checkout
