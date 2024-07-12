@@ -96,7 +96,7 @@ jobs:
 
   test_deprecation_warnings:
     docker:
-      - image: circleci/python:latest
+      - image: cimg/python:latest
 
     steps:
       - checkout
