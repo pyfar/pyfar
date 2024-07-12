@@ -177,7 +177,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "latest"
           requires:
             - build_and_test
 
@@ -234,7 +234,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "latest"
           requires:
             - build_and_test
           filters:
