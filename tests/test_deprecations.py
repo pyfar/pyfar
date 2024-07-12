@@ -305,7 +305,7 @@ def test_deprecation_shelve_functions():
             "pyfar 0.9.0 in favor of 'high_shelf'"):
         pfilt.high_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
 
-    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
             pfilt.high_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
 
@@ -315,7 +315,7 @@ def test_deprecation_shelve_functions():
             "pyfar 0.9.0 in favor of 'low_shelf'"):
         pfilt.low_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
 
-    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
             pfilt.low_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
 
@@ -326,7 +326,7 @@ def test_deprecation_shelve_functions():
         pfilt.high_shelve_cascade(None, 250, "lower", -60, None, 4,
                                   sampling_rate=44100)
 
-    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
             pfilt.high_shelve_cascade(None, 250, "lower", -60, None, 4,
                                       sampling_rate=44100)
@@ -338,7 +338,7 @@ def test_deprecation_shelve_functions():
         pfilt.low_shelve_cascade(None, 250, "lower", -60, None, 4,
                                  sampling_rate=44100)
 
-    if version.parse(pf.__version__) >= version.parse('0.8.0'):
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
             pfilt.low_shelve_cascade(None, 250, "lower", -60, None, 4,
                                      sampling_rate=44100)

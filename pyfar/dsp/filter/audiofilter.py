@@ -407,7 +407,8 @@ blob/master/filter_design/audiofilter.py
     warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
                    "of 'low_shelf'"), PyfarDeprecationWarning)
 
-    return low_shelf(signal, frequency, gain, order, shelve_type, sampling_rate)
+    return low_shelf(signal, frequency, gain, order, shelve_type,
+                     sampling_rate)
 
 
 def low_shelf(signal, frequency, gain, order, shelf_type='I',
