@@ -49,6 +49,31 @@ def test_smooth_fractional_octave_mode(mode):
     npt.assert_allclose(output.time.flatten(), reference)
 
 
+@pytest.mark.parametrize("mode", (
+    "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
+def test_smooth_fractional_octave_complex(mode):
+    """
+    Test return signal for different smoothing modes against saved references
+    """
+
+    # load input data
+    input = np.loadtxt(os.path.join(
+            os.path.dirname(__file__), "references",
+            "dsp.smooth_fractional_octave_input.csv"))
+    input = pf.Signal(input, 44100)
+    input.fft_norm = 'None'
+    input.complex = True
+
+    # smooth
+    output, _ = smooth_fractional_octave(input, 1, mode)
+
+    # compare to reference
+    reference = np.loadtxt(os.path.join(
+            os.path.dirname(__file__), "references",
+            f"dsp.smooth_fractional_octave_{mode}.csv"))
+    npt.assert_allclose(output.time.flatten(), reference)
+
+
 @pytest.mark.parametrize("num_fractions", (1, 5))
 def test_smooth_fractional_octave_num_fractions(num_fractions):
     """
