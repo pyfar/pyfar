@@ -1430,7 +1430,7 @@ def find_impulse_response_start(
                     f'No values below threshold found found for channel {ch}',
                     'defaulting to 0')
 
-    return np.squeeze(start_sample)
+    return start_sample
 
 
 @rename_arg({"freq_range": "frequency_range"},
