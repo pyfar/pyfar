@@ -28,7 +28,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         ymin = ymax - 100
     else:
         data = signal.time.T
-    # get data defined in 'show_real_imag_abs'
+    # get data defined in 'mode'
     data, y_label = _utils._assert_and_match_data_to_mode(data, mode)
 
     # auto detect the time unit
