@@ -95,6 +95,10 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    mode : str
+        ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
+        part or absolute value of a complex-valued time domain signal is
+        plotted. The default is ``real``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -232,6 +236,8 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -363,6 +369,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -421,7 +429,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
 
 def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
                    orientation="vertical", method='pcolormesh',
-                   colorbar=True, ax=None, style='light', side='right', **kwargs):
+                   colorbar=True, ax=None, style='light', side='right',
+                   **kwargs):
     """
     2D color coded plot of the group delay.
 
@@ -501,6 +510,8 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -654,6 +665,12 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    mode : str
+        ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
+        part or absolute value of a complex-valued time domain signal is
+        plotted. The default is ``real``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -796,6 +813,8 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -946,6 +965,8 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
