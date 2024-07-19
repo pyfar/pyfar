@@ -1099,7 +1099,8 @@ class _SignalIterator(object):
             sampling_rate=signal.sampling_rate,
             n_samples=signal.n_samples,
             domain=signal.domain,
-            fft_norm=signal.fft_norm)
+            fft_norm=signal.fft_norm,
+            is_complex=signal.complex)
 
     def __next__(self):
         if self._signal.domain == self._iterated_sig.domain:
