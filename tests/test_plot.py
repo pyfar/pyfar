@@ -318,11 +318,11 @@ def test_2d_plots(function, handsome_signal_2d):
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
     (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
-def test_2d_plots_complex(function, handsome_complex_signal):
+def test_2d_plots_complex(function, handsome_signal_complex_2d):
     """Test all 2d plots with default arguments."""
     filename = function.__name__
     create_figure()
-    function(handsome_complex_signal)
+    function(handsome_signal_complex_2d)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -719,3 +719,14 @@ def test_set_specific_plot_parameters():
         facecolor = mcolors.to_hex(plt.gca().patch.get_facecolor())
         assert facecolor == '#000000'  # #000000 is hex for black
     plt.close('all')
+
+
+# signal = pf.signals.sine(200, 4410)
+# signal = pf.dsp.time_window(signal, (1500, 2000, 3000, 3500))
+# signal = pf.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
+#                    is_complex=True)
+
+# for idx, s in enumerate(signal):
+#     signal[idx] = pf.dsp.filter.bell(s, (idx+1)*200, -20, 5)
+
+# test_2d_plots_complex(plot.group_delay_2d, signal)

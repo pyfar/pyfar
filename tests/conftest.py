@@ -553,6 +553,28 @@ def handsome_signal_2d():
 
 
 @pytest.fixture
+def handsome_signal_complex_2d():
+    """
+    45 channel signal with delayed, scaled and bell-filtered impulses
+    for testing 2D plots
+
+    Returns
+    -------
+    signal : Signal
+        Multi channel signal
+    """
+
+    delays = np.array(np.sin(np.linspace(0, 2*np.pi, 45))*50 + 55, dtype=int)
+    amplitudes = 10**(-10*(1-np.cos(np.linspace(0, 2*np.pi, 45)))/20)
+    signal = pyfar.signals.impulse(2**9, delays, amplitudes)
+    signal.complex = True
+    for idx, s in enumerate(signal):
+        signal[idx] = pf.dsp.filter.bell(s, (idx+1)*200, -20, 5)
+
+    return signal
+
+
+@pytest.fixture
 def time_data():
     """
     TimeData object with three data points.
