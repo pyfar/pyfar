@@ -38,9 +38,12 @@ def test_normalization(reference_method, channel_handling, truth):
     npt.assert_allclose(answer.time[..., 0], truth, rtol=1e-14)
 
 
-def test_domains_normalization():
+@pytest.mark.parametrize('is_complex', [False, True])
+def test_domains_normalization(is_complex):
     """Test for normalization in time and frequency domain."""
     signal = pf.signals.noise(128, seed=7)
+    signal.fft_norm = "none"
+    signal.complex = is_complex
     time = pf.dsp.normalize(signal, domain="time")
     freq = pf.dsp.normalize(signal, domain="freq")
 
@@ -168,4 +171,22 @@ def test_error_raises():
     with raises(ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), nan_policy='invalid')
     with raises(ValueError, match=("The signal includes NaNs.")):
-        pf.dsp.normalize(pf.Signal([0, np.nan, 0], 44100), nan_policy='raise')
+        pf.dsp.normalize(pf.TimeData([0, np.nan, 0], [0, 1, 3]),
+                         nan_policy='raise')
+
+
+@pytest.mark.parametrize('reference_method', ['energy', 'power', 'rms'])
+@pytest.mark.parametrize('input_signal', [pf.TimeData([1, 1, 1],
+                                                      [0, 1, 2],
+                                                      is_complex=True),
+                                          pf.Signal([1, 0, 1],
+                                                    sampling_rate=48000,
+                                                    is_complex=True)])
+def test_invalid_modes_complex(reference_method, input_signal):
+    """Parametrized test for all combinations of reference_method and
+    channel_handling parameters using an impulse.
+    """
+    with raises(ValueError, match=("'energy', 'power', and 'rms' reference "
+                                   "method is not implemented for complex "
+                                   "time signals.")):
+        pf.dsp.normalize(input_signal, reference_method=reference_method)
