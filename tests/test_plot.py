@@ -721,11 +721,10 @@ def test_set_specific_plot_parameters():
     plt.close('all')
 
 
-# signal = pf.signals.sine(200, 4410)
-# signal = pf.dsp.time_window(signal, (1500, 2000, 3000, 3500))
-# signal = pf.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
-#                    is_complex=True)
-
+# delays = np.array(np.sin(np.linspace(0, 2*np.pi, 45))*50 + 55, dtype=int)
+# amplitudes = 10**(-10*(1-np.cos(np.linspace(0, 2*np.pi, 45)))/20)
+# signal = pf.signals.impulse(2**9, delays, amplitudes)
+# signal.complex = True
 # for idx, s in enumerate(signal):
 #     signal[idx] = pf.dsp.filter.bell(s, (idx+1)*200, -20, 5)
 

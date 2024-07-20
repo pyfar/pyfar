@@ -205,10 +205,12 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     data = dsp.group_delay(signal)
+    data = np.reshape(data, signal.freq.shape)
+
     # get data according to side
     data, frequencies = _utils._assert_and_match_data_to_side(data, signal,
                                                               side)
-    data = np.reshape(data, signal.freq.shape)
+
     data = data.T if orientation == "vertical" else data
 
     # auto detect the unit
