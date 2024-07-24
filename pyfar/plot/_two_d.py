@@ -91,7 +91,8 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
         data = np.abs(signal.freq)
 
     # get data according to side
-    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(data, signal,
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(data,
+                                                                      signal,
                                                                       side)
 
     data = data.T if orientation == "vertical" else data
