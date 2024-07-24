@@ -29,7 +29,7 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
         data = signal.time
 
     # get data defined in 'mode'
-    data, y_label = _utils._assert_and_match_data_to_mode(data, mode)
+    data, y_label = _utils._assert_and_match_data_to_mode(data, signal, mode)
 
     data = data.T if orientation == "vertical" else data
     # auto detect the time unit
@@ -91,8 +91,8 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
         data = np.abs(signal.freq)
 
     # get data according to side
-    data, frequencies = _utils._assert_and_match_data_to_side(data, signal,
-                                                              side)
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(data, signal,
+                                                                      side)
 
     data = data.T if orientation == "vertical" else data
     # setup axis label and data
@@ -105,7 +105,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
         ax_scale = np.roll(ax_scale, 1)
 
     axis[1].set_label_text("Indices")
-    axis[0].set_label_text("Frequency in Hz")
+    axis[0].set_label_text(xlabel)
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
     ax_scale[0](freq_scale)
@@ -144,8 +144,9 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
     # prepare input
     data = dsp.phase(signal, deg=deg, unwrap=unwrap)
     # get data according to side
-    data, frequencies = _utils._assert_and_match_data_to_side(data, signal,
-                                                              side)
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(data,
+                                                                      signal,
+                                                                      side)
     data = data.T if orientation == "vertical" else data
 
     # setup axis label and data
@@ -158,7 +159,7 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
         ax_scale = np.roll(ax_scale, 1)
 
     axis[1].set_label_text("Indices")
-    axis[0].set_label_text("Frequency in Hz")
+    axis[0].set_label_text(xlabel)
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
     # color limits
@@ -208,8 +209,9 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
     data = np.reshape(data, signal.freq.shape)
 
     # get data according to side
-    data, frequencies = _utils._assert_and_match_data_to_side(data, signal,
-                                                              side)
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(data,
+                                                                      signal,
+                                                                      side)
 
     data = data.T if orientation == "vertical" else data
 
@@ -232,7 +234,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
         ax_scale = np.roll(ax_scale, 1)
 
     axis[1].set_label_text("Indices")
-    axis[0].set_label_text("Frequency in Hz")
+    axis[0].set_label_text(xlabel)
     ax_lim[0](_utils._lower_frequency_limit(signal), signal.frequencies[-1])
 
     ax_scale[0](freq_scale)
