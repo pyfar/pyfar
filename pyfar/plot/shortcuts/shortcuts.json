@@ -75,15 +75,19 @@
     "toggle_x": {
         "key": ["X"],
         "key_verbose": ["shift+x"],
-        "info": "toggle between linear and logarithmic x-axis"},
+        "info": "toggle x-axis style (see below for more information)"},
     "toggle_y": {
         "key": ["Y"],
         "key_verbose": ["shift+y"],
-        "info": "toggle between linear and logarithmic y-axis"},
+        "info": "toggle y-axis style (see below for more information)"},
     "toggle_cm": {
         "key": ["C"],
         "key_verbose": ["shift+c"],
-        "info": "toggle between linear and logarithmic color data"},
+        "info": "toggle colormap style (see below for more information)"},
+    "toggle_mode": {
+        "key": ["M"],
+        "key_verbose": ["shift+m"],
+        "info": "toggle display of complex audio data (real, imaginary, or absolute time data; left or right-sided spectrum)"},
     "toggle_all": {
         "key": ["A"],
         "key_verbose": ["shift+a"],
