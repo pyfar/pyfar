@@ -320,7 +320,7 @@ def test_2d_plots(function, handsome_signal_2d):
     (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
 def test_2d_plots_complex(function, handsome_signal_complex_2d):
     """Test all 2d plots with default arguments."""
-    filename = function.__name__
+    filename = f'complex_2d_{function.__name__}'  
     create_figure()
     function(handsome_signal_complex_2d)
     save_and_compare(create_baseline, baseline_path, output_path, filename,

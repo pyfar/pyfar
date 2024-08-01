@@ -170,13 +170,14 @@ def test_assert_and_match_data_to_side():
 
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]
+    assert _xlabel == "Frequency in Hz (left)"
 
     data, frequencies, _xlabel = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='right')
 
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]
-
+    assert _xlabel == "Frequency in Hz (right)"
 
 def test_assert_and_match_data_to_side_freq():
     signal = pf.FrequencyData([3, 4, 5, 6, 7],
