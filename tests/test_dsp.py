@@ -111,6 +111,18 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
         grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
 
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4)])
+def test_group_delay_cshape(shape):
+    """Test if group delay function keeps cshape of signals of shape `m x n`
+     with `m = 1` or `n = 1`."""
+    delay = np.random.randint(0, 200, (shape))
+    impulse = pf.signals.impulse(256, delay, np.ones(shape))
+
+    grp = dsp.group_delay(impulse)
+
+    assert grp.shape[:2] == impulse.cshape
+
+
 def test_linear_phase():
     # test signal
     N = 64
@@ -654,6 +666,16 @@ def test_impulse_response_delay_multidim():
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4)])
+def test_impulse_response_delay_cshape(shape):
+    """Test if find_impulse_response_delay function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`."""
+    ir = pf.signals.impulse(256, 24, np.ones(shape))
+    start_sample = dsp.find_impulse_response_delay(ir)
+
+    assert start_sample.shape == ir.cshape
+
+
 def test_impulse_response_start_insufficient_snr():
     n_samples = 2**9
     snr = 15
@@ -754,6 +776,16 @@ def test_impulse_response_start_multidim():
     start_sample_est = dsp.find_impulse_response_start(ir_awgn)
 
     npt.assert_allclose(start_sample_est, start_samples - 1)
+
+
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4)])
+def test_impulse_response_start_cshape(shape):
+    """Test if find_impulse_response_start function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`."""
+    ir = pf.signals.impulse(256, 24, np.ones(shape))
+    start_sample = dsp.find_impulse_response_start(ir)
+
+    assert start_sample.shape == ir.cshape
 
 
 def test_convolve_default():
