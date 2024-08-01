@@ -193,6 +193,8 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -265,6 +267,8 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -358,6 +362,12 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    mode : str
+        ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
+        part or absolute value of a complex-valued time domain signal is
+        plotted. The default is ``real``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -438,6 +448,8 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are forwarded to matplotlib.pyplot.plot
 
@@ -524,6 +536,8 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 

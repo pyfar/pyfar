@@ -449,14 +449,22 @@ def _assert_and_match_data_to_side(data, signal, side):
         frequencies = np.flipud(np.abs(frequencies))
         data = data[..., ::-1]
 
-    return data, frequencies
+    if (type(signal) is not FrequencyData) and signal.complex:
+        xlabel = f"Frequency in Hz ({side})"
+    else:
+        xlabel = "Frequency in Hz"
+
+    return data, frequencies, xlabel
 
 
-def _assert_and_match_data_to_mode(data, mode):
+def _assert_and_match_data_to_mode(data, signal, mode):
     """Adjust data and y-label for plotting according to specified mode."""
 
     if mode == 'real':
-        return np.real(data), 'Amplitude'
+        if signal.complex:
+            return np.real(data), 'Amplitude (real)'
+        else:
+            return np.real(data), 'Amplitude'
     elif mode == 'imag':
         return np.imag(data), 'Amplitude (imaginary)'
     elif mode == 'abs':

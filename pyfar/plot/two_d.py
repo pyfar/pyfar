@@ -7,7 +7,7 @@ from . import _interaction as ia
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
             indices=None, orientation="vertical", method='pcolormesh',
-            colorbar=True, ax=None, style='light', **kwargs):
+            colorbar=True, ax=None, style='light', mode='real', **kwargs):
     """
     2D color coded plot of time signals.
 
@@ -95,6 +95,10 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    mode : str
+        ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
+        part or absolute value of a complex-valued time domain signal is
+        plotted. The default is ``real``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -136,7 +140,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
     with context(style):
         ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
-            indices, orientation, method, colorbar, ax, **kwargs)
+            indices, orientation, method, colorbar, ax, mode, **kwargs)
 
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
@@ -155,7 +159,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
 def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
             freq_scale='log', indices=None, orientation="vertical",
             method='pcolormesh', colorbar=True, ax=None, style='light',
-            **kwargs):
+            side='right', **kwargs):
     """
     2D color coded plot of magnitude spectra.
 
@@ -232,6 +236,8 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -272,7 +278,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, freq_scale, indices,
-            orientation, method, colorbar, ax, **kwargs)
+            orientation, method, colorbar, ax, side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -291,7 +297,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
 def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
              orientation="vertical", method='pcolormesh',
-             colorbar=True, ax=None, style='light', **kwargs):
+             colorbar=True, ax=None, style='light', side='right', **kwargs):
     """
     2D color coded plot of phase spectra.
 
@@ -363,6 +369,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -421,7 +429,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
 
 def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
                    orientation="vertical", method='pcolormesh',
-                   colorbar=True, ax=None, style='light', **kwargs):
+                   colorbar=True, ax=None, style='light', side='right',
+                   **kwargs):
     """
     2D color coded plot of the group delay.
 
@@ -501,6 +510,8 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -541,7 +552,7 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
     with context(style):
         ax, qm, cb = _two_d._group_delay_2d(
             signal, unit, freq_scale, indices, orientation, method,
-            colorbar, ax, **kwargs)
+            colorbar, ax, side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -561,7 +572,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                  log_prefix_freq=None, log_reference=1, freq_scale='log',
                  unit='s', indices=None, orientation="vertical",
                  method='pcolormesh', colorbar=True, ax=None, style='light',
-                 **kwargs):
+                 mode='real', side='right', **kwargs):
     """
     2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
 
@@ -654,6 +665,12 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    mode : str
+        ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
+        part or absolute value of a complex-valued time domain signal is
+        plotted. The default is ``real``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -696,7 +713,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
             log_reference, freq_scale, unit, indices, orientation, method,
-            colorbar, ax, **kwargs)
+            colorbar, ax, mode, side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -718,7 +735,8 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
                   freq_scale='log', deg=False, unwrap=False, indices=None,
                   orientation="vertical", method='pcolormesh',
-                  colorbar=True, ax=None, style='light', **kwargs):
+                  colorbar=True, ax=None, style='light', side='right',
+                  **kwargs):
     """
     2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
 
@@ -795,6 +813,8 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -837,7 +857,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
-            indices, orientation, method, colorbar, ax, **kwargs)
+            indices, orientation, method, colorbar, ax, side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -858,7 +878,8 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
 def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
                         unit="s", freq_scale='log', indices=None,
                         orientation="vertical", method='pcolormesh',
-                        colorbar=True, ax=None, style='light', **kwargs):
+                        colorbar=True, ax=None, style='light', side='right',
+                        **kwargs):
     """
     2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
 
@@ -944,6 +965,8 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str
+        ``left`` or ``right`` to specify which side of a spectrum is plotted.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -985,7 +1008,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
-            orientation, method, colorbar, ax, **kwargs)
+            orientation, method, colorbar, ax, side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(

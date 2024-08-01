@@ -25,7 +25,7 @@ IMPORTANT: IN THE REPOSITORY, BOTH `CREATE_BASELINE` AND `COMPARE_OUTPUT` NEED
 TO BE SET TO FALSE, SO THE TRAVIS-CI CHECKS DO NOT FAIL.
 """
 # global parameters -----------------------------------------------------------
-create_baseline = False
+create_baseline = True
 
 # file type used for saving the plots
 file_type = "png"
@@ -311,6 +311,18 @@ def test_2d_plots(function, handsome_signal_2d):
     filename = function.__name__
     create_figure()
     function(handsome_signal_2d)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
+    (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
+def test_2d_plots_complex(function, handsome_signal_complex_2d):
+    """Test all 2d plots with default arguments."""
+    filename = f'complex_2d_{function.__name__}'  
+    create_figure()
+    function(handsome_signal_complex_2d)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -707,3 +719,13 @@ def test_set_specific_plot_parameters():
         facecolor = mcolors.to_hex(plt.gca().patch.get_facecolor())
         assert facecolor == '#000000'  # #000000 is hex for black
     plt.close('all')
+
+
+# delays = np.array(np.sin(np.linspace(0, 2*np.pi, 45))*50 + 55, dtype=int)
+# amplitudes = 10**(-10*(1-np.cos(np.linspace(0, 2*np.pi, 45)))/20)
+# signal = pf.signals.impulse(2**9, delays, amplitudes)
+# signal.complex = True
+# for idx, s in enumerate(signal):
+#     signal[idx] = pf.dsp.filter.bell(s, (idx+1)*200, -20, 5)
+
+# test_2d_plots_complex(plot.group_delay_2d, signal)
