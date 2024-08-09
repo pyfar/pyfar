@@ -198,7 +198,7 @@ def test_filter_iir_process_multi_dim_filt(impulse):
 
     res = filt.process(impulse)
 
-    npt.assert_allclose(res.time[:, :3], coeff[:, 0])
+    npt.assert_allclose(res.time[:, 0, :3], coeff[:, 0])
 
     impulse.time = np.vstack((impulse.time, impulse.time))
     filt = fo.FilterIIR(coeff, impulse.sampling_rate)
@@ -218,7 +218,7 @@ def test_filter_fir_process_multi_dim_filt(impulse):
 
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
-    npt.assert_allclose(res.time[:, :3], coeff)
+    npt.assert_allclose(res.time[:, 0, :3], coeff)
 
     impulse.time = np.vstack((impulse.time, impulse.time))
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
@@ -325,7 +325,7 @@ def test_filter_sos_process_multi_dim_filt(impulse):
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
 
-    npt.assert_allclose(res.time[:, :3], coeff[:, 0])
+    npt.assert_allclose(res.time[:, 0, :3], coeff[:, 0])
 
     impulse.time = np.vstack((impulse.time, impulse.time))
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
