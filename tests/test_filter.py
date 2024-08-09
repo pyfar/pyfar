@@ -279,7 +279,7 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
         # restricting rtol was not needed locally. It was added for tests to
         # pass on the testing platform
         npt.assert_allclose(
-            y.time[:,0,:], np.atleast_2d(reference), rtol=.01, atol=1e-10)
+            y.time[:, 0, :], np.atleast_2d(reference), rtol=.01, atol=1e-10)
 
 
 def test_reconstructing_fractional_octave_bands_warning():
