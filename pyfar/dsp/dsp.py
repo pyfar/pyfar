@@ -1302,6 +1302,10 @@ def find_impulse_response_delay(impulse_response, N=1):
 
         start_samples[ch] = start_sample
 
+    # squeeze if signal has only one channel
+    if impulse_response.cshape == (1, ):
+        start_samples = start_samples.squeeze()
+
     return start_samples
 
 
@@ -1430,7 +1434,11 @@ def find_impulse_response_start(
                     f'No values below threshold found found for channel {ch}',
                     'defaulting to 0')
 
-    return np.squeeze(start_sample)
+    # squeeze if start sample is a single channel value
+    if start_sample.shape == (1,):
+        start_sample = np.squeeze(start_sample)
+
+    return start_sample
 
 
 @rename_arg({"freq_range": "frequency_range"},
