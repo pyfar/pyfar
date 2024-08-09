@@ -43,4 +43,5 @@ class PyfarDeprecationWarning(Warning):
         self.message = message
 
     def __str__(self):
+        """Return the message of the warning."""
         return repr(self.message)

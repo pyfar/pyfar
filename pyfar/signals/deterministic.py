@@ -1,3 +1,4 @@
+"""Module for generating deterministic signals as part of pyfar.signals."""
 import numpy as np
 import warnings
 import pyfar

@@ -1,3 +1,4 @@
+"""This module provides functions to calculate spherical Voronoi diagrams."""
 import deepdiff
 import numpy as np
 from scipy import spatial as spat

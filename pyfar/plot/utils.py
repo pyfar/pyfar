@@ -1,3 +1,4 @@
+"""Utilities for the pyfar plot module."""
 import matplotlib.style as mpl_style
 import os
 import json

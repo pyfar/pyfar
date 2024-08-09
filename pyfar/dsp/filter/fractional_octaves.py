@@ -1,3 +1,4 @@
+"""Fractional octave filter bank."""
 import warnings
 import numpy as np
 import scipy.signal as spsignal
