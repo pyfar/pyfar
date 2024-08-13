@@ -359,7 +359,7 @@ def _match_shape(*args):
     shape = (1, )
     for arg in args:
         arg = np.asarray(arg)
-        if arg.size > size:
+        if (arg.size > size) or (arg.ndim > 1):
             size = arg.size
             shape = arg.shape
 
