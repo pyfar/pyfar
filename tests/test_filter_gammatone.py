@@ -69,9 +69,9 @@ def test_gammatone_bands_init_and_getter():
 
 
 @pytest.mark.parametrize('amplitudes,shape_filtered,sampling_rate', (
-    [np.array([1]), (85, 2048), 44100],
-    [np.array([1]), (85, 2048), 48000],
-    [np.array([1]), (85, 2048), 96000],
+    [np.array([1]), (85, 1, 2048), 44100],
+    [np.array([1]), (85, 1, 2048), 48000],
+    [np.array([1]), (85, 1, 2048), 96000],
     [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100]
 ))
 def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
@@ -122,11 +122,11 @@ def test_gammatone_bands_reset_state():
         pf.Signal(np.zeros(2**11), 44100), reset=False)
 
     # check for equality
-    npt.assert_array_equal(real_a.time, real.time[:, :2**11])
-    npt.assert_array_equal(imag_a.time, imag.time[:, :2**11])
+    npt.assert_array_equal(real_a.time, real.time[:, :, :2**11])
+    npt.assert_array_equal(imag_a.time, imag.time[:, :, :2**11])
 
-    npt.assert_array_equal(real_b.time, real.time[:, -2**11:])
-    npt.assert_array_equal(imag_b.time, imag.time[:, -2**11:])
+    npt.assert_array_equal(real_b.time, real.time[:, :, -2**11:])
+    npt.assert_array_equal(imag_b.time, imag.time[:, :, -2**11:])
 
 
 def test_gammatone_bands_assertions():
