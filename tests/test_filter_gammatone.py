@@ -165,6 +165,17 @@ def test_gammatone_bands_repr():
                         "@ 44100 Hz sampling rate")
 
 
+@pytest.mark.parametrize('shape', [(4, 1), (1, 4), (1,)])
+def test_gammatone_shape(shape):
+    impulse = pf.signals.impulse(2048, 0, np.ones(shape))
+    GFB = filter.GammatoneBands([0, 22050])
+
+    real, imag = GFB.process(impulse)
+
+    assert real.time.shape == (GFB.n_bands, *shape, impulse.n_samples)
+    assert imag.time.shape == (GFB.n_bands, *shape, impulse.n_samples)
+
+
 def test_erb_frequencies():
     """Test erb_frequencies against reference from the AMT toolbox"""
 
