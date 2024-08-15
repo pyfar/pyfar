@@ -179,6 +179,7 @@ def test_assert_and_match_data_to_side():
     assert data.shape[-1] == frequencies.shape[0]
     assert _xlabel == "Frequency in Hz (right)"
 
+
 def test_assert_and_match_data_to_side_freq():
     signal = pf.FrequencyData([3, 4, 5, 6, 7],
                               [1, 2, 3, 4, 5])
