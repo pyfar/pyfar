@@ -97,16 +97,14 @@ def test_impulse_multi_channel():
     npt.assert_allclose(signal.time, ref)
 
 
-@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1,), (1, 1)])
-def test_impulse_different_cshapes(shape):
+@pytest.mark.parametrize("delay_shape", [(4, 1), (1, 4), (1,), (1, 1), (2, 2)])
+@pytest.mark.parametrize("amp_shape", [(4, 1), (1, 4), (1,), (1, 1), (2, 2)])
+def test_impulse_different_cshapes(delay_shape, amp_shape,):
     """test impulse different cshapes."""
-    # test with array and number
-    signal = pfs.impulse(3, 0, np.ones(shape))
-    npt.assert_allclose(signal.time[..., 0], np.ones(shape))
-
-    # test with two arrays
-    signal = pfs.impulse(3, np.zeros(shape, dtype=int), 1)
-    npt.assert_allclose(signal.time[..., 0], np.ones(shape))
+    signal = pfs.impulse(
+        3, np.zeros(delay_shape, dtype=int), np.ones(amp_shape))
+    npt.assert_allclose(signal.time[..., 0], np.ones(amp_shape))
+    npt.assert_allclose(np.sum(signal.time, axis=-1), np.ones(amp_shape))
 
 
 def test_impulse_float():
