@@ -108,13 +108,17 @@ def test_impulse_different_cshapes(delay_shape, amp_shape,):
     npt.assert_allclose(np.sum(signal.time, axis=-1), desired)
 
 
-@pytest.mark.parametrize("amp_shape", [(1,), (1, 1), (2, 2), (2, 1), (1, 2)])
-@pytest.mark.parametrize("phase_shape", [(1,), (1, 1), (2, 2), (2, 1), (1, 2)])
-def test_sine_different_cshapes(amp_shape, phase_shape,):
+@pytest.mark.parametrize("frequency_shape", [
+    (1,), (1, 1), (2, 2), (2, 1), (1, 2)])
+@pytest.mark.parametrize("amp_shape", [
+    (1,), (1, 1), (2, 2), (2, 1), (1, 2)])
+@pytest.mark.parametrize("phase_shape", [
+    (1,), (1, 1), (2, 2), (2, 1), (1, 2)])
+def test_sine_different_cshapes(frequency_shape, amp_shape, phase_shape,):
     """test impulse different cshapes."""
     signal = pfs.sine(
-        1000, 5, np.ones(amp_shape), np.zeros(phase_shape))
-    desired_cshape = np.broadcast_shapes(amp_shape, phase_shape)
+        np.ones(frequency_shape), 5, np.ones(amp_shape), np.zeros(phase_shape))
+    desired_cshape = np.broadcast_shapes(frequency_shape, amp_shape, phase_shape)
     npt.assert_allclose(signal.cshape, desired_cshape)
 
 

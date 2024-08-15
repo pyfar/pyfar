@@ -32,12 +32,11 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
     Notes
     -----
-    The parameters `frequency`, `amplitude`, and `phase` are
-    Numpy broadcasting :doc:`broadcasted<numpy:user/basics.broadcasting>`
-    to the parameter that contains the most elements. For example `frequency`
-    could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)``, and `phase`
-    could be a scalar. In this case all parameters would be broadcasted to a
-    shape of ``(2, 4)``.
+    The parameters `frequency`, `amplitude`, and `phase` are broadcasted using
+    the :doc:`numpy rules<numpy:user/basics.broadcasting>`. For example
+    `frequency` could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)``,
+    and `phase` could be a scalar. In this case all parameters would be
+    broadcasted to a shape of ``(2, 4)``.
     """
 
     # check and match the cshape
@@ -98,7 +97,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
         Length of the impulse in samples
     delay : double, array like, optional
         Delay in samples. The default is ``0``.
-    amplitude : double, optional
+    amplitude : double, array like, optional
         The peak amplitude of the impulse. The default is ``1``.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
@@ -113,9 +112,8 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
     Notes
     -----
-    The parameters `delay` and `amplitude` are
-    :doc:`broadcasted<numpy:user/basics.broadcasting>`
-    to the parameter that contains the most elements. For example `delay`
+    The parameters `delay` and `amplitude` are broadcasted using the
+    :doc:`numpy rules<numpy:user/basics.broadcasting>`. For example `delay`
     could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)`` or a scalar.
     In this case all parameters would be broadcasted to a shape of ``(2, 4)``.
     """
@@ -338,7 +336,7 @@ def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
 def _match_shape(*args):
     """
     Match the shape of *args to the shape of the arg with the largest size
-    using np.broadcast_to()
+    using np.broadcast_shapes and np.broadcast_to()
 
     Parameters
     ----------
