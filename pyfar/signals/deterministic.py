@@ -354,10 +354,10 @@ def _match_shape(*args):
         (*arg_1, *arg_2, ..., *arg_N)
     """
 
-    # find the shape of the largest array
+    # broadcast shapes
     shape = np.broadcast_shapes(*[np.asarray(arg).shape for arg in args])
 
-    # try to match the shape
+    # match the shape
     result = []
     for arg in args:
         arg = np.broadcast_to(arg, shape)
