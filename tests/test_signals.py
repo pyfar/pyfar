@@ -114,8 +114,8 @@ def test_sine_different_cshapes(amp_shape, phase_shape,):
     """test impulse different cshapes."""
     signal = pfs.sine(
         1000, 5, np.ones(amp_shape), np.zeros(phase_shape))
-    desired = np.broadcast_shapes(amp_shape, phase_shape)
-    npt.assert_allclose(signal.cshape, desired)
+    desired_cshape = np.broadcast_shapes(amp_shape, phase_shape)
+    npt.assert_allclose(signal.cshape, desired_cshape)
 
 
 def test_impulse_float():
