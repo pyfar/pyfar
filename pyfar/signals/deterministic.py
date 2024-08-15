@@ -355,13 +355,7 @@ def _match_shape(*args):
     """
 
     # find the shape of the largest array
-    size = 1
-    shape = (1, )
-    for arg in args:
-        arg = np.asarray(arg)
-        if (arg.size > size) or (arg.ndim > 1):
-            size = arg.size
-            shape = arg.shape
+    shape = np.broadcast_shapes(*[np.asarray(arg).shape for arg in args])
 
     # try to match the shape
     result = []
