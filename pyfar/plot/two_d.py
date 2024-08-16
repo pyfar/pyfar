@@ -95,10 +95,11 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    mode : str
+    mode : str, optional
         ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
-        part or absolute value of a complex-valued time domain signal is
-        plotted. The default is ``real``.
+        part or absolute value of the time data is plotted. ``'imag'`` and
+        ``'abs'``` can only be used for complex Signals.
+        The default is ``real``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -236,8 +237,11 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    side : str
-        ``left`` or ``right`` to specify which side of a spectrum is plotted.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -369,8 +373,11 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    side : str
-        ``left`` or ``right`` to specify which side of a spectrum is plotted.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -510,8 +517,11 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    side : str
-        ``left`` or ``right`` to specify which side of a spectrum is plotted.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -669,8 +679,11 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
         part or absolute value of a complex-valued time domain signal is
         plotted. The default is ``real``.
-    side : str
-        ``left`` or ``right`` to specify which side of a spectrum is plotted.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -813,8 +826,11 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    side : str
-        ``left`` or ``right`` to specify which side of a spectrum is plotted.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -965,8 +981,11 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    side : str
-        ``left`` or ``right`` to specify which side of a spectrum is plotted.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
