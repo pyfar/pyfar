@@ -353,13 +353,13 @@ def _match_shape(*args):
     """
 
     # broadcast shapes
-    shape = np.broadcast_shapes(*[np.asarray(arg).shape for arg in args])
+    shape = np.broadcast_shapes(*[np.atleast_1d(arg).shape for arg in args])
 
     # match the shape
     result = []
     for arg in args:
         arg = np.broadcast_to(arg, shape)
         arg.setflags(write=1)
-        result.append(np.atleast_1d(arg))
+        result.append(arg)
 
     return shape, result
