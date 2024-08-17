@@ -67,8 +67,7 @@ def group_delay(signal, frequencies=None, method='fft'):
     Returns
     -------
     group_delay : numpy array
-        Frequency dependent group delay in samples. The array is flattened if
-        a single channel signal was passed to the function.
+        Frequency dependent group delay in samples.
 
     References
     ----------

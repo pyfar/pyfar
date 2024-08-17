@@ -111,7 +111,7 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
         grp[0, :], impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
 
-@pytest.mark.parametrize("shape", [(4, 1), (1, 4)])
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_group_delay_cshape(shape):
     """Test if group delay function keeps cshape of signals of shape `m x n`
      with `m = 1` or `n = 1`."""
@@ -120,7 +120,7 @@ def test_group_delay_cshape(shape):
 
     grp = dsp.group_delay(impulse)
 
-    assert grp.shape[:2] == impulse.cshape
+    assert grp.shape == (*impulse.cshape, grp.shape[-1])
 
 
 def test_linear_phase():
@@ -666,7 +666,7 @@ def test_impulse_response_delay_multidim():
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
-@pytest.mark.parametrize("shape", [(4, 1), (1, 4)])
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_impulse_response_delay_cshape(shape):
     """Test if find_impulse_response_delay function keeps cshape of signals of
     shape `m x n` with `m = 1` or `n = 1`."""
@@ -778,7 +778,7 @@ def test_impulse_response_start_multidim():
     npt.assert_allclose(start_sample_est, start_samples - 1)
 
 
-@pytest.mark.parametrize("shape", [(4, 1), (1, 4)])
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_impulse_response_start_cshape(shape):
     """Test if find_impulse_response_start function keeps cshape of signals of
     shape `m x n` with `m = 1` or `n = 1`."""
