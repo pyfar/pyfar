@@ -116,9 +116,10 @@ def group_delay(signal, frequencies=None, method='fft'):
         raise ValueError(
             "Invalid method, needs to be either 'scipy' or 'fft'.")
 
-    # flatten in numpy fashion if a single channel is returned
-    if signal.cshape == (1, ):
-        group_delay = np.squeeze(group_delay)
+    # squeeze last dimension. If only one frequency is given shape (1, ) is
+    # obtained instead of (1, 1)
+    if frequencies is not None and frequencies.size == 1:
+        group_delay = np.squeeze(group_delay, axis = -1)
 
     return group_delay
 
@@ -1302,10 +1303,6 @@ def find_impulse_response_delay(impulse_response, N=1):
 
         start_samples[ch] = start_sample
 
-    # squeeze if signal has only one channel
-    if impulse_response.cshape == (1, ):
-        start_samples = start_samples.squeeze()
-
     return start_samples
 
 
@@ -1433,10 +1430,6 @@ def find_impulse_response_start(
                 warnings.warn(
                     f'No values below threshold found found for channel {ch}',
                     'defaulting to 0')
-
-    # squeeze if start sample is a single channel value
-    if start_sample.shape == (1,):
-        start_sample = np.squeeze(start_sample)
 
     return start_sample
 
