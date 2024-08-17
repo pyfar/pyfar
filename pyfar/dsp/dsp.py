@@ -67,8 +67,7 @@ def group_delay(signal, frequencies=None, method='fft'):
     Returns
     -------
     group_delay : numpy array
-        Frequency dependent group delay in samples. The array is flattened if
-        a single channel signal was passed to the function.
+        Frequency dependent group delay in samples.
 
     References
     ----------
@@ -116,9 +115,10 @@ def group_delay(signal, frequencies=None, method='fft'):
         raise ValueError(
             "Invalid method, needs to be either 'scipy' or 'fft'.")
 
-    # flatten in numpy fashion if a single channel is returned
-    if signal.cshape == (1, ):
-        group_delay = np.squeeze(group_delay)
+    # squeeze last dimension. If only one frequency is given, shape (1, ) is
+    # returned instead of (1, 1)
+    if frequencies is not None and frequencies.size == 1:
+        group_delay = np.squeeze(group_delay, axis=-1)
 
     return group_delay
 
@@ -1430,7 +1430,7 @@ def find_impulse_response_start(
                     f'No values below threshold found found for channel {ch}',
                     'defaulting to 0')
 
-    return np.squeeze(start_sample)
+    return start_sample
 
 
 @rename_arg({"freq_range": "frequency_range"},
