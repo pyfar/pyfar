@@ -115,8 +115,7 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
 def test_group_delay_cshape(shape):
     """Test if group delay function keeps cshape of signals of shape `m x n`
      with `m = 1` or `n = 1`."""
-    delay = np.random.randint(0, 200, (shape))
-    impulse = pf.signals.impulse(256, delay, np.ones(shape))
+    impulse = pf.signals.impulse(256, 0, np.ones(shape))
 
     grp = dsp.group_delay(impulse)
 
