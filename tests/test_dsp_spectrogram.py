@@ -57,7 +57,7 @@ def test_normalize(sine):
     assert pf.dsp.spectrogram(sine, normalize=False)[-1].max() > 1
 
 
-@pytest.mark.parametrize('shape', [(2, 1), (1, 2), (1,)])
+@pytest.mark.parametrize('shape', [(2, 1), (1, 2), (1,), (1, 1)])
 def test_spectrogram_shape(shape):
     """Test cshape of spectrogram returns"""
     impulse = pf.signals.impulse(2048, 0, np.ones((shape)))
