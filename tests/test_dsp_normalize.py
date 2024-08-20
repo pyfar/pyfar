@@ -54,6 +54,19 @@ def test_domains_normalization(is_complex):
     npt.assert_allclose(np.max(np.abs(freq.freq)), 1)
 
 
+def test_auto_domain_normalization():
+    """Test for normalization with auto domain."""
+    signal = pf.Signal([1, 3, 0], 10)
+    time_data = pf.TimeData([1, 3, 0], [0, 1, 4])
+    freq_data = pf.FrequencyData([2, 0, 1.5], [10, 100, 1000])
+
+    assert pf.dsp.normalize(signal) == pf.dsp.normalize(signal, domain='time')
+    assert pf.dsp.normalize(time_data) == pf.dsp.normalize(time_data,
+                                                           domain='time')
+    assert pf.dsp.normalize(freq_data) == pf.dsp.normalize(freq_data,
+                                                           domain='freq')
+
+
 @pytest.mark.parametrize('unit, limit1, limit2', (
                          [None, (0, 1000), (1000, 2000)],
                          ['s', (0, 0.5), (0.5, 1)]))
@@ -135,7 +148,8 @@ def test_error_raises():
                                    "'pyfar.classes.audio.TimeData'>'")):
         pf.dsp.normalize(pf.TimeData([1, 1, 1], [1, 2, 3]), domain='freq')
 
-    with raises(ValueError, match=("domain must be 'time' or 'freq'.")):
+    with raises(ValueError, match=("domain must be 'time', 'freq' or 'auto' "
+                                   "but is 'invalid_domain'.")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='invalid_domain')
 
     with raises(ValueError, match=("reference_method must be 'max', 'mean',")):
