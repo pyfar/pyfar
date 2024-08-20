@@ -221,22 +221,22 @@ def test_bell(impulse):
         x = pfilt.bell(impulse, 1000, 10, 2, quality_warp='nope')
 
 
-def test_shelve(impulse):
+def test_shelf(impulse):
     # Uses third party code.
     # We thus only test the functionality not the results
 
-    shelves = [pfilt.low_shelve, pfilt.high_shelve]
+    shelves = [pfilt.low_shelf, pfilt.high_shelf]
     kinds = ['Low', 'High']
 
-    for shelve, kind in zip(shelves, kinds):
+    for shelf, kind in zip(shelves, kinds):
         # Filter object
-        f_obj = shelve(None, 1000, 10, 2, sampling_rate=44100)
+        f_obj = shelf(None, 1000, 10, 2, sampling_rate=44100)
         assert isinstance(f_obj, pclass.FilterIIR)
-        assert f_obj.comment == (f"{kind}-shelve of order 2 and type I with "
+        assert f_obj.comment == (f"{kind}-shelf of order 2 and type I with "
                                  "10 dB gain at 1000 Hz.")
 
         # Filter
-        x = shelve(impulse, 1000, 10, 2)
+        x = shelf(impulse, 1000, 10, 2)
         y = f_obj.process(impulse)
         assert isinstance(x, Signal)
         npt.assert_allclose(x.time, y.time)
@@ -244,15 +244,15 @@ def test_shelve(impulse):
         # ValueError
         with pytest.raises(ValueError):
             # pass signal and sampling rate
-            x = shelve(impulse, 1000, 10, 2, sampling_rate=44100)
+            x = shelf(impulse, 1000, 10, 2, sampling_rate=44100)
         with pytest.raises(ValueError):
             # pass no signal and no sampling rate
-            x = shelve(None, 1000, 10, 2)
+            x = shelf(None, 1000, 10, 2)
         # check wrong input arguments
         with pytest.raises(ValueError):
-            x = shelve(impulse, 1000, 10, 2, shelve_type='nope')
+            x = shelf(impulse, 1000, 10, 2, shelf_type='nope')
         with pytest.raises(ValueError):
-            x = shelve(impulse, 1000, 10, 3)
+            x = shelf(impulse, 1000, 10, 3)
 
 
 def test_crossover(impulse):
