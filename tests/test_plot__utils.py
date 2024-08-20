@@ -165,17 +165,19 @@ def test_assert_and_match_data_to_side():
     signal.fft_norm = 'none'
     signal.complex = True
 
-    data, frequencies = plot._utils._assert_and_match_data_to_side(
+    data, frequencies, _xlabel = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='left')
 
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]
+    assert _xlabel == "Frequency in Hz (left)"
 
-    data, frequencies = plot._utils._assert_and_match_data_to_side(
+    data, frequencies, _xlabel = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='right')
 
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]
+    assert _xlabel == "Frequency in Hz (right)"
 
 
 def test_assert_and_match_data_to_side_freq():
@@ -187,8 +189,9 @@ def test_assert_and_match_data_to_side_freq():
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='left')
 
-    data, frequencies = plot._utils._assert_and_match_data_to_side(
+    data, frequencies, _xlabel = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='right')
+
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]
 
@@ -199,19 +202,25 @@ def test_assert_and_match_data_to_side_freq():
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='right')
 
-    data, frequencies = plot._utils._assert_and_match_data_to_side(
+    data, frequencies, _xlabel = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='left')
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]
 
 
 @pytest.mark.parametrize("mode, ylabel", [('real', 'Amplitude'),
+                                          ('real', 'Amplitude (real)'),
                                           ('imag', 'Amplitude (imaginary)'),
                                           ('abs', 'Amplitude (absolute)')])
 def test_assert_and_match_data_to_mode(mode, ylabel):
     signal = pf.signals.sine(20, 32)
 
+    if not ylabel == 'Amplitude':
+        signal.fft_norm = 'none'
+        signal.complex = True
+
     data, _ylabel = plot._utils._assert_and_match_data_to_mode(signal.time,
+                                                               signal,
                                                                mode)
 
     if mode == 'real':

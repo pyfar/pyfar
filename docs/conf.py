@@ -107,6 +107,9 @@ html_favicon = '_static/favicon.ico'
 
 # -- HTML theme options
 # https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/layout.html
+html_sidebars = {
+  "pyfar": []
+}
 
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
@@ -125,6 +128,8 @@ html_theme_options = {
     "show_toc_level": 3,  # Show all subsections of notebooks
     "secondary_sidebar_items": ["page-toc"],  # Omit 'show source' link that that shows notebook in json format
     "navigation_with_keys": True,
+    # Configure navigation depth for section navigation
+    "navigation_depth": 1,
 }
 
 html_context = {

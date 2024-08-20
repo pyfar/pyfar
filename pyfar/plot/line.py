@@ -50,10 +50,11 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    mode : str
+    mode : str, optional
         ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
-        part or absolute value of a complex-valued time domain signal is
-        plotted. The default is ``real``.
+        part or absolute value of the time data is plotted. ``'imag'`` and
+        ``'abs'``` can only be used for complex Signals.
+        The default is ``real``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -126,8 +127,11 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
-    side : str
-        ``left`` or ``right`` to specify which side of a spectrum is plotted.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -193,6 +197,11 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -265,6 +274,11 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -355,9 +369,16 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
         :py:data:`matplotlib.style.available`. Pass a dictionary to set
         specific plot parameters, for example
-        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
-        ``style = {}`` to use the currently active plotstyle. The default is
-        ``light``.
+    mode : str
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the time data is plotted.
+        ``'imag'`` and ``'abs'``` can only be used for complex Signals.
+        The default is ``'real'``.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -439,6 +460,11 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are forwarded to matplotlib.pyplot.plot
 
@@ -525,6 +551,11 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 

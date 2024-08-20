@@ -28,8 +28,8 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         ymin = ymax - 100
     else:
         data = signal.time.T
-    # get data defined in 'show_real_imag_abs'
-    data, y_label = _utils._assert_and_match_data_to_mode(data, mode)
+    # get data defined in 'mode'
+    data, y_label = _utils._assert_and_match_data_to_mode(data, signal, mode)
 
     # auto detect the time unit
     if unit in [None, "auto"]:
@@ -80,7 +80,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     else:
         data = np.abs(signal.freq)
 
-    data, frequencies = _utils._assert_and_match_data_to_side(
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(
         data, signal, side)
 
     # prepare figure
@@ -91,7 +91,8 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         _utils._set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
     else:
         ax.set_ylabel("Magnitude")
-    ax.set_xlabel("Frequency in Hz")
+    ax.set_xlabel(xlabel)
+
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
                       frequencies[-1], ax.get_xlim())
 
@@ -127,7 +128,7 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     phase_data = dsp.phase(signal, deg=deg, unwrap=unwrap)
 
-    phase_data, frequencies = _utils._assert_and_match_data_to_side(
+    phase_data, frequencies, xlabel = _utils._assert_and_match_data_to_side(
         phase_data, signal, side)
 
     # Construct the correct label string
@@ -181,7 +182,8 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
             ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 4))
 
     # prepare figure
-    ax.set_xlabel("Frequency in Hz")
+    ax.set_xlabel(xlabel)
+
     ax.set_ylabel(ylabel_string)
     ax.grid(True, 'both')
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
@@ -225,12 +227,13 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, side='right',
         factor, unit = _utils._deal_time_units(unit)
         data = data / signal.sampling_rate * factor
 
-    data, frequencies = _utils._assert_and_match_data_to_side(
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(
         data, signal, side)
 
     # prepare figure
     _, ax = _utils._prepare_plot(ax)
-    ax.set_xlabel("Frequency in Hz")
+    ax.set_xlabel(xlabel)
+
     ax.set_ylabel(f"Group delay in {unit}")
     ax.grid(True, 'both')
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),

@@ -1,6 +1,9 @@
-=====
-pyfar
-=====
+.. raw:: html
+
+    <h1 align="center">
+    <img src="https://github.com/pyfar/gallery/raw/main/docs/resources/logos/pyfar_logos_fixed_size_pyfar.png" width="300">
+    </h1><br>
+
 
 .. image:: https://badge.fury.io/py/pyfar.svg
     :target: https://badge.fury.io/py/pyfar
@@ -14,8 +17,9 @@ pyfar
 
 
 The python package for acoustics research (pyfar) offers classes to store
-audio data, filters, coordinates, and orientations. It also contains common
-functions for digital audio signal processing and plotting audio signals.
+audio data, filters, coordinates, and orientations. It also contains functions
+for reading and writing audio data, as well as functions for processing,
+generating, and plotting audio signals.
 
 Getting Started
 ===============
@@ -51,7 +55,7 @@ Check out the `contributing guidelines`_ if you want to become part of pyfar.
 .. _pyfar example gallery: https://pyfar-gallery.readthedocs.io/en/latest/examples_gallery.html
 .. _pyfar documentation: https://pyfar.readthedocs.io
 .. _pyfar.org: https://pyfar.org
-.. _SoundFile: https://pysoundfile.readthedocs.io
+.. _SoundFile: https://python-soundfile.readthedocs.io
 .. _libsndfile: http://www.mega-nerd.com/libsndfile/
 .. _help section: https://pyfar-gallery.readthedocs.io/en/latest/help
 .. _contributing guidelines: https://pyfar.readthedocs.io/en/stable/contributing.html
