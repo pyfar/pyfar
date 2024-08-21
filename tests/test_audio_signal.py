@@ -395,6 +395,7 @@ def test_magic_getitem_complex():
     """Test slicing operations by the magic function __getitem__."""
     time = np.arange(2 * 3 * 4, dtype=complex).reshape((2, 3, 4))
     signal = Signal(time, 44100, domain='time', is_complex=True)
+    assert signal[0].complex
     npt.assert_allclose(signal[0]._data, time[0])
 
 
