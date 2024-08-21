@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+import re
 from pyfar import TransmissionMatrix
 from pyfar import FrequencyData
 
@@ -51,14 +52,32 @@ def test_correct_input_formats_impedance(impedance_type,
     elif impedance_type == "output":
         tmatrix_random_data.output_impedance(Zl)
 
-def test_correct_input_formats_TF_quantity1(load_impedance_with_correct_format,
+@pytest.fixture(scope="module")
+def simple_tmat():
+    return TransmissionMatrix(np.ones([2,2,1]), 100)
+@pytest.mark.parametrize("quantity_indices",
+                         [(0,0), (0,1), (1,0), (1,1), [0,0], np.array([1,0])])
+def test_TF_valid_quantity_input(quantity_indices, simple_tmat):
+    simple_tmat.transfer_function(quantity_indices, np.inf)
+
+@pytest.mark.parametrize("quantity_indices", [1, "string", [1,1,1]])
+def test_TF_quantity_input_wrong_numel(quantity_indices, simple_tmat):
+    error_msg = re.escape("'quantity_indices' must be an array-like "
+                          "type with two elements.")
+    with pytest.raises(ValueError, match=error_msg):
+        simple_tmat.transfer_function(quantity_indices, np.inf)
+
+@pytest.mark.parametrize("quantity_indices", [(-1,0), (0, 1.9), (0, "string")])
+def test_TF_quantity_input_wrong_ints(quantity_indices, simple_tmat):
+    error_msg = re.escape("'quantity_indices' must contain two "
+                          "integers between 0 and 1.")
+    with pytest.raises(ValueError, match=error_msg):
+        simple_tmat.transfer_function(quantity_indices, np.inf)
+
+def test_TF_correct_load_input_format(load_impedance_with_correct_format,
                                             tmatrix_random_data):
     Zl = load_impedance_with_correct_format
-    tmatrix_random_data.transfer_function_quantity1(Zl)
-def test_correct_input_formats_TF_quantity2(load_impedance_with_correct_format,
-                                            tmatrix_random_data):
-    Zl = load_impedance_with_correct_format
-    tmatrix_random_data.transfer_function_quantity2(Zl)
+    tmatrix_random_data.transfer_function((1,1), Zl)
 
 
 #---------------
