@@ -30,7 +30,7 @@ test_requirements = [
     'watchdog',
     'flake8',
     'coverage',
-    'Sphinx',
+    'Sphinx<8',
     'twine'
 ]
 

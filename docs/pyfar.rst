@@ -2,29 +2,73 @@ pyfar
 =====
 
 .. toctree::
-   :caption: Getting Started
-   :maxdepth: 2
+   :maxdepth: 3
+   :hidden:
 
    readme
-
-
-.. toctree::
-   :caption: Documentation
-   :maxdepth: 2
-
-   classes
-   modules
-
-
-.. toctree::
-   :caption: Contributing
-   :maxdepth: 1
-
+   api_reference
    contributing
-
-
-.. toctree::
-   :caption: Other
-   :maxdepth: 1
-
    history
+
+
+Python package for acoustics research
+
+The python package for acoustics research (pyfar) offers classes to store
+audio data, filters, coordinates, and orientations. It also contains functions
+for reading and writing audio data, as well as functions for processing,
+generating, and plotting audio signals.
+
+.. grid:: 1 2 2 2
+    :gutter: 4
+
+    .. grid-item-card::
+        :link: readme.html
+        :text-align: center
+        :padding: 0 0 3 3
+
+        **Getting Started**
+        ^^^^
+
+        .. raw:: html
+
+            <i class="fa-solid fa-rocket icon-style"></i>
+
+
+    .. grid-item-card::
+        :link: api_reference
+        :link-type: ref
+        :text-align: center
+        :padding: 0 0 3 3
+
+        **API Reference**
+        ^^^^
+
+        .. raw:: html
+
+            <i class="fa-solid fa-file-lines icon-style"></i>
+
+
+    .. grid-item-card::
+        :link: contributing.html
+        :text-align: center
+        :padding: 0 0 3 3
+
+        **Contributing**
+        ^^^^
+
+        .. raw:: html
+
+            <i class="fa-solid fa-pen icon-style"></i>
+
+    .. grid-item-card::
+        :link: history.html
+        :text-align: center
+        :padding: 0 0 3 3
+
+        **History**
+        ^^^^
+
+        .. raw:: html
+
+            <i class="fa-solid fa-clock-rotate-left icon-style">
+            </i>
