@@ -314,12 +314,14 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def transfer_function(self, quantity_indices, Zl: complex | FrequencyData) -> FrequencyData:
-        """Returns the transfer function (output/input) for specified quantities and given load impedance.
+    def transfer_function(self, quantity_indices, Zl: complex | FrequencyData) -> FrequencyData: #noqa 501
+        """Returns the transfer function (output/input) for specified quantities and
+        given load impedance.
 
-        The transfer function (TF) is the relation between an output and input quantity of modelled two-port
-        and depends on the load impedance at the output. Since there are two quantities at input and output
-        respectively, four transfer functions exist in total. The first usually refers to the "voltage-like"
+        The transfer function (TF) is the relation between an output and input quantity
+        of modelled two-port and depends on the load impedance at the output. Since
+        there are two quantities at input and output respectively, four transfer
+        functions exist in total. The first usually refers to the "voltage-like"
         quantity (Q1) whereas the second refers to the "current-like" quantity (Q2).
 
         See Equation (2-1) in Reference [1]_:
@@ -331,9 +333,9 @@ class TransmissionMatrix(FrequencyData):
         Parameters
         ----------
         quantity_indices : array_like (int, int)
-            Array-like object with two integer elements referring to the indices of the utilized
-            quantity (0 = first and 1 = second quantity) at the output and input. For example,
-            (1,0) refers to the TF with Q2_out / Q1_in.
+            Array-like object with two integer elements referring to the indices of the
+            utilized quantity (0 = first and 1 = second quantity) at the output and
+            input. For example, (1,0) refers to the TF with Q2_out / Q1_in.
         Zl : scalar | FrequencyData
             The load impedance data as scalar or FrequencyData. The shape must match
             the entries of the T-matrix, i.e. shape(tmat.A.freq) == shape(Zl.freq) or
@@ -347,10 +349,12 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(quantity_indices) or not len(quantity_indices) == 2:
-            raise ValueError("'quantity_indices' must be an array-like type with two elements.")
+            raise ValueError("'quantity_indices' must be an array-like type "
+                             "with two elements.")
         quantity_indices = np.array(quantity_indices)
         if not all(np.logical_or(quantity_indices == 0, quantity_indices == 1)):
-            raise ValueError("'quantity_indices' must contain two integers between 0 and 1.")
+            raise ValueError("'quantity_indices' must contain two integers "
+                             "between 0 and 1.")
 
         if quantity_indices[0] == 0 and quantity_indices[1] == 0:
             return self._transfer_function_q1q1(Zl)
