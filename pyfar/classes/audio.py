@@ -420,7 +420,8 @@ class TimeData(_Audio):
     def _return_item(self, data):
         """Return new :py:func:`TimeData` object with data."""
         item = TimeData(
-            data, times=self.times, comment=self.comment)
+            data, times=self.times, comment=self.comment,
+            is_complex=self.complex)
         return item
 
     def __repr__(self):
