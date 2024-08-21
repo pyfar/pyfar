@@ -358,6 +358,9 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     frequencies, times, spectrogram = dsp.spectrogram(
         signal[first_channel], window, window_length, window_overlap_fct)
 
+    spectrogram, frequencies, ylabel = _utils._assert_and_match_data_to_side(
+                                            spectrogram, signal, side)
+
     # get magnitude data in dB
     if dB:
         if log_prefix is None:
@@ -381,7 +384,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     qm = ax[0].pcolormesh(times, frequencies, spectrogram, **kwargs)
 
     # Adjust axes:
-    ax[0].set_ylabel('Frequency in Hz')
+    ax[0].set_ylabel(ylabel)
     ax[0].set_xlabel(f'Time in {unit}')
     ax[0].set_xlim((times[0], times[-1]))
     ax[0].set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
