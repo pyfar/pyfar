@@ -314,15 +314,26 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def transfer_function_quantity1(self, Zl: complex | FrequencyData) -> FrequencyData:
-        """Returns the transfer function of the first quantity (output/input).
+    def transfer_function(self, quantity_indices, Zl: complex | FrequencyData) -> FrequencyData:
+        """Returns the transfer function (output/input) for specified quantities and given load impedance.
 
-        The TF is calculated based on the load impedance at the output.
-        The first quantity usually refers to voltage, force, pressure, etc.
-        See Equation (2-1) in Reference [1]_: Defined as e2/e1 using i2 = e2/Zl.
+        The transfer function (TF) is the relation between an output and input quantity of modelled two-port
+        and depends on the load impedance at the output. Since there are two quantities at input and output
+        respectively, four transfer functions exist in total. The first usually refers to the "voltage-like"
+        quantity (Q1) whereas the second refers to the "current-like" quantity (Q2).
+
+        See Equation (2-1) in Reference [1]_:
+        - Q1_out / Q1_in => Defined as e2/e1 using i2 = e2/Zl.
+        - Q2_out / Q2_in => Defined as i2/i1 using e2 = i2*Zl.
+        - Q2_out / Q1_in => Defined as i2/e1 = (e2/e1)/Zl.
+        - Q1_out / Q2_in => Defined as e2/i1 = (i2/i1)*Zl.
 
         Parameters
         ----------
+        quantity_indices : array_like (int, int)
+            Array-like object with two integer elements referring to the indices of the utilized
+            quantity (0 = first and 1 = second quantity) at the output and input. For example,
+            (1,0) refers to the TF with Q2_out / Q1_in.
         Zl : scalar | FrequencyData
             The load impedance data as scalar or FrequencyData. The shape must match
             the entries of the T-matrix, i.e. shape(tmat.A.freq) == shape(Zl.freq) or
@@ -335,6 +346,23 @@ class TransmissionMatrix(FrequencyData):
             identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
 
         """
+        if np.isscalar(quantity_indices) or not len(quantity_indices) == 2:
+            raise ValueError("'quantity_indices' must be an array-like type with two elements.")
+        quantity_indices = np.array(quantity_indices)
+        if not all(np.logical_or(quantity_indices == 0, quantity_indices == 1)):
+            raise ValueError("'quantity_indices' must contain two integers between 0 and 1.")
+
+        if quantity_indices[0] == 0 and quantity_indices[1] == 0:
+            return self._transfer_function_q1q1(Zl)
+        if quantity_indices[0] == 1 and quantity_indices[1] == 1:
+            return self._transfer_function_q2q2(Zl)
+        if quantity_indices[0] == 1 and quantity_indices[1] == 0:
+            return self._transfer_function_q2q1(Zl)
+        if quantity_indices[0] == 0 and quantity_indices[1] == 1:
+            return self._transfer_function_q1q2(Zl)
+
+    def _transfer_function_q1q1(self, Zl: complex | FrequencyData) -> FrequencyData:
+        """Returns the transfer function of the first quantity (output/input)."""
         idx_inf, __, __ = self._check_for_inf(Zl)
         denominator = (self.A * Zl + self.B)
         nominator = Zl*FrequencyData(np.ones_like(denominator.freq), self.frequencies)
@@ -348,27 +376,18 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def transfer_function_quantity2(self, Zl: complex | FrequencyData) -> FrequencyData:
-        """Returns the transfer function of the second quantity (output/input).
+    def _transfer_function_q2q1(self, Zl: complex | FrequencyData) -> FrequencyData:
+        """Returns the transfer function Q2_out / Q1_in."""
+        denominator = (self.A * Zl + self.B)
+        nominator = FrequencyData(np.ones_like(denominator.freq), self.frequencies)
 
-        The TF is calculated based on the load impedance at the output. The second
-        quantity usually refers to some flow or movement, e.g. current, velocity,...
-        See Equation (2-1) in Reference [1]_: Defined as i2/i1 using e2 = i2*Zl.
+        # In cases where the denominator is zero, e.g. Zl = 0 & B = 0,
+        # are related to short-circuated outputs (undefined current) => NaN
+        denominator.freq[denominator.freq == 0] = np.nan
+        return nominator / denominator
 
-        Parameters
-        ----------
-        Zl : scalar | FrequencyData
-            The load impedance data as scalar or FrequencyData. The shape must match
-            the entries of the T-matrix, i.e. shape(tmat.A.freq) == shape(Zl.freq) or
-            must be broadcastable.
-
-        Returns
-        -------
-        TF : FrequencyData
-            A FrequencyData object with the resulting transfer function. The shape is
-            identical to the entries of the T-matrix, i.e. shape(tmat.A) == shape(TF).
-
-        """
+    def _transfer_function_q2q2(self, Zl: complex | FrequencyData) -> FrequencyData:
+        """Returns the transfer function of the second quantity (output/input)."""
         denominator = (self.C * Zl + self.D)
         nominator = FrequencyData(np.ones_like(denominator.freq), self.frequencies)
 
@@ -382,10 +401,20 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    # def transfer_function_quantity1_to_quantity2(self, Zl):
-    #     pass
-    # def transfer_function_quantity2_to_quantity1(self, Zl):
-    #     pass
+    def _transfer_function_q1q2(self, Zl: complex | FrequencyData) -> FrequencyData:
+        """Returns the transfer function Q1_out / Q2_in."""
+        denominator = (self.C * Zl + self.D)
+        nominator = Zl*FrequencyData(np.ones_like(denominator.freq), self.frequencies)
+
+        # Admittance form for Zl = inf
+        idx_inf, __, __  = self._check_for_inf(Zl)
+        nominator.freq[idx_inf] = 1
+        denominator.freq[idx_inf] = (self.C + self.D / Zl).freq[idx_inf]
+
+        # In cases where the denominator is zero, e.g. Zl = inf & C = 0,
+        # are related to non-physical cases (e.g. undefined current/voltage) => NaN
+        denominator.freq[denominator.freq == 0] = np.nan
+        return nominator / denominator
 
     @classmethod
     def _create_abcd_matrix_broadcast(cls, abcd_data: FrequencyData,
