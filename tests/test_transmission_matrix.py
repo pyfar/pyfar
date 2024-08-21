@@ -199,3 +199,22 @@ def test_tmatrix_create_gyrator(transducer_contant, frequencies):
     tmat_obj = TransmissionMatrix.create_identity(frequencies) @ tmat
     Zin = tmat_obj.input_impedance(Zl)
     npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
+
+@pytest.fixture(scope="module")
+def simple_tmat():
+    return TransmissionMatrix(np.ones([2,2,1]), 100)
+@pytest.mark.parametrize("quantity_indices", [(0,0), (0,1), (1,0), (1,1), [0,0], np.array([1,0])])
+def test_tmatrix_transfer_function_valid_input(quantity_indices, simple_tmat):
+    simple_tmat.transfer_function(quantity_indices, np.inf)
+
+@pytest.mark.parametrize("quantity_indices", [1, "string", [1,1,1]])
+def test_tmatrix_transfer_function_input_wrong_numel(quantity_indices, simple_tmat):
+    error_msg = re.escape("'quantity_indices' must be an array-like type with two elements.")
+    with pytest.raises(ValueError, match=error_msg):
+        simple_tmat.transfer_function(quantity_indices, np.inf)
+
+@pytest.mark.parametrize("quantity_indices", [(-1,0), (0, 1.9), (0, "string")])
+def test_tmatrix_transfer_function_input_wrong_ints(quantity_indices, simple_tmat):
+    error_msg = re.escape("'quantity_indices' must contain two integers between 0 and 1.")
+    with pytest.raises(ValueError, match=error_msg):
+        simple_tmat.transfer_function(quantity_indices, np.inf)
