@@ -128,7 +128,7 @@ class TransmissionMatrix(FrequencyData):
         order = np.roll(order, -2)  # Now T-axes indices are [-2, -1]; freq axis at [-3]
         order[[-1, -3]] = order[[-3, -1]]  # Correct freq axis index
         order[[-3, -2]] = order[[-2, -3]]  # Correct order of T-matrix dimensions
-        data = np.permute_dims(data, order)
+        data = np.transpose(data, order)
 
         return cls(data, frequencies)
 
