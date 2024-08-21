@@ -14,7 +14,8 @@ def frequencies():
 #| INPUT TESTS |
 #---------------
 @pytest.fixture(scope="module", params=
-                ["input_impedance", "output_impedance", "TF_voltage", "TF_current"])
+                ["input_impedance", "output_impedance",
+                 "TF_voltage", "TF_current"])
 def parameter_function(request):
     return request.param
 @pytest.fixture(scope="module", params=
@@ -28,11 +29,13 @@ def abcd_cshape(request):
         return [4,5]
 @pytest.fixture(scope="module")
 def tmatrix_random_data(abcd_cshape, frequencies):
-    data = np.random.uniform(0.0001, 2000, abcd_cshape + [2,2, len(frequencies)])
+    data = np.random.uniform(0.0001, 2000,
+                             abcd_cshape + [2,2, len(frequencies)])
     return TransmissionMatrix(data, frequencies)
 
 @pytest.fixture(scope="module", params=
-                ["scalar", "FrequencyData_vector", "FrequencyData_abcd_cshape"])
+                ["scalar", "FrequencyData_vector",
+                 "FrequencyData_abcd_cshape"])
 def load_impedance_with_correct_format(request, frequencies, abcd_cshape):
     if request.param == "scalar":
         return 2
@@ -101,7 +104,7 @@ def load_impedance(request, frequencies):
     elif request.param == "mixed_load":
         return FrequencyData([0, 2, np.inf], frequencies)
 
-def _special_twoport_tmatrix(twoport_type, Zl : FrequencyData, Z : FrequencyData):
+def _special_twoport_tmatrix(twoport_type, Zl : FrequencyData, Z : FrequencyData): #noqa 501
     if twoport_type == "bypass":
         return TransmissionMatrix.create_identity(Zl.frequencies)
     if twoport_type == "series_impedance":
@@ -209,38 +212,46 @@ def _expected_voltage_to_current_tf(twoport_type, Zl : FrequencyData, Z : Freque
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
 def test_input_impedance(impedance_type : str, twoport_type : str,
                          load_impedance : FrequencyData, impedance_random):
-    tmat = _special_twoport_tmatrix(twoport_type, load_impedance, impedance_random)
+    tmat = _special_twoport_tmatrix(
+        twoport_type, load_impedance, impedance_random)
     if impedance_type == "input":
         Zres = tmat.input_impedance(load_impedance)
     else:
         Zres = tmat.output_impedance(load_impedance)
-    Zexpected = _expected_impedance(twoport_type, load_impedance, impedance_random)
+    Zexpected = _expected_impedance(
+        twoport_type, load_impedance, impedance_random)
 
     idx_inf = Zexpected.freq == np.inf
     idx_default = np.logical_not(idx_inf)
-    npt.assert_allclose(Zres.freq[idx_default], Zexpected.freq[idx_default], atol=1e-15)
+    npt.assert_allclose(
+        Zres.freq[idx_default], Zexpected.freq[idx_default], atol=1e-15)
     assert(np.all(np.abs(Zres.freq[idx_inf]) > 1e15))
 
-@pytest.mark.parametrize("tf_type", ["voltage", "current", "voltage/current", "current/voltage"])
+@pytest.mark.parametrize("tf_type", ["voltage", "current", "voltage/current",
+                                     "current/voltage"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
-def test_transfer_function(tf_type, twoport_type, load_impedance,impedance_random):
+def test_transfer_function(tf_type, twoport_type,
+                           load_impedance, impedance_random):
     """Test for 'voltage' quantity transfer function"""
-    tmat = _special_twoport_tmatrix(twoport_type, load_impedance, impedance_random)
+    tmat = _special_twoport_tmatrix(
+        twoport_type, load_impedance, impedance_random)
 
     if tf_type == "voltage":
         quantity_indices = (0,0)
-        TF_expected = _expected_voltage_tf(twoport_type, load_impedance, impedance_random)
+        TF_expected = _expected_voltage_tf(twoport_type,
+                                           load_impedance, impedance_random)
     elif tf_type == "current":
         quantity_indices = (1,1)
-        TF_expected = _expected_current_tf(twoport_type, load_impedance, impedance_random)
+        TF_expected = _expected_current_tf(twoport_type,
+                                           load_impedance, impedance_random)
     elif tf_type == "voltage/current":
         quantity_indices = (0,1)
-        TF_expected = _expected_voltage_to_current_tf(twoport_type, load_impedance, impedance_random)
-        # return
+        TF_expected = _expected_voltage_to_current_tf(
+            twoport_type, load_impedance, impedance_random)
     elif tf_type == "current/voltage":
         quantity_indices = (1,0)
-        TF_expected = _expected_current_to_voltage_tf(twoport_type, load_impedance, impedance_random)
-        # return
+        TF_expected = _expected_current_to_voltage_tf(
+            twoport_type, load_impedance, impedance_random)
     else:
         raise ValueError("Unexpected value for 'tf_type'.")
 

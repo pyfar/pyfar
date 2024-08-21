@@ -4,7 +4,8 @@ import pytest
 from pyfar import TransmissionMatrix
 
 
-def _abcd_matrix_stack(abcd, shape_extra_dims=None, frequencies=[100, 200, 300]):
+def _abcd_matrix_stack(abcd, shape_extra_dims=None,
+                       frequencies=[100, 200, 300]):
     n_freq_bins = len(frequencies)
     if shape_extra_dims is None:
         shape = n_freq_bins
@@ -70,7 +71,8 @@ def test_tmatrix_multiplication_bottom_row_zero(
     rng = np.random.default_rng()
     abcd_ApluB = (2, 1, 0, 0)
     abcd_rng = rng.random(4)
-    abcd_target = (2 * abcd_rng[0] + abcd_rng[2], 2 * abcd_rng[1] + abcd_rng[3], 0, 0)
+    abcd_target = (2 * abcd_rng[0] + abcd_rng[2],
+                   2 * abcd_rng[1] + abcd_rng[3], 0, 0)
     _check_matrix_multiplication_result(
         abcd_ApluB, abcd_rng, abcd_target, shape_extra_dims, frequencies
     )
