@@ -324,7 +324,7 @@ def _freq_group_delay_2d(
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                  freq_scale='linear', unit="s", window='hann',
                  window_length=1024, window_overlap_fct=0.5,
-                 colorbar=True, ax=None, **kwargs):
+                 colorbar=True, ax=None, side='right', **kwargs):
     """Plot the magnitude spectrum versus time.
 
     See pyfar.line.spectogram for more information.

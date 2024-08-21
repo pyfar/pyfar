@@ -1021,7 +1021,8 @@ class Signal(FrequencyData, TimeData):
         """Return new Signal object with data."""
         item = Signal(data, sampling_rate=self.sampling_rate,
                       n_samples=self.n_samples, domain=self.domain,
-                      fft_norm=self.fft_norm, comment=self.comment)
+                      fft_norm=self.fft_norm, comment=self.comment,
+                      is_complex=self.complex)
         return item
 
     def _encode(self):
