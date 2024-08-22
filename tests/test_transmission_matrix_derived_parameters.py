@@ -63,7 +63,8 @@ def simple_tmat():
 def test_TF_valid_quantity_input(quantity_indices, simple_tmat):
     simple_tmat.transfer_function(quantity_indices, np.inf)
 
-@pytest.mark.parametrize("quantity_indices", [1, "string", (1, "string"), [1,1,1]]) # noqa 501
+@pytest.mark.parametrize("quantity_indices",
+                         [1, "string", (1, "string"), [1,1,1]])
 def test_TF_quantity_input_wrong_numel(quantity_indices, simple_tmat):
     error_msg = re.escape("'quantity_indices' must be an array-like type "
                           "with two numeric elements.")
@@ -104,7 +105,8 @@ def load_impedance(request, frequencies):
     elif request.param == "mixed_load":
         return FrequencyData([0, 2, np.inf], frequencies)
 
-def _special_twoport_tmatrix(twoport_type, Zl : FrequencyData, Z : FrequencyData): #noqa 501
+def _special_twoport_tmatrix(
+        twoport_type, Zl: FrequencyData, Z: FrequencyData):
     if twoport_type == "bypass":
         return TransmissionMatrix.create_identity(Zl.frequencies)
     if twoport_type == "series_impedance":
@@ -122,7 +124,8 @@ def _twoport_type_list():
     return ["bypass", "series_impedance", "parallel_impedance",
             "series_load_impedance", "parallel_load_impedance"]
 
-def _expected_impedance(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
+def _expected_impedance(
+        twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
     if twoport_type == "bypass":
         Zexpected =  Zl
     elif twoport_type == "series_impedance":
@@ -139,7 +142,8 @@ def _expected_impedance(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> 
         raise ValueError("Unexpected value for 'twoport_type'")
     return Zexpected
 
-def _expected_voltage_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
+def _expected_voltage_tf(
+        twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 
@@ -157,7 +161,8 @@ def _expected_voltage_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) ->
         TF.freq[np.isinf(Zl.freq)] = np.nan
     return TF
 
-def _expected_current_to_voltage_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
+def _expected_current_to_voltage_tf(
+        twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 
@@ -172,7 +177,8 @@ def _expected_current_to_voltage_tf(twoport_type, Zl : FrequencyData, Z : Freque
 
     return TF
 
-def _expected_current_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
+def _expected_current_tf(
+        twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 
@@ -190,7 +196,8 @@ def _expected_current_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) ->
         TF.freq[Zl.freq == 0] = np.nan
     return TF
 
-def _expected_voltage_to_current_tf(twoport_type, Zl : FrequencyData, Z : FrequencyData) -> FrequencyData: #noqa 501
+def _expected_voltage_to_current_tf(
+        twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 

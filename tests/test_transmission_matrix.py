@@ -29,11 +29,16 @@ def test_tmatrix_init():
     frequencies = [100, 200, 300]
     TransmissionMatrix(np.ones([2, 2, len(frequencies)]), frequencies)
     TransmissionMatrix(np.ones([4, 2, 2, len(frequencies)]), frequencies)
-    _expect_data_with_wrong_abcd_dims(np.ones([2, len(frequencies)]), frequencies) # noqa 501
-    _expect_data_with_wrong_abcd_dims(np.ones([3, 2, len(frequencies)]), frequencies) # noqa 501
-    _expect_data_with_wrong_abcd_dims(np.ones([2, 5, len(frequencies)]), frequencies) # noqa 501
-    _expect_data_with_wrong_abcd_dims(np.ones([7, 4, 2, len(frequencies)]), frequencies) # noqa 501
-    _expect_data_with_wrong_abcd_dims(np.ones([7,8,4,2, len(frequencies)]), frequencies) # noqa 501
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([2, len(frequencies)]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([3, 2, len(frequencies)]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([2, 5, len(frequencies)]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([7, 4, 2, len(frequencies)]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([7,8,4,2, len(frequencies)]), frequencies)
 
 
 def _expect_error_abcd_same_type(A, B, C, D):
@@ -42,7 +47,8 @@ def _expect_error_abcd_same_type(A, B, C, D):
     ):
         TransmissionMatrix.from_abcd(A, B, C, D, 1000)
 def test_tmatrix_from_abcd_input_types(frequencies, Mat_list, Mat_np, Mat_pf):
-    TransmissionMatrix.from_abcd(Mat_list, Mat_list, Mat_list, Mat_list, frequencies) # noqa 501
+    TransmissionMatrix.from_abcd(Mat_list, Mat_list,
+                                 Mat_list, Mat_list, frequencies)
     TransmissionMatrix.from_abcd(Mat_np, Mat_np, Mat_np, Mat_np, frequencies)
     TransmissionMatrix.from_abcd(Mat_pf, Mat_pf, Mat_pf, Mat_pf)
 
@@ -64,7 +70,8 @@ def test_tmatrix_from_abcd_optional_frequencies(Mat_list, Mat_pf):
 # -------------------------
 @pytest.fixture(scope="module")
 def abcd_data_3x2():
-    """ABCD matrices with 2 frequency bins and one additional dimension of size 3""" # noqa 501
+    """ABCD matrices with 2 frequency bins andone additional
+    dimension of size 3"""
     frequencies = [100, 200]
     A = FrequencyData([[1, 1], [1, 1], [1, 1]], frequencies)
     B = FrequencyData([[2, 2], [2, 2], [2, 2]], frequencies)
@@ -74,7 +81,8 @@ def abcd_data_3x2():
     return tmat, A, B, C, D
 @pytest.fixture(scope="module")
 def abcd_data_3x3x1():
-    """ABCD matrices with 1 frequency bin and two additional dimension of size 3""" # noqa 501
+    """ABCD matrices with 1 frequency bin and two additional
+    dimensions of size 3"""
     A = FrequencyData(
         [[[1.1], [1.1], [1.1]], [[1.2], [1.2], [1.2]], [[1.3], [1.3], [1.3]]],
         100)

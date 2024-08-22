@@ -37,7 +37,8 @@ class TransmissionMatrix(FrequencyData):
 
     Notes
     -----
-    This class is derived from the :py:class:`~pyfar.classes.audio.FrequencyData`
+    This class is derived from the
+    :py:class:`~pyfar.classes.audio.FrequencyData`
     but has a special constraint: The input data must match a shape like
     (..., 2, 2, N), so the resulting cshape is (...,2,2). The last axis refers
     to the frequency, and the two axes before to the ABCD-Matrix (which is a
@@ -59,7 +60,7 @@ class TransmissionMatrix(FrequencyData):
     .. [#] M. Lampton. “Transmission Matrices in Electroacoustics". Acustica.
            Vol. 39, pp. 239-251. 1978.
 
-    """ #noqa 501
+    """
 
     def __init__(self, data, frequencies, comment = ""):
         """Create TransmissionMatrix with data, and frequencies.
@@ -197,22 +198,26 @@ class TransmissionMatrix(FrequencyData):
 
     @property
     def A(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) A entry of the T-matrix.""" # noqa 501
+        """Returns the (potentially multi-dimensional) A entry of the
+        T-matrix."""
         return self[..., 0, 0, :]
 
     @property
     def B(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) B entry of the T-matrix.""" # noqa 501
+        """Returns the (potentially multi-dimensional) B entry of the
+        T-matrix."""
         return self[..., 0, 1, :]
 
     @property
     def C(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) C entry of the T-matrix.""" # noqa 501
+        """Returns the (potentially multi-dimensional) C entry of the
+        T-matrix."""
         return self[..., 1, 0, :]
 
     @property
     def D(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) D entry of the T-matrix.""" # noqa 501
+        """Returns the (potentially multi-dimensional) D entry of the
+        T-matrix."""
         return self[..., 1, 1, :]
 
     def _check_for_inf(self, Zl: complex | FrequencyData) -> bool:
@@ -326,7 +331,8 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def transfer_function(self, quantity_indices, Zl: complex | FrequencyData) -> FrequencyData: #noqa 501
+    def transfer_function(self, quantity_indices,
+                          Zl: complex | FrequencyData) -> FrequencyData:
         """Returns the transfer function (output/input) for specified
         quantities and given load impedance.
 
@@ -383,8 +389,9 @@ class TransmissionMatrix(FrequencyData):
         if quantity_indices[0] == 0 and quantity_indices[1] == 1:
             return self._transfer_function_q1q2(Zl)
 
-    def _transfer_function_q1q1(self, Zl: complex | FrequencyData) -> FrequencyData: # noqa 501
-        """Returns the transfer function of the first quantity (output/input).""" # noqa 501
+    def _transfer_function_q1q1(self,
+                                Zl: complex | FrequencyData) -> FrequencyData:
+        """Returns the first quantity's transfer function (Q1_out/Q1_in)."""
         idx_inf, __, __ = self._check_for_inf(Zl)
         denominator = (self.A * Zl + self.B)
         nominator = Zl*FrequencyData(np.ones_like(denominator.freq),
@@ -399,7 +406,8 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def _transfer_function_q2q1(self, Zl: complex | FrequencyData) -> FrequencyData: # noqa 501
+    def _transfer_function_q2q1(self,
+                                Zl: complex | FrequencyData) -> FrequencyData:
         """Returns the transfer function Q2_out / Q1_in."""
         denominator = (self.A * Zl + self.B)
         nominator = FrequencyData(np.ones_like(denominator.freq),
@@ -410,8 +418,9 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.nan
         return nominator / denominator
 
-    def _transfer_function_q2q2(self, Zl: complex | FrequencyData) -> FrequencyData: # noqa 501
-        """Returns the transfer function of the second quantity (output/input).""" # noqa 501
+    def _transfer_function_q2q2(self,
+                                Zl: complex | FrequencyData) -> FrequencyData:
+        """Returns the second quantity's transfer function (Q2_out/Q2_in)."""
         denominator = (self.C * Zl + self.D)
         nominator = FrequencyData(np.ones_like(denominator.freq),
                                   self.frequencies)
@@ -426,7 +435,8 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
-    def _transfer_function_q1q2(self, Zl: complex | FrequencyData) -> FrequencyData: # noqa 501
+    def _transfer_function_q1q2(self,
+                                Zl: complex | FrequencyData) -> FrequencyData:
         """Returns the transfer function Q1_out / Q2_in."""
         denominator = (self.C * Zl + self.D)
         nominator = Zl*FrequencyData(np.ones_like(denominator.freq),
@@ -481,7 +491,7 @@ class TransmissionMatrix(FrequencyData):
             FrequencyData(identity_3d, frequencies), abcd_cshape)
 
     @classmethod
-    def create_series_impedance(cls, impedance : FrequencyData, abcd_cshape = ()): # noqa 501
+    def create_series_impedance(cls, impedance: FrequencyData, abcd_cshape=()):
         """Creates a transmission matrix representing a series impedance.
 
         This means the impedance is connected in series with a potential load
@@ -511,7 +521,8 @@ class TransmissionMatrix(FrequencyData):
         return cls._create_abcd_matrix_broadcast(series_Z_abcd, abcd_cshape)
 
     @classmethod
-    def create_shunt_admittance(cls, admittance : FrequencyData, abcd_cshape = ()): # noqa 501
+    def create_shunt_admittance(cls, admittance: FrequencyData,
+                                abcd_cshape = ()):
         """Creates a transmission matrix representing a shunt admittance
         (parallel connection).
 
