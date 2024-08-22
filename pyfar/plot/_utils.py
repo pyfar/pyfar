@@ -457,7 +457,8 @@ def _assert_and_match_data_to_side(data, signal, side):
     return data, frequencies, xlabel
 
 
-def _assert_and_match_spectogram_to_side(spectogram, frequencies, signal, side):
+def _assert_and_match_spectogram_to_side(spectogram, frequencies, signal,
+                                         side):
     """Adjust data and frequency vector for plotting as specified by side."""
 
     if side == 'left':
