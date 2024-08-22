@@ -11,6 +11,11 @@ signal = pf.dsp.filter.bell(signal, 1e3, 12, 1, "III")
 signal = pf.dsp.filter.bell(signal, 10e3, -60, 100, "III")
 np.savetxt("dsp.smooth_fractional_octave_input.csv", signal.time)
 
+# also save a complex-valued version of the input signal
+signal.fft_norm = 'none'
+signal.complex = True
+np.savetxt("dsp.smooth_fractional_octave_complex_input.csv", signal.time)
+
 signal = pf.Signal(np.loadtxt("dsp.smooth_fractional_octave_input.csv"),
                    44100)
 
@@ -49,3 +54,34 @@ pf.plot.time_freq(y, label="0.2")
 np.savetxt("dsp.smooth_fractional_octave_5.csv", y.time)
 
 ax[1].legend(loc=3)
+
+# test different modes for complex-valued time data ---------------------------
+signal = pf.Signal(
+    np.loadtxt("dsp.smooth_fractional_octave_complex_input.csv",
+               dtype=complex),
+    44100, is_complex=True)
+
+plt.figure()
+ax = pf.plot.time_freq(signal)
+
+y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_zerophase")
+pf.plot.time_freq(y, label="magnitude_zerophase")
+np.savetxt("dsp.smooth_fractional_octave_magnitude_zerophase_complex.csv",
+           y.time)
+
+y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude_phase")
+pf.plot.time_freq(y, label="magnitude phase")
+np.savetxt("dsp.smooth_fractional_octave_magnitude_phase_complex.csv",
+           y.time)
+
+y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="magnitude")
+pf.plot.time_freq(y, label="magnitude copy")
+np.savetxt("dsp.smooth_fractional_octave_magnitude_copy_phase_complex.csv",
+           y.time)
+
+y, _ = pf.dsp.smooth_fractional_octave(signal, 1, mode="complex")
+pf.plot.time_freq(y, label="complex")
+np.savetxt("dsp.smooth_fractional_octave_complex_complex.csv", y.time)
+
+ax[1].legend(loc=3)
+pass

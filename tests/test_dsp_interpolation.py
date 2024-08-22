@@ -70,7 +70,7 @@ def test_smooth_fractional_octave_complex(mode):
     # compare to reference
     reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
-            f"dsp.smooth_fractional_octave_{mode}.csv"))
+            f"dsp.smooth_fractional_octave_{mode}_complex.csv"))
     npt.assert_allclose(output.time.flatten(), reference)
 
 
