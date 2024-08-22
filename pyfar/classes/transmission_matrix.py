@@ -167,16 +167,6 @@ class TransmissionMatrix(FrequencyData):
         return self @ t_matrix
 
     @property
-    def abcd_axes(self):
-        """The indices of the axes referring to the transmission matrix
-
-        This relates to the axes with respect to the full data set
-        (including the frequency-axis).
-
-        """
-        return (-3, -2)
-
-    @property
     def abcd_caxes(self):
         """The indices of the channel axes referring to the transmission matrix
 
