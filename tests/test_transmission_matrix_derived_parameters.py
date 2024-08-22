@@ -63,14 +63,14 @@ def simple_tmat():
 def test_TF_valid_quantity_input(quantity_indices, simple_tmat):
     simple_tmat.transfer_function(quantity_indices, np.inf)
 
-@pytest.mark.parametrize("quantity_indices", [1, "string", [1,1,1]])
+@pytest.mark.parametrize("quantity_indices", [1, "string", (1, "string"), [1,1,1]]) # noqa 501
 def test_TF_quantity_input_wrong_numel(quantity_indices, simple_tmat):
-    error_msg = re.escape("'quantity_indices' must be an array-like "
-                          "type with two elements.")
+    error_msg = re.escape("'quantity_indices' must be an array-like type "
+                          "with two numeric elements.")
     with pytest.raises(ValueError, match=error_msg):
         simple_tmat.transfer_function(quantity_indices, np.inf)
 
-@pytest.mark.parametrize("quantity_indices", [(-1,0), (0, 1.9), (0, "string")])
+@pytest.mark.parametrize("quantity_indices", [(-1,0), (0, 1.9)])
 def test_TF_quantity_input_wrong_ints(quantity_indices, simple_tmat):
     error_msg = re.escape("'quantity_indices' must contain two "
                           "integers between 0 and 1.")

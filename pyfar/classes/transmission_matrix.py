@@ -364,10 +364,12 @@ class TransmissionMatrix(FrequencyData):
             shape(tmat.A) == shape(TF).
 
         """
-        if np.isscalar(quantity_indices) or not len(quantity_indices) == 2:
-            raise ValueError("'quantity_indices' must be an array-like type "
-                             "with two elements.")
+        is_scalar = np.isscalar(quantity_indices)
         quantity_indices = np.array(quantity_indices)
+        is_numeric = np.issubdtype(quantity_indices.dtype, np.number)
+        if is_scalar or not is_numeric or not len(quantity_indices) == 2:
+            raise ValueError("'quantity_indices' must be an array-like type "
+                             "with two numeric elements.")
         if not all(np.logical_or(quantity_indices==0, quantity_indices==1)):
             raise ValueError("'quantity_indices' must contain two integers "
                              "between 0 and 1.")
