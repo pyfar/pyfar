@@ -358,8 +358,10 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     frequencies, times, spectrogram = dsp.spectrogram(
         signal[first_channel], window, window_length, window_overlap_fct)
 
-    spectrogram, frequencies, ylabel = _utils._assert_and_match_data_to_side(
-                                            spectrogram, signal, side)
+    # adapt data according to side
+    spectrogram, frequencies, ylabel = \
+        _utils._assert_and_match_spectogram_to_side(spectrogram, frequencies,
+                                                    signal, side)
 
     # get magnitude data in dB
     if dB:
