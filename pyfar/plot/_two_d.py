@@ -360,8 +360,8 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
 
     # adapt data according to side
     spectrogram, frequencies, ylabel = \
-        _utils._assert_and_match_spectogram_to_side(spectrogram, frequencies,
-                                                    signal, side)
+        _utils._assert_and_match_spectrogram_to_side(spectrogram, frequencies,
+                                                     signal, side)
 
     # get magnitude data in dB
     if dB:

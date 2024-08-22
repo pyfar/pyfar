@@ -457,8 +457,8 @@ def _assert_and_match_data_to_side(data, signal, side):
     return data, frequencies, xlabel
 
 
-def _assert_and_match_spectogram_to_side(spectogram, frequencies, signal,
-                                         side):
+def _assert_and_match_spectrogram_to_side(spectrogram, frequencies, signal,
+                                          side):
     """Adjust data and frequency vector for plotting as specified by side."""
 
     if side == 'left':
@@ -469,23 +469,20 @@ def _assert_and_match_spectogram_to_side(spectogram, frequencies, signal,
         raise ValueError('Invalid `side` parameter, pass either `left` or '
                          '`right`.')
 
-    if mask.sum() < 2:
-        raise ValueError(f'The {side} side of the spectrum is not defined.')
-
     # get corresponding data
     frequencies = frequencies[mask]
-    spectogram = spectogram[mask, ...]
+    spectrogram = spectrogram[mask, ...]
 
     if side == 'left':
         frequencies = np.flipud(np.abs(frequencies))
-        spectogram = spectogram[::-1, ...]
+        spectrogram = spectrogram[::-1, ...]
 
     if (type(signal) is not FrequencyData) and signal.complex:
         xlabel = f"Frequency in Hz ({side})"
     else:
         xlabel = "Frequency in Hz"
 
-    return spectogram, frequencies, xlabel
+    return spectrogram, frequencies, xlabel
 
 
 def _assert_and_match_data_to_mode(data, signal, mode):
