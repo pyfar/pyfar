@@ -420,7 +420,8 @@ class TimeData(_Audio):
     def _return_item(self, data):
         """Return new :py:func:`TimeData` object with data."""
         item = TimeData(
-            data, times=self.times, comment=self.comment)
+            data, times=self.times, comment=self.comment,
+            is_complex=self.complex)
         return item
 
     def __repr__(self):
@@ -1021,7 +1022,8 @@ class Signal(FrequencyData, TimeData):
         """Return new Signal object with data."""
         item = Signal(data, sampling_rate=self.sampling_rate,
                       n_samples=self.n_samples, domain=self.domain,
-                      fft_norm=self.fft_norm, comment=self.comment)
+                      fft_norm=self.fft_norm, comment=self.comment,
+                      is_complex=self.complex)
         return item
 
     def _encode(self):
@@ -1099,7 +1101,8 @@ class _SignalIterator(object):
             sampling_rate=signal.sampling_rate,
             n_samples=signal.n_samples,
             domain=signal.domain,
-            fft_norm=signal.fft_norm)
+            fft_norm=signal.fft_norm,
+            is_complex=signal.complex)
 
     def __next__(self):
         if self._signal.domain == self._iterated_sig.domain:

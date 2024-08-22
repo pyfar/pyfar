@@ -18,6 +18,7 @@ import pytest
 
 import pyfar as pf
 import pyfar.signals as pfs
+import pyfar.dsp.filter as pfilt
 from pyfar.classes.warnings import PyfarDeprecationWarning
 
 # This defines the plot size and the backend
@@ -294,4 +295,80 @@ def test_deprecations_freq_range_parameter_renaming_results():
                                               freq_range=(20, 20e3)).time,
         pf.dsp.filter.fractional_octave_bands(sweep, 8,
                                               frequency_range=(20, 20e3)).time,
+        rtol=0)
+
+
+def test_deprecation_shelve_functions():
+    # test high_shelve()
+    with pytest.warns(
+        PyfarDeprecationWarning, match="'high_shelve' will be deprecated in "
+            "pyfar 0.9.0 in favor of 'high_shelf'"):
+        pfilt.high_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pfilt.high_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
+
+    # test low_shelve()
+    with pytest.warns(
+        PyfarDeprecationWarning, match="'low_shelve' will be deprecated in "
+            "pyfar 0.9.0 in favor of 'low_shelf'"):
+        pfilt.low_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pfilt.low_shelve(None, 10e3, 1.5, 1, "I", sampling_rate=44100)
+
+    # test high_shelve_cascade()
+    with pytest.warns(
+        PyfarDeprecationWarning, match="'high_shelve_cascade' will be "
+            "deprecated in pyfar 0.9.0 in favor of 'high_shelf_cascade'"):
+        pfilt.high_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                  sampling_rate=44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pfilt.high_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                      sampling_rate=44100)
+
+    # test low_shelve_cascade()
+    with pytest.warns(
+        PyfarDeprecationWarning, match="'low_shelve_cascade' will be "
+            "deprecated in pyfar 0.9.0 in favor of 'low_shelf_cascade'"):
+        pfilt.low_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                 sampling_rate=44100)
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pfilt.low_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                     sampling_rate=44100)
+
+
+def test_deprecations_shelf_function_results():
+    np.testing.assert_allclose(
+        pfilt.high_shelve(None, 10e3, 1.5, 1, "I",
+                          sampling_rate=44100).coefficients,
+        pfilt.high_shelf(None, 10e3, 1.5, 1, "I",
+                         sampling_rate=44100).coefficients,
+        rtol=0)
+
+    np.testing.assert_allclose(
+        pfilt.low_shelve(None, 10e3, 1.5, 1, "I",
+                         sampling_rate=44100).coefficients,
+        pfilt.low_shelf(None, 10e3, 1.5, 1, "I",
+                        sampling_rate=44100).coefficients,
+        rtol=0)
+
+    np.testing.assert_allclose(
+        pfilt.high_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                  sampling_rate=44100)[0].coefficients,
+        pfilt.high_shelf_cascade(None, 250, "lower", -60, None, 4,
+                                 sampling_rate=44100)[0].coefficients,
+        rtol=0)
+
+    np.testing.assert_allclose(
+        pfilt.low_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                 sampling_rate=44100)[0].coefficients,
+        pfilt.low_shelf_cascade(None, 250, "lower", -60, None, 4,
+                                sampling_rate=44100)[0].coefficients,
         rtol=0)

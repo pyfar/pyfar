@@ -425,3 +425,50 @@ def _phase_label(unwrap, deg):
         raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
     return phase_label
+
+
+def _assert_and_match_data_to_side(data, signal, side):
+    """Adjust data and frequency vector for plotting as specified by side."""
+
+    if side == 'left':
+        mask = signal.frequencies <= 0
+    elif side == 'right':
+        mask = signal.frequencies >= 0
+    else:
+        raise ValueError('Invalid `side` parameter, pass either `left` or '
+                         '`right`.')
+
+    if mask.sum() < 2:
+        raise ValueError(f'The {side} side of the spectrum is not defined.')
+
+    # get corresponding data
+    frequencies = signal.frequencies[mask]
+    data = data[..., mask]
+
+    if side == 'left':
+        frequencies = np.flipud(np.abs(frequencies))
+        data = data[..., ::-1]
+
+    if (type(signal) is not FrequencyData) and signal.complex:
+        xlabel = f"Frequency in Hz ({side})"
+    else:
+        xlabel = "Frequency in Hz"
+
+    return data, frequencies, xlabel
+
+
+def _assert_and_match_data_to_mode(data, signal, mode):
+    """Adjust data and y-label for plotting according to specified mode."""
+
+    if mode == 'real':
+        if signal.complex:
+            return np.real(data), 'Amplitude (real)'
+        else:
+            return np.real(data), 'Amplitude'
+    elif mode == 'imag':
+        return np.imag(data), 'Amplitude (imaginary)'
+    elif mode == 'abs':
+        return np.abs(data), 'Amplitude (absolute)'
+    else:
+        raise ValueError('`mode` has to be `real`, `imag`, or '
+                         f'`abs`, but is {mode}.')
