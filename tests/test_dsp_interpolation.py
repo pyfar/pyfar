@@ -61,7 +61,7 @@ def test_smooth_fractional_octave_complex(mode):
             os.path.dirname(__file__), "references",
             "dsp.smooth_fractional_octave_input.csv"))
     input = pf.Signal(input, 44100)
-    input.fft_norm = 'None'
+    input.fft_norm = 'none'
     input.complex = True
 
     # smooth
@@ -103,11 +103,11 @@ def test_smooth_fractional_octave_window_parameter():
     function
     """
 
-    _, window_paraeter = smooth_fractional_octave(pf.signals.impulse(64), 1)
+    _, window_parameter = smooth_fractional_octave(pf.signals.impulse(64), 1)
 
-    assert len(window_paraeter) == 2
-    assert isinstance(window_paraeter[0], int)
-    assert isinstance(window_paraeter[1], float)
+    assert len(window_parameter) == 2
+    assert isinstance(window_parameter[0], int)
+    assert isinstance(window_parameter[1], float)
 
 
 @pytest.mark.parametrize("amplitudes", (
