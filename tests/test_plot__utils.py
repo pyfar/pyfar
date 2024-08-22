@@ -189,7 +189,7 @@ def test_assert_and_match_data_to_side_freq():
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='left')
 
-    data, frequencies, _xlabel = plot._utils._assert_and_match_data_to_side(
+    data, frequencies, _ = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='right')
 
     assert not np.any(frequencies < 0.0)
@@ -202,7 +202,7 @@ def test_assert_and_match_data_to_side_freq():
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='right')
 
-    data, frequencies, _xlabel = plot._utils._assert_and_match_data_to_side(
+    data, frequencies, _ = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='left')
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]

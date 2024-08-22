@@ -418,7 +418,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
     with context(style):
         ax, qm, cb = _two_d._phase_2d(
             signal, deg, unwrap, freq_scale, indices, orientation, method,
-            colorbar, ax, **kwargs)
+            colorbar, ax, side, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
