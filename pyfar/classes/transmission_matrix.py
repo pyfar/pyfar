@@ -90,8 +90,8 @@ class TransmissionMatrix(FrequencyData):
         shape = np.shape(data)
         n_dim = len(shape)
         if n_dim < 3 or shape[-3] != 2 or shape[-2] != 2:
-            raise ValueError("'data' must have a shape like [..., 2, 2, N]"
-                             ", e.g. [2, 2, 100].")
+            raise ValueError("'data' must have a shape like "
+                             "(..., 2, 2, n_bins), e.g. [2, 2, 100].")
 
         super().__init__(data, frequencies, comment)
 
