@@ -103,6 +103,16 @@ class TransmissionMatrix(FrequencyData):
             A comment related to the data. The default is ``""``, which
             initializes an empty string.
 
+        Examples
+        --------
+        >>> import pyfar as pf
+        >>> frequencies = (100,200,300)
+        >>> data = np.ones( (2, 2, len(frequencies)) )
+        >>> tmat = pf.TransmissionMatrix.from_tmatrix(data, frequencies)
+
+        >>> data = np.ones( (3, 2, 2, len(frequencies)) )
+        >>> tmat = pf.TransmissionMatrix.from_tmatrix(data, frequencies)
+
         """
         return tmat(data, frequencies, comment)
 
@@ -119,6 +129,27 @@ class TransmissionMatrix(FrequencyData):
         frequencies : array, double, None
             Frequencies of the data in Hz. This is optional if using the
             FrequencyData type for A, B, C, D.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import pyfar as pf
+        >>> frequencies = (100,200,300)
+
+        >>> # From np.array
+        >>> A = np.ones(len(frequencies))
+        >>> (B,C,D) = (A+1, A+2, A+3)
+        >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D, frequencies)
+
+        >>> # From FrequencyData objects
+        >>> A = pf.FrequencyData( A, frequencies )
+        >>> (B,C,D) = (A+1, A+2, A+3)
+        >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D)
+
+        >>> # Data with higher abcd dimension
+        >>> A = np.ones( (3, 4, len(frequencies)) )
+        >>> (B,C,D) = (A+1, A+2, A+3)
+        >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D, frequencies)
 
         """
         num_freqdata = 0
