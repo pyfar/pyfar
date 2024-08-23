@@ -96,7 +96,7 @@ class TransmissionMatrix(FrequencyData):
         super().__init__(data, frequencies, comment)
 
     @classmethod
-    def from_abcd(cls, A,B,C,D, frequencies = None):
+    def from_abcd(tmat, A,B,C,D, frequencies = None):
         """Create a TransmissionMatrix object from A-, B-, C-, D-data, and
         frequencies.
 
@@ -146,7 +146,7 @@ class TransmissionMatrix(FrequencyData):
         order[[-3, -2]] = order[[-2, -3]]  # Correct order of T-matrix
         data = np.transpose(data, order)
 
-        return cls(data, frequencies)
+        return tmat(data, frequencies)
 
 
     def cascade(self, t_matrix: TransmissionMatrix):
@@ -453,7 +453,7 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     @classmethod
-    def create_identity(cls, frequencies, abcd_cshape = ()):
+    def create_identity(tmat, frequencies, abcd_cshape = ()):
         """Creates an object with identity matrix entries (bypass).
 
         See Equation (2-7) in Table I of Reference [1]_.
@@ -468,16 +468,17 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        cls : TransmissionMatrix
+        tmat : TransmissionMatrix
             A TransmissionMatrix object that contains 2x2 identity matrices.
 
         """
         A = np.ones((*abcd_cshape, np.array(frequencies).size))
         (B,C,D) = (0,0,1)
-        return cls.from_abcd(A, B, C, D, frequencies)
+        return tmat.from_abcd(A, B, C, D, frequencies)
 
     @classmethod
-    def create_series_impedance(cls, impedance: FrequencyData, abcd_cshape=()):
+    def create_series_impedance(tmat, impedance: FrequencyData,
+                                abcd_cshape=()):
         """Creates a transmission matrix representing a series impedance.
 
         This means the impedance is connected in series with a potential load
@@ -493,7 +494,7 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        cls : TransmissionMatrix
+        tmat : TransmissionMatrix
             A TransmissionMatrix representing a series impedance.
 
         """
@@ -502,10 +503,10 @@ class TransmissionMatrix(FrequencyData):
 
         (Z, frequencies) = (impedance.freq[0], impedance.frequencies)
         Z = np.zeros((*abcd_cshape, np.array(frequencies).size)) + Z
-        return cls.from_abcd(1, Z, 0, 1, frequencies)
+        return tmat.from_abcd(1, Z, 0, 1, frequencies)
 
     @classmethod
-    def create_shunt_admittance(cls, admittance: FrequencyData,
+    def create_shunt_admittance(tmat, admittance: FrequencyData,
                                 abcd_cshape = ()):
         """Creates a transmission matrix representing a shunt admittance
         (parallel connection).
@@ -524,7 +525,7 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        cls : TransmissionMatrix
+        tmat : TransmissionMatrix
             A TransmissionMatrix representing a parallel connection.
 
         """
@@ -533,7 +534,7 @@ class TransmissionMatrix(FrequencyData):
 
         (Y, frequencies) = (admittance.freq[0], admittance.frequencies)
         Y = np.zeros((*abcd_cshape, np.array(frequencies).size)) + Y
-        return cls.from_abcd(1, 0, Y, 1, frequencies)
+        return tmat.from_abcd(1, 0, Y, 1, frequencies)
 
     @staticmethod
     def create_transformer(transducer_constant : complex) -> np.ndarray:
