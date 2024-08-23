@@ -12,6 +12,7 @@ properties like input impedance of transfer functions can directly be derived.
 """
 from __future__ import annotations
 import numpy as np
+import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
 
 
@@ -102,33 +103,41 @@ class TransmissionMatrix(FrequencyData):
         Parameters
         ----------
         A, B, C, D : FrequencyData, array, double
-            Raw data for the matrix entries A, B, C and D. Must use the same
-            data type for all inputs.
+            Raw data for the matrix entries A, B, C and D. The data need to
+            match or be broadcastable into one ``shape``.
         frequencies : array, double, None
             Frequencies of the data in Hz. This is optional if using the
             FrequencyData type for A, B, C, D.
 
         """
-        if (
-            not isinstance(B, type(A))
-            or not isinstance(C, type(A))
-            or not isinstance(D, type(A))
-        ):
-            raise ValueError("A-,B-,C- and D-Matrices must "
-                             "be of the same type.")
+        num_freqdata = 0
+        for obj in (A,B,C,D):
+            if isinstance(obj, FrequencyData):
+                num_freqdata = num_freqdata + 1
 
-        if isinstance(A, FrequencyData):
+        if num_freqdata == 4:
             frequencies = A.frequencies
-            A = A.freq
-            B = B.freq
-            C = C.freq
-            D = D.freq
+            for obj in (B,C,D): #Frequency bins must match
+                npt.assert_allclose(A.frequencies, obj.frequencies, atol=1e-15)
+            (A,B,C,D) = (A.freq, B.freq, C.freq, D.freq)
+        elif num_freqdata != 0:
+            raise ValueError(
+                        "If using FrequencyData objects, all matrix entries "
+                        "A, B, C, D, must be FrequencyData objects.")
+
         if frequencies is None:
             raise ValueError("'frequencies' must be specified if not using "
                              "'FrequencyData' objects as input.")
+        # broadcast shapes
+        shape = np.broadcast_shapes(
+            np.array(A).shape, np.array(B).shape,
+            np.array(C).shape, np.array(D).shape)
+        A = np.broadcast_to(A, shape)
+        B = np.broadcast_to(B, shape)
+        C = np.broadcast_to(C, shape)
+        D = np.broadcast_to(D, shape)
 
         data = np.array([[A, B], [C, D]])
-
         # Switch dimension order so that T matrices refer to
         # third and second last dimension (axes -3 and -2)
         order = np.array(range(data.ndim))

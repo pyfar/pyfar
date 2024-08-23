@@ -43,12 +43,14 @@ def test_tmatrix_init():
 
 def _expect_error_abcd_same_type(A, B, C, D):
     with pytest.raises(
-        ValueError, match="A-,B-,C- and D-Matrices must be of the same type"
-    ):
+        ValueError, match=
+                    "If using FrequencyData objects, all matrix entries "
+                    "A, B, C, D, must be FrequencyData objects."):
         TransmissionMatrix.from_abcd(A, B, C, D, 1000)
 def test_tmatrix_from_abcd_input_types(frequencies, Mat_list, Mat_np, Mat_pf):
     TransmissionMatrix.from_abcd(Mat_list, Mat_list,
                                  Mat_list, Mat_list, frequencies)
+    TransmissionMatrix.from_abcd(Mat_np, Mat_np, Mat_list, Mat_np, frequencies)
     TransmissionMatrix.from_abcd(Mat_np, Mat_np, Mat_np, Mat_np, frequencies)
     TransmissionMatrix.from_abcd(Mat_pf, Mat_pf, Mat_pf, Mat_pf)
 
