@@ -67,13 +67,29 @@ class TransmissionMatrix(FrequencyData):
     def __init__(self, data, frequencies, comment = ""):
         """Create TransmissionMatrix with data, and frequencies.
 
-        To ensure handing the correct data, it is recommended to use the
-        :py:func:`~from_abcd` method to create objects.
+        Same as :py:func:`~from_tmatrix`.
+
+        """
+        shape = np.shape(data)
+        n_dim = len(shape)
+        if n_dim < 3 or shape[-3] != 2 or shape[-2] != 2:
+            raise ValueError("'data' must have a shape like "
+                             "(..., 2, 2, n_bins), e.g. (2, 2, 100).")
+
+        super().__init__(data, frequencies, comment)
+
+    @classmethod
+    def from_tmatrix(tmat, data, frequencies, comment = ""):
+        """Create TransmissionMatrix using data in T-matrix shape
+        and frequencies.
+
+        To ensure handing the data in correct format, it is recommended to use
+        the :py:func:`~from_abcd` method to create objects.
 
         Parameters
         ----------
         data : array, double
-            Raw data in the frequency domain. The memory layout of Data is 'C'.
+            Raw data in the frequency domain.
             In contrast to the :py:class:`~pyfar.classes.audio.FrequencyData`
             class, data must have a shape of the form (..., 2, 2, N), e.g.
             (2, 2, 1024) or (3, 2, 2, 1024). In those examples 1024 refers to
@@ -88,13 +104,7 @@ class TransmissionMatrix(FrequencyData):
             initializes an empty string.
 
         """
-        shape = np.shape(data)
-        n_dim = len(shape)
-        if n_dim < 3 or shape[-3] != 2 or shape[-2] != 2:
-            raise ValueError("'data' must have a shape like "
-                             "(..., 2, 2, n_bins), e.g. [2, 2, 100].")
-
-        super().__init__(data, frequencies, comment)
+        return tmat(data, frequencies, comment)
 
     @classmethod
     def from_abcd(tmat, A,B,C,D, frequencies = None):

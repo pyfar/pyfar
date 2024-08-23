@@ -20,26 +20,34 @@ def Mat_pf(Mat_np, frequencies):
 
 def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
     error_msg = re.escape("'data' must have a shape like "
-                          "(..., 2, 2, n_bins), e.g. [2, 2, 100].")
+                          "(..., 2, 2, n_bins), e.g. (2, 2, 100).")
     with pytest.raises(ValueError, match=error_msg):
         TransmissionMatrix(data, frequencies)
     with pytest.raises(ValueError, match=error_msg):
+        TransmissionMatrix.from_tmatrix(data, frequencies)
+    with pytest.raises(ValueError, match=error_msg):
         TransmissionMatrix(np.ndarray.tolist(data), frequencies)
+    with pytest.raises(ValueError, match=error_msg):
+        TransmissionMatrix.from_tmatrix(np.ndarray.tolist(data), frequencies)
+
 def test_tmatrix_init():
     frequencies = [100, 200, 300]
-    TransmissionMatrix(np.ones([2, 2, len(frequencies)]), frequencies)
-    TransmissionMatrix(np.ones([4, 2, 2, len(frequencies)]), frequencies)
-    _expect_data_with_wrong_abcd_dims(
-        np.ones([2, len(frequencies)]), frequencies)
-    _expect_data_with_wrong_abcd_dims(
-        np.ones([3, 2, len(frequencies)]), frequencies)
-    _expect_data_with_wrong_abcd_dims(
-        np.ones([2, 5, len(frequencies)]), frequencies)
-    _expect_data_with_wrong_abcd_dims(
-        np.ones([7, 4, 2, len(frequencies)]), frequencies)
-    _expect_data_with_wrong_abcd_dims(
-        np.ones([7,8,4,2, len(frequencies)]), frequencies)
+    num_bins = len(frequencies)
+    TransmissionMatrix(np.ones([2, 2, num_bins]), frequencies)
+    TransmissionMatrix(np.ones([4, 2, 2, num_bins]), frequencies)
+    TransmissionMatrix.from_tmatrix(np.ones([2, 2, num_bins]), frequencies)
+    TransmissionMatrix.from_tmatrix(np.ones([4, 2, 2, num_bins]), frequencies)
 
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([2, num_bins]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([3, 2, num_bins]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([2, 5, num_bins]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([7, 4, 2, num_bins]), frequencies)
+    _expect_data_with_wrong_abcd_dims(
+        np.ones([7, 8, 4, 2, num_bins]), frequencies)
 
 def _expect_error_abcd_same_type(A, B, C, D):
     with pytest.raises(
