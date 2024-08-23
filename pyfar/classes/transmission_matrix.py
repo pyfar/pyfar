@@ -7,9 +7,23 @@ Transmission matrices (short T-matrices) are a convenient representation of
 fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission
 lines.
 
-Systems can be cascaded my multiplying consecutive T-matrices (e.g., by simply
-using the ``@`` operator). Furthermore, properties like input impedance of
-transfer functions can directly be derived.
+System properties like input impedance or transfer functions can directly be
+derived from a T-matrix. Furthermore, systems can be cascaded my multiplying
+consecutive T-matrices (e.g., by simply using the ``@`` operator):
+
+>>> import numpy as np
+>>> import pyfar as pf
+>>> frequencies = (100,200,300)
+>>> A = np.ones(len(frequencies))
+>>> (B,C,D) = (A+1,A+2,A+3)
+>>>
+>>> #T-matrices: 1st with arbitrary data and secondly, a bypass system
+>>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D,frequencies)
+>>> tmat_bypass = pf.TransmissionMatrix.create_identity(frequencies)
+>>>
+>>> tmat_out = tmat @ tmat_bypass
+>>> tmat_out.freq == tmat.freq
+
 """
 from __future__ import annotations
 import numpy as np
@@ -188,33 +202,6 @@ class TransmissionMatrix(FrequencyData):
         data = np.transpose(data, order)
 
         return tmat(data, frequencies)
-
-
-    def cascade(self, t_matrix: TransmissionMatrix):
-        """Cascades two systems (T-matrices) by doing a matrix multiplication
-
-        Parameters
-        ----------
-        t_matrix : TransmissionMatrix
-            The other TransmissionMatrix to perform the matrix multiplication.
-
-        Returns
-        -------
-        tmat_out : TransmissionMatrix
-            The index for the given frequency. If the input was an array like,
-            a numpy array of indices is returned.
-
-        Notes
-        -----
-        An easier approach, especially to cascade multiple systems, is using
-        the @-operator, e.g.::
-
-            T = T1 @ T2 @ T3 ...
-
-        See also Equation (2-3) in Reference [1]_.
-
-        """
-        return self @ t_matrix
 
     @property
     def abcd_caxes(self):
