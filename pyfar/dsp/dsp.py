@@ -1836,8 +1836,8 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
             definition originates from microphone array signal processing.
         number
             Apply a knee with a width of `number` dB according to [#]_ Eq. (4).
-            This definition of the knee originates from the classic audio
-            effects limiting, compression, and expansion.
+            This definition of the knee originates from the classic limiting
+            audio effect.
     freq_range : array like, optional
         Frequency range in which the limiting is applied. This must be an array
         like containing the lower and upper limit in Hz. The default ``None``
@@ -1851,13 +1851,13 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
         ``'below'``
             Soft limiting `signal` to enformce an absolute minimum value of
             `limit`
-        log_prefix: float, int
-            The log predix is used to linearize the limit and knee, e.g.,
-            ``limit_linear = 10**(limit / log_prefix)``. The default ``None``
-            uses ``20`` if `signal` is a Freuquency data Object or `signal` is
-            a Signal object with the FFT norm ``'none'``, ``'unitary'``,
-            ``'amplitude'`` or ``'rms'``. Otherwise a `log_prefix` of 10 is
-            used.
+    log_prefix: float, int
+        The log predix is used to linearize the limit and knee, e.g.,
+        ``limit_linear = 10**(limit / log_prefix)``. The default ``None``
+        uses ``20`` if `signal` is a Freuquency data Object or `signal` is
+        a Signal object with the FFT norm ``'none'``, ``'unitary'``,
+        ``'amplitude'`` or ``'rms'``. Otherwise a `log_prefix` of 10 is
+        used.
 
     Returns
     -------
