@@ -453,17 +453,6 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     @classmethod
-    def _create_abcd_matrix_broadcast(cls, abcd_data: FrequencyData,
-                                      abcd_cshape : tuple):
-        if abcd_data.cdim != 2 or abcd_data.cshape != (2,2):
-            raise ValueError("'abcd_data' must have a cshape of (2,2).")
-
-        if abcd_cshape != ():
-            abcd_data.freq = np.broadcast_to(abcd_data.freq,
-                                np.append(abcd_cshape, abcd_data.freq.shape))
-        return cls(abcd_data.freq, abcd_data.frequencies)
-
-    @classmethod
     def create_identity(cls, frequencies, abcd_cshape = ()):
         """Creates an object with identity matrix entries (bypass).
 
@@ -483,11 +472,9 @@ class TransmissionMatrix(FrequencyData):
             A TransmissionMatrix object that contains 2x2 identity matrices.
 
         """
-        identity = np.array([[1,0],[0,1]])
-        identity_3d = np.repeat(identity[:, :, np.newaxis],
-                                len(frequencies), axis = 2)
-        return cls._create_abcd_matrix_broadcast(
-            FrequencyData(identity_3d, frequencies), abcd_cshape)
+        A = np.ones((*abcd_cshape, np.array(frequencies).size))
+        (B,C,D) = (0,0,1)
+        return cls.from_abcd(A, B, C, D, frequencies)
 
     @classmethod
     def create_series_impedance(cls, impedance: FrequencyData, abcd_cshape=()):
@@ -510,14 +497,12 @@ class TransmissionMatrix(FrequencyData):
             A TransmissionMatrix representing a series impedance.
 
         """
-
         if impedance.cshape != (1,):
             raise ValueError("Number of channels for 'impedance' must be 1.")
-        Z = impedance.freq[0]
-        ones, zeros = np.ones_like(Z), np.zeros_like(Z)
-        series_Z_abcd = FrequencyData([[ones, Z],[zeros, ones]],
-                                      impedance.frequencies)
-        return cls._create_abcd_matrix_broadcast(series_Z_abcd, abcd_cshape)
+
+        (Z, frequencies) = (impedance.freq[0], impedance.frequencies)
+        Z = np.zeros((*abcd_cshape, np.array(frequencies).size)) + Z
+        return cls.from_abcd(1, Z, 0, 1, frequencies)
 
     @classmethod
     def create_shunt_admittance(cls, admittance: FrequencyData,
@@ -545,11 +530,10 @@ class TransmissionMatrix(FrequencyData):
         """
         if admittance.cshape != (1,):
             raise ValueError("Number of channels for 'admittance' must be 1.")
-        Y = admittance.freq[0]
-        ones, zeros = np.ones_like(Y), np.zeros_like(Y)
-        series_Z_abcd = FrequencyData([[ones, zeros],[Y, ones]],
-                                      admittance.frequencies)
-        return cls._create_abcd_matrix_broadcast(series_Z_abcd, abcd_cshape)
+
+        (Y, frequencies) = (admittance.freq[0], admittance.frequencies)
+        Y = np.zeros((*abcd_cshape, np.array(frequencies).size)) + Y
+        return cls.from_abcd(1, 0, Y, 1, frequencies)
 
     @staticmethod
     def create_transformer(transducer_constant : complex) -> np.ndarray:

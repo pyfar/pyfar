@@ -121,31 +121,6 @@ def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
 
 
 
-def test_create_abcd_matrix_broadcast_input_shape():
-    data_cshape_0d = FrequencyData([1,2,3], [100,200,300])
-    data_cshape_1d = FrequencyData([[1], [1], [3]], [100])
-    data_cshape_2x3 = FrequencyData([[[1], [1], [3]],[[1], [1], [3]]], [100])
-    error_msg = re.escape("'abcd_data' must have a cshape of (2,2).")
-    with pytest.raises(ValueError, match = error_msg):
-        TransmissionMatrix._create_abcd_matrix_broadcast(data_cshape_0d, (3,4))
-    with pytest.raises(ValueError, match = error_msg):
-        TransmissionMatrix._create_abcd_matrix_broadcast(data_cshape_1d, (3,4))
-    with pytest.raises(ValueError, match = error_msg):
-        TransmissionMatrix._create_abcd_matrix_broadcast(data_cshape_2x3,(3,4))
-
-@pytest.mark.parametrize("abcd_cshape", [(), (1,), (4,), (4, 5)])
-def test_create_abcd_matrix_broadcast(abcd_cshape):
-    a,b,c,d = 1,2,3,4
-    abcd_2d = np.array([[a,b],[c,d]])
-    frequencies = [100,200,300]
-    abcd_data = np.repeat(abcd_2d[:,:, np.newaxis], len(frequencies), axis = 2)
-    tmat = TransmissionMatrix._create_abcd_matrix_broadcast(
-        FrequencyData(abcd_data, frequencies), abcd_cshape)
-    if abcd_cshape == ():
-        abcd_cshape = (1,)
-    assert tmat.abcd_cshape == abcd_cshape
-    _compare_tmat_vs_abcd(tmat, a, b, c, d)
-
 @pytest.mark.parametrize("abcd_cshape", [(), (4,), (4, 5)])
 def test_tmatrix_create_identity(abcd_cshape):
     frequencies = [100,200,300]
