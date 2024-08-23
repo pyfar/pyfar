@@ -64,4 +64,6 @@ def test_spectrogram_shape(shape):
     freq, time, spectro = pf.dsp.spectrogram(impulse)
 
     assert spectro.shape == (*shape, *freq.shape, *time.shape)
+    assert time.ndim == 1
+    assert freq.ndim == 1
 
