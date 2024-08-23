@@ -166,7 +166,11 @@ class _Audio():
 
 
         """
+        length = self._data.shape[-1]
         data = self._data[key]
+        if length != np.atleast_1d(data).shape[-1]:
+            raise KeyError((f'Indexed dimensions must not exceed the channel '
+                            f'dimension (cdim), which is {len(self.cshape)}'))
         return self._return_item(data)
 
     def __setitem__(self, key, value):
