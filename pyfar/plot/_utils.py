@@ -471,7 +471,7 @@ def _assert_and_match_spectrogram_to_side(spectrogram, frequencies, signal,
 
     # get corresponding data
     frequencies = frequencies[mask]
-    spectrogram = spectrogram[mask, ...]
+    spectrogram = spectrogram[..., mask, :]
 
     if side == 'left':
         frequencies = np.flipud(np.abs(frequencies))
