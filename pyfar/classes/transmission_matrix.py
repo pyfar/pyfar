@@ -7,8 +7,9 @@ Transmission matrices (short T-matrices) are a convenient representation of
 fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission
 lines.
 
-Systems can be cascaded my multiplying consecutive T-matrices. Furthermore,
-properties like input impedance of transfer functions can directly be derived.
+Systems can be cascaded my multiplying consecutive T-matrices (e.g., by simply
+using the ``@`` operator). Furthermore, properties like input impedance of
+transfer functions can directly be derived.
 """
 from __future__ import annotations
 import numpy as np
@@ -258,7 +259,8 @@ class TransmissionMatrix(FrequencyData):
                         x       x   |
                     o---xxxxxxxxx---o
 
-        See Equation (2-6) in Reference [1]_.
+        See Equation (2-6) in Reference [1]_:
+        :math:`Z_\\mathrm{in} = \\frac{AZ_L + B}{CZ_L + D}`
 
         Parameters
         ----------
@@ -300,7 +302,8 @@ class TransmissionMatrix(FrequencyData):
                     |   x       x
                     o---xxxxxxxxx---o
 
-        See Equation (2-6) in Reference [1]_.
+        See Equation (2-6) in Reference [1]_:
+        :math:`Z_\\mathrm{out} = \\frac{DZ_L + B}{CZ_L + A}`
 
         Parameters
         ----------
@@ -339,15 +342,26 @@ class TransmissionMatrix(FrequencyData):
         quantity of modelled two-port and depends on the load impedance at the
         output. Since there are two quantities at input and output
         respectively, four transfer functions exist in total. The first usually
-        refers to the "voltage-like" quantity (Q1) whereas the second refers to
-        the "current-like" quantity (Q2).
+        refers to the "voltage-like" quantity (:math:`Q_1`) whereas the second
+        refers to the "current-like" quantity (:math:`Q_2`).
 
-        See Equation (2-1) in Reference [1]_:
+        The TFs can be derived from Equation (2-1) in Reference [1]_:
 
-        * Q1_out / Q1_in => Defined as e2/e1 using i2 = e2/Zl.
-        * Q2_out / Q2_in => Defined as i2/i1 using e2 = i2*Zl.
-        * Q2_out / Q1_in => Defined as i2/e1 = (e2/e1)/Zl.
-        * Q1_out / Q2_in => Defined as e2/i1 = (i2/i1)*Zl.
+        .. math::
+            Q_{1,\\mathrm{in}} = AQ_{1,\\mathrm{out}} + BQ_{2,\\mathrm{in}}
+
+            Q_{2,\\mathrm{in}} = CQ_{1,\\mathrm{out}} + DQ_{2,\\mathrm{in}}
+
+        The four TFs are defined as:
+
+        * :math:`Q_{1,\\mathrm{out}} / Q_{1,\\mathrm{in}}` using
+          :math:`Q_{2,\\mathrm{out}} = Q_{1,\\mathrm{out}}/Z_L`
+        * :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}} =
+          Q_{1,\\mathrm{out}} / Q_{1,\\mathrm{in}} \\cdot \\frac{1}{Z_L}`
+        * :math:`Q_{2,\\mathrm{out}} / Q_{2,\\mathrm{in}}` using
+          :math:`Q_{1,\\mathrm{out}} = Q_{2,\\mathrm{out}}\\cdot Z_L`
+        * :math:`Q_{1,\\mathrm{out}} / Q_{2,\\mathrm{in}} =
+          Q_{2,\\mathrm{out}} / Q_{2,\\mathrm{in}} \\cdot Z_L`
 
         Parameters
         ----------
@@ -454,16 +468,22 @@ class TransmissionMatrix(FrequencyData):
 
     @classmethod
     def create_identity(tmat, frequencies, abcd_cshape = ()):
-        """Creates an object with identity matrix entries (bypass).
+        r"""Creates an object with identity matrix entries (bypass).
 
-        See Equation (2-7) in Table I of Reference [1]_.
+        See Equation (2-7) in Table I of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                1 & 0 \\
+                0 & 1
+                \end{bmatrix}
 
         Parameters
         ----------
         frequencies : array_like
             The frequency sampling points in Hz.
         abcd_cshape : tuple | int, optional
-            Shape of additional dimensions besides (2,2,num_bins).
+            Shape of additional channel dimensions besides (2,2).
             Per default, no additional dimensions are created.
 
         Returns
@@ -479,17 +499,23 @@ class TransmissionMatrix(FrequencyData):
     @classmethod
     def create_series_impedance(tmat, impedance: FrequencyData,
                                 abcd_cshape=()):
-        """Creates a transmission matrix representing a series impedance.
+        r"""Creates a transmission matrix representing a series impedance.
 
         This means the impedance is connected in series with a potential load
-        impedance. See Equation (2-8) in Table I of Reference [1]_.
+        impedance. See Equation (2-8) in Table I of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                1 & Z \\
+                0 & 1
+                \end{bmatrix}
 
         Parameters
         ----------
         impedance : FrequencyData
             The impedance data of the series impedance.
         abcd_cshape : tuple | int, optional
-            Shape of additional dimensions besides (2,2,num_bins).
+            Shape of additional channel dimensions besides (2,2).
             Per default, no additional dimensions are created.
 
         Returns
@@ -508,19 +534,25 @@ class TransmissionMatrix(FrequencyData):
     @classmethod
     def create_shunt_admittance(tmat, admittance: FrequencyData,
                                 abcd_cshape = ()):
-        """Creates a transmission matrix representing a shunt admittance
+        r"""Creates a transmission matrix representing a shunt admittance
         (parallel connection).
 
         In this case, the impedance (= 1 / admittance) is connected in parallel
         with a potential load impedance.
-        See Equation (2-9) in Table I of Reference [1]_.
+        See Equation (2-9) in Table I of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                1 & 0 \\
+                Y & 1
+                \end{bmatrix}
 
         Parameters
         ----------
         admittance : FrequencyData
             The admittance data of the element connected in parallel.
         abcd_cshape : tuple | int, optional
-            Shape of additional dimensions besides (2,2,num_bins).
+            Shape of additional channel dimensions besides (2,2).
             Per default, no additional dimensions are created.
 
         Returns
@@ -538,16 +570,22 @@ class TransmissionMatrix(FrequencyData):
 
     @staticmethod
     def create_transformer(transducer_constant : complex) -> np.ndarray:
-        """Creates a frequency-independent transmission matrix representing a
+        r"""Creates a frequency-independent transmission matrix representing a
         transformer.
 
-        See Equation (2-12) in Table I of Reference [1]_.
+        See Equation (2-12) in Table I of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                N & 0 \\
+                0 & 1/N
+                \end{bmatrix}
 
         Parameters
         ----------
         transducer_constant : scalar
             The transmission ratio with respect to voltage-like quantity,
-            i.e. Uout/Uin.
+            i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`.
 
         Returns
         -------
@@ -566,17 +604,27 @@ class TransmissionMatrix(FrequencyData):
 
     @staticmethod
     def create_gyrator(transducer_constant : complex) -> np.ndarray:
-        """Creates a frequency-independent transmission matrix representing a
+        r"""Creates a frequency-independent transmission matrix representing a
         gyrator.
 
-        See Equation (2-14) in Table I of Reference [1]_.
+        The T-matrix is defined by a transducer constant (:math:`M`),
+        see Equation (2-14) in Table I of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                0 & M \\
+                1/M & 0
+                \end{bmatrix}
+
+        :math:`M` connects the first input and second output quantity (e.g.,
+        :math:`U_\mathrm{out} = I_\mathrm{in} \cdot M`). A respective system
+        with load :math:`Z_L` has the input impedance
+        :math:`Z_\mathrm{in} = M^2 / Z_L`.
 
         Parameters
         ----------
         transducer_constant : scalar
-            The transducer constant (M) connecting first input and second
-            output quantity, e.g.: Uout = Iin * M. The input impedance of this
-            system is Zin = M^2 / Zl.
+            The transducer constant :math:`M`.
 
         Returns
         -------
