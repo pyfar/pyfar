@@ -182,10 +182,9 @@ class TransmissionMatrix(FrequencyData):
         data = np.array([[A, B], [C, D]])
         # Switch dimension order so that T matrices refer to
         # third and second last dimension (axes -3 and -2)
-        order = np.array(range(data.ndim))
-        order = np.roll(order, -2)  # Now T-axes at [-2, -1]; freq axis at [-3]
-        order[[-1, -3]] = order[[-3, -1]]  # Correct freq axis index
-        order[[-3, -2]] = order[[-2, -3]]  # Correct order of T-matrix
+        order = np.array(range(data.ndim-1))
+        order = np.roll(order, -2)
+        order = np.append(order, data.ndim-1)
         data = np.transpose(data, order)
 
         return tmat(data, frequencies)
