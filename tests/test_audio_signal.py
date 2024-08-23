@@ -306,6 +306,13 @@ def test_cshape():
     assert signal.cshape == (2, 3)
 
 
+def test_cdim():
+    """Test the attribute cdim."""
+    time = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    signal = Signal(time, 44100)
+    assert signal.cdim == 2
+
+
 def test_magic_getitem():
     """Test slicing operations by the magic function __getitem__."""
     time = np.arange(2 * 3 * 4).reshape((2, 3, 4))
@@ -419,8 +426,27 @@ def test_reshape_exceptions():
         signal_out = signal_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape audio object'):
+    with pytest.raises(ValueError, match='Cannot reshape audio object'):
         signal_out = signal_in.reshape((3, 4))
+
+
+def test_transpose():
+    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    signal_out = signal_in.transpose()
+    npt.assert_allclose(signal_in.T._data, signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
+
+
+@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
+def test_transpose_args(taxis):
+    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    signal_out = signal_in.transpose(taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
+    signal_out = signal_in.transpose(*taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
 
 
 def test_flatten():

@@ -463,7 +463,11 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
         if (np.any(data > 1.) and
                 subtype.upper() not in ['FLOAT', 'DOUBLE', 'VORBIS']):
             warnings.warn(
-                f'{format}-files of subtype {subtype} are clipped to +/- 1.')
+                (f'{format}-files of subtype {subtype} are clipped to +/- 1. '
+                 'Normalize your audio with pyfar.dsp.normalize to 1-LSB, with'
+                 ' LSB being the least significant bit (e.g. 2**-15 for '
+                 "16 bit) or use non-clipping subtypes 'FLOAT', 'DOUBLE', or "
+                 "'VORBIS' (see pyfar.io.audio_subtypes)"))
         soundfile.write(
             file=filename, data=data.T, samplerate=sampling_rate,
             subtype=subtype, **kwargs)
@@ -530,7 +534,7 @@ def default_audio_subtype(format):
 
     Notes
     -----
-    This function is a wrapper of :py:func:`soundfile.default_audio_subtype()`.
+    This function is a wrapper of :py:func:`soundfile.default_subtype()`.
 
     Examples
     --------
