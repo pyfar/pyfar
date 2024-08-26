@@ -52,6 +52,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     2. Smooth the spectrum by convolution with a smoothing window
     3. Interpolate the spectrum to the original linear frequency scale
 
+    Smoothing of complex-valued time data is not implemented.
 
     Parameters
     ----------
