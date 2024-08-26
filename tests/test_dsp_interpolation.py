@@ -25,7 +25,9 @@ def test_smooth_fractional_octave_assertions():
     with raises(ValueError, match="The smoothing width"):
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
-    with raises(TypeError, match="Fractional octave smoothing for complex-valued time data is not implemented."):
+    with raises(TypeError, match=("Fractional octave smoothing for "
+                                  "complex-valued time data is not "
+                                  "implemented.")):
 
         smooth_fractional_octave(pf.Signal([1, 0], 1, is_complex=True), 1)
 
@@ -50,31 +52,6 @@ def test_smooth_fractional_octave_mode(mode):
     reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             f"dsp.smooth_fractional_octave_{mode}.csv"))
-    npt.assert_allclose(output.time.flatten(), reference)
-
-
-@pytest.mark.parametrize("mode", (
-    "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
-def test_smooth_fractional_octave_complex(mode):
-    """
-    Test return signal for different smoothing modes against saved references
-    """
-
-    # load input data
-    input = np.loadtxt(os.path.join(
-            os.path.dirname(__file__), "references",
-            "dsp.smooth_fractional_octave_input.csv"))
-    input = pf.Signal(input, 44100)
-    input.fft_norm = 'none'
-    input.complex = True
-
-    # smooth
-    output, _ = smooth_fractional_octave(input, 1, mode)
-
-    # compare to reference
-    reference = np.loadtxt(os.path.join(
-            os.path.dirname(__file__), "references",
-            f"dsp.smooth_fractional_octave_{mode}_complex.csv"))
     npt.assert_allclose(output.time.flatten(), reference)
 
 
