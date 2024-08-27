@@ -97,7 +97,7 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency = 1000
     frequency_idx = np.abs(signal.frequencies-frequency).argmin()
     grp = dsp.group_delay(signal, frequency, method='scipy')
-    assert grp.shape == (1, )
+    assert grp.shape == (1, 1)
     npt.assert_allclose(
         grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 

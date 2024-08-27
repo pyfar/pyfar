@@ -67,7 +67,9 @@ def group_delay(signal, frequencies=None, method='fft'):
     Returns
     -------
     group_delay : numpy array
-        Frequency dependent group delay in samples.
+                Frequency dependent group delay of shape
+                (:py:func:`~pyfar.classes.audio.Signal.cshape`,
+                frequencies).
 
     References
     ----------
@@ -114,11 +116,6 @@ def group_delay(signal, frequencies=None, method='fft'):
     else:
         raise ValueError(
             "Invalid method, needs to be either 'scipy' or 'fft'.")
-
-    # squeeze last dimension. If only one frequency is given, shape (1, ) is
-    # returned instead of (1, 1)
-    if frequencies is not None and frequencies.size == 1:
-        group_delay = np.squeeze(group_delay, axis=-1)
 
     return group_delay
 
