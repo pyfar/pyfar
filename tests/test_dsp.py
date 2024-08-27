@@ -119,7 +119,7 @@ def test_group_delay_cshape(shape):
 
     grp = dsp.group_delay(impulse)
 
-    assert grp.shape == (*impulse.cshape, len(impulse.frequencies))
+    assert grp.shape == (*impulse.cshape, impulse.n_bins)
 
 
 def test_linear_phase():
