@@ -67,9 +67,9 @@ def group_delay(signal, frequencies=None, method='fft'):
     Returns
     -------
     group_delay : numpy array
-                Frequency dependent group delay of shape
-                (:py:func:`~pyfar.classes.audio.Signal.cshape`,
-                frequencies).
+        Frequency dependent group delay of shape
+        (:py:func:`~pyfar.classes.audio.Signal.cshape`,
+        frequencies).
 
     References
     ----------
