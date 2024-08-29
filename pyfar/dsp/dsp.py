@@ -296,7 +296,7 @@ def spectrogram(signal, window='hann', window_length=1024,
     window = sgn.get_window(window, window_length)
 
     frequencies, times, spectrogram = sgn.spectrogram(
-        x=signal.time.squeeze(), fs=signal.sampling_rate, window=window,
+        x=signal.time, fs=signal.sampling_rate, window=window,
         noverlap=window_overlap, mode='magnitude', scaling='spectrum')
 
     # remove normalization from scipy.signal.spectrogram
