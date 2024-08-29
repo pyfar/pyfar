@@ -349,8 +349,8 @@ def test_time_window_input():
         dsp.time_window(sig, interval=[1, 2, 3])
     with pytest.raises(ValueError, match='longer'):
         dsp.time_window(sig, interval=[1, 11])
-    match = 'asdasdasd'
-    with pytest.raises(ValueError, match=match):
+    m = r"invalid literal for int\(\) with base 10: np\.str_\('[a-zA-Z0-9]'\)"
+    with pytest.raises(ValueError, match=m):
         dsp.time_window(sig, interval=['a', 'b'])
 
 

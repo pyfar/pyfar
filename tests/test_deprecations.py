@@ -53,7 +53,7 @@ def test__check_time_unit():
 
     create_figure()
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        match = 'asdasdasd'
+        match = 'Unit is None but must be s, ms, mus, samples, auto.'
         with pytest.raises(ValueError, match=match):
             # remove xscale from pyfar 0.6.0!
             pf.plot._utils._check_time_unit(None)

@@ -94,7 +94,7 @@ def test_line_phase_options(param, signal, request):
 def test_line_phase_unwrap_assertion(sine):
     """Test assertion for unwrap parameter."""
     create_figure()
-    match = 'asdasdasd'
+    match = 'unwrap is infinity but must be True, False, or 360'
     with pytest.raises(ValueError, match=match):
         plot.phase(sine, unwrap='infinity')
 
@@ -146,7 +146,7 @@ def test_line_freq_scale_assertion(function, sine):
     """
 
     create_figure()
-    match = 'asdasdasd'
+    match = "scale is warped but must be 'linear', or 'log'."
     with pytest.raises(ValueError, match=match):
         function(sine, freq_scale="warped")
 
@@ -172,15 +172,15 @@ def test_time_unit_assertion(sine):
     """Test if all line plots raise an assertion for a wrong unit parameter."""
 
     create_figure()
-    match = 'asdasdasd'
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
     with pytest.raises(ValueError, match=match):
         plot.time(sine, unit="pascal")
 
-    match = 'asdasdasd'
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
     with pytest.raises(ValueError, match=match):
         plot.group_delay(sine, unit="pascal")
 
-    match = 'asdasdasd'
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
     with pytest.raises(ValueError, match=match):
         plot.spectrogram(sine, unit="pascal")
 
@@ -369,7 +369,7 @@ def test_2d_phase_options(param, handsome_signal_2d):
 def test_phase_2d_unwrap_assertion(handsome_signal_2d):
     """Test assertion for unwrap parameter."""
     create_figure()
-    match = 'asdasdasd'
+    match = 'unwrap is infinity but must be True, False, or 360'
     with pytest.raises(ValueError, match=match):
         plot.phase_2d(handsome_signal_2d, unwrap='infinity')
 
@@ -419,15 +419,15 @@ def test_2d_freq_scale_assertion(handsome_signal_2d):
     """
 
     create_figure()
-    match = 'asdasdasd'
+    match = "xscale is warped but must be 'linear', or 'log'."
     with pytest.raises(ValueError, match=match):
         plot.freq_2d(handsome_signal_2d, freq_scale="warped")
 
-    match = 'asdasdasd'
+    match = "xscale is warped but must be 'linear', or 'log'."
     with pytest.raises(ValueError, match=match):
         plot.phase_2d(handsome_signal_2d, freq_scale="warped")
 
-    match = 'asdasdasd'
+    match = "xscale is warped but must be 'linear', or 'log'."
     with pytest.raises(ValueError, match=match):
         plot.group_delay_2d(handsome_signal_2d, freq_scale="warped")
 
@@ -453,11 +453,11 @@ def test_2d_time_unit_assertion(handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
 
     create_figure()
-    match = 'asdasdasd'
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
     with pytest.raises(ValueError, match=match):
         plot.time_2d(handsome_signal_2d, unit="pascal")
 
-    match = 'asdasdasd'
+    match = "'pascal' is not in list"
     with pytest.raises(ValueError, match=match):
         plot.group_delay_2d(handsome_signal_2d, unit="pascal")
 

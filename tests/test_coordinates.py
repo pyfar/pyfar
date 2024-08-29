@@ -115,19 +115,19 @@ def test_exist_systems():
     coords._exist_system('sph', unit='rad')
 
     # tests that have to fail
-    match = 'asdasdasd'
+    match = 'The domain must be specified'
     with pytest.raises(ValueError, match=match):
         coords._exist_system()
     with pytest.raises(AssertionError):
         coords._exist_system('shp')
-    match = 'asdasdasd'
+    match = 'The domain must be specified'
     with pytest.raises(ValueError, match=match):
         coords._exist_system(None, 'side')
     with pytest.raises(AssertionError):
         coords._exist_system('sph', 'tight')
     with pytest.raises(AssertionError):
         coords._exist_system('sph', 'side', 'met')
-    match = 'asdasdasd'
+    match = 'The domain must be specified'
     with pytest.raises(ValueError, match=match):
         coords._exist_system(None, None, 'met')
 
@@ -609,7 +609,7 @@ def test_rotation_assertion():
     """Test rotation with unknown rotation type."""
     c = Coordinates(1, 0, 0)
     # test with unknown type
-    match = 'asdasdasd'
+    match = "rotation must be 'quat', 'matrix', 'rotvec', or"
     with pytest.raises(ValueError, match=match):
         c.rotate('urgh', 90)
 

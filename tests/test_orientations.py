@@ -43,7 +43,7 @@ def test_orientations_from_view_up():
     # number of views to ups M:N
     views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 1, 0]]
-    match = 'asdasdasd'
+    match = 'Expected 1:1, 1:N or N:1 `views` and `ups` not M:N, got '
     with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
 
@@ -53,25 +53,25 @@ def test_orientations_from_view_up_invalid():
     # mal-formed lists
     views = [[1, 0, 0], [0, 0]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    match = 'asdasdasd'
+    match = 'setting an array element with a sequence. The requested'
     with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
     # any of views and ups has zero-length
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    match = 'asdasdasd'
+    match = 'View and Up Vectors must have a length.'
     with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
     # views' and ups' shape must be (N, 3) or (3,)
     views = [0, 1]
     ups = [0, 1]
-    match = 'asdasdasd'
+    match = 'Expected `views` and `ups` to have shape'
     with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
     # view and up vectors must be orthogonal
     views = [1.0, 0.5, 0.1]
     ups = [0, 0, 1]
-    match = 'asdasdasd'
+    match = 'View and Up vectors must be perpendicular'
     with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
 
@@ -112,7 +112,7 @@ def test_orientations_show(views, ups, positions, orientations):
     orientations.show(positions)
     # with non-matching positions
     positions = Coordinates(0, 1, 0)
-    match = 'asdasdasd'
+    match = 'If provided, there must be the same number'
     with pytest.raises(ValueError, match=match):
         orientations.show(positions)
 
@@ -186,10 +186,10 @@ def test_orientations_indexing_assignment(orientations):
     orientations[0] = Orientations.from_view_up([0, 0, 1], [1, 0, 0])
     orientations[0] = [0, 0, 0, 1]
     orientations[:] = [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0]]
-    match = 'asdasdasd'
+    match = 'Expected assigned value to have shape or'
     with pytest.raises(ValueError, match=match):
         orientations[0] = [0, 0, 3]
-    match = 'asdasdasd'
+    match = 'could not broadcast input array from shape'
     with pytest.raises(ValueError, match=match):
         orientations[0] = orientations
 

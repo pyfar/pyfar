@@ -186,7 +186,7 @@ def test_filter_fir_init_state(impulse):
 def test_filter_fir_process_sampling_rate_mismatch(impulse):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse.sampling_rate-1)
-    match = 'asdasdasd'
+    match = 'The sampling rates of filter and signal do not match'
     with pytest.raises(ValueError, match=match):
         filt.process(impulse)
 

@@ -36,7 +36,7 @@ def test_data_time_init_wrong_number_of_times():
     data = [1, 0, -1]
     times = [0, .1]
 
-    match = 'asdasdasd'
+    match = 'The length of times must be data.shape'
     with pytest.raises(ValueError, match=match):
         TimeData(data, times)
 
@@ -46,7 +46,7 @@ def test_data_time_with_non_monotonously_increasing_time():
     data = [1, 0, -1]
     times = [0, .2, .1]
 
-    match = 'asdasdasd'
+    match = 'Times must be monotonously increasing'
     with pytest.raises(ValueError, match=match):
         TimeData(data, times)
 
@@ -86,7 +86,7 @@ def test_reshape_exceptions():
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     # test assertion for non-tuple input
-    match = 'asdasdasd'
+    match = 'newshape must be an integer or tuple'
     with pytest.raises(ValueError, match=match):
         data_out = data_in.reshape([3, 2])
 
@@ -172,7 +172,7 @@ def test_magic_setitem_wrong_n_samples():
 
     time_a = TimeData([1, 0, -1], [0, .1, .3])
     time_b = TimeData([2, 0, -2, 0], [0, .1, .3, .7])
-    match = 'asdasdasd'
+    match = 'The number of samples does not match'
     with pytest.raises(ValueError, match=match):
         time_a[0] = time_b
 

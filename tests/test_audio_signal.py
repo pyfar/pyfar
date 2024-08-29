@@ -282,7 +282,7 @@ def test_setter_fft_norm():
     npt.assert_allclose(signal.freq, spec_power_unitary)
 
     # setting an invalid fft_norm
-    match = 'asdasdasd'
+    match = 'Invalid FFT normalization. Has to be none, unitary, amplitude'
     with pytest.raises(ValueError, match=match):
         signal.fft_norm = 'bullshit'
 
@@ -423,7 +423,7 @@ def test_reshape_exceptions():
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     # test assertion for non-tuple input
-    match = 'asdasdasd'
+    match = 'newshape must be an integer or tuple'
     with pytest.raises(ValueError, match=match):
         signal_out = signal_in.reshape([3, 2])
 
