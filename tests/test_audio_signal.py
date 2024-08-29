@@ -327,6 +327,13 @@ def test_magic_getitem_allslice():
     npt.assert_allclose(signal[:]._data, time[:])
 
 
+def test_magic_getitem_ellipsis():
+    """Test slicing operations by the magic function __getitem__."""
+    signal = pf.Signal([[[1, 1, 1], [2, 2, 2]]], 44100)
+    npt.assert_allclose(signal[..., 0].time, np.atleast_2d([1, 1, 1]))
+    assert signal[..., 0].time.shape == (1, 3)
+
+
 @pytest.mark.parametrize('domain', ['time', 'freq'])
 def test_magic_getitem_error(domain):
     """
