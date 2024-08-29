@@ -6,7 +6,6 @@ exclude = [
 ]
 line-length = 79
 lint.ignore = [
-    "PT011", # use match in pytest.raises
     "PT018", # Assertion should be broken down into multiple parts
     "PT019", # Fixture `_` without value is injected as parameter
 ]

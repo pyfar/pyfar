@@ -115,17 +115,20 @@ def test_exist_systems():
     coords._exist_system('sph', unit='rad')
 
     # tests that have to fail
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords._exist_system()
     with pytest.raises(AssertionError):
         coords._exist_system('shp')
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords._exist_system(None, 'side')
     with pytest.raises(AssertionError):
         coords._exist_system('sph', 'tight')
     with pytest.raises(AssertionError):
         coords._exist_system('sph', 'side', 'met')
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords._exist_system(None, None, 'met')
 
 
@@ -606,7 +609,8 @@ def test_rotation_assertion():
     """Test rotation with unknown rotation type."""
     c = Coordinates(1, 0, 0)
     # test with unknown type
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         c.rotate('urgh', 90)
 
 

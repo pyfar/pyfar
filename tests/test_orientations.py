@@ -43,7 +43,8 @@ def test_orientations_from_view_up():
     # number of views to ups M:N
     views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 1, 0]]
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
 
 
@@ -52,22 +53,26 @@ def test_orientations_from_view_up_invalid():
     # mal-formed lists
     views = [[1, 0, 0], [0, 0]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
     # any of views and ups has zero-length
     views = [[1, 0, 0], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
     # views' and ups' shape must be (N, 3) or (3,)
     views = [0, 1]
     ups = [0, 1]
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
     # view and up vectors must be orthogonal
     views = [1.0, 0.5, 0.1]
     ups = [0, 0, 1]
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
 
 
@@ -107,7 +112,8 @@ def test_orientations_show(views, ups, positions, orientations):
     orientations.show(positions)
     # with non-matching positions
     positions = Coordinates(0, 1, 0)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         orientations.show(positions)
 
 
@@ -180,9 +186,11 @@ def test_orientations_indexing_assignment(orientations):
     orientations[0] = Orientations.from_view_up([0, 0, 1], [1, 0, 0])
     orientations[0] = [0, 0, 0, 1]
     orientations[:] = [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0]]
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         orientations[0] = [0, 0, 3]
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         orientations[0] = orientations
 
 

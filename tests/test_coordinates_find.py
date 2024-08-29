@@ -96,19 +96,23 @@ def test_find_nearest_error():
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, -1)
 
     # test Coordinate object as input
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(5, 1)
 
     # test wrong string for distance measure
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, 1, 'bla')
 
     # test wrong type for distance measure
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, 1, 5)
 
     # test negative radius_tol
@@ -168,31 +172,39 @@ def test_find_within_error():
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, -1, 'euclidean')
 
     # test Coordinate object as input
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(5, 1)
 
     # test wrong string for distance measure
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, 'bla')
 
     # test wrong type for distance measure
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, 5)
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, atol=-1)
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, atol='h')
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, radius_tol='h')
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, return_sorted=-1)
 
 

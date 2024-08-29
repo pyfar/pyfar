@@ -282,7 +282,8 @@ def test_setter_fft_norm():
     npt.assert_allclose(signal.freq, spec_power_unitary)
 
     # setting an invalid fft_norm
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal.fft_norm = 'bullshit'
 
 
@@ -445,7 +446,8 @@ def test_reshape_exceptions():
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     # test assertion for non-tuple input
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal_out = signal_in.reshape([3, 2])
 
     # test assertion for wrong dimension
