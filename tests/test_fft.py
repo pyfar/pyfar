@@ -337,7 +337,8 @@ def test_normalization_with_window_value_error():
     wrong length.
     """
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # n_samples=5, and len(window)=5
         fft.normalization(np.array([.5, 1, .5]), 4, 44100,
                           'amplitude', window=[1, 1, 1, 1, 1])
@@ -345,10 +346,12 @@ def test_normalization_with_window_value_error():
 
 def test_normalization_exceptions():
     # Call without numpy array
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         fft.normalization(1, 1, 44100, 'rms')
     # Invalid normalization
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         fft.normalization(np.array([1]), 1, 44100, 'goofy')
 
 

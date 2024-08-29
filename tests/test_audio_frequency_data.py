@@ -26,7 +26,8 @@ def test_data_frequency_init_wrong_number_of_freqs():
     data = [1, 0, -1]
     freqs = [0, .1]
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         FrequencyData(data, freqs)
 
 
@@ -35,7 +36,8 @@ def test_data_frequency_with_non_monotonously_increasing_frequencies():
     data = [1, 0, -1]
     freqs = [0, .2, .1]
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         FrequencyData(data, freqs)
 
 
@@ -100,7 +102,8 @@ def test_reshape_exceptions():
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     # test assertion for non-tuple input
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         data_out = data_in.reshape([3, 2])
 
     # test assertion for wrong dimension
@@ -186,7 +189,8 @@ def test_magic_setitem_wrong_n_bins():
     freq_a = FrequencyData([1, 0, -1], [0, .1, .3])
     freq_b = FrequencyData([2, 0, -2, 0], [0, .1, .3, .7])
 
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         freq_a[0] = freq_b
 
 

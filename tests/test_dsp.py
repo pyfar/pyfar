@@ -349,7 +349,8 @@ def test_time_window_input():
         dsp.time_window(sig, interval=[1, 2, 3])
     with pytest.raises(ValueError, match='longer'):
         dsp.time_window(sig, interval=[1, 11])
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         dsp.time_window(sig, interval=['a', 'b'])
 
 

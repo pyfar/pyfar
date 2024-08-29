@@ -115,7 +115,8 @@ def test_add_time_data_and_time_data():
 def test_add_time_data_and_number_wrong_domain():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'freq')
 
 
@@ -123,7 +124,8 @@ def test_add_time_data_and_number_wrong_times():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
     y = TimeData([1, 0, 0], [0, .1, .4])
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, y), 'time')
 
 
@@ -131,7 +133,8 @@ def test_add_frequency_data_and_number():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = pf.add((x, 1), 'freq')
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'time')
 
     # check if old signal did not change
@@ -162,7 +165,8 @@ def test_add_frequency_data_and_frequency_data():
 def test_add_frequency_data_and_number_wrong_domain():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'time')
 
 
@@ -170,7 +174,8 @@ def test_add_frequency_data_and_number_wrong_frequencies():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = FrequencyData([1, 0, 0], [0, .1, .4])
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, y), 'freq')
 
 
@@ -431,23 +436,28 @@ def test_assert_match_for_arithmetic():
     assert out[2] == 'rms'
 
     # check with non-tuple input for first argument
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             s, 'time', division=False, matmul=False)
     # check with invalid data type in first argument
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, ['str', 'ing']), 'time', division=False, matmul=False)
     # check with complex data and time domain operation
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, np.array([1 + 1j])), 'time', division=False, matmul=False)
     # test signals with different sampling rates
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, s1), 'time', division=False, matmul=False)
     # test signals with different n_samples
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, s2), 'time', division=False, matmul=False)
 
@@ -496,14 +506,16 @@ def test_get_arithmetic_data_with_signal():
 
 
 def test_assert_match_for_arithmetic_data_different_audio_classes():
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (Signal(1, 1), TimeData(1, 1)), 'time', division=False,
             matmul=False)
 
 
 def test_assert_match_for_arithmetic_data_wrong_domain():
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (1, 1), 'space', division=False, matmul=False)
 
@@ -517,7 +529,8 @@ def test_assert_match_for_arithmetic_data_wrong_cshape():
 
 
 def test_get_arithmetic_data_wrong_domain():
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         signal._get_arithmetic_data(
             Signal(1, 44100), 'space', (1,), False, Signal)
 
@@ -530,7 +543,8 @@ def test_array_broadcasting_errors():
 
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, y))
 
 

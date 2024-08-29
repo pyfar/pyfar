@@ -23,10 +23,12 @@ def test_butterworth(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.butterworth(impulse, 2, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.butterworth(None, 2, 1000, 'lowpass')
 
@@ -47,10 +49,12 @@ def test_chebyshev1(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.chebyshev1(impulse, 2, 1, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.chebyshev1(None, 2, 1, 1000, 'lowpass')
 
@@ -71,10 +75,12 @@ def test_chebyshev2(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.chebyshev2(impulse, 2, 40, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass')
 
@@ -96,10 +102,12 @@ def test_elliptic(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.elliptic(impulse, 2, 1, 40, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.elliptic(None, 2, 1, 40, 1000, 'lowpass')
 
@@ -119,10 +127,12 @@ def test_bessel(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.bessel(impulse, 2, 1000, 'lowpass', 'phase', 44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.bessel(None, 2, 1000, 'lowpass', 'phase')
 
@@ -208,16 +218,20 @@ def test_bell(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # test ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.bell(impulse, 1000, 10, 2, sampling_rate=44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.bell(None, 1000, 10, 2)
     # check wrong input arguments
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         x = pfilt.bell(impulse, 1000, 10, 2, bell_type='nope')
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         x = pfilt.bell(impulse, 1000, 10, 2, quality_warp='nope')
 
 
@@ -242,16 +256,20 @@ def test_shelve(impulse):
         npt.assert_allclose(x.time, y.time)
 
         # ValueError
-        with pytest.raises(ValueError):
+        match = 'asdasdasd'
+        with pytest.raises(ValueError, match=match):
             # pass signal and sampling rate
             x = shelve(impulse, 1000, 10, 2, sampling_rate=44100)
-        with pytest.raises(ValueError):
+        match = 'asdasdasd'
+        with pytest.raises(ValueError, match=match):
             # pass no signal and no sampling rate
             x = shelve(None, 1000, 10, 2)
         # check wrong input arguments
-        with pytest.raises(ValueError):
+        match = 'asdasdasd'
+        with pytest.raises(ValueError, match=match):
             x = shelve(impulse, 1000, 10, 2, shelve_type='nope')
-        with pytest.raises(ValueError):
+        match = 'asdasdasd'
+        with pytest.raises(ValueError, match=match):
             x = shelve(impulse, 1000, 10, 3)
 
 
@@ -272,13 +290,16 @@ def test_crossover(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # test ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.crossover(impulse, 2, 1000, 44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.crossover(None, 2, 1000)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # odd filter order
         x = pfilt.crossover(impulse, 3, 1000)
 
@@ -367,10 +388,12 @@ def test_notch(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.notch(impulse, 1e3, 1, 44100)
-    with pytest.raises(ValueError):
+    match = 'asdasdasd'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.notch(None, 1e3, 1)
 
