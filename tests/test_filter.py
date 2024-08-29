@@ -260,13 +260,16 @@ def test_shelf(impulse):
         with pytest.raises(ValueError, match=match):
             # pass signal and sampling rate
             x = shelf(impulse, 1000, 10, 2, sampling_rate=44100)
-        with pytest.raises(ValueError):
+        match = 'Either signal or sampling_rate must be none.'
+        with pytest.raises(ValueError, match=match):
             # pass no signal and no sampling rate
             x = shelf(None, 1000, 10, 2)
         # check wrong input arguments
-        with pytest.raises(ValueError):
+        match = "shelf_type must be 'I', 'II' or 'III' but is 'nope'.'"
+        with pytest.raises(ValueError, match=match):
             x = shelf(impulse, 1000, 10, 2, shelf_type='nope')
-        with pytest.raises(ValueError):
+        match = 'order must be 1 or 2 but is 3'
+        with pytest.raises(ValueError, match=match):
             x = shelf(impulse, 1000, 10, 3)
 
 
