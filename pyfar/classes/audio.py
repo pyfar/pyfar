@@ -176,12 +176,12 @@ class _Audio():
         try:
             data = self._data[key]
         except IndexError as Error:
-            if 'out of bounds' in str(Error):
-                raise Error
-            else:
+            if 'too many indices for array' in str(Error):
                 raise IndexError((
                     f'Indexed dimensions must not exceed the channel '
                     f'dimension (cdim), which is {len(self.cshape)}'))
+            else:
+                raise Error
 
         return self._return_item(data)
 
