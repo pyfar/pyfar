@@ -96,22 +96,22 @@ def test_find_nearest_error():
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
-    match = 'asdasdasd'
+    match = 'k must be an integer > 0 and <= self.csize'
     with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, -1)
 
     # test Coordinate object as input
-    match = 'asdasdasd'
+    match = 'find must be an pf.Coordinates object.'
     with pytest.raises(ValueError, match=match):
         coords.find_nearest(5, 1)
 
     # test wrong string for distance measure
-    match = 'asdasdasd'
+    match = 'distance_measure needs to be in '
     with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, 1, 'bla')
 
     # test wrong type for distance measure
-    match = 'asdasdasd'
+    match = 'distance_measure needs to be in '
     with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, 1, 5)
 
@@ -172,38 +172,38 @@ def test_find_within_error():
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
-    match = 'asdasdasd'
+    match = 'distance must be a non negative number'
     with pytest.raises(ValueError, match=match):
         coords.find_within(find, -1, 'euclidean')
 
     # test Coordinate object as input
-    match = 'asdasdasd'
+    match = 'coords must be an pf.Coordinates object.'
     with pytest.raises(ValueError, match=match):
         coords.find_within(5, 1)
 
     # test wrong string for distance measure
-    match = 'asdasdasd'
+    match = 'distance_measure needs to be in '
     with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, 'bla')
 
     # test wrong type for distance measure
-    match = 'asdasdasd'
+    match = 'distance_measure needs to be in '
     with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, 5)
 
-    match = 'asdasdasd'
+    match = 'atol must be a non negative number.'
     with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, atol=-1)
 
-    match = 'asdasdasd'
+    match = 'atol must be a non negative number.'
     with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, atol='h')
 
-    match = 'asdasdasd'
+    match = 'radius_tol must be a non negative number.'
     with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, radius_tol='h')
 
-    match = 'asdasdasd'
+    match = 'return_sorted must be a bool.'
     with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, return_sorted=-1)
 

@@ -115,7 +115,7 @@ def test_add_time_data_and_time_data():
 def test_add_time_data_and_number_wrong_domain():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    match = 'asdasdasd'
+    match = "The domain must be 'time'."
     with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'freq')
 
@@ -124,7 +124,7 @@ def test_add_time_data_and_number_wrong_times():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
     y = TimeData([1, 0, 0], [0, .1, .4])
-    match = 'asdasdasd'
+    match = 'The times does not match.'
     with pytest.raises(ValueError, match=match):
         pf.add((x, y), 'time')
 
@@ -133,7 +133,7 @@ def test_add_frequency_data_and_number():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = pf.add((x, 1), 'freq')
-    match = 'asdasdasd'
+    match = "The domain must be 'freq'."
     with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'time')
 
@@ -165,7 +165,7 @@ def test_add_frequency_data_and_frequency_data():
 def test_add_frequency_data_and_number_wrong_domain():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    match = 'asdasdasd'
+    match = "The domain must be 'freq'."
     with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'time')
 
@@ -174,7 +174,7 @@ def test_add_frequency_data_and_number_wrong_frequencies():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = FrequencyData([1, 0, 0], [0, .1, .4])
-    match = 'asdasdasd'
+    match = 'The frequencies do not match.'
     with pytest.raises(ValueError, match=match):
         pf.add((x, y), 'freq')
 
@@ -441,27 +441,27 @@ def test_assert_match_for_arithmetic():
     assert out[2] == 'rms'
 
     # check with non-tuple input for first argument
-    match = 'asdasdasd'
+    match = "Input argument 'data' must be a tuple."
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             s, 'time', division=False, matmul=False)
     # check with invalid data type in first argument
-    match = 'asdasdasd'
+    match = 'Input must be of type Signal, int, float, or complex'
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, ['str', 'ing']), 'time', division=False, matmul=False)
     # check with complex data and time domain operation
-    match = 'asdasdasd'
+    match = 'Complex input can not be applied in the time domain.'
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, np.array([1 + 1j])), 'time', division=False, matmul=False)
     # test signals with different sampling rates
-    match = 'asdasdasd'
+    match = 'The sampling rates do not match'
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, s1), 'time', division=False, matmul=False)
     # test signals with different n_samples
-    match = 'asdasdasd'
+    match = 'The number of samples does not match'
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, s2), 'time', division=False, matmul=False)
@@ -511,7 +511,7 @@ def test_get_arithmetic_data_with_signal():
 
 
 def test_assert_match_for_arithmetic_data_different_audio_classes():
-    match = 'asdasdasd'
+    match = 'The audio objects do not match.'
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (Signal(1, 1), TimeData(1, 1)), 'time', division=False,
@@ -519,7 +519,7 @@ def test_assert_match_for_arithmetic_data_different_audio_classes():
 
 
 def test_assert_match_for_arithmetic_data_wrong_domain():
-    match = 'asdasdasd'
+    match = 'domain must be time or freq but is space.'
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (1, 1), 'space', division=False, matmul=False)
@@ -534,7 +534,7 @@ def test_assert_match_for_arithmetic_data_wrong_cshape():
 
 
 def test_get_arithmetic_data_wrong_domain():
-    match = 'asdasdasd'
+    match = "domain must be 'time' or 'freq' but found space"
     with pytest.raises(ValueError, match=match):
         signal._get_arithmetic_data(
             Signal(1, 44100), 'space', (1,), False, Signal)
@@ -548,7 +548,7 @@ def test_array_broadcasting_errors():
 
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
-    match = 'asdasdasd'
+    match = 'operands could not be broadcast together with shapes'
     with pytest.raises(ValueError, match=match):
         pf.add((x, y))
 
