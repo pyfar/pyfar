@@ -265,9 +265,9 @@ def test_shelf(impulse):
             # pass no signal and no sampling rate
             x = shelf(None, 1000, 10, 2)
         # check wrong input arguments
-        match = "shelve_type must be 'I', 'II' or 'III' but is 'nope'.'"
+        match = "shelf_type must be 'I', 'II' or 'III' but is 'nope'.'"
         with pytest.raises(ValueError, match=match):
-            x = shelf(impulse, 1000, 10, 2, shelve_type='nope')
+            x = shelf(impulse, 1000, 10, 2, shelf_type='nope')
         match = 'order must be 1 or 2 but is 3'
         with pytest.raises(ValueError, match=match):
             x = shelf(impulse, 1000, 10, 3)
