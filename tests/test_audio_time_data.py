@@ -152,11 +152,11 @@ def test_magic_getitem_error():
     """
     time = pf.TimeData([[0, 0, 0], [1, 1, 1]], [0, 1, 3])
     # manually indexing too many dimensions
-    with pytest.raises(KeyError, match='Indexed dimensions must not exceed'):
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
         time[0, 1]
     # indexing too many dimensions with ellipsis operator
-    with pytest.raises(KeyError, match='Indexed dimensions must not exceed'):
-        time[..., 1]
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        time[0, 0, ..., 1]
 
 
 def test_magic_setitem_wrong_n_samples():

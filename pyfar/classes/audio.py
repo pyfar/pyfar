@@ -166,11 +166,23 @@ class _Audio():
 
 
         """
-        length = self._data.shape[-1]
-        data = self._data[key]
-        if length != np.atleast_1d(data).shape[-1]:
-            raise KeyError((f'Indexed dimensions must not exceed the channel '
-                            f'dimension (cdim), which is {len(self.cshape)}'))
+
+        # add empty slice at the end to always get all data contained in last
+        # dimension (samples or frequency bins)
+        if hasattr(key, '__iter__'):
+            key = (*key, slice(None))
+
+        # try indexing and raise verbose errors if it fails
+        try:
+            data = self._data[key]
+        except IndexError as Error:
+            if 'out of bounds' in str(Error):
+                raise Error
+            else:
+                raise IndexError((
+                    f'Indexed dimensions must not exceed the channel '
+                    f'dimension (cdim), which is {len(self.cshape)}'))
+
         return self._return_item(data)
 
     def __setitem__(self, key, value):

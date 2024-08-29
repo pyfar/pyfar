@@ -336,11 +336,11 @@ def test_magic_getitem_error(domain):
     signal = pf.Signal([[0, 0, 0, 0, 0], [1, 1, 1, 1, 1]], 1)
     signal.domain = domain
     # manually indexing too many dimensions
-    with pytest.raises(KeyError, match='Indexed dimensions must not exceed'):
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
         signal[0, 1]
     # indexing too many dimensions with ellipsis operator
-    with pytest.raises(KeyError, match='Indexed dimensions must not exceed'):
-        signal[..., 1]
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        signal[0, 0, ..., 1]
 
 
 def test_magic_setitem():
