@@ -2765,10 +2765,10 @@ class Coordinates():
 
         return new
 
-    def __array__(self):
+    def __array__(self, copy=True, dtype=None):
         """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
         # copy to avoid changing the coordinate system of the original object
-        return self.copy().cartesian
+        return np.array(self.cartesian, copy=copy, dtype=dtype)
 
     def __repr__(self):
         """Get info about Coordinates object."""
