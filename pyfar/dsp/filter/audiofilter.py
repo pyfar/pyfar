@@ -549,7 +549,6 @@ def high_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -759,7 +758,6 @@ def low_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
