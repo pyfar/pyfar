@@ -12,7 +12,8 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
     2D color coded plot of time signals.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+    :py:func:`matplotlib.pyplot.pcolormesh` or
+    :py:func:`matplotlib.pyplot.contourf`.
 
     Parameters
     ----------
@@ -71,7 +72,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -89,25 +90,28 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
-        to manipulate the way the data is displayed, e.g., by limiting the
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh` /
+        :py:class:`matplotlib.contour.QuadContourSet` collection. This can be
+        used to manipulate the way the data is displayed, e.g., by limiting the
         range of the colormap by ``quad_mesh.set_clim()``. It can also be used
         to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
@@ -126,7 +130,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.time_2d(impulses, unit='ms')
-    """
+    """  # noqa: E501
 
     with context(style):
         ax, qm, cb = _two_d._time_2d(
@@ -155,7 +159,8 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     2D color coded plot of magnitude spectra.
 
     Plots ``abs(signal.freq)`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+    :py:func:`matplotlib.pyplot.pcolormesh` or
+    :py:func:`matplotlib.pyplot.contourf`.
 
     Parameters
     ----------
@@ -203,7 +208,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -221,24 +226,27 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
-        to manipulate the way the data is displayed, e.g., by limiting the
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh` /
+        :py:class:`matplotlib.contour.QuadContourSet` collection. This can be
+        used to manipulate the way the data is displayed, e.g., by limiting the
         range of the colormap by ``quad_mesh.set_clim()``. It can also be used
         to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
@@ -258,7 +266,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.freq_2d(impulses, dB=False)
-    """
+    """  # noqa: E501
 
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
@@ -287,7 +295,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
     2D color coded plot of phase spectra.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
-    ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+    :py:func:`matplotlib.pyplot.pcolormesh` or
+    :py:func:`matplotlib.pyplot.contourf`.
 
     Parameters
     ----------
@@ -330,7 +339,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -348,24 +357,27 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
-        to manipulate the way the data is displayed, e.g., by limiting the
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh` /
+        :py:class:`matplotlib.contour.QuadContourSet` collection. This can be
+        used to manipulate the way the data is displayed, e.g., by limiting the
         range of the colormap by ``quad_mesh.set_clim()``. It can also be used
         to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
@@ -385,7 +397,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.phase_2d(impulses, unwrap=True, freq_scale="linear")
-    """
+    """  # noqa: E501
 
     with context(style):
         ax, qm, cb = _two_d._phase_2d(
@@ -413,8 +425,8 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
     2D color coded plot of the group delay.
 
     Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
-    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()`` or
-    ``matplotlib.pyplot.contourf()``.
+    (`kwargs`) to :py:func:`matplotlib.pyplot.pcolormesh` or
+    :py:func:`matplotlib.pyplot.contourf`.
 
     Parameters
     ----------
@@ -465,7 +477,7 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -483,24 +495,27 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
-        to manipulate the way the data is displayed, e.g., by limiting the
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh` /
+        :py:class:`matplotlib.contour.QuadContourSet` collection. This can b
+        used to manipulate the way the data is displayed, e.g., by limiting the
         range of the colormap by ``quad_mesh.set_clim()``. It can also be used
         to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
@@ -520,7 +535,7 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.group_delay_2d(impulses, unit="samples")
-    """
+    """  # noqa: E501
 
     with context(style):
         ax, qm, cb = _two_d._group_delay_2d(
@@ -550,8 +565,8 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
 
     Plots ``signal.time`` and ``abs(signal.freq)`` passes keyword arguments
-    (`kwargs`) to ``matplotlib.pyplot.pcolormesh()`` or
-    ``matplotlib.pyplot.contourf()``.
+    (`kwargs`) to :py:func:`matplotlib.pyplot.pcolormesh` or
+    :py:func:`matplotlib.pyplot.contourf`.
 
     Parameters
     ----------
@@ -620,7 +635,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -633,25 +648,28 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
-        to manipulate the way the data is displayed, e.g., by limiting the
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh` /
+        :py:class:`matplotlib.contour.QuadContourSet` collection. This can be
+        used to manipulate the way the data is displayed, e.g., by limiting the
         range of the colormap by ``quad_mesh.set_clim()``. It can also be used
         to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
@@ -670,7 +688,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.time_freq_2d(impulses, dB_freq=False, unit='ms')
-    """
+    """  # noqa: E501
 
     with context(style):
         ax, qm, cb = _two_d._time_freq_2d(
@@ -703,8 +721,8 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
-    arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()`` or
-    ``matplotlib.pyplot.contourf()``.
+    arguments (`kwargs`) to :py:func:`matplotlib.pyplot.pcolormesh` or
+    :py:func:`matplotlib.pyplot.contourf`.
 
     Parameters
     ----------
@@ -757,7 +775,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -770,24 +788,27 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh` /
+        :py:class:`matplotlib.contour.QuadContourSet` collection. This can be used
         to manipulate the way the data is displayed, e.g., by limiting the
         range of the colormap by ``quad_mesh.set_clim()``. It can also be used
         to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
@@ -808,7 +829,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.freq_phase_2d(impulses, dB=False, unwrap=True,
         ...                       freq_scale="linear")
-    """
+    """  # noqa: E501
 
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
@@ -839,8 +860,9 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
-    passes keyword arguments (`kwargs`) to ``matplotlib.pyplot.pcolormesh()``
-    or ``matplotlib.pyplot.contourf()``.
+    passes keyword arguments (`kwargs`) to
+    :py:func:`matplotlib.pyplot.pcolormesh`
+    or :py:func:`matplotlib.pyplot.contourf`.
 
     Parameters
     ----------
@@ -901,7 +923,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -914,25 +936,28 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of four axes is returned. The first
         two are the axis on which the data is plotted, the last two are the
         axis of the colorbar. If `colorbar` is ``False``, only the axes on
         which the data is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib Quadmesh / QuadContourSet collection. This can be used
-        to manipulate the way the data is displayed, e.g., by limiting the
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh` /
+        :py:class:`matplotlib.contour.QuadContourSet` collection. This can be
+        used to manipulate the way the data is displayed, e.g., by limiting the
         range of the colormap by ``quad_mesh.set_clim()``. It can also be used
         to generate a colorbar by ``cb = fig.colorbar(quad_mesh, ...)``.
     colorbar : Colorbar
@@ -951,7 +976,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.freq_group_delay_2d(impulses, dB=False, unit="samples")
-    """
+    """  # noqa: E501
 
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
@@ -1017,7 +1042,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     window : str
         Specifies the window that is applied to each block of the time data
         before applying the Fourier transform. The default is ``hann``. See
-        ``scipy.signal.get_window`` for a list of possible windows.
+        :py:func:`scipy.signal.get_window` for a list of possible windows.
     window_length : integer
         Specifies the window/block length in samples. The default is ``1024``.
     window_overlap_fct : double
@@ -1027,7 +1052,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     colorbar : bool, optional
         Control the colorbar. The default is ``True``, which adds a colorbar
         to the plot. ``False`` omits the colorbar.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -1045,23 +1070,26 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         The default is ``None``.
     style : str
         ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
-        ``matplotlib.style.available``. Pass a dictonary to set specific plot
-        parameters, for example ``style = {'axes.facecolor':'black'}``. Pass an
-        empty dictonary ``style = {}`` to use the currently active plotstyle.
-        The default is ``light``.
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
     **kwargs
         Keyword arguments that are passed to
-        ``matplotlib.pyplot.pcolormesh()`` or ``matplotlib.pyplot.contourf()``.
+        :py:func:`matplotlib.pyplot.pcolormesh` or
+        :py:func:`matplotlib.pyplot.contourf`.
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         If `colorbar` is ``True`` an array of two axes is returned. The first
         is the axis on which the data is plotted, the second is the axis of the
         colorbar. If `colorbar` is ``False``, only the axis on which the data
         is plotted is returned.
-    quad_mesh : QuadMesh
-        The Matplotlib quad mesh collection. This can be used to manipulate the
+    quad_mesh : :py:class:`~matplotlib.collections.QuadMesh`, :py:class:`matplotlib.contour.QuadContourSet`
+        The Matplotlib :py:class:`~matplotlib.collections.QuadMesh`
+        collection. This can be used to manipulate the
         way the data is displayed, e.g., by limiting the range of the colormap
         by ``quad_mesh.set_clim()``. It can also be used to generate a colorbar
         by ``cb = fig.colorbar(quad_mesh, ...)``.
@@ -1080,7 +1108,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         >>> import pyfar as pf
         >>> sweep = pf.signals.linear_sweep_time(2**14, [0, 22050])
         >>> pf.plot.spectrogram(sweep, unit='ms')
-    """
+    """  # noqa: E501
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
 

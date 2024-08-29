@@ -22,8 +22,8 @@ class GammatoneBands():
     reconstruction of the input signal (see examples below).
 
     Calling ``GFB = GammatoneBands()`` constructs the filter bank. Afterwards
-    the class methods ``GFB.process()`` and ``GFB.reconstruct`` can be used to
-    filter and reconstruct signals. All relevant data such as the filter
+    the class methods ``GFB.process()`` and ``GFB.reconstruct()`` can be used
+    to filter and reconstruct signals. All relevant data such as the filter
     coefficients can be obtained for example through ``GFB.coefficients``. See
     below for more documentation.
 

@@ -1,2 +1,4 @@
+pyfar
+=====
 
 .. include:: header.rst

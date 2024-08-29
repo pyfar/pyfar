@@ -187,9 +187,9 @@ def fractional_octave_bands(
     signal : Signal, None
         The signal to be filtered. Pass ``None`` to create the filter without
         applying it.
-    num_fractions : int, optional
+    num_fractions : int
         The number of bands an octave is divided into. Eg., ``1`` refers to
-        octave bands and ``3`` to third octave bands. The default is ``1``.
+        octave bands and ``3`` to third octave bands.
     sampling_rate : None, int
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
