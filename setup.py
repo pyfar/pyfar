@@ -30,7 +30,7 @@ test_requirements = [
     'watchdog',
     'flake8',
     'coverage',
-    'Sphinx',
+    'Sphinx<8',
     'twine'
 ]
 
@@ -67,7 +67,7 @@ setup(
         "Documentation": "https://pyfar.readthedocs.io/",
         "Source Code": "https://github.com/pyfar/pyfar",
     },
-    version='0.6.5',
+    version='0.6.8',
     zip_safe=False,
     python_requires='>=3.8'
 )

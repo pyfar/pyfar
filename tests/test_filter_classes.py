@@ -198,7 +198,7 @@ def test_filter_iir_process_multi_dim_filt(impulse):
 
     res = filt.process(impulse)
 
-    npt.assert_allclose(res.time[:, :3], coeff[:, 0])
+    npt.assert_allclose(res.time[:, 0, :3], coeff[:, 0])
 
     impulse.time = np.vstack((impulse.time, impulse.time))
     filt = fo.FilterIIR(coeff, impulse.sampling_rate)
@@ -218,7 +218,7 @@ def test_filter_fir_process_multi_dim_filt(impulse):
 
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
-    npt.assert_allclose(res.time[:, :3], coeff)
+    npt.assert_allclose(res.time[:, 0, :3], coeff)
 
     impulse.time = np.vstack((impulse.time, impulse.time))
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
@@ -325,7 +325,7 @@ def test_filter_sos_process_multi_dim_filt(impulse):
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
 
-    npt.assert_allclose(res.time[:, :3], coeff[:, 0])
+    npt.assert_allclose(res.time[:, 0, :3], coeff[:, 0])
 
     impulse.time = np.vstack((impulse.time, impulse.time))
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
@@ -352,11 +352,11 @@ def test_blockwise_processing(Filter):
 
     # filter in two blocks with correct handling of the state
     Filter.init_state(signal.cshape, 'zeros')
-    block_a = Filter.process(signal[0, :3], reset=False)
-    block_b = Filter.process(signal[0, 3:], reset=False)
+    block_a = Filter.process(pf.Signal(signal.time[0, :3], 44100), reset=False)
+    block_b = Filter.process(pf.Signal(signal.time[0, 3:], 44100), reset=False)
     # outputs have to be identical in this case
-    npt.assert_array_equal(complete[0, :3].time, block_a.time)
-    npt.assert_array_equal(complete[0, 3:].time, block_b.time)
+    npt.assert_array_equal(np.atleast_2d(complete.time[0, :3]), block_a.time)
+    npt.assert_array_equal(np.atleast_2d(complete.time[0, 3:]), block_b.time)
 
 
 def test_blockwise_processing_with_coefficients_exchange():
@@ -371,11 +371,11 @@ def test_blockwise_processing_with_coefficients_exchange():
     filter = pf.FilterFIR([coefficients_1], 44100)
     filter.init_state(input.cshape, state='zeros')
     # process first block
-    filter_1 = filter.process(input[..., :2])
+    filter_1 = filter.process(pf.Signal(input.time[..., :2], 44100))
     # update filter coefficients
     filter.coefficients = [coefficients_2]
     # process second block
-    filter_2 = filter.process(input[..., 2:])
+    filter_2 = filter.process(pf.Signal(input.time[..., 2:], 44100))
 
     # overlap and add time variant filtering
     # first block

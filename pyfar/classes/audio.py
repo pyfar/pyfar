@@ -166,7 +166,23 @@ class _Audio():
 
 
         """
-        data = self._data[key]
+
+        # add empty slice at the end to always get all data contained in last
+        # dimension (samples or frequency bins)
+        if hasattr(key, '__iter__'):
+            key = (*key, slice(None))
+
+        # try indexing and raise verbose errors if it fails
+        try:
+            data = self._data[key]
+        except IndexError as Error:
+            if 'too many indices for array' in str(Error):
+                raise IndexError((
+                    f'Indexed dimensions must not exceed the channel '
+                    f'dimension (cdim), which is {len(self.cshape)}'))
+            else:
+                raise Error
+
         return self._return_item(data)
 
     def __setitem__(self, key, value):
@@ -1109,7 +1125,7 @@ def matrix_multiplication(
     """Matrix multiplication of multidimensional pyfar audio objects and/or
     array likes.
 
-    The multiplication is based on ``numpy.matmul`` and acts on the channels
+    The multiplication is based on :py:data:`numpy.matmul` and acts on the channels
     of audio objects (:py:func:`Signal`, :py:func:`TimeData`, and
     :py:func:`FrequencyData`). Alternatively, the ``@`` operator can be used
     for frequency domain matrix multiplications with the default parameters.

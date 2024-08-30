@@ -22,8 +22,8 @@ class GammatoneBands():
     reconstruction of the input signal (see examples below).
 
     Calling ``GFB = GammatoneBands()`` constructs the filter bank. Afterwards
-    the class methods ``GFB.process()`` and ``GFB.reconstruct`` can be used to
-    filter and reconstruct signals. All relevant data such as the filter
+    the class methods ``GFB.process()`` and ``GFB.reconstruct()`` can be used
+    to filter and reconstruct signals. All relevant data such as the filter
     coefficients can be obtained for example through ``GFB.coefficients``. See
     below for more documentation.
 
@@ -309,7 +309,7 @@ class GammatoneBands():
             delay_samples + 3, sampling_rate=self.sampling_rate))
 
         # compute the envelope
-        ir = real.time + 1j * imag.time
+        ir = real.time[:, 0, :] + 1j * imag.time[:, 0, :]
         env = np.abs(ir)
 
         # sample at which the maximum occurs
@@ -443,10 +443,6 @@ class GammatoneBands():
         # restore original channel shape
         time_out = np.reshape(time_out,
                               (self.n_bands, ) + signal.cshape + (-1, ))
-
-        # squeeze dimension of single channel signal
-        if signal.cshape == (1, ):
-            time_out = np.squeeze(time_out)
 
         # return real and immaginary part of output as pyfar Signal objects
         real = signal.copy()

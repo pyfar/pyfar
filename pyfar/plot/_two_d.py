@@ -309,7 +309,8 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     See pyfar.line.spectogram for more information.
 
     Note: this function always returns only the axis of the actual plot
-    together with the quadmesh and colorbar. It does not return an array of
+    together with the :py:class:`~matplotlib.collections.QuadMesh` and
+    colorbar. It does not return an array of
     axes containing also the axis of the colorbar as the public function does.
     This makes  handling interactions easier. The axis of the colorbar is added
     in pyfar.line.spectrogram.
@@ -335,6 +336,11 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     # get spectrogram
     frequencies, times, spectrogram = dsp.spectrogram(
         signal[first_channel], window, window_length, window_overlap_fct)
+
+    # squeeze dsp.spectrogram returns for correct plotting
+    times = times.squeeze()
+    frequencies = frequencies.squeeze()
+    spectrogram = spectrogram.squeeze()
 
     # get magnitude data in dB
     if dB:

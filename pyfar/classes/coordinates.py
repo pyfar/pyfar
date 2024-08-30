@@ -4,12 +4,12 @@ The following introduces the
 and the coordinate systems that are available in pyfar. Available sampling
 schemes are listed at :py:mod:`spharpy.samplings <spharpy.samplings>`.
 :ref:`Examples <gallery:/gallery/interactive/pyfar_coordinates.ipynb>` for
-working with Coordinates objects are part of the pyfar galler.
+working with Coordinates objects are part of the pyfar gallery.
 
 Different coordinate systems are frequently used in acoustics research and
 handling sampling points and different systems can be cumbersome. The
 Coordinates class was designed with this in mind. It stores coordinates in
-cartesioan coordinates internally and can convert to all coordinate systems
+cartesian coordinates internally and can convert to all coordinate systems
 listed below. Additionally, the the class can  query and plot coordinates
 points. Functions for converting coordinates not stored in a Coordinates object
 are available for convenience. However, it is strongly recommended to use the
@@ -1492,13 +1492,14 @@ class Coordinates():
             ``mask==True``.
             The default is ``None``, which plots all points in the same color.
         kwargs : optional
-            Keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
+            Keyword arguments are passed to
+            :py:func:`matplotlib.pyplot.scatter`.
             If a mask is provided and the key `c` is contained in kwargs, it
             will be overwritten.
 
         Returns
         -------
-        ax : matplotlib.axes._subplots.Axes3DSubplot
+        ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
             The axis used for the plot.
 
         """
@@ -1518,7 +1519,8 @@ class Coordinates():
 
         return ax
 
-    def find_nearest(self, find, k=1, distance_measure='euclidean'):
+    def find_nearest(self, find, k=1, distance_measure='euclidean',
+                     radius_tol=None):
         """
         Find the k nearest coordinates points.
 
@@ -1538,6 +1540,14 @@ class Coordinates():
             ``'spherical_meter'``
                 distance is determined by the great-circle distance
                 expressed in meters.
+        radius_tol : float, None
+            For all spherical distance measures, the coordinates must be on
+            a sphere, so the radius must be constant. This parameter defines
+            the maximum allowed difference within the radii. Note that
+            increasing the tolerance decreases the accuracy of the search.
+            The default ``None`` uses a tolerance of two times the decimal
+            resolution, which is determined from the data type of the
+            coordinate points using ``numpy.finfo``.
 
         Returns
         -------
@@ -1550,7 +1560,7 @@ class Coordinates():
 
         Notes
         -----
-        This is a wrapper for ``scipy.spatial.cKDTree``.
+        This is a wrapper for :py:class:`scipy.spatial.cKDTree`.
 
         Examples
         --------
@@ -1606,6 +1616,10 @@ class Coordinates():
         """
 
         # check the input
+        if radius_tol is None:
+            radius_tol = 2 * np.finfo(self.x.dtype).resolution
+        if not isinstance(radius_tol, float) or radius_tol < 0:
+            raise ValueError("radius_tol must be a non negative number.")
         if not isinstance(k, int) or k <= 0 or k > self.csize:
             raise ValueError("k must be an integer > 0 and <= self.csize.")
         if not isinstance(find, Coordinates):
@@ -1633,10 +1647,10 @@ class Coordinates():
             # determine validate radius
             radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
-            if delta_radius > 1e-15:
+            if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same \
-                    radius. Differences are larger than 1e-15")
+                    f"find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
             # convert cartesian coordinates to length on the great circle using
@@ -1706,7 +1720,7 @@ class Coordinates():
             Absolute tolerance for distance. The default ``None`` uses a
             tolerance of two times the decimal resolution, which is
             determined from the data type of the coordinate points
-            using ``numpy.finfo``.
+            using :py:class:`numpy.finfo`.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
@@ -1719,7 +1733,7 @@ class Coordinates():
             found or points outside the search distance may be returned.
             The default ``None`` uses a tolerance of two times the decimal
             resolution, which is determined from the data type of the
-            coordinate points using ``numpy.finfo``.
+            coordinate points using :py:class:`numpy.finfo`.
 
         Returns
         -------
@@ -1729,8 +1743,8 @@ class Coordinates():
 
         Notes
         -----
-        This is a wrapper for ``scipy.spatial.cKDTree``. Compared to previous
-        implementations, it supports self.ndim>1 as well.
+        This is a wrapper for :py:class:`scipy.spatial.cKDTree`.
+        Compared to previous implementations, it supports self.ndim>1 as well.
 
         Examples
         --------
@@ -1880,11 +1894,11 @@ class Coordinates():
 
         Notes
         -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
-        (N, 3) array. The coordinate points in self are thus reshaped to
-        (`csize`, 3) before they are passed to ``cKDTree``. The index that
-        is returned refers to the reshaped coordinate points. To access the
-        points for example use
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an (N, 3) array. The coordinate points in self are thus
+        reshaped to (`csize`, 3) before they are passed to ``cKDTree``.
+        The index that  is returned refers to the reshaped coordinate points.
+        To access the points for example use
 
         >>> points_reshaped = self.cartesian.reshape((self.csize, 3))
         >>> points_reshaped[index]
@@ -1956,7 +1970,8 @@ class Coordinates():
 
         Notes
         -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (`csize`, 3) before they are passed to ``cKDTree``. The index that
         is returned refers to the reshaped coordinate points. To access the
@@ -2032,7 +2047,8 @@ class Coordinates():
 
         Notes
         -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (`csize`, 3) before they are passed to ``cKDTree``. The index that
         is returned refers to the reshaped coordinate points. To access the
@@ -2187,8 +2203,8 @@ class Coordinates():
         """
         Rotate points stored in the object around the origin of coordinates.
 
-        This is a wrapper for ``scipy.spatial.transform.Rotation`` (see this
-        class for more detailed information).
+        This is a wrapper for :py:class:`scipy.spatial.transform.Rotation`
+        (see this class for more detailed information).
 
         Parameters
         ----------
@@ -2626,22 +2642,13 @@ class Coordinates():
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
-        # shapes of non scalar entries
-        shapes = [p.shape for p in [x, y, z] if p.ndim != 1 or p.shape[0] > 1]
+        # determine shape
+        shapes = np.broadcast_shapes(x.shape, y.shape, z.shape)
 
-        # repeat scalar entries if non-scalars exists
-        if len(shapes):
-            if x.size == 1:
-                x = np.tile(x, shapes[0])
-            if y.size == 1:
-                y = np.tile(y, shapes[0])
-            if z.size == 1:
-                z = np.tile(z, shapes[0])
-
-        # check for equal shape
-        assert (x.shape == y.shape) and (x.shape == z.shape), \
-            "x, y, and z must be scalar or of the \
-            same shape."
+        # broadcast to same shape
+        x = np.broadcast_to(x, shapes)
+        y = np.broadcast_to(y, shapes)
+        z = np.broadcast_to(z, shapes)
 
         # set values
         self._x = x
@@ -2749,10 +2756,10 @@ class Coordinates():
 
         return new
 
-    def __array__(self):
+    def __array__(self, copy=True, dtype=None):
         """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
         # copy to avoid changing the coordinate system of the original object
-        return self.copy().cartesian
+        return np.array(self.cartesian, copy=copy, dtype=dtype)
 
     def __repr__(self):
         """Get info about Coordinates object."""
@@ -2851,8 +2858,8 @@ def cart2sph(x, y, z):
 
     Notes
     -----
-    To ensure proper handling of the azimuth angle, the ``arctan2``
-    implementation from numpy is used.
+    To ensure proper handling of the azimuth angle, the
+    :py:data:`numpy.arctan2` implementation from numpy is used.
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.divide(
@@ -2966,8 +2973,8 @@ def cart2cyl(x, y, z):
 
     Notes
     -----
-    To ensure proper handling of the azimuth angle, the ``arctan2``
-    implementation from numpy is used.
+    To ensure proper handling of the azimuth angle, the
+    :py:data:`numpy.arctan2` implementation from numpy is used.
     """
     azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
     if isinstance(z, np.ndarray):
@@ -3022,8 +3029,8 @@ def cyl2cart(azimuth, height, radius):
 
     Notes
     -----
-    To ensure proper handling of the azimuth angle, the ``arctan2``
-    implementation from numpy is used.
+    To ensure proper handling of the azimuth angle, the
+    :py:data:`numpy.arctan2` implementation from numpy is used.
     """
     azimuth = np.atleast_1d(azimuth)
     height = np.atleast_1d(height)

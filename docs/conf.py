@@ -90,6 +90,7 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
+    'soundfile': ('https://python-soundfile.readthedocs.io/en/latest/', None),
     'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None),
     'gallery': ('https://pyfar-gallery.readthedocs.io/en/latest/', None),
     }
@@ -106,6 +107,9 @@ html_favicon = '_static/favicon.ico'
 
 # -- HTML theme options
 # https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/layout.html
+html_sidebars = {
+  "pyfar": []
+}
 
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
@@ -124,6 +128,8 @@ html_theme_options = {
     "show_toc_level": 3,  # Show all subsections of notebooks
     "secondary_sidebar_items": ["page-toc"],  # Omit 'show source' link that that shows notebook in json format
     "navigation_with_keys": True,
+    # Configure navigation depth for section navigation
+    "navigation_depth": 1,
 }
 
 html_context = {

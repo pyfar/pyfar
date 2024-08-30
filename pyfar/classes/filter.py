@@ -164,7 +164,7 @@ class Filter(object):
         Get and set the coefficients of the filter.
 
         Refer to the
-        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
         cases.
         """
         return self._coefficients
@@ -247,7 +247,12 @@ class Filter(object):
 
         # prepare output signal
         filtered_signal = deepcopy(signal)
-        filtered_signal.time = np.squeeze(filtered_signal_data)
+
+        # squeeze first dimension if there is only one filter channel
+        if self.n_channels == 1:
+            filtered_signal.time = np.squeeze(filtered_signal_data, axis=0)
+        else:
+            filtered_signal.time = filtered_signal_data
 
         return filtered_signal
 
@@ -306,7 +311,8 @@ class FilterFIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
             string.
@@ -331,7 +337,7 @@ class FilterFIR(Filter):
         Get and set the coefficients of the filter.
 
         Refer to the
-        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
         cases.
         """
         # property from Filter is overwritten, because FilterFIR internally
@@ -357,8 +363,8 @@ class FilterFIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
@@ -401,7 +407,8 @@ class FilterIIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
             string.
@@ -426,8 +433,8 @@ class FilterIIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
@@ -470,7 +477,8 @@ class FilterSOS(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an emptry
             string.
@@ -516,8 +524,8 @@ class FilterSOS(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial

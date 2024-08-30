@@ -3,11 +3,15 @@ import numpy as np
 import warnings
 
 import pyfar as pf
+if np.__version__ < '2.0.0':
+    from numpy import VisibleDeprecationWarning
+else:
+    from numpy.exceptions import VisibleDeprecationWarning
 
 # this warning needs to be caught and appears if numpy array are generated
 # from nested lists containing lists of unequal lengths, e.g.,
 #  [[1, 0, 0], [1, 0]]
-warnings.filterwarnings("error", category=np.VisibleDeprecationWarning)
+warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 
 class Orientations(Rotation):
@@ -54,10 +58,10 @@ class Orientations(Rotation):
 
     """
 
-    def __init__(self, quat=None, normalize=True, copy=True):
+    def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, copy=copy)
+        super().__init__(quat, copy=copy, **kwargs)
 
     @classmethod
     def from_view_up(cls, views, ups):
@@ -84,7 +88,7 @@ class Orientations(Rotation):
 
         Returns
         -------
-        orientations : `Orientations` instance
+        orientations : Orientations
             Object containing the orientations represented by quaternions.
         """
 
@@ -92,7 +96,7 @@ class Orientations(Rotation):
         try:
             views = np.atleast_2d(views).astype(np.float64)
             ups = np.atleast_2d(ups).astype(np.float64)
-        except np.VisibleDeprecationWarning:
+        except VisibleDeprecationWarning:
             raise ValueError("Expected `views` and `ups` to have shape (N, 3)")
 
         # check views and ups
@@ -148,7 +152,7 @@ class Orientations(Rotation):
 
         Returns
         -------
-        ax : matplotlib.axes._subplots.Axes3DSubplot
+        ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
             The axis used for the plot.
 
         """
@@ -187,9 +191,9 @@ class Orientations(Rotation):
         Returns
         ----------
         vector_triple: ndarray, shape (N, 3), normalized vectors
-            - views, see `Orientations.from_view_up.__doc__`
-            - ups, see `Orientations.from_view_up.__doc__`
-            - rights, see `Orientations.from_view_up.__doc__`
+            - views, see :py:func:`Orientations.from_view_up`
+            - ups, see :py:func:`Orientations.from_view_up`
+            - rights, see :py:func:`Orientations.from_view_up`
                 A single vector or a stack of vectors, pointing to the right of
                 the object, constructed as a cross product of ups and rights.
         """
