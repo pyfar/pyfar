@@ -227,25 +227,25 @@ class TransmissionMatrix(FrequencyData):
     def A(self) -> FrequencyData:
         """Returns the (potentially multi-dimensional) A entry of the
         T-matrix."""
-        return self[..., 0, 0, :]
+        return self[..., 0, 0]
 
     @property
     def B(self) -> FrequencyData:
         """Returns the (potentially multi-dimensional) B entry of the
         T-matrix."""
-        return self[..., 0, 1, :]
+        return self[..., 0, 1]
 
     @property
     def C(self) -> FrequencyData:
         """Returns the (potentially multi-dimensional) C entry of the
         T-matrix."""
-        return self[..., 1, 0, :]
+        return self[..., 1, 0]
 
     @property
     def D(self) -> FrequencyData:
         """Returns the (potentially multi-dimensional) D entry of the
         T-matrix."""
-        return self[..., 1, 1, :]
+        return self[..., 1, 1]
 
     def _check_for_inf(self, Zl: complex | FrequencyData) -> bool:
         """Check given load impedance for np.inf values
