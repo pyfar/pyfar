@@ -49,20 +49,20 @@ def test_group_delay_single_channel(impulse_group_delay):
         dsp.group_delay(signal, method='fft', frequencies=[1, 2, 3])
 
     grp = dsp.group_delay(signal, method='scipy')
-    assert grp.shape == (signal.n_bins, )
+    assert grp.shape == (1, signal.n_bins)
     npt.assert_allclose(
-        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
+        grp[0, :], impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(signal, method='fft')
-    assert grp.shape == (signal.n_bins, )
+    assert grp.shape == (1, signal.n_bins)
     npt.assert_allclose(
-        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
+        grp[0, :], impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(
         signal, method='fft')
-    assert grp.shape == (signal.n_bins, )
+    assert grp.shape == (1, signal.n_bins)
     npt.assert_allclose(
-        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
+        grp[0, :], impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
 
 def test_group_delay_two_channel(impulse_group_delay_two_channel):
@@ -97,7 +97,7 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency = 1000
     frequency_idx = np.abs(signal.frequencies-frequency).argmin()
     grp = dsp.group_delay(signal, frequency, method='scipy')
-    assert grp.shape == ()
+    assert grp.shape == (1, 1)
     npt.assert_allclose(
         grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
@@ -106,9 +106,20 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency_idx = np.abs(
         signal.frequencies-frequency[..., np.newaxis]).argmin(axis=-1)
     grp = dsp.group_delay(signal, frequency, method='scipy')
-    assert grp.shape == (2,)
+    assert grp.shape == (1, 2)
     npt.assert_allclose(
-        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
+        grp[0, :], impulse_group_delay[1][0, frequency_idx], atol=1e-10)
+
+
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
+def test_group_delay_cshape(shape):
+    """Test if group delay function keeps cshape of signals of shape `m x n`
+     with `m = 1` or `n = 1`."""
+    impulse = pf.signals.impulse(256, 0, np.ones(shape))
+
+    grp = dsp.group_delay(impulse)
+
+    assert grp.shape == (*impulse.cshape, impulse.n_bins)
 
 
 def test_linear_phase():
@@ -121,13 +132,13 @@ def test_linear_phase():
     y = dsp.linear_phase(x, N/2)
     # test output
     assert isinstance(y, pf.Signal)
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y)[0, :], N / 2 * np.ones(y.n_bins))
     # test if input did not change
     npt.assert_allclose(x.time, pf.signals.impulse(N).time)
 
     # test group delay in seconds
     y = dsp.linear_phase(x, N / 2 / fs, unit="s")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y)[0, :], N / 2 * np.ones(y.n_bins))
 
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
@@ -144,13 +155,13 @@ def test_linear_phase_multichannel():
 
     # test with scalar group delay
     y = dsp.linear_phase(x, N/2)
-    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
-    npt.assert_allclose(dsp.group_delay(y[1]), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[0])[0, :], N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1])[0, :], N / 2 * np.ones(y.n_bins))
 
     # test with array like group delay
     y = dsp.linear_phase(x, [N/2, N/4])
-    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
-    npt.assert_allclose(dsp.group_delay(y[1]), N / 4 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[0])[0, :], N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1])[0, :], N / 4 * np.ones(y.n_bins))
 
 
 def test_zero_phase():
@@ -654,6 +665,16 @@ def test_impulse_response_delay_multidim():
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
+def test_impulse_response_delay_cshape(shape):
+    """Test if find_impulse_response_delay function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`."""
+    ir = pf.signals.impulse(256, 24, np.ones(shape))
+    start_sample = dsp.find_impulse_response_delay(ir)
+
+    assert start_sample.shape == ir.cshape
+
+
 def test_impulse_response_start_insufficient_snr():
     n_samples = 2**9
     snr = 15
@@ -754,6 +775,16 @@ def test_impulse_response_start_multidim():
     start_sample_est = dsp.find_impulse_response_start(ir_awgn)
 
     npt.assert_allclose(start_sample_est, start_samples - 1)
+
+
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
+def test_impulse_response_start_cshape(shape):
+    """Test if find_impulse_response_start function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`."""
+    ir = pf.signals.impulse(256, 24, np.ones(shape))
+    start_sample = dsp.find_impulse_response_start(ir)
+
+    assert start_sample.shape == ir.cshape
 
 
 def test_convolve_default():

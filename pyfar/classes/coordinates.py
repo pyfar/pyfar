@@ -2642,22 +2642,13 @@ class Coordinates():
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
-        # shapes of non scalar entries
-        shapes = [p.shape for p in [x, y, z] if p.ndim != 1 or p.shape[0] > 1]
+        # determine shape
+        shapes = np.broadcast_shapes(x.shape, y.shape, z.shape)
 
-        # repeat scalar entries if non-scalars exists
-        if len(shapes):
-            if x.size == 1:
-                x = np.tile(x, shapes[0])
-            if y.size == 1:
-                y = np.tile(y, shapes[0])
-            if z.size == 1:
-                z = np.tile(z, shapes[0])
-
-        # check for equal shape
-        assert (x.shape == y.shape) and (x.shape == z.shape), \
-            "x, y, and z must be scalar or of the \
-            same shape."
+        # broadcast to same shape
+        x = np.broadcast_to(x, shapes)
+        y = np.broadcast_to(y, shapes)
+        z = np.broadcast_to(z, shapes)
 
         # set values
         self._x = x
@@ -2765,10 +2756,10 @@ class Coordinates():
 
         return new
 
-    def __array__(self):
+    def __array__(self, copy=True, dtype=None):
         """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
         # copy to avoid changing the coordinate system of the original object
-        return self.copy().cartesian
+        return np.array(self.cartesian, copy=copy, dtype=dtype)
 
     def __repr__(self):
         """Get info about Coordinates object."""
