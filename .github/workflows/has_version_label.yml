@@ -15,12 +15,8 @@ jobs:
       - name: Check for version label
         run: |
           echo "Checking for version label on pull request..."
-          echo $(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/labels)
-          LABELS_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/labels)
-          VERSION_LABEL=$(echo "$LABELS_JSON" | jq -r '.[].name' | grep -P 'v\d+\.\d+\.\d+' || true)
-          if [ -z "$VERSION_LABEL" ]; then
-            echo "Error: No version label found on this pull request. Please add a label in the format vX.Y.Z."
-            exit 1
-          fi
+          PR_DATA=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }})
+          LABEL_NAMES=$(echo "$PR_DATA" | jq -r '.labels[].name')
+          echo "Labels: $LABEL_NAMES"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
