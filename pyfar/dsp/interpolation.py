@@ -52,6 +52,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     2. Smooth the spectrum by convolution with a smoothing window
     3. Interpolate the spectrum to the original linear frequency scale
 
+    Smoothing of complex-valued time data is not implemented.
 
     Parameters
     ----------
@@ -154,6 +155,10 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
 
     if not isinstance(signal, pf.Signal):
         raise TypeError("Input signal has to be of type pyfar.Signal")
+
+    if type(signal) is not pf.FrequencyData and signal.complex:
+        raise TypeError(("Fractional octave smoothing for complex-valued "
+                         "time data is not implemented."))
 
     if mode in ["magnitude_zerophase", "magnitude"]:
         data = [np.atleast_2d(np.abs(signal.freq_raw))]
