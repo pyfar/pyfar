@@ -5,7 +5,7 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -31,7 +31,8 @@ test_requirements = [
     'flake8',
     'coverage',
     'Sphinx<8',
-    'twine'
+    'twine',
+    'sphinx_mdinclude',
 ]
 
 setup(
@@ -53,6 +54,7 @@ setup(
     install_requires=requirements,
     license="MIT license",
     long_description=readme,
+    long_description_content_type='text/markdown',
     include_package_data=True,
     keywords='pyfar',
     name='pyfar',
