@@ -2650,6 +2650,11 @@ class Coordinates():
         y = np.broadcast_to(y, shapes)
         z = np.broadcast_to(z, shapes)
 
+        # set writeable
+        x.setflags(write=True)
+        y.setflags(write=True)
+        z.setflags(write=True)
+
         # set values
         self._x = x
         self._y = y
@@ -2756,11 +2761,6 @@ class Coordinates():
 
         return new
 
-    def __array__(self, copy=True, dtype=None):
-        """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
-        # copy to avoid changing the coordinate system of the original object
-        return np.array(self.cartesian, copy=copy, dtype=dtype)
-
     def __repr__(self):
         """Get info about Coordinates object."""
         # object type
@@ -2807,10 +2807,109 @@ class Coordinates():
         return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment \
             & eq_sh_order & eq_system
 
+    def __add__(self, other):
+        """Add two Coordinates objects."""
+        return _arithmetics(self, other, 'add')
+
+    def __radd__(self, other):
+        """Add two Coordinates objects."""
+        return _arithmetics(other, self, 'add')
+
+    def __sub__(self, other):
+        """Subtract two Coordinates objects."""
+        return _arithmetics(self, other, 'sub')
+
+    def __rsub__(self, other):
+        """Subtract two Coordinates objects."""
+        return _arithmetics(other, self, 'sub')
+
+    def dot(self, other):
+        """Dot product two Coordinates objects."""
+
+        if not isinstance(other, Coordinates):
+            raise TypeError(
+                "Dot product is only possible with Coordinates objects.")
+
+        return self.x * other.x + self.y * other.y + self.z * other.z
+
+
+    def cross(self, other):
+        """Cross product two Coordinates objects
+
+        Parameters
+        ----------
+        other : pf.Coordinates
+            other Coordinates object to perform the cross product with
+
+        Returns
+        -------
+        result : pf.Coordinates
+            new Coordinates object with the cross product of the two objects
+        """
+
+        if not isinstance(other, Coordinates):
+            raise TypeError(
+                "Dot product is only possible with Coordinates objects.")
+
+        new = Coordinates()
+        new.cartesian = np.zeros(np.broadcast_shapes(
+            self.cartesian.shape, other.cartesian.shape))
+
+        # apply cross product
+        new.x = self.y * other.z - self.z * other.y
+        new.y = self.z * other.x - self.x * other.z
+        new.z = self.x * other.y - self.y * other.x
+
+        return new
+
+
     def _check_empty(self):
         """check if object is empty"""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
+
+
+def _arithmetics(first, second, operation):
+    """Add or Subtract two Coordinates objects, numbers or arrays.
+
+    Parameters
+    ----------
+    first : Coordinates, number, array
+        first operand
+    second : Coordinates, number, array
+        second operand
+    operation : 'add', 'sub'
+        whether to add or subtract the two objects
+
+    Returns
+    -------
+    new : Coordinates
+        result of the operation
+
+    """
+    # convert data
+    data = []
+    for obj in [first, second]:
+        if isinstance(obj, Coordinates):
+            data.append(obj.cartesian)
+        elif isinstance(obj, (int, float)):
+            data.append(np.array(obj))
+        else:
+            op = 'Addition' if operation == 'add' else 'Subtraction'
+            raise TypeError(
+                f"{op} is only possible with Coordinates or number.")
+
+    # broadcast shapes
+    shape = np.broadcast_shapes(data[0].shape, data[1].shape)
+    new = pf.Coordinates()
+    new.cartesian = np.zeros(shape)
+
+    # perform operation
+    if operation == 'add':
+        new.cartesian = data[0] + data[1]
+    elif operation == 'sub':
+        new.cartesian = data[0] - data[1]
+    return new
 
 
 def cart2sph(x, y, z):
