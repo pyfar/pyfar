@@ -1463,6 +1463,11 @@ def find_impulse_response_start(
                         f'{ch} defaulting to 0')
 
         ir_start[idx] = start_sample
+
+    # squeeze first dimeension is signal is not complex
+    if not impulse_response.complex:
+        ir_start = np.squeeze(ir_start, axis=0)
+
     return ir_start
 
 

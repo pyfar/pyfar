@@ -52,11 +52,11 @@ def test_return_values_complex():
     npt.assert_allclose(times, [0, 512/1024, 1])
 
     # check middle slice
-    npt.assert_allclose(spectro[:256, 1], 0, atol=1e-13)
-    npt.assert_allclose(spectro[256, 1], 1, atol=1e-13)
-    npt.assert_allclose(spectro[257:1024-256, 1], 0, atol=1e-13)
-    npt.assert_allclose(spectro[1024-256, 1], 1, atol=1e-13)
-    npt.assert_allclose(spectro[1024-255:, 1], 0, atol=1e-13)
+    npt.assert_allclose(spectro[0, :256, 1], 0, atol=1e-13)
+    npt.assert_allclose(spectro[0, 256, 1], 1, atol=1e-13)
+    npt.assert_allclose(spectro[0, 257:1024-256, 1], 0, atol=1e-13)
+    npt.assert_allclose(spectro[0, 1024-256, 1], 1, atol=1e-13)
+    npt.assert_allclose(spectro[0, 1024-255:, 1], 0, atol=1e-13)
 
 
 @pytest.mark.parametrize('window,value', [
