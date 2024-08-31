@@ -880,7 +880,7 @@ class Interaction(object):
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix_freq, prm.log_reference, prm.yscale,
                     prm.unit_time, prm.window, prm.window_length,
-                    prm.window_overlap_fct, prm.colorbar, self.ax,
+                    prm.window_overlap_fct, prm.colorbar, self.ax, prm.side,
                     **self.kwargs_2d)
                 self.ax = self.all_axes
 

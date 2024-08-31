@@ -1175,7 +1175,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         'spectrogram', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, yscale=freq_scale, unit_time=unit,
         window=window, window_length=window_length,
-        window_overlap_fct=window_overlap_fct)
+        window_overlap_fct=window_overlap_fct, side=side)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction

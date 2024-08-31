@@ -677,7 +677,7 @@ def test_toggle_display_of_complex_signals(function):
 
     # dont run test for non-plot functions and functions that plot on more
     # than one axis
-    if function[0] in non_plot_functions + ['spectrogram'] or \
+    if function[0] in non_plot_functions or \
             not plots[function[0]]['complex'] or \
             plots[function[0]]['n_plots'] != 1:
         return
