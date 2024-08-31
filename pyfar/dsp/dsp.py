@@ -68,8 +68,9 @@ def group_delay(signal, frequencies=None, method='fft'):
     Returns
     -------
     group_delay : numpy array
-        Frequency dependent group delay in samples. The array is flattened if
-        a single channel signal was passed to the function.
+        Frequency dependent group delay of shape
+        (:py:func:`~pyfar.classes.audio.Signal.cshape`,
+        frequencies).
 
     References
     ----------
@@ -121,10 +122,6 @@ def group_delay(signal, frequencies=None, method='fft'):
     else:
         raise ValueError(
             "Invalid method, needs to be either 'scipy' or 'fft'.")
-
-    # flatten in numpy fashion if a single channel is returned
-    if signal.cshape == (1, ):
-        group_delay = np.squeeze(group_delay)
 
     return group_delay
 
@@ -307,7 +304,7 @@ def spectrogram(signal, window='hann', window_length=1024,
     window = sgn.get_window(window, window_length)
 
     frequencies, times, spectrogram = sgn.spectrogram(
-        x=signal.time.squeeze(), fs=signal.sampling_rate, window=window,
+        x=signal.time, fs=signal.sampling_rate, window=window,
         noverlap=window_overlap, mode='magnitude', scaling='spectrum',
         return_onesided=not signal.complex)
 
@@ -1465,8 +1462,8 @@ def find_impulse_response_start(
                         'No values below threshold found found for channel '
                         f'{ch} defaulting to 0')
 
-        ir_start[idx, :] = np.squeeze(start_sample)
-    return np.squeeze(ir_start)
+        ir_start[idx] = start_sample
+    return ir_start
 
 
 @rename_arg({"freq_range": "frequency_range"},
