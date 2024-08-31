@@ -324,7 +324,7 @@ def _freq_group_delay_2d(
 def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                  freq_scale='linear', unit="s", window='hann',
                  window_length=1024, window_overlap_fct=0.5,
-                 colorbar=True, ax=None, **kwargs):
+                 colorbar=True, ax=None, side='right', **kwargs):
     """Plot the magnitude spectrum versus time.
 
     See pyfar.line.spectogram for more information.
@@ -363,6 +363,11 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     frequencies = frequencies.squeeze()
     spectrogram = spectrogram.squeeze()
 
+    # adapt data according to side
+    spectrogram, frequencies, ylabel = \
+        _utils._assert_and_match_spectrogram_to_side(spectrogram, frequencies,
+                                                     signal, side)
+
     # get magnitude data in dB
     if dB:
         if log_prefix is None:
@@ -386,7 +391,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     qm = ax[0].pcolormesh(times, frequencies, spectrogram, **kwargs)
 
     # Adjust axes:
-    ax[0].set_ylabel('Frequency in Hz')
+    ax[0].set_ylabel(ylabel)
     ax[0].set_xlabel(f'Time in {unit}')
     ax[0].set_xlim((times[0], times[-1]))
     ax[0].set_ylim((max(20, frequencies[1]), signal.sampling_rate/2))
