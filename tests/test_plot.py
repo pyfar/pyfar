@@ -303,6 +303,26 @@ def test_spectrogram():
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('side', ['left', 'right'])
+def test_spectrogram_complex(side):
+    """Test spectrogram with default parameters"""
+    function = plot.spectrogram
+
+    print(f"Testing: {function.__name__}")
+
+    filename = function.__name__ + f'_complex_{side}_default'
+    create_figure()
+
+    sweep = pf.signals.exponential_sweep_time(2**16, [100, 10e3])
+
+    sweep.fft_norm = "none"
+    sweep.complex = True
+
+    function(sweep, side=side)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
     (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])

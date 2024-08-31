@@ -1048,7 +1048,8 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
                 freq_scale='linear', unit='s', window='hann',
                 window_length=1024, window_overlap_fct=0.5,
-                colorbar=True, ax=None, style='light', **kwargs):
+                colorbar=True, ax=None, style='light', side='right',
+                **kwargs):
     """Plot blocks of the magnitude spectrum versus time.
 
     Parameters
@@ -1121,6 +1122,11 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
+    side : str, optional
+        ``'right'`` to plot the right-sided spectrum containing the positive
+        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        the negative frequencies (only possible for complex Signals). The
+        default is ``'right'``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -1161,7 +1167,8 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._spectrogram(
             signal.flatten(), dB, log_prefix, log_reference, freq_scale, unit,
-            window, window_length, window_overlap_fct, colorbar, ax, **kwargs)
+            window, window_length, window_overlap_fct, colorbar, ax, side,
+            **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(

@@ -233,3 +233,20 @@ def test_assert_and_match_data_to_mode(mode, ylabel):
         npt.assert_allclose(data,
                             np.abs(signal.time), atol=1e-15)
     assert _ylabel == ylabel
+
+
+@pytest.mark.parametrize('side', ['left', 'right'])
+def test_assert_and_match_spectrogram_to_side(side):
+
+    signal = pf.Signal(data=[1, 4, 5, 6, 7], sampling_rate=48000,
+                       is_complex=True)
+
+    frequencies, _, spec = pf.dsp.spectrogram(signal, window_length=4)
+
+    spec, frequencies, xlabel = \
+        plot._utils._assert_and_match_spectrogram_to_side(
+            np.squeeze(spec, axis=0), frequencies, signal, side)
+
+    assert not np.any(frequencies < 0.0)
+    assert spec.shape[0] == frequencies.shape[0]
+    assert xlabel == f'Frequency in Hz ({side})'
