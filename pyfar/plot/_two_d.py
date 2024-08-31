@@ -358,6 +358,11 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     frequencies, times, spectrogram = dsp.spectrogram(
         signal[first_channel], window, window_length, window_overlap_fct)
 
+    # squeeze dsp.spectrogram returns for correct plotting
+    times = times.squeeze()
+    frequencies = frequencies.squeeze()
+    spectrogram = spectrogram.squeeze()
+
     # adapt data according to side
     spectrogram, frequencies, ylabel = \
         _utils._assert_and_match_spectrogram_to_side(spectrogram, frequencies,
