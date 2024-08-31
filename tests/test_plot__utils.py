@@ -244,9 +244,9 @@ def test_assert_and_match_spectrogram_to_side(side):
     frequencies, _, spec = pf.dsp.spectrogram(signal, window_length=4)
 
     spec, frequencies, xlabel = \
-        plot._utils._assert_and_match_spectrogram_to_side(spec,
-                                                          frequencies, signal,
-                                                          side)
+        plot._utils._assert_and_match_spectrogram_to_side(
+            np.squeeze(spec, axis=0), frequencies, signal, side)
+
     assert not np.any(frequencies < 0.0)
     assert spec.shape[0] == frequencies.shape[0]
     assert xlabel == f'Frequency in Hz ({side})'
