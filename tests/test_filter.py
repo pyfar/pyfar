@@ -137,14 +137,14 @@ def test_allpass(impulse, order):
     gd = pf.dsp.group_delay(sig_filt)
 
     # Group delay at w = 0
-    T_gr_0 = gd[0]
+    T_gr_0 = gd[0, 0]
     # definition of group delay at fc (Tietze et al.)
     T_fc_desired = T_gr_0 * (1 / np.sqrt(2))
     # id of frequency bin closest to fc
     idx = sig_filt.find_nearest_frequency(fc)
     # group delay below fc and at fc
-    T_below = gd[:idx]
-    T_fc = gd[idx]
+    T_below = gd[0, :idx]
+    T_fc = gd[0, idx]
 
     # tolerance for group delay below fc
     tol = 1 - (T_fc / T_gr_0)
@@ -287,7 +287,7 @@ def test_crossover(impulse):
     for order in [2, 4, 6, 8]:
         for frequency in [4000, (1e2, 10e3)]:
             x = pfilt.crossover(impulse, order, frequency)
-            x_sum = np.sum(x.freq, axis=-2).flatten()
+            x_sum = np.sum(x.freq, axis=-3).flatten()
             x_ref = np.ones(x.n_bins)
             npt.assert_allclose(x_ref, np.abs(x_sum), atol=.0005)
 
@@ -318,7 +318,7 @@ def test_reconstructing_fractional_octave_bands():
     x = pf.signals.impulse(2**12)
     y, f = pfilt.reconstructing_fractional_octave_bands(x)
     assert isinstance(y, Signal)
-    assert y.cshape == (9, )
+    assert y.cshape == (9, 1)
     assert y.fft_norm == 'none'
 
     # test reconstruction (sum has a group delay of half the filter length)
@@ -343,7 +343,7 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
         # restricting rtol was not needed locally. It was added for tests to
         # pass on the testing platform
         npt.assert_allclose(
-            y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
+            y.time[:, 0, :], np.atleast_2d(reference), rtol=.01, atol=1e-10)
 
 
 def test_reconstructing_fractional_octave_bands_warning():

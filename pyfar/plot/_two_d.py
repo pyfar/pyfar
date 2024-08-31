@@ -358,6 +358,11 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     frequencies, times, spectrogram = dsp.spectrogram(
         signal[first_channel], window, window_length, window_overlap_fct)
 
+    # squeeze dsp.spectrogram returns for correct plotting
+    times = times.squeeze()
+    frequencies = frequencies.squeeze()
+    spectrogram = spectrogram.squeeze()
+
     # get magnitude data in dB
     if dB:
         if log_prefix is None:

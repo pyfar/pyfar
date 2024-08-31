@@ -25,6 +25,12 @@ def test_smooth_fractional_octave_assertions():
     with raises(ValueError, match="The smoothing width"):
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
+    with raises(TypeError, match=("Fractional octave smoothing for "
+                                  "complex-valued time data is not "
+                                  "implemented.")):
+
+        smooth_fractional_octave(pf.Signal([1, 0], 1, is_complex=True), 1)
+
 
 @pytest.mark.parametrize("mode", (
     "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
@@ -78,11 +84,11 @@ def test_smooth_fractional_octave_window_parameter():
     function
     """
 
-    _, window_paraeter = smooth_fractional_octave(pf.signals.impulse(64), 1)
+    _, window_parameter = smooth_fractional_octave(pf.signals.impulse(64), 1)
 
-    assert len(window_paraeter) == 2
-    assert isinstance(window_paraeter[0], int)
-    assert isinstance(window_paraeter[1], float)
+    assert len(window_parameter) == 2
+    assert isinstance(window_parameter[0], int)
+    assert isinstance(window_parameter[1], float)
 
 
 @pytest.mark.parametrize("amplitudes", (
@@ -224,7 +230,7 @@ def test_fractional_delay_mode_cyclic(delay):
     delayed = fractional_time_shift(signal, delay, mode="cyclic")
 
     # if the delay is too large, it is cyclicly shifted
-    group_delay = pf.dsp.group_delay(delayed)[0]
+    group_delay = pf.dsp.group_delay(delayed)[0, 0]
     npt.assert_allclose(group_delay, (16+delay) % 32, atol=.05)
 
 
