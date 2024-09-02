@@ -42,6 +42,7 @@ dependencies = [
 # TODO: add maintainers section here
 
 [project.optional-dependencies]
+# TODO: is this necessary?
 setup = [
     "pytest-runner",
 ]
@@ -55,6 +56,18 @@ tests = [
     "twine",
     "sphinx_mdinclude",
 ]
+misc = [
+     "bump2version",
+     "pytest-cov",
+     "autodocsumm",
+     "pydata-sphinx-theme",
+     "sphinx-design",
+     "sphinx-favicon",
+     "sphinx-reredirects",
+]
+# TODO: why are some sphinx deps in dev but not tests?
+# TODO: make own docs dependencies
+dev = ["pyfar[setup,tests,misc]"]
 
 [project.urls]
 homepage = "https://pyfar.org"
