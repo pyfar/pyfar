@@ -2760,6 +2760,11 @@ class Coordinates():
             new._weights = new._weights[index]
 
         return new
+   def __array__(self, copy=True, dtype=None):
+        """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
+        # copy to avoid changing the coordinate system of the original object
+        return np.array(self.cartesian, copy=copy, dtype=dtype)
+
 
     def __repr__(self):
         """Get info about Coordinates object."""
