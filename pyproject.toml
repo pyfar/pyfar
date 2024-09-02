@@ -1,8 +1,121 @@
+#------------------------------------------------------------------------------
+# Copyright (c) The pyfar developers
+#------------------------------------------------------------------------------
+
+[project]
+name = "pyfar"
+version = "0.6.8"
+description = "Project for data formats in acoustics."
+requires-python = ">=3.8"
+authors = [
+    {name = "The pyfar Developers", email = "info@pyfar.org"},
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+# TODO: add better keywords
+keywords = [
+    "pyfar",
+    "acoustics",
+    "audio processing",
+]
+classifiers=[
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "numpy>=1.23.0",
+    "scipy>=1.5.0",
+    "matplotlib",
+    "sofar>=0.1.2",
+    "urllib3",
+    "deepdiff",
+    "soundfile>=0.11.0",
+]
+# TODO: add maintainers section here
+
+[project.optional-dependencies]
+setup = [
+    "pytest-runner",
+]
+tests = [
+    "pytest",
+    "wheel",
+    "watchdog",
+    "ruff",
+    "coverage",
+    "sphinx<8",
+    "twine",
+    "sphinx_mdinclude",
+]
+
+[project.urls]
+homepage = "https://pyfar.org"
+documentation = "https://pyfar.readthedocs.io"
+repository = "https://github.com/pyfar/pyfar"
+issues = "https://github.com/pyfar/pyfar/issues"
+changelog = "https://github.com/pyfar/pyfar/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.envs.hatch-static-analysis]
+# TODO: talk about fixing ruff version
+dependencies = ["ruff==0.6.3"]
+
+[tool.hatch.envs.docs]
+platforms = ["linux"]
+python = "3.12"
+dependencies = [
+    "pyfar[docs]"
+]
+
+[tool.hatch.envs.docs.scripts]
+build = ["cd docs && make html"]
+
+[tool.hatch.envs.tests]
+dependencies = [
+    "pyfar[tests]"
+]
+
+[[tool.hatch.envs.tests.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.tests.scripts]
+import = ["python -c \"import pyfar\""]
+test = ["python -m pytest -v tests"]
+
+[tool.hatch.envs.tests.overrides]
+platform.linux.pre-install-commands = ["cat /proc/cpuinfo"]
+platform.macos.pre-install-commands = ["sysctl -a machdep.cpu"]
+platform.windows.pre-install-commands = ["systeminfo"]
+
+# TODO: talk about contents of sdist
+[tool.hatch.build.targets.sdist]
+include = [
+  "pyfar",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["pyfar"]
+
+[tools.pytest.ini_options]
+norecursedirs = "private"
+testpaths = "tests"
+
+
 [tool.ruff]
 exclude = [
     ".git",
     "docs",
-    "setup.py",
 ]
 line-length = 79
 lint.ignore = []
