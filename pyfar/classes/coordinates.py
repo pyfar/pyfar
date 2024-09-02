@@ -2823,6 +2823,30 @@ class Coordinates():
         """Subtract two Coordinates objects."""
         return _arithmetics(other, self, 'sub')
 
+    def __mul__(self, other):
+        """Multiply two Coordinates objects."""
+        return _arithmetics(self, other, 'mul')
+
+    def __rmul__(self, other):
+        """Multiply two Coordinates objects."""
+        return _arithmetics(other, self, 'mul')
+
+    def __div__(self, other):
+        """Divide one Coordinates objects."""
+        return _arithmetics(self, other, 'div')
+
+    def __truediv__(self, other):
+        """Divide one Coordinates objects."""
+        return _arithmetics(self, other, 'div')
+
+    def __rtruediv__(self, other):
+        """Divide two Coordinates objects."""
+        return _arithmetics(other, self, 'div')
+
+    def __rdiv__(self, other):
+        """Divide two Coordinates objects."""
+        return _arithmetics(other, self, 'div')
+
     def dot(self, other):
         """Dot product two Coordinates objects."""
 
@@ -2878,7 +2902,7 @@ def _arithmetics(first, second, operation):
         first operand
     second : Coordinates, number, array
         second operand
-    operation : 'add', 'sub'
+    operation : 'add', 'sub', 'mul', 'div'
         whether to add or subtract the two objects
 
     Returns
@@ -2889,15 +2913,22 @@ def _arithmetics(first, second, operation):
     """
     # convert data
     data = []
+    num_objects = 0
     for obj in [first, second]:
         if isinstance(obj, Coordinates):
             data.append(obj.cartesian)
+            num_objects += 1
         elif isinstance(obj, (int, float)):
             data.append(np.array(obj))
         else:
             op = 'Addition' if operation == 'add' else 'Subtraction'
             raise TypeError(
                 f"{op} is only possible with Coordinates or number.")
+
+    if operation in ['mul', 'div'] and num_objects > 1:
+        raise TypeError(
+            "Multiplication and division are only possible with one "
+            "Coordinates object.")
 
     # broadcast shapes
     shape = np.broadcast_shapes(data[0].shape, data[1].shape)
@@ -2909,6 +2940,10 @@ def _arithmetics(first, second, operation):
         new.cartesian = data[0] + data[1]
     elif operation == 'sub':
         new.cartesian = data[0] - data[1]
+    elif operation == 'mul':
+        new.cartesian = data[0] * data[1]
+    elif operation == 'div':
+        new.cartesian = data[0] / data[1]
     return new
 
 

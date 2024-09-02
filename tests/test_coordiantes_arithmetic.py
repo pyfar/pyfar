@@ -47,6 +47,45 @@ def test_arithmetic_coordinates(other, operator, order):
     npt.assert_array_equal(new.cartesian, desired.cartesian)
 
 
+
+@pytest.mark.parametrize(
+    "other",
+    (
+        1,
+        1.0,
+    ),
+)
+@pytest.mark.parametrize(
+    "operator",
+    (
+        "*",
+        "/",
+    ),
+)
+@pytest.mark.parametrize(
+    "order",
+    (
+        True,
+        False,
+    ),
+)
+def test_arithmetic_coordinates_mul_div(other, operator, order):
+    coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
+    part1 = coords if order else other
+    part2 = other if order else coords
+    if operator == "*":
+        new = part1 * part2
+        desired = pf.Coordinates([0, 1], [0, 1], [0, 1])
+    elif operator == "/":
+        new = part1 / part2
+        if order:
+            desired = pf.Coordinates([0, 1], [0, 1], [0, 1])
+        else:
+            desired = pf.Coordinates([np.inf, 1], [np.inf, 1], [np.inf, 1])
+    assert isinstance(new, pf.Coordinates)
+    npt.assert_array_equal(new.cartesian, desired.cartesian)
+
+
 @pytest.mark.parametrize(
     "other",
     (
