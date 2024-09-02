@@ -1810,9 +1810,9 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
 def soft_limit_spectrum(signal, limit, knee, freq_range=None,
                         direction='above', log_prefix=None):
     """
-    Apply a frequency-wise soft limiting to input spectra.
+    Soft limiting the magniude spectrum.
 
-    Soft limiting gradually increases the amount of limiting to avoid
+    Soft limiting gradually increases the gain reduction to avoid
     discontinuities in the data that would appear in hard limiting. The
     transition betwwen the magnitude where no limiting is applied to the
     magnitude where the limiting reaches its full effect is termed `knee`
@@ -1950,9 +1950,12 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
         raise ValueError((f"direction is '{direction}' but must be 'above', "
                           "or 'below'"))
 
-    if knee != "arctan" and knee < 0:
-        raise ValueError(
-            f"knee is {knee} but must be 'arctan' or a number >= 0")
+    if isinstance(knee, str) and knee != "arctan":
+        raise ValueError(f"knee is '{knee}' but 'arctan'")
+    elif isinstance(knee, (int, float)) and knee < 0:
+        raise ValueError(f"knee is {knee} but must be >= 0")
+    elif not isinstance(knee, (str, int, float)):
+        raise TypeError("knee must be a string or number")
 
     if isinstance(limit, pyfar.FrequencyData):
         limit = limit.freq
