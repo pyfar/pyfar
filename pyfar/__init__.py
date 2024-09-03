@@ -11,7 +11,7 @@ from .classes.audio import Signal, TimeData, FrequencyData
 from .classes.audio import (add, subtract, multiply, divide, power,
                             matrix_multiplication)
 from .classes.coordinates import Coordinates
-from .classes.coordinates import (deg2rad, rad2deg)
+from .classes.coordinates import (deg2rad, rad2deg, dot, cross)
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 
@@ -45,4 +45,7 @@ __all__ = [
     'io',
     'dsp',
     'signals',
-    'utils']
+    'utils',
+    'dot',
+    'cross',
+    ]

@@ -51,8 +51,8 @@ def test_arithmetic_coordinates(other, operator, order):
 @pytest.mark.parametrize(
     "other",
     (
-        1,
-        1.0,
+        5,
+        5.0,
     ),
 )
 @pytest.mark.parametrize(
@@ -75,13 +75,14 @@ def test_arithmetic_coordinates_mul_div(other, operator, order):
     part2 = other if order else coords
     if operator == "*":
         new = part1 * part2
-        desired = pf.Coordinates([0, 1], [0, 1], [0, 1])
+        desired = pf.Coordinates([0, 5], [0, 5], [0, 5])
     elif operator == "/":
         new = part1 / part2
         if order:
-            desired = pf.Coordinates([0, 1], [0, 1], [0, 1])
+            desired = pf.Coordinates([0, .2], [0, .2], [0, .2])
         else:
-            desired = pf.Coordinates([np.inf, 1], [np.inf, 1], [np.inf, 1])
+            desired = pf.Coordinates(
+                [np.inf, 5], [np.inf, 5], [np.inf, 5])
     assert isinstance(new, pf.Coordinates)
     npt.assert_array_equal(new.cartesian, desired.cartesian)
 
@@ -116,11 +117,11 @@ def test_arithmetic_coordinates_error(other, operator):
     elif operator == "dot":
         match = "Dot product is only possible with Coordinates."
         with pytest.raises(TypeError, match=match):
-            coords.dot(other)
+            pf.dot(coords, other)
     elif operator == "cross":
         match = "Dot product is only possible with Coordinates."
         with pytest.raises(TypeError, match=match):
-            coords.cross(other)
+            pf.cross(coords, other)
 
 
 @pytest.mark.parametrize(
@@ -132,12 +133,12 @@ def test_arithmetic_coordinates_error(other, operator):
 )
 def test_dot_product(other):
     coords = pf.Coordinates(1, 1, 1)
-    dot = coords.dot(other)
+    dot = pf.dot(coords, other)
     npt.assert_array_equal(dot, 3 * other.x)
 
 
 def test_cross_product():
     coords_1 = pf.Coordinates(1, 0, 0)
     coords_2 = pf.Coordinates(0, 1, 0)
-    cross = coords_1.cross(coords_2)
+    cross = pf.cross(coords_1, coords_2)
     npt.assert_array_equal(cross.cartesian, [[0, 0, 1]])

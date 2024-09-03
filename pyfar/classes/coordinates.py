@@ -2650,7 +2650,7 @@ class Coordinates():
         y = np.broadcast_to(y, shapes)
         z = np.broadcast_to(z, shapes)
 
-        # set writeable
+        # set writeable, to make sure that the class does not become read-only
         x.setflags(write=True)
         y.setflags(write=True)
         z.setflags(write=True)
@@ -2852,50 +2852,76 @@ class Coordinates():
         """Divide two Coordinates objects."""
         return _arithmetics(other, self, 'div')
 
-    def dot(self, other):
-        """Dot product two Coordinates objects."""
-
-        if not isinstance(other, Coordinates):
-            raise TypeError(
-                "Dot product is only possible with Coordinates objects.")
-
-        return self.x * other.x + self.y * other.y + self.z * other.z
-
-
-    def cross(self, other):
-        """Cross product two Coordinates objects
-
-        Parameters
-        ----------
-        other : pf.Coordinates
-            other Coordinates object to perform the cross product with
-
-        Returns
-        -------
-        result : pf.Coordinates
-            new Coordinates object with the cross product of the two objects
-        """
-
-        if not isinstance(other, Coordinates):
-            raise TypeError(
-                "Dot product is only possible with Coordinates objects.")
-
-        new = Coordinates()
-        new.cartesian = np.zeros(np.broadcast_shapes(
-            self.cartesian.shape, other.cartesian.shape))
-
-        # apply cross product
-        new.x = self.y * other.z - self.z * other.y
-        new.y = self.z * other.x - self.x * other.z
-        new.z = self.x * other.y - self.y * other.x
-
-        return new
 
     def _check_empty(self):
         """check if object is empty"""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
 
+
+def dot(a, b):
+    """Dot product two Coordinates objects.
+
+    .. math::
+        \\vec{a} \\cdot \\vec{b}
+        = a_x \\cdot b_x + a_y \\cdot b_y + a_z \\cdot b_z
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : np.ndarray
+        array with the dot product of the two objects
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    return a.x * b.x + a.y * b.y + a.z * b.z
+
+
+def cross(a, b):
+    """Cross product two Coordinates objects
+
+    .. math::
+        \\vec{a} \\times \\vec{b}
+        = (a_y \\cdot b_z - a_z \\cdot b_y) \\cdot \\hat{x}
+        + (a_z \\cdot b_x - a_x \\cdot b_z) \\cdot \\hat{y}
+        + (a_x \\cdot b_y - a_y \\cdot b_x) \\cdot \\hat{z}
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : pf.Coordinates
+        new Coordinates object with the cross product of the two objects
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    new = Coordinates()
+    new.cartesian = np.zeros(np.broadcast_shapes(
+        a.cartesian.shape, b.cartesian.shape))
+
+    # apply cross product
+    new.x = a.y * b.z - a.z * b.y
+    new.y = a.z * b.x - a.x * b.z
+    new.z = a.x * b.y - a.y * b.x
+
+    return new
 
 def _arithmetics(first, second, operation):
     """Add or Subtract two Coordinates objects, numbers or arrays.
@@ -2925,7 +2951,14 @@ def _arithmetics(first, second, operation):
         elif isinstance(obj, (int, float)):
             data.append(np.array(obj))
         else:
-            op = 'Addition' if operation == 'add' else 'Subtraction'
+            if operation == 'add':
+                op = 'Addition'
+            elif operation == 'sub':
+                op = 'Subtraction'
+            elif operation == 'mul':
+                op = 'Multiplication'
+            elif operation == 'div':
+                op = 'Division'
             raise TypeError(
                 f"{op} is only possible with Coordinates or number.")
 
