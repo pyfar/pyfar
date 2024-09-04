@@ -150,17 +150,17 @@ class TransmissionMatrix(FrequencyData):
         >>> import pyfar as pf
         >>> frequencies = (100,200,300)
 
-        >>> # From np.array
+        From np.array
         >>> A = np.ones(len(frequencies))
         >>> (B,C,D) = (A+1, A+2, A+3)
         >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D, frequencies)
 
-        >>> # From FrequencyData objects
+        From FrequencyData objects
         >>> A = pf.FrequencyData( A, frequencies )
         >>> (B,C,D) = (A+1, A+2, A+3)
         >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D)
 
-        >>> # Data with higher abcd dimension
+        Data with higher abcd dimension
         >>> A = np.ones( (3, 4, len(frequencies)) )
         >>> (B,C,D) = (A+1, A+2, A+3)
         >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D, frequencies)
