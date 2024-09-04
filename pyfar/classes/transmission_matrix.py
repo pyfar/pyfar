@@ -25,6 +25,7 @@ consecutive T-matrices (e.g., by simply using the ``@`` operator):
 >>> tmat_out.freq == tmat.freq
 
 """
+from __future__ import annotations # required for Python <= 3.9
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
