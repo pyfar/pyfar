@@ -247,7 +247,7 @@ class TransmissionMatrix(FrequencyData):
         T-matrix."""
         return self[..., 1, 1]
 
-    def _check_for_inf(self, Zl: complex | FrequencyData) -> bool:
+    def _check_for_inf(self, Zl: complex | FrequencyData):
         """Check given load impedance for np.inf values
 
         Returns
@@ -259,7 +259,8 @@ class TransmissionMatrix(FrequencyData):
         idx_inf_Zl : logical array
             An np.ndarray of logicals pointing to elements referring to
             Zl = inf. The shape refers to an indexable version of given Zl.
-        Zl_indexable : An indexable version of Zl.
+        Zl_indexable : np.ndarray
+            An indexable version of Zl.
 
         """
         if isinstance(Zl, FrequencyData):
