@@ -17,7 +17,7 @@ consecutive T-matrices (e.g., by simply using the ``@`` operator):
 >>> A = np.ones(len(frequencies))
 >>> (B,C,D) = (A+1,A+2,A+3)
 >>>
->>> #T-matrices: 1st with arbitrary data and secondly, a bypass system
+>>> # T-matrices: First with arbitrary data and secondly, a bypass system
 >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D,frequencies)
 >>> tmat_bypass = pf.TransmissionMatrix.create_identity(frequencies)
 >>>
@@ -25,14 +25,13 @@ consecutive T-matrices (e.g., by simply using the ``@`` operator):
 >>> tmat_out.freq == tmat.freq
 
 """
-from __future__ import annotations
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
 
 
 class TransmissionMatrix(FrequencyData):
-    r"""Class representing a transmission matrix
+    r"""Class representing a transmission matrix.
 
     This implementation is based on a paper by Lampton [#]_ and uses the ABCD-
     representation. A single T-matrix is a (2x2)-matrix of the form:
@@ -79,9 +78,9 @@ class TransmissionMatrix(FrequencyData):
     """
 
     def __init__(self, data, frequencies, comment = ""):
-        """Create TransmissionMatrix with data, and frequencies.
+        """Initialize TransmissionMatrix with data, and frequencies.
 
-        Same as :py:func:`~from_tmatrix`.
+        This should not be used directly. Instead use :py:func:`~from_tmatrix`.
 
         """
         shape = np.shape(data)
@@ -93,16 +92,16 @@ class TransmissionMatrix(FrequencyData):
         super().__init__(data, frequencies, comment)
 
     @classmethod
-    def from_tmatrix(tmat, data, frequencies, comment = ""):
+    def from_tmatrix(cls, data, frequencies, comment = ""):
         """Create TransmissionMatrix using data in T-matrix shape
         and frequencies.
 
-        To ensure handing the data in correct format, it is recommended to use
-        the :py:func:`~from_abcd` method to create objects.
+        For using individual objects for A, B, C, D matrix entries,
+        see :py:func:`~from_abcd` method.
 
         Parameters
         ----------
-        data : array, double
+        data : array_like, double
             Raw data in the frequency domain.
             In contrast to the :py:class:`~pyfar.classes.audio.FrequencyData`
             class, data must have a shape of the form (..., 2, 2, N), e.g.
@@ -110,7 +109,7 @@ class TransmissionMatrix(FrequencyData):
             the number of frequency bins and the two dimensions before that to
             the (2x2) ABCD matrices. Supported data types are ``int``,
             ``float`` or ``complex``, where ``int`` is converted to ``float``.
-        frequencies : array, double
+        frequencies : array_like, double
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
         comment : str, optional
@@ -128,16 +127,16 @@ class TransmissionMatrix(FrequencyData):
         >>> tmat = pf.TransmissionMatrix.from_tmatrix(data, frequencies)
 
         """
-        return tmat(data, frequencies, comment)
+        return cls(data, frequencies, comment)
 
     @classmethod
-    def from_abcd(tmat, A,B,C,D, frequencies = None):
+    def from_abcd(cls, A, B, C, D, frequencies = None):
         """Create a TransmissionMatrix object from A-, B-, C-, D-data, and
         frequencies.
 
         Parameters
         ----------
-        A, B, C, D : FrequencyData, array, double
+        A, B, C, D : FrequencyData, array_like, double
             Raw data for the matrix entries A, B, C and D. The data need to
             match or be broadcastable into one ``shape``.
         frequencies : array, double, None
@@ -174,7 +173,7 @@ class TransmissionMatrix(FrequencyData):
         if num_freqdata == 4:
             frequencies = A.frequencies
             for obj in (B,C,D): #Frequency bins must match
-                npt.assert_allclose(A.frequencies, obj.frequencies, atol=1e-15)
+                npt.assert_allclose(frequencies, obj.frequencies, atol=1e-15)
             (A,B,C,D) = (A.freq, B.freq, C.freq, D.freq)
         elif num_freqdata != 0:
             raise ValueError(
@@ -201,7 +200,7 @@ class TransmissionMatrix(FrequencyData):
         order = np.append(order, data.ndim-1)
         data = np.transpose(data, order)
 
-        return tmat(data, frequencies)
+        return cls(data, frequencies)
 
     @property
     def abcd_caxes(self):
