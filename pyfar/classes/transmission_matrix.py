@@ -367,7 +367,7 @@ class TransmissionMatrix(FrequencyData):
     def transfer_function(self, quantity_indices,
                           Zl: complex | FrequencyData) -> FrequencyData:
         """Returns the transfer function (output/input) for specified
-        quantities and given load impedance.
+        quantities and a given load impedance.
 
         The transfer function (TF) is the relation between an output and input
         quantity of modelled two-port and depends on the load impedance at the
@@ -671,3 +671,12 @@ class TransmissionMatrix(FrequencyData):
         tmat[0,1] = transducer_constant
         tmat[1,0] = 1/transducer_constant
         return tmat
+    def __repr__(self):
+        """String representation of TransmissionMatrix class."""
+        repr_string = (
+            f"TransmissionMatrix:\n"
+            f"{self.abcd_cshape} channels per matrix entry "
+            f"with {self.n_bins} frequencies\n"
+            f"Total number of {self.cshape} channels")
+
+        return repr_string
