@@ -233,22 +233,26 @@ class TransmissionMatrix(FrequencyData):
     @property
     def A(self) -> FrequencyData:
         """A entry of the transmission matrix."""
-        return self[..., 0, 0]
+        return FrequencyData(self.freq[..., 0, 0, :], self.frequencies,
+                             self.comment)
 
     @property
     def B(self) -> FrequencyData:
         """B entry of the transmission matrix."""
-        return self[..., 0, 1]
+        return FrequencyData(self.freq[..., 0, 1, :], self.frequencies,
+                             self.comment)
 
     @property
     def C(self) -> FrequencyData:
         """C entry of the transmission matrix."""
-        return self[..., 1, 0]
+        return FrequencyData(self.freq[..., 1, 0, :], self.frequencies,
+                             self.comment)
 
     @property
     def D(self) -> FrequencyData:
         """D entry of the transmission matrix."""
-        return self[..., 1, 1]
+        return FrequencyData(self.freq[..., 1, 1, :], self.frequencies,
+                             self.comment)
 
     def _check_for_inf(self, Zl: complex | FrequencyData):
         """Check given load impedance for np.inf values
@@ -671,6 +675,7 @@ class TransmissionMatrix(FrequencyData):
         tmat[0,1] = transducer_constant
         tmat[1,0] = 1/transducer_constant
         return tmat
+
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
         repr_string = (
@@ -680,3 +685,41 @@ class TransmissionMatrix(FrequencyData):
             f"Total number of {self.cshape} channels")
 
         return repr_string
+
+    def is_indexable(self):
+        """Returns true if ABCD-entries have more than one channel and are
+        therefore indexable
+        """
+        return len(self.cshape) > 2
+
+    def __getitem__(self, key):
+        """Get copied slice of the TransmissionMatrix at key.
+
+            Note, that slicing ABCD or frequency dimension is not possible.
+        """
+
+        if not self.is_indexable():
+            raise IndexError(
+                "Object is not indexable, since ABCD-entries "
+                "only have a single channel")
+
+        # Add three empty slices at the end to always get all data contained
+        # in frequency and T-Matrix dimensions (last three dimensions).
+        if hasattr(key, '__iter__'):
+            key = (*key, slice(None), slice(None), slice(None))
+
+        # try indexing and raise verbose errors if it fails
+        try:
+            data = self._data[key]
+        except IndexError as Error:
+            if 'too many indices for array' in str(Error):
+                raise IndexError((
+                    f'Indexed dimensions must not exceed the ABCD '
+                    f'channel dimension (abcd_cdim), which is '
+                    f'{len(self.abcd_cshape)}'))
+            else:
+                raise Error
+
+        return TransmissionMatrix.from_tmatrix(
+            data, frequencies=self.frequencies,
+            comment=self.comment)

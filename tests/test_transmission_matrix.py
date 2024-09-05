@@ -2,6 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import re
+import pyfar as pf
 from pyfar import TransmissionMatrix
 from pyfar import FrequencyData
 
@@ -195,3 +196,31 @@ def test_tmatrix_create_gyrator(transducer_contant, frequencies):
     tmat_obj = TransmissionMatrix.create_identity(frequencies) @ tmat
     Zin = tmat_obj.input_impedance(Zl)
     npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
+
+
+def test_tmatrix_slicing():
+    frequencies = [100,200,300]
+    eye_2x2 = TransmissionMatrix.create_identity(frequencies)
+    eye_1x2x2 = pf.utils.broadcast_cshape(eye_2x2, (1, 2, 2))
+    eye_3x2x2 = pf.utils.broadcast_cshape(eye_2x2, (3, 2, 2))
+    eye_4x3x2x2 = pf.utils.broadcast_cshape(eye_2x2, (4, 3, 2, 2))
+
+    npt.assert_allclose(eye_1x2x2[0].freq, eye_2x2.freq, atol = 1e-15)
+    npt.assert_allclose(eye_3x2x2[0].freq, eye_2x2.freq, atol = 1e-15)
+    npt.assert_allclose(eye_3x2x2[1].freq, eye_2x2.freq, atol = 1e-15)
+    npt.assert_allclose(eye_3x2x2[2].freq, eye_2x2.freq, atol = 1e-15)
+    npt.assert_allclose(eye_4x3x2x2[0,0].freq, eye_2x2.freq, atol = 1e-15)
+    npt.assert_allclose(eye_4x3x2x2[1,2].freq, eye_2x2.freq, atol = 1e-15)
+
+    with pytest.raises(IndexError):
+        eye_2x2[0]
+    with pytest.raises(IndexError):
+        eye_1x2x2[0,1]
+    with pytest.raises(IndexError):
+        eye_1x2x2[0,:]
+    with pytest.raises(IndexError):
+        eye_4x3x2x2[0,0,0]
+    with pytest.raises(IndexError):
+        eye_4x3x2x2[0,:,0]
+    with pytest.raises(IndexError):
+        eye_4x3x2x2[0,:,:]
