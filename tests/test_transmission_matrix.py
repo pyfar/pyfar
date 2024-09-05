@@ -9,14 +9,17 @@ from pyfar import FrequencyData
 def frequencies():
     return [100, 200]
 @pytest.fixture(scope="module")
-def Mat_list():
+def A_list():
+    """Test data for a matrix-entry (e.g. A) using a list type"""
     return [1, 1]
 @pytest.fixture(scope="module")
-def Mat_np(Mat_list):
-    return np.array(Mat_list)
+def A_np(A_list):
+    """Test data for a matrix-entry (e.g. A) using an np.ndarray"""
+    return np.array(A_list)
 @pytest.fixture(scope="module")
-def Mat_pf(Mat_np, frequencies):
-    return FrequencyData(Mat_np, frequencies)
+def A_FreqDat(A_np, frequencies):
+    """Test data for a matrix-entry (e.g. A) using a FrequencyData object"""
+    return FrequencyData(A_np, frequencies)
 
 def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
     error_msg = re.escape("'data' must have a shape like "
@@ -55,24 +58,25 @@ def _expect_error_abcd_same_type(A, B, C, D):
                     "If using FrequencyData objects, all matrix entries "
                     "A, B, C, D, must be FrequencyData objects."):
         TransmissionMatrix.from_abcd(A, B, C, D, 1000)
-def test_tmatrix_from_abcd_input_types(frequencies, Mat_list, Mat_np, Mat_pf):
-    TransmissionMatrix.from_abcd(Mat_list, Mat_list,
-                                 Mat_list, Mat_list, frequencies)
-    TransmissionMatrix.from_abcd(Mat_np, Mat_np, Mat_list, Mat_np, frequencies)
-    TransmissionMatrix.from_abcd(Mat_np, Mat_np, Mat_np, Mat_np, frequencies)
-    TransmissionMatrix.from_abcd(Mat_pf, Mat_pf, Mat_pf, Mat_pf)
 
-    _expect_error_abcd_same_type(Mat_np, Mat_np, Mat_np, Mat_pf)
-    _expect_error_abcd_same_type(Mat_np, Mat_np, Mat_pf, Mat_np)
-    _expect_error_abcd_same_type(Mat_np, Mat_pf, Mat_np, Mat_np)
-    _expect_error_abcd_same_type(Mat_pf, Mat_np, Mat_np, Mat_np)
+def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
+    TransmissionMatrix.from_abcd(A_list, A_list,
+                                 A_list, A_list, frequencies)
+    TransmissionMatrix.from_abcd(A_np, A_np, A_list, A_np, frequencies)
+    TransmissionMatrix.from_abcd(A_np, A_np, A_np, A_np, frequencies)
+    TransmissionMatrix.from_abcd(A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
 
-def test_tmatrix_from_abcd_optional_frequencies(Mat_list, Mat_pf):
-    TransmissionMatrix.from_abcd(Mat_pf, Mat_pf, Mat_pf, Mat_pf)
+    _expect_error_abcd_same_type(A_np, A_np, A_np, A_FreqDat)
+    _expect_error_abcd_same_type(A_np, A_np, A_FreqDat, A_np)
+    _expect_error_abcd_same_type(A_np, A_FreqDat, A_np, A_np)
+    _expect_error_abcd_same_type(A_FreqDat, A_np, A_np, A_np)
+
+def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
+    TransmissionMatrix.from_abcd(A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
     with pytest.raises(ValueError, match="'frequencies' must be specified if "
                        "not using 'FrequencyData' objects as input"
     ):
-        TransmissionMatrix.from_abcd(Mat_list, Mat_list, Mat_list, Mat_list)
+        TransmissionMatrix.from_abcd(A_list, A_list, A_list, A_list)
 
 
 # -------------------------
@@ -80,7 +84,7 @@ def test_tmatrix_from_abcd_optional_frequencies(Mat_list, Mat_pf):
 # -------------------------
 @pytest.fixture(scope="module")
 def abcd_data_3x2():
-    """ABCD matrices with 2 frequency bins andone additional
+    """ABCD matrices with 2 frequency bins and one additional
     dimension of size 3"""
     frequencies = [100, 200]
     A = FrequencyData([[1, 1], [1, 1], [1, 1]], frequencies)
