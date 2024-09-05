@@ -3,24 +3,26 @@ The following introduces the :py:class:`~TransmissionMatrix` class available
 in pyfar.
 
 Transmission matrices (short T-matrices) are a convenient representation of
-`Two-ports` (or `Quadrupoles`). These can represent systems from various
+`Two-ports` or `Quadrupoles`. These can represent systems from various
 fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission
 lines.
 
 System properties like input impedance or transfer functions can directly be
 derived from a T-matrix. Furthermore, systems can be cascaded my multiplying
-consecutive T-matrices (e.g., by simply using the ``@`` operator):
+consecutive T-matrices simply using the ``@`` operator:
 
 >>> import numpy as np
 >>> import pyfar as pf
 >>> frequencies = (100,200,300)
+>>> # T-matrix with arbitrary data
 >>> A = np.ones(len(frequencies))
 >>> (B,C,D) = (A+1,A+2,A+3)
->>>
->>> # T-matrices: First with arbitrary data and secondly, a bypass system
 >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D,frequencies)
+>>>
+>>> # T-matrix of a bypass system
 >>> tmat_bypass = pf.TransmissionMatrix.create_identity(frequencies)
 >>>
+>>> # Cascade
 >>> tmat_out = tmat @ tmat_bypass
 >>> tmat_out.freq == tmat.freq
 
@@ -43,31 +45,30 @@ class TransmissionMatrix(FrequencyData):
                 C & D
             \end{bmatrix}
 
-    This class represents frequency-dependent matrix of a multi-dimensional
-    form, i.e. A, B, C and D can be matrices as well. For this purpose, it is
-    derived from the :py:class:`~pyfar.classes.audio.FrequencyData` class. In
-    the easiest case, each matrix entry (A,B,C,D) is a single-channel
+    This class is derived from :py:class:`~pyfar.classes.audio.FrequencyData`,
+    representing a frequency-dependent matrix of a multi-dimensional form
+    In the easiest case, each matrix entry (A,B,C,D) is a single-channel
     FrequencyData object (i.e. a vector depending on frequency). However,
     additional dimensions can be used to represent additional variables (e.g.
     multiple layouts of an electrical circuit).
 
     Notes
     -----
-    This class is derived from the
-    :py:class:`~pyfar.classes.audio.FrequencyData`
-    but has a special constraint: The input data must match a shape like
-    (..., 2, 2, N), so the resulting cshape is (...,2,2). The last axis refers
-    to the frequency, and the two axes before to the ABCD-Matrix (which is a
-    2x2 matrix). For example, `obj[...,0,0]` returns the A-entry as
+    This class is derived from
+    :py:class:`~pyfar.classes.audio.FrequencyData` but has a special
+    constraint: The underlying frequency domain data must match a shape like
+    (..., 2, 2, N). The last axis refers to the frequency, and the two axes
+    before to the ABCD-Matrix (which is a 2x2 matrix), so the resulting cshape
+    is (...,2,2). For example, `obj[...,0,0]` returns the A-entry as
     :py:class:`~pyfar.classes.audio.FrequencyData`.
 
     Another point is the numerical handling when deriving input/output
     impedance or transfer functions (see :py:func:`~input_impedance`,
     :py:func:`~output_impedance`, :py:func:`~transfer_function`):
     In the respective equations, the load impedance Zl is usually multiplied.
-    This can lead to numerical problems for Zl = inf. Thus, Zl is applied in
-    the form of 1/Zl (as admittance) in this case to avoid such problems.
-    Nevertheless, there are additional cases where certain entries of the
+    However, Zl is applied in the form of 1/Zl (as admittance) in for Zl = inf
+    to avoid numerical problems.
+    There are additional cases where certain entries of the
     T-matrix being zero might still lead to the main denominator becoming zero.
     For these cases, the denominator is set to eps.
 
@@ -81,7 +82,8 @@ class TransmissionMatrix(FrequencyData):
     def __init__(self, data, frequencies, comment = ""):
         """Initialize TransmissionMatrix with data, and frequencies.
 
-        This should not be used directly. Instead use :py:func:`~from_tmatrix`.
+        This should not be used directly. Instead use :py:func:`~from_tmatrix`
+        or :py:func:`~from_tmatrix`.
 
         """
         shape = np.shape(data)
@@ -98,7 +100,7 @@ class TransmissionMatrix(FrequencyData):
         and frequencies.
 
         For using individual objects for A, B, C, D matrix entries,
-        see :py:func:`~from_abcd` method.
+        see :py:func:`~from_abcd`.
 
         Parameters
         ----------
@@ -137,9 +139,15 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        A, B, C, D : FrequencyData, array_like, double
-            Raw data for the matrix entries A, B, C and D. The data need to
-            match or be broadcastable into one ``shape``.
+        A : FrequencyData, array_like, double
+            Raw data for the matrix entries A. The data need to match the
+            B, C and D entry or be broadcastable into one ``shape``.
+        B : FrequencyData, array_like, double
+            See A.
+        C : FrequencyData, array_like, double
+            See A.
+        D : FrequencyData, array_like, double
+            See A.
         frequencies : array, double, None
             Frequencies of the data in Hz. This is optional if using the
             FrequencyData type for A, B, C, D.
@@ -150,20 +158,23 @@ class TransmissionMatrix(FrequencyData):
         >>> import pyfar as pf
         >>> frequencies = (100,200,300)
 
-        From np.array
+        >>> # From np.array
         >>> A = np.ones(len(frequencies))
         >>> (B,C,D) = (A+1, A+2, A+3)
         >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D, frequencies)
+        >>> tmat
 
-        From FrequencyData objects
+        >>> # From FrequencyData objects
         >>> A = pf.FrequencyData( A, frequencies )
         >>> (B,C,D) = (A+1, A+2, A+3)
         >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D)
+        >>> tmat
 
-        Data with higher abcd dimension
+        >>> # Data with higher abcd dimension
         >>> A = np.ones( (3, 4, len(frequencies)) )
         >>> (B,C,D) = (A+1, A+2, A+3)
         >>> tmat = pf.TransmissionMatrix.from_abcd(A,B,C,D, frequencies)
+        >>> tmat
 
         """
         num_freqdata = 0
@@ -205,12 +216,8 @@ class TransmissionMatrix(FrequencyData):
 
     @property
     def abcd_caxes(self):
-        """The indices of the channel axes referring to the transmission matrix
-
-        This relates to the axes with respect to channel-related data set
-        (excluding the frequency-axis).
-
-        """
+        """The indices of the channel axes referring to the transmission
+        matrix, namely (-2, -1)"""
         return (-2, -1)
 
     @property
@@ -218,33 +225,29 @@ class TransmissionMatrix(FrequencyData):
         """The channel shape of the transmission matrix entries (A, B, C, D)
 
         This is the same as 'cshape' without the last two elements, but
-        atleast (1,).
+        at least (1,).
 
         """
         return self.A.cshape
 
     @property
     def A(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) A entry of the
-        T-matrix."""
+        """A entry of the transmission matrix."""
         return self[..., 0, 0]
 
     @property
     def B(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) B entry of the
-        T-matrix."""
+        """B entry of the transmission matrix."""
         return self[..., 0, 1]
 
     @property
     def C(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) C entry of the
-        T-matrix."""
+        """C entry of the transmission matrix."""
         return self[..., 1, 0]
 
     @property
     def D(self) -> FrequencyData:
-        """Returns the (potentially multi-dimensional) D entry of the
-        T-matrix."""
+        """D entry of the transmission matrix."""
         return self[..., 1, 1]
 
     def _check_for_inf(self, Zl: complex | FrequencyData):
@@ -293,16 +296,16 @@ class TransmissionMatrix(FrequencyData):
         Parameters
         ----------
         Zl : scalar | FrequencyData
-            The load impedance data as scalar or FrequencyData. The shape must
-            match the entries of the T-matrix, i.e.
-            shape(tmat.A.freq) == shape(Zl.freq) or must be broadcastable.
+            The load impedance data as scalar or FrequencyData. In latter case,
+            the shape must match the entries of the T-matrix, i.e.
+            shape(tmat.A.freq) == shape(Zl.freq), or must be broadcastable.
 
         Returns
         -------
         Zout : FrequencyData
             A FrequencyData object with the resulting output impedance. The
-            shape is identical to the entries of the T-matrix, i.e.
-            shape(tmat.A) == shape(Zout).
+            cshape is identical to the entries of the T-matrix, i.e.
+            tmat.A.cshape == Zout.cshape.
 
         """
         nominator = (self.A * Zl + self.B)
@@ -336,16 +339,16 @@ class TransmissionMatrix(FrequencyData):
         Parameters
         ----------
         Zl : scalar | FrequencyData
-            The load impedance data as scalar or FrequencyData. The shape must
-            match the entries of the T-matrix, i.e.
-            shape(tmat.A.freq) == shape(Zl.freq) or must be broadcastable.
+            The load impedance data as scalar or FrequencyData. In latter case,
+            the shape must match the entries of the T-matrix, i.e.
+            shape(tmat.A.freq) == shape(Zl.freq), or must be broadcastable.
 
         Returns
         -------
         Zout : FrequencyData
             A FrequencyData object with the resulting output impedance. The
-            shape is identical to the entries of the T-matrix, i.e.
-            shape(tmat.A) == shape(Zout).
+            cshape is identical to the entries of the T-matrix, i.e.
+            tmat.A.cshape == Zout.cshape.
 
         """
         nominator = (self.D * Zl + self.B)
@@ -395,20 +398,20 @@ class TransmissionMatrix(FrequencyData):
         ----------
         quantity_indices : array_like (int, int)
             Array-like object with two integer elements referring to the
-            indices of the utilized quantity (0 = first and 1 = second
-            quantity) at the output and input. For example, (1,0) refers to the
-            TF with Q2_out / Q1_in.
+            indices of the utilized quantity at the output (first integer)
+            and input (second integer). For example, (1,0) refers to the
+            TF :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}}`.
         Zl : scalar | FrequencyData
-            The load impedance data as scalar or FrequencyData. The shape must
-            match the entries of the T-matrix, i.e.
-            shape(tmat.A.freq) == shape(Zl.freq) or must be broadcastable.
+            The load impedance data as scalar or FrequencyData. In latter case,
+            the shape must match the entries of the T-matrix, i.e.
+            shape(tmat.A.freq) == shape(Zl.freq), or must be broadcastable.
 
         Returns
         -------
         TF : FrequencyData
             A FrequencyData object with the resulting transfer function. The
-            shape is identical to the entries of the T-matrix, i.e.
-            shape(tmat.A) == shape(TF).
+            cshape is identical to the entries of the T-matrix, i.e.
+            tmat.A.cshape == TF.cshape.
 
         """
         is_scalar = np.isscalar(quantity_indices)
@@ -549,7 +552,7 @@ class TransmissionMatrix(FrequencyData):
         Returns
         -------
         tmat : TransmissionMatrix
-            A TransmissionMatrix representing a series impedance.
+            A TransmissionMatrix object representing a series impedance.
 
         """
         if impedance.cshape != (1,):
@@ -586,7 +589,7 @@ class TransmissionMatrix(FrequencyData):
         Returns
         -------
         tmat : TransmissionMatrix
-            A TransmissionMatrix representing a parallel connection.
+            A TransmissionMatrix object representing a parallel connection.
 
         """
         if admittance.cshape != (1,):
