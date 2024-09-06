@@ -133,67 +133,106 @@ def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
 
 
 
-@pytest.mark.parametrize("abcd_cshape", [(), (4,), (4, 5)])
-def test_tmatrix_create_identity(abcd_cshape):
-    frequencies = [100,200,300]
-    identity_tmat = TransmissionMatrix.create_identity(frequencies,abcd_cshape)
-    if abcd_cshape == ():
-        abcd_cshape = (1,)
-    assert identity_tmat.abcd_cshape == abcd_cshape
-    _compare_tmat_vs_abcd(identity_tmat, 1, 0, 0, 1)
+def test_tmatrix_create_identity(frequencies):
+    tmat_eye = TransmissionMatrix.create_identity(frequencies)
+    assert isinstance(tmat_eye, TransmissionMatrix)
+    assert tmat_eye.abcd_cshape == (1,)
+    _compare_tmat_vs_abcd(tmat_eye, 1, 0, 0, 1)
 
-def test_tmatrix_create_series_impedance(abcd_cshape = (4,5)):
-    with pytest.raises(ValueError, match = "Number of channels for "
-                       "'impedance' must be 1."):
-        TransmissionMatrix.create_series_impedance(
-            FrequencyData([[1,2], [3,4]],[10,20]))
+@pytest.mark.parametrize("no_freqs", [None, ()])
+def test_tmatrix_create_identity_scalar_input(no_freqs):
+    eye = TransmissionMatrix.create_identity(no_freqs)
+    assert isinstance(eye, np.ndarray)
+    npt.assert_allclose(eye, np.eye(2), atol=1e-15)
 
-    frequencies = [100,200,300]
-    Z = FrequencyData([10, 20, 30], frequencies)
-    tmat = TransmissionMatrix.create_series_impedance(Z, abcd_cshape)
+@pytest.mark.parametrize("method_name",
+                         ["create_series_impedance", "create_shunt_admittance",
+                          "create_transformer", "create_gyrator"])
+def test_tmatrix_create_methods_wrong_input(method_name):
+    if method_name == "create_series_impedance":
+        input_name = "impedance"
+    elif method_name == "create_shunt_admittance":
+        input_name = "admittance"
+    else:
+        input_name = "transducer_constant"
+
+    func = getattr(TransmissionMatrix, method_name)
+    err_msg = "'" + input_name + "' "
+    "must be a numerical scalar or FrequencyData object."
+    with pytest.raises(ValueError, match=err_msg):
+        func("wrong_input")
+    with pytest.raises(ValueError, match=err_msg):
+        func('wrong_input')
+    with pytest.raises(ValueError, match=err_msg):
+        func((1,2,3))
+    with pytest.raises(ValueError, match=err_msg):
+        func([1,2,3])
+
+
+@pytest.mark.parametrize("abcd_cshape", [(1,), (4,5)])
+def test_tmatrix_create_series_impedance(A_FreqDat, abcd_cshape):
+    Z = pf.utils.broadcast_cshape(A_FreqDat, abcd_cshape)
+    tmat = TransmissionMatrix.create_series_impedance(Z)
+    assert isinstance(tmat, TransmissionMatrix)
     assert tmat.abcd_cshape == abcd_cshape
     _compare_tmat_vs_abcd(tmat, 1, Z.freq, 0, 1)
 
-def test_tmatrix_create_shunt_admittance(abcd_cshape = (4,5)):
-    with pytest.raises(ValueError, match = "Number of channels for "
-                       "'admittance' must be 1."):
-        TransmissionMatrix.create_shunt_admittance(
-            FrequencyData([[1,2], [3,4]],[10,20]))
+def test_tmatrix_create_series_impedance_scalar_input():
+    Z = 42
+    tmat = TransmissionMatrix.create_series_impedance(Z)
+    assert isinstance(tmat, np.ndarray)
+    assert tmat.shape == (2,2)
+    npt.assert_allclose(tmat, [[1, Z],[0, 1]], atol=1e-15)
 
-    frequencies = [100,200,300]
-    Y = FrequencyData([10, 20, 30], frequencies)
-    tmat = TransmissionMatrix.create_shunt_admittance(Y, abcd_cshape)
+@pytest.mark.parametrize("abcd_cshape", [(1,), (4,5)])
+def test_tmatrix_create_shunt_admittance(A_FreqDat, abcd_cshape):
+    Y = pf.utils.broadcast_cshape(A_FreqDat, abcd_cshape)
+    tmat = TransmissionMatrix.create_shunt_admittance(Y)
+    assert isinstance(tmat, TransmissionMatrix)
     assert tmat.abcd_cshape == abcd_cshape
     _compare_tmat_vs_abcd(tmat, 1, 0, Y.freq, 1)
 
-@pytest.mark.parametrize("transducer_contant", [2.5, (2.5)])
-def test_tmatrix_create_transformer(transducer_contant, frequencies):
-    error_msg = "'transducer_constant' must be a numerical scalar"
-    with pytest.raises(ValueError, match = error_msg):
-        TransmissionMatrix.create_transformer([1,1])
+def test_tmatrix_create_shunt_admittance_scalar_input():
+    Y = 42
+    tmat = TransmissionMatrix.create_shunt_admittance(Y)
+    assert isinstance(tmat, np.ndarray)
+    assert tmat.shape == (2,2)
+    npt.assert_allclose(tmat, [[1, 0],[Y, 1]], atol=1e-15)
 
-    N = transducer_contant
-    tmat = TransmissionMatrix.create_transformer(N)
+@pytest.mark.parametrize("transducer_contant",
+                         [2.5, (2.5), FrequencyData([2.5, 5, 10], [1, 2, 3])])
+def test_tmatrix_create_transformer(transducer_contant, frequencies):
+    tmat = TransmissionMatrix.create_transformer(transducer_contant)
+    if isinstance(transducer_contant, FrequencyData):
+        assert(isinstance(tmat, TransmissionMatrix))
+        N = transducer_contant.freq
+    else:
+        assert(isinstance(tmat, np.ndarray))
+        N = transducer_contant
+        # Convert to T-Matrix object
+        tmat = TransmissionMatrix.create_identity(frequencies) @ tmat
 
     Zl = 100
     Zin_expected = N*N * Zl
-    tmat_obj = TransmissionMatrix.create_identity(frequencies) @ tmat
-    Zin = tmat_obj.input_impedance(Zl)
+    Zin = tmat.input_impedance(Zl)
     npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
 
-@pytest.mark.parametrize("transducer_contant", [2.5, (2.5)])
+@pytest.mark.parametrize("transducer_contant",
+                         [2.5, (2.5), FrequencyData([2.5, 5, 10], [1, 2, 3])])
 def test_tmatrix_create_gyrator(transducer_contant, frequencies):
-    error_msg = "'transducer_constant' must be a numerical scalar"
-    with pytest.raises(ValueError, match = error_msg):
-        TransmissionMatrix.create_gyrator([1,1])
-
-    N = transducer_contant
-    tmat = TransmissionMatrix.create_gyrator(N)
+    tmat = TransmissionMatrix.create_gyrator(transducer_contant)
+    if isinstance(transducer_contant, FrequencyData):
+        assert(isinstance(tmat, TransmissionMatrix))
+        N = transducer_contant.freq
+    else:
+        assert(isinstance(tmat, np.ndarray))
+        N = transducer_contant
+        # Convert to T-Matrix object
+        tmat = TransmissionMatrix.create_identity(frequencies) @ tmat
 
     Zl = 100
     Zin_expected = N*N / Zl
-    tmat_obj = TransmissionMatrix.create_identity(frequencies) @ tmat
-    Zin = tmat_obj.input_impedance(Zl)
+    Zin = tmat.input_impedance(Zl)
     npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
 
 

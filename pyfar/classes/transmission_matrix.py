@@ -501,8 +501,8 @@ class TransmissionMatrix(FrequencyData):
         denominator.freq[denominator.freq == 0] = np.nan
         return nominator / denominator
 
-    @classmethod
-    def create_identity(tmat, frequencies, abcd_cshape = ()):
+    @staticmethod
+    def create_identity(frequencies = None):
         r"""Creates an object with identity matrix entries (bypass).
 
         See Equation (2-7) in Table I of Reference [1]_:
@@ -515,25 +515,28 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        frequencies : array_like
-            The frequency sampling points in Hz.
-        abcd_cshape : tuple | int, optional
-            Shape of additional channel dimensions besides (2,2).
-            Per default, no additional dimensions are created.
+        frequencies : None | array_like, optional
+            The frequency sampling points in Hz. The default is `None` which
+            will result in this function to return an np.ndarray instead of an
+            TransmissionMatrix object.
 
         Returns
         -------
-        tmat : TransmissionMatrix
-            A TransmissionMatrix object that contains 2x2 identity matrices.
+        tmat : np.ndarray | TransmissionMatrix
+            If frequencies are specified, a TransmissionMatrix object that
+            contains one 2x2 identity matrix per bin is returned. Otherwise,
+            this returns a 2x2 np.ndarray.
 
         """
-        A = np.ones((*abcd_cshape, np.array(frequencies).size))
-        (B,C,D) = (0,0,1)
-        return tmat.from_abcd(A, B, C, D, frequencies)
+        if frequencies is None or len(frequencies) == 0:
+            return np.eye(2)
 
-    @classmethod
-    def create_series_impedance(tmat, impedance: FrequencyData,
-                                abcd_cshape=()):
+        return TransmissionMatrix.from_abcd(np.ones_like(frequencies),
+                                            0, 0, 1, frequencies)
+
+    @staticmethod
+    def create_series_impedance(impedance: complex | FrequencyData
+                                ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a series impedance.
 
         This means the impedance is connected in series with a potential load
@@ -547,28 +550,32 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        impedance : FrequencyData
+        impedance : scalar | FrequencyData
             The impedance data of the series impedance.
-        abcd_cshape : tuple | int, optional
-            Shape of additional channel dimensions besides (2,2).
-            Per default, no additional dimensions are created.
 
         Returns
         -------
-        tmat : TransmissionMatrix
-            A TransmissionMatrix object representing a series impedance.
+        tmat : np.ndarray | TransmissionMatrix
+            A transmission matrix representing the series connection
+            and can be cascaded with TransmissionMatrix objects.
+            If a scalar was used as input a frequency-independent
+            matrix is returned, namely an np.ndarray of shape (2,2).
 
         """
-        if impedance.cshape != (1,):
-            raise ValueError("Number of channels for 'impedance' must be 1.")
+        if np.isscalar(impedance) and not isinstance(impedance, str):
+            tmat = np.identity(2)
+            tmat[0,1] = impedance
+            return tmat
 
-        (Z, frequencies) = (impedance.freq[0], impedance.frequencies)
-        Z = np.zeros((*abcd_cshape, np.array(frequencies).size)) + Z
-        return tmat.from_abcd(1, Z, 0, 1, frequencies)
+        if not isinstance(impedance, FrequencyData):
+            raise ValueError("'impedance' must be a "
+                             "numerical scalar or FrequencyData object.")
+        return TransmissionMatrix.from_abcd(
+            1, impedance.freq, 0, 1, impedance.frequencies)
 
-    @classmethod
-    def create_shunt_admittance(tmat, admittance: FrequencyData,
-                                abcd_cshape = ()):
+    @staticmethod
+    def create_shunt_admittance(admittance: complex | FrequencyData
+                                ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a shunt admittance
         (parallel connection).
 
@@ -584,29 +591,33 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        admittance : FrequencyData
+        admittance : scalar | FrequencyData
             The admittance data of the element connected in parallel.
-        abcd_cshape : tuple | int, optional
-            Shape of additional channel dimensions besides (2,2).
-            Per default, no additional dimensions are created.
 
         Returns
         -------
-        tmat : TransmissionMatrix
-            A TransmissionMatrix object representing a parallel connection.
+        tmat : np.ndarray | TransmissionMatrix
+            A transmission matrix representing a parallel connection
+            and can be cascaded with TransmissionMatrix objects.
+            If a scalar was used as input a frequency-independent
+            matrix is returned, namely an np.ndarray of shape (2,2).
 
         """
-        if admittance.cshape != (1,):
-            raise ValueError("Number of channels for 'admittance' must be 1.")
+        if np.isscalar(admittance) and not isinstance(admittance, str):
+            tmat = np.identity(2)
+            tmat[1,0] = admittance
+            return tmat
 
-        (Y, frequencies) = (admittance.freq[0], admittance.frequencies)
-        Y = np.zeros((*abcd_cshape, np.array(frequencies).size)) + Y
-        return tmat.from_abcd(1, 0, Y, 1, frequencies)
+        if not isinstance(admittance, FrequencyData):
+            raise ValueError("'admittance' must be a "
+                             "numerical scalar or FrequencyData object.")
+        return TransmissionMatrix.from_abcd(
+            1, 0, admittance.freq, 1, admittance.frequencies)
 
     @staticmethod
-    def create_transformer(transducer_constant : complex) -> np.ndarray:
-        r"""Creates a frequency-independent transmission matrix representing a
-        transformer.
+    def create_transformer(transducer_constant :
+                complex | FrequencyData) -> np.ndarray | TransmissionMatrix:
+        r"""Creates a transmission matrix representing a transformer.
 
         See Equation (2-12) in Table I of Reference [1]_:
 
@@ -618,29 +629,40 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar
+        transducer_constant : scalar | FrequencyData
             The transmission ratio with respect to voltage-like quantity,
-            i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`.
+            i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`. If a scalar is given,
+            i.e. a frequency-independent transformer matrix is requested, the
+            return value will be a 2x2 np.ndarray isntead.
 
         Returns
         -------
-        tmat : np.ndarray
-            A 2x2 array representing the transmission matrix of the transformer
+        tmat : np.ndarray | TransmissionMatrix
+            A transmission matrix representing the transformer
             and can be cascaded with TransmissionMatrix objects.
+            If a scalar was used as input a frequency-independent
+            matrix is returned, namely an np.ndarray of shape (2,2).
 
         """
-        if not np.isscalar(transducer_constant):
+        if np.isscalar(transducer_constant) and not isinstance(
+            transducer_constant, str):
+            tmat = np.identity(2)
+            tmat[0,0] = transducer_constant
+            tmat[1,1] = 1/transducer_constant
+            return tmat
+
+        if not isinstance(transducer_constant, FrequencyData):
             raise ValueError("'transducer_constant' must be a "
-                             "numerical scalar.")
-        tmat = np.identity(2)
-        tmat[0,0] = transducer_constant
-        tmat[1,1] = 1/transducer_constant
-        return tmat
+                             "numerical scalar or FrequencyData object.")
+        A = transducer_constant.freq
+        D = (1/transducer_constant).freq
+        frequencies = transducer_constant.frequencies
+        return TransmissionMatrix.from_abcd(A, 0, 0, D, frequencies)
 
     @staticmethod
-    def create_gyrator(transducer_constant : complex) -> np.ndarray:
-        r"""Creates a frequency-independent transmission matrix representing a
-        gyrator.
+    def create_gyrator(transducer_constant :
+                complex | FrequencyData) -> np.ndarray | TransmissionMatrix:
+        r"""Creates a transmission matrix representing a gyrator.
 
         The T-matrix is defined by a transducer constant (:math:`M`),
         see Equation (2-14) in Table I of Reference [1]_:
@@ -658,23 +680,34 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar
-            The transducer constant :math:`M`.
+        transducer_constant : scalar | FrequencyData
+            The transducer constant :math:`M`. If a scalar is given,
+            i.e. a frequency-independent transformer matrix is requested, the
+            return value will be a 2x2 np.ndarray instead.
 
         Returns
         -------
-        tmat : np.ndarray
-            A 2x2 array representing the transmission matrix of the gyrator and
-            can be cascaded with TransmissionMatrix objects.
+        tmat : np.ndarray | TransmissionMatrix
+            A the transmission matrix representing the gyrator and can be
+            cascaded with TransmissionMatrix objects. If a scalar was used as
+            input a frequency-independent matrix is returned, namely an
+            np.ndarray of shape (2,2).
 
         """
-        if not np.isscalar(transducer_constant):
+        if np.isscalar(transducer_constant) and not isinstance(
+            transducer_constant, str):
+            tmat = np.zeros([2,2])
+            tmat[0,1] = transducer_constant
+            tmat[1,0] = 1/transducer_constant
+            return tmat
+
+        if not isinstance(transducer_constant, FrequencyData):
             raise ValueError("'transducer_constant' must be a "
-                             "numerical scalar.")
-        tmat = np.zeros([2,2])
-        tmat[0,1] = transducer_constant
-        tmat[1,0] = 1/transducer_constant
-        return tmat
+                             "numerical scalar or FrequencyData object.")
+        B = transducer_constant.freq
+        C = (1/transducer_constant).freq
+        frequencies = transducer_constant.frequencies
+        return TransmissionMatrix.from_abcd(0, B, C, 0, frequencies)
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
@@ -695,7 +728,7 @@ class TransmissionMatrix(FrequencyData):
     def __getitem__(self, key):
         """Get copied slice of the TransmissionMatrix at key.
 
-            Note, that slicing ABCD or frequency dimension is not possible.
+            Note, that slicing ABCD or frequency dimensions is not possible.
         """
 
         if not self.is_indexable():
