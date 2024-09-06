@@ -10,8 +10,12 @@ Different coordinate systems are frequently used in acoustics research and
 handling sampling points and different systems can be cumbersome. The
 Coordinates class was designed with this in mind. It stores coordinates in
 cartesian coordinates internally and can convert to all coordinate systems
-listed below. Additionally, the the class can  query and plot coordinates
-points. Functions for converting coordinates not stored in a Coordinates object
+listed below. Additionally, the the class can query and plot coordinates
+points. Addition and subtraction are supported with numbers and Coordinates
+objects, while multiplication and division are supported with numbers only.
+All arithmetic operations are performed element-wise on Cartesian coordinates
+using the appropriate operator.
+Functions for converting coordinates not stored in a Coordinates object
 are available for convenience. However, it is strongly recommended to use the
 Coordinates class for all conversions.
 
