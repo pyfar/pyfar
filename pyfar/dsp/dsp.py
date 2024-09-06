@@ -1825,7 +1825,7 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
     ----------
     signal : Signal, FrequencyData
         The input data
-    limit : number, array like
+    limit : number, Signal, FrequencyData
         The gain in dB at which the limiting reaches its full effect. If this
         is a number, the same limit is applied to all frequencies. If this an
         audio object it must broadcastable to ``signal.cshape``.
@@ -1853,11 +1853,9 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
             `limit`
     log_prefix: float, int
         The log predix is used to linearize the limit and knee, e.g.,
-        ``limit_linear = 10**(limit / log_prefix)``. The default ``None``
-        uses ``20`` if `signal` is a Freuquency data Object or `signal` is
-        a Signal object with the FFT norm ``'none'``, ``'unitary'``,
-        ``'amplitude'`` or ``'rms'``. Otherwise a `log_prefix` of 10 is
-        used.
+        ``limit_linear = 10**(limit / log_prefix)``.The default ``None``, uses
+        ``10`` for signals with ``'psd'`` and ``'power'`` FFT normalization and
+        ``20`` otherwise.
 
     Returns
     -------
@@ -1867,8 +1865,7 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
     Examples
     --------
 
-    Use signal with linearly increasing log. magnitude to illustrate the effect
-    of different knees
+    Illustrate effect of limit and knee
 
     .. plot ::
 
@@ -1876,18 +1873,25 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
         >>> import numpy as np
         >>>
         >>> signal = pf.FrequencyData(
-        ...     10**(np.arange(-30, 31)/20), np.arange(0, 61))
-        >>>
-        >>> for knee in ['arctan', 10, 0]:
+        ...     10**(np.arange(-20, 21)/20), np.arange(0, 41))
+        >>> for knee in ['arctan', 20, 0]:
         >>>     limited = pf.dsp.soft_limit_spectrum(signal, 0, knee)
         >>>     pf.plot.freq(limited, freq_scale='linear', label=f'{knee=}')
-        >>>
         >>> ax = pf.plot.freq(signal, freq_scale='linear',
-        ...                   linestyle='--', label='original')
+        ...                   linestyle='--', label='input')
         >>>
-        >>> ax.legend(loc='lower right')
-        >>> ax.set_xlim(0, 60)
-        >>> ax.set_ylim(-30, 30)
+        >>> ax.legend(loc='upper left')
+        >>> ax.set_xlim(0, 40)
+        >>> ax.set_ylim(-20, 20)
+        >>> bbox=dict(facecolor='white', edgecolor='none', alpha=0.5)
+        >>> arrowprops= dict(
+        ...     arrowstyle="<->", shrinkA=0, shrinkB=0,
+        ...     color=pf.plot.color('r'))
+        >>> ax.annotate("limit=0 dB", (20, 0), (10, 0), bbox=bbox,
+        ...             arrowprops=dict(arrowstyle="->"), va='center')
+        >>> ax.text(20, -14, 'knee=20 dB', ha='center',
+        ...         color=pf.plot.color('r'), bbox=bbox)
+        >>> ax.annotate("", (10, -15), (30, -15), arrowprops=arrowprops)
 
     Apply limiting with knee (soft limiting) and without knee (hard limiting)
 
