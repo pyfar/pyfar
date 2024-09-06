@@ -2881,6 +2881,14 @@ def dot(a, b):
     -------
     result : np.ndarray
         array with the dot product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(1, 0, 0)
+    >>> pf.dot(a, b)
+    array([1.])
     """
 
     if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
@@ -2910,6 +2918,15 @@ def cross(a, b):
     -------
     result : pf.Coordinates
         new Coordinates object with the cross product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(0, 1, 0)
+    >>> result = pf.cross(a, b)
+    >>> result.cartesian
+    array([0., 0., 1.])
     """
 
     if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
