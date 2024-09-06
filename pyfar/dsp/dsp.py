@@ -1807,7 +1807,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         return log_prefix * np.log10(np.abs(data) / log_reference)
 
 
-def soft_limit_spectrum(signal, limit, knee, freq_range=None,
+def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
                         direction='above', log_prefix=None):
     """
     Soft limiting the magniude spectrum.
@@ -1838,7 +1838,7 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
             Apply a knee with a width of `number` dB according to [#]_ Eq. (4).
             This definition of the knee originates from the classic limiting
             audio effect.
-    freq_range : array like, optional
+    frequency_range : array like, optional
         Frequency range in which the limiting is applied. This must be an array
         like containing the lower and upper limit in Hz. The default ``None``
         applies the limiting to all frequencies.
@@ -1962,16 +1962,20 @@ def soft_limit_spectrum(signal, limit, knee, freq_range=None,
         raise TypeError("knee must be a string or number")
 
     if isinstance(limit, pyfar.FrequencyData):
+        if np.any(np.abs(limit.frequencies - signal.frequencies)) > 1e-14:
+            raise ValueError(('The limit must be specified for the same '
+                              'frequencies as the input signal'))
         limit = limit.freq
     limit = np.broadcast_to(limit, signal.cshape + (signal.n_bins, ))
 
     # define frequency range
-    if freq_range is None:
+    if frequency_range is None:
         freq_mask = np.full((signal.n_bins, ), True)
     else:
         freq_mask = np.full(signal.n_bins, False)
-        freq_mask[signal.find_nearest_frequency(np.min(freq_range)):
-                  signal.find_nearest_frequency(np.max(freq_range)) + 1] = True
+        freq_mask[signal.find_nearest_frequency(np.min(frequency_range)):
+                  signal.find_nearest_frequency(np.max(frequency_range)) + 1] \
+            = True
 
     # get spectral data
     signal_limited = signal.copy()
