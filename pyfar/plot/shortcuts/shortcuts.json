@@ -75,15 +75,15 @@
     "toggle_x": {
         "key": ["X"],
         "key_verbose": ["shift+x"],
-        "info": "toggle x-axis style (see below for more information)"},
+        "info": "toggle x-axis unit or scale (see below for more information)"},
     "toggle_y": {
         "key": ["Y"],
         "key_verbose": ["shift+y"],
-        "info": "toggle y-axis style (see below for more information)"},
+        "info": "toggle y-axis unit or scale (see below for more information)"},
     "toggle_cm": {
         "key": ["C"],
         "key_verbose": ["shift+c"],
-        "info": "toggle colormap style (see below for more information)"},
+        "info": "toggle colormap unit (see below for more information)"},
     "toggle_mode": {
         "key": ["M"],
         "key_verbose": ["shift+m"],
