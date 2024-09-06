@@ -8,11 +8,11 @@ from pyfar import FrequencyData
 
 @pytest.fixture(scope="module")
 def frequencies():
-    return [100, 200]
+    return [100, 200, 300]
 @pytest.fixture(scope="module")
 def A_list():
     """Test data for a matrix-entry (e.g. A) using a list type"""
-    return [1, 1]
+    return [1, 2, 3]
 @pytest.fixture(scope="module")
 def A_np(A_list):
     """Test data for a matrix-entry (e.g. A) using an np.ndarray"""
@@ -34,8 +34,7 @@ def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
     with pytest.raises(ValueError, match=error_msg):
         TransmissionMatrix.from_tmatrix(np.ndarray.tolist(data), frequencies)
 
-def test_tmatrix_init():
-    frequencies = [100, 200, 300]
+def test_tmatrix_init(frequencies):
     num_bins = len(frequencies)
     TransmissionMatrix(np.ones([2, 2, num_bins]), frequencies)
     TransmissionMatrix(np.ones([4, 2, 2, num_bins]), frequencies)
@@ -198,8 +197,7 @@ def test_tmatrix_create_gyrator(transducer_contant, frequencies):
     npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
 
 
-def test_tmatrix_slicing():
-    frequencies = [100,200,300]
+def test_tmatrix_slicing(frequencies):
     eye_2x2 = TransmissionMatrix.create_identity(frequencies)
     eye_1x2x2 = pf.utils.broadcast_cshape(eye_2x2, (1, 2, 2))
     eye_3x2x2 = pf.utils.broadcast_cshape(eye_2x2, (3, 2, 2))
