@@ -7,7 +7,8 @@ from . import _audiofilter as iir
 
 
 def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
-    """Create and apply first or second order allpass filter.
+    """
+    Create and apply first or second order allpass filter.
 
     Allpass filters have an almost constant group delay below their cut-off
     frequency and are often used in analogue loudspeaker design.
@@ -88,8 +89,8 @@ blob/master/filter_design/audiofilter.py
 
         ax1.set_title('1. and 2. order allpass filter with fc = 1000 Hz')
         ax2.legend()
-
     """
+
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -137,7 +138,8 @@ blob/master/filter_design/audiofilter.py
 
 def bell(signal, center_frequency, gain, quality, bell_type='II',
          quality_warp='cos', sampling_rate=None):
-    """Create and apply second order bell (parametric equalizer) filter.
+    """
+    Create and apply second order bell (parametric equalizer) filter.
 
     Uses the implementation of [#]_.
 
@@ -183,8 +185,8 @@ def bell(signal, center_frequency, gain, quality, bell_type='II',
     ----------
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
-
     """
+
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -226,7 +228,8 @@ blob/master/filter_design/audiofilter.py
 
 def high_shelve(signal, frequency, gain, order, shelve_type='I',
                 sampling_rate=None):
-    """:py:func:`~pyfar.dsp.filter.high_shelve` will be deprecated in
+    """
+    :py:func:`~pyfar.dsp.filter.high_shelve` will be deprecated in
     pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf`.
     Create and/or apply first or second order high shelf filter.
 
@@ -277,8 +280,8 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     ----------
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
-
     """
+
     warnings.warn(("'high_shelve' will be deprecated in pyfar 0.9.0 in favor"
                    " of 'high_shelf'"), PyfarDeprecationWarning)
 
@@ -288,7 +291,8 @@ blob/master/filter_design/audiofilter.py
 
 def high_shelf(signal, frequency, gain, order, shelf_type='I',
                sampling_rate=None):
-    """Create and/or apply first or second order high shelf filter.
+    """
+    Create and/or apply first or second order high shelf filter.
 
     Uses the implementation of [#]_.
 
@@ -337,8 +341,8 @@ def high_shelf(signal, frequency, gain, order, shelf_type='I',
     ----------
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
-
     """
+
     output = _shelf(
         signal, frequency, gain, order, shelf_type, sampling_rate, 'high')
 
@@ -347,7 +351,8 @@ blob/master/filter_design/audiofilter.py
 
 def low_shelve(signal, frequency, gain, order, shelve_type='I',
                sampling_rate=None):
-    """:py:func:`~pyfar.dsp.filter.low_shelve` will be deprecated in
+    """
+    :py:func:`~pyfar.dsp.filter.low_shelve` will be deprecated in
     pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf`.
     Create and apply first or second order low shelf filter.
 
@@ -398,8 +403,8 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     ----------
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
-
     """
+
     warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
                    "of 'low_shelf'"), PyfarDeprecationWarning)
 
@@ -409,7 +414,8 @@ blob/master/filter_design/audiofilter.py
 
 def low_shelf(signal, frequency, gain, order, shelf_type='I',
               sampling_rate=None):
-    """Create and apply first or second order low shelf filter.
+    """
+    Create and apply first or second order low shelf filter.
 
     Uses the implementation of [#]_.
 
@@ -458,8 +464,8 @@ def low_shelf(signal, frequency, gain, order, shelf_type='I',
     ----------
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
-
     """
+
     output = _shelf(
         signal, frequency, gain, order, shelf_type, sampling_rate, 'low')
 
@@ -469,7 +475,8 @@ blob/master/filter_design/audiofilter.py
 def high_shelve_cascade(
         signal, frequency, frequency_type="lower", gain=None, slope=None,
         bandwidth=None, N=None, sampling_rate=None):
-    """:py:func:`~pyfar.dsp.filter.high_shelve_cascade` will be deprecated in
+    """
+    :py:func:`~pyfar.dsp.filter.high_shelve_cascade` will be deprecated in
     pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.high_shelf_cascade`.
     Create and apply constant slope filter from cascaded 2nd order high
     shelves.
@@ -558,8 +565,8 @@ def high_shelve_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-
     """  # noqa: E501
+
     warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'high_shelf_cascade'"),
                   PyfarDeprecationWarning)
@@ -676,7 +683,8 @@ def high_shelf_cascade(
 def low_shelve_cascade(
         signal, frequency, frequency_type="upper", gain=None, slope=None,
         bandwidth=None, N=None, sampling_rate=None):
-    """:py:func:`~pyfar.dsp.filter.low_shelve_cascade` will be deprecated in
+    """
+    :py:func:`~pyfar.dsp.filter.low_shelve_cascade` will be deprecated in
     pyfar 0.9.0 in favor of :py:func:`~pyfar.dsp.filter.low_shelf_cascade`.
     Create and apply constant slope filter from cascaded 2nd order low shelves.
 
@@ -766,8 +774,8 @@ def low_shelve_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-
     """  # noqa: E501
+
     warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'low_shelf_cascade'"), PyfarDeprecationWarning)
 
@@ -881,11 +889,13 @@ def low_shelf_cascade(
 
 
 def _shelf(signal, frequency, gain, order, shelf_type, sampling_rate, kind):
-    """First and second order high and low shelves.
+    """
+    First and second order high and low shelves.
 
     For the documentation refer to high_shelf and low_shelf. The only
     additional parameter is `kind`, which has to be 'high' or 'low'.
     """
+
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -945,8 +955,8 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
     [1] F. Schultz, N. Hahn, and S. Spors, “Shelving Filter Cascade with
         Adjustable Transition Slope and Bandwidth,” in 148th AES Convention
         (Vienna, Austria, 2020).
-
     """
+
     # check input -------------------------------------------------------------
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):

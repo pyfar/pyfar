@@ -9,13 +9,14 @@ from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class SphericalVoronoi(spat.SphericalVoronoi):
-    """Voronoi diagrams on the surface of a sphere. Note that
+    """
+    Voronoi diagrams on the surface of a sphere. Note that
     :py:func:`calculate_sph_voronoi_weights` can be used directly, if only the
     sampling weights are needed.
     """
-
     def __init__(self, sampling, round_decimals=12, center=0.0):
-        """Calculate a Voronoi diagram on the sphere for the given samplings
+        """
+        Calculate a Voronoi diagram on the sphere for the given samplings
         points.
 
         This function will be deprecated in pyfar 0.8.0 in favor
@@ -37,7 +38,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
             Spherical voronoi diagram as implemented in
             :py:mod:`scipy.spatial`.
 
-        See Also
+        See also
         --------
         :py:func:`calculate_sph_voronoi_weights`
 
@@ -82,7 +83,8 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
 def calculate_sph_voronoi_weights(
         sampling, normalize=True, center=[0, 0, 0], round_decimals=12):
-    """Calculate sampling weights for numeric integration.
+    """
+    Calculate sampling weights for numeric integration.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.calculate_sampling_weights`.

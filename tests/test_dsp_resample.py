@@ -5,7 +5,8 @@ import numpy as np
 
 @pytest.mark.parametrize('L', [2, 0.5])
 def test_resampling(L):
-    """Tests the up and downsampling of a noise signal to the double/half sampling
+    """
+    Tests the up and downsampling of a noise signal to the double/half sampling
     rate.
     """
     fs_1 = 48000
@@ -19,7 +20,8 @@ def test_resampling(L):
 
 
 def test_upsampling_delayed_impulse():
-    """Compares an upsampled delayed impulse with the analytic result of a
+    """
+    Compares an upsampled delayed impulse with the analytic result of a
     sinc function.
     """
     fs_1 = 48000
@@ -40,7 +42,8 @@ def test_upsampling_delayed_impulse():
 
 
 def test_downsampling_delayed_impulse():
-    """Compares a downsampled delayed impulse with the analytic result of a
+    """
+    Compares a downsampled delayed impulse with the analytic result of a
     sinc function.
     """
     fs_1 = 48000
@@ -90,7 +93,8 @@ def test_resample_assertions():
 
 
 def test_frequency_matching():
-    """Tests the amplitude matching in the frequency domain for the first N/2-10
+    """
+    Tests the amplitude matching in the frequency domain for the first N/2-10
     samples.
     """
     fs_1 = 48000
@@ -104,7 +108,8 @@ def test_frequency_matching():
 
 
 def test_resample_multidimensional_impulse():
-    """Compares an upsampled multidimensional delayed impulse with cshape = (3,2)
+    """
+    Compares an upsampled multidimensional delayed impulse with cshape = (3,2)
     with the analytic result of a sinc function.
     """
     fs_1 = 48000
@@ -129,6 +134,7 @@ def test_resample_multidimensional_impulse():
 
 def test_resample_suppress_aliasing():
     """Test the aliasing suppression filter"""
+
     # test signal
     signal = pf.signals.impulse(1024, 512)
     # measure impulse response of anti-aliasing filter

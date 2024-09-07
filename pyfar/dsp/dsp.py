@@ -26,8 +26,8 @@ def phase(signal, deg=False, unwrap=False):
     -------
     phase : numpy array
         The phase of the signal.
-
     """
+
     if not isinstance(signal, pyfar.Signal) and \
             not isinstance(signal, pyfar.FrequencyData):
         raise TypeError(
@@ -74,8 +74,8 @@ def group_delay(signal, frequencies=None, method='fft'):
     References
     ----------
     .. [#]  https://www.dsprelated.com/showarticle/69.php
-
     """
+
     # check input and default values
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -136,7 +136,6 @@ def wrap_to_2pi(x):
     -------
     x : double
         Phase wrapped to 2 pi`.
-
     """
     positive_input = (x > 0)
     zero_check = np.logical_and(positive_input, (x == 0))
@@ -146,7 +145,8 @@ def wrap_to_2pi(x):
 
 
 def linear_phase(signal, group_delay, unit="samples"):
-    """Set the phase to a linear phase with a specified group delay.
+    """
+    Set the phase to a linear phase with a specified group delay.
 
     The linear phase signal is computed as
 
@@ -174,8 +174,8 @@ def linear_phase(signal, group_delay, unit="samples"):
     -------
     signal: Signal
         linear phase copy of the input data
-
     """
+
     if not isinstance(signal, pyfar.Signal):
         raise TypeError("signal must be a pyfar Signal object.")
 
@@ -221,8 +221,8 @@ def zero_phase(signal):
     -------
     signal : Signal, FrequencyData
         zero phase copy of the input data
-
     """
+
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData)):
         raise TypeError(
             'Input data has to be of type Signal or FrequencyData.')
@@ -245,7 +245,6 @@ def nextpow2(x):
     -------
     nextpow2 : double
         Exponent of next higher power of 2.
-
     """
     return np.ceil(np.log2(x))
 
@@ -284,8 +283,8 @@ def spectrogram(signal, window='hann', window_length=1024,
     times : numpy array
         Times in seconds at which the magnitude spectrum was computed
     spectrogram : numpy array
-
     """
+
     # check input
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -540,7 +539,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
 
 def kaiser_window_beta(A):
-    """Return a shape parameter beta to create kaiser window based on desired
+    """ Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
 
     This function can be used to call :py:func:`~pyfar.dsp.time_window` with
@@ -560,7 +559,6 @@ def kaiser_window_beta(A):
     ----------
     .. [#]  A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
             Third edition, Upper Saddle, Pearson, 2010.
-
     """
     A = np.abs(A)
     if A > 50:
@@ -574,7 +572,7 @@ def kaiser_window_beta(A):
 
 
 def _time_window_symmetric_interval_two(interval, window):
-    """Symmetric time window between 2 values given in interval.
+    """ Symmetric time window between 2 values given in interval.
 
     Parameters
     ----------
@@ -591,7 +589,6 @@ def _time_window_symmetric_interval_two(interval, window):
         Index of first sample of window
     win_stop : int
         Index of last sample of window
-
     """
     win_samples = interval[1]-interval[0]+1
     win = sgn.windows.get_window(window, win_samples, fftbins=False)
@@ -620,7 +617,6 @@ def _time_window_left(n_samples, interval, window):
         Index of first sample of window
     win_stop : int
         Index of last sample of window
-
     """
     fade_samples = int(2*(interval[1]-interval[0]))
     fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
@@ -649,7 +645,6 @@ def _time_window_right(interval, window):
         Index of first sample of window
     win_stop : int
         Index of last sample of window
-
     """
     fade_samples = int(2*(interval[1]-interval[0]))
     fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
@@ -680,7 +675,6 @@ def _time_window_symmetric_zero(n_samples, interval, window):
         Index of first sample of window
     win_stop : int
         Index of last sample of window
-
     """
     fade_samples = int(2*(interval[1]-interval[0]))
     fade = sgn.windows.get_window(window, fade_samples, fftbins=False)
@@ -695,7 +689,7 @@ def _time_window_symmetric_zero(n_samples, interval, window):
 
 
 def _time_window_symmetric_interval_four(interval, window):
-    """Symmetric time window with two fades and constant range in between.
+    """ Symmetric time window with two fades and constant range in between.
 
     Parameters
     ----------
@@ -712,7 +706,6 @@ def _time_window_symmetric_interval_four(interval, window):
         Index of first sample of window
     win_stop : int
         Index of last sample of window
-
     """
     fade_in_samples = int(2*(interval[1]-interval[0]))
     fade_in = sgn.windows.get_window(
@@ -861,7 +854,6 @@ def _cross_fade(first, second, indices):
     -------
     result : array, double
         The resulting array after cross-fading.
-
     """
     indices = np.asarray(indices)
     if np.shape(first)[-1] != np.shape(second)[-1]:
@@ -886,7 +878,8 @@ def _cross_fade(first, second, indices):
 
 
 def minimum_phase(signal, n_fft=None, truncate=True):
-    """Calculate the minimum phase equivalent of a finite impulse response.
+    """
+    Calculate the minimum phase equivalent of a finite impulse response.
 
     The method is based on the Hilbert transform of the real-valued cepstrum
     of the finite impulse response, that is the cepstrum of the magnitude
@@ -1021,6 +1014,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     >>> impulse_padded = pf.dsp.pad_zeros(impulse, 128, mode='end')
 
     """
+
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -1511,7 +1505,6 @@ def deconvolve(system_output, system_input, fft_length=None,
     .. [#] S. Mueller and P. Masserani "Transfer function measurement with
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
-
     """
     # Check if system_output and system_input are both type Signal
     if not isinstance(system_output, pyfar.Signal):
@@ -1773,7 +1766,6 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
     >>> import pyfar as pf
     >>> signal = pf.signals.noise(41000, rms=[1, 1])
     >>> decibel_data = decibel(signal, domain='time')
-
     """
     if log_prefix is None:
         if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
@@ -1814,7 +1806,8 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
 
 
 def energy(signal):
-    r"""Computes the channel wise energy in the time domain
+    r"""
+    Computes the channel wise energy in the time domain
 
     .. math::
 
@@ -1844,7 +1837,6 @@ def energy(signal):
     ----------
     .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
            (Upper Saddle et al., Pearson, 2010), Third edition.
-
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
@@ -1855,7 +1847,8 @@ def energy(signal):
 
 
 def power(signal):
-    r"""Compute the power of a signal.
+    r"""
+    Compute the power of a signal.
 
     The power is calculated as
 
@@ -1882,7 +1875,6 @@ def power(signal):
     The power equals the squared RMS of a signal. :py:func:`~pyfar.dsp.energy`
     and :py:func:`~pyfar.dsp.rms` can be used to compute the energy and the
     RMS.
-
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
@@ -1893,7 +1885,8 @@ def power(signal):
 
 
 def rms(signal):
-    r"""Compute the root mean square (RMS) of a signal.
+    r"""
+    Compute the root mean square (RMS) of a signal.
 
     The RMS is calculated as
 
@@ -1918,7 +1911,6 @@ def rms(signal):
     The RMS equals the square root of the signal's power.
     :py:func:`~pyfar.dsp.energy` and :py:func:`~pyfar.dsp.power` can be used
     to compute the energy and the power.
-
     """
     # check input
     if not isinstance(signal, pyfar.Signal):
@@ -1931,7 +1923,8 @@ def rms(signal):
 
 def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
             nan_policy='raise'):
-    """Average multi-channel signals.
+    """
+    Average multi-channel signals.
 
     Parameters
     ----------
@@ -2002,6 +1995,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     magnitude spectra after using a mode that discards the phase.
 
     """
+
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
                                pyfar.TimeData)):
@@ -2087,7 +2081,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 def normalize(signal, reference_method='max', domain='auto',
               channel_handling='individual', target=1, limits=(None, None),
               unit=None, return_reference=False, nan_policy='raise'):
-    """Apply a normalization.
+    """
+    Apply a normalization.
 
     In the default case, the normalization ensures that the maximum absolute
     amplitude of the signal after normalization is 1. This is achieved by
@@ -2240,7 +2235,6 @@ def normalize(signal, reference_method='max', domain='auto',
         >>> pf.plot.time_freq(signal, label='Original Signal', unit='ms')
         >>> ax[1].set_ylim(-15, 15)
         >>> ax[1].legend()
-
     """  # noqa: E501
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,

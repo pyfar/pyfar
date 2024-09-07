@@ -1,4 +1,5 @@
-"""Read and write objects to disk, read and write audio files, read SOFA files.
+"""
+Read and write objects to disk, read and write audio files, read SOFA files.
 
 The functions :py:func:`read` and :py:func:`write` allow to save or load
 several pyfar objects and other variables. So, e.g., workspaces in notebooks
@@ -34,7 +35,8 @@ import pyfar.classes.filter as fo
 
 
 def read_sofa(filename, verify=True):
-    """Import a SOFA file as pyfar object.
+    """
+    Import a SOFA file as pyfar object.
 
     Parameters
     ----------
@@ -82,12 +84,14 @@ def read_sofa(filename, verify=True):
     .. [#] https://pyfar.org
 
     """
+
     sofa = sf.read_sofa(filename, verify)
     return convert_sofa(sofa)
 
 
 def convert_sofa(sofa):
-    """Convert SOFA object to pyfar object.
+    """
+    Convert SOFA object to pyfar object.
 
     Parameters
     ----------
@@ -128,8 +132,8 @@ def convert_sofa(sofa):
     References
     ----------
     .. [#] https://pyfar.org
-
     """
+
     # check input
     if not isinstance(sofa, sf.Sofa):
         raise TypeError((
@@ -192,7 +196,8 @@ def _sofa_pos(pos_type, coordinates):
 
 
 def read(filename):
-    """Read any compatible pyfar object or numpy array (.far file) from disk.
+    """
+    Read any compatible pyfar object or numpy array (.far file) from disk.
 
     Parameters
     ----------
@@ -212,7 +217,6 @@ def read(filename):
     >>> collection = pyfar.read('my_objs.far')
     >>> my_signal = collection['my_signal']
     >>> my_orientations = collection['my_orientations']
-
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
@@ -278,7 +282,8 @@ def read(filename):
 
 
 def write(filename, compress=False, **objs):
-    """Write any compatible pyfar object or numpy array and often used builtin
+    """
+    Write any compatible pyfar object or numpy array and often used builtin
     types as .far file to disk.
 
     Parameters
@@ -307,7 +312,6 @@ def write(filename, compress=False, **objs):
     -----
     * Supported builtin types are:
       bool, bytes, complex, float, frozenset, int, list, set, str and tuple
-
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
@@ -341,7 +345,8 @@ def write(filename, compress=False, **objs):
 
 
 def read_audio(filename, dtype='float64', **kwargs):
-    """Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
+    """
+    Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
 
     Reads 'wav', 'aiff', 'ogg', 'flac', and 'mp3' files among others. For a
     complete list see :py:func:`audio_formats`.
@@ -374,7 +379,6 @@ def read_audio(filename, dtype='float64', **kwargs):
     * Reading int values from a float file will *not* scale the data to
       [-1.0, 1.0). If the file contains ``np.array([42.6], dtype='float32')``,
       you will read ``np.array([43], dtype='int32')`` for ``dtype='int32'``.
-
     """
     if not soundfile_imported:
         warnings.warn(soundfile_warning)
@@ -387,7 +391,8 @@ def read_audio(filename, dtype='float64', **kwargs):
 
 
 def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
-    """Write a :py:class:`~pyfar.classes.audio.Signal` object as an audio file to
+    """
+    Write a :py:class:`~pyfar.classes.audio.Signal` object as an audio file to
     disk.
 
     Writes 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
@@ -643,8 +648,8 @@ def read_comsol(filename, expressions=None, parameters=None):
     >>> data
     FrequencyData:
     (8, 1, 3, 4) channels with 2 frequencies
-
     """
+
     # check Datatype
     suffix = pathlib.Path(filename).suffix
     if suffix not in ['.txt', '.dat', '.csv']:
@@ -825,7 +830,6 @@ def read_comsol_header(filename):
     'freq'
     >>> domain_data
     [100.0, 500.0]
-
     """
     # Check Datatype
     suffix = pathlib.Path(filename).suffix

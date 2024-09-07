@@ -1,4 +1,5 @@
-"""The following documents the FFT functionality. More details and background
+"""
+The following documents the FFT functionality. More details and background
 including a complete list and explanation of available `FFT normalizations` is
 given in the
 :ref:`FFT notebook <gallery:/gallery/interactive/fast_fourier_transform.ipynb>`
@@ -11,7 +12,8 @@ from scipy import fft
 
 
 def rfftfreq(n_samples, sampling_rate):
-    """Returns the positive discrete frequencies for which the FFT is calculated.
+    """
+    Returns the positive discrete frequencies for which the FFT is calculated.
 
     If the number of samples
     :math:`N` is even the number of frequency bins will be :math:`2/N+1`, if
@@ -29,13 +31,13 @@ def rfftfreq(n_samples, sampling_rate):
     frequencies : array, double
         The positive discrete frequencies in Hz for which the FFT is
         calculated.
-
     """
     return fft.rfftfreq(n_samples, d=1/sampling_rate)
 
 
 def rfft(data, n_samples, sampling_rate, fft_norm):
-    """Calculate the FFT of a real-valued time-signal.
+    """
+    Calculate the FFT of a real-valued time-signal.
 
     The function returns only the right-hand side of the axis-symmetric
     spectrum. Details on the FFT normalization given by `fft_norm` are given
@@ -60,6 +62,7 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
         (..., n_bins)
 
     """
+
     # DFT
     spec = fft.rfft(
         data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
@@ -71,7 +74,8 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
 
 
 def irfft(spec, n_samples, sampling_rate, fft_norm):
-    """Calculate the IFFT of a single-sided Fourier spectrum.
+    """
+    Calculate the IFFT of a single-sided Fourier spectrum.
 
     The function takes only the right-hand side of the spectrum and returns a
     real-valued time signal. Details on the FFT normalization given by
@@ -96,8 +100,8 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
     data : array, double
         Array containing the time domain signal with dimensions
         (..., ``'n_samples'``)
-
     """
+
     # Inverse normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True)
@@ -110,7 +114,8 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
                   inverse=False, single_sided=True, window=None):
-    """Normalize a Fourier spectrum.
+    """
+    Normalize a Fourier spectrum.
 
     Apply normalizations defined in [1]_ to the DFT spectrum.
     Note that the phase is maintained in all cases, i.e., instead of taking
@@ -178,8 +183,8 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             Scaling of the Discrete Fourier Transform and the Implied Physical
             Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
             May 2020, p. e-Brief 600.
-
     """
+
     # check if normalization should be applied
     if fft_norm == 'none':
         return spec
@@ -264,7 +269,8 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
 
 
 def _is_odd(num):
-    """Check if a number is even or odd. Returns True if odd and False if even.
+    """
+    Check if a number is even or odd. Returns True if odd and False if even.
 
     Parameters
     ----------
@@ -281,7 +287,8 @@ def _is_odd(num):
 
 
 def _n_bins(n_samples):
-    """Helper function to calculate the number of bins resulting from a FFT
+    """
+    Helper function to calculate the number of bins resulting from a FFT
     with n_samples
 
     Paramters

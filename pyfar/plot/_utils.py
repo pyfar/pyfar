@@ -24,7 +24,6 @@ def _prepare_plot(ax=None, subplots=None):
     ax : matplotlib.axes.Axes
         The current axes if `subplots` is ``None`` all axes from the
         current figure as a single axis or array/list of axes otherwise.
-
     """
     if ax is None:
         # get current figure or create new one
@@ -76,7 +75,8 @@ def _prepare_plot(ax=None, subplots=None):
 
 
 def _set_axlim(ax, setter, low, high, limits):
-    """Set axis limits depending on existing data.
+    """
+    Set axis limits depending on existing data.
 
     Sets the limits of an axis to `low` and `high` if there are no lines and
     collections asociated to the axis and to `min(limits[0], low)` and
@@ -94,8 +94,8 @@ def _set_axlim(ax, setter, low, high, limits):
         upper axis limit
     limits : tuple of length 2
         current axis limits, e.g., `ax.get_xlim()`.
-
     """
+
     if not ax.lines and not ax.collections:
         # set desired limit if axis does not contain any lines or points
         setter((low, high))
@@ -127,6 +127,7 @@ def _lower_frequency_limit(signal):
 
 def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with pyfar default color if possible."""
+
     # pyfar default colors
     colors = {'p': '#5F4690',  # purple
               'b': '#1471B9',  # blue
@@ -148,7 +149,8 @@ def _return_default_colors_rgb(**kwargs):
 
 
 def _default_color_dict():
-    """Pyfar default colors in the order matching the plotstyles"""
+    """pyfar default colors in the order matching the plotstyles"""
+
     colors = {'b': '#1471B9',  # blue
               'r': '#D83C27',  # red
               'y': '#ECAD20',  # yellow
@@ -177,7 +179,7 @@ def _check_axis_scale(scale, axis='x'):
 
 
 def _get_quad_mesh_from_axis(ax):
-    """Get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
+    """get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
     if there is one.
 
     Parameters
@@ -187,7 +189,6 @@ def _get_quad_mesh_from_axis(ax):
     Returns
     -------
     cm : Matplotlib QuadMesh object
-
     """
     quad_mesh_found = False
     for qm in ax.get_children():
@@ -202,7 +203,8 @@ def _get_quad_mesh_from_axis(ax):
 
 
 def _time_auto_unit(time_max):
-    """Automatically set the unit for time axis according to the absolute maximum
+    """
+    Automatically set the unit for time axis according to the absolute maximum
     of the input data. This is a separate function for ease of testing and for
     use across different plots.
 
@@ -210,8 +212,8 @@ def _time_auto_unit(time_max):
     ----------
     time_max : float
         Absolute maximum of the time data in seconds
-
     """
+
     if time_max == 0:
         unit = 's'
     elif time_max < 1e-3:
@@ -239,7 +241,6 @@ def _deal_time_units(unit='s'):
         Factor the data is to be multiplied with, i.e. 1e-3 for milliseconds
     string : str
         String representation of the unit using LaTeX formatting.
-
     """
     if unit == 's':
         factor = 1
@@ -270,7 +271,6 @@ def _log_prefix(signal):
     ----------
     fft_norm : str
         FFT normalization
-
     """
     if isinstance(signal, Signal) and signal.fft_norm in ('power', 'psd'):
         log_prefix = 10
@@ -281,7 +281,8 @@ def _log_prefix(signal):
 
 def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
                      colorbar, **kwargs):
-    """Check and prepare input for 2D plots
+    """
+    Check and prepare input for 2D plots
 
     1. Check for correct instance and cshape of data
     2. Prepare the plot
@@ -334,8 +335,8 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
         parameter from 2d plots against which the channels are plotted
     kwargs : keyword arguments
         With added default value for shading if it was not contained
-
     """
+
     # check input
     instance = str(type(data)).split('.')[-1][:-2]
     instances = [str(ii).split('.')[-1][:-2] for ii in instances]
@@ -374,7 +375,8 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
 
 
 def _add_colorbar(colorbar, fig, ax, qm, label):
-    """Add colorbar to 2D plot
+    """
+    Add colorbar to 2D plot
 
     Parameters
     ----------
@@ -391,7 +393,6 @@ def _add_colorbar(colorbar, fig, ax, qm, label):
     Returns
     -------
     cb : matplotlib colorbar object
-
     """
     if colorbar:
         if ax[1] is None:
@@ -407,6 +408,7 @@ def _add_colorbar(colorbar, fig, ax, qm, label):
 
 def _phase_label(unwrap, deg):
     """Generate label for plotting the phase."""
+
     phase_label = 'Phase '
 
     if deg:

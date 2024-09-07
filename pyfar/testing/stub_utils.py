@@ -1,4 +1,5 @@
-"""Contains tools to easily generate stubs for the most common pyfar Classes.
+"""
+Contains tools to easily generate stubs for the most common pyfar Classes.
 
 Stubs are used instead of pyfar objects for testing functions that have pyfar
 objects as input arguments. This makes testing such functions independent from
@@ -32,7 +33,6 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     -------
     signal
         stub of pyfar Signal class
-
     """
 
     # Use MagicMock and side_effect to mock __getitem__
@@ -95,7 +95,6 @@ def time_data_stub(time, times):
     -------
     time_data
         stub of pyfar TimeData class
-
     """
 
     # Use MagicMock and side_effect to mock __getitem__
@@ -119,7 +118,8 @@ def time_data_stub(time, times):
 
 
 def frequency_data_stub(freq, frequencies):
-    """Function to generate stub of pyfar FrequencyData class based onMagicMock.
+    """
+    Function to generate stub of pyfar FrequencyData class based onMagicMock.
     The properties of the signal are set without any further check.
 
     Parameters
@@ -133,7 +133,6 @@ def frequency_data_stub(freq, frequencies):
     -------
     frequency_data
         stub of pyfar FrequencyData class
-
     """
 
     # Use MagicMock and side_effect to mock __getitem__
@@ -157,7 +156,7 @@ def frequency_data_stub(freq, frequencies):
 
 
 def impulse_func(delay, n_samples, fft_norm, cshape):
-    """Generate time and frequency data of delta impulse.
+    """ Generate time and frequency data of delta impulse.
 
     Parameters
     ----------
@@ -201,7 +200,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
 
 
 def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
-    """Generate time and frequency data of sine signal.
+    """ Generate time and frequency data of sine signal.
     The frequency is adjusted resulting in a fully periodic signal in the
     given time interval.
 
@@ -255,7 +254,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
 
 
 def noise_func(sigma, n_samples, cshape):
-    """Generate time and frequency data of zero-mean, gaussian white noise,
+    """ Generate time and frequency data of zero-mean, gaussian white noise,
     RMS FFT normalization.
 
     Parameters
@@ -309,7 +308,6 @@ def _normalization(freq, n_samples, fft_norm):
            Scaling of the Discrete Fourier Transform and the Implied Physical
            Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
            May 2020, p. e-Brief 600.
-
     """
     norm = np.ones_like(freq)
     if fft_norm == 'rms':
@@ -333,7 +331,8 @@ def any_ndarray():
 
 
 def dict_of_builtins():
-    """Return a dictionary that contains all builtin types that can
+    """
+    Return a dictionary that contains all builtin types that can
     be written to and read from disk.
     """
     typename_instance = {}
@@ -347,21 +346,18 @@ def dict_of_builtins():
 
 class AnyClass:
     """Placeholder class"""
-
     def __init__(self, x=42):
         self.x = x
 
 
 class NoEncodeClass:
     """Placeholder class to Raise NotImplementedError for `_encode`."""
-
     def __init__(self, x=42):
         self.x = x
 
 
 class NoDecodeClass:
     """Placeholder class to Raise NotImplementedError for `_decode`"""
-
     def __init__(self, x=42):
         self.x = x
 
@@ -377,7 +373,6 @@ class NoDecodeClass:
 class FlatData:
     """Class only containing flat data and methods.
     """
-
     def __init__(self, m=49):
         self.signal = any_ndarray()
         self._m = m
@@ -407,7 +402,6 @@ class NestedData:
     as well as methods. The purpose of this class is, to define and test
     general requirements for the encoding and decoding process.
     """
-
     def __init__(self, n, comment, matrix, subobj, mylist, mydict):
         self._n = n
         self._comment = comment
@@ -467,7 +461,7 @@ class NestedData:
 
 
 def stub_str_to_type():
-    """Stubs `_codec.str_to_type` for tests that use general data structures.
+    """ Stubs `_codec.str_to_type` for tests that use general data structures.
     """
     def side_effect(type_str):
         if type_str == "BuiltinsWrapper":
@@ -484,7 +478,7 @@ def stub_str_to_type():
 
 
 def stub_is_pyfar_type():
-    """Stubs `_codec._is_pyfar_type` for tests that use general data
+    """ Stubs `_codec._is_pyfar_type` for tests that use general data
     structures.
     """
     def side_effect(obj):

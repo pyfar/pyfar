@@ -1,4 +1,5 @@
-"""Test deprecations. For each deprecation two things must be tested:
+"""
+Test deprecations. For each deprecation two things must be tested:
 1. Is a proper warning raised. This is done using
    with pytest.warns(PyfarDeprecationWarning, match="some text"):
        call_of_function()
@@ -30,6 +31,7 @@ from pyfar.testing.plot_utils import create_figure
     (pf.plot.time_freq), (pf.plot.freq_phase), (pf.plot.freq_group_delay)])
 def test_xscale_deprecation(function, handsome_signal):
     """Deprecate xscale parameter in plot functions"""
+
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove xscale from pyfar 0.6.0!
@@ -39,6 +41,7 @@ def test_xscale_deprecation(function, handsome_signal):
 
 def test_spectrogram_yscale_deprecation(sine):
     """Deprecate yscale parameter in plot functions"""
+
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove yscale from pyfar 0.6.0!
@@ -48,6 +51,7 @@ def test_spectrogram_yscale_deprecation(sine):
 
 def test__check_time_unit():
     """Deprecate unit=None in plots showing the time or group delay"""
+
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(ValueError):
             # remove xscale from pyfar 0.6.0!

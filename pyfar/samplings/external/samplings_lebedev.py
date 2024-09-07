@@ -1,4 +1,5 @@
-"""Generate Lebedev spherical sampling grids.
+"""
+Generate Lebedev spherical sampling grids.
 
 These are helper functions. For generating Lebedev Grids see
 pyfar.spatial.samplings.
@@ -33,7 +34,8 @@ import numpy as np
 
 
 def _lebedevSphere(degree):
-    """Generate  Lebedev sampling grids.
+    """
+    Generate  Lebedev sampling grids.
 
     These are helper functions. For generating Lebedev Grids see
     pyfar.spatial.samplings.
@@ -92,6 +94,7 @@ def _lebedevSphere(degree):
            algebraic order of accuracy"
            Doklady Mathematics, Vol. 59, No. 3, 1999, pp. 477-481.
     """
+
     leb_tmp = {'x': np.zeros(degree),
                'y': np.zeros(degree),
                'z': np.zeros(degree),
@@ -4679,6 +4682,7 @@ def _lebedevSphere(degree):
 
 def _lebedevReccurencePoints(kind, start, a, b, v, leb):
     """Get points for _lebedevSphere."""
+
     c = 0.
 
     if kind == 1:

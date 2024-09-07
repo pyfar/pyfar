@@ -1,4 +1,5 @@
-"""This module contains anechoic audio content and impulse responses for listening
+"""
+This module contains anechoic audio content and impulse responses for listening
 and illustration. Note that each file has a separate license that is listed
 below.
 
@@ -22,7 +23,8 @@ file_dir = os.path.join(os.path.dirname(__file__), 'files')
 
 
 def castanets(sampling_rate=44100):
-    """Get an anechoic castanet sample.
+    """
+    Get an anechoic castanet sample.
 
     Castanets rhythm from EUB SQAM CD track 27 re-programmed as anechoic
     version using samples from the Vienna Symphonic Library [#]_.
@@ -47,8 +49,8 @@ def castanets(sampling_rate=44100):
     References
     ----------
     .. [#] https://iaem.at/Members/frank/sounds/
-
     """
+
     # download files if requires
     files = _load_files('castanets')
 
@@ -65,7 +67,8 @@ def castanets(sampling_rate=44100):
 
 
 def drums(sampling_rate=48000):
-    """Get a dry drum sample.
+    """
+    Get a dry drum sample.
 
     The sample was recorded with microphones close to the drums in a dry
     rehearsal room.
@@ -86,8 +89,8 @@ def drums(sampling_rate=48000):
     -------
     drums : Signal
         The drum sample.
-
     """
+
     # download files if requires
     files = _load_files('drums')
 
@@ -106,7 +109,8 @@ def drums(sampling_rate=48000):
 
 
 def guitar(sampling_rate=48000):
-    """Get an anechoic guitar sample.
+    """
+    Get an anechoic guitar sample.
 
     The data is an excerpt from the file `Flamenco2_U89.wav` from the Cologne
     University of Applied Sciences, Anechoic Recordings  [#]_.
@@ -133,8 +137,8 @@ def guitar(sampling_rate=48000):
     References
     ----------
     .. [#] http://audiogroup.web.th-koeln.de/anechoic.html
-
     """
+
     # download files if requires
     files = _load_files('guitar')
 
@@ -153,7 +157,8 @@ def guitar(sampling_rate=48000):
 
 
 def speech(voice="female", sampling_rate=44100):
-    """Get an anechoic speech sample.
+    """
+    Get an anechoic speech sample.
 
     The samples were taken from 'Music for Archimedes' [#]_ (Tracks 4, 5) with
     kind permission of Bang & Olufsen for research and personal purposes. Any
@@ -185,8 +190,8 @@ def speech(voice="female", sampling_rate=44100):
 
     .. [#] V. Hansen, and G. Munch, 'Making Recordings for Simulation Tests in
            the Archimedes Project,' J. Audio Eng. Soc. 39, 768–774 (1991).
-
     """
+
     # download files if requires
     files = _load_files('speech')
 
@@ -208,7 +213,8 @@ def speech(voice="female", sampling_rate=44100):
 
 def binaural_room_impulse_response(
         diffuse_field_compensation=False, sampling_rate=48000):
-    """Get a binaural room impulse response (BRIR).
+    """
+    Get a binaural room impulse response (BRIR).
 
     The BRIR was recorded with the FABIAN head and torso simulator in the
     Berliner Philharmonie [#]_ (Emitter 17). The head of FABIAN was rotated
@@ -246,8 +252,8 @@ def binaural_room_impulse_response(
            C. Pörschmann, and S. Weinzierl 'Recordings of a Loudspeaker
            Orchestra with Multi-Channel Microphone Arrays for the Evaluation of
            Spatial Audio Methods,' J. Audio Eng. Soc. (submitted)
-
     """
+
     # download files if requires
     files = _load_files('binaural_room_impulse_response')
     if diffuse_field_compensation:
@@ -272,7 +278,8 @@ def binaural_room_impulse_response(
 
 
 def headphone_impulse_responses(sampling_rate=44100):
-    """Get Headphone Impulse Responses (HpIRs).
+    """
+    Get Headphone Impulse Responses (HpIRs).
 
     The HpIRs are taken from the FABIAN database [#]_. They were measured with
     Sennheiser HD-650 headphones.
@@ -298,8 +305,8 @@ def headphone_impulse_responses(sampling_rate=44100):
     References
     ----------
     .. [#] http://dx.doi.org/10.14279/depositonce-5718.5
-
     """
+
     # download files if requires
     files = _load_files('headphone_impulse_responses')
 
@@ -315,7 +322,8 @@ def headphone_impulse_responses(sampling_rate=44100):
 def head_related_impulse_responses(
         position=[[0, 0]], diffuse_field_compensation=False,
         sampling_rate=44100):
-    """Get HRIRs for specified source positions and sampling rate.
+    """
+    Get HRIRs for specified source positions and sampling rate.
 
     The head-related impulse responses (HRIRs) are taken from the FABIAN
     database [#]_. They are shortened to 128 samples for convenience. HRIRs are
@@ -368,8 +376,8 @@ def head_related_impulse_responses(
     References
     ----------
     .. [#] http://dx.doi.org/10.14279/depositonce-5718.5
-
     """
+
     # download files if requires
     files = _load_files('head_related_impulse_responses')
 
@@ -429,7 +437,8 @@ def head_related_impulse_responses(
 
 
 def room_impulse_response(sampling_rate=48000):
-    """Get a room impulse response (RIR).
+    """
+    Get a room impulse response (RIR).
 
     The RIR was recorded with class I 1/2 inch measurement microphone in the
     Berliner Philharmonie [#]_ (Emitter 17). For more information see [#]_. A
@@ -461,8 +470,8 @@ def room_impulse_response(sampling_rate=48000):
            C. Pörschmann, and S. Weinzierl 'Recordings of a Loudspeaker
            Orchestra with Multi-Channel Microphone Arrays for the Evaluation of
            Spatial Audio Methods,' J. Audio Eng. Soc. (submitted)
-
     """
+
     # download files if requires
     files = _load_files('room_impulse_response')
 
@@ -478,6 +487,7 @@ def room_impulse_response(sampling_rate=48000):
 
 def _load_files(data):
     """Download files from Audio Communication Server if they do not exist."""
+
     # create directory if required
     if not os.path.isdir(file_dir):
         # provide verbose error for read-only file systems

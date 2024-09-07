@@ -10,10 +10,12 @@ from pyfar.dsp.filter.audiofilter import _shelving_cascade_slope_parameters
 @pytest.mark.parametrize("shelf_type,g_s_b", [
     ("low", (20., -10., 2.)), ("high", (20., 10., 2.))])
 def test_shelving_cascade_slope_parameters(shelf_type, g_s_b):
-    """Test if all parameter combinations from gain (g), slope (s), and
+    """
+    Test if all parameter combinations from gain (g), slope (s), and
     bandwidth (b) yield the correct values. Two out of the three parameters
     must be given.
     """
+
     # test with missing third parameter
     g_s_b_test = _shelving_cascade_slope_parameters(
         g_s_b[0], g_s_b[1], None, shelf_type)
@@ -36,6 +38,7 @@ def test_shelving_cascade_slope_parameters(shelf_type, g_s_b):
 def test_shelving_cascade_slope_parameters_assertion(
         shelf_type, g_s_b, match):
     """Test assertions for shelving_cascade_slope_parameters"""
+
     with pytest.raises(ValueError, match=match):
         _shelving_cascade_slope_parameters(
             g_s_b[0], g_s_b[1], g_s_b[2], shelf_type)
@@ -43,6 +46,7 @@ def test_shelving_cascade_slope_parameters_assertion(
 
 def test_shelf_cascade_errors():
     """Test all value errors."""
+
     signal = pf.signals.impulse(10)
 
     # signal and sampling rate are both None
@@ -67,6 +71,7 @@ def test_shelf_cascade_errors():
 
 def test_shelf_cascade_warnings():
     """Test all warnings."""
+
     signal = pf.signals.impulse(10)
 
     # bandwidth is too small

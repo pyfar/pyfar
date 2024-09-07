@@ -1,4 +1,5 @@
-"""The utilities contain functions that are helpful when working with multiple
+"""
+The utilities contain functions that are helpful when working with multiple
 pyfar audio objects. The pyfar gallery gives background information to
 :ref:`work with audio objects </gallery/interactive/pyfar_audio_objects.ipynb>`
 including an introduction to the channel shape (`cshape`), channel axis
@@ -9,7 +10,8 @@ import numpy as np
 
 
 def broadcast_cshape(signal, cshape):
-    """Broadcast a signal to a certain cshape.
+    """
+    Broadcast a signal to a certain cshape.
 
     The channel shape (`cshape`) gives the shape of the audio data excluding
     the last dimension, which is ``n_samples`` for time domain objects and
@@ -27,8 +29,8 @@ def broadcast_cshape(signal, cshape):
     -------
     signal : Signal, TimeData, FrequencyData
         Broadcasted copy of the input signal
-
     """
+
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
         raise TypeError("Input data must be a pyfar audio object")
 
@@ -39,7 +41,8 @@ def broadcast_cshape(signal, cshape):
 
 
 def broadcast_cshapes(signals, cshape=None):
-    """Broadcast multiple signals to a common cshape.
+    """
+    Broadcast multiple signals to a common cshape.
 
     The channel shape (`cshape`) gives the shape of the audio data excluding
     the last dimension, which is ``n_samples`` for time domain objects and
@@ -59,8 +62,8 @@ def broadcast_cshapes(signals, cshape=None):
     -------
     signals : tuple of Signal, TimeData, FrequencyData
         The broadcasted copies of the input signals in a tuple.
-
     """
+
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
             raise TypeError("All input data must be pyfar audio objects")
@@ -71,7 +74,8 @@ def broadcast_cshapes(signals, cshape=None):
 
 
 def broadcast_cdim(signal, cdim):
-    """Broadcast a signal to a certain cdim.
+    """
+    Broadcast a signal to a certain cdim.
 
     The channel dimension (`cdim`) gives the dimension of the audio data
     excluding the last dimension, which is ``n_samples`` for time domain
@@ -90,8 +94,8 @@ def broadcast_cdim(signal, cdim):
     -------
     signal : Signal, TimeData, FrequencyData
         The broadcasted copy input signal
-
     """
+
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
         raise TypeError("Input data must be a pyfar audio object")
     if len(signal.cshape) > cdim:
@@ -105,7 +109,8 @@ def broadcast_cdim(signal, cdim):
 
 
 def broadcast_cdims(signals, cdim=None):
-    """Broadcast multiple signals to a common cdim.
+    """
+    Broadcast multiple signals to a common cdim.
 
     The channel dimension (`cdim`) gives the dimension of the audio data
     excluding the last dimension, which is ``n_samples`` for time domain
@@ -125,8 +130,8 @@ def broadcast_cdims(signals, cdim=None):
     -------
     signals : tuple of Signal, TimeData, FrequencyData
         The broadcasted copies of the input signals in a tuple.
-
     """
+
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
             raise TypeError("All input data must be pyfar audio objects")
@@ -136,7 +141,8 @@ def broadcast_cdims(signals, cdim=None):
 
 
 def concatenate_channels(signals, caxis=0, broadcasting=False):
-    """Merge multiple Signal, Timedata or Frequencydata objects along a given
+    """
+    Merge multiple Signal, Timedata or Frequencydata objects along a given
     caxis.
 
     Parameters
@@ -163,7 +169,6 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
     -------
     merged : Signal, TimeData, FrequencyData
         The merged signal object.
-
     """
     # check input
     for signal in signals:

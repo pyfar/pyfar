@@ -47,7 +47,8 @@ def test_prepare_plot():
 
 
 def test_prepare_plot_2d():
-    """Test assertion that are not tested directly with plots.
+    """
+    Test assertion that are not tested directly with plots.
     """
     data = pf.Signal([1, 0, 0], 44100)
     kwargs = {"shading": "flat"}
@@ -78,6 +79,7 @@ def test_lower_frequency_limit(
         sine, sine_short, frequency_data,
         frequency_data_one_point, time_data):
     """Test the private function plot._utils._lower_frequency_limit"""
+
     # test Signal with frequencies below 20 Hz
     low = plot._utils._lower_frequency_limit(sine)
     assert low == 20

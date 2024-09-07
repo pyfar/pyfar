@@ -1,4 +1,5 @@
-"""The following documents the audio classes and arithmetic operations for
+"""
+The following documents the audio classes and arithmetic operations for
 audio data. More details and background is given in the gallery
 (:doc:`audio objects<gallery:gallery/interactive/pyfar_audio_objects>`,
 :doc:`Fourier transform<gallery:gallery/interactive/fast_fourier_transform>`,
@@ -44,7 +45,6 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
-
     # indicate use of _Audio arithmetic operations for overloaded operators
     # (e.g. __rmul__)
     __array_priority__ = 1.0
@@ -72,7 +72,8 @@ class _Audio():
 
     @property
     def cshape(self):
-        """Return channel shape.
+        """
+        Return channel shape.
 
         The channel shape gives the shape of the audio data excluding the last
         dimension, which is `n_samples` for time domain objects and
@@ -82,7 +83,8 @@ class _Audio():
 
     @property
     def cdim(self):
-        """Return channel dimension.
+        """
+        Return channel dimension.
 
         The channel dimension (`cdim`) gives the number of dimensions of the
         audio data excluding the last dimension, which is `n_samples` for
@@ -93,7 +95,8 @@ class _Audio():
         return len(self.cshape)
 
     def reshape(self, newshape):
-        """Return reshaped copy of the audio object.
+        """
+        Return reshaped copy of the audio object.
 
         Parameters
         ----------
@@ -112,6 +115,7 @@ class _Audio():
         The number of samples and frequency bins always remains the same.
 
         """
+
         # check input
         if not isinstance(newshape, int) and not isinstance(newshape, tuple):
             raise ValueError("newshape must be an integer or tuple")
@@ -151,7 +155,6 @@ class _Audio():
                 that the `i`-th caxis becomes transposed object's `j`-th caxis.
             n ints
                 same as 'iterable of ints'.
-
         """
         if hasattr(axes, '__iter__'):
             axes = axes[0] if len(axes) == 1 else axes
@@ -227,7 +230,8 @@ class _Audio():
         raise NotImplementedError("To be implemented by derived classes.")
 
     def __getitem__(self, key):
-        """Get copied slice of the audio object at key.
+        """
+        Get copied slice of the audio object at key.
 
         Examples
         --------
@@ -243,7 +247,8 @@ class _Audio():
         return self._return_item(data)
 
     def __setitem__(self, key, value):
-        """Set channels of audio object at key.
+        """
+        Set channels of audio object at key.
 
         Examples
         --------
@@ -252,14 +257,14 @@ class _Audio():
         >>> import pyfar as pf
         >>> signal = pf.signals.noise(10, rms=[1, 1])
         >>> signal[0] = pf.signals.noise(10, rms=2)
-
         """
         self._assert_matching_meta_data(value)
         self._data[key] = value._data
 
 
 class TimeData(_Audio):
-    """Create audio object with time data and times.
+    """
+    Create audio object with time data and times.
 
     Objects of this class contain time data which is not directly convertible
     to frequency domain, i.e., non-equidistant samples.
@@ -277,11 +282,10 @@ class TimeData(_Audio):
     comment : str
         A comment related to `data`. The default is ``''``, which
         initializes an empty string.
-
     """
-
     def __init__(self, data, times, comment=""):
         """Create TimeData object with data, and times."""
+
         _Audio.__init__(self, 'time', comment)
 
         self.time = data
@@ -343,7 +347,6 @@ class TimeData(_Audio):
         indices : int, array-like
             The index for the given time instance. If the input was an array
             like, a numpy array of indices is returned.
-
         """
         times = np.atleast_1d(value)
         indices = np.zeros_like(times).astype(int)
@@ -352,7 +355,8 @@ class TimeData(_Audio):
         return np.squeeze(indices)
 
     def _assert_matching_meta_data(self, other):
-        """Check if the meta data matches across two :py:func:`TimeData` objects.
+        """
+        Check if the meta data matches across two :py:func:`TimeData` objects.
         """
         if other.__class__ != TimeData:
             raise ValueError("Comparison only valid against TimeData objects.")
@@ -435,7 +439,8 @@ class TimeData(_Audio):
 
 
 class FrequencyData(_Audio):
-    """Create audio object with frequency data and frequencies.
+    """
+    Create audio object with frequency data and frequencies.
 
     Objects of this class contain frequency data which is not directly
     convertible to the time domain, i.e., non-equidistantly spaced bins or
@@ -470,9 +475,9 @@ class FrequencyData(_Audio):
             Austria, May 2020, p. e-Brief 600.
 
     """
-
     def __init__(self, data, frequencies, comment=""):
         """Create audio object with frequency data and frequencies."""
+
         _Audio.__init__(self, 'freq', comment)
 
         # init
@@ -495,6 +500,7 @@ class FrequencyData(_Audio):
     @freq.setter
     def freq(self, value):
         """Set the frequency data."""
+
         # check data type
         data = np.atleast_2d(np.asarray(value))
         if data.dtype.kind == "i":
@@ -533,7 +539,6 @@ class FrequencyData(_Audio):
         indices : int, array-like
             The index for the given frequency. If the input was an array like,
             a numpy array of indices is returned.
-
         """
         freqs = np.atleast_1d(value)
         indices = np.zeros_like(freqs).astype(int)
@@ -627,7 +632,8 @@ class FrequencyData(_Audio):
 
 
 class Signal(FrequencyData, TimeData):
-    """Create audio object with time or frequency data and sampling rate.
+    """
+    Create audio object with time or frequency data and sampling rate.
 
     Objects of this class contain data which is directly convertible between
     time and frequency domain (equally spaced samples and frequency bins). The
@@ -668,9 +674,7 @@ class Signal(FrequencyData, TimeData):
             Scaling of the Discrete Fourier Transform and the Implied
             Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
             Austria, May 2020, p. e-Brief 600.
-
     """
-
     def __init__(
             self,
             data,
@@ -679,7 +683,8 @@ class Signal(FrequencyData, TimeData):
             domain='time',
             fft_norm='none',
             comment=""):
-        """Create audio Signal with time or frequency data and sampling rate.
+        """
+        Create audio Signal with time or frequency data and sampling rate.
         """
         # unpack array
         if hasattr(sampling_rate, '__iter__'):
@@ -843,7 +848,8 @@ class Signal(FrequencyData, TimeData):
 
     @property
     def fft_norm(self):
-        """The normalization for the Discrete Fourier Transform (DFT).
+        """
+        The normalization for the Discrete Fourier Transform (DFT).
 
         See :py:func:`~pyfar.dsp.fft.normalization` and
         :ref:`arithmetic operations<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`
@@ -853,7 +859,8 @@ class Signal(FrequencyData, TimeData):
 
     @fft_norm.setter
     def fft_norm(self, value):
-        """The normalization for the Discrete Fourier Transform (DFT).
+        """
+        The normalization for the Discrete Fourier Transform (DFT).
 
         See :py:func:`~pyfar.dsp.fft.normalization` for more information.
         """
@@ -901,7 +908,8 @@ class Signal(FrequencyData, TimeData):
 
     @property
     def signal_type(self):
-        """The signal type is ``'energy'``  if the ``fft_norm = None`` and
+        """
+        The signal type is ``'energy'``  if the ``fft_norm = None`` and
         ``'power'`` otherwise.
         """
         stype = 'energy' if self.fft_norm == 'none' else 'power'
@@ -941,7 +949,6 @@ class Signal(FrequencyData, TimeData):
         >>> for idx, channel in enumerate(signal):
         >>>     channel.time *= idx
         >>>     signal[idx] = channel
-
         """
         return _SignalIterator(self._data.__iter__(), self)
 
@@ -949,7 +956,6 @@ class Signal(FrequencyData, TimeData):
 class _SignalIterator(object):
     """Iterator for :py:func:`Signal`
     """
-
     def __init__(self, array_iterator, signal):
         self._array_iterator = array_iterator
         self._signal = signal
@@ -1012,7 +1018,6 @@ def add(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-
     """  # noqa: E501
     return _arithmetic(data, domain, _add)
 
@@ -1060,7 +1065,6 @@ def subtract(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-
     """  # noqa: E501
     return _arithmetic(data, domain, _subtract)
 
@@ -1108,7 +1112,6 @@ def multiply(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-
     """  # noqa: E501
     return _arithmetic(data, domain, _multiply)
 
@@ -1155,7 +1158,6 @@ def divide(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       normalization ``'none'``.
     * Other combinations raise an error.
-
     """  # noqa: E501
     return _arithmetic(data, domain, _divide)
 
@@ -1202,7 +1204,6 @@ def power(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       same normalization.
     * Other combinations raise an error.
-
     """  # noqa: E501
     return _arithmetic(data, domain, _power)
 
@@ -1377,6 +1378,7 @@ def matrix_multiplication(
 
 def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     """Apply arithmetic operations."""
+
     # check input and obtain meta data of new signal
     division = True if operation == _divide else False
     matmul = True if operation == _matrix_multiplication else False
@@ -1450,6 +1452,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
         Otherwise empty tuple.
 
     """
+
     # we need at least two signals
     if not isinstance(data, tuple):
         raise ValueError("Input argument 'data' must be a tuple.")
@@ -1533,7 +1536,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
 
 
 def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
-    """Return data in desired domain without any fft normalization.
+    """
+    Return data in desired domain without any fft normalization.
 
     Parameters
     ----------
@@ -1554,7 +1558,6 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type):
     data_out : numpy array
         Data in desired domain without any fft normalization if data is a
         Signal. `np.asarray(data)` otherwise.
-
     """
     if isinstance(data, (Signal, TimeData, FrequencyData)):
         # get signal in correct domain
@@ -1613,7 +1616,8 @@ def _matrix_multiplication(a, b, axes, audio_type):
 
 
 def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
-    """Helper function to determine the fft_norm resulting from an
+    """
+    Helper function to determine the fft_norm resulting from an
     arithmetic operation of two audio objects.
 
     For addition, subtraction and multiplication:
@@ -1646,8 +1650,8 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     fft_norm_result : str, ``'none'``, ``'unitary'``, ``'amplitude'``,
     ``'rms'``, ``'power'`` or ``'psd'``
         The fft_norm resulting from arithmetic operation.
-
     """
+
     # check if fft_norms are valid
     valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
     if fft_norm_1 not in valid_fft_norms:

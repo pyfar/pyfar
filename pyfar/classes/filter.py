@@ -1,4 +1,5 @@
-"""The following documents the pyfar filter classes. Examples for working with
+"""
+The following documents the pyfar filter classes. Examples for working with
 filter objects are part of the
 :doc:`examples gallery<gallery:gallery/interactive/pyfar_filtering>`.
 Available filters are shown in the
@@ -47,7 +48,8 @@ def _pop_state_from_kwargs(**kwargs):
 
 
 def _extend_sos_coefficients(sos, order):
-    """Extend a set of SOS filter coefficients to match a required filter order
+    """
+    Extend a set of SOS filter coefficients to match a required filter order
     by adding sections with coefficients resulting in an ideal frequency
     response.
 
@@ -77,6 +79,7 @@ def _extend_sos_coefficients(sos, order):
 
 def _repr_string(filter_type, order, n_channels, sampling_rate):
     """Generate repr string for filter objects"""
+
     ch_str = 'channel' if n_channels == 1 else 'channels'
 
     if filter_type == "SOS":
@@ -100,18 +103,19 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
 
 
 class Filter(object):
-    """Container class for digital filters.
+    """
+    Container class for digital filters.
     This is an abstract class method, only used for the shared processing
     method used for the application of a filter on a signal.
     """
-
     def __init__(
             self,
             coefficients=None,
             sampling_rate=None,
             state=None,
             comment=""):
-        """Initialize a general Filter object.
+        """
+        Initialize a general Filter object.
 
         Parameters
         ----------
@@ -131,6 +135,7 @@ class Filter(object):
             The filter object.
 
         """
+
         if coefficients is not None:
             self.coefficients = coefficients
         else:
@@ -156,7 +161,8 @@ class Filter(object):
 
     @property
     def coefficients(self):
-        """Get and set the coefficients of the filter.
+        """
+        Get and set the coefficients of the filter.
 
         Refer to the
         :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
@@ -183,7 +189,8 @@ class Filter(object):
 
     @property
     def state(self):
-        """The current state of the filter as an array with dimensions
+        """
+        The current state of the filter as an array with dimensions
         corresponding to the order of the filter and number of filter channels.
         """
         return self._state
@@ -210,7 +217,6 @@ class Filter(object):
         -------
         filtered : Signal
             A filtered copy of the input signal.
-
         """
         if not isinstance(signal, pf.Signal):
             raise ValueError("The input needs to be a Signal object.")
@@ -288,7 +294,8 @@ class Filter(object):
 
 
 class FilterFIR(Filter):
-    """Filter object for FIR filters.
+    """
+    Filter object for FIR filters.
 
     Parameters
     ----------
@@ -310,9 +317,7 @@ class FilterFIR(Filter):
     -------
     FilterFIR
         The FIR filter object.
-
     """
-
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -324,7 +329,8 @@ class FilterFIR(Filter):
 
     @property
     def coefficients(self):
-        """Get and set the coefficients of the filter.
+        """
+        Get and set the coefficients of the filter.
 
         Refer to the
         :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
@@ -338,6 +344,7 @@ class FilterFIR(Filter):
     @coefficients.setter
     def coefficients(self, value):
         """Coefficients of the filter"""
+
         b = np.atleast_2d(value)
         # add a-coefficients for easier handling across filter classes
         a = np.zeros_like(b)
@@ -358,7 +365,6 @@ class FilterFIR(Filter):
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
-
         """
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
@@ -381,7 +387,8 @@ class FilterFIR(Filter):
 
 
 class FilterIIR(Filter):
-    """Filter object for IIR filters.
+    """
+    Filter object for IIR filters.
 
     For IIR filters with high orders, second order section IIR filters using
     FilterSOS should be considered.
@@ -407,9 +414,7 @@ class FilterIIR(Filter):
     -------
     FilterIIR
         The IIR filter object.
-
     """
-
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -431,7 +436,6 @@ class FilterIIR(Filter):
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
-
         """
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
@@ -454,7 +458,8 @@ class FilterIIR(Filter):
 
 
 class FilterSOS(Filter):
-    """Filter object for IIR filters as second order sections (SOS).
+    """
+    Filter object for IIR filters as second order sections (SOS).
 
     Parameters
     ----------
@@ -480,9 +485,7 @@ class FilterSOS(Filter):
     -------
     FilterSOS
         The SOS filter object.
-
     """
-
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         if state is not None:
@@ -493,6 +496,7 @@ class FilterSOS(Filter):
     @Filter.coefficients.setter
     def coefficients(self, value):
         """Coefficients of the filter"""
+
         coeff = _atleast_3d_first_dim(value)
         if coeff.shape[-1] != 6:
             raise ValueError(
@@ -504,8 +508,7 @@ class FilterSOS(Filter):
     @property
     def order(self):
         """The order of the filter.
-        This is always twice the number of sections.
-        """
+        This is always twice the number of sections."""
         return 2*self.n_sections
 
     @property
@@ -525,7 +528,6 @@ class FilterSOS(Filter):
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
-
         """
         new_state = np.zeros((self.n_channels, *cshape, self.n_sections, 2))
         if state == 'step':

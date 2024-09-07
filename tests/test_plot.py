@@ -141,8 +141,10 @@ def test_line_freq_scale_option(function, freq_scale, handsome_signal):
 @pytest.mark.parametrize('function', [
     (plot.freq), (plot.phase), (plot.group_delay), (plot.spectrogram)])
 def test_line_freq_scale_assertion(function, sine):
-    """Test if all line plots raise an assertion for a wrong scale parameter.
     """
+    Test if all line plots raise an assertion for a wrong scale parameter.
+    """
+
     create_figure()
     with raises(ValueError):
         function(sine, freq_scale="warped")
@@ -167,6 +169,7 @@ def test_time_unit(function, unit, handsome_signal):
 
 def test_time_unit_assertion(sine):
     """Test if all line plots raise an assertion for a wrong unit parameter."""
+
     create_figure()
     with raises(ValueError):
         plot.time(sine, unit="pascal")
@@ -181,9 +184,11 @@ def test_time_unit_assertion(sine):
 
 
 def test_line_custom_subplots(handsome_signal, handsome_signal_v2):
-    """Test custom subplots in row, column, and mixed layout including hold
+    """
+    Test custom subplots in row, column, and mixed layout including hold
     functionality.
     """
+
     # plot layouts to be tested
     plots = {
         'row': [plot.time, plot.freq],
@@ -319,7 +324,8 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
     (plot.spectrogram), (plot.time_2d), (plot.freq_2d), (plot.phase_2d),
     (plot.group_delay_2d)])
 def test_2d_colorbar_assertion(function, handsome_signal_2d):
-    """Test assertion when passing an array of axes but not having a colorbar.
+    """
+    Test assertion when passing an array of axes but not having a colorbar.
     """
     create_figure()
     with raises(ValueError, match="A list of axes"):
@@ -332,7 +338,8 @@ def test_2d_colorbar_assertion(function, handsome_signal_2d):
     (plot.group_delay_2d), (plot.time_freq_2d), (plot.freq_phase_2d),
     (plot.freq_group_delay_2d)])
 def test_2d_cshape_assertion(function):
-    """Test assertion when passing a signal with wrong cshape.
+    """
+    Test assertion when passing a signal with wrong cshape.
     """
     error_str = r"signal.cshape must be \(m, \) with m\>=2 but is \(2, 2\)"
     create_figure()
@@ -402,8 +409,10 @@ def test_2d_freq_scale_option(function, freq_scale, handsome_signal_2d):
 
 
 def test_2d_freq_scale_assertion(handsome_signal_2d):
-    """Test if all 2d plots raise an assertion for a wrong scale parameter.
     """
+    Test if all 2d plots raise an assertion for a wrong scale parameter.
+    """
+
     create_figure()
     with raises(ValueError):
         plot.freq_2d(handsome_signal_2d, freq_scale="warped")
@@ -434,6 +443,7 @@ def test_2d_time_unit(function, unit, handsome_signal_2d):
 
 def test_2d_time_unit_assertion(handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
+
     create_figure()
     with raises(ValueError):
         plot.time_2d(handsome_signal_2d, unit="pascal")
@@ -497,6 +507,7 @@ def test_2d_method_assertion(function, handsome_signal_2d):
 
 def test_use():
     """Test if use changes the plot style."""
+
     for style in ["dark", "default"]:
 
         filename = 'use_' + style
@@ -561,7 +572,8 @@ def test_title_style(style, handsome_signal):
     (plot.freq), (plot.phase), (plot.group_delay)])
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_log_tick_labels(function, limits, noise):
-    """Test that only major tick labels are shown for logarithmic frequency
+    """
+    Test that only major tick labels are shown for logarithmic frequency
     axis in line plots.
     """
     create_figure()
@@ -583,7 +595,8 @@ def test_log_tick_labels(function, limits, noise):
 )
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_2d_log_tick_labels(function, limits, handsome_signal_2d):
-    """Test that only major tick labels are shown for logarithmic frequency
+    """
+    Test that only major tick labels are shown for logarithmic frequency
     axis in 2d plots.
     """
     create_figure()
@@ -603,7 +616,8 @@ def test_2d_log_tick_labels(function, limits, handsome_signal_2d):
 
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_spectrogram_log_tick_labels(limits, noise):
-    """Test that only major tick labels are shown for logarithmic frequency
+    """
+    Test that only major tick labels are shown for logarithmic frequency
     axis in spectrograms.
     """
     create_figure()
@@ -626,7 +640,8 @@ def test_spectrogram_log_tick_labels(limits, noise):
     ['axes.facecolor', 'black'],
     ['axes.grid', False]])
 def test_pyfar_plot_with_empty_style(rcParams, value):
-    """Test passing an empty style to a pyfar plot function to check if the
+    """
+    Test passing an empty style to a pyfar plot function to check if the
     currently active plot stlye remains active.
     """
     with pf.plot.context({rcParams: value}):

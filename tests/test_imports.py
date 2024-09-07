@@ -1,4 +1,5 @@
-"""Test imports separately for each module and top level functions/classes. These
+"""
+Test imports separately for each module and top level functions/classes. These
 tests will give hints in case a single export breaks, whereas im `import pyfar`
 would fail completely and make possible issues harder to find.
 """

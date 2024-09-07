@@ -9,7 +9,8 @@ from . import _interaction as ia
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
             indices=None, orientation="vertical", method='pcolormesh',
             colorbar=True, ax=None, style='light', **kwargs):
-    """2D color coded plot of time signals.
+    """
+    2D color coded plot of time signals.
 
     Plots ``signal.time`` and passes keyword arguments (`kwargs`) to
     :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -130,8 +131,8 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.time_2d(impulses, unit='ms')
-
     """  # noqa: E501
+
     with context(style):
         ax, qm, cb = _two_d._time_2d(
             signal, dB, log_prefix, log_reference, unit,
@@ -155,7 +156,8 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
             freq_scale='log', indices=None, orientation="vertical",
             method='pcolormesh', colorbar=True, ax=None, style='light',
             **kwargs):
-    """2D color coded plot of magnitude spectra.
+    """
+    2D color coded plot of magnitude spectra.
 
     Plots ``abs(signal.freq)`` and passes keyword arguments (`kwargs`) to
     :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -265,8 +267,8 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.freq_2d(impulses, dB=False)
-
     """  # noqa: E501
+
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, freq_scale, indices,
@@ -290,7 +292,8 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
 def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
              orientation="vertical", method='pcolormesh',
              colorbar=True, ax=None, style='light', **kwargs):
-    """2D color coded plot of phase spectra.
+    """
+    2D color coded plot of phase spectra.
 
     Plots ``angle(signal.freq)`` and passes keyword arguments (`kwargs`) to
     :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -395,8 +398,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.phase_2d(impulses, unwrap=True, freq_scale="linear")
-
     """  # noqa: E501
+
     with context(style):
         ax, qm, cb = _two_d._phase_2d(
             signal, deg, unwrap, freq_scale, indices, orientation, method,
@@ -419,7 +422,8 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
 def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
                    orientation="vertical", method='pcolormesh',
                    colorbar=True, ax=None, style='light', **kwargs):
-    """2D color coded plot of the group delay.
+    """
+    2D color coded plot of the group delay.
 
     Plots ``pyfar.dsp.group_delay(signal.freq)`` and passes keyword arguments
     (`kwargs`) to :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -532,8 +536,8 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.group_delay_2d(impulses, unit="samples")
-
     """  # noqa: E501
+
     with context(style):
         ax, qm, cb = _two_d._group_delay_2d(
             signal, unit, freq_scale, indices, orientation, method,
@@ -558,7 +562,8 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                  unit='s', indices=None, orientation="vertical",
                  method='pcolormesh', colorbar=True, ax=None, style='light',
                  **kwargs):
-    """2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
+    """
+    2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
 
     Plots ``signal.time`` and ``abs(signal.freq)`` passes keyword arguments
     (`kwargs`) to :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -684,8 +689,8 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         >>> impulses = pf.signals.impulse(
         ...     64, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.time_freq_2d(impulses, dB_freq=False, unit='ms')
-
     """  # noqa: E501
+
     with context(style):
         ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
@@ -713,7 +718,8 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
                   freq_scale='log', deg=False, unwrap=False, indices=None,
                   orientation="vertical", method='pcolormesh',
                   colorbar=True, ax=None, style='light', **kwargs):
-    """2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
+    """
+    2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
     arguments (`kwargs`) to :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -824,8 +830,8 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.freq_phase_2d(impulses, dB=False, unwrap=True,
         ...                       freq_scale="linear")
-
     """  # noqa: E501
+
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
@@ -851,7 +857,8 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
                         unit="s", freq_scale='log', indices=None,
                         orientation="vertical", method='pcolormesh',
                         colorbar=True, ax=None, style='light', **kwargs):
-    """2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
+    """
+    2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
     passes keyword arguments (`kwargs`) to
@@ -970,8 +977,8 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         >>> impulses = pf.signals.impulse(
         ...     2048, np.arange(0, 25), np.linspace(1, .5, 25))
         >>> pf.plot.freq_group_delay_2d(impulses, dB=False, unit="samples")
-
     """  # noqa: E501
+
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
@@ -1102,7 +1109,6 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         >>> import pyfar as pf
         >>> sweep = pf.signals.linear_sweep_time(2**14, [0, 22050])
         >>> pf.plot.spectrogram(sweep, unit='ms')
-
     """  # noqa: E501
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')

@@ -10,7 +10,7 @@ lint.select = [
     "E",
     "F",
     "W",
-    "D", # Missing docstring in public module
+    "D100", # Missing docstring in public module
     "D101", # Missing docstring in public class
     "D102", # Missing docstring in public method
     "D103", # Missing docstring in public function
@@ -28,16 +28,15 @@ lint.select = [
     "D412", # No blank lines allowed between a section and its content
     "D414", # Section has no content
     "D419", # Docstring is empty
-    "D415", # First line should end with a period
-    "D417", # Missing argument descriptions in the docstring
 ]
 
 # Ignore missing docstrings in tests
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "D100",
-    "D101",
     "D103",
     "D104",
-    "D415",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D101"]

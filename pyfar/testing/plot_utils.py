@@ -1,4 +1,5 @@
-"""Functions for testing of plots.
+"""
+Functions for testing of plots.
 
 Intended to reduce code redundancy and assure reproducibility on different
 operating systems
@@ -13,7 +14,8 @@ import pyfar as pf
 
 
 def create_figure(width=6, height=4.8, dpi=100, style="light"):
-    """Create figure with defined parameters for reproducible testing.
+    """
+    Create figure with defined parameters for reproducible testing.
 
     Parameters
     ----------
@@ -27,8 +29,8 @@ def create_figure(width=6, height=4.8, dpi=100, style="light"):
     Returns
     -------
     fig : Matplotlib Figure object
-
     """
+
     plt.close('all')
     matplotlib.use('Agg')
     mpt.set_reproducibility_for_testing()
@@ -41,7 +43,8 @@ def create_figure(width=6, height=4.8, dpi=100, style="light"):
 
 def save_and_compare(create_baseline, baseline_path, test_path, filename,
                      file_type, compare_output):
-    """Save current Figure as Image and compare images against baseline
+    """
+    Save current Figure as Image and compare images against baseline
 
     Parameters
     ----------
@@ -62,7 +65,6 @@ def save_and_compare(create_baseline, baseline_path, test_path, filename,
         image is saved under `test_oath` in case they differ using
         matplotlib.testing.compare.compare_images. If true, an error is also
         raised if the images differ.
-
     """
     # file names for saving
     baseline = os.path.join(baseline_path, filename + "." + file_type)

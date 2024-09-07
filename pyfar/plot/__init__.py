@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""The following documents the pyfar plot functions. Make sure to have a look at
+"""
+The following documents the pyfar plot functions. Make sure to have a look at
 the
 :doc:`plotting<gallery:gallery/interactive/pyfar_plotting>` and
 :doc:`interactive plotting<gallery:gallery/interactive/pyfar_interactive_plots>`

@@ -1,4 +1,4 @@
-"""This module contains the Orientations class."""
+"""This module contains the Orientations class. """
 from scipy.spatial.transform import Rotation
 import numpy as np
 import warnings
@@ -16,7 +16,8 @@ warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 
 class Orientations(Rotation):
-    """This class for Orientations in the three-dimensional space,
+    """
+    This class for Orientations in the three-dimensional space,
     is a subclass of :py:class:`scipy:scipy.spatial.transform.Rotation` and
     equally based on quaternions of shape (N, 4). It inherits all methods of
     the Rotation class and adds the creation from perpendicular view and up
@@ -91,8 +92,8 @@ class Orientations(Rotation):
         -------
         orientations : Orientations
             Object containing the orientations represented by quaternions.
-
         """
+
         # init views and up
         try:
             views = np.atleast_2d(views).astype(np.float64)
@@ -132,7 +133,8 @@ class Orientations(Rotation):
 
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
-        """Visualize Orientations as triples of view (red), up (green) and
+        """
+        Visualize Orientations as triples of view (red), up (green) and
         right (blue) vectors in a quiver plot.
 
         Parameters
@@ -196,7 +198,6 @@ class Orientations(Rotation):
             - rights, see :py:func:`Orientations.from_view_up`
                 A single vector or a stack of vectors, pointing to the right of
                 the object, constructed as a cross product of ups and rights.
-
         """
         # Apply self as a Rotation (base class) on eye i.e. generate orientions
         # as rotations relative to standard basis in 3d
@@ -221,13 +222,13 @@ class Orientations(Rotation):
         return cls.from_quat(obj_dict['quat'])
 
     def __setitem__(self, idx, val):
-        """Assign orientations(s) at given index(es) from object.
+        """
+        Assign orientations(s) at given index(es) from object.
 
         Parameters
         ----------
         idx : see NumPy Indexing
         val : array_like quaternion(s), shape (N, 4) or (4,)
-
         """
         if isinstance(val, Orientations):
             val = val.as_quat()

@@ -27,7 +27,8 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""Python library partition the unit sphere into partition with equal area.
+"""
+Python library partition the unit sphere into partition with equal area.
 """
 
 from math import gcd
@@ -189,7 +190,8 @@ def caps(dimension, N):
 
 
 def polar_colat(dimension, N):
-    """The colatitude of the North polar (top) spherical cap
+    """
+    The colatitude of the North polar (top) spherical cap
     Given dim and N, determine the colatitude of the North polar spherical cap.
 
     Parameters
@@ -203,7 +205,6 @@ def polar_colat(dimension, N):
     -------
     colatitude : double
         The colatitude angle of the top cap.
-
     """
     # enough = N > 2
     # c_polar = np.empty()
@@ -284,7 +285,6 @@ def round_to_naturals(N, r_regions):
     -------
     n_regions : int
         The rounded integer number per collar.
-
     """
     r_regions = np.asarray(r_regions)
     n_regions = np.zeros(r_regions.shape, dtype=int)
@@ -322,7 +322,6 @@ def cap_colats(dimension, N, c_polar, n_regions):
     -------
     c_caps : double
         Colatitude angles of the caps
-
     """
     c_caps = np.zeros(np.size(n_regions))
     c_caps[0] = c_polar
@@ -507,7 +506,6 @@ def area_of_cap(dimension, s_cap):
     -------
     area : double
         The resulting area
-
     """
     if dimension == 1:
         area = 2 * s_cap
@@ -580,7 +578,7 @@ def polar2cart(points_polar):
     points_polar : array, double
         The points in polar coordinates, with shape (2, N)
 
-    Returns
+    Returns:
     -------
     points_cart : array, double
         The points in Cartesian coordinates with shape (3, N)

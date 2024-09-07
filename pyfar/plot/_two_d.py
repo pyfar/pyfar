@@ -243,8 +243,10 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
 def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
                   log_reference, freq_scale, unit, indices, orientation,
                   method, colorbar, ax, **kwargs):
-    """Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
+    Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
+    """
+
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _time_2d(
@@ -262,6 +264,7 @@ def _freq_phase_2d(signal, dB, log_prefix, log_reference, freq_scale, deg,
                    unwrap, indices, orientation, method, colorbar, ax,
                    **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
+
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
@@ -279,8 +282,10 @@ def _freq_phase_2d(signal, dB, log_prefix, log_reference, freq_scale, deg,
 def _freq_group_delay_2d(
         signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
         orientation, method, colorbar, ax, **kwargs):
-    """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
+    Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
+    """
+
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
@@ -310,6 +315,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     This makes  handling interactions easier. The axis of the colorbar is added
     in pyfar.line.spectrogram.
     """
+
     # check input
     # check input and prepare the figure and axis
     fig, ax, _, kwargs = _utils._prepare_2d_plot(

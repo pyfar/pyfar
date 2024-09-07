@@ -10,6 +10,7 @@ import numpy.testing as npt
     pf.FrequencyData([1, 2, 3], [1, 2, 4])])
 def test_broadcast_cshape(signal):
     """Test broadcasting for all audio classes"""
+
     broadcasted = pf.utils.broadcast_cshape(signal, (2, 3))
     assert signal.cshape == (1, )
     assert broadcasted.cshape == (2, 3)
@@ -18,6 +19,7 @@ def test_broadcast_cshape(signal):
 
 def test_broadcast_cshape_assertions():
     """Test assertions"""
+
     # invalid input type
     with pytest.raises(TypeError, match="Input data must be a pyfar audio"):
         pf.utils.broadcast_cshape([1, 2, 3], (1, ))
@@ -27,6 +29,7 @@ def test_broadcast_cshape_assertions():
     (None, (2,)), ((2, 2), (2, 2))])
 def test_broadcast_cshapes(cshape, reference):
     """Test broadcasting multiple signals with all audio classes"""
+
     signals = (pf.signals.impulse(5, [0, 1]),
                pf.TimeData([1, 2, 3], [1, 2, 4]),
                pf.FrequencyData([1, 2], [2, 3]))
@@ -41,6 +44,7 @@ def test_broadcast_cshapes(cshape, reference):
 
 def test_broadcast_cshapes_assertions():
     """Test assertions"""
+
     # invalid input type
     with pytest.raises(TypeError, match="All input data must be pyfar"):
         pf.utils.broadcast_cshapes([1, 2, 3], (1, ))
@@ -52,6 +56,7 @@ def test_broadcast_cshapes_assertions():
     pf.FrequencyData([1, 2, 3], [1, 2, 4])])
 def test_broadcast_cdim(signal):
     """Test broadcast cdim for all audio classes"""
+
     broadcasted = pf.utils.broadcast_cdim(signal, 2)
 
     assert signal.cshape == (1, )
@@ -61,6 +66,7 @@ def test_broadcast_cdim(signal):
 
 def test_broadcast_cdim_assertions():
     """Test assertions"""
+
     # invalid input type
     with pytest.raises(TypeError, match="Input data must be a pyfar audio"):
         pf.utils.broadcast_cdim([1, 2, 3], 2)
@@ -74,6 +80,7 @@ def test_broadcast_cdim_assertions():
     (None, 2), (3, 3)])
 def test_broadcast_cdims(cdim, reference):
     """Test broadcasting multiple signals with all audio classes"""
+
     signals = (pf.signals.impulse(5, [[0, 1], [2, 3]]),
                pf.TimeData([1, 2, 3], [1, 2, 4]))
 

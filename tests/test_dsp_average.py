@@ -20,7 +20,8 @@ from pytest import raises
      'log_magnitude_zerophase', 10**(np.array([(-40+0)/2, (-20+20)/2])/20)]
     ))
 def test_averaging(signal, mode, answer):
-    """Parametrized test for averaging data in all modi.
+    """
+    Parametrized test for averaging data in all modi.
     """
     ave_sig = pf.dsp.average(signal, mode)
     if mode == 'linear':
@@ -34,7 +35,8 @@ def test_averaging(signal, mode, answer):
     [1, [[(1+3)/2, (2+4)/2], [(5+7)/2, (6+8)/2]]]
     ))
 def test_caxis_averaging(caxis, answer):
-    """Parametrized test for averaging along caxis
+    """
+    Parametrized test for averaging along caxis
     """
     signal = pf.Signal(np.arange(1, 9).reshape(2, 2, 2), 44100)
     ave_sig = pf.dsp.average(signal, caxis=caxis)
@@ -42,7 +44,7 @@ def test_caxis_averaging(caxis, answer):
 
 
 def test_weighted_averaging():
-    """Tests averaging Signal with weighted channels"""
+    """Tests averaging Signal with weighted channels """
     signal = pf.Signal([[1, 2, 3], [4, 5, 6]], 44100)
     ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))
     answer = [[1*0.8+4*0.2, 2*0.8+5*0.2, 3*0.8+6*0.2]]

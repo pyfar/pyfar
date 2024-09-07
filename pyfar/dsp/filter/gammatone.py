@@ -10,7 +10,8 @@ from pyfar._utils import rename_arg
 
 
 class GammatoneBands():
-    """Generate reconstructing auditory filter bank.
+    """
+    Generate reconstructing auditory filter bank.
 
     Generate a forth order reconstructing Gammatone auditory filter bank
     according to [#]_. The center frequencies of the Gammatone filters
@@ -120,7 +121,6 @@ class GammatoneBands():
     .. [#] V. Hohmann, 'Frequency analysis and synthesis using a gammatone
            filterbank,' Acta Acust. united Ac. 88, 433-442 (2002).
     .. [#] https://amtoolbox.org/
-
     """
 
     @rename_arg({"freq_range": "frequency_range"},
@@ -176,8 +176,8 @@ class GammatoneBands():
     def freq_range(self):
         """Get the frequency range of the filter bank in Hz.
         ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-        """
+        of ``'frequency_range'``."""
+
         # Deprecation warning for freq_range parameter
         warnings.warn((
             'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
@@ -222,19 +222,22 @@ class GammatoneBands():
 
     @property
     def coefficients(self):
-        """Get the filter coefficients a as in Eq. (7) in Hohmann 2002 per band.
+        """
+        Get the filter coefficients a as in Eq. (7) in Hohmann 2002 per band.
         """
         return self._coefficients
 
     @property
     def normalizations(self):
-        """Get the normalization per band described below Eq. (9) in Hohmann 2002.
+        """
+        Get the normalization per band described below Eq. (9) in Hohmann 2002.
         """
         return self._normalizations
 
     @property
     def delays(self):
-        """Get the delays required for summing the filter bands.
+        """
+        Get the delays required for summing the filter bands.
 
         Section 4 in Hohmann 2002 describes, how the delays are calculated.
         """
@@ -242,7 +245,8 @@ class GammatoneBands():
 
     @property
     def gains(self):
-        """Get the gains required for summing the filter bands.
+        """
+        Get the gains required for summing the filter bands.
 
         Section 4 in Hohmann 2002 describes, how the gains are calculated.
         """
@@ -250,14 +254,16 @@ class GammatoneBands():
 
     @property
     def phase_factors(self):
-        """Get the phase factors required for summing the filter bands.
+        """
+        Get the phase factors required for summing the filter bands.
 
         Section 4 in Hohmann 2002 describes, how the factors are calculated.
         """
         return self._phase_factors
 
     def _get_coefficients(self):
-        """Compute the Gammatone filter coefficients
+        """
+        Compute the Gammatone filter coefficients
 
         Returns
         -------
@@ -267,8 +273,8 @@ class GammatoneBands():
         normalizations : numpy array
             The normalization factors, i.e., the b_0 coefficients. The array
             has as many coefficients as self.frequencies.
-
         """
+
         # Eq. (13) in Hohmann 2002
         erb_aud = 24.7 + self.frequencies / 9.265
 
@@ -289,10 +295,12 @@ class GammatoneBands():
         return coefficients, normalizations
 
     def _get_delays_and_phase_factors(self):
-        """Section 4 in Hohmann 2002 describes how to derive these values. This
+        """
+        Section 4 in Hohmann 2002 describes how to derive these values. This
         is a direct Python port of the corresponding function in the AMT
         toolbox `hohmann2002_process.m`.
         """
+
         # the delay in samples
         delay_samples = int(np.round(self.delay * self.sampling_rate))
 
@@ -318,10 +326,12 @@ class GammatoneBands():
         return delays, phase_factors
 
     def _get_gains(self):
-        """Section 4 in Hohmann 2002 describes how to derive these values. This
+        """
+        Section 4 in Hohmann 2002 describes how to derive these values. This
         is a direct Python port of the corresponding function in the AMT
         toolbox `hohmann2002_process.m`.
         """
+
         # positive and negative center frequencies in the z-plane
         z = np.atleast_2d(
             np.exp(2j * np.pi * self.frequencies / self.sampling_rate)).T
@@ -352,7 +362,8 @@ class GammatoneBands():
         return gains.flatten()
 
     def process(self, signal, reset=True):
-        """Filter an input signal.
+        """
+        Filter an input signal.
 
         The filter output is a complex valued time signal, whose real and
         imaginary part are returned separately.
@@ -391,8 +402,8 @@ class GammatoneBands():
         - An exception to this occurs if ``signal.cshape`` is ``(1, )``, i.e.,
           signal is a single channel signal. In this case the cshape of the
           output signals is ``(self.n_bands)`` and `not` ``(self.n_bands, 1)``.
-
         """
+
         # check input
         if not isinstance(signal, pf.Signal):
             raise TypeError("signal must be a pyfar Signal object")
@@ -446,7 +457,8 @@ class GammatoneBands():
         return real, imag
 
     def reconstruct(self, real, imag):
-        """Reconstruct filter bands.
+        """
+        Reconstruct filter bands.
 
         The summation process is described in Section 4 of Hohmann 2002 and
         uses the pre-calculated delays, phase factors and gains.
@@ -465,8 +477,8 @@ class GammatoneBands():
         reconstructed : Signal
             The summed input.  ``summed.cshape`` matches the ``cshape`` or the
             original signal before it was filtered.
-
         """
+
         # prepare output
         summed = real.copy()
         time = real.time.copy() + 1j * imag.time.copy()
@@ -524,7 +536,8 @@ class GammatoneBands():
             "freq_range parameter will be deprecated in pyfar 0.8.0 in "
             "favor of frequency_range")
 def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
-    """Get frequencies that are linearly spaced on the ERB frequency scale.
+    """
+    Get frequencies that are linearly spaced on the ERB frequency scale.
 
     The human auditory system analyzes sound in auditory filters, whose band-
     width is often given as a equivalent rectangular bandwidth (ERB). The ERB
@@ -575,6 +588,7 @@ def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
 
 
     """
+
     # check input
     if not isinstance(frequency_range, (list, tuple, np.ndarray)) \
             or len(frequency_range) != 2:
