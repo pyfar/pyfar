@@ -1,3 +1,4 @@
+"""Digital signal processing functions."""
 import multiprocessing
 import numpy as np
 from scipy import signal as sgn

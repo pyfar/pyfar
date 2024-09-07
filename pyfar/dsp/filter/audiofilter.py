@@ -1,3 +1,4 @@
+"""Audio filter design and application."""
 import warnings
 from pyfar.classes.warnings import PyfarDeprecationWarning
 import numpy as np

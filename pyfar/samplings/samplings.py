@@ -1,3 +1,4 @@
+"""Module for spherical sampling grids."""
 import numpy as np
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning

@@ -1,3 +1,4 @@
+"""Signal processing functions related to interpolation and resampling."""
 import numpy as np
 from scipy.special import iv as bessel_first_mod
 from scipy.interpolate import interp1d

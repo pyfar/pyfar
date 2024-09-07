@@ -155,6 +155,7 @@ class Filter(object):
         self.comment = comment
 
     def init_state(self, state='zeros'):
+        """Initialize the buffer elements to pre-defined initial conditions."""
         self._state = state
         self._initialized = True
 
@@ -380,6 +381,7 @@ class FilterFIR(Filter):
         return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "FIR", self.order, self.n_channels, self.sampling_rate)
 
@@ -450,6 +452,7 @@ class FilterIIR(Filter):
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "IIR", self.order, self.n_channels, self.sampling_rate)
 
@@ -548,5 +551,6 @@ class FilterSOS(Filter):
             return res
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "SOS", self.n_sections, self.n_channels, self.sampling_rate)
