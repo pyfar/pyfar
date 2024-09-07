@@ -36,6 +36,7 @@ def fractional_octave_frequencies(
     cutoff_freq : tuple, array, float
         The lower and upper critical frequencies in Hz of the bandpass filters
         for each band as a tuple corresponding to ``(f_lower, f_upper)``.
+
     """
     nominal = None
 
@@ -123,6 +124,7 @@ def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     exact : array, float
         The exact center frequencies, resulting in a uniform distribution of
         frequency bands over the frequency range.
+
     """
     if num_fractions == 1:
         nominal = np.array([
@@ -236,7 +238,6 @@ def fractional_octave_bands(
         ...     "Filter bands and the sum of their squared magnitudes")
 
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -292,8 +293,8 @@ def _coefficients_fractional_octave_bands(
     -----
     This function uses second order sections of butterworth filters for
     increased numeric accuracy and stability.
-    """
 
+    """
     f_crit = fractional_octave_frequencies(
         num_fractions, frequency_range, return_cutoff=True)[2]
 
@@ -333,8 +334,7 @@ def _coefficients_fractional_octave_bands(
 def reconstructing_fractional_octave_bands(
         signal, num_fractions=1, frequency_range=(63, 16000),
         overlap=1, slope=0, n_samples=2**12, sampling_rate=None):
-    """
-    Create and/or apply an amplitude preserving fractional octave filter bank.
+    """Create and/or apply an amplitude preserving fractional octave filter bank.
 
     .. note::
         This filter bank has -6 dB cut-off frequencies. For sufficient lengths
@@ -420,8 +420,8 @@ def reconstructing_fractional_octave_bands(
         >>> pf.plot.freq(y, ax=ax[1])
         >>> ax[1].set_title(
         ...     "Reconstructed (black) and filtered impulse (colored)")
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):

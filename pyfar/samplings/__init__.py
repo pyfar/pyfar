@@ -1,5 +1,4 @@
-"""
-Collection of sampling schemes and related functionality. For information on
+"""Collection of sampling schemes and related functionality. For information on
 the used coordinate systems refer to the
 :py:mod:`Coordinates documentation <pyfar.classes.coordinates>`.
 

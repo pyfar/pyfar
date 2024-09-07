@@ -1,11 +1,9 @@
-"""
-The following documents the pyfar warning classes.
+"""The following documents the pyfar warning classes.
 """
 
 
 class PyfarDeprecationWarning(Warning):
-    """
-    This class creates a custom PyfarDeprecationWarning inheriting from
+    """This class creates a custom PyfarDeprecationWarning inheriting from
     the `Warning` class. It's supposed to be used instead of
     `DeprecationWarning` or `PendingDeprecationWarning`. Both Warnings are
     ignored by default, so using `warnings.simplefilter()` to show the warning
@@ -39,6 +37,7 @@ class PyfarDeprecationWarning(Warning):
     >>>         pf.signals.exponential_sweep(2**10, [1e3, 20e3])
 
     """
+
     def __init__(self, message):
         self.message = message
 

@@ -39,7 +39,8 @@ def test_phase_deg_unwrap(sine_plus_impulse):
 
 def test_group_delay_single_channel(impulse_group_delay):
     """Test the function returning the group delay of a signal,
-    single channel."""
+    single channel.
+    """
     signal = impulse_group_delay[0]
 
     with pytest.raises(ValueError, match="Invalid method"):
@@ -67,7 +68,8 @@ def test_group_delay_single_channel(impulse_group_delay):
 
 def test_group_delay_two_channel(impulse_group_delay_two_channel):
     """Test the function returning the group delay of a signal,
-    two channels."""
+    two channels.
+    """
     signal = impulse_group_delay_two_channel[0]
     grp = dsp.group_delay(signal, method='scipy')
     assert grp.shape == (signal.cshape + (signal.n_bins,))
@@ -81,7 +83,8 @@ def test_group_delay_two_channel(impulse_group_delay_two_channel):
 def test_group_delay_two_by_two_channel(
         impulse_group_delay_two_by_two_channel):
     """Test the function returning the group delay of a signal,
-    2-by-2 channels."""
+    2-by-2 channels.
+    """
     signal = impulse_group_delay_two_by_two_channel[0]
     grp = dsp.group_delay(signal)
     assert grp.shape == (signal.cshape + (signal.n_bins,))
@@ -91,7 +94,8 @@ def test_group_delay_two_by_two_channel(
 
 def test_group_delay_custom_frequencies(impulse_group_delay):
     """Test the function returning the group delay of a signal,
-    called for specific frequencies."""
+    called for specific frequencies.
+    """
     signal = impulse_group_delay[0]
     # Single frequency, of type int
     frequency = 1000
@@ -308,7 +312,6 @@ def test_time_shift_multi_dim(shift_samples):
 
 def test_time_shift_assertions():
     """Test assertions for shift_time"""
-
     # wrong mode
     with pytest.raises(ValueError, match="mode is 'cut'"):
         dsp.time_shift(impulse(10), 2, mode='cut')
@@ -325,7 +328,7 @@ def test_time_shift_assertions():
 
 
 def test_time_window_default():
-    """ Test time_window function with default values."""
+    """Test time_window function with default values."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
     time_win = np.atleast_2d(sgn.windows.hann(10, sym=True))
@@ -362,7 +365,7 @@ def test_time_window_interval_types():
 
 
 def test_time_window_interval_order_error():
-    """ Test errors for incorrect order of values in interval."""
+    """Test errors for incorrect order of values in interval."""
     sig = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='ascending'):
         dsp.time_window(sig, interval=[2, 1])
@@ -371,7 +374,7 @@ def test_time_window_interval_order_error():
 
 
 def test_time_window_interval_unit_error():
-    """ Test errors for incorrect boundaries in combinations with unit."""
+    """Test errors for incorrect boundaries in combinations with unit."""
     sig = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='than signal'):
         dsp.time_window(sig, interval=[0, 11], unit='samples')
@@ -380,14 +383,14 @@ def test_time_window_interval_unit_error():
 
 
 def test_time_window_crop_none():
-    """ Test crop option 'none'."""
+    """Test crop option 'none'."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(sig, interval=[1, 3], crop='none')
     assert sig_win.n_samples == 10
 
 
 def test_time_window_crop_interval():
-    """ Test truncation of windowed signal to interval."""
+    """Test truncation of windowed signal to interval."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
         sig, interval=[1, 3], shape='symmetric', unit='samples',
@@ -406,7 +409,7 @@ def test_time_window_crop_interval():
 
 
 def test_time_window_crop_end():
-    """ Test crop option 'end'."""
+    """Test crop option 'end'."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
         sig, interval=[1, 3], shape='symmetric', unit='samples',
@@ -425,7 +428,7 @@ def test_time_window_crop_end():
 
 
 def test_time_window_symmetric():
-    """ Test window option symmetric."""
+    """Test window option symmetric."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
         sig, interval=[1, 5], window='hann', shape='symmetric',
@@ -435,7 +438,7 @@ def test_time_window_symmetric():
 
 
 def test_time_window_symmetric_zero():
-    """ Test window option symmetric_zero."""
+    """Test window option symmetric_zero."""
     sig = pyfar.Signal(np.ones(12), 2)
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 4], shape='symmetric_zero')
@@ -444,7 +447,7 @@ def test_time_window_symmetric_zero():
 
 
 def test_time_window_left():
-    """ Test window options left."""
+    """Test window options left."""
     sig = pyfar.Signal(np.ones(7), 1)
     # Odd number of samples, crop='none'
     sig_win = dsp.time_window(
@@ -469,7 +472,7 @@ def test_time_window_left():
 
 
 def test_time_window_right():
-    """ Test window options right."""
+    """Test window options right."""
     sig = pyfar.Signal(np.ones(7), 1)
     # Odd number of samples, crop='none'
     sig_win = dsp.time_window(
@@ -494,7 +497,7 @@ def test_time_window_right():
 
 
 def test_time_window_interval_four_values():
-    """ Test time_window with four values given in interval."""
+    """Test time_window with four values given in interval."""
     sig = pyfar.Signal(np.ones(9), 1)
     sig_win = dsp.time_window(
         sig, window='triang', interval=[1, 3, 6, 7], crop='none')
@@ -508,7 +511,7 @@ def test_time_window_interval_four_values():
 
 
 def test_time_window_multichannel():
-    """ Test time_window of multichannel signal."""
+    """Test time_window of multichannel signal."""
     time = np.array(
         [[[1, 1, 1, 1], [2, 2, 2, 2]], [[3, 3, 3, 3], [4, 4, 4, 4]]])
     sig = pyfar.Signal(time, 1)
@@ -522,7 +525,7 @@ def test_time_window_multichannel():
 
 @pytest.mark.parametrize("crop", ['none', 'window', 'end'])
 def test_time_window_return_window(crop):
-    """ Test return window parameter."""
+    """Test return window parameter."""
     sig = pyfar.Signal(np.ones(10), 44100)
     sig_win, win = dsp.time_window(
         sig, interval=(4, 8), crop=crop, return_window=True)
@@ -538,14 +541,14 @@ def test_time_window_return_window(crop):
 
 
 def test_time_window_return_window_error():
-    """ Test return window with non bool parameter."""
+    """Test return window with non bool parameter."""
     sig = pyfar.Signal(np.ones(10), 44100)
     with pytest.raises(TypeError, match="boolean"):
         dsp.time_window(sig, interval=(4, 8), return_window='a')
 
 
 def test_kaiser_window_beta():
-    """ Test function call."""
+    """Test function call."""
     A = 51
     beta = dsp.kaiser_window_beta(A)
     beta_true = 0.1102*(A-8.7)
@@ -794,8 +797,7 @@ def test_convolve_mode_and_method(method, mode, desired):
 
 
 def test_convolve_mismatching_cdims():
-    """
-    Test if convolve works with broadcastable signals with different cdims
+    """Test if convolve works with broadcastable signals with different cdims
     """
     # generate and convolve signals
     signal_a = pf.signals.impulse(1, amplitude=np.atleast_2d([1, 2]))

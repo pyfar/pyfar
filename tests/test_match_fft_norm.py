@@ -37,7 +37,8 @@ def test_input_division_type():
                           ['psd',        'psd',          'psd']])
 def test_result_no_division(fft_norm_1, fft_norm_2, result):
     """Test the returned fft_norm for arithmetic operation by passing
-    valid combinations of fft_norms"""
+    valid combinations of fft_norms
+    """
     assert _match_fft_norm(fft_norm_1, fft_norm_2) == result
 
 
@@ -82,7 +83,8 @@ def test_assertion_no_division(fft_norm_1, fft_norm_2):
                           ['psd',        'psd',          'none']])
 def test_result_division(fft_norm_1, fft_norm_2, result):
     """Test the returned fft_norm for arithmetic operation by passing
-    valid combinations of fft_norms, with division=True"""
+    valid combinations of fft_norms, with division=True
+    """
     assert _match_fft_norm(fft_norm_1, fft_norm_2, division=True) == result
 
 
@@ -113,6 +115,7 @@ def test_result_division(fft_norm_1, fft_norm_2, result):
                           ['psd',        'power']])
 def test_assertion_division(fft_norm_1, fft_norm_2):
     """Test assertion by passing invalid combinations of fft_norms,
-    with division=True"""
+    with division=True
+    """
     with pytest.raises(ValueError, match="Either fft_norm_2 "):
         _match_fft_norm(fft_norm_1, fft_norm_2, division=True)

@@ -5,8 +5,7 @@ import pyfar as pf
 
 
 def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
-    """
-    Create and apply a digital Butterworth IIR filter.
+    """Create and apply a digital Butterworth IIR filter.
 
     This is a wrapper for :py:func:`scipy.signal.butter`. Which creates digital
     Butterworth filter coefficients in second-order sections (SOS).
@@ -35,8 +34,8 @@ def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -67,8 +66,7 @@ def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
 
 def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
                sampling_rate=None):
-    """
-    Create and apply digital Chebyshev Type I IIR filter.
+    """Create and apply digital Chebyshev Type I IIR filter.
 
     This is a wrapper for :py:func:`scipy.signal.cheby1`. Which creates digital
     Chebyshev Type I filter coefficients in second-order sections (SOS).
@@ -99,8 +97,8 @@ def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -133,8 +131,7 @@ def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
 
 def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
                sampling_rate=None):
-    """
-    Create and apply digital Chebyshev Type II IIR filter.
+    """Create and apply digital Chebyshev Type II IIR filter.
 
     This is a wrapper for :py:func:`scipy.signal.cheby2`. Which creates digital
     Chebyshev Type II filter coefficients in second-order sections (SOS).
@@ -166,8 +163,8 @@ def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -200,8 +197,7 @@ def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
 
 def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
              sampling_rate=None):
-    """
-    Create and apply digital Elliptic (Cauer) IIR filter.
+    """Create and apply digital Elliptic (Cauer) IIR filter.
 
     This is a wrapper for :py:func:`scipy.signal.ellip`. Which creates digital
     Elliptic (Cauer) filter coefficients in second-order sections (SOS).
@@ -234,8 +230,8 @@ def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -269,8 +265,7 @@ def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
 
 def bessel(signal, N, frequency, btype='lowpass', norm='phase',
            sampling_rate=None):
-    """
-    Create and apply digital Bessel/Thomson IIR filter.
+    """Create and apply digital Bessel/Thomson IIR filter.
 
     This is a wrapper for :py:func:`scipy.signal.bessel`. Which creates digital
     Bessel filter coefficients in second-order sections (SOS).
@@ -320,8 +315,8 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -352,8 +347,7 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
 
 
 def crossover(signal, N, frequency, sampling_rate=None):
-    """
-    Create and apply Linkwitz-Riley crossover network.
+    """Create and apply Linkwitz-Riley crossover network.
 
     Linkwitz-Riley crossover filters ([#]_, [#]_) are designed by cascading
     Butterworth filters of order `N/2`. where `N` must be even.
@@ -387,8 +381,8 @@ def crossover(signal, N, frequency, sampling_rate=None):
             drivers,' J. Audio Eng. Soc., vol. 24, no. 1, pp. 2–8, Jan. 1976.
     .. [#]  D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
             2005.
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -454,8 +448,7 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
 
 def notch(signal, center_frequency, quality, sampling_rate=None):
-    """
-    Create and apply or return a second order IIR notch filter.
+    """Create and apply or return a second order IIR notch filter.
 
     A notch filter is a band-stop filter with a narrow bandwidth
     (high quality factor). It rejects a narrow frequency band around the
@@ -489,8 +482,8 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     ----------
     .. [#]  S. J. Orfanidis, “Introduction To Signal Processing”,
             Prentice-Hall, 1996
-    """
 
+    """
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):

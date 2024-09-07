@@ -6,8 +6,7 @@ from pyfar import TimeData
 
 
 def test_data_time_init_with_defaults():
-    """
-    Test to init without optional parameters.
+    """Test to init without optional parameters.
     Test getter for domain, time, times, length, and n_samples.
     """
     data = [1, 0, -1]
@@ -23,8 +22,7 @@ def test_data_time_init_with_defaults():
 
 
 def test_data_time_init_wrong_dtype():
-    """
-    Test assertion from non integer/float data (also test time setter because
+    """Test assertion from non integer/float data (also test time setter because
     it is called during initialization)
     """
     with pytest.raises(ValueError, match="time data is complex"):
@@ -166,7 +164,6 @@ def test_magic_setitem():
 
 def test_magic_setitem_wrong_n_samples():
     """Test the setimtem for TimeData with wrong number of samples."""
-
     time_a = TimeData([1, 0, -1], [0, .1, .3])
     time_b = TimeData([2, 0, -2, 0], [0, .1, .3, .7])
     with pytest.raises(ValueError):

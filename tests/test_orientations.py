@@ -72,8 +72,7 @@ def test_orientations_from_view_up_invalid():
 
 
 def test_orientations_show(views, ups, positions, orientations):
-    """
-    Visualize orientations via `Orientations.show()`
+    """Visualize orientations via `Orientations.show()`
     with and without `positions`.
     """
     # default orientation
@@ -112,8 +111,7 @@ def test_orientations_show(views, ups, positions, orientations):
 
 
 def test_as_view_up_right(views, ups, orientations):
-    """
-    Output of this method must be the normed input vectors.
+    """Output of this method must be the normed input vectors.
     """
     views = np.atleast_2d(views).astype(np.float64)
     views /= np.linalg.norm(views, axis=1)[:, np.newaxis]
@@ -156,8 +154,7 @@ def test_from_view_as_view_roundtrip():
 
 
 def test_orientations_indexing(orientations):
-    """
-    Apply index-operator `[]` on `Orientations` to get a single quaternion.
+    """Apply index-operator `[]` on `Orientations` to get a single quaternion.
     """
     orientations[0]
     orientations[1]
@@ -172,8 +169,7 @@ def test_orientations_indexing(orientations):
 
 
 def test_orientations_indexing_assignment(orientations):
-    """
-    Assign a new value to a quaternion of an `Orientation`
+    """Assign a new value to a quaternion of an `Orientation`
     via the index-operator `[]`.
     """
     orientations[0] = Orientations([0, 0, 0, 1])

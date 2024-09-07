@@ -201,7 +201,7 @@ def test_find_within_error():
 ])
 @pytest.mark.parametrize('radius', [.5, 1, 2])
 def test_find_within_spherical(distance_measure, radius):
-    '''Test spherical distance measures for different radii'''
+    """Test spherical distance measures for different radii"""
     # Sampling grid in the median plane
     coords = pf.Coordinates.from_spherical_front(
         np.arange(0, 360, 10)*np.pi/180, np.pi/2, radius)
@@ -239,7 +239,7 @@ def test_find_within_atol():
 
 
 def test_find_within_tol_radius():
-    '''Test spherical distance measure with tolerance for radius'''
+    """Test spherical distance measure with tolerance for radius"""
     # Sampling grid in the median plane with varying radii
     coords = pf.Coordinates.from_spherical_front(
         np.arange(0, 360, 10)*np.pi/180, np.pi/2, 1)

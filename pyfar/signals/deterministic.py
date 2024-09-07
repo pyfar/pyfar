@@ -39,8 +39,8 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     `frequency` could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)``,
     and `phase` could be a scalar. In this case all parameters would be
     broadcasted to a shape of ``(2, 4)``.
-    """
 
+    """
     # check and match the cshape
     try:
         cshape, (frequency, amplitude, phase) = _match_shape(
@@ -81,8 +81,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
 
 def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
-    """
-    Generate a single or multi channel impulse signal, also known as the
+    """Generate a single or multi channel impulse signal, also known as the
     Dirac delta function.
 
     .. math::
@@ -118,6 +117,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     :doc:`numpy rules<numpy:user/basics.broadcasting>`. For example `delay`
     could be of shape ``(2, 4)``, `amplitude` of shape ``(2, 1)`` or a scalar.
     In this case all parameters would be broadcasted to a shape of ``(2, 4)``.
+
     """
     # check and match the cshape
     try:
@@ -144,8 +144,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
 def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
                       sampling_rate=44100):
-    """
-    Generate sine sweep with linearly increasing frequency in the time domain.
+    """Generate sine sweep with linearly increasing frequency in the time domain.
 
     Time domain sweep generation according to [#]_:
 
@@ -202,8 +201,8 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
         >>> import pyfar as pf
         >>> sweep = pf.signals.linear_sweep_time(2**16, [0, 22050])
         >>> pf.plot.time_freq(sweep)
-    """
 
+    """
     signal = _time_domain_sweep(
         n_samples, frequency_range, n_fade_out, amplitude,
         sampling_rate, "linear")
@@ -215,8 +214,7 @@ def linear_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, n_fade_in=0,
         n_fade_out=0, bandpass_order=8, sampling_rate=44100,
         return_group_delay=False):
-    """
-    Generate sine sweep with linearly increasing frequency in the frequency
+    """Generate sine sweep with linearly increasing frequency in the frequency
     domain.
 
     Sine sweep synthesis according to [#]_.
@@ -297,8 +295,8 @@ def linear_sweep_freq(
         >>> sweep = pf.signals.linear_sweep_freq(
         ...     2**16, [50, 22050], 1000, 1000)
         >>> pf.plot.time_freq(sweep)
-    """
 
+    """
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='linear',
@@ -314,8 +312,7 @@ def linear_sweep_freq(
 
 def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
                            amplitude=1, sweep_rate=None, sampling_rate=44100):
-    """
-    Generate sine sweep with exponentially increasing frequency in the time
+    """Generate sine sweep with exponentially increasing frequency in the time
     domain.
 
     Time domain sweep generation according to [#]_:
@@ -382,8 +379,8 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
         >>> import pyfar as pf
         >>> sweep = pf.signals.exponential_sweep_time(2**16, [50, 22050])
         >>> pf.plot.time_freq(sweep)
-    """
 
+    """
     signal = _time_domain_sweep(
         n_samples, frequency_range, n_fade_out, amplitude, sampling_rate,
         "exponential", sweep_rate)
@@ -395,8 +392,7 @@ def exponential_sweep_freq(
         n_samples, frequency_range, start_margin, stop_margin, n_fade_in=0,
         n_fade_out=0, bandpass_order=8, sampling_rate=44100,
         return_group_delay=False):
-    """
-    Generate sine sweep with exponentially increasing frequency in the
+    """Generate sine sweep with exponentially increasing frequency in the
     frequency domain.
 
     Sweep synthesis according to [#]_.
@@ -479,8 +475,8 @@ def exponential_sweep_freq(
         >>> sweep = pf.signals.exponential_sweep_freq(
         ...     2**16, [50, 22050], 5000, 1000)
         >>> pf.plot.time_freq(sweep)
-    """
 
+    """
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='exponential',
@@ -498,8 +494,7 @@ def magnitude_spectrum_weighted_sweep(
         n_samples, magnitude_spectrum, start_margin, stop_margin,
         n_fade_in=0, n_fade_out=0, sampling_rate=44100,
         return_group_delay=False):
-    """
-    Generate sine sweep with arbitrary magnitude spectrum in the frequency
+    """Generate sine sweep with arbitrary magnitude spectrum in the frequency
     domain.
 
     Frequency domain sine sweep synthesis according to [#]_. There is currently
@@ -572,8 +567,8 @@ def magnitude_spectrum_weighted_sweep(
         >>> sweep = pf.signals.magnitude_spectrum_weighted_sweep(
         ...     2**16, magnitude, 5000, 1000)
         >>> pf.plot.time_freq(sweep)
-    """
 
+    """
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type=magnitude_spectrum,
@@ -589,8 +584,7 @@ def magnitude_spectrum_weighted_sweep(
 
 def linear_perfect_sweep(
         n_samples, sampling_rate=44100, return_group_delay=False):
-    """
-    Generate a perfect linear sweep in the frequency domain.
+    """Generate a perfect linear sweep in the frequency domain.
 
     The perfect sweep is generated according to [#]_ and is used for adaptive
     system identification. It is orthogonal to delayed versions of itself.
@@ -662,8 +656,8 @@ def linear_perfect_sweep(
         >>>     plt.gca().set_xlim(-2**7, 2**7)
         >>>     plt.gca().set_xlabel('time lag in samples')
         >>>     plt.gca().set_ylabel('auto correlation')
-    """
 
+    """
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='perfect_linear',
@@ -681,8 +675,7 @@ def _frequency_domain_sweep(
         n_samples, sweep_type, frequency_range, bandpass_order,
         start_margin, stop_margin, n_fade_in, n_fade_out, sampling_rate,
         return_group_delay):
-    """
-    Frequency domain sweep synthesis with arbitrary magnitude response [#]_.
+    """Frequency domain sweep synthesis with arbitrary magnitude response [#]_.
 
     Non-unique parameters are documented in ``linear_sweep_freq``,
     ``exponential_sweep_freq``, ``linear_perfect_sweep``, and
@@ -725,8 +718,8 @@ def _frequency_domain_sweep(
            Directors Cut Including Previously Unreleased Material and some
            Corrections.' J. Audio Eng. Soc. 2001, 49 (6), 443-471. (all
            equations referenced in the code refer to this).
-    """
 
+    """
     # check input (only checks for user input, no checks for calling the
     # private function from the public functions)
     if isinstance(sweep_type, pyfar.Signal):
@@ -954,8 +947,7 @@ def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
 
 
 def _match_shape(*args):
-    """
-    Match the shape of *args to the shape of the arg with the largest size
+    """Match the shape of *args to the shape of the arg with the largest size
     using np.broadcast_shapes and np.broadcast_to()
 
     Parameters
@@ -970,8 +962,8 @@ def _match_shape(*args):
     args : list
         args with new common shape
         (*arg_1, *arg_2, ..., *arg_N)
-    """
 
+    """
     # broadcast shapes
     shape = np.broadcast_shapes(*[np.atleast_1d(arg).shape for arg in args])
 

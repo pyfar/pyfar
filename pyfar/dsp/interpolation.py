@@ -43,8 +43,7 @@ def _weighted_moving_average(input, output, weights):
 
 def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
                              window="boxcar"):
-    """
-    Smooth spectrum with a fractional octave width.
+    """Smooth spectrum with a fractional octave width.
 
     The smoothing is done according to Tylka et al. 2017 [#]_ (method 2) in
     three steps:
@@ -150,8 +149,8 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
         >>> ax.set_xlim(200, 4e3)
         >>> ax.set_ylim(-45, 5)
         >>> ax.legend(loc=3)
-    """
 
+    """
     if not isinstance(signal, pf.Signal):
         raise TypeError("Input signal has to be of type pyfar.Signal")
 
@@ -243,8 +242,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
 
 def fractional_time_shift(signal, shift, unit="samples", order=30,
                           side_lobe_suppression=60, mode="linear"):
-    """
-    Apply fractional time shift to input data.
+    """Apply fractional time shift to input data.
 
     This function uses a windowed Sinc filter (Method FIR-2 in [#]_ according
     to Equations 21 and 22) to apply fractional delays, i.e., non-integer
@@ -345,8 +343,8 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         >>>     pf.plot.time(delayed, label=f"delayed, mode={mode}", unit='ms')
         >>>
         >>> ax.legend()
-    """
 
+    """
     # check input -------------------------------------------------------------
     if not isinstance(signal, (pf.Signal)):
         raise TypeError("Input data has to be of type pyfar.Signal")
@@ -555,6 +553,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
         ...                   label="resampled (time domain matched)", c='y')
         >>> ax[0].set_xlim(1.2,1.46)
         >>> plt.legend()
+
     """
     # check input
     if not isinstance(signal, (pf.Signal)):
@@ -630,8 +629,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
 
 
 class InterpolateSpectrum():
-    """
-    Interpolate an incomplete spectrum to a complete single sided spectrum.
+    """Interpolate an incomplete spectrum to a complete single sided spectrum.
 
     This is intended to interpolate transfer functions, for example sparse
     spectra that are defined only at octave frequencies or incomplete spectra
@@ -810,11 +808,9 @@ class InterpolateSpectrum():
         self._f_in = data.frequencies.copy()
 
     def __call__(self, n_samples, sampling_rate, show=False):
-        """
-        Interpolate a Signal with n_samples length.
+        """Interpolate a Signal with n_samples length.
         (see class docstring) for more information.
         """
-
         # length of half sided spectrum and highest frequency
         n_fft = n_samples//2 + 1
         f_max = sampling_rate / n_samples * (n_fft - 1)

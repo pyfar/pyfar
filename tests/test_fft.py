@@ -313,11 +313,9 @@ def test_normalization_single_sided_multi_channel_even_samples():
 
 
 def test_normalization_with_window():
-    """
-    Test if the window cancels out if applying the normalization and
+    """Test if the window cancels out if applying the normalization and
     inverse normalization.
     """
-
     # test with window as list and numpy array
     windows = [[1, 1, 1, 1], np.array([1, 1, 1, 1])]
 
@@ -333,11 +331,9 @@ def test_normalization_with_window():
 
 
 def test_normalization_with_window_value_error():
-    """
-    Test if normalization throws a ValueError if the window has the
+    """Test if normalization throws a ValueError if the window has the
     wrong length.
     """
-
     with raises(ValueError):
         # n_samples=5, and len(window)=5
         fft.normalization(np.array([.5, 1, .5]), 4, 44100,
@@ -354,7 +350,7 @@ def test_normalization_exceptions():
 
 
 def test_rfft_normalization_impulse(impulse_stub):
-    """ Test for call of normalization in rfft.
+    """Test for call of normalization in rfft.
     """
     signal_spec = fft.rfft(
         impulse_stub.time, impulse_stub.n_samples, impulse_stub.sampling_rate,
@@ -366,7 +362,7 @@ def test_rfft_normalization_impulse(impulse_stub):
 
 
 def test_rfft_normalization_sine(sine_stub):
-    """ Test for correct call of normalization in rfft.
+    """Test for correct call of normalization in rfft.
     """
     signal_spec = fft.rfft(
         sine_stub.time, sine_stub.n_samples, sine_stub.sampling_rate,

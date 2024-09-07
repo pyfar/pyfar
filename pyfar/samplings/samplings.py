@@ -12,8 +12,7 @@ from . import external
 
 
 def cart_equidistant_cube(n_points):
-    """
-    Create a cuboid sampling with equidistant spacings in x, y, and z.
+    """Create a cuboid sampling with equidistant spacings in x, y, and z.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.cube_equidistant`.
@@ -67,8 +66,7 @@ def cart_equidistant_cube(n_points):
 
 
 def sph_dodecahedron(radius=1.):
-    """
-    Generate a sampling based on the center points of the twelve
+    """Generate a sampling based on the center points of the twelve
     dodecahedron faces.
 
     This function will be deprecated in pyfar 0.8.0 in favor
@@ -84,6 +82,7 @@ def sph_dodecahedron(radius=1.):
     sampling : Coordinates
         Sampling positions. Sampling weights can be obtained from
         :py:func:`calculate_sph_voronoi_weights`.
+
     """
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -129,8 +128,7 @@ def sph_dodecahedron(radius=1.):
 
 
 def sph_icosahedron(radius=1.):
-    """
-    Generate a sampling from the center points of the twenty icosahedron faces.
+    """Generate a sampling from the center points of the twenty icosahedron faces.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.icosahedron`.
@@ -171,8 +169,7 @@ def sph_icosahedron(radius=1.):
 
 
 def sph_equiangular(n_points=None, sh_order=None, radius=1.):
-    """
-    Generate an equiangular sampling of the sphere.
+    """Generate an equiangular sampling of the sphere.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.equiangular`.
@@ -263,8 +260,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
 
 
 def sph_gaussian(n_points=None, sh_order=None, radius=1.):
-    """
-    Generate sampling of the sphere based on the Gaussian quadrature.
+    """Generate sampling of the sphere based on the Gaussian quadrature.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.gaussian`.
@@ -350,8 +346,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
 
 
 def sph_extremal(n_points=None, sh_order=None, radius=1.):
-    """
-    Return a Hyperinterpolation sampling grid.
+    """Return a Hyperinterpolation sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.hyperinterpolation`.
@@ -451,8 +446,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
 def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
                  radius=1.):
-    """
-    Return spherical t-design sampling grid.
+    """Return spherical t-design sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.spherical_t_design`.
@@ -587,8 +581,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
 
 def sph_equal_angle(delta_angles, radius=1.):
-    """
-    Generate sampling of the sphere with equally spaced angles.
+    """Generate sampling of the sphere with equally spaced angles.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.equal_angle`.
@@ -658,8 +651,7 @@ def sph_equal_angle(delta_angles, radius=1.):
 
 def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
                      azimuth_res=1, match=360):
-    """
-    Spherical sampling grid according to the great circle distance criterion.
+    """Spherical sampling grid according to the great circle distance criterion.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.great_circle`.
@@ -700,6 +692,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
             the head-related transfer functions of an artificial head with a
             high directional resolution,” 109th AES Convention, Los Angeles,
             USA, Sep. 2000.
+
     """
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -752,8 +745,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
 
 
 def sph_lebedev(n_points=None, sh_order=None, radius=1.):
-    """
-    Return Lebedev spherical sampling grid.
+    """Return Lebedev spherical sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.lebedev`.
@@ -856,8 +848,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
 
 
 def sph_fliege(n_points=None, sh_order=None, radius=1.):
-    """
-    Return Fliege-Maier spherical sampling grid.
+    """Return Fliege-Maier spherical sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.fliege`.
@@ -956,6 +947,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
            and corresponding cubature formulae,” IMA J. Numerical Analysis,
            Vol. 19, pp. 317–334, Apr. 1999, doi: 10.1093/imanum/19.2.317.
     .. [#] https://audiogroup.web.th-koeln.de/SOFiA_wiki/DOWNLOAD.html
+
     """
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -1026,8 +1018,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
 
 
 def sph_equal_area(n_points, radius=1.):
-    """
-    Sampling based on partitioning into faces with equal area.
+    """Sampling based on partitioning into faces with equal area.
 
     This function will be deprecated in pyfar 0.8.0 in favor
     of :py:func:`spharpy.samplings.equal_area`.
@@ -1053,6 +1044,7 @@ def sph_equal_area(n_points, radius=1.):
     .. [#]  P. Leopardi, “A partition of the unit sphere into regions of equal
             area and small diameter,” Electronic Transactions on Numerical
             Analysis, vol. 25, no. 12, pp. 309–327, 2006.
+
     """
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -1073,7 +1065,6 @@ def _sph_extremal_load_data(orders='all'):
     orders = 'all' : load all samplings up to SH order 99
     orders = int, list : load sampling of specified SH order(s)
     """
-
     # set the SH orders to be read
     if isinstance(orders, int):
         orders = [orders]
@@ -1121,7 +1112,6 @@ def _sph_t_design_load_data(degrees='all'):
     degrees = 'all' : load all samplings up to degree 99
     degrees = number : load sampling of specified degree
     """
-
     # set the degrees to be read
     if isinstance(degrees, int):
         degrees = [degrees]

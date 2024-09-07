@@ -139,7 +139,6 @@ def test_interaction_attached():
     This test will fail if a new plot function is added to the pyfar.plot that
     does not have an interaction. This is intended behavior.
     """
-
     # dummy signal
     # - long enough to avoid warning due to identical xlims in spectrogram
     # - with delay to avoid warning due to identical ylims in group delay
@@ -174,7 +173,6 @@ def test_interaction_attached():
 ])
 def test_toggle_plots(plot_type, initial_function, function_list):
     """Test toggling plots by checking labels after toggling."""
-
     # dummy signal
     # - long enough to avoid warning due to identical xlims in spectrogram
     # - with delay to avoid warning due to identical ylims in group delay
@@ -238,8 +236,7 @@ def test_toggle_plots(plot_type, initial_function, function_list):
      sc_ctr["cycle_plot_types"]["key"][0]),
     ])
 def test_interaction_not_allowed(plot, signal, shortcut):
-    """
-    Test interactions that are not allowed are caught.
+    """Test interactions that are not allowed are caught.
     Can be extended if required in the future.
     """
     # Use create figure to specify the plot backend
@@ -418,8 +415,7 @@ def test_toggle_colormap():
 
 
 def test_toggle_orientation_2d_plots():
-    """
-    Test if the orientation is toggled by comparing the axis labels before
+    """Test if the orientation is toggled by comparing the axis labels before
     and after toggling.
     """
     # Use create figure to specify the plot backend

@@ -12,6 +12,7 @@ from matplotlib.ticker import (
 
 class FractionalOctaveFormatter(FixedFormatter):
     """Formatter for fractional octave bands."""
+
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -32,6 +33,7 @@ class FractionalOctaveFormatter(FixedFormatter):
 
 class FractionalOctaveLocator(FixedLocator):
     """Locator for fractional octave bands."""
+
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -50,6 +52,7 @@ class FractionalOctaveLocator(FixedLocator):
 
 class LogLocatorITAToolbox(LogLocator):
     """Log-locator inspired by the tick labels used in the ITA-Toolbox."""
+
     def __init__(
         self,
         base=10.0,
@@ -63,10 +66,10 @@ class LogLocatorITAToolbox(LogLocator):
 
 
 class LogFormatterITAToolbox(LogFormatter):
-    """
-    Log-formatter inspired by the tick labels used in the ITA-Toolbox
+    """Log-formatter inspired by the tick labels used in the ITA-Toolbox
     for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
     """
+
     def __init__(
         self,
         base=10.0,
@@ -95,8 +98,7 @@ class LogFormatterITAToolbox(LogFormatter):
         return s
 
     def __call__(self, x, pos=None):
-        """
-        Return the format for tick val *x*.
+        """Return the format for tick val *x*.
         """
         if x == 0.0:  # Symlog
             return '0'
@@ -110,10 +112,10 @@ class LogFormatterITAToolbox(LogFormatter):
 
 
 class MultipleFractionLocator(MultipleLocator):
-    r"""
-    Tick locator for rational fraction multiples of a specified base, ie.
+    r"""Tick locator for rational fraction multiples of a specified base, ie.
     `math: \pi / 2`.
     """
+
     def __init__(self, nominator=1, denominator=2, base=1):
         super().__init__(base=base * nominator / denominator)
         self._nominator = nominator
@@ -121,10 +123,10 @@ class MultipleFractionLocator(MultipleLocator):
 
 
 class MultipleFractionFormatter(Formatter):
-    r"""
-    Tick formatter for rational fraction multiples of a specified base, ie.
+    r"""Tick formatter for rational fraction multiples of a specified base, ie.
     `math: \pi / 2`.
     """
+
     def __init__(self, nominator=1, denominator=2, base=1, base_str=None):
         super().__init__()
         self._nominator = nominator

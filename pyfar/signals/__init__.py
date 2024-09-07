@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module contains functions for generating common deterministic and
+"""This module contains functions for generating common deterministic and
 stochastic audio signals such as impulses, sine sweeps, and noise signals.
 
 All signal lengths are given in samples. The value for the length is casted to

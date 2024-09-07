@@ -8,8 +8,7 @@ from pyfar.plot._interaction import PlotParameter
 
 
 def plotstyle(style='light'):
-    """
-    Get the fullpath of the pyfar plotstyles ``light`` or ``dark``.
+    """Get the fullpath of the pyfar plotstyles ``light`` or ``dark``.
 
     The plotstyles are defined by mplstyle files, which is Matplotlibs format
     to define styles. By default, pyfar uses the ``light`` plotstyle.
@@ -24,13 +23,12 @@ def plotstyle(style='light'):
     style : str
         Full path to the pyfar plotstyle.
 
-    See also
+    See Also
     --------
     pyfar.plot.use
     pyfar.plot.context
 
     """
-
     if style in ['light', 'dark']:
         style = os.path.join(
             os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
@@ -68,7 +66,7 @@ def context(style='light', after_reset=False):
         If ``True``, apply style after resetting settings to their defaults;
         otherwise, apply style on top of the current settings.
 
-    See also
+    See Also
     --------
     pyfar.plot.plotstyle
 
@@ -81,8 +79,8 @@ def context(style='light', after_reset=False):
     >>> with pf.plot.context():
     >>>     fig, ax = plt.subplots(2, 1)
     >>>     pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
-    """
 
+    """
     # get pyfar plotstyle if desired
     style = plotstyle(style)
 
@@ -92,8 +90,7 @@ def context(style='light', after_reset=False):
 
 
 def use(style="light"):
-    """
-    Use plot style settings from a style specification.
+    """Use plot style settings from a style specification.
 
     The style name of ``default`` is reserved for reverting back to
     the default style settings. This is a wrapper for
@@ -119,7 +116,7 @@ def use(style="light"):
         |      | first to last in the list.                                  |
         +------+-------------------------------------------------------------+
 
-    See also
+    See Also
     --------
     pyfar.plot.plotstyle
 
@@ -139,7 +136,6 @@ def use(style="light"):
     >>> pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
 
     """
-
     # get pyfar plotstyle if desired
     style = plotstyle(style)
     # use plot style
@@ -177,6 +173,7 @@ def color(color):
     -------
     color_hex : str
         pyfar default color as HEX string
+
     """
     color_dict = _utils._default_color_dict()
     colors = list(color_dict.keys())
@@ -223,7 +220,6 @@ def shortcuts(show=True, report=False, layout="console"):
         The console output as a string. Only returned if `report` is ``True``.
 
     """  # noqa: W605 (to ignore \*)
-
     # load short cuts from json file
     sc = os.path.join(os.path.dirname(__file__), 'shortcuts', 'shortcuts.json')
     with open(sc, "r") as read_file:

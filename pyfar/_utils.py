@@ -5,8 +5,7 @@ import functools
 
 # Decorator function to rename parameters to be deprecated
 def rename_arg(arg_map, warning_message):
-    """
-    Function for deprecating or renaming arguments.
+    """Function for deprecating or renaming arguments.
 
     Intercepts input if a deprecated argument is passed, replaces it with
     a new argument and raises a PyfarDeprecationWarning.
@@ -37,6 +36,7 @@ def rename_arg(arg_map, warning_message):
         >>>     return arg1, arg2, new_arg
         >>>
         >>> function(1, 2, old_arg=3)
+
     """
 
     def decorator(func):
