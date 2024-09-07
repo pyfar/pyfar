@@ -399,7 +399,6 @@ def reconstructing_fractional_octave_bands(
 
     Examples
     --------
-
     Filter and re-synthesize an impulse signal.
 
     .. plot::

@@ -59,7 +59,6 @@ class GammatoneBands():
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf

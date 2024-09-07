@@ -375,7 +375,6 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
     Examples
     --------
-
     Exponential sweep between 50 and 22050 Hz
 
     .. plot::
@@ -472,7 +471,6 @@ def exponential_sweep_freq(
 
     Examples
     --------
-
     Exponential sweep between 50 and 22050 Hz
 
     .. plot::
@@ -565,7 +563,6 @@ def magnitude_spectrum_weighted_sweep(
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf

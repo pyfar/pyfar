@@ -17,6 +17,17 @@ lint.select = [
     "D104", # Missing docstring in public package
     "D105", # Missing docstring in magic method
     "D106", # Missing docstring in public nested class
+    "D206", # Docstring should be indented with spaces, not tabs
+    "D207", # Docstring is under-indented
+    "D208", # Docstring is over-indented
+    "D407", # Missing section underline
+    "D408", # Section underline should be in the line following the section's name
+    "D409", # Section underline should match the length of its name
+    "D410", # Missing blank line after section
+    "D411", # Missing blank line before section
+    "D412", # No blank lines allowed between a section and its content
+    "D414", # Section has no content
+    "D419", # Docstring is empty
 ]
 
 # Ignore missing docstrings in tests
@@ -26,3 +37,6 @@ lint.select = [
     "D103",
     "D104",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D101"]

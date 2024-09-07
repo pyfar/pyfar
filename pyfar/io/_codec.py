@@ -441,7 +441,7 @@ def _is_numpy_scalar(obj):
 
 def _is_type_hint(obj):
     """ Check if object is stored along with its type in the typical format:
-            [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)]
+    [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)]
     """
     return isinstance(obj, list) \
         and len(obj) == 2 \
@@ -462,7 +462,7 @@ def _str_to_type(type_as_string, module='pyfar'):
         The default is 'pyfar'.
 
     Returns
-    ----------
+    -------
     PyfarType: type.
         A valid PyfarType.
     """

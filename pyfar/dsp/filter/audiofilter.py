@@ -65,7 +65,7 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
 blob/master/filter_design/audiofilter.py
 
     Examples
-    -----
+    --------
     First and second order allpass filter with ``fc = 1000`` Hz.
 
     .. plot::
@@ -550,7 +550,6 @@ def high_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -760,7 +759,6 @@ def low_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 

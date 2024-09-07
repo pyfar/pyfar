@@ -296,7 +296,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -340,7 +339,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -381,7 +379,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -421,7 +418,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -461,7 +457,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -501,7 +496,6 @@ class Coordinates():
 
         Examples
         --------
-
         Create a coordinates object
 
         >>> import pyfar as pf
@@ -1033,8 +1027,8 @@ class Coordinates():
     @property
     def sh_order(self):
         """This function will be deprecated in pyfar 0.8.0 in favor
-            of :py:class:`spharpy.samplings.SamplingSphere`.
-            Get the maximum spherical harmonic order."""
+        of :py:class:`spharpy.samplings.SamplingSphere`.
+        Get the maximum spherical harmonic order."""
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),
@@ -1045,8 +1039,8 @@ class Coordinates():
     @sh_order.setter
     def sh_order(self, value):
         """This function will be deprecated in pyfar 0.8.0 in favor
-            of :py:class:`spharpy.samplings.SamplingSphere`.
-            Set the maximum spherical harmonic order."""
+        of :py:class:`spharpy.samplings.SamplingSphere`.
+        Set the maximum spherical harmonic order."""
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),
@@ -1564,7 +1558,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find frontal point from a spherical coordinate system
 
         .. plot::
@@ -1748,7 +1741,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find all point with 1m distance from the frontal point
 
         .. plot::
@@ -1905,7 +1897,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find the nearest point in a line
 
         .. plot::
@@ -1982,7 +1973,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find frontal points within a distance of 0.5 meters
 
         .. plot::
@@ -2059,7 +2049,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find top points within a distance of 45 degrees
 
         .. plot::
@@ -2137,7 +2126,6 @@ class Coordinates():
 
         Examples
         --------
-
         Find horizontal slice of spherical coordinate system within a ring of
         +/- 10 degrees
 
@@ -2242,7 +2230,6 @@ class Coordinates():
 
         Examples
         --------
-
         Get a coordinates object
 
         >>> import pyfar as pf
