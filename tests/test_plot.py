@@ -242,7 +242,7 @@ def test_line_frequency_data(function, handsome_signal):
 
 
 def test_spectrogram():
-    """Test spectrogram with default parameters"""
+    """Test spectrogram with default parameters."""
     function = plot.spectrogram
 
     print(f"Testing: {function.__name__}")
@@ -274,7 +274,7 @@ def test_2d_plots(function, handsome_signal_2d):
 @pytest.mark.parametrize('orientation', [('vertical'), ('horizontal')])
 def test_2d_points_orientation(
         function, orientation, points, handsome_signal_2d):
-    """Test 2D plots with varing `points` and `orientation` parameters"""
+    """Test 2D plots with varing `points` and `orientation` parameters."""
     print(f"Testing: {function.__name__}")
     points_label = 'points-default' if points == 'default' else 'points-custom'
     signal = handsome_signal_2d
@@ -294,7 +294,7 @@ def test_2d_points_orientation(
     (plot.group_delay_2d)])
 @pytest.mark.parametrize('colorbar', [('off'), ('axes')])
 def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
-    """Test 2D color bar options"""
+    """Test 2D color bar options."""
     print(f"Testing: {function.__name__} with colorbar {colorbar}")
     filename = f'{function.__name__}_colorbar-{colorbar}'
     # pad zeros to get minimum signal length for spectrogram

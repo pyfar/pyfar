@@ -78,7 +78,7 @@ def _extend_sos_coefficients(sos, order):
 
 
 def _repr_string(filter_type, order, n_channels, sampling_rate):
-    """Generate repr string for filter objects"""
+    """Generate repr string for filter objects."""
 
     ch_str = 'channel' if n_channels == 1 else 'channels'
 
@@ -172,7 +172,7 @@ class Filter(object):
 
     @coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
         self._coefficients = _atleast_3d_first_dim(value)
 
     @property
@@ -184,7 +184,7 @@ class Filter(object):
 
     @property
     def n_channels(self):
-        """The number of channels of the filter"""
+        """The number of channels of the filter."""
         return self._coefficients.shape[0]
 
     @property
@@ -343,7 +343,7 @@ class FilterFIR(Filter):
 
     @coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
 
         b = np.atleast_2d(value)
         # add a-coefficients for easier handling across filter classes
@@ -495,7 +495,7 @@ class FilterSOS(Filter):
 
     @Filter.coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
 
         coeff = _atleast_3d_first_dim(value)
         if coeff.shape[-1] != 6:
@@ -513,7 +513,7 @@ class FilterSOS(Filter):
 
     @property
     def n_sections(self):
-        """The number of sections"""
+        """The number of sections."""
         return self._coefficients.shape[-2]
 
     def init_state(self, cshape, state='zeros'):

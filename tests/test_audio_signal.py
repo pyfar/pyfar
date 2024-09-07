@@ -27,7 +27,7 @@ def test_signal_init_default_parameter():
 
 
 def test_signal_init_assertions():
-    """Test assertions in initialization"""
+    """Test assertions in initialization."""
 
     with pytest.raises(ValueError, match="Invalid FFT normalization"):
         Signal(1, 44100, fft_norm="funky")
@@ -42,7 +42,7 @@ def test_signal_init_assertions():
 def test_signal_init_time_dtype():
     """
     Test casting and assertions of dtype (also test time setter because
-    it is called during initialization)
+    it is called during initialization).
     """
     # integer to float casting
     signal = Signal([1, 2, 3], 44100)
@@ -60,7 +60,7 @@ def test_signal_init_time_dtype():
 def test_data_frequency_init_dtype():
     """
     Test casting and assertions of dtype (also test freq setter because
-    it is called during initialization)
+    it is called during initialization).
     """
 
     # integer to float casting
@@ -488,7 +488,7 @@ def test___eq___notEqual():
 
 
 def test__repr__(capfd):
-    """Test string representation"""
+    """Test string representation."""
     print(Signal([0, 1, 0], 44100))
     out, _ = capfd.readouterr()
     assert ("time domain energy Signal:\n"
@@ -528,7 +528,7 @@ def test_setter_freq_raw_single_frequency():
 def test_setter_freq_raw_dtype():
     """
     Test casting and assertions of dtype (not tested during initialization
-    because that calls the `freq` setter)
+    because that calls the `freq` setter).
     """
     signal = Signal([0, 1, 2], 44100, 4, "freq")
 

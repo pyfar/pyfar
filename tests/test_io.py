@@ -22,7 +22,7 @@ from pyfar import FrequencyData, TimeData
 @pytest.mark.parametrize('input_type', ('filename', 'path_object'))
 def test_read_sofa_filename_and_path_object(
         input_type, generate_sofa_GeneralFIR, noise_two_by_three_channel):
-    """Test read_sofa with filename and path object as input"""
+    """Test read_sofa with filename and path object as input."""
 
     if input_type == 'filename':
         file = generate_sofa_GeneralFIR
@@ -37,33 +37,33 @@ def test_read_sofa_filename_and_path_object(
 
 def test_read_sofa_GeneralFIR(
         generate_sofa_GeneralFIR, noise_two_by_three_channel):
-    """Test for sofa datatype GeneralFIR"""
+    """Test for sofa datatype GeneralFIR."""
     signal = io.read_sofa(generate_sofa_GeneralFIR)[0]
     npt.assert_allclose(signal.time, noise_two_by_three_channel.time)
 
 
 def test_read_sofa_GeneralTF(
         generate_sofa_GeneralTF, noise_two_by_three_channel):
-    """Test for sofa datatype GeneralTF"""
+    """Test for sofa datatype GeneralTF."""
     signal = io.read_sofa(generate_sofa_GeneralTF)[0]
     npt.assert_allclose(signal.freq, noise_two_by_three_channel.freq)
 
 
 def test_read_sofa_GeneralFIR_E(generate_sofa_GeneralFIR_E):
-    "Test order of axis for emitter dependent FIR data"
+    "Test order of axis for emitter dependent FIR data."
     signal = io.read_sofa(generate_sofa_GeneralFIR_E)[0]
     assert signal.cshape == (3, 4, 2)
 
 
 def test_read_sofa_GeneralTF_E(generate_sofa_GeneralTF_E):
-    "Test order of axis for emitter dependent TF data"
+    "Test order of axis for emitter dependent TF data."
     signal = io.read_sofa(generate_sofa_GeneralTF_E)[0]
     assert signal.cshape == (3, 4, 2)
 
 
 def test_read_sofa_coordinates(
         generate_sofa_GeneralFIR, sofa_reference_coordinates):
-    """Test for reading coordinates in sofa file"""
+    """Test for reading coordinates in sofa file."""
     _, s_coords, r_coords, = io.read_sofa(generate_sofa_GeneralFIR)
     npt.assert_allclose(
         s_coords.cartesian, sofa_reference_coordinates[0])
@@ -73,7 +73,7 @@ def test_read_sofa_coordinates(
 
 def test_read_sofa_position_type_spherical(
         generate_sofa_postype_spherical, sofa_reference_coordinates):
-    """Test to verify correct position type of sofa file"""
+    """Test to verify correct position type of sofa file."""
     _, s_coords, r_coords = io.read_sofa(generate_sofa_postype_spherical)
     npt.assert_allclose(
         s_coords.spherical_elevation[..., :2] / np.pi * 180,
@@ -107,7 +107,7 @@ def test_read_erroneous_data(file, version):
 def test_convert_sofa_assertion():
     """
     Test assertion for convert_sofa
-    (everything else is tested through read_sofa)
+    (everything else is tested through read_sofa).
     """
 
     with pytest.raises(TypeError, match="Input must be a sofar.Sofa object"):
@@ -205,7 +205,7 @@ def test_write_read_FlatDataNoPyfarType_TypeError(_, no_decode_obj, tmpdir):
 
 def test_write_read_orientations(orientations, tmpdir):
     """ Orientations
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'orientations.far')
     io.write(filename, orientations=orientations)
@@ -216,7 +216,7 @@ def test_write_read_orientations(orientations, tmpdir):
 
 def test_write_read_coordinates(coordinates, tmpdir):
     """ Coordinates
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'coordinates.far')
     io.write(filename, coordinates=coordinates)
@@ -228,7 +228,7 @@ def test_write_read_coordinates(coordinates, tmpdir):
 @pytest.mark.parametrize("domain", ["time", "freq"])
 def test_write_read_signal(domain, sine, tmpdir):
     """ Signal
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'signal.far')
     sine.domain = domain
@@ -242,7 +242,7 @@ def test_write_read_signal(domain, sine, tmpdir):
 
 def test_write_read_timedata(time_data, tmpdir):
     """ TimeData
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'timedata.far')
     io.write(filename, timedata=time_data)
@@ -253,7 +253,7 @@ def test_write_read_timedata(time_data, tmpdir):
 
 def test_write_read_frequencydata(frequency_data, tmpdir):
     """ TimeData
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'frequencydata.far')
     io.write(filename, frequencydata=frequency_data)
@@ -264,7 +264,7 @@ def test_write_read_frequencydata(frequency_data, tmpdir):
 
 def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     """ SphericalVoronoi
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'sphericalvoronoi.far')
     io.write(filename, sphericalvoronoi=sphericalvoronoi)
@@ -275,7 +275,7 @@ def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
 
 def test_write_read_filter(filter, tmpdir):
     """ Filter
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'filter.far')
     io.write(filename, filter=filter)
@@ -286,7 +286,7 @@ def test_write_read_filter(filter, tmpdir):
 
 def test_write_filterFIR(filterFIR, tmpdir):
     """ filterFIR
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'filterIIR.far')
     io.write(filename, filterFIR=filterFIR)
@@ -297,7 +297,7 @@ def test_write_filterFIR(filterFIR, tmpdir):
 
 def test_write_filterIIR(filterIIR, tmpdir):
     """ FilterIIR
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'filterIIR.far')
     io.write(filename, filterIIR=filterIIR)
@@ -308,7 +308,7 @@ def test_write_filterIIR(filterIIR, tmpdir):
 
 def test_write_filterSOS(filterSOS, tmpdir):
     """ filterSOS
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'filterSOS.far')
     io.write(filename, filterSOS=filterSOS)
@@ -319,7 +319,7 @@ def test_write_filterSOS(filterSOS, tmpdir):
 
 def test_write_gammatone_bands(tmpdir):
     """ dsp.filter.GammatoneBands
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'gammatone_bands.far')
     gammatone_bands = pyfar.dsp.filter.GammatoneBands((0, 22050))
@@ -331,7 +331,7 @@ def test_write_gammatone_bands(tmpdir):
 
 def test_write_read_numpy_ndarrays(tmpdir):
     """ Numpy ndarray
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
     matrix_2d_float = matrix_2d_int.astype(float)
@@ -613,7 +613,7 @@ def test_write_audio_clip(sf_write_mock):
 
 
 def test_write_audio_sampling_rate_type(tmpdir):
-    """Test sampling_rates of type float"""
+    """Test sampling_rates of type float."""
 
     # test with integer value as float
     signal = pyfar.signals.impulse(1024)

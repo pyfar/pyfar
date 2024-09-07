@@ -149,7 +149,7 @@ def _return_default_colors_rgb(**kwargs):
 
 
 def _default_color_dict():
-    """pyfar default colors in the order matching the plotstyles"""
+    """pyfar default colors in the order matching the plotstyles."""
 
     colors = {'b': '#1471B9',  # blue
               'r': '#D83C27',  # red
@@ -282,7 +282,7 @@ def _log_prefix(signal):
 def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
                      colorbar, **kwargs):
     """
-    Check and prepare input for 2D plots
+    Check and prepare input for 2D plots.
 
     1. Check for correct instance and cshape of data
     2. Prepare the plot
@@ -376,7 +376,7 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
 
 def _add_colorbar(colorbar, fig, ax, qm, label):
     """
-    Add colorbar to 2D plot
+    Add colorbar to 2D plot.
 
     Parameters
     ----------

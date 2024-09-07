@@ -956,7 +956,7 @@ def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
 def _match_shape(*args):
     """
     Match the shape of *args to the shape of the arg with the largest size
-    using np.broadcast_shapes and np.broadcast_to()
+    using np.broadcast_shapes and np.broadcast_to().
 
     Parameters
     ----------

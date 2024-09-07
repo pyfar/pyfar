@@ -129,7 +129,7 @@ def test_nan_value_normalization(data):
 
 
 def test_error_raises():
-    """Test normalize function errors"""
+    """Test normalize function errors."""
     with raises(TypeError, match=("Input data has to be of type 'Signal', "
                                   "'TimeData' or 'FrequencyData'.")):
         pf.dsp.normalize([0, 1, 0])

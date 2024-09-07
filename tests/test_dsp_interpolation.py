@@ -11,7 +11,7 @@ from pyfar.dsp import (InterpolateSpectrum,
 
 
 def test_smooth_fractional_octave_assertions():
-    """Test if the assertions are raised correctly"""
+    """Test if the assertions are raised correctly."""
 
     # wrong audio data type
     with raises(TypeError, match="Input signal has to be of type"):
@@ -30,7 +30,7 @@ def test_smooth_fractional_octave_assertions():
     "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
 def test_smooth_fractional_octave_mode(mode):
     """
-    Test return signal for different smoothing modes against saved references
+    Test return signal for different smoothing modes against saved references.
     """
 
     # load input data
@@ -52,7 +52,7 @@ def test_smooth_fractional_octave_mode(mode):
 @pytest.mark.parametrize("num_fractions", (1, 5))
 def test_smooth_fractional_octave_num_fractions(num_fractions):
     """
-    Test return signal for different smoothing widths against saved references
+    Test return signal for different smoothing widths against saved references.
     """
 
     # load input data
@@ -75,7 +75,7 @@ def test_smooth_fractional_octave_window_parameter():
     """
     Test the returned window paramters. Only the types are tested. Testing
     values would require implementing the same code as contained in the
-    function
+    function.
     """
 
     _, window_paraeter = smooth_fractional_octave(pf.signals.impulse(64), 1)
@@ -94,7 +94,7 @@ def test_smooth_fractional_octave_input_signal_shape(amplitudes):
     """
     - Test for different shapes of the input signal
     - Test if padding is correct (if it would not be the output spectrum
-      would be shifted
+      would be shifted.
     """
 
     # manually path a window for smoothing (undocumented feature for testing)
@@ -110,7 +110,7 @@ def test_smooth_fractional_octave_input_signal_shape(amplitudes):
 
 
 def test_fractional_time_shift_assertions():
-    """Test if the assertions are raised correctly"""
+    """Test if the assertions are raised correctly."""
 
     # wrong audio data type
     with raises(TypeError, match="Input data has to be of type pyfar.Signal"):
@@ -151,7 +151,7 @@ def test_fractional_time_shift_channels(
         mode, delays_impulse, fractional_delays):
     """
     Test fractional delay with different combinations of single/multi-channel
-    signals and delays and the two modes "linear" and "cyclic"
+    signals and delays and the two modes "linear" and "cyclic".
     """
 
     # generate input and delay signal
@@ -175,7 +175,7 @@ def test_fractional_time_shift_channels(
 
 
 def test_fractional_time_shift_unit():
-    """Test passing shift in different units"""
+    """Test passing shift in different units."""
 
     impulse = pf.signals.impulse(128, 64)
     delayed_samples = fractional_time_shift(impulse, 1, 'samples')
@@ -186,7 +186,7 @@ def test_fractional_time_shift_unit():
 
 @pytest.mark.parametrize("order", [2, 3])
 def test_fractional_delay_order(order):
-    """Test if the order parameter behaves as intended"""
+    """Test if the order parameter behaves as intended."""
 
     signal = pf.signals.impulse(32, 16)
     delayed = pf.dsp.fractional_time_shift(signal, 0.5, order=order)
@@ -197,7 +197,7 @@ def test_fractional_delay_order(order):
 
 @pytest.mark.parametrize("delay", [30.4, -30.4])
 def test_fractional_delay_mode_cyclic(delay):
-    """Test the mode delay"""
+    """Test the mode delay."""
 
     signal = pf.signals.impulse(32, 16)
     delayed = fractional_time_shift(signal, delay, mode="cyclic")
@@ -208,7 +208,7 @@ def test_fractional_delay_mode_cyclic(delay):
 
 
 def test_interpolate_spectrum_init():
-    """Test return objects"""
+    """Test return objects."""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
     # interpolation object
@@ -222,7 +222,7 @@ def test_interpolate_spectrum_init():
 
 
 def test_interpolate_spectrum_init_assertions():
-    """Test if init raises assertions correctly"""
+    """Test if init raises assertions correctly."""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
     # data (invalid type)

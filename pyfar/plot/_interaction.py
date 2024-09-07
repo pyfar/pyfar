@@ -471,17 +471,17 @@ class PlotParameter(object):
         return changed
 
     def toggle_orientation(self):
-        """Toggle the orientation of 2D plots"""
+        """Toggle the orientation of 2D plots."""
         self.orientation = "horizontal" if self.orientation == "vertical" \
             else "vertical"
 
     def cycle_plot_types(self):
-        """Cycle the plot types"""
+        """Cycle the plot types."""
         self._plot_type = np.roll(self._plot_type, -1)
 
     @property
     def plot_type(self):
-        """Return current the plot type"""
+        """Return current the plot type."""
         return self._plot_type[0]
 
     @property
@@ -576,7 +576,7 @@ class Interaction(object):
 
     def select_action(self, event):
         """
-        Select what to do based on the keyboard event
+        Select what to do based on the keyboard event.
 
         Parameters
         ----------

@@ -598,7 +598,7 @@ def _time_window_symmetric_interval_two(interval, window):
 
 
 def _time_window_left(n_samples, interval, window):
-    """ Left-sided time window. ""
+    """ Left-sided time window. "".
 
     Parameters
     ----------
@@ -628,7 +628,7 @@ def _time_window_left(n_samples, interval, window):
 
 
 def _time_window_right(interval, window):
-    """ Right-sided time window. ""
+    """ Right-sided time window. "".
 
     Parameters
     ----------
@@ -656,7 +656,7 @@ def _time_window_right(interval, window):
 
 
 def _time_window_symmetric_zero(n_samples, interval, window):
-    """ Symmetric time window with respect to t=0. ""
+    """ Symmetric time window with respect to t=0. "".
 
     Parameters
     ----------
@@ -1807,7 +1807,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
 
 def energy(signal):
     r"""
-    Computes the channel wise energy in the time domain
+    Computes the channel wise energy in the time domain.
 
     .. math::
 

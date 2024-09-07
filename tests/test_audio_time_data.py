@@ -25,7 +25,7 @@ def test_data_time_init_with_defaults():
 def test_data_time_init_wrong_dtype():
     """
     Test assertion from non integer/float data (also test time setter because
-    it is called during initialization)
+    it is called during initialization).
     """
     with pytest.raises(ValueError, match="time data is complex"):
         TimeData(np.arange(2).astype(complex), [0, 1])
@@ -229,7 +229,7 @@ def test___eq___notEqual():
 
 
 def test__repr__(capfd):
-    """Test string representation"""
+    """Test string representation."""
     print(TimeData([1, 2, 3], [1, 2, 3]))
     out, _ = capfd.readouterr()
     assert ("TimeData:\n"

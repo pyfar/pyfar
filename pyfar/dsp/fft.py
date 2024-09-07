@@ -289,7 +289,7 @@ def _is_odd(num):
 def _n_bins(n_samples):
     """
     Helper function to calculate the number of bins resulting from a FFT
-    with n_samples
+    with n_samples.
 
     Paramters
     ---------

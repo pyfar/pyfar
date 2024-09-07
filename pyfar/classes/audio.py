@@ -954,7 +954,7 @@ class Signal(FrequencyData, TimeData):
 
 
 class _SignalIterator(object):
-    """Iterator for :py:func:`Signal`
+    """Iterator for :py:func:`Signal`.
     """
     def __init__(self, array_iterator, signal):
         self._array_iterator = array_iterator

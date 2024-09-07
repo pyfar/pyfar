@@ -1,5 +1,5 @@
 """
-Brief
+Brief.
 =====
 
 This module is not part of the public API. It contains encoding and decoding
@@ -441,7 +441,7 @@ def _is_numpy_scalar(obj):
 
 def _is_type_hint(obj):
     """ Check if object is stored along with its type in the typical format:
-    [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)]
+    [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)].
     """
     return isinstance(obj, list) \
         and len(obj) == 2 \

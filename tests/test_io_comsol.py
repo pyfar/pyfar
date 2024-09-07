@@ -237,7 +237,7 @@ def test_read_comsol_first_value_data(filename, p1, suffix):
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_another_value_data(filename, p1, type):
-    """Test freq=500; theta=0.7854; phi=3.1416"""
+    """Test freq=500; theta=0.7854; phi=3.1416."""
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     data, _ = io.read_comsol(path + type)
     point = 0
@@ -256,7 +256,7 @@ def test_read_comsol_another_value_data(filename, p1, type):
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_parameters_another_value_data(filename, p1, type):
-    """Test freq=500; theta=0.7854; phi=3.1416"""
+    """Test freq=500; theta=0.7854; phi=3.1416."""
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     _, _, parameters, _, _ = io.read_comsol_header(path + type)
     theta = 1

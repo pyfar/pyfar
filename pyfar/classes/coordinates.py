@@ -985,7 +985,7 @@ class Coordinates():
         return points
 
     def _get_cyl(self, convention='top', unit='rad'):
-        """internal function to convert cart to cyl coordinates"""
+        """internal function to convert cart to cyl coordinates."""
 
         # check if object is empty
         self._check_empty()
@@ -2804,7 +2804,7 @@ class Coordinates():
             & eq_sh_order & eq_system
 
     def _check_empty(self):
-        """check if object is empty"""
+        """check if object is empty."""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
 
@@ -3048,7 +3048,7 @@ def cyl2cart(azimuth, height, radius):
 
 def rad2deg(coordinates, domain='spherical'):
     """
-    Convert a copy of coordinates in radians to degree
+    Convert a copy of coordinates in radians to degree.
 
     Parameters
     ----------
@@ -3078,7 +3078,7 @@ def rad2deg(coordinates, domain='spherical'):
 
 def deg2rad(coordinates, domain='spherical'):
     """
-    Convert a copy of coordinates in degree to radians
+    Convert a copy of coordinates in degree to radians.
 
     Parameters
     ----------
@@ -3107,7 +3107,7 @@ def deg2rad(coordinates, domain='spherical'):
 
 
 def _convert_angles(coordinates, domain, factor):
-    """Private function called by rad2deg and deg2rad"""
+    """Private function called by rad2deg and deg2rad."""
 
     # check coordinates
     coordinates = np.atleast_2d(coordinates).astype(float)

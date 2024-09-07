@@ -161,7 +161,7 @@ class GammatoneBands():
         self._gains = self._get_gains()
 
     def __repr__(self):
-        """Nice string representation of class instances"""
+        """Nice string representation of class instances."""
         return (f"Reconstructing Gammatone filter bank with {self.n_bands} "
                 f"bands between {self.frequency_range[0]} "
                 f"and {self.frequency_range[1]} "
@@ -187,37 +187,37 @@ class GammatoneBands():
 
     @property
     def frequency_range(self):
-        """Get the frequency range of the filter bank in Hz"""
+        """Get the frequency range of the filter bank in Hz."""
         return self._frequency_range
 
     @property
     def resolution(self):
-        """Get the resolution of the filter bank in ERB units"""
+        """Get the resolution of the filter bank in ERB units."""
         return self._resolution
 
     @property
     def reference_frequency(self):
-        """Get the reference frequency of the filter bank in Hz"""
+        """Get the reference frequency of the filter bank in Hz."""
         return self._reference_frequency
 
     @property
     def frequencies(self):
-        """Get the center frequencies of the Gammatone filters in Hz"""
+        """Get the center frequencies of the Gammatone filters in Hz."""
         return self._frequencies
 
     @property
     def n_bands(self):
-        """Get the number of bands in the filter bank"""
+        """Get the number of bands in the filter bank."""
         return len(self.frequencies)
 
     @property
     def delay(self):
-        """Get the desired delay of the filter bank in seconds"""
+        """Get the desired delay of the filter bank in seconds."""
         return self._delay
 
     @property
     def sampling_rate(self):
-        """Get the sampling rate of the filter bank in Hz"""
+        """Get the sampling rate of the filter bank in Hz."""
         return self._sampling_rate
 
     @property
@@ -263,7 +263,7 @@ class GammatoneBands():
 
     def _get_coefficients(self):
         """
-        Compute the Gammatone filter coefficients
+        Compute the Gammatone filter coefficients.
 
         Returns
         -------

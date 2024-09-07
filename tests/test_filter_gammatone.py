@@ -130,7 +130,7 @@ def test_gammatone_bands_reset_state():
 
 
 def test_gammatone_bands_assertions():
-    """Test all assertions"""
+    """Test all assertions."""
 
     # wrong values in freq_range
     with pytest.raises(ValueError, match="Values in frequency_range must be"):
@@ -157,7 +157,7 @@ def test_gammatone_bands_assertions():
 
 
 def test_gammatone_bands_repr():
-    """Test string representation"""
+    """Test string representation."""
 
     GFB = filter.GammatoneBands([0, 22050])
     assert str(GFB) == ("Reconstructing Gammatone filter bank with 42 bands "
@@ -166,7 +166,7 @@ def test_gammatone_bands_repr():
 
 
 def test_erb_frequencies():
-    """Test erb_frequencies against reference from the AMT toolbox"""
+    """Test erb_frequencies against reference from the AMT toolbox."""
 
     frequencies = filter.erb_frequencies([0, 22050], .5)
 
@@ -182,7 +182,7 @@ def test_erb_frequencies():
 
 
 def test_erb_frequencies_assertions():
-    """Test assertions for erb_frequencies"""
+    """Test assertions for erb_frequencies."""
 
     # freq_range must be an array of length 2
     with pytest.raises(ValueError, match="frequency_range must be an array"):

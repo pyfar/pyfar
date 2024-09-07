@@ -192,7 +192,7 @@ def test_xfade(impulse):
 
 
 def test_regularized_spectrum_inversion(impulse):
-    """Test regularized_spectrum_inversion"""
+    """Test regularized_spectrum_inversion."""
     res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
 
     ind = impulse.find_nearest_frequency([200, 10e3])
@@ -205,7 +205,7 @@ def test_regularized_spectrum_inversion(impulse):
 
 
 def test_regularized_spectrum_inversion_assertions(impulse):
-    """Test regularized_spectrum_inversion errors"""
+    """Test regularized_spectrum_inversion errors."""
     with pytest.raises(
             ValueError, match='needs to be of type pyfar.Signal'):
         dsp.regularized_spectrum_inversion('error', (1, 2))
@@ -220,7 +220,7 @@ def test_regularized_spectrum_inversion_assertions(impulse):
 
 
 def test_regularized_spectrum_inversion_normalized(impulse):
-    """Test normalized parameter of regularized_spectrum_inversion"""
+    """Test normalized parameter of regularized_spectrum_inversion."""
     impulse.fft_norm = 'amplitude'
 
     # normalized = True
@@ -242,7 +242,7 @@ def test_regularized_spectrum_inversion_normalized(impulse):
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
 @pytest.mark.parametrize("unit", ["samples", "s"])
 def test_time_shift_cyclic(shift_samples, unit):
-    """Test cyclic time shift using samples and seconds"""
+    """Test cyclic time shift using samples and seconds."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -263,7 +263,7 @@ def test_time_shift_cyclic(shift_samples, unit):
 @pytest.mark.parametrize("shift", [2, -2, 0])
 @pytest.mark.parametrize("pad_value", [0, np.nan])
 def test_time_shift_linear(shift, pad_value):
-    """Test linear time shift with different pad values"""
+    """Test linear time shift with different pad values."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -292,7 +292,7 @@ def test_time_shift_linear(shift, pad_value):
 @pytest.mark.parametrize("shift_samples", [(
     [1, 2, 3]), (np.array([1, 2, 3]))])
 def test_time_shift_multi_dim(shift_samples):
-    """Test with multi-channel signal and shift values as list and np.array"""
+    """Test with multi-channel signal and shift values as list and np.array."""
     delay = 2
     n_samples = 10
 
@@ -307,7 +307,7 @@ def test_time_shift_multi_dim(shift_samples):
 
 
 def test_time_shift_assertions():
-    """Test assertions for shift_time"""
+    """Test assertions for shift_time."""
 
     # wrong mode
     with pytest.raises(ValueError, match="mode is 'cut'"):
@@ -607,7 +607,7 @@ def test_minimum_phase_multidim():
 
 
 def test_impulse_response_delay():
-    """Test delay of an ideal impulse"""
+    """Test delay of an ideal impulse."""
     n_samples = 2**10
     snr = 60
     start_sample = np.array([24])
@@ -624,7 +624,7 @@ def test_impulse_response_delay():
 
 
 def test_impulse_response_delay_sinc():
-    """Test delay of a band-limited sinc function shifted by 1/2 samples"""
+    """Test delay of a band-limited sinc function shifted by 1/2 samples."""
     sr = 44100
     n_samples = 128
     samples = np.arange(n_samples)
@@ -639,7 +639,7 @@ def test_impulse_response_delay_sinc():
 
 
 def test_impulse_response_delay_multidim():
-    """Ideal multi-dimensional Signal of ideal impulses"""
+    """Ideal multi-dimensional Signal of ideal impulses."""
     n_samples = 2**10
     snr = 60
 
@@ -795,7 +795,7 @@ def test_convolve_mode_and_method(method, mode, desired):
 
 def test_convolve_mismatching_cdims():
     """
-    Test if convolve works with broadcastable signals with different cdims
+    Test if convolve works with broadcastable signals with different cdims.
     """
     # generate and convolve signals
     signal_a = pf.signals.impulse(1, amplitude=np.atleast_2d([1, 2]))

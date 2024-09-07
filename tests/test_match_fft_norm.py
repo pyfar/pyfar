@@ -3,7 +3,7 @@ from pyfar.classes.audio import _match_fft_norm
 
 
 def test_input_fft_norm_valid():
-    """Test assertion by passing invalid fft_norm"""
+    """Test assertion by passing invalid fft_norm."""
     with pytest.raises(ValueError,
                        match='fft_norm_1 is invalid but must be in '):
         _match_fft_norm('invalid', 'none')
@@ -13,7 +13,7 @@ def test_input_fft_norm_valid():
 
 
 def test_input_division_type():
-    """Test assertion by passing invalid division parameter"""
+    """Test assertion by passing invalid division parameter."""
     with pytest.raises(TypeError,
                        match='Parameter division must be type bool.'):
         _match_fft_norm('none', 'none', 'invalid')
@@ -37,7 +37,7 @@ def test_input_division_type():
                           ['psd',        'psd',          'psd']])
 def test_result_no_division(fft_norm_1, fft_norm_2, result):
     """Test the returned fft_norm for arithmetic operation by passing
-    valid combinations of fft_norms"""
+    valid combinations of fft_norms."""
     assert _match_fft_norm(fft_norm_1, fft_norm_2) == result
 
 
@@ -63,7 +63,7 @@ def test_result_no_division(fft_norm_1, fft_norm_2, result):
                           ['psd',        'rms'],
                           ['psd',        'power']])
 def test_assertion_no_division(fft_norm_1, fft_norm_2):
-    """Test assertion by passing invalid combinations of fft_norms"""
+    """Test assertion by passing invalid combinations of fft_norms."""
     with pytest.raises(ValueError, match="Either one fft_norm has to be "):
         _match_fft_norm(fft_norm_1, fft_norm_2)
 
@@ -82,7 +82,7 @@ def test_assertion_no_division(fft_norm_1, fft_norm_2):
                           ['psd',        'psd',          'none']])
 def test_result_division(fft_norm_1, fft_norm_2, result):
     """Test the returned fft_norm for arithmetic operation by passing
-    valid combinations of fft_norms, with division=True"""
+    valid combinations of fft_norms, with division=True."""
     assert _match_fft_norm(fft_norm_1, fft_norm_2, division=True) == result
 
 
@@ -113,6 +113,6 @@ def test_result_division(fft_norm_1, fft_norm_2, result):
                           ['psd',        'power']])
 def test_assertion_division(fft_norm_1, fft_norm_2):
     """Test assertion by passing invalid combinations of fft_norms,
-    with division=True"""
+    with division=True."""
     with pytest.raises(ValueError, match="Either fft_norm_2 "):
         _match_fft_norm(fft_norm_1, fft_norm_2, division=True)

@@ -131,7 +131,7 @@ def point_set_polar(dimension, N):
 
 
 def caps(dimension, N):
-    """Partition a sphere into to nested spherical caps
+    """Partition a sphere into to nested spherical caps.
 
     Does the following:
     1)  partitions the unit sphere S^dim into a list of spherical caps of
@@ -220,7 +220,7 @@ def polar_colat(dimension, N):
 
 
 def ideal_region_list(dimension, N, c_polar, n_collars):
-    """The ideal real number of regions in each zone
+    """The ideal real number of regions in each zone.
 
     List the ideal real number of regions in each collar, plus the polar caps.
     Given dim, N, c_polar and n_collars, determine r_regions, a list of the
@@ -567,7 +567,7 @@ def sradius_of_cap(dimension, area):
 
 
 def polar2cart(points_polar):
-    """Comnversion from the polar angles theta and phi to Cartesian coordinates
+    """Comnversion from the polar angles theta and phi to Cartesian coordinates.
 
         x = cos(phi) * sin(theta)
         y = sin(phi) * sin(theta)

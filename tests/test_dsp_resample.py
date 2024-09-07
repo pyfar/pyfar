@@ -133,7 +133,7 @@ def test_resample_multidimensional_impulse():
 
 
 def test_resample_suppress_aliasing():
-    """Test the aliasing suppression filter"""
+    """Test the aliasing suppression filter."""
 
     # test signal
     signal = pf.signals.impulse(1024, 512)

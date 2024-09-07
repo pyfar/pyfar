@@ -68,7 +68,7 @@ def test_sine_assertions():
 
 
 def test_impulse_with_defaults():
-    """Test impulse with default parameters"""
+    """Test impulse with default parameters."""
     signal = pfs.impulse(3)
     assert isinstance(signal, pf.Signal)
     npt.assert_allclose(signal.time, np.atleast_2d([1, 0, 0]))
@@ -79,7 +79,7 @@ def test_impulse_with_defaults():
 
 
 def test_impulse_with_user_parameters():
-    """Test impulse with custom delay, amplitude and sampling rate"""
+    """Test impulse with custom delay, amplitude and sampling rate."""
     signal = pfs.impulse(3, 1, 2, 48000)
     npt.assert_allclose(signal.time, np.atleast_2d([0, 2, 0]))
     assert signal.sampling_rate == 48000
@@ -142,7 +142,7 @@ def test_impulse_float():
 
 
 def test_impulse_assertions():
-    """Test assertions for impulse functions"""
+    """Test assertions for impulse functions."""
     with pytest.raises(ValueError, match="The parameters delay"):
         pfs.impulse(10, [1, 2], [1, 2, 3])
 
@@ -559,7 +559,7 @@ def test_frequency_domain_sweep():
     Test general frequency domain sweep synthesis. Specific tests for public
     functions are contained in ``test_linear_perfect_sweep``,
     ``test_linear_sweep_freq``, ``test_exponential_sweep_freq``, and
-    ``test_magnitude_spectrum_weighted_sweep``,
+    ``test_magnitude_spectrum_weighted_sweep``,.
     '''
 
     # test frequency range - sweep with smaller range contains less energy
