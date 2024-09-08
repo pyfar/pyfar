@@ -313,9 +313,6 @@ def test_setter_and_getter_with_conversion(domain_in, domain_out, point):
                         convert=True)")
             # check point
             npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
-            # check if system was converted
-            # assert c._system["domain"] == domain_out
-            # assert c._system["convention"] == convention_out
 
 
 def test_getter_with_degrees():

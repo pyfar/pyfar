@@ -851,7 +851,7 @@ class Coordinates():
             raise ValueError(
                 f"{unit} is not implemented.")
 
-        # return points
+        # return the points
         return angles_1, angles_2, radius
 
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
@@ -2285,8 +2285,8 @@ class Coordinates():
                 value = np.asarray(value) / 180 * np.pi
             rot = sp_rot.from_rotvec(value)
         elif not bool(re.search('[^x-z]', rotation.lower())):
-            # only check if string contains xyz, everything else is checked in
-            # from_euler()
+            # only check if string contains xyz, everything else is checked
+            # in from_euler()
             rot = sp_rot.from_euler(rotation, value, degrees)
         else:
             raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "
@@ -2791,7 +2791,6 @@ class Coordinates():
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        # return not deepdiff.DeepDiff(self, other)
         if self.cshape != other.cshape:
             return False
         eq_x = self._x == other._x
