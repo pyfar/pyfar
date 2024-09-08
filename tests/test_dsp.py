@@ -692,7 +692,9 @@ def test_impulse_response_start():
     ir = np.zeros(n_samples)
     snr = 60
 
-    noise = pf.Signal(np.random.randn(n_samples) * 10**(-snr/20), 44100)
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((n_samples))
+    noise = pf.Signal(rand * 10**(-snr/20), 44100)
 
     start_sample = 24
     ir[start_sample] = 1
@@ -745,8 +747,10 @@ def test_impulse_response_start_multidim():
 
     snr = 60
 
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((n_channels, n_samples))
     noise = pf.Signal(
-        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+        rand * 10**(-snr/20), 44100)
 
     start_sample = [24, 5, 43]
     ir[[0, 1, 2], start_sample] = 1
@@ -759,8 +763,11 @@ def test_impulse_response_start_multidim():
     npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
 
     ir = np.zeros((2, n_channels, n_samples))
+
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((2, n_channels, n_samples))
     noise = pf.Signal(
-        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
+        rand * 10**(-snr/20), 44100)
 
     start_sample_1 = [24, 5, 43]
     ir[0, [0, 1, 2], start_sample_1] = 1
