@@ -374,8 +374,7 @@ class NoDecodeClass:
 
 
 class FlatData:
-    """Class only containing flat data and methods.
-    """
+    """Class only containing flat data and methods."""
 
     def __init__(self, m=49):
         self.signal = any_ndarray()
@@ -466,8 +465,7 @@ class NestedData:
 
 
 def stub_str_to_type():
-    """Stubs `_codec.str_to_type` for tests that use general data structures.
-    """
+    """Stubs `_codec.str_to_type` for tests that use general data structures."""
     def side_effect(type_str):
         if type_str == "BuiltinsWrapper":
             return _codec.BuiltinsWrapper

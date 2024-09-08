@@ -99,9 +99,7 @@ class LogFormatterITAToolbox(LogFormatter):
         return s
 
     def __call__(self, x, pos=None):
-        """
-        Return the format for tick val *x*.
-        """
+        """Return the format for tick val *x*."""
         if x == 0.0:  # Symlog
             return '0'
 

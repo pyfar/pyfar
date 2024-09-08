@@ -384,8 +384,7 @@ def _encode_object_json_aided(obj, name, zipfile):
 
 
 def _is_pyfar_type(obj):
-    """True if object is a Pyfar-type.
-    """
+    """True if object is a Pyfar-type."""
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
         'Orientations',
@@ -422,21 +421,18 @@ def _supported_builtin_types():
 
 
 def _is_numpy_type(obj):
-    """True if object is a Numpy-type.
-    """
+    """True if object is a Numpy-type."""
     return type(obj).__module__ == np.__name__
 
 
 def _is_dtype(obj):
-    """True if object is `numpy.dtype`.
-    """
+    """True if object is `numpy.dtype`."""
     return isinstance(obj, type) and (
         obj.__module__ == 'numpy' or obj == complex)
 
 
 def _is_numpy_scalar(obj):
-    """True if object is any numpy.dtype scalar e.g. `numpy.int32`.
-    """
+    """True if object is any numpy.dtype scalar e.g. `numpy.int32`."""
     return type(obj).__module__ == 'numpy'
 
 

@@ -1,6 +1,4 @@
-"""
-Input and output module for pyfar.
-"""
+"""Input and output module for pyfar."""
 
 from .io import (read, write,
                  read_sofa, convert_sofa,

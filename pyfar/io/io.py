@@ -550,7 +550,7 @@ def default_audio_subtype(format):
 
 
 def read_comsol(filename, expressions=None, parameters=None):
-    """Read data exported from COMSOL Multiphysics.
+    r"""Read data exported from COMSOL Multiphysics.
 
     .. note::
         The data is created by defining at least one `Expression` within a
@@ -763,7 +763,7 @@ def read_comsol(filename, expressions=None, parameters=None):
 
 
 def read_comsol_header(filename):
-    """Read header information on exported data from COMSOL Multiphysics.
+    r"""Read header information on exported data from COMSOL Multiphysics.
 
     .. note::
         The data is created by defining at least one `Expression` within a

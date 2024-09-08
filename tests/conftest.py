@@ -452,8 +452,7 @@ def frequency_data_one_point():
 
 @pytest.fixture
 def sofa_reference_coordinates(noise_two_by_three_channel):
-    """Define coordinates to write in reference files.
-    """
+    """Define coordinates to write in reference files."""
     n_measurements = noise_two_by_three_channel.cshape[0]
     n_receivers = noise_two_by_three_channel.cshape[1]
     source_coordinates = np.random.rand(n_measurements, 3)
@@ -576,15 +575,13 @@ def positions():
 
 @pytest.fixture
 def orientations(views, ups):
-    """Orientations object uses fixtures `views` and `ups`.
-    """
+    """Orientations object uses fixtures `views` and `ups`."""
     return Orientations.from_view_up(views, ups)
 
 
 @pytest.fixture
 def coordinates():
-    """Coordinates object.
-    """
+    """Coordinates object."""
     return Coordinates([0, 1], [2, 3], [4, 5])
 
 
@@ -600,15 +597,13 @@ def state():
 
 @pytest.fixture
 def filter(coeffs, state):
-    """Filter object.
-    """
+    """Filter object."""
     return fo.Filter(coefficients=coeffs, state=state)
 
 
 @pytest.fixture
 def filterFIR():
-    """FilterFIR objectr.
-    """
+    """FilterFIR objectr."""
     coeff = np.array([
         [1, 1 / 2, 0],
         [1, 1 / 4, 1 / 8]])
@@ -617,24 +612,21 @@ def filterFIR():
 
 @pytest.fixture
 def filterIIR():
-    """FilterIIR object.
-    """
+    """FilterIIR object."""
     coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
     return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
 def filterSOS():
-    """FilterSOS objectr.
-    """
+    """FilterSOS objectr."""
     sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
 
 
 @pytest.fixture
 def sphericalvoronoi():
-    """SphericalVoronoi object.
-    """
+    """SphericalVoronoi object."""
     points = np.array(
         [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
     sampling = Coordinates(points[:, 0], points[:, 1], points[:, 2])
@@ -643,29 +635,25 @@ def sphericalvoronoi():
 
 @pytest.fixture
 def any_obj():
-    """Any object acting as placeholder for non-PyFar-objects.
-    """
+    """Any object acting as placeholder for non-PyFar-objects."""
     return stub_utils.AnyClass()
 
 
 @pytest.fixture
 def no_encode_obj():
-    """Any object acting as placeholder for non-PyFar-objects.
-    """
+    """Any object acting as placeholder for non-PyFar-objects."""
     return stub_utils.NoEncodeClass()
 
 
 @pytest.fixture
 def no_decode_obj():
-    """Any object acting as placeholder for non-PyFar-objects.
-    """
+    """Any object acting as placeholder for non-PyFar-objects."""
     return stub_utils.NoDecodeClass()
 
 
 @pytest.fixture
 def flat_data():
-    """Class being primarily used as a subclass of the nested data object.
-    """
+    """Class being primarily used as a subclass of the nested data object."""
     return stub_utils.FlatData()
 
 
@@ -679,6 +667,5 @@ def nested_data():
 
 @pytest.fixture
 def dict_of_builtins():
-    """Dictionary that contains builtins with support for writing and reading.
-    """
+    """Dictionary that contains builtins with support for writing and reading."""
     return stub_utils.dict_of_builtins()

@@ -28,9 +28,7 @@ def test_smooth_fractional_octave_assertions():
 @pytest.mark.parametrize("mode", (
     "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
 def test_smooth_fractional_octave_mode(mode):
-    """
-    Test return signal for different smoothing modes against saved references.
-    """
+    """Test return signal for different smoothing modes against saved references."""
     # load input data
     input = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
@@ -49,9 +47,7 @@ def test_smooth_fractional_octave_mode(mode):
 
 @pytest.mark.parametrize("num_fractions", (1, 5))
 def test_smooth_fractional_octave_num_fractions(num_fractions):
-    """
-    Test return signal for different smoothing widths against saved references.
-    """
+    """Test return signal for different smoothing widths against saved references."""
     # load input data
     signal = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
@@ -275,9 +271,7 @@ def test_interpolate_spectrum_init_assertions():
     ])
 def test_interpolate_spectrum_interpolation(
         method, freq_in, frequencies, freq_out, n_samples, sampling_rate):
-    """
-    Test the if the interpolated spectrum matches the reference across methods.
-    """
+    """Test the if the interpolated spectrum matches the reference across methods."""
     # create test data
     data = pf.FrequencyData(freq_in, frequencies)
     interpolator = InterpolateSpectrum(
@@ -321,9 +315,7 @@ def test_interpolate_spectrum_clip():
       [0, .301, .477, .602, .699, .778])])
 def test_interpolate_spectrum_fscale(
         fscale, n_samples, sampling_rate, f_in, f_base, f_query):
-    """
-    Test frequency vectors for linear and logarithmic frequency interpolation.
-    """
+    """Test frequency vectors for linear and logarithmic frequency interpolation."""
     # test data
     data = pf.FrequencyData([1, 1, 1], f_in)
 

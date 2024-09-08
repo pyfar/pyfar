@@ -20,9 +20,7 @@ from pytest import raises
      'log_magnitude_zerophase', 10**(np.array([(-40+0)/2, (-20+20)/2])/20)]
     ))
 def test_averaging(signal, mode, answer):
-    """
-    Parametrized test for averaging data in all modi.
-    """
+    """Parametrized test for averaging data in all modi."""
     ave_sig = pf.dsp.average(signal, mode)
     if mode == 'linear':
         npt.assert_equal(ave_sig.time[0], answer)
@@ -35,9 +33,7 @@ def test_averaging(signal, mode, answer):
     [1, [[(1+3)/2, (2+4)/2], [(5+7)/2, (6+8)/2]]]
     ))
 def test_caxis_averaging(caxis, answer):
-    """
-    Parametrized test for averaging along caxis.
-    """
+    """Parametrized test for averaging along caxis."""
     signal = pf.Signal(np.arange(1, 9).reshape(2, 2, 2), 44100)
     ave_sig = pf.dsp.average(signal, caxis=caxis)
     npt.assert_equal(ave_sig.time, answer)

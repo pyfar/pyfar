@@ -513,9 +513,7 @@ def test_setter_freq_raw():
 
 
 def test_setter_freq_raw_single_frequency():
-    """
-    Test if attribute freq_raw is set correctly for single frequency data.
-    """
+    """Test if attribute freq_raw is set correctly for single frequency data."""
     signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
     with pytest.warns(UserWarning, match="Number of samples not given"):
         signal.freq_raw = np.array([[1.]])

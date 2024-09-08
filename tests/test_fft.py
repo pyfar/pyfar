@@ -352,8 +352,7 @@ def test_normalization_exceptions():
 
 
 def test_rfft_normalization_impulse(impulse_stub):
-    """Test for call of normalization in rfft.
-    """
+    """Test for call of normalization in rfft."""
     signal_spec = fft.rfft(
         impulse_stub.time, impulse_stub.n_samples, impulse_stub.sampling_rate,
         impulse_stub.fft_norm)
@@ -364,8 +363,7 @@ def test_rfft_normalization_impulse(impulse_stub):
 
 
 def test_rfft_normalization_sine(sine_stub):
-    """Test for correct call of normalization in rfft.
-    """
+    """Test for correct call of normalization in rfft."""
     signal_spec = fft.rfft(
         sine_stub.time, sine_stub.n_samples, sine_stub.sampling_rate,
         sine_stub.fft_norm)
