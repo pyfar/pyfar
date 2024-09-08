@@ -61,8 +61,7 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
     ----------
     .. [#] Tietze, U., Schenk, C. & Gamm, E. (2019). Halbleiter-
         Schaltungstechnik (16th ed.). Springer Vieweg
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
 
     Examples
     --------
@@ -183,8 +182,7 @@ def bell(signal, center_frequency, gain, quality, bell_type='II',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     # check input
@@ -278,8 +276,7 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     warnings.warn(("'high_shelve' will be deprecated in pyfar 0.9.0 in favor"
@@ -339,8 +336,7 @@ def high_shelf(signal, frequency, gain, order, shelf_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     output = _shelf(
@@ -401,8 +397,7 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
@@ -462,8 +457,7 @@ def low_shelf(signal, frequency, gain, order, shelf_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     output = _shelf(
