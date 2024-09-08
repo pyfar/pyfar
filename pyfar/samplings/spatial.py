@@ -84,7 +84,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
 def calculate_sph_voronoi_weights(
         sampling, normalize=True, center=[0, 0, 0], round_decimals=12):
-    r"""
+    """
     Calculate sampling weights for numeric integration.
 
     This function will be deprecated in pyfar 0.8.0 in favor

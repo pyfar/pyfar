@@ -23,7 +23,8 @@ def test_signal_stub_properties():
 
 
 def test_signal_stub_times():
-    """Test times vector of Signal stub."""
+    """Test times vector of Signal stub.
+    """
     time = np.ones((1, 4))
     freq = np.ones((1, 3))
     sampling_rate = 1
@@ -141,7 +142,8 @@ def test_frequency_data_stub_slice():
 
 
 def test_impulse_func_single_channel():
-    """Test generation of delta impulse, single channel."""
+    """Test generation of delta impulse, single channel.
+    """
     n_samples = 4
     fft_norm = 'none'
     cshape = (1,)
@@ -170,7 +172,8 @@ def test_impulse_func_rms():
 
 
 def test_impulse_func_value_error():
-    """Test generation of delta impulse, value errors."""
+    """Test generation of delta impulse, value errors.
+    """
     n_samples = 4
     fft_norm = 'none'
     # Delay too large
@@ -186,7 +189,8 @@ def test_impulse_func_value_error():
 
 
 def test_impulse_func_multi_channel():
-    """Test generation of delta impulse, multiple channels."""
+    """Test generation of delta impulse, multiple channels.
+    """
     n_samples = 4
     fft_norm = 'none'
     cshape = (2, 2)
@@ -237,7 +241,8 @@ def test_normalization_rms_odd():
 
 
 def test_sine_func():
-    """Test generation of sine data, single channel."""
+    """Test generation of sine data, single channel.
+    """
     n_samples = 4
     sampling_rate = 4
     fft_norm = 'none'
@@ -283,7 +288,8 @@ def test_sine_func_rms():
 
 
 def test_sine_func_multi_channel():
-    """Test generation of sine data, multiple channels."""
+    """Test generation of sine data, multiple channels.
+    """
     sampling_rate = 12
     n_samples = 12
     fft_norm = 'none'
@@ -321,7 +327,8 @@ def test_sine_func_multi_channel():
 
 
 def test_sine_func_frequency_adjustment():
-    """Test generation of sine data, adjusted frequency."""
+    """Test generation of sine data, adjusted frequency.
+    """
     n_samples = 4
     sampling_rate = 4
     fft_norm = 'none'
@@ -346,7 +353,8 @@ def test_sine_func_frequency_adjustment():
 
 
 def test_sine_func_value_error():
-    """Test generation of sine data, value errors."""
+    """Test generation of sine data, value errors.
+    """
     n_samples = 4
     fft_norm = 'none'
     # Sampling theorem
@@ -375,7 +383,8 @@ def test_sine_func_value_error():
 
 
 def test_noise_func():
-    """Test generation of noise data, single channel."""
+    """Test generation of noise data, single channel.
+    """
     n_samples = 2**18
     sigma = 1
     cshape = (1,)
@@ -389,7 +398,8 @@ def test_noise_func():
 
 
 def test_noise_func_multi_channel():
-    """Test generation of noise data, multiple channels."""
+    """Test generation of noise data, multiple channels.
+    """
     n_samples = 2**10
     sigma = 1
     cshape = (2, 2)

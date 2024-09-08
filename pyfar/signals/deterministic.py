@@ -80,7 +80,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
 
 
 def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
-    r"""
+    """
     Generate a single or multi channel impulse signal, also known as the
     Dirac delta function.
 
@@ -143,7 +143,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
 def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
                       sampling_rate=44100):
-    r"""
+    """
     Generate sine sweep with linearly increasing frequency in the time domain.
 
     Time domain sweep generation according to [#]_:
@@ -311,7 +311,7 @@ def linear_sweep_freq(
 
 def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
                            amplitude=1, sweep_rate=None, sampling_rate=44100):
-    r"""
+    """
     Generate sine sweep with exponentially increasing frequency in the time
     domain.
 

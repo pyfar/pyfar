@@ -47,7 +47,9 @@ def test_prepare_plot():
 
 
 def test_prepare_plot_2d():
-    """Test assertion that are not tested directly with plots."""
+    """
+    Test assertion that are not tested directly with plots.
+    """
     data = pf.Signal([1, 0, 0], 44100)
     kwargs = {"shading": "flat"}
 

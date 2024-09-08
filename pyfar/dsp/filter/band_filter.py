@@ -448,7 +448,7 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
 
 def notch(signal, center_frequency, quality, sampling_rate=None):
-    r"""
+    """
     Create and apply or return a second order IIR notch filter.
 
     A notch filter is a band-stop filter with a narrow bandwidth

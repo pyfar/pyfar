@@ -7,7 +7,7 @@ from . import _audiofilter as iir
 
 
 def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
-    r"""
+    """
     Create and apply first or second order allpass filter.
 
     Allpass filters have an almost constant group delay below their cut-off

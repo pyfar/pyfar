@@ -355,7 +355,9 @@ class TimeData(_Audio):
         return np.squeeze(indices)
 
     def _assert_matching_meta_data(self, other):
-        """Check if the meta data matches across two :py:func:`TimeData` objects."""
+        """
+        Check if the meta data matches across two :py:func:`TimeData` objects.
+        """
         if other.__class__ != TimeData:
             raise ValueError("Comparison only valid against TimeData objects.")
         if self.n_samples != other.n_samples:
@@ -681,7 +683,9 @@ class Signal(FrequencyData, TimeData):
             domain='time',
             fft_norm='none',
             comment=""):
-        """Create audio Signal with time or frequency data and sampling rate."""
+        """
+        Create audio Signal with time or frequency data and sampling rate.
+        """
         # unpack array
         if hasattr(sampling_rate, '__iter__'):
             assert len(sampling_rate) != 0
@@ -923,7 +927,8 @@ class Signal(FrequencyData, TimeData):
         return repr_string
 
     def __len__(self):
-        """Length of the object which is the number of samples stored."""
+        """Length of the object which is the number of samples stored.
+        """
         warnings.warn(
             ("len(Signal) will be deprecated in pyfar 0.8.0 "
              "Use Signal.n_samples instead"), PyfarDeprecationWarning)
@@ -949,7 +954,8 @@ class Signal(FrequencyData, TimeData):
 
 
 class _SignalIterator(object):
-    """Iterator for :py:func:`Signal`."""
+    """Iterator for :py:func:`Signal`.
+    """
 
     def __init__(self, array_iterator, signal):
         self._array_iterator = array_iterator

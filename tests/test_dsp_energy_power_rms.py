@@ -8,7 +8,9 @@ import numpy.testing as npt
                                              [44100/20, 2],
                                              [44100/50, 3]))
 def test_sinewave(freq, amplitude):
-    """Test the energy, power and rms of different full period Sinewaves."""
+    """
+    Test the energy, power and rms of different full period Sinewaves.
+    """
     n_samples = 44100
     signal = pf.signals.sine(freq, n_samples, amplitude)
     energy = pf.dsp.energy(signal)

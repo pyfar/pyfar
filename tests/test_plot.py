@@ -141,7 +141,9 @@ def test_line_freq_scale_option(function, freq_scale, handsome_signal):
 @pytest.mark.parametrize('function', [
     (plot.freq), (plot.phase), (plot.group_delay), (plot.spectrogram)])
 def test_line_freq_scale_assertion(function, sine):
-    """Test if all line plots raise an assertion for a wrong scale parameter."""
+    """
+    Test if all line plots raise an assertion for a wrong scale parameter.
+    """
     create_figure()
     with raises(ValueError):
         function(sine, freq_scale="warped")
@@ -319,7 +321,9 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
     (plot.spectrogram), (plot.time_2d), (plot.freq_2d), (plot.phase_2d),
     (plot.group_delay_2d)])
 def test_2d_colorbar_assertion(function, handsome_signal_2d):
-    """Test assertion when passing an array of axes but not having a colorbar."""
+    """
+    Test assertion when passing an array of axes but not having a colorbar.
+    """
     create_figure()
     with raises(ValueError, match="A list of axes"):
         function(handsome_signal_2d, colorbar=False,
@@ -331,7 +335,9 @@ def test_2d_colorbar_assertion(function, handsome_signal_2d):
     (plot.group_delay_2d), (plot.time_freq_2d), (plot.freq_phase_2d),
     (plot.freq_group_delay_2d)])
 def test_2d_cshape_assertion(function):
-    """Test assertion when passing a signal with wrong cshape."""
+    """
+    Test assertion when passing a signal with wrong cshape.
+    """
     error_str = r"signal.cshape must be \(m, \) with m\>=2 but is \(2, 2\)"
     create_figure()
     with raises(ValueError, match=error_str):
@@ -400,7 +406,9 @@ def test_2d_freq_scale_option(function, freq_scale, handsome_signal_2d):
 
 
 def test_2d_freq_scale_assertion(handsome_signal_2d):
-    """Test if all 2d plots raise an assertion for a wrong scale parameter."""
+    """
+    Test if all 2d plots raise an assertion for a wrong scale parameter.
+    """
     create_figure()
     with raises(ValueError):
         plot.freq_2d(handsome_signal_2d, freq_scale="warped")

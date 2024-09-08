@@ -2620,7 +2620,9 @@ class Coordinates():
              "coordinates and units"))
 
     def _make_system(self, domain=None, convention=None, unit=None):
-        """Make and return class internal information about coordinate system."""
+        """
+        Make and return class internal information about coordinate system.
+        """
         # check if coordinate system exists
         self._exist_system(domain, convention, unit)
 
@@ -2846,7 +2848,7 @@ class Coordinates():
 
 
 def cart2sph(x, y, z):
-    r"""
+    """
     Transforms from Cartesian to spherical coordinates.
 
     Spherical coordinates follow the common convention in Physics/Mathematics.
@@ -2903,7 +2905,7 @@ def cart2sph(x, y, z):
 
 
 def sph2cart(azimuth, colatitude, radius):
-    r"""
+    """
     Transforms from spherical to Cartesian coordinates.
 
     Spherical coordinates follow the common convention in Physics/Mathematics.
@@ -2963,7 +2965,7 @@ def sph2cart(azimuth, colatitude, radius):
 
 
 def cart2cyl(x, y, z):
-    r"""
+    """
     Transforms from Cartesian to cylindrical coordinates.
 
     Cylindrical coordinates follow the convention that the `azimuth` is 0 at
@@ -3019,7 +3021,7 @@ def cart2cyl(x, y, z):
 
 
 def cyl2cart(azimuth, height, radius):
-    r"""
+    """
     Transforms from cylindrical to Cartesian coordinates.
 
     Cylindrical coordinates follow the convention that the `azimuth` is 0 at

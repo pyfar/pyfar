@@ -56,7 +56,9 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
 def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
           ax=None, **kwargs):
-    """Plot the logarithmic absolute spectrum on the positive frequency axis."""
+    """
+    Plot the logarithmic absolute spectrum on the positive frequency axis.
+    """
     # check input
     if not isinstance(signal, (Signal, FrequencyData)):
         raise TypeError(
@@ -237,7 +239,9 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                log_prefix_freq=None, log_reference=1, freq_scale='log',
                unit="s", ax=None, **kwargs):
-    """Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout."""
+    """
+    Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
+    """
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
@@ -266,7 +270,9 @@ def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
 def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                       unit="s", freq_scale='log', ax=None, **kwargs):
-    """Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout."""
+    """
+    Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
+    """
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 

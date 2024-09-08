@@ -143,7 +143,7 @@ def wrap_to_2pi(x):
 
 
 def linear_phase(signal, group_delay, unit="samples"):
-    r"""
+    """
     Set the phase to a linear phase with a specified group delay.
 
     The linear phase signal is computed as
@@ -196,7 +196,7 @@ def linear_phase(signal, group_delay, unit="samples"):
 
 
 def zero_phase(signal):
-    r"""Calculate zero phase signal.
+    """Calculate zero phase signal.
 
     The zero phase signal is obtained by taking the absolute values of the
     spectrum

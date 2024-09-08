@@ -1,4 +1,6 @@
-"""The following documents the pyfar warning classes."""
+"""
+The following documents the pyfar warning classes.
+"""
 
 
 class PyfarDeprecationWarning(Warning):

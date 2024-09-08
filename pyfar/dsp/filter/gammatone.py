@@ -222,12 +222,16 @@ class GammatoneBands():
 
     @property
     def coefficients(self):
-        """Get the filter coefficients a as in Eq. (7) in Hohmann 2002 per band."""
+        """
+        Get the filter coefficients a as in Eq. (7) in Hohmann 2002 per band.
+        """
         return self._coefficients
 
     @property
     def normalizations(self):
-        """Get the normalization per band described below Eq. (9) in Hohmann 2002."""
+        """
+        Get the normalization per band described below Eq. (9) in Hohmann 2002.
+        """
         return self._normalizations
 
     @property

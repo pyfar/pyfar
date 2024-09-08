@@ -230,7 +230,9 @@ def test_pulsed_noise_with_defaults():
 
 
 def test_pulsed_noise_fade_spectrum_and_seed():
-    """Test pulsed noise signal generation with custom n_fade, spectrum, and seed."""
+    """
+    Test pulsed noise signal generation with custom n_fade, spectrum, and seed.
+    """
     # pink noise with 50 samples fade
     signal = pfs.pulsed_noise(
         n_pulse=200, n_pause=100, n_fade=50, spectrum="pink", seed=1)

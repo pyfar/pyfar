@@ -27,7 +27,9 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""Python library partition the unit sphere into partition with equal area."""
+"""
+Python library partition the unit sphere into partition with equal area.
+"""
 
 from math import gcd
 import numpy as np

@@ -797,7 +797,9 @@ def test_convolve_mode_and_method(method, mode, desired):
 
 
 def test_convolve_mismatching_cdims():
-    """Test if convolve works with broadcastable signals with different cdims."""
+    """
+    Test if convolve works with broadcastable signals with different cdims.
+    """
     # generate and convolve signals
     signal_a = pf.signals.impulse(1, amplitude=np.atleast_2d([1, 2]))
     signal_b = pf.Signal([1, -1], 44100)
