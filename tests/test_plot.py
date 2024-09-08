@@ -144,7 +144,6 @@ def test_line_freq_scale_assertion(function, sine):
     """
     Test if all line plots raise an assertion for a wrong scale parameter.
     """
-
     create_figure()
     with raises(ValueError):
         function(sine, freq_scale="warped")
@@ -169,7 +168,6 @@ def test_time_unit(function, unit, handsome_signal):
 
 def test_time_unit_assertion(sine):
     """Test if all line plots raise an assertion for a wrong unit parameter."""
-
     create_figure()
     with raises(ValueError):
         plot.time(sine, unit="pascal")
@@ -188,7 +186,6 @@ def test_line_custom_subplots(handsome_signal, handsome_signal_v2):
     Test custom subplots in row, column, and mixed layout including hold
     functionality.
     """
-
     # plot layouts to be tested
     plots = {
         'row': [plot.time, plot.freq],
@@ -412,7 +409,6 @@ def test_2d_freq_scale_assertion(handsome_signal_2d):
     """
     Test if all 2d plots raise an assertion for a wrong scale parameter.
     """
-
     create_figure()
     with raises(ValueError):
         plot.freq_2d(handsome_signal_2d, freq_scale="warped")
@@ -443,7 +439,6 @@ def test_2d_time_unit(function, unit, handsome_signal_2d):
 
 def test_2d_time_unit_assertion(handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
-
     create_figure()
     with raises(ValueError):
         plot.time_2d(handsome_signal_2d, unit="pascal")
@@ -507,7 +502,6 @@ def test_2d_method_assertion(function, handsome_signal_2d):
 
 def test_use():
     """Test if use changes the plot style."""
-
     for style in ["dark", "default"]:
 
         filename = 'use_' + style

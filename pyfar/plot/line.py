@@ -68,7 +68,6 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         >>> pf.plot.time(sine, unit='ms')
 
     """
-
     with context(style):
         ax = _line._time(signal.flatten(), dB, log_prefix, log_reference, unit,
                          ax, **kwargs)
@@ -139,7 +138,6 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         >>> sine = pf.signals.sine(100, 4410)
         >>> pf.plot.freq(sine)
     """
-
     with context(style):
         ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
                          freq_scale, ax, **kwargs)
@@ -204,7 +202,6 @@ def phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
         >>> impulse = pf.signals.impulse(100, 10)
         >>> pf.plot.phase(impulse, unwrap=True)
     """
-
     with context(style):
         ax = _line._phase(
             signal.flatten(), deg, unwrap, freq_scale, ax, **kwargs)
@@ -275,7 +272,6 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
         >>> impulse = pf.signals.impulse(100, 10)
         >>> pf.plot.group_delay(impulse, unit='samples')
     """
-
     with context(style):
         ax = _line._group_delay(
             signal.flatten(), unit, freq_scale, ax, **kwargs)
@@ -366,7 +362,6 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         >>> sine = pf.signals.sine(100, 4410)
         >>> pf.plot.time_freq(sine, unit='ms')
     """
-
     with context(style):
         ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
                               log_prefix_time, log_prefix_freq,
@@ -443,7 +438,6 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         >>> impulse = pf.signals.impulse(100, 10)
         >>> pf.plot.freq_phase(impulse, unwrap=True)
     """
-
     with context(style):
         ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
                                freq_scale, deg, unwrap, ax, **kwargs)
@@ -527,7 +521,6 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         >>> impulse = pf.signals.impulse(100, 10)
         >>> pf.plot.freq_group_delay(impulse, unit='samples')
     """
-
     with context(style):
         ax = _line._freq_group_delay(
             signal.flatten(), dB, log_prefix, log_reference,
@@ -591,7 +584,6 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
         >>> pf.plot.custom_subplots(impulse, plots)
 
     """
-
     with context(style):
         ax = _line._custom_subplots(signal.flatten(), plots, ax, **kwargs)
 

@@ -36,7 +36,6 @@ def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -100,7 +99,6 @@ def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -167,7 +165,6 @@ def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -235,7 +232,6 @@ def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -321,7 +317,6 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
     filter : FilterSOS
         SOS Filter object. Only returned if ``signal = None``.
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -388,7 +383,6 @@ def crossover(signal, N, frequency, sampling_rate=None):
     .. [#]  D. Bohn, 'Linkwitz Riley crossovers: A primer,' Rane, RaneNote 160,
             2005.
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -490,7 +484,6 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
     .. [#]  S. J. Orfanidis, “Introduction To Signal Processing”,
             Prentice-Hall, 1996
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):

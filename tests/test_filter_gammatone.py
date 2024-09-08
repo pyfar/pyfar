@@ -10,7 +10,6 @@ def test_gammatone_bands_init_and_getter():
     Initialize the filter bank, test all public properties, test all private
     variables.
     """
-
     # initialize filter bank
     GFB = filter.GammatoneBands([0, 22050], resolution=.5)
 
@@ -80,7 +79,6 @@ def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     multi channel signals of different sampling rates. Assert shape of
     intermediate results. Assert values of final result.
     """
-
     # initialize filter bank
     GFB = filter.GammatoneBands(
         [0, 22050], resolution=.5, sampling_rate=sampling_rate)
@@ -131,7 +129,6 @@ def test_gammatone_bands_reset_state():
 
 def test_gammatone_bands_assertions():
     """Test all assertions."""
-
     # wrong values in freq_range
     with pytest.raises(ValueError, match="Values in frequency_range must be"):
         filter.GammatoneBands([-1, 22050])
@@ -158,7 +155,6 @@ def test_gammatone_bands_assertions():
 
 def test_gammatone_bands_repr():
     """Test string representation."""
-
     GFB = filter.GammatoneBands([0, 22050])
     assert str(GFB) == ("Reconstructing Gammatone filter bank with 42 bands "
                         "between 0 and 22050 Hz spaced by 1 ERB units "
@@ -167,7 +163,6 @@ def test_gammatone_bands_repr():
 
 def test_erb_frequencies():
     """Test erb_frequencies against reference from the AMT toolbox."""
-
     frequencies = filter.erb_frequencies([0, 22050], .5)
 
     # assert type and length
@@ -183,7 +178,6 @@ def test_erb_frequencies():
 
 def test_erb_frequencies_assertions():
     """Test assertions for erb_frequencies."""
-
     # freq_range must be an array of length 2
     with pytest.raises(ValueError, match="frequency_range must be an array"):
         filter.erb_frequencies(1)

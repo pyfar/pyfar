@@ -79,7 +79,6 @@ def _extend_sos_coefficients(sos, order):
 
 def _repr_string(filter_type, order, n_channels, sampling_rate):
     """Generate repr string for filter objects."""
-
     ch_str = 'channel' if n_channels == 1 else 'channels'
 
     if filter_type == "SOS":
@@ -108,6 +107,7 @@ class Filter(object):
     This is an abstract class method, only used for the shared processing
     method used for the application of a filter on a signal.
     """
+
     def __init__(
             self,
             coefficients=None,
@@ -135,7 +135,6 @@ class Filter(object):
             The filter object.
 
         """
-
         if coefficients is not None:
             self.coefficients = coefficients
         else:
@@ -318,6 +317,7 @@ class FilterFIR(Filter):
     FilterFIR
         The FIR filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -344,7 +344,6 @@ class FilterFIR(Filter):
     @coefficients.setter
     def coefficients(self, value):
         """Coefficients of the filter."""
-
         b = np.atleast_2d(value)
         # add a-coefficients for easier handling across filter classes
         a = np.zeros_like(b)
@@ -415,6 +414,7 @@ class FilterIIR(Filter):
     FilterIIR
         The IIR filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -486,6 +486,7 @@ class FilterSOS(Filter):
     FilterSOS
         The SOS filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         if state is not None:
@@ -496,7 +497,6 @@ class FilterSOS(Filter):
     @Filter.coefficients.setter
     def coefficients(self, value):
         """Coefficients of the filter."""
-
         coeff = _atleast_3d_first_dim(value)
         if coeff.shape[-1] != 6:
             raise ValueError(
@@ -508,7 +508,8 @@ class FilterSOS(Filter):
     @property
     def order(self):
         """The order of the filter.
-        This is always twice the number of sections."""
+        This is always twice the number of sections.
+        """
         return 2*self.n_sections
 
     @property

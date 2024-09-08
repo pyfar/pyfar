@@ -334,7 +334,7 @@ def noise():
 
 @pytest.fixture
 def noise_two_by_three_channel():
-    """ 2-by-3 channel gaussian white noise signal.
+    """2-by-3 channel gaussian white noise signal.
 
     Returns
     -------
@@ -366,7 +366,6 @@ def handsome_signal():
     signal : Signal
         Windowed sine
     """
-
     signal = pf.signals.sine(200, 4410)
     signal = pf.dsp.time_window(signal, (1500, 2000, 3000, 3500))
     signal.fft_norm = 'none'
@@ -383,7 +382,6 @@ def handsome_signal_v2():
     signal : Signal
         Windowed sine
     """
-
     signal = pf.signals.sine(2000, 4410)
     signal = pf.dsp.time_window(signal, (500, 1000, 2000, 2500))
     signal.fft_norm = 'none'
@@ -401,7 +399,6 @@ def handsome_signal_2d():
     signal : Signal
         Multi channel signal
     """
-
     delays = np.array(np.sin(np.linspace(0, 2*np.pi, 45))*50 + 55, dtype=int)
     amplitudes = 10**(-10*(1-np.cos(np.linspace(0, 2*np.pi, 45)))/20)
     signal = pyfar.signals.impulse(2**9, delays, amplitudes)
@@ -467,7 +464,7 @@ def sofa_reference_coordinates(noise_two_by_three_channel):
 @pytest.fixture
 def generate_sofa_GeneralFIR(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR."""
+    """Generate the reference sofa files of type GeneralFIR."""
     filename = os.path.join(tmpdir, ('GeneralFIR' + '.sofa'))
 
     sofafile = sf.Sofa('GeneralFIR', True)
@@ -487,7 +484,7 @@ def generate_sofa_GeneralFIR(
 @pytest.fixture
 def generate_sofa_GeneralTF(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralTF."""
+    """Generate the reference sofa files of type GeneralTF."""
     filename = os.path.join(tmpdir, ('GeneralTF' + '.sofa'))
 
     sofafile = sf.Sofa('GeneralTF', True)
@@ -504,7 +501,7 @@ def generate_sofa_GeneralTF(
 
 @pytest.fixture
 def generate_sofa_GeneralFIR_E(tmpdir):
-    """ Generate the reference sofa files of type GeneralFIR-E."""
+    """Generate the reference sofa files of type GeneralFIR-E."""
     filename = os.path.join(tmpdir, ('GeneralFIR-E.sofa'))
 
     sofafile = sf.Sofa('GeneralFIR-E', True)
@@ -518,7 +515,7 @@ def generate_sofa_GeneralFIR_E(tmpdir):
 
 @pytest.fixture
 def generate_sofa_GeneralTF_E(tmpdir):
-    """ Generate the reference sofa files of type GeneralFIR-E."""
+    """Generate the reference sofa files of type GeneralFIR-E."""
     filename = os.path.join(tmpdir, ('GeneralTF-E.sofa'))
 
     sofafile = sf.Sofa('GeneralTF-E', True)
@@ -534,10 +531,9 @@ def generate_sofa_GeneralTF_E(tmpdir):
 @pytest.fixture
 def generate_sofa_postype_spherical(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR,
+    """Generate the reference sofa files of type GeneralFIR,
     spherical position type.
     """
-
     filename = os.path.join(tmpdir, ('GeneralFIR' + '.sofa'))
 
     sofafile = sf.Sofa('GeneralFIR', True)
@@ -556,7 +552,7 @@ def generate_sofa_postype_spherical(
 
 @pytest.fixture
 def views():
-    """ Used for the creation of Orientation objects with
+    """Used for the creation of Orientation objects with
     `Orientations.from_view_up`.
     """
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
@@ -564,7 +560,7 @@ def views():
 
 @pytest.fixture
 def ups():
-    """ Used for the creation of Orientation objects with
+    """Used for the creation of Orientation objects with
     `Orientations.from_view_up`.
     """
     return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
@@ -572,7 +568,7 @@ def ups():
 
 @pytest.fixture
 def positions():
-    """ Used for the visualization of Orientation objects with
+    """Used for the visualization of Orientation objects with
     `Orientations.show`.
     """
     return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
@@ -580,14 +576,14 @@ def positions():
 
 @pytest.fixture
 def orientations(views, ups):
-    """ Orientations object uses fixtures `views` and `ups`.
+    """Orientations object uses fixtures `views` and `ups`.
     """
     return Orientations.from_view_up(views, ups)
 
 
 @pytest.fixture
 def coordinates():
-    """ Coordinates object.
+    """Coordinates object.
     """
     return Coordinates([0, 1], [2, 3], [4, 5])
 
@@ -604,14 +600,14 @@ def state():
 
 @pytest.fixture
 def filter(coeffs, state):
-    """ Filter object.
+    """Filter object.
     """
     return fo.Filter(coefficients=coeffs, state=state)
 
 
 @pytest.fixture
 def filterFIR():
-    """ FilterFIR objectr.
+    """FilterFIR objectr.
     """
     coeff = np.array([
         [1, 1 / 2, 0],
@@ -621,7 +617,7 @@ def filterFIR():
 
 @pytest.fixture
 def filterIIR():
-    """ FilterIIR object.
+    """FilterIIR object.
     """
     coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
     return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
@@ -629,7 +625,7 @@ def filterIIR():
 
 @pytest.fixture
 def filterSOS():
-    """ FilterSOS objectr.
+    """FilterSOS objectr.
     """
     sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
@@ -637,7 +633,7 @@ def filterSOS():
 
 @pytest.fixture
 def sphericalvoronoi():
-    """ SphericalVoronoi object.
+    """SphericalVoronoi object.
     """
     points = np.array(
         [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
@@ -647,35 +643,35 @@ def sphericalvoronoi():
 
 @pytest.fixture
 def any_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.AnyClass()
 
 
 @pytest.fixture
 def no_encode_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.NoEncodeClass()
 
 
 @pytest.fixture
 def no_decode_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.NoDecodeClass()
 
 
 @pytest.fixture
 def flat_data():
-    """ Class being primarily used as a subclass of the nested data object.
+    """Class being primarily used as a subclass of the nested data object.
     """
     return stub_utils.FlatData()
 
 
 @pytest.fixture
 def nested_data():
-    """ General nested data structure primarily used to illustrate mechanism of
+    """General nested data structure primarily used to illustrate mechanism of
     `io.write` and `io.read`.
     """
     return stub_utils.NestedData.create()
@@ -683,6 +679,6 @@ def nested_data():
 
 @pytest.fixture
 def dict_of_builtins():
-    """ Dictionary that contains builtins with support for writing and reading.
+    """Dictionary that contains builtins with support for writing and reading.
     """
     return stub_utils.dict_of_builtins()

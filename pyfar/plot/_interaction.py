@@ -57,9 +57,10 @@ from pyfar.plot import _utils
 
 
 class Cycle(object):
-    """ Cycle class implementation inspired by itertools.cycle. Supports
+    """Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions.
     """
+
     def __init__(self, cshape, index=0):
         """
         Parameters
@@ -130,6 +131,7 @@ class PlotParameter(object):
     `self.update` for more information.
 
     """
+
     def __init__(self, plot,
                  dB_time=False, dB_freq=True,              # dB properties
                  log_prefix_time=20, log_prefix_freq=20,
@@ -212,7 +214,6 @@ class PlotParameter(object):
             Defines the plot by module.plot_function, e.g., 'freq'
 
         """
-
         # strip "2d" from plot name
         self._plot = plot[:-3] if plot.endswith("_2d") else plot
         self.plot = plot
@@ -434,7 +435,8 @@ class PlotParameter(object):
     def toggle_x(self):
         """Toggle the x-axis type.
 
-        For example toggle between lin and log frequency axis."""
+        For example toggle between lin and log frequency axis.
+        """
         changed = False
         if self.x_type is not None:
             if len(self._x_type) > 1:
@@ -447,7 +449,8 @@ class PlotParameter(object):
     def toggle_y(self):
         """Toggle the y-axis type.
 
-        For example toggle between showing lin and log time signals."""
+        For example toggle between showing lin and log time signals.
+        """
         changed = False
         if self.y_type is not None:
             if len(self._y_type) > 1:
@@ -460,7 +463,8 @@ class PlotParameter(object):
     def toggle_colormap(self):
         """Toggle the color map type.
 
-        For example toggle between showing lin and log magnitude."""
+        For example toggle between showing lin and log magnitude.
+        """
         changed = False
         if self.cm_type is not None:
             if len(self._cm_type) > 1:
@@ -511,6 +515,7 @@ class Interaction(object):
     Toggle between plots; move or zoom axis or color map; toggle axis types;
     cycle channels.
     """
+
     def __init__(self, signal, axes, colorbars, style, plot_parameter,
                  **kwargs):
         """
@@ -536,7 +541,6 @@ class Interaction(object):
         kwargs : arguments, optional
             **kwargs are passed to the plot functions.
         """
-
         # save input arguments
         self.cshape = signal.cshape
         self.signal = signal.flatten()
@@ -588,7 +592,6 @@ class Interaction(object):
         event : mpl_connect event
             class that contains the action, e.g., the pressed key as a string
         """
-
         ctr = self.ctr
         self.event = event
 
@@ -682,7 +685,6 @@ class Interaction(object):
 
     def toggle_plot(self, event):
         """Toggle between plot types."""
-
         plot = self.plot
         prm = self.params
 
@@ -845,7 +847,6 @@ class Interaction(object):
         Get parameters for moving/zoom and call apply_move_and_zoom().
         See apply_move_and_zoom for more parameter description.
         """
-
         ctr = self.ctr
         getter = None
 
@@ -1034,7 +1035,6 @@ def get_new_axis_limits(limits, axis_type, operation, direction, amount=.1):
         10 percent of the current axis/colormap range. The default is 0.1
 
     """
-
     # get the amount to be shifted
     dyn_range = np.diff(np.array(limits))
     shift = amount * dyn_range

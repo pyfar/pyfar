@@ -45,6 +45,7 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
+
     # indicate use of _Audio arithmetic operations for overloaded operators
     # (e.g. __rmul__)
     __array_priority__ = 1.0
@@ -115,7 +116,6 @@ class _Audio():
         The number of samples and frequency bins always remains the same.
 
         """
-
         # check input
         if not isinstance(newshape, int) and not isinstance(newshape, tuple):
             raise ValueError("newshape must be an integer or tuple")
@@ -283,9 +283,9 @@ class TimeData(_Audio):
         A comment related to `data`. The default is ``''``, which
         initializes an empty string.
     """
+
     def __init__(self, data, times, comment=""):
         """Create TimeData object with data, and times."""
-
         _Audio.__init__(self, 'time', comment)
 
         self.time = data
@@ -475,9 +475,9 @@ class FrequencyData(_Audio):
             Austria, May 2020, p. e-Brief 600.
 
     """
+
     def __init__(self, data, frequencies, comment=""):
         """Create audio object with frequency data and frequencies."""
-
         _Audio.__init__(self, 'freq', comment)
 
         # init
@@ -500,7 +500,6 @@ class FrequencyData(_Audio):
     @freq.setter
     def freq(self, value):
         """Set the frequency data."""
-
         # check data type
         data = np.atleast_2d(np.asarray(value))
         if data.dtype.kind == "i":
@@ -675,6 +674,7 @@ class Signal(FrequencyData, TimeData):
             Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
             Austria, May 2020, p. e-Brief 600.
     """
+
     def __init__(
             self,
             data,
@@ -956,6 +956,7 @@ class Signal(FrequencyData, TimeData):
 class _SignalIterator(object):
     """Iterator for :py:func:`Signal`.
     """
+
     def __init__(self, array_iterator, signal):
         self._array_iterator = array_iterator
         self._signal = signal
@@ -1378,7 +1379,6 @@ def matrix_multiplication(
 
 def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     """Apply arithmetic operations."""
-
     # check input and obtain meta data of new signal
     division = True if operation == _divide else False
     matmul = True if operation == _matrix_multiplication else False
@@ -1452,7 +1452,6 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
         Otherwise empty tuple.
 
     """
-
     # we need at least two signals
     if not isinstance(data, tuple):
         raise ValueError("Input argument 'data' must be a tuple.")
@@ -1651,7 +1650,6 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
     ``'rms'``, ``'power'`` or ``'psd'``
         The fft_norm resulting from arithmetic operation.
     """
-
     # check if fft_norms are valid
     valid_fft_norms = ['none', 'unitary', 'amplitude', 'rms', 'power', 'psd']
     if fft_norm_1 not in valid_fft_norms:

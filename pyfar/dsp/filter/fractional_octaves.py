@@ -239,7 +239,6 @@ def fractional_octave_bands(
         ...     "Filter bands and the sum of their squared magnitudes")
 
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -296,7 +295,6 @@ def _coefficients_fractional_octave_bands(
     This function uses second order sections of butterworth filters for
     increased numeric accuracy and stability.
     """
-
     f_crit = fractional_octave_frequencies(
         num_fractions, frequency_range, return_cutoff=True)[2]
 
@@ -424,7 +422,6 @@ def reconstructing_fractional_octave_bands(
         >>> ax[1].set_title(
         ...     "Reconstructed (black) and filtered impulse (colored)")
     """
-
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):

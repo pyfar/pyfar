@@ -1,4 +1,4 @@
-"""This module contains the Orientations class. """
+"""This module contains the Orientations class."""
 from scipy.spatial.transform import Rotation
 import numpy as np
 import warnings
@@ -93,7 +93,6 @@ class Orientations(Rotation):
         orientations : Orientations
             Object containing the orientations represented by quaternions.
         """
-
         # init views and up
         try:
             views = np.atleast_2d(views).astype(np.float64)
