@@ -141,7 +141,7 @@ class _Audio():
 
         Parameters
         ----------
-        caxes : empty, ``None``, iterable of ints, or n ints
+        axes : empty, ``None``, iterable of ints, or n ints
             Define how the :py:mod:` caxes <pyfar._concepts.audio_classes>`
             are ordered in the transposed audio object.
             Note that the last dimension of the data in the audio object
@@ -1634,12 +1634,12 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
 
     Parameters
     ----------
-    fft_norm_1 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
-    ``'power'`` or ``'psd'``
-        First fft_norm for matching.
-    fft_norm_2 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
-    ``'power'`` or ``'psd'``
-        Second fft_norm for matching.
+    fft_norm_1 : str
+        First fft_norm for matching. Can be ``'none'``, ``'unitary'``,
+        ``'amplitude'``, ``'rms'``, ``'power'`` or ``'psd'``
+    fft_norm_2 : str
+        Second fft_norm for matching. Can be ``'none'``, ``'unitary'``,
+        ``'amplitude'``, ``'rms'``, ``'power'`` or ``'psd'``
     division : bool
         ``False`` if arithmetic operation is addition, subtraction or
         multiplication;

@@ -622,7 +622,7 @@ class Coordinates():
     def set_sph(
             self, angles_1, angles_2, radius,
             convention='top_colat', unit='rad'):
-        """
+        r"""
         This function will be deprecated in pyfar 0.8.0 in favor
         of the ``spherical_*`` properties. For conversions from or into degree
         use :py:func:`deg2rad` and :py:func:`rad2deg`.
@@ -650,8 +650,14 @@ class Coordinates():
 
         Parameters
         ----------
-        points_i: array like, number
-            Points for the first, second, and third coordinate
+        angles_1: array like, number
+            Points for the first coordinate, see table above.
+        angles_2: array like, number
+            Points for the second coordinate, see table above.
+        radius: array like, number
+            Distance to the origin of the right handed Cartesian
+            coordinate system in meters
+            (:math:`0` < radius < :math:`\infty`).
         convention : string, optional
             Convention in which the coordinate points are stored. The default
             is ``'top_colat'``.
@@ -849,7 +855,7 @@ class Coordinates():
         return angles_1, angles_2, radius
 
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
-        """
+        r"""
         This function will be deprecated in pyfar 0.8.0 in favor
         of the :py:func:`cylindrical` property. For conversions from or
         into degree use :py:func:`deg2rad` and :py:func:`rad2deg`.
@@ -871,8 +877,18 @@ class Coordinates():
 
         Parameters
         ----------
-        points_i: array like, number
-            Points for the first, second, and third coordinate
+        azimuth : array like, number
+            Counter clock-wise angle in the x-y plane of the right handed
+            Cartesian coordinate system in radians. :math:`0` radians are
+            defined in positive x-direction, :math:`\pi/2` radians in
+            positive y-direction and so on
+            (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic).
+        z : array like, number
+            Z coordinate of a right handed Cartesian coordinate system
+            in meters (:math:`-\infty` < z < :math:`\infty`).
+        radius_z : array like, number
+            radius in z plane in meters
+            (:math:`0` < radius_z < :math:`\infty`).
         convention : string, optional
             Convention in which the coordinate points are stored. The default
             is ``'top'``.
@@ -884,6 +900,8 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the cylindrical property."),
                 PyfarDeprecationWarning)
+        if unit == 'deg':
+            azimuth = azimuth / 180 * np.pi
         self._set_cyl(azimuth, z, radius_z, convention)
 
     def _set_cyl(self, azimuth, z, rho, convention='top', unit='rad'):
@@ -1859,8 +1877,14 @@ class Coordinates():
 
         Parameters
         ----------
-        points_i : array like, number
-            First, second and third coordinate of the points to which the
+        points_1 : array like, number
+            First coordinate of the points to which the
+            nearest neighbors are searched.
+        points_2 : array like, number
+            Second coordinate of the points to which the
+            nearest neighbors are searched.
+        points_3 : array like, number
+            Third coordinate of the points to which the
             nearest neighbors are searched.
         k : int, optional
             Number of points to return. k must be > 0. The default is ``1``.
@@ -1931,8 +1955,14 @@ class Coordinates():
 
         Parameters
         ----------
-        points_i : array like, number
-            First, second and third coordinate of the points to which the
+        points_1 : array like, number
+            First coordinate of the points to which the
+            nearest neighbors are searched.
+        points_2 : array like, number
+            Second coordinate of the points to which the
+            nearest neighbors are searched.
+        points_3 : array like, number
+            Third coordinate of the points to which the
             nearest neighbors are searched.
         distance : number
             Euclidean distance in meters in which the nearest points are
@@ -2007,8 +2037,14 @@ class Coordinates():
 
         Parameters
         ----------
-        points_i : array like, number
-            First, second and third coordinate of the points to which the
+        points_1 : array like, number
+            First coordinate of the points to which the
+            nearest neighbors are searched.
+        points_2 : array like, number
+            Second coordinate of the points to which the
+            nearest neighbors are searched.
+        points_3 : array like, number
+            Third coordinate of the points to which the
             nearest neighbors are searched.
         distance : number
             Great circle distance in degrees in which the nearest points are
@@ -2512,7 +2548,7 @@ class Coordinates():
             Specify the domain of the coordinate system, e.g., 'cart'.
         convention : string
             The convention of the coordinate system, e.g., 'top_colat'
-        units: string
+        unit: string
             The unit of the coordinate system (rad, deg, or met for radians,
             degrees, or meters)
         """
@@ -2613,13 +2649,12 @@ class Coordinates():
 
         Parameters
         ----------
-        convert : boolean, optional
-            Set self._points if convert = True. Return points as
-            matrix otherwise. The default is False.
-        system: dict, optional
-            The coordinate system against which the range of the points are
-            checked as returned from self._make_system. If system = None
-            self._system is used.
+        x : array like, number
+            First coordinate of the points in cartesian.
+        y : array like, number
+            Second coordinate of the points in cartesian.
+        z : array like, number
+            Third coordinate of the points in cartesian.
 
         Set self._points, which is an atleast_2d numpy array of shape
         [L,M,...,N, 3].

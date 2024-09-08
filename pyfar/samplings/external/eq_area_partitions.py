@@ -233,12 +233,13 @@ def ideal_region_list(dimension, N, c_polar, n_collars):
     Parameters
     ----------
     dimension : int
-        The dimension
+        The dimension.
     N : int
-        The number of points
-    c_polar :
+        The number of points.
+    c_polar : double
+        The colatitude angle of the polar caps.
     n_collars : int
-        The number of collar elements
+        The number of collar elements.
 
     Returns
     -------
@@ -456,6 +457,7 @@ def area_of_sphere(dimension):
     Parameters
     ----------
     dimension : int
+        The dimension
 
     Returns
     -------
@@ -567,7 +569,7 @@ def sradius_of_cap(dimension, area):
 
 
 def polar2cart(points_polar):
-    """Comnversion from the polar angles theta and phi to Cartesian coordinates.
+    """Conversion from the polar angles theta and phi to Cartesian coordinates.
 
         x = cos(phi) * sin(theta)
         y = sin(phi) * sin(theta)

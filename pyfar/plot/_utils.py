@@ -185,10 +185,12 @@ def _get_quad_mesh_from_axis(ax):
     Parameters
     ----------
     ax : matplotlib.axes.Axes
+        axis to get the quad mesh from.
 
     Returns
     -------
     cm : Matplotlib QuadMesh object
+        The quad mesh object from the axis.
     """
     quad_mesh_found = False
     for qm in ax.get_children():
@@ -269,8 +271,8 @@ def _log_prefix(signal):
 
     Parameters
     ----------
-    fft_norm : str
-        FFT normalization
+    signal : Signal
+        Signal from where the FFT normalization is used.
     """
     if isinstance(signal, Signal) and signal.fft_norm in ('power', 'psd'):
         log_prefix = 10
@@ -292,7 +294,7 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
     ----------
     data : Signal, FrequencyData, TimeData
         The input data for the plot function
-    instance : tuple of pyfar audio classes
+    instances : tuple of pyfar audio classes
         Tuple of classes that can be used for the plot function that calls this
     min_n_channels : int
         Minimum numbers channels required by the plot (1 for spectrogram, 2
@@ -326,6 +328,8 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
             `colorbar` must be ``True``
     colorbar : bool
         Flag indicating if a colobar should be added to the plot
+    kwargs : keyword arguments
+        Additional keyword arguments for the plot function.
 
     Returns
     -------
@@ -383,10 +387,12 @@ def _add_colorbar(colorbar, fig, ax, qm, label):
     colorbar : bool
         Flag indicating if a colobar should be added to the plot
     fig : matplotlib figure object
+        Figure to plot on.
     ax : list[matplotlib.axes.Axes], None
         either a list of to axes objects or a list with one axis and None
         object
     qm : matplotlib quadmesh object
+        Quadmesh object to plot.
     label : string
         colorbar label
 

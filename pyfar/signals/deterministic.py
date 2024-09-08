@@ -690,6 +690,8 @@ def _frequency_domain_sweep(
 
     Parameters
     ----------
+    n_samples : int
+        The length of the sweep in samples.
     sweep_type : Signal, string
         Specify the magnitude response of the sweep.
 
@@ -708,6 +710,38 @@ def _frequency_domain_sweep(
         ``'perfect_linear'``
             Perfect linear sweep. Note that the parameters `start_margin`,
             `stop_margin`, and `frequency_range` are not required in this case.
+    frequency_range : array like
+        Frequency range of the sweep given by the lower and upper cut-off
+        frequency in Hz. The restriction of the frequency range is realized
+        by applying a Butterworth high-pass if ``frequency_range[0] > 0``
+        and/or by a low-pass if ``frequency_range[1] < sampling_rate / 2``.
+        Note that the exponential sweep can not start at 0 Hz, because its
+        magnitude is defined by 1/frequency.
+    bandpass_order : int
+        The order of the Butterworth filters that are applied to limit the
+        frequency range (see above).
+    start_margin : int, float
+        The time in samples, at which the sweep starts. The start margin is
+        required because the frequency domain sweep synthesis has pre-ringing
+        in the time domain.
+    stop_margin : int, float
+        Time in samples, at which the sweep stops. This is relative to
+        `n_samples`, e.g., a stop margin of 100 samples means that the sweep
+        ends at sample ``n_samples-100``. This is required, because the
+        frequency domain sweep synthesis has post-ringing in the time domain.
+    n_fade_in : int
+        Duration of a squared sine fade-in in samples. The fade starts at the
+        first sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal.
+    n_fade_out : int
+        Duration of a squared cosine fade-out in samples. The fade ends at the
+        last sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal.
+    sampling_rate : int
+        The sampling rate in Hz.
+    return_group_delay : boolean
+        Return the analytical group delay of the sweep. This can be used to
+        compute the times at which distortion products appear.
 
     Returns
     -------

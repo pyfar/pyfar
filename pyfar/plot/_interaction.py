@@ -524,12 +524,17 @@ class Interaction(object):
             axes objects of all axes in the plot holding data
         colorbars : Matplotlib colorbar, array like
             all colorbar objects in the plot
-        style : plot style
-            E.g. 'light'
+        style : str
+            ``light`` or ``dark`` to use the pyfar plot styles or a plot style
+            from :py:data:`matplotlib.style.available`. Pass a dictionary
+            to set specific plot parameters, for example
+            ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+            ``style = {}`` to use the currently active plotstyle. The default
+            is ``light``.
         plot_parameter : PlotParameter
             An object of the PlotParameter class
-
-        **kwargs are passed to the plot functions
+        kwargs : arguments, optional
+            **kwargs are passed to the plot functions.
         """
 
         # save input arguments

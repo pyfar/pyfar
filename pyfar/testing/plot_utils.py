@@ -24,7 +24,14 @@ def create_figure(width=6, height=4.8, dpi=100, style="light"):
     height : float
         The height in inch. The default is 4.8
     dpi : int
-        The resolutoin in dots per inch. The default is 100
+        The resolution in dots per inch. The default is 100
+    style : str
+        ``light`` or ``dark`` to use the pyfar plot styles or a plot style from
+        :py:data:`matplotlib.style.available`. Pass a dictionary to set
+        specific plot parameters, for example
+        ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+        ``style = {}`` to use the currently active plotstyle. The default is
+        ``light``.
 
     Returns
     -------

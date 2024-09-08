@@ -1093,7 +1093,7 @@ def time_shift(
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
-    pad_type : numeric, optional
+    pad_value : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
         Pad :py:data:`numpy.nan` to the respective channels if the rms value
         of the signal is to be maintained for block-wise rms estimation of the
@@ -1931,7 +1931,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     signal: Signal, TimeData, FrequencyData
         Input signal.
     mode: string
-
         ``'linear'``
             Average ``signal.time`` if the signal is in the time domain and
             ``signal.freq`` if the signal is in the frequency domain. Note that

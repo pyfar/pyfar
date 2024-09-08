@@ -62,7 +62,6 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
         The width of the smoothing window in fractional octaves, e.g., 3 will
         apply third octave smoothing and 1 will apply octave smoothing.
     mode : str, optional
-
         ``"magnitude_zerophase"``
             Only the magnitude response, i.e., the absolute spectrum is
             smoothed. Note that this return a zero-phase signal. It might be
