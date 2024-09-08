@@ -425,7 +425,7 @@ def test_reshape():
 
     # test reshape with tuple
     rng = np.random.default_rng()
-    x = rng.standard_normal((6, 256))
+    x = rng.random((6, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
@@ -437,7 +437,7 @@ def test_reshape():
 
     # test reshape with int
     rng = np.random.default_rng()
-    x = rng.standard_normal((3, 2, 256))
+    x = rng.random((3, 2, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.reshape(6)
     npt.assert_allclose(signal_in._data.reshape(6, -1), signal_out._data)
@@ -446,7 +446,7 @@ def test_reshape():
 
 def test_reshape_exceptions():
     rng = np.random.default_rng()
-    x = rng.standard_normal((6, 256))
+    x = rng.random((6, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
@@ -461,7 +461,7 @@ def test_reshape_exceptions():
 
 def test_transpose():
     rng = np.random.default_rng()
-    x = rng.standard_normal((6, 2, 5, 256))
+    x = rng.random((6, 2, 5, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.transpose()
     npt.assert_allclose(signal_in.T._data, signal_out._data)
@@ -472,7 +472,7 @@ def test_transpose():
 @pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
 def test_transpose_args(taxis):
     rng = np.random.default_rng()
-    x = rng.standard_normal((6, 2, 5, 256))
+    x = rng.random((6, 2, 5, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.transpose(taxis)
     npt.assert_allclose(
@@ -486,7 +486,7 @@ def test_flatten():
 
     # test 2D signal (flatten should not change anything)
     rng = np.random.default_rng()
-    x = rng.standard_normal((2, 256))
+    x = rng.random((2, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.flatten()
 
@@ -495,7 +495,7 @@ def test_flatten():
 
     # test 3D signal
     rng = np.random.default_rng()
-    x = rng.standard_normal((3, 2, 256))
+    x = rng.random((3, 2, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.flatten()
 
