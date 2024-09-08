@@ -603,7 +603,7 @@ def state():
 
 
 @pytest.fixture
-def filter(coeffs, state):
+def filterObject(coeffs, state):
     """ Filter object.
     """
     return fo.Filter(coefficients=coeffs, state=state)

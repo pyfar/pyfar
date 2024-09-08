@@ -575,10 +575,10 @@ def test_minimum_phase_against_reference():
     # tests are separated since their reliability depends on the type of
     # filters. The homomorphic method works best for filters with odd numbers
     # of taps. Hilbert_2 approximates the ideal minimum phase
-    input = [0, 0, 0, 0, 1, 0, 0, 0, 0]
+    input_data = [0, 0, 0, 0, 1, 0, 0, 0, 0]
     output = [1, 0, 0, 0, 0]
     min_phase = pyfar.dsp.minimum_phase(
-        pyfar.Signal(input, 44100))
+        pyfar.Signal(input_data, 44100))
 
     npt.assert_allclose(
         min_phase.time.flatten(), np.array(output, dtype=float),

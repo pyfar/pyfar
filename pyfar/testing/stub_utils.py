@@ -38,9 +38,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        time = np.atleast_2d(signal.time[slice])
-        freq = np.atleast_2d(signal.freq[slice])
+    def getitem(slice_idx):
+        time = np.atleast_2d(signal.time[slice_idx])
+        freq = np.atleast_2d(signal.freq[slice_idx])
         item = signal_stub(
             time,
             freq,
@@ -55,10 +55,10 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
         return samples
 
     def find_nearest_frequency(freqs):
-        bin = np.zeros(len(freqs), dtype=int)
+        bins = np.zeros(len(freqs), dtype=int)
         for idx, freq in enumerate(freqs):
-            bin[idx] = np.argmin(np.abs(signal.frequencies-freq))
-        return bin
+            bins[idx] = np.argmin(np.abs(signal.frequencies-freq))
+        return bins
 
     signal = mock.MagicMock(
         spec_set=Signal(time, sampling_rate, domain='time'))
@@ -100,8 +100,8 @@ def time_data_stub(time, times):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        time = np.atleast_2d(time_data.time[slice])
+    def getitem(slice_idx):
+        time = np.atleast_2d(time_data.time[slice_idx])
         item = time_data_stub(time, time_data.times)
         return item
 
@@ -138,8 +138,8 @@ def frequency_data_stub(freq, frequencies):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        freq = np.atleast_2d(frequency_data.freq[slice])
+    def getitem(slice_idx):
+        freq = np.atleast_2d(frequency_data.freq[slice_idx])
         item = frequency_data_stub(freq, frequency_data.frequencies)
         return item
 

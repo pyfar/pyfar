@@ -84,8 +84,9 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
 
     if filter_type == "SOS":
         sec_str = 'section' if order == 1 else 'sections'
-        repr = (f"SOS filter with {order} {sec_str} and {n_channels} {ch_str} "
-                f"@ {sampling_rate} Hz sampling rate")
+        representation = (f"SOS filter with {order} {sec_str} and "
+                          f"{n_channels} {ch_str} "
+                          f"@ {sampling_rate} Hz sampling rate")
     else:
         if order % 10 == 1:
             order_string = 'st'
@@ -96,10 +97,12 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
         else:
             order_string = 'th'
 
-        repr = (f"{order}{order_string} order {filter_type} filter with "
-                f"{n_channels} {ch_str} @ {sampling_rate} Hz sampling rate")
+        representation = (f"{order}{order_string} order "
+                          f"{filter_type} filter with "
+                            f"{n_channels} {ch_str} @ {sampling_rate} "
+                            "Hz sampling rate")
 
-    return repr
+    return representation
 
 
 class Filter(object):

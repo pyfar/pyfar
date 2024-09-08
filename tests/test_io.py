@@ -273,15 +273,15 @@ def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     assert actual == sphericalvoronoi
 
 
-def test_write_read_filter(filter, tmpdir):
+def test_write_read_filter(filterObject, tmpdir):
     """ Filter
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filter.far')
-    io.write(filename, filter=filter)
+    io.write(filename, filter=filterObject)
     actual = io.read(filename)['filter']
     assert isinstance(actual, fo.Filter)
-    assert actual == filter
+    assert actual == filterObject
 
 
 def test_write_filterFIR(filterFIR, tmpdir):
@@ -394,7 +394,7 @@ def test_write_read_builtins(dict_of_builtins, tmpdir):
 
 
 def test_write_read_multiplePyfarObjects(
-        filter,
+        filterObject,
         filterFIR,
         filterIIR,
         filterSOS,
@@ -413,7 +413,7 @@ def test_write_read_multiplePyfarObjects(
     matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
     io.write(
         filename,
-        filter=filter,
+        filter=filterObject,
         filterFIR=filterFIR,
         filterIIR=filterIIR,
         filterSOS=filterSOS,
@@ -427,7 +427,7 @@ def test_write_read_multiplePyfarObjects(
         **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
-    assert actual['filter'] == filter
+    assert actual['filter'] == filterObject
     assert isinstance(actual['filterFIR'], fo.FilterFIR)
     assert actual['filterFIR'] == filterFIR
     assert isinstance(actual['filterIIR'], fo.FilterIIR)
@@ -452,7 +452,7 @@ def test_write_read_multiplePyfarObjects(
 
 
 def test_write_read_multiplePyfarObjectsWithCompression(
-        filter,
+        filterObject,
         filterFIR,
         filterIIR,
         filterSOS,
@@ -472,7 +472,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     io.write(
         filename,
         compress=True,
-        filter=filter,
+        filter=filterObject,
         filterFIR=filterFIR,
         filterIIR=filterIIR,
         filterSOS=filterSOS,
@@ -486,7 +486,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
-    assert actual['filter'] == filter
+    assert actual['filter'] == filterObject
     assert isinstance(actual['filterFIR'], fo.FilterFIR)
     assert actual['filterFIR'] == filterFIR
     assert isinstance(actual['filterIIR'], fo.FilterIIR)
