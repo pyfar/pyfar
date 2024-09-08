@@ -50,6 +50,7 @@ def castanets(sampling_rate=44100):
     ----------
     .. [#] https://iaem.at/Members/frank/sounds/
     """
+
     # download files if requires
     files = _load_files('castanets')
 
@@ -89,6 +90,7 @@ def drums(sampling_rate=48000):
     drums : Signal
         The drum sample.
     """
+
     # download files if requires
     files = _load_files('drums')
 
@@ -136,6 +138,7 @@ def guitar(sampling_rate=48000):
     ----------
     .. [#] http://audiogroup.web.th-koeln.de/anechoic.html
     """
+
     # download files if requires
     files = _load_files('guitar')
 
@@ -188,6 +191,7 @@ def speech(voice="female", sampling_rate=44100):
     .. [#] V. Hansen, and G. Munch, 'Making Recordings for Simulation Tests in
            the Archimedes Project,' J. Audio Eng. Soc. 39, 768–774 (1991).
     """
+
     # download files if requires
     files = _load_files('speech')
 
@@ -249,6 +253,7 @@ def binaural_room_impulse_response(
            Orchestra with Multi-Channel Microphone Arrays for the Evaluation of
            Spatial Audio Methods,' J. Audio Eng. Soc. (submitted)
     """
+
     # download files if requires
     files = _load_files('binaural_room_impulse_response')
     if diffuse_field_compensation:
@@ -301,6 +306,7 @@ def headphone_impulse_responses(sampling_rate=44100):
     ----------
     .. [#] http://dx.doi.org/10.14279/depositonce-5718.5
     """
+
     # download files if requires
     files = _load_files('headphone_impulse_responses')
 
@@ -371,6 +377,7 @@ def head_related_impulse_responses(
     ----------
     .. [#] http://dx.doi.org/10.14279/depositonce-5718.5
     """
+
     # download files if requires
     files = _load_files('head_related_impulse_responses')
 
@@ -464,6 +471,7 @@ def room_impulse_response(sampling_rate=48000):
            Orchestra with Multi-Channel Microphone Arrays for the Evaluation of
            Spatial Audio Methods,' J. Audio Eng. Soc. (submitted)
     """
+
     # download files if requires
     files = _load_files('room_impulse_response')
 
@@ -479,6 +487,7 @@ def room_impulse_response(sampling_rate=48000):
 
 def _load_files(data):
     """Download files from Audio Communication Server if they do not exist."""
+
     # create directory if required
     if not os.path.isdir(file_dir):
         # provide verbose error for read-only file systems

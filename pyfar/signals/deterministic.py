@@ -40,6 +40,7 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     and `phase` could be a scalar. In this case all parameters would be
     broadcasted to a shape of ``(2, 4)``.
     """
+
     # check and match the cshape
     try:
         cshape, (frequency, amplitude, phase) = _match_shape(
@@ -202,6 +203,7 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
         >>> sweep = pf.signals.linear_sweep_time(2**16, [0, 22050])
         >>> pf.plot.time_freq(sweep)
     """
+
     signal = _time_domain_sweep(
         n_samples, frequency_range, n_fade_out, amplitude,
         sampling_rate, "linear")
@@ -296,6 +298,7 @@ def linear_sweep_freq(
         ...     2**16, [50, 22050], 1000, 1000)
         >>> pf.plot.time_freq(sweep)
     """
+
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='linear',
@@ -380,6 +383,7 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
         >>> sweep = pf.signals.exponential_sweep_time(2**16, [50, 22050])
         >>> pf.plot.time_freq(sweep)
     """
+
     signal = _time_domain_sweep(
         n_samples, frequency_range, n_fade_out, amplitude, sampling_rate,
         "exponential", sweep_rate)
@@ -476,6 +480,7 @@ def exponential_sweep_freq(
         ...     2**16, [50, 22050], 5000, 1000)
         >>> pf.plot.time_freq(sweep)
     """
+
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='exponential',
@@ -568,6 +573,7 @@ def magnitude_spectrum_weighted_sweep(
         ...     2**16, magnitude, 5000, 1000)
         >>> pf.plot.time_freq(sweep)
     """
+
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type=magnitude_spectrum,
@@ -657,6 +663,7 @@ def linear_perfect_sweep(
         >>>     plt.gca().set_xlabel('time lag in samples')
         >>>     plt.gca().set_ylabel('auto correlation')
     """
+
     return _frequency_domain_sweep(
         n_samples=n_samples,
         sweep_type='perfect_linear',
@@ -753,6 +760,7 @@ def _frequency_domain_sweep(
            Corrections.' J. Audio Eng. Soc. 2001, 49 (6), 443-471. (all
            equations referenced in the code refer to this).
     """
+
     # check input (only checks for user input, no checks for calling the
     # private function from the public functions)
     if isinstance(sweep_type, pyfar.Signal):
@@ -997,6 +1005,7 @@ def _match_shape(*args):
         args with new common shape
         (*arg_1, *arg_2, ..., *arg_N)
     """
+
     # broadcast shapes
     shape = np.broadcast_shapes(*[np.atleast_1d(arg).shape for arg in args])
 

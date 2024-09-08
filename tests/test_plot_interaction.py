@@ -139,6 +139,7 @@ def test_interaction_attached():
     This test will fail if a new plot function is added to the pyfar.plot that
     does not have an interaction. This is intended behavior.
     """
+
     # dummy signal
     # - long enough to avoid warning due to identical xlims in spectrogram
     # - with delay to avoid warning due to identical ylims in group delay
@@ -173,6 +174,7 @@ def test_interaction_attached():
 ])
 def test_toggle_plots(plot_type, initial_function, function_list):
     """Test toggling plots by checking labels after toggling."""
+
     # dummy signal
     # - long enough to avoid warning due to identical xlims in spectrogram
     # - with delay to avoid warning due to identical ylims in group delay

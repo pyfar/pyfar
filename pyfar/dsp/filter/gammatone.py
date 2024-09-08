@@ -176,8 +176,8 @@ class GammatoneBands():
     def freq_range(self):
         """Get the frequency range of the filter bank in Hz.
         ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-        """
+        of ``'frequency_range'``."""
+
         # Deprecation warning for freq_range parameter
         warnings.warn((
             'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
@@ -274,6 +274,7 @@ class GammatoneBands():
             The normalization factors, i.e., the b_0 coefficients. The array
             has as many coefficients as self.frequencies.
         """
+
         # Eq. (13) in Hohmann 2002
         erb_aud = 24.7 + self.frequencies / 9.265
 
@@ -299,6 +300,7 @@ class GammatoneBands():
         is a direct Python port of the corresponding function in the AMT
         toolbox `hohmann2002_process.m`.
         """
+
         # the delay in samples
         delay_samples = int(np.round(self.delay * self.sampling_rate))
 
@@ -329,6 +331,7 @@ class GammatoneBands():
         is a direct Python port of the corresponding function in the AMT
         toolbox `hohmann2002_process.m`.
         """
+
         # positive and negative center frequencies in the z-plane
         z = np.atleast_2d(
             np.exp(2j * np.pi * self.frequencies / self.sampling_rate)).T
@@ -400,6 +403,7 @@ class GammatoneBands():
           signal is a single channel signal. In this case the cshape of the
           output signals is ``(self.n_bands)`` and `not` ``(self.n_bands, 1)``.
         """
+
         # check input
         if not isinstance(signal, pf.Signal):
             raise TypeError("signal must be a pyfar Signal object")
@@ -474,6 +478,7 @@ class GammatoneBands():
             The summed input.  ``summed.cshape`` matches the ``cshape`` or the
             original signal before it was filtered.
         """
+
         # prepare output
         summed = real.copy()
         time = real.time.copy() + 1j * imag.time.copy()
@@ -583,6 +588,7 @@ def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
 
 
     """
+
     # check input
     if not isinstance(frequency_range, (list, tuple, np.ndarray)) \
             or len(frequency_range) != 2:

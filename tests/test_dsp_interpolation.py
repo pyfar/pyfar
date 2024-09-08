@@ -12,6 +12,7 @@ from pyfar.dsp import (InterpolateSpectrum,
 
 def test_smooth_fractional_octave_assertions():
     """Test if the assertions are raised correctly."""
+
     # wrong audio data type
     with raises(TypeError, match="Input signal has to be of type"):
         smooth_fractional_octave(pf.FrequencyData(1, 1), .5)
@@ -31,6 +32,7 @@ def test_smooth_fractional_octave_mode(mode):
     """
     Test return signal for different smoothing modes against saved references.
     """
+
     # load input data
     input = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
@@ -52,6 +54,7 @@ def test_smooth_fractional_octave_num_fractions(num_fractions):
     """
     Test return signal for different smoothing widths against saved references.
     """
+
     # load input data
     signal = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
@@ -74,6 +77,7 @@ def test_smooth_fractional_octave_window_parameter():
     values would require implementing the same code as contained in the
     function.
     """
+
     _, window_paraeter = smooth_fractional_octave(pf.signals.impulse(64), 1)
 
     assert len(window_paraeter) == 2
@@ -92,6 +96,7 @@ def test_smooth_fractional_octave_input_signal_shape(amplitudes):
     - Test if padding is correct (if it would not be the output spectrum
       would be shifted.
     """
+
     # manually path a window for smoothing (undocumented feature for testing)
     # The window does not smooth and thus the return spectrum should be
     # identical to the input spectrum (appart from interpolation errors during
@@ -106,6 +111,7 @@ def test_smooth_fractional_octave_input_signal_shape(amplitudes):
 
 def test_fractional_time_shift_assertions():
     """Test if the assertions are raised correctly."""
+
     # wrong audio data type
     with raises(TypeError, match="Input data has to be of type pyfar.Signal"):
         fractional_time_shift(pf.FrequencyData(1, 1), .5)
@@ -147,6 +153,7 @@ def test_fractional_time_shift_channels(
     Test fractional delay with different combinations of single/multi-channel
     signals and delays and the two modes "linear" and "cyclic".
     """
+
     # generate input and delay signal
     signal = pf.signals.impulse(128, delays_impulse)
     delayed = fractional_time_shift(signal, fractional_delays, mode=mode)
@@ -169,6 +176,7 @@ def test_fractional_time_shift_channels(
 
 def test_fractional_time_shift_unit():
     """Test passing shift in different units."""
+
     impulse = pf.signals.impulse(128, 64)
     delayed_samples = fractional_time_shift(impulse, 1, 'samples')
     delayed_seconds = fractional_time_shift(impulse, 1/44100, 's')
@@ -179,6 +187,7 @@ def test_fractional_time_shift_unit():
 @pytest.mark.parametrize("order", [2, 3])
 def test_fractional_delay_order(order):
     """Test if the order parameter behaves as intended."""
+
     signal = pf.signals.impulse(32, 16)
     delayed = pf.dsp.fractional_time_shift(signal, 0.5, order=order)
 
@@ -189,6 +198,7 @@ def test_fractional_delay_order(order):
 @pytest.mark.parametrize("delay", [30.4, -30.4])
 def test_fractional_delay_mode_cyclic(delay):
     """Test the mode delay."""
+
     signal = pf.signals.impulse(32, 16)
     delayed = fractional_time_shift(signal, delay, mode="cyclic")
 
@@ -278,6 +288,7 @@ def test_interpolate_spectrum_interpolation(
     """
     Test the if the interpolated spectrum matches the reference across methods.
     """
+
     # create test data
     data = pf.FrequencyData(freq_in, frequencies)
     interpolator = InterpolateSpectrum(
@@ -297,6 +308,7 @@ def test_interpolate_spectrum_interpolation(
 
 def test_interpolate_spectrum_clip():
     """Test if clipping the magnitude data works."""
+
     data = pf.FrequencyData([1, 2], [1, 2])
     # interpolate with and without clipping
     interpolator = InterpolateSpectrum(
@@ -324,6 +336,7 @@ def test_interpolate_spectrum_fscale(
     """
     Test frequency vectors for linear and logarithmic frequency interpolation.
     """
+
     # test data
     data = pf.FrequencyData([1, 1, 1], f_in)
 
@@ -346,8 +359,8 @@ def test_interpolate_spectrum_show():
 
     This only tests if the code finishes without errors. Because the plot is
     an informal plot for inspection, we don't test specifics of the figure and
-    axes for speed up the testing.
-    """
+    axes for speed up the testing."""
+
     data = pf.FrequencyData([1, 2], [1, 2])
     interpolator = InterpolateSpectrum(
         data, "magnitude", ("linear", "linear", "linear"))

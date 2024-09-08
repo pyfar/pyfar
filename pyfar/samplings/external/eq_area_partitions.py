@@ -580,7 +580,7 @@ def polar2cart(points_polar):
     points_polar : array, double
         The points in polar coordinates, with shape (2, N)
 
-    Returns
+    Returns:
     -------
     points_cart : array, double
         The points in Cartesian coordinates with shape (3, N)

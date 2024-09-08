@@ -14,7 +14,6 @@ class SphericalVoronoi(spat.SphericalVoronoi):
     :py:func:`calculate_sph_voronoi_weights` can be used directly, if only the
     sampling weights are needed.
     """
-
     def __init__(self, sampling, round_decimals=12, center=0.0):
         """
         Calculate a Voronoi diagram on the sphere for the given samplings
@@ -39,7 +38,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
             Spherical voronoi diagram as implemented in
             :py:mod:`scipy.spatial`.
 
-        See Also
+        See also
         --------
         :py:func:`calculate_sph_voronoi_weights`
 

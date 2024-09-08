@@ -90,6 +90,7 @@ blob/master/filter_design/audiofilter.py
         ax1.set_title('1. and 2. order allpass filter with fc = 1000 Hz')
         ax2.legend()
     """
+
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -185,6 +186,7 @@ def bell(signal, center_frequency, gain, quality, bell_type='II',
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
     """
+
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -279,6 +281,7 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
     """
+
     warnings.warn(("'high_shelve' will be deprecated in pyfar 0.9.0 in favor"
                    " of 'high_shelf'"), PyfarDeprecationWarning)
 
@@ -339,6 +342,7 @@ def high_shelf(signal, frequency, gain, order, shelf_type='I',
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
     """
+
     output = _shelf(
         signal, frequency, gain, order, shelf_type, sampling_rate, 'high')
 
@@ -400,6 +404,7 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
     """
+
     warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
                    "of 'low_shelf'"), PyfarDeprecationWarning)
 
@@ -460,6 +465,7 @@ def low_shelf(signal, frequency, gain, order, shelf_type='I',
     .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
 blob/master/filter_design/audiofilter.py
     """
+
     output = _shelf(
         signal, frequency, gain, order, shelf_type, sampling_rate, 'low')
 
@@ -560,6 +566,7 @@ def high_shelve_cascade(
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
     """  # noqa: E501
+
     warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'high_shelf_cascade'"),
                   PyfarDeprecationWarning)
@@ -768,6 +775,7 @@ def low_shelve_cascade(
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
     """  # noqa: E501
+
     warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'low_shelf_cascade'"), PyfarDeprecationWarning)
 
@@ -887,6 +895,7 @@ def _shelf(signal, frequency, gain, order, shelf_type, sampling_rate, kind):
     For the documentation refer to high_shelf and low_shelf. The only
     additional parameter is `kind`, which has to be 'high' or 'low'.
     """
+
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -983,6 +992,7 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
         Adjustable Transition Slope and Bandwidth,” in 148th AES Convention
         (Vienna, Austria, 2020).
     """
+
     # check input -------------------------------------------------------------
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):

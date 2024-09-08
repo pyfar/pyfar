@@ -62,6 +62,7 @@ def rfft(data, n_samples, sampling_rate, fft_norm):
         (..., n_bins)
 
     """
+
     # DFT
     spec = fft.rfft(
         data, n=n_samples, axis=-1, workers=multiprocessing.cpu_count())
@@ -100,6 +101,7 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
         Array containing the time domain signal with dimensions
         (..., ``'n_samples'``)
     """
+
     # Inverse normalization
     spec = normalization(spec, n_samples, sampling_rate, fft_norm,
                          inverse=True, single_sided=True)
@@ -182,6 +184,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             Units of the Spectra of Time-Discrete Signals,” Vienna, Austria,
             May 2020, p. e-Brief 600.
     """
+
     # check if normalization should be applied
     if fft_norm == 'none':
         return spec

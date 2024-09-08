@@ -24,12 +24,13 @@ def plotstyle(style='light'):
     style : str
         Full path to the pyfar plotstyle.
 
-    See Also
+    See also
     --------
     pyfar.plot.use
     pyfar.plot.context
 
     """
+
     if style in ['light', 'dark']:
         style = os.path.join(
             os.path.dirname(__file__), 'plotstyles', f'{style}.mplstyle')
@@ -67,7 +68,7 @@ def context(style='light', after_reset=False):
         If ``True``, apply style after resetting settings to their defaults;
         otherwise, apply style on top of the current settings.
 
-    See Also
+    See also
     --------
     pyfar.plot.plotstyle
 
@@ -81,6 +82,7 @@ def context(style='light', after_reset=False):
     >>>     fig, ax = plt.subplots(2, 1)
     >>>     pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
     """
+
     # get pyfar plotstyle if desired
     style = plotstyle(style)
 
@@ -117,7 +119,7 @@ def use(style="light"):
         |      | first to last in the list.                                  |
         +------+-------------------------------------------------------------+
 
-    See Also
+    See also
     --------
     pyfar.plot.plotstyle
 
@@ -137,6 +139,7 @@ def use(style="light"):
     >>> pf.plot.time(pf.Signal([0, 1, 0, -1], 44100), ax=ax[0])
 
     """
+
     # get pyfar plotstyle if desired
     style = plotstyle(style)
     # use plot style
@@ -220,6 +223,7 @@ def shortcuts(show=True, report=False, layout="console"):
         The console output as a string. Only returned if `report` is ``True``.
 
     """  # noqa: W605 (to ignore \*)
+
     # load short cuts from json file
     sc = os.path.join(os.path.dirname(__file__), 'shortcuts', 'shortcuts.json')
     with open(sc, "r") as read_file:

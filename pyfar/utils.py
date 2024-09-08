@@ -30,6 +30,7 @@ def broadcast_cshape(signal, cshape):
     signal : Signal, TimeData, FrequencyData
         Broadcasted copy of the input signal
     """
+
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
         raise TypeError("Input data must be a pyfar audio object")
 
@@ -62,6 +63,7 @@ def broadcast_cshapes(signals, cshape=None):
     signals : tuple of Signal, TimeData, FrequencyData
         The broadcasted copies of the input signals in a tuple.
     """
+
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
             raise TypeError("All input data must be pyfar audio objects")
@@ -93,6 +95,7 @@ def broadcast_cdim(signal, cdim):
     signal : Signal, TimeData, FrequencyData
         The broadcasted copy input signal
     """
+
     if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
         raise TypeError("Input data must be a pyfar audio object")
     if len(signal.cshape) > cdim:
@@ -128,6 +131,7 @@ def broadcast_cdims(signals, cdim=None):
     signals : tuple of Signal, TimeData, FrequencyData
         The broadcasted copies of the input signals in a tuple.
     """
+
     for signal in signals:
         if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
             raise TypeError("All input data must be pyfar audio objects")

@@ -595,7 +595,8 @@ def test_coordinates_init_from_cylindrical(azimuth, z, radius_z):
 
 
 def test_angle_conversion_wrong_input():
-    """Test input checks when converting from deg to rad and vice versa."""
+    '''Test input checks when converting from deg to rad and vice versa.'''
+
     # test input checks (common functionality, needs to be tested for
     # only one function)
     # 1. input data has the wrong shape
@@ -615,7 +616,8 @@ def test_angle_conversion_wrong_input():
         # list
         [[0, np.pi, 1], np.array([0, 180, 1])]))
 def test_angle_conversion_rad2deg_spherical(rad, deg):
-    """Test angle conversion from rad to deg and spherical coordinates."""
+    '''Test angle conversion from rad to deg and spherical coordinates.'''
+
     # copy input
     rad_copy = rad.copy()
     # convert
@@ -631,10 +633,11 @@ def test_angle_conversion_rad2deg_spherical(rad, deg):
 
 
 def test_angle_conversion_rad2deg_cylindrical():
-    """
+    '''
     Test angle conversion from rad to deg and cylindrical coordinates. Only
     the result is checked. Everything else is tested above.
-    """
+    '''
+
     # copy input
     rad = np.array([np.pi, 1, 2])
     # convert
@@ -644,10 +647,11 @@ def test_angle_conversion_rad2deg_cylindrical():
 
 
 def test_angle_conversion_deg2rad():
-    """
+    '''
     Test angle conversion from rad to deg. Only spherical coordinates are used
     and the result is checked. Everything else is tested above.
-    """
+    '''
+
     # copy input
     deg = np.array([180, 360, 1])
     # convert

@@ -299,6 +299,7 @@ def test_crossover(impulse):
 
 def test_reconstructing_fractional_octave_bands():
     """Test the reconstructing fractional octave filter bank."""
+
     # test filter object
     f_obj, f = pfilt.reconstructing_fractional_octave_bands(
         None, sampling_rate=44100)

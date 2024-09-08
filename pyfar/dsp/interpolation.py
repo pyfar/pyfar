@@ -150,6 +150,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
         >>> ax.set_ylim(-45, 5)
         >>> ax.legend(loc=3)
     """
+
     if not isinstance(signal, pf.Signal):
         raise TypeError("Input signal has to be of type pyfar.Signal")
 
@@ -344,6 +345,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         >>>
         >>> ax.legend()
     """
+
     # check input -------------------------------------------------------------
     if not isinstance(signal, (pf.Signal)):
         raise TypeError("Input data has to be of type pyfar.Signal")
@@ -811,6 +813,7 @@ class InterpolateSpectrum():
         Interpolate a Signal with n_samples length.
         (see class docstring) for more information.
         """
+
         # length of half sided spectrum and highest frequency
         n_fft = n_samples//2 + 1
         f_max = sampling_rate / n_samples * (n_fft - 1)

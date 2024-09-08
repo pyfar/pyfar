@@ -79,6 +79,7 @@ def test_lower_frequency_limit(
         sine, sine_short, frequency_data,
         frequency_data_one_point, time_data):
     """Test the private function plot._utils._lower_frequency_limit."""
+
     # test Signal with frequencies below 20 Hz
     low = plot._utils._lower_frequency_limit(sine)
     assert low == 20

@@ -13,6 +13,7 @@ from matplotlib.ticker import NullFormatter
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
           ax=None, **kwargs):
     """Plot the time data of a signal."""
+
     # check input
     if not isinstance(signal, (Signal, TimeData)):
         raise TypeError('Input data has to be of type: Signal or TimeData.')
@@ -59,6 +60,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     """
     Plot the logarithmic absolute spectrum on the positive frequency axis.
     """
+
     # check input
     if not isinstance(signal, (Signal, FrequencyData)):
         raise TypeError(
@@ -105,6 +107,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
            **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis."""
+
     # check input
     if not isinstance(signal, (Signal, FrequencyData)):
         raise TypeError(
@@ -193,6 +196,7 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
 
 def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
     """Plot the group delay on the positive frequency axis."""
+
     # check input
     if not isinstance(signal, Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -242,6 +246,7 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
+
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
@@ -257,6 +262,7 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
                 freq_scale='log', deg=False, unwrap=False, ax=None, **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
+
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
@@ -273,6 +279,7 @@ def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
+
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 

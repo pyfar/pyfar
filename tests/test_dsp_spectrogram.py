@@ -8,6 +8,7 @@ import numpy.testing as npt
 
 def test_assertions(sine):
     """Test assertions due to wrong input data."""
+
     with raises(TypeError, match="Input data has to be of type: Signal."):
         spectrogram([1, 2, 3])
 

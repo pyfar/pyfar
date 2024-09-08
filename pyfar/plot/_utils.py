@@ -95,6 +95,7 @@ def _set_axlim(ax, setter, low, high, limits):
     limits : tuple of length 2
         current axis limits, e.g., `ax.get_xlim()`.
     """
+
     if not ax.lines and not ax.collections:
         # set desired limit if axis does not contain any lines or points
         setter((low, high))
@@ -126,6 +127,7 @@ def _lower_frequency_limit(signal):
 
 def _return_default_colors_rgb(**kwargs):
     """Replace color in kwargs with pyfar default color if possible."""
+
     # pyfar default colors
     colors = {'p': '#5F4690',  # purple
               'b': '#1471B9',  # blue
@@ -147,7 +149,8 @@ def _return_default_colors_rgb(**kwargs):
 
 
 def _default_color_dict():
-    """Pyfar default colors in the order matching the plotstyles."""
+    """pyfar default colors in the order matching the plotstyles."""
+
     colors = {'b': '#1471B9',  # blue
               'r': '#D83C27',  # red
               'y': '#ECAD20',  # yellow
@@ -176,7 +179,7 @@ def _check_axis_scale(scale, axis='x'):
 
 
 def _get_quad_mesh_from_axis(ax):
-    """Get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
+    """get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
     if there is one.
 
     Parameters
@@ -212,6 +215,7 @@ def _time_auto_unit(time_max):
     time_max : float
         Absolute maximum of the time data in seconds
     """
+
     if time_max == 0:
         unit = 's'
     elif time_max < 1e-3:
@@ -336,6 +340,7 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
     kwargs : keyword arguments
         With added default value for shading if it was not contained
     """
+
     # check input
     instance = str(type(data)).split('.')[-1][:-2]
     instances = [str(ii).split('.')[-1][:-2] for ii in instances]
@@ -409,6 +414,7 @@ def _add_colorbar(colorbar, fig, ax, qm, label):
 
 def _phase_label(unwrap, deg):
     """Generate label for plotting the phase."""
+
     phase_label = 'Phase '
 
     if deg:

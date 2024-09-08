@@ -1073,6 +1073,7 @@ def _sph_extremal_load_data(orders='all'):
     orders = 'all' : load all samplings up to SH order 99
     orders = int, list : load sampling of specified SH order(s)
     """
+
     # set the SH orders to be read
     if isinstance(orders, int):
         orders = [orders]
@@ -1120,6 +1121,7 @@ def _sph_t_design_load_data(degrees='all'):
     degrees = 'all' : load all samplings up to degree 99
     degrees = number : load sampling of specified degree
     """
+
     # set the degrees to be read
     if isinstance(degrees, int):
         degrees = [degrees]

@@ -16,6 +16,7 @@ def test_coordinates_init():
 
 def test__systems():
     """Test completeness of internal representation of coordinate systems."""
+
     # get all coordinate systems
     coords = Coordinates()
     systems = coords._systems()
@@ -57,6 +58,7 @@ def test__systems():
 
 def test_coordinate_names():
     """Test if units agree across coordinates that appear more than once."""
+
     # get all coordinate systems
     c = Coordinates()
     systems = c._systems()
@@ -147,6 +149,7 @@ def test_systems():
 
 def test_coordinates_init_val():
     """Test initializing Coordinates with values of different type and size."""
+
     # test input: scalar
     c1 = 1
     # test input: 2 element vectors
@@ -581,6 +584,7 @@ def test_find_slice():
     (Coordinates([[0, 1], [1, 0]], 2, 3), [[0, 2, 3], [0, 2, 3]])])
 def test_find_slice_slicing(coordinates, desired):
     """Test if return values can be used for slicing."""
+
     index, mask = coordinates.find_slice('x', 'met', 0)
     assert coordinates[index] == coordinates[mask]
     npt.assert_equal(coordinates[index].get_cart(), np.atleast_2d(desired))

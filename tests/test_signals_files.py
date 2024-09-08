@@ -15,6 +15,7 @@ import pyfar as pf
 @pytest.mark.parametrize('sampling_rate', (44100, 48000))
 def test_files(function, sampling_rate):
     """Test all files that only have the sampling rate as parameter."""
+
     # load data
     signal = function(sampling_rate=sampling_rate)
     # assert type and sampling rate
@@ -58,6 +59,7 @@ def test_speech(sampling_rate):
     ('median', 'spherical_side', np.zeros(180), np.arange(-45, 135)*2)])
 def test_hrirs_position(position, convention, first, second):
     """Test `position` argument."""
+
     # get the data
     hrirs, sources = pf.signals.files.head_related_impulse_responses(position)
 
@@ -88,6 +90,7 @@ def test_hrirs_diffuse_field_compensation():
 @pytest.mark.parametrize('sampling_rate', (44100, 48000))
 def test_hrirs_sampling_rate(sampling_rate):
     """Test getting HRIRs in different sampling rates."""
+
     hrirs, _ = pf.signals.files.head_related_impulse_responses(
         sampling_rate=sampling_rate)
     assert hrirs.sampling_rate == sampling_rate

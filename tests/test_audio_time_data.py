@@ -166,6 +166,7 @@ def test_magic_setitem():
 
 def test_magic_setitem_wrong_n_samples():
     """Test the setimtem for TimeData with wrong number of samples."""
+
     time_a = TimeData([1, 0, -1], [0, .1, .3])
     time_b = TimeData([2, 0, -2, 0], [0, .1, .3, .7])
     with pytest.raises(ValueError):

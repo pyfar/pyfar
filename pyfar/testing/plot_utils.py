@@ -37,6 +37,7 @@ def create_figure(width=6, height=4.8, dpi=100, style="light"):
     -------
     fig : Matplotlib Figure object
     """
+
     plt.close('all')
     matplotlib.use('Agg')
     mpt.set_reproducibility_for_testing()

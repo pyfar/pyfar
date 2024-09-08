@@ -102,8 +102,7 @@ def test_value_cshape_broadcasting():
 
 def test_value_return():
     """Test the parameter return_values = True, which returns the values_norm
-    data.
-    """
+    data."""
     n_samples, amplitude = 3., 1.
     signal = pf.signals.impulse(n_samples, amplitude=amplitude)
     _, values_norm = pf.dsp.normalize(signal, return_reference=True,

@@ -38,6 +38,7 @@ def noise(n_samples, spectrum="white", rms=1, sampling_rate=44100, seed=None):
         type of the spectrum (``white``, ``pink``) and the RMS amplitude are
         written to `comment`.
     """
+
     # generate the noise
     rms = np.atleast_1d(rms)
     n_samples = int(n_samples)
@@ -112,6 +113,7 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
         FFT normalization (see :py:func:`~pyfar.dsp.fft.normalization`).
         `comment` contains information about the selected parameters.
     """
+
     if n_pulse < 2 * n_fade:
         raise ValueError(
             "n_fade too large. It must be smaller than n_pulse/2.")

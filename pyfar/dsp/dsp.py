@@ -27,6 +27,7 @@ def phase(signal, deg=False, unwrap=False):
     phase : numpy array
         The phase of the signal.
     """
+
     if not isinstance(signal, pyfar.Signal) and \
             not isinstance(signal, pyfar.FrequencyData):
         raise TypeError(
@@ -74,6 +75,7 @@ def group_delay(signal, frequencies=None, method='fft'):
     ----------
     .. [#]  https://www.dsprelated.com/showarticle/69.php
     """
+
     # check input and default values
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -173,6 +175,7 @@ def linear_phase(signal, group_delay, unit="samples"):
     signal: Signal
         linear phase copy of the input data
     """
+
     if not isinstance(signal, pyfar.Signal):
         raise TypeError("signal must be a pyfar Signal object.")
 
@@ -219,6 +222,7 @@ def zero_phase(signal):
     signal : Signal, FrequencyData
         zero phase copy of the input data
     """
+
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData)):
         raise TypeError(
             'Input data has to be of type Signal or FrequencyData.')
@@ -280,6 +284,7 @@ def spectrogram(signal, window='hann', window_length=1024,
         Times in seconds at which the magnitude spectrum was computed
     spectrogram : numpy array
     """
+
     # check input
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
@@ -534,7 +539,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
 
 def kaiser_window_beta(A):
-    """Return a shape parameter beta to create kaiser window based on desired
+    """ Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
 
     This function can be used to call :py:func:`~pyfar.dsp.time_window` with
@@ -567,7 +572,7 @@ def kaiser_window_beta(A):
 
 
 def _time_window_symmetric_interval_two(interval, window):
-    """Symmetric time window between 2 values given in interval.
+    """ Symmetric time window between 2 values given in interval.
 
     Parameters
     ----------
@@ -593,7 +598,7 @@ def _time_window_symmetric_interval_two(interval, window):
 
 
 def _time_window_left(n_samples, interval, window):
-    """Left-sided time window. "".
+    """ Left-sided time window. "".
 
     Parameters
     ----------
@@ -623,7 +628,7 @@ def _time_window_left(n_samples, interval, window):
 
 
 def _time_window_right(interval, window):
-    """Right-sided time window. "".
+    """ Right-sided time window. "".
 
     Parameters
     ----------
@@ -651,7 +656,7 @@ def _time_window_right(interval, window):
 
 
 def _time_window_symmetric_zero(n_samples, interval, window):
-    """Symmetric time window with respect to t=0. "".
+    """ Symmetric time window with respect to t=0. "".
 
     Parameters
     ----------
@@ -684,7 +689,7 @@ def _time_window_symmetric_zero(n_samples, interval, window):
 
 
 def _time_window_symmetric_interval_four(interval, window):
-    """Symmetric time window with two fades and constant range in between.
+    """ Symmetric time window with two fades and constant range in between.
 
     Parameters
     ----------
@@ -1009,6 +1014,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     >>> impulse_padded = pf.dsp.pad_zeros(impulse, 128, mode='end')
 
     """
+
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
@@ -1988,6 +1994,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     magnitude spectra after using a mode that discards the phase.
 
     """
+
     # check input
     if not isinstance(signal, (pyfar.Signal, pyfar.FrequencyData,
                                pyfar.TimeData)):

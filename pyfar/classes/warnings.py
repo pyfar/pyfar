@@ -39,7 +39,6 @@ class PyfarDeprecationWarning(Warning):
     >>>         pf.signals.exponential_sweep(2**10, [1e3, 20e3])
 
     """
-
     def __init__(self, message):
         self.message = message
 

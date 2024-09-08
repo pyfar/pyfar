@@ -84,6 +84,7 @@ def read_sofa(filename, verify=True):
     .. [#] https://pyfar.org
 
     """
+
     sofa = sf.read_sofa(filename, verify)
     return convert_sofa(sofa)
 
@@ -132,6 +133,7 @@ def convert_sofa(sofa):
     ----------
     .. [#] https://pyfar.org
     """
+
     # check input
     if not isinstance(sofa, sf.Sofa):
         raise TypeError((
@@ -647,6 +649,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     FrequencyData:
     (8, 1, 3, 4) channels with 2 frequencies
     """
+
     # check Datatype
     suffix = pathlib.Path(filename).suffix
     if suffix not in ['.txt', '.dat', '.csv']:

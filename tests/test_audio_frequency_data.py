@@ -44,6 +44,7 @@ def test_data_frequency_init_dtype():
     Test casting and assertions of dtype (also test freq setter because
     it is called during initialization).
     """
+
     # integer to float casting
     data = FrequencyData([1, 2, 3], [1, 2, 3])
     assert data.freq.dtype.kind == "f"
@@ -181,6 +182,7 @@ def test_magic_setitem():
 
 def test_magic_setitem_wrong_n_bins():
     """Test the setitem for FrequencyData with wrong number of bins."""
+
     freq_a = FrequencyData([1, 0, -1], [0, .1, .3])
     freq_b = FrequencyData([2, 0, -2, 0], [0, .1, .3, .7])
 
