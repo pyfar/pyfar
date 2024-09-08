@@ -64,7 +64,7 @@ def test_filter_fir_init_multi_dim():
         [1, 1/4, 1/8]])
     desired = np.array([
         [[1, 1/2, 0], [1, 0, 0]],
-        [[1, 1/4, 1/8], [1, 0, 0]]
+        [[1, 1/4, 1/8], [1, 0, 0]],
         ])
     filt = fo.FilterFIR(coeff, sampling_rate=2*np.pi)
     # seprately test internal coefficients and property because they differ
@@ -124,7 +124,7 @@ def test_filter_iir_init_state(impulse):
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
-    desired = np.array([[[-0.5, 0, ]]])
+    desired = np.array([[[-0.5, 0 ]]])
     npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
@@ -298,7 +298,7 @@ def test_filter_sos_init_state(impulse):
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
-    desired = np.array([[[[-0.5, 0, ]]]])
+    desired = np.array([[[[-0.5, 0 ]]]])
     npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel

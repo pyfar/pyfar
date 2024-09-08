@@ -636,7 +636,10 @@ def test_converters():
     'points_1, points_2, points_3, actual, expected', [
         (1, 1, 1,                Coordinates(1, 1, -1),                 False),
         ([1, 1], [1, 1], [1, 1], Coordinates([1, 1], [1, 1], [1, 2]),   False),
-        ([1, 1], [1, 1], [1, 1], Coordinates([1, 1.0], [1, 1.0], [1, 1]), True)
+        (
+            [1, 1], [1, 1], [1, 1],
+            Coordinates([1, 1.0], [1, 1.0], [1, 1]),
+            True),
     ])
 def test___eq___differInPoints(
         points_1, points_2, points_3, actual, expected):

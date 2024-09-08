@@ -13,7 +13,7 @@ from .band_filter import (
     elliptic,
     bessel,
     crossover,
-    notch
+    notch,
 )
 
 from .audiofilter import (
@@ -32,12 +32,12 @@ from .audiofilter import (
 from .fractional_octaves import (
     fractional_octave_bands,
     reconstructing_fractional_octave_bands,
-    fractional_octave_frequencies
+    fractional_octave_frequencies,
 )
 
 from .gammatone import (
     GammatoneBands,
-    erb_frequencies
+    erb_frequencies,
 )
 
 
@@ -63,5 +63,5 @@ __all__ = [
     'reconstructing_fractional_octave_bands',
     'fractional_octave_frequencies',
     'GammatoneBands',
-    'erb_frequencies'
+    'erb_frequencies',
 ]

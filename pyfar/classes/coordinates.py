@@ -1667,9 +1667,9 @@ class Coordinates():
                 index_multi = np.moveaxis(index, -1, 0)
                 index = np.empty((k), dtype=tuple)
                 for kk in range(k):
-                    index[kk] = tuple([index_multi[kk]], )
+                    index[kk] = tuple([index_multi[kk]] )
             else:
-                index = tuple([index], )
+                index = tuple([index] )
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
             index_multi = []
@@ -1829,9 +1829,9 @@ class Coordinates():
         if self.cdim == 1:
             if find.csize > 1:
                 for i in range(len(index)):
-                    index[i] = tuple([index[i]], )
+                    index[i] = tuple([index[i]] )
             else:
-                index = tuple([index], )
+                index = tuple([index] )
 
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
@@ -2370,7 +2370,7 @@ class Coordinates():
                     "negative_z": [0, 0, -1],
                     "x": ["unbound", [-np.inf, np.inf]],
                     "y": ["unbound", [-np.inf, np.inf]],
-                    "z": ["unbound", [-np.inf, np.inf]]}
+                    "z": ["unbound", [-np.inf, np.inf]]},
             },
             "sph": {
                 "top_colat": {
@@ -2482,7 +2482,7 @@ class Coordinates():
                     "negative_z": [3 * np.pi / 2, np.pi / 2, 1],
                     "phi": ["cyclic", [0, 2 * np.pi]],
                     "theta": ["bound", [0, np.pi]],
-                    "radius": ["bound", [0, np.inf]]}
+                    "radius": ["bound", [0, np.inf]]},
             },
             "cyl": {
                 "top": {
@@ -2507,8 +2507,8 @@ class Coordinates():
                     "negative_z": [0, -1, 0],
                     "azimuth": ["cyclic", [0, 2 * np.pi]],
                     "z": ["unbound", [-np.inf, np.inf]],
-                    "radius_z": ["bound", [0, np.inf]]}
-            }
+                    "radius_z": ["bound", [0, np.inf]]},
+            },
         }
 
         return _systems
