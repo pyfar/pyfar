@@ -76,7 +76,7 @@ def test_reshape():
 
     # test reshape with int
     rng = np.random.default_rng()
-    rand = rng.standard_normal((63, 2, 256))
+    rand = rng.standard_normal((3, 2, 256))
     data_in = TimeData(rand, range(256))
     data_out = data_in.reshape(6)
     npt.assert_allclose(data_in._data.reshape(6, -1), data_out._data)
