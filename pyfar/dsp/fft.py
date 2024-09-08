@@ -114,7 +114,7 @@ def irfft(spec, n_samples, sampling_rate, fft_norm):
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
                   inverse=False, single_sided=True, window=None):
-    """
+    r"""
     Normalize a Fourier spectrum.
 
     Apply normalizations defined in [1]_ to the DFT spectrum.

@@ -149,7 +149,7 @@ def _return_default_colors_rgb(**kwargs):
 
 
 def _default_color_dict():
-    """pyfar default colors in the order matching the plotstyles."""
+    """Pyfar default colors in the order matching the plotstyles."""
 
     colors = {'b': '#1471B9',  # blue
               'r': '#D83C27',  # red
@@ -179,7 +179,7 @@ def _check_axis_scale(scale, axis='x'):
 
 
 def _get_quad_mesh_from_axis(ax):
-    """get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
+    """Get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
     if there is one.
 
     Parameters

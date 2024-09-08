@@ -145,7 +145,7 @@ def wrap_to_2pi(x):
 
 
 def linear_phase(signal, group_delay, unit="samples"):
-    """
+    r"""
     Set the phase to a linear phase with a specified group delay.
 
     The linear phase signal is computed as
@@ -199,7 +199,7 @@ def linear_phase(signal, group_delay, unit="samples"):
 
 
 def zero_phase(signal):
-    """Calculate zero phase signal.
+    r"""Calculate zero phase signal.
 
     The zero phase signal is obtained by taking the absolute values of the
     spectrum
@@ -539,7 +539,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
 
 def kaiser_window_beta(A):
-    """ Return a shape parameter beta to create kaiser window based on desired
+    """Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
 
     This function can be used to call :py:func:`~pyfar.dsp.time_window` with
@@ -572,7 +572,7 @@ def kaiser_window_beta(A):
 
 
 def _time_window_symmetric_interval_two(interval, window):
-    """ Symmetric time window between 2 values given in interval.
+    """Symmetric time window between 2 values given in interval.
 
     Parameters
     ----------
@@ -598,7 +598,7 @@ def _time_window_symmetric_interval_two(interval, window):
 
 
 def _time_window_left(n_samples, interval, window):
-    """ Left-sided time window. "".
+    """Left-sided time window. "".
 
     Parameters
     ----------
@@ -628,7 +628,7 @@ def _time_window_left(n_samples, interval, window):
 
 
 def _time_window_right(interval, window):
-    """ Right-sided time window. "".
+    """Right-sided time window. "".
 
     Parameters
     ----------
@@ -656,7 +656,7 @@ def _time_window_right(interval, window):
 
 
 def _time_window_symmetric_zero(n_samples, interval, window):
-    """ Symmetric time window with respect to t=0. "".
+    """Symmetric time window with respect to t=0. "".
 
     Parameters
     ----------
@@ -689,7 +689,7 @@ def _time_window_symmetric_zero(n_samples, interval, window):
 
 
 def _time_window_symmetric_interval_four(interval, window):
-    """ Symmetric time window with two fades and constant range in between.
+    """Symmetric time window with two fades and constant range in between.
 
     Parameters
     ----------

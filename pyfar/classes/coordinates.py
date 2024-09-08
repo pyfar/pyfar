@@ -210,6 +210,7 @@ class Coordinates():
         Comment about the stored coordinate points. The default is
         ``""``, which initializes an empty string.
     """
+
     _x: np.array = np.empty
     _y: np.array = np.empty
     _z: np.array = np.empty
@@ -1003,7 +1004,7 @@ class Coordinates():
         return points
 
     def _get_cyl(self, convention='top', unit='rad'):
-        """internal function to convert cart to cyl coordinates."""
+        """Internal function to convert cart to cyl coordinates."""
 
         # check if object is empty
         self._check_empty()
@@ -1046,7 +1047,8 @@ class Coordinates():
     def sh_order(self):
         """This function will be deprecated in pyfar 0.8.0 in favor
         of :py:class:`spharpy.samplings.SamplingSphere`.
-        Get the maximum spherical harmonic order."""
+        Get the maximum spherical harmonic order.
+        """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),
@@ -1058,7 +1060,8 @@ class Coordinates():
     def sh_order(self, value):
         """This function will be deprecated in pyfar 0.8.0 in favor
         of :py:class:`spharpy.samplings.SamplingSphere`.
-        Set the maximum spherical harmonic order."""
+        Set the maximum spherical harmonic order.
+        """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.SamplingSphere."),
@@ -1121,7 +1124,8 @@ class Coordinates():
         Returns :py:func:`x`, :py:func:`y`, :py:func:`z`.
         Right handed cartesian coordinate system. See
         see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information."""
+        more information.
+        """
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
 
@@ -1136,7 +1140,8 @@ class Coordinates():
         system. :py:func:`azimuth`, :py:func:`elevation`,
         :py:func:`radius`. See
         see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information."""
+        more information.
+        """
         azimuth, elevation, radius = cart2sph(self.x, self.y, self.z)
         elevation = np.pi / 2 - elevation
         return np.atleast_2d(np.moveaxis(
@@ -1158,7 +1163,8 @@ class Coordinates():
         Returns :py:func:`azimuth`, :py:func:`colatitude`,
         :py:func:`radius`. See
         see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information."""
+        more information.
+        """
         azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
             np.array([azimuth, colatitude, radius]), 0, -1))
@@ -1176,7 +1182,8 @@ class Coordinates():
         Spherical coordinates according to the side pole coordinate system.
         Returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
         see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information."""
+        more information.
+        """
         polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
         lateral = lateral - np.pi / 2
         polar = np.mod(polar + np.pi / 2, 2 * np.pi) - np.pi / 2
@@ -1197,7 +1204,8 @@ class Coordinates():
         Spherical coordinates according to the frontal pole coordinate system.
         Returns :py:func:`frontal`, :py:func:`upper`, :py:func:`radius`. See
         see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information."""
+        more information.
+        """
 
         frontal, upper, radius = cart2sph(self.y, self.z, self.x)
         return np.atleast_2d(np.moveaxis(
@@ -1216,7 +1224,8 @@ class Coordinates():
         Cylindrical coordinates.
         Returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
         see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information."""
+        more information.
+        """
         azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
             np.array([azimuth, z, rho]), 0, -1))
@@ -1230,7 +1239,8 @@ class Coordinates():
     def x(self):
         r"""
         X coordinate of a right handed Cartesian coordinate system in meters
-        (:math:`-\infty` < x < :math:`\infty`)."""
+        (:math:`-\infty` < x < :math:`\infty`).
+        """
         self._check_empty()
         return self._x
 
@@ -1242,7 +1252,8 @@ class Coordinates():
     def y(self):
         r"""
         Y coordinate of a right handed Cartesian coordinate system in meters
-        (:math:`-\infty` < y < :math:`\infty`)."""
+        (:math:`-\infty` < y < :math:`\infty`).
+        """
         self._check_empty()
         return self._y
 
@@ -1254,7 +1265,8 @@ class Coordinates():
     def z(self):
         r"""
         Z coordinate of a right handed Cartesian coordinate system in meters
-        (:math:`-\infty` < z < :math:`\infty`)."""
+        (:math:`-\infty` < z < :math:`\infty`).
+        """
         self._check_empty()
         return self._z
 
@@ -1266,7 +1278,8 @@ class Coordinates():
     def rho(self):
         r"""
         Radial distance to the the z-axis of the right handed Cartesian
-        coordinate system (:math:`0` < rho < :math:`\infty`)."""
+        coordinate system (:math:`0` < rho < :math:`\infty`).
+        """
         return self.cylindrical[..., 2]
 
     @rho.setter
@@ -1279,7 +1292,8 @@ class Coordinates():
     def radius(self):
         r"""
         Distance to the origin of the right handed Cartesian coordinate system
-        in meters (:math:`0` < radius < :math:`\infty`)."""
+        in meters (:math:`0` < radius < :math:`\infty`).
+        """
         return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     @radius.setter
@@ -1294,7 +1308,8 @@ class Coordinates():
         Counter clock-wise angle in the x-y plane of the right handed Cartesian
         coordinate system in radians. :math:`0` radians are defined in positive
         x-direction, :math:`\pi/2` radians in positive y-direction and so on
-        (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic)."""
+        (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic).
+        """
         return self.spherical_colatitude[..., 0]
 
     @azimuth.setter
@@ -1311,7 +1326,8 @@ class Coordinates():
         x-direction, :math:`\pi/2` radians in positive z-direction, and
         :math:`-\pi/2` in negative z-direction
         (:math:`-\pi/2\leq` elevation :math:`\leq\pi/2`). The elevation is a
-        variation of the colatitude."""
+        variation of the colatitude.
+        """
         return self.spherical_elevation[..., 1]
 
     @elevation.setter
@@ -1328,7 +1344,8 @@ class Coordinates():
         z-direction, :math:`\pi/2` radians in positive x-direction, and
         :math:`\pi` in negative z-direction
         (:math:`0\leq` colatitude :math:`\leq\pi`). The colatitude is a
-        variation of the elevation angle."""
+        variation of the elevation angle.
+        """
         return self.spherical_colatitude[..., 1]
 
     @colatitude.setter
@@ -1344,7 +1361,8 @@ class Coordinates():
         in radians. :math:`0` radians frontal angle are defined in positive
         y-direction, :math:`\pi/2` radians in positive z-direction,
         :math:`\pi` in negative y-direction and so on
-        (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic)."""
+        (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic).
+        """
         return self.spherical_front[..., 0]
 
     @frontal.setter
@@ -1360,7 +1378,8 @@ class Coordinates():
         in radians. :math:`0` radians upper angle are defined in positive
         x-direction, :math:`\pi/2` radians in positive z-direction, and
         :math:`\pi` in negative x-direction
-        (:math:`0\leq` upper :math:`\leq\pi`)."""
+        (:math:`0\leq` upper :math:`\leq\pi`).
+        """
         return self.spherical_front[..., 1]
 
     @upper.setter
@@ -1376,7 +1395,8 @@ class Coordinates():
         coordinate system in radians. :math:`0` radians are defined in positive
         x-direction, :math:`\pi/2` radians in positive y-direction and
         :math:`-\pi/2` in negative y-direction
-        (:math:`-\pi/2\leq` lateral :math:`\leq\pi/2`)."""
+        (:math:`-\pi/2\leq` lateral :math:`\leq\pi/2`).
+        """
         return self.spherical_side[..., 0]
 
     @lateral.setter
@@ -1392,7 +1412,8 @@ class Coordinates():
         in radians. :math:`0` radians polar angle are defined in positive
         x-direction, :math:`\pi/2` radians in positive z-direction,
         :math:`\pi` in negative x-direction and so on
-        (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic)."""
+        (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic).
+        """
         return self.spherical_side[..., 1]
 
     @polar.setter
@@ -2839,13 +2860,13 @@ class Coordinates():
             & eq_sh_order & eq_system
 
     def _check_empty(self):
-        """check if object is empty."""
+        """Check if object is empty."""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
 
 
 def cart2sph(x, y, z):
-    """
+    r"""
     Transforms from Cartesian to spherical coordinates.
 
     Spherical coordinates follow the common convention in Physics/Mathematics.
@@ -2902,7 +2923,7 @@ def cart2sph(x, y, z):
 
 
 def sph2cart(azimuth, colatitude, radius):
-    """
+    r"""
     Transforms from spherical to Cartesian coordinates.
 
     Spherical coordinates follow the common convention in Physics/Mathematics.
@@ -2962,7 +2983,7 @@ def sph2cart(azimuth, colatitude, radius):
 
 
 def cart2cyl(x, y, z):
-    """
+    r"""
     Transforms from Cartesian to cylindrical coordinates.
 
     Cylindrical coordinates follow the convention that the `azimuth` is 0 at
@@ -3018,7 +3039,7 @@ def cart2cyl(x, y, z):
 
 
 def cyl2cart(azimuth, height, radius):
-    """
+    r"""
     Transforms from cylindrical to Cartesian coordinates.
 
     Cylindrical coordinates follow the convention that the `azimuth` is 0 at

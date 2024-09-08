@@ -451,7 +451,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
 def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
                  radius=1.):
-    """
+    r"""
     Return spherical t-design sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
@@ -658,7 +658,7 @@ def sph_equal_angle(delta_angles, radius=1.):
 
 def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
                      azimuth_res=1, match=360):
-    """
+    r"""
     Spherical sampling grid according to the great circle distance criterion.
 
     This function will be deprecated in pyfar 0.8.0 in favor

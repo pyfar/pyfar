@@ -45,6 +45,7 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
+
     # indicate use of _Audio arithmetic operations for overloaded operators
     # (e.g. __rmul__)
     __array_priority__ = 1.0
@@ -283,6 +284,7 @@ class TimeData(_Audio):
         A comment related to `data`. The default is ``''``, which
         initializes an empty string.
     """
+
     def __init__(self, data, times, comment=""):
         """Create TimeData object with data, and times."""
 
@@ -475,6 +477,7 @@ class FrequencyData(_Audio):
             Austria, May 2020, p. e-Brief 600.
 
     """
+
     def __init__(self, data, frequencies, comment=""):
         """Create audio object with frequency data and frequencies."""
 
@@ -675,6 +678,7 @@ class Signal(FrequencyData, TimeData):
             Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
             Austria, May 2020, p. e-Brief 600.
     """
+
     def __init__(
             self,
             data,
@@ -956,6 +960,7 @@ class Signal(FrequencyData, TimeData):
 class _SignalIterator(object):
     """Iterator for :py:func:`Signal`.
     """
+
     def __init__(self, array_iterator, signal):
         self._array_iterator = array_iterator
         self._signal = signal

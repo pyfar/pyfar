@@ -44,7 +44,7 @@ def test_caxis_averaging(caxis, answer):
 
 
 def test_weighted_averaging():
-    """Tests averaging Signal with weighted channels. """
+    """Tests averaging Signal with weighted channels."""
     signal = pf.Signal([[1, 2, 3], [4, 5, 6]], 44100)
     ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))
     answer = [[1*0.8+4*0.2, 2*0.8+5*0.2, 3*0.8+6*0.2]]

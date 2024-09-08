@@ -211,7 +211,8 @@ def test_getter_freq():
 
 def test_setter_freq():
     """Test if attribute freq is set correctly and for the warning for
-    estimating the number of samples from n_bins."""
+    estimating the number of samples from n_bins.
+    """
     signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
     with pytest.warns(UserWarning, match="Number of samples not given"):
         signal.freq = np.array([[1., 2., 3.]])
