@@ -722,6 +722,16 @@ class TransmissionMatrix(FrequencyData):
 
         return repr_string
 
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective `_encode` counterpart."""
+        obj = cls(
+            obj_dict['_data'],
+            obj_dict['_frequencies'],
+            obj_dict['_comment'])
+        obj.__dict__.update(obj_dict)
+        return obj
+
     def is_indexable(self):
         """Returns true if ABCD-entries have more than one channel and are
         therefore indexable.
