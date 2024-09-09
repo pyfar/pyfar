@@ -282,15 +282,20 @@ def test_tmatrix_slicing(frequencies):
     npt.assert_allclose(eye_4x3x2x2[0,0].freq, eye_2x2.freq, atol = 1e-15)
     npt.assert_allclose(eye_4x3x2x2[1,2].freq, eye_2x2.freq, atol = 1e-15)
 
-    with pytest.raises(IndexError):
+    error_msg = "Object is not indexable, since ABCD-entries " \
+    "only have a single channel"
+    with pytest.raises(IndexError, match=error_msg):
         eye_2x2[0]
-    with pytest.raises(IndexError):
+
+    error_msg = "Indexed dimensions must not exceed the ABCD " \
+    "channel dimension (abcd_cdim), which is "
+    with pytest.raises(IndexError, match=re.escape(error_msg + "1")):
         eye_1x2x2[0,1]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=re.escape(error_msg + "1")):
         eye_1x2x2[0,:]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=re.escape(error_msg + "2")):
         eye_4x3x2x2[0,0,0]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=re.escape(error_msg + "2")):
         eye_4x3x2x2[0,:,0]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=re.escape(error_msg + "2")):
         eye_4x3x2x2[0,:,:]

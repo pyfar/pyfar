@@ -724,7 +724,7 @@ class TransmissionMatrix(FrequencyData):
 
     def is_indexable(self):
         """Returns true if ABCD-entries have more than one channel and are
-        therefore indexable
+        therefore indexable.
         """
         return len(self.cshape) > 2
 
@@ -736,7 +736,7 @@ class TransmissionMatrix(FrequencyData):
 
         if not self.is_indexable():
             raise IndexError(
-                "Object is not indexable, since ABCD-entries "
+                "Object is not indexable, since ABCD-entries " \
                 "only have a single channel")
 
         # Add three empty slices at the end to always get all data contained
