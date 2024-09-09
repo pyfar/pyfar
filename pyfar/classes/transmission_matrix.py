@@ -14,6 +14,7 @@ consecutive T-matrices simply using the ``@`` operator:
 >>> import numpy as np
 >>> import pyfar as pf
 >>> frequencies = (100,200,300)
+>>>
 >>> # T-matrix with arbitrary data
 >>> A = np.ones(len(frequencies))
 >>> (B,C,D) = (A+1,A+2,A+3)
@@ -315,6 +316,26 @@ class TransmissionMatrix(FrequencyData):
             cshape is identical to the entries of the T-matrix, i.e.
             tmat.A.cshape == Zout.cshape.
 
+        Example
+        -------
+
+        >>> import numpy as np
+        >>> import pyfar as pf
+        >>>
+        >>> # Frequency-dependent load impedance
+        >>> frequencies = (100,200,300)
+        >>> load_impedance = pf.FrequencyData((0, 1, np.inf), frequencies)
+        >>>
+        >>> # T-Matrix for frequency-independent series impedance R = 1 Ohm
+        >>> R = pf.FrequencyData((1,1,1), frequencies)
+        >>> tmat = pf.TransmissionMatrix.create_series_impedance(R)
+        >>>
+        >>> # Expected result: (1+0, 1+1, 1+inf) = (1, 2, inf)
+        >>> # Note, that due to numerical limitations infinite load will
+        >>> # result in Zin > 1e15.
+        >>> Zin = tmat.input_impedance(load_impedance)
+        >>> Zin.freq
+
         """
         nominator = (self.A * Zl + self.B)
         denominator = (self.C * Zl + self.D)
@@ -343,6 +364,9 @@ class TransmissionMatrix(FrequencyData):
 
         See Equation (2-6) in Reference [1]_:
         :math:`Z_\\mathrm{out} = \\frac{DZ_L + B}{CZ_L + A}`
+
+        For a code example, see :py:func:`~input_impedance` and exchange
+        respective method call with `output_impedance`.
 
         Parameters
         ----------
