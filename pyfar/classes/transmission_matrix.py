@@ -225,7 +225,8 @@ class TransmissionMatrix(FrequencyData):
         """The channel shape of the transmission matrix entries (A, B, C, D)
 
         This is the same as 'cshape' without the last two elements, but
-        at least (1,).
+        at least (1,). In other words, a matrix with cshape (2,2) will return
+        (1,) as abcd_cshape.
 
         """
         abcd_cshape = self.cshape[:-2]
