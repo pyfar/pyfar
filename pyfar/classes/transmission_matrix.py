@@ -733,7 +733,7 @@ class TransmissionMatrix(FrequencyData):
         obj.__dict__.update(obj_dict)
         return obj
 
-    def is_indexable(self):
+    def is_indexable(self) -> bool:
         """Returns true if ABCD-entries have more than one channel and are
         therefore indexable.
         """
