@@ -228,7 +228,10 @@ class TransmissionMatrix(FrequencyData):
         at least (1,).
 
         """
-        return self.A.cshape
+        abcd_cshape = self.cshape[:-2]
+        if abcd_cshape == ():
+            abcd_cshape = (1,)
+        return abcd_cshape
 
     @property
     def A(self) -> FrequencyData:
