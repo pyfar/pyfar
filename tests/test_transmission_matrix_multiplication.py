@@ -6,6 +6,7 @@ from pyfar import TransmissionMatrix
 
 def _abcd_matrix_stack(abcd, shape_extra_dims=None,
                        frequencies=[100, 200, 300]):
+    """Create T-Matrix with given extra-dimensions for testing purposes."""
     n_freq_bins = len(frequencies)
     if shape_extra_dims is None:
         shape = n_freq_bins
@@ -25,6 +26,7 @@ def _check_matrix_multiplication_result(
     shape_extra_dims=None,
     frequencies=[100, 200, 300],
 ):
+    """Assertion check if matrix multiplication result matches given target."""
     tmat1 = _abcd_matrix_stack(abcd_mat1, shape_extra_dims, frequencies)
     tmat2 = _abcd_matrix_stack(abcd_mat2, shape_extra_dims, frequencies)
     tmat_out = tmat1 @ tmat2
@@ -38,6 +40,7 @@ def _check_matrix_multiplication_result(
 def test_tmatrix_multiplication_identity(
     shape_extra_dims, frequencies=[100, 200, 300]
 ):
+    """Test result of T-Matrix multiplication with eye matrix."""
     rng = np.random.default_rng()
     abcd_identity = (1, 0, 0, 1)
     abcd_rng = rng.random(4)
@@ -49,6 +52,7 @@ def test_tmatrix_multiplication_identity(
 def test_tmatrix_multiplication_negative_identity(
     shape_extra_dims, frequencies=[100, 200, 300]
 ):
+    """Test result of T-Matrix multiplication with negated eye matrix."""
     rng = np.random.default_rng()
     abcd_identity = (-1, 0, 0, -1)
     abcd_rng = rng.random(4)

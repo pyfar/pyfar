@@ -17,38 +17,47 @@ def frequencies():
                 ["input_impedance", "output_impedance",
                  "TF_voltage", "TF_current"])
 def parameter_function(request):
+    """Parametrized fixture with names of methods for derived parameters."""
     return request.param
 @pytest.fixture(scope="module", params=
-                ["abcd_cshape[]", "abcd_cshape[4]", "abcd_cshape[4,5]"])
+                ["abcd_cshape()", "abcd_cshape(4,)", "abcd_cshape(4,5)"])
 def abcd_cshape(request):
-    if request.param == "abcd_cshape[]":
-        return []
-    elif request.param == "abcd_cshape[4]":
-        return [4]
-    elif request.param == "abcd_cshape[4,5]":
-        return [4,5]
+    """Parametrized fixture for different abcd_cshapes."""
+    if request.param == "abcd_cshape()":
+        return ()
+    elif request.param == "abcd_cshape(4,)":
+        return (4,)
+    elif request.param == "abcd_cshape(4,5)":
+        return (4,5)
 @pytest.fixture(scope="module")
 def tmatrix_random_data(abcd_cshape, frequencies):
-    data = np.random.uniform(0.0001, 2000,
-                             abcd_cshape + [2,2, len(frequencies)])
+    """Fixture creating T-Matrix with rng data for different abcd_cshapes."""
+    shape = (*abcd_cshape, 2,2, len(frequencies))
+    data = np.random.uniform(0.0001, 2000, shape)
     return TransmissionMatrix(data, frequencies)
 
 @pytest.fixture(scope="module", params=
                 ["scalar", "FrequencyData_vector",
                  "FrequencyData_abcd_cshape"])
 def load_impedance_with_correct_format(request, frequencies, abcd_cshape):
+    """Fixture creating load_impedance in different formats:
+    1) scalar,
+    2) array matching the frequency vector,
+    3) FrequencyData object match abcd_cshape."""
     if request.param == "scalar":
         return 2
     elif request.param == "FrequencyData_vector":
         return FrequencyData(np.ones_like(frequencies)*2, frequencies)
     elif request.param == "FrequencyData_abcd_cshape":
-        shape = abcd_cshape + [len(frequencies)]
+        shape = (*abcd_cshape, len(frequencies))
         return FrequencyData(np.ones(shape), frequencies)
 
 @pytest.mark.parametrize("impedance_type", ["input", "output"])
-def test_correct_input_formats_impedance(impedance_type,
+def test_valid_input_formats_impedance(impedance_type,
                                          load_impedance_with_correct_format,
                                          tmatrix_random_data):
+    """Test whether input/output impedance runs without errors for Zl with
+    valid input formats."""
     Zl = load_impedance_with_correct_format
     if impedance_type == "input":
         tmatrix_random_data.input_impedance(Zl)
@@ -61,11 +70,15 @@ def simple_tmat():
 @pytest.mark.parametrize("quantity_indices",
                          [(0,0), (0,1), (1,0), (1,1), [0,0], np.array([1,0])])
 def test_TF_valid_quantity_input(quantity_indices, simple_tmat):
+    """Test whether TF method runs without errors for valid input types
+    for indices."""
     simple_tmat.transfer_function(quantity_indices, np.inf)
 
 @pytest.mark.parametrize("quantity_indices",
                          [1, "string", (1, "string"), [1,1,1]])
 def test_TF_quantity_input_wrong_numel(quantity_indices, simple_tmat):
+    """Test whether TF method raises error for invalid types or size
+    of indices."""
     error_msg = re.escape("'quantity_indices' must be an array-like type "
                           "with two numeric elements.")
     with pytest.raises(ValueError, match=error_msg):
@@ -73,13 +86,16 @@ def test_TF_quantity_input_wrong_numel(quantity_indices, simple_tmat):
 
 @pytest.mark.parametrize("quantity_indices", [(-1,0), (0, 1.9)])
 def test_TF_quantity_input_wrong_ints(quantity_indices, simple_tmat):
+    """Test whether TF method raises error for invalid integer values
+    for indices."""
     error_msg = re.escape("'quantity_indices' must contain two "
                           "integers between 0 and 1.")
     with pytest.raises(ValueError, match=error_msg):
         simple_tmat.transfer_function(quantity_indices, np.inf)
 
-def test_TF_correct_load_input_format(load_impedance_with_correct_format,
+def test_TF_valid_load_input_format(load_impedance_with_correct_format,
                                             tmatrix_random_data):
+    """Test whether TF method runs without errors for valid Zl input."""
     Zl = load_impedance_with_correct_format
     tmatrix_random_data.transfer_function((1,1), Zl)
 
@@ -89,12 +105,16 @@ def test_TF_correct_load_input_format(load_impedance_with_correct_format,
 #---------------
 @pytest.fixture(scope="module")
 def impedance_random(frequencies) -> FrequencyData:
+    """Fixture returning impedance as FrequencyData object with random data."""
     rng = np.random.default_rng()
     return FrequencyData(rng.random(len(frequencies)), frequencies)
 
 @pytest.fixture(scope="module",
                 params=["random_load", "inf_load", "zero_load", "mixed_load"])
-def load_impedance(request, frequencies):
+def load_impedance(request, frequencies) -> FrequencyData:
+    """Parametrized fixture for load impedance as FrequencyData object with
+    different types of data:
+    1) random, 2) infinite load, 3) zero load, 4) mix of all."""
     if request.param == "random_load":
         rng = np.random.default_rng()
         return FrequencyData(rng.random(len(frequencies)), frequencies)
@@ -107,6 +127,12 @@ def load_impedance(request, frequencies):
 
 def _special_twoport_tmatrix(
         twoport_type, Zl: FrequencyData, Z: FrequencyData):
+    """Returns a T-Matrix representing a twoport for special circuit types:
+    1) By-pass system
+    2) A series impedance != load_impedance
+    3) A parallel impedance != load_impedance
+    4) A series impedance == load_impedance
+    5) A parallel impedance == load_impedance"""
     if twoport_type == "bypass":
         return TransmissionMatrix.create_identity(Zl.frequencies)
     if twoport_type == "series_impedance":
@@ -121,11 +147,13 @@ def _special_twoport_tmatrix(
         raise ValueError("Unexpected value for 'twoport_type'")
 
 def _twoport_type_list():
+    """A list including all valid twoport types used in the tests."""
     return ["bypass", "series_impedance", "parallel_impedance",
             "series_load_impedance", "parallel_load_impedance"]
 
 def _expected_impedance(
         twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
+    """Returns the expected input/output impedance for testes twoport types."""
     if twoport_type == "bypass":
         Zexpected =  Zl
     elif twoport_type == "series_impedance":
@@ -144,6 +172,7 @@ def _expected_impedance(
 
 def _expected_voltage_tf(
         twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
+    """Returns the expected TF Uout/Uin for testes twoport types."""
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 
@@ -163,6 +192,7 @@ def _expected_voltage_tf(
 
 def _expected_current_to_voltage_tf(
         twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
+    """Returns the expected TF Iout/Uin for testes twoport types."""
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 
@@ -179,6 +209,7 @@ def _expected_current_to_voltage_tf(
 
 def _expected_current_tf(
         twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
+    """Returns the expected TF Iout/Iin for testes twoport types."""
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 
@@ -198,6 +229,7 @@ def _expected_current_tf(
 
 def _expected_voltage_to_current_tf(
         twoport_type, Zl: FrequencyData, Z: FrequencyData) -> FrequencyData:
+    """Returns the expected TF Uout/Iin for testes twoport types."""
     if twoport_type not in _twoport_type_list():
         raise ValueError("Unexpected value for 'twoport_type'")
 
@@ -219,6 +251,8 @@ def _expected_voltage_to_current_tf(
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
 def test_input_impedance(impedance_type : str, twoport_type : str,
                          load_impedance : FrequencyData, impedance_random):
+    """Significantly parametrized test for result of input/output impedance
+    method."""
     tmat = _special_twoport_tmatrix(
         twoport_type, load_impedance, impedance_random)
     if impedance_type == "input":
@@ -239,7 +273,7 @@ def test_input_impedance(impedance_type : str, twoport_type : str,
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
 def test_transfer_function(tf_type, twoport_type,
                            load_impedance, impedance_random):
-    """Test for 'voltage' quantity transfer function"""
+    """Significantly parametrized test for result of TF method."""
     tmat = _special_twoport_tmatrix(
         twoport_type, load_impedance, impedance_random)
 

@@ -35,6 +35,7 @@ def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
         TransmissionMatrix.from_tmatrix(np.ndarray.tolist(data), frequencies)
 
 def test_tmatrix_init(frequencies):
+    """Test constructor with data of valid and invalid shapes."""
     num_bins = len(frequencies)
     TransmissionMatrix(np.ones([2, 2, num_bins]), frequencies)
     TransmissionMatrix(np.ones([4, 2, 2, num_bins]), frequencies)
@@ -60,6 +61,7 @@ def _expect_error_abcd_same_type(A, B, C, D):
         TransmissionMatrix.from_abcd(A, B, C, D, 1000)
 
 def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
+    """Test 'from_abcd' with valid and invalid data types."""
     TransmissionMatrix.from_abcd(A_list, A_list,
                                  A_list, A_list, frequencies)
     TransmissionMatrix.from_abcd(A_np, A_np, A_list, A_np, frequencies)
@@ -72,6 +74,7 @@ def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
     _expect_error_abcd_same_type(A_FreqDat, A_np, A_np, A_np)
 
 def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
+    """Test 'from_abcd' throws error if handing in arrays but no frequencies"""
     TransmissionMatrix.from_abcd(A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
     with pytest.raises(ValueError, match="'frequencies' must be specified if "
                        "not using 'FrequencyData' objects as input"
@@ -82,6 +85,17 @@ def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
 # -------------------------
 # TESTS FOR HIGHER DIM DATA
 # -------------------------
+@pytest.fixture(scope="module")
+def abcd_data_1x2():
+    """ABCD matrices with 2 frequency bins and one additional
+    dimension of size 3"""
+    frequencies = [100, 200]
+    A = FrequencyData([[1, 1]], frequencies)
+    B = FrequencyData([[2, 2]], frequencies)
+    C = FrequencyData([[3, 3]], frequencies)
+    D = FrequencyData([[4, 4]], frequencies)
+    tmat = TransmissionMatrix.from_abcd(A, B, C, D)
+    return tmat, A, B, C, D
 @pytest.fixture(scope="module")
 def abcd_data_3x2():
     """ABCD matrices with 2 frequency bins and one additional
@@ -106,7 +120,17 @@ def abcd_data_3x3x1():
     tmat = TransmissionMatrix.from_abcd(A, B, C, D)
     return tmat, A, B, C, D
 
+def test_tmatrix_abcd_cshape(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1):
+    """Test whether abcd_cshape matches cshape of A-property."""
+    tmat, A, __, __, __ = abcd_data_1x2
+    assert tmat.abcd_cshape == A.cshape
+    tmat, A, __, __, __ = abcd_data_3x2
+    assert tmat.abcd_cshape == A.cshape
+    tmat, A, __, __, __  = abcd_data_3x3x1
+    assert tmat.abcd_cshape == A.cshape
+
 def _compare_tmat_vs_abcd(tmat, A, B, C, D):
+    """Test whether ABCD entries of T-Matrix match given data sets"""
     if isinstance(A, FrequencyData):
         assert tmat.A == A
         assert tmat.B == B
@@ -118,13 +142,9 @@ def _compare_tmat_vs_abcd(tmat, A, B, C, D):
         assert np.all(tmat.C.freq == C)
         assert np.all(tmat.D.freq == D)
 
-def test_tmatrix_abcd_cshape(abcd_data_3x2, abcd_data_3x3x1):
-    tmat, A, __, __, __ = abcd_data_3x2
-    assert tmat.abcd_cshape == A.cshape
-    tmat, A, __, __, __  = abcd_data_3x3x1
-    assert tmat.abcd_cshape == A.cshape
-
 def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
+    """Test whether ABCD entries of T-Matrix match ABCD data used for
+     initialization"""
     tmat, A, B, C, D = abcd_data_3x2
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
@@ -132,8 +152,11 @@ def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
 
-
+# ------------------------
+# TESTS FOR CREATE METHODS
+# ------------------------
 def test_tmatrix_create_identity(frequencies):
+    """Test whether creation of identity matrix with frequencies"""
     tmat_eye = TransmissionMatrix.create_identity(frequencies)
     assert isinstance(tmat_eye, TransmissionMatrix)
     assert tmat_eye.abcd_cshape == (1,)
@@ -141,6 +164,7 @@ def test_tmatrix_create_identity(frequencies):
 
 @pytest.mark.parametrize("no_freqs", [None, ()])
 def test_tmatrix_create_identity_scalar_input(no_freqs):
+    """Test whether creation of identity matrix without frequencies"""
     eye = TransmissionMatrix.create_identity(no_freqs)
     assert isinstance(eye, np.ndarray)
     npt.assert_allclose(eye, np.eye(2), atol=1e-15)
@@ -149,6 +173,7 @@ def test_tmatrix_create_identity_scalar_input(no_freqs):
                          ["create_series_impedance", "create_shunt_admittance",
                           "create_transformer", "create_gyrator"])
 def test_tmatrix_create_methods_wrong_input(method_name):
+    """Test create methods raise error on invalid input data."""
     if method_name == "create_series_impedance":
         input_name = "impedance"
     elif method_name == "create_shunt_admittance":
@@ -171,6 +196,7 @@ def test_tmatrix_create_methods_wrong_input(method_name):
 
 @pytest.mark.parametrize("abcd_cshape", [(1,), (4,5)])
 def test_tmatrix_create_series_impedance(A_FreqDat, abcd_cshape):
+    """Test `create_series_impedance` using FrequencyData input."""
     Z = pf.utils.broadcast_cshape(A_FreqDat, abcd_cshape)
     tmat = TransmissionMatrix.create_series_impedance(Z)
     assert isinstance(tmat, TransmissionMatrix)
@@ -178,6 +204,7 @@ def test_tmatrix_create_series_impedance(A_FreqDat, abcd_cshape):
     _compare_tmat_vs_abcd(tmat, 1, Z.freq, 0, 1)
 
 def test_tmatrix_create_series_impedance_scalar_input():
+    """Test create series impedance using scalar input."""
     Z = 42
     tmat = TransmissionMatrix.create_series_impedance(Z)
     assert isinstance(tmat, np.ndarray)
@@ -186,6 +213,7 @@ def test_tmatrix_create_series_impedance_scalar_input():
 
 @pytest.mark.parametrize("abcd_cshape", [(1,), (4,5)])
 def test_tmatrix_create_shunt_admittance(A_FreqDat, abcd_cshape):
+    """Test `create_shunt_admittance` using FrequencyData input."""
     Y = pf.utils.broadcast_cshape(A_FreqDat, abcd_cshape)
     tmat = TransmissionMatrix.create_shunt_admittance(Y)
     assert isinstance(tmat, TransmissionMatrix)
@@ -193,6 +221,7 @@ def test_tmatrix_create_shunt_admittance(A_FreqDat, abcd_cshape):
     _compare_tmat_vs_abcd(tmat, 1, 0, Y.freq, 1)
 
 def test_tmatrix_create_shunt_admittance_scalar_input():
+    """Test `create_shunt_admittance` using scalar input."""
     Y = 42
     tmat = TransmissionMatrix.create_shunt_admittance(Y)
     assert isinstance(tmat, np.ndarray)
@@ -202,6 +231,7 @@ def test_tmatrix_create_shunt_admittance_scalar_input():
 @pytest.mark.parametrize("transducer_contant",
                          [2.5, (2.5), FrequencyData([2.5, 5, 10], [1, 2, 3])])
 def test_tmatrix_create_transformer(transducer_contant, frequencies):
+    """Test `create_transformer` for FrequencyData and scalar input."""
     tmat = TransmissionMatrix.create_transformer(transducer_contant)
     if isinstance(transducer_contant, FrequencyData):
         assert(isinstance(tmat, TransmissionMatrix))
@@ -220,6 +250,7 @@ def test_tmatrix_create_transformer(transducer_contant, frequencies):
 @pytest.mark.parametrize("transducer_contant",
                          [2.5, (2.5), FrequencyData([2.5, 5, 10], [1, 2, 3])])
 def test_tmatrix_create_gyrator(transducer_contant, frequencies):
+    """Test `create_gyrator` for FrequencyData and scalar input."""
     tmat = TransmissionMatrix.create_gyrator(transducer_contant)
     if isinstance(transducer_contant, FrequencyData):
         assert(isinstance(tmat, TransmissionMatrix))
@@ -237,6 +268,8 @@ def test_tmatrix_create_gyrator(transducer_contant, frequencies):
 
 
 def test_tmatrix_slicing(frequencies):
+    """Test whether slicing a T-Matrix object return T-Matrix or raises correct
+    error for invalid keys."""
     eye_2x2 = TransmissionMatrix.create_identity(frequencies)
     eye_1x2x2 = pf.utils.broadcast_cshape(eye_2x2, (1, 2, 2))
     eye_3x2x2 = pf.utils.broadcast_cshape(eye_2x2, (3, 2, 2))
