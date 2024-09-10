@@ -60,14 +60,13 @@ class TransmissionMatrix(FrequencyData):
     constraint: The underlying frequency domain data must match a shape like
     (..., 2, 2, N). The last axis refers to the frequency, and the two axes
     before to the ABCD-Matrix (which is a 2x2 matrix), so the resulting cshape
-    is (...,2,2). For example, `obj[...,0,0]` returns the A-entry as
-    :py:class:`~pyfar.classes.audio.FrequencyData`.
+    is (...,2,2).
 
     Another point is the numerical handling when deriving input/output
     impedance or transfer functions (see :py:func:`~input_impedance`,
     :py:func:`~output_impedance`, :py:func:`~transfer_function`):
     In the respective equations, the load impedance Zl is usually multiplied.
-    However, Zl is applied in the form of 1/Zl (as admittance) in for Zl = inf
+    However, Zl is applied in the form of 1/Zl (as admittance) for Zl = inf
     to avoid numerical problems.
     There are additional cases where certain entries of the
     T-matrix being zero might still lead to the main denominator becoming zero.
@@ -83,7 +82,7 @@ class TransmissionMatrix(FrequencyData):
     def __init__(self, data, frequencies, comment = ""):
         """Initialize TransmissionMatrix with data, and frequencies.
 
-        This should not be used directly. Instead use :py:func:`~from_tmatrix`
+        This should not be used directly. Instead use :py:func:`~from_abcd`.
         or :py:func:`~from_tmatrix`.
 
         """
@@ -225,8 +224,8 @@ class TransmissionMatrix(FrequencyData):
     def abcd_cshape(self):
         """The channel shape of the transmission matrix entries (A, B, C, D)
 
-        This is the same as 'cshape' without the last two elements, but
-        at least (1,). In other words, a matrix with cshape (2,2) will return
+        This is the same as 'cshape' without the last two elements.
+        As an exception, a matrix with cshape (2,2) will return
         (1,) as abcd_cshape.
 
         """
@@ -401,21 +400,22 @@ class TransmissionMatrix(FrequencyData):
         """Returns the transfer function (output/input) for specified
         quantities and a given load impedance.
 
-        The transfer function (TF) is the relation between an output and input
+        The transfer function is the relation between an output and input
         quantity of modelled two-port and depends on the load impedance at the
         output. Since there are two quantities at input and output
         respectively, four transfer functions exist in total. The first usually
         refers to the "voltage-like" quantity (:math:`Q_1`) whereas the second
         refers to the "current-like" quantity (:math:`Q_2`).
 
-        The TFs can be derived from Equation (2-1) in Reference [1]_:
+        The transfer functions can be derived from Equation (2-1)
+        in Reference [1]_:
 
         .. math::
             Q_{1,\\mathrm{in}} = AQ_{1,\\mathrm{out}} + BQ_{2,\\mathrm{in}}
 
             Q_{2,\\mathrm{in}} = CQ_{1,\\mathrm{out}} + DQ_{2,\\mathrm{in}}
 
-        The four TFs are defined as:
+        The four transfer functions are defined as:
 
         * :math:`Q_{1,\\mathrm{out}} / Q_{1,\\mathrm{in}}` using
           :math:`Q_{2,\\mathrm{out}} = Q_{1,\\mathrm{out}}/Z_L`
@@ -432,7 +432,7 @@ class TransmissionMatrix(FrequencyData):
             Array-like object with two integer elements referring to the
             indices of the utilized quantity at the output (first integer)
             and input (second integer). For example, (1,0) refers to the
-            TF :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}}`.
+            transfer function :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}}`.
         Zl : scalar | FrequencyData
             The load impedance data as scalar or FrequencyData. In latter case,
             the shape must match the entries of the T-matrix, i.e.
@@ -440,10 +440,10 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        TF : FrequencyData
+        transfer_function : FrequencyData
             A FrequencyData object with the resulting transfer function. The
             cshape is identical to the entries of the T-matrix, i.e.
-            tmat.A.cshape == TF.cshape.
+            tmat.A.cshape == transfer_function.cshape.
 
         """
         is_scalar = np.isscalar(quantity_indices)
