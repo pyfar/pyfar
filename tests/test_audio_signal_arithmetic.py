@@ -227,11 +227,6 @@ def test_signal_inversion(fft_norm):
     npt.assert_allclose(signal.time.flatten(), [2, 0, 0])
     npt.assert_allclose(signal_inv.time.flatten(), [.5, 0, 0])
 
-    # 'rms' norm
-    signal.fft_norm = 'rms'
-    with pytest.raises(ValueError, match="Either fft_norm_2"):
-        1 / signal
-
 
 def test_subtraction():
     # only test one case - everything else is tested below

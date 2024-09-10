@@ -183,9 +183,9 @@ def test_coordinates_init_val():
     Coordinates(c6, c6, c7)
 
     # tests that have to fail
-    with raises(ValueError, match="shape mismatch"):
+    with pytest.raises(ValueError, match="shape mismatch"):
         Coordinates(c2, c2, c6)
-    with raises(ValueError, match="shape mismatch"):
+    with pytest.raises(ValueError, match="shape mismatch"):
         Coordinates(c2, c2, c8)
 
 

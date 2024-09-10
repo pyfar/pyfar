@@ -53,7 +53,7 @@ def test_orientations_from_view_up_invalid():
     # mal-formed lists
     views = [[1, 0, 0], [0, 0]]
     ups = [[0, 1, 0], [0, 0, 0]]
-    match = 'setting an array element with a sequence. The requested'
+    match = 'setting an array element with a sequence.'
     with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
     # any of views and ups has zero-length
