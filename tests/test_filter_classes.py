@@ -298,7 +298,7 @@ def test_filter_sos_init_state(impulse):
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
-    desired = np.array([[[[-0.5, 0 ]]]])
+    desired = np.array([[[[-0.5, 0]]]])
     npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
