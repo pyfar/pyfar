@@ -147,14 +147,14 @@ def test_allpass(impulse, order):
     gd = pf.dsp.group_delay(sig_filt)
 
     # Group delay at w = 0
-    T_gr_0 = gd[0]
+    T_gr_0 = gd[0, 0]
     # definition of group delay at fc (Tietze et al.)
     T_fc_desired = T_gr_0 * (1 / np.sqrt(2))
     # id of frequency bin closest to fc
     idx = sig_filt.find_nearest_frequency(fc)
     # group delay below fc and at fc
-    T_below = gd[:idx]
-    T_fc = gd[idx]
+    T_below = gd[0, :idx]
+    T_fc = gd[0, idx]
 
     # tolerance for group delay below fc
     tol = 1 - (T_fc / T_gr_0)
