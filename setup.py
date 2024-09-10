@@ -5,7 +5,7 @@
 
 from setuptools import setup, find_packages
 
-with open('README.md') as readme_file:
+with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -31,8 +31,7 @@ test_requirements = [
     'ruff',
     'coverage',
     'Sphinx<8',
-    'twine',
-    'sphinx_mdinclude',
+    'twine'
 ]
 
 setup(
@@ -53,7 +52,6 @@ setup(
     description="Project for data formats in acoustics.",
     install_requires=requirements,
     license="MIT license",
-    long_description_content_type='text/markdown',
     long_description=readme,
     include_package_data=True,
     keywords='pyfar',

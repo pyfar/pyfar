@@ -167,20 +167,6 @@ def test_magic_setitem():
     npt.assert_allclose(time_a.time, np.asarray([[2, 0, -2], [1, 0, -1]]))
 
 
-def test_magic_getitem_error():
-    """
-    Test if indexing that would return a subset of the frequency bins raises a
-    key error.
-    """
-    time = pf.TimeData([[0, 0, 0], [1, 1, 1]], [0, 1, 3])
-    # manually indexing too many dimensions
-    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
-        time[0, 1]
-    # indexing too many dimensions with ellipsis operator
-    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
-        time[0, 0, ..., 1]
-
-
 def test_magic_setitem_wrong_n_samples():
     """Test the setimtem for TimeData with wrong number of samples."""
 

@@ -7,7 +7,9 @@ this code is included in the open educational resource
 computational examples"
 
 hosted at
-URL = ('https://github.com/spatialaudio/digital-signal-processing-lecture/tree/master/filter_design')
+URL = ('https://github.com/spatialaudio/'
+       'digital-signal-processing-lecture/tree/master/'
+       'filter_design')
 
 and is licensed under The MIT License (MIT):
 Copyright (c) 2020 Sascha Spors, Frank Schultz
@@ -85,17 +87,11 @@ def q_from_bw(bw):
 def f_prewarping(f, fs):
     """Do the frequency prewarping.
 
-    Parameters
-    ----------
-    f : float
-        analog frequency in Hz to be prewarped
-    fs : float
-        sampling frequency in Hz
-
-    Returns
-    -------
-    float
-        prewarped angular frequency in rad/s
+    input:
+    f...analog frequency in Hz to be prewarped
+    fs...sampling frequency in Hz
+    output:
+    prewarped angular frequency in rad/s
     """
     return 2*fs*np.tan(np.pi*f/fs)
 
