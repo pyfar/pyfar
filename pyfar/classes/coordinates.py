@@ -2817,43 +2817,43 @@ class Coordinates():
             & eq_sh_order & eq_system
 
     def __add__(self, other):
-        """Add two Coordinates objects."""
+        """Add two numbers/Coordinates objects."""
         return _arithmetics(self, other, 'add')
 
     def __radd__(self, other):
-        """Add two Coordinates objects."""
+        """Add two numbers/Coordinates objects."""
         return _arithmetics(other, self, 'add')
 
     def __sub__(self, other):
-        """Subtract two Coordinates objects."""
+        """Subtract two numbers/Coordinates objects."""
         return _arithmetics(self, other, 'sub')
 
     def __rsub__(self, other):
-        """Subtract two Coordinates objects."""
+        """Subtract two numbers/Coordinates objects."""
         return _arithmetics(other, self, 'sub')
 
     def __mul__(self, other):
-        """Multiply two Coordinates objects."""
+        """Multiply Coordinates object with number."""
         return _arithmetics(self, other, 'mul')
 
     def __rmul__(self, other):
-        """Multiply two Coordinates objects."""
+        """Multiply number with Coordinates object."""
         return _arithmetics(other, self, 'mul')
 
     def __div__(self, other):
-        """Divide one Coordinates object."""
+        """Divide Coordinates object with number."""
         return _arithmetics(self, other, 'div')
 
     def __truediv__(self, other):
-        """Divide one Coordinates object."""
+        """Divide Coordinates object with number."""
         return _arithmetics(self, other, 'div')
 
     def __rtruediv__(self, other):
-        """Divide two Coordinates objects."""
+        """Divide number with Coordinates object."""
         return _arithmetics(other, self, 'div')
 
     def __rdiv__(self, other):
-        """Divide two Coordinates objects."""
+        """Divide number with Coordinates object."""
         return _arithmetics(other, self, 'div')
 
 
