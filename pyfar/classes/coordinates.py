@@ -10,7 +10,7 @@ Different coordinate systems are frequently used in acoustics research and
 handling sampling points and different systems can be cumbersome. The
 Coordinates class was designed with this in mind. It stores coordinates in
 cartesian coordinates internally and can convert to all coordinate systems
-listed below. Additionally, the the class can query and plot coordinates
+listed below. Additionally, the class can query and plot coordinates
 points. Addition and subtraction are supported with numbers and Coordinates
 objects, while multiplication and division are supported with numbers only.
 All arithmetic operations are performed element-wise on Cartesian coordinates
@@ -2841,11 +2841,11 @@ class Coordinates():
         return _arithmetics(other, self, 'mul')
 
     def __div__(self, other):
-        """Divide one Coordinates objects."""
+        """Divide one Coordinates object."""
         return _arithmetics(self, other, 'div')
 
     def __truediv__(self, other):
-        """Divide one Coordinates objects."""
+        """Divide one Coordinates object."""
         return _arithmetics(self, other, 'div')
 
     def __rtruediv__(self, other):
@@ -2864,7 +2864,7 @@ class Coordinates():
 
 
 def dot(a, b):
-    """Dot product two Coordinates objects.
+    """Dot product of two Coordinates objects.
 
     .. math::
         \\vec{a} \\cdot \\vec{b}
@@ -2899,7 +2899,7 @@ def dot(a, b):
 
 
 def cross(a, b):
-    """Cross product two Coordinates objects
+    """Cross product of two Coordinates objects
 
     .. math::
         \\vec{a} \\times \\vec{b}
