@@ -206,7 +206,7 @@ def test_fractional_delay_mode_cyclic(delay):
     delayed = fractional_time_shift(signal, delay, mode="cyclic")
 
     # if the delay is too large, it is cyclicly shifted
-    group_delay = pf.dsp.group_delay(delayed)[0]
+    group_delay = pf.dsp.group_delay(delayed)[0, 0]
     npt.assert_allclose(group_delay, (16+delay) % 32, atol=.05)
 
 

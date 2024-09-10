@@ -179,13 +179,13 @@ def test_coordinates_init_val():
     Coordinates(c1, c1, c7)
     # input 3D data
     Coordinates(c1, c1, c8)
+    # input (3,) and (2, 3) data
+    Coordinates(c6, c6, c7)
 
     # tests that have to fail
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="shape mismatch"):
         Coordinates(c2, c2, c6)
-    with pytest.raises(AssertionError):
-        Coordinates(c6, c6, c7)
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="shape mismatch"):
         Coordinates(c2, c2, c8)
 
 

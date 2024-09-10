@@ -172,6 +172,20 @@ def test_magic_getitem_slice():
     npt.assert_allclose(FrequencyData(data[0], freqs)._data, freq[0]._data)
 
 
+def test_magic_getitem_error():
+    """
+    Test if indexing that would return a subset of the frequency bins raises a
+    key error.
+    """
+    freq = pf.FrequencyData([[0, 0, 0], [1, 1, 1]], [0, 1, 3])
+    # manually indexing too many dimensions
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        freq[0, 1]
+    # indexing too many dimensions with ellipsis operator
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        freq[0, 0, ..., 1]
+
+
 def test_magic_setitem():
     """Test the setitem for FrequencyData."""
     freqs = [0, .1, .3]

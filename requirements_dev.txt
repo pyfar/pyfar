@@ -21,3 +21,4 @@ pydata-sphinx-theme
 sphinx-design
 sphinx-favicon
 sphinx-reredirects
+sphinx_mdinclude
