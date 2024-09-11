@@ -111,9 +111,9 @@ html_favicon = '_static/favicon.ico'
 
 # -- HTML theme options
 # https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/layout.html
-html_sidebars = {
-  "pyfar": []
-}
+# html_sidebars = {
+#   "pyfar": []
+# }
 
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
