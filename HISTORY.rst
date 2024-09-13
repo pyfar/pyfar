@@ -2,9 +2,33 @@
 History
 =======
 
+0.6.9 (2024-09-13)
+------------------
+* Documentation
+
+  * Improve the layout of the main page of the documentation (PR #653, #679)
+  * Improve documentation of pyfar.dsp.filter.high_shelve_cascade and pyfar.dsp.filter.low_shelve_cascade (PR #648)
+  * Correct erroneous description of default value for the *num_fractions* parameter in pyfar.dsp.filter.fractional_octave_bands
+  * Fix broken link to python-soundfile documentation (PR #651)
+
+* Bugfixes and enhancements
+
+  * Slicing on pyfar audio objects (e.g., signal[0]) now always gives entire channels and en error is raised if slicing of signal objects would return a subset of the samples or frequencies. This must now be done using *signal.time* and *signal.freq* directly (e.g., signal.time[..., 0:5], PR #674)
+  * The Coordinates class now only raises a deprecation warning, if the parameter *sh_order* is set with a number (e.g., coordinates.sh_order = 1) but not if it is None (PR #694)
+  * All dsp and filter functions now maintain the *shape* and *cshape* of the input data (PR #676, #658, #659, #663, #664, #666, #678)
+  * Fix deprecation warnings from Matlab and Numpy (PR #640, #670)
+  * Change default value for *domain* parameter in pyfar.dsp.normalize to work for pyfar.FrequencyData objects (PR #649)
+  * Use numpy functions for broadcasting input of pyfar.Coordinates (PR #665)
+
+* Automation and testing
+
+  * Pull request now require version labels (PR #622)
+  * Added test for deprecation warnings (PR #644)
+  * Limit to sphinx version <8 to avoid failing builds on readthedocs (PR #662)
+
 0.6.8 (2024-06-27)
 ------------------
-* Make compatibile for scipy 1.14 (PR #638)
+* Make compatible for scipy 1.14 (PR #638)
 * Fix previous page title on pyfar main page (#637)
 * Enhance user warning for writing clipped audio files (#624)
 * Improve documentation (#634)

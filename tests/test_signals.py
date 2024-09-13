@@ -101,7 +101,7 @@ def test_impulse_multi_channel():
     (1,), (1, 1), (2, 2), (2, 1), (1, 2), None])
 @pytest.mark.parametrize("amp_shape", [
     (1,), (1, 1), (2, 2), (2, 1), (1, 2), None])
-def test_impulse_different_cshapes(delay_shape, amp_shape,):
+def test_impulse_different_cshapes(delay_shape, amp_shape):
     """Test impulse different cshapes."""
     signal = pfs.impulse(
         3,
@@ -121,7 +121,7 @@ def test_impulse_different_cshapes(delay_shape, amp_shape,):
     (1,), (1, 1), (2, 2), (2, 1), (1, 2), None])
 @pytest.mark.parametrize("phase_shape", [
     (1,), (1, 1), (2, 2), (2, 1), (1, 2), None])
-def test_sine_different_cshapes(frequency_shape, amp_shape, phase_shape,):
+def test_sine_different_cshapes(frequency_shape, amp_shape, phase_shape):
     """Test impulse different cshapes."""
     signal = pfs.sine(
         1 if frequency_shape is None else np.ones(frequency_shape),

@@ -310,7 +310,7 @@ class GammatoneBands():
             delay_samples + 3, sampling_rate=self.sampling_rate))
 
         # compute the envelope
-        ir = real.time + 1j * imag.time
+        ir = real.time[:, 0, :] + 1j * imag.time[:, 0, :]
         env = np.abs(ir)
 
         # sample at which the maximum occurs
@@ -444,10 +444,6 @@ class GammatoneBands():
         # restore original channel shape
         time_out = np.reshape(time_out,
                               (self.n_bands, ) + signal.cshape + (-1, ))
-
-        # squeeze dimension of single channel signal
-        if signal.cshape == (1, ):
-            time_out = np.squeeze(time_out)
 
         # return real and immaginary part of output as pyfar Signal objects
         real = signal.copy()

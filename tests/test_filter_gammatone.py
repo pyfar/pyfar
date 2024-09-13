@@ -69,10 +69,10 @@ def test_gammatone_bands_init_and_getter():
 
 
 @pytest.mark.parametrize('amplitudes,shape_filtered,sampling_rate', (
-    [np.array([1]), (85, 2048), 44100],
-    [np.array([1]), (85, 2048), 48000],
-    [np.array([1]), (85, 2048), 96000],
-    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100]
+    [np.array([1]), (85, 1, 2048), 44100],
+    [np.array([1]), (85, 1, 2048), 48000],
+    [np.array([1]), (85, 1, 2048), 96000],
+    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100],
 ))
 def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     """
@@ -122,11 +122,11 @@ def test_gammatone_bands_reset_state():
         pf.Signal(np.zeros(2**11), 44100), reset=False)
 
     # check for equality
-    npt.assert_array_equal(real_a.time, real.time[:, :2**11])
-    npt.assert_array_equal(imag_a.time, imag.time[:, :2**11])
+    npt.assert_array_equal(real_a.time, real.time[:, :, :2**11])
+    npt.assert_array_equal(imag_a.time, imag.time[:, :, :2**11])
 
-    npt.assert_array_equal(real_b.time, real.time[:, -2**11:])
-    npt.assert_array_equal(imag_b.time, imag.time[:, -2**11:])
+    npt.assert_array_equal(real_b.time, real.time[:, :, -2**11:])
+    npt.assert_array_equal(imag_b.time, imag.time[:, :, -2**11:])
 
 
 def test_gammatone_bands_assertions():
@@ -163,6 +163,18 @@ def test_gammatone_bands_repr():
     assert str(GFB) == ("Reconstructing Gammatone filter bank with 42 bands "
                         "between 0 and 22050 Hz spaced by 1 ERB units "
                         "@ 44100 Hz sampling rate")
+
+
+@pytest.mark.parametrize('shape', [(4, 1), (1, 4), (1,), (1, 1)])
+def test_gammatone_bands_shape(shape):
+    """Test the shape of GammatoneBands-filtered signals."""
+    impulse = pf.signals.impulse(2048, 0, np.ones(shape))
+    GFB = filter.GammatoneBands([0, 22050])
+
+    real, imag = GFB.process(impulse)
+
+    assert real.time.shape == (GFB.n_bands, *shape, impulse.n_samples)
+    assert imag.time.shape == (GFB.n_bands, *shape, impulse.n_samples)
 
 
 def test_erb_frequencies():

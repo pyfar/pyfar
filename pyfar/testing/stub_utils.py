@@ -274,9 +274,9 @@ def noise_func(sigma, n_samples, cshape):
         Spectrum
 
     """
-    np.random.seed(1000)
     # Time vector
-    time = np.random.normal(0, sigma, (cshape + (n_samples,)))
+    rng = np.random.default_rng(1000)
+    time = sigma * rng.standard_normal((cshape + (n_samples,)))
     freq = np.fft.rfft(time)
     norm = 1 / n_samples / np.sqrt(2) * 2
     freq *= norm
@@ -477,7 +477,7 @@ def stub_str_to_type():
                 'NoEncodeClass': type(NoEncodeClass()),
                 'NoDecodeClass': type(NoDecodeClass()),
                 'FlatData': type(FlatData()),
-                'NestedData': type(NestedData.create())
+                'NestedData': type(NestedData.create()),
                 }.get(type_str)
     return mock.MagicMock(side_effect=side_effect)
 

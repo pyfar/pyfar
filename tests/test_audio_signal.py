@@ -335,6 +335,29 @@ def test_magic_getitem_allslice():
     npt.assert_allclose(signal[:]._data, time[:])
 
 
+def test_magic_getitem_ellipsis():
+    """Test slicing operations by the magic function __getitem__."""
+    signal = pf.Signal([[[1, 1, 1], [2, 2, 2]]], 44100)
+    npt.assert_allclose(signal[..., 0].time, np.atleast_2d([1, 1, 1]))
+    assert signal[..., 0].time.shape == (1, 3)
+
+
+@pytest.mark.parametrize('domain', ['time', 'freq'])
+def test_magic_getitem_error(domain):
+    """
+    Test if indexing that would return a subset of the samples or frequency
+    bins raises a key error.
+    """
+    signal = pf.Signal([[0, 0, 0, 0, 0], [1, 1, 1, 1, 1]], 1)
+    signal.domain = domain
+    # manually indexing too many dimensions
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        signal[0, 1]
+    # indexing too many dimensions with ellipsis operator
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        signal[0, 0, ..., 1]
+
+
 def test_magic_setitem():
     """Test the magic function __setitem__."""
     signal = Signal([1, 2, 3], 44100)
@@ -402,7 +425,9 @@ def test_find_nearest_frequency():
 def test_reshape():
 
     # test reshape with tuple
-    signal_in = Signal(np.random.rand(6, 256), 44100)
+    rng = np.random.default_rng()
+    x = rng.random((6, 256))
+    signal_in = Signal(x, 44100)
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     assert id(signal_in) != id(signal_out)
@@ -412,14 +437,18 @@ def test_reshape():
     assert id(signal_in) != id(signal_out)
 
     # test reshape with int
-    signal_in = Signal(np.random.rand(3, 2, 256), 44100)
+    rng = np.random.default_rng()
+    x = rng.random((3, 2, 256))
+    signal_in = Signal(x, 44100)
     signal_out = signal_in.reshape(6)
     npt.assert_allclose(signal_in._data.reshape(6, -1), signal_out._data)
     assert id(signal_in) != id(signal_out)
 
 
 def test_reshape_exceptions():
-    signal_in = Signal(np.random.rand(6, 256), 44100)
+    rng = np.random.default_rng()
+    x = rng.random((6, 256))
+    signal_in = Signal(x, 44100)
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     # test assertion for non-tuple input
@@ -432,7 +461,9 @@ def test_reshape_exceptions():
 
 
 def test_transpose():
-    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    rng = np.random.default_rng()
+    x = rng.random((6, 2, 5, 256))
+    signal_in = Signal(x, 44100)
     signal_out = signal_in.transpose()
     npt.assert_allclose(signal_in.T._data, signal_out._data)
     npt.assert_allclose(
@@ -441,7 +472,9 @@ def test_transpose():
 
 @pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
 def test_transpose_args(taxis):
-    signal_in = Signal(np.random.rand(6, 2, 5, 256), 44100)
+    rng = np.random.default_rng()
+    x = rng.random((6, 2, 5, 256))
+    signal_in = Signal(x, 44100)
     signal_out = signal_in.transpose(taxis)
     npt.assert_allclose(
         signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
@@ -453,7 +486,8 @@ def test_transpose_args(taxis):
 def test_flatten():
 
     # test 2D signal (flatten should not change anything)
-    x = np.random.rand(2, 256)
+    rng = np.random.default_rng()
+    x = rng.random((2, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.flatten()
 
@@ -461,7 +495,8 @@ def test_flatten():
     assert id(signal_in) != id(signal_out)
 
     # test 3D signal
-    x = np.random.rand(3, 2, 256)
+    rng = np.random.default_rng()
+    x = rng.random((3, 2, 256))
     signal_in = Signal(x, 44100)
     signal_out = signal_in.flatten()
 

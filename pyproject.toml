@@ -16,7 +16,13 @@ lint.select = [
     "E",
     "F",
     "W",
-    "D", # Docstrings
+    "D",
+    "ERA",
+    "NPY",
+    "COM",
+    "I002",
+    "TID252",
+    "FIX",
 ]
 
 # Ignore missing docstrings in tests
