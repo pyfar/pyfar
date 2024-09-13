@@ -59,7 +59,7 @@ def test_normalize(sine):
 
 @pytest.mark.parametrize('shape', [(2, 1), (1, 2), (1,), (1, 1)])
 def test_spectrogram_shape(shape):
-    """Test cshape of spectrogram returns"""
+    """Test cshape of spectrogram returns."""
     impulse = pf.signals.impulse(2048, 0, np.ones((shape)))
     freq, time, spectro = pf.dsp.spectrogram(impulse)
 

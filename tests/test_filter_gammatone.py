@@ -167,7 +167,7 @@ def test_gammatone_bands_repr():
 
 @pytest.mark.parametrize('shape', [(4, 1), (1, 4), (1,), (1, 1)])
 def test_gammatone_bands_shape(shape):
-    """Test the shape of GammatoneBands-filtered signals"""
+    """Test the shape of GammatoneBands-filtered signals."""
     impulse = pf.signals.impulse(2048, 0, np.ones(shape))
     GFB = filter.GammatoneBands([0, 22050])
 

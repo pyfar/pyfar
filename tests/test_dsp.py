@@ -114,7 +114,7 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
 @pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_group_delay_cshape(shape):
     """Test if group delay function keeps cshape of signals of shape `m x n`
-     with `m = 1` or `n = 1`."""
+    with `m = 1` or `n = 1`."""
     impulse = pf.signals.impulse(256, 0, np.ones(shape))
 
     grp = dsp.group_delay(impulse)
