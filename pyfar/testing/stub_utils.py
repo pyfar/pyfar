@@ -468,7 +468,7 @@ def stub_str_to_type():
                 'NoEncodeClass': type(NoEncodeClass()),
                 'NoDecodeClass': type(NoDecodeClass()),
                 'FlatData': type(FlatData()),
-                'NestedData': type(NestedData.create())
+                'NestedData': type(NestedData.create()),
                 }.get(type_str)
     return mock.MagicMock(side_effect=side_effect)
 
