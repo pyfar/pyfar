@@ -85,10 +85,10 @@ def test_smooth_fractional_octave_window_parameter():
 
 
 @pytest.mark.parametrize("amplitudes", [
-    1,                   # single channel signal
-    [1, .9, .8, .7],     # flat multi-channel signal.
+    1,                    # single channel signal
+    [1, .9, .8, .7],      # flat multi-channel signal.
     [[1, .9], [.8, .7]],  # 2D multi-channel signal
-))
+])
 def test_smooth_fractional_octave_input_signal_shape(amplitudes):
     """
     - Test for different shapes of the input signal

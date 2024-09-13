@@ -68,12 +68,12 @@ def test_gammatone_bands_init_and_getter():
                                                    0.483240051077418])
 
 
-@pytest.mark.parametrize('amplitudes,shape_filtered,sampling_rate', (
-    [np.array([1]), (85, 1, 2048), 44100],
-    [np.array([1]), (85, 1, 2048), 48000],
-    [np.array([1]), (85, 1, 2048), 96000],
-    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100],
-))
+@pytest.mark.parametrize(('amplitudes', 'shape_filtered', 'sampling_rate'), [
+    (np.array([1]), (85, 1, 2048), 44100),
+    (np.array([1]), (85, 1, 2048), 48000),
+    (np.array([1]), (85, 1, 2048), 96000),
+    (np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100),
+])
 def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     """
     Verify the entire filter bank processing with a round trip using single and
