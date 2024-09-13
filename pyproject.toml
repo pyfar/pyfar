@@ -10,6 +10,7 @@ lint.select = [
     "E",
     "F",
     "W",
+    "ERA",
     "NPY",
     "COM",
     "I002",

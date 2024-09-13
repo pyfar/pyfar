@@ -871,7 +871,6 @@ def zplane_plot(ax, z, p, k):
     plt.text(0, +1, 'k=%f' % k)
     plt.text(0, -1, 'ROC for causal: white')
     plt.axis('square')
-    # plt.axis([-2, 2, -2, 2])
     plt.xlabel(r'$\Re\{z\}$')
     plt.ylabel(r'$\Im\{z\}$')
     plt.grid(True)
