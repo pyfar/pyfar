@@ -117,8 +117,10 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
 
 @pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_group_delay_cshape(shape):
-    """Test if group delay function keeps cshape of signals of shape `m x n`
-    with `m = 1` or `n = 1`."""
+    """
+    Test if group delay function keeps cshape of signals of shape `m x n`
+    with `m = 1` or `n = 1`.
+    """
     impulse = pf.signals.impulse(256, 0, np.ones(shape))
 
     grp = dsp.group_delay(impulse)
@@ -668,8 +670,10 @@ def test_impulse_response_delay_multidim():
 
 @pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_impulse_response_delay_cshape(shape):
-    """Test if find_impulse_response_delay function keeps cshape of signals of
-    shape `m x n` with `m = 1` or `n = 1`."""
+    """
+    Test if find_impulse_response_delay function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`.
+    """
     ir = pf.signals.impulse(256, 24, np.ones(shape))
     start_sample = dsp.find_impulse_response_delay(ir)
 
@@ -787,8 +791,10 @@ def test_impulse_response_start_multidim():
 
 @pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_impulse_response_start_cshape(shape):
-    """Test if find_impulse_response_start function keeps cshape of signals of
-    shape `m x n` with `m = 1` or `n = 1`."""
+    """
+    Test if find_impulse_response_start function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`.
+    """
     ir = pf.signals.impulse(256, 24, np.ones(shape))
     start_sample = dsp.find_impulse_response_start(ir)
 
