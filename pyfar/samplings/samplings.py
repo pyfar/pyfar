@@ -465,12 +465,12 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     .. math::
 
-        L = \\lceil \\frac{(t+1)^2}{2} \\rceil+1,
+        L = \lceil \frac{(t+1)^2}{2} \rceil+1,
 
     points will be generated, except for t = 3, 5, 7, 9, 11, 13, and 15.
     T-designs allow for an inverse spherical harmonic transform matrix
-    calculated as :math:`D = \\frac{4\\pi}{L} \\mathbf{Y}^\\mathrm{H}` with
-    :math:`\\mathbf{Y}^\\mathrm{H}` being the hermitian transpose of the
+    calculated as :math:`D = \frac{4\pi}{L} \mathbf{Y}^\mathrm{H}` with
+    :math:`\mathbf{Y}^\mathrm{H}` being the hermitian transpose of the
     spherical harmonics matrix.
 
     Parameters
@@ -670,9 +670,9 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     Parameters
     ----------
     elevation : array like, optional
-        Contains the elevation from wich the sampling grid is generated, with
-        :math:`-90^\\circ\\leq elevation \\leq 90^\\circ` (:math:`90^\\circ`:
-        North Pole, :math:`-90^\\circ`: South Pole). The default is
+        Contains the elevation from which the sampling grid is generated, with
+        :math:`-90^\circ\leq elevation \leq 90^\circ` (:math:`90^\circ`:
+        North Pole, :math:`-90^\circ`: South Pole). The default is
         ``np.linspace(-90, 90, 19)``.
     gcd : number, optional
         Desired great circle distance (GCD). Note that the actual GCD of the

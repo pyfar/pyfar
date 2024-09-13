@@ -147,10 +147,10 @@ def linear_phase(signal, group_delay, unit="samples"):
 
     The linear phase signal is computed as
 
-    .. math:: H_{\\mathrm{lin}} = |H| \\mathrm{e}^{-j \\omega \\tau}\\,,
+    .. math:: H_{\mathrm{lin}} = |H| \mathrm{e}^{-j \omega \tau}\,,
 
-    with :math:`H` the complex spectrum of the input data, :math:`|\\cdot|` the
-    absolute values, :math:`\\omega` the frequency in radians and :math:`\\tau`
+    with :math:`H` the complex spectrum of the input data, :math:`|\cdot|` the
+    absolute values, :math:`\omega` the frequency in radians and :math:`\tau`
     the group delay in seconds.
 
     Parameters
@@ -201,7 +201,7 @@ def zero_phase(signal):
     The zero phase signal is obtained by taking the absolute values of the
     spectrum
 
-    .. math:: H_z = |H| = \\sqrt{\\mathrm{real}(H)^2 + \\mathrm{imag}(H)^2},
+    .. math:: H_z = |H| = \sqrt{\mathrm{real}(H)^2 + \mathrm{imag}(H)^2},
 
     where :math:`H` is the complex valued spectrum of the input data and
     :math:`H_z` the real valued zero phase spectrum.

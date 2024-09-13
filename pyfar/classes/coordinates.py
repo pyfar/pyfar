@@ -274,13 +274,13 @@ class Coordinates():
         ----------
         x : ndarray, number
             X coordinate of a right handed Cartesian coordinate system in
-            meters (-\infty < x < \infty).
+            meters (:math:`-\infty` < x < :math:`\infty`).
         y : ndarray, number
             Y coordinate of a right handed Cartesian coordinate system in
-            meters (-\infty < y < \infty).
+            meters ():math:`-\infty` < y < :math:`\infty`).
         z : ndarray, number
             Z coordinate of a right handed Cartesian coordinate system in
-            meters (-\infty < z < \infty).
+            meters (:math:`-\infty` < z < :math:`\infty`).
         weights: array like, number, optional
             Weighting factors for coordinate points. The `shape` of the array
             must match the `shape` of the individual coordinate arrays.
@@ -300,7 +300,7 @@ class Coordinates():
 
         >>> import pyfar as pf
         >>> coordinates = pf.Coordinates(0, 0, 1)
-        """
+        """  # noqa: D301
         return cls(x, y, z, weights=weights, comment=comment)
 
     @classmethod
@@ -2865,17 +2865,17 @@ def cart2sph(x, y, z):
 
     .. math::
 
-        azimuth &= \\arctan(\\frac{y}{x}),
+        azimuth &= \arctan(\frac{y}{x}),
 
-        colatitude &= \\arccos(\\frac{z}{r}),
+        colatitude &= \arccos(\frac{z}{r}),
 
-        radius &= \\sqrt{x^2 + y^2 + z^2}
+        radius &= \sqrt{x^2 + y^2 + z^2}
 
     .. math::
 
-        0 < azimuth < 2 \\pi,
+        0 < azimuth < 2 \pi,
 
-        0 < colatitude < \\pi
+        0 < colatitude < \pi
 
     Parameters
     ----------
@@ -2922,17 +2922,17 @@ def sph2cart(azimuth, colatitude, radius):
 
     .. math::
 
-        x &= radius \\cdot \\sin(colatitude) \\cdot \\cos(azimuth),
+        x &= radius \cdot \sin(colatitude) \cdot \cos(azimuth),
 
-        y &= radius \\cdot \\sin(colatitude) \\cdot \\sin(azimuth),
+        y &= radius \cdot \sin(colatitude) \cdot \sin(azimuth),
 
-        z &= radius \\cdot \\cos(colatitude)
+        z &= radius \cdot \cos(colatitude)
 
     .. math::
 
-        0 < azimuth < 2 \\pi
+        0 < azimuth < 2 \pi
 
-        0 < colatitude < \\pi
+        0 < colatitude < \pi
 
 
     Parameters
@@ -2982,15 +2982,15 @@ def cart2cyl(x, y, z):
 
     .. math::
 
-        azimuth &= \\arctan(\\frac{y}{x}),
+        azimuth &= \arctan(\frac{y}{x}),
 
         height &= z,
 
-        radius &= \\sqrt{x^2 + y^2},
+        radius &= \sqrt{x^2 + y^2},
 
     .. math::
 
-        0 < azimuth < 2 \\pi
+        0 < azimuth < 2 \pi
 
     Parameters
     ----------
@@ -3038,15 +3038,15 @@ def cyl2cart(azimuth, height, radius):
 
     .. math::
 
-        x &= radius \\cdot \\cos(azimuth),
+        x &= radius \cdot \cos(azimuth),
 
-        y &= radius \\cdot \\sin(azimuth),
+        y &= radius \cdot \sin(azimuth),
 
         z &= height
 
     .. math::
 
-        0 < azimuth < 2 \\pi
+        0 < azimuth < 2 \pi
 
     Parameters
     ----------

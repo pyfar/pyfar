@@ -14,13 +14,13 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
     frequency and are often used in analogue loudspeaker design.
     The filter transfer function is based on Tietze et al. [#]_:
 
-    .. math:: A(s) = \\frac{1-\\frac{a_i}{\\omega_c} s+\\frac{b_i}
-                {\\omega_c^2} s^2}{1+\\frac{a_i}{\\omega_c} s
-                +\\frac{b_i}{\\omega_c^2} s^2},
+    .. math:: A(s) = \frac{1-\frac{a_i}{\omega_c} s+\frac{b_i}
+                {\omega_c^2} s^2}{1+\frac{a_i}{\omega_c} s
+                +\frac{b_i}{\omega_c^2} s^2},
 
 
-    where :math:`\\omega_c = 2 \\pi f_c` with the cut-off frequency :math:`f_c`
-    and :math:`s=\\mathrm{i} \\omega`.
+    where :math:`\omega_c = 2 \pi f_c` with the cut-off frequency :math:`f_c`
+    and :math:`s=\mathrm{i} \omega`.
 
     By definition the ``bi`` coefficient of a first order allpass is ``0``.
 

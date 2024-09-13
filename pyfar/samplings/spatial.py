@@ -104,7 +104,7 @@ def calculate_sph_voronoi_weights(
         radius.
     normalize : boolean, optional
         Normalize the samplings weights to ``sum(weights)=1``. Otherwise the
-        weights sum to :math:`4 \\pi r^2`. The default is ``True``.
+        weights sum to :math:`4 \pi r^2`. The default is ``True``.
     center : list
         Center of the spherical sampling grid. The default is ``[0, 0, 0]``.
     round_decimals : int, optional

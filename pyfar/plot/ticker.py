@@ -116,7 +116,7 @@ class LogFormatterITAToolbox(LogFormatter):
 class MultipleFractionLocator(MultipleLocator):
     r"""
     Tick locator for rational fraction multiples of a specified base, ie.
-    `math: \pi / 2`.
+    :math:`\pi / 2`.
     """
 
     def __init__(self, nominator=1, denominator=2, base=1):
@@ -128,7 +128,7 @@ class MultipleFractionLocator(MultipleLocator):
 class MultipleFractionFormatter(Formatter):
     r"""
     Tick formatter for rational fraction multiples of a specified base, ie.
-    `math: \pi / 2`.
+    :math:`\pi / 2`.
     """
 
     def __init__(self, nominator=1, denominator=2, base=1, base_str=None):

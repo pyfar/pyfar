@@ -612,7 +612,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     Obtain information on the input file with
     :py:func:`~pyfar.io.read_comsol_header`.
 
-    >>> expressions, units, parameters, domain, domain_data = \\
+    >>> expressions, units, parameters, domain, domain_data = \
     >>>     pf.io.read_comsol_header('comsol_sample.csv')
     >>> expressions
     ['pabe.p_t']
@@ -817,7 +817,7 @@ def read_comsol_header(filename):
 
     Obtain information on the input file.
 
-    >>> expressions, units, parameters, domain, domain_data = \\
+    >>> expressions, units, parameters, domain, domain_data = \
     >>>     pf.io.read_comsol_header('comsol_sample.csv')
     >>> expressions
     ['pabe.p_t']

@@ -87,10 +87,10 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
 
     .. math::
         s(n) =
-        \\begin{cases}
-        \\text{amplitude},  & \\text{if $n$ = delay}\\\\
-        0, & \\text{else}
-        \\end{cases}
+        \begin{cases}
+        \text{amplitude},  & \text{if $n$ = delay}\\\
+        0, & \text{else}
+        \end{cases}
 
 
     Parameters
@@ -150,12 +150,12 @@ def linear_sweep_time(n_samples, frequency_range, n_fade_out=90, amplitude=1,
     Time domain sweep generation according to [#]_:
 
     .. math::
-        s(t) = \\sin(2\\pi f_\\mathrm{low} t + 2\\pi (f_\\mathrm{high}-
-        f_\\mathrm{low}) / T \\cdot t^2 / 2),
+        s(t) = \sin(2\pi f_\mathrm{low} t + 2\pi (f_\mathrm{high}-
+        f_\mathrm{low}) / T \cdot t^2 / 2),
 
     with :math:`T` the duration in seconds, :math:`t` the sampling points in
-    seconds, and the frequency limits :math:`f_\\mathrm{low}` and
-    :math:`f_\\mathrm{high}`.
+    seconds, and the frequency limits :math:`f_\mathrm{low}` and
+    :math:`f_\mathrm{high}`.
 
     The linear sweep can also be generated in the frequency domain (see
     :py:func:`~linear_sweep_freq`). Time domain synthesis exhibits a constant
@@ -321,16 +321,16 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
     Time domain sweep generation according to [#]_:
 
     .. math::
-        s(t) = \\sin(2\\pi f_\\mathrm{low} L \\left( e^{t/L} - 1 \\right))
+        s(t) = \sin(2\pi f_\mathrm{low} L \left( e^{t/L} - 1 \right))
 
     with
 
     .. math::
-        L = T / \\log(f_\\mathrm{high}/f_\\mathrm{low}),
+        L = T / \log(f_\mathrm{high}/f_\mathrm{low}),
 
     :math:`T` the duration in seconds, :math:`t` the sampling points in
-    seconds, and the frequency limits :math:`f_\\mathrm{low}` and
-    :math:`f_\\mathrm{high}`.
+    seconds, and the frequency limits :math:`f_\mathrm{low}` and
+    :math:`f_\mathrm{high}`.
 
     The exponential sweep can also be generated in the frequency domain (see
     see :py:func:`~exponential_sweep_freq`). Time domain synthesis exhibits a
