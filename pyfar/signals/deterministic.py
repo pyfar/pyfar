@@ -88,7 +88,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     .. math::
         s(n) =
         \begin{cases}
-        \text{amplitude},  & \text{if $n$ = delay}\\\
+        \text{amplitude},  & \text{if $n$ = delay}\\
         0, & \text{else}
         \end{cases}
 
