@@ -260,12 +260,6 @@ class Coordinates():
         self.sh_order = sh_order
         self._comment = comment
 
-        if sh_order is not None:
-            warnings.warn((
-                "This function will be deprecated in pyfar 0.8.0 in favor "
-                "of spharpy.samplings.SamplingSphere."),
-                    PyfarDeprecationWarning)
-
     @classmethod
     def from_cartesian(
             cls, x, y, z, weights: np.array = None, comment: str = ""):
@@ -1047,10 +1041,12 @@ class Coordinates():
         """This function will be deprecated in pyfar 0.8.0 in favor
             of :py:class:`spharpy.samplings.SamplingSphere`.
             Set the maximum spherical harmonic order."""
-        warnings.warn((
-            "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of spharpy.samplings.SamplingSphere."),
-                PyfarDeprecationWarning)
+
+        if value is not None:
+            warnings.warn((
+                "This function will be deprecated in pyfar 0.8.0 in favor "
+                "of spharpy.samplings.SamplingSphere."),
+                    PyfarDeprecationWarning)
 
         self._sh_order = int(value) if value is not None else None
 
