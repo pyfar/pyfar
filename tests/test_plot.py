@@ -198,7 +198,7 @@ def test_line_custom_subplots(handsome_signal, handsome_signal_v2):
         'row': [plot.time, plot.freq],
         'col': [[plot.time], [plot.freq]],
         'mix': [[plot.time, plot.freq],
-                [plot.phase, plot.group_delay]]
+                [plot.phase, plot.group_delay]],
     }
 
     for p in plots:
@@ -601,7 +601,7 @@ def test_log_tick_labels(function, limits, noise):
 
 
 @pytest.mark.parametrize(
-    "function", [(plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)]
+    "function", [(plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)],
 )
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_2d_log_tick_labels(function, limits, handsome_signal_2d):

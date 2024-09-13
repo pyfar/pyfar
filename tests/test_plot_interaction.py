@@ -118,7 +118,7 @@ plots = {
         'shortcut': sc_plot["freq_group_delay"]["key"][0],
         'xlabel': ['Indices', 'Indices'],
         'ylabel': ['Frequency in Hz', 'Frequency in Hz'],
-        'cblabel': ['Magnitude in dB', 'Group delay in s']}
+        'cblabel': ['Magnitude in dB', 'Group delay in s']},
     }
 
 
@@ -170,7 +170,7 @@ def test_interaction_attached():
 
 @pytest.mark.parametrize(("plot_type", "initial_function", "function_list"), [
     ("line", pf.plot.time, getmembers(pf.plot.line, isfunction)),
-    ("2d", pf.plot.time_2d, getmembers(pf.plot.two_d, isfunction))
+    ("2d", pf.plot.time_2d, getmembers(pf.plot.two_d, isfunction)),
 ])
 def test_toggle_plots(plot_type, initial_function, function_list):
     """Test toggling plots by checking labels after toggling."""
@@ -265,7 +265,7 @@ def test_interaction_not_allowed(plot, signal, shortcut):
      ("other", "move", "increase", [0, 10], [1, 11]),
      ("other", "move", "decrease", [0, 10], [-1, 9]),
      ("other", "zoom", "increase", [0, 10], [1, 9]),
-     ("other", "zoom", "decrease", [0, 10], [-1, 11])
+     ("other", "zoom", "decrease", [0, 10], [-1, 11]),
      ])
 def test_get_new_axis_limits(ax_type, operation, direction,
                              limits, new_limits):

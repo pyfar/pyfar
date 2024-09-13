@@ -27,7 +27,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-"""
+"""   # noqa: E501
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 import numpy as np
@@ -871,7 +871,6 @@ def zplane_plot(ax, z, p, k):
     plt.text(0, +1, 'k=%f' % k)
     plt.text(0, -1, 'ROC for causal: white')
     plt.axis('square')
-    # plt.axis([-2, 2, -2, 2])
     plt.xlabel(r'$\Re\{z\}$')
     plt.ylabel(r'$\Im\{z\}$')
     plt.grid(True)

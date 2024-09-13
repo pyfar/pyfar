@@ -315,9 +315,6 @@ def test_setter_and_getter_with_conversion(domain_in, domain_out, point):
                         convert=True)")
             # check point
             npt.assert_allclose(p.flatten(), p_out, atol=1e-15)
-            # check if system was converted
-            # assert c._system["domain"] == domain_out
-            # assert c._system["convention"] == convention_out
 
 
 def test_getter_with_degrees():
@@ -640,7 +637,10 @@ def test_converters():
     ("points_1", "points_2", "points_3", "actual", "expected"), [
         (1, 1, 1,                Coordinates(1, 1, -1),                 False),
         ([1, 1], [1, 1], [1, 1], Coordinates([1, 1], [1, 1], [1, 2]),   False),
-        ([1, 1], [1, 1], [1, 1], Coordinates([1, 1.0], [1, 1.0], [1, 1]), True)
+        (
+            [1, 1], [1, 1], [1, 1],
+            Coordinates([1, 1.0], [1, 1.0], [1, 1]),
+            True),
     ])
 def test___eq___differInPoints(
         points_1, points_2, points_3, actual, expected):

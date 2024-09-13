@@ -139,7 +139,7 @@ def test_read_comsol_header_domain_data(filename, domain_data, type):
     'pressure_only',
     'pressure_parametric',
     'intensity_product',
-    'character_collection'
+    'character_collection',
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_data_domain(filename, type):
@@ -277,7 +277,7 @@ def test_read_comsol_parameters_another_value_data(filename, p1, type):
     'pressure_only',
     'pressure_parametric',
     'intensity_product',
-    'character_collection'
+    'character_collection',
     ])
 @pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
 def test_read_comsol_expressions(filename, type):

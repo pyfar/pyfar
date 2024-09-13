@@ -9,8 +9,8 @@ else:
     from numpy.exceptions import VisibleDeprecationWarning
 
 # this warning needs to be caught and appears if numpy array are generated
-# from nested lists containing lists of unequal lengths, e.g.,
-#  [[1, 0, 0], [1, 0]]
+# from nested lists containing lists of unequal lengths,
+#  e.g., [[1, 0, 0], [1, 0]]
 warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 

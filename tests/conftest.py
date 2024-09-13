@@ -459,8 +459,9 @@ def sofa_reference_coordinates(noise_two_by_three_channel):
     """
     n_measurements = noise_two_by_three_channel.cshape[0]
     n_receivers = noise_two_by_three_channel.cshape[1]
-    source_coordinates = np.random.rand(n_measurements, 3)
-    receiver_coordinates = np.random.rand(n_receivers, 3)
+    rng = np.random.default_rng()
+    source_coordinates = rng.random((n_measurements, 3))
+    receiver_coordinates = rng.random((n_receivers, 3))
     return source_coordinates, receiver_coordinates
 
 

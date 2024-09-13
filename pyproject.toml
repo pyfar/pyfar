@@ -14,5 +14,11 @@ lint.select = [
     "F",
     "W",
     "PT", # Pytest style
+    "ERA",
+    "NPY",
+    "COM",
+    "I002",
+    "TID252",
+    "FIX",
 ]
 
