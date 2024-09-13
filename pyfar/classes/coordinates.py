@@ -300,7 +300,7 @@ class Coordinates():
 
         >>> import pyfar as pf
         >>> coordinates = pf.Coordinates(0, 0, 1)
-        """  # noqa: D301
+        """
         return cls(x, y, z, weights=weights, comment=comment)
 
     @classmethod
