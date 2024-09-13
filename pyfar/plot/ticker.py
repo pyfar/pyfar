@@ -54,7 +54,7 @@ class LogLocatorITAToolbox(LogLocator):
         self,
         base=10.0,
         subs=(0.2, 0.4, 0.6, 1),
-        numticks=None
+        numticks=None,
     ):
         super().__init__(
             base=base,
@@ -72,7 +72,7 @@ class LogFormatterITAToolbox(LogFormatter):
         base=10.0,
         labelOnlyBase=False,
         minor_thresholds=None,
-        linthresh=None
+        linthresh=None,
     ):
         super().__init__(
             base=base,

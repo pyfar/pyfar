@@ -108,7 +108,6 @@ def point_set_polar(dimension, N):
             a_point = (a_top + a_bot)/2
 
             point_l_n = np.arange(0, np.size(points_l), dtype=int)
-            # points_l = points_l[np.newaxis]
 
             if dimension == 2:
                 points_s[0:dimension-1, point_n+point_l_n-1] = \
@@ -121,7 +120,6 @@ def point_set_polar(dimension, N):
                     points_l[:, point_l_n]
 
             points_s[dimension-1, point_n+point_l_n-1] = a_point
-            # point_n = point_n + points_l.shape[1]
             point_n += np.size(points_l)
 
         points_s[:, -1] = np.zeros(dimension)
@@ -206,8 +204,6 @@ def polar_colat(dimension, N):
     colatitude : double
         The colatitude angle of the top cap.
     """
-    # enough = N > 2
-    # c_polar = np.empty()
     if N == 1:
         c_polar = np.pi
     elif N == 2:

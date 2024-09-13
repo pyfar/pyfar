@@ -248,7 +248,12 @@ class Filter(object):
 
         # prepare output signal
         filtered_signal = deepcopy(signal)
-        filtered_signal.time = np.squeeze(filtered_signal_data)
+
+        # squeeze first dimension if there is only one filter channel
+        if self.n_channels == 1:
+            filtered_signal.time = np.squeeze(filtered_signal_data, axis=0)
+        else:
+            filtered_signal.time = filtered_signal_data
 
         return filtered_signal
 

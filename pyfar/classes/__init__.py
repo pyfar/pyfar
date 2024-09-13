@@ -10,5 +10,5 @@ __all__ = [
     'coordinates',
     'orientations',
     'filter',
-    'warnings'
+    'warnings',
 ]

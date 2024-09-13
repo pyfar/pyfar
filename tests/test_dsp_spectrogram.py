@@ -31,9 +31,9 @@ def test_return_values():
     npt.assert_allclose(times, [0, 512/1024, 1])
 
     # check middle slice
-    npt.assert_allclose(spectro[:256, 1], 0, atol=1e-13)
-    npt.assert_allclose(spectro[256, 1], 1, atol=1e-13)
-    npt.assert_allclose(spectro[257:, 1], 0, atol=1e-13)
+    npt.assert_allclose(spectro[0, :256, 1], 0, atol=1e-13)
+    npt.assert_allclose(spectro[0, 256, 1], 1, atol=1e-13)
+    npt.assert_allclose(spectro[0, 257:, 1], 0, atol=1e-13)
 
 
 @pytest.mark.parametrize('window,value', [
@@ -47,7 +47,7 @@ def test_window(window, value):
     _, _, spectro = pf.dsp.spectrogram(signal, window=window)
 
     # check middle slice
-    npt.assert_allclose(spectro[255:258, 1], value, atol=1e-13)
+    npt.assert_allclose(spectro[0, 255:258, 1], value, atol=1e-13)
 
 
 def test_normalize(sine):
@@ -55,3 +55,15 @@ def test_normalize(sine):
     sine.fft_norm = 'amplitude'
     assert pf.dsp.spectrogram(sine)[-1].max() < 1
     assert pf.dsp.spectrogram(sine, normalize=False)[-1].max() > 1
+
+
+@pytest.mark.parametrize('shape', [(2, 1), (1, 2), (1,), (1, 1)])
+def test_spectrogram_shape(shape):
+    """Test cshape of spectrogram returns"""
+    impulse = pf.signals.impulse(2048, 0, np.ones((shape)))
+    freq, time, spectro = pf.dsp.spectrogram(impulse)
+
+    assert spectro.shape == (*shape, *freq.shape, *time.shape)
+    assert time.ndim == 1
+    assert freq.ndim == 1
+

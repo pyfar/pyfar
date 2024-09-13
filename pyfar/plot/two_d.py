@@ -1,7 +1,7 @@
 """Plotting functions for 2D data."""
 import numpy as np
 from pyfar.plot.utils import context
-from .. import Signal
+from pyfar import Signal
 from . import _two_d
 from . import _interaction as ia
 

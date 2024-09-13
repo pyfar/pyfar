@@ -68,8 +68,9 @@ def group_delay(signal, frequencies=None, method='fft'):
     Returns
     -------
     group_delay : numpy array
-        Frequency dependent group delay in samples. The array is flattened if
-        a single channel signal was passed to the function.
+        Frequency dependent group delay of shape
+        (:py:func:`~pyfar.classes.audio.Signal.cshape`,
+        frequencies).
 
     References
     ----------
@@ -116,10 +117,6 @@ def group_delay(signal, frequencies=None, method='fft'):
     else:
         raise ValueError(
             "Invalid method, needs to be either 'scipy' or 'fft'.")
-
-    # flatten in numpy fashion if a single channel is returned
-    if signal.cshape == (1, ):
-        group_delay = np.squeeze(group_delay)
 
     return group_delay
 
@@ -300,7 +297,7 @@ def spectrogram(signal, window='hann', window_length=1024,
     window = sgn.get_window(window, window_length)
 
     frequencies, times, spectrogram = sgn.spectrogram(
-        x=signal.time.squeeze(), fs=signal.sampling_rate, window=window,
+        x=signal.time, fs=signal.sampling_rate, window=window,
         noverlap=window_overlap, mode='magnitude', scaling='spectrum')
 
     # remove normalization from scipy.signal.spectrogram
@@ -1428,7 +1425,7 @@ def find_impulse_response_start(
                     f'No values below threshold found found for channel {ch}',
                     'defaulting to 0')
 
-    return np.squeeze(start_sample)
+    return start_sample
 
 
 @rename_arg({"freq_range": "frequency_range"},
@@ -2002,7 +1999,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                          "or 'FrequencyData'."))
     if type(signal) is pyfar.TimeData and mode in (
             'log_magnitude_zerophase', 'magnitude_zerophase',
-            'magnitude_phase', 'power',):
+            'magnitude_phase', 'power'):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
@@ -2042,7 +2039,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     else:
         raise ValueError(
             """mode must be 'linear', 'magnitude_zerophase', 'power',
-            'magnitude_phase' or 'log_magnitude_zerophase'."""
+            'magnitude_phase' or 'log_magnitude_zerophase'.""",
             )
     # check if data includes NaNs and raise error or create masked array
     if nan_policy == 'raise' and np.any(np.isnan(data)):

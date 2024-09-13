@@ -128,7 +128,7 @@ blob/master/filter_design/audiofilter.py
                     f"{frequency} Hz.")
 
     if signal is None:
-        # return filter-object
+        # return the filter-object
         return filt
     else:
         # return filtered signal

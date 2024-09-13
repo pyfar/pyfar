@@ -79,7 +79,9 @@ def test_data_frequency_setter_freq():
 def test_reshape():
 
     # test reshape with tuple
-    data_in = FrequencyData(np.random.rand(6, 256), range(256))
+    rng = np.random.default_rng()
+    x = rng.random((6, 256))
+    data_in = FrequencyData(x, range(256))
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     assert id(data_in) != id(data_out)
@@ -89,14 +91,18 @@ def test_reshape():
     assert id(data_in) != id(data_out)
 
     # test reshape with int
-    data_in = FrequencyData(np.random.rand(3, 2, 256), range(256))
+    rng = np.random.default_rng()
+    x = rng.random((3, 2, 256))
+    data_in = FrequencyData(x, range(256))
     data_out = data_in.reshape(6)
     npt.assert_allclose(data_in._data.reshape(6, -1), data_out._data)
     assert id(data_in) != id(data_out)
 
 
 def test_reshape_exceptions():
-    data_in = FrequencyData(np.random.rand(6, 256), range(256))
+    rng = np.random.default_rng()
+    x = rng.random((6, 256))
+    data_in = FrequencyData(x, range(256))
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     # test assertion for non-tuple input
@@ -109,7 +115,9 @@ def test_reshape_exceptions():
 
 
 def test_transpose():
-    signal_in = FrequencyData(np.random.rand(6, 2, 5, 256), range(256))
+    rng = np.random.default_rng()
+    x = rng.random((6, 2, 5, 256))
+    signal_in = FrequencyData(x, range(256))
     signal_out = signal_in.transpose()
     npt.assert_allclose(signal_in.T._data, signal_out._data)
     npt.assert_allclose(
@@ -118,7 +126,9 @@ def test_transpose():
 
 @pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
 def test_transpose_args(taxis):
-    signal_in = FrequencyData(np.random.rand(6, 2, 5, 256), range(256))
+    rng = np.random.default_rng()
+    x = rng.random((6, 2, 5, 256))
+    signal_in = FrequencyData(x, range(256))
     signal_out = signal_in.transpose(taxis)
     npt.assert_allclose(
         signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
@@ -130,7 +140,8 @@ def test_transpose_args(taxis):
 def test_flatten():
 
     # test 2D signal (flatten should not change anything)
-    x = np.random.rand(2, 256)
+    rng = np.random.default_rng()
+    x = rng.random((2, 256))
     data_in = FrequencyData(x, range(256))
     data_out = data_in.flatten()
 
@@ -138,7 +149,8 @@ def test_flatten():
     assert id(data_in) != id(data_out)
 
     # test 3D signal
-    x = np.random.rand(3, 2, 256)
+    rng = np.random.default_rng()
+    x = rng.random((3, 2, 256))
     data_in = FrequencyData(x, range(256))
     data_out = data_in.flatten()
 
@@ -167,6 +179,20 @@ def test_magic_getitem_slice():
     freqs = [0, .1, .3]
     freq = FrequencyData(data, freqs)
     npt.assert_allclose(FrequencyData(data[0], freqs)._data, freq[0]._data)
+
+
+def test_magic_getitem_error():
+    """
+    Test if indexing that would return a subset of the frequency bins raises a
+    key error.
+    """
+    freq = pf.FrequencyData([[0, 0, 0], [1, 1, 1]], [0, 1, 3])
+    # manually indexing too many dimensions
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        freq[0, 1]
+    # indexing too many dimensions with ellipsis operator
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        freq[0, 0, ..., 1]
 
 
 def test_magic_setitem():

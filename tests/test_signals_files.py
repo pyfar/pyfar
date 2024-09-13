@@ -10,7 +10,7 @@ import pyfar as pf
     pf.signals.files.guitar,
     pf.signals.files.binaural_room_impulse_response,
     pf.signals.files.room_impulse_response,
-    pf.signals.files.headphone_impulse_responses
+    pf.signals.files.headphone_impulse_responses,
 ])
 @pytest.mark.parametrize('sampling_rate', (44100, 48000))
 def test_files(function, sampling_rate):
