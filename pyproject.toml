@@ -17,6 +17,8 @@ lint.select = [
     "F",
     "W",
     "D",
+    "D",
+    "D417",   # Missing argument descriptions in the docstring
     "ERA",
     "NPY",
     "COM",
