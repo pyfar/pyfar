@@ -124,7 +124,7 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     except ValueError as error:
         raise ValueError(
             ("The parameters delay and amplitude can not be "
-            "broadcasted to the same shape"), stacklevel=2) from error
+            "broadcasted to the same shape")) from error
 
     # generate the impulse
     n_samples = int(n_samples)

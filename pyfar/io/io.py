@@ -271,7 +271,7 @@ def read(filename):
                     raise TypeError((
                         f"'{name}' object in {filename} was written with "
                         f"pyfar {pyfar_version} and could not be read with "
-                        f"pyfar {pf.__version__}."), stacklevel=2) from e
+                        f"pyfar {pf.__version__}.")) from e
 
         if 'builtin_wrapper' in collection:
             for key, value in collection['builtin_wrapper'].items():
@@ -667,7 +667,7 @@ def read_comsol(filename, expressions=None, parameters=None):
             r'The data contains values in dB. Consider to use de-logarithmize '
             r'data, such as sound pressure, if possible. otherwise any '
             r'further processing of the data might lead to erroneous results.',
-            UserWarning, stacklevel=2)
+            stacklevel=2)
     header, is_complex, delimiter = _read_comsol_get_headerline(filename)
 
     # set default variables
@@ -744,7 +744,7 @@ def read_comsol(filename, expressions=None, parameters=None):
                         warnings.warn(
                             r'Specific combinations is set in the Parametric '
                             r'Sweep in Comsol. Missing data is filled with '
-                            r'nans.', UserWarning, stacklevel=2)
+                            r'nans.', stacklevel=2)
 
     # reshape data to final shape
     data_out = np.reshape(data_out, final_shape)
