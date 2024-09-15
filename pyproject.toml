@@ -4,31 +4,27 @@
 
 [project]
 name = "pyfar"
-version = "0.6.8"
+dynamic = ["version"]
 description = "Project for data formats in acoustics."
-requires-python = ">=3.8"
-authors = [
-    {name = "The pyfar Developers", email = "info@pyfar.org"},
-]
 readme = "README.md"
 license = {file = "LICENSE"}
-# TODO: add better keywords
+requires-python = ">=3.9"
+authors = [
+    { name = "The pyfar developers", email = "info@pyfar.org" },
+]
 keywords = [
     "pyfar",
-    "acoustics",
-    "audio processing",
 ]
-classifiers=[
+classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "numpy>=1.23.0",
@@ -52,33 +48,34 @@ tests = [
     "watchdog",
     "ruff",
     "coverage",
-    "sphinx<8",
     "twine",
+    "pytest-cov",
+]
+docs = [
+    "sphinx<8",
+    "autodocsumm",
+    "pydata-sphinx-theme",
     "sphinx_mdinclude",
+    "sphinx-design",
+    "sphinx-favicon",
+    "sphinx-reredirects",
 ]
-misc = [
-     "bump2version",
-     "pytest-cov",
-     "autodocsumm",
-     "pydata-sphinx-theme",
-     "sphinx-design",
-     "sphinx-favicon",
-     "sphinx-reredirects",
-]
-# TODO: why are some sphinx deps in dev but not tests?
-# TODO: make own docs dependencies
-dev = ["pyfar[setup,tests,misc]"]
+dev = ["pyfar[setup,tests,docs]"]
 
 [project.urls]
-homepage = "https://pyfar.org"
-documentation = "https://pyfar.readthedocs.io"
-repository = "https://github.com/pyfar/pyfar"
-issues = "https://github.com/pyfar/pyfar/issues"
+"Bug Tracker" = "https://github.com/pyfar/pyfar/issues"
+Documentation = "https://pyfar.readthedocs.io/"
+Download = "https://pypi.org/project/pyfar/"
+Homepage = "https://pyfar.org/"
+"Source Code" = "https://github.com/pyfar/pyfar"
 changelog = "https://github.com/pyfar/pyfar/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "pyfar/__init__.py"
 
 [tool.hatch.envs.hatch-static-analysis]
 # TODO: talk about fixing ruff version
@@ -100,7 +97,7 @@ dependencies = [
 ]
 
 [[tool.hatch.envs.tests.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.tests.scripts]
 import = ["python -c \"import pyfar\""]
@@ -111,24 +108,19 @@ platform.linux.pre-install-commands = ["cat /proc/cpuinfo"]
 platform.macos.pre-install-commands = ["sysctl -a machdep.cpu"]
 platform.windows.pre-install-commands = ["systeminfo"]
 
-# TODO: talk about contents of sdist
 [tool.hatch.build.targets.sdist]
 include = [
-  "pyfar",
+    "/pyfar",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["pyfar"]
 
-[tools.pytest.ini_options]
-norecursedirs = "private"
-testpaths = "tests"
-
-
 [tool.ruff]
 exclude = [
     ".git",
     "docs",
+    "setup.py",
 ]
 line-length = 79
 lint.ignore = []
@@ -136,5 +128,11 @@ lint.select = [
     "E",
     "F",
     "W",
+    "ERA",
+    "NPY",
+    "COM",
+    "I002",
+    "TID252",
+    "FIX",
 ]
 
