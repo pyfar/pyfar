@@ -97,8 +97,10 @@ class Orientations(Rotation):
         try:
             views = np.atleast_2d(views).astype(np.float64)
             ups = np.atleast_2d(ups).astype(np.float64)
-        except VisibleDeprecationWarning:
-            raise ValueError("Expected `views` and `ups` to have shape (N, 3)")
+        except VisibleDeprecationWarning as exc:
+            raise ValueError(
+                "Expected `views` and `ups` to have shape (N, 3)",
+                stacklevel=2) from exc
 
         # check views and ups
         if (views.ndim > 2 or views.shape[-1] != 3 or

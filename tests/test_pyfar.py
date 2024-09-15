@@ -1,5 +1,5 @@
 def test_import_pyfar():
     try:
         import pyfar           # noqa
-    except ImportError:
-        raise AssertionError()
+    except ImportError as exc:
+        raise AssertionError() from exc

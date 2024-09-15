@@ -247,9 +247,9 @@ def _decode_object_json_aided(name, type_hint, zipfile):
     ObjType = _str_to_type(type_hint[1:])
     try:
         return ObjType._decode(obj_dict)
-    except AttributeError:
+    except AttributeError as e:
         raise NotImplementedError(
-            f'You must implement `{type}._decode` first.')
+            f'You must implement `{type}._decode` first.') from e
 
 
 def _encode(obj, zip_path, zipfile):
@@ -377,9 +377,9 @@ def _encode_object_json_aided(obj, name, zipfile):
         zipfile.writestr(
             f'{name}/{type_hint}',
             json.dumps(obj_dict))
-    except AttributeError:
+    except AttributeError as error:
         raise NotImplementedError(
-            f'You must implement `{type}._encode` first.')
+            f'You must implement `{type}._encode` first.') from error
 
 
 def _is_pyfar_type(obj):

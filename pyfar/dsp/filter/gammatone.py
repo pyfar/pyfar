@@ -182,7 +182,7 @@ class GammatoneBands():
         warnings.warn((
             'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
             ' of frequency_range'),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=2)
         return self._frequency_range
 
     @property

@@ -33,4 +33,4 @@ def test_iter_domain_change():
 
     with pytest.raises(RuntimeError, match='domain changes'):
         for s in sig:
-            s.freq
+            s.freq  # noqa: B018
