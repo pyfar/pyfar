@@ -46,19 +46,19 @@ tests = [
     "pytest",
     "wheel",
     "watchdog",
-    "ruff",
+    "ruff==0.4.1",
     "coverage",
     "twine",
     "pytest-cov",
 ]
 docs = [
     "sphinx<8",
-    "autodocsumm",
-    "pydata-sphinx-theme",
-    "sphinx_mdinclude",
-    "sphinx-design",
-    "sphinx-favicon",
-    "sphinx-reredirects",
+    # "autodocsumm",
+    # "pydata-sphinx-theme",
+    # "sphinx_mdinclude",
+    # "sphinx-design",
+    # "sphinx-favicon",
+    # "sphinx-reredirects",
 ]
 dev = ["pyfar[setup,tests,docs]"]
 
@@ -79,7 +79,8 @@ path = "pyfar/__init__.py"
 
 [tool.hatch.envs.hatch-static-analysis]
 # TODO: talk about fixing ruff version
-dependencies = ["ruff==0.6.3"]
+dependencies = ["ruff==0.4.1"]
+config-path = "ruff.toml"
 
 [tool.hatch.envs.docs]
 platforms = ["linux"]
@@ -91,22 +92,13 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 build = ["cd docs && make html"]
 
-[tool.hatch.envs.tests]
+[tool.hatch.envs.test]
 dependencies = [
     "pyfar[tests]"
 ]
 
-[[tool.hatch.envs.tests.matrix]]
+[[tool.hatch.envs.test.matrix]]
 python = ["3.9", "3.10", "3.11", "3.12"]
-
-[tool.hatch.envs.tests.scripts]
-import = ["python -c \"import pyfar\""]
-test = ["python -m pytest -v tests"]
-
-[tool.hatch.envs.tests.overrides]
-platform.linux.pre-install-commands = ["cat /proc/cpuinfo"]
-platform.macos.pre-install-commands = ["sysctl -a machdep.cpu"]
-platform.windows.pre-install-commands = ["systeminfo"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -115,24 +107,3 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["pyfar"]
-
-[tool.ruff]
-exclude = [
-    ".git",
-    "docs",
-    "setup.py",
-]
-line-length = 79
-lint.ignore = []
-lint.select = [
-    "E",
-    "F",
-    "W",
-    "ERA",
-    "NPY",
-    "COM",
-    "I002",
-    "TID252",
-    "FIX",
-]
-

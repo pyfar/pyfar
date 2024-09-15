@@ -40,13 +40,14 @@ jobs:
       - run:
           name: Install System Dependencies
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
-      - python/install-packages:
-          pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          pip-dependency-file: requirements_dev.txt
+      - run:
+          name: Install Hatch
+          command: |
+            python -m pip install --upgrade pip
+            pip install hatch
       - run:
           name: Run tests
-          command: pytest
+          command: hatch test -i py=<<parameters.version>>
 
   ruff:
     parameters:

@@ -1,0 +1,14 @@
+
+exclude = [
+    ".git",
+    "docs",
+    "setup.py",
+]
+line-length = 79
+lint.ignore = []
+lint.extend-select = [
+    "E",
+    "F",
+    "W",
+]
+
