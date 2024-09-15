@@ -502,7 +502,10 @@ def audio_formats():
     return soundfile.available_formats()
 
 
-@pf._utils.rename_arg({"format" : "audio_format"}, None)
+@pf._utils.rename_arg(
+        {"format" : "audio_format"},
+        "'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'")
 def audio_subtypes(audio_format=None):
     """Return a dictionary of available audio subtypes.
 
@@ -531,7 +534,10 @@ def audio_subtypes(audio_format=None):
     return soundfile.available_subtypes(format=audio_format)
 
 
-@pf._utils.rename_arg({"format" : "audio_format"}, None)
+@pf._utils.rename_arg(
+        {"format" : "audio_format"},
+        "'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'")
 def default_audio_subtype(audio_format):
     """Return the default subtype for a given format.
 
