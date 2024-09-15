@@ -1663,9 +1663,9 @@ class Coordinates():
                 index_multi = np.moveaxis(index, -1, 0)
                 index = np.empty((k), dtype=tuple)
                 for kk in range(k):
-                    index[kk] = tuple([index_multi[kk]])
+                    index[kk] = (index_multi[kk], )
             else:
-                index = tuple([index])
+                index = (index, )
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
             index_multi = []
@@ -1825,9 +1825,9 @@ class Coordinates():
         if self.cdim == 1:
             if find.csize > 1:
                 for i in range(len(index)):
-                    index[i] = tuple([index[i]])
+                    index[i] = (index[i], )
             else:
-                index = tuple([index])
+                index = (index, )
 
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
