@@ -502,7 +502,8 @@ def audio_formats():
     return soundfile.available_formats()
 
 
-def audio_subtypes(format=None):
+@pf._utils.rename_arg({"format" : "audio_format"}, None)
+def audio_subtypes(audio_format=None):
     """Return a dictionary of available audio subtypes.
 
     Parameters
@@ -527,10 +528,11 @@ def audio_subtypes(format=None):
         warnings.warn(soundfile_warning)
         return
 
-    return soundfile.available_subtypes(format=format)
+    return soundfile.available_subtypes(format=audio_format)
 
 
-def default_audio_subtype(format):
+@pf._utils.rename_arg({"format" : "audio_format"}, None)
+def default_audio_subtype(audio_format):
     """Return the default subtype for a given format.
 
     Notes
@@ -550,7 +552,7 @@ def default_audio_subtype(format):
         warnings.warn(soundfile_warning)
         return
 
-    return soundfile.default_subtype(format)
+    return soundfile.default_subtype(audio_format)
 
 
 def read_comsol(filename, expressions=None, parameters=None):
