@@ -511,7 +511,7 @@ def audio_subtypes(audio_format=None):
 
     Parameters
     ----------
-    format : str
+    audio_format : str
         If given, only compatible subtypes are returned.
 
     Notes
@@ -540,6 +540,11 @@ def audio_subtypes(audio_format=None):
         "pyfar 0.9.0 in favor of 'audio_format'")
 def default_audio_subtype(audio_format):
     """Return the default subtype for a given format.
+
+    Parameters
+    ----------
+    audio_format : str
+        If given, only compatible subtypes are returned.
 
     Notes
     -----
