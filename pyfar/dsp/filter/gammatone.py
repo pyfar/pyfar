@@ -355,7 +355,7 @@ class GammatoneBands():
 
         # iteratively find gains
         gains = np.ones((self.n_bands, 1))
-        for ii in range(100):
+        for _ii in range(100):
             h_fin = np.matmul(h, gains)
             gains /= np.abs(h_fin)
 

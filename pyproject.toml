@@ -5,8 +5,12 @@ exclude = [
     "setup.py",
 ]
 line-length = 79
-lint.ignore = []
+lint.ignore = [
+    "B006",
+    "B008",
+]
 lint.select = [
+    "B",
     "E",
     "F",
     "W",
