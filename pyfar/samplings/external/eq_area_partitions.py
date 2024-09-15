@@ -178,7 +178,7 @@ def caps(dimension, N):
         c_polar = polar_colat(dimension, N)
         n_collars = num_collars(N, c_polar, ideal_collar_angle(dimension, N))
         r_regions = ideal_region_list(dimension, N, c_polar, n_collars)
-        n_regions = round_to_naturals(N, r_regions)
+        n_regions = round_to_naturals(r_regions)
         s_cap = cap_colats(dimension, N, c_polar, n_regions)
 
     return s_cap, n_regions
@@ -256,7 +256,7 @@ def ideal_region_list(dimension, N, c_polar, n_collars):
     return r_regions
 
 
-def round_to_naturals(N, r_regions):
+def round_to_naturals(r_regions):
     """Round off a given list of numbers of regions
     Given N and r_regions, determine n_regions, a list of the natural number
     of regions in each collar and the polar caps.
@@ -268,8 +268,6 @@ def round_to_naturals(N, r_regions):
 
     Parameters
     ----------
-    N : int
-        The dimension
     r_regions : double
         The ideal number of regions per collar before rounding
     Returns

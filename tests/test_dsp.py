@@ -185,7 +185,7 @@ def test_zero_phase_assertion():
         dsp.zero_phase(pf.TimeData([1, 0, 0], [0, 1, 3]))
 
 
-def test_xfade(impulse):
+def test_xfade():
     first = np.ones(5001)
     idx_1 = 500
     second = np.ones(5001)*2
