@@ -378,7 +378,7 @@ def test_deprecations_audio_io():
     with pytest.warns(
         PyfarDeprecationWarning, match="'format' will be deprecated in "
         "pyfar 0.9.0 in favor of 'audio_format'"):
-        pf.io.audio_formats(format='wav')
+        pf.io.audio_subtypes(format='wav')
     with pytest.warns(
         PyfarDeprecationWarning, match="'format' will be deprecated in "
         "pyfar 0.9.0 in favor of 'audio_format'"):
