@@ -2,7 +2,26 @@ Filter (FilterIIR, FilterFIR, FilterSOS)
 ----------------------------------------
 
 .. automodule:: pyfar.classes.filter
-    :members:
-    :undoc-members:
-    :exclude-members: [,Filter, ]
-    :inherited-members:
+
+**Classes:**
+
+.. autosummary::
+
+   pyfar.FilterFIR
+   pyfar.FilterIIR
+   pyfar.FilterSOS
+
+.. autoclass:: pyfar.FilterFIR
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: pyfar.FilterIIR
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: pyfar.FilterSOS
+   :members:
+   :undoc-members:
+   :inherited-members:
