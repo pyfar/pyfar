@@ -2250,12 +2250,14 @@ def normalize(signal, reference_method='max', domain='auto',
                                or type(signal) is pyfar.Signal):
         domain = 'time'
     if (type(signal) is pyfar.FrequencyData) and domain == 'time':
+        class_name = signal.__class__.__name__
         raise ValueError((
-            f"domain is '{domain}' and signal is type '{signal.__class__}'"
+            f"domain is '{domain}' and signal is type '{class_name}'"
             " but must be of type 'Signal' or 'TimeData'."))
     if (type(signal) is pyfar.TimeData) and domain == 'freq':
+        class_name = signal.__class__.__name__
         raise ValueError((
-            f"domain is '{domain}' and signal is type '{signal.__class__}'"
+            f"domain is '{domain}' and signal is type '{class_name}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
     if isinstance(limits, (int, float)) or len(limits) != 2:
         raise ValueError("limits must be an array like of length 2.")
