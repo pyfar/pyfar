@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Project for data formats in acoustics."
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 authors = [
     { name = "The pyfar developers", email = "info@pyfar.org" },
 ]
@@ -21,6 +21,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -38,7 +39,6 @@ dependencies = [
 # TODO: add maintainers section here
 
 [project.optional-dependencies]
-# TODO: is this necessary?
 setup = [
     "pytest-runner",
 ]
@@ -46,19 +46,19 @@ tests = [
     "pytest",
     "wheel",
     "watchdog",
-    "ruff==0.4.1",
+    "ruff==0.6.5",
     "coverage",
     "twine",
     "pytest-cov",
 ]
 docs = [
     "sphinx<8",
-    # "autodocsumm",
-    # "pydata-sphinx-theme",
-    # "sphinx_mdinclude",
-    # "sphinx-design",
-    # "sphinx-favicon",
-    # "sphinx-reredirects",
+    "autodocsumm",
+    "pydata-sphinx-theme",
+    "sphinx_mdinclude",
+    "sphinx-design",
+    "sphinx-favicon",
+    "sphinx-reredirects",
 ]
 dev = ["pyfar[setup,tests,docs]"]
 
@@ -79,8 +79,9 @@ path = "pyfar/__init__.py"
 
 [tool.hatch.envs.hatch-static-analysis]
 # TODO: talk about fixing ruff version
-dependencies = ["ruff==0.4.1"]
+dependencies = ["ruff==0.6.5"]
 config-path = "ruff.toml"
+
 
 [tool.hatch.envs.docs]
 platforms = ["linux"]
@@ -92,13 +93,17 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 build = ["cd docs && make html"]
 
-[tool.hatch.envs.test]
+[tool.hatch.envs.hatch-test]
 dependencies = [
     "pyfar[tests]"
 ]
 
-[[tool.hatch.envs.test.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12"]
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.hatch-test.scripts]
+tests = ["pytest --cov=pyfar tests"]
+deprecations = ["pytest -W error::DeprecationWarning"]
 
 [tool.hatch.build.targets.sdist]
 include = [
