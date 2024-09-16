@@ -533,12 +533,12 @@ def high_shelve_cascade(
 
     Returns
     -------
-    signal : :py:class:`~pyfar.classes.audio.Signal`, :py:class:`~pyfar.classes.filter.FilterSOS`
+    signal : :py:class:`~pyfar.Signal`, :py:class:`~pyfar.FilterSOS`
         The filtered signal (returned if ``sampling_rate = None``) or the
         Filter object (returned if ``signal = None``).
     N : int
         The number of shelf filters that were cascaded
-    ideal : :py:class:`~pyfar.classes.audio.FrequencyData`
+    ideal : :py:class:`~pyfar.FrequencyData`
         The ideal, piece-wise magnitude response of the filter
 
     References
@@ -565,7 +565,7 @@ def high_shelve_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-    """  # noqa: E501
+    """
 
     warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'high_shelf_cascade'"),
@@ -640,12 +640,12 @@ def high_shelf_cascade(
 
     Returns
     -------
-    signal : :py:class:`~pyfar.classes.audio.Signal`, :py:class:`~pyfar.classes.filter.FilterSOS`
+    signal : :py:class:`~pyfar.Signal`, :py:class:`~pyfar.FilterSOS`
         The filtered signal (returned if ``sampling_rate = None``) or the
         Filter object (returned if ``signal = None``).
     N : int
         The number of shelf filters that were cascaded
-    ideal : :py:class:`~pyfar.classes.audio.FrequencyData`
+    ideal : :py:class:`~pyfar.FrequencyData`
         The ideal, piece-wise magnitude response of the filter
 
     References
@@ -672,7 +672,7 @@ def high_shelf_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-    """  # noqa E501
+    """
     signal, N, ideal_response = _shelf_cascade(
         signal, frequency, frequency_type, gain, slope, bandwidth, N,
         sampling_rate, shelf_type="high")
@@ -743,12 +743,12 @@ def low_shelve_cascade(
 
     Returns
     -------
-    signal : :py:class:`~pyfar.classes.audio.Signal`, :py:class:`~pyfar.classes.filter.FilterSOS`
+    signal : :py:class:`~pyfar.Signal`, :py:class:`~pyfar.FilterSOS`
         The filtered signal (returned if ``sampling_rate = None``) or the
         Filter object (returned if ``signal = None``).
     N : int
         The number of shelf filters that were cascaded
-    ideal : :py:class:`~pyfar.classes.audio.FrequencyData`
+    ideal : :py:class:`~pyfar.FrequencyData`
         The ideal, piece-wise magnitude response of the filter
 
     References
@@ -775,7 +775,7 @@ def low_shelve_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-    """  # noqa: E501
+    """
 
     warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'low_shelf_cascade'"), PyfarDeprecationWarning)
@@ -849,12 +849,12 @@ def low_shelf_cascade(
 
     Returns
     -------
-    signal : :py:class:`~pyfar.classes.audio.Signal`, :py:class:`~pyfar.classes.filter.FilterSOS`
+    signal : :py:class:`~pyfar.Signal`, :py:class:`~pyfar.FilterSOS`
         The filtered signal (returned if ``sampling_rate = None``) or the
         Filter object (returned if ``signal = None``).
     N : int
         The number of shelf filters that were cascaded
-    ideal : :py:class:`~pyfar.classes.audio.FrequencyData`
+    ideal : :py:class:`~pyfar.FrequencyData`
         The ideal, piece-wise magnitude response of the filter
 
     References
@@ -881,7 +881,7 @@ def low_shelf_cascade(
         >>> pf.plot.freq(ideal, c='k', ls='--', label="ideal")
         >>> pf.plot.freq(impulse, label="actual")
         >>> plt.legend()
-    """  # noqa E501
+    """
     signal, N, ideal_response = _shelf_cascade(
         signal, frequency, frequency_type, gain, slope, bandwidth, N,
         sampling_rate, shelf_type="low")

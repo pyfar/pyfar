@@ -136,13 +136,13 @@ def test_error_raises():
 
     with raises(ValueError, match=("domain is 'time' and signal is type "
                                    "'<class "
-                                   "'pyfar.classes.audio.FrequencyData'>'")):
+                                   "'pyfar.FrequencyData'>'")):
         pf.dsp.normalize(pf.FrequencyData([1, 1, 1], [100, 200, 300]),
                          domain='time')
 
     with raises(ValueError, match=("domain is 'freq' and signal is type "
                                    "'<class "
-                                   "'pyfar.classes.audio.TimeData'>'")):
+                                   "'pyfar.TimeData'>'")):
         pf.dsp.normalize(pf.TimeData([1, 1, 1], [1, 2, 3]), domain='freq')
 
     with raises(ValueError, match=("domain must be 'time', 'freq' or 'auto' "

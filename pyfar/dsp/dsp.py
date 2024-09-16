@@ -68,7 +68,7 @@ def group_delay(signal, frequencies=None, method='fft'):
     -------
     group_delay : numpy array
         Frequency dependent group delay of shape
-        (:py:func:`~pyfar.classes.audio.Signal.cshape`,
+        (:py:func:`~pyfar.Signal.cshape`,
         frequencies).
 
     References
@@ -1069,7 +1069,7 @@ def time_shift(
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
         can be performed by passing an array matching the signals channel
-        dimensions :py:func:`~pyfar.classes.audio.Signal.cshape`.
+        dimensions :py:func:`~pyfar.Signal.cshape`.
     mode : str, optional
         The shifting mode
 
@@ -1096,16 +1096,16 @@ def time_shift(
         Pad :py:data:`numpy.nan` to the respective channels if the rms value
         of the signal is to be maintained for block-wise rms estimation of the
         noise power of a signal. Note that if NaNs are padded, the returned
-        data will be a :py:class:`~pyfar.classes.audio.TimeData` instead of
-        :py:class:`~pyfar.classes.audio.Signal` object.
+        data will be a :py:class:`~pyfar.TimeData` instead of
+        :py:class:`~pyfar.Signal` object.
 
     Returns
     -------
     Signal, TimeData
         The time-shifted signal. This is a
-        :py:class:`~pyfar.classes.audio.TimeData` object in case a linear shift
+        :py:class:`~pyfar.TimeData` object in case a linear shift
         was done and the signal was padded with Nans. In all other cases, a
-        :py:class:`~pyfar.classes.audio.Signal` object is returned.
+        :py:class:`~pyfar.Signal` object is returned.
 
     Examples
     --------
@@ -1215,7 +1215,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     -------
     delay : numpy.ndarray, float
         Delay of the impulse response, as an array of shape
-        :py:func:`~pyfar.classes.audio.Signal.cshape`. Can be floating point
+        :py:func:`~pyfar.Signal.cshape`. Can be floating point
         values in the case of sub-sample values.
 
     References
@@ -1956,7 +1956,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         ``None`` averages across all channels.
     weights: array like
         Array with channel weights for averaging the data. Must be
-        broadcastable to :py:func:`~pyfar.classes.audio.Signal.cshape`.
+        broadcastable to :py:func:`~pyfar.Signal.cshape`.
         The default is ``None``, which applies equal weights to all channels.
     keepdims: bool, optional
         If this is ``True``, the axes which are reduced during the averaging
@@ -2127,10 +2127,10 @@ def normalize(signal, reference_method='max', domain='auto',
           (cf. :ref:`FFT normalization<gallery:/gallery/interactive/fast_fourier_transform.ipynb#FFT-normalizations>`).
         ``'auto'``
            Uses ``'time'`` domain normalization for
-           :py:class:`Signal <pyfar.classes.audio.Signal>` and
-           :py:class:`TimeData <pyfar.classes.audio.TimeData>` objects and
+           :py:class:`Signal <pyfar.Signal>` and
+           :py:class:`TimeData <pyfar.TimeData>` objects and
            ``'freq'`` domain normalization for
-           :py:class:`FrequencyData <pyfar.classes.audio.FrequencyData>`
+           :py:class:`FrequencyData <pyfar.FrequencyData>`
            objects.
 
         The default is ``'auto'``.
@@ -2151,7 +2151,7 @@ def normalize(signal, reference_method='max', domain='auto',
     target: scalar, array
         The target to which the signal is normalized. Can be a scalar or an
         array. In the latter case the shape of `target` must be broadcastable
-        to :py:func:`~pyfar.classes.audio.Signal.cshape`. The default is ``1``.
+        to :py:func:`~pyfar.Signal.cshape`. The default is ``1``.
     limits: tuple, array_like
         Restrict the time or frequency range that is used to compute the
         `reference` value. Two element tuple specifying upper and lower limit
