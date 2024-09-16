@@ -154,7 +154,7 @@ def _decode(obj, zipfile):
     if isinstance(obj, dict):
         for key in obj.keys():
             _inner_decode(obj, key, zipfile)
-    elif type(obj) in [list, tuple, set, frozenset]:
+    elif isinstance(obj, (list, tuple, set, frozenset)):
         for i in range(0, len(obj)):
             _inner_decode(obj, i, zipfile)
 
