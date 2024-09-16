@@ -386,8 +386,7 @@ def test_deprecations_audio_io():
 
     if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
-            pfilt.default_audio_subtype(None, 250, "lower", -60, None, 4,
-                                     sampling_rate=44100)
+            pf.io.default_audio_subtype(format='wav')
 
     if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
