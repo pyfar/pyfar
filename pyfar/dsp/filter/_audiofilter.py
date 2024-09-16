@@ -845,32 +845,33 @@ def zplane_plot(ax, z, p, k):
     # draw unit circle
     Nf = 2**7
     Om = np.arange(Nf) * 2*np.pi/Nf
-    ax.plot(np.cos(Om), np.sin(Om), 'C7')
+    plt.plot(np.cos(Om), np.sin(Om), 'C7')
 
     try:  # TBD: check if this pole is compensated by a zero
         circle = Circle((0, 0), radius=np.max(np.abs(p)),
                         color='C7', alpha=0.15)
-        ax.add_artist(circle)
+        plt.gcf().gca().add_artist(circle)
     except ValueError:
         print('no pole at all, ROC is whole z-plane')
 
     zu, zc = np.unique(z, return_counts=True)  # find and count unique zeros
     for zui, zci in zip(zu, zc):  # plot them individually
-        ax.plot(np.real(zui), np.imag(zui), ms=7,
+        plt.plot(np.real(zui), np.imag(zui), ms=7,
                  color='C0', marker='o', fillstyle='none')
         if zci > 1:  # if multiple zeros exist then indicate the count
-            ax.text(np.real(zui), np.imag(zui), zci)
+            plt.text(np.real(zui), np.imag(zui), zci)
 
     pu, pc = np.unique(p, return_counts=True)  # find and count unique poles
     for pui, pci in zip(pu, pc):  # plot them individually
-        ax.plot(np.real(pui), np.imag(pui), ms=7,
+        plt.plot(np.real(pui), np.imag(pui), ms=7,
                  color='C3', marker='x')
         if pci > 1:  # if multiple poles exist then indicate the count
-            ax.text(np.real(pui), np.imag(pui), pci)
+            plt.text(np.real(pui), np.imag(pui), pci)
 
-    ax.text(0, +1, 'k=%f' % k)
-    ax.text(0, -1, 'ROC for causal: white')
+    plt.text(0, +1, 'k=%f' % k)
+    plt.text(0, -1, 'ROC for causal: white')
     plt.axis('square')
+    # plt.axis([-2, 2, -2, 2])
     plt.xlabel(r'$\Re\{z\}$')
     plt.ylabel(r'$\Im\{z\}$')
     plt.grid(True)

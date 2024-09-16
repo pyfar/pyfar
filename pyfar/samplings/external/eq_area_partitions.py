@@ -108,6 +108,7 @@ def point_set_polar(dimension, N):
             a_point = (a_top + a_bot)/2
 
             point_l_n = np.arange(0, np.size(points_l), dtype=int)
+            # points_l = points_l[np.newaxis]
 
             if dimension == 2:
                 points_s[0:dimension-1, point_n+point_l_n-1] = \
@@ -120,6 +121,7 @@ def point_set_polar(dimension, N):
                     points_l[:, point_l_n]
 
             points_s[dimension-1, point_n+point_l_n-1] = a_point
+            # point_n = point_n + points_l.shape[1]
             point_n += np.size(points_l)
 
         points_s[:, -1] = np.zeros(dimension)
@@ -178,7 +180,7 @@ def caps(dimension, N):
         c_polar = polar_colat(dimension, N)
         n_collars = num_collars(N, c_polar, ideal_collar_angle(dimension, N))
         r_regions = ideal_region_list(dimension, N, c_polar, n_collars)
-        n_regions = round_to_naturals(r_regions)
+        n_regions = round_to_naturals(N, r_regions)
         s_cap = cap_colats(dimension, N, c_polar, n_regions)
 
     return s_cap, n_regions
@@ -201,6 +203,8 @@ def polar_colat(dimension, N):
     colatitude : double
         The colatitude angle of the top cap.
     """
+    # enough = N > 2
+    # c_polar = np.empty()
     if N == 1:
         c_polar = np.pi
     elif N == 2:
@@ -256,7 +260,7 @@ def ideal_region_list(dimension, N, c_polar, n_collars):
     return r_regions
 
 
-def round_to_naturals(r_regions):
+def round_to_naturals(N, r_regions):
     """Round off a given list of numbers of regions
     Given N and r_regions, determine n_regions, a list of the natural number
     of regions in each collar and the polar caps.
@@ -268,6 +272,8 @@ def round_to_naturals(r_regions):
 
     Parameters
     ----------
+    N : int
+        The dimension
     r_regions : double
         The ideal number of regions per collar before rounding
     Returns
