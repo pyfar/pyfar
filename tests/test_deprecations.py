@@ -67,7 +67,7 @@ def test_pad_zero_modi():
         pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, 'before')
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        match = 'asdasdasd'
+        match = 'Unknown padding mode.'
         with pytest.raises(ValueError, match=match):
             # remove mode 'before' and 'after' from pyfar 0.8.0!
             pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, mode='before')
