@@ -392,7 +392,7 @@ def test_write_read_builtins(dict_of_builtins, tmpdir):
         filename,
         any_int=any_int,
         any_bool=any_bool,
-        **dict_of_builtins
+        **dict_of_builtins,
     )
 
     actual = io.read(filename)

@@ -173,7 +173,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     n_log = N**(n_lin/(N-1))
 
     # frequency bin spacing in octaves: log2(n_log[n]/n_log[n-1])
-    # Note: n_log[0] = 1
+    # Note: n_log[0] -> 1
     delta_n = np.log2(n_log[1])
 
     # width of the window in logarithmically spaced samples

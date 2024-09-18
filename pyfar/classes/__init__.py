@@ -11,5 +11,5 @@ __all__ = [
     'orientations',
     'filter',
     'transmission_matrix',
-    'warnings'
+    'warnings',
 ]

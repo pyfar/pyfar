@@ -45,8 +45,8 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
-    # indicate use of _Audio arithmetic operations for overloaded operators
-    # (e.g. __rmul__)
+    # indicate use of _Audio arithmetic operations for
+    # overloaded operators (e.g. __rmul__)
     __array_priority__ = 1.0
 
     def __init__(self, domain, comment=""):

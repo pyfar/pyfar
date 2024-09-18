@@ -234,14 +234,14 @@ def test_regularized_spectrum_inversion_normalized(impulse):
     """Test normalized parameter of regularized_spectrum_inversion"""
     impulse.fft_norm = 'amplitude'
 
-    # normalized = True
+    # normalized -> True
     res = dsp.regularized_spectrum_inversion(
         impulse * 2, [200, 10e3], normalized=True)
     ind = impulse.find_nearest_frequency([200, 10e3])
     npt.assert_allclose(
         res.freq[:, ind[0]:ind[1]],
         np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5*0.5*impulse.n_samples)
-    # normalized = False
+    # normalized -> False
     res = dsp.regularized_spectrum_inversion(
         impulse * 2, [200, 10e3], normalized=False)
     ind = impulse.find_nearest_frequency([200, 10e3])
@@ -467,12 +467,12 @@ def test_time_window_left():
         sig, window='triang', interval=[2, 5], shape='left', crop='none')
     time_win = np.array([[0, 0, 1/6, 3/6, 5/6, 1, 1]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='end'
+    # crop -> 'end'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='left', crop='end')
     time_win = np.array([[0, 0, 1/6, 3/6, 5/6, 1, 1]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='window'
+    # crop -> 'window'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='left', crop='window')
     time_win = np.array([[1/6, 3/6, 5/6, 1, 1]])
@@ -492,12 +492,12 @@ def test_time_window_right():
         sig, window='triang', interval=[2, 5], shape='right', crop='none')
     time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6, 0]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='end'
+    # crop -> 'end'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='right', crop='end')
     time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='window'
+    # crop -> 'window'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='right', crop='window')
     time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6]])
@@ -608,9 +608,6 @@ def test_minimum_phase_multidim():
     imp_minphase = pyfar.dsp.minimum_phase(
         imp_linphase, truncate=False)
 
-    # assert imp_minphase.n_samples == imp_linphase.n_samples
-    # assert imp_minphase.cshape == imp_linphase.cshape
-
     imp_zerophase = pyfar.signals.impulse(
         n_samples+1, amplitude=np.ones((2, 3)))
 
@@ -692,7 +689,9 @@ def test_impulse_response_start():
     ir = np.zeros(n_samples)
     snr = 60
 
-    noise = pf.Signal(np.random.randn(n_samples) * 10**(-snr/20), 44100)
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((n_samples))
+    noise = pf.Signal(rand * 10**(-snr/20), 44100)
 
     start_sample = 24
     ir[start_sample] = 1
@@ -745,8 +744,10 @@ def test_impulse_response_start_multidim():
 
     snr = 60
 
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((n_channels, n_samples))
     noise = pf.Signal(
-        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+        rand * 10**(-snr/20), 44100)
 
     start_sample = [24, 5, 43]
     ir[[0, 1, 2], start_sample] = 1
@@ -759,8 +760,11 @@ def test_impulse_response_start_multidim():
     npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
 
     ir = np.zeros((2, n_channels, n_samples))
+
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((2, n_channels, n_samples))
     noise = pf.Signal(
-        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
+        rand * 10**(-snr/20), 44100)
 
     start_sample_1 = [24, 5, 43]
     ir[0, [0, 1, 2], start_sample_1] = 1
