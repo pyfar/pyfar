@@ -38,32 +38,27 @@ def _check_matrix_multiplication_result(
 
 @pytest.mark.parametrize("shape_extra_dims", [None, 4, [4, 5]])
 def test_tmatrix_multiplication_identity(
-    shape_extra_dims, frequencies=[100, 200, 300]
-):
+    shape_extra_dims, frequencies=[100, 200, 300]):
     """Test result of T-Matrix multiplication with eye matrix."""
     rng = np.random.default_rng()
     abcd_identity = (1, 0, 0, 1)
     abcd_rng = rng.random(4)
     _check_matrix_multiplication_result(
-        abcd_rng, abcd_identity, abcd_rng, shape_extra_dims, frequencies
-    )
+        abcd_rng, abcd_identity, abcd_rng, shape_extra_dims, frequencies)
 
 @pytest.mark.parametrize("shape_extra_dims", [None, 4, [4, 5]])
 def test_tmatrix_multiplication_negative_identity(
-    shape_extra_dims, frequencies=[100, 200, 300]
-):
+    shape_extra_dims, frequencies=[100, 200, 300]):
     """Test result of T-Matrix multiplication with negated eye matrix."""
     rng = np.random.default_rng()
     abcd_identity = (-1, 0, 0, -1)
     abcd_rng = rng.random(4)
     _check_matrix_multiplication_result(
-        abcd_rng, abcd_identity, -abcd_rng, shape_extra_dims, frequencies
-    )
+        abcd_rng, abcd_identity, -abcd_rng, shape_extra_dims, frequencies)
 
 @pytest.mark.parametrize("shape_extra_dims", [None, 4, [4, 5]])
 def test_tmatrix_multiplication_bottom_row_zero(
-    shape_extra_dims, frequencies=[100, 200, 300]
-):
+    shape_extra_dims, frequencies=[100, 200, 300]):
     """
     Inputs:
         [ 2  1 ]    [ a  b ]
@@ -78,13 +73,11 @@ def test_tmatrix_multiplication_bottom_row_zero(
     abcd_target = (2 * abcd_rng[0] + abcd_rng[2],
                    2 * abcd_rng[1] + abcd_rng[3], 0, 0)
     _check_matrix_multiplication_result(
-        abcd_ApluB, abcd_rng, abcd_target, shape_extra_dims, frequencies
-    )
+        abcd_ApluB, abcd_rng, abcd_target, shape_extra_dims, frequencies)
 
 @pytest.mark.parametrize("shape_extra_dims", [None, 4, [4, 5]])
 def test_tmatrix_multiplication_random(
-    shape_extra_dims, frequencies=[100, 200, 300]
-):
+    shape_extra_dims, frequencies=[100, 200, 300]):
     """
     Inputs:
         [ a1  b1 ]    [ a2  b2 ]
@@ -105,5 +98,4 @@ def test_tmatrix_multiplication_random(
         c1 * b2 + d1 * d2,
     )
     _check_matrix_multiplication_result(
-        abcd_rng1, abcd_rng2, abcd_target, shape_extra_dims, frequencies
-    )
+        abcd_rng1, abcd_rng2, abcd_target, shape_extra_dims, frequencies)

@@ -33,7 +33,8 @@ def abcd_cshape(request):
 def tmatrix_random_data(abcd_cshape, frequencies):
     """Fixture creating T-Matrix with rng data for different abcd_cshapes."""
     shape = (*abcd_cshape, 2,2, len(frequencies))
-    data = np.random.uniform(0.0001, 2000, shape)
+    rng = np.random.default_rng()
+    data = rng.uniform(0.0001, 2000, shape)
     return TransmissionMatrix(data, frequencies)
 
 @pytest.fixture(scope="module", params=

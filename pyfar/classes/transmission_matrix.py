@@ -563,7 +563,7 @@ class TransmissionMatrix(FrequencyData):
                                             0, 0, 1, frequencies)
 
     @staticmethod
-    def create_series_impedance(impedance: complex | FrequencyData
+    def create_series_impedance(impedance: complex | FrequencyData,
                                 ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a series impedance.
 
@@ -602,7 +602,7 @@ class TransmissionMatrix(FrequencyData):
             1, impedance.freq, 0, 1, impedance.frequencies)
 
     @staticmethod
-    def create_shunt_admittance(admittance: complex | FrequencyData
+    def create_shunt_admittance(admittance: complex | FrequencyData,
                                 ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a shunt admittance
         (parallel connection).

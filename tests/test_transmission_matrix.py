@@ -77,8 +77,7 @@ def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
     """Test 'from_abcd' throws error if handing in arrays but no frequencies"""
     TransmissionMatrix.from_abcd(A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
     with pytest.raises(ValueError, match="'frequencies' must be specified if "
-                       "not using 'FrequencyData' objects as input"
-    ):
+                       "not using 'FrequencyData' objects as input"):
         TransmissionMatrix.from_abcd(A_list, A_list, A_list, A_list)
 
 
