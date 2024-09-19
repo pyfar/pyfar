@@ -183,13 +183,13 @@ def _sofa_pos(pos_type, coordinates):
         return Coordinates.from_spherical_elevation(
             coordinates[:, 0] * np.pi / 180,
             coordinates[:, 1] * np.pi / 180,
-            coordinates[:, 2]
+            coordinates[:, 2],
         )
     elif pos_type == 'cartesian':
         return Coordinates(
             coordinates[:, 0],
             coordinates[:, 1],
-            coordinates[:, 2]
+            coordinates[:, 2],
         )
     else:
         raise ValueError("Position:Type {pos_type} is not supported.")

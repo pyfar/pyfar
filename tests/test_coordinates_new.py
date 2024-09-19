@@ -321,9 +321,6 @@ def test_find_slice_sph(coordinate, unit, value, tol, des_index, des_mask):
 def test_find_slice_error():
     d = np.array([358, 359, 0, 1, 2]) * np.pi / 180
     c = Coordinates.from_spherical_elevation(d, 0, 1)
-    # out of range query
-    # with pytest.raises(AssertionError):
-    #     c.find_slice('azimuth', 'deg', -1, 1)
     # non existing coordinate query
     with pytest.raises(ValueError, match="does not exist"):
         c.find_slice('elevation', 'ged', 1, 1)
