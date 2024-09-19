@@ -4,6 +4,29 @@ audio data. More details and background is given in the gallery
 (:doc:`audio objects<gallery:gallery/interactive/pyfar_audio_objects>`,
 :doc:`Fourier transform<gallery:gallery/interactive/fast_fourier_transform>`,
 :doc:`gallery:gallery/interactive/pyfar_arithmetics`).
+
+All Audio objects support indexing, for example you can get a copy of the first
+channel of an audio object with
+
+>>> import pyfar as pf
+>>> signal = pf.signals.noise(10, rms=[1, 1])
+>>> first_channel = signal[0]
+
+and set the first channel with
+
+>>> signal[0] = pf.signals.noise(10, rms=2)
+
+For more information see the `NumPy documentation on indexing
+<https://numpy.org/doc/stable/user/basics.indexing.html>`_.
+
+In addition `Signal` objects support iteration across the first dimension.
+The actual iteration is handled through numpy's array iteration. The following
+iterates the channels of a `Signal` object
+
+>>> signal = pf.signals.impulse(2, amplitude=[1, 1, 1])
+>>> for idx, channel in enumerate(signal):
+>>>     channel.time *= idx
+>>>     signal[idx] = channel
 """
 
 from copy import deepcopy
@@ -12,7 +35,7 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
-from .warnings import PyfarDeprecationWarning
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class _Audio():
@@ -22,8 +45,8 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
-    # indicate use of _Audio arithmetic operations for overloaded operators
-    # (e.g. __rmul__)
+    # indicate use of _Audio arithmetic operations for
+    # overloaded operators (e.g. __rmul__)
     __array_priority__ = 1.0
 
     def __init__(self, domain, comment=""):
@@ -57,6 +80,19 @@ class _Audio():
         `n_bins` for frequency domain objects.
         """
         return self._data.shape[:-1]
+
+    @property
+    def cdim(self):
+        """
+        Return channel dimension.
+
+        The channel dimension (`cdim`) gives the number of dimensions of the
+        audio data excluding the last dimension, which is `n_samples` for
+        time domain objects and `n_bins` for frequency domain objects.
+        Therefore it is equivalent to the length of the channel shape
+        (`cshape`) (e.g. ``self.cshape = (2, 3)``; ``self.cdim = 2``).
+        """
+        return len(self.cshape)
 
     def reshape(self, newshape):
         """
@@ -95,10 +131,51 @@ class _Audio():
                 newshape + (length_last_dimension, ))
         except ValueError:
             if np.prod(newshape) != np.prod(self.cshape):
-                raise ValueError((f"Can not reshape audio object of cshape "
+                raise ValueError((f"Cannot reshape audio object of cshape "
                                   f"{self.cshape} to {newshape}"))
 
         return reshaped
+
+    def transpose(self, *axes):
+        """Transpose time/frequency data and return copy of the audio object.
+
+        Parameters
+        ----------
+        caxes : empty, ``None``, iterable of ints, or n ints
+            Define how the :py:mod:` caxes <pyfar._concepts.audio_classes>`
+            are ordered in the transposed audio object.
+            Note that the last dimension of the data in the audio object
+            always contains the time samples or frequency bins and can not
+            be transposed.
+
+            empty (default) or ``None``
+                reverses the order of ``self.caxes``.
+            iterable of ints
+                `i` in the `j`-th place of the interable means
+                that the `i`-th caxis becomes transposed object's `j`-th caxis.
+            n ints
+                same as 'iterable of ints'.
+        """
+        if hasattr(axes, '__iter__'):
+            axes = axes[0] if len(axes) == 1 else axes
+        if axes is None or len(axes) == 0:
+            axes = tuple(range(len(self.cshape)))[::-1]
+        else:
+            assert all([a > -len(self.cshape) - 1 for a in axes]), \
+                "Negative axes index out of bounds."
+            axes = tuple([a % len(self.cshape) if a < 0 else a for a in axes])
+
+        # throw exception before deepcopy
+        np.empty(np.ones(len(self.cshape), dtype=int)).transpose(axes)
+        transposed = deepcopy(self)
+        transposed._data = transposed._data.transpose(*axes, len(self.cshape))
+
+        return transposed
+
+    @property
+    def T(self):
+        """Shorthand for `Signal.transpose()`."""
+        return self.transpose()
 
     def flatten(self):
         """Return flattened copy of the audio object.
@@ -202,30 +279,28 @@ class _Audio():
 
 
 class TimeData(_Audio):
-    """Class for time data.
+    """
+    Create audio object with time data and times.
 
     Objects of this class contain time data which is not directly convertible
     to frequency domain, i.e., non-equidistant samples.
 
+    Parameters
+    ----------
+    data : array, double
+        Raw data in the time domain. The memory layout of data is 'C'.
+        E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
+        1024 samples each. The data can be ``int`` or ``float`` and is
+        converted to ``float`` in any case.
+    times : array, double
+        Times in seconds at which the data is sampled. The number of times
+        must match the `size` of the last dimension of `data`.
+    comment : str
+        A comment related to `data`. The default is ``''``, which
+        initializes an empty string.
     """
     def __init__(self, data, times, comment=""):
-        """Create TimeData object with data, and times.
-
-        Parameters
-        ----------
-        data : array, double
-            Raw data in the time domain. The memory layout of data is 'C'.
-            E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with
-            1024 samples each. The data can be ``int`` or ``float`` and is
-            converted to ``float`` in any case.
-        times : array, double
-            Times in seconds at which the data is sampled. The number of times
-            must match the `size` of the last dimension of `data`.
-        comment : str
-            A comment related to `data`. The default is ``''``, which
-            initializes an empty string.
-
-        """
+        """Create TimeData object with data, and times."""
 
         _Audio.__init__(self, 'time', comment)
 
@@ -368,45 +443,44 @@ class TimeData(_Audio):
 
 
 class FrequencyData(_Audio):
-    """Class for frequency data.
+    """
+    Create audio object with frequency data and frequencies.
 
     Objects of this class contain frequency data which is not directly
     convertible to the time domain, i.e., non-equidistantly spaced bins or
     incomplete spectra.
 
+    Parameters
+    ----------
+    data : array, double
+        Raw data in the frequency domain. The memory layout of Data is 'C'.
+        E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
+        frequency bins each. Data can be ``int``, ``float`` or ``complex``.
+        Data of type ``int`` is converted to ``float``.
+    frequencies : array, double
+        Frequencies of the data in Hz. The number of frequencies must match
+        the size of the last dimension of data.
+    comment : str, optional
+        A comment related to the data. The default is ``""``, which
+        initializes an empty string.
+
+
+    Notes
+    -----
+    FrequencyData objects do not support an FFT norm, because this requires
+    knowledge about the sampling rate or the number of samples of the time
+    signal [#]_.
+
+    References
+    ----------
+    .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+            Scaling of the Discrete Fourier Transform and the Implied
+            Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+            Austria, May 2020, p. e-Brief 600.
+
     """
     def __init__(self, data, frequencies, comment=""):
-        """Create FrequencyData with data, and frequencies.
-
-        Parameters
-        ----------
-        data : array, double
-            Raw data in the frequency domain. The memory layout of Data is 'C'.
-            E.g. data of ``shape = (3, 2, 1024)`` has 3 x 2 channels with 1024
-            frequency bins each. Data can be ``int``, ``float`` or ``complex``.
-            Data of type ``int`` is converted to ``float``.
-        frequencies : array, double
-            Frequencies of the data in Hz. The number of frequencies must match
-            the size of the last dimension of data.
-        comment : str, optional
-            A comment related to the data. The default is ``""``, which
-            initializes an empty string.
-
-
-        Notes
-        -----
-        FrequencyData objects do not support an FFT norm, because this requires
-        knowledge about the sampling rate or the number of samples of the time
-        signal [#]_.
-
-        References
-        ----------
-        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
-               Scaling of the Discrete Fourier Transform and the Implied
-               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
-               Austria, May 2020, p. e-Brief 600.
-
-        """
+        """Create audio object with frequency data and frequencies."""
 
         _Audio.__init__(self, 'freq', comment)
 
@@ -550,13 +624,48 @@ class FrequencyData(_Audio):
 
 
 class Signal(FrequencyData, TimeData):
-    """Class for audio signals.
+    """
+    Create audio object with time or frequency data and sampling rate.
 
     Objects of this class contain data which is directly convertible between
     time and frequency domain (equally spaced samples and frequency bins). The
     data is always real valued in the time domain and complex valued in the
     frequency domain.
 
+    Parameters
+    ----------
+    data : ndarray, double
+        Raw data of the signal in the time or frequency domain. The memory
+        layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
+        3 x 2 channels with 1024 samples or frequency bins each. Time data
+        is converted to ``float``. Frequency is converted to ``complex``
+        and must be provided as single sided spectra, i.e., for all
+        frequencies between 0 Hz and half the sampling rate.
+    sampling_rate : double
+        Sampling rate in Hz
+    n_samples : int, optional
+        Number of samples of the time signal. Required if domain is
+        ``'freq'``. The default is ``None``, which assumes an even number
+        of samples if the data is provided in the frequency domain.
+    domain : ``'time'``, ``'freq'``, optional
+        Domain of data. The default is ``'time'``
+    fft_norm : str, optional
+        The normalization of the Discrete Fourier Transform (DFT). Can be
+        ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
+        or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
+        for more information. The default is ``'none'``, which is typically
+        used for energy signals, such as impulse responses.
+    comment : str
+        A comment related to `data`. The default is ``""``, which
+        initializes an empty string.
+
+
+    References
+    ----------
+    .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
+            Scaling of the Discrete Fourier Transform and the Implied
+            Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
+            Austria, May 2020, p. e-Brief 600.
     """
     def __init__(
             self,
@@ -566,44 +675,15 @@ class Signal(FrequencyData, TimeData):
             domain='time',
             fft_norm='none',
             comment=""):
-        """Create Signal with data, and sampling rate.
-
-        Parameters
-        ----------
-        data : ndarray, double
-            Raw data of the signal in the time or frequency domain. The memory
-            layout of data is 'C'. E.g. data of ``shape = (3, 2, 1024)`` has
-            3 x 2 channels with 1024 samples or frequency bins each. Time data
-            is converted to ``float``. Frequency is converted to ``complex``
-            and must be provided as single sided spectra, i.e., for all
-            frequencies between 0 Hz and half the sampling rate.
-        sampling_rate : double
-            Sampling rate in Hz
-        n_samples : int, optional
-            Number of samples of the time signal. Required if domain is
-            ``'freq'``. The default is ``None``, which assumes an even number
-            of samples if the data is provided in the frequency domain.
-        domain : ``'time'``, ``'freq'``, optional
-            Domain of data. The default is ``'time'``
-        fft_norm : str, optional
-            The normalization of the Discrete Fourier Transform (DFT). Can be
-            ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``, ``'power'``,
-            or ``'psd'``. See :py:func:`~pyfar.dsp.fft.normalization` and [#]_
-            for more information. The default is ``'none'``, which is typically
-            used for energy signals, such as impulse responses.
-        comment : str
-            A comment related to `data`. The default is ``""``, which
-            initializes an empty string.
-
-
-        References
-        ----------
-        .. [#] J. Ahrens, C. Andersson, P. Höstmad, and W. Kropp, “Tutorial on
-               Scaling of the Discrete Fourier Transform and the Implied
-               Physical Units of the Spectra of Time-Discrete Signals,” Vienna,
-               Austria, May 2020, p. e-Brief 600.
-
         """
+        Create audio Signal with time or frequency data and sampling rate.
+        """
+        # unpack array
+        if hasattr(sampling_rate, '__iter__'):
+            assert len(sampling_rate) != 0
+            if len(sampling_rate) != 1:
+                raise ValueError("Multirate signals are not supported.")
+            sampling_rate = sampling_rate[0]
 
         # initialize signal specific parameters
         self._sampling_rate = sampling_rate

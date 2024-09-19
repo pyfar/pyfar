@@ -17,7 +17,7 @@ from .line import (
     time_freq,
     freq_phase,
     freq_group_delay,
-    custom_subplots
+    custom_subplots,
 )
 
 from .two_d import (
@@ -28,12 +28,12 @@ from .two_d import (
     time_freq_2d,
     freq_phase_2d,
     freq_group_delay_2d,
-    spectrogram
+    spectrogram,
 )
 
 from .spatial import (
     scatter,
-    quiver
+    quiver,
 )
 
 from .utils import (
@@ -41,7 +41,7 @@ from .utils import (
     context,
     use,
     color,
-    shortcuts
+    shortcuts,
 )
 
 __all__ = [
@@ -67,5 +67,5 @@ __all__ = [
     'context',
     'use',
     'color',
-    'shortcuts'
+    'shortcuts',
 ]

@@ -63,7 +63,9 @@ def test_data_time_setter_time():
 def test_reshape():
 
     # test reshape with tuple
-    data_in = TimeData(np.random.rand(6, 256), range(256))
+    rng = np.random.default_rng()
+    rand = rng.random((6, 256))
+    data_in = TimeData(rand, range(256))
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     assert id(data_in) != id(data_out)
@@ -73,14 +75,18 @@ def test_reshape():
     assert id(data_in) != id(data_out)
 
     # test reshape with int
-    data_in = TimeData(np.random.rand(3, 2, 256), range(256))
+    rng = np.random.default_rng()
+    rand = rng.random((3, 2, 256))
+    data_in = TimeData(rand, range(256))
     data_out = data_in.reshape(6)
     npt.assert_allclose(data_in._data.reshape(6, -1), data_out._data)
     assert id(data_in) != id(data_out)
 
 
 def test_reshape_exceptions():
-    data_in = TimeData(np.random.rand(6, 256), range(256))
+    rng = np.random.default_rng()
+    rand = rng.random((6, 256))
+    data_in = TimeData(rand, range(256))
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     # test assertion for non-tuple input
@@ -88,14 +94,38 @@ def test_reshape_exceptions():
         data_out = data_in.reshape([3, 2])
 
     # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Can not reshape audio object'):
+    with pytest.raises(ValueError, match='Cannot reshape audio object'):
         data_out = data_in.reshape((3, 4))
+
+
+def test_transpose():
+    rng = np.random.default_rng()
+    rand = rng.random((6, 2, 5, 256))
+    signal_in = TimeData(rand, range(256))
+    signal_out = signal_in.transpose()
+    npt.assert_allclose(signal_in.T._data, signal_out._data)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
+
+
+@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
+def test_transpose_args(taxis):
+    rng = np.random.default_rng()
+    rand = rng.random((6, 2, 5, 256))
+    signal_in = TimeData(rand, range(256))
+    signal_out = signal_in.transpose(taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
+    signal_out = signal_in.transpose(*taxis)
+    npt.assert_allclose(
+        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
 
 
 def test_flatten():
 
     # test 2D signal (flatten should not change anything)
-    x = np.random.rand(2, 256)
+    rng = np.random.default_rng()
+    x = rng.random((2, 256))
     data_in = TimeData(x, range(256))
     data_out = data_in.flatten()
 
@@ -103,7 +133,8 @@ def test_flatten():
     assert id(data_in) != id(data_out)
 
     # test 3D signal
-    x = np.random.rand(3, 2, 256)
+    rng = np.random.default_rng()
+    x = rng.random((3, 2, 256))
     data_in = TimeData(x, range(256))
     data_out = data_in.flatten()
 

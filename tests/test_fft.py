@@ -139,7 +139,7 @@ def test_normalization_none(impulse_stub):
 def test_normalization_single_sided_single_channel_even_samples():
     # single sided test spectrum
     v = 1/3 + 1/3j
-    vsq = v * np.abs(v)
+    vsq = np.abs(v)**2
     spec_single = np.array([v, v, v])
     # valid number of samples of time signal corresponding to spec_single
     N = 4       # time signal with even number of samples
@@ -161,7 +161,7 @@ def test_normalization_single_sided_single_channel_even_samples():
                            vsq / Nsq]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs * 2,
-                         vsq / N / fs])
+                         vsq / N / fs]),
     }
 
     for normalization in truth:
@@ -173,13 +173,17 @@ def test_normalization_single_sided_single_channel_even_samples():
         print(f"Assesing normalization: '{normalization}' (inverse)")
         spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True)
-        npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
+        if normalization in ['power', 'psd']:
+            # Inverse only resembles magnitude for power norms
+            npt.assert_allclose(spec_out_inv, np.abs(spec_single), atol=1e-15)
+        else:
+            npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
 def test_normalization_single_sided_single_channel_odd_samples():
     # single sided test spectrum
     v = 1/3 + 1/3j
-    vsq = v * np.abs(v)
+    vsq = np.abs(v)**2
     spec_single = np.array([v, v, v])
     # valid number of samples of time signal corresponding to spec_single
     N = 5       # time signal with even number of samples
@@ -201,7 +205,7 @@ def test_normalization_single_sided_single_channel_odd_samples():
                            vsq / Nsq * 2]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs * 2,
-                         vsq / N / fs * 2])
+                         vsq / N / fs * 2]),
     }
 
     for normalization in truth:
@@ -213,13 +217,17 @@ def test_normalization_single_sided_single_channel_odd_samples():
         print(f"Assesing normalization: '{normalization}' (inverse)")
         spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True)
-        npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
+        if normalization in ['power', 'psd']:
+            # Inverse only resembles magnitude for power norms
+            npt.assert_allclose(spec_out_inv, np.abs(spec_single), atol=1e-15)
+        else:
+            npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
 def test_normalization_both_sided_single_channel():
     # single sided test spectrum
     v = 1/3 + 1/3j
-    vsq = v * np.abs(v)
+    vsq = np.abs(v)**2
     spec_single = np.array([v, v, v])
     # valid number of samples of time signal corresponding to spec_single
     N = 3       # time signal with even number of samples
@@ -237,7 +245,7 @@ def test_normalization_both_sided_single_channel():
                            vsq / Nsq]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs,
-                         vsq / N / fs])
+                         vsq / N / fs]),
     }
 
     for normalization in truth:
@@ -251,13 +259,17 @@ def test_normalization_both_sided_single_channel():
         spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True,
                                          single_sided=False)
-        npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
+        if normalization in ['power', 'psd']:
+            # Inverse only resembles magnitude for power norms
+            npt.assert_allclose(spec_out_inv, np.abs(spec_single), atol=1e-15)
+        else:
+            npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
 def test_normalization_single_sided_multi_channel_even_samples():
     # single sided test spectrum
     v = 1/3 + 1/3j
-    vsq = v * np.abs(v)
+    vsq = np.abs(v)**2
     tile = (4, 2, 1)
     spec_single = np.tile(np.array([v, v, v]), tile)
     # valid number of samples of time signal corresponding to spec_single
@@ -280,7 +292,7 @@ def test_normalization_single_sided_multi_channel_even_samples():
                            vsq / Nsq]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs * 2,
-                         vsq / N / fs])
+                         vsq / N / fs]),
     }
 
     for normalization in truth:
@@ -293,7 +305,11 @@ def test_normalization_single_sided_multi_channel_even_samples():
         print(f"Assesing normalization: '{normalization}' (inverse)")
         spec_out_inv = fft.normalization(spec_out, N, fs,
                                          normalization, inverse=True)
-        npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
+        if normalization in ['power', 'psd']:
+            # Inverse only resembles magnitude for power norms
+            npt.assert_allclose(spec_out_inv, np.abs(spec_single), atol=1e-15)
+        else:
+            npt.assert_allclose(spec_out_inv, spec_single, atol=1e-15)
 
 
 def test_normalization_with_window():

@@ -13,30 +13,36 @@ from .band_filter import (
     elliptic,
     bessel,
     crossover,
-    notch
+    notch,
 )
 
 from .audiofilter import (
+    allpass,
     bell,
+    high_shelf,
     high_shelve,
     low_shelve,
+    low_shelf,
     high_shelve_cascade,
-    low_shelve_cascade
+    high_shelf_cascade,
+    low_shelve_cascade,
+    low_shelf_cascade,
 )
 
 from .fractional_octaves import (
     fractional_octave_bands,
     reconstructing_fractional_octave_bands,
-    fractional_octave_frequencies
+    fractional_octave_frequencies,
 )
 
 from .gammatone import (
     GammatoneBands,
-    erb_frequencies
+    erb_frequencies,
 )
 
 
 __all__ = [
+    'allpass',
     'butterworth',
     'chebyshev1',
     'chebyshev2',
@@ -46,12 +52,16 @@ __all__ = [
     'notch',
     'bell',
     'high_shelve',
+    'high_shelf',
     'low_shelve',
+    'low_shelf',
     'high_shelve_cascade',
+    'high_shelf_cascade',
     'low_shelve_cascade',
+    'low_shelf_cascade',
     'fractional_octave_bands',
     'reconstructing_fractional_octave_bands',
     'fractional_octave_frequencies',
     'GammatoneBands',
-    'erb_frequencies'
+    'erb_frequencies',
 ]
