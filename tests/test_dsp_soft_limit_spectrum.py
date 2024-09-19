@@ -12,6 +12,14 @@ def test_assertions_signal():
         soft_limit_spectrum(pf.TimeData([1, 2, 3], [0, 1, 3]), 0, 0)
 
 
+def test_assertion_limit():
+    """Test assertion for passing a signal as limiting function."""
+
+    with pytest.raises(TypeError, match='Signal objects can not be used'):
+        soft_limit_spectrum(
+            pf.signals.impulse(10), pf.signals.impulse(10), 0)
+
+
 def test_assertion_direction():
     """Test assertion for passing invalid value for `direction` parameter."""
 

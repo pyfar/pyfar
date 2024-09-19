@@ -1825,10 +1825,10 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
     ----------
     signal : Signal, FrequencyData
         The input data
-    limit : number, Signal, FrequencyData
+    limit : number, FrequencyData
         The gain in dB at which the limiting reaches its full effect. If this
-        is a number, the same limit is applied to all frequencies. If this an
-        audio object it must be broadcastable to ``signal.cshape`` and
+        is a number, the same limit is applied to all frequencies. If this a
+        FrequencyData object it must be broadcastable to ``signal.cshape`` and
         specified for the same frequencies.
     knee : number, string
         If this is a number, a knee with a width of `number` dB according to
@@ -1986,11 +1986,17 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
     elif not isinstance(knee, (str, int, float)):
         raise TypeError("knee must be a string or number")
 
-    if isinstance(limit, pyfar.FrequencyData):
+    if type(limit) is pyfar.FrequencyData:
         if np.any(np.abs(limit.frequencies - signal.frequencies)) > 1e-14:
             raise ValueError(('The limit must be specified for the same '
                               'frequencies as the input signal'))
         limit = limit.freq
+
+    if type(limit) is pyfar.Signal:
+        raise TypeError(('Signal objects can not be used for limiting. '
+                         'Convert the signal to a frequency data object '
+                         'with values in decibel.'))
+
     limit = np.broadcast_to(limit, signal.cshape + (signal.n_bins, ))
 
     # define frequency range
