@@ -58,14 +58,14 @@ def test_signal_and_frequency_data_input(data_in):
 
 
 @pytest.mark.parametrize('limit', [-10, 0, 10])
-@pytest.mark.parametrize('direction', ['above', 'below'])
+@pytest.mark.parametrize('direction', ['upper', 'lower'])
 def test_limit_and_direction(limit, direction):
     """Test if all values are correctly limited"""
 
     data_in = pf.FrequencyData(10**(np.arange(-100, 101)/20), np.arange(201))
     data_out = soft_limit_spectrum(data_in, limit, knee=0, direction=direction)
 
-    if direction == 'above':
+    if direction == 'upper':
         assert np.all(20*np.log10(np.abs(data_out.freq)) <= limit + 1e-14)
     else:
         assert np.all(20*np.log10(np.abs(data_out.freq)) >= limit - 1e-14)
@@ -100,13 +100,13 @@ def test_knee_width_in_db(limit, knee):
     freq_out = 20*np.log10(np.abs(data_out.freq))
 
     # categorize data
-    below_knee = freq_in <= (limit - knee / 2)
-    above_knee = freq_in >= (limit + knee / 2)
-    within_knee = np.logical_not(np.logical_or(below_knee, above_knee))
+    lower_knee = freq_in <= (limit - knee / 2)
+    upper_knee = freq_in >= (limit + knee / 2)
+    within_knee = np.logical_not(np.logical_or(lower_knee, upper_knee))
 
-    npt.assert_almost_equal(freq_in[below_knee], freq_out[below_knee], 14)
+    npt.assert_almost_equal(freq_in[lower_knee], freq_out[lower_knee], 14)
     assert np.all(freq_in[within_knee] > freq_out[within_knee])
-    assert np.all(freq_out[above_knee] <= limit + 1e-14)
+    assert np.all(freq_out[upper_knee] <= limit + 1e-14)
 
 
 @pytest.mark.parametrize('limit', [-10, 0, 10])

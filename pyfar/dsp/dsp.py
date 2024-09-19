@@ -1808,13 +1808,13 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
 
 
 def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
-                        direction='above', log_prefix=None):
+                        direction='upper', log_prefix=None):
     """
     Soft limiting the magniude spectrum.
 
     Soft limiting gradually increases the gain reduction to avoid
     discontinuities in the data that would appear in hard limiting. The
-    transition betwwen the magnitude where no limiting is applied to the
+    transition between the magnitude where no limiting is applied to the
     magnitude where the limiting reaches its full effect is termed `knee`
     (see examples below).
 
@@ -1828,16 +1828,14 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
     limit : number, Signal, FrequencyData
         The gain in dB at which the limiting reaches its full effect. If this
         is a number, the same limit is applied to all frequencies. If this an
-        audio object it must broadcastable to ``signal.cshape``.
+        audio object it must be broadcastable to ``signal.cshape`` and
+        specified for the same frequencies.
     knee : number, string
-        ``'arctan'``
-            Apply an arcus tangens knee according to [#]_ Section 3.6.4. In
-            this case the parameter `ratio` (below) is ignored. This knee
-            definition originates from microphone array signal processing.
-        number
-            Apply a knee with a width of `number` dB according to [#]_ Eq. (4).
-            This definition of the knee originates from the classic limiting
-            audio effect.
+        If this is a number, a knee with a width of `number` dB according to
+        [#]_ Eq. (4) is applied. This definition of the knee originates from
+        the classic limiting audio effect. If this is ``'arctan'`` an arcus
+        tangens knee according to [#]_ Section 3.6.4 is applied. This knee
+        definition originates from microphone array signal processing.
     frequency_range : array like, optional
         Frequency range in which the limiting is applied. This must be an array
         like containing the lower and upper limit in Hz. The default ``None``
@@ -1845,14 +1843,14 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
     direction : str, optional
         Define how the limiting works
 
-        ``'above'`` (default)
-            Soft limiting `signal` to enforece an aboslute maximum value of
+        ``'upper'`` (default)
+            Soft limiting `signal` to enforce an aboslute maximum value of
             `limit`.
-        ``'below'``
-            Soft limiting `signal` to enformce an absolute minimum value of
+        ``'lower'``
+            Soft limiting `signal` to enforce an absolute minimum value of
             `limit`
     log_prefix: float, int
-        The log predix is used to linearize the limit and knee, e.g.,
+        The log prefix is used to linearize the limit and knee, e.g.,
         ``limit_linear = 10**(limit / log_prefix)``.The default ``None``, uses
         ``10`` for signals with ``'psd'`` and ``'power'`` FFT normalization and
         ``20`` otherwise.
@@ -1860,7 +1858,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
     Returns
     -------
     limited : Signal, FrequencyData
-        The limited input data.
+        The limited copy of the input data.
 
     Examples
     --------
@@ -1912,7 +1910,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> ax.set_ylim(-5, 25)
         >>> ax.legend()
 
-    Apply soft limiting `above` and `below` +/-10 dB
+    Apply soft limiting above and below +/-10 dB
 
     .. plot ::
 
@@ -1922,17 +1920,44 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> signal = pf.dsp.filter.bell(signal, 2e2, -20, 3)
         >>> signal = pf.dsp.filter.bell(signal, 6e3, 20, 3)
         >>>
-        >>> above = pf.dsp.soft_limit_spectrum(
-        ...     signal, limit=10, knee=6, direction="above")
-        >>> below = pf.dsp.soft_limit_spectrum(
-        ...     signal, limit=-10, knee=6, direction="below")
+        >>> upper = pf.dsp.soft_limit_spectrum(
+        ...     signal, limit=10, knee=6, direction="upper")
+        >>> lower = pf.dsp.soft_limit_spectrum(
+        ...     signal, limit=-10, knee=6, direction="lower")
         >>>
-        >>> pf.plot.freq(above, label='limit above')
-        >>> pf.plot.freq(below, label='limit below')
+        >>> pf.plot.freq(upper, label='upper limit')
+        >>> pf.plot.freq(lower, label='lower limit')
         >>> ax = pf.plot.freq(signal, ls='--', label='original')
         >>>
         >>> ax.set_ylim(-25, 25)
         >>> ax.legend()
+
+    Apply frequency dependent soft limiting
+
+    .. plot ::
+
+        >>> import pyfar as pf
+        >>>
+        >>> # input data
+        >>> signal = pf.signals.impulse(2**13)
+        >>> signal = pf.dsp.filter.bell(signal, 2e2, 20, 4)
+        >>> signal = pf.dsp.filter.bell(signal, 2e3, 20, 4)
+        >>>
+        >>> # frequency dependent limit
+        >>> limit = pf.dsp.filter.low_shelf(
+        ...     pf.signals.impulse(2**13), 500, -10, 2) * 10
+        >>> limit = pf.FrequencyData(
+        ...     pf.dsp.decibel(limit), limit.frequencies)
+        >>>
+        >>> # soft limiting input signal
+        >>> limited = pf.dsp.soft_limit_spectrum(signal, limit, 10)
+        >>>
+        >>> # plot
+        >>> ax = pf.plot.freq(signal, label='original')
+        >>> pf.plot.freq(limited, label='limited')
+        >>> pf.plot.freq(limit, dB=False, label='limit', c='k', ls='--')
+        >>> ax.set_ylim(-5, 25)
+        >>> ax.legend(loc='upper left')
 
     References
     -----------
@@ -1950,9 +1975,9 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         raise TypeError(
             "input signal must be a pyfar Signal or FrequencyData object")
 
-    if direction not in ['above', 'below']:
-        raise ValueError((f"direction is '{direction}' but must be 'above', "
-                          "or 'below'"))
+    if direction not in ['upper', 'lower']:
+        raise ValueError((f"direction is '{direction}' but must be 'upper', "
+                          "or 'lower'"))
 
     if isinstance(knee, str) and knee != "arctan":
         raise ValueError(f"knee is '{knee}' but 'arctan'")
@@ -1982,7 +2007,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
     freq = signal_limited.freq
 
     # handle 'inverse' limiting
-    if direction == 'below':
+    if direction == 'lower':
         freq[freq == 0] = np.finfo(float).eps
         freq = 1 / freq
 
@@ -2030,7 +2055,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
             # apply limiting
             freq[..., soft] *= 10**(gain_soft / log_prefix)
 
-    if direction == "below":
+    if direction == "lower":
         freq = 1 / freq
 
     signal_limited.freq = freq
