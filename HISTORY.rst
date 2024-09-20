@@ -24,6 +24,9 @@ History
   * Replace scipy's legacy spectrogram with new implementation #682
   * deprecate Python 3.8 #683
 
+* bugfixes
+  * Fix unit string in group delay plot #703
+
 * documentation
 
   * Improve docstring for pyfar.signals.exponential_sweep_time #514
@@ -34,6 +37,7 @@ History
   * replace flake8 by ruff #526, #611, #686, #687, #688, #689, #690, #691, #702
   * remove environment files which are no longer required #626
   * Harmonize class documentation #631
+  * wait for test_deprecation_warnings before release #696
 
 0.6.9 (2024-09-13)
 ------------------
