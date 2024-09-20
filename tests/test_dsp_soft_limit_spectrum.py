@@ -12,14 +12,6 @@ def test_assertions_signal():
         soft_limit_spectrum(pf.TimeData([1, 2, 3], [0, 1, 3]), 0, 0)
 
 
-def test_assertion_limit():
-    """Test assertion for passing a signal as limiting function."""
-
-    with pytest.raises(TypeError, match='Signal objects can not be used'):
-        soft_limit_spectrum(
-            pf.signals.impulse(10), pf.signals.impulse(10), 0)
-
-
 def test_assertion_direction():
     """Test assertion for passing invalid value for `direction` parameter."""
 
@@ -41,19 +33,6 @@ def test_assertion_knee():
     # wrong type
     with pytest.raises(TypeError, match="knee must be"):
         soft_limit_spectrum(pf.Signal([1, 2, 3], 1), 0, knee=(1, 1))
-
-
-def test_assertion_knee_wrong_frequencies():
-    """
-    Test if passing a frequency-dependent knee with frequencies not matching
-    the input data raises an error.
-    """
-
-    limit = pf.FrequencyData([1, 1, 1], [0, 1, 3])
-    data_in = pf.FrequencyData([1, 1, 1], [0, 1, 2])
-
-    with pytest.raises(ValueError, match='The limit must be specified'):
-        soft_limit_spectrum(data_in, limit, knee=0)
 
 
 @pytest.mark.parametrize('data_in', [
@@ -82,15 +61,15 @@ def test_limit_and_direction(limit, direction):
 def test_frequency_dependend_limit():
     """Test frequency-dependent limit passed as audio object"""
 
-    limit = pf.FrequencyData([0, -6, -12], [0, 1, 3])
+    limit = np.atleast_2d([0, -6, -12])
     data_in = pf.FrequencyData(10**(np.array([-3, -3, -3])/20), [0, 1, 3])
     data_out = soft_limit_spectrum(data_in, limit, knee=0)
 
-    limit_applied = 20*np.log10(np.abs(data_in.freq)) > limit.freq
+    limit_applied = 20*np.log10(np.abs(data_in.freq)) > limit
 
     # test limited values
     npt.assert_almost_equal(20*np.log10(np.abs(data_out.freq[limit_applied])),
-                            limit.freq[limit_applied])
+                            limit[limit_applied])
     # test non-limited values
     npt.assert_equal(data_out.freq[~limit_applied],
                      data_in.freq[~limit_applied])

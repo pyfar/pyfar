@@ -1822,11 +1822,11 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
     ----------
     signal : Signal, FrequencyData
         The input data
-    limit : number, FrequencyData
+    limit : number, array like
         The gain in dB at which the limiting reaches its full effect. If this
-        is a number, the same limit is applied to all frequencies. If this a
-        FrequencyData object it must be broadcastable to ``signal.cshape`` and
-        specified for the same frequencies.
+        is a number, the same limit is applied to all frequencies. If this an
+        array like, it must be broadcastable to ``signal.freq`` to apply
+        frequency-dependent limits.
     knee : number, string
         If this is a number, a knee with a width of `number` dB according to
         [#]_ Eq. (4) is applied. This definition of the knee originates from
@@ -1943,8 +1943,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> # frequency dependent limit
         >>> limit = pf.dsp.filter.low_shelf(
         ...     pf.signals.impulse(2**13), 500, -10, 2) * 10
-        >>> limit = pf.FrequencyData(
-        ...     pf.dsp.decibel(limit), limit.frequencies)
+        >>> limit = pf.dsp.decibel(limit).flatten()
         >>>
         >>> # soft limiting input signal
         >>> limited = pf.dsp.soft_limit_spectrum(signal, limit, 10)
@@ -1952,7 +1951,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> # plot
         >>> ax = pf.plot.freq(signal, label='original')
         >>> pf.plot.freq(limited, label='limited')
-        >>> pf.plot.freq(limit, dB=False, label='limit', c='k', ls='--')
+        >>> ax.plot(signal.frequencies, limit, label='limit', c='k', ls='--')
         >>> ax.set_ylim(-5, 25)
         >>> ax.legend(loc='upper left')
 
@@ -1982,17 +1981,6 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         raise ValueError(f"knee is {knee} but must be >= 0")
     elif not isinstance(knee, (str, int, float)):
         raise TypeError("knee must be a string or number")
-
-    if type(limit) is pyfar.FrequencyData:
-        if np.any(np.abs(limit.frequencies - signal.frequencies)) > 1e-14:
-            raise ValueError(('The limit must be specified for the same '
-                              'frequencies as the input signal'))
-        limit = limit.freq
-
-    if type(limit) is pyfar.Signal:
-        raise TypeError(('Signal objects can not be used for limiting. '
-                         'Convert the signal to a frequency data object '
-                         'with values in decibel.'))
 
     limit = np.broadcast_to(limit, signal.cshape + (signal.n_bins, ))
 
