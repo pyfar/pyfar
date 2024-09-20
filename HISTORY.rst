@@ -4,40 +4,43 @@ History
 
 0.7.0 (2024-09-20)
 ------------------
-* enhancements
+* Features
 
-  * Frequency domain sweep synthesis #199
-  * Soft limiting #325
-  * Filterbanks to classes #380
-  * Allow complex time data in Signals and TimeData #504, #396, #462, #464, #505, #510, #513, #547, #646, #655, #668, #704
-    * Required modifications in dsp module #459, #460, #461, #525, #546, #566, #567, #573, #592, #594, #598, #601, #677
-    * Required modifications in plot module #615, #652, #656, #671, #672, #702
-  * add transpose method to audio classes #481
-  * allow array of size 1 for sampling_rate in Audio classes #534
-  * Remove phase for FFT normalizations 'power' and 'psd' #557
-  * enhance phase plot ticks #559
-  * Add allpass filters #571
-  * add cdim property to audio classes #619
-  * Add TransmissionMatrix #636
-  * rename and deprecate shelve/shelf, shelve_type/shelf_type #643
-  * Add arithmetic operations for Coordinate class #680
-  * Replace scipy's legacy spectrogram with new implementation #682
-  * deprecate Python 3.8 #683
+  * Signals and TimeData objects can now have complex time data. This is specified by the `complex` flag. In the case of Signal objects, this results in both sided spectra (PR #504, #396, #462, #464, #505, #510, #513, #547, #646, #655, #668, #704)
+    * Functions in the dsp module can now handle complex valued time data or raise an error (PR #459, #460, #461, #525, #546, #566, #567, #573, #592, #594, #598, #601, #677)
+    * All plot functions can now handle complex valued time data and both sided spectra via the options `side` and `mode`  (PR #615, #652, #656, #671, #672, #702)
+  * Added TransmissionMatrix Class (PR #636)
+  * Added frequency domain sweep synthesis (PR #199)
+  * Added spectral soft limiting(PR #325)
+  * Add arithmetic operations for Coordinate class (PR #680)
+  * Added transpose method to audio classes (PR #481)
+  * Added allpass filters (PR #571)
+  * Added `cdim`` property to audio classes (PR #619)
 
-* bugfixes
-  * Fix unit string in group delay plot #703
+* Enhancements
 
-* documentation
+  * The sampling_rate property of Signal Objects is enforced to be a scalar. (PR #534)
+  * The ticks in phase plots adjust better to the range of the data shown in the plot (PR #559)
+  * Replaced scipy's legacy spectrogram with new short-time Fourier transform implementation (PR #682)
+  * Deprecated Python 3.8 (PR #683)
 
-  * Improve docstring for pyfar.signals.exponential_sweep_time #514
-  * Show paths of classes as imported in pyfar #684
+* Bugfixes
+
+  * Removed phase for FFT normalizations 'power' and 'psd' (PR #557)
+  * Fix unit string in group delay plot (PR #703)
+  * Rename and deprecate shelve/shelf, shelve_type/shelf_type due to a typo in the function names (PR #643)
+
+* Documentation
+
+  * Improve docstring for pyfar.signals.exponential_sweep_time (PR #514)
+  * Show paths of classes as imported in pyfar (PR #684)
 
 * Automation and testing
 
-  * replace flake8 by ruff #526, #611, #686, #687, #688, #689, #690, #691, #702
-  * remove environment files which are no longer required #626
-  * Harmonize class documentation #631
-  * wait for test_deprecation_warnings before release #696
+  * replace flake8 by ruff (PR #526, #611, #686, #687, #688, #689, #690, #691, #702)
+  * remove environment files which are no longer required (PR #626)
+  * Harmonize class documentation (PR #631)
+  * wait for test_deprecation_warnings before release (PR #696)
 
 0.6.9 (2024-09-13)
 ------------------
