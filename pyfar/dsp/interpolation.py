@@ -694,7 +694,7 @@ class InterpolateSpectrum():
     -------
     interpolator : :py:class:`InterpolateSpectrum`
         The interpolator can be called to interpolate the data (see examples
-        below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has
+        below). It returns a :py:class:`~pyfar.Signal` and has
         the following parameters
 
         `n_samples` : int

@@ -53,10 +53,10 @@ def read_sofa(filename, verify=True):
         The audio object that is returned depends on the DataType of the SOFA
         object:
 
-        - :py:class:`~pyfar.classes.audio.Signal`
+        - :py:class:`~pyfar.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
             ``'FIR-E'``, or ``'FIRE'``.
-        - :py:class:`~pyfar.classes.audio.FrequencyData`
+        - :py:class:`~pyfar.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
             ``'TF-E'``, or ``'TFE'``.
 
@@ -104,13 +104,13 @@ def convert_sofa(sofa):
         The audio object that is returned depends on the DataType of the SOFA
         object:
 
-        - :py:class:`~pyfar.classes.audio.Signal`
+        - :py:class:`~pyfar.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
             ``'FIR-E'``, or ``'FIRE'``. In case of ``'FIR-E'``, the time data
             is returned with the `cshape` EMRN (samples are in the last
             dimension) and not MRNE as in the SOFA standard (emitters are in
             the last dimension).
-        - :py:class:`~pyfar.classes.audio.FrequencyData`
+        - :py:class:`~pyfar.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
             ``'TF-E'``, or ``'TFE'``. In case of ``'TF-E'``, the frequency data
             is returned with the `cshape` EMRN (frequencies are in the last
@@ -347,7 +347,7 @@ def write(filename, compress=False, **objs):
 
 def read_audio(filename, dtype='float64', **kwargs):
     """
-    Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
+    Import an audio file as :py:class:`~pyfar.Signal` object.
 
     Reads 'wav', 'aiff', 'ogg', 'flac', and 'mp3' files among others. For a
     complete list see :py:func:`audio_formats`.
@@ -371,7 +371,7 @@ def read_audio(filename, dtype='float64', **kwargs):
     Returns
     -------
     signal : Signal
-        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
+        :py:class:`~pyfar.Signal` object containing the audio
         data.
 
     Notes
@@ -393,7 +393,7 @@ def read_audio(filename, dtype='float64', **kwargs):
 
 def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     """
-    Write a :py:class:`~pyfar.classes.audio.Signal` object as an audio file to
+    Write a :py:class:`~pyfar.Signal` object as an audio file to
     disk.
 
     Writes 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
