@@ -161,7 +161,7 @@ plots = {
         'xlabel': ['Indices', 'Indices'],
         'ylabel': ['Frequency in Hz', 'Frequency in Hz'],
         'cblabel': ['Magnitude in dB', 'Group delay in s'],
-        'complex': 'freq'}
+        'complex': 'freq'},
     }
 
 # define non-plot functions in the module. They are skipped by tests using
