@@ -310,8 +310,13 @@ def shortcuts(show=True, report=False, layout="console"):
         elif layout == "sphinx":
             sc_str += "\n**Notes on plot controls**\n\n"
 
-        x_toggle_str = [f":py:func:`~pyfar.plot.{x}`" for x in x_toggle]
-        y_toggle_str = [f":py:func:`~pyfar.plot.{y}`" for y in y_toggle]
+        # generate links to plot function for sphinx documentation
+        if layout == 'sphinx':
+            x_toggle = [f":py:func:`~pyfar.plot.{x}`" for x in x_toggle]
+            y_toggle = [f":py:func:`~pyfar.plot.{y}`" for y in y_toggle]
+            spectrogram = ":py:func:`~pyfar.plot.spectrogram`"
+        else:
+            spectrogram = "spectrogram"
 
         sc_str += ("- Moving and zooming the x and y axes is supported by all "
                    "plots.\n"
@@ -328,13 +333,13 @@ def shortcuts(show=True, report=False, layout="console"):
                    "  - wrapped and unwrapped phase for axes showing phase "
                    "phase information.\n\n"
                    "- Toggling the x-axis style is supported by: "
-                   f"{', '.join(x_toggle_str)} (and their 2d versions)\n"
+                   f"{', '.join(x_toggle)} (and their 2d versions)\n"
                    "- Toggling the y-axis style is supported by: "
-                   f"{', '.join(y_toggle_str)} (and their 2d versions)\n"
+                   f"{', '.join(y_toggle)} (and their 2d versions)\n"
                    "- Toggling the colormap style is supported by all "
                    "2d plots\n"
                    "- Toggling between line and 2D plots is not supported by:"
-                   " spectrogram\n")
+                   f" {spectrogram}\n")
 
     if show:
         print(sc_str)

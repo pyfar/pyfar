@@ -90,4 +90,4 @@ Note that not all plots are available for TimeData and FrequencyData objects as 
 - Toggling the x-axis style is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay` (and their 2d versions)
 - Toggling the y-axis style is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay` (and their 2d versions)
 - Toggling the colormap style is supported by all 2d plots
-- Toggling between line and 2D plots is not supported by: spectrogram
+- Toggling between line and 2D plots is not supported by: :py:func:`~pyfar.plot.spectrogram`
