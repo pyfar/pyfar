@@ -945,8 +945,6 @@ def test_impulse_response_start_multidim_complex():
     rng = np.random.default_rng()
     noise = pf.Signal(
         rng.standard_normal((n_channels, n_samples)) * 10**(-snr/20), 44100)
-    noise = pf.Signal(
-        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
 
     start_sample_real_1 = [24, 5, 43]
     start_sample_imag_1 = [14, 3, 20]
