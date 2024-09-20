@@ -2,6 +2,39 @@
 History
 =======
 
+0.7.0 (2024-09-20)
+------------------
+* enhancements
+
+  * Frequency domain sweep synthesis #199
+  * Soft limiting #325
+  * Filterbanks to classes #380
+  * Allow complex time data in Signals and TimeData #504, #396, #462, #464, #505, #510, #513, #547, #646, #655, #668, #704
+    * Required modifications in dsp module #459, #460, #461, #525, #546, #566, #567, #573, #592, #594, #598, #601, #677
+    * Required modifications in plot module #615, #652, #656, #671, #672, #702
+  * add transpose method to audio classes #481
+  * allow array of size 1 for sampling_rate in Audio classes #534
+  * Remove phase for FFT normalizations 'power' and 'psd' #557
+  * enhance phase plot ticks #559
+  * Add allpass filters #571
+  * add cdim property to audio classes #619
+  * Add TransmissionMatrix #636
+  * rename and deprecate shelve/shelf, shelve_type/shelf_type #643
+  * Add arithmetic operations for Coordinate class #680
+  * Replace scipy's legacy spectrogram with new implementation #682
+  * deprecate Python 3.8 #683
+
+* documentation
+
+  * Improve docstring for pyfar.signals.exponential_sweep_time #514
+  * Show paths of classes as imported in pyfar #684
+
+* Automation and testing
+
+  * replace flake8 by ruff #526, #611, #686, #687, #688, #689, #690, #691, #702
+  * remove environment files which are no longer required #626
+  * Harmonize class documentation #631
+
 0.6.9 (2024-09-13)
 ------------------
 * Documentation
