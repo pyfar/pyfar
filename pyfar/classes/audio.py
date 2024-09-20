@@ -45,8 +45,8 @@ class _Audio():
     three sub-classes :py:func:`TimeData`, :py:func:`FrequencyData`, and
     :py:func:`Signal`.
     """
-    # indicate use of _Audio arithmetic operations for overloaded operators
-    # (e.g. __rmul__)
+    # indicate use of _Audio arithmetic operations for
+    # overloaded operators (e.g. __rmul__)
     __array_priority__ = 1.0
 
     def __init__(self, domain, comment=""):
@@ -243,7 +243,23 @@ class _Audio():
 
 
         """
-        data = self._data[key]
+
+        # add empty slice at the end to always get all data contained in last
+        # dimension (samples or frequency bins)
+        if hasattr(key, '__iter__'):
+            key = (*key, slice(None))
+
+        # try indexing and raise verbose errors if it fails
+        try:
+            data = self._data[key]
+        except IndexError as Error:
+            if 'too many indices for array' in str(Error):
+                raise IndexError((
+                    f'Indexed dimensions must not exceed the channel '
+                    f'dimension (cdim), which is {len(self.cshape)}'))
+            else:
+                raise Error
+
         return self._return_item(data)
 
     def __setitem__(self, key, value):

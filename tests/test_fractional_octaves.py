@@ -135,5 +135,5 @@ def test_sum_bands_din():
 
     mask = (impulse.frequencies > 30) & (impulse.frequencies < 20e3)
 
-    assert not np.any(diff[mask] > 10**(1/10))
-    assert not np.any(diff[mask] < 10**(-1/10))
+    assert not np.any(diff[:, mask] > 10**(1/10))
+    assert not np.any(diff[:, mask] < 10**(-1/10))

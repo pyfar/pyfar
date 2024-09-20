@@ -260,12 +260,6 @@ class Coordinates():
         self.sh_order = sh_order
         self._comment = comment
 
-        if sh_order is not None:
-            warnings.warn((
-                "This function will be deprecated in pyfar 0.8.0 in favor "
-                "of spharpy.samplings.SamplingSphere."),
-                    PyfarDeprecationWarning)
-
     @classmethod
     def from_cartesian(
             cls, x, y, z, weights: np.array = None, comment: str = ""):
@@ -851,7 +845,7 @@ class Coordinates():
             raise ValueError(
                 f"{unit} is not implemented.")
 
-        # return points
+        # return the points
         return angles_1, angles_2, radius
 
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
@@ -1047,10 +1041,12 @@ class Coordinates():
         """This function will be deprecated in pyfar 0.8.0 in favor
             of :py:class:`spharpy.samplings.SamplingSphere`.
             Set the maximum spherical harmonic order."""
-        warnings.warn((
-            "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of spharpy.samplings.SamplingSphere."),
-                PyfarDeprecationWarning)
+
+        if value is not None:
+            warnings.warn((
+                "This function will be deprecated in pyfar 0.8.0 in favor "
+                "of spharpy.samplings.SamplingSphere."),
+                    PyfarDeprecationWarning)
 
         self._sh_order = int(value) if value is not None else None
 
@@ -1667,9 +1663,9 @@ class Coordinates():
                 index_multi = np.moveaxis(index, -1, 0)
                 index = np.empty((k), dtype=tuple)
                 for kk in range(k):
-                    index[kk] = tuple([index_multi[kk]], )
+                    index[kk] = tuple([index_multi[kk]])
             else:
-                index = tuple([index], )
+                index = tuple([index])
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
             index_multi = []
@@ -1829,9 +1825,9 @@ class Coordinates():
         if self.cdim == 1:
             if find.csize > 1:
                 for i in range(len(index)):
-                    index[i] = tuple([index[i]], )
+                    index[i] = tuple([index[i]])
             else:
-                index = tuple([index], )
+                index = tuple([index])
 
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
@@ -2285,8 +2281,8 @@ class Coordinates():
                 value = np.asarray(value) / 180 * np.pi
             rot = sp_rot.from_rotvec(value)
         elif not bool(re.search('[^x-z]', rotation.lower())):
-            # only check if string contains xyz, everything else is checked in
-            # from_euler()
+            # only check if string contains xyz, everything else is checked
+            # in from_euler()
             rot = sp_rot.from_euler(rotation, value, degrees)
         else:
             raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "
@@ -2370,7 +2366,7 @@ class Coordinates():
                     "negative_z": [0, 0, -1],
                     "x": ["unbound", [-np.inf, np.inf]],
                     "y": ["unbound", [-np.inf, np.inf]],
-                    "z": ["unbound", [-np.inf, np.inf]]}
+                    "z": ["unbound", [-np.inf, np.inf]]},
             },
             "sph": {
                 "top_colat": {
@@ -2482,7 +2478,7 @@ class Coordinates():
                     "negative_z": [3 * np.pi / 2, np.pi / 2, 1],
                     "phi": ["cyclic", [0, 2 * np.pi]],
                     "theta": ["bound", [0, np.pi]],
-                    "radius": ["bound", [0, np.inf]]}
+                    "radius": ["bound", [0, np.inf]]},
             },
             "cyl": {
                 "top": {
@@ -2507,8 +2503,8 @@ class Coordinates():
                     "negative_z": [0, -1, 0],
                     "azimuth": ["cyclic", [0, 2 * np.pi]],
                     "z": ["unbound", [-np.inf, np.inf]],
-                    "radius_z": ["bound", [0, np.inf]]}
-            }
+                    "radius_z": ["bound", [0, np.inf]]},
+            },
         }
 
         return _systems
@@ -2642,22 +2638,13 @@ class Coordinates():
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
-        # shapes of non scalar entries
-        shapes = [p.shape for p in [x, y, z] if p.ndim != 1 or p.shape[0] > 1]
+        # determine shape
+        shapes = np.broadcast_shapes(x.shape, y.shape, z.shape)
 
-        # repeat scalar entries if non-scalars exists
-        if len(shapes):
-            if x.size == 1:
-                x = np.tile(x, shapes[0])
-            if y.size == 1:
-                y = np.tile(y, shapes[0])
-            if z.size == 1:
-                z = np.tile(z, shapes[0])
-
-        # check for equal shape
-        assert (x.shape == y.shape) and (x.shape == z.shape), \
-            "x, y, and z must be scalar or of the \
-            same shape."
+        # broadcast to same shape
+        x = np.broadcast_to(x, shapes)
+        y = np.broadcast_to(y, shapes)
+        z = np.broadcast_to(z, shapes)
 
         # set values
         self._x = x
@@ -2765,10 +2752,10 @@ class Coordinates():
 
         return new
 
-    def __array__(self):
+    def __array__(self, copy=True, dtype=None):
         """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
         # copy to avoid changing the coordinate system of the original object
-        return self.copy().cartesian
+        return np.array(self.cartesian, copy=copy, dtype=dtype)
 
     def __repr__(self):
         """Get info about Coordinates object."""
@@ -2800,7 +2787,6 @@ class Coordinates():
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        # return not deepdiff.DeepDiff(self, other)
         if self.cshape != other.cshape:
             return False
         eq_x = self._x == other._x

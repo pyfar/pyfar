@@ -94,6 +94,24 @@ jobs:
             cd docs/
             make html SPHINXOPTS="-W"
 
+  test_deprecation_warnings:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Install System Dependencies
+          command: sudo apt-get update && sudo apt-get install -y libsndfile1
+      - python/install-packages:
+          pkg-manager: pip
+          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
+          pip-dependency-file: requirements_dev.txt
+      - run: |
+          python --version
+      - run:
+          name: Run tests
+          command: pytest tests -W error::DeprecationWarning
+
   test_pypi_publish:
     parameters:
       version:
@@ -129,7 +147,6 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.8"
                 - "3.9"
                 - "3.10"
                 - "3.11"
@@ -138,7 +155,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
           requires:
             - build_and_test
 
@@ -146,7 +163,11 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
+          requires:
+            - build_and_test
+
+      - test_deprecation_warnings:
           requires:
             - build_and_test
 
@@ -159,7 +180,6 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.8"
                 - "3.9"
                 - "3.10"
                 - "3.11"
@@ -175,7 +195,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
           requires:
             - build_and_test
           filters:
@@ -189,7 +209,17 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+
+      - test_deprecation_warnings:
           requires:
             - build_and_test
           filters:
@@ -203,7 +233,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
           requires:
             - build_and_test
             - ruff

@@ -21,14 +21,14 @@ from .dsp import (
     power,
     rms,
     normalize,
-    average
+    average,
 )
 
 from .interpolation import (
     smooth_fractional_octave,
     fractional_time_shift,
     resample,
-    InterpolateSpectrum
+    InterpolateSpectrum,
 )
 
 from . import filter
@@ -64,5 +64,5 @@ __all__ = [
     'resample',
     'average',
     'normalize',
-    'fractional_time_shift'
+    'fractional_time_shift',
 ]
