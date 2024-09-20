@@ -921,9 +921,9 @@ def test_impulse_response_start_multidim_complex():
     ir = np.zeros((n_channels, n_samples), dtype=complex)
 
     snr = 60
-
+    rng = np.random.default_rng()
     noise = pf.Signal(
-        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+        rng.standard_normal((n_channels, n_samples)) * 10**(-snr/20), 44100)
 
     start_sample_real = [24, 5, 43]
     ir[[0, 1, 2], start_sample_real] = 1
@@ -942,6 +942,9 @@ def test_impulse_response_start_multidim_complex():
                         np.array(start_sample_imag) - 1)
 
     ir = np.zeros((2, n_channels, n_samples), dtype=complex)
+    rng = np.random.default_rng()
+    noise = pf.Signal(
+        rng.standard_normal((n_channels, n_samples)) * 10**(-snr/20), 44100)
     noise = pf.Signal(
         np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
 
