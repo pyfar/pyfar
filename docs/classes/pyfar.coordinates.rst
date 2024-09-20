@@ -22,7 +22,9 @@ Coordinates
 
 .. autosummary::
 
+   cross
    deg2rad
+   dot
    rad2deg
 
 .. autoclass:: pyfar.Coordinates
@@ -34,9 +36,13 @@ Coordinates
 
 .. autofunction:: pyfar.classes.coordinates.cart2sph
 
+.. autofunction:: pyfar.cross
+
 .. autofunction:: pyfar.classes.coordinates.cyl2cart
 
 .. autofunction:: pyfar.deg2rad
+
+.. autofunction:: pyfar.dot
 
 .. autofunction:: pyfar.rad2deg
 
