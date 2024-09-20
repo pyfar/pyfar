@@ -108,6 +108,7 @@ def test_complex_group_delay_single_channel(impulse_complex_group_delay):
     npt.assert_allclose(grp[0], impulse_complex_group_delay[1].flatten(),
                         rtol=1e-10, atol=1e-10)
 
+
 def test_group_delay_two_channel(impulse_group_delay_two_channel):
     """Test the function returning the group delay of a signal,
     two channels."""
