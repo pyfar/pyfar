@@ -196,7 +196,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
     data = np.reshape(data, signal.freq.shape)
     data = data.T if orientation == "vertical" else data
     # auto detect the unit
-    if unit is None:
+    if unit == 'auto':
         unit = _utils._time_auto_unit(
             np.nanmax(np.abs(data) / signal.sampling_rate))
     # set the unit
