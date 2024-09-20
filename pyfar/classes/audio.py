@@ -1370,6 +1370,8 @@ def matrix_multiplication(
 
 def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     """Apply arithmetic operations."""
+    #NOTE: The import is done here to avoid a circular import
+    from pyfar.classes.transmission_matrix import TransmissionMatrix
 
     # check input and obtain meta data of new signal
     division = True if operation == _divide else False
@@ -1400,6 +1402,8 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
         result = TimeData(result, times)
     elif audio_type == FrequencyData:
         result = FrequencyData(result, frequencies)
+    elif audio_type == TransmissionMatrix:
+        result = TransmissionMatrix(result, frequencies)
 
     return result
 
@@ -1444,6 +1448,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
         Otherwise empty tuple.
 
     """
+    #NOTE: The import is done here to avoid a circular import
+    from pyfar.classes.transmission_matrix import TransmissionMatrix
 
     # we need at least two signals
     if not isinstance(data, tuple):
@@ -1467,7 +1473,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     # check input types and meta data
     n_audio_objects = 0
     for d in data:
-        if isinstance(d, (Signal, TimeData, FrequencyData)):
+        if isinstance(d,(Signal, TimeData, FrequencyData, TransmissionMatrix)):
             n_audio_objects += 1
             # store meta data upon first appearance
             if n_audio_objects == 1:
@@ -1479,7 +1485,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                     if domain != "time":
                         raise ValueError("The domain must be 'time'.")
                     times = d.times
-                elif isinstance(d, FrequencyData):
+                elif isinstance(d, (FrequencyData, TransmissionMatrix)):
                     if domain != "freq":
                         raise ValueError("The domain must be 'freq'.")
                     frequencies = d.frequencies
@@ -1502,7 +1508,7 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                     if not np.allclose(times, d.times, atol=1e-15):
                         raise ValueError(
                             "The times does not match.")
-                elif isinstance(d, FrequencyData):
+                elif isinstance(d, (FrequencyData, TransmissionMatrix)):
                     if not np.allclose(
                             frequencies, d.frequencies, atol=1e-15):
                         raise ValueError(

@@ -16,7 +16,7 @@ from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.samplings import SphericalVoronoi
 import pyfar.classes.filter as fo
-from pyfar import FrequencyData, TimeData
+from pyfar import FrequencyData, TimeData, TransmissionMatrix
 
 
 @pytest.mark.parametrize('input_type', ('filename', 'path_object'))
@@ -260,6 +260,17 @@ def test_write_read_frequencydata(frequency_data, tmpdir):
     actual = io.read(filename)['frequencydata']
     assert isinstance(actual, FrequencyData)
     assert actual == frequency_data
+
+def test_write_read_transmissionmatrix(tmpdir):
+    """ TransmissionMatrix
+    Make sure `read` understands the bits written by `write`
+    """
+    tmatrix = TransmissionMatrix.create_transformer(FrequencyData(42, 100))
+    filename = os.path.join(tmpdir, 'transmissionmatrix.far')
+    io.write(filename, transmissionmatrix=tmatrix)
+    actual = io.read(filename)['transmissionmatrix']
+    assert isinstance(actual, FrequencyData)
+    assert actual == tmatrix
 
 
 def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
