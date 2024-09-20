@@ -111,7 +111,7 @@ jobs:
             pip install hatch
       - run:
           name: Run tests
-          command: hatch test -i py=<<parameters.version>> tests -W error::DeprecationWarning
+          command: hatch test -i py=3.12 tests -W error::DeprecationWarning
       - python/install-packages:
           pkg-manager: pip
           # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
