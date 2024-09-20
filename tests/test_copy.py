@@ -8,7 +8,6 @@ def test_copy(
     obj_list = [pyfar.Signal(1000, 44100),
                 pyfar.Orientations(),
                 pyfar.Coordinates(),
-                # pyfar.classes.filter.Filter(),
                 filterFIR,
                 filterIIR,
                 filterSOS,

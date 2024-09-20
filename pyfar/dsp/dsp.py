@@ -249,8 +249,8 @@ def spectrogram(signal, window='hann', window_length=1024,
                 window_overlap_fct=0.5, normalize=True):
     """Compute the magnitude spectrum versus time.
 
-    This is a wrapper for :py:func:`scipy.signal.spectrogram` with two
-    differences.
+    This is a wrapper for :py:meth:`scipy.signal.ShortTimeFFT.spectrogram`
+    with two differences.
     First, the returned times refer to the start of the FFT blocks, i.e., the
     first time is always 0 whereas it is window_length/2 in scipy. Second, the
     returned spectrogram is normalized according to ``signal.fft_norm`` if the
@@ -294,10 +294,23 @@ def spectrogram(signal, window='hann', window_length=1024,
     # get spectrogram from scipy.signal
     window_overlap = int(window_length * window_overlap_fct)
     window = sgn.get_window(window, window_length)
+    hop = window_length - window_overlap
 
-    frequencies, times, spectrogram = sgn.spectrogram(
-        x=signal.time, fs=signal.sampling_rate, window=window,
-        noverlap=window_overlap, mode='magnitude', scaling='spectrum')
+    SFT = sgn.ShortTimeFFT(window, hop, signal.sampling_rate,
+                           fft_mode='onesided', scale_to='magnitude')
+
+    spectrogram = \
+        SFT.spectrogram(signal.time, p0=0,
+                        p1=(signal.n_samples-window_overlap)//SFT.hop,
+                        k_offset=window_length//2, detr='constant')
+
+    # scipy returns the squared magnitude, therefore we take the square root
+    spectrogram = np.sqrt(spectrogram)
+
+    frequencies = SFT.f
+    times = SFT.t(signal.n_samples, p0=0,
+                  p1=(signal.n_samples-window_overlap)//SFT.hop,
+                  k_offset=window_length//2)
 
     # remove normalization from scipy.signal.spectrogram
     spectrogram /= np.sqrt(1 / window.sum()**2)
@@ -2001,7 +2014,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                          "or 'FrequencyData'."))
     if type(signal) is pyfar.TimeData and mode in (
             'log_magnitude_zerophase', 'magnitude_zerophase',
-            'magnitude_phase', 'power',):
+            'magnitude_phase', 'power'):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
@@ -2041,7 +2054,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     else:
         raise ValueError(
             """mode must be 'linear', 'magnitude_zerophase', 'power',
-            'magnitude_phase' or 'log_magnitude_zerophase'."""
+            'magnitude_phase' or 'log_magnitude_zerophase'.""",
             )
     # check if data includes NaNs and raise error or create masked array
     if nan_policy == 'raise' and np.any(np.isnan(data)):

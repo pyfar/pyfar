@@ -10,12 +10,12 @@ from decimal import Decimal
 import warnings
 
 
-def _weighted_moving_average(input, output, weights):
+def _weighted_moving_average(input_data, output, weights):
     """Moving average filter of length N and arbitrary.
 
     Parameters
     ----------
-    input : numpy.ndarray
+    input_data : numpy.ndarray
         The input array
     output : numpy.ndarray
         The output buffer
@@ -35,8 +35,8 @@ def _weighted_moving_average(input, output, weights):
 
     """
     strided = np.lib.stride_tricks.as_strided(
-        input, strides=input.strides*2,
-        shape=(weights.size, input.size - (weights.size-1)))
+        input_data, strides=input_data.strides*2,
+        shape=(weights.size, input_data.size - (weights.size-1)))
     output[:] = np.average(strided, weights=weights, axis=0)
 
 
@@ -173,7 +173,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     n_log = N**(n_lin/(N-1))
 
     # frequency bin spacing in octaves: log2(n_log[n]/n_log[n-1])
-    # Note: n_log[0] = 1
+    # Note: n_log[0] -> 1
     delta_n = np.log2(n_log[1])
 
     # width of the window in logarithmically spaced samples

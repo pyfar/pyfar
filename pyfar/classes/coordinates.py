@@ -10,8 +10,12 @@ Different coordinate systems are frequently used in acoustics research and
 handling sampling points and different systems can be cumbersome. The
 Coordinates class was designed with this in mind. It stores coordinates in
 cartesian coordinates internally and can convert to all coordinate systems
-listed below. Additionally, the the class can  query and plot coordinates
-points. Functions for converting coordinates not stored in a Coordinates object
+listed below. Additionally, the class can query and plot coordinates
+points. Addition and subtraction are supported with numbers and Coordinates
+objects, while multiplication and division are supported with numbers only.
+All arithmetic operations are performed element-wise on Cartesian coordinates
+using the appropriate operator.
+Functions for converting coordinates not stored in a Coordinates object
 are available for convenience. However, it is strongly recommended to use the
 Coordinates class for all conversions.
 
@@ -259,12 +263,6 @@ class Coordinates():
         self._set_weights(weights)
         self.sh_order = sh_order
         self._comment = comment
-
-        if sh_order is not None:
-            warnings.warn((
-                "This function will be deprecated in pyfar 0.8.0 in favor "
-                "of spharpy.samplings.SamplingSphere."),
-                    PyfarDeprecationWarning)
 
     @classmethod
     def from_cartesian(
@@ -851,7 +849,7 @@ class Coordinates():
             raise ValueError(
                 f"{unit} is not implemented.")
 
-        # return points
+        # return the points
         return angles_1, angles_2, radius
 
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
@@ -1047,10 +1045,12 @@ class Coordinates():
         """This function will be deprecated in pyfar 0.8.0 in favor
             of :py:class:`spharpy.samplings.SamplingSphere`.
             Set the maximum spherical harmonic order."""
-        warnings.warn((
-            "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of spharpy.samplings.SamplingSphere."),
-                PyfarDeprecationWarning)
+
+        if value is not None:
+            warnings.warn((
+                "This function will be deprecated in pyfar 0.8.0 in favor "
+                "of spharpy.samplings.SamplingSphere."),
+                    PyfarDeprecationWarning)
 
         self._sh_order = int(value) if value is not None else None
 
@@ -1667,9 +1667,9 @@ class Coordinates():
                 index_multi = np.moveaxis(index, -1, 0)
                 index = np.empty((k), dtype=tuple)
                 for kk in range(k):
-                    index[kk] = tuple([index_multi[kk]], )
+                    index[kk] = tuple([index_multi[kk]])
             else:
-                index = tuple([index], )
+                index = tuple([index])
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
             index_multi = []
@@ -1829,9 +1829,9 @@ class Coordinates():
         if self.cdim == 1:
             if find.csize > 1:
                 for i in range(len(index)):
-                    index[i] = tuple([index[i]], )
+                    index[i] = tuple([index[i]])
             else:
-                index = tuple([index], )
+                index = tuple([index])
 
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
@@ -2285,8 +2285,8 @@ class Coordinates():
                 value = np.asarray(value) / 180 * np.pi
             rot = sp_rot.from_rotvec(value)
         elif not bool(re.search('[^x-z]', rotation.lower())):
-            # only check if string contains xyz, everything else is checked in
-            # from_euler()
+            # only check if string contains xyz, everything else is checked
+            # in from_euler()
             rot = sp_rot.from_euler(rotation, value, degrees)
         else:
             raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "
@@ -2370,7 +2370,7 @@ class Coordinates():
                     "negative_z": [0, 0, -1],
                     "x": ["unbound", [-np.inf, np.inf]],
                     "y": ["unbound", [-np.inf, np.inf]],
-                    "z": ["unbound", [-np.inf, np.inf]]}
+                    "z": ["unbound", [-np.inf, np.inf]]},
             },
             "sph": {
                 "top_colat": {
@@ -2482,7 +2482,7 @@ class Coordinates():
                     "negative_z": [3 * np.pi / 2, np.pi / 2, 1],
                     "phi": ["cyclic", [0, 2 * np.pi]],
                     "theta": ["bound", [0, np.pi]],
-                    "radius": ["bound", [0, np.inf]]}
+                    "radius": ["bound", [0, np.inf]]},
             },
             "cyl": {
                 "top": {
@@ -2507,8 +2507,8 @@ class Coordinates():
                     "negative_z": [0, -1, 0],
                     "azimuth": ["cyclic", [0, 2 * np.pi]],
                     "z": ["unbound", [-np.inf, np.inf]],
-                    "radius_z": ["bound", [0, np.inf]]}
-            }
+                    "radius_z": ["bound", [0, np.inf]]},
+            },
         }
 
         return _systems
@@ -2649,6 +2649,11 @@ class Coordinates():
         x = np.broadcast_to(x, shapes)
         y = np.broadcast_to(y, shapes)
         z = np.broadcast_to(z, shapes)
+
+        # set writeable, to make sure that the class does not become read-only
+        x.setflags(write=True)
+        y.setflags(write=True)
+        z.setflags(write=True)
 
         # set values
         self._x = x
@@ -2791,7 +2796,6 @@ class Coordinates():
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        # return not deepdiff.DeepDiff(self, other)
         if self.cshape != other.cshape:
             return False
         eq_x = self._x == other._x
@@ -2807,10 +2811,193 @@ class Coordinates():
         return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment \
             & eq_sh_order & eq_system
 
+    def __add__(self, other):
+        """Add two numbers/Coordinates objects."""
+        return _arithmetics(self, other, 'add')
+
+    def __radd__(self, other):
+        """Add two numbers/Coordinates objects."""
+        return _arithmetics(other, self, 'add')
+
+    def __sub__(self, other):
+        """Subtract two numbers/Coordinates objects."""
+        return _arithmetics(self, other, 'sub')
+
+    def __rsub__(self, other):
+        """Subtract two numbers/Coordinates objects."""
+        return _arithmetics(other, self, 'sub')
+
+    def __mul__(self, other):
+        """Multiply Coordinates object with number."""
+        return _arithmetics(self, other, 'mul')
+
+    def __rmul__(self, other):
+        """Multiply number with Coordinates object."""
+        return _arithmetics(other, self, 'mul')
+
+    def __div__(self, other):
+        """Divide Coordinates object with number."""
+        return _arithmetics(self, other, 'div')
+
+    def __truediv__(self, other):
+        """Divide Coordinates object with number."""
+        return _arithmetics(self, other, 'div')
+
+    def __rtruediv__(self, other):
+        """Divide number with Coordinates object."""
+        return _arithmetics(other, self, 'div')
+
+    def __rdiv__(self, other):
+        """Divide number with Coordinates object."""
+        return _arithmetics(other, self, 'div')
+
+
     def _check_empty(self):
         """check if object is empty"""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
+
+
+def dot(a, b):
+    """Dot product of two Coordinates objects.
+
+    .. math::
+        \\vec{a} \\cdot \\vec{b}
+        = a_x \\cdot b_x + a_y \\cdot b_y + a_z \\cdot b_z
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : np.ndarray
+        array with the dot product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(1, 0, 0)
+    >>> pf.dot(a, b)
+    array([1.])
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    return a.x * b.x + a.y * b.y + a.z * b.z
+
+
+def cross(a, b):
+    """Cross product of two Coordinates objects
+
+    .. math::
+        \\vec{a} \\times \\vec{b}
+        = (a_y \\cdot b_z - a_z \\cdot b_y) \\cdot \\hat{x}
+        + (a_z \\cdot b_x - a_x \\cdot b_z) \\cdot \\hat{y}
+        + (a_x \\cdot b_y - a_y \\cdot b_x) \\cdot \\hat{z}
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : pf.Coordinates
+        new Coordinates object with the cross product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(0, 1, 0)
+    >>> result = pf.cross(a, b)
+    >>> result.cartesian
+    array([0., 0., 1.])
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    new = Coordinates()
+    new.cartesian = np.zeros(np.broadcast_shapes(
+        a.cartesian.shape, b.cartesian.shape))
+
+    # apply cross product
+    new.x = a.y * b.z - a.z * b.y
+    new.y = a.z * b.x - a.x * b.z
+    new.z = a.x * b.y - a.y * b.x
+
+    return new
+
+def _arithmetics(first, second, operation):
+    """Add or Subtract two Coordinates objects, numbers or arrays.
+
+    Parameters
+    ----------
+    first : Coordinates, number, array
+        first operand
+    second : Coordinates, number, array
+        second operand
+    operation : 'add', 'sub', 'mul', 'div'
+        whether to add or subtract the two objects
+
+    Returns
+    -------
+    new : Coordinates
+        result of the operation
+
+    """
+    # convert data
+    data = []
+    num_objects = 0
+    for obj in [first, second]:
+        if isinstance(obj, Coordinates):
+            data.append(obj.cartesian)
+            num_objects += 1
+        elif isinstance(obj, (int, float)):
+            data.append(np.array(obj))
+        else:
+            if operation == 'add':
+                op = 'Addition'
+            elif operation == 'sub':
+                op = 'Subtraction'
+            elif operation == 'mul':
+                op = 'Multiplication'
+            elif operation == 'div':
+                op = 'Division'
+            raise TypeError(
+                f"{op} is only possible with Coordinates or number.")
+
+    if operation in ['mul', 'div'] and num_objects > 1:
+        raise TypeError(
+            "Multiplication and division are only possible with one "
+            "Coordinates object.")
+
+    # broadcast shapes
+    shape = np.broadcast_shapes(data[0].shape, data[1].shape)
+    new = pf.Coordinates()
+    new.cartesian = np.zeros(shape)
+
+    # perform operation
+    if operation == 'add':
+        new.cartesian = data[0] + data[1]
+    elif operation == 'sub':
+        new.cartesian = data[0] - data[1]
+    elif operation == 'mul':
+        new.cartesian = data[0] * data[1]
+    elif operation == 'div':
+        new.cartesian = data[0] / data[1]
+    return new
 
 
 def cart2sph(x, y, z):

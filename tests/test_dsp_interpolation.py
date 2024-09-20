@@ -34,13 +34,13 @@ def test_smooth_fractional_octave_mode(mode):
     """
 
     # load input data
-    input = np.loadtxt(os.path.join(
+    input_data = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             "dsp.smooth_fractional_octave_input.csv"))
-    input = pf.Signal(input, 44100)
+    input_data = pf.Signal(input_data, 44100)
 
     # smooth
-    output, _ = smooth_fractional_octave(input, 1, mode)
+    output, _ = smooth_fractional_octave(input_data, 1, mode)
 
     # compare to reference
     reference = np.loadtxt(os.path.join(
@@ -88,7 +88,7 @@ def test_smooth_fractional_octave_window_parameter():
 @pytest.mark.parametrize("amplitudes", (
     1,                   # single channel signal
     [1, .9, .8, .7],     # flat multi-channel signal.
-    [[1, .9], [.8, .7]]  # 2D multi-channel signal
+    [[1, .9], [.8, .7]],  # 2D multi-channel signal
 ))
 def test_smooth_fractional_octave_input_signal_shape(amplitudes):
     """
@@ -145,7 +145,7 @@ def test_fractional_time_shift_assertions():
     # multi channel signal with single channel delays
     ([64, 32], 10.4), ([[64, 32], [48, 16]], 10.4),
     # multi channel signals with multi channel delays
-    ([64, 32], [10.4, 5.4]), ([[64, 32], [48, 16]], [10.4, 5.4])
+    ([64, 32], [10.4, 5.4]), ([[64, 32], [48, 16]], [10.4, 5.4]),
 ])
 def test_fractional_time_shift_channels(
         mode, delays_impulse, fractional_delays):
@@ -281,7 +281,7 @@ def test_interpolate_spectrum_init_assertions():
       [np.linspace(0, 3, 13), np.linspace(0, 3*np.pi, 13)]),
 
      ("magnitude", [1, 2], [1, 2], 12, 6,
-      [0, .5, 1, 1.5, 2, 2.5, 3])
+      [0, .5, 1, 1.5, 2, 2.5, 3]),
     ])
 def test_interpolate_spectrum_interpolation(
         method, freq_in, frequencies, freq_out, n_samples, sampling_rate):

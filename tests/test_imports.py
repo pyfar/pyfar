@@ -18,6 +18,7 @@ def test_import_classes():
     from pyfar import Signal                 # noqa: F401
     from pyfar import TimeData               # noqa: F401
     from pyfar import FrequencyData          # noqa: F401
+    from pyfar import TransmissionMatrix     # noqa: F401
 
     from pyfar import Coordinates            # noqa: F401
     from pyfar import Orientations           # noqa: F401
