@@ -361,21 +361,21 @@ def test_blockwise_processing(Filter):
 
 def test_blockwise_processing_with_coefficients_exchange():
     # input signal
-    input = pf.Signal([1, 2, 3, 4, 0], 44100)
+    input_data = pf.Signal([1, 2, 3, 4, 0], 44100)
 
     coefficients_1 = [2, -2]
     coefficients_2 = [2, -1.9]
 
     # time variant filtering using Filter object
     # initialize filter and state
-    filter = pf.FilterFIR([coefficients_1], 44100)
-    filter.init_state(input.cshape, state='zeros')
+    filterObj = pf.FilterFIR([coefficients_1], 44100)
+    filterObj.init_state(input_data.cshape, state='zeros')
     # process first block
-    filter_1 = filter.process(pf.Signal(input.time[..., :2], 44100))
+    filter_1 = filterObj.process(pf.Signal(input_data.time[..., :2], 44100))
     # update filter coefficients
-    filter.coefficients = [coefficients_2]
+    filterObj.coefficients = [coefficients_2]
     # process second block
-    filter_2 = filter.process(pf.Signal(input.time[..., 2:], 44100))
+    filter_2 = filterObj.process(pf.Signal(input_data.time[..., 2:], 44100))
 
     # overlap and add time variant filtering
     # first block
@@ -433,19 +433,19 @@ def test_extend_sos_coefficients():
     npt.assert_allclose(imp_filt, imp)
 
 
-def test___eq___equal(filter):
-    actual = filter.copy()
-    assert filter == actual
+def test___eq___equal(filterObject):
+    actual = filterObject.copy()
+    assert filterObject == actual
 
 
-def test___eq___notEqual(filter, coeffs, state):
+def test___eq___notEqual(filterObject, coeffs, state):
     actual = fo.Filter(coefficients=2 * coeffs, state=state)
-    assert not filter == actual
+    assert not filterObject == actual
     actual = fo.Filter(coefficients=coeffs, state=2 * state)
-    assert not filter == actual
-    actual = filter.copy()
+    assert not filterObject == actual
+    actual = filterObject.copy()
     actual.comment = f'{actual.comment} A completely different thing'
-    assert not filter == actual
+    assert not filterObject == actual
 
 
 def test_repr(capfd):
