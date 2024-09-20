@@ -15,7 +15,7 @@ History
   * Added arithmetic operations for Coordinate class (PR #680)
   * Added transpose method to audio classes (PR #481)
   * Added allpass filters (PR #571)
-  * Added `cdim`` property to audio classes (PR #619)
+  * Added `cdim` property to audio classes (PR #619)
 
 * Enhancements
 
