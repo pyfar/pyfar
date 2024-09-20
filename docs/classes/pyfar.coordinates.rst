@@ -7,7 +7,7 @@ Coordinates
 
 .. autosummary::
 
-   pyfar.Coordinates
+   Coordinates
 
 **Functions:**
 
@@ -16,9 +16,14 @@ Coordinates
    cart2cyl
    cart2sph
    cyl2cart
-   pyfar.deg2rad
-   pyfar.rad2deg
    sph2cart
+
+.. currentmodule:: pyfar
+
+.. autosummary::
+
+   deg2rad
+   rad2deg
 
 .. autoclass:: pyfar.Coordinates
    :members:

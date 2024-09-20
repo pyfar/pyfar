@@ -7,20 +7,22 @@ Audio (Signal, TimeData, FrequencyData)
 
 .. autosummary::
 
-   pyfar.FrequencyData
-   pyfar.Signal
-   pyfar.TimeData
+   FrequencyData
+   Signal
+   TimeData
 
 **Functions:**
 
+.. currentmodule:: pyfar
+
 .. autosummary::
 
-   pyfar.add
-   pyfar.divide
-   pyfar.matrix_multiplication
-   pyfar.multiply
-   pyfar.power
-   pyfar.subtract
+   add
+   divide
+   matrix_multiplication
+   multiply
+   power
+   subtract
 
 .. autoclass:: pyfar.FrequencyData
    :members:

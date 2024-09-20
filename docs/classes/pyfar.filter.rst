@@ -7,21 +7,21 @@ Filter (FilterIIR, FilterFIR, FilterSOS)
 
 .. autosummary::
 
-   pyfar.FilterFIR
-   pyfar.FilterIIR
-   pyfar.FilterSOS
+   FilterFIR
+   FilterIIR
+   FilterSOS
 
-.. autoclass:: pyfar.FilterFIR
+.. autoclass:: FilterFIR
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: pyfar.FilterIIR
+.. autoclass:: FilterIIR
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: pyfar.FilterSOS
+.. autoclass:: FilterSOS
    :members:
    :undoc-members:
    :inherited-members:
