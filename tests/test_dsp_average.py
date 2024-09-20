@@ -23,8 +23,8 @@ from pytest import raises
      'magnitude_phase', pf.signals.impulse(128, 1, 2).freq[0]],
     [pf.FrequencyData([[1, 2, 3], [4, 5, 6]], [1, 2, 3]),
      'power', np.sqrt([(1+16)/2, (4+25)/2, (9+36)/2])],
-    [pf.FrequencyData([[0.01, 0.1, ], [1, 10]], [1, 2]),
-     'log_magnitude_zerophase', 10**(np.array([(-40+0)/2, (-20+20)/2])/20)]
+    [pf.FrequencyData([[0.01, 0.1], [1, 10]], [1, 2]),
+     'log_magnitude_zerophase', 10**(np.array([(-40+0)/2, (-20+20)/2])/20)],
     ))
 def test_averaging(signal, mode, answer):
     """
@@ -39,7 +39,7 @@ def test_averaging(signal, mode, answer):
 
 @pytest.mark.parametrize('caxis, answer', (
     [(0, 2), [[(1+2+5+6)/4, (3+4+7+8)/4]]],
-    [1, [[(1+3)/2, (2+4)/2], [(5+7)/2, (6+8)/2]]]
+    [1, [[(1+3)/2, (2+4)/2], [(5+7)/2, (6+8)/2]]],
     ))
 def test_caxis_averaging(caxis, answer):
     """

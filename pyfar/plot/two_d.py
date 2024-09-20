@@ -1,6 +1,6 @@
 import numpy as np
 from pyfar.plot.utils import context
-from .. import Signal
+from pyfar import Signal
 from . import _two_d
 from . import _interaction as ia
 
@@ -239,7 +239,7 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``light``.
     side : str, optional
         ``'right'`` to plot the right-sided spectrum containing the positive
-        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
     **kwargs
@@ -375,7 +375,7 @@ def phase_2d(signal, deg=False, unwrap=False, freq_scale='log', indices=None,
         ``light``.
     side : str, optional
         ``'right'`` to plot the right-sided spectrum containing the positive
-        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
     **kwargs
@@ -519,7 +519,7 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
         ``light``.
     side : str, optional
         ``'right'`` to plot the right-sided spectrum containing the positive
-        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
     **kwargs
@@ -681,7 +681,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         plotted. The default is ``real``.
     side : str, optional
         ``'right'`` to plot the right-sided spectrum containing the positive
-        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
     **kwargs
@@ -828,7 +828,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``light``.
     side : str, optional
         ``'right'`` to plot the right-sided spectrum containing the positive
-        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
     **kwargs
@@ -983,7 +983,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         ``light``.
     side : str, optional
         ``'right'`` to plot the right-sided spectrum containing the positive
-        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
     **kwargs
@@ -1124,7 +1124,7 @@ def spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ``light``.
     side : str, optional
         ``'right'`` to plot the right-sided spectrum containing the positive
-        frequencies, or ``'left'``to plot the left-sided spectrum containing
+        frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
     **kwargs

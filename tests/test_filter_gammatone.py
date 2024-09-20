@@ -72,7 +72,7 @@ def test_gammatone_bands_init_and_getter():
     [np.array([1]), (85, 1, 2048), 44100],
     [np.array([1]), (85, 1, 2048), 48000],
     [np.array([1]), (85, 1, 2048), 96000],
-    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100]
+    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100],
 ))
 def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     """

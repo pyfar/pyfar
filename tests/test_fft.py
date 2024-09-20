@@ -182,7 +182,7 @@ def test_normalization_single_sided_single_channel_even_samples():
                            vsq / Nsq]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs * 2,
-                         vsq / N / fs])
+                         vsq / N / fs]),
     }
 
     for normalization in truth:
@@ -226,7 +226,7 @@ def test_normalization_single_sided_single_channel_odd_samples():
                            vsq / Nsq * 2]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs * 2,
-                         vsq / N / fs * 2])
+                         vsq / N / fs * 2]),
     }
 
     for normalization in truth:
@@ -266,7 +266,7 @@ def test_normalization_both_sided_single_channel():
                            vsq / Nsq]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs,
-                         vsq / N / fs])
+                         vsq / N / fs]),
     }
 
     for normalization in truth:
@@ -313,7 +313,7 @@ def test_normalization_single_sided_multi_channel_even_samples():
                            vsq / Nsq]),
         'psd': np.array([vsq / N / fs,
                          vsq / N / fs * 2,
-                         vsq / N / fs])
+                         vsq / N / fs]),
     }
 
     for normalization in truth:

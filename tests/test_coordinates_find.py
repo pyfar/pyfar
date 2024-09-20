@@ -21,7 +21,7 @@ def test_find_nearest_simple():
     (0, 'spherical_radians', 0),                        # radians match
     (np.pi / 16, 'spherical_radians', np.pi / 16),      # radians no match
     (0, 'spherical_meter', 0),                          # meters match
-    (np.pi / 16, 'spherical_meter', np.pi / 16 * 1.1)   # meters no match
+    (np.pi / 16, 'spherical_meter', np.pi / 16 * 1.1),   # meters no match
 ])
 def test_find_nearest_simple_spherical_distance(
         azimuth, distance_measure, distance):
@@ -197,7 +197,7 @@ def test_find_within_error():
 
 
 @pytest.mark.parametrize('distance_measure', [
-     'spherical_radians', 'spherical_meter'
+     'spherical_radians', 'spherical_meter',
 ])
 @pytest.mark.parametrize('radius', [.5, 1, 2])
 def test_find_within_spherical(distance_measure, radius):
