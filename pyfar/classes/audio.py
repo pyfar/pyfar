@@ -1642,7 +1642,8 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
     # check input types and meta data
     n_audio_objects = 0
     for d in data:
-        if isinstance(d, (Signal, TimeData, FrequencyData, TransmissionMatrix)):
+        if isinstance(d, (Signal, TimeData, FrequencyData,
+                          TransmissionMatrix)):
             # check for complex valued time data
             if isinstance(d, (Signal, TimeData)):
                 if d.complex:
