@@ -9,7 +9,7 @@ History
   * Signals and TimeData objects can now have complex time data. This is specified by the `complex` flag. In the case of Signal objects, this results in both sided spectra (PR #504, #396, #462, #464, #505, #510, #513, #547, #646, #655, #668, #704)
     * Functions in the dsp module can now handle complex valued time data or raise an error (PR #459, #460, #461, #525, #546, #566, #567, #573, #592, #594, #598, #601, #677)
     * All plot functions can now handle complex valued time data and both sided spectra via the options `side` and `mode`  (PR #615, #652, #656, #671, #672, #702)
-  * Added TransmissionMatrix Class (PR #636)
+  * Added TransmissionMatrix Class, which is a convenient representations for two-ports / quadrupoles. These can represent systems from various fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission lines (PR #636).
   * Added frequency domain sweep synthesis (PR #199)
   * Added spectral soft limiting (PR #325)
   * Added arithmetic operations for Coordinate class (PR #680)
