@@ -3,7 +3,7 @@ History
 =======
 
 0.6.10 (2024-09-23)
-------------------
+-------------------
 * Fix bug in compress parameter in pyfar.io.write. Previously files were compressed if `compress=False` (PR #707)
 * Automation and testing: wait for test deprecations before release (PR #696)
 
