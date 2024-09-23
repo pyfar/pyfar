@@ -40,13 +40,13 @@ def test_smooth_fractional_octave_mode(mode):
     """
 
     # load input data
-    input = np.loadtxt(os.path.join(
+    input_data = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             "dsp.smooth_fractional_octave_input.csv"))
-    input = pf.Signal(input, 44100)
+    input_data = pf.Signal(input_data, 44100)
 
     # smooth
-    output, _ = smooth_fractional_octave(input, 1, mode)
+    output, _ = smooth_fractional_octave(input_data, 1, mode)
 
     # compare to reference
     reference = np.loadtxt(os.path.join(
