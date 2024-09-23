@@ -462,6 +462,16 @@ def test_write_read_multiplePyfarObjects(
     assert dict_of_builtins.items() <= actual.items()
 
 
+def test_write_read_compression(sine, tmpdir):
+    """Test whether compressed files are larger than uncompressed files."""
+    filename_compressed = os.path.join(tmpdir, 'sine_compressed.far')
+    io.write(filename_compressed, signal=sine, compress=True)
+    filename_uncompressed = os.path.join(tmpdir, 'sine_uncompressed.far')
+    io.write(filename_uncompressed, signal=sine, compress=False)
+    assert os.path.getsize(filename_uncompressed) > os.path.getsize(
+        filename_compressed)
+
+
 def test_write_read_multiplePyfarObjectsWithCompression(
         filterObject,
         filterFIR,
