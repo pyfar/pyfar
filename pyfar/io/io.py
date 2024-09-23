@@ -316,7 +316,7 @@ def write(filename, compress=False, **objs):
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
-    compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
+    compression = zipfile.ZIP_DEFLATED if compress else zipfile.ZIP_STORED
     zip_buffer = io.BytesIO()
     builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
