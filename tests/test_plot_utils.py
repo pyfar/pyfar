@@ -37,9 +37,11 @@ def test_shortcuts_report():
     """Test layout of return / console output"""
     _, report = utils.shortcuts(show=False, report=True, layout="console")
     assert ".. list-table::" not in report
+    assert ":py:func:" not in report
 
     _, report = utils.shortcuts(show=False, report=True, layout="sphinx")
     assert ".. list-table::" in report
+    assert ":py:func:" in report
 
     with pytest.raises(ValueError, match="layout is 'tex'"):
         utils.shortcuts(report=True, layout="tex")

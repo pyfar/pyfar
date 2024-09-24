@@ -6,6 +6,7 @@ from pyfar.dsp import fft
 from pyfar.classes.warnings import PyfarDeprecationWarning
 from pyfar._utils import rename_arg
 import warnings
+import scipy.fft as sfft
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -104,9 +105,14 @@ def group_delay(signal, frequencies=None, method='fft'):
         group_delay = group_delay.reshape(signal.cshape + (-1, ))
 
     elif method == 'fft':
-        freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
-                          signal.n_samples, signal.sampling_rate,
-                          fft_norm='none')
+        if signal.complex:
+            freq_k = fft.fft(signal.time * np.arange(signal.n_samples),
+                             signal.n_samples, signal.sampling_rate,
+                             fft_norm='none')
+        else:
+            freq_k = fft.rfft(signal.time * np.arange(signal.n_samples),
+                              signal.n_samples, signal.sampling_rate,
+                              fft_norm='none')
 
         group_delay = np.real(freq_k / signal.freq_raw)
 
@@ -275,7 +281,9 @@ def spectrogram(signal, window='hann', window_length=1024,
     Returns
     -------
     frequencies : numpy array
-        Frequencies in Hz at which the magnitude spectrum was computed
+        Frequencies in Hz at which the magnitude spectrum was computed. For
+        complex valued signals, frequencies and spectrogram is arranged such
+        that 0 Hz bin is centered.
     times : numpy array
         Times in seconds at which the magnitude spectrum was computed
     spectrogram : numpy array
@@ -296,8 +304,10 @@ def spectrogram(signal, window='hann', window_length=1024,
     window = sgn.get_window(window, window_length)
     hop = window_length - window_overlap
 
+    fft_mode = 'twosided' if signal.complex else 'onesided'
+
     SFT = sgn.ShortTimeFFT(window, hop, signal.sampling_rate,
-                           fft_mode='onesided', scale_to='magnitude')
+                           fft_mode=fft_mode, scale_to='magnitude')
 
     spectrogram = \
         SFT.spectrogram(signal.time, p0=0,
@@ -318,8 +328,13 @@ def spectrogram(signal, window='hann', window_length=1024,
     # apply normalization from signal
     if normalize:
         spectrogram = fft.normalization(
-            spectrogram, window_length, signal.sampling_rate,
-            signal.fft_norm, window=window)
+                spectrogram, window_length, signal.sampling_rate,
+                signal.fft_norm, window=window)
+
+    # rearrange spectrogram and frequencies to center 0 Hz bin
+    if signal.complex:
+        frequencies = sfft.fftshift(frequencies)
+        spectrogram = sfft.fftshift(spectrogram, axes=0)
 
     # scipy.signal takes the center of the DFT blocks as time stamp we take the
     # beginning (looks nicer in plots, both conventions are used)
@@ -1196,7 +1211,8 @@ def time_shift(
 
     if np.any(np.isnan(shifted.time)):
         shifted = pyfar.TimeData(
-            shifted.time, shifted.times, comment=shifted.comment)
+            shifted.time, shifted.times, comment=shifted.comment,
+            is_complex=signal.complex)
 
     return shifted
 
@@ -1215,7 +1231,9 @@ def find_impulse_response_delay(impulse_response, N=1):
     2.  By default a first order polynomial is used, as the slope of the
         analytic signal should in theory be linear.
 
-    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_start`.
+    Alternatively see :py:func:`pyfar.dsp.find_impulse_response_start`. For
+    complex-valued time signals, the delay is calculated separately for the
+    real and complex part, and its minimum value returned.
 
     Parameters
     ----------
@@ -1263,54 +1281,65 @@ def find_impulse_response_delay(impulse_response, N=1):
     n = int(np.ceil((N+2)/2))
 
     start_samples = np.zeros(impulse_response.cshape)
+    modes = ['real', 'complex'] if impulse_response.complex else ['real']
+    start_sample = np.zeros((len(modes), 1), dtype=float)
+
     for ch in np.ndindex(impulse_response.cshape):
         # Calculate the correlation between the impulse response and its
         # minimum phase equivalent. This requires a minimum phase equivalent
         # in the strict sense, instead of the appriximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
+        for idx, mode in enumerate(modes):
+            ir = impulse_response.time[ch]
+            ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
-        # minimum phase warns if the input signal is not symmetric, which is
-        # not critical for this application
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore", message="h does not appear to by symmetric",
-                category=RuntimeWarning)
-            ir_minphase = sgn.minimum_phase(
-                impulse_response.time[ch], n_fft=4*n_samples)
+            if np.max(ir) > 1e-16:
+                # minimum phase warns if the input signal is not symmetric,
+                # which is not critical for this application
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore", message="h does not appear to by symmetric",
+                        category=RuntimeWarning)
+                    ir_minphase = sgn.minimum_phase(
+                        ir, n_fft=4*n_samples)
 
-        correlation = sgn.correlate(
-            impulse_response.time[ch],
-            np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
-            mode='full')
-        lags = np.arange(-n_samples + 1, n_samples)
+                correlation = sgn.correlate(
+                    ir,
+                    np.pad(ir_minphase, (0, n_samples - (n_samples + 1)//2)),
+                    mode='full')
+                lags = np.arange(-n_samples + 1, n_samples)
 
-        # calculate the analytic signal of the correlation function
-        correlation_analytic = sgn.hilbert(correlation)
+                # calculate the analytic signal of the correlation function
+                correlation_analytic = sgn.hilbert(correlation)
 
-        # find the maximum of the analytic part of the correlation function
-        # and define the search range around the maximum
-        argmax = np.argmax(np.abs(correlation_analytic))
-        search_region_range = np.arange(argmax-n, argmax+n)
-        search_region = np.imag(correlation_analytic[search_region_range])
+                # find the maximum of the analytic part of the correlation
+                # function and define the search range around the maximum
+                argmax = np.argmax(np.abs(correlation_analytic))
+                search_region_range = np.arange(argmax-n, argmax+n)
+                search_region = np.imag(
+                    correlation_analytic[search_region_range])
 
-        # mask values with a negative gradient
-        mask = np.gradient(search_region, search_region_range) > 0
+                # mask values with a negative gradient
+                mask = np.gradient(search_region, search_region_range) > 0
 
-        # fit a polygon and estimate its roots
-        search_region_poly = np.polyfit(
-            search_region_range[mask]-argmax, search_region[mask], N)
-        roots = np.roots(search_region_poly)
+                # fit a polygon and estimate its roots
+                search_region_poly = np.polyfit(
+                    search_region_range[mask]-argmax, search_region[mask], N)
+                roots = np.roots(search_region_poly)
 
-        # Use only real-valued roots
-        if np.all(np.isreal(roots)):
-            root = roots[np.abs(roots) == np.min(np.abs(roots))]
-            start_sample = np.squeeze(lags[argmax] + root)
-        else:
-            start_sample = np.nan
-            warnings.warn(f"Starting sample not found for channel {ch}")
+                # Use only real-valued roots
+                if np.all(np.isreal(roots)):
+                    root = roots[np.abs(roots) == np.min(np.abs(roots))]
+                    start_sample[idx] = np.squeeze(lags[argmax] + root)
+                else:
+                    start_sample[idx] = np.nan
+                    warnings.warn('Starting sample not found for channel '
+                                  f'{ch}')
+            else:
+                start_sample[idx] = np.nan
 
-        start_samples[ch] = start_sample
+        start_samples[ch] = np.nanmin(start_sample)
 
     return start_samples
 
@@ -1324,7 +1353,8 @@ def find_impulse_response_start(
     ``threshold`` level relative to the maximum level of the impulse response.
     For room impulse responses, ISO 3382 [#]_ specifies a threshold of 20 dB.
     This function is primary intended to be used when processing room impulse
-    responses.
+    responses. For complex-valued time signals the onset is computed separately
+    for the real and imaginary part.
     Alternatively see :py:func:`pyfar.dsp.find_impulse_response_delay`.
 
 
@@ -1404,43 +1434,55 @@ def find_impulse_response_start(
         >>> ax.legend()
 
     """
-    ir_squared = np.abs(impulse_response.time)**2
+    modes = ['real', 'complex'] if impulse_response.complex else ['real']
+    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape))
+    for idx, mode in enumerate(modes):
+        ir = impulse_response.time
+        ir_squared = np.real(ir)**2 if mode == 'real' else np.imag(ir)**2
 
-    mask_start = int(0.9*impulse_response.n_samples)
+        mask_start = int(0.9*impulse_response.n_samples)
 
-    mask = np.arange(mask_start, ir_squared.shape[-1])
-    noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
+        mask = np.arange(mask_start, ir_squared.shape[-1])
+        noise = np.mean(np.take(ir_squared, mask, axis=-1), axis=-1)
 
-    max_sample = np.argmax(ir_squared, axis=-1)
-    max_value = np.max(ir_squared, axis=-1)
+        max_sample = np.argmax(ir_squared, axis=-1)
+        max_value = np.max(ir_squared, axis=-1)
 
-    if np.any(max_value < 10**(threshold/10) * noise) or \
-            np.any(max_sample > mask_start):
-        warnings.warn(
-            "The SNR seems lower than the specified threshold value. Check "
-            "if this is a valid impulse response with sufficient SNR.")
+        if np.any(max_value < 10**(threshold/10) * noise) or \
+                np.any(max_sample > mask_start):
+            warnings.warn(
+                "The SNR seems lower than the specified threshold value. "
+                "Check if this is a valid impulse response with sufficient "
+                "SNR.")
 
-    start_sample = max_sample.copy()
+        start_sample = max_sample.copy()
 
-    for ch in np.ndindex(impulse_response.cshape):
-        # Only look for the start sample if the maximum index is bigger than 0
-        if start_sample[ch] > 0:
-            # Check samples before maximum
-            ir_before_max = np.squeeze(
-                ir_squared[ch][:max_sample[ch]+1] / max_value[ch])
-            # First sample above or at the threshold level
-            idx_first_above_thresh = np.where(
-                ir_before_max >= 10**(-threshold/10))[0]
-            if idx_first_above_thresh.size > 0:
-                # The start sample is the last sample below the threshold
-                start_sample[ch] = np.min(idx_first_above_thresh) - 1
-            else:
-                start_sample[ch] = 0
-                warnings.warn(
-                    f'No values below threshold found found for channel {ch}',
-                    'defaulting to 0')
+        for ch in np.ndindex(impulse_response.cshape):
+            # Only look for the start sample if the maximum index is bigger
+            # than 0
+            if start_sample[ch] > 0:
+                # Check samples before maximum
+                ir_before_max = np.squeeze(
+                    ir_squared[ch][:max_sample[ch]+1] / max_value[ch])
+                # First sample above or at the threshold level
+                idx_first_above_thresh = np.where(
+                    ir_before_max >= 10**(-threshold/10))[0]
+                if idx_first_above_thresh.size > 0:
+                    # The start sample is the last sample below the threshold
+                    start_sample[ch] = np.min(idx_first_above_thresh) - 1
+                else:
+                    start_sample[ch] = 0
+                    warnings.warn(
+                        'No values below threshold found found for channel '
+                        f'{ch} defaulting to 0')
 
-    return start_sample
+        ir_start[idx] = start_sample
+
+    # squeeze first dimeension is signal is not complex
+    if not impulse_response.complex:
+        ir_start = np.squeeze(ir_start, axis=0)
+
+    return ir_start
 
 
 @rename_arg({"freq_range": "frequency_range"},
@@ -1695,8 +1737,11 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
         res[..., :n_min-1] += res[..., -n_min+1:]
         res = res[..., :n_max]
 
+    is_result_complex = True if res.dtype.kind == 'c' else False
+
     return pyfar.Signal(
-        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm)
+        res, signal1.sampling_rate, domain='time', fft_norm=fft_norm,
+        is_complex=is_result_complex)
 
 
 def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
@@ -2103,8 +2148,14 @@ def energy(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex:
+            raise ValueError((
+                "'energy' is not implemented for complex time signals."))
+
     # return and compute data
-    return np.sum(signal.time**2, axis=-1)
+    return np.sum(np.abs(signal.time)**2, axis=-1)
 
 
 def power(signal):
@@ -2141,8 +2192,14 @@ def power(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex:
+            raise ValueError((
+                "'power' is not implemented for complex time signals."))
+
     # return and compute data
-    return np.sum(signal.time**2, axis=-1)/signal.n_samples
+    return np.sum(np.abs(signal.time)**2, axis=-1)/signal.n_samples
 
 
 def rms(signal):
@@ -2177,6 +2234,11 @@ def rms(signal):
     if not isinstance(signal, pyfar.Signal):
         raise ValueError(f"signal is type '{signal.__class__}'"
                          " but must be of type 'Signal'.")
+
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex:
+            raise ValueError((
+                "'rms' is not implemented for complex time signals."))
 
     # return and compute data
     return np.sqrt(power(signal))
@@ -2262,15 +2324,23 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                                pyfar.TimeData)):
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
+
+    if isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        if signal.complex and mode == 'power':
+            raise ValueError((
+                "'power' is not implemented for complex time signals."))
+
     if type(signal) is pyfar.TimeData and mode in (
             'log_magnitude_zerophase', 'magnitude_zerophase',
             'magnitude_phase', 'power'):
         raise ValueError((
             f"mode is '{mode}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
+
     if nan_policy not in ('propagate', 'omit', 'raise'):
         raise ValueError("nan_policy has to be 'propagate', 'omit', or"
                          "'raise'.")
+
     # check for caxis
     if caxis and np.max(caxis) > len(signal.cshape):
         raise ValueError(('The maximum of caxis needs to be smaller than '
@@ -2332,9 +2402,11 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     # return average data as pyfar object, depending on input signal type
     if isinstance(signal, pyfar.Signal):
         return pyfar.Signal(data, signal.sampling_rate, signal.n_samples,
-                            signal.domain, signal.fft_norm, signal.comment)
+                            signal.domain, signal.fft_norm, signal.comment,
+                            signal.complex)
     elif isinstance(signal, pyfar.TimeData):
-        return pyfar.TimeData(data, signal.times, signal.comment)
+        return pyfar.TimeData(data, signal.times, signal.comment,
+                              signal.complex)
     else:
         return pyfar.FrequencyData(data, signal.frequencies, signal.comment)
 
@@ -2520,6 +2592,10 @@ def normalize(signal, reference_method='max', domain='auto',
         raise ValueError((
             f"domain is '{domain}' and signal is type '{signal.__class__}'"
             " but must be of type 'Signal' or 'FrequencyData'."))
+    if isinstance(signal, (pyfar.TimeData, pyfar.Signal)):
+        if signal.complex and reference_method in ['energy', 'power', 'rms']:
+            raise ValueError("'energy', 'power', and 'rms' reference method "
+                             "is not implemented for complex time signals.")
     if isinstance(limits, (int, float)) or len(limits) != 2:
         raise ValueError("limits must be an array like of length 2.")
     if tuple(limits) != (None, None) and \
