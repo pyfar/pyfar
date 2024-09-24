@@ -23,11 +23,11 @@ def test_read_comsol_wrong_file_type():
         io.read_comsol(filename)
 
 
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_warning_for_db_values(type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_warning_for_db_values(suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', 'level_only')
     with pytest.warns(Warning, match='dB'):
-        io.read_comsol(path + type)
+        io.read_comsol(path + suffix)
 
 
 def test_read_comsol_error_wrong_domain():
@@ -47,10 +47,10 @@ def test_read_comsol_error_wrong_domain():
     ('intensity_product', ['pabe.p_t*pabe.v_inst*2/sqrt(2)']),
     ('character_collection', ['1e-3[m/s]*(1e3)']),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_header_expressions(filename, expressions, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_header_expressions(filename, expressions, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    actual_expressions, _, _, _, _ = io.read_comsol_header(path + type)
+    actual_expressions, _, _, _, _ = io.read_comsol_header(path + suffix)
     assert len(actual_expressions) == len(expressions)
     for i, exp in enumerate(expressions):
         assert actual_expressions[i] == expressions[i]
@@ -66,10 +66,11 @@ def test_read_comsol_header_expressions(filename, expressions, type):
     ('intensity_product', ['Pa*m/s']),
     ('character_collection', ['m/s']),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_header_expressions_unit(filename, expressions_unit, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_header_expressions_unit(
+        filename, expressions_unit, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    _, actual_units, _, _, _ = io.read_comsol_header(path + type)
+    _, actual_units, _, _, _ = io.read_comsol_header(path + suffix)
     assert len(actual_units) == len(expressions_unit)
     for i, exp in enumerate(expressions_unit):
         assert actual_units[i] == expressions_unit[i]
@@ -90,10 +91,10 @@ def test_read_comsol_header_expressions_unit(filename, expressions_unit, type):
      {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
       'phi': [0., 1.5708, 3.1416, 4.7124]}),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_header_parameters(filename, parameters, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_header_parameters(filename, parameters, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    _, _, actual_parameters, _, _ = io.read_comsol_header(path + type)
+    _, _, actual_parameters, _, _ = io.read_comsol_header(path + suffix)
     assert parameters == actual_parameters
 
 
@@ -107,10 +108,10 @@ def test_read_comsol_header_parameters(filename, parameters, type):
     ('intensity_product', 'freq'),
     ('character_collection', 'freq'),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_header_domain(filename, domain, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_header_domain(filename, domain, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    _, _, _, actual_domain, _ = io.read_comsol_header(path + type)
+    _, _, _, actual_domain, _ = io.read_comsol_header(path + suffix)
     assert domain == actual_domain
 
 
@@ -124,10 +125,10 @@ def test_read_comsol_header_domain(filename, domain, type):
     ("pressure_parametric", [100, 500]),
     ('intensity_product', [100, 500]),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_header_domain_data(filename, domain_data, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_header_domain_data(filename, domain_data, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    _, _, _, _, actual_domain_data = io.read_comsol_header(path + type)
+    _, _, _, _, actual_domain_data = io.read_comsol_header(path + suffix)
     assert domain_data == actual_domain_data
 
 
@@ -141,11 +142,11 @@ def test_read_comsol_header_domain_data(filename, domain_data, type):
     'intensity_product',
     'character_collection',
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_data_domain(filename, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_data_domain(filename, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    _, _, _, domain, domain_data = io.read_comsol_header(path + type)
-    data = io.read_comsol(path + type)
+    _, _, _, domain, domain_data = io.read_comsol_header(path + suffix)
+    data = io.read_comsol(path + suffix)
     data = data[0] if isinstance(data, tuple) else data
     assert domain == data.domain
     if domain == 'freq':
@@ -163,11 +164,11 @@ def test_read_comsol_data_domain(filename, type):
     ('pressure_parametric', 8),
     ('intensity_product', 8),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_data_shapes(filename, nodes, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_data_shapes(filename, nodes, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, _, parameters, _, _ = io.read_comsol_header(path + type)
-    data = io.read_comsol(path + type)
+    expressions, _, parameters, _, _ = io.read_comsol_header(path + suffix)
+    data = io.read_comsol(path + suffix)
     coordinates = data[1] if isinstance(data, tuple) else None
     data = data[0] if isinstance(data, tuple) else data
     if coordinates is not None:
@@ -185,10 +186,10 @@ def test_read_comsol_data_shapes(filename, nodes, type):
     'pressure_parametric',
     'intensity_product',
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_coordinates(filename, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_coordinates(filename, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    _, coordinates = io.read_comsol(path + type)
+    _, coordinates = io.read_comsol(path + suffix)
     xyz = coordinates.cartesian
     assert all(xyz[0] == [-.5, -.5, -.5])
     assert all(xyz[1] == [0.5, -0.5, -0.5])
@@ -234,11 +235,11 @@ def test_read_comsol_first_value_data(filename, p1, suffix):
     ('pressure_parametric',
      complex(-1.6519703918208651E-4, -0.003880099599610891)),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_another_value_data(filename, p1, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_another_value_data(filename, p1, suffix):
     """Test freq=500; theta=0.7854; phi=3.1416"""
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    data, _ = io.read_comsol(path + type)
+    data, _ = io.read_comsol(path + suffix)
     point = 0
     exp = 0
     freq = 1
@@ -253,16 +254,16 @@ def test_read_comsol_another_value_data(filename, p1, type):
     ('pressure_parametric',
      complex(-1.6519703918208651E-4, -0.003880099599610891)),
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_parameters_another_value_data(filename, p1, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_parameters_another_value_data(filename, p1, suffix):
     """Test freq=500; theta=0.7854; phi=3.1416"""
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    _, _, parameters, _, _ = io.read_comsol_header(path + type)
+    _, _, parameters, _, _ = io.read_comsol_header(path + suffix)
     theta = 1
     phi = 2
     parameters['theta'] = [parameters['theta'][theta]]
     parameters['phi'] = [parameters['phi'][phi]]
-    data, _ = io.read_comsol(path + type, parameters=parameters)
+    data, _ = io.read_comsol(path + suffix, parameters=parameters)
     point = 0
     exp = 0
     freq = 1
@@ -279,11 +280,11 @@ def test_read_comsol_parameters_another_value_data(filename, p1, type):
     'intensity_product',
     'character_collection',
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_expressions(filename, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_expressions(filename, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, _, _, _, _ = io.read_comsol_header(path + type)
-    data = io.read_comsol(path + type, expressions=[expressions[0]])
+    expressions, _, _, _, _ = io.read_comsol_header(path + suffix)
+    data = io.read_comsol(path + suffix, expressions=[expressions[0]])
     data = data[0] if isinstance(data, tuple) else data
     assert data.cshape[1] == 1
 
@@ -291,13 +292,13 @@ def test_read_comsol_expressions(filename, type):
 @pytest.mark.parametrize("filename",  [
     'pressure_parametric_incomplete',
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_check_incomplete(filename, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_check_incomplete(filename, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, _, _, _, _ = io.read_comsol_header(path + type)
+    expressions, _, _, _, _ = io.read_comsol_header(path + suffix)
     with pytest.warns(Warning, match='Specific'):
         data, _ = io.read_comsol(
-            path + type, expressions=[expressions[0]])
+            path + suffix, expressions=[expressions[0]])
     assert all(np.isnan(data.freq[:, 0, -1, -1, 1]).flatten())
     data.freq[:, 0, -1, -1, 1] = 0
     assert any(~np.isnan(data.freq.flatten()))
@@ -307,14 +308,14 @@ def test_read_comsol_check_incomplete(filename, type):
     'intensity_parametric',
     'intensity_average',
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_parameters_shape(filename, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_parameters_shape(filename, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     expressions, expressions_unit, parameters, domain, domain_data \
-        = io.read_comsol_header(path + type)
+        = io.read_comsol_header(path + suffix)
     parameters['theta'] = parameters['theta'][:1]
     parameters['phi'] = parameters['phi'][:2]
-    data = io.read_comsol(path + type, parameters=parameters)
+    data = io.read_comsol(path + suffix, parameters=parameters)
     data = data[0] if isinstance(data, tuple) else data
     assert data.cshape[1] == len(expressions)
     assert data.cshape[2] == len(parameters['theta'][:1])
@@ -326,15 +327,15 @@ def test_read_comsol_parameters_shape(filename, type):
     'intensity_parametric',
     'intensity_average',
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_expressions_value(filename, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_expressions_value(filename, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     expressions, expressions_unit, parameters, domain, domain_data \
-        = io.read_comsol_header(path + type)
+        = io.read_comsol_header(path + suffix)
     data_exp = io.read_comsol(
-        path + type, expressions=[expressions[0], expressions[2]])
+        path + suffix, expressions=[expressions[0], expressions[2]])
     data_exp = data_exp[0] if isinstance(data_exp, tuple) else data_exp
-    data = io.read_comsol(path + type)
+    data = io.read_comsol(path + suffix)
     data = data[0] if isinstance(data, tuple) else data
     assert data_exp.freq[0, 0, 1, 1, 1] == data.freq[0, 0, 1, 1, 1]
     assert data_exp.freq[0, 1, 1, 1, 1] == data.freq[0, 2, 1, 1, 1]
@@ -347,12 +348,12 @@ def test_read_comsol_expressions_value(filename, type):
     'intensity_parametric_specific',
     'pressure_parametric_specific',
     ])
-@pytest.mark.parametrize("type",  ['.txt', '.dat', '.csv'])
-def test_read_comsol_check_specific_combination(filename, type):
+@pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
+def test_read_comsol_check_specific_combination(filename, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
-    expressions, _, _, _, _ = io.read_comsol_header(path + type)
+    expressions, _, _, _, _ = io.read_comsol_header(path + suffix)
     with pytest.warns(Warning, match='Specific'):
-        data = io.read_comsol(path + type, expressions=[expressions[0]])
+        data = io.read_comsol(path + suffix, expressions=[expressions[0]])
     data = data[0] if isinstance(data, tuple) else data
     # For specific combinations shape of parameters need to be same
     assert data.cshape[2] == data.cshape[3]

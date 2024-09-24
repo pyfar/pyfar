@@ -374,3 +374,22 @@ def test_deprecations_shelf_function_results():
         pfilt.low_shelf_cascade(None, 250, "lower", -60, None, 4,
                                 sampling_rate=44100)[0].coefficients,
         rtol=0)
+
+
+def test_deprecations_audio_io():
+    with pytest.warns(
+        PyfarDeprecationWarning, match="'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'"):
+        pf.io.audio_subtypes(format='wav')
+    with pytest.warns(
+        PyfarDeprecationWarning, match="'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'"):
+        pf.io.default_audio_subtype(format='wav')
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pf.io.default_audio_subtype(format='wav')
+
+    if version.parse(pf.__version__) >= version.parse('0.9.0'):
+        with pytest.raises(TypeError):
+            pf.io.audio_subtypes(format='wav')

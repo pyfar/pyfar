@@ -73,6 +73,55 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('mode', [
+    'real', 'imag', 'abs'])
+def test_complex_time_plots(mode,
+                            handsome_complex_signal,
+                            handsome_complex_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {plot.time.__name__}, mode "
+          f"= {mode}")
+
+    # initial plot
+    filename = f'{plot.time.__name__}_{mode}_default'
+    create_figure()
+    plot.time(handsome_complex_signal, mode=mode)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = f'{plot.time.__name__}_{mode}_hold'
+    plot.time(handsome_complex_signal_v2,
+              mode=mode)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.freq), (plot.phase), (plot.group_delay),
+    (plot.freq_phase), (plot.freq_group_delay)])
+@pytest.mark.parametrize('side_flag', [
+                         'left', 'right'])
+def test_complex_freq_plots(function, side_flag,
+                            handsome_complex_signal,
+                            handsome_complex_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {function.__name__}")
+
+    # initial plot
+    filename = f'{function.__name__}_{side_flag}_default'
+    create_figure()
+    function(handsome_complex_signal, side=side_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = f'{function.__name__}_{side_flag}_hold'
+    function(handsome_complex_signal_v2, side=side_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
 @pytest.mark.parametrize('signal', ['handsome_signal', 'impulse'])
 @pytest.mark.parametrize('param', [
     ['phase_deg', True, False],
@@ -258,6 +307,26 @@ def test_spectrogram():
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('side', ['left', 'right'])
+def test_spectrogram_complex(side):
+    """Test spectrogram with default parameters"""
+    function = plot.spectrogram
+
+    print(f"Testing: {function.__name__}")
+
+    filename = function.__name__ + f'_complex_{side}_default'
+    create_figure()
+
+    sweep = pf.signals.exponential_sweep_time(2**16, [100, 10e3])
+
+    sweep.fft_norm = "none"
+    sweep.complex = True
+
+    function(sweep, side=side)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
     (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
@@ -266,6 +335,18 @@ def test_2d_plots(function, handsome_signal_2d):
     filename = function.__name__
     create_figure()
     function(handsome_signal_2d)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
+    (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
+def test_2d_plots_complex(function, handsome_signal_complex_2d):
+    """Test all 2d plots with default arguments."""
+    filename = f'complex_2d_{function.__name__}'
+    create_figure()
+    function(handsome_signal_complex_2d)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 

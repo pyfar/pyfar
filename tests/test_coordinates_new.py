@@ -329,43 +329,43 @@ def test_find_slice_error():
 
 
 @pytest.mark.parametrize(
-    ("coordinate", "min", "max"), [
+    'coordinate, minimum, maximum', [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
     ])
-def test_angle_limits_cyclic(coordinate, min, max):
+def test_angle_limits_cyclic(coordinate, minimum, maximum):
     """Test different queries for find slice."""
     # spherical grid
     d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
     c = Coordinates(d, 0, 1)
     c.__setattr__(coordinate, d)
     attr = c.__getattribute__(coordinate)
-    desired = (d - min) % (max - min) + min
+    desired = (d - minimum) % (maximum - minimum) + minimum
     np.testing.assert_allclose(attr, desired, atol=2e-14)
 
 
 @pytest.mark.parametrize(
-    ("coordinate", "min", "max"), [
+    'coordinate, minimum, maximum', [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
         ('radius', 0, np.inf),
         ('rho', 0, np.inf),
     ])
-def test_angle_cyclic_limits(coordinate, min, max):
+def test_angle_cyclic_limits(coordinate, minimum, maximum):
     """Test different queries for find slice."""
     # spherical grid
     d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
     c = Coordinates(d, 0, 1)
     c.__setattr__(coordinate, d)
     attr = c.__getattribute__(coordinate)
-    assert all(attr <= max)
-    assert all(attr >= min)
+    assert all(attr <= maximum)
+    assert all(attr >= minimum)
 
 
 @pytest.mark.parametrize(
-    ("coordinate", "min", "max"), [
+    'coordinate, minimum, maximum', [
         ('colatitude', 0, np.pi),
         ('upper', 0, np.pi),
         ('elevation', -np.pi/2, np.pi/2),
@@ -383,20 +383,21 @@ def test_angle_cyclic_limits(coordinate, min, max):
         (0),
         (np.finfo(float).eps),
     ])
-def test_angle_limits_rounded_by_2eps(coordinate, min, max, eps_min, eps_max):
+def test_angle_limits_rounded_by_2eps(
+        coordinate, minimum, maximum, eps_min, eps_max):
     """Test different queries for find slice."""
     # spherical grid
-    if max == np.inf:
-        d = np.arange(min, np.pi/4, 4*np.pi)
+    if maximum == np.inf:
+        d = np.arange(minimum, np.pi/4, 4*np.pi)
     else:
-        d = np.arange(min, np.pi/4, max)
+        d = np.arange(minimum, np.pi/4, maximum)
     d[0] -= eps_min
     d[-1] += eps_max
     c = Coordinates(d, 0, 1)
     c.__setattr__(coordinate, d)
     attr = c.__getattribute__(coordinate)
-    assert all(attr <= max)
-    assert all(attr >= min)
+    assert all(attr <= maximum)
+    assert all(attr >= minimum)
 
 
 def test__repr__dim():
