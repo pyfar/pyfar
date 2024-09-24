@@ -42,6 +42,11 @@ History
   * Harmonize class documentation (PR #631)
   * wait for test_deprecation_warnings before release (PR #696)
 
+0.6.10 (2024-09-23)
+-------------------
+* Fix bug in compress parameter in pyfar.io.write. Previously files were compressed if `compress=False` (PR #707)
+* Automation and testing: wait for test deprecations before release (PR #696)
+
 0.6.9 (2024-09-13)
 ------------------
 * Documentation
