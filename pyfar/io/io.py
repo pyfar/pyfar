@@ -72,7 +72,7 @@ def read_sofa(filename, verify=True, verbose=True):
         automatically matched.
     receiver_coordinates : Coordinates
         Coordinates object containing the data stored in
-        `SOFA_object.RecevierPosition`. The domain, convention and unit are
+        `SOFA_object.ReceiverPosition`. The domain, convention and unit are
         automatically matched.
 
     Notes
