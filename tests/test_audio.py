@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from pyfar.classes.audio import _Audio
 import pyfar as pf
@@ -25,6 +26,30 @@ def test_audio_comment():
 
     with pytest.raises(TypeError, match="comment has to be of type string."):
         pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
+
+
+def test_check_input_type_is_numeric_error():
+    """Test if error is raised."""
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        _Audio._check_input_type_is_numeric(np.array(['1', '2', '3']))
+
+
+@pytest.mark.parametrize('dtype', ['int', 'uint', 'float', 'complex'])
+def test_check_input_type_is_numeric_no_error(dtype):
+    """Test if data passes as expected."""
+    _Audio._check_input_type_is_numeric(np.array([1, 2, 3], dtype=dtype))
+
+
+@pytest.mark.parametrize('value', [np.nan, np.inf, -np.inf])
+def test_check_input_values_are_numeric_error(value):
+    """Test if errors are raised."""
+    with pytest.raises(ValueError, match="input values must be numeric"):
+        _Audio._check_input_values_are_numeric(np.array([1, 2, value]))
+
+
+def test_check_input_values_are_numeric_no_error():
+    """Test if data passes as expected."""
+    _Audio._check_input_values_are_numeric(np.array([1, 2, 3]))
 
 
 def test_not_implemented():

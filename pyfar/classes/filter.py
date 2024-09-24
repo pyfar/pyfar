@@ -84,8 +84,9 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
 
     if filter_type == "SOS":
         sec_str = 'section' if order == 1 else 'sections'
-        repr = (f"SOS filter with {order} {sec_str} and {n_channels} {ch_str} "
-                f"@ {sampling_rate} Hz sampling rate")
+        representation = (f"SOS filter with {order} {sec_str} and "
+                          f"{n_channels} {ch_str} "
+                          f"@ {sampling_rate} Hz sampling rate")
     else:
         if order % 10 == 1:
             order_string = 'st'
@@ -96,10 +97,12 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
         else:
             order_string = 'th'
 
-        repr = (f"{order}{order_string} order {filter_type} filter with "
-                f"{n_channels} {ch_str} @ {sampling_rate} Hz sampling rate")
+        representation = (f"{order}{order_string} order "
+                          f"{filter_type} filter with "
+                            f"{n_channels} {ch_str} @ {sampling_rate} "
+                            "Hz sampling rate")
 
-    return repr
+    return representation
 
 
 class Filter(object):
@@ -313,7 +316,7 @@ class FilterFIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        the channel shape of the :py:class:`~pyfar.Signal`
         to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
@@ -366,7 +369,7 @@ class FilterFIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            The channel shape of the :py:class:`~pyfar.Signal`
             which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
@@ -411,7 +414,7 @@ class FilterIIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        the channel shape of the :py:class:`~pyfar.Signal`
         to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
@@ -438,7 +441,7 @@ class FilterIIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            The channel shape of the :py:class:`~pyfar.Signal`
             which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
@@ -483,7 +486,7 @@ class FilterSOS(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
-        the channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+        the channel shape of the :py:class:`~pyfar.Signal`
         to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an emptry
@@ -532,7 +535,7 @@ class FilterSOS(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the :py:class:`~pyfar.classes.audio.Signal`
+            The channel shape of the :py:class:`~pyfar.Signal`
             which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes

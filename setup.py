@@ -68,7 +68,7 @@ setup(
         "Documentation": "https://pyfar.readthedocs.io/",
         "Source Code": "https://github.com/pyfar/pyfar",
     },
-    version='0.6.9',
+    version='0.6.10',
     zip_safe=False,
     python_requires='>=3.9'
 )

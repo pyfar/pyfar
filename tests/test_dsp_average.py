@@ -8,8 +8,15 @@ from pytest import raises
 @pytest.mark.parametrize('signal, mode, answer', (
     [pf.Signal([[1, 2, 3], [4, 5, 6]], 44100),
      'linear', [2.5, 3.5, 4.5]],
+    [pf.Signal([[1 + 1j, 2 + 2j, 3 + 3j], [4 + 4j, 5 + 5j, 6 + 6j]], 44100,
+               is_complex=True),
+     'linear', [2.5 + 2.5j, 3.5 + 3.5j, 4.5 + 4.5j]],
     [pf.TimeData([[1, 2, 3], [4, 5, 6]], [1, 2, 3]),
      'linear', [2.5, 3.5, 4.5]],
+    [pf.TimeData([[1 + 1j, 2 + 2j, 3 + 3j], [4 + 4j, 5 + 5j, 6 + 6j]],
+                 [1 + 1j, 2 + 2j, 3 + 3j],
+                 is_complex=True),
+     'linear', [2.5 + 2.5j, 3.5 + 3.5j, 4.5 + 4.5j]],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
      'magnitude_zerophase', np.zeros(65)+2],
     [pf.signals.impulse(128, [0, 2], [1, 3]),
@@ -48,6 +55,17 @@ def test_weighted_averaging():
     signal = pf.Signal([[1, 2, 3], [4, 5, 6]], 44100)
     ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))
     answer = [[1*0.8+4*0.2, 2*0.8+5*0.2, 3*0.8+6*0.2]]
+    npt.assert_almost_equal(ave_sig.time, answer, decimal=15)
+
+
+def test_complex_weighted_averaging():
+    """Tests averaging Signal with weighted channels. """
+    signal = pf.Signal([[1 + 1j, 2 + 2j, 3 + 3j], [4 + 4j, 5 + 5j, 6 + 6j]],
+                       44100, is_complex=True)
+    ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))
+    answer = [[(1 + 1j)*0.8 + (4 + 4j)*0.2,
+               (2 + 2j)*0.8 + (5 + 5j)*0.2,
+               (3 + 3j)*0.8 + (6 + 6j)*0.2]]
     npt.assert_almost_equal(ave_sig.time, answer, decimal=15)
 
 
@@ -92,9 +110,15 @@ def test_error_raises():
     with pytest.warns(UserWarning,
                       match="Averaging one dimensional caxis"):
         pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), caxis=(1, 2))
+
     with raises(ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.average(pf.Signal(np.zeros((5, 2)), 44100),
                        nan_policy='invalid')
     with raises(ValueError, match=("The signal includes NaNs.")):
-        pf.dsp.average(pf.Signal([[0, np.nan], [1, 2]], 44100),
+        pf.dsp.average(pf.TimeData([[0, np.nan], [1, 2]], [0, 1]),
                        nan_policy='raise')
+    # test invalid mode for complex time signal
+    signal.complex = True
+    with raises(ValueError,
+                match="'power' is not implemented for complex time signals."):
+        pf.dsp.average(signal, 'power')
