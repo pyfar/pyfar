@@ -304,9 +304,7 @@ def spectrogram(signal, window='hann', window_length=1024,
     window = sgn.get_window(window, window_length)
     hop = window_length - window_overlap
 
-    fft_mode = 'onesided'
-    if signal.complex:
-        fft_mode = 'twosided'
+    fft_mode = 'twosided' if signal.complex else 'onesided'
 
     SFT = sgn.ShortTimeFFT(window, hop, signal.sampling_rate,
                            fft_mode=fft_mode, scale_to='magnitude')
