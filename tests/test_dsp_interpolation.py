@@ -25,6 +25,12 @@ def test_smooth_fractional_octave_assertions():
     with raises(ValueError, match="The smoothing width"):
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
+    with raises(TypeError, match=("Fractional octave smoothing for "
+                                  "complex-valued time data is not "
+                                  "implemented.")):
+
+        smooth_fractional_octave(pf.Signal([1, 0], 1, is_complex=True), 1)
+
 
 @pytest.mark.parametrize("mode", (
     "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
@@ -34,13 +40,13 @@ def test_smooth_fractional_octave_mode(mode):
     """
 
     # load input data
-    input = np.loadtxt(os.path.join(
+    input_data = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             "dsp.smooth_fractional_octave_input.csv"))
-    input = pf.Signal(input, 44100)
+    input_data = pf.Signal(input_data, 44100)
 
     # smooth
-    output, _ = smooth_fractional_octave(input, 1, mode)
+    output, _ = smooth_fractional_octave(input_data, 1, mode)
 
     # compare to reference
     reference = np.loadtxt(os.path.join(
@@ -78,11 +84,11 @@ def test_smooth_fractional_octave_window_parameter():
     function
     """
 
-    _, window_paraeter = smooth_fractional_octave(pf.signals.impulse(64), 1)
+    _, window_parameter = smooth_fractional_octave(pf.signals.impulse(64), 1)
 
-    assert len(window_paraeter) == 2
-    assert isinstance(window_paraeter[0], int)
-    assert isinstance(window_paraeter[1], float)
+    assert len(window_parameter) == 2
+    assert isinstance(window_parameter[0], int)
+    assert isinstance(window_parameter[1], float)
 
 
 @pytest.mark.parametrize("amplitudes", (
@@ -182,6 +188,27 @@ def test_fractional_time_shift_unit():
     delayed_seconds = fractional_time_shift(impulse, 1/44100, 's')
 
     npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
+
+
+def test_fractional_time_shift_complex():
+    """Test time shift for complex-valued time signals"""
+
+    frac_delay = 12.4
+    sampling_rate = 48000
+    impulse = pf.signals.impulse(128, 30, sampling_rate=sampling_rate)
+    impulse.fft_norm = 'none'
+    impulse.complex = True
+
+    impulse_delayed = fractional_time_shift(impulse, frac_delay, 'samples')
+
+    # frequency up to which group delay is tested
+    f_id = impulse_delayed.find_nearest_frequency(19e3)
+
+    # calculate group delays and set up array of desired delays
+    group_delays = pf.dsp.group_delay(impulse_delayed)[..., 10:f_id]
+    target_delay = np.ones_like(group_delays) * (30+frac_delay)
+
+    npt.assert_allclose(group_delays, target_delay, atol=.05)
 
 
 @pytest.mark.parametrize("order", [2, 3])

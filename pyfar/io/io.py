@@ -53,10 +53,10 @@ def read_sofa(filename, verify=True):
         The audio object that is returned depends on the DataType of the SOFA
         object:
 
-        - :py:class:`~pyfar.classes.audio.Signal`
+        - :py:class:`~pyfar.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
             ``'FIR-E'``, or ``'FIRE'``.
-        - :py:class:`~pyfar.classes.audio.FrequencyData`
+        - :py:class:`~pyfar.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
             ``'TF-E'``, or ``'TFE'``.
 
@@ -104,13 +104,13 @@ def convert_sofa(sofa):
         The audio object that is returned depends on the DataType of the SOFA
         object:
 
-        - :py:class:`~pyfar.classes.audio.Signal`
+        - :py:class:`~pyfar.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
             ``'FIR-E'``, or ``'FIRE'``. In case of ``'FIR-E'``, the time data
             is returned with the `cshape` EMRN (samples are in the last
             dimension) and not MRNE as in the SOFA standard (emitters are in
             the last dimension).
-        - :py:class:`~pyfar.classes.audio.FrequencyData`
+        - :py:class:`~pyfar.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
             ``'TF-E'``, or ``'TFE'``. In case of ``'TF-E'``, the frequency data
             is returned with the `cshape` EMRN (frequencies are in the last
@@ -316,7 +316,7 @@ def write(filename, compress=False, **objs):
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
-    compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
+    compression = zipfile.ZIP_DEFLATED if compress else zipfile.ZIP_STORED
     zip_buffer = io.BytesIO()
     builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
@@ -347,7 +347,7 @@ def write(filename, compress=False, **objs):
 
 def read_audio(filename, dtype='float64', **kwargs):
     """
-    Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
+    Import an audio file as :py:class:`~pyfar.Signal` object.
 
     Reads 'wav', 'aiff', 'ogg', 'flac', and 'mp3' files among others. For a
     complete list see :py:func:`audio_formats`.
@@ -371,7 +371,7 @@ def read_audio(filename, dtype='float64', **kwargs):
     Returns
     -------
     signal : Signal
-        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
+        :py:class:`~pyfar.Signal` object containing the audio
         data.
 
     Notes
@@ -393,7 +393,7 @@ def read_audio(filename, dtype='float64', **kwargs):
 
 def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     """
-    Write a :py:class:`~pyfar.classes.audio.Signal` object as an audio file to
+    Write a :py:class:`~pyfar.Signal` object as an audio file to
     disk.
 
     Writes 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
@@ -458,13 +458,14 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     else:
         # Only the subtypes FLOAT, DOUBLE, VORBIS are not clipped,
         # see _clipped_audio_subtypes()
-        format = pathlib.Path(filename).suffix[1:]
+        format_type = pathlib.Path(filename).suffix[1:]
         if subtype is None:
-            subtype = default_audio_subtype(format)
+            subtype = default_audio_subtype(format_type)
         if (np.any(data > 1.) and
                 subtype.upper() not in ['FLOAT', 'DOUBLE', 'VORBIS']):
             warnings.warn(
-                (f'{format}-files of subtype {subtype} are clipped to +/- 1. '
+                (f'{format_type}-files of subtype {subtype} '
+                 'are clipped to +/- 1. '
                  'Normalize your audio with pyfar.dsp.normalize to 1-LSB, with'
                  ' LSB being the least significant bit (e.g. 2**-15 for '
                  "16 bit) or use non-clipping subtypes 'FLOAT', 'DOUBLE', or "
@@ -502,12 +503,16 @@ def audio_formats():
     return soundfile.available_formats()
 
 
-def audio_subtypes(format=None):
+@pf._utils.rename_arg(
+        {"format" : "audio_format"},
+        "'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'")
+def audio_subtypes(audio_format=None):
     """Return a dictionary of available audio subtypes.
 
     Parameters
     ----------
-    format : str
+    audio_format : str
         If given, only compatible subtypes are returned.
 
     Notes
@@ -527,11 +532,20 @@ def audio_subtypes(format=None):
         warnings.warn(soundfile_warning, stacklevel=2)
         return
 
-    return soundfile.available_subtypes(format=format)
+    return soundfile.available_subtypes(format=audio_format)
 
 
-def default_audio_subtype(format):
+@pf._utils.rename_arg(
+        {"format" : "audio_format"},
+        "'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'")
+def default_audio_subtype(audio_format):
     """Return the default subtype for a given format.
+
+    Parameters
+    ----------
+    audio_format : str
+        If given, only compatible subtypes are returned.
 
     Notes
     -----
@@ -550,7 +564,7 @@ def default_audio_subtype(format):
         warnings.warn(soundfile_warning, stacklevel=2)
         return
 
-    return soundfile.default_subtype(format)
+    return soundfile.default_subtype(audio_format)
 
 
 def read_comsol(filename, expressions=None, parameters=None):
