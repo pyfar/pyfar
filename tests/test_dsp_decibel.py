@@ -83,6 +83,7 @@ def test_decibel_complex():
     npt.assert_equal(pf.dsp.decibel(pf.Signal([0], 44100), domain='time'),
                      20*np.log10(np.abs(np.finfo(float).eps)))
     # Test invalid domain
-    with raises(ValueError, match=("Domain is 'invalid domain', but has to be "
-                                   "'time', 'freq', or 'freq_raw'.")):
+    with pytest.raises(
+            ValueError, match=("Domain is 'invalid domain', but has to be "
+            "'time', 'freq', or 'freq_raw'.")):
         pf.dsp.decibel(test_Signal, domain='invalid domain')

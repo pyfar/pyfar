@@ -24,7 +24,7 @@ def test_smooth_fractional_octave_assertions():
     with pytest.raises(ValueError, match="The smoothing width"):
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
-    with raises(TypeError, match=("Fractional octave smoothing for "
+    with pytest.raises(TypeError, match=("Fractional octave smoothing for "
                                   "complex-valued time data is not "
                                   "implemented.")):
 

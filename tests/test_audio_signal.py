@@ -667,7 +667,7 @@ def test_setter_freq_raw_dtype():
 
 
 @pytest.mark.parametrize("domain", ["time", "freq"])
-@pytest.mark.parametrize("is_complex, kind", [(True, "c"), (False, "f")])
+@pytest.mark.parametrize(('is_complex', 'kind'), [(True, "c"), (False, "f")])
 def test_setter_complex_(domain, is_complex, kind):
     """ test setting complex flag of time and frequency domain signals"""
     # test setting complex from False to True

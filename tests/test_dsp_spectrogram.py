@@ -60,7 +60,7 @@ def test_return_values_complex():
     npt.assert_allclose(spectro[0, 1024-255:, 1], 0, atol=1e-13)
 
 
-@pytest.mark.parametrize('window,value', [
+@pytest.mark.parametrize(("window", "value"), [
     ('rect', [0, 1, 0]),         # rect window does not spread energy
     ('hann', [.5, 1, .5])])      # hann window spreads energy
 def test_window(window, value):

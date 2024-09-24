@@ -149,8 +149,9 @@ def test__deal_time_units_mus():
 def test_assert_and_match_data_to_side_wrong_parameter():
     signal = pf.signals.sine(20, 32)
 
-    with raises(ValueError, match='Invalid `side` parameter, pass either '
-                '`left` or `right`.'):
+    with pytest.raises(
+            ValueError, match='Invalid `side` parameter, pass either '
+            '`left` or `right`.'):
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='quatsch')
 
@@ -158,8 +159,9 @@ def test_assert_and_match_data_to_side_wrong_parameter():
 def test_assert_and_match_data_to_side():
     signal = pf.signals.sine(20, 32)
 
-    with raises(ValueError, match='The left side of the spectrum is not '
-                'defined.'):
+    with pytest.raises(
+            ValueError, match='The left side of the spectrum is not '
+            'defined.'):
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='left')
 
@@ -185,8 +187,9 @@ def test_assert_and_match_data_to_side_freq():
     signal = pf.FrequencyData([3, 4, 5, 6, 7],
                               [1, 2, 3, 4, 5])
 
-    with raises(ValueError, match='The left side of the spectrum is not '
-                'defined.'):
+    with pytest.raises(
+            ValueError, match='The left side of the spectrum is not '
+            'defined.'):
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='left')
 
@@ -198,8 +201,8 @@ def test_assert_and_match_data_to_side_freq():
 
     signal = pf.FrequencyData([3, 4, 5, 6, 7],
                               [-5, -4, -3, -2, -1])
-    with raises(ValueError, match='The right side of the spectrum is not '
-                'defined.'):
+    with pytest.raises(ValueError, match='The right side of the spectrum '
+                       'is not defined.'):
         plot._utils._assert_and_match_data_to_side(
             signal.freq, signal, side='right')
 
@@ -209,7 +212,7 @@ def test_assert_and_match_data_to_side_freq():
     assert data.shape[-1] == frequencies.shape[0]
 
 
-@pytest.mark.parametrize("mode, ylabel", [('real', 'Amplitude'),
+@pytest.mark.parametrize(("mode", "ylabel"), [('real', 'Amplitude'),
                                           ('real', 'Amplitude (real)'),
                                           ('imag', 'Amplitude (imaginary)'),
                                           ('abs', 'Amplitude (absolute)')])

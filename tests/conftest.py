@@ -67,7 +67,7 @@ def sine_stub_complex():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def sine_stub_odd():
     """Sine signal stub, odd number of samples
     To be used in cases, when a dependence on the Signal class is prohibited,
@@ -257,7 +257,7 @@ def impulse_complex():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def impulse_group_delay():
     """Delayed delta impulse signal with analytical group delay.
 
@@ -306,7 +306,7 @@ def impulse_complex_group_delay():
     return signal, group_delay
 
 
-@pytest.fixture
+@pytest.fixture()
 def impulse_group_delay_two_channel():
     """Delayed 2 channel delta impulse signal with analytical group delay.
 
@@ -413,7 +413,7 @@ def sine_plus_impulse_complex():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def noise():
     """Gaussian white noise signal.
 
@@ -513,7 +513,7 @@ def handsome_complex_signal():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def handsome_complex_signal_v2():
     """
     Windowed 1kHz sine signal for testing plots
@@ -531,7 +531,7 @@ def handsome_complex_signal_v2():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def handsome_signal_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
@@ -574,7 +574,7 @@ def handsome_signal_complex_2d():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def time_data():
     """
     TimeData object with three data points.

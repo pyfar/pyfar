@@ -1017,7 +1017,7 @@ def test_convolve_mode_and_method(method, mode, desired):
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-@pytest.mark.parametrize("mode, desired", [
+@pytest.mark.parametrize(("mode", "desired"), [
     ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
@@ -1030,7 +1030,7 @@ def test_convolve_mode_and_method_complex(method, mode, desired):
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-@pytest.mark.parametrize("mode, desired", [
+@pytest.mark.parametrize(("mode", "desired"), [
     ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])

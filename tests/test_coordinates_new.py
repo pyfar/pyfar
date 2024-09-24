@@ -329,7 +329,7 @@ def test_find_slice_error():
 
 
 @pytest.mark.parametrize(
-    'coordinate, minimum, maximum', [
+    ("coordinate", "minimum", "maximum"), [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
@@ -346,7 +346,7 @@ def test_angle_limits_cyclic(coordinate, minimum, maximum):
 
 
 @pytest.mark.parametrize(
-    'coordinate, minimum, maximum', [
+    ("coordinate", "minimum", "maximum"), [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
@@ -365,7 +365,7 @@ def test_angle_cyclic_limits(coordinate, minimum, maximum):
 
 
 @pytest.mark.parametrize(
-    'coordinate, minimum, maximum', [
+    ("coordinate", "minimum", "maximum"), [
         ('colatitude', 0, np.pi),
         ('upper', 0, np.pi),
         ('elevation', -np.pi/2, np.pi/2),

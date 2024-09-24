@@ -227,8 +227,8 @@ def test_tmatrix_create_shunt_admittance_scalar_input():
     assert tmat.shape == (2,2)
     npt.assert_allclose(tmat, [[1, 0],[Y, 1]], atol=1e-15)
 
-@pytest.mark.parametrize("transducer_constant",
-                         [2.5, (2.5), FrequencyData([2.5, 5, 10], [1, 2, 3])])
+@pytest.mark.parametrize("transducer_constant", [
+    2.5, (2.5, ), FrequencyData([2.5, 5, 10], [1, 2, 3])])
 def test_tmatrix_create_transformer(transducer_constant, frequencies):
     """Test `create_transformer` for FrequencyData and scalar input."""
     tmat = TransmissionMatrix.create_transformer(transducer_constant)
@@ -246,8 +246,8 @@ def test_tmatrix_create_transformer(transducer_constant, frequencies):
     Zin = tmat.input_impedance(Zl)
     npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
 
-@pytest.mark.parametrize("transducer_constant",
-                         [2.5, (2.5), FrequencyData([2.5, 5, 10], [1, 2, 3])])
+@pytest.mark.parametrize("transducer_constant", [
+    2.5, (2.5, ), FrequencyData([2.5, 5, 10], [1, 2, 3])])
 def test_tmatrix_create_gyrator(transducer_constant, frequencies):
     """Test `create_gyrator` for FrequencyData and scalar input."""
     tmat = TransmissionMatrix.create_gyrator(transducer_constant)

@@ -193,7 +193,8 @@ def test_invalid_modes_complex(reference_method, input_signal):
     """Parametrized test for all combinations of reference_method and
     channel_handling parameters using an impulse.
     """
-    with pytest.raises(ValueError, match=("'energy', 'power', and 'rms' reference "
-                                   "method is not implemented for complex "
-                                   "time signals.")):
+    with pytest.raises(
+            ValueError, match=("'energy', 'power', and 'rms' reference "
+            "method is not implemented for complex "
+            "time signals.")):
         pf.dsp.normalize(input_signal, reference_method=reference_method)
