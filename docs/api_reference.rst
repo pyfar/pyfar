@@ -21,6 +21,7 @@ Classes
    classes/pyfar.filter
    classes/pyfar.coordinates
    classes/pyfar.orientations
+   classes/pyfar.transmission_matrix
 
 Modules
 -------

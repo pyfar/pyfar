@@ -696,7 +696,7 @@ def _frequency_domain_sweep(
         Specify the magnitude response of the sweep.
 
         signal
-            The magnitude response as :py:class:`~pyfar.classes.audio.Signal`
+            The magnitude response as :py:class:`~pyfar.Signal`
             object. If ``signal.n_samples`` is smaller than `n_samples`, zeros
             are padded to the end of `signal`. Note that `frequency_range` is
             not required in this case.

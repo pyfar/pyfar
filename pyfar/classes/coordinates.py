@@ -1,6 +1,6 @@
 r"""
 The following introduces the
-:py:func:`Coordinates class <pyfar.classes.coordinates.Coordinates>`
+:py:func:`Coordinates class <pyfar.Coordinates>`
 and the coordinate systems that are available in pyfar. Available sampling
 schemes are listed at :py:mod:`spharpy.samplings <spharpy.samplings>`.
 :ref:`Examples <gallery:/gallery/interactive/pyfar_coordinates.ipynb>` for
@@ -10,8 +10,12 @@ Different coordinate systems are frequently used in acoustics research and
 handling sampling points and different systems can be cumbersome. The
 Coordinates class was designed with this in mind. It stores coordinates in
 cartesian coordinates internally and can convert to all coordinate systems
-listed below. Additionally, the the class can  query and plot coordinates
-points. Functions for converting coordinates not stored in a Coordinates object
+listed below. Additionally, the class can query and plot coordinates
+points. Addition and subtraction are supported with numbers and Coordinates
+objects, while multiplication and division are supported with numbers only.
+All arithmetic operations are performed element-wise on Cartesian coordinates
+using the appropriate operator.
+Functions for converting coordinates not stored in a Coordinates object
 are available for convenience. However, it is strongly recommended to use the
 Coordinates class for all conversions.
 
@@ -43,58 +47,58 @@ lists all coordinates.
 
    * - Coordinate
      - Descriptions
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.x`,
-       :py:func:`~pyfar.classes.coordinates.Coordinates.y`,
-       :py:func:`~pyfar.classes.coordinates.Coordinates.z`
+   * - :py:func:`~pyfar.Coordinates.x`,
+       :py:func:`~pyfar.Coordinates.y`,
+       :py:func:`~pyfar.Coordinates.z`
      - x, y, z coordinate of a right handed Cartesian coordinate system in
        meter (:math:`-\infty` < x,y,z < :math:`\infty`).
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.azimuth`
+   * - :py:func:`~pyfar.Coordinates.azimuth`
      - Counter clock-wise angle in the x-y plane of the right handed Cartesian
        coordinate system in radians. :math:`0` radians are defined in positive
        x-direction, :math:`\pi/2` radians in positive y-direction and so on
        (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic).
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.colatitude`
+   * - :py:func:`~pyfar.Coordinates.colatitude`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians colatitude are defined in positive
        z-direction, :math:`\pi/2` radians in positive x-direction, and
        :math:`\pi` in negative z-direction
        (:math:`0\leq` colatitude :math:`\leq\pi`). The colatitude is a
        variation of the elevation angle.
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.elevation`
+   * - :py:func:`~pyfar.Coordinates.elevation`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians elevation are defined in positive
        x-direction, :math:`\pi/2` radians in positive z-direction, and
        :math:`-\pi/2` in negative z-direction
        (:math:`-\pi/2\leq` elevation :math:`\leq\pi/2`). The elevation is a
        variation of the colatitude.
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.lateral`
+   * - :py:func:`~pyfar.Coordinates.lateral`
      - Counter clock-wise angle in the x-y plane of the right handed Cartesian
        coordinate system in radians. :math:`0` radians are defined in positive
        x-direction, :math:`\pi/2` radians in positive y-direction and
        :math:`-\pi/2` in negative y-direction
        (:math:`-\pi/2\leq` lateral :math:`\leq\pi/2`).
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.polar`
+   * - :py:func:`~pyfar.Coordinates.polar`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians polar angle are defined in positive
        x-direction, :math:`\pi/2` radians in positive z-direction,
        :math:`\pi` in negative x-direction and so on
        (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic).
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.frontal`
+   * - :py:func:`~pyfar.Coordinates.frontal`
      - Angle in the y-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians frontal angle are defined in positive
        y-direction, :math:`\pi/2` radians in positive z-direction,
        :math:`\pi` in negative y-direction and so on
        (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic).
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.upper`
+   * - :py:func:`~pyfar.Coordinates.upper`
      - Angle in the x-z plane of the right handed Cartesian coordinate system
        in radians. :math:`0` radians upper angle are defined in positive
        x-direction, :math:`\pi/2` radians in positive z-direction, and
        :math:`\pi` in negative x-direction
        (:math:`0\leq` upper :math:`\leq\pi`).
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.radius`
+   * - :py:func:`~pyfar.Coordinates.radius`
      - Distance to the origin of the right handed Cartesian coordinate system
        in meters (:math:`0` < radius < :math:`\infty`).
-   * - :py:func:`~pyfar.classes.coordinates.Coordinates.rho`
+   * - :py:func:`~pyfar.Coordinates.rho`
      - Radial distance to the the z-axis of the right handed Cartesian
        coordinate system (:math:`0` < rho < :math:`\infty`).
 
@@ -2670,6 +2674,11 @@ class Coordinates():
         y = np.broadcast_to(y, shapes)
         z = np.broadcast_to(z, shapes)
 
+        # set writeable, to make sure that the class does not become read-only
+        x.setflags(write=True)
+        y.setflags(write=True)
+        z.setflags(write=True)
+
         # set values
         self._x = x
         self._y = y
@@ -2826,10 +2835,193 @@ class Coordinates():
         return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment \
             & eq_sh_order & eq_system
 
+    def __add__(self, other):
+        """Add two numbers/Coordinates objects."""
+        return _arithmetics(self, other, 'add')
+
+    def __radd__(self, other):
+        """Add two numbers/Coordinates objects."""
+        return _arithmetics(other, self, 'add')
+
+    def __sub__(self, other):
+        """Subtract two numbers/Coordinates objects."""
+        return _arithmetics(self, other, 'sub')
+
+    def __rsub__(self, other):
+        """Subtract two numbers/Coordinates objects."""
+        return _arithmetics(other, self, 'sub')
+
+    def __mul__(self, other):
+        """Multiply Coordinates object with number."""
+        return _arithmetics(self, other, 'mul')
+
+    def __rmul__(self, other):
+        """Multiply number with Coordinates object."""
+        return _arithmetics(other, self, 'mul')
+
+    def __div__(self, other):
+        """Divide Coordinates object with number."""
+        return _arithmetics(self, other, 'div')
+
+    def __truediv__(self, other):
+        """Divide Coordinates object with number."""
+        return _arithmetics(self, other, 'div')
+
+    def __rtruediv__(self, other):
+        """Divide number with Coordinates object."""
+        return _arithmetics(other, self, 'div')
+
+    def __rdiv__(self, other):
+        """Divide number with Coordinates object."""
+        return _arithmetics(other, self, 'div')
+
+
     def _check_empty(self):
         """check if object is empty."""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
+
+
+def dot(a, b):
+    """Dot product of two Coordinates objects.
+
+    .. math::
+        \\vec{a} \\cdot \\vec{b}
+        = a_x \\cdot b_x + a_y \\cdot b_y + a_z \\cdot b_z
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : np.ndarray
+        array with the dot product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(1, 0, 0)
+    >>> pf.dot(a, b)
+    array([1.])
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    return a.x * b.x + a.y * b.y + a.z * b.z
+
+
+def cross(a, b):
+    """Cross product of two Coordinates objects
+
+    .. math::
+        \\vec{a} \\times \\vec{b}
+        = (a_y \\cdot b_z - a_z \\cdot b_y) \\cdot \\hat{x}
+        + (a_z \\cdot b_x - a_x \\cdot b_z) \\cdot \\hat{y}
+        + (a_x \\cdot b_y - a_y \\cdot b_x) \\cdot \\hat{z}
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : pf.Coordinates
+        new Coordinates object with the cross product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(0, 1, 0)
+    >>> result = pf.cross(a, b)
+    >>> result.cartesian
+    array([0., 0., 1.])
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    new = Coordinates()
+    new.cartesian = np.zeros(np.broadcast_shapes(
+        a.cartesian.shape, b.cartesian.shape))
+
+    # apply cross product
+    new.x = a.y * b.z - a.z * b.y
+    new.y = a.z * b.x - a.x * b.z
+    new.z = a.x * b.y - a.y * b.x
+
+    return new
+
+def _arithmetics(first, second, operation):
+    """Add or Subtract two Coordinates objects, numbers or arrays.
+
+    Parameters
+    ----------
+    first : Coordinates, number, array
+        first operand
+    second : Coordinates, number, array
+        second operand
+    operation : 'add', 'sub', 'mul', 'div'
+        whether to add or subtract the two objects
+
+    Returns
+    -------
+    new : Coordinates
+        result of the operation
+
+    """
+    # convert data
+    data = []
+    num_objects = 0
+    for obj in [first, second]:
+        if isinstance(obj, Coordinates):
+            data.append(obj.cartesian)
+            num_objects += 1
+        elif isinstance(obj, (int, float)):
+            data.append(np.array(obj))
+        else:
+            if operation == 'add':
+                op = 'Addition'
+            elif operation == 'sub':
+                op = 'Subtraction'
+            elif operation == 'mul':
+                op = 'Multiplication'
+            elif operation == 'div':
+                op = 'Division'
+            raise TypeError(
+                f"{op} is only possible with Coordinates or number.")
+
+    if operation in ['mul', 'div'] and num_objects > 1:
+        raise TypeError(
+            "Multiplication and division are only possible with one "
+            "Coordinates object.")
+
+    # broadcast shapes
+    shape = np.broadcast_shapes(data[0].shape, data[1].shape)
+    new = pf.Coordinates()
+    new.cartesian = np.zeros(shape)
+
+    # perform operation
+    if operation == 'add':
+        new.cartesian = data[0] + data[1]
+    elif operation == 'sub':
+        new.cartesian = data[0] - data[1]
+    elif operation == 'mul':
+        new.cartesian = data[0] * data[1]
+    elif operation == 'div':
+        new.cartesian = data[0] / data[1]
+    return new
 
 
 def cart2sph(x, y, z):

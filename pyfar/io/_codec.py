@@ -399,6 +399,7 @@ def _is_pyfar_type(obj):
         'SphericalVoronoi',
         'TimeData',
         'FrequencyData',
+        'TransmissionMatrix',
         'BuiltinsWrapper']
 
 

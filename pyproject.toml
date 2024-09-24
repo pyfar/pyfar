@@ -30,6 +30,7 @@ lint.select = [
     "D419", # Docstring is empty
     "D415", # First line should end with a period
     "D417", # Missing argument descriptions in the docstring
+    "A",
     "ERA",
     "NPY",
     "COM",
