@@ -416,7 +416,7 @@ class NestedData:
         self._complex = 3 + 4j
         print('foo')
         self._tuple = (1, 2, 3)
-        self._set = set(('a', 1, 2))
+        self._set = {'a', 1, 2}
         self._frozenset = frozenset(('a', 1, 2))
 
     @classmethod
@@ -433,7 +433,7 @@ class NestedData:
             'subobject': FlatData(-1),
             'complex-number': 3 + 4j,
             'a tuple': (1, 2, 3),
-            'a set': set(('a', 1, 2)),
+            'a set': {'a', 1, 2},
             'a frozenset': frozenset(('a', 1, 2))}
         return NestedData(
             n, comment, matrix, subobj, mylist, mydict)

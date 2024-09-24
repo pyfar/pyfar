@@ -10,6 +10,7 @@ line-length = 79
 lint.ignore = []
 lint.select = [
     "ARG",
+    "C4",
     "E",
     "F",
     "W",
