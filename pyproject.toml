@@ -42,6 +42,7 @@ dependencies = [
 deploy = [
     "twine",
     "wheel",
+    "build",
     "setuptools",
     "bump-my-version",
     ]
