@@ -782,14 +782,14 @@ class TransmissionMatrix(FrequencyData):
         # try indexing and raise verbose errors if it fails
         try:
             data = self._data[key]
-        except IndexError as Error:
-            if 'too many indices for array' in str(Error):
+        except IndexError as error:
+            if 'too many indices for array' in str(error):
                 raise IndexError((
                     f'Indexed dimensions must not exceed the ABCD '
                     f'channel dimension (abcd_cdim), which is '
-                    f'{len(self.abcd_cshape)}'))
+                    f'{len(self.abcd_cshape)}')) from error
             else:
-                raise Error
+                raise error
 
         return TransmissionMatrix.from_tmatrix(
             data, frequencies=self.frequencies,

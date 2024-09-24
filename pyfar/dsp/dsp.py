@@ -1335,7 +1335,7 @@ def find_impulse_response_delay(impulse_response, N=1):
                 else:
                     start_sample[idx] = np.nan
                     warnings.warn('Starting sample not found for channel '
-                                  f'{ch}')
+                                  f'{ch}', stacklevel=2)
             else:
                 start_sample[idx] = np.nan
 
@@ -1453,7 +1453,7 @@ def find_impulse_response_start(
             warnings.warn(
                 "The SNR seems lower than the specified threshold value. "
                 "Check if this is a valid impulse response with sufficient "
-                "SNR.")
+                "SNR.", stacklevel=2)
 
         start_sample = max_sample.copy()
 
@@ -1474,7 +1474,7 @@ def find_impulse_response_start(
                     start_sample[ch] = 0
                     warnings.warn(
                         'No values below threshold found found for channel '
-                        f'{ch} defaulting to 0')
+                        f'{ch} defaulting to 0', stacklevel=2)
 
         ir_start[idx] = start_sample
 
