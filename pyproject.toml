@@ -1,25 +1,75 @@
-[tool.ruff]
-exclude = [
-    ".git",
-    "docs",
-    "setup.py",
-    "pyfar/dsp/filter/_audiofilter.py",
-    "pyfar/samplings/external",
-]
-line-length = 79
-lint.ignore = []
-lint.select = [
-    "ARG",
-    "C4",
-    "E",
-    "F",
-    "W",
-    "A",
-    "ERA",
-    "NPY",
-    "COM",
-    "I002",
-    "TID252",
-    "FIX",
-]
+#------------------------------------------------------------------------------
+# Copyright (c) The pyfar developers
+#------------------------------------------------------------------------------
 
+[project]
+name = "pyfar"
+dynamic = ["version"]
+description = "Project for data formats in acoustics."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+authors = [
+    { name = "The pyfar developers", email = "info@pyfar.org" },
+]
+keywords = [
+    "pyfar",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "numpy>=1.23.0",
+    "scipy>=1.5.0",
+    "matplotlib",
+    "sofar>=0.1.2",
+    "urllib3",
+    "deepdiff",
+    "soundfile>=0.11.0",
+]
+# TODO: add maintainers section here
+
+[project.optional-dependencies]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "wheel",
+    "watchdog",
+    "ruff==0.6.5",
+    "coverage",
+    "twine",
+]
+docs = [
+    "sphinx<8",
+    "autodocsumm",
+    "pydata-sphinx-theme",
+    "sphinx_mdinclude",
+    "sphinx-design",
+    "sphinx-favicon",
+    "sphinx-reredirects",
+]
+dev = ["pyfar[setup,tests,docs]"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/pyfar/pyfar/issues"
+Documentation = "https://pyfar.readthedocs.io/"
+Download = "https://pypi.org/project/pyfar/"
+Homepage = "https://pyfar.org/"
+"Source Code" = "https://github.com/pyfar/pyfar"
+changelog = "https://github.com/pyfar/pyfar/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find = {}  # Scan the project directory with the default parameters
