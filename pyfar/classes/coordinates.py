@@ -553,6 +553,12 @@ class Coordinates():
             raise ValueError(
                 (f"Conversion for {convention} is not implemented."))
 
+        if unit != 'met':
+            # Can not be tested. Will only be raised if a coordinate system
+            # is not fully implemented.
+            raise ValueError(
+                f"Unit for {unit} is not implemented")
+
         # make array
         x = np.atleast_1d(np.asarray(x, dtype=np.float64))
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
@@ -569,7 +575,7 @@ class Coordinates():
         # save coordinates to self
         self._set_points(x, y, z)
 
-    def get_cart(self, convention='right', unit='met', convert=False):
+    def get_cart(self, convention='right', unit='met', convert=False):  # noqa: ARG002
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of :py:func:`cartesian`
@@ -732,7 +738,9 @@ class Coordinates():
         # save coordinates to self
         self._set_points(x, y, z)
 
-    def get_sph(self, convention='top_colat', unit='rad', convert=False):
+    def get_sph(
+            self, convention='top_colat', unit='rad',
+            convert=False):  # noqa: ARG002
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of the `spherical_...` properties. For conversions from or into degree
@@ -807,7 +815,9 @@ class Coordinates():
         points[..., 1] = points[..., 1] * conversion_factor
         return points
 
-    def _get_sph(self, convention='top_colat', unit='rad', convert=False):
+    def _get_sph(
+            self, convention='top_colat', unit='rad',
+            convert=False):  # noqa: ARG002
         # check if object is empty
         self._check_empty()
 
@@ -898,9 +908,7 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the cylindrical property."),
                 PyfarDeprecationWarning)
-        if unit == 'deg':
-            azimuth = azimuth / 180 * np.pi
-        self._set_cyl(azimuth, z, radius_z, convention)
+        self._set_cyl(azimuth, z, radius_z, convention, unit)
 
     def _set_cyl(self, azimuth, z, rho, convention='top', unit='rad'):
 
@@ -946,7 +954,8 @@ class Coordinates():
         # save coordinates to self
         self._set_points(x, y, z)
 
-    def get_cyl(self, convention='top', unit='rad', convert=False):
+    def get_cyl(
+            self, convention='top', unit='rad', convert=False):  # noqa: ARG002
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of the `cylindrical` property. For conversions from or into degree
@@ -994,7 +1003,12 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the cylindrical property."),
                 PyfarDeprecationWarning)
+
+        if not convention == 'top':
+            raise ValueError(
+                f"Conversion for {convention} is not implemented.")
         points = self.cylindrical
+
 
         conversion_factor = 1 if unit == 'rad' else 180 / np.pi
         points[..., 0] = points[..., 0] * conversion_factor
@@ -1680,9 +1694,9 @@ class Coordinates():
                 index_multi = np.moveaxis(index, -1, 0)
                 index = np.empty((k), dtype=tuple)
                 for kk in range(k):
-                    index[kk] = tuple([index_multi[kk]])
+                    index[kk] = (index_multi[kk], )
             else:
-                index = tuple([index])
+                index = (index, )
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
             index_multi = []
@@ -1841,9 +1855,9 @@ class Coordinates():
         if self.cdim == 1:
             if find.csize > 1:
                 for i in range(len(index)):
-                    index[i] = tuple([index[i]])
+                    index[i] = (index[i], )
             else:
-                index = tuple([index])
+                index = (index, )
 
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)

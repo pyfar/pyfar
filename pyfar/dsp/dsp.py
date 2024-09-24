@@ -2344,7 +2344,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                           'len(signal.cshape).'))
     # set caxis default
     if caxis is None:
-        caxis = tuple([i for i in range(len((signal.cshape)))])
+        caxis = tuple(i for i in range(len((signal.cshape))))
 
     # check if averaging over one dimensional caxis
     if 1 in signal.cshape:

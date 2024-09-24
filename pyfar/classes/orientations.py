@@ -63,7 +63,7 @@ class Orientations(Rotation):
     def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, copy=copy, **kwargs)
+        super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
 
     @classmethod
     def from_view_up(cls, views, ups):

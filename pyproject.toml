@@ -3,10 +3,14 @@ exclude = [
     ".git",
     "docs",
     "setup.py",
+    "pyfar/dsp/filter/_audiofilter.py",
+    "pyfar/samplings/external",
 ]
 line-length = 79
 lint.ignore = []
 lint.select = [
+    "ARG",
+    "C4",
     "E",
     "F",
     "W",
