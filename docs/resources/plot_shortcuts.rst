@@ -58,11 +58,13 @@ Note that not all plots are available for TimeData and FrequencyData objects as 
    * - shift+minus, alt+shift+down
      - zoom colormap range out
    * - shift+x
-     - toggle between linear and logarithmic x-axis
+     - toggle x-axis unit or scale (see below for more information)
    * - shift+y
-     - toggle between linear and logarithmic y-axis
+     - toggle y-axis unit or scale (see below for more information)
    * - shift+c
-     - toggle between linear and logarithmic color data
+     - toggle colormap unit (see below for more information)
+   * - shift+m
+     - toggle display of complex audio data (real, imaginary, or absolute time data; left or right-sided spectrum)
    * - shift+a
      - toggle between plotting all channels and plotting single channels
    * - <
@@ -78,7 +80,14 @@ Note that not all plots are available for TimeData and FrequencyData objects as 
 
 - Moving and zooming the x and y axes is supported by all plots.
 - Moving and zooming the colormap is only supported by plots that have a colormap.
-- Toggling the x-axis is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay`
-- Toggling the y-axis is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay`
-- Toggling the colormap is supported by: :py:func:`~pyfar.plot.spectrogram`
-- Toggling between line and 2D plots is not supported by: spectrogram
+- Toggling the x-axis, y-axis and colormap toggles between
+
+  - linear and logarithmic axis scaling for frequency axes,
+  - seconds, milliseconds, microseconds, and samples for time axes,
+  - linear amplitude and amplitude in dB for axes showing amplitudes,
+  - wrapped and unwrapped phase for axes showing phase phase information.
+
+- Toggling the x-axis style is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay` (and their 2d versions)
+- Toggling the y-axis style is supported by: :py:func:`~pyfar.plot.time`, :py:func:`~pyfar.plot.freq`, :py:func:`~pyfar.plot.phase`, :py:func:`~pyfar.plot.group_delay`, :py:func:`~pyfar.plot.spectrogram`, :py:func:`~pyfar.plot.time_freq`, :py:func:`~pyfar.plot.freq_phase`, :py:func:`~pyfar.plot.freq_group_delay` (and their 2d versions)
+- Toggling the colormap style is supported by all 2d plots
+- Toggling between line and 2D plots is not supported by: :py:func:`~pyfar.plot.spectrogram`
