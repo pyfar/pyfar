@@ -40,9 +40,9 @@ jobs:
       - run:
           name: Install System Dependencies
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
-      - run:
-          name: install dependencies
-          command: pip install -e ".[tests]"
+      - python/install-packages:
+          args: ".[tests]"
+          pkg-manager: pip
       - run:
           name: Run tests
           command: pytest
@@ -59,9 +59,9 @@ jobs:
 
     steps:
       - checkout
-      - run:
-          name: install dependencies
-          command: pip install -e ".[tests]"
+      - python/install-packages:
+          args: ".[tests]"
+          pkg-manager: pip
       - run:
           name: Ruff
           command: ruff check
@@ -81,10 +81,12 @@ jobs:
       - run:
           name: Install System Dependencies
           command: sudo apt-get update && sudo apt-get install -y libsndfile1 texlive-latex-extra dvipng
+      - python/install-packages:
+          args: ".[docs]"
+          pkg-manager: pip
       - run:
           name: Sphinx
           command: |
-            pip install -e ".[docs]"
             cd docs/
             make html SPHINXOPTS="-W"
 
@@ -96,9 +98,9 @@ jobs:
       - run:
           name: Install System Dependencies
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
-      - run:
-          name: install dependencies
-          command: pip install -e ".[tests]"
+      - python/install-packages:
+          args: ".[tests]"
+          pkg-manager: pip
       - run: |
           python --version
       - run:
@@ -120,9 +122,9 @@ jobs:
       - run:
           name: Install System Dependencies
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
-      - run:
-          name: install dependencies
-          command: pip install -e ".[deploy]"
+      - python/install-packages:
+          args: ".[deploy]"
+          pkg-manager: pip
       - run:
           name: deploy
           command: |  # create whl, install twine and publish to Test PyPI
@@ -144,9 +146,9 @@ jobs:
       - run:
           name: Install System Dependencies
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
-      - run:
-          name: install dependencies
-          command: pip install -e ".[deploy]"
+      - python/install-packages:
+          args: ".[deploy]"
+          pkg-manager: pip
       - run:
           name: deploy
           command: |  # create whl, install twine and publish to Test PyPI
