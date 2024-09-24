@@ -39,14 +39,18 @@ dependencies = [
 # TODO: add maintainers section here
 
 [project.optional-dependencies]
+deploy = [
+    "twine",
+    "wheel",
+    "setuptools",
+    "bump2version",
+    ]
 tests = [
     "pytest",
     "pytest-cov",
-    "wheel",
     "watchdog",
     "ruff==0.6.5",
     "coverage",
-    "twine",
 ]
 docs = [
     "sphinx<8",
@@ -57,7 +61,7 @@ docs = [
     "sphinx-favicon",
     "sphinx-reredirects",
 ]
-dev = ["pyfar[setup,tests,docs]"]
+dev = ["pyfar[deploy,tests,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/pyfar/pyfar/issues"
