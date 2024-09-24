@@ -126,7 +126,7 @@ jobs:
       - run:
           name: deploy
           command: |  # create whl, install twine and publish to Test PyPI
-            pip install build
+            python -m build
             twine check dist/*
 
   run_pypi_publish:
@@ -150,7 +150,8 @@ jobs:
       - run:
           name: deploy
           command: |  # create whl, install twine and publish to Test PyPI
-            pip install build
+            python -m build
+            twine check dist/*
             twine upload dist/*
 
 # Invoke jobs via workflows
