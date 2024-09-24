@@ -349,7 +349,7 @@ def test_setter_fft_norm():
 
 
 def test_fft_selection():
-    """Test if appropriate FFT is computed"""
+    """Test if appropriate FFT is computed."""
     signal = Signal([1, 2, 3], 44100, is_complex=False)
     assert signal.freq.shape[1] == 2
 
@@ -667,7 +667,7 @@ def test_setter_freq_raw_dtype():
 @pytest.mark.parametrize("domain", ["time", "freq"])
 @pytest.mark.parametrize("is_complex, kind", [(True, "c"), (False, "f")])
 def test_setter_complex_(domain, is_complex, kind):
-    """ test setting complex flag of time and frequency domain signals"""
+    """ test setting complex flag of time and frequency domain signals."""
     # test setting complex from False to True
     # for time domain signals
 
@@ -679,7 +679,7 @@ def test_setter_complex_(domain, is_complex, kind):
 
 
 def test_setter_complex_assert():
-    """ test setting complex flag of time and frequency domain signals"""
+    """ test setting complex flag of time and frequency domain signals."""
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
                     is_complex=True)
@@ -697,7 +697,7 @@ def test_setter_complex_assert():
 
 def test_setter_complex_even():
     """ test setting complex flag of time and frequency domain signals
-        with even number of samples """
+    with even number of samples. """
     # test setting complex from False to True
     # for time domain signals
     signal = Signal([0, 1, 2, 3], 44100, 4, "time")
@@ -746,7 +746,7 @@ def test_setter_complex_even():
 
 def test_setter_complex_odd():
     """ test setting complex flag of time and frequency domain signals
-        with odd number of samples """
+    with odd number of samples. """
     # test setting complex from False to True
     # for time domain signals
     signal = Signal([0, 1, 2, 3, 4], 44100, 5, "time")
@@ -795,7 +795,7 @@ def test_setter_complex_odd():
 
 def test_frequencies():
     """
-    Test computing the discrete frequencies of the rfft/fft
+    Test computing the discrete frequencies of the rfft/fft.
     """
     # test frequencies from a real-valued signals
     # with odd number of samples

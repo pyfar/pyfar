@@ -37,7 +37,7 @@ def test_return_values():
 
 
 def test_return_values_complex():
-    """Test return values of the spectrogram with default parameters"""
+    """Test return values of the spectrogram with default parameters."""
     # test signal and spectrogram
     signal = pf.signals.sine(256, 2*1024, sampling_rate=1024)
     signal.fft_norm = "none"

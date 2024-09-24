@@ -79,7 +79,7 @@ def test_output_length():
 @pytest.mark.parametrize("is_complex_sig2", [True, False])
 def test_output_sweep(is_complex_sig1, is_complex_sig2):
     """test of flat output frequency response resulting from deconvolving
-       a sweep with the same sweep."""
+    a sweep with the same sweep."""
     fs = 44100
     sweep_1 = pfs.exponential_sweep_time(fs, (100, 10000))
     sweep_2 = pfs.exponential_sweep_time(fs, (100, 10000))

@@ -260,7 +260,7 @@ def test_regularized_spectrum_inversion(impulse):
 
 
 def test_regularized_spectrum_inversion_complex(impulse_complex):
-    """Test regularized_spectrum_inversion for complex input signals"""
+    """Test regularized_spectrum_inversion for complex input signals."""
     res = dsp.regularized_spectrum_inversion(impulse_complex * 2, [200, 10e3])
 
     ind = impulse_complex.find_nearest_frequency([200, 10e3])
@@ -331,7 +331,7 @@ def test_time_shift_cyclic(shift_samples, unit):
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
 @pytest.mark.parametrize("unit", ["samples", "s"])
 def test_time_shift_cyclic_complex(shift_samples, unit):
-    """Test cyclic time shift using samples and seconds"""
+    """Test cyclic time shift using samples and seconds."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -383,7 +383,7 @@ def test_time_shift_linear(shift, pad_value):
 @pytest.mark.parametrize("shift", [2, -2, 0])
 @pytest.mark.parametrize("pad_value", [0, np.nan])
 def test_time_shift_linear_complex(shift, pad_value):
-    """Test linear time shift with different pad values"""
+    """Test linear time shift with different pad values."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -978,7 +978,7 @@ def test_convolve_default():
 
 
 def test_convolve_complex():
-    '''Test dsp.convolve with complex signals with default parameters'''
+    '''Test dsp.convolve with complex signals with default parameters.'''
     x = pf.Signal([1, 0.5, 0.25, 0], 44100, is_complex=True)
     y = pf.Signal([1, -1, 0], 44100, is_complex=True)
 
@@ -1021,7 +1021,7 @@ def test_convolve_mode_and_method(method, mode, desired):
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
 def test_convolve_mode_and_method_complex(method, mode, desired):
-    '''Test dsp.convolve with complex signals with various methods and modes'''
+    """Test convolve with complex signals with various methods and modes."""
     x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=True)
     y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
     res = dsp.convolve(x, y, mode=mode, method=method)
@@ -1034,7 +1034,7 @@ def test_convolve_mode_and_method_complex(method, mode, desired):
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
 def test_convolve_mode_and_method_real_complex(method, mode, desired):
-    '''Test dsp.convolve with complex signals with various methods and modes'''
+    """Test convolve with complex signals with various methods and modes."""
     x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=False)
     y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
     res = dsp.convolve(x, y, mode=mode, method=method)

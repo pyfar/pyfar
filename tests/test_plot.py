@@ -305,7 +305,7 @@ def test_spectrogram():
 
 @pytest.mark.parametrize('side', ['left', 'right'])
 def test_spectrogram_complex(side):
-    """Test spectrogram with default parameters"""
+    """Test spectrogram with default parameters."""
     function = plot.spectrogram
 
     print(f"Testing: {function.__name__}")

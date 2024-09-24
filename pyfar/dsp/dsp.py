@@ -1916,7 +1916,6 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
 
     Examples
     --------
-
     Illustrate effect of limit and knee
 
     .. plot ::
@@ -2013,7 +2012,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> ax.legend(loc='upper left')
 
     References
-    -----------
+    ----------
     .. [#] B. Bernschütz, Microphone arrays and sound field decomposition for
            dynamic binaural synthesis, Ph.D Thesis, (Berlin, Germany,
            TU Berlin, 2016).

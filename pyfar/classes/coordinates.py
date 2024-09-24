@@ -2918,7 +2918,7 @@ def dot(a, b):
 
 
 def cross(a, b):
-    """Cross product of two Coordinates objects
+    """Cross product of two Coordinates objects.
 
     .. math::
         \\vec{a} \\times \\vec{b}

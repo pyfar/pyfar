@@ -497,7 +497,7 @@ def handsome_signal_v2():
 @pytest.fixture
 def handsome_complex_signal():
     """
-    Windows 200 Hz sine signal, with complex valued data for testing plots
+    Windows 200 Hz sine signal, with complex valued data for testing plots.
 
     Returns
     -------
@@ -516,7 +516,7 @@ def handsome_complex_signal():
 @pytest.fixture
 def handsome_complex_signal_v2():
     """
-    Windowed 1kHz sine signal for testing plots
+    Windowed 1kHz sine signal for testing plots.
 
     Returns
     -------
@@ -556,7 +556,7 @@ def handsome_signal_2d():
 def handsome_signal_complex_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
-    for testing 2D plots
+    for testing 2D plots.
 
     Returns
     -------

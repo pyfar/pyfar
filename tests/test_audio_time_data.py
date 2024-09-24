@@ -38,7 +38,7 @@ def test_data_time_init_wrong_dtype():
 
 def test_time_init_complex_flag():
     """
-    Test assertion from non boolean complex flag
+    Test assertion from non boolean complex flag.
     """
     complex_flag = 1
     with pytest.raises(TypeError, match="``is_complex`` flag is "

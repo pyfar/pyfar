@@ -263,7 +263,7 @@ def test_write_read_frequencydata(frequency_data, tmpdir):
 
 def test_write_read_transmissionmatrix(tmpdir):
     """ TransmissionMatrix
-    Make sure `read` understands the bits written by `write`
+    Make sure `read` understands the bits written by `write`.
     """
     tmatrix = TransmissionMatrix.create_transformer(FrequencyData(42, 100))
     filename = os.path.join(tmpdir, 'transmissionmatrix.far')
