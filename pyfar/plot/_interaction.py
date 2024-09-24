@@ -1084,8 +1084,12 @@ class Interaction(object):
 
         # write new text
         with plt.style.context(utils.plotstyle(self.style)):
-            bbox = dict(boxstyle="round", fc=mpl.rcParams["axes.facecolor"],
-                        ec=mpl.rcParams["axes.facecolor"], alpha=.5)
+            bbox = {
+                'boxstyle': "round",
+                'fc': mpl.rcParams["axes.facecolor"],
+                'ec': mpl.rcParams["axes.facecolor"],
+                'alpha': .5,
+                }
 
             self.txt = self.ax.text(
                 x_pos, y_pos, f'Ch. {self.cycler.current_channel}',
