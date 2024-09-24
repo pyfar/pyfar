@@ -715,7 +715,7 @@ class Signal(FrequencyData, TimeData):
     comment : str, optional
         A comment related to `data`. The default is ``""``, which
         initializes an empty string.
-    is_complex : bool
+    is_complex : bool, optional
         Specifies if the underlying time domain data are complex
         or real-valued. If ``True`` and `domain` is ``'time'``, the
         input data will be cast to complex. The default is ``False``.
