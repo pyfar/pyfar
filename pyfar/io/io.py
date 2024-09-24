@@ -711,7 +711,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     expressions_header = np.array(re.findall(exp_pattern, header))
     domain_header = np.array(
         [float(x) for x in re.findall(domain_pattern, header)])
-    parameter_header = dict()
+    parameter_header = {}
     for key in parameters:
         parameter_header[key] = np.array(
             [float(x) for x in re.findall(key+value_pattern, header)])
@@ -727,8 +727,8 @@ def read_comsol(filename, expressions=None, parameters=None):
     temp_shape = [n_nodes, len(expressions), n_combinations, len(domain_data)]
 
     # create pairs of parameter values
-    pairs = np.meshgrid(*[x for x in parameters.values()])
-    parameter_pairs = dict()
+    pairs = np.meshgrid(*list(parameters.values()))
+    parameter_pairs = {}
     for idx, key in enumerate(parameters):
         parameter_pairs[key] = pairs[idx].T.flatten()
 
@@ -900,7 +900,7 @@ def read_comsol_header(filename):
     # create parameters dict
     parameter_names = _unique_strings(re.findall(param_pattern, header))
     parameter_names.remove(domain_str)
-    parameters = dict()
+    parameters = {}
     for para_name in parameter_names:
         unit = _unique_strings(
             re.findall(para_name + param_unit_pattern, header))
@@ -914,7 +914,7 @@ def read_comsol_header(filename):
 
 def _read_comsol_metadata(filename):
     suffix = pathlib.Path(filename).suffix
-    metadata = dict()
+    metadata = {}
     # loop over meta data lines (starting with %)
     number_names = ['Dimension', 'Nodes', 'Expressions']
     with open(filename) as f:

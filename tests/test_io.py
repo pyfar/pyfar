@@ -128,7 +128,7 @@ def test_write_read_flat_data(tmpdir, flat_data):
 
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
-def test_write_read_nested_data(nested_data, flat_data, tmpdir):
+def test_write_read_nested_data(nested_data, tmpdir):
     filename = os.path.join(tmpdir, 'write_nested_flat_data.far')
     io.write(filename, nested_data=nested_data)
     actual = io.read(filename)
@@ -625,7 +625,7 @@ def test_write_audio_nd(noise_two_by_three_channel, tmpdir):
 
 
 @patch('soundfile.write')
-def test_write_audio_clip(sf_write_mock):
+def test_write_audio_clip(sf_write_mock):  # noqa: ARG001
     """Test for clipping warning."""
     signal = pyfar.Signal([1., 2., 3.], 44100)
     with pytest.warns(Warning, match='clipped'):

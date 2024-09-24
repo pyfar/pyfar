@@ -87,7 +87,7 @@ def context(style='light', after_reset=False):
     style = plotstyle(style)
 
     # apply plot style
-    with mpl_style.context(style):
+    with mpl_style.context(style, after_reset=after_reset):
         yield
 
 
