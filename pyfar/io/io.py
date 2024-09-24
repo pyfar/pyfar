@@ -34,7 +34,7 @@ from . import _codec as codec
 import pyfar.classes.filter as fo
 
 
-def read_sofa(filename, verify=True):
+def read_sofa(filename, verify=True, verbose=True):
     """
     Import a SOFA file as pyfar object.
 
@@ -46,6 +46,9 @@ def read_sofa(filename, verify=True):
         Verify if the data contained in the SOFA file agrees with the AES69
         standard (see references). If the verification fails, the SOFA file
         can be loaded by setting ``verify=False``. The default is ``True``
+    verbose : bool, optional
+        Print the names of detected custom variables and attributes.
+        The default is True.
 
     Returns
     -------
@@ -85,7 +88,7 @@ def read_sofa(filename, verify=True):
 
     """
 
-    sofa = sf.read_sofa(filename, verify)
+    sofa = sf.read_sofa(filename, verify, verbose)
     return convert_sofa(sofa)
 
 
