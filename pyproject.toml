@@ -4,7 +4,7 @@
 
 [project]
 name = "pyfar"
-dynamic = ["version"]
+version = "0.6.10"
 description = "Project for data formats in acoustics."
 readme = "README.md"
 license = {file = "LICENSE"}
