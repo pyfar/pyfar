@@ -43,7 +43,7 @@ deploy = [
     "twine",
     "wheel",
     "setuptools",
-    "bump2version",
+    "bump-my-version",
     ]
 tests = [
     "pytest",
