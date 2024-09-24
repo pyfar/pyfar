@@ -262,7 +262,7 @@ def test_write_read_frequencydata(frequency_data, tmpdir):
     assert actual == frequency_data
 
 def test_write_read_transmissionmatrix(tmpdir):
-    """ TransmissionMatrix
+    """TransmissionMatrix
     Make sure `read` understands the bits written by `write`.
     """
     tmatrix = TransmissionMatrix.create_transformer(FrequencyData(42, 100))
@@ -285,7 +285,7 @@ def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
 
 
 def test_write_read_filter(filterObject, tmpdir):
-    """ Filter
+    """Filter
     Make sure `read` understands the bits written by `write`.
     """
     filename = os.path.join(tmpdir, 'filter.far')

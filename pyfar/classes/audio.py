@@ -327,6 +327,7 @@ class TimeData(_Audio):
         A flag which indicates if the time data are real or complex-valued.
         The default is ``False``.
     """
+
     def __init__(self, data, times, comment="", is_complex=False):
         """Create TimeData object with data, and times."""
 

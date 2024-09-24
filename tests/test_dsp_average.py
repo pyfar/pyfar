@@ -59,7 +59,7 @@ def test_weighted_averaging():
 
 
 def test_complex_weighted_averaging():
-    """Tests averaging Signal with weighted channels. """
+    """Tests averaging Signal with weighted channels."""
     signal = pf.Signal([[1 + 1j, 2 + 2j, 3 + 3j], [4 + 4j, 5 + 5j, 6 + 6j]],
                        44100, is_complex=True)
     ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))

@@ -96,7 +96,8 @@ def test_group_delay_single_channel(impulse_group_delay):
 
 def test_complex_group_delay_single_channel(impulse_complex_group_delay):
     """Test the function returning the group delay of a signal,
-    single channel."""
+    single channel.
+    """
     signal = impulse_complex_group_delay[0]
 
     grp = dsp.group_delay(signal, method='scipy')
@@ -461,7 +462,7 @@ def test_time_window_default():
 
 
 def test_time_window_complex():
-    """ Test time_window function with default values."""
+    """Test time_window function with default values."""
     sig = pyfar.Signal(np.ones(10), 2, is_complex=True)
     sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
     time_win = np.atleast_2d(sgn.windows.hann(10, sym=True)).astype(complex)
@@ -988,7 +989,7 @@ def test_convolve_default():
 
 
 def test_convolve_complex():
-    '''Test dsp.convolve with complex signals with default parameters.'''
+    """Test dsp.convolve with complex signals with default parameters."""
     x = pf.Signal([1, 0.5, 0.25, 0], 44100, is_complex=True)
     y = pf.Signal([1, -1, 0], 44100, is_complex=True)
 

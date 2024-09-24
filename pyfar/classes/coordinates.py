@@ -2903,7 +2903,7 @@ class Coordinates():
 
 
 def dot(a, b):
-    """Dot product of two Coordinates objects.
+    r"""Dot product of two Coordinates objects.
 
     .. math::
         \\vec{a} \\cdot \\vec{b}
@@ -2938,7 +2938,7 @@ def dot(a, b):
 
 
 def cross(a, b):
-    """Cross product of two Coordinates objects.
+    r"""Cross product of two Coordinates objects.
 
     .. math::
         \\vec{a} \\times \\vec{b}

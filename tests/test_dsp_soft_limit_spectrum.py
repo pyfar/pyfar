@@ -78,7 +78,7 @@ def test_frequency_dependend_limit():
 @pytest.mark.parametrize('limit', [-10, 0, 10])
 @pytest.mark.parametrize('knee', [0, 5, 10])
 def test_knee_width_in_db(limit, knee):
-    "Test the knee width given in decibel."""
+    """Test the knee width given in decibel."""
 
     data_in = pf.FrequencyData(10**(np.arange(-100, 101)/20), np.arange(201))
     data_out = soft_limit_spectrum(data_in, limit, knee)
