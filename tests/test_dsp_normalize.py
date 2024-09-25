@@ -38,9 +38,12 @@ def test_normalization(reference_method, channel_handling, truth):
     npt.assert_allclose(answer.time[..., 0], truth, rtol=1e-14)
 
 
-def test_domains_normalization():
+@pytest.mark.parametrize('is_complex', [False, True])
+def test_domains_normalization(is_complex):
     """Test for normalization in time and frequency domain."""
     signal = pf.signals.noise(128, seed=7)
+    signal.fft_norm = "none"
+    signal.complex = is_complex
     time = pf.dsp.normalize(signal, domain="time")
     freq = pf.dsp.normalize(signal, domain="freq")
 
@@ -49,6 +52,19 @@ def test_domains_normalization():
 
     assert np.max(np.abs(freq.time)) != 1
     npt.assert_allclose(np.max(np.abs(freq.freq)), 1)
+
+
+def test_auto_domain_normalization():
+    """Test for normalization with auto domain."""
+    signal = pf.Signal([1, 3, 0], 10)
+    time_data = pf.TimeData([1, 3, 0], [0, 1, 4])
+    freq_data = pf.FrequencyData([2, 0, 1.5], [10, 100, 1000])
+
+    assert pf.dsp.normalize(signal) == pf.dsp.normalize(signal, domain='time')
+    assert pf.dsp.normalize(time_data) == pf.dsp.normalize(time_data,
+                                                           domain='time')
+    assert pf.dsp.normalize(freq_data) == pf.dsp.normalize(freq_data,
+                                                           domain='freq')
 
 
 @pytest.mark.parametrize('unit, limit1, limit2', (
@@ -132,7 +148,8 @@ def test_error_raises():
                                    "'pyfar.classes.audio.TimeData'>'")):
         pf.dsp.normalize(pf.TimeData([1, 1, 1], [1, 2, 3]), domain='freq')
 
-    with raises(ValueError, match=("domain must be 'time' or 'freq'.")):
+    with raises(ValueError, match=("domain must be 'time', 'freq' or 'auto' "
+                                   "but is 'invalid_domain'.")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), domain='invalid_domain')
 
     with raises(ValueError, match=("reference_method must be 'max', 'mean',")):
@@ -154,4 +171,22 @@ def test_error_raises():
     with raises(ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.normalize(pf.Signal([0, 1, 0], 44100), nan_policy='invalid')
     with raises(ValueError, match=("The signal includes NaNs.")):
-        pf.dsp.normalize(pf.Signal([0, np.nan, 0], 44100), nan_policy='raise')
+        pf.dsp.normalize(pf.TimeData([0, np.nan, 0], [0, 1, 3]),
+                         nan_policy='raise')
+
+
+@pytest.mark.parametrize('reference_method', ['energy', 'power', 'rms'])
+@pytest.mark.parametrize('input_signal', [pf.TimeData([1, 1, 1],
+                                                      [0, 1, 2],
+                                                      is_complex=True),
+                                          pf.Signal([1, 0, 1],
+                                                    sampling_rate=48000,
+                                                    is_complex=True)])
+def test_invalid_modes_complex(reference_method, input_signal):
+    """Parametrized test for all combinations of reference_method and
+    channel_handling parameters using an impulse.
+    """
+    with raises(ValueError, match=("'energy', 'power', and 'rms' reference "
+                                   "method is not implemented for complex "
+                                   "time signals.")):
+        pf.dsp.normalize(input_signal, reference_method=reference_method)

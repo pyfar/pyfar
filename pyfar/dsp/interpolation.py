@@ -10,12 +10,12 @@ from decimal import Decimal
 import warnings
 
 
-def _weighted_moving_average(input, output, weights):
+def _weighted_moving_average(input_data, output, weights):
     """Moving average filter of length N and arbitrary.
 
     Parameters
     ----------
-    input : numpy.ndarray
+    input_data : numpy.ndarray
         The input array
     output : numpy.ndarray
         The output buffer
@@ -28,15 +28,15 @@ def _weighted_moving_average(input, output, weights):
     Note
     ----
     This function is primarily intended to be used in combination with
-    ``scipy.ndimage.generic_filter1d``. The input is strided instead of
+    :py:func:`scipy.ndimage.generic_filter1d`. The input is strided instead of
     reshaped, leaving the memory layout unchanged. The function does also not
     return it's output but requires the output buffer as function input, which
-    is required by ``scipy.ndimage.generic_filter1d``.
+    is required by :py:func:`scipy.ndimage.generic_filter1d`.
 
     """
     strided = np.lib.stride_tricks.as_strided(
-        input, strides=input.strides*2,
-        shape=(weights.size, input.size - (weights.size-1)))
+        input_data, strides=input_data.strides*2,
+        shape=(weights.size, input_data.size - (weights.size-1)))
     output[:] = np.average(strided, weights=weights, axis=0)
 
 
@@ -52,6 +52,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     2. Smooth the spectrum by convolution with a smoothing window
     3. Interpolate the spectrum to the original linear frequency scale
 
+    Smoothing of complex-valued time data is not implemented.
 
     Parameters
     ----------
@@ -155,6 +156,10 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     if not isinstance(signal, pf.Signal):
         raise TypeError("Input signal has to be of type pyfar.Signal")
 
+    if type(signal) is not pf.FrequencyData and signal.complex:
+        raise TypeError(("Fractional octave smoothing for complex-valued "
+                         "time data is not implemented."))
+
     if mode in ["magnitude_zerophase", "magnitude"]:
         data = [np.atleast_2d(np.abs(signal.freq_raw))]
     elif mode == "complex":
@@ -173,7 +178,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     n_log = N**(n_lin/(N-1))
 
     # frequency bin spacing in octaves: log2(n_log[n]/n_log[n-1])
-    # Note: n_log[0] = 1
+    # Note: n_log[0] -> 1
     delta_n = np.log2(n_log[1])
 
     # width of the window in logarithmically spaced samples
@@ -261,8 +266,7 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
         float, the same shift is applied to all channels of `signal`. If this
         is an array like different delays are applied to the channels of
         `signal`. In this case it must broadcast to `signal.cshape` (see
-        `Numpy broadcasting
-        <https://numpy.org/doc/stable/user/basics.broadcasting.html>`_)
+        :doc:`Numpy broadcasting<numpy:user/basics.broadcasting>`)
     unit : str, optional
         The unit of the shift. Either 'samples' or 's'. Defaults to 'samples'.
     order : int, optional
@@ -453,7 +457,8 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
              post_filter=False):
     """Resample signal to new sampling rate.
 
-    The SciPy function ``scipy.signal.resample_poly`` is used for resampling.
+    The SciPy function :py:func:`scipy.signal.resample_poly` is used for
+    resampling.
     The resampling ratio ``L = sampling_rate/signal.sampling_rate``
     is approximated by a fraction of two integer numbers `up/down` to first
     upsample the signal by `up` and then downsample by `down`. This way `up`
@@ -606,7 +611,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
     # resample data with scipy resampe_poly function
     data = sgn.resample_poly(signal.time, up, down, axis=-1)
     data = pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
-                     comment=signal.comment)
+                     comment=signal.comment, is_complex=signal.complex)
 
     if post_filter and L > 1:
 
@@ -674,7 +679,7 @@ class InterpolateSpectrum():
             Differ when interpolating half-integers (e.g. 0.5, 1.5) in that
             ``'nearest-up'`` rounds up and ``'nearest'`` rounds down.
 
-        The interpolation is done using ``scipy.interpolate.interp1d``.
+        The interpolation is done using :py:class:`scipy.interpolate.interp1d`.
     fscale : string, optional
 
         ``'linear'``
@@ -694,7 +699,7 @@ class InterpolateSpectrum():
     -------
     interpolator : :py:class:`InterpolateSpectrum`
         The interpolator can be called to interpolate the data (see examples
-        below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has
+        below). It returns a :py:class:`~pyfar.Signal` and has
         the following parameters
 
         `n_samples` : int

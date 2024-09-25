@@ -16,7 +16,7 @@ def plotstyle(style='light'):
     Parameters
     ----------
     style : str
-        ``light``, or ``dark``
+        ``light`` or ``dark``
 
     Returns
     -------
@@ -42,7 +42,7 @@ def context(style='light', after_reset=False):
     """Context manager for using plot styles temporarily.
 
     This context manager supports the two pyfar styles ``light`` and ``dark``.
-    It is a wrapper for ``matplotlib.pyplot.style.context()``.
+    It is a wrapper for :py:func:`matplotlib.style.context`.
 
     Parameters
     ----------
@@ -52,10 +52,10 @@ def context(style='light', after_reset=False):
         +------+-------------------------------------------------------------+
         | str  | The name of a style or a path/URL to a style file. For a    |
         |      | list of available style names, see                          |
-        |      | ``matplotlib.style.available``.                             |
+        |      | :py:data:`matplotlib.style.available`.                      |
         +------+-------------------------------------------------------------+
         | dict | Dictionary with valid key/value pairs for                   |
-        |      | ``matplotlib.rcParams``.                                    |
+        |      | :py:data:`matplotlib.rcParams`.                             |
         +------+-------------------------------------------------------------+
         | Path | A path-like object which is a path to a style file.         |
         +------+-------------------------------------------------------------+
@@ -87,7 +87,7 @@ def context(style='light', after_reset=False):
     style = plotstyle(style)
 
     # apply plot style
-    with mpl_style.context(style):
+    with mpl_style.context(style, after_reset=after_reset):
         yield
 
 
@@ -96,8 +96,9 @@ def use(style="light"):
     Use plot style settings from a style specification.
 
     The style name of ``default`` is reserved for reverting back to
-    the default style settings. This is a wrapper for ``matplotlib.style.use``
-    that supports the pyfar plot styles ``light`` and ``dark``.
+    the default style settings. This is a wrapper for
+    :py:func:`matplotlib.style.use` that supports the pyfar plot styles
+    ``light`` and ``dark``.
 
     Parameters
     ----------
@@ -107,10 +108,10 @@ def use(style="light"):
         +------+-------------------------------------------------------------+
         | str  | The name of a style or a path/URL to a style file. For a    |
         |      | list of available style names, see                          |
-        |      | ``matplotlib.style.available``.                             |
+        |      | :py:data:`matplotlib.style.available`.                      |
         +------+-------------------------------------------------------------+
         | dict | Dictionary with valid key/value pairs for                   |
-        |      | ``matplotlib.rcParams``.                                    |
+        |      | :py:data:`matplotlib.rcParams`.                             |
         +------+-------------------------------------------------------------+
         | Path | A path-like object which is a path to a style file.         |
         +------+-------------------------------------------------------------+
@@ -201,7 +202,7 @@ def shortcuts(show=True, report=False, layout="console"):
     `Matplotlib backend
     <https://matplotlib.org/stable/users/explain/backends.html>`_
 
-    .. include:: ../../docs/concepts/resources/plot_shortcuts.rst
+    .. include:: ../../docs/resources/plot_shortcuts.rst
 
     Parameters
     ----------
@@ -234,7 +235,6 @@ def shortcuts(show=True, report=False, layout="console"):
         # get list of plots that allow toggling axes and colormaps
         x_toggle = []
         y_toggle = []
-        cm_toggle = []
         for plot in short_cuts["plots"]:
             params = PlotParameter(plot)
             if params.x_type is not None:
@@ -243,9 +243,6 @@ def shortcuts(show=True, report=False, layout="console"):
             if params.y_type is not None:
                 if len(params.y_type) > 1:
                     y_toggle.append(plot)
-            if params.cm_type is not None:
-                if len(params.cm_type) > 1:
-                    cm_toggle.append(plot)
 
         # shortcuts for toggling between plots
         if layout == "console":
@@ -313,22 +310,36 @@ def shortcuts(show=True, report=False, layout="console"):
         elif layout == "sphinx":
             sc_str += "\n**Notes on plot controls**\n\n"
 
-        x_toggle_str = [f":py:func:`~pyfar.plot.{x}`" for x in x_toggle]
-        y_toggle_str = [f":py:func:`~pyfar.plot.{y}`" for y in y_toggle]
-        cm_toggle_str = [f":py:func:`~pyfar.plot.{c}`" for c in cm_toggle]
+        # generate links to plot function for sphinx documentation
+        if layout == 'sphinx':
+            x_toggle = [f":py:func:`~pyfar.plot.{x}`" for x in x_toggle]
+            y_toggle = [f":py:func:`~pyfar.plot.{y}`" for y in y_toggle]
+            spectrogram = ":py:func:`~pyfar.plot.spectrogram`"
+        else:
+            spectrogram = "spectrogram"
 
         sc_str += ("- Moving and zooming the x and y axes is supported by all "
                    "plots.\n"
                    "- Moving and zooming the colormap is only supported by "
                    "plots that have a colormap.\n"
-                   "- Toggling the x-axis is supported by: "
-                   f"{', '.join(x_toggle_str)}\n"
-                   "- Toggling the y-axis is supported by: "
-                   f"{', '.join(y_toggle_str)}\n"
-                   "- Toggling the colormap is supported by: "
-                   f"{', '.join(cm_toggle_str)}\n"
+                   "- Toggling the x-axis, y-axis and colormap toggles "
+                   "between\n\n"
+                   "  - linear and logarithmic axis scaling for frequency "
+                   "axes,\n"
+                   "  - seconds, milliseconds, microseconds, and samples for "
+                   "time axes,\n"
+                   "  - linear amplitude and amplitude in dB for axes showing "
+                   "amplitudes,\n"
+                   "  - wrapped and unwrapped phase for axes showing phase "
+                   "phase information.\n\n"
+                   "- Toggling the x-axis style is supported by: "
+                   f"{', '.join(x_toggle)} (and their 2d versions)\n"
+                   "- Toggling the y-axis style is supported by: "
+                   f"{', '.join(y_toggle)} (and their 2d versions)\n"
+                   "- Toggling the colormap style is supported by all "
+                   "2d plots\n"
                    "- Toggling between line and 2D plots is not supported by:"
-                   " spectrogram\n")
+                   f" {spectrogram}\n")
 
     if show:
         print(sc_str)

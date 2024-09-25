@@ -25,6 +25,12 @@ def test_smooth_fractional_octave_assertions():
     with raises(ValueError, match="The smoothing width"):
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
+    with raises(TypeError, match=("Fractional octave smoothing for "
+                                  "complex-valued time data is not "
+                                  "implemented.")):
+
+        smooth_fractional_octave(pf.Signal([1, 0], 1, is_complex=True), 1)
+
 
 @pytest.mark.parametrize("mode", (
     "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
@@ -34,13 +40,13 @@ def test_smooth_fractional_octave_mode(mode):
     """
 
     # load input data
-    input = np.loadtxt(os.path.join(
+    input_data = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             "dsp.smooth_fractional_octave_input.csv"))
-    input = pf.Signal(input, 44100)
+    input_data = pf.Signal(input_data, 44100)
 
     # smooth
-    output, _ = smooth_fractional_octave(input, 1, mode)
+    output, _ = smooth_fractional_octave(input_data, 1, mode)
 
     # compare to reference
     reference = np.loadtxt(os.path.join(
@@ -78,17 +84,17 @@ def test_smooth_fractional_octave_window_parameter():
     function
     """
 
-    _, window_paraeter = smooth_fractional_octave(pf.signals.impulse(64), 1)
+    _, window_parameter = smooth_fractional_octave(pf.signals.impulse(64), 1)
 
-    assert len(window_paraeter) == 2
-    assert isinstance(window_paraeter[0], int)
-    assert isinstance(window_paraeter[1], float)
+    assert len(window_parameter) == 2
+    assert isinstance(window_parameter[0], int)
+    assert isinstance(window_parameter[1], float)
 
 
 @pytest.mark.parametrize("amplitudes", (
     1,                   # single channel signal
     [1, .9, .8, .7],     # flat multi-channel signal.
-    [[1, .9], [.8, .7]]  # 2D multi-channel signal
+    [[1, .9], [.8, .7]],  # 2D multi-channel signal
 ))
 def test_smooth_fractional_octave_input_signal_shape(amplitudes):
     """
@@ -145,7 +151,7 @@ def test_fractional_time_shift_assertions():
     # multi channel signal with single channel delays
     ([64, 32], 10.4), ([[64, 32], [48, 16]], 10.4),
     # multi channel signals with multi channel delays
-    ([64, 32], [10.4, 5.4]), ([[64, 32], [48, 16]], [10.4, 5.4])
+    ([64, 32], [10.4, 5.4]), ([[64, 32], [48, 16]], [10.4, 5.4]),
 ])
 def test_fractional_time_shift_channels(
         mode, delays_impulse, fractional_delays):
@@ -184,6 +190,27 @@ def test_fractional_time_shift_unit():
     npt.assert_almost_equal(delayed_samples.time, delayed_seconds.time)
 
 
+def test_fractional_time_shift_complex():
+    """Test time shift for complex-valued time signals"""
+
+    frac_delay = 12.4
+    sampling_rate = 48000
+    impulse = pf.signals.impulse(128, 30, sampling_rate=sampling_rate)
+    impulse.fft_norm = 'none'
+    impulse.complex = True
+
+    impulse_delayed = fractional_time_shift(impulse, frac_delay, 'samples')
+
+    # frequency up to which group delay is tested
+    f_id = impulse_delayed.find_nearest_frequency(19e3)
+
+    # calculate group delays and set up array of desired delays
+    group_delays = pf.dsp.group_delay(impulse_delayed)[..., 10:f_id]
+    target_delay = np.ones_like(group_delays) * (30+frac_delay)
+
+    npt.assert_allclose(group_delays, target_delay, atol=.05)
+
+
 @pytest.mark.parametrize("order", [2, 3])
 def test_fractional_delay_order(order):
     """Test if the order parameter behaves as intended"""
@@ -203,7 +230,7 @@ def test_fractional_delay_mode_cyclic(delay):
     delayed = fractional_time_shift(signal, delay, mode="cyclic")
 
     # if the delay is too large, it is cyclicly shifted
-    group_delay = pf.dsp.group_delay(delayed)[0]
+    group_delay = pf.dsp.group_delay(delayed)[0, 0]
     npt.assert_allclose(group_delay, (16+delay) % 32, atol=.05)
 
 
@@ -281,7 +308,7 @@ def test_interpolate_spectrum_init_assertions():
       [np.linspace(0, 3, 13), np.linspace(0, 3*np.pi, 13)]),
 
      ("magnitude", [1, 2], [1, 2], 12, 6,
-      [0, .5, 1, 1.5, 2, 2.5, 3])
+      [0, .5, 1, 1.5, 2, 2.5, 3]),
     ])
 def test_interpolate_spectrum_interpolation(
         method, freq_in, frequencies, freq_out, n_samples, sampling_rate):

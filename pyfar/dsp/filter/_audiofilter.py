@@ -7,9 +7,7 @@ this code is included in the open educational resource
 computational examples"
 
 hosted at
-URL = ('https://github.com/spatialaudio/'
-       'digital-signal-processing-lecture/tree/master/'
-       'filter_design')
+URL = ('https://github.com/spatialaudio/digital-signal-processing-lecture/tree/master/filter_design')
 
 and is licensed under The MIT License (MIT):
 Copyright (c) 2020 Sascha Spors, Frank Schultz
@@ -29,7 +27,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-"""
+"""   # noqa: E501
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 import numpy as np
@@ -87,11 +85,17 @@ def q_from_bw(bw):
 def f_prewarping(f, fs):
     """Do the frequency prewarping.
 
-    input:
-    f...analog frequency in Hz to be prewarped
-    fs...sampling frequency in Hz
-    output:
-    prewarped angular frequency in rad/s
+    Parameters
+    ----------
+    f : float
+        analog frequency in Hz to be prewarped
+    fs : float
+        sampling frequency in Hz
+
+    Returns
+    -------
+    float
+        prewarped angular frequency in rad/s
     """
     return 2*fs*np.tan(np.pi*f/fs)
 

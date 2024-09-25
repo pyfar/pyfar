@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 import pyfar as pf
-import pyfar.dsp.filter as filter
 
 
 def test_gammatone_bands_init_and_getter():
@@ -12,10 +11,10 @@ def test_gammatone_bands_init_and_getter():
     """
 
     # initialize filter bank
-    GFB = filter.GammatoneBands([0, 22050], resolution=.5)
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050], resolution=.5)
 
     # test the getter
-    npt.assert_array_equal(GFB.freq_range, [0, 22050])
+    npt.assert_array_equal(GFB.frequency_range, [0, 22050])
     assert GFB.resolution == .5
     assert GFB.reference_frequency == 1000
     assert GFB.frequencies.shape == (85, )
@@ -69,10 +68,10 @@ def test_gammatone_bands_init_and_getter():
 
 
 @pytest.mark.parametrize('amplitudes,shape_filtered,sampling_rate', (
-    [np.array([1]), (85, 2048), 44100],
-    [np.array([1]), (85, 2048), 48000],
-    [np.array([1]), (85, 2048), 96000],
-    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100]
+    [np.array([1]), (85, 1, 2048), 44100],
+    [np.array([1]), (85, 1, 2048), 48000],
+    [np.array([1]), (85, 1, 2048), 96000],
+    [np.array([[1, 2], [3, 4]]), (85, 2, 2, 2048), 44100],
 ))
 def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     """
@@ -82,7 +81,7 @@ def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
     """
 
     # initialize filter bank
-    GFB = filter.GammatoneBands(
+    GFB = pf.dsp.filter.GammatoneBands(
         [0, 22050], resolution=.5, sampling_rate=sampling_rate)
 
     # filter and sum an impulse signal
@@ -111,7 +110,7 @@ def test_gammatone_bands_roundtrip(amplitudes, shape_filtered, sampling_rate):
 
 def test_gammatone_bands_reset_state():
 
-    GFB = filter.GammatoneBands([0, 22050])
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
 
     # filter in one block
     real, imag = GFB.process(pf.signals.impulse(2**12))
@@ -122,32 +121,32 @@ def test_gammatone_bands_reset_state():
         pf.Signal(np.zeros(2**11), 44100), reset=False)
 
     # check for equality
-    npt.assert_array_equal(real_a.time, real.time[:, :2**11])
-    npt.assert_array_equal(imag_a.time, imag.time[:, :2**11])
+    npt.assert_array_equal(real_a.time, real.time[:, :, :2**11])
+    npt.assert_array_equal(imag_a.time, imag.time[:, :, :2**11])
 
-    npt.assert_array_equal(real_b.time, real.time[:, -2**11:])
-    npt.assert_array_equal(imag_b.time, imag.time[:, -2**11:])
+    npt.assert_array_equal(real_b.time, real.time[:, :, -2**11:])
+    npt.assert_array_equal(imag_b.time, imag.time[:, :, -2**11:])
 
 
 def test_gammatone_bands_assertions():
     """Test all assertions"""
 
     # wrong values in freq_range
-    with pytest.raises(ValueError, match="Values in freq_range must be"):
-        filter.GammatoneBands([-1, 22050])
-    with pytest.raises(ValueError, match="Values in freq_range must be"):
-        filter.GammatoneBands([0, 24e3])
+    with pytest.raises(ValueError, match="Values in frequency_range must be"):
+        pf.dsp.filter.GammatoneBands([-1, 22050])
+    with pytest.raises(ValueError, match="Values in frequency_range must be"):
+        pf.dsp.filter.GammatoneBands([0, 24e3])
 
     # wrong value for delay
     with pytest.raises(ValueError, match="The delay must be larger than zero"):
-        filter.GammatoneBands([0, 22050], delay=0)
+        pf.dsp.filter.GammatoneBands([0, 22050], delay=0)
 
     # wrong value for resolution
     with pytest.raises(ValueError, match="The resolution must be larger than"):
-        filter.GammatoneBands([0, 22050], resolution=0)
+        pf.dsp.filter.GammatoneBands([0, 22050], resolution=0)
 
     # mismatching type for filter
-    GFB = filter.GammatoneBands([0, 22050])
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
     with pytest.raises(TypeError, match="signal must be"):
         GFB.process([1, 0, 0])
 
@@ -159,16 +158,28 @@ def test_gammatone_bands_assertions():
 def test_gammatone_bands_repr():
     """Test string representation"""
 
-    GFB = filter.GammatoneBands([0, 22050])
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
     assert str(GFB) == ("Reconstructing Gammatone filter bank with 42 bands "
                         "between 0 and 22050 Hz spaced by 1 ERB units "
                         "@ 44100 Hz sampling rate")
 
 
+@pytest.mark.parametrize('shape', [(4, 1), (1, 4), (1,), (1, 1)])
+def test_gammatone_bands_shape(shape):
+    """Test the shape of GammatoneBands-filtered signals"""
+    impulse = pf.signals.impulse(2048, 0, np.ones(shape))
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
+
+    real, imag = GFB.process(impulse)
+
+    assert real.time.shape == (GFB.n_bands, *shape, impulse.n_samples)
+    assert imag.time.shape == (GFB.n_bands, *shape, impulse.n_samples)
+
+
 def test_erb_frequencies():
     """Test erb_frequencies against reference from the AMT toolbox"""
 
-    frequencies = filter.erb_frequencies([0, 22050], .5)
+    frequencies = pf.dsp.filter.erb_frequencies([0, 22050], .5)
 
     # assert type and length
     assert isinstance(frequencies, np.ndarray)
@@ -185,13 +196,13 @@ def test_erb_frequencies_assertions():
     """Test assertions for erb_frequencies"""
 
     # freq_range must be an array of length 2
-    with pytest.raises(ValueError, match="freq_range must be an array"):
-        filter.erb_frequencies(1)
-    with pytest.raises(ValueError, match="freq_range must be an array"):
-        filter.erb_frequencies([1])
+    with pytest.raises(ValueError, match="frequency_range must be an array"):
+        pf.dsp.filter.erb_frequencies(1)
+    with pytest.raises(ValueError, match="frequency_range must be an array"):
+        pf.dsp.filter.erb_frequencies([1])
     # values freq_range must be increasing
-    with pytest.raises(ValueError, match="The first value of freq_range"):
-        filter.erb_frequencies([1, 0])
+    with pytest.raises(ValueError, match="The first value of frequency_range"):
+        pf.dsp.filter.erb_frequencies([1, 0])
     # resolution must be > 0
     with pytest.raises(ValueError, match="Resolution must be larger"):
-        filter.erb_frequencies([0, 1], 0)
+        pf.dsp.filter.erb_frequencies([0, 1], 0)

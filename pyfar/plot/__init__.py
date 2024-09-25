@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """
-The following documents the pyfar plot functions. Refer to the
-:py:mod:`concepts <pyfar._concepts.plots>` for more background information.
-"""
+The following documents the pyfar plot functions. Make sure to have a look at
+the
+:doc:`plotting<gallery:gallery/interactive/pyfar_plotting>` and
+:doc:`interactive plotting<gallery:gallery/interactive/pyfar_interactive_plots>`
+examples. The latter make use of the pyfar
+:py:func:`~pyfar.plot.shortcuts` to quickly explore acoustic signals.
+"""  # noqa: E501
 
 from .line import (
     freq,
@@ -13,7 +17,7 @@ from .line import (
     time_freq,
     freq_phase,
     freq_group_delay,
-    custom_subplots
+    custom_subplots,
 )
 
 from .two_d import (
@@ -24,12 +28,12 @@ from .two_d import (
     time_freq_2d,
     freq_phase_2d,
     freq_group_delay_2d,
-    spectrogram
+    spectrogram,
 )
 
 from .spatial import (
     scatter,
-    quiver
+    quiver,
 )
 
 from .utils import (
@@ -37,7 +41,7 @@ from .utils import (
     context,
     use,
     color,
-    shortcuts
+    shortcuts,
 )
 
 __all__ = [
@@ -63,5 +67,5 @@ __all__ = [
     'context',
     'use',
     'color',
-    'shortcuts'
+    'shortcuts',
 ]

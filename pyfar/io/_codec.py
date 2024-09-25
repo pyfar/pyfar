@@ -154,7 +154,7 @@ def _decode(obj, zipfile):
     if isinstance(obj, dict):
         for key in obj.keys():
             _inner_decode(obj, key, zipfile)
-    elif any([isinstance(obj, x) for x in [list, tuple, set, frozenset]]):
+    elif isinstance(obj, (list, tuple, set, frozenset)):
         for i in range(0, len(obj)):
             _inner_decode(obj, i, zipfile)
 
@@ -195,7 +195,7 @@ def _inner_decode(obj, key, zipfile):
     elif obj[key][0][1:] == 'tuple':
         obj[key] = tuple(obj[key][1])
     elif obj[key][0][1:] == 'set':
-        obj[key] = set(tuple(obj[key][1]))
+        obj[key] = set(obj[key][1])
     elif obj[key][0][1:] == 'frozenset':
         obj[key] = frozenset(tuple(obj[key][1]))
     elif obj[key][0][1:] == 'bytes':
@@ -326,9 +326,9 @@ def _inner_encode(obj, key, zip_path, zipfile):
     elif isinstance(obj[key], complex):
         obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
     elif isinstance(obj[key], (tuple, set, frozenset)):
-        obj[key] = [f'${type(obj[key]).__name__ }', list(obj[key])]
+        obj[key] = [f'${type(obj[key]).__name__}', list(obj[key])]
     elif isinstance(obj[key], bytes):
-        obj[key] = [f'${type(obj[key]).__name__ }', obj[key].hex()]
+        obj[key] = [f'${type(obj[key]).__name__}', obj[key].hex()]
     else:
         _encode(obj[key], zip_path, zipfile)
 
@@ -398,6 +398,7 @@ def _is_pyfar_type(obj):
         'SphericalVoronoi',
         'TimeData',
         'FrequencyData',
+        'TransmissionMatrix',
         'BuiltinsWrapper']
 
 

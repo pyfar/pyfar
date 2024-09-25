@@ -1,9 +1,110 @@
-"""
-The following documents the pyfar coordinates class and functions for
-coordinate conversion. More background information is given in
-:py:mod:`coordinates concepts <pyfar._concepts.coordinates>`.
-Available sampling schemes are listed at
-:py:mod:`spharpy.samplings <spharpy.samplings>`.
+r"""
+The following introduces the
+:py:func:`Coordinates class <pyfar.Coordinates>`
+and the coordinate systems that are available in pyfar. Available sampling
+schemes are listed at :py:mod:`spharpy.samplings <spharpy.samplings>`.
+:ref:`Examples <gallery:/gallery/interactive/pyfar_coordinates.ipynb>` for
+working with Coordinates objects are part of the pyfar gallery.
+
+Different coordinate systems are frequently used in acoustics research and
+handling sampling points and different systems can be cumbersome. The
+Coordinates class was designed with this in mind. It stores coordinates in
+cartesian coordinates internally and can convert to all coordinate systems
+listed below. Additionally, the class can query and plot coordinates
+points. Addition and subtraction are supported with numbers and Coordinates
+objects, while multiplication and division are supported with numbers only.
+All arithmetic operations are performed element-wise on Cartesian coordinates
+using the appropriate operator.
+Functions for converting coordinates not stored in a Coordinates object
+are available for convenience. However, it is strongly recommended to use the
+Coordinates class for all conversions.
+
+.. _coordinate_systems:
+
+Coordinate Systems
+------------------
+
+Each coordinate system has a unique name, e.g., `spherical_elevation`, and is
+defined by three coordinates, in this case `azimuth`, `elevation`, and
+`radius`. The available coordinate systems are shown in the image below.
+
+|coordinate_systems|
+
+.. _coordinates:
+
+Coordinates
+-----------
+
+The unit for length for the coordinates is always meter, while the unit for
+angles is radians. Each coordinate is unique, but can appear in multiple
+coordinate systems, e.g., the `azimuth` angle is contained in two coordinate
+systems (`spherical_colatitude` and `spherical_elevation`). The table below
+lists all coordinates.
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Coordinate
+     - Descriptions
+   * - :py:func:`~pyfar.Coordinates.x`,
+       :py:func:`~pyfar.Coordinates.y`,
+       :py:func:`~pyfar.Coordinates.z`
+     - x, y, z coordinate of a right handed Cartesian coordinate system in
+       meter (:math:`-\infty` < x,y,z < :math:`\infty`).
+   * - :py:func:`~pyfar.Coordinates.azimuth`
+     - Counter clock-wise angle in the x-y plane of the right handed Cartesian
+       coordinate system in radians. :math:`0` radians are defined in positive
+       x-direction, :math:`\pi/2` radians in positive y-direction and so on
+       (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic).
+   * - :py:func:`~pyfar.Coordinates.colatitude`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians colatitude are defined in positive
+       z-direction, :math:`\pi/2` radians in positive x-direction, and
+       :math:`\pi` in negative z-direction
+       (:math:`0\leq` colatitude :math:`\leq\pi`). The colatitude is a
+       variation of the elevation angle.
+   * - :py:func:`~pyfar.Coordinates.elevation`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians elevation are defined in positive
+       x-direction, :math:`\pi/2` radians in positive z-direction, and
+       :math:`-\pi/2` in negative z-direction
+       (:math:`-\pi/2\leq` elevation :math:`\leq\pi/2`). The elevation is a
+       variation of the colatitude.
+   * - :py:func:`~pyfar.Coordinates.lateral`
+     - Counter clock-wise angle in the x-y plane of the right handed Cartesian
+       coordinate system in radians. :math:`0` radians are defined in positive
+       x-direction, :math:`\pi/2` radians in positive y-direction and
+       :math:`-\pi/2` in negative y-direction
+       (:math:`-\pi/2\leq` lateral :math:`\leq\pi/2`).
+   * - :py:func:`~pyfar.Coordinates.polar`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians polar angle are defined in positive
+       x-direction, :math:`\pi/2` radians in positive z-direction,
+       :math:`\pi` in negative x-direction and so on
+       (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic).
+   * - :py:func:`~pyfar.Coordinates.frontal`
+     - Angle in the y-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians frontal angle are defined in positive
+       y-direction, :math:`\pi/2` radians in positive z-direction,
+       :math:`\pi` in negative y-direction and so on
+       (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic).
+   * - :py:func:`~pyfar.Coordinates.upper`
+     - Angle in the x-z plane of the right handed Cartesian coordinate system
+       in radians. :math:`0` radians upper angle are defined in positive
+       x-direction, :math:`\pi/2` radians in positive z-direction, and
+       :math:`\pi` in negative x-direction
+       (:math:`0\leq` upper :math:`\leq\pi`).
+   * - :py:func:`~pyfar.Coordinates.radius`
+     - Distance to the origin of the right handed Cartesian coordinate system
+       in meters (:math:`0` < radius < :math:`\infty`).
+   * - :py:func:`~pyfar.Coordinates.rho`
+     - Radial distance to the the z-axis of the right handed Cartesian
+       coordinate system (:math:`0` < rho < :math:`\infty`).
+
+.. |coordinate_systems| image:: resources/coordinate_systems.png
+   :width: 100%
+   :alt: pyfar coordinate systems
 """
 
 import numpy as np
@@ -19,8 +120,99 @@ import pyfar as pf
 
 class Coordinates():
     """
-    Container class for storing, converting, rotating, querying, and plotting
-    3D coordinate systems.
+    This function will be changed in pyfar 0.8.0 and will just be able to
+    get cartesian coordinates. If you want to initialize in an other
+    domain use :py:func:`from_spherical_colatitude`,
+    :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
+    :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
+    instead. For conversions from or into degree
+    use :py:func:`deg2rad` and :py:func:`rad2deg`.
+
+    Create :py:func:`Coordinates` object with or without coordinate points.
+    The points that enter the Coordinates object are defined by the `name`
+    (`domain`, `convention`, and `unit`. The `unit` will be deprecated in pyfar
+    v0.8.0 in favor of fixed default units, see :ref:`coordinate_systems` and
+    :ref:`coordinates`)
+
+    +--------------------+----------+------------+----------+----------+
+    | domain, convention | points_1 | points_2   | points_3 | unit     |
+    +====================+==========+============+==========+==========+
+    | cart, right        | x        | y          | z        | met      |
+    +--------------------+----------+------------+----------+----------+
+    | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | sph, side          | lateral  | polar      | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | sph, front         | phi      | theta      | radius   | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+    | cyl, top           | azimuth  | z          | radius_z | rad, deg |
+    +--------------------+----------+------------+----------+----------+
+
+    Parameters
+    ----------
+    points_1 : array like, number
+        Points for the first coordinate.
+        ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+        to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+    points_2 : array like, number
+        Points for the second coordinate.
+        ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+        to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+    points_3 : array like, number
+        Points for the third coordinate.
+        ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
+        to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
+    domain : string
+        ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+        parameters will be deprecated in pyfar 0.8.0 in favor of
+        ``from_*``.  Different units are no longer supported. The unit is
+        meter for distances and radians for angles.
+        domain of the coordinate system
+
+        ``'cart'``
+            Cartesian
+        ``'sph'``
+            Spherical
+        ``'cyl'``
+            Cylindrical
+
+        The default is ``'cart'``.
+    convention: string
+        ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+        parameters will be deprecated in pyfar 0.8.0 in favor of
+        ``from_*``.  Different units are no longer supported.
+        Default angle unit is radiant.
+
+        Coordinate convention (see above)
+        The default is ``'right'`` if domain is ``'cart'``,
+        ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
+        ``'cyl'``.
+    unit: string
+        ``'domain'``, ``'unit'`` and ``'convention'`` initialization
+        parameters will be deprecated in pyfar 0.8.0 in favor of
+        ``from_*``. Different units are no longer supported. Default
+        angle unit is radiant.
+        The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of the :py:func:`deg2rad` and :py:func:`rad2deg`.
+
+        Unit of the coordinate system. By default the first available unit
+        is used, which is meters (``'met'``) for ``domain = 'cart'`` and
+        radians (``'rad'``) in all other cases (See above).
+    weights: array like, number, optional
+        Weighting factors for coordinate points. The `shape` of the array
+        must match the `shape` of the individual coordinate arrays.
+        The default is ``None``.
+    sh_order : int, optional
+        This property will be deprecated in pyfar 0.8.0 in favor of
+        :py:class:`spharpy.samplings.SamplingSphere`
+
+        Maximum spherical harmonic order of the sampling grid.
+        The default is ``None``.
+    comment : str, optional
+        Comment about the stored coordinate points. The default is
+        ``""``, which initializes an empty string.
     """
     _x: np.array = np.empty
     _y: np.array = np.empty
@@ -37,97 +229,6 @@ class Coordinates():
             domain: str = 'cart', convention: str = None, unit: str = None,
             weights: np.array = None, sh_order=None,
             comment: str = "") -> None:
-        """
-        This function will be changed in pyfar 0.8.0 and will just be able to
-        get cartesian coordinates. If you want to initialize in an other
-        domain use :py:func:`from_spherical_colatitude`,
-        :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
-        :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
-        instead.
-
-        Create :py:func:`Coordinates` object with or without coordinate points.
-        The points that enter the Coordinates object are defined by the
-        `domain`, `convention`, and `unit` as illustrated in the
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>`:
-
-        +--------------------+----------+------------+----------+----------+
-        | domain, convention | points_1 | points_2   | points_3 | unit     |
-        +====================+==========+============+==========+==========+
-        | cart, right        | x        | y          | z        | met      |
-        +--------------------+----------+------------+----------+----------+
-        | sph, top_colat     | azimuth  | colatitude | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | sph, top_elev      | azimuth  | elevation  | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | sph, side          | lateral  | polar      | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | sph, front         | phi      | theta      | radius   | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-        | cyl, top           | azimuth  | z          | radius_z | rad, deg |
-        +--------------------+----------+------------+----------+----------+
-
-        Parameters
-        ----------
-        points_1 : array like, number
-            Points for the first coordinate.
-            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
-        points_2 : array like, number
-            Points for the second coordinate.
-            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
-        points_3 : array like, number
-            Points for the third coordinate.
-            ``'points_1'``, ``'points_2'``, and ``'points_3'`` will be renamed
-            to ``'x'``, ``'y'`` and ``'z'`` in pyfar 0.8.0.
-        domain : string
-            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
-            parameters will be deprecated in pyfar 0.8.0 in favor of
-            ``from_*``.  Different units are no longer supported. The unit is
-            meter for distances and radians for angles.
-            domain of the coordinate system
-
-            ``'cart'``
-                Cartesian
-            ``'sph'``
-                Spherical
-            ``'cyl'``
-                Cylindrical
-
-            The default is ``'cart'``.
-        convention: string
-            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
-            parameters will be deprecated in pyfar 0.8.0 in favor of
-            ``from_*``.  Different units are no longer supported.
-            Default angle unit is radiant.
-
-            Coordinate convention (see above)
-            The default is ``'right'`` if domain is ``'cart'``,
-            ``'top_colat'`` if domain is ``'sph'``, and ``'top'`` if domain is
-            ``'cyl'``.
-        unit: string
-            ``'domain'``, ``'unit'`` and ``'convention'`` initialization
-            parameters will be deprecated in pyfar 0.8.0 in favor of
-            ``from_*``. Different units are no longer supported. Default
-            angle unit is radiant.
-
-            Unit of the coordinate system. By default the first available unit
-            is used, which is meters (``'met'``) for ``domain = 'cart'`` and
-            radians (``'rad'``) in all other cases (See above).
-        weights: array like, number, optional
-            Weighting factors for coordinate points. The `shape` of the array
-            must match the `shape` of the individual coordinate arrays.
-            The default is ``None``.
-        sh_order : int, optional
-            This property will be deprecated in pyfar 0.8.0 in favor of
-            :py:class:`spharpy.samplings.SamplingSphere`
-
-            Maximum spherical harmonic order of the sampling grid.
-            The default is ``None``.
-        comment : str, optional
-            Comment about the stored coordinate points. The default is
-            ``""``, which initializes an empty string.
-        """
 
         # init empty object
         super(Coordinates, self).__init__()
@@ -160,14 +261,8 @@ class Coordinates():
 
         # save meta data
         self._set_weights(weights)
-        self._sh_order = sh_order
+        self.sh_order = sh_order
         self._comment = comment
-
-        if sh_order is not None:
-            warnings.warn((
-                "This function will be deprecated in pyfar 0.8.0 in favor "
-                "of spharpy.samplings.SamplingSphere."),
-                    PyfarDeprecationWarning)
 
     @classmethod
     def from_cartesian(
@@ -175,7 +270,7 @@ class Coordinates():
         r"""
         Create a Coordinates class object from a set of points in the
         right-handed cartesian coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -218,7 +313,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -259,7 +354,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -300,7 +395,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -340,7 +435,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         spherical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -380,7 +475,7 @@ class Coordinates():
             comment: str = ""):
         """Create a Coordinates class object from a set of points in the
         cylindrical coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -464,6 +559,12 @@ class Coordinates():
             raise ValueError(
                 (f"Conversion for {convention} is not implemented."))
 
+        if unit != 'met':
+            # Can not be tested. Will only be raised if a coordinate system
+            # is not fully implemented.
+            raise ValueError(
+                f"Unit for {unit} is not implemented")
+
         # make array
         x = np.atleast_1d(np.asarray(x, dtype=np.float64))
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
@@ -480,7 +581,7 @@ class Coordinates():
         # save coordinates to self
         self._set_points(x, y, z)
 
-    def get_cart(self, convention='right', unit='met', convert=False):
+    def get_cart(self, convention='right', unit='met', convert=False):  # noqa: ARG002
         """
         This function will be deprecated in pyfar 0.8.0 in favor
         of :py:func:`cartesian`
@@ -533,7 +634,8 @@ class Coordinates():
             convention='top_colat', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the ``spherical_*`` properties.
+        of the ``spherical_*`` properties. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in spherical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -566,6 +668,8 @@ class Coordinates():
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         """
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
@@ -601,6 +705,10 @@ class Coordinates():
 
         # convert to radians
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             angles_1 = angles_1 / 180 * np.pi
             angles_2 = angles_2 / 180 * np.pi
 
@@ -630,10 +738,13 @@ class Coordinates():
         # save coordinates to self
         self._set_points(x, y, z)
 
-    def get_sph(self, convention='top_colat', unit='rad', convert=False):
+    def get_sph(
+            self, convention='top_colat', unit='rad',
+            convert=False):  # noqa: ARG002
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the `spherical_...` properties.
+        of the `spherical_...` properties. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in spherical coordinate systems.
 
         The points that are returned are defined by the `domain`,
@@ -664,6 +775,8 @@ class Coordinates():
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
             ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
         convert : boolean, optional
             If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
@@ -702,7 +815,9 @@ class Coordinates():
         points[..., 1] = points[..., 1] * conversion_factor
         return points
 
-    def _get_sph(self, convention='top_colat', unit='rad', convert=False):
+    def _get_sph(
+            self, convention='top_colat', unit='rad',
+            convert=False):  # noqa: ARG002
         # check if object is empty
         self._check_empty()
 
@@ -734,19 +849,24 @@ class Coordinates():
 
         # convert to degrees
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             angles_1 = angles_1 / np.pi * 180
             angles_2 = angles_2 / np.pi * 180
         elif not unit == 'rad':
             raise ValueError(
                 f"{unit} is not implemented.")
 
-        # return points
+        # return the points
         return angles_1, angles_2, radius
 
     def set_cyl(self, azimuth, z, radius_z, convention='top', unit='rad'):
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the :py:func:`cylindrical` property.
+        of the :py:func:`cylindrical` property. For conversions from or
+        into degree use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Enter coordinate points in cylindrical coordinate systems.
 
         The points that enter the Coordinates object are defined by the
@@ -778,7 +898,7 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the cylindrical property."),
                 PyfarDeprecationWarning)
-        self._set_cyl(azimuth, z, radius_z, convention)
+        self._set_cyl(azimuth, z, radius_z, convention, unit)
 
     def _set_cyl(self, azimuth, z, rho, convention='top', unit='rad'):
 
@@ -800,6 +920,10 @@ class Coordinates():
 
         # convert to radians
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             azimuth = azimuth / 180 * np.pi
         elif not unit == 'rad':
             raise ValueError(
@@ -820,10 +944,12 @@ class Coordinates():
         # save coordinates to self
         self._set_points(x, y, z)
 
-    def get_cyl(self, convention='top', unit='rad', convert=False):
+    def get_cyl(
+            self, convention='top', unit='rad', convert=False):  # noqa: ARG002
         """
         This function will be deprecated in pyfar 0.8.0 in favor
-        of the `cylindrical` property.
+        of the `cylindrical` property. For conversions from or into degree
+        use :py:func:`deg2rad` and :py:func:`rad2deg`.
         Get coordinate points in cylindrical coordinate system.
 
         The points that are returned are defined by the `domain`, `convention`,
@@ -847,7 +973,10 @@ class Coordinates():
             is ``'right'``.
         unit : string, optional
             Unit in which the coordinate points are stored. The default is
-            ``'met'``.
+            ``'rad'``.
+            The ``'deg'`` parameter will be deprecated in pyfar 0.8.0 in favor
+            of the :py:func:`deg2rad` and :py:func:`rad2deg`.
+
         convert : boolean, optional
             If True, the internal representation of the samplings points will
             be converted to the queried coordinate system. The default is
@@ -864,7 +993,12 @@ class Coordinates():
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of the cylindrical property."),
                 PyfarDeprecationWarning)
+
+        if not convention == 'top':
+            raise ValueError(
+                f"Conversion for {convention} is not implemented.")
         points = self.cylindrical
+
 
         conversion_factor = 1 if unit == 'rad' else 180 / np.pi
         points[..., 0] = points[..., 0] * conversion_factor
@@ -888,6 +1022,10 @@ class Coordinates():
 
         # convert to degrees
         if unit == 'deg':
+            warnings.warn((
+                "'deg' parameter will be deprecated in pyfar 0.8.0 in favor "
+                "of the pyfar.deg2rad and pyfar.rad2deg"),
+                    PyfarDeprecationWarning)
             azimuth = azimuth / np.pi * 180
         elif unit != 'rad':
             raise ValueError(
@@ -923,12 +1061,14 @@ class Coordinates():
         """This function will be deprecated in pyfar 0.8.0 in favor
             of :py:class:`spharpy.samplings.SamplingSphere`.
             Set the maximum spherical harmonic order."""
-        warnings.warn((
-            "This function will be deprecated in pyfar 0.8.0 in favor "
-            "of spharpy.samplings.SamplingSphere."),
-                PyfarDeprecationWarning)
 
-        self._sh_order = int(value)
+        if value is not None:
+            warnings.warn((
+                "This function will be deprecated in pyfar 0.8.0 in favor "
+                "of spharpy.samplings.SamplingSphere."),
+                    PyfarDeprecationWarning)
+
+        self._sh_order = int(value) if value is not None else None
 
     @property
     def comment(self):
@@ -984,7 +1124,7 @@ class Coordinates():
         """
         Returns :py:func:`x`, :py:func:`y`, :py:func:`z`.
         Right handed cartesian coordinate system. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
@@ -999,7 +1139,7 @@ class Coordinates():
         Spherical coordinates according to the top pole elevation coordinate
         system. :py:func:`azimuth`, :py:func:`elevation`,
         :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         azimuth, elevation, radius = cart2sph(self.x, self.y, self.z)
         elevation = np.pi / 2 - elevation
@@ -1021,7 +1161,7 @@ class Coordinates():
         system.
         Returns :py:func:`azimuth`, :py:func:`colatitude`,
         :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
@@ -1039,7 +1179,7 @@ class Coordinates():
         """
         Spherical coordinates according to the side pole coordinate system.
         Returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
         lateral = lateral - np.pi / 2
@@ -1060,7 +1200,7 @@ class Coordinates():
         """
         Spherical coordinates according to the frontal pole coordinate system.
         Returns :py:func:`frontal`, :py:func:`upper`, :py:func:`radius`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
 
         frontal, upper, radius = cart2sph(self.y, self.z, self.x)
@@ -1079,7 +1219,7 @@ class Coordinates():
         """
         Cylindrical coordinates.
         Returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
-        :py:mod:`coordinates concepts <pyfar._concepts.coordinates>` for
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information."""
         azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
@@ -1094,7 +1234,7 @@ class Coordinates():
     def x(self):
         r"""
         X coordinate of a right handed Cartesian coordinate system in meters
-        (-\infty < x < \infty)."""
+        (:math:`-\infty` < x < :math:`\infty`)."""
         self._check_empty()
         return self._x
 
@@ -1106,7 +1246,7 @@ class Coordinates():
     def y(self):
         r"""
         Y coordinate of a right handed Cartesian coordinate system in meters
-        (-\infty < y < \infty)."""
+        (:math:`-\infty` < y < :math:`\infty`)."""
         self._check_empty()
         return self._y
 
@@ -1118,7 +1258,7 @@ class Coordinates():
     def z(self):
         r"""
         Z coordinate of a right handed Cartesian coordinate system in meters
-        (-\infty < z < \infty)."""
+        (:math:`-\infty` < z < :math:`\infty`)."""
         self._check_empty()
         return self._z
 
@@ -1129,8 +1269,8 @@ class Coordinates():
     @property
     def rho(self):
         r"""
-        Radial distance to the the z-axis of the right handed
-        Cartesian coordinate system in meters (0 \leq radius < \infty)."""
+        Radial distance to the the z-axis of the right handed Cartesian
+        coordinate system (:math:`0` < rho < :math:`\infty`)."""
         return self.cylindrical[..., 2]
 
     @rho.setter
@@ -1142,8 +1282,8 @@ class Coordinates():
     @property
     def radius(self):
         r"""
-        Radial distance to the origin of the coordinate
-        system in meters (0 \leq radius < \infty)."""
+        Distance to the origin of the right handed Cartesian coordinate system
+        in meters (:math:`0` < radius < :math:`\infty`)."""
         return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     @radius.setter
@@ -1155,10 +1295,10 @@ class Coordinates():
     @property
     def azimuth(self):
         r"""
-        Counter clock-wise angle in the x-y plane of the right handed
-        Cartesian coordinate system in radians. 0 radians are defined in
-        positive x-direction, pi/2 radians in positive y-direction and so on
-        (-\infty < azimuth < \infty, 2pi-cyclic)."""
+        Counter clock-wise angle in the x-y plane of the right handed Cartesian
+        coordinate system in radians. :math:`0` radians are defined in positive
+        x-direction, :math:`\pi/2` radians in positive y-direction and so on
+        (:math:`-\infty` < azimuth < :math:`\infty`, :math:`2\pi`-cyclic)."""
         return self.spherical_colatitude[..., 0]
 
     @azimuth.setter
@@ -1170,10 +1310,11 @@ class Coordinates():
     @property
     def elevation(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        x-direction, pi/2 radians in positive z-direction, and -pi/2 in
-        negative z-direction (0 \leq azimuth \leq pi). The elevation is a
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians elevation are defined in positive
+        x-direction, :math:`\pi/2` radians in positive z-direction, and
+        :math:`-\pi/2` in negative z-direction
+        (:math:`-\pi/2\leq` elevation :math:`\leq\pi/2`). The elevation is a
         variation of the colatitude."""
         return self.spherical_elevation[..., 1]
 
@@ -1186,10 +1327,11 @@ class Coordinates():
     @property
     def colatitude(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        z-direction, pi/2 radians in positive x-direction, and pi in negative
-        z-direction (pi/2 \leq azimuth \leq pi/2). The colatitude is a
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians colatitude are defined in positive
+        z-direction, :math:`\pi/2` radians in positive x-direction, and
+        :math:`\pi` in negative z-direction
+        (:math:`0\leq` colatitude :math:`\leq\pi`). The colatitude is a
         variation of the elevation angle."""
         return self.spherical_colatitude[..., 1]
 
@@ -1202,10 +1344,11 @@ class Coordinates():
     @property
     def frontal(self):
         r"""
-        Angle in the y-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        y-direction, pi/2 radians in positive z-direction, pi in negative
-        y-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
+        Angle in the y-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians frontal angle are defined in positive
+        y-direction, :math:`\pi/2` radians in positive z-direction,
+        :math:`\pi` in negative y-direction and so on
+        (:math:`-\infty` < frontal < :math:`\infty`, :math:`2\pi`-cyclic)."""
         return self.spherical_front[..., 0]
 
     @frontal.setter
@@ -1217,10 +1360,11 @@ class Coordinates():
     @property
     def upper(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        x-direction, pi/2 radians in positive z-direction, and pi in negative
-        x-direction (0 \leq azimuth \leq pi)."""
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians upper angle are defined in positive
+        x-direction, :math:`\pi/2` radians in positive z-direction, and
+        :math:`\pi` in negative x-direction
+        (:math:`0\leq` upper :math:`\leq\pi`)."""
         return self.spherical_front[..., 1]
 
     @upper.setter
@@ -1232,10 +1376,11 @@ class Coordinates():
     @property
     def lateral(self):
         r"""
-        Counter clock-wise angle in the x-y plane of the right handed
-        Cartesian coordinate system in radians. 0 radians are defined in
-        positive x-direction, pi/2 radians in positive y-direction and -pi/2
-        in negative y-direction (-pi/2 \leq lateral \leq pi/2)."""
+        Counter clock-wise angle in the x-y plane of the right handed Cartesian
+        coordinate system in radians. :math:`0` radians are defined in positive
+        x-direction, :math:`\pi/2` radians in positive y-direction and
+        :math:`-\pi/2` in negative y-direction
+        (:math:`-\pi/2\leq` lateral :math:`\leq\pi/2`)."""
         return self.spherical_side[..., 0]
 
     @lateral.setter
@@ -1247,10 +1392,11 @@ class Coordinates():
     @property
     def polar(self):
         r"""
-        Angle in the x-z plane of the right handed Cartesian coordinate
-        system in radians. 0 radians elevation are defined in positive
-        x-direction, pi/2 radians in positive z-direction, pi in negative
-        x-direction and so on (-\infty < azimuth < \infty, 2pi-cyclic)."""
+        Angle in the x-z plane of the right handed Cartesian coordinate system
+        in radians. :math:`0` radians polar angle are defined in positive
+        x-direction, :math:`\pi/2` radians in positive z-direction,
+        :math:`\pi` in negative x-direction and so on
+        (:math:`-\infty` < polar < :math:`\infty`, :math:`2\pi`-cyclic)."""
         return self.spherical_side[..., 1]
 
     @polar.setter
@@ -1362,25 +1508,35 @@ class Coordinates():
             ``mask==True``.
             The default is ``None``, which plots all points in the same color.
         kwargs : optional
-            Keyword arguments are passed to ``matplotlib.pyplot.scatter()``.
+            Keyword arguments are passed to
+            :py:func:`matplotlib.pyplot.scatter`.
             If a mask is provided and the key `c` is contained in kwargs, it
             will be overwritten.
 
         Returns
         -------
-        ax : matplotlib.axes._subplots.Axes3DSubplot
+        ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
             The axis used for the plot.
 
         """
         if mask is None:
-            pf.plot.scatter(self, **kwargs)
+            ax = pf.plot.scatter(self, **kwargs)
         else:
             mask = np.asarray(mask)
             colors = np.full(self.cshape, pf.plot.color('b'))
             colors[mask] = pf.plot.color('r')
-            pf.plot.scatter(self, c=colors.flatten(), **kwargs)
+            ax = pf.plot.scatter(self, c=colors.flatten(), **kwargs)
 
-    def find_nearest(self, find, k=1, distance_measure='euclidean'):
+        ax.set_box_aspect([
+            np.ptp(self.x),
+            np.ptp(self.y),
+            np.ptp(self.z)])
+        ax.set_aspect('equal')
+
+        return ax
+
+    def find_nearest(self, find, k=1, distance_measure='euclidean',
+                     radius_tol=None):
         """
         Find the k nearest coordinates points.
 
@@ -1394,12 +1550,20 @@ class Coordinates():
             ``'euclidean'``
                 distance is determined by the euclidean distance.
                 This is default.
-            ``'spherical_radiance'``
+            ``'spherical_radians'``
                 distance is determined by the great-circle distance
                 expressed in radians.
             ``'spherical_meter'``
                 distance is determined by the great-circle distance
                 expressed in meters.
+        radius_tol : float, None
+            For all spherical distance measures, the coordinates must be on
+            a sphere, so the radius must be constant. This parameter defines
+            the maximum allowed difference within the radii. Note that
+            increasing the tolerance decreases the accuracy of the search.
+            The default ``None`` uses a tolerance of two times the decimal
+            resolution, which is determined from the data type of the
+            coordinate points using ``numpy.finfo``.
 
         Returns
         -------
@@ -1412,7 +1576,7 @@ class Coordinates():
 
         Notes
         -----
-        This is a wrapper for ``scipy.spatial.cKDTree``.
+        This is a wrapper for :py:class:`scipy.spatial.cKDTree`.
 
         Examples
         --------
@@ -1468,12 +1632,16 @@ class Coordinates():
         """
 
         # check the input
+        if radius_tol is None:
+            radius_tol = 2 * np.finfo(self.x.dtype).resolution
+        if not isinstance(radius_tol, float) or radius_tol < 0:
+            raise ValueError("radius_tol must be a non negative number.")
         if not isinstance(k, int) or k <= 0 or k > self.csize:
             raise ValueError("k must be an integer > 0 and <= self.csize.")
         if not isinstance(find, Coordinates):
             raise ValueError("find must be an pf.Coordinates object.")
         allowed_measures = [
-                'euclidean', 'spherical_degree', 'spherical_meter']
+                'euclidean', 'spherical_radians', 'spherical_meter']
         if distance_measure not in allowed_measures:
             raise ValueError(
                 f"distance_measure needs to be in {allowed_measures} and "
@@ -1491,32 +1659,33 @@ class Coordinates():
         # nearest points
         distance, index = kdtree.query(points, k=k)
 
-        if distance_measure in ['spherical_radiance', 'spherical_meter']:
+        if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
             radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
-            if delta_radius > 1e-15:
+            if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same \
-                    radius. Differences are larger than 1e-15")
+                    f"find_nearest_sph only works if all points have the same \
+                    radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
+
+            # convert cartesian coordinates to length on the great circle using
+            # the Haversine formula
+            distance = 2 * np.arcsin(distance / (2 * radius))
 
             if distance_measure == 'spherical_meter':
                 # convert angle in radiant to distance on the sphere
-                # d = 2r*pi*d/(2*pi) = r*d
-                distance = radius * distance
-
-            # convert cartesian coordinates to length on the great circle
-            distance = 2 * radius * np.arcsin(distance/(2*radius))
+                # distance = 2*radius*pi*distance/(2*pi) = radius*distance
+                distance *= radius
 
         if self.cdim == 1:
             if k > 1:
                 index_multi = np.moveaxis(index, -1, 0)
                 index = np.empty((k), dtype=tuple)
                 for kk in range(k):
-                    index[kk] = tuple([index_multi[kk]], )
+                    index[kk] = (index_multi[kk], )
             else:
-                index = tuple([index], )
+                index = (index, )
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
             index_multi = []
@@ -1541,7 +1710,7 @@ class Coordinates():
 
     def find_within(
             self, find, distance=0., distance_measure='euclidean',
-            atol=1e-15, return_sorted=True):
+            atol=None, return_sorted=True, radius_tol=None):
         """
         Find coordinates within a certain distance to the query points.
 
@@ -1557,15 +1726,30 @@ class Coordinates():
             ``'euclidean'``
                 distance is determined by the euclidean distance.
                 This is default.
-            ``'spherical_radiance'``
+            ``'spherical_radians'``
                 distance is determined by the great-circle distance
                 expressed in radians.
             ``'spherical_meter'``
                 distance is determined by the great-circle distance
                 expressed in meters.
+        atol : float, None
+            Absolute tolerance for distance. The default ``None`` uses a
+            tolerance of two times the decimal resolution, which is
+            determined from the data type of the coordinate points
+            using :py:class:`numpy.finfo`.
         return_sorted : bool, optional
             Sorts returned indices if True and does not sort them if False.
             The default is True.
+        radius_tol : float, None
+            For all spherical distance measures, the coordinates must be on
+            a sphere, so the radius must be constant. This parameter defines
+            the maximum allowed difference within the radii. Note that
+            increasing the tolerance decreases the accuracy of the search,
+            i.e., points that are within the search distance might not be
+            found or points outside the search distance may be returned.
+            The default ``None`` uses a tolerance of two times the decimal
+            resolution, which is determined from the data type of the
+            coordinate points using :py:class:`numpy.finfo`.
 
         Returns
         -------
@@ -1575,8 +1759,8 @@ class Coordinates():
 
         Notes
         -----
-        This is a wrapper for ``scipy.spatial.cKDTree``. Compared to previous
-        implementations, it supports self.ndim>1 as well.
+        This is a wrapper for :py:class:`scipy.spatial.cKDTree`.
+        Compared to previous implementations, it supports self.ndim>1 as well.
 
         Examples
         --------
@@ -1603,16 +1787,22 @@ class Coordinates():
         """
 
         # check the input
+        if radius_tol is None:
+            radius_tol = 2 * np.finfo(self.x.dtype).resolution
+        if atol is None:
+            atol = 2 * np.finfo(self.x.dtype).resolution
         if float(distance) < 0:
             raise ValueError("distance must be a non negative number.")
         if not isinstance(atol, float) or atol < 0:
             raise ValueError("atol must be a non negative number.")
+        if not isinstance(radius_tol, float) or radius_tol < 0:
+            raise ValueError("radius_tol must be a non negative number.")
         if not isinstance(find, Coordinates):
             raise ValueError("coords must be an pf.Coordinates object.")
         if not isinstance(return_sorted, bool):
             raise ValueError("return_sorted must be a bool.")
         allowed_measures = [
-            'euclidean', 'spherical_radiance', 'spherical_meter']
+            'euclidean', 'spherical_radians', 'spherical_meter']
         if distance_measure not in allowed_measures:
             raise ValueError(
                 f"distance_measure needs to be in {allowed_measures} and "
@@ -1631,22 +1821,22 @@ class Coordinates():
         if distance_measure == 'euclidean':
             index = kdtree.query_ball_point(
                 points, distance + atol, return_sorted=return_sorted)
-        if distance_measure == ['spherical_radiance', 'spherical_meter']:
+        if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
             radius = self.radius
             delta_radius = np.max(radius) - np.min(radius)
-            if delta_radius > 1e-15:
+            if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same \
-                    radius. Differences are larger than 1e-15")
+                    "find_nearest_sph only works if all points have the same "
+                    f"radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
-            if distance_measure == 'spherical_meter':
+            if distance_measure == 'spherical_radians':
                 # convert angle in radiant to distance on the sphere
                 # d = 2r*pi*d/(2*pi) = r*d
                 distance = radius * distance
 
-            # convert length on the great circle to in cartesian coordinates
+            # convert length on the great circle to euclidean distance
             distance = 2 * radius * np.sin(distance / (2 * radius))
 
             index = kdtree.query_ball_point(
@@ -1655,9 +1845,9 @@ class Coordinates():
         if self.cdim == 1:
             if find.csize > 1:
                 for i in range(len(index)):
-                    index[i] = tuple([index[i]], )
+                    index[i] = (index[i], )
             else:
-                index = tuple([index], )
+                index = (index, )
 
         else:
             index_array = np.arange(self.csize).reshape(self.cshape)
@@ -1720,11 +1910,11 @@ class Coordinates():
 
         Notes
         -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
-        (N, 3) array. The coordinate points in self are thus reshaped to
-        (`csize`, 3) before they are passed to ``cKDTree``. The index that
-        is returned refers to the reshaped coordinate points. To access the
-        points for example use
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an (N, 3) array. The coordinate points in self are thus
+        reshaped to (`csize`, 3) before they are passed to ``cKDTree``.
+        The index that  is returned refers to the reshaped coordinate points.
+        To access the points for example use
 
         >>> points_reshaped = self.cartesian.reshape((self.csize, 3))
         >>> points_reshaped[index]
@@ -1796,7 +1986,8 @@ class Coordinates():
 
         Notes
         -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (`csize`, 3) before they are passed to ``cKDTree``. The index that
         is returned refers to the reshaped coordinate points. To access the
@@ -1872,7 +2063,8 @@ class Coordinates():
 
         Notes
         -----
-        ``numpy.spatial.cKDTree`` is used for the search, which requires an
+        :py:class:`scipy.spatial.cKDTree` is used for the search, which
+        requires an
         (N, 3) array. The coordinate points in self are thus reshaped to
         (`csize`, 3) before they are passed to ``cKDTree``. The index that
         is returned refers to the reshaped coordinate points. To access the
@@ -2027,8 +2219,8 @@ class Coordinates():
         """
         Rotate points stored in the object around the origin of coordinates.
 
-        This is a wrapper for ``scipy.spatial.transform.Rotation`` (see this
-        class for more detailed information).
+        This is a wrapper for :py:class:`scipy.spatial.transform.Rotation`
+        (see this class for more detailed information).
 
         Parameters
         ----------
@@ -2109,8 +2301,8 @@ class Coordinates():
                 value = np.asarray(value) / 180 * np.pi
             rot = sp_rot.from_rotvec(value)
         elif not bool(re.search('[^x-z]', rotation.lower())):
-            # only check if string contains xyz, everything else is checked in
-            # from_euler()
+            # only check if string contains xyz, everything else is checked
+            # in from_euler()
             rot = sp_rot.from_euler(rotation, value, degrees)
         else:
             raise ValueError("rotation must be 'quat', 'matrix', 'rotvec', "
@@ -2194,7 +2386,7 @@ class Coordinates():
                     "negative_z": [0, 0, -1],
                     "x": ["unbound", [-np.inf, np.inf]],
                     "y": ["unbound", [-np.inf, np.inf]],
-                    "z": ["unbound", [-np.inf, np.inf]]}
+                    "z": ["unbound", [-np.inf, np.inf]]},
             },
             "sph": {
                 "top_colat": {
@@ -2306,7 +2498,7 @@ class Coordinates():
                     "negative_z": [3 * np.pi / 2, np.pi / 2, 1],
                     "phi": ["cyclic", [0, 2 * np.pi]],
                     "theta": ["bound", [0, np.pi]],
-                    "radius": ["bound", [0, np.inf]]}
+                    "radius": ["bound", [0, np.inf]]},
             },
             "cyl": {
                 "top": {
@@ -2331,8 +2523,8 @@ class Coordinates():
                     "negative_z": [0, -1, 0],
                     "azimuth": ["cyclic", [0, 2 * np.pi]],
                     "z": ["unbound", [-np.inf, np.inf]],
-                    "radius_z": ["bound", [0, np.inf]]}
-            }
+                    "radius_z": ["bound", [0, np.inf]]},
+            },
         }
 
         return _systems
@@ -2466,22 +2658,18 @@ class Coordinates():
         y = np.atleast_1d(np.asarray(y, dtype=np.float64))
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
-        # shapes of non scalar entries
-        shapes = [p.shape for p in [x, y, z] if p.ndim != 1 or p.shape[0] > 1]
+        # determine shape
+        shapes = np.broadcast_shapes(x.shape, y.shape, z.shape)
 
-        # repeat scalar entries if non-scalars exists
-        if len(shapes):
-            if x.size == 1:
-                x = np.tile(x, shapes[0])
-            if y.size == 1:
-                y = np.tile(y, shapes[0])
-            if z.size == 1:
-                z = np.tile(z, shapes[0])
+        # broadcast to same shape
+        x = np.broadcast_to(x, shapes)
+        y = np.broadcast_to(y, shapes)
+        z = np.broadcast_to(z, shapes)
 
-        # check for equal shape
-        assert (x.shape == y.shape) and (x.shape == z.shape), \
-            "x, y, and z must be scalar or of the \
-            same shape."
+        # set writeable, to make sure that the class does not become read-only
+        x.setflags(write=True)
+        y.setflags(write=True)
+        z.setflags(write=True)
 
         # set values
         self._x = x
@@ -2589,10 +2777,10 @@ class Coordinates():
 
         return new
 
-    def __array__(self):
+    def __array__(self, copy=True, dtype=None):
         """Instances of Coordinates behave like `numpy.ndarray`, array_like."""
         # copy to avoid changing the coordinate system of the original object
-        return self.copy().cartesian
+        return np.array(self.cartesian, copy=copy, dtype=dtype)
 
     def __repr__(self):
         """Get info about Coordinates object."""
@@ -2603,17 +2791,8 @@ class Coordinates():
         else:
             obj = "Empty Coordinates object"
 
-        # coordinate convention
-        conv = "domain: {}, convention: {}, unit: {}".format(
-            self._system['domain'], self._system['convention'],
-            self._system['unit'])
-
-        # coordinates and units
-        coords = ["{} in {}".format(c, u) for c, u in
-                  zip(self._system['coordinates'], self._system['units'])]
-
         # join information
-        _repr = obj + "\n" + conv + "\n" + "coordinates: " + ", ".join(coords)
+        _repr = obj + "\n"
 
         # check for sampling weights
         if self._weights is None:
@@ -2633,7 +2812,6 @@ class Coordinates():
 
     def __eq__(self, other):
         """Check for equality of two objects."""
-        # return not deepdiff.DeepDiff(self, other)
         if self.cshape != other.cshape:
             return False
         eq_x = self._x == other._x
@@ -2649,10 +2827,193 @@ class Coordinates():
         return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment \
             & eq_sh_order & eq_system
 
+    def __add__(self, other):
+        """Add two numbers/Coordinates objects."""
+        return _arithmetics(self, other, 'add')
+
+    def __radd__(self, other):
+        """Add two numbers/Coordinates objects."""
+        return _arithmetics(other, self, 'add')
+
+    def __sub__(self, other):
+        """Subtract two numbers/Coordinates objects."""
+        return _arithmetics(self, other, 'sub')
+
+    def __rsub__(self, other):
+        """Subtract two numbers/Coordinates objects."""
+        return _arithmetics(other, self, 'sub')
+
+    def __mul__(self, other):
+        """Multiply Coordinates object with number."""
+        return _arithmetics(self, other, 'mul')
+
+    def __rmul__(self, other):
+        """Multiply number with Coordinates object."""
+        return _arithmetics(other, self, 'mul')
+
+    def __div__(self, other):
+        """Divide Coordinates object with number."""
+        return _arithmetics(self, other, 'div')
+
+    def __truediv__(self, other):
+        """Divide Coordinates object with number."""
+        return _arithmetics(self, other, 'div')
+
+    def __rtruediv__(self, other):
+        """Divide number with Coordinates object."""
+        return _arithmetics(other, self, 'div')
+
+    def __rdiv__(self, other):
+        """Divide number with Coordinates object."""
+        return _arithmetics(other, self, 'div')
+
+
     def _check_empty(self):
         """check if object is empty"""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
+
+
+def dot(a, b):
+    """Dot product of two Coordinates objects.
+
+    .. math::
+        \\vec{a} \\cdot \\vec{b}
+        = a_x \\cdot b_x + a_y \\cdot b_y + a_z \\cdot b_z
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : np.ndarray
+        array with the dot product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(1, 0, 0)
+    >>> pf.dot(a, b)
+    array([1.])
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    return a.x * b.x + a.y * b.y + a.z * b.z
+
+
+def cross(a, b):
+    """Cross product of two Coordinates objects
+
+    .. math::
+        \\vec{a} \\times \\vec{b}
+        = (a_y \\cdot b_z - a_z \\cdot b_y) \\cdot \\hat{x}
+        + (a_z \\cdot b_x - a_x \\cdot b_z) \\cdot \\hat{y}
+        + (a_x \\cdot b_y - a_y \\cdot b_x) \\cdot \\hat{z}
+
+    Parameters
+    ----------
+    a : pf.Coordinates
+        first argument, must be broadcastable with b
+    b : pf.Coordinates
+        second argument, much be broadcastable with a
+
+    Returns
+    -------
+    result : pf.Coordinates
+        new Coordinates object with the cross product of the two objects
+
+    Examples
+    --------
+    >>> import pyfar as pf
+    >>> a = pf.Coordinates(1, 0, 0)
+    >>> b = pf.Coordinates(0, 1, 0)
+    >>> result = pf.cross(a, b)
+    >>> result.cartesian
+    array([0., 0., 1.])
+    """
+
+    if not isinstance(a, Coordinates) or not isinstance(b, Coordinates):
+        raise TypeError(
+            "Dot product is only possible with Coordinates objects.")
+
+    new = Coordinates()
+    new.cartesian = np.zeros(np.broadcast_shapes(
+        a.cartesian.shape, b.cartesian.shape))
+
+    # apply cross product
+    new.x = a.y * b.z - a.z * b.y
+    new.y = a.z * b.x - a.x * b.z
+    new.z = a.x * b.y - a.y * b.x
+
+    return new
+
+def _arithmetics(first, second, operation):
+    """Add or Subtract two Coordinates objects, numbers or arrays.
+
+    Parameters
+    ----------
+    first : Coordinates, number, array
+        first operand
+    second : Coordinates, number, array
+        second operand
+    operation : 'add', 'sub', 'mul', 'div'
+        whether to add or subtract the two objects
+
+    Returns
+    -------
+    new : Coordinates
+        result of the operation
+
+    """
+    # convert data
+    data = []
+    num_objects = 0
+    for obj in [first, second]:
+        if isinstance(obj, Coordinates):
+            data.append(obj.cartesian)
+            num_objects += 1
+        elif isinstance(obj, (int, float)):
+            data.append(np.array(obj))
+        else:
+            if operation == 'add':
+                op = 'Addition'
+            elif operation == 'sub':
+                op = 'Subtraction'
+            elif operation == 'mul':
+                op = 'Multiplication'
+            elif operation == 'div':
+                op = 'Division'
+            raise TypeError(
+                f"{op} is only possible with Coordinates or number.")
+
+    if operation in ['mul', 'div'] and num_objects > 1:
+        raise TypeError(
+            "Multiplication and division are only possible with one "
+            "Coordinates object.")
+
+    # broadcast shapes
+    shape = np.broadcast_shapes(data[0].shape, data[1].shape)
+    new = pf.Coordinates()
+    new.cartesian = np.zeros(shape)
+
+    # perform operation
+    if operation == 'add':
+        new.cartesian = data[0] + data[1]
+    elif operation == 'sub':
+        new.cartesian = data[0] - data[1]
+    elif operation == 'mul':
+        new.cartesian = data[0] * data[1]
+    elif operation == 'div':
+        new.cartesian = data[0] / data[1]
+    return new
 
 
 def cart2sph(x, y, z):
@@ -2700,8 +3061,8 @@ def cart2sph(x, y, z):
 
     Notes
     -----
-    To ensure proper handling of the azimuth angle, the ``arctan2``
-    implementation from numpy is used.
+    To ensure proper handling of the azimuth angle, the
+    :py:data:`numpy.arctan2` implementation from numpy is used.
     """
     radius = np.sqrt(x**2 + y**2 + z**2)
     z_div_r = np.divide(
@@ -2815,8 +3176,8 @@ def cart2cyl(x, y, z):
 
     Notes
     -----
-    To ensure proper handling of the azimuth angle, the ``arctan2``
-    implementation from numpy is used.
+    To ensure proper handling of the azimuth angle, the
+    :py:data:`numpy.arctan2` implementation from numpy is used.
     """
     azimuth = np.mod(np.arctan2(y, x), 2 * np.pi)
     if isinstance(z, np.ndarray):
@@ -2871,8 +3232,8 @@ def cyl2cart(azimuth, height, radius):
 
     Notes
     -----
-    To ensure proper handling of the azimuth angle, the ``arctan2``
-    implementation from numpy is used.
+    To ensure proper handling of the azimuth angle, the
+    :py:data:`numpy.arctan2` implementation from numpy is used.
     """
     azimuth = np.atleast_1d(azimuth)
     height = np.atleast_1d(height)

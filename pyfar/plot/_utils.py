@@ -10,7 +10,7 @@ def _prepare_plot(ax=None, subplots=None):
 
     Parameters
     ----------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.axes.Axes
         Axes to plot on. The default is None in which case the axes are
         obtained from the current figure. A new figure is created if it does
         not exist.
@@ -21,7 +21,7 @@ def _prepare_plot(ax=None, subplots=None):
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.axes.Axes
         The current axes if `subplots` is ``None`` all axes from the
         current figure as a single axis or array/list of axes otherwise.
     """
@@ -84,7 +84,7 @@ def _set_axlim(ax, setter, low, high, limits):
 
     Parameters
     ----------
-    ax : Matplotlib Axes Object
+    ax : matplotlib.axes.Axes
         axis for which the limits are to be set.
     setter : function
         function for setting the limits, .e.g., `ax.set_xlim`.
@@ -179,11 +179,12 @@ def _check_axis_scale(scale, axis='x'):
 
 
 def _get_quad_mesh_from_axis(ax):
-    """get the QuadMesh from an axis, if there is one.
+    """get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
+    if there is one.
 
     Parameters
     ----------
-    ax : Matplotlib axes object
+    ax : matplotlib.axes.Axes
 
     Returns
     -------
@@ -310,7 +311,7 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
             which might mask the data's resolution.
 
         The default is ``'pcolormesh'``.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -383,7 +384,7 @@ def _add_colorbar(colorbar, fig, ax, qm, label):
     colorbar : bool
         Flag indicating if a colobar should be added to the plot
     fig : matplotlib figure object
-    ax : list
+    ax : list[matplotlib.axes.Axes], None
         either a list of to axes objects or a list with one axis and None
         object
     qm : matplotlib quadmesh object
@@ -424,3 +425,78 @@ def _phase_label(unwrap, deg):
         raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
     return phase_label
+
+
+def _assert_and_match_data_to_side(data, signal, side):
+    """Adjust data and frequency vector for plotting as specified by side."""
+
+    if side == 'left':
+        mask = signal.frequencies <= 0
+    elif side == 'right':
+        mask = signal.frequencies >= 0
+    else:
+        raise ValueError('Invalid `side` parameter, pass either `left` or '
+                         '`right`.')
+
+    if mask.sum() < 2:
+        raise ValueError(f'The {side} side of the spectrum is not defined.')
+
+    # get corresponding data
+    frequencies = signal.frequencies[mask]
+    data = data[..., mask]
+
+    if side == 'left':
+        frequencies = np.flipud(np.abs(frequencies))
+        data = data[..., ::-1]
+
+    if (type(signal) is not FrequencyData) and signal.complex:
+        xlabel = f"Frequency in Hz ({side})"
+    else:
+        xlabel = "Frequency in Hz"
+
+    return data, frequencies, xlabel
+
+
+def _assert_and_match_spectrogram_to_side(spectrogram, frequencies, signal,
+                                          side):
+    """Adjust data and frequency vector for plotting as specified by side."""
+
+    if side == 'left':
+        mask = frequencies <= 0
+    elif side == 'right':
+        mask = frequencies >= 0
+    else:
+        raise ValueError('Invalid `side` parameter, pass either `left` or '
+                         '`right`.')
+
+    # get corresponding data
+    frequencies = frequencies[mask]
+    spectrogram = spectrogram[..., mask, :]
+
+    if side == 'left':
+        frequencies = np.flipud(np.abs(frequencies))
+        spectrogram = spectrogram[::-1, ...]
+
+    if (type(signal) is not FrequencyData) and signal.complex:
+        xlabel = f"Frequency in Hz ({side})"
+    else:
+        xlabel = "Frequency in Hz"
+
+    return spectrogram, frequencies, xlabel
+
+
+def _assert_and_match_data_to_mode(data, signal, mode):
+    """Adjust data and y-label for plotting according to specified mode."""
+
+    if mode == 'real':
+        if signal.complex:
+            return np.real(data), 'Amplitude (real)'
+        else:
+            return np.real(data), 'Amplitude'
+    elif mode == 'imag':
+        return np.imag(data), 'Amplitude (imaginary)'
+    elif mode == 'abs':
+        return np.abs(data), 'Amplitude (absolute)'
+    else:
+        raise ValueError('`mode` has to be `real`, `imag`, or '
+                         f'`abs`, but is {mode}.')

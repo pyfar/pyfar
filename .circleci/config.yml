@@ -48,7 +48,7 @@ jobs:
           name: Run tests
           command: pytest
 
-  flake:
+  ruff:
     parameters:
       version:
         description: "version tag"
@@ -65,34 +65,8 @@ jobs:
           # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
           pip-dependency-file: requirements_dev.txt
       - run:
-          name: Flake8
-          command: flake8 pyfar
-
-  test_examples:
-    parameters:
-      version:
-        description: "version tag"
-        default: "latest"
-        type: string
-    executor:
-      name: python-docker
-      version: <<parameters.version>>
-
-    steps:
-      - checkout
-      - run:
-          name: Install System Dependencies
-          command: sudo apt-get update && sudo apt-get install -y libsndfile1
-      - python/install-packages:
-          pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          pip-dependency-file: requirements_dev.txt
-      - run:
-          name: Examples
-          command: |
-            pip install astroid
-            pip install -e .
-            pytest --nbmake examples/*.ipynb
+          name: Ruff
+          command: ruff check
 
   test_documentation_build:
     parameters:
@@ -119,6 +93,24 @@ jobs:
             pip install -e .
             cd docs/
             make html SPHINXOPTS="-W"
+
+  test_deprecation_warnings:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Install System Dependencies
+          command: sudo apt-get update && sudo apt-get install -y libsndfile1
+      - python/install-packages:
+          pkg-manager: pip
+          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
+          pip-dependency-file: requirements_dev.txt
+      - run: |
+          python --version
+      - run:
+          name: Run tests
+          command: pytest tests -W error::DeprecationWarning
 
   test_pypi_publish:
     parameters:
@@ -155,23 +147,15 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.8"
                 - "3.9"
                 - "3.10"
                 - "3.11"
-      - flake:
+                - "3.12"
+      - ruff:
           matrix:
             parameters:
               version:
-                - "3.9"
-          requires:
-            - build_and_test
-
-      - test_examples:
-          matrix:
-            parameters:
-              version:
-                - "3.9"
+                - "3.12"
           requires:
             - build_and_test
 
@@ -179,7 +163,11 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
+          requires:
+            - build_and_test
+
+      - test_deprecation_warnings:
           requires:
             - build_and_test
 
@@ -192,10 +180,10 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.8"
                 - "3.9"
                 - "3.10"
                 - "3.11"
+                - "3.12"
           filters:
             branches:
               ignore: /.*/
@@ -203,25 +191,11 @@ workflows:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
-      - flake:
+      - ruff:
           matrix:
             parameters:
               version:
-                - "3.9"
-          requires:
-            - build_and_test
-          filters:
-            branches:
-              ignore: /.*/
-            # only act on version tags
-            tags:
-              only: /^v[0-9]+(\.[0-9]+)*$/
-
-      - test_examples:
-          matrix:
-            parameters:
-              version:
-                - "3.9"
+                - "3.12"
           requires:
             - build_and_test
           filters:
@@ -235,7 +209,17 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+
+      - test_deprecation_warnings:
           requires:
             - build_and_test
           filters:
@@ -249,12 +233,12 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
+                - "3.12"
           requires:
             - build_and_test
-            - flake
-            - test_examples
+            - ruff
             - test_documentation_build
+            - test_deprecation_warnings
           filters:
             branches:
               ignore: /.*/

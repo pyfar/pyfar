@@ -1,9 +1,10 @@
 """
-The following documents the pyfar filter classes. More background information
-is given in the
-:py:mod:`filter concepts <pyfar._concepts.filter_classes>`. Available filters
-are shown in :py:mod:`filter types <pyfar._concepts.filter_types>` and
-documented in :py:mod:`pyfar.dsp.filter`.
+The following documents the pyfar filter classes. Examples for working with
+filter objects are part of the
+:doc:`examples gallery<gallery:gallery/interactive/pyfar_filtering>`.
+Available filters are shown in the
+:doc:`filter types examples<gallery:gallery/interactive/pyfar_filter_types>`
+and documented in :py:mod:`pyfar.dsp.filter`.
 """
 import deepdiff
 import warnings
@@ -83,8 +84,9 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
 
     if filter_type == "SOS":
         sec_str = 'section' if order == 1 else 'sections'
-        repr = (f"SOS filter with {order} {sec_str} and {n_channels} {ch_str} "
-                f"@ {sampling_rate} Hz sampling rate")
+        representation = (f"SOS filter with {order} {sec_str} and "
+                          f"{n_channels} {ch_str} "
+                          f"@ {sampling_rate} Hz sampling rate")
     else:
         if order % 10 == 1:
             order_string = 'st'
@@ -95,10 +97,12 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
         else:
             order_string = 'th'
 
-        repr = (f"{order}{order_string} order {filter_type} filter with "
-                f"{n_channels} {ch_str} @ {sampling_rate} Hz sampling rate")
+        representation = (f"{order}{order_string} order "
+                          f"{filter_type} filter with "
+                            f"{n_channels} {ch_str} @ {sampling_rate} "
+                            "Hz sampling rate")
 
-    return repr
+    return representation
 
 
 class Filter(object):
@@ -163,7 +167,7 @@ class Filter(object):
         Get and set the coefficients of the filter.
 
         Refer to the
-        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
         cases.
         """
         return self._coefficients
@@ -246,7 +250,12 @@ class Filter(object):
 
         # prepare output signal
         filtered_signal = deepcopy(signal)
-        filtered_signal.time = np.squeeze(filtered_signal_data)
+
+        # squeeze first dimension if there is only one filter channel
+        if self.n_channels == 1:
+            filtered_signal.time = np.squeeze(filtered_signal_data, axis=0)
+        else:
+            filtered_signal.time = filtered_signal_data
 
         return filtered_signal
 
@@ -305,7 +314,8 @@ class FilterFIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
             string.
@@ -330,7 +340,7 @@ class FilterFIR(Filter):
         Get and set the coefficients of the filter.
 
         Refer to the
-        :py:mod:`filter concepts <pyfar._concepts.filter_concepts>` for use
+        :doc:`gallery:gallery/interactive/pyfar_filter_types` for use
         cases.
         """
         # property from Filter is overwritten, because FilterFIR internally
@@ -356,8 +366,8 @@ class FilterFIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
@@ -400,7 +410,8 @@ class FilterIIR(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, order)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an empty
             string.
@@ -425,8 +436,8 @@ class FilterIIR(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial
@@ -469,7 +480,8 @@ class FilterSOS(Filter):
     state : array, double, optional
         The state of the filter from prior information with dimensions
         ``(n_filter_chan, *cshape, n_sections, 2)``, where ``cshape`` is
-        the channel shape of the ``~py:class:Signal`` to be filtered.
+        the channel shape of the :py:class:`~pyfar.Signal`
+        to be filtered.
     comment : str
             A comment. The default is ``''``, which initializes an emptry
             string.
@@ -515,8 +527,8 @@ class FilterSOS(Filter):
         Parameters
         ----------
         cshape : tuple, int
-            The channel shape of the ``~py:class:Signal`` which is to be
-            filtered.
+            The channel shape of the :py:class:`~pyfar.Signal`
+            which is to be filtered.
         state : str, optional
             The desired state. This can either be ``'zeros'`` which initializes
             an empty filter, or ``'step'`` which constructs the initial

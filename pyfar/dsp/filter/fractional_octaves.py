@@ -2,6 +2,7 @@ import warnings
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
+from pyfar._utils import rename_arg
 
 
 def fractional_octave_frequencies(
@@ -153,11 +154,14 @@ def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
     return nominal, exact
 
 
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
 def fractional_octave_bands(
         signal,
         num_fractions,
         sampling_rate=None,
-        freq_range=(20.0, 20e3),
+        frequency_range=(20.0, 20e3),
         order=14):
     """Create and/or apply an energy preserving fractional octave filter bank.
 
@@ -183,17 +187,23 @@ def fractional_octave_bands(
     signal : Signal, None
         The signal to be filtered. Pass ``None`` to create the filter without
         applying it.
-    num_fractions : int, optional
+    num_fractions : int
         The number of bands an octave is divided into. Eg., ``1`` refers to
-        octave bands and ``3`` to third octave bands. The default is ``1``.
+        octave bands and ``3`` to third octave bands.
     sampling_rate : None, int
         The sampling rate in Hz. Only required if signal is ``None``. The
         default is ``None``.
-    freq_range : array, tuple, optional
+    frequency_range : array, tuple, optional
         The lower and upper frequency limits. The default is
         ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
+    freq_range: array, tuple, optional
+        The lower and upper frequency limits. The default is
+        ``frequency_range=(20, 20e3)``.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
+
 
     Returns
     -------
@@ -215,7 +225,7 @@ def fractional_octave_bands(
         >>> # generate the data
         >>> x = pf.signals.impulse(2**17)
         >>> y = pf.dsp.filter.fractional_octave_bands(
-        ...     x, 1, freq_range=(20, 8e3))
+        ...     x, 1, frequency_range=(20, 8e3))
         >>> # frequency domain plot
         >>> y_sum = pf.FrequencyData(
         ...     np.sum(np.abs(y.freq)**2, 0), y.frequencies)
@@ -225,6 +235,7 @@ def fractional_octave_bands(
         ...     "Filter bands and the sum of their squared magnitudes")
 
     """
+
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
@@ -234,7 +245,7 @@ def fractional_octave_bands(
 
     sos = _coefficients_fractional_octave_bands(
         sampling_rate=fs, num_fractions=num_fractions,
-        freq_range=freq_range, order=order)
+        frequency_range=frequency_range, order=order)
 
     filt = pf.FilterSOS(sos, fs)
     filt.comment = (
@@ -253,7 +264,7 @@ def fractional_octave_bands(
 
 def _coefficients_fractional_octave_bands(
         sampling_rate, num_fractions,
-        freq_range=(20.0, 20e3), order=14):
+        frequency_range=(20.0, 20e3), order=14):
     """Calculate the second order section filter coefficients of a fractional
     octave band filter bank.
 
@@ -283,7 +294,7 @@ def _coefficients_fractional_octave_bands(
     """
 
     f_crit = fractional_octave_frequencies(
-        num_fractions, freq_range, return_cutoff=True)[2]
+        num_fractions, frequency_range, return_cutoff=True)[2]
 
     freqs_upper = f_crit[1]
     freqs_lower = f_crit[0]

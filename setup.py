@@ -5,7 +5,7 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -14,7 +14,7 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'numpy>=1.23.0',
     'scipy>=1.5.0',
-    'matplotlib<=3.7',
+    'matplotlib',
     'sofar>=0.1.2',
     'urllib3',
     'deepdiff',
@@ -28,10 +28,11 @@ test_requirements = [
     'bump2version',
     'wheel',
     'watchdog',
-    'flake8',
+    'ruff',
     'coverage',
-    'Sphinx',
-    'twine'
+    'Sphinx<8',
+    'twine',
+    'sphinx_mdinclude',
 ]
 
 setup(
@@ -43,14 +44,15 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11'
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12'
     ],
     description="Project for data formats in acoustics.",
     install_requires=requirements,
     license="MIT license",
+    long_description_content_type='text/markdown',
     long_description=readme,
     include_package_data=True,
     keywords='pyfar',
@@ -66,7 +68,7 @@ setup(
         "Documentation": "https://pyfar.readthedocs.io/",
         "Source Code": "https://github.com/pyfar/pyfar",
     },
-    version='0.5.4',
+    version='0.7.0',
     zip_safe=False,
-    python_requires='>=3.8'
+    python_requires='>=3.9'
 )
