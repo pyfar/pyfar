@@ -34,7 +34,6 @@ jobs:
     executor:
       name: python-docker
       version: <<parameters.version>>
-
     steps:
       - checkout
       - run:
@@ -56,7 +55,6 @@ jobs:
     executor:
       name: python-docker
       version: <<parameters.version>>
-
     steps:
       - checkout
       - run:
@@ -75,7 +73,6 @@ jobs:
     executor:
       name: python-docker
       version: <<parameters.version>>
-
     steps:
       - checkout
       - run:
@@ -89,8 +86,14 @@ jobs:
             make html SPHINXOPTS="-W"
 
   test_deprecation_warnings:
-    docker:
-      - image: cimg/python:3.12
+    parameters:
+      version:
+        description: "version tag"
+        default: "latest"
+        type: string
+    executor:
+      name: python-docker
+      version: <<parameters.version>>
     steps:
       - checkout
       - run:
@@ -114,7 +117,6 @@ jobs:
     executor:
       name: python-docker
       version: <<parameters.version>>
-
     steps:
       - checkout
       - run:
@@ -138,7 +140,6 @@ jobs:
     executor:
       name: python-docker
       version: <<parameters.version>>
-
     steps:
       - checkout
       - run:
@@ -185,6 +186,10 @@ workflows:
             - build_and_test
 
       - test_deprecation_warnings:
+          matrix:
+            parameters:
+              version:
+                - "3.12"
           requires:
             - build_and_test
 
@@ -246,6 +251,10 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
       - test_deprecation_warnings:
+          matrix:
+            parameters:
+              version:
+                - "3.12"
           requires:
             - build_and_test
           filters:
