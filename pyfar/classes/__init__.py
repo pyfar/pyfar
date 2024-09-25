@@ -2,6 +2,7 @@ from . import audio
 from . import coordinates
 from . import orientations
 from . import filter
+from . import transmission_matrix
 from . import warnings
 
 __all__ = [
@@ -9,5 +10,6 @@ __all__ = [
     'coordinates',
     'orientations',
     'filter',
-    'warnings'
+    'transmission_matrix',
+    'warnings',
 ]

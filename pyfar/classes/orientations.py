@@ -9,18 +9,19 @@ else:
     from numpy.exceptions import VisibleDeprecationWarning
 
 # this warning needs to be caught and appears if numpy array are generated
-# from nested lists containing lists of unequal lengths, e.g.,
-#  [[1, 0, 0], [1, 0]]
+# from nested lists containing lists of unequal lengths,
+#  e.g., [[1, 0, 0], [1, 0]]
 warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 
 class Orientations(Rotation):
     """
     This class for Orientations in the three-dimensional space,
-    is a subclass of scipy.spatial.transform.Rotation and equally based on
-    quaternions of shape (N, 4). It inherits all methods of the Rotation class
-    and adds the creation from perpendicular view and up vectors and a
-    convenient plot function.
+    is a subclass of :py:class:`scipy:scipy.spatial.transform.Rotation` and
+    equally based on quaternions of shape (N, 4). It inherits all methods of
+    the Rotation class and adds the creation from perpendicular view and up
+    vectors through :py:func:`~from_view_up` and a convenient plot function
+    :py:func:`~show`.
 
     An orientation can be visualized with the triple of view, up and right
     vectors and it is tied to the object's local coordinate system.
@@ -61,7 +62,7 @@ class Orientations(Rotation):
     def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, copy=copy, **kwargs)
+        super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
 
     @classmethod
     def from_view_up(cls, views, ups):

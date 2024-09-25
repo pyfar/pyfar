@@ -16,7 +16,7 @@ from pyfar import Signal
 from pyfar import Coordinates
 from pyfar.samplings import SphericalVoronoi
 import pyfar.classes.filter as fo
-from pyfar import FrequencyData, TimeData
+from pyfar import FrequencyData, TimeData, TransmissionMatrix
 
 
 @pytest.mark.parametrize('input_type', ('filename', 'path_object'))
@@ -128,7 +128,7 @@ def test_write_read_flat_data(tmpdir, flat_data):
 
 @patch('pyfar.io._codec._str_to_type', new=stub_str_to_type())
 @patch('pyfar.io._codec._is_pyfar_type', new=stub_is_pyfar_type())
-def test_write_read_nested_data(nested_data, flat_data, tmpdir):
+def test_write_read_nested_data(nested_data, tmpdir):
     filename = os.path.join(tmpdir, 'write_nested_flat_data.far')
     io.write(filename, nested_data=nested_data)
     actual = io.read(filename)
@@ -261,6 +261,17 @@ def test_write_read_frequencydata(frequency_data, tmpdir):
     assert isinstance(actual, FrequencyData)
     assert actual == frequency_data
 
+def test_write_read_transmissionmatrix(tmpdir):
+    """ TransmissionMatrix
+    Make sure `read` understands the bits written by `write`
+    """
+    tmatrix = TransmissionMatrix.create_transformer(FrequencyData(42, 100))
+    filename = os.path.join(tmpdir, 'transmissionmatrix.far')
+    io.write(filename, transmissionmatrix=tmatrix)
+    actual = io.read(filename)['transmissionmatrix']
+    assert isinstance(actual, FrequencyData)
+    assert actual == tmatrix
+
 
 def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     """ SphericalVoronoi
@@ -273,15 +284,15 @@ def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
     assert actual == sphericalvoronoi
 
 
-def test_write_read_filter(filter, tmpdir):
+def test_write_read_filter(filterObject, tmpdir):
     """ Filter
     Make sure `read` understands the bits written by `write`
     """
     filename = os.path.join(tmpdir, 'filter.far')
-    io.write(filename, filter=filter)
+    io.write(filename, filter=filterObject)
     actual = io.read(filename)['filter']
     assert isinstance(actual, fo.Filter)
-    assert actual == filter
+    assert actual == filterObject
 
 
 def test_write_filterFIR(filterFIR, tmpdir):
@@ -381,7 +392,7 @@ def test_write_read_builtins(dict_of_builtins, tmpdir):
         filename,
         any_int=any_int,
         any_bool=any_bool,
-        **dict_of_builtins
+        **dict_of_builtins,
     )
 
     actual = io.read(filename)
@@ -394,7 +405,7 @@ def test_write_read_builtins(dict_of_builtins, tmpdir):
 
 
 def test_write_read_multiplePyfarObjects(
-        filter,
+        filterObject,
         filterFIR,
         filterIIR,
         filterSOS,
@@ -413,7 +424,7 @@ def test_write_read_multiplePyfarObjects(
     matrix_2d_int = np.arange(0, 24, dtype=int).reshape((4, 6))
     io.write(
         filename,
-        filter=filter,
+        filter=filterObject,
         filterFIR=filterFIR,
         filterIIR=filterIIR,
         filterSOS=filterSOS,
@@ -427,7 +438,7 @@ def test_write_read_multiplePyfarObjects(
         **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
-    assert actual['filter'] == filter
+    assert actual['filter'] == filterObject
     assert isinstance(actual['filterFIR'], fo.FilterFIR)
     assert actual['filterFIR'] == filterFIR
     assert isinstance(actual['filterIIR'], fo.FilterIIR)
@@ -462,7 +473,7 @@ def test_write_read_compression(sine, tmpdir):
 
 
 def test_write_read_multiplePyfarObjectsWithCompression(
-        filter,
+        filterObject,
         filterFIR,
         filterIIR,
         filterSOS,
@@ -482,7 +493,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     io.write(
         filename,
         compress=True,
-        filter=filter,
+        filter=filterObject,
         filterFIR=filterFIR,
         filterIIR=filterIIR,
         filterSOS=filterSOS,
@@ -496,7 +507,7 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         **dict_of_builtins)
     actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
-    assert actual['filter'] == filter
+    assert actual['filter'] == filterObject
     assert isinstance(actual['filterFIR'], fo.FilterFIR)
     assert actual['filterFIR'] == filterFIR
     assert isinstance(actual['filterIIR'], fo.FilterIIR)
@@ -614,7 +625,7 @@ def test_write_audio_nd(noise_two_by_three_channel, tmpdir):
 
 
 @patch('soundfile.write')
-def test_write_audio_clip(sf_write_mock):
+def test_write_audio_clip(sf_write_mock):  # noqa: ARG001
     """Test for clipping warning."""
     signal = pyfar.Signal([1., 2., 3.], 44100)
     with pytest.warns(Warning, match='clipped'):

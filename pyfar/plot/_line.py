@@ -11,7 +11,7 @@ from matplotlib.ticker import NullFormatter
 
 
 def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
-          ax=None, **kwargs):
+          ax=None, mode='real', **kwargs):
     """Plot the time data of a signal."""
 
     # check input
@@ -28,6 +28,9 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
         ymin = ymax - 100
     else:
         data = signal.time.T
+    # get data defined in 'mode'
+    data, y_label = _utils._assert_and_match_data_to_mode(data, signal, mode)
+
     # auto detect the time unit
     if unit in [None, "auto"]:
         unit = _utils._time_auto_unit(signal.times[..., -1])
@@ -42,10 +45,10 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
     _, ax = _utils._prepare_plot(ax)
     ax.set_xlabel(f"Time in {unit}")
     if dB:
-        ax.set_ylabel("Amplitude in dB")
+        ax.set_ylabel(y_label + ' in dB')
         _utils._set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
     else:
-        ax.set_ylabel("Amplitude")
+        ax.set_ylabel(y_label)
     _utils._set_axlim(ax, ax.set_xlim, times[0], times[-1],
                       ax.get_xlim())
 
@@ -56,7 +59,7 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
 
 def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
-          ax=None, **kwargs):
+          ax=None, side='right', **kwargs):
     """
     Plot the logarithmic absolute spectrum on the positive frequency axis.
     """
@@ -77,6 +80,9 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     else:
         data = np.abs(signal.freq)
 
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(
+        data, signal, side)
+
     # prepare figure
     _, ax = _utils._prepare_plot(ax)
     ax.grid(True, 'both')
@@ -85,15 +91,16 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         _utils._set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
     else:
         ax.set_ylabel("Magnitude")
-    ax.set_xlabel("Frequency in Hz")
+    ax.set_xlabel(xlabel)
+
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
-                      signal.frequencies[-1], ax.get_xlim())
+                      frequencies[-1], ax.get_xlim())
 
     # plot data
     if freq_scale == 'log':
-        ax.semilogx(signal.frequencies, data.T, **kwargs)
+        ax.semilogx(frequencies, data.T, **kwargs)
     else:
-        ax.plot(signal.frequencies, data.T, **kwargs)
+        ax.plot(frequencies, data.T, **kwargs)
 
     # set and format ticks
     if freq_scale == 'log':
@@ -105,7 +112,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 
 
 def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
-           **kwargs):
+           side='right', **kwargs):
     """Plot the phase of the spectrum on the positive frequency axis."""
 
     # check input
@@ -121,35 +128,73 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
     phase_data = dsp.phase(signal, deg=deg, unwrap=unwrap)
 
+    phase_data, frequencies, xlabel = _utils._assert_and_match_data_to_side(
+        phase_data, signal, side)
+
     # Construct the correct label string
     ylabel_string = _utils._phase_label(unwrap, deg)
 
     # y-axis formatting
     y_margin = 5 if deg else np.radians(5)
-    if not deg and (not unwrap or unwrap == "360"):
-        # nice tick formatting is not done for unwrap=True. In this case
-        # it can create 1000 or more ticks.
-        ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
-        ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 6))
-        ax.yaxis.set_major_formatter(MultipleFractionFormatter(
-            nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
-
     ymin = np.nanmin(phase_data) - y_margin  # more elegant solution possible?
     ymax = np.nanmax(phase_data) + y_margin
+    if unwrap == '360':
+        ymin = -y_margin
+        ymax = 360+y_margin if deg else 2*np.pi+y_margin
+
+    if not deg:
+        if ymax-ymin < np.pi:
+            # set yrange to +/- pi/2
+            ymin = np.pi/2+y_margin
+            ymax = -np.pi/2-y_margin
+            # major ticks at multiples of pi/4
+            ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 4))
+            ax.yaxis.set_major_formatter(MultipleFractionFormatter(
+                nominator=1, denominator=4, base=np.pi, base_str=r'\pi'))
+            # minor ticks at multiples of pi/8
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 8))
+        elif unwrap is True:
+            if ymax-ymin < 20*np.pi:
+                # ticks at at multiples of 2 pi / pi
+                # if yrange is smaller than 20 pi
+                nmaj = 2
+                nmin = 1
+            else:
+                # major ticks at multiples of x*20*pi
+                # with x determined to maximum 10 intervals
+                nmaj = np.ceil((ymax-ymin)/np.pi/9/20)*20
+                # minor ticks at half of major ticks,
+                # but rounded to multiples of 10*pi
+                nmin = np.round(nmaj/2/10)*10
+            ax.yaxis.set_major_locator(
+                MultipleFractionLocator(nmaj, 1, np.pi))
+            ax.yaxis.set_major_formatter(
+                MultipleFractionFormatter(nmaj, 1, np.pi, r'\pi'))
+            ax.yaxis.set_minor_locator(
+                MultipleFractionLocator(nmin/2, 1, np.pi))
+        else:
+            # unwrap is False or "360"
+            # major ticks at multiples of pi/2
+            ax.yaxis.set_major_locator(MultipleFractionLocator(np.pi, 2))
+            ax.yaxis.set_major_formatter(MultipleFractionFormatter(
+                nominator=1, denominator=2, base=np.pi, base_str=r'\pi'))
+            # minor ticks at multiples of pi/4
+            ax.yaxis.set_minor_locator(MultipleFractionLocator(np.pi, 4))
 
     # prepare figure
-    ax.set_xlabel("Frequency in Hz")
+    ax.set_xlabel(xlabel)
+
     ax.set_ylabel(ylabel_string)
     ax.grid(True, 'both')
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
-                      signal.frequencies[-1], ax.get_xlim())
+                      frequencies[-1], ax.get_xlim())
     _utils._set_axlim(ax, ax.set_ylim, ymin, ymax, ax.get_ylim())
 
     # plot data
     if freq_scale == 'log':
-        ax.semilogx(signal.frequencies, phase_data.T, **kwargs)
+        ax.semilogx(frequencies, phase_data.T, **kwargs)
     else:
-        ax.plot(signal.frequencies, phase_data.T, **kwargs)
+        ax.plot(frequencies, phase_data.T, **kwargs)
 
     # set and format ticks
     if freq_scale == 'log':
@@ -160,7 +205,8 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
     return ax
 
 
-def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
+def _group_delay(signal, unit="s", freq_scale='log', ax=None, side='right',
+                 **kwargs):
     """Plot the group delay on the positive frequency axis."""
 
     # check input
@@ -181,21 +227,25 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
         factor, unit = _utils._deal_time_units(unit)
         data = data / signal.sampling_rate * factor
 
+    data, frequencies, xlabel = _utils._assert_and_match_data_to_side(
+        data, signal, side)
+
     # prepare figure
     _, ax = _utils._prepare_plot(ax)
-    ax.set_xlabel("Frequency in Hz")
+    ax.set_xlabel(xlabel)
+
     ax.set_ylabel(f"Group delay in {unit}")
     ax.grid(True, 'both')
     _utils._set_axlim(ax, ax.set_xlim, _utils._lower_frequency_limit(signal),
-                      signal.frequencies[-1], ax.get_xlim())
+                      frequencies[-1], ax.get_xlim())
     _utils._set_axlim(ax, ax.set_ylim, .5 * np.nanmin(data),
                       1.5 * np.nanmax(data), ax.get_ylim())
 
     # plot data
     if freq_scale == 'log':
-        ax.semilogx(signal.frequencies, data.T, **kwargs)
+        ax.semilogx(frequencies, data.T, **kwargs)
     else:
-        ax.plot(signal.frequencies, data.T, **kwargs)
+        ax.plot(frequencies, data.T, **kwargs)
 
     # set and format ticks
     if freq_scale == 'log':
@@ -208,7 +258,8 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, **kwargs):
 
 def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                log_prefix_freq=None, log_reference=1, freq_scale='log',
-               unit="s", ax=None, **kwargs):
+               unit="s", ax=None, side='right', mode='real',
+               **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
@@ -217,23 +268,25 @@ def _time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
     _time(signal, dB_time, log_prefix_time, log_reference, unit, ax[0],
-          **kwargs)
+          mode, **kwargs)
     _freq(signal, dB_freq, log_prefix_freq, log_reference, freq_scale, ax[1],
-          **kwargs)
+          side, **kwargs)
     fig.align_ylabels()
 
     return ax
 
 
 def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
-                freq_scale='log', deg=False, unwrap=False, ax=None, **kwargs):
+                freq_scale='log', deg=False, unwrap=False, ax=None,
+                side='right', **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
-    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], **kwargs)
-    _phase(signal, deg, unwrap, freq_scale, ax[1], **kwargs)
+    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], side,
+          **kwargs)
+    _phase(signal, deg, unwrap, freq_scale, ax[1], side, **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
 
@@ -241,7 +294,8 @@ def _freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
 
 def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
-                      unit="s", freq_scale='log', ax=None, **kwargs):
+                      unit="s", freq_scale='log', ax=None, side='right',
+                      **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
@@ -249,8 +303,9 @@ def _freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     fig, ax = _utils._prepare_plot(ax, (2, 1))
     kwargs = _utils._return_default_colors_rgb(**kwargs)
 
-    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], **kwargs)
-    _group_delay(signal, unit, freq_scale, ax[1], **kwargs)
+    _freq(signal, dB, log_prefix, log_reference, freq_scale, ax[0], side,
+          **kwargs)
+    _group_delay(signal, unit, freq_scale, ax[1], side, **kwargs)
     ax[0].set_xlabel(None)
     fig.align_ylabels()
 

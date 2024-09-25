@@ -71,7 +71,7 @@ def test_orientations_from_view_up_invalid():
         Orientations.from_view_up(views, ups)
 
 
-def test_orientations_show(views, ups, positions, orientations):
+def test_orientations_show(positions, orientations):
     """
     Visualize orientations via `Orientations.show()`
     with and without `positions`.

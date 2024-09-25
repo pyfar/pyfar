@@ -19,6 +19,27 @@ def test_resampling(L):
     assert signal.n_samples/fs_1 == resampled_sig.n_samples/fs_2
 
 
+@pytest.mark.parametrize('L', [2, 0.5])
+def test_resampling_complex(L):
+    """
+    Tests the up and downsampling of a complex noise signal to the double/half
+    sampling rate.
+    """
+    fs_1 = 48000
+    fs_2 = L*fs_1
+    signal = pf.signals.noise(1024, sampling_rate=fs_1)
+    signal.fft_norm = "none"
+    signal.complex = True
+
+    resampled_sig = pf.dsp.resample(signal, fs_2, post_filter=False)
+    # check if result is stil complex
+    assert resampled_sig.complex is True
+    # asserts the sample length
+    assert L*signal.n_samples == resampled_sig.n_samples
+    # asserts the length of time of the signals
+    assert signal.n_samples/fs_1 == resampled_sig.n_samples/fs_2
+
+
 def test_upsampling_delayed_impulse():
     """
     Compares an upsampled delayed impulse with the analytic result of a
