@@ -77,10 +77,10 @@ def test_find_nearest_2d_2d_k5():
 
 def test_find_nearest_2d_k3():
     # 1D spherical, nearest point
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+    coords = pf.Coordinates(np.arange(10), 0, 0)
     k = 5
-    find = pf.Coordinates.from_spherical_elevation(
-        np.array([[0, np.pi/2], [np.pi, 3*np.pi/2]]), 0, 1)
+    find = pf.Coordinates(np.array([[0, 1], [2, 3]]), 0, 0)
+
     i, d = coords.find_nearest(find, k=k)
     npt.assert_equal(i[0][0].shape, (2, 2))
     npt.assert_equal(len(i), k)
@@ -92,7 +92,7 @@ def test_find_nearest_2d_k3():
 
 
 def test_find_nearest_error():
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+    coords = pf.Coordinates(np.arange(10), 0, 0)
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
@@ -164,7 +164,7 @@ def test_find_within_multiple_dim_points():
 
 
 def test_find_within_error():
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+    coords = pf.Coordinates(np.arange(10), 0, 0)
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
