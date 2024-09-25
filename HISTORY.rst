@@ -37,7 +37,7 @@ History
 
 * Automation and testing
 
-  * replace flake8 by ruff (PR #526, #611, #686, #687, #688, #689, #690, #691, #702)
+  * replace flake8 by ruff (PR #526, #611, #686, #687, #688, #689, #690, #691, #702, #699, #697)
   * remove environment files which are no longer required (PR #626)
   * Harmonize class documentation (PR #631)
   * wait for test_deprecation_warnings before release (PR #696)
