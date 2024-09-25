@@ -84,9 +84,6 @@ def test_deprecations_0_8_0_set_sh_order():
 
 
 def test_signal_len():
-    with pytest.warns(PyfarDeprecationWarning,
-                      match=re.escape("len(Signal) will be deprecated")):
-        len(pf.Signal([1, 2, 3], 44100))
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError, match=re.escape("had no len()")):
