@@ -25,40 +25,6 @@ from pyfar.classes.warnings import PyfarDeprecationWarning
 from pyfar.testing.plot_utils import create_figure
 
 
-# deprecate in 0.6.0 ----------------------------------------------------------
-@pytest.mark.parametrize('function', [
-    (pf.plot.freq), (pf.plot.phase), (pf.plot.group_delay),
-    (pf.plot.time_freq), (pf.plot.freq_phase), (pf.plot.freq_group_delay)])
-def test_xscale_deprecation(function, handsome_signal):
-    """Deprecate xscale parameter in plot functions"""
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(AttributeError):
-            # remove xscale from pyfar 0.6.0!
-            create_figure()
-            function(handsome_signal, xscale='linear')
-
-
-def test_spectrogram_yscale_deprecation(sine):
-    """Deprecate yscale parameter in plot functions"""
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(AttributeError):
-            # remove yscale from pyfar 0.6.0!
-            create_figure()
-            pf.plot.spectrogram(sine, yscale='linear')
-
-
-def test__check_time_unit():
-    """Deprecate unit=None in plots showing the time or group delay"""
-
-    if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(ValueError):
-            # remove xscale from pyfar 0.6.0!
-            create_figure()
-            pf.plot._utils._check_time_unit(None)
-
-
 # deprecate in 0.8.0 ----------------------------------------------------------
 def test_pad_zero_modi():
     with pytest.warns(PyfarDeprecationWarning,
@@ -101,17 +67,6 @@ def test_pad_zero_modi():
     ])
 def test_deprecations_0_8_0(statement):
     coords = pf.Coordinates.from_spherical_colatitude(np.arange(6), 0, 0)
-    coords.y = 1
-
-    # PyfarDeprecationWarning for
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="This function will be"):
-        eval(statement)
-
-    # PyfarDeprecationWarning check version
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="0.8.0"):
-        eval(statement)
 
     # remove statement from pyfar 0.8.0!
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
@@ -121,15 +76,6 @@ def test_deprecations_0_8_0(statement):
 
 def test_deprecations_0_8_0_set_sh_order():
     coords = pf.Coordinates(np.arange(6), 0, 0)
-    # sh_order setter
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.sh_order = 1
-
-    # sh_order setter
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="0.8.0"):
-        coords.sh_order = 1
 
     # remove statement from pyfar 0.8.0!
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
@@ -151,11 +97,6 @@ def test_signal_len():
 def test_deprecations_find_nearest_k():
     coords = pf.Coordinates(np.arange(6), 0, 0)
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0 in favor"):
-        coords.find_nearest_k(1, 0, 0)
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             coords.find_nearest_k(1, 0, 0)
@@ -163,11 +104,6 @@ def test_deprecations_find_nearest_k():
 
 def test_deprecations_find_slice():
     coords = pf.samplings.sph_lebedev(sh_order=10)
-
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0. Use "):
-        coords.find_slice('elevation', 'deg', 0, 5)
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
@@ -177,11 +113,6 @@ def test_deprecations_find_slice():
 def test_deprecations_find_nearest_cart():
     coords = pf.samplings.sph_lebedev(sh_order=10)
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0 in favor "):
-        coords.find_nearest_cart(1, 1, 1, 1)
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             coords.find_nearest_cart(1, 1, 1, 1)
@@ -189,11 +120,6 @@ def test_deprecations_find_nearest_cart():
 
 def test_deprecations_find_nearest_sph():
     coords = pf.samplings.sph_lebedev(sh_order=10)
-
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0 in favor "):
-        coords.find_nearest_sph(1, 1, 1, 1)
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
