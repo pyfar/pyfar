@@ -2669,3 +2669,67 @@ def normalize(signal, reference_method='max', domain='auto',
         return normalized_signal, reference_norm
     else:
         return normalized_signal
+
+
+def correlate(signal_1, signal_2, mode='linear'):
+    # docstring
+    # - formulas
+    # - mention behaviour for complex Signals
+    # - examples
+
+    # check input
+    if type(signal_1) is not pyfar.Signal or \
+            type(signal_2) is not pyfar.Signal:
+        raise TypeError("signal_1 and signal_2 must be pyfar.Signal objects")
+
+    if signal_1.complex != signal_2.complex:
+        raise ValueError(("Both signals must be complex or real valued. "
+                          "Mixtures are not allowed."))
+
+    if mode not in ['linear', 'cyclic']:
+        raise ValueError(f"mode is '{mode}' but must be 'linear' or 'cyclic'")
+
+    # copy input to avoid changing mutual data
+    signal_1 = signal_1.copy()
+    signal_2 = signal_2.copy()
+
+    # determine signal length for FFT
+    n_samples = np.array([signal_1.n_samples, signal_2.n_samples], dtype=int)
+    if mode == 'cyclic':
+        if n_samples[0] != n_samples[1]:
+            raise ValueError(("signal_1 and signal_2 must be of the same "
+                              "length in 'cyclic' mode"))
+        n_fft = n_samples[0]
+    else:
+        n_fft = np.sum(n_samples) - 1
+
+        # zero pad signals to match lengths
+        if signal_1.n_samples < n_fft:
+            signal_1 = pyfar.dsp.pad_zeros(
+                signal_1, n_fft - signal_1.n_samples, 'end')
+        if signal_2.n_samples < n_fft:
+            signal_2 = pyfar.dsp.pad_zeros(
+                signal_2, n_fft - signal_2.n_samples, 'beginning')
+
+    # compute correlation as frequency domain convolution
+    # with time flipped and conjugate values for second signal
+    signal_2.time = signal_2.time.copy()[..., ::-1].conj()
+    correlation = signal_1 * signal_2
+    correlation = correlation.time
+
+    # compute lags, i.e., times that the second signal was shifted
+    # with respect to the first
+    if mode == 'cyclic':
+        roll = n_fft // 2
+        correlation = np.roll(correlation, -roll, -1)
+        if n_fft % 2:
+            lags = np.arange(-roll, roll + 1)
+        else:
+            lags = np.arange(-roll + 1, roll + 1)
+    else:
+        lags = np.arange(-n_samples[1] + 1, n_samples[0])
+
+    # get lag tha maximized the correlation
+    argmax = lags[np.argmax(np.abs(correlation), -1)]
+
+    return correlation, lags, argmax
