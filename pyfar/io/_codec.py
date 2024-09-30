@@ -249,7 +249,7 @@ def _decode_object_json_aided(name, type_hint, zipfile):
         return ObjType._decode(obj_dict)
     except AttributeError as e:
         raise NotImplementedError(
-            f'You must implement `{ObjType.name}._decode` first.') from e
+            f'You must implement `{ObjType.__name__}._decode` first.') from e
 
 
 def _encode(obj, zip_path, zipfile):
