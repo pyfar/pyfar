@@ -593,7 +593,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
             'cause a infinite loop in `scipy.resample_poly`. If this occurs, '
             'interrupt and choose different sampling rates or decrease '
             'frac_limit. However, this can cause an error in the target '
-            'sampling rate realisation.'))
+            'sampling rate realisation.'), stacklevel=2)
     # give the numerator and denomitor of the fraction for factor L
     if frac_limit is None:
         frac = Fraction(Decimal(L)).limit_denominator()
@@ -607,7 +607,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
             f'The target sampling rate was realized with an error of {error}.'
             f'The error might be decreased by setting `frac_limit` to a value '
             f'larger than {down} (This warning is not shown, if the target '
-            'sampling rate can exactly be realized).'))
+            'sampling rate can exactly be realized).'), stacklevel=2)
     # resample data with scipy resampe_poly function
     data = sgn.resample_poly(signal.time, up, down, axis=-1)
     data = pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,

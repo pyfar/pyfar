@@ -235,15 +235,15 @@ def test_separation_from_time_data():
     freq = FrequencyData(data, freqs)
 
     with pytest.raises(AttributeError):
-        freq.time
+        assert freq.time
     with pytest.raises(AttributeError):
-        freq.times
+        assert freq.times
     with pytest.raises(AttributeError):
-        freq.n_samples
+        assert freq.n_samples
     with pytest.raises(AttributeError):
-        freq.signal_length
+        assert freq.signal_length
     with pytest.raises(AttributeError):
-        freq.find_nearest_time
+        assert freq.find_nearest_time
 
 
 def test_separation_from_signal():
@@ -253,7 +253,7 @@ def test_separation_from_signal():
     freq = FrequencyData(data, freqs)
 
     with pytest.raises(AttributeError):
-        freq.sampling_rate
+        assert freq.sampling_rate
     with pytest.raises(AttributeError):
         freq.domain = 'freq'
 

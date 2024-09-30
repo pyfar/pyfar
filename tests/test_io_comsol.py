@@ -52,7 +52,7 @@ def test_read_comsol_header_expressions(filename, expressions, suffix):
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     actual_expressions, _, _, _, _ = io.read_comsol_header(path + suffix)
     assert len(actual_expressions) == len(expressions)
-    for i, exp in enumerate(expressions):
+    for i, _exp in enumerate(expressions):
         assert actual_expressions[i] == expressions[i]
 
 
@@ -72,7 +72,7 @@ def test_read_comsol_header_expressions_unit(
     path = os.path.join(os.getcwd(), 'tests', 'test_io_data', filename)
     _, actual_units, _, _, _ = io.read_comsol_header(path + suffix)
     assert len(actual_units) == len(expressions_unit)
-    for i, exp in enumerate(expressions_unit):
+    for i, _exp in enumerate(expressions_unit):
         assert actual_units[i] == expressions_unit[i]
 
 

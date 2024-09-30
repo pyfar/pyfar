@@ -23,6 +23,7 @@ from pyfar.classes.warnings import PyfarDeprecationWarning
 
 # This defines the plot size and the backend
 from pyfar.testing.plot_utils import create_figure
+import numpy.testing as npt
 
 
 # deprecate in 0.6.0 ----------------------------------------------------------
@@ -239,11 +240,11 @@ def test_deprecations_freq_range_parameter_warnings():
             PyfarDeprecationWarning,
             match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
             "favor of frequency_range"):
-        gt.freq_range
+        npt.assert_equal((20, 20e3), gt.freq_range)
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
-            gt.freq_range
+            npt.assert_equal((20, 20e3), gt.freq_range)
 
     with pytest.warns(
             PyfarDeprecationWarning,
