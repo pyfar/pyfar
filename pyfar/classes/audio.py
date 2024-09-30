@@ -374,7 +374,7 @@ class TimeData(_Audio):
 
     @property
     def complex(self):
-        """Return or set the flag indicating if the data is complex."""
+        """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
     @complex.setter
@@ -968,7 +968,7 @@ class Signal(FrequencyData, TimeData):
 
     @property
     def complex(self):
-        """Return or set the flag indicating if the data is complex."""
+        """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
     @complex.setter
