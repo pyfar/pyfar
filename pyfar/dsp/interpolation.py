@@ -1,3 +1,4 @@
+"""Signal processing functions related to interpolation and resampling."""
 import numpy as np
 from scipy.special import iv as bessel_first_mod
 from scipy.interpolate import interp1d
@@ -62,7 +63,6 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
         The width of the smoothing window in fractional octaves, e.g., 3 will
         apply third octave smoothing and 1 will apply octave smoothing.
     mode : str, optional
-
         ``"magnitude_zerophase"``
             Only the magnitude response, i.e., the absolute spectrum is
             smoothed. Note that this return a zero-phase signal. It might be
@@ -121,7 +121,6 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
 
     Examples
     --------
-
     Octave smoothing of continuous spectrum consisting of two bell filters.
 
     .. plot::
@@ -299,7 +298,6 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
 
     References
     ----------
-
     .. [#] T. I. Laakso, V. Välimäki, M. Karjalainen, and U. K. Laine,
            'Splitting the unit delay,' IEEE Signal Processing Magazine 13,
            30-60 (1996). doi:10.1109/79.482137
@@ -309,7 +307,6 @@ def fractional_time_shift(signal, shift, unit="samples", order=30,
 
     Examples
     --------
-
     Apply a fractional shift of 2.3 samples using filters of orders 6 and 30
 
     .. plot::

@@ -37,7 +37,7 @@ def test_shelving_cascade_slope_parameters(shelf_type, g_s_b):
     ("low", (20., -10, 2), "Exactly two out of the parameters")])
 def test_shelving_cascade_slope_parameters_assertion(
         shelf_type, g_s_b, match):
-    """Test assertions for shelving_cascade_slope_parameters"""
+    """Test assertions for shelving_cascade_slope_parameters."""
 
     with pytest.raises(ValueError, match=match):
         _shelving_cascade_slope_parameters(

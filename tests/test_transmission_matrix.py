@@ -11,15 +11,15 @@ def frequencies():
     return [100, 200, 300]
 @pytest.fixture(scope="module")
 def A_list():
-    """Test data for a matrix-entry (e.g. A) using a list type"""
+    """Test data for a matrix-entry (e.g. A) using a list type."""
     return [1, 2, 3]
 @pytest.fixture(scope="module")
 def A_np(A_list):
-    """Test data for a matrix-entry (e.g. A) using an np.ndarray"""
+    """Test data for a matrix-entry (e.g. A) using an np.ndarray."""
     return np.array(A_list)
 @pytest.fixture(scope="module")
 def A_FreqDat(A_np, frequencies):
-    """Test data for a matrix-entry (e.g. A) using a FrequencyData object"""
+    """Test data for a matrix-entry (e.g. A) using a FrequencyData object."""
     return FrequencyData(A_np, frequencies)
 
 def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
@@ -74,7 +74,7 @@ def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
     _expect_error_abcd_same_type(A_FreqDat, A_np, A_np, A_np)
 
 def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
-    """Test 'from_abcd' throws error if handing in arrays but no frequencies"""
+    """Test from_abcd throws error if handing in arrays but no frequencies."""
     TransmissionMatrix.from_abcd(A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
     with pytest.raises(ValueError, match="'frequencies' must be specified if "
                        "not using 'FrequencyData' objects as input"):
@@ -87,7 +87,7 @@ def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
 @pytest.fixture(scope="module")
 def abcd_data_1x2():
     """ABCD matrices with 2 frequency bins and one additional
-    dimension of size 3"""
+    dimension of size 3."""
     frequencies = [100, 200]
     A = FrequencyData([[1, 1]], frequencies)
     B = FrequencyData([[2, 2]], frequencies)
@@ -98,7 +98,7 @@ def abcd_data_1x2():
 @pytest.fixture(scope="module")
 def abcd_data_3x2():
     """ABCD matrices with 2 frequency bins and one additional
-    dimension of size 3"""
+    dimension of size 3."""
     frequencies = [100, 200]
     A = FrequencyData([[1, 1], [1, 1], [1, 1]], frequencies)
     B = FrequencyData([[2, 2], [2, 2], [2, 2]], frequencies)
@@ -109,7 +109,7 @@ def abcd_data_3x2():
 @pytest.fixture(scope="module")
 def abcd_data_3x3x1():
     """ABCD matrices with 1 frequency bin and two additional
-    dimensions of size 3"""
+    dimensions of size 3."""
     A = FrequencyData(
         [[[1.1], [1.1], [1.1]], [[1.2], [1.2], [1.2]], [[1.3], [1.3], [1.3]]],
         100)
@@ -129,7 +129,7 @@ def test_tmatrix_abcd_cshape(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1):
     assert tmat.abcd_cshape == A.cshape
 
 def _compare_tmat_vs_abcd(tmat, A, B, C, D):
-    """Test whether ABCD entries of T-Matrix match given data sets"""
+    """Test whether ABCD entries of T-Matrix match given data sets."""
     if isinstance(A, FrequencyData):
         assert tmat.A == A
         assert tmat.B == B
@@ -143,7 +143,7 @@ def _compare_tmat_vs_abcd(tmat, A, B, C, D):
 
 def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
     """Test whether ABCD entries of T-Matrix match ABCD data used for
-     initialization"""
+    initialization."""
     tmat, A, B, C, D = abcd_data_3x2
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
@@ -155,7 +155,7 @@ def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
 # TESTS FOR CREATE METHODS
 # ------------------------
 def test_tmatrix_create_identity(frequencies):
-    """Test whether creation of identity matrix with frequencies"""
+    """Test whether creation of identity matrix with frequencies."""
     tmat_eye = TransmissionMatrix.create_identity(frequencies)
     assert isinstance(tmat_eye, TransmissionMatrix)
     assert tmat_eye.abcd_cshape == (1,)
@@ -163,7 +163,7 @@ def test_tmatrix_create_identity(frequencies):
 
 @pytest.mark.parametrize("no_freqs", [None, ()])
 def test_tmatrix_create_identity_scalar_input(no_freqs):
-    """Test whether creation of identity matrix without frequencies"""
+    """Test whether creation of identity matrix without frequencies."""
     eye = TransmissionMatrix.create_identity(no_freqs)
     assert isinstance(eye, np.ndarray)
     npt.assert_allclose(eye, np.eye(2), atol=1e-15)

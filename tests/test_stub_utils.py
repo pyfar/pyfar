@@ -214,7 +214,7 @@ def test_impulse_func_multi_channel():
 
 
 def test_normalization_none():
-    """ Test unitary FFT normalization implemented in stubs_utils.py"""
+    """ Test unitary FFT normalization implemented in stubs_utils.py."""
     n_samples = 4
     freq = np.array([1, 1, 1], dtype=complex)
     freq_norm = stub_utils._normalization(freq, n_samples, 'none')

@@ -463,7 +463,7 @@ def noise_two_by_three_channel():
 @pytest.fixture()
 def handsome_signal():
     """
-    Windows 200 Hz sine signal for testing plots
+    Windows 200 Hz sine signal for testing plots.
 
     Returns
     -------
@@ -480,7 +480,7 @@ def handsome_signal():
 @pytest.fixture()
 def handsome_signal_v2():
     """
-    Windowed 1kHz sine signal for testing plots
+    Windowed 1kHz sine signal for testing plots.
 
     Returns
     -------
@@ -497,7 +497,7 @@ def handsome_signal_v2():
 @pytest.fixture()
 def handsome_complex_signal():
     """
-    Windows 200 Hz sine signal, with complex valued data for testing plots
+    Windows 200 Hz sine signal, with complex valued data for testing plots.
 
     Returns
     -------
@@ -516,7 +516,7 @@ def handsome_complex_signal():
 @pytest.fixture()
 def handsome_complex_signal_v2():
     """
-    Windowed 1kHz sine signal for testing plots
+    Windowed 1kHz sine signal for testing plots.
 
     Returns
     -------
@@ -535,7 +535,7 @@ def handsome_complex_signal_v2():
 def handsome_signal_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
-    for testing 2D plots
+    for testing 2D plots.
 
     Returns
     -------
@@ -556,7 +556,7 @@ def handsome_signal_2d():
 def handsome_signal_complex_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
-    for testing 2D plots
+    for testing 2D plots.
 
     Returns
     -------
@@ -721,7 +721,7 @@ def generate_sofa_postype_spherical(
 @pytest.fixture()
 def views():
     """ Used for the creation of Orientation objects with
-    `Orientations.from_view_up`
+    `Orientations.from_view_up`.
     """
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
 
@@ -729,7 +729,7 @@ def views():
 @pytest.fixture()
 def ups():
     """ Used for the creation of Orientation objects with
-    `Orientations.from_view_up`
+    `Orientations.from_view_up`.
     """
     return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
 
@@ -737,7 +737,7 @@ def ups():
 @pytest.fixture()
 def positions():
     """ Used for the visualization of Orientation objects with
-    `Orientations.show`
+    `Orientations.show`.
     """
     return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
 

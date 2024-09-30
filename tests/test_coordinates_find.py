@@ -6,7 +6,7 @@ import pyfar as pf
 
 
 def test_find_nearest_simple():
-    """Test returns of find_nearest_k"""
+    """Test returns of find_nearest_k."""
     # 1D cartesian, nearest point
     x = np.arange(6)
     coords = pf.Coordinates(x, 0, 0)
@@ -25,7 +25,7 @@ def test_find_nearest_simple():
 ])
 def test_find_nearest_simple_spherical_distance(
         azimuth, distance_measure, distance):
-    """Test spherical distance measures for find nearest"""
+    """Test spherical distance measures for find nearest."""
     # 1D spherical coordinates points in front and to the left
     coords = pf.Coordinates().from_spherical_elevation([0, np.pi/2], 0, 1.1)
     find = pf.Coordinates().from_spherical_elevation(azimuth, 0, 1.1)
@@ -213,7 +213,7 @@ def test_find_within_error():
 ])
 @pytest.mark.parametrize('radius', [.5, 1, 2])
 def test_find_within_spherical(distance_measure, radius):
-    '''Test spherical distance measures for different radii'''
+    '''Test spherical distance measures for different radii.'''
     # Sampling grid in the median plane
     coords = pf.Coordinates.from_spherical_front(
         np.arange(0, 360, 10)*np.pi/180, np.pi/2, radius)
@@ -251,7 +251,7 @@ def test_find_within_atol():
 
 
 def test_find_within_tol_radius():
-    '''Test spherical distance measure with tolerance for radius'''
+    '''Test spherical distance measure with tolerance for radius.'''
     # Sampling grid in the median plane with varying radii
     coords = pf.Coordinates.from_spherical_front(
         np.arange(0, 360, 10)*np.pi/180, np.pi/2, 1)

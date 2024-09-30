@@ -59,7 +59,8 @@ def test_tmatrix_multiplication_negative_identity(
 @pytest.mark.parametrize("shape_extra_dims", [None, 4, [4, 5]])
 def test_tmatrix_multiplication_bottom_row_zero(
     shape_extra_dims, frequencies=[100, 200, 300]):
-    """
+    """Test result of T-Matrix multiplication with bottom row zero matrix.
+
     Inputs:
         [ 2  1 ]    [ a  b ]
         [ 0  0 ]    [ c  d ]
@@ -79,6 +80,8 @@ def test_tmatrix_multiplication_bottom_row_zero(
 def test_tmatrix_multiplication_random(
     shape_extra_dims, frequencies=[100, 200, 300]):
     """
+    Test T-Matrix multiplication with random matrices.
+
     Inputs:
         [ a1  b1 ]    [ a2  b2 ]
         [ c1  d1 ]    [ c2  d2 ]

@@ -1,3 +1,4 @@
+"""Fractional octave filter bank."""
 import warnings
 import numpy as np
 import scipy.signal as spsignal
@@ -22,6 +23,9 @@ def fractional_octave_frequencies(
     frequency_range : array, tuple
         The lower and upper frequency limits, the default is
         ``frequency_range=(20, 20e3)``.
+    return_cutoff : bool, optional
+        If ``True``, the lower and upper critical frequencies of the bandpass
+        filters for each band are returned. The default is ``False``.
 
     Returns
     -------
@@ -48,7 +52,7 @@ def fractional_octave_frequencies(
 
     if num_fractions in [1, 3]:
         nominal, exact = _center_frequencies_fractional_octaves_iec(
-            nominal, num_fractions)
+            num_fractions)
 
         mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
         nominal = nominal[mask]
@@ -96,7 +100,7 @@ def _exact_center_frequencies_fractional_octaves(
     return exact
 
 
-def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
+def _center_frequencies_fractional_octaves_iec(num_fractions):
     """Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
     octave ratio
@@ -401,7 +405,6 @@ def reconstructing_fractional_octave_bands(
 
     Examples
     --------
-
     Filter and re-synthesize an impulse signal.
 
     .. plot::

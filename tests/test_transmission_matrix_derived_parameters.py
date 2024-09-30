@@ -128,12 +128,15 @@ def load_impedance(request, frequencies) -> FrequencyData:
 
 def _special_twoport_tmatrix(
         twoport_type, Zl: FrequencyData, Z: FrequencyData):
-    """Returns a T-Matrix representing a twoport for special circuit types:
+    """
+    Returns a T-Matrix representing a twoport for special circuit types.
+
     1) By-pass system
     2) A series impedance != load_impedance
     3) A parallel impedance != load_impedance
     4) A series impedance == load_impedance
-    5) A parallel impedance == load_impedance"""
+    5) A parallel impedance == load_impedance
+    """
     if twoport_type == "bypass":
         return TransmissionMatrix.create_identity(Zl.frequencies)
     if twoport_type == "series_impedance":

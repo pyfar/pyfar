@@ -42,7 +42,7 @@ def test_averaging(signal, mode, answer):
     ])
 def test_caxis_averaging(caxis, answer):
     """
-    Parametrized test for averaging along caxis
+    Parametrized test for averaging along caxis.
     """
     signal = pf.Signal(np.arange(1, 9).reshape(2, 2, 2), 44100)
     ave_sig = pf.dsp.average(signal, caxis=caxis)
@@ -50,7 +50,7 @@ def test_caxis_averaging(caxis, answer):
 
 
 def test_weighted_averaging():
-    """Tests averaging Signal with weighted channels """
+    """Tests averaging Signal with weighted channels. """
     signal = pf.Signal([[1, 2, 3], [4, 5, 6]], 44100)
     ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))
     answer = [[1*0.8+4*0.2, 2*0.8+5*0.2, 3*0.8+6*0.2]]
@@ -58,7 +58,7 @@ def test_weighted_averaging():
 
 
 def test_complex_weighted_averaging():
-    """Tests averaging Signal with weighted channels """
+    """Tests averaging Signal with weighted channels. """
     signal = pf.Signal([[1 + 1j, 2 + 2j, 3 + 3j], [4 + 4j, 5 + 5j, 6 + 6j]],
                        44100, is_complex=True)
     ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))
@@ -69,7 +69,7 @@ def test_complex_weighted_averaging():
 
 
 def test_keepdims_parameters():
-    """Test keepdims parameter"""
+    """Test keepdims parameter."""
     signal = pf.Signal(np.arange(1, 9).reshape(2, 2, 2), 44100)
     ave1 = pf.dsp.average(signal)
     ave2 = pf.dsp.average(signal, keepdims=True)

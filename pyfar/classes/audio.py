@@ -142,7 +142,7 @@ class _Audio():
 
         Parameters
         ----------
-        caxes : empty, ``None``, iterable of ints, or n ints
+        axes : empty, ``None``, iterable of ints, or n ints
             Define how the :py:mod:` caxes <pyfar._concepts.audio_classes>`
             are ordered in the transposed audio object.
             Note that the last dimension of the data in the audio object
@@ -374,6 +374,7 @@ class TimeData(_Audio):
 
     @property
     def complex(self):
+        """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
     @complex.setter
@@ -460,40 +461,52 @@ class TimeData(_Audio):
         return obj
 
     def __add__(self, data):
+        """Add two TimeData objects."""
         return add((self, data), 'time')
 
     def __radd__(self, data):
+        """Add two TimeData objects."""
         return add((data, self), 'time')
 
     def __sub__(self, data):
+        """Subtract two TimeData objects."""
         return subtract((self, data), 'time')
 
     def __rsub__(self, data):
+        """Subtract two TimeData objects."""
         return subtract((data, self), 'time')
 
     def __mul__(self, data):
+        """Multiply two TimeData objects."""
         return multiply((self, data), 'time')
 
     def __rmul__(self, data):
+        """Multiply two TimeData objects."""
         return multiply((data, self), 'time')
 
     def __truediv__(self, data):
+        """Divide two TimeData objects."""
         return divide((self, data), 'time')
 
     def __rtruediv__(self, data):
+        """Divide two TimeData objects."""
         return divide((data, self), 'time')
 
     def __pow__(self, data):
+        """Raise two TimeData objects to the power."""
         return power((self, data), 'time')
 
     def __rpow__(self, data):
+        """Raise two TimeData objects to the power."""
         return power((data, self), 'time')
 
     def __matmul__(self, data):
+        """Matrix multiplication of two TimeData objects."""
         return matrix_multiplication(
             (self, data), 'time')
 
     def __rmatmul__(self, data):
+        """Matrix multiplication of two TimeData objects."""
         return matrix_multiplication(
             (data, self), 'time')
 
@@ -639,40 +652,52 @@ class FrequencyData(_Audio):
         return obj
 
     def __add__(self, data):
+        """Add two FrequencyData objects."""
         return add((self, data), 'freq')
 
     def __radd__(self, data):
+        """Add two FrequencyData objects."""
         return add((data, self), 'freq')
 
     def __sub__(self, data):
+        """Subtract two FrequencyData objects."""
         return subtract((self, data), 'freq')
 
     def __rsub__(self, data):
+        """Subtract two FrequencyData objects."""
         return subtract((data, self), 'freq')
 
     def __mul__(self, data):
+        """Multiply two FrequencyData objects."""
         return multiply((self, data), 'freq')
 
     def __rmul__(self, data):
+        """Multiply two FrequencyData objects."""
         return multiply((data, self), 'freq')
 
     def __truediv__(self, data):
+        """Divide two FrequencyData objects."""
         return divide((self, data), 'freq')
 
     def __rtruediv__(self, data):
+        """Divide two FrequencyData objects."""
         return divide((data, self), 'freq')
 
     def __pow__(self, data):
+        """Raise two FrequencyData objects to the power."""
         return power((self, data), 'freq')
 
     def __rpow__(self, data):
+        """Raise two FrequencyData objects to the power."""
         return power((data, self), 'freq')
 
     def __matmul__(self, data):
+        """Matrix multiplication of two FrequencyData objects."""
         return matrix_multiplication(
             (self, data), 'freq')
 
     def __rmatmul__(self, data):
+        """Matrix multiplication of two FrequencyData objects."""
         return matrix_multiplication(
             (data, self), 'freq')
 
@@ -943,6 +968,7 @@ class Signal(FrequencyData, TimeData):
 
     @property
     def complex(self):
+        """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
     @complex.setter
@@ -1110,7 +1136,7 @@ class Signal(FrequencyData, TimeData):
 
 
 class _SignalIterator(object):
-    """Iterator for :py:func:`Signal`
+    """Iterator for :py:func:`Signal`.
     """
     def __init__(self, array_iterator, signal):
         self._array_iterator = array_iterator
@@ -1315,7 +1341,7 @@ def divide(data: tuple, domain='freq'):
     * If both signals have the same FFT normalization, the results gets the
       normalization ``'none'``.
     * Other combinations raise an error.
-   """  # noqa: E501
+    """  # noqa: E501
     return _arithmetic(data, domain, _divide)
 
 
@@ -1818,12 +1844,12 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
 
     Parameters
     ----------
-    fft_norm_1 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
-    ``'power'`` or ``'psd'``
-        First fft_norm for matching.
-    fft_norm_2 : str, ``'none'``, ``'unitary'``, ``'amplitude'``, ``'rms'``,
-    ``'power'`` or ``'psd'``
-        Second fft_norm for matching.
+    fft_norm_1 : str
+        First fft_norm for matching. Can be ``'none'``, ``'unitary'``,
+        ``'amplitude'``, ``'rms'``, ``'power'`` or ``'psd'``
+    fft_norm_2 : str
+        Second fft_norm for matching. Can be ``'none'``, ``'unitary'``,
+        ``'amplitude'``, ``'rms'``, ``'power'`` or ``'psd'``
     division : bool
         ``False`` if arithmetic operation is addition, subtraction or
         multiplication;
