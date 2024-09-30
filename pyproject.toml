@@ -11,7 +11,12 @@ authors = [
 keywords = [
     "pyfar",
     "acoustics",
-    "audio processing",
+    "Fourier transforms",
+    "audio signal processing",
+    "filterbanks",
+    "parametric filters",
+    "audio signal visualization",
+    "read and write audio signals",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
