@@ -1,5 +1,4 @@
 import pytest
-from pytest import raises
 import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
@@ -14,26 +13,26 @@ def test_smooth_fractional_octave_assertions():
     """Test if the assertions are raised correctly."""
 
     # wrong audio data type
-    with raises(TypeError, match="Input signal has to be of type"):
+    with pytest.raises(TypeError, match="Input signal has to be of type"):
         smooth_fractional_octave(pf.FrequencyData(1, 1), .5)
 
     # wrong value for mode
-    with raises(ValueError, match="mode is 'smooth' but must be"):
+    with pytest.raises(ValueError, match="mode is 'smooth' but must be"):
         smooth_fractional_octave(pf.Signal(1, 1), 1, "smooth")
 
     # smoothing width too small
-    with raises(ValueError, match="The smoothing width"):
+    with pytest.raises(ValueError, match="The smoothing width"):
         smooth_fractional_octave(pf.Signal([1, 0], 1), 1)
 
-    with raises(TypeError, match=("Fractional octave smoothing for "
+    with pytest.raises(TypeError, match=("Fractional octave smoothing for "
                                   "complex-valued time data is not "
                                   "implemented.")):
 
         smooth_fractional_octave(pf.Signal([1, 0], 1, is_complex=True), 1)
 
 
-@pytest.mark.parametrize("mode", (
-    "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"))
+@pytest.mark.parametrize("mode", [
+    "magnitude_zerophase", "magnitude_phase", "magnitude", "complex"])
 def test_smooth_fractional_octave_mode(mode):
     """
     Test return signal for different smoothing modes against saved references.
@@ -55,7 +54,7 @@ def test_smooth_fractional_octave_mode(mode):
     npt.assert_allclose(output.time.flatten(), reference)
 
 
-@pytest.mark.parametrize("num_fractions", (1, 5))
+@pytest.mark.parametrize("num_fractions", [1, 5])
 def test_smooth_fractional_octave_num_fractions(num_fractions):
     """
     Test return signal for different smoothing widths against saved references.
@@ -91,11 +90,11 @@ def test_smooth_fractional_octave_window_parameter():
     assert isinstance(window_parameter[1], float)
 
 
-@pytest.mark.parametrize("amplitudes", (
-    1,                   # single channel signal
-    [1, .9, .8, .7],     # flat multi-channel signal.
+@pytest.mark.parametrize("amplitudes", [
+    1,                    # single channel signal
+    [1, .9, .8, .7],      # flat multi-channel signal.
     [[1, .9], [.8, .7]],  # 2D multi-channel signal
-))
+])
 def test_smooth_fractional_octave_input_signal_shape(amplitudes):
     """
     - Test for different shapes of the input signal
@@ -119,30 +118,34 @@ def test_fractional_time_shift_assertions():
     """Test if the assertions are raised correctly."""
 
     # wrong audio data type
-    with raises(TypeError, match="Input data has to be of type pyfar.Signal"):
+    with pytest.raises(
+            TypeError, match="Input data has to be of type pyfar.Signal"):
         fractional_time_shift(pf.FrequencyData(1, 1), .5)
 
     # wrong values for order and side_lobe_suppression
-    with raises(ValueError, match="The order must be > 0"):
+    with pytest.raises(ValueError, match="The order must be > 0"):
         fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, order=0)
-    with raises(ValueError, match="The side lobe suppression must be > 0"):
+    with pytest.raises(
+            ValueError, match="The side lobe suppression must be > 0"):
         fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, "samples", 2, 0)
 
     # filter length exceeds signal length
-    with raises(ValueError, match="The order is 30 but must not exceed 2"):
+    with pytest.raises(
+            ValueError, match="The order is 30 but must not exceed 2"):
         fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5)
 
     # wrong unit
-    with raises(ValueError, match="Unit is 'meter' but has to be"):
+    with pytest.raises(ValueError, match="Unit is 'meter' but has to be"):
         fractional_time_shift(pf.signals.impulse(64), 1, 'meter')
 
     # wrong mode
-    with raises(ValueError, match="The mode is 'full' but must be 'linear'"):
+    with pytest.raises(
+            ValueError, match="The mode is 'full' but must be 'linear'"):
         fractional_time_shift(pf.Signal([1, 0, 0], 44100), .5, 2, mode="full")
 
 
 @pytest.mark.parametrize("mode", ["linear", "cyclic"])
-@pytest.mark.parametrize("delays_impulse, fractional_delays", [
+@pytest.mark.parametrize(("delays_impulse", "fractional_delays"), [
     # single channel signals and delays
     # (positive/negative with fractions <0.5 and >0.5)
     (64, 10.4), (64, 10.6), (64, -10.4), (64, -10.6),
@@ -249,53 +252,54 @@ def test_interpolate_spectrum_init():
 
 
 def test_interpolate_spectrum_init_assertions():
-    """Test if init raises assertions correctly."""
+    """Test if init pytest.raises assertions correctly."""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
     # data (invalid type)
-    with raises(TypeError, match="data must be"):
+    with pytest.raises(TypeError, match="data must be"):
         InterpolateSpectrum(1, "complex", ("linear", "linear", "linear"))
     # data (not enough bins)
-    with raises(ValueError, match="data.n_bins must be at least 2"):
-        fd_short = pf.FrequencyData(1, 100)
+    fd_short = pf.FrequencyData(1, 100)
+    with pytest.raises(ValueError, match="data.n_bins must be at least 2"):
         InterpolateSpectrum(
             fd_short, "complex", ("linear", "linear", "linear"))
 
     # test invalid method
-    with raises(ValueError, match="method is 'invalid'"):
+    with pytest.raises(ValueError, match="method is 'invalid'"):
         InterpolateSpectrum(fd, "invalid", ("linear", "linear", "linear"))
 
     # test kind (invald type)
-    with raises(ValueError, match="kind must be a tuple of length 3"):
+    with pytest.raises(ValueError, match="kind must be a tuple of length 3"):
         InterpolateSpectrum(fd, "complex", "linear")
     # test kind (invalid length)
-    with raises(ValueError, match="kind must be a tuple of length 3"):
+    with pytest.raises(ValueError, match="kind must be a tuple of length 3"):
         InterpolateSpectrum(fd, "complex", ("linear", "linear"))
     # test kind (wrong entry)
-    with raises(ValueError, match="kind contains 'wrong'"):
+    with pytest.raises(ValueError, match="kind contains 'wrong'"):
         InterpolateSpectrum(fd, "complex", ("linear", "linear", "wrong"))
 
     # test fscale
-    with raises(ValueError, match="fscale is 'nice'"):
+    with pytest.raises(ValueError, match="fscale is 'nice'"):
         InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), fscale="nice")
 
     # test clip (wrong value of bool)
-    with raises(ValueError, match="clip must be a tuple of length 2"):
+    with pytest.raises(ValueError, match="clip must be a tuple of length 2"):
         InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), clip=True)
     # test clip (invalid type)
-    with raises(ValueError, match="clip must be a tuple of length 2"):
+    with pytest.raises(ValueError, match="clip must be a tuple of length 2"):
         InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), clip=1)
     # test clip (invalid length)
-    with raises(ValueError, match="clip must be a tuple of length 2"):
+    with pytest.raises(ValueError, match="clip must be a tuple of length 2"):
         InterpolateSpectrum(
             fd, "complex", ("linear", "linear", "linear"), clip=(1, 2, 3))
 
 
-@pytest.mark.parametrize(
-    "method, freq_in, frequencies, n_samples, sampling_rate, freq_out",
+@pytest.mark.parametrize((
+        "method", "freq_in", "frequencies", "n_samples",
+        "sampling_rate", "freq_out"),
     [
      ("complex", [1+2j, 2+1j], [1, 2], 12, 6,
       [0+3j, 0.5+2.5j, 1+2j, 1.5+1.5j, 2+1j, 2.5+0.5j, 3+0j]),
@@ -346,14 +350,14 @@ def test_interpolate_spectrum_clip():
         data, "magnitude", ("linear", "linear", "linear"), clip=(1, 2))
     signal_clip = interpolator(6, 6)
 
-    assert np.any(np.abs(signal_no_clip.freq) < 1) and \
-           np.any(np.abs(signal_no_clip.freq) > 2)
-    assert np.all(np.abs(signal_clip.freq) >= 1) and \
-           np.all(np.abs(signal_clip.freq) <= 2)
+    assert np.any(np.abs(signal_no_clip.freq) < 1)
+    assert np.any(np.abs(signal_no_clip.freq) > 2)
+    assert np.all(np.abs(signal_clip.freq) >= 1)
+    assert np.all(np.abs(signal_clip.freq) <= 2)
 
 
 @pytest.mark.parametrize(
-    'fscale,n_samples,sampling_rate,f_in,f_base,f_query',
+    ("fscale", "n_samples", "sampling_rate", "f_in", "f_base", "f_query"),
     [('linear', 10, 40, [0, 10, 20], [0, 10, 20],
      pf.dsp.fft.rfftfreq(10, 40)),
      ('log', 10, 40, [0, 10, 20], [0, .544, .778],

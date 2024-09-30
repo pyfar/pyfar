@@ -1,7 +1,6 @@
 import pyfar as pf
 from pyfar.dsp import spectrogram
 import pytest
-from pytest import raises
 import numpy as np
 import numpy.testing as npt
 
@@ -9,13 +8,15 @@ import numpy.testing as npt
 def test_assertions(sine):
     """Test assertions due to wrong input data."""
 
-    with raises(TypeError, match="Input data has to be of type: Signal."):
+    with pytest.raises(
+            TypeError, match="Input data has to be of type: Signal."):
         spectrogram([1, 2, 3])
 
-    with raises(ValueError, match="window_length exceeds signal length"):
+    with pytest.raises(
+            ValueError, match="window_length exceeds signal length"):
         spectrogram(pf.Signal(1, 44100))
 
-    with raises(TypeError, match="The normalize parameter"):
+    with pytest.raises(TypeError, match="The normalize parameter"):
         spectrogram(sine, normalize=1)
 
 
@@ -59,7 +60,7 @@ def test_return_values_complex():
     npt.assert_allclose(spectro[0, 1024-255:, 1], 0, atol=1e-13)
 
 
-@pytest.mark.parametrize('window,value', [
+@pytest.mark.parametrize(("window", "value"), [
     ('rect', [0, 1, 0]),         # rect window does not spread energy
     ('hann', [.5, 1, .5])])      # hann window spreads energy
 def test_window(window, value):

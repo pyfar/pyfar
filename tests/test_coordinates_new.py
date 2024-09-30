@@ -14,7 +14,7 @@ def test___eq___copy():
 
 
 @pytest.mark.parametrize(
-    'x, y, z, radius, radius_z', [
+    ("x", "y", "z", "radius", "radius_z"), [
         (1, 0, 0, 1, 1),
         (-1, 0, 0, 1, 1),
         (0, 2, 0, 2, 2),
@@ -29,7 +29,7 @@ def test_getter_radii_from_cart(x, y, z, radius, radius_z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z, azimuth, elevation', [
+    ("x", "y", "z", "azimuth", "elevation"), [
         (1, 0, 0, 0, 0),
         (-1, 0, 0, np.pi, 0),
         (0, 1, 0, np.pi/2, 0),
@@ -60,7 +60,7 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
 
 
 @pytest.mark.parametrize(
-    'x, y, z, frontal, upper', [
+    ("x", "y", "z", "frontal", "upper"), [
         (0, 1, 0, 0, np.pi/2),
         (0, -1, 0, np.pi, np.pi/2),
         (0, 0, 1, np.pi/2, np.pi/2),
@@ -84,7 +84,7 @@ def test_getter_sph_front_from_cart(x, y, z, frontal, upper):
 
 
 @pytest.mark.parametrize(
-    'x, y, z, lateral, polar', [
+    ("x", "y", "z", "lateral", "polar"), [
         (0, 1, 0, np.pi/2, 0),
         (0, -1, 0, -np.pi/2, 0),
         (0, 0, 1, 0, np.pi/2),
@@ -108,7 +108,7 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
 
 
 @pytest.mark.parametrize(
-    'x, actual', [
+    ("x", "actual"), [
         (0, np.array([0])),
         (np.ones((1,)), np.ones((1,))),
         (np.ones((3,)), np.ones((3,))),
@@ -130,7 +130,7 @@ def test_coordinates_squeeze(x, actual):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (0, 1, 0),
         (0, -1, 0),
         (0., 0, 1),
@@ -154,7 +154,7 @@ def test_cart_setter_same_size(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (np.ones((2, 3, 1)), 10, -1),
         (np.ones((2,)), 2, 1),
     ])
@@ -173,7 +173,7 @@ def test_cart_setter_different_size(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (np.ones((3, 1)), 7, 3),
         (np.ones((1, 2)), 5, 1),
         (np.ones((1, 1)), 5, 1),
@@ -191,7 +191,7 @@ def test_cart_setter_different_size_with_flatten(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (0, 1, 0),
         (0, -1, 0),
         (0., 0, 1),
@@ -213,7 +213,7 @@ def test__array__getter(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (np.ones((3, 1)), 7, 3),
         (np.ones((1, 2)), 5, 1),
         (np.ones((1, 1)), 5, 1),
@@ -299,7 +299,7 @@ def test_find_slice_cart():
 
 
 @pytest.mark.parametrize(
-    'coordinate, unit, value, tol, des_index, des_mask', [
+    ("coordinate", "unit", "value", "tol", "des_index", "des_mask"), [
         ('azimuth', 'deg', 0, 1, np.array([1, 2, 3]),
             np.array([0, 1, 1, 1, 0])),
         ('azimuth', 'deg', 359, 2, np.array([0, 1, 2, 3]),
@@ -329,7 +329,7 @@ def test_find_slice_error():
 
 
 @pytest.mark.parametrize(
-    'coordinate, minimum, maximum', [
+    ("coordinate", "minimum", "maximum"), [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
@@ -346,7 +346,7 @@ def test_angle_limits_cyclic(coordinate, minimum, maximum):
 
 
 @pytest.mark.parametrize(
-    'coordinate, minimum, maximum', [
+    ("coordinate", "minimum", "maximum"), [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
@@ -365,7 +365,7 @@ def test_angle_cyclic_limits(coordinate, minimum, maximum):
 
 
 @pytest.mark.parametrize(
-    'coordinate, minimum, maximum', [
+    ("coordinate", "minimum", "maximum"), [
         ('colatitude', 0, np.pi),
         ('upper', 0, np.pi),
         ('elevation', -np.pi/2, np.pi/2),
@@ -605,14 +605,14 @@ def test_angle_conversion_wrong_input():
         deg2rad(np.ones((2, 3)), 'wrong')
 
 
-@pytest.mark.parametrize('rad,deg', (
+@pytest.mark.parametrize(("rad", "deg"), [
         # flat array
-        [np.array([0, np.pi, 1]), np.array([0, 180, 1])],
+        (np.array([0, np.pi, 1]), np.array([0, 180, 1])),
         # 2D array
-        [np.array([[0, np.pi, 1], [np.pi, 0, 2]]),
-         np.array([[0, 180, 1], [180, 0, 2]])],
+        (np.array([[0, np.pi, 1], [np.pi, 0, 2]]),
+         np.array([[0, 180, 1], [180, 0, 2]])),
         # list
-        [[0, np.pi, 1], np.array([0, 180, 1])]))
+        ([0, np.pi, 1], np.array([0, 180, 1]))])
 def test_angle_conversion_rad2deg_spherical(rad, deg):
     '''Test angle conversion from rad to deg and spherical coordinates.'''
 

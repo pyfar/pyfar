@@ -1,7 +1,6 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest import raises
 
 import pyfar as pf
 import pyfar.classes.audio as signal
@@ -245,7 +244,8 @@ def test_add_time_data_and_time_data():
 def test_add_time_data_and_number_wrong_domain():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    with raises(ValueError):
+    match = "The domain must be 'time'."
+    with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'freq')
 
 
@@ -253,7 +253,8 @@ def test_add_time_data_and_number_wrong_times():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
     y = TimeData([1, 0, 0], [0, .1, .4])
-    with raises(ValueError):
+    match = 'The times does not match.'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, y), 'time')
 
 
@@ -261,7 +262,8 @@ def test_add_frequency_data_and_number():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = pf.add((x, 1), 'freq')
-    with raises(ValueError):
+    match = "The domain must be 'freq'."
+    with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'time')
 
     # check if old signal did not change
@@ -292,7 +294,8 @@ def test_add_frequency_data_and_frequency_data():
 def test_add_frequency_data_and_number_wrong_domain():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    with raises(ValueError):
+    match = "The domain must be 'freq'."
+    with pytest.raises(ValueError, match=match):
         pf.add((x, 1), 'time')
 
 
@@ -300,7 +303,8 @@ def test_add_frequency_data_and_number_wrong_frequencies():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     y = FrequencyData([1, 0, 0], [0, .1, .4])
-    with raises(ValueError):
+    match = 'The frequencies do not match.'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, y), 'freq')
 
 
@@ -703,19 +707,23 @@ def test_assert_match_for_arithmetic():
     assert not out[7]
 
     # check with non-tuple input for first argument
-    with raises(ValueError):
+    match = "Input argument 'data' must be a tuple."
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             s, 'time', division=False, matmul=False)
     # check with invalid data type in first argument
-    with raises(ValueError):
+    match = 'Input must be of type Signal, int, float, or complex'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, ['str', 'ing']), 'time', division=False, matmul=False)
     # test signals with different sampling rates
-    with raises(ValueError):
+    match = 'The sampling rates do not match'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, s1), 'time', division=False, matmul=False)
     # test signals with different n_samples
-    with raises(ValueError):
+    match = 'The number of samples does not match'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (s, s2), 'time', division=False, matmul=False)
 
@@ -773,14 +781,16 @@ def test_get_arithmetic_data_with_signal_complex_casting():
 
 
 def test_assert_match_for_arithmetic_data_different_audio_classes():
-    with raises(ValueError):
+    match = 'The audio objects do not match.'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (Signal(1, 1), TimeData(1, 1)), 'time', division=False,
             matmul=False)
 
 
 def test_assert_match_for_arithmetic_data_wrong_domain():
-    with raises(ValueError):
+    match = 'domain must be time or freq but is space.'
+    with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
             (1, 1), 'space', division=False, matmul=False)
 
@@ -788,13 +798,14 @@ def test_assert_match_for_arithmetic_data_wrong_domain():
 def test_assert_match_for_arithmetic_data_wrong_cshape():
     x = Signal(np.ones((2, 3, 4)), 44100)
     y = Signal(np.ones((5, 4)), 44100)
-    with raises(ValueError, match="The cshapes"):
+    with pytest.raises(ValueError, match="The cshapes"):
         signal._assert_match_for_arithmetic(
             (x, y), 'freq', division=False, matmul=False)
 
 
 def test_get_arithmetic_data_wrong_domain():
-    with raises(ValueError):
+    match = "domain must be 'time' or 'freq' but found space"
+    with pytest.raises(ValueError, match=match):
         signal._get_arithmetic_data(
             Signal(1, 44100), 'space', (1,), False, Signal,
             contains_complex=False)
@@ -803,12 +814,13 @@ def test_get_arithmetic_data_wrong_domain():
 def test_array_broadcasting_errors():
     x = np.arange(2 * 3 * 4 * 10).reshape((2, 3, 4, 10))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    with raises(ValueError, match="array dimension"):
+    with pytest.raises(ValueError, match="array dimension"):
         pf.add((x, y), domain='time')
 
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
-    with raises(ValueError):
+    match = 'operands could not be broadcast together with shapes'
+    with pytest.raises(ValueError, match=match):
         pf.add((x, y))
 
 
@@ -858,11 +870,11 @@ def test_matrix_multiplication_shape_mismatch():
     # Signals
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = pf.signals.impulse(10, amplitude=np.array([[1, 2], [3, 4]]))
-    with raises(ValueError, match="matmul: Input operand 1"):
+    with pytest.raises(ValueError, match="matmul: Input operand 1"):
         pf.matrix_multiplication((x, y))
     # Signal and array
     y = np.ones((2, 2, 6)) * np.array([[1, 2], [3, 4]])[..., None]
-    with raises(ValueError, match="matmul: Input operand 1"):
+    with pytest.raises(ValueError, match="matmul: Input operand 1"):
         pf.matrix_multiplication((x, y))
 
 
@@ -966,12 +978,12 @@ def test_matrix_multiplication_axes():
     npt.assert_allclose(z.freq, des, atol=1e-15)
 
 
-@pytest.mark.parametrize("sx, sy, az, sz",
-                         [[(1, 3, 5), (3, 5, 4), 5, (3, 3, 4)],
-                          [(2,), (3, 2, 4), 2, (3, 1, 4)],
-                          [(1, 2), (3, 2, 4), 2, (3, 1, 4)],
-                          [(2, 3, 4), (4,), 4, (2, 3, 1)],
-                          [(2, 3, 4), (4, 1), 4, (2, 3, 1)]])
+@pytest.mark.parametrize(('sx', 'sy', 'az', 'sz'),
+                         [((1, 3, 5), (3, 5, 4), 5, (3, 3, 4)),
+                          ((2,), (3, 2, 4), 2, (3, 1, 4)),
+                          ((1, 2), (3, 2, 4), 2, (3, 1, 4)),
+                          ((2, 3, 4), (4,), 4, (2, 3, 1)),
+                          ((2, 3, 4), (4, 1), 4, (2, 3, 1))])
 def test_matrix_multiplication_broadcasting(sx, sy, az, sz):
     """Test broadcasting."""
     x = pf.signals.impulse(10, amplitude=np.ones(sx))
@@ -1016,9 +1028,9 @@ def test_matrix_multiplication_array_mismatch_errors():
     """Test errors for multiplication of signal with array."""
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = np.ones((3, 2, 1)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
-    with raises(ValueError, match='matmul'):
+    with pytest.raises(ValueError, match='matmul'):
         x @ y
-    with raises(ValueError, match='matmul'):
+    with pytest.raises(ValueError, match='matmul'):
         y @ x
 
 

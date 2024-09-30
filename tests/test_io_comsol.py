@@ -37,7 +37,7 @@ def test_read_comsol_error_wrong_domain():
         io.read_comsol(path)
 
 
-@pytest.mark.parametrize("filename,expressions",  [
+@pytest.mark.parametrize(('filename', 'expressions'),  [
     ('intensity_average', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
     ('intensity_only', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
     ('intensity_parametric', ['pabe.Ix', 'pabe.Iy', 'pabe.Iz']),
@@ -56,7 +56,7 @@ def test_read_comsol_header_expressions(filename, expressions, suffix):
         assert actual_expressions[i] == expressions[i]
 
 
-@pytest.mark.parametrize("filename,expressions_unit",  [
+@pytest.mark.parametrize(('filename', 'expressions_unit'),  [
     ('intensity_average', ['W/m^2', 'W/m^2', 'W/m^2']),
     ('intensity_only', ['W/m^2', 'W/m^2', 'W/m^2']),
     ('intensity_parametric', ['W/m^2', 'W/m^2', 'W/m^2']),
@@ -76,7 +76,7 @@ def test_read_comsol_header_expressions_unit(
         assert actual_units[i] == expressions_unit[i]
 
 
-@pytest.mark.parametrize("filename,parameters",  [
+@pytest.mark.parametrize(('filename', 'parameters'),  [
     ('intensity_average',
      {'theta': [0.0, 0.7854, 1.5708, 2.3562, 3.1416],
       'phi': [0., 1.5708, 3.1416, 4.7124]}),
@@ -98,7 +98,7 @@ def test_read_comsol_header_parameters(filename, parameters, suffix):
     assert parameters == actual_parameters
 
 
-@pytest.mark.parametrize("filename,domain",  [
+@pytest.mark.parametrize(('filename', 'domain'),  [
     ('intensity_average', 'freq'),
     ('intensity_only', 'freq'),
     ('intensity_parametric', 'freq'),
@@ -115,7 +115,7 @@ def test_read_comsol_header_domain(filename, domain, suffix):
     assert domain == actual_domain
 
 
-@pytest.mark.parametrize("filename,domain_data",  [
+@pytest.mark.parametrize(('filename', 'domain_data'),  [
     ("intensity_average", [100, 500]),
     ("intensity_only", [100, 500]),
     ("intensity_parametric", [100, 500]),
@@ -123,7 +123,6 @@ def test_read_comsol_header_domain(filename, domain, suffix):
      [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]),
     ("pressure_only", [100, 500]),
     ("pressure_parametric", [100, 500]),
-    ('intensity_product', [100, 500]),
     ('intensity_product', [100, 500]),
     ])
 @pytest.mark.parametrize("suffix",  ['.txt', '.dat', '.csv'])
@@ -156,7 +155,7 @@ def test_read_comsol_data_domain(filename, suffix):
         assert all(domain_data == data.times)
 
 
-@pytest.mark.parametrize("filename,nodes",  [
+@pytest.mark.parametrize(('filename', 'nodes'),  [
     ('intensity_average', 1),
     ('intensity_only', 8),
     ('intensity_parametric', 8),
@@ -202,7 +201,7 @@ def test_read_comsol_coordinates(filename, suffix):
     assert all(xyz[7] == [0.5, 0.5, 0.5])
 
 
-@pytest.mark.parametrize("filename,p1",  [
+@pytest.mark.parametrize(('filename', 'p1'),  [
     ('intensity_average', np.float64(1.2867253973047096E-24)),
     ('intensity_only', np.float64(-1.0535540378988276E-8)),
     ('intensity_parametric', np.float64(-1.0535540378988267E-8)),
@@ -230,7 +229,7 @@ def test_read_comsol_first_value_data(filename, p1, suffix):
         assert type(data.time.flatten()[0]) == type(p1)
 
 
-@pytest.mark.parametrize("filename,p1",  [
+@pytest.mark.parametrize(('filename', 'p1'),  [
     ('intensity_parametric',
      -1.0533947432793473E-8),
     ('pressure_parametric',
@@ -249,7 +248,7 @@ def test_read_comsol_another_value_data(filename, p1, suffix):
     assert data.freq[point, exp, theta, phi, freq] == p1
 
 
-@pytest.mark.parametrize("filename,p1",  [
+@pytest.mark.parametrize(('filename', 'p1'),  [
     ('intensity_parametric',
      -1.0533947432793473E-8),
     ('pressure_parametric',

@@ -643,8 +643,9 @@ class TransmissionMatrix(FrequencyData):
             1, 0, admittance.freq, 1, admittance.frequencies)
 
     @staticmethod
-    def create_transformer(transducer_constant :
-                complex | FrequencyData) -> np.ndarray | TransmissionMatrix:
+    def create_transformer(
+            transducer_constant: float | int | FrequencyData,
+            ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a transformer.
 
         See Equation (2-12) in Table I of Reference [1]_:
@@ -661,7 +662,7 @@ class TransmissionMatrix(FrequencyData):
             The transmission ratio with respect to voltage-like quantity,
             i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
-            return value will be a 2x2 np.ndarray isntead.
+            return value will be a 2x2 np.ndarray instead.
 
         Returns
         -------
