@@ -3,8 +3,8 @@
 ## 0.7.0 (2024-09-20)
 ### Features
 - Signals and TimeData objects can now have complex time data. This is specified by the `complex` flag. In the case of Signal objects, this results in both sided spectra (PR [#504](https://github.com/pyfar/pyfar/pull/504), [#396](https://github.com/pyfar/pyfar/pull/396), [#462](https://github.com/pyfar/pyfar/pull/462), [#464](https://github.com/pyfar/pyfar/pull/464), [#505](https://github.com/pyfar/pyfar/pull/505), [#510](https://github.com/pyfar/pyfar/pull/510), [#513](https://github.com/pyfar/pyfar/pull/513), [#547](https://github.com/pyfar/pyfar/pull/547), [#646](https://github.com/pyfar/pyfar/pull/646), [#655](https://github.com/pyfar/pyfar/pull/655), [#668](https://github.com/pyfar/pyfar/pull/668), [#704](https://github.com/pyfar/pyfar/pull/704))
-  - Functions in the dsp module can now handle complex valued time data or raise an error (PR [#459](https://github.com/pyfar/pyfar/pull/459), [#460](https://github.com/pyfar/pyfar/pull/460), [#461](https://github.com/pyfar/pyfar/pull/461), [#525](https://github.com/pyfar/pyfar/pull/525), [#546](https://github.com/pyfar/pyfar/pull/546), [#566](https://github.com/pyfar/pyfar/pull/566), [#567](https://github.com/pyfar/pyfar/pull/567), [#573](https://github.com/pyfar/pyfar/pull/573), [#592](https://github.com/pyfar/pyfar/pull/592), [#594](https://github.com/pyfar/pyfar/pull/594), [#598](https://github.com/pyfar/pyfar/pull/598), [#601](https://github.com/pyfar/pyfar/pull/601), [#677](https://github.com/pyfar/pyfar/pull/677))
-  - All plot functions can now handle complex valued time data and both sided spectra via the options `side` and `mode`  (PR [#615](https://github.com/pyfar/pyfar/pull/615), [#652](https://github.com/pyfar/pyfar/pull/652), [#656](https://github.com/pyfar/pyfar/pull/656), [#671](https://github.com/pyfar/pyfar/pull/671), [#672](https://github.com/pyfar/pyfar/pull/672), [#702](https://github.com/pyfar/pyfar/pull/702))
+- Functions in the dsp module can now handle complex valued time data or raise an error (PR [#459](https://github.com/pyfar/pyfar/pull/459), [#460](https://github.com/pyfar/pyfar/pull/460), [#461](https://github.com/pyfar/pyfar/pull/461), [#525](https://github.com/pyfar/pyfar/pull/525), [#546](https://github.com/pyfar/pyfar/pull/546), [#566](https://github.com/pyfar/pyfar/pull/566), [#567](https://github.com/pyfar/pyfar/pull/567), [#573](https://github.com/pyfar/pyfar/pull/573), [#592](https://github.com/pyfar/pyfar/pull/592), [#594](https://github.com/pyfar/pyfar/pull/594), [#598](https://github.com/pyfar/pyfar/pull/598), [#601](https://github.com/pyfar/pyfar/pull/601), [#677](https://github.com/pyfar/pyfar/pull/677))
+- All plot functions can now handle complex valued time data and both sided spectra via the options `side` and `mode`  (PR [#615](https://github.com/pyfar/pyfar/pull/615), [#652](https://github.com/pyfar/pyfar/pull/652), [#656](https://github.com/pyfar/pyfar/pull/656), [#671](https://github.com/pyfar/pyfar/pull/671), [#672](https://github.com/pyfar/pyfar/pull/672), [#702](https://github.com/pyfar/pyfar/pull/702))
 - Added TransmissionMatrix Class, which is a convenient representations for two-ports / quadrupoles. These can represent systems from various fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission lines (PR [#636](https://github.com/pyfar/pyfar/pull/636)).
 - Added frequency domain sweep synthesis (PR [#199](https://github.com/pyfar/pyfar/pull/199))
 - Added spectral soft limiting (PR [#325](https://github.com/pyfar/pyfar/pull/325))
@@ -20,7 +20,7 @@
 - Deprecated Python 3.8 (PR [#683](https://github.com/pyfar/pyfar/pull/683))
 
 ### Bugfixes
-- Removed phase for FFT normalizations 'power' and 'psd' (PR [#557](https://github.com/pyfar/pyfar/pull/557))
+- Removed phase for FFT normalizations `power` and `psd` (PR [#557](https://github.com/pyfar/pyfar/pull/557))
 - Fix unit string in group delay plot (PR [#703](https://github.com/pyfar/pyfar/pull/703))
 - Rename and deprecate shelve/shelf, shelve_type/shelf_type due to a typo in the function names (PR [#643](https://github.com/pyfar/pyfar/pull/643))
 
@@ -43,15 +43,15 @@
 ### Documentation
 - Improve the layout of the main page of the documentation (PR [#653](https://github.com/pyfar/pyfar/pull/653), [#679](https://github.com/pyfar/pyfar/pull/679))
 - Improve documentation of pyfar.dsp.filter.high_shelve_cascade and pyfar.dsp.filter.low_shelve_cascade (PR [#648](https://github.com/pyfar/pyfar/pull/648))
-- Correct erroneous description of default value for the *num_fractions- parameter in pyfar.dsp.filter.fractional_octave_bands
+- Correct erroneous description of default value for the `num_fractions` parameter in pyfar.dsp.filter.fractional_octave_bands
 - Fix broken link to python-soundfile documentation (PR [#651](https://github.com/pyfar/pyfar/pull/651))
 
 ### Bugfixes and enhancements
-- Slicing on pyfar audio objects (e.g., signal[0]) now always gives entire channels and en error is raised if slicing of signal objects would return a subset of the samples or frequencies. This must now be done using *signal.time- and *signal.freq- directly (e.g., signal.time[..., 0:5], PR [#674](https://github.com/pyfar/pyfar/pull/674))
-- The Coordinates class now only raises a deprecation warning, if the parameter *sh_order- is set with a number (e.g., coordinates.sh_order = 1) but not if it is None (PR [#694](https://github.com/pyfar/pyfar/pull/694))
-- All dsp and filter functions now maintain the *shape- and *cshape- of the input data (PR [#676](https://github.com/pyfar/pyfar/pull/676), [#658](https://github.com/pyfar/pyfar/pull/658), [#659](https://github.com/pyfar/pyfar/pull/659), [#663](https://github.com/pyfar/pyfar/pull/663), [#664](https://github.com/pyfar/pyfar/pull/664), [#666](https://github.com/pyfar/pyfar/pull/666), [#678](https://github.com/pyfar/pyfar/pull/678))
+- Slicing on pyfar audio objects (e.g., signal[0]) now always gives entire channels and en error is raised if slicing of signal objects would return a subset of the samples or frequencies. This must now be done using `signal.time` and `signal.freq` directly (e.g., `signal.time[..., 0:5]`, PR [#674](https://github.com/pyfar/pyfar/pull/674))
+- The Coordinates class now only raises a deprecation warning, if the parameter `sh_order` is set with a number (e.g., coordinates.sh_order = 1) but not if it is None (PR [#694](https://github.com/pyfar/pyfar/pull/694))
+- All dsp and filter functions now maintain the `shape` and `cshape` of the input data (PR [#676](https://github.com/pyfar/pyfar/pull/676), [#658](https://github.com/pyfar/pyfar/pull/658), [#659](https://github.com/pyfar/pyfar/pull/659), [#663](https://github.com/pyfar/pyfar/pull/663), [#664](https://github.com/pyfar/pyfar/pull/664), [#666](https://github.com/pyfar/pyfar/pull/666), [#678](https://github.com/pyfar/pyfar/pull/678))
 - Fix deprecation warnings from Matlab and Numpy (PR [#640](https://github.com/pyfar/pyfar/pull/640), [#670](https://github.com/pyfar/pyfar/pull/670))
-- Change default value for *domain- parameter in pyfar.dsp.normalize to work for pyfar.FrequencyData objects (PR [#649](https://github.com/pyfar/pyfar/pull/649))
+- Change default value for `domain` parameter in pyfar.dsp.normalize to work for pyfar.FrequencyData objects (PR [#649](https://github.com/pyfar/pyfar/pull/649))
 - Use numpy functions for broadcasting input of pyfar.Coordinates (PR [#665](https://github.com/pyfar/pyfar/pull/665))
 
 ### Automation and testing
@@ -64,10 +64,10 @@
 - Fix previous page title on pyfar main page ([#637](https://github.com/pyfar/pyfar/pull/637))
 - Enhance user warning for writing clipped audio files ([#624](https://github.com/pyfar/pyfar/pull/624))
 - Improve documentation ([#634](https://github.com/pyfar/pyfar/pull/634))
-- Introduce radius_tol to Coordiantes.find_nearest ([#621](https://github.com/pyfar/pyfar/pull/621))
+- Introduce `radius_tol` to `Coordiantes.find_nearest` ([#621](https://github.com/pyfar/pyfar/pull/621))
 
 ## 0.6.7 (2024-06-17)
-- Make compatibile for numpy 2.0 (PR [#629](https://github.com/pyfar/pyfar/pull/629))
+- Make compatible for numpy 2.0 (PR [#629](https://github.com/pyfar/pyfar/pull/629))
 
 ## 0.6.6 (2024-06-07)
 - Improve documentation (PR [#569](https://github.com/pyfar/pyfar/pull/569), [#574](https://github.com/pyfar/pyfar/pull/574), [#590](https://github.com/pyfar/pyfar/pull/590), [#591](https://github.com/pyfar/pyfar/pull/591), [#597](https://github.com/pyfar/pyfar/pull/597), [#605](https://github.com/pyfar/pyfar/pull/605))
@@ -85,19 +85,19 @@
 - Add testing for Python 3.12 (PR [#561](https://github.com/pyfar/pyfar/pull/561))
 
 ## 0.6.4 (2024-02-16)
-- Bugfix in `pyfar.io.read_comsol_header`: Fix for reading expressions containing the characters '-', '[', and ']' (PR [#535](https://github.com/pyfar/pyfar/pull/535))
-- Bugfix in `pyfar.dsp.fft.normalization`: Correct the normalization factor for the case `fft_norm=='psd'`. (PR [#541](https://github.com/pyfar/pyfar/pull/541))
+- Bugfix in `pyfar.io.read_comsol_header` : Fix for reading expressions containing the characters `-`, `[`, and `]` (PR [#535](https://github.com/pyfar/pyfar/pull/535))
+- Bugfix in `pyfar.dsp.fft.normalization` : Correct the normalization factor for the case `fft_norm=='psd'`. (PR [#541](https://github.com/pyfar/pyfar/pull/541))
 - Maintenance: Remove tests for deprecated numpy functionality (PR [#537](https://github.com/pyfar/pyfar/pull/537))
 
 ## 0.6.3 (2024-01-26)
-- Bugfix in `pyfar.utils.concatenate_channels`: Amplitude of time domain Signals was wrong when concatenating in the frequency domain and concatenation failed for a mixture of Signals in the time and frequency domain (PR [#532](https://github.com/pyfar/pyfar/pull/532))
+- Bugfix in `pyfar.utils.concatenate_channels` : Amplitude of time domain Signals was wrong when concatenating in the frequency domain and concatenation failed for a mixture of Signals in the time and frequency domain (PR [#532](https://github.com/pyfar/pyfar/pull/532))
 
 ## 0.6.2 (2024-01-12)
-- Bugfix in `pyfar.Coordinates.find_within`: Fix for spherical distance measures and improved flexibility and documentation (PR [#524](https://github.com/pyfar/pyfar/pull/524))
+- Bugfix in `pyfar.Coordinates.find_within` : Fix for spherical distance measures and improved flexibility and documentation (PR [#524](https://github.com/pyfar/pyfar/pull/524))
 
 ## 0.6.1 (2023-11-17)
-- Bugfix in `pyfar.Coordinates.find_nearest`: Correct name of parameter 'spherical_radians' in docstring and fix computation of spherical distance between query points and actual points (PR [#519](https://github.com/pyfar/pyfar/pull/519))
-- Improve `pyfar.signals.files.head_related_impulse_responses`: Use new structure of `pyfar.Coordinates` to find the requested head-related impulse responses (PR [#520](https://github.com/pyfar/pyfar/pull/520))
+- Bugfix in `pyfar.Coordinates.find_nearest` : Correct name of parameter 'spherical_radians' in docstring and fix computation of spherical distance between query points and actual points (PR [#519](https://github.com/pyfar/pyfar/pull/519))
+- Improve `pyfar.signals.files.head_related_impulse_responses` : Use new structure of `pyfar.Coordinates` to find the requested head-related impulse responses (PR [#520](https://github.com/pyfar/pyfar/pull/520))
 
 ## 0.6.0 (2023-10-20)
 ### Refactored `pyfar.Coordinates` class and module
@@ -135,7 +135,7 @@
 ### `pyfar.io`
 - Save the current pyfar version if using `pyfar.io.write` for providing more verbose feedback in case old data can not be read with newer versions of pyfar in the future (PR [#445](https://github.com/pyfar/pyfar/pull/445))
 - Updated version of sofar package. `pyfar.io.read_sofa` now also works with path objects (PR [#472](https://github.com/pyfar/pyfar/pull/472))
-- `pyfar.io.read_comsol` can now handle expressions containing the characters '*' '(' and ')' (PR [#393](https://github.com/pyfar/pyfar/pull/393))
+- `pyfar.io.read_comsol` can now handle expressions containing the characters '`' '(' and ')' (PR [#393](https://github.com/pyfar/pyfar/pull/393))
 - `pyfar.io.write_audio` does now accept sampling rates of type float, if they do not contain decimal values (PR [#414](https://github.com/pyfar/pyfar/pull/414))
 
 ### `pyfar.signals.files`
@@ -178,7 +178,7 @@
 ## 0.5.2 (2023-01-20)
 - Bugfix: Remove deprecated usage of `np.int`. (PR [#409](https://github.com/pyfar/pyfar/pull/409))
 - Bugfix: Switch to MathJax to fix equation rendering issues in the documentation. (PR [#420](https://github.com/pyfar/pyfar/pull/420))
-- Bugfix: `read_comsol` now allow for `*`, `(`, and `)` in expressions and units. (PR [#417](https://github.com/pyfar/pyfar/pull/417), originally [#393](https://github.com/pyfar/pyfar/pull/393))
+- Bugfix: `read_comsol` now allow for ```, `(`, and `)` in expressions and units. (PR [#417](https://github.com/pyfar/pyfar/pull/417), originally [#393](https://github.com/pyfar/pyfar/pull/393))
 - Bugfix: `read_sofa` now support reading files of conventions `FIR-E` and `TF-E`. (PR  [#415](https://github.com/pyfar/pyfar/pull/415))
 - General: Update information on PyPI. (PR [#427](https://github.com/pyfar/pyfar/pull/427), originally [#377](https://github.com/pyfar/pyfar/pull/377))
 
