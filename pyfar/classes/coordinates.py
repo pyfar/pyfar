@@ -151,7 +151,6 @@ class Coordinates():
     _y: np.array = np.empty
     _z: np.array = np.empty
     _weights: np.array = None
-    _sh_order: int = None
     _comment: str = None
     _system: dict = None
 
@@ -159,7 +158,7 @@ class Coordinates():
             self, x: np.array = np.asarray([]),
             y: np.array = np.asarray([]),
             z: np.array = np.asarray([]),
-            weights: np.array = None, sh_order=None,
+            weights: np.array = None,
             comment: str = "") -> None:
 
         # init empty object
@@ -851,7 +850,8 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     np.arange(0, 2*np.pi, np.pi/10), 0, 1)
             >>> to_find = pf.Coordinates(1, 0, 0)
             >>> index, distance = coords.find_nearest(to_find)
             >>> coords.show(index)
@@ -1035,7 +1035,8 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     np.arange(0, 2*np.pi, np.pi/10), 0, 1)
             >>> find = pf.Coordinates(1, 0, 0)
             >>> index = coords.find_within(find, 1)
             >>> coords.show(index)
@@ -1637,10 +1638,6 @@ class Coordinates():
         else:
             _repr += "\nContains sampling weights"
 
-        # check for sh_order
-        if self._sh_order is not None:
-            _repr += f"\nSpherical harmonic order: {self._sh_order}"
-
         # check for comment
         if self._comment != "":
             _repr += f"\nComment: {self._comment}"
@@ -1655,14 +1652,13 @@ class Coordinates():
         eq_y = self._y == other._y
         eq_z = self._z == other._z
         eq_weights = self._weights == other._weights
-        eq_sh_order = self._sh_order == other._sh_order
         eq_comment = self._comment == other._comment
         eq_system = self._system == other._system
         if self._x.shape == ():
             return eq_x & eq_y & eq_z & eq_weights & eq_comment \
-                & eq_sh_order & eq_system
+                & eq_system
         return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment \
-            & eq_sh_order & eq_system
+            & eq_system
 
     def __add__(self, other):
         """Add two numbers/Coordinates objects."""
