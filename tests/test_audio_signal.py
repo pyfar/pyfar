@@ -328,7 +328,8 @@ def test_setter_fft_norm():
     npt.assert_allclose(signal.freq, spec_power_unitary)
 
     # setting an invalid fft_norm
-    with pytest.raises(ValueError):
+    match = 'Invalid FFT normalization. Has to be none, unitary, amplitude'
+    with pytest.raises(ValueError, match=match):
         signal.fft_norm = 'bullshit'
 
     # setting fft_norm for complex time signals
@@ -468,8 +469,8 @@ def test_magic_setitem_wrong_n_samples():
         signal[0] = set_signal
 
 
-@pytest.mark.parametrize("audio", (
-    pf.TimeData([1, 2], [1, 2]), pf.FrequencyData([1, 2], [1, 2])))
+@pytest.mark.parametrize("audio", [
+    pf.TimeData([1, 2], [1, 2]), pf.FrequencyData([1, 2], [1, 2])])
 def test_magic_setitem_wrong_type(audio):
     signal = Signal([1, 2, 3, 4], 44100)
     with pytest.raises(ValueError, match="Comparison only valid"):
@@ -530,7 +531,8 @@ def test_reshape_exceptions():
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     # test assertion for non-tuple input
-    with pytest.raises(ValueError):
+    match = 'newshape must be an integer or tuple'
+    with pytest.raises(ValueError, match=match):
         signal_out = signal_in.reshape([3, 2])
 
     # test assertion for wrong dimension
@@ -665,7 +667,7 @@ def test_setter_freq_raw_dtype():
 
 
 @pytest.mark.parametrize("domain", ["time", "freq"])
-@pytest.mark.parametrize("is_complex, kind", [(True, "c"), (False, "f")])
+@pytest.mark.parametrize(('is_complex', 'kind'), [(True, "c"), (False, "f")])
 def test_setter_complex_(domain, is_complex, kind):
     """ test setting complex flag of time and frequency domain signals"""
     # test setting complex from False to True

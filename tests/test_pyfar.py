@@ -1,5 +1,8 @@
+import pytest
+
+
 def test_import_pyfar():
     try:
         import pyfar           # noqa
-    except ImportError as exc:
-        raise AssertionError() from exc
+    except ImportError:
+        pytest.fail('import pyfar failed')
