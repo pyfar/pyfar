@@ -314,9 +314,10 @@ def _coefficients_fractional_octave_bands(
     for idx, Wn in enumerate(Wns):
         # in case the upper frequency limit is above Nyquist, use a highpass
         if Wn[-1] > 1:
-            warnings.warn('The upper frequency limit {} Hz is above the \
-                Nyquist frequency. Using a highpass filter instead of a \
-                bandpass'.format(np.round(freqs_upper[idx], decimals=1)),
+            warnings.warn(
+                f'The upper frequency limit {freqs_upper[idx]:.1f} Hz is above'
+                ' the Nyquist frequency. Using a highpass filter instead of a '
+                'bandpass.',
                 stacklevel=2)
             Wn = Wn[0]
             btype = 'highpass'
