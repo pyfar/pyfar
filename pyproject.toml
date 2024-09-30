@@ -8,13 +8,10 @@ exclude = [
 ]
 line-length = 79
 lint.ignore = [
-    "B006",
-    "B008",
     "PT018", # Assertion should be broken down into multiple parts
     "PT019", # Fixture `_` without value is injected as parameter
 ]
 lint.select = [
-    "B",
     "ARG",
     "C4",
     "E",

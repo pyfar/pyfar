@@ -44,9 +44,9 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     try:
         cshape, (frequency, amplitude, phase) = _match_shape(
             frequency, amplitude, phase)
-    except ValueError as error:
+    except ValueError:
         raise ValueError(("The parameters frequency, amplitude, and phase can "
-                          "not be broadcasted to the same shape")) from error
+                          "not be broadcasted to the same shape"))
 
     if np.any(frequency < 0) or np.any(frequency > sampling_rate/2):
         raise ValueError(
@@ -121,10 +121,9 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     # check and match the cshape
     try:
         cshape, (delay, amplitude) = _match_shape(delay, amplitude)
-    except ValueError as error:
-        raise ValueError(
-            ("The parameters delay and amplitude can not be "
-            "broadcasted to the same shape")) from error
+    except ValueError:
+        raise ValueError(("The parameters delay and amplitude can not be "
+                          "broadcasted to the same shape"))
 
     # generate the impulse
     n_samples = int(n_samples)
@@ -746,8 +745,7 @@ def _frequency_domain_sweep(
     if frequency_range[0] == 0 and sweep_type == "exponential":
         warnings.warn((
             "The exponential sweep has a 1/sqrt(frequency) magnitude spectrum."
-            " The magnitude is set to 0 at 0 Hz to avoid a division by zero."),
-            stacklevel=2)
+            " The magnitude is set to 0 at 0 Hz to avoid a division by zero."))
 
     # initialize basic parameters ---------------------------------------------
 

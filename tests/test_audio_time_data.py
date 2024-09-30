@@ -267,13 +267,13 @@ def test_separation_from_data_frequency():
     time = TimeData(data, times)
 
     with pytest.raises(AttributeError):
-        assert time.freq
+        time.freq
     with pytest.raises(AttributeError):
-        assert time.frequencies
+        time.frequencies
     with pytest.raises(AttributeError):
-        assert time.n_bins
+        time.n_bins
     with pytest.raises(AttributeError):
-        assert time.find_nearest_frequency
+        time.find_nearest_frequency
 
 
 def test_separation_from_signal():
@@ -283,7 +283,7 @@ def test_separation_from_signal():
     time = TimeData(data, times)
 
     with pytest.raises(AttributeError):
-        assert time.sampling_rate
+        time.sampling_rate
     with pytest.raises(AttributeError):
         time.domain = 'time'
 

@@ -282,7 +282,7 @@ blob/master/filter_design/audiofilter.py
     """
 
     warnings.warn(("'high_shelve' will be deprecated in pyfar 0.9.0 in favor"
-                   " of 'high_shelf'"), PyfarDeprecationWarning, stacklevel=2)
+                   " of 'high_shelf'"), PyfarDeprecationWarning)
 
     return high_shelf(signal, frequency, gain, order, shelve_type,
                       sampling_rate)
@@ -405,7 +405,7 @@ blob/master/filter_design/audiofilter.py
     """
 
     warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
-                   "of 'low_shelf'"), PyfarDeprecationWarning, stacklevel=2)
+                   "of 'low_shelf'"), PyfarDeprecationWarning)
 
     return low_shelf(signal, frequency, gain, order, shelve_type,
                      sampling_rate)
@@ -569,7 +569,7 @@ def high_shelve_cascade(
 
     warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'high_shelf_cascade'"),
-                  PyfarDeprecationWarning, stacklevel=2)
+                  PyfarDeprecationWarning)
 
     return high_shelf_cascade(signal, frequency, frequency_type, gain, slope,
                               bandwidth, N, sampling_rate)
@@ -779,8 +779,7 @@ def low_shelve_cascade(
     """
 
     warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.9.0 "
-                   "in favor of 'low_shelf_cascade'"),
-                   PyfarDeprecationWarning, stacklevel=2)
+                   "in favor of 'low_shelf_cascade'"), PyfarDeprecationWarning)
 
     return low_shelf_cascade(signal, frequency, frequency_type, gain, slope,
                              bandwidth, N, sampling_rate)
@@ -974,7 +973,7 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
         warnings.warn((
             f"The bandwidth is {bandwidth} octaves but should be at least 1 "
             "to obtain a good approximation of the desired frequency response."
-        ), stacklevel=2)
+        ))
 
     # get sampling rate
     sampling_rate = sampling_rate if signal is None else signal.sampling_rate
@@ -1005,8 +1004,7 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
                        f"It was set to {sampling_rate/2} Hz, which equals "
                        f"a restriction of the bandwidth to {bandwidth} "
                        f"octaves and a reduction of the gain to {gain} dB to "
-                       f"maintain the intended slope of {slope} dB/octave."),
-                       stacklevel=2)
+                       f"maintain the intended slope of {slope} dB/octave."))
 
     # determine number of shelf filters per octave ---------------------------
 
@@ -1021,7 +1019,7 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
     if N < N_min:
         warnings.warn((
             f"N is {N} but should be at least {N_min} to obtain an good "
-            "approximation of the desired frequency response"), stacklevel=2)
+            "approximation of the desired frequency response"))
 
     # used shelf filters per octave
     N_octave = N / bandwidth

@@ -45,9 +45,7 @@ def rename_arg(arg_map, warning_message):
             new_kwargs = {}
             for kwarg, value in kwargs.items():
                 if kwarg in arg_map:
-                    warnings.warn(
-                        (warning_message), PyfarDeprecationWarning,
-                        stacklevel=2)
+                    warnings.warn((warning_message), PyfarDeprecationWarning)
                 new_kwargs[arg_map.get(kwarg, kwarg)] = value
             return func(*args, **new_kwargs)
         return wrapper

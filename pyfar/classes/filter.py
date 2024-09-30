@@ -43,8 +43,7 @@ def _atleast_4d_first_dim(arr):
 def _pop_state_from_kwargs(**kwargs):
     kwargs.pop('zi', None)
     warnings.warn(
-        "This filter function does not support saving the filter state",
-        stacklevel=2)
+        "This filter function does not support saving the filter state")
     return kwargs
 
 
