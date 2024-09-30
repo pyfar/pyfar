@@ -650,20 +650,15 @@ def linear_perfect_sweep(
         >>> sweep = pf.signals.linear_perfect_sweep(2**8)
         >>>
         >>> # compute auto-correlation
-        >>> auto_correlation = np.empty(2**8)
-        >>> for idx, shift in enumerate(range(-2**7, 2**7)):
-        >>>     auto_correlation[idx] = np.dot(
-        ...         sweep.time.flatten(),
-        ...         np.roll(sweep.time.flatten(), shift))
+        >>> auto_correlation, lags, _ = pf.dsp.correlate(
+        ...     sweep, sweep, 'cyclic')
         >>>
-        >>> auto_correlation /= pf.dsp.energy(sweep)
+        >>> auto_correlation = pf.TimeData(
+        ...     auto_correlation / pf.dsp.energy(sweep), lags)
         >>>
-        >>> # plot auto-correlation
-        >>> with pf.plot.context():
-        >>>     plt.plot(np.arange(-2**7, 2**7), auto_correlation)
-        >>>     plt.gca().set_xlim(-2**7, 2**7)
-        >>>     plt.gca().set_xlabel('time lag in samples')
-        >>>     plt.gca().set_ylabel('auto correlation')
+        >>> ax = pf.plot.time(auto_correlation)
+        >>> ax.set_xlabel('time lag in samples')
+        >>> ax.set_ylabel('auto correlation')
     """
 
     return _frequency_domain_sweep(
