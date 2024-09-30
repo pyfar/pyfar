@@ -7,13 +7,17 @@ exclude = [
     "pyfar/samplings/external",
 ]
 line-length = 79
-lint.ignore = []
+lint.ignore = [
+    "PT018", # Assertion should be broken down into multiple parts
+    "PT019", # Fixture `_` without value is injected as parameter
+]
 lint.select = [
     "ARG",
     "C4",
     "E",
     "F",
     "W",
+    "PT", # Pytest style
     "A",
     "ERA",
     "NPY",

@@ -1,8 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 
-from pytest import raises
-
+import pytest
 from pyfar.dsp import fft
 
 
@@ -359,7 +358,8 @@ def test_normalization_with_window_value_error():
     wrong length.
     """
 
-    with raises(ValueError):
+    match = 'window must be 4 long but is 5 long.'
+    with pytest.raises(ValueError, match=match):
         # n_samples=5, and len(window)=5
         fft.normalization(np.array([.5, 1, .5]), 4, 44100,
                           'amplitude', window=[1, 1, 1, 1, 1])
@@ -367,10 +367,14 @@ def test_normalization_with_window_value_error():
 
 def test_normalization_exceptions():
     # Call without numpy array
-    with raises(ValueError):
+    match = "Input 'spec' must be a numpy array."
+    with pytest.raises(ValueError, match=match):
         fft.normalization(1, 1, 44100, 'rms')
     # Invalid normalization
-    with raises(ValueError):
+    match = "norm type must be 'unitary', 'amplitude', 'rms', "\
+        "'power', or 'psd' but is 'goofy'"
+
+    with pytest.raises(ValueError, match=match):
         fft.normalization(np.array([1]), 1, 44100, 'goofy')
 
 
